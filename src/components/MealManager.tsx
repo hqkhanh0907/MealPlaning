@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Meal, Dish, Ingredient, MealType } from '../types';
 import { calculateMealNutrition } from '../utils/nutrition';
 import { Plus, Trash2, Edit3, X, Save, Utensils, Search } from 'lucide-react';
+import { useNotification } from '../contexts/NotificationContext';
 
 const MEAL_TYPE_SHORT_LABELS: Record<MealType, string> = {
   breakfast: 'Sáng',
@@ -26,6 +27,7 @@ interface MealManagerProps {
 }
 
 export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredients, onAdd, onUpdate, onDelete, isUsed }) => {
+  const notify = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,12 +82,10 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
 
   const handleDelete = (id: string) => {
     if (isUsed(id)) {
-      alert("Bữa ăn này đang được sử dụng trong kế hoạch. Không thể xóa!");
+      notify.warning('Không thể xóa', 'Bữa ăn này đang được sử dụng trong kế hoạch.');
       return;
     }
-    if (globalThis.confirm("Bạn có chắc chắn muốn xóa bữa ăn này?")) {
-      onDelete(id);
-    }
+    onDelete(id);
   };
 
   const filteredMeals = meals

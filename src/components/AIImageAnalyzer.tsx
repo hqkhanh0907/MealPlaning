@@ -3,8 +3,10 @@ import { Upload, Loader2, Image as ImageIcon, Sparkles, Camera, X, Save } from '
 import { analyzeDishImage, suggestIngredientInfo } from '../services/geminiService';
 import { AnalyzedDishResult, AnalyzedIngredient, SaveAnalyzedDishPayload } from '../types';
 import { normalizeUnit, calculateIngredientNutrition } from '../utils/nutrition';
+import { useNotification } from '../contexts/NotificationContext';
 
 export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDishResult) => void; onSave?: (result: SaveAnalyzedDishPayload) => void }> = ({ onAnalysisComplete, onSave }) => {
+  const notify = useNotification();
   // Use a ref to track the latest callback to avoid stale closures in async functions
   const onAnalysisCompleteRef = useRef(onAnalysisComplete);
   
@@ -115,7 +117,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDi
       onAnalysisCompleteRef.current(analysis);
     } catch (error) {
       console.error("Failed to analyze image:", error);
-      alert("Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.");
+      notify.error('Phân tích thất bại', 'Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -211,7 +213,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDi
       
     } catch (error) {
       console.error("Failed to research ingredient:", error);
-      alert("Không thể tìm thấy thông tin. Vui lòng thử lại.");
+      notify.error('Tra cứu thất bại', 'Không thể tìm thấy thông tin. Vui lòng thử lại.');
     } finally {
       setResearchingIngredientIndex(null);
     }

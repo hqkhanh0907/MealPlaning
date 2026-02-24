@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dish, Ingredient, DishIngredient } from '../types';
 import { calculateDishNutrition } from '../utils/nutrition';
 import { Plus, Trash2, Edit3, X, Save, Search, ChefHat } from 'lucide-react';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface DishManagerProps {
   dishes: Dish[];
@@ -13,6 +14,7 @@ interface DishManagerProps {
 }
 
 export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, onAdd, onUpdate, onDelete, isUsed }) => {
+  const notify = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,7 +76,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
 
   const handleDelete = (id: string, name: string) => {
     if (isUsed(id)) {
-      alert("Món ăn này đang được sử dụng trong một hoặc nhiều bữa ăn. Vui lòng gỡ món ăn khỏi các bữa ăn trước khi xóa.");
+      notify.warning('Không thể xóa', 'Món ăn này đang được sử dụng trong bữa ăn. Vui lòng gỡ khỏi các bữa ăn trước.');
       return;
     }
     setDeleteConfirmation({

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Ingredient, Dish } from '../types';
 import { Plus, Trash2, Edit3, X, Save, Search, Apple, Sparkles, Loader2 } from 'lucide-react';
 import { suggestIngredientInfo } from '../services/geminiService';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface IngredientManagerProps {
   ingredients: Ingredient[];
@@ -13,6 +14,7 @@ interface IngredientManagerProps {
 }
 
 export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, dishes: _dishes, onAdd, onUpdate, onDelete, isUsed }) => {
+  const notify = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIng, setEditingIng] = useState<Ingredient | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,9 +90,9 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
       console.error("Failed to get ingredient info:", error);
       if (!isModalOpenRef.current) return;
       if (error instanceof Error && error.message === "Timeout") {
-        alert("Hệ thống phản hồi quá lâu. Vui lòng thử lại sau.");
+        notify.warning('Phản hồi quá lâu', 'Hệ thống phản hồi quá lâu. Vui lòng thử lại sau.');
       } else {
-        alert("Không thể tìm thấy thông tin nguyên liệu. Vui lòng thử lại.");
+        notify.error('Tra cứu thất bại', 'Không thể tìm thấy thông tin nguyên liệu. Vui lòng thử lại.');
       }
     } finally {
       if (isModalOpenRef.current) {
@@ -111,7 +113,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
 
   const handleDelete = (id: string, name: string) => {
     if (isUsed(id)) {
-      alert("Nguyên liệu này đang được sử dụng trong một hoặc nhiều món ăn. Vui lòng gỡ nguyên liệu khỏi các món ăn trước khi xóa.");
+      notify.warning('Không thể xóa', 'Nguyên liệu này đang được sử dụng trong món ăn. Vui lòng gỡ khỏi các món ăn trước.');
       return;
     }
     

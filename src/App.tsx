@@ -7,6 +7,7 @@ import { AIImageAnalyzer } from './components/AIImageAnalyzer';
 import { CalendarTab } from './components/CalendarTab';
 import { ManagementTab } from './components/ManagementTab';
 import { usePersistedState } from './hooks/usePersistedState';
+import { useNotification } from './contexts/NotificationContext';
 import { TypeSelectionModal } from './components/modals/TypeSelectionModal';
 import { ClearPlanModal } from './components/modals/ClearPlanModal';
 import { PlanningModal } from './components/modals/PlanningModal';
@@ -15,12 +16,7 @@ import {
   CalendarDays,
   Settings2,
   Utensils,
-  X,
   Sparkles,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Info,
   BookOpen,
   ShoppingCart
 } from 'lucide-react';
@@ -30,23 +26,6 @@ import { suggestMealPlan, AvailableMealInfo } from './services/geminiService';
 
 type MainTab = 'calendar' | 'management' | 'ai-analysis' | 'grocery';
 type ManagementSubTab = 'ingredients' | 'dishes' | 'meals';
-type NotificationType = 'success' | 'error' | 'info' | 'warning';
-
-type NotificationState = {
-  type: NotificationType;
-  title: string;
-  message: string;
-  onClick?: () => void;
-} | null;
-
-// --- Notification style maps ---
-
-const NOTIFICATION_STYLES: Record<NotificationType, { border: string; iconBg: string; title: string; message: string; icon: React.ReactNode }> = {
-  success: { border: 'border-emerald-500 shadow-emerald-100', iconBg: 'bg-emerald-50 text-emerald-600', title: 'text-emerald-800', message: 'text-emerald-600', icon: <CheckCircle2 className="w-6 h-6" /> },
-  error: { border: 'border-rose-500 shadow-rose-100', iconBg: 'bg-rose-50 text-rose-600', title: 'text-rose-800', message: 'text-rose-600', icon: <XCircle className="w-6 h-6" /> },
-  warning: { border: 'border-amber-400 shadow-amber-100', iconBg: 'bg-amber-50 text-amber-600', title: 'text-amber-800', message: 'text-amber-600', icon: <AlertTriangle className="w-6 h-6" /> },
-  info: { border: 'border-slate-300 shadow-slate-100', iconBg: 'bg-slate-100 text-slate-600', title: 'text-slate-800', message: 'text-slate-500', icon: <Info className="w-6 h-6" /> },
-};
 
 // --- Pure helper functions ---
 
@@ -129,26 +108,6 @@ const processAnalyzedDish = (
 
 // --- Extracted UI components ---
 
-const NotificationToast: React.FC<{ notification: NonNullable<NotificationState>; onDismiss: () => void }> = ({ notification, onDismiss }) => {
-  const styles = NOTIFICATION_STYLES[notification.type];
-  const handleClick = () => {
-    notification.onClick?.();
-    onDismiss();
-  };
-  return (
-    <button type="button" onClick={handleClick} className={`fixed top-4 left-4 right-4 sm:top-auto sm:left-auto sm:bottom-6 sm:right-6 bg-white px-5 py-4 rounded-2xl shadow-xl cursor-pointer transition-all z-9999 flex items-center gap-4 border-2 text-left ${styles.border}`}>
-      <div className={`p-2.5 rounded-xl ${styles.iconBg}`}>{styles.icon}</div>
-      <div className="flex-1">
-        <h4 className={`font-bold text-lg ${styles.title}`}>{notification.title}</h4>
-        <p className={`text-sm font-medium ${styles.message}`}>{notification.message}</p>
-      </div>
-      <button type="button" onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="ml-2 p-1.5 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
-        <X className="w-5 h-5" />
-      </button>
-    </button>
-  );
-};
-
 const NAV_ITEMS: { tab: MainTab; icon: React.ReactNode; label: string }[] = [
   { tab: 'calendar', icon: <CalendarDays className="w-5 h-5" />, label: 'Lịch trình' },
   { tab: 'management', icon: <BookOpen className="w-5 h-5" />, label: 'Thư viện' },
@@ -209,13 +168,8 @@ export default function App() {
   const [isClearPlanModalOpen, setIsClearPlanModalOpen] = useState(false);
   const [planningType, setPlanningType] = useState<MealType | null>(null);
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [notification, setNotification] = useState<NotificationState>(null);
 
-  useEffect(() => {
-    if (!notification) return;
-    const timer = setTimeout(() => setNotification(null), 30000);
-    return () => clearTimeout(timer);
-  }, [notification]);
+  const notify = useNotification();
 
   const currentPlan = useMemo(() =>
     dayPlans.find(p => p.date === selectedDate) || { date: selectedDate, breakfastId: null, lunchId: null, dinnerId: null },
@@ -250,11 +204,11 @@ export default function App() {
       const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableMeals);
       if (suggestion.breakfastId || suggestion.lunchId || suggestion.dinnerId) {
         setDayPlans(prev => applySuggestionToDayPlans(prev, selectedDate, suggestion));
-        if (suggestion.reasoning) alert(`AI Gợi ý: ${suggestion.reasoning}`);
+        notify.success('Đã gợi ý thực đơn!', suggestion.reasoning || 'AI đã chọn thực đơn phù hợp cho bạn.');
       }
     } catch (error) {
       console.error("Failed to suggest meal plan:", error);
-      alert("Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng kiểm tra lại cấu hình API Key.");
+      notify.error('Gợi ý thất bại', 'Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng kiểm tra lại API Key.');
     } finally {
       setIsSuggesting(false);
     }
@@ -287,27 +241,26 @@ export default function App() {
     if (newIngredients.length > 0) setIngredients(prev => [...prev, ...newIngredients]);
 
     if (result.shouldCreateDish === false) {
-      alert(`Đã lưu ${newIngredients.length} nguyên liệu mới vào thư viện!`);
+      notify.success('Lưu thành công!', `Đã lưu ${newIngredients.length} nguyên liệu mới vào thư viện.`);
       setActiveMainTab('management');
       setActiveManagementSubTab('ingredients');
     } else {
       setDishes(prev => [...prev, { id: `dish-${Date.now()}`, name: result.name, ingredients: dishIngredients }]);
-      alert(`Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới vào thư viện!`);
+      notify.success('Lưu thành công!', `Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới.`);
       setActiveMainTab('management');
       setActiveManagementSubTab('dishes');
     }
   }, [ingredients]);
 
-  const handleAnalysisComplete = useCallback(() => {
-    if (activeMainTabRef.current !== 'ai-analysis') {
-      setNotification({ type: 'success', title: 'Phân tích hoàn tất!', message: 'Nhấn để xem kết quả', onClick: () => setActiveMainTab('ai-analysis') });
-    }
-  }, []);
-
   const openTypeSelection = useCallback(() => setIsTypeSelectionModalOpen(true), []);
   const openClearPlan = useCallback(() => setIsClearPlanModalOpen(true), []);
   const openGoalModal = useCallback(() => setIsGoalModalOpen(true), []);
-  const dismissNotification = useCallback(() => setNotification(null), []);
+
+  const handleAnalysisComplete = useCallback(() => {
+    if (activeMainTabRef.current !== 'ai-analysis') {
+      notify.success('Phân tích hoàn tất!', 'Nhấn để xem kết quả', { onClick: () => setActiveMainTab('ai-analysis') });
+    }
+  }, [notify]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-200">
@@ -383,8 +336,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Notification System */}
-      {notification && <NotificationToast notification={notification} onDismiss={dismissNotification} />}
 
       {/* Modals */}
       {isTypeSelectionModalOpen && <TypeSelectionModal currentPlan={currentPlan} onSelectType={handlePlanMeal} onClose={() => setIsTypeSelectionModalOpen(false)} />}
