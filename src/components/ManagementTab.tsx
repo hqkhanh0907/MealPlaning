@@ -41,18 +41,18 @@ export const ManagementTab: React.FC<ManagementTabProps> = ({
   onAddMeal, onUpdateMeal, onDeleteMeal, isMealUsed,
 }) => {
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
-          <BookOpen className="w-6 h-6 text-emerald-500" />
-          <h2 className="text-2xl font-bold text-slate-800">Thư viện dữ liệu</h2>
+          <BookOpen className="w-6 h-6 text-emerald-500 shrink-0" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Thư viện dữ liệu</h2>
         </div>
-        <div className="flex overflow-x-auto scrollbar-hide bg-slate-100 p-1 rounded-xl flex-nowrap">
+        <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide bg-slate-100 p-1 rounded-xl flex-nowrap">
           {SUB_TABS.map(tab => (
             <button
               key={tab.key}
               onClick={() => onSubTabChange(tab.key)}
-              className={`px-4 py-2.5 sm:py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 active:bg-slate-200'}`}
+              className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 active:bg-slate-200'}`}
             >
               {tab.label}
             </button>
