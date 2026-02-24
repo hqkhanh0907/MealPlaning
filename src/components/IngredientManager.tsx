@@ -12,7 +12,7 @@ interface IngredientManagerProps {
   isUsed: (id: string) => boolean;
 }
 
-export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, dishes, onAdd, onUpdate, onDelete, isUsed }) => {
+export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, dishes: _dishes, onAdd, onUpdate, onDelete, isUsed }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIng, setEditingIng] = useState<Ingredient | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,10 +84,10 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
         fiberPer100: info.fiber
         // Giữ nguyên đơn vị tính của người dùng, không lấy từ AI trả về
       }));
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to get ingredient info:", error);
       if (!isModalOpenRef.current) return;
-      if (error.message === "Timeout") {
+      if (error instanceof Error && error.message === "Timeout") {
         alert("Hệ thống phản hồi quá lâu. Vui lòng thử lại sau.");
       } else {
         alert("Không thể tìm thấy thông tin nguyên liệu. Vui lòng thử lại.");
@@ -150,7 +150,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
             placeholder="Tìm kiếm nguyên liệu..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-base sm:text-sm"
           />
         </div>
         <button 
@@ -224,8 +224,8 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-60">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto sm:mx-4">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <h4 className="font-bold text-slate-800 text-lg">{editingIng ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu mới'}</h4>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -234,13 +234,14 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên nguyên liệu</label>
+                <label htmlFor="ing-name" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên nguyên liệu</label>
                 <div className="flex gap-2">
                   <input 
+                    id="ing-name"
                     required
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm"
                     placeholder="Ví dụ: Thịt bò, Cà chua..."
                   />
                   <button
@@ -248,7 +249,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
                     onClick={handleAISearch}
                     disabled={!formData.name || !formData.unit || isSearchingAI}
                     className="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={!formData.unit ? "Vui lòng nhập đơn vị tính trước khi tìm kiếm" : "Tự động điền thông tin bằng AI"}
+                    title={formData.unit ? "Tự động điền thông tin bằng AI" : "Vui lòng nhập đơn vị tính trước khi tìm kiếm"}
                   >
                     {isSearchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
                   </button>
@@ -256,12 +257,13 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
               </div>
               
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Đơn vị tính</label>
-                <input 
+                <label htmlFor="ing-unit" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Đơn vị tính</label>
+                <input
+                  id="ing-unit"
                   required
                   value={formData.unit}
                   onChange={e => setFormData({...formData, unit: e.target.value})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm"
                   placeholder="g, ml, cái, quả..."
                 />
               </div>
@@ -270,45 +272,45 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Calories / {getDisplayUnit(formData.unit)}</label>
                   <input 
-                    type="number" required step="0.1"
+                    type="number" required step="0.1" min="0"
                     value={formData.caloriesPer100}
-                    onChange={e => setFormData({...formData, caloriesPer100: Number(e.target.value)})}
+                    onChange={e => setFormData({...formData, caloriesPer100: Math.max(0, Number(e.target.value))})}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Protein / {getDisplayUnit(formData.unit)}</label>
                   <input 
-                    type="number" required step="0.1"
+                    type="number" required step="0.1" min="0"
                     value={formData.proteinPer100}
-                    onChange={e => setFormData({...formData, proteinPer100: Number(e.target.value)})}
+                    onChange={e => setFormData({...formData, proteinPer100: Math.max(0, Number(e.target.value))})}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Carbs / {getDisplayUnit(formData.unit)}</label>
                   <input 
-                    type="number" required step="0.1"
+                    type="number" required step="0.1" min="0"
                     value={formData.carbsPer100}
-                    onChange={e => setFormData({...formData, carbsPer100: Number(e.target.value)})}
+                    onChange={e => setFormData({...formData, carbsPer100: Math.max(0, Number(e.target.value))})}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Fat / {getDisplayUnit(formData.unit)}</label>
                   <input 
-                    type="number" required step="0.1"
+                    type="number" required step="0.1" min="0"
                     value={formData.fatPer100}
-                    onChange={e => setFormData({...formData, fatPer100: Number(e.target.value)})}
+                    onChange={e => setFormData({...formData, fatPer100: Math.max(0, Number(e.target.value))})}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Fiber / {getDisplayUnit(formData.unit)}</label>
                   <input 
-                    type="number" required step="0.1"
+                    type="number" required step="0.1" min="0"
                     value={formData.fiberPer100}
-                    onChange={e => setFormData({...formData, fiberPer100: Number(e.target.value)})}
+                    onChange={e => setFormData({...formData, fiberPer100: Math.max(0, Number(e.target.value))})}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
                   />
                 </div>
@@ -324,8 +326,8 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
         </div>
       )}
       {deleteConfirmation.isOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-70">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trash2 className="w-8 h-8" />

@@ -103,7 +103,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
             placeholder="Tìm kiếm món ăn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-base sm:text-sm"
           />
         </div>
         <button 
@@ -172,8 +172,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-60">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col sm:mx-4">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <h4 className="font-bold text-slate-800 text-lg">{editingDish ? 'Sửa món ăn' : 'Tạo món ăn mới'}</h4>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -183,12 +183,13 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
             
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên món ăn</label>
-                <input 
+                <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên món ăn</label>
+                <input
+                  id="dish-name"
                   required
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm"
                   placeholder="VD: Ức gà áp chảo"
                 />
               </div>
@@ -196,10 +197,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Ingredient Selector */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-bold text-slate-500 uppercase">Chọn nguyên liệu</label>
+                  <p className="block text-xs font-bold text-slate-500 uppercase">Chọn nguyên liệu</p>
                   <div className="relative">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all" placeholder="Tìm nguyên liệu..." />
+                    <input className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all" placeholder="Tìm nguyên liệu..." />
                   </div>
                   <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100">
                     {ingredients.map(ing => (
@@ -218,7 +219,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
 
                 {/* Selected Ingredients */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-bold text-slate-500 uppercase">Nguyên liệu đã chọn</label>
+                  <p className="block text-xs font-bold text-slate-500 uppercase">Nguyên liệu đã chọn</p>
                   <div className="space-y-2">
                     {selectedIngredients.map(si => {
                       const ing = ingredients.find(i => i.id === si.ingredientId);
@@ -230,8 +231,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                             <div className="flex items-center gap-2 mt-1.5">
                               <input 
                                 type="number"
+                                min="0.1"
+                                step="0.1"
                                 value={si.amount}
-                                onChange={e => handleUpdateAmount(si.ingredientId, Number(e.target.value))}
+                                onChange={e => handleUpdateAmount(si.ingredientId, Math.max(0.1, Number(e.target.value) || 0.1))}
                                 className="w-20 px-2.5 py-1 text-sm rounded-lg border border-slate-200 outline-none focus:border-emerald-500 transition-all"
                               />
                               <span className="text-xs font-medium text-slate-500">{ing.unit}</span>
@@ -269,8 +272,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
         </div>
       )}
       {deleteConfirmation.isOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-70">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trash2 className="w-8 h-8" />

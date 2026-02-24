@@ -3,6 +3,18 @@ import { Meal, Dish, Ingredient, MealType } from '../types';
 import { calculateMealNutrition } from '../utils/nutrition';
 import { Plus, Trash2, Edit3, X, Save, Utensils, Search } from 'lucide-react';
 
+const MEAL_TYPE_SHORT_LABELS: Record<MealType, string> = {
+  breakfast: 'Sáng',
+  lunch: 'Trưa',
+  dinner: 'Tối',
+};
+
+const MEAL_TYPE_LABELS: Record<MealType, string> = {
+  breakfast: 'Bữa Sáng',
+  lunch: 'Bữa Trưa',
+  dinner: 'Bữa Tối',
+};
+
 interface MealManagerProps {
   meals: Meal[];
   dishes: Dish[];
@@ -71,7 +83,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
       alert("Bữa ăn này đang được sử dụng trong kế hoạch. Không thể xóa!");
       return;
     }
-    if (window.confirm("Bạn có chắc chắn muốn xóa bữa ăn này?")) {
+    if (globalThis.confirm("Bạn có chắc chắn muốn xóa bữa ăn này?")) {
       onDelete(id);
     }
   };
@@ -112,12 +124,12 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
               placeholder="Tìm kiếm bữa ăn..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-base sm:text-sm"
             />
           </div>
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as typeof filterType)}
             className="w-full sm:w-40 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-slate-700 font-medium appearance-none"
             style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
           >
@@ -128,7 +140,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
           </select>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             className="w-full sm:w-48 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-slate-700 font-medium appearance-none"
             style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
           >
@@ -152,9 +164,10 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
         {filteredMeals.map(meal => {
           const nutrition = calculateMealNutrition(meal, dishes, ingredients);
           return (
-            <div 
-              key={meal.id} 
-              className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col group cursor-pointer"
+            <button
+              type="button"
+              key={meal.id}
+              className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col group cursor-pointer text-left w-full"
               onClick={() => setViewingMeal(meal)}
             >
               <div className="flex items-start justify-between mb-4">
@@ -166,7 +179,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-bold text-slate-800 text-lg">{meal.name}</p>
                       <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded font-bold uppercase">
-                        {meal.type === 'breakfast' ? 'Sáng' : meal.type === 'lunch' ? 'Trưa' : 'Tối'}
+                        {MEAL_TYPE_SHORT_LABELS[meal.type]}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 font-medium">
@@ -201,7 +214,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
                   <Trash2 className="w-4 h-4" /> Xóa
                 </button>
               </div>
-            </div>
+            </button>
           );
         })}
         {filteredMeals.length === 0 && (
@@ -212,8 +225,9 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
       </div>
 
       {viewingMeal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={() => setViewingMeal(null)}>
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-60">
+          <button type="button" aria-label="Close" className="absolute inset-0 w-full h-full cursor-default" onClick={() => setViewingMeal(null)} tabIndex={-1} />
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col sm:mx-4 relative">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <h4 className="font-bold text-slate-800 text-lg">{viewingMeal.name}</h4>
               <button onClick={() => setViewingMeal(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -224,7 +238,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-500 uppercase">Loại bữa ăn:</span>
                 <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
-                  {viewingMeal.type === 'breakfast' ? 'Bữa Sáng' : viewingMeal.type === 'lunch' ? 'Bữa Trưa' : 'Bữa Tối'}
+                  {MEAL_TYPE_LABELS[viewingMeal.type]}
                 </span>
               </div>
               
@@ -238,11 +252,11 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
                       <div key={dish.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <p className="font-bold text-slate-800 mb-2">{dish.name}</p>
                         <div className="space-y-1">
-                          {dish.ingredients.map((di, idx) => {
+                          {dish.ingredients.map((di) => {
                             const ing = ingredients.find(i => i.id === di.ingredientId);
                             if (!ing) return null;
                             return (
-                              <div key={idx} className="flex justify-between text-sm text-slate-600">
+                              <div key={di.ingredientId} className="flex justify-between text-sm text-slate-600">
                                 <span>- {ing.name}</span>
                                 <span>{di.amount} {ing.unit}</span>
                               </div>
@@ -274,8 +288,8 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-60">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col sm:mx-4">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <h4 className="font-bold text-slate-800 text-lg">{editingMeal ? 'Sửa bữa ăn' : 'Tạo bữa ăn mới'}</h4>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -286,21 +300,23 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên bữa ăn</label>
-                  <input 
+                  <label htmlFor="meal-name" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên bữa ăn</label>
+                  <input
+                    id="meal-name"
                     required
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm"
                     placeholder="VD: Bữa sáng giàu đạm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Loại bữa ăn</label>
-                  <select 
+                  <label htmlFor="meal-type" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Loại bữa ăn</label>
+                  <select
+                    id="meal-type"
                     value={type}
                     onChange={e => setType(e.target.value as MealType)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white transition-all text-base sm:text-sm"
                   >
                     <option value="breakfast">Bữa Sáng</option>
                     <option value="lunch">Bữa Trưa</option>
@@ -310,7 +326,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
               </div>
 
               <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-500 uppercase">Chọn các món ăn</label>
+                <p className="block text-xs font-bold text-slate-500 uppercase">Chọn các món ăn</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {dishes.map(dish => {
                     const isSelected = selectedDishIds.includes(dish.id);

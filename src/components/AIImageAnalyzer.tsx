@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Loader2, Image as ImageIcon, Sparkles, Camera, X, Save } from 'lucide-react';
 import { analyzeDishImage, suggestIngredientInfo } from '../services/geminiService';
+import { AnalyzedDishResult, AnalyzedIngredient, SaveAnalyzedDishPayload } from '../types';
+import { normalizeUnit, calculateIngredientNutrition } from '../utils/nutrition';
 
-export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => void; onSave?: (result: any) => void }> = ({ onAnalysisComplete, onSave }) => {
+export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDishResult) => void; onSave?: (result: SaveAnalyzedDishPayload) => void }> = ({ onAnalysisComplete, onSave }) => {
   // Use a ref to track the latest callback to avoid stale closures in async functions
   const onAnalysisCompleteRef = useRef(onAnalysisComplete);
   
@@ -12,7 +14,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
 
   const [image, setImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<AnalyzedDishResult | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +27,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
       if (!items) return;
 
       for (const item of items) {
-        if (item.type.indexOf('image') !== -1) {
+        if (item.type.includes('image')) {
           const blob = item.getAsFile();
           if (blob) {
             const reader = new FileReader();
@@ -40,8 +42,8 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
       }
     };
 
-    window.addEventListener('paste', handlePaste);
-    return () => window.removeEventListener('paste', handlePaste);
+    globalThis.addEventListener('paste', handlePaste);
+    return () => globalThis.removeEventListener('paste', handlePaste);
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,7 +73,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
   };
 
   const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
+    if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
@@ -111,7 +113,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
       const analysis = await analyzeDishImage(base64Data, mimeType);
       setResult(analysis);
       onAnalysisCompleteRef.current(analysis);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to analyze image:", error);
       alert("Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.");
     } finally {
@@ -120,44 +122,49 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
   };
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [editedResult, setEditedResult] = useState<any>(null);
+  const [editedResult, setEditedResult] = useState<AnalyzedDishResult | null>(null);
   const [saveDish, setSaveDish] = useState(true);
   const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>([]);
   const [researchingIngredientIndex, setResearchingIngredientIndex] = useState<number | null>(null);
 
   const handleOpenSaveModal = () => {
     if (result) {
-      setEditedResult(JSON.parse(JSON.stringify(result))); // Deep copy
+      setEditedResult(structuredClone(result));
       setSaveDish(true);
       setSelectedIngredients(new Array(result.ingredients.length).fill(true));
       setIsSaveModalOpen(true);
     }
   };
 
-  const handleUpdateIngredient = (index: number, field: string, value: any) => {
-    const newIngredients = [...editedResult.ingredients];
+  const handleUpdateIngredient = (index: number, field: string, value: string | number) => {
+    if (!editedResult) return;
+    const newIngredients: AnalyzedIngredient[] = [...editedResult.ingredients];
+    const current = newIngredients[index];
+
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      newIngredients[index] = {
-        ...newIngredients[index],
-        [parent]: {
-          ...newIngredients[index][parent],
-          [child]: value
-        }
-      };
+      if (parent === 'nutritionPerStandardUnit') {
+        newIngredients[index] = {
+          ...current,
+          nutritionPerStandardUnit: {
+            ...current.nutritionPerStandardUnit,
+            [child]: value,
+          },
+        };
+      }
     } else {
       newIngredients[index] = {
-        ...newIngredients[index],
-        [field]: value
-      };
+        ...current,
+        [field]: value,
+      } as AnalyzedIngredient;
     }
     setEditedResult({ ...editedResult, ingredients: newIngredients });
   };
 
   const handleConfirmSave = () => {
     if (onSave && editedResult) {
-      const finalIngredients = editedResult.ingredients.filter((_: any, idx: number) => selectedIngredients[idx]);
-      
+      const finalIngredients = editedResult.ingredients.filter((_: AnalyzedIngredient, idx: number) => selectedIngredients[idx]);
+
       const payload = {
         ...editedResult,
         ingredients: finalIngredients,
@@ -215,7 +222,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           {isCameraOpen ? (
-            <div className="relative rounded-2xl overflow-hidden bg-black aspect-square sm:aspect-video flex items-center justify-center">
+            <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center">
               {cameraError ? (
                 <div className="text-center p-6 max-w-xs">
                   <div className="w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -231,7 +238,9 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                 </div>
               ) : (
                 <>
-                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover">
+                    <track kind="captions" />
+                  </video>
                   <canvas ref={canvasRef} className="hidden" />
                   <div className="absolute bottom-4 flex gap-4">
                     <button 
@@ -257,7 +266,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
               }`}
             >
               {image ? (
-                <div className="relative aspect-square sm:aspect-video">
+                <div className="relative aspect-video">
                   <img src={image} alt="Uploaded dish" className="w-full h-full object-cover" />
                   <button 
                     onClick={() => {
@@ -270,7 +279,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                   </button>
                 </div>
               ) : (
-                <div className="w-full aspect-square sm:aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
+                <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
                   <div className="flex gap-4">
                     <button 
                       onClick={() => fileInputRef.current?.click()}
@@ -355,7 +364,9 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
 
               <div>
                 <h4 className="font-bold text-slate-800 mb-3">Chi tiết nguyên liệu & Dinh dưỡng:</h4>
-                <div className="overflow-x-auto">
+
+                {/* Desktop: Table view */}
+                <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead className="text-xs text-slate-500 uppercase bg-slate-100">
                       <tr>
@@ -368,44 +379,70 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {result.ingredients.map((ing: any, idx: number) => {
-                        // Calculate nutrition based on amount
-                        let factor = 1;
-                        const rawUnit = ing.unit.toLowerCase().trim();
-                        let unit = rawUnit;
-                        
-                        // Normalize unit
-                        if (['g', 'gram', 'grams', 'gam'].includes(rawUnit)) unit = 'g';
-                        else if (['ml', 'milliliter', 'milliliters'].includes(rawUnit)) unit = 'ml';
-                        else if (['kg', 'kilogram', 'kilograms'].includes(rawUnit)) unit = 'kg';
-                        else if (['l', 'liter', 'liters'].includes(rawUnit)) unit = 'l';
-
-                        if (['g', 'ml'].includes(unit)) {
-                          factor = ing.amount / 100;
-                        } else if (['kg', 'l'].includes(unit)) {
-                          factor = (ing.amount * 1000) / 100;
-                        } else {
-                          factor = ing.amount;
-                        }
-
-                        const cal = Math.round(ing.nutritionPerStandardUnit.calories * factor);
-                        const pro = Math.round(ing.nutritionPerStandardUnit.protein * factor);
-                        const carbs = Math.round(ing.nutritionPerStandardUnit.carbs * factor);
-                        const fat = Math.round(ing.nutritionPerStandardUnit.fat * factor);
-
+                      {result.ingredients.map((ing: AnalyzedIngredient, idx: number) => {
+                        const tempIngredient = {
+                          id: '', name: ing.name, unit: normalizeUnit(ing.unit),
+                          caloriesPer100: ing.nutritionPerStandardUnit.calories,
+                          proteinPer100: ing.nutritionPerStandardUnit.protein,
+                          carbsPer100: ing.nutritionPerStandardUnit.carbs,
+                          fatPer100: ing.nutritionPerStandardUnit.fat,
+                          fiberPer100: ing.nutritionPerStandardUnit.fiber,
+                        };
+                        const n = calculateIngredientNutrition(tempIngredient, ing.amount);
                         return (
-                          <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                          <tr key={`desktop-${ing.name}-${idx}`} className="hover:bg-slate-50 transition-colors">
                             <td className="px-3 py-2 font-medium text-slate-800">{ing.name}</td>
                             <td className="px-3 py-2 text-slate-600">{ing.amount} {ing.unit}</td>
-                            <td className="px-3 py-2 font-medium text-orange-500">{cal}</td>
-                            <td className="px-3 py-2 font-medium text-blue-500">{pro}</td>
-                            <td className="px-3 py-2 font-medium text-amber-500">{carbs}</td>
-                            <td className="px-3 py-2 font-medium text-rose-500">{fat}</td>
+                            <td className="px-3 py-2 font-medium text-orange-500">{Math.round(n.calories)}</td>
+                            <td className="px-3 py-2 font-medium text-blue-500">{Math.round(n.protein)}</td>
+                            <td className="px-3 py-2 font-medium text-amber-500">{Math.round(n.carbs)}</td>
+                            <td className="px-3 py-2 font-medium text-rose-500">{Math.round(n.fat)}</td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile: Card list view */}
+                <div className="sm:hidden space-y-3">
+                  {result.ingredients.map((ing: AnalyzedIngredient, idx: number) => {
+                    const tempIngredient = {
+                      id: '', name: ing.name, unit: normalizeUnit(ing.unit),
+                      caloriesPer100: ing.nutritionPerStandardUnit.calories,
+                      proteinPer100: ing.nutritionPerStandardUnit.protein,
+                      carbsPer100: ing.nutritionPerStandardUnit.carbs,
+                      fatPer100: ing.nutritionPerStandardUnit.fat,
+                      fiberPer100: ing.nutritionPerStandardUnit.fiber,
+                    };
+                    const n = calculateIngredientNutrition(tempIngredient, ing.amount);
+                    return (
+                      <div key={`mobile-${ing.name}-${idx}`} className="bg-white p-3 rounded-xl border border-slate-100">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-bold text-slate-800 text-sm">{ing.name}</p>
+                          <span className="text-xs text-slate-500 font-medium">{ing.amount} {ing.unit}</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Calo</p>
+                            <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Đạm</p>
+                            <p className="text-sm font-bold text-blue-500">{Math.round(n.protein)}g</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Carbs</p>
+                            <p className="text-sm font-bold text-amber-500">{Math.round(n.carbs)}g</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Béo</p>
+                            <p className="text-sm font-bold text-rose-500">{Math.round(n.fat)}g</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               
@@ -434,8 +471,8 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
       </div>
 
       {isSaveModalOpen && editedResult && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-70">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-4xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col sm:mx-4">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <h4 className="font-bold text-slate-800 text-lg">Xác nhận lưu món ăn</h4>
               <button onClick={() => setIsSaveModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -462,19 +499,21 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                 {saveDish && (
                   <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên món ăn</label>
-                      <input 
+                      <label htmlFor="ai-dish-name" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên món ăn</label>
+                      <input
+                        id="ai-dish-name"
                         value={editedResult.name}
                         onChange={e => setEditedResult({ ...editedResult, name: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Mô tả</label>
-                      <textarea 
+                      <label htmlFor="ai-dish-desc" className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Mô tả</label>
+                      <textarea
+                        id="ai-dish-desc"
                         value={editedResult.description}
                         onChange={e => setEditedResult({ ...editedResult, description: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm"
                         rows={2}
                       />
                     </div>
@@ -495,8 +534,8 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                 </div>
                 
                 <div className="space-y-4">
-                  {editedResult.ingredients.map((ing: any, idx: number) => (
-                    <div key={idx} className={`p-4 rounded-xl border transition-all ${selectedIngredients[idx] ? 'bg-slate-50 border-slate-200' : 'bg-white border-slate-100 opacity-60'}`}>
+                  {editedResult.ingredients.map((ing: AnalyzedIngredient, idx: number) => (
+                    <div key={`edit-${ing.name}-${idx}`} className={`p-4 rounded-xl border transition-all ${selectedIngredients[idx] ? 'bg-slate-50 border-slate-200' : 'bg-white border-slate-100 opacity-60'}`}>
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
                           <input 
@@ -523,25 +562,29 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                       
                       <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!selectedIngredients[idx] && 'pointer-events-none grayscale'}`}>
                         <div className="md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tên</label>
-                          <input 
+                          <label htmlFor={`ai-ing-name-${idx}`} className="block text-xs font-bold text-slate-500 uppercase mb-1">Tên</label>
+                          <input
+                            id={`ai-ing-name-${idx}`}
                             value={ing.name}
                             onChange={e => handleUpdateIngredient(idx, 'name', e.target.value)}
                             className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-emerald-500 outline-none text-sm"
                           />
                         </div>
                         <div className="md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Số lượng</label>
-                          <input 
+                          <label htmlFor={`ai-ing-amount-${idx}`} className="block text-xs font-bold text-slate-500 uppercase mb-1">Số lượng</label>
+                          <input
+                            id={`ai-ing-amount-${idx}`}
                             type="number"
+                            min="0"
                             value={ing.amount}
-                            onChange={e => handleUpdateIngredient(idx, 'amount', Number(e.target.value))}
+                            onChange={e => handleUpdateIngredient(idx, 'amount', Math.max(0, Number(e.target.value)))}
                             className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-emerald-500 outline-none text-sm"
                           />
                         </div>
                         <div className="md:col-span-1">
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Đơn vị</label>
-                          <input 
+                          <label htmlFor={`ai-ing-unit-${idx}`} className="block text-xs font-bold text-slate-500 uppercase mb-1">Đơn vị</label>
+                          <input
+                            id={`ai-ing-unit-${idx}`}
                             value={ing.unit}
                             onChange={e => handleUpdateIngredient(idx, 'unit', e.target.value)}
                             className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-emerald-500 outline-none text-sm"
@@ -553,47 +596,52 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                         <p className="text-xs font-bold text-slate-500 uppercase mb-2">Dinh dưỡng (cho 100g/ml hoặc 1 đơn vị)</p>
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Calo</label>
-                            <input 
-                              type="number"
+                            <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-400 block mb-0.5">Calo</label>
+                            <input
+                              id={`ai-ing-cal-${idx}`}
+                              type="number" min="0"
                               value={ing.nutritionPerStandardUnit.calories}
-                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', Number(e.target.value))}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', Math.max(0, Number(e.target.value)))}
                               className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Protein</label>
-                            <input 
-                              type="number"
+                            <label htmlFor={`ai-ing-pro-${idx}`} className="text-[10px] text-slate-400 block mb-0.5">Protein</label>
+                            <input
+                              id={`ai-ing-pro-${idx}`}
+                              type="number" min="0"
                               value={ing.nutritionPerStandardUnit.protein}
-                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', Number(e.target.value))}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', Math.max(0, Number(e.target.value)))}
                               className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Carbs</label>
-                            <input 
-                              type="number"
+                            <label htmlFor={`ai-ing-carbs-${idx}`} className="text-[10px] text-slate-400 block mb-0.5">Carbs</label>
+                            <input
+                              id={`ai-ing-carbs-${idx}`}
+                              type="number" min="0"
                               value={ing.nutritionPerStandardUnit.carbs}
-                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', Number(e.target.value))}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', Math.max(0, Number(e.target.value)))}
                               className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Fat</label>
-                            <input 
-                              type="number"
+                            <label htmlFor={`ai-ing-fat-${idx}`} className="text-[10px] text-slate-400 block mb-0.5">Fat</label>
+                            <input
+                              id={`ai-ing-fat-${idx}`}
+                              type="number" min="0"
                               value={ing.nutritionPerStandardUnit.fat}
-                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', Number(e.target.value))}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', Math.max(0, Number(e.target.value)))}
                               className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Fiber</label>
-                            <input 
-                              type="number"
+                            <label htmlFor={`ai-ing-fiber-${idx}`} className="text-[10px] text-slate-400 block mb-0.5">Fiber</label>
+                            <input
+                              id={`ai-ing-fiber-${idx}`}
+                              type="number" min="0"
                               value={ing.nutritionPerStandardUnit.fiber}
-                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', Number(e.target.value))}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', Math.max(0, Number(e.target.value)))}
                               className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
                             />
                           </div>

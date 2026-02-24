@@ -1,4 +1,5 @@
 import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
+import { AnalyzedDishResult, IngredientSuggestion, MealPlanSuggestion, MealType } from '../types';
 
 const getAI = () => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -6,11 +7,19 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
+export type AvailableMealInfo = {
+  id: string;
+  name: string;
+  type: MealType;
+  calories: number;
+  protein: number;
+};
+
 export const suggestMealPlan = async (
   targetCalories: number,
   targetProtein: number,
-  availableMeals: any[]
-) => {
+  availableMeals: AvailableMealInfo[]
+): Promise<MealPlanSuggestion> => {
   const ai = getAI();
 
   const prompt = `
@@ -43,10 +52,10 @@ export const suggestMealPlan = async (
     }
   });
 
-  return JSON.parse(response.text || "{}");
+  return JSON.parse(response.text || "{}") as MealPlanSuggestion;
 };
 
-export const analyzeDishImage = async (base64Image: string, mimeType: string) => {
+export const analyzeDishImage = async (base64Image: string, mimeType: string): Promise<AnalyzedDishResult> => {
   const ai = getAI();
 
   const prompt = `
@@ -120,10 +129,10 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string) =>
     }
   });
 
-  return JSON.parse(response.text || "{}");
+  return JSON.parse(response.text || "{}") as AnalyzedDishResult;
 };
 
-export const suggestIngredientInfo = async (ingredientName: string, unit: string) => {
+export const suggestIngredientInfo = async (ingredientName: string, unit: string): Promise<IngredientSuggestion> => {
   const ai = getAI();
 
   const isPiece = !['g', 'kg', 'mg', 'ml', 'l'].includes(unit.toLowerCase().trim());
@@ -140,8 +149,7 @@ export const suggestIngredientInfo = async (ingredientName: string, unit: string
     - unit (chuỗi, trả về chính xác "${unit}")
   `;
 
-  // Set a timeout for the API call
-  const timeoutPromise = new Promise((_, reject) => 
+  const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error("Timeout")), 300000)
   );
 
@@ -166,7 +174,7 @@ export const suggestIngredientInfo = async (ingredientName: string, unit: string
     }
   });
 
-  const response = await Promise.race([apiCallPromise, timeoutPromise]) as any;
+  const response = await Promise.race([apiCallPromise, timeoutPromise]);
 
-  return JSON.parse(response.text || "{}");
+  return JSON.parse(response.text || "{}") as IngredientSuggestion;
 };

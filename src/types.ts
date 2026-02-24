@@ -41,3 +41,66 @@ export type UserProfile = {
   proteinRatio: number;
   targetCalories: number;
 };
+
+// --- Derived / Computed Types ---
+
+export type NutritionInfo = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+};
+
+export type MealWithNutrition = Meal & NutritionInfo;
+
+// --- AI Service Types ---
+
+export type AnalyzedNutritionPerUnit = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+};
+
+export type AnalyzedIngredient = {
+  name: string;
+  amount: number;
+  unit: string;
+  nutritionPerStandardUnit: AnalyzedNutritionPerUnit;
+};
+
+export type AnalyzedDishResult = {
+  name: string;
+  description: string;
+  totalNutrition: {
+    calories: number;
+    protein: number;
+    fat: number;
+    carbs: number;
+  };
+  ingredients: AnalyzedIngredient[];
+};
+
+export type SaveAnalyzedDishPayload = {
+  name: string;
+  shouldCreateDish?: boolean;
+  ingredients: AnalyzedIngredient[];
+};
+
+export type MealPlanSuggestion = {
+  breakfastId: string;
+  lunchId: string;
+  dinnerId: string;
+  reasoning: string;
+};
+
+export type IngredientSuggestion = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  unit: string;
+};

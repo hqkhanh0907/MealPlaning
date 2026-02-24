@@ -1,26 +1,40 @@
-import { Ingredient, Dish, Meal, DishIngredient } from '../types';
+import { Ingredient, Dish, Meal, NutritionInfo } from '../types';
+
+const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+
+// --- Unit Normalization (shared across app) ---
+
+const UNIT_ALIASES: Record<string, string> = {
+  g: 'g', gram: 'g', grams: 'g', gam: 'g',
+  kg: 'kg', kilogram: 'kg', kilograms: 'kg',
+  mg: 'mg', milligram: 'mg', milligrams: 'mg',
+  ml: 'ml', milliliter: 'ml', milliliters: 'ml',
+  l: 'l', liter: 'l', liters: 'l',
+};
+
+export const normalizeUnit = (rawUnit: string): string => {
+  const lower = rawUnit.toLowerCase().trim();
+  return UNIT_ALIASES[lower] ?? lower;
+};
 
 const isWeightOrVolume = (unit: string): boolean => {
-  const lower = unit.toLowerCase().trim();
-  return ['g', 'kg', 'mg', 'ml', 'l'].includes(lower);
+  const normalized = normalizeUnit(unit);
+  return ['g', 'kg', 'mg', 'ml', 'l'].includes(normalized);
 };
 
 const getConversionFactor = (unit: string): number => {
-  const lower = unit.toLowerCase().trim();
-  if (lower === 'kg' || lower === 'l') return 1000;
-  if (lower === 'mg') return 0.001;
+  const normalized = normalizeUnit(unit);
+  if (normalized === 'kg' || normalized === 'l') return 1000;
+  if (normalized === 'mg') return 0.001;
   return 1;
 };
 
-export const calculateIngredientNutrition = (ingredient: Ingredient, amount: number) => {
-  // Normalize amount to the base unit factor
+export const calculateIngredientNutrition = (ingredient: Ingredient, amount: number): NutritionInfo => {
   let factor: number;
   
   if (isWeightOrVolume(ingredient.unit)) {
-    // For weight/volume, we store nutrition per 100g/ml
     factor = (amount * getConversionFactor(ingredient.unit)) / 100;
   } else {
-    // For pieces (quả, cái, chai...), we store nutrition per 1 unit
     factor = amount;
   }
   
@@ -33,8 +47,8 @@ export const calculateIngredientNutrition = (ingredient: Ingredient, amount: num
   };
 };
 
-export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[]) => {
-  return dish.ingredients.reduce(
+export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[]): NutritionInfo => {
+  return dish.ingredients.reduce<NutritionInfo>(
     (acc, di) => {
       const ingredient = allIngredients.find((i) => i.id === di.ingredientId);
       if (!ingredient) return acc;
@@ -47,12 +61,12 @@ export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[])
         fiber: acc.fiber + nutrition.fiber,
       };
     },
-    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+    { ...ZERO_NUTRITION }
   );
 };
 
-export const calculateMealNutrition = (meal: Meal, allDishes: Dish[], allIngredients: Ingredient[]) => {
-  return meal.dishIds.reduce(
+export const calculateMealNutrition = (meal: Meal, allDishes: Dish[], allIngredients: Ingredient[]): NutritionInfo => {
+  return meal.dishIds.reduce<NutritionInfo>(
     (acc, dishId) => {
       const dish = allDishes.find((d) => d.id === dishId);
       if (!dish) return acc;
@@ -65,6 +79,6 @@ export const calculateMealNutrition = (meal: Meal, allDishes: Dish[], allIngredi
         fiber: acc.fiber + nutrition.fiber,
       };
     },
-    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+    { ...ZERO_NUTRITION }
   );
 };
