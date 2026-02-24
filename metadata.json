@@ -1,5 +1,5 @@
 {
   "name": "High Protein Meal Planner",
   "description": "Meal planner for 1500 kcal, 166g protein, digestion support",
-  "requestFramePermissions": []
+  "requestFramePermissions": ["camera"]
 }

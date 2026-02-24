@@ -1,12 +1,11 @@
 import React from 'react';
-import { Meal } from '../data/meals';
 import { Activity, Flame, Beef, Wheat, Droplet, Leaf } from 'lucide-react';
 
 interface SummaryProps {
   selectedMeals: {
-    breakfast: Meal | null;
-    lunch: Meal | null;
-    dinner: Meal | null;
+    breakfast: any | null;
+    lunch: any | null;
+    dinner: any | null;
   };
   targetCalories: number;
   targetProtein: number;
@@ -23,13 +22,13 @@ export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories,
   const proPercent = Math.min(100, (totalProtein / targetProtein) * 100);
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100">
+    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-6 sm:p-8 border border-slate-100">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
           <Activity className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Tổng quan dinh dưỡng</h2>
+          <h2 className="text-xl font-bold text-slate-800">Dinh dưỡng trong ngày</h2>
           <p className="text-sm text-slate-500">Mục tiêu: {targetCalories} kcal, {targetProtein}g Protein</p>
         </div>
       </div>
@@ -42,8 +41,8 @@ export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories,
               <Flame className="w-5 h-5 text-orange-500" /> Calories
             </div>
             <div className="text-right">
-              <span className="text-2xl font-bold text-slate-800">{totalCalories}</span>
-              <span className="text-sm text-slate-500"> / {targetCalories} kcal</span>
+              <span className="text-2xl font-bold text-slate-800">{Math.round(totalCalories)}</span>
+              <span className="text-sm text-slate-500"> / {targetCalories}</span>
             </div>
           </div>
           <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
@@ -61,8 +60,8 @@ export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories,
               <Beef className="w-5 h-5 text-blue-500" /> Protein
             </div>
             <div className="text-right">
-              <span className="text-2xl font-bold text-slate-800">{totalProtein}</span>
-              <span className="text-sm text-slate-500"> / {targetProtein} g</span>
+              <span className="text-2xl font-bold text-slate-800">{Math.round(totalProtein)}</span>
+              <span className="text-sm text-slate-500"> / {targetProtein}g</span>
             </div>
           </div>
           <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
@@ -80,21 +79,21 @@ export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories,
             <Wheat className="w-4 h-4" />
             <span className="text-sm font-medium">Carbs</span>
           </div>
-          <p className="text-2xl font-bold text-amber-900">{totalCarbs}<span className="text-sm font-normal text-amber-700/70 ml-1">g</span></p>
+          <p className="text-2xl font-bold text-amber-900">{Math.round(totalCarbs)}<span className="text-sm font-normal text-amber-700/70 ml-1">g</span></p>
         </div>
         <div className="bg-rose-50 rounded-2xl p-4 border border-rose-100/50">
           <div className="flex items-center gap-2 text-rose-700 mb-1">
             <Droplet className="w-4 h-4" />
             <span className="text-sm font-medium">Fat</span>
           </div>
-          <p className="text-2xl font-bold text-rose-900">{totalFat}<span className="text-sm font-normal text-rose-700/70 ml-1">g</span></p>
+          <p className="text-2xl font-bold text-rose-900">{Math.round(totalFat)}<span className="text-sm font-normal text-rose-700/70 ml-1">g</span></p>
         </div>
         <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100/50">
           <div className="flex items-center gap-2 text-emerald-700 mb-1">
             <Leaf className="w-4 h-4" />
             <span className="text-sm font-medium">Chất xơ</span>
           </div>
-          <p className="text-2xl font-bold text-emerald-900">{totalFiber}<span className="text-sm font-normal text-emerald-700/70 ml-1">g</span></p>
+          <p className="text-2xl font-bold text-emerald-900">{Math.round(totalFiber)}<span className="text-sm font-normal text-emerald-700/70 ml-1">g</span></p>
         </div>
       </div>
     </div>
