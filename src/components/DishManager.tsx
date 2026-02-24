@@ -20,6 +20,16 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
   const [name, setName] = useState('');
   const [selectedIngredients, setSelectedIngredients] = useState<DishIngredient[]>([]);
 
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    dishId: string | null;
+    dishName: string;
+  }>({
+    isOpen: false,
+    dishId: null,
+    dishName: ''
+  });
+
   const handleOpenModal = (dish?: Dish) => {
     if (dish) {
       setEditingDish(dish);
@@ -62,13 +72,22 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string, name: string) => {
     if (isUsed(id)) {
-      alert("Món ăn này đang được sử dụng trong một bữa ăn đã lên kế hoạch. Không thể xóa!");
+      alert("Món ăn này đang được sử dụng trong một hoặc nhiều bữa ăn. Vui lòng gỡ món ăn khỏi các bữa ăn trước khi xóa.");
       return;
     }
-    if (window.confirm("Bạn có chắc chắn muốn xóa món ăn này?")) {
-      onDelete(id);
+    setDeleteConfirmation({
+      isOpen: true,
+      dishId: id,
+      dishName: name
+    });
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmation.dishId) {
+      onDelete(deleteConfirmation.dishId);
+      setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });
     }
   };
 
@@ -133,7 +152,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   <Edit3 className="w-4 h-4" /> Sửa
                 </button>
                 <button 
-                  onClick={() => handleDelete(dish.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(dish.id, dish.name);
+                  }}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(dish.id) ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-rose-600 hover:bg-rose-50'}`}
                 >
                   <Trash2 className="w-4 h-4" /> Xóa
@@ -242,6 +264,36 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 <Save className="w-5 h-5" />
                 Lưu món ăn
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-8 h-8" />
+              </div>
+              <h4 className="font-bold text-slate-800 text-xl mb-2">Xóa món ăn?</h4>
+              <p className="text-slate-600 mb-6">
+                Bạn có chắc chắn muốn xóa món <span className="font-bold text-slate-800">"{deleteConfirmation.dishName}"</span>?
+                <br/>Hành động này không thể hoàn tác.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })}
+                  className="flex-1 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  Hủy
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold shadow-sm shadow-rose-200 hover:bg-rose-600 transition-all"
+                >
+                  Xóa ngay
+                </button>
+              </div>
             </div>
           </div>
         </div>

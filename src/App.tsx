@@ -230,8 +230,10 @@ export default function App() {
 
   // Check if item is used in any plan
   const isMealUsed = (mealId: string) => dayPlans.some(p => p.breakfastId === mealId || p.lunchId === mealId || p.dinnerId === mealId);
-  const isDishUsed = (dishId: string) => meals.some(m => m.dishIds.includes(dishId) && isMealUsed(m.id));
-  const isIngredientUsed = (ingId: string) => dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId) && isDishUsed(d.id));
+  // Dish is used if it belongs to ANY meal (not just planned ones)
+  const isDishUsed = (dishId: string) => meals.some(m => m.dishIds.includes(dishId));
+  // Ingredient is used if it belongs to ANY dish (not just used ones) - simplified to protect data integrity
+  const isIngredientUsed = (ingId: string) => dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId));
 
   const handleSaveAnalyzedDish = (result: any) => {
     // 1. Process Ingredients

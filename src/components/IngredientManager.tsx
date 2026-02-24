@@ -110,15 +110,16 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
   };
 
   const handleDelete = (id: string, name: string) => {
-    // Check if used in any dish (even if not planned)
-    const usedInDishes = dishes?.filter(d => d.ingredients.some(di => di.ingredientId === id)) || [];
+    if (isUsed(id)) {
+      alert("Nguyên liệu này đang được sử dụng trong một hoặc nhiều món ăn. Vui lòng gỡ nguyên liệu khỏi các món ăn trước khi xóa.");
+      return;
+    }
     
     setDeleteConfirmation({
       isOpen: true,
       ingredientId: id,
       ingredientName: name,
-      usageCount: usedInDishes.length,
-      exampleDish: usedInDishes.length > 0 ? usedInDishes[0].name : undefined
+      usageCount: 0
     });
   };
 
@@ -208,7 +209,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
                   e.stopPropagation();
                   handleDelete(ing.id, ing.name);
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(ing.id) ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-rose-600 hover:bg-rose-50'}`}
               >
                 <Trash2 className="w-4 h-4" /> Xóa
               </button>
