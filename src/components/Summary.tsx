@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Flame, Beef, Wheat, Droplet, Leaf } from 'lucide-react';
+import { Activity, Flame, Beef, Wheat, Droplet, Leaf, Edit3 } from 'lucide-react';
 
 interface SummaryProps {
   selectedMeals: {
@@ -9,9 +9,10 @@ interface SummaryProps {
   };
   targetCalories: number;
   targetProtein: number;
+  onEditGoals?: () => void;
 }
 
-export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories, targetProtein }) => {
+export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories, targetProtein, onEditGoals }) => {
   const totalCalories = (selectedMeals.breakfast?.calories || 0) + (selectedMeals.lunch?.calories || 0) + (selectedMeals.dinner?.calories || 0);
   const totalProtein = (selectedMeals.breakfast?.protein || 0) + (selectedMeals.lunch?.protein || 0) + (selectedMeals.dinner?.protein || 0);
   const totalCarbs = (selectedMeals.breakfast?.carbs || 0) + (selectedMeals.lunch?.carbs || 0) + (selectedMeals.dinner?.carbs || 0);
@@ -23,14 +24,25 @@ export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories,
 
   return (
     <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-6 sm:p-8 border border-slate-100">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
-          <Activity className="w-6 h-6" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+            <Activity className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Dinh dưỡng trong ngày</h2>
+            <p className="text-sm text-slate-500">Mục tiêu: {targetCalories} kcal, {targetProtein}g Protein</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">Dinh dưỡng trong ngày</h2>
-          <p className="text-sm text-slate-500">Mục tiêu: {targetCalories} kcal, {targetProtein}g Protein</p>
-        </div>
+        {onEditGoals && (
+          <button 
+            onClick={onEditGoals}
+            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
+            title="Chỉnh sửa mục tiêu"
+          >
+            <Edit3 className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

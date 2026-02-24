@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { initialIngredients, initialDishes, initialMeals } from './data/initialData';
-import { Ingredient, Dish, Meal, DayPlan, MealType, DishIngredient } from './types';
+import { Ingredient, Dish, Meal, DayPlan, MealType, DishIngredient, UserProfile } from './types';
 import { calculateMealNutrition } from './utils/nutrition';
 import { Summary } from './components/Summary';
 import { GroceryList } from './components/GroceryList';
@@ -24,17 +24,41 @@ import {
   X,
   Trash2,
   Sparkles,
-  Loader2
+  Loader2,
+  Target,
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
+
+type NotificationState = {
+  type: 'success' | 'error' | 'info' | 'warning';
+  title: string;
+  message: string;
+  onClick?: () => void;
+} | null;
 import { suggestMealPlan } from './services/geminiService';
 
 export default function App() {
   const [activeMainTab, setActiveMainTab] = useState<'calendar' | 'management' | 'ai-analysis'>('calendar');
+  const activeMainTabRef = useRef(activeMainTab);
+
+  useEffect(() => {
+    activeMainTabRef.current = activeMainTab;
+  }, [activeMainTab]);
+
   const [activeManagementSubTab, setActiveManagementSubTab] = useState<'ingredients' | 'dishes' | 'meals'>('meals');
   const [selectedDate, setSelectedDate] = useState(() => {
     const d = new Date();
     return d.toISOString().split('T')[0];
   });
+
+  // User Profile State
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    weight: 83,
+    proteinRatio: 2, // 2g per kg
+    targetCalories: 1500
+  });
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   // State for library
   const [ingredients, setIngredients] = useState<Ingredient[]>(initialIngredients);
@@ -50,6 +74,16 @@ export default function App() {
   const [planningSearchQuery, setPlanningSearchQuery] = useState('');
   const [planningSortBy, setPlanningSortBy] = useState<'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc'>('name-asc');
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const [notification, setNotification] = useState<NotificationState>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const currentPlan = useMemo(() => {
     return dayPlans.find(p => p.date === selectedDate) || {
@@ -83,7 +117,11 @@ export default function App() {
         };
       });
 
-      const suggestion = await suggestMealPlan(1500, 166, availableMeals);
+      const suggestion = await suggestMealPlan(
+        userProfile.targetCalories, 
+        Math.round(userProfile.weight * userProfile.proteinRatio), 
+        availableMeals
+      );
       
       if (suggestion.breakfastId || suggestion.lunchId || suggestion.dinnerId) {
         setDayPlans(prev => {
@@ -203,6 +241,7 @@ export default function App() {
     // We need a local copy of ingredients to check against, including newly created ones in this loop
     const currentIngredients = [...ingredients];
 
+    // result.ingredients now contains only the SELECTED ingredients
     result.ingredients.forEach((aiIng: any) => {
       // Check if ingredient already exists (by name)
       let existingIng = currentIngredients.find(i => i.name.toLowerCase() === aiIng.name.toLowerCase());
@@ -236,17 +275,23 @@ export default function App() {
       setIngredients(prev => [...prev, ...newIngredients]);
     }
 
-    // 2. Create Dish
-    const newDish: Dish = {
-      id: `dish-${Date.now()}`,
-      name: result.name,
-      ingredients: dishIngredients
-    };
+    // 2. Create Dish (Only if shouldCreateDish is true or undefined/legacy)
+    if (result.shouldCreateDish !== false) {
+      const newDish: Dish = {
+        id: `dish-${Date.now()}`,
+        name: result.name,
+        ingredients: dishIngredients
+      };
 
-    setDishes(prev => [...prev, newDish]);
-    alert(`Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới vào thư viện!`);
-    setActiveMainTab('management');
-    setActiveManagementSubTab('dishes');
+      setDishes(prev => [...prev, newDish]);
+      alert(`Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới vào thư viện!`);
+      setActiveMainTab('management');
+      setActiveManagementSubTab('dishes');
+    } else {
+      alert(`Đã lưu ${newIngredients.length} nguyên liệu mới vào thư viện!`);
+      setActiveMainTab('management');
+      setActiveManagementSubTab('ingredients');
+    }
   };
 
   return (
@@ -260,7 +305,7 @@ export default function App() {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold tracking-tight text-slate-800">Smart Meal Planner</h1>
-              <p className="text-xs text-slate-500 font-medium">Dinh dưỡng chính xác cho 83kg</p>
+              <p className="text-xs text-slate-500 font-medium">Dinh dưỡng chính xác cho {userProfile.weight}kg</p>
             </div>
           </div>
           
@@ -326,8 +371,9 @@ export default function App() {
               <div className="lg:col-span-2">
                 <Summary 
                   selectedMeals={selectedMealsForSummary} 
-                  targetCalories={1500} 
-                  targetProtein={166} 
+                  targetCalories={userProfile.targetCalories} 
+                  targetProtein={Math.round(userProfile.weight * userProfile.proteinRatio)} 
+                  onEditGoals={() => setIsGoalModalOpen(true)}
                 />
               </div>
               <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col">
@@ -337,7 +383,7 @@ export default function App() {
                 </div>
                 <div className="flex-1 space-y-4 text-sm text-slate-600 leading-relaxed">
                   <p>
-                    Dựa trên trọng lượng 83kg, bạn cần duy trì lượng protein cao (166g) để bảo vệ cơ bắp trong khi thâm hụt calo.
+                    Dựa trên trọng lượng <strong>{userProfile.weight}kg</strong>, bạn cần duy trì lượng protein cao (<strong>{Math.round(userProfile.weight * userProfile.proteinRatio)}g</strong>) để bảo vệ cơ bắp trong khi thâm hụt calo.
                   </p>
                   <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
                     <p className="text-emerald-800 font-medium mb-1">Mẹo tiêu hóa:</p>
@@ -526,13 +572,75 @@ export default function App() {
             </div>
             <AIImageAnalyzer 
               onAnalysisComplete={(result) => {
-                console.log("Analysis complete:", result);
+                console.log("Analysis complete. Current tab:", activeMainTabRef.current);
+                if (activeMainTabRef.current !== 'ai-analysis') {
+                  console.log("Showing notification");
+                  setNotification({
+                    type: 'success',
+                    title: 'Phân tích hoàn tất!',
+                    message: 'Nhấn để xem kết quả',
+                    onClick: () => setActiveMainTab('ai-analysis')
+                  });
+                }
               }} 
               onSave={handleSaveAnalyzedDish}
             />
           </div>
         </div>
       </main>
+
+      {/* Notification System */}
+      {notification && (
+        <div 
+          onClick={() => {
+            if (notification.onClick) {
+              notification.onClick();
+              setNotification(null);
+            }
+          }}
+          className={`fixed bottom-6 right-6 bg-white px-5 py-4 rounded-2xl shadow-xl cursor-pointer transition-all z-[9999] flex items-center gap-4 border-2 ${
+            notification.type === 'success' ? 'border-emerald-500 shadow-emerald-100' :
+            notification.type === 'error' ? 'border-rose-500 shadow-rose-100' :
+            notification.type === 'warning' ? 'border-amber-400 shadow-amber-100' :
+            'border-slate-300 shadow-slate-100'
+          }`}
+        >
+          <div className={`p-2.5 rounded-xl ${
+            notification.type === 'success' ? 'bg-emerald-50 text-emerald-600' :
+            notification.type === 'error' ? 'bg-rose-50 text-rose-600' :
+            notification.type === 'warning' ? 'bg-amber-50 text-amber-600' :
+            'bg-slate-100 text-slate-600'
+          }`}>
+            {notification.type === 'success' ? <CheckCircle2 className="w-6 h-6" /> :
+             notification.type === 'error' ? <XCircle className="w-6 h-6" /> :
+             notification.type === 'warning' ? <AlertTriangle className="w-6 h-6" /> :
+             <Info className="w-6 h-6" />}
+          </div>
+          <div>
+            <h4 className={`font-bold text-lg ${
+              notification.type === 'success' ? 'text-emerald-800' :
+              notification.type === 'error' ? 'text-rose-800' :
+              notification.type === 'warning' ? 'text-amber-800' :
+              'text-slate-800'
+            }`}>{notification.title}</h4>
+            <p className={`text-sm font-medium ${
+              notification.type === 'success' ? 'text-emerald-600' :
+              notification.type === 'error' ? 'text-rose-600' :
+              notification.type === 'warning' ? 'text-amber-600' :
+              'text-slate-500'
+            }`}>{notification.message}</p>
+          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setNotification(null);
+            }}
+            className="ml-2 p-1.5 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
 
       {/* Type Selection Modal */}
       {isTypeSelectionModalOpen && (
@@ -769,6 +877,101 @@ export default function App() {
                   <p className="font-bold text-slate-800 text-lg group-hover:text-rose-700">Tháng này</p>
                   <p className="text-sm text-slate-500">Xóa kế hoạch của tháng hiện tại</p>
                 </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Goal Setting Modal */}
+      {isGoalModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[80] p-4" onClick={(e) => { if (e.target === e.currentTarget) setIsGoalModalOpen(false); }}>
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-indigo-50 text-indigo-600 p-2 rounded-xl">
+                  <Target className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800">Mục tiêu dinh dưỡng</h3>
+              </div>
+              <button 
+                onClick={() => setIsGoalModalOpen(false)}
+                className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Weight Input */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Cân nặng hiện tại (kg)</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    value={userProfile.weight}
+                    onChange={(e) => setUserProfile({...userProfile, weight: Number(e.target.value)})}
+                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">kg</span>
+                </div>
+              </div>
+
+              {/* Protein Ratio Input */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-bold text-slate-700">Lượng Protein mong muốn</label>
+                  <span className="text-xs font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded">
+                    {Math.round(userProfile.weight * userProfile.proteinRatio)}g / ngày
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      value={userProfile.proteinRatio}
+                      onChange={(e) => setUserProfile({...userProfile, proteinRatio: Number(e.target.value)})}
+                      className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">g / kg</span>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {[1.2, 1.6, 2.0, 2.2].map(ratio => (
+                      <button
+                        key={ratio}
+                        onClick={() => setUserProfile({...userProfile, proteinRatio: ratio})}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${userProfile.proteinRatio === ratio ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300'}`}
+                      >
+                        {ratio}g
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Khuyến nghị: 1.2-1.6g cho người vận động nhẹ, 1.6-2.2g cho người tập luyện/tăng cơ.
+                  </p>
+                </div>
+              </div>
+
+              {/* Calories Input */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Mục tiêu Calo (kcal)</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    value={userProfile.targetCalories}
+                    onChange={(e) => setUserProfile({...userProfile, targetCalories: Number(e.target.value)})}
+                    className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">kcal</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setIsGoalModalOpen(false)}
+                className="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200 mt-4"
+              >
+                Lưu thay đổi
               </button>
             </div>
           </div>

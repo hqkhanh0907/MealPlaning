@@ -33,6 +33,19 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
     unit: 'g'
   });
 
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    ingredientId: string | null;
+    ingredientName: string;
+    usageCount: number;
+    exampleDish?: string;
+  }>({
+    isOpen: false,
+    ingredientId: null,
+    ingredientName: '',
+    usageCount: 0
+  });
+
   const handleOpenModal = (ing?: Ingredient) => {
     if (ing) {
       setEditingIng(ing);
@@ -96,21 +109,24 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string, name: string) => {
     // Check if used in any dish (even if not planned)
     const usedInDishes = dishes?.filter(d => d.ingredients.some(di => di.ingredientId === id)) || [];
     
-    if (usedInDishes.length > 0) {
-      if (!window.confirm(`Nguyên liệu này đang được sử dụng trong ${usedInDishes.length} món ăn (ví dụ: ${usedInDishes[0].name}). Xóa nó sẽ loại bỏ nó khỏi các món ăn này. Bạn có chắc chắn không?`)) {
-        return;
-      }
-    } else {
-      if (!window.confirm("Bạn có chắc chắn muốn xóa nguyên liệu này?")) {
-        return;
-      }
+    setDeleteConfirmation({
+      isOpen: true,
+      ingredientId: id,
+      ingredientName: name,
+      usageCount: usedInDishes.length,
+      exampleDish: usedInDishes.length > 0 ? usedInDishes[0].name : undefined
+    });
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmation.ingredientId) {
+      onDelete(deleteConfirmation.ingredientId);
+      setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });
     }
-    
-    onDelete(id);
   };
 
   const filteredIngredients = ingredients.filter(ing => ing.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -188,7 +204,10 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
                 <Edit3 className="w-4 h-4" /> Sửa
               </button>
               <button 
-                onClick={() => handleDelete(ing.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(ing.id, ing.name);
+                }}
                 className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
               >
                 <Trash2 className="w-4 h-4" /> Xóa
@@ -300,6 +319,40 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-8 h-8" />
+              </div>
+              <h4 className="font-bold text-slate-800 text-xl mb-2">Xóa nguyên liệu?</h4>
+              <p className="text-slate-600 mb-6">
+                Bạn có chắc chắn muốn xóa <span className="font-bold text-slate-800">"{deleteConfirmation.ingredientName}"</span>?
+                {deleteConfirmation.usageCount > 0 && (
+                  <span className="block mt-2 text-rose-600 font-medium text-sm bg-rose-50 p-3 rounded-xl">
+                    Cảnh báo: Nguyên liệu này đang được dùng trong {deleteConfirmation.usageCount} món ăn (ví dụ: {deleteConfirmation.exampleDish}). Xóa nó sẽ ảnh hưởng đến các món ăn này.
+                  </span>
+                )}
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })}
+                  className="flex-1 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  Hủy
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold shadow-sm shadow-rose-200 hover:bg-rose-600 transition-all"
+                >
+                  Xóa ngay
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

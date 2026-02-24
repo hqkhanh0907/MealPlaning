@@ -35,3 +35,9 @@ export type DayPlan = {
   lunchId: string | null;
   dinnerId: string | null;
 };
+
+export type UserProfile = {
+  weight: number;
+  proteinRatio: number;
+  targetCalories: number;
+};

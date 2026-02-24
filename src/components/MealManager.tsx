@@ -23,6 +23,9 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
   const [type, setType] = useState<MealType>('breakfast');
   const [selectedDishIds, setSelectedDishIds] = useState<string[]>([]);
 
+  const [filterType, setFilterType] = useState<'all' | MealType>('all');
+  const [viewingMeal, setViewingMeal] = useState<Meal | null>(null);
+
   const handleOpenModal = (meal?: Meal) => {
     if (meal) {
       setEditingMeal(meal);
@@ -75,6 +78,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
 
   const filteredMeals = meals
     .filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(m => filterType === 'all' || m.type === filterType)
     .sort((a, b) => {
       const nutritionA = calculateMealNutrition(a, dishes, ingredients);
       const nutritionB = calculateMealNutrition(b, dishes, ingredients);
@@ -101,7 +105,7 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto flex-1">
-          <div className="relative w-full sm:w-96">
+          <div className="relative w-full sm:w-64">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text"
@@ -111,6 +115,17 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm"
             />
           </div>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as any)}
+            className="w-full sm:w-40 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-slate-700 font-medium appearance-none"
+            style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
+          >
+            <option value="all">Tất cả loại</option>
+            <option value="breakfast">Bữa Sáng</option>
+            <option value="lunch">Bữa Trưa</option>
+            <option value="dinner">Bữa Tối</option>
+          </select>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
@@ -137,7 +152,11 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
         {filteredMeals.map(meal => {
           const nutrition = calculateMealNutrition(meal, dishes, ingredients);
           return (
-            <div key={meal.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col group">
+            <div 
+              key={meal.id} 
+              className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col group cursor-pointer"
+              onClick={() => setViewingMeal(meal)}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
@@ -170,13 +189,13 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
 
               <div className="mt-auto flex items-center gap-2 pt-4 border-t border-slate-50">
                 <button 
-                  onClick={() => handleOpenModal(meal)}
+                  onClick={(e) => { e.stopPropagation(); handleOpenModal(meal); }}
                   className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
                 >
                   <Edit3 className="w-4 h-4" /> Sửa
                 </button>
                 <button 
-                  onClick={() => handleDelete(meal.id)}
+                  onClick={(e) => { e.stopPropagation(); handleDelete(meal.id); }}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(meal.id) ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-rose-600 hover:bg-rose-50'}`}
                 >
                   <Trash2 className="w-4 h-4" /> Xóa
@@ -191,6 +210,68 @@ export const MealManager: React.FC<MealManagerProps> = ({ meals, dishes, ingredi
           </div>
         )}
       </div>
+
+      {viewingMeal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={() => setViewingMeal(null)}>
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h4 className="font-bold text-slate-800 text-lg">{viewingMeal.name}</h4>
+              <button onClick={() => setViewingMeal(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-500 uppercase">Loại bữa ăn:</span>
+                <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                  {viewingMeal.type === 'breakfast' ? 'Bữa Sáng' : viewingMeal.type === 'lunch' ? 'Bữa Trưa' : 'Bữa Tối'}
+                </span>
+              </div>
+              
+              <div>
+                <h5 className="font-bold text-slate-800 mb-3">Danh sách món ăn:</h5>
+                <div className="space-y-3">
+                  {viewingMeal.dishIds.map(dishId => {
+                    const dish = dishes.find(d => d.id === dishId);
+                    if (!dish) return null;
+                    return (
+                      <div key={dish.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <p className="font-bold text-slate-800 mb-2">{dish.name}</p>
+                        <div className="space-y-1">
+                          {dish.ingredients.map((di, idx) => {
+                            const ing = ingredients.find(i => i.id === di.ingredientId);
+                            if (!ing) return null;
+                            return (
+                              <div key={idx} className="flex justify-between text-sm text-slate-600">
+                                <span>- {ing.name}</span>
+                                <span>{di.amount} {ing.unit}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                <h5 className="font-bold text-emerald-800 mb-2">Tổng dinh dưỡng:</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs text-emerald-600 uppercase font-bold">Calories</span>
+                    <p className="text-xl font-bold text-emerald-700">{Math.round(calculateMealNutrition(viewingMeal, dishes, ingredients).calories)} kcal</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-emerald-600 uppercase font-bold">Protein</span>
+                    <p className="text-xl font-bold text-emerald-700">{Math.round(calculateMealNutrition(viewingMeal, dishes, ingredients).protein)} g</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">

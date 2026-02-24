@@ -1,8 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Loader2, Image as ImageIcon, Sparkles, Camera, X, Save } from 'lucide-react';
-import { analyzeDishImage } from '../services/geminiService';
+import { analyzeDishImage, suggestIngredientInfo } from '../services/geminiService';
 
 export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => void; onSave?: (result: any) => void }> = ({ onAnalysisComplete, onSave }) => {
+  // Use a ref to track the latest callback to avoid stale closures in async functions
+  const onAnalysisCompleteRef = useRef(onAnalysisComplete);
+  
+  useEffect(() => {
+    onAnalysisCompleteRef.current = onAnalysisComplete;
+  }, [onAnalysisComplete]);
+
   const [image, setImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
@@ -103,12 +110,103 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
 
       const analysis = await analyzeDishImage(base64Data, mimeType);
       setResult(analysis);
-      onAnalysisComplete(analysis);
+      onAnalysisCompleteRef.current(analysis);
     } catch (error: any) {
       console.error("Failed to analyze image:", error);
       alert("Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.");
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [editedResult, setEditedResult] = useState<any>(null);
+  const [saveDish, setSaveDish] = useState(true);
+  const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>([]);
+  const [researchingIngredientIndex, setResearchingIngredientIndex] = useState<number | null>(null);
+
+  const handleOpenSaveModal = () => {
+    if (result) {
+      setEditedResult(JSON.parse(JSON.stringify(result))); // Deep copy
+      setSaveDish(true);
+      setSelectedIngredients(new Array(result.ingredients.length).fill(true));
+      setIsSaveModalOpen(true);
+    }
+  };
+
+  const handleUpdateIngredient = (index: number, field: string, value: any) => {
+    const newIngredients = [...editedResult.ingredients];
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      newIngredients[index] = {
+        ...newIngredients[index],
+        [parent]: {
+          ...newIngredients[index][parent],
+          [child]: value
+        }
+      };
+    } else {
+      newIngredients[index] = {
+        ...newIngredients[index],
+        [field]: value
+      };
+    }
+    setEditedResult({ ...editedResult, ingredients: newIngredients });
+  };
+
+  const handleConfirmSave = () => {
+    if (onSave && editedResult) {
+      const finalIngredients = editedResult.ingredients.filter((_: any, idx: number) => selectedIngredients[idx]);
+      
+      const payload = {
+        ...editedResult,
+        ingredients: finalIngredients,
+        shouldCreateDish: saveDish
+      };
+      
+      onSave(payload);
+      setIsSaveModalOpen(false);
+    }
+  };
+
+  const toggleIngredientSelection = (index: number) => {
+    const newSelection = [...selectedIngredients];
+    newSelection[index] = !newSelection[index];
+    setSelectedIngredients(newSelection);
+  };
+
+  const toggleAllIngredients = () => {
+    const allSelected = selectedIngredients.every(Boolean);
+    setSelectedIngredients(new Array(selectedIngredients.length).fill(!allSelected));
+  };
+
+  const handleResearchIngredient = async (index: number) => {
+    const ingredient = editedResult.ingredients[index];
+    if (!ingredient.name) return;
+
+    try {
+      setResearchingIngredientIndex(index);
+      const info = await suggestIngredientInfo(ingredient.name, ingredient.unit);
+      
+      // Update nutrition
+      const newIngredients = [...editedResult.ingredients];
+      newIngredients[index] = {
+        ...newIngredients[index],
+        nutritionPerStandardUnit: {
+          calories: info.calories,
+          protein: info.protein,
+          carbs: info.carbs,
+          fat: info.fat,
+          fiber: info.fiber
+        }
+      };
+      setEditedResult({ ...editedResult, ingredients: newIngredients });
+      
+    } catch (error) {
+      console.error("Failed to research ingredient:", error);
+      alert("Không thể tìm thấy thông tin. Vui lòng thử lại.");
+    } finally {
+      setResearchingIngredientIndex(null);
     }
   };
 
@@ -256,13 +354,58 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
               </div>
 
               <div>
-                <h4 className="font-bold text-slate-800 mb-3">Nguyên liệu chính nhận diện được:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {result.ingredients.map((ing: any, idx: number) => (
-                    <span key={idx} className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium">
-                      {ing.name} <span className="text-slate-400 text-xs ml-1">({ing.amount} {ing.unit})</span>
-                    </span>
-                  ))}
+                <h4 className="font-bold text-slate-800 mb-3">Chi tiết nguyên liệu & Dinh dưỡng:</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-slate-500 uppercase bg-slate-100">
+                      <tr>
+                        <th className="px-3 py-2 rounded-l-lg">Nguyên liệu</th>
+                        <th className="px-3 py-2">Định lượng</th>
+                        <th className="px-3 py-2">Calo</th>
+                        <th className="px-3 py-2">Đạm</th>
+                        <th className="px-3 py-2">Carbs</th>
+                        <th className="px-3 py-2 rounded-r-lg">Béo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {result.ingredients.map((ing: any, idx: number) => {
+                        // Calculate nutrition based on amount
+                        let factor = 1;
+                        const rawUnit = ing.unit.toLowerCase().trim();
+                        let unit = rawUnit;
+                        
+                        // Normalize unit
+                        if (['g', 'gram', 'grams', 'gam'].includes(rawUnit)) unit = 'g';
+                        else if (['ml', 'milliliter', 'milliliters'].includes(rawUnit)) unit = 'ml';
+                        else if (['kg', 'kilogram', 'kilograms'].includes(rawUnit)) unit = 'kg';
+                        else if (['l', 'liter', 'liters'].includes(rawUnit)) unit = 'l';
+
+                        if (['g', 'ml'].includes(unit)) {
+                          factor = ing.amount / 100;
+                        } else if (['kg', 'l'].includes(unit)) {
+                          factor = (ing.amount * 1000) / 100;
+                        } else {
+                          factor = ing.amount;
+                        }
+
+                        const cal = Math.round(ing.nutritionPerStandardUnit.calories * factor);
+                        const pro = Math.round(ing.nutritionPerStandardUnit.protein * factor);
+                        const carbs = Math.round(ing.nutritionPerStandardUnit.carbs * factor);
+                        const fat = Math.round(ing.nutritionPerStandardUnit.fat * factor);
+
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-3 py-2 font-medium text-slate-800">{ing.name}</td>
+                            <td className="px-3 py-2 text-slate-600">{ing.amount} {ing.unit}</td>
+                            <td className="px-3 py-2 font-medium text-orange-500">{cal}</td>
+                            <td className="px-3 py-2 font-medium text-blue-500">{pro}</td>
+                            <td className="px-3 py-2 font-medium text-amber-500">{carbs}</td>
+                            <td className="px-3 py-2 font-medium text-rose-500">{fat}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
               
@@ -273,7 +416,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
 
               {onSave && (
                 <button 
-                  onClick={() => onSave(result)}
+                  onClick={handleOpenSaveModal}
                   className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
                 >
                   <Save className="w-5 h-5" />
@@ -289,6 +432,197 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
           )}
         </div>
       </div>
+
+      {isSaveModalOpen && editedResult && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h4 className="font-bold text-slate-800 text-lg">Xác nhận lưu món ăn</h4>
+              <button onClick={() => setIsSaveModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              {/* Dish Info */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h5 className="font-bold text-slate-800">Thông tin món ăn</h5>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={saveDish}
+                      onChange={(e) => setSaveDish(e.target.checked)}
+                      className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm font-medium text-slate-600">Lưu món ăn này</span>
+                  </label>
+                </div>
+                
+                {saveDish && (
+                  <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tên món ăn</label>
+                      <input 
+                        value={editedResult.name}
+                        onChange={e => setEditedResult({ ...editedResult, name: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Mô tả</label>
+                      <textarea 
+                        value={editedResult.description}
+                        onChange={e => setEditedResult({ ...editedResult, description: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none transition-all"
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Ingredients List */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h5 className="font-bold text-slate-800">Chi tiết nguyên liệu</h5>
+                  <button 
+                    onClick={toggleAllIngredients}
+                    className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                  >
+                    {selectedIngredients.every(Boolean) ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {editedResult.ingredients.map((ing: any, idx: number) => (
+                    <div key={idx} className={`p-4 rounded-xl border transition-all ${selectedIngredients[idx] ? 'bg-slate-50 border-slate-200' : 'bg-white border-slate-100 opacity-60'}`}>
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedIngredients[idx]}
+                            onChange={() => toggleIngredientSelection(idx)}
+                            className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <span className="text-xs font-bold text-slate-400 uppercase">Nguyên liệu #{idx + 1}</span>
+                        </div>
+                        <button
+                          onClick={() => handleResearchIngredient(idx)}
+                          disabled={researchingIngredientIndex === idx || !selectedIngredients[idx]}
+                          className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-all disabled:opacity-50"
+                        >
+                          {researchingIngredientIndex === idx ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Sparkles className="w-3.5 h-3.5" />
+                          )}
+                          AI Research
+                        </button>
+                      </div>
+                      
+                      <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!selectedIngredients[idx] && 'pointer-events-none grayscale'}`}>
+                        <div className="md:col-span-1">
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tên</label>
+                          <input 
+                            value={ing.name}
+                            onChange={e => handleUpdateIngredient(idx, 'name', e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-emerald-500 outline-none text-sm"
+                          />
+                        </div>
+                        <div className="md:col-span-1">
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Số lượng</label>
+                          <input 
+                            type="number"
+                            value={ing.amount}
+                            onChange={e => handleUpdateIngredient(idx, 'amount', Number(e.target.value))}
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-emerald-500 outline-none text-sm"
+                          />
+                        </div>
+                        <div className="md:col-span-1">
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Đơn vị</label>
+                          <input 
+                            value={ing.unit}
+                            onChange={e => handleUpdateIngredient(idx, 'unit', e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-emerald-500 outline-none text-sm"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className={`mt-3 bg-white p-3 rounded-lg border border-slate-100 ${!selectedIngredients[idx] && 'pointer-events-none grayscale opacity-50'}`}>
+                        <p className="text-xs font-bold text-slate-500 uppercase mb-2">Dinh dưỡng (cho 100g/ml hoặc 1 đơn vị)</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                          <div>
+                            <label className="text-[10px] text-slate-400 block mb-0.5">Calo</label>
+                            <input 
+                              type="number"
+                              value={ing.nutritionPerStandardUnit.calories}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', Number(e.target.value))}
+                              className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-slate-400 block mb-0.5">Protein</label>
+                            <input 
+                              type="number"
+                              value={ing.nutritionPerStandardUnit.protein}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', Number(e.target.value))}
+                              className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-slate-400 block mb-0.5">Carbs</label>
+                            <input 
+                              type="number"
+                              value={ing.nutritionPerStandardUnit.carbs}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', Number(e.target.value))}
+                              className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-slate-400 block mb-0.5">Fat</label>
+                            <input 
+                              type="number"
+                              value={ing.nutritionPerStandardUnit.fat}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', Number(e.target.value))}
+                              className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-slate-400 block mb-0.5">Fiber</label>
+                            <input 
+                              type="number"
+                              value={ing.nutritionPerStandardUnit.fiber}
+                              onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', Number(e.target.value))}
+                              className="w-full px-2 py-1.5 rounded border border-slate-200 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsSaveModalOpen(false)}
+                className="px-6 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-all"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleConfirmSave}
+                className="bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold shadow-sm shadow-emerald-200 hover:bg-emerald-600 transition-all flex items-center gap-2"
+              >
+                <Save className="w-5 h-5" />
+                Xác nhận lưu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
