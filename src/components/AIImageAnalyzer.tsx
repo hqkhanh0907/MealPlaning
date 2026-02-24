@@ -245,14 +245,22 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                   <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Protein</p>
                   <p className="text-2xl font-bold text-blue-500">{result.protein} <span className="text-sm text-slate-500 font-medium">g</span></p>
                 </div>
+                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                  <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Carbs</p>
+                  <p className="text-2xl font-bold text-amber-500">{result.carbs} <span className="text-sm text-slate-500 font-medium">g</span></p>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                  <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Fat</p>
+                  <p className="text-2xl font-bold text-rose-500">{result.fat} <span className="text-sm text-slate-500 font-medium">g</span></p>
+                </div>
               </div>
 
               <div>
                 <h4 className="font-bold text-slate-800 mb-3">Nguyên liệu chính nhận diện được:</h4>
                 <div className="flex flex-wrap gap-2">
-                  {result.ingredients.map((ing: string, idx: number) => (
+                  {result.ingredients.map((ing: any, idx: number) => (
                     <span key={idx} className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium">
-                      {ing}
+                      {ing.name} <span className="text-slate-400 text-xs ml-1">({ing.estimatedAmount} {ing.unit})</span>
                     </span>
                   ))}
                 </div>

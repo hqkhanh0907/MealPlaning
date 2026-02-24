@@ -51,8 +51,9 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string) =>
 
   const prompt = `
     Hãy phân tích hình ảnh món ăn này.
-    Nhận diện tên món ăn, ước tính lượng calo và protein cho một khẩu phần ăn thông thường.
-    Liệt kê các nguyên liệu chính.
+    Nhận diện tên món ăn, mô tả ngắn gọn.
+    Ước tính tổng lượng calo, protein, fat, carbs cho một khẩu phần ăn thông thường.
+    Liệt kê chi tiết các nguyên liệu chính, bao gồm tên nguyên liệu, ước lượng khối lượng (amount) và đơn vị tính (unit) cho khẩu phần đó.
     Trả về kết quả bằng tiếng Việt dưới dạng JSON.
   `;
 
@@ -70,16 +71,26 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string) =>
         type: Type.OBJECT,
         properties: {
           name: { type: Type.STRING, description: "Tên món ăn" },
-          calories: { type: Type.NUMBER, description: "Ước tính calo" },
-          protein: { type: Type.NUMBER, description: "Ước tính protein (gram)" },
+          description: { type: Type.STRING, description: "Mô tả ngắn gọn về món ăn" },
+          calories: { type: Type.NUMBER, description: "Ước tính tổng calo (kcal)" },
+          protein: { type: Type.NUMBER, description: "Ước tính tổng protein (g)" },
+          fat: { type: Type.NUMBER, description: "Ước tính tổng fat (g)" },
+          carbs: { type: Type.NUMBER, description: "Ước tính tổng carbs (g)" },
           ingredients: {
             type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "Danh sách nguyên liệu chính"
-          },
-          description: { type: Type.STRING, description: "Mô tả ngắn gọn về món ăn" }
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, description: "Tên nguyên liệu" },
+                estimatedAmount: { type: Type.NUMBER, description: "Ước lượng khối lượng" },
+                unit: { type: Type.STRING, description: "Đơn vị tính (g, ml, cái, quả...)" }
+              },
+              required: ["name", "estimatedAmount", "unit"]
+            },
+            description: "Danh sách nguyên liệu chính với định lượng"
+          }
         },
-        required: ["name", "calories", "protein", "ingredients", "description"]
+        required: ["name", "description", "calories", "protein", "fat", "carbs", "ingredients"]
       }
     }
   });
