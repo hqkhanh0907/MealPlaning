@@ -20,7 +20,7 @@ const PROTEIN_PRESETS = [1.2, 1.6, 2, 2.2];
 export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfile, onUpdateProfile, onClose }) => {
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90vh] sm:mx-4">
+      <div className="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90vh] sm:mx-4">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-50 text-indigo-600 p-2 rounded-xl">
