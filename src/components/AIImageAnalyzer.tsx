@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, Image as ImageIcon, Sparkles, Camera, X } from 'lucide-react';
+import { Upload, Loader2, Image as ImageIcon, Sparkles, Camera, X, Save } from 'lucide-react';
 import { analyzeDishImage } from '../services/geminiService';
 
-export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => void }> = ({ onAnalysisComplete }) => {
+export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => void; onSave?: (result: any) => void }> = ({ onAnalysisComplete, onSave }) => {
   const [image, setImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
@@ -239,19 +239,19 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Calo</p>
-                  <p className="text-2xl font-bold text-orange-500">{result.calories} <span className="text-sm text-slate-500 font-medium">kcal</span></p>
+                  <p className="text-2xl font-bold text-orange-500">{result.totalNutrition?.calories} <span className="text-sm text-slate-500 font-medium">kcal</span></p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Protein</p>
-                  <p className="text-2xl font-bold text-blue-500">{result.protein} <span className="text-sm text-slate-500 font-medium">g</span></p>
+                  <p className="text-2xl font-bold text-blue-500">{result.totalNutrition?.protein} <span className="text-sm text-slate-500 font-medium">g</span></p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Carbs</p>
-                  <p className="text-2xl font-bold text-amber-500">{result.carbs} <span className="text-sm text-slate-500 font-medium">g</span></p>
+                  <p className="text-2xl font-bold text-amber-500">{result.totalNutrition?.carbs} <span className="text-sm text-slate-500 font-medium">g</span></p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-xs font-bold text-slate-400 uppercase mb-1">Ước tính Fat</p>
-                  <p className="text-2xl font-bold text-rose-500">{result.fat} <span className="text-sm text-slate-500 font-medium">g</span></p>
+                  <p className="text-2xl font-bold text-rose-500">{result.totalNutrition?.fat} <span className="text-sm text-slate-500 font-medium">g</span></p>
                 </div>
               </div>
 
@@ -260,7 +260,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                 <div className="flex flex-wrap gap-2">
                   {result.ingredients.map((ing: any, idx: number) => (
                     <span key={idx} className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium">
-                      {ing.name} <span className="text-slate-400 text-xs ml-1">({ing.estimatedAmount} {ing.unit})</span>
+                      {ing.name} <span className="text-slate-400 text-xs ml-1">({ing.amount} {ing.unit})</span>
                     </span>
                   ))}
                 </div>
@@ -270,6 +270,16 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: any) => vo
                 <p className="font-bold mb-1">Lưu ý:</p>
                 <p className="opacity-80">Kết quả phân tích chỉ mang tính chất tham khảo. Bạn có thể sử dụng thông tin này để thêm món ăn mới vào thư viện.</p>
               </div>
+
+              {onSave && (
+                <button 
+                  onClick={() => onSave(result)}
+                  className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                >
+                  <Save className="w-5 h-5" />
+                  Lưu vào thư viện món ăn
+                </button>
+              )}
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 text-center space-y-4">

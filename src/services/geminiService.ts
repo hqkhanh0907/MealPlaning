@@ -50,11 +50,19 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string) =>
   const ai = getAI();
 
   const prompt = `
-    Hãy phân tích hình ảnh món ăn này.
-    Nhận diện tên món ăn, mô tả ngắn gọn.
-    Ước tính tổng lượng calo, protein, fat, carbs cho một khẩu phần ăn thông thường.
-    Liệt kê chi tiết các nguyên liệu chính, bao gồm tên nguyên liệu, ước lượng khối lượng (amount) và đơn vị tính (unit) cho khẩu phần đó.
-    Trả về kết quả bằng tiếng Việt dưới dạng JSON.
+    Hãy phân tích hình ảnh món ăn này để tạo dữ liệu cho ứng dụng quản lý dinh dưỡng.
+    
+    1. Nhận diện tên món ăn và mô tả ngắn gọn.
+    2. Ước tính tổng dinh dưỡng của cả món ăn (để tham khảo).
+    3. QUAN TRỌNG: Liệt kê chi tiết từng nguyên liệu để tạo dữ liệu. Với mỗi nguyên liệu:
+       - Tên nguyên liệu.
+       - Khối lượng/Số lượng ước tính có trong món ăn này (amount).
+       - Đơn vị tính (unit) (ưu tiên g, ml, cái, quả, lát...).
+       - Thông tin dinh dưỡng chuẩn hóa (nutrition):
+         + Nếu đơn vị là khối lượng/thể tích (g, kg, ml, l): Cung cấp dinh dưỡng cho **100g** hoặc **100ml**.
+         + Nếu đơn vị là đếm được (cái, quả, lát...): Cung cấp dinh dưỡng cho **1 đơn vị** (1 cái, 1 quả...).
+    
+    Trả về JSON.
   `;
 
   const response = await ai.models.generateContent({
@@ -71,26 +79,43 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string) =>
         type: Type.OBJECT,
         properties: {
           name: { type: Type.STRING, description: "Tên món ăn" },
-          description: { type: Type.STRING, description: "Mô tả ngắn gọn về món ăn" },
-          calories: { type: Type.NUMBER, description: "Ước tính tổng calo (kcal)" },
-          protein: { type: Type.NUMBER, description: "Ước tính tổng protein (g)" },
-          fat: { type: Type.NUMBER, description: "Ước tính tổng fat (g)" },
-          carbs: { type: Type.NUMBER, description: "Ước tính tổng carbs (g)" },
+          description: { type: Type.STRING, description: "Mô tả ngắn gọn" },
+          totalNutrition: {
+            type: Type.OBJECT,
+            properties: {
+              calories: { type: Type.NUMBER },
+              protein: { type: Type.NUMBER },
+              fat: { type: Type.NUMBER },
+              carbs: { type: Type.NUMBER }
+            },
+            required: ["calories", "protein", "fat", "carbs"]
+          },
           ingredients: {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
               properties: {
-                name: { type: Type.STRING, description: "Tên nguyên liệu" },
-                estimatedAmount: { type: Type.NUMBER, description: "Ước lượng khối lượng" },
-                unit: { type: Type.STRING, description: "Đơn vị tính (g, ml, cái, quả...)" }
+                name: { type: Type.STRING },
+                amount: { type: Type.NUMBER, description: "Số lượng trong món ăn này" },
+                unit: { type: Type.STRING },
+                nutritionPerStandardUnit: {
+                  type: Type.OBJECT,
+                  description: "Dinh dưỡng cho 100g/ml hoặc 1 đơn vị",
+                  properties: {
+                    calories: { type: Type.NUMBER },
+                    protein: { type: Type.NUMBER },
+                    fat: { type: Type.NUMBER },
+                    carbs: { type: Type.NUMBER },
+                    fiber: { type: Type.NUMBER }
+                  },
+                  required: ["calories", "protein", "fat", "carbs", "fiber"]
+                }
               },
-              required: ["name", "estimatedAmount", "unit"]
-            },
-            description: "Danh sách nguyên liệu chính với định lượng"
+              required: ["name", "amount", "unit", "nutritionPerStandardUnit"]
+            }
           }
         },
-        required: ["name", "description", "calories", "protein", "fat", "carbs", "ingredients"]
+        required: ["name", "description", "totalNutrition", "ingredients"]
       }
     }
   });

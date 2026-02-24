@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { initialIngredients, initialDishes, initialMeals } from './data/initialData';
-import { Ingredient, Dish, Meal, DayPlan, MealType } from './types';
+import { Ingredient, Dish, Meal, DayPlan, MealType, DishIngredient } from './types';
 import { calculateMealNutrition } from './utils/nutrition';
 import { Summary } from './components/Summary';
 import { GroceryList } from './components/GroceryList';
@@ -194,6 +194,60 @@ export default function App() {
   const isMealUsed = (mealId: string) => dayPlans.some(p => p.breakfastId === mealId || p.lunchId === mealId || p.dinnerId === mealId);
   const isDishUsed = (dishId: string) => meals.some(m => m.dishIds.includes(dishId) && isMealUsed(m.id));
   const isIngredientUsed = (ingId: string) => dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId) && isDishUsed(d.id));
+
+  const handleSaveAnalyzedDish = (result: any) => {
+    // 1. Process Ingredients
+    const newIngredients: Ingredient[] = [];
+    const dishIngredients: DishIngredient[] = [];
+    
+    // We need a local copy of ingredients to check against, including newly created ones in this loop
+    const currentIngredients = [...ingredients];
+
+    result.ingredients.forEach((aiIng: any) => {
+      // Check if ingredient already exists (by name)
+      let existingIng = currentIngredients.find(i => i.name.toLowerCase() === aiIng.name.toLowerCase());
+      
+      if (!existingIng) {
+        // Create new ingredient
+        const newIng: Ingredient = {
+          id: `ing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: aiIng.name,
+          unit: aiIng.unit,
+          caloriesPer100: aiIng.nutritionPerStandardUnit.calories,
+          proteinPer100: aiIng.nutritionPerStandardUnit.protein,
+          carbsPer100: aiIng.nutritionPerStandardUnit.carbs,
+          fatPer100: aiIng.nutritionPerStandardUnit.fat,
+          fiberPer100: aiIng.nutritionPerStandardUnit.fiber
+        };
+        newIngredients.push(newIng);
+        currentIngredients.push(newIng);
+        existingIng = newIng;
+      }
+
+      // Add to dish ingredients
+      dishIngredients.push({
+        ingredientId: existingIng.id,
+        amount: aiIng.amount
+      });
+    });
+
+    // Update ingredients state
+    if (newIngredients.length > 0) {
+      setIngredients(prev => [...prev, ...newIngredients]);
+    }
+
+    // 2. Create Dish
+    const newDish: Dish = {
+      id: `dish-${Date.now()}`,
+      name: result.name,
+      ingredients: dishIngredients
+    };
+
+    setDishes(prev => [...prev, newDish]);
+    alert(`Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới vào thư viện!`);
+    setActiveMainTab('management');
+    setActiveManagementSubTab('dishes');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-200">
@@ -470,9 +524,12 @@ export default function App() {
                 <h2 className="text-2xl font-bold text-slate-800">AI Phân tích hình ảnh</h2>
               </div>
             </div>
-            <AIImageAnalyzer onAnalysisComplete={(result) => {
-              console.log("Analysis complete:", result);
-            }} />
+            <AIImageAnalyzer 
+              onAnalysisComplete={(result) => {
+                console.log("Analysis complete:", result);
+              }} 
+              onSave={handleSaveAnalyzedDish}
+            />
           </div>
         </div>
       </main>
