@@ -284,27 +284,27 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDi
                 <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
                   <div className="flex gap-4">
                     <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-100 transition-all"
+                      onClick={startCamera}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-emerald-50 transition-all"
                     >
-                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all">
-                        <Upload className="w-6 h-6 text-slate-400 group-hover:text-emerald-500" />
+                      <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center shadow-sm transition-all">
+                        <Camera className="w-7 h-7 text-emerald-600" />
                       </div>
-                      <span className="text-sm font-bold">Tải ảnh lên</span>
+                      <span className="text-sm font-bold text-emerald-700">Chụp ảnh</span>
                     </button>
                     <div className="w-px bg-slate-200 h-20 self-center"></div>
                     <button 
-                      onClick={startCamera}
+                      onClick={() => fileInputRef.current?.click()}
                       className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-100 transition-all"
                     >
-                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all">
-                        <Camera className="w-6 h-6 text-slate-400 group-hover:text-emerald-500" />
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center transition-all">
+                        <Upload className="w-6 h-6 text-slate-400" />
                       </div>
-                      <span className="text-sm font-bold">Chụp ảnh</span>
+                      <span className="text-sm font-bold text-slate-500">Tải ảnh lên</span>
                     </button>
                   </div>
                   <p className="text-xs text-slate-400 text-center mt-2">
-                    Hoặc dán ảnh (Ctrl+V) trực tiếp vào đây<br/>Hỗ trợ JPG, PNG
+                    <span className="hidden sm:inline">Hoặc dán ảnh (Ctrl+V) trực tiếp vào đây<br/></span>Hỗ trợ JPG, PNG
                   </p>
                 </div>
               )}
@@ -338,7 +338,38 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDi
         </div>
 
         <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-          {result ? (
+          {isAnalyzing ? (
+            <div className="space-y-6 animate-pulse">
+              <div>
+                <div className="h-7 bg-slate-200 rounded-lg w-2/3 mb-3" />
+                <div className="h-4 bg-slate-200 rounded w-full mb-1.5" />
+                <div className="h-4 bg-slate-200 rounded w-4/5" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="bg-white p-4 rounded-xl border border-slate-100">
+                    <div className="h-3 bg-slate-200 rounded w-16 mb-2" />
+                    <div className="h-7 bg-slate-200 rounded w-20" />
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div className="h-5 bg-slate-200 rounded w-48 mb-3" />
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="bg-white p-3 rounded-xl border border-slate-100 flex justify-between">
+                      <div className="h-4 bg-slate-200 rounded w-24" />
+                      <div className="h-4 bg-slate-200 rounded w-16" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="text-center text-sm text-slate-500 font-medium">
+                <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
+                AI đang phân tích hình ảnh...
+              </div>
+            </div>
+          ) : result ? (
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-bold text-slate-800 mb-2">{result.name}</h3>

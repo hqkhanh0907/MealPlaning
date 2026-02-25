@@ -7,10 +7,10 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export type AvailableMealInfo = {
+export type AvailableDishInfo = {
   id: string;
   name: string;
-  type: MealType;
+  tags: MealType[];
   calories: number;
   protein: number;
 };
@@ -18,7 +18,7 @@ export type AvailableMealInfo = {
 export const suggestMealPlan = async (
   targetCalories: number,
   targetProtein: number,
-  availableMeals: AvailableMealInfo[]
+  availableDishes: AvailableDishInfo[]
 ): Promise<MealPlanSuggestion> => {
   const ai = getAI();
 
@@ -26,10 +26,10 @@ export const suggestMealPlan = async (
     Bạn là một chuyên gia dinh dưỡng. Hãy lên thực đơn cho một ngày (Bữa sáng, Bữa trưa, Bữa tối) dựa trên thư viện món ăn có sẵn.
     Mục tiêu: ~${targetCalories} kcal, ~${targetProtein}g protein.
     
-    Thư viện món ăn hiện có:
-    ${JSON.stringify(availableMeals)}
+    Thư viện món ăn hiện có (mỗi món có tags cho biết phù hợp bữa nào):
+    ${JSON.stringify(availableDishes)}
     
-    Hãy chọn 1 bữa sáng, 1 bữa trưa và 1 bữa tối từ thư viện sao cho tổng dinh dưỡng gần với mục tiêu nhất có thể.
+    Hãy chọn các MÓN ĂN cho 3 bữa. Mỗi bữa có thể có 1 hoặc nhiều món. Ưu tiên chọn món có tag phù hợp với bữa đó.
     Trả về kết quả dưới dạng JSON.
   `;
 
@@ -42,12 +42,12 @@ export const suggestMealPlan = async (
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          breakfastId: { type: Type.STRING },
-          lunchId: { type: Type.STRING },
-          dinnerId: { type: Type.STRING },
+          breakfastDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+          lunchDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+          dinnerDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
           reasoning: { type: Type.STRING, description: "Giải thích ngắn gọn lý do chọn thực đơn này bằng tiếng Việt" }
         },
-        required: ["breakfastId", "lunchId", "dinnerId", "reasoning"]
+        required: ["breakfastDishIds", "lunchDishIds", "dinnerDishIds", "reasoning"]
       }
     }
   });

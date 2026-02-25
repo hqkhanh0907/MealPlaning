@@ -75,8 +75,9 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
   };
 
   return (
-    <button
-      type="button"
+    <div
+      role={toast.onClick ? 'button' : undefined}
+      tabIndex={toast.onClick ? 0 : undefined}
       className={`
         bg-white rounded-2xl shadow-lg border ${styles.border}
         px-4 py-3 flex items-start gap-3 w-full max-w-sm text-left
@@ -85,6 +86,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
         ${toast.onClick ? 'cursor-pointer hover:shadow-xl active:scale-[0.98]' : ''}
       `}
       onClick={toast.onClick ? handleClick : undefined}
+      onKeyDown={toast.onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } } : undefined}
       onMouseEnter={() => clearTimeout(timerRef.current)}
       onMouseLeave={() => { timerRef.current = setTimeout(handleDismiss, 2000); }}
     >
@@ -100,7 +102,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
       >
         <X className="w-4 h-4" />
       </button>
-    </button>
+    </div>
   );
 };
 

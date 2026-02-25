@@ -1,18 +1,17 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
-import { Ingredient, Dish, Meal } from '../types';
+import { Ingredient, Dish } from '../types';
 import { IngredientManager } from './IngredientManager';
 import { DishManager } from './DishManager';
-import { MealManager } from './MealManager';
+import { DataBackup } from './DataBackup';
 
-type SubTab = 'ingredients' | 'dishes' | 'meals';
+type SubTab = 'ingredients' | 'dishes';
 
 interface ManagementTabProps {
   activeSubTab: SubTab;
   onSubTabChange: (tab: SubTab) => void;
   ingredients: Ingredient[];
   dishes: Dish[];
-  meals: Meal[];
   onAddIngredient: (ing: Ingredient) => void;
   onUpdateIngredient: (ing: Ingredient) => void;
   onDeleteIngredient: (id: string) => void;
@@ -21,24 +20,20 @@ interface ManagementTabProps {
   onUpdateDish: (dish: Dish) => void;
   onDeleteDish: (id: string) => void;
   isDishUsed: (id: string) => boolean;
-  onAddMeal: (meal: Meal) => void;
-  onUpdateMeal: (meal: Meal) => void;
-  onDeleteMeal: (id: string) => void;
-  isMealUsed: (id: string) => boolean;
+  onImportData: (data: Record<string, unknown>) => void;
 }
 
 const SUB_TABS: { key: SubTab; label: string }[] = [
-  { key: 'meals', label: 'Bữa ăn' },
   { key: 'dishes', label: 'Món ăn' },
   { key: 'ingredients', label: 'Nguyên liệu' },
 ];
 
 export const ManagementTab: React.FC<ManagementTabProps> = ({
   activeSubTab, onSubTabChange,
-  ingredients, dishes, meals,
+  ingredients, dishes,
   onAddIngredient, onUpdateIngredient, onDeleteIngredient, isIngredientUsed,
   onAddDish, onUpdateDish, onDeleteDish, isDishUsed,
-  onAddMeal, onUpdateMeal, onDeleteMeal, isMealUsed,
+  onImportData,
 }) => {
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -60,13 +55,6 @@ export const ManagementTab: React.FC<ManagementTabProps> = ({
         </div>
       </div>
 
-      {activeSubTab === 'ingredients' && (
-        <IngredientManager
-          ingredients={ingredients} dishes={dishes}
-          onAdd={onAddIngredient} onUpdate={onUpdateIngredient}
-          onDelete={onDeleteIngredient} isUsed={isIngredientUsed}
-        />
-      )}
       {activeSubTab === 'dishes' && (
         <DishManager
           dishes={dishes} ingredients={ingredients}
@@ -74,14 +62,18 @@ export const ManagementTab: React.FC<ManagementTabProps> = ({
           onDelete={onDeleteDish} isUsed={isDishUsed}
         />
       )}
-      {activeSubTab === 'meals' && (
-        <MealManager
-          meals={meals} dishes={dishes} ingredients={ingredients}
-          onAdd={onAddMeal} onUpdate={onUpdateMeal}
-          onDelete={onDeleteMeal} isUsed={isMealUsed}
+      {activeSubTab === 'ingredients' && (
+        <IngredientManager
+          ingredients={ingredients} dishes={dishes}
+          onAdd={onAddIngredient} onUpdate={onUpdateIngredient}
+          onDelete={onDeleteIngredient} isUsed={isIngredientUsed}
         />
       )}
+
+      {/* Data Backup */}
+      <div className="pt-4 border-t border-slate-200">
+        <DataBackup onImport={onImportData} />
+      </div>
     </div>
   );
 };
-

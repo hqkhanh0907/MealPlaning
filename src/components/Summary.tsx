@@ -1,24 +1,20 @@
 import React from 'react';
 import { Activity, Flame, Beef, Wheat, Droplet, Leaf, Edit3 } from 'lucide-react';
-import { MealWithNutrition } from '../types';
+import { DayNutritionSummary } from '../types';
 
 interface SummaryProps {
-  selectedMeals: {
-    breakfast: MealWithNutrition | null;
-    lunch: MealWithNutrition | null;
-    dinner: MealWithNutrition | null;
-  };
+  dayNutrition: DayNutritionSummary;
   targetCalories: number;
   targetProtein: number;
   onEditGoals?: () => void;
 }
 
-export const Summary: React.FC<SummaryProps> = ({ selectedMeals, targetCalories, targetProtein, onEditGoals }) => {
-  const totalCalories = (selectedMeals.breakfast?.calories || 0) + (selectedMeals.lunch?.calories || 0) + (selectedMeals.dinner?.calories || 0);
-  const totalProtein = (selectedMeals.breakfast?.protein || 0) + (selectedMeals.lunch?.protein || 0) + (selectedMeals.dinner?.protein || 0);
-  const totalCarbs = (selectedMeals.breakfast?.carbs || 0) + (selectedMeals.lunch?.carbs || 0) + (selectedMeals.dinner?.carbs || 0);
-  const totalFat = (selectedMeals.breakfast?.fat || 0) + (selectedMeals.lunch?.fat || 0) + (selectedMeals.dinner?.fat || 0);
-  const totalFiber = (selectedMeals.breakfast?.fiber || 0) + (selectedMeals.lunch?.fiber || 0) + (selectedMeals.dinner?.fiber || 0);
+export const Summary: React.FC<SummaryProps> = ({ dayNutrition, targetCalories, targetProtein, onEditGoals }) => {
+  const totalCalories = dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories;
+  const totalProtein = dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein;
+  const totalCarbs = dayNutrition.breakfast.carbs + dayNutrition.lunch.carbs + dayNutrition.dinner.carbs;
+  const totalFat = dayNutrition.breakfast.fat + dayNutrition.lunch.fat + dayNutrition.dinner.fat;
+  const totalFiber = dayNutrition.breakfast.fiber + dayNutrition.lunch.fiber + dayNutrition.dinner.fiber;
 
   const calPercent = Math.min(100, (totalCalories / targetCalories) * 100);
   const proPercent = Math.min(100, (totalProtein / targetProtein) * 100);

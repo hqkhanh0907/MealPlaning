@@ -1,4 +1,4 @@
-import { Ingredient, Dish, Meal } from '../types';
+import { Ingredient, Dish } from '../types';
 
 export const initialIngredients: Ingredient[] = [
   { id: 'i1', name: 'Ức gà', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: 'g' },
@@ -17,6 +17,7 @@ export const initialDishes: Dish[] = [
   {
     id: 'd1',
     name: 'Yến mạch sữa chua',
+    tags: ['breakfast'],
     ingredients: [
       { ingredientId: 'i3', amount: 50 },
       { ingredientId: 'i4', amount: 150 },
@@ -26,6 +27,7 @@ export const initialDishes: Dish[] = [
   {
     id: 'd2',
     name: 'Ức gà áp chảo',
+    tags: ['lunch', 'dinner'],
     ingredients: [
       { ingredientId: 'i1', amount: 200 },
     ],
@@ -33,6 +35,7 @@ export const initialDishes: Dish[] = [
   {
     id: 'd3',
     name: 'Khoai lang luộc',
+    tags: ['lunch', 'dinner'],
     ingredients: [
       { ingredientId: 'i5', amount: 150 },
     ],
@@ -40,6 +43,7 @@ export const initialDishes: Dish[] = [
   {
     id: 'd4',
     name: 'Bông cải xanh luộc',
+    tags: ['lunch', 'dinner'],
     ingredients: [
       { ingredientId: 'i6', amount: 150 },
     ],
@@ -47,29 +51,9 @@ export const initialDishes: Dish[] = [
   {
     id: 'd5',
     name: 'Trứng ốp la (2 quả)',
+    tags: ['breakfast', 'dinner'],
     ingredients: [
       { ingredientId: 'i2', amount: 100 },
     ],
-  },
-];
-
-export const initialMeals: Meal[] = [
-  {
-    id: 'm1',
-    name: 'Bữa sáng Yến mạch & Whey',
-    type: 'breakfast',
-    dishIds: ['d1'],
-  },
-  {
-    id: 'm2',
-    name: 'Bữa trưa Ức gà & Khoai lang',
-    type: 'lunch',
-    dishIds: ['d2', 'd3', 'd4'],
-  },
-  {
-    id: 'm3',
-    name: 'Bữa tối Trứng & Salad',
-    type: 'dinner',
-    dishIds: ['d5', 'd4'],
   },
 ];

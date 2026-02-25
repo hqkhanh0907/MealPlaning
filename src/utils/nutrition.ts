@@ -1,4 +1,4 @@
-import { Ingredient, Dish, Meal, NutritionInfo } from '../types';
+import { Ingredient, Dish, NutritionInfo } from '../types';
 
 const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
 
@@ -65,8 +65,12 @@ export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[])
   );
 };
 
-export const calculateMealNutrition = (meal: Meal, allDishes: Dish[], allIngredients: Ingredient[]): NutritionInfo => {
-  return meal.dishIds.reduce<NutritionInfo>(
+export const calculateDishesNutrition = (
+  dishIds: string[],
+  allDishes: Dish[],
+  allIngredients: Ingredient[]
+): NutritionInfo => {
+  return dishIds.reduce<NutritionInfo>(
     (acc, dishId) => {
       const dish = allDishes.find((d) => d.id === dishId);
       if (!dish) return acc;

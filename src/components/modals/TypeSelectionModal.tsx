@@ -16,9 +16,9 @@ const ModalBackdrop: React.FC<{ onClose: () => void; children: React.ReactNode }
 );
 
 const MEAL_OPTIONS: { type: MealType; planKey: keyof DayPlan; label: string; desc: string; colorClass: string }[] = [
-  { type: 'breakfast', planKey: 'breakfastId', label: 'Bữa Sáng', desc: 'Bắt đầu ngày mới đầy năng lượng', colorClass: 'bg-amber-100 text-amber-600' },
-  { type: 'lunch', planKey: 'lunchId', label: 'Bữa Trưa', desc: 'Nạp lại năng lượng cho buổi chiều', colorClass: 'bg-blue-100 text-blue-600' },
-  { type: 'dinner', planKey: 'dinnerId', label: 'Bữa Tối', desc: 'Bữa ăn nhẹ nhàng, dễ tiêu hóa', colorClass: 'bg-indigo-100 text-indigo-600' },
+  { type: 'breakfast', planKey: 'breakfastDishIds', label: 'Bữa Sáng', desc: 'Bắt đầu ngày mới đầy năng lượng', colorClass: 'bg-amber-100 text-amber-600' },
+  { type: 'lunch', planKey: 'lunchDishIds', label: 'Bữa Trưa', desc: 'Nạp lại năng lượng cho buổi chiều', colorClass: 'bg-blue-100 text-blue-600' },
+  { type: 'dinner', planKey: 'dinnerDishIds', label: 'Bữa Tối', desc: 'Bữa ăn nhẹ nhàng, dễ tiêu hóa', colorClass: 'bg-indigo-100 text-indigo-600' },
 ];
 
 export const TypeSelectionModal: React.FC<TypeSelectionModalProps> = ({ currentPlan, onSelectType, onClose }) => {
@@ -36,7 +36,7 @@ export const TypeSelectionModal: React.FC<TypeSelectionModalProps> = ({ currentP
         </div>
         <div className="p-6 sm:p-8 space-y-4">
           {MEAL_OPTIONS.map(({ type, planKey, label, desc, colorClass }) => {
-            const isPlanned = Boolean(currentPlan[planKey]);
+            const isPlanned = (currentPlan[planKey] as string[]).length > 0;
             return (
               <button
                 key={type}

@@ -97,11 +97,13 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             </div>
           </div>
 
+          <p className="text-xs text-slate-400 text-center">Thay đổi được tự động lưu ngay lập tức</p>
+
           <button
             onClick={onClose}
-            className="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 active:bg-emerald-700 transition-all shadow-sm shadow-emerald-200 mt-4 min-h-12"
+            className="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 active:bg-emerald-700 transition-all shadow-sm shadow-emerald-200 mt-2 min-h-12"
           >
-            Lưu thay đổi
+            Hoàn tất
           </button>
         </div>
       </div>

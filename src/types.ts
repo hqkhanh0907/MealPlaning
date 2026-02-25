@@ -14,26 +14,20 @@ export type DishIngredient = {
   amount: number; // in 'unit'
 };
 
+export type MealType = 'breakfast' | 'lunch' | 'dinner';
+
 export type Dish = {
   id: string;
   name: string;
   ingredients: DishIngredient[];
-};
-
-export type MealType = 'breakfast' | 'lunch' | 'dinner';
-
-export type Meal = {
-  id: string;
-  name: string;
-  type: MealType;
-  dishIds: string[];
+  tags: MealType[]; // which meal slots this dish is suitable for
 };
 
 export type DayPlan = {
   date: string; // YYYY-MM-DD
-  breakfastId: string | null;
-  lunchId: string | null;
-  dinnerId: string | null;
+  breakfastDishIds: string[];
+  lunchDishIds: string[];
+  dinnerDishIds: string[];
 };
 
 export type UserProfile = {
@@ -52,7 +46,15 @@ export type NutritionInfo = {
   fiber: number;
 };
 
-export type MealWithNutrition = Meal & NutritionInfo;
+export type SlotInfo = {
+  dishIds: string[];
+} & NutritionInfo;
+
+export type DayNutritionSummary = {
+  breakfast: SlotInfo;
+  lunch: SlotInfo;
+  dinner: SlotInfo;
+};
 
 // --- AI Service Types ---
 
@@ -90,9 +92,9 @@ export type SaveAnalyzedDishPayload = {
 };
 
 export type MealPlanSuggestion = {
-  breakfastId: string;
-  lunchId: string;
-  dinnerId: string;
+  breakfastDishIds: string[];
+  lunchDishIds: string[];
+  dinnerDishIds: string[];
   reasoning: string;
 };
 

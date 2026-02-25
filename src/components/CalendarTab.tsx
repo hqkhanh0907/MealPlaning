@@ -1,12 +1,12 @@
 import React from 'react';
 import {
   CalendarDays, Plus, Edit3, Sparkles, Loader2, Trash2,
-  Info, AlertCircle, CheckCircle2
+  Info, AlertCircle, CheckCircle2, ChefHat, MoreVertical
 } from 'lucide-react';
-import { Meal, Dish, Ingredient, DayPlan, MealType, NutritionInfo, MealWithNutrition } from '../types';
-import { calculateMealNutrition } from '../utils/nutrition';
+import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary, SlotInfo } from '../types';
 import { Summary } from './Summary';
 import { DateSelector } from './DateSelector';
+import { getDynamicTips, NutritionTip } from '../utils/tips';
 
 const MEAL_TYPE_LABELS: Record<MealType, string> = {
   breakfast: 'Bữa Sáng',
@@ -14,62 +14,82 @@ const MEAL_TYPE_LABELS: Record<MealType, string> = {
   dinner: 'Bữa Tối',
 };
 
-const getMissingMealsText = (meals: { breakfast: unknown; lunch: unknown; dinner: unknown }): string => {
+const getMissingSlots = (dayNutrition: DayNutritionSummary): string => {
   const missing: string[] = [];
-  if (!meals.breakfast) missing.push('bữa sáng');
-  if (!meals.lunch) missing.push('bữa trưa');
-  if (!meals.dinner) missing.push('bữa tối');
+  if (dayNutrition.breakfast.dishIds.length === 0) missing.push('bữa sáng');
+  if (dayNutrition.lunch.dishIds.length === 0) missing.push('bữa trưa');
+  if (dayNutrition.dinner.dishIds.length === 0) missing.push('bữa tối');
   return missing.join(', ');
 };
 
 interface MealCardProps {
   type: MealType;
-  meal: Meal | undefined;
-  nutrition: NutritionInfo | null;
+  slot: SlotInfo;
+  dishes: Dish[];
   onEdit: () => void;
 }
 
-const MealCard: React.FC<MealCardProps> = ({ type, meal, nutrition, onEdit }) => (
-  <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-    <div className="flex justify-between items-start mb-4">
-      <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-        {MEAL_TYPE_LABELS[type]}
-      </span>
-      <button
-        onClick={onEdit}
-        className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-      >
-        <Edit3 className="w-4 h-4" />
-      </button>
-    </div>
-    {meal && nutrition ? (
-      <div className="space-y-3">
-        <h4 className="font-bold text-slate-800 text-lg">{meal.name}</h4>
-        <div className="flex flex-wrap gap-2">
-          <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded uppercase">
-            {Math.round(nutrition.calories)} kcal
-          </span>
-          <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">
-            {Math.round(nutrition.protein)}g Pro
-          </span>
+const MealCard: React.FC<MealCardProps> = ({ type, slot, dishes, onEdit }) => {
+  const dishNames = slot.dishIds
+    .map(id => dishes.find(d => d.id === id)?.name)
+    .filter(Boolean);
+
+  return (
+    <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+      <div className="flex justify-between items-start mb-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          {MEAL_TYPE_LABELS[type]}
+        </span>
+        <button
+          onClick={onEdit}
+          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all min-h-9 min-w-9 flex items-center justify-center"
+        >
+          <Edit3 className="w-4 h-4" />
+        </button>
+      </div>
+      {dishNames.length > 0 ? (
+        <div className="space-y-2">
+          {dishNames.map((name) => (
+            <div key={name} className="flex items-center gap-2">
+              <ChefHat className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <span className="font-medium text-slate-800 text-sm">{name}</span>
+            </div>
+          ))}
+          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-slate-50">
+            <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded uppercase">
+              {Math.round(slot.calories)} kcal
+            </span>
+            <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase">
+              {Math.round(slot.protein)}g Pro
+            </span>
+          </div>
         </div>
-      </div>
-    ) : (
-      <div className="py-8 text-center border-2 border-dashed border-slate-100 rounded-xl">
-        <p className="text-sm text-slate-400">Chưa có món ăn</p>
-      </div>
-    )}
-  </div>
-);
+      ) : (
+        <button onClick={onEdit} className="w-full py-3 sm:py-4 text-center border-2 border-dashed border-slate-100 rounded-xl hover:border-emerald-300 hover:bg-emerald-50/50 active:bg-emerald-50 transition-all min-h-12 flex items-center justify-center gap-2">
+          <Plus className="w-4 h-4 text-slate-300" />
+          <p className="text-sm text-slate-400">Thêm món ăn</p>
+        </button>
+      )}
+    </div>
+  );
+};
 
 interface RecommendationPanelProps {
   weight: number;
+  targetCalories: number;
   targetProtein: number;
-  selectedMeals: { breakfast: MealWithNutrition | null; lunch: MealWithNutrition | null; dinner: MealWithNutrition | null };
+  dayNutrition: DayNutritionSummary;
 }
 
-const RecommendationPanel: React.FC<RecommendationPanelProps> = ({ weight, targetProtein, selectedMeals }) => {
-  const isComplete = selectedMeals.breakfast && selectedMeals.lunch && selectedMeals.dinner;
+const TIP_STYLES: Record<NutritionTip['type'], string> = {
+  success: 'bg-emerald-50 border-emerald-100 text-emerald-800',
+  warning: 'bg-amber-50 border-amber-100 text-amber-800',
+  info: 'bg-blue-50 border-blue-100 text-blue-800',
+};
+
+const RecommendationPanel: React.FC<RecommendationPanelProps> = ({ weight, targetCalories, targetProtein, dayNutrition }) => {
+  const tips = React.useMemo(() => getDynamicTips(dayNutrition, targetCalories, targetProtein), [dayNutrition, targetCalories, targetProtein]);
+  const isComplete = dayNutrition.breakfast.dishIds.length > 0 && dayNutrition.lunch.dishIds.length > 0 && dayNutrition.dinner.dishIds.length > 0;
 
   return (
     <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col">
@@ -77,41 +97,44 @@ const RecommendationPanel: React.FC<RecommendationPanelProps> = ({ weight, targe
         <Info className="w-5 h-5" />
         <h3>Gợi ý cho bạn</h3>
       </div>
-      <div className="flex-1 space-y-4 text-sm text-slate-600 leading-relaxed">
-        <p>
-          Dựa trên trọng lượng <strong>{weight}kg</strong>, bạn cần duy trì lượng protein cao (<strong>{targetProtein}g</strong>) để bảo vệ cơ bắp trong khi thâm hụt calo.
+      <div className="flex-1 space-y-3 text-sm text-slate-600 leading-relaxed">
+        <p className="text-slate-500">
+          Mục tiêu: <strong>{weight}kg</strong> · <strong>{targetCalories} kcal</strong> · <strong>{targetProtein}g protein</strong>
         </p>
-        <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-          <p className="text-emerald-800 font-medium mb-1">Mẹo tiêu hóa:</p>
-          <p className="text-emerald-700/80">
-            Hãy ưu tiên các món có Kimchi hoặc Sữa chua Hy Lạp để bổ sung probiotics, giúp hấp thụ protein tốt hơn.
-          </p>
-        </div>
+
+        {tips.map((tip, idx) => (
+          <div key={idx} className={`p-3 rounded-xl border ${TIP_STYLES[tip.type]}`}>
+            <p className="font-medium">
+              <span className="mr-1.5">{tip.emoji}</span>
+              {tip.text}
+            </p>
+          </div>
+        ))}
+
         {isComplete ? (
-          <div className="flex items-center gap-2 text-emerald-600 font-medium">
+          <div className="flex items-center gap-2 text-emerald-600 font-medium pt-1">
             <CheckCircle2 className="w-4 h-4" />
             Kế hoạch ngày hôm nay đã hoàn tất!
           </div>
-        ) : (
-          <div className="flex items-center gap-2 text-amber-600 font-medium">
+        ) : dayNutrition.breakfast.dishIds.length > 0 || dayNutrition.lunch.dishIds.length > 0 || dayNutrition.dinner.dishIds.length > 0 ? (
+          <div className="flex items-center gap-2 text-amber-600 font-medium pt-1">
             <AlertCircle className="w-4 h-4" />
-            Bạn còn thiếu {getMissingMealsText(selectedMeals)}
+            Bạn còn thiếu {getMissingSlots(dayNutrition)}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
 };
 
-interface CalendarTabProps {
+export interface CalendarTabProps {
   selectedDate: string;
   onSelectDate: (date: string) => void;
   dayPlans: DayPlan[];
-  meals: Meal[];
   dishes: Dish[];
   ingredients: Ingredient[];
   currentPlan: DayPlan;
-  selectedMealsForSummary: { breakfast: MealWithNutrition | null; lunch: MealWithNutrition | null; dinner: MealWithNutrition | null };
+  dayNutrition: DayNutritionSummary;
   userWeight: number;
   targetCalories: number;
   targetProtein: number;
@@ -125,9 +148,46 @@ interface CalendarTabProps {
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
 
+const MoreMenu: React.FC<{ onClearPlan: () => void }> = ({ onClearPlan }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(prev => !prev)}
+        className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition-all min-h-11 min-w-11"
+        aria-label="Thêm tùy chọn"
+      >
+        <MoreVertical className="w-5 h-5" />
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-10 min-w-44">
+          <button
+            onClick={() => { onClearPlan(); setIsOpen(false); }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 active:bg-rose-100 transition-all"
+          >
+            <Trash2 className="w-4 h-4" />
+            Xóa kế hoạch
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const CalendarTab: React.FC<CalendarTabProps> = ({
-  selectedDate, onSelectDate, dayPlans, meals, dishes, ingredients, currentPlan,
-  selectedMealsForSummary, userWeight, targetCalories, targetProtein,
+  selectedDate, onSelectDate, dayPlans, dishes,
+  dayNutrition, userWeight, targetCalories, targetProtein,
   isSuggesting, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
 }) => {
   return (
@@ -145,7 +205,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({
             </div>
             <button
               onClick={onOpenTypeSelection}
-              className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full text-sm font-bold hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200"
+              className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full text-sm font-bold hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200 min-h-11"
             >
               <Plus className="w-4 h-4" />
               Lên kế hoạch
@@ -159,52 +219,44 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <Summary
-            selectedMeals={selectedMealsForSummary}
+            dayNutrition={dayNutrition}
             targetCalories={targetCalories}
             targetProtein={targetProtein}
             onEditGoals={onOpenGoalModal}
           />
         </div>
-        <RecommendationPanel weight={userWeight} targetProtein={targetProtein} selectedMeals={selectedMealsForSummary} />
+        <RecommendationPanel weight={userWeight} targetCalories={targetCalories} targetProtein={targetProtein} dayNutrition={dayNutrition} />
       </section>
 
       {/* Planning Section */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-4 gap-4">
           <h2 className="text-2xl font-bold text-slate-800">Kế hoạch ăn uống</h2>
-          <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={onSuggestMealPlan}
-              disabled={isSuggesting}
-              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-medium hover:bg-indigo-100 transition-all disabled:opacity-50"
-            >
-              {isSuggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              Gợi ý AI
-            </button>
-            <button
-              onClick={onOpenClearPlan}
-              className="flex items-center justify-center gap-2 bg-rose-50 text-rose-600 px-4 py-2 rounded-xl font-medium hover:bg-rose-100 transition-all"
-            >
-              <Trash2 className="w-4 h-4" />
-              Xóa
-            </button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={onOpenTypeSelection}
-              className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-11"
             >
               <Plus className="w-4 h-4" />
               Lên kế hoạch
             </button>
+            <button
+              onClick={onSuggestMealPlan}
+              disabled={isSuggesting}
+              className="flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2.5 rounded-xl font-medium hover:bg-indigo-100 active:scale-[0.98] transition-all disabled:opacity-50 min-h-11"
+            >
+              {isSuggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              <span className="hidden sm:inline">Gợi ý AI</span>
+              <span className="sm:hidden">AI</span>
+            </button>
+            <MoreMenu onClearPlan={onOpenClearPlan} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {MEAL_TYPES.map(type => {
-            const mealId = currentPlan[`${type}Id` as keyof DayPlan] as string | null;
-            const meal = meals.find(m => m.id === mealId);
-            const nutrition = meal ? calculateMealNutrition(meal, dishes, ingredients) : null;
-            return <MealCard key={type} type={type} meal={meal} nutrition={nutrition} onEdit={() => onPlanMeal(type)} />;
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          {MEAL_TYPES.map(type => (
+            <MealCard key={type} type={type} slot={dayNutrition[type]} dishes={dishes} onEdit={() => onPlanMeal(type)} />
+          ))}
         </div>
       </section>
     </div>

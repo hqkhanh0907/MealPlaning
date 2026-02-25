@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { initialIngredients, initialDishes, initialMeals } from './data/initialData';
-import { Ingredient, Dish, Meal, DayPlan, MealType, DishIngredient, UserProfile, SaveAnalyzedDishPayload } from './types';
-import { calculateMealNutrition } from './utils/nutrition';
+import { initialIngredients, initialDishes } from './data/initialData';
+import { Ingredient, Dish, DayPlan, MealType, DishIngredient, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
+import { calculateDishesNutrition, calculateDishNutrition } from './utils/nutrition';
 import { GroceryList } from './components/GroceryList';
 import { AIImageAnalyzer } from './components/AIImageAnalyzer';
 import { CalendarTab } from './components/CalendarTab';
@@ -12,6 +12,7 @@ import { TypeSelectionModal } from './components/modals/TypeSelectionModal';
 import { ClearPlanModal } from './components/modals/ClearPlanModal';
 import { PlanningModal } from './components/modals/PlanningModal';
 import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   CalendarDays,
   Settings2,
@@ -20,12 +21,18 @@ import {
   BookOpen,
   ShoppingCart
 } from 'lucide-react';
-import { suggestMealPlan, AvailableMealInfo } from './services/geminiService';
+import { suggestMealPlan, AvailableDishInfo } from './services/geminiService';
 
 // --- Types ---
 
 type MainTab = 'calendar' | 'management' | 'ai-analysis' | 'grocery';
-type ManagementSubTab = 'ingredients' | 'dishes' | 'meals';
+type ManagementSubTab = 'ingredients' | 'dishes';
+
+const MEAL_TYPE_LABELS: Record<MealType, string> = {
+  breakfast: 'Bữa Sáng',
+  lunch: 'Bữa Trưa',
+  dinner: 'Bữa Tối',
+};
 
 // --- Pure helper functions ---
 
@@ -67,19 +74,52 @@ const clearPlansByScope = (plans: DayPlan[], selectedDate: string, scope: 'day' 
   });
 };
 
+const EMPTY_DAY_PLAN = (date: string): DayPlan => ({
+  date, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [],
+});
+
+const getDayPlanSlotKey = (type: MealType): keyof DayPlan => {
+  const map: Record<MealType, keyof DayPlan> = {
+    breakfast: 'breakfastDishIds',
+    lunch: 'lunchDishIds',
+    dinner: 'dinnerDishIds',
+  };
+  return map[type];
+};
+
 const applySuggestionToDayPlans = (
   plans: DayPlan[], selectedDate: string,
-  suggestion: { breakfastId: string; lunchId: string; dinnerId: string }
+  suggestion: { breakfastDishIds: string[]; lunchDishIds: string[]; dinnerDishIds: string[] }
 ): DayPlan[] => {
   const existing = plans.find(p => p.date === selectedDate);
+  const merged: DayPlan = {
+    date: selectedDate,
+    breakfastDishIds: suggestion.breakfastDishIds.length > 0 ? suggestion.breakfastDishIds : (existing?.breakfastDishIds ?? []),
+    lunchDishIds: suggestion.lunchDishIds.length > 0 ? suggestion.lunchDishIds : (existing?.lunchDishIds ?? []),
+    dinnerDishIds: suggestion.dinnerDishIds.length > 0 ? suggestion.dinnerDishIds : (existing?.dinnerDishIds ?? []),
+  };
   if (existing) {
-    return plans.map(p =>
-      p.date === selectedDate
-        ? { ...p, breakfastId: suggestion.breakfastId || p.breakfastId, lunchId: suggestion.lunchId || p.lunchId, dinnerId: suggestion.dinnerId || p.dinnerId }
-        : p
-    );
+    return plans.map(p => p.date === selectedDate ? merged : p);
   }
-  return [...plans, { date: selectedDate, breakfastId: suggestion.breakfastId || null, lunchId: suggestion.lunchId || null, dinnerId: suggestion.dinnerId || null }];
+  return [...plans, merged];
+};
+
+// Data migration: convert old format (breakfastId/mealId) to new format (dishIds)
+const migrateDayPlans = (plans: unknown[]): DayPlan[] => {
+  return plans.map((p: unknown) => {
+    const plan = p as Record<string, unknown>;
+    // Already new format
+    if (Array.isArray(plan.breakfastDishIds)) return plan as unknown as DayPlan;
+    // Old format — we can't lookup meals anymore, so just create empty
+    return EMPTY_DAY_PLAN(plan.date as string);
+  });
+};
+
+const migrateDishes = (dishes: unknown[]): Dish[] => {
+  return (dishes as Record<string, unknown>[]).map(d => ({
+    ...(d as unknown as Dish),
+    tags: Array.isArray((d as Record<string, unknown>).tags) ? (d as unknown as Dish).tags : [] as MealType[],
+  }));
 };
 
 const processAnalyzedDish = (
@@ -108,11 +148,18 @@ const processAnalyzedDish = (
 
 // --- Extracted UI components ---
 
+const TAB_LABELS: Record<MainTab, string> = {
+  'calendar': 'Lịch trình',
+  'management': 'Thư viện',
+  'ai-analysis': 'AI Phân tích',
+  'grocery': 'Đi chợ',
+};
+
 const NAV_ITEMS: { tab: MainTab; icon: React.ReactNode; label: string }[] = [
-  { tab: 'calendar', icon: <CalendarDays className="w-5 h-5" />, label: 'Lịch trình' },
-  { tab: 'management', icon: <BookOpen className="w-5 h-5" />, label: 'Thư viện' },
-  { tab: 'ai-analysis', icon: <Sparkles className="w-5 h-5" />, label: 'AI' },
-  { tab: 'grocery', icon: <ShoppingCart className="w-5 h-5" />, label: 'Đi chợ' },
+  { tab: 'calendar', icon: <CalendarDays className="w-6 h-6" />, label: 'Lịch trình' },
+  { tab: 'management', icon: <BookOpen className="w-6 h-6" />, label: 'Thư viện' },
+  { tab: 'ai-analysis', icon: <Sparkles className="w-6 h-6" />, label: 'AI' },
+  { tab: 'grocery', icon: <ShoppingCart className="w-6 h-6" />, label: 'Đi chợ' },
 ];
 
 const DESKTOP_NAV_ITEMS: { tab: MainTab; icon: React.ReactNode; label: string }[] = [
@@ -122,12 +169,19 @@ const DESKTOP_NAV_ITEMS: { tab: MainTab; icon: React.ReactNode; label: string }[
   { tab: 'grocery', icon: <ShoppingCart className="w-4 h-4" />, label: 'Đi chợ' },
 ];
 
-const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void }> = ({ activeTab, onTabChange }) => (
+const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }> = ({ activeTab, onTabChange, showAIBadge }) => (
   <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-30 sm:hidden">
     <div className="flex items-center justify-around px-2 py-1">
       {NAV_ITEMS.map(({ tab, icon, label }) => (
-        <button key={tab} onClick={() => onTabChange(tab)} className={`flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-h-14 rounded-xl transition-all ${activeTab === tab ? 'text-emerald-600' : 'text-slate-400 active:text-slate-600'}`}>
-          {icon}<span className="text-[10px] font-bold">{label}</span>
+        <button key={tab} onClick={() => onTabChange(tab)} className={`flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-h-14 rounded-xl transition-all relative ${activeTab === tab ? 'text-emerald-600' : 'text-slate-400 active:text-slate-600'}`}>
+          <div className="relative">
+            {icon}
+            {tab === 'ai-analysis' && showAIBadge && (
+              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white" />
+            )}
+          </div>
+          <span className="text-[11px] font-bold">{label}</span>
+          {activeTab === tab && <div className="absolute -bottom-1 w-5 h-0.5 bg-emerald-500 rounded-full" />}
         </button>
       ))}
     </div>
@@ -152,39 +206,58 @@ export default function App() {
   const activeMainTabRef = useRef(activeMainTab);
   useEffect(() => { activeMainTabRef.current = activeMainTab; }, [activeMainTab]);
 
-  const [activeManagementSubTab, setActiveManagementSubTab] = useState<ManagementSubTab>('meals');
+  // Clear AI badge when navigating to AI tab
+  useEffect(() => {
+    if (activeMainTab === 'ai-analysis') setHasNewAIResult(false);
+  }, [activeMainTab]);
+
+  const [activeManagementSubTab, setActiveManagementSubTab] = useState<ManagementSubTab>('dishes');
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   const [userProfile, setUserProfile] = usePersistedState<UserProfile>('mp-user-profile', { weight: 83, proteinRatio: 2, targetCalories: 1500 });
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   const [ingredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', initialIngredients);
-  const [dishes, setDishes] = usePersistedState<Dish[]>('mp-dishes', initialDishes);
-  const [meals, setMeals] = usePersistedState<Meal[]>('mp-meals', initialMeals);
-  const [dayPlans, setDayPlans] = usePersistedState<DayPlan[]>('mp-day-plans', []);
+  const [rawDishes, setDishes] = usePersistedState<Dish[]>('mp-dishes', initialDishes);
+  const [rawDayPlans, setDayPlans] = usePersistedState<DayPlan[]>('mp-day-plans', []);
+
+  // Migrate old data formats
+  const dishes = useMemo(() => migrateDishes(rawDishes), [rawDishes]);
+  const dayPlans = useMemo(() => migrateDayPlans(rawDayPlans), [rawDayPlans]);
+
+  // Persist migrated data back to localStorage if migration changed something
+  useEffect(() => {
+    const needsMigration = rawDishes.some((d: unknown) => !Array.isArray((d as Record<string, unknown>).tags));
+    if (needsMigration) {
+      setDishes(dishes);
+    }
+  }, []); // Only run once on mount
 
   const [isPlanningModalOpen, setIsPlanningModalOpen] = useState(false);
   const [isTypeSelectionModalOpen, setIsTypeSelectionModalOpen] = useState(false);
   const [isClearPlanModalOpen, setIsClearPlanModalOpen] = useState(false);
   const [planningType, setPlanningType] = useState<MealType | null>(null);
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const [hasNewAIResult, setHasNewAIResult] = useState(false);
 
   const notify = useNotification();
 
   const currentPlan = useMemo(() =>
-    dayPlans.find(p => p.date === selectedDate) || { date: selectedDate, breakfastId: null, lunchId: null, dinnerId: null },
+    dayPlans.find(p => p.date === selectedDate) || EMPTY_DAY_PLAN(selectedDate),
     [dayPlans, selectedDate]
   );
 
-  const selectedMealsForSummary = useMemo(() => {
-    const getMeal = (id: string | null) => {
-      if (!id) return null;
-      const meal = meals.find(m => m.id === id);
-      if (!meal) return null;
-      return { ...meal, ...calculateMealNutrition(meal, dishes, ingredients) };
+  const dayNutrition = useMemo((): DayNutritionSummary => {
+    const calc = (dishIds: string[]) => ({
+      dishIds,
+      ...calculateDishesNutrition(dishIds, dishes, ingredients),
+    });
+    return {
+      breakfast: calc(currentPlan.breakfastDishIds),
+      lunch: calc(currentPlan.lunchDishIds),
+      dinner: calc(currentPlan.dinnerDishIds),
     };
-    return { breakfast: getMeal(currentPlan.breakfastId), lunch: getMeal(currentPlan.lunchId), dinner: getMeal(currentPlan.dinnerId) };
-  }, [currentPlan, meals, dishes, ingredients]);
+  }, [currentPlan, dishes, ingredients]);
 
   const targetProtein = Math.round(userProfile.weight * userProfile.proteinRatio);
 
@@ -197,12 +270,12 @@ export default function App() {
   const handleSuggestMealPlan = useCallback(async () => {
     try {
       setIsSuggesting(true);
-      const availableMeals: AvailableMealInfo[] = meals.map(m => {
-        const n = calculateMealNutrition(m, dishes, ingredients);
-        return { id: m.id, name: m.name, type: m.type, calories: Math.round(n.calories), protein: Math.round(n.protein) };
+      const availableDishes: AvailableDishInfo[] = dishes.map(d => {
+        const n = calculateDishNutrition(d, ingredients);
+        return { id: d.id, name: d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
       });
-      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableMeals);
-      if (suggestion.breakfastId || suggestion.lunchId || suggestion.dinnerId) {
+      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableDishes);
+      if (suggestion.breakfastDishIds.length > 0 || suggestion.lunchDishIds.length > 0 || suggestion.dinnerDishIds.length > 0) {
         setDayPlans(prev => applySuggestionToDayPlans(prev, selectedDate, suggestion));
         notify.success('Đã gợi ý thực đơn!', suggestion.reasoning || 'AI đã chọn thực đơn phù hợp cho bạn.');
       }
@@ -212,23 +285,29 @@ export default function App() {
     } finally {
       setIsSuggesting(false);
     }
-  }, [meals, dishes, ingredients, userProfile.targetCalories, targetProtein, selectedDate]);
+  }, [dishes, ingredients, userProfile.targetCalories, targetProtein, selectedDate, notify]);
 
   const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month') => {
     setDayPlans(prev => clearPlansByScope(prev, selectedDate, scope));
     setIsClearPlanModalOpen(false);
   }, [selectedDate]);
 
-  const handleUpdatePlan = useCallback((type: MealType, mealId: string | null) => {
+  const handleUpdatePlan = useCallback((type: MealType, dishIds: string[]) => {
+    const slotKey = getDayPlanSlotKey(type);
     setDayPlans(prev => {
       const existing = prev.find(p => p.date === selectedDate);
-      if (existing) return prev.map(p => p.date === selectedDate ? { ...p, [`${type}Id`]: mealId } : p);
-      return [...prev, { date: selectedDate, breakfastId: type === 'breakfast' ? mealId : null, lunchId: type === 'lunch' ? mealId : null, dinnerId: type === 'dinner' ? mealId : null }];
+      if (existing) return prev.map(p => p.date === selectedDate ? { ...p, [slotKey]: dishIds } : p);
+      return [...prev, { ...EMPTY_DAY_PLAN(selectedDate), [slotKey]: dishIds }];
     });
   }, [selectedDate]);
 
-  const isMealUsed = useCallback((mealId: string) => dayPlans.some(p => p.breakfastId === mealId || p.lunchId === mealId || p.dinnerId === mealId), [dayPlans]);
-  const isDishUsed = useCallback((dishId: string) => meals.some(m => m.dishIds.includes(dishId)), [meals]);
+  const isDishUsed = useCallback((dishId: string) =>
+    dayPlans.some(p =>
+      p.breakfastDishIds.includes(dishId) ||
+      p.lunchDishIds.includes(dishId) ||
+      p.dinnerDishIds.includes(dishId)
+    ), [dayPlans]);
+
   const isIngredientUsed = useCallback((ingId: string) => dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)), [dishes]);
 
   const handleDeleteIngredient = useCallback((id: string) => {
@@ -245,12 +324,12 @@ export default function App() {
       setActiveMainTab('management');
       setActiveManagementSubTab('ingredients');
     } else {
-      setDishes(prev => [...prev, { id: `dish-${Date.now()}`, name: result.name, ingredients: dishIngredients }]);
+      setDishes(prev => [...prev, { id: `dish-${Date.now()}`, name: result.name, ingredients: dishIngredients, tags: [] }]);
       notify.success('Lưu thành công!', `Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới.`);
       setActiveMainTab('management');
       setActiveManagementSubTab('dishes');
     }
-  }, [ingredients]);
+  }, [ingredients, notify]);
 
   const openTypeSelection = useCallback(() => setIsTypeSelectionModalOpen(true), []);
   const openClearPlan = useCallback(() => setIsClearPlanModalOpen(true), []);
@@ -258,13 +337,22 @@ export default function App() {
 
   const handleAnalysisComplete = useCallback(() => {
     if (activeMainTabRef.current !== 'ai-analysis') {
+      setHasNewAIResult(true);
       notify.success('Phân tích hoàn tất!', 'Nhấn để xem kết quả', { onClick: () => setActiveMainTab('ai-analysis') });
     }
   }, [notify]);
 
+  const handleImportData = useCallback((data: Record<string, unknown>) => {
+    const IMPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile'];
+    for (const key of IMPORT_KEYS) {
+      if (key in data) {
+        localStorage.setItem(key, JSON.stringify(data[key]));
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-200">
-      {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-20 pt-safe">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -272,30 +360,34 @@ export default function App() {
               <Utensils className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-800">Smart Meal Planner</h1>
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-800">
+                <span className="sm:hidden">{TAB_LABELS[activeMainTab]}</span>
+                <span className="hidden sm:inline">Smart Meal Planner</span>
+              </h1>
               <p className="text-xs text-slate-500 font-medium hidden sm:block">Dinh dưỡng chính xác cho {userProfile.weight}kg</p>
             </div>
           </div>
-
-          {/* Desktop Navigation - hidden on mobile */}
           <DesktopNav activeTab={activeMainTab} onTabChange={setActiveMainTab} />
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-8">
         <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'}>
+          <ErrorBoundary fallbackTitle="Lỗi tab Lịch trình">
           <CalendarTab
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
-            meals={meals} dishes={dishes} ingredients={ingredients} currentPlan={currentPlan}
-            selectedMealsForSummary={selectedMealsForSummary}
+            dishes={dishes} ingredients={ingredients} currentPlan={currentPlan}
+            dayNutrition={dayNutrition}
             userWeight={userProfile.weight} targetCalories={userProfile.targetCalories} targetProtein={targetProtein}
             isSuggesting={isSuggesting}
             onOpenTypeSelection={openTypeSelection} onOpenClearPlan={openClearPlan}
             onOpenGoalModal={openGoalModal} onPlanMeal={handlePlanMeal} onSuggestMealPlan={handleSuggestMealPlan}
           />
+          </ErrorBoundary>
         </div>
 
         <div className={activeMainTab === 'grocery' ? 'block' : 'hidden'}>
+          <ErrorBoundary fallbackTitle="Lỗi tab Đi chợ">
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div className="flex items-center gap-3">
@@ -303,27 +395,29 @@ export default function App() {
                 <h2 className="text-2xl font-bold text-slate-800">Danh sách đi chợ</h2>
               </div>
             </div>
-            <GroceryList selectedMeals={selectedMealsForSummary} allDishes={dishes} allIngredients={ingredients} />
+            <GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={selectedDate} allDishes={dishes} allIngredients={ingredients} />
           </div>
+          </ErrorBoundary>
         </div>
 
         <div className={activeMainTab === 'management' ? 'block' : 'hidden'}>
+          <ErrorBoundary fallbackTitle="Lỗi tab Thư viện">
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}
-            ingredients={ingredients} dishes={dishes} meals={meals}
+            ingredients={ingredients} dishes={dishes}
             onAddIngredient={ing => setIngredients(prev => [...prev, ing])}
             onUpdateIngredient={ing => setIngredients(prev => prev.map(i => i.id === ing.id ? ing : i))}
             onDeleteIngredient={handleDeleteIngredient} isIngredientUsed={isIngredientUsed}
             onAddDish={dish => setDishes(prev => [...prev, dish])}
             onUpdateDish={dish => setDishes(prev => prev.map(d => d.id === dish.id ? dish : d))}
             onDeleteDish={id => setDishes(prev => prev.filter(d => d.id !== id))} isDishUsed={isDishUsed}
-            onAddMeal={meal => setMeals(prev => [...prev, meal])}
-            onUpdateMeal={meal => setMeals(prev => prev.map(m => m.id === meal.id ? meal : m))}
-            onDeleteMeal={id => setMeals(prev => prev.filter(m => m.id !== id))} isMealUsed={isMealUsed}
+            onImportData={handleImportData}
           />
+          </ErrorBoundary>
         </div>
 
         <div className={activeMainTab === 'ai-analysis' ? 'block' : 'hidden'}>
+          <ErrorBoundary fallbackTitle="Lỗi tab AI Phân tích">
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div className="flex items-center gap-3">
@@ -333,18 +427,30 @@ export default function App() {
             </div>
             <AIImageAnalyzer onAnalysisComplete={handleAnalysisComplete} onSave={handleSaveAnalyzedDish} />
           </div>
+          </ErrorBoundary>
         </div>
       </main>
 
-
-      {/* Modals */}
       {isTypeSelectionModalOpen && <TypeSelectionModal currentPlan={currentPlan} onSelectType={handlePlanMeal} onClose={() => setIsTypeSelectionModalOpen(false)} />}
-      {isPlanningModalOpen && planningType && <PlanningModal planningType={planningType} meals={meals} dishes={dishes} ingredients={ingredients} currentPlan={currentPlan} onSelectMeal={handleUpdatePlan} onClose={() => setIsPlanningModalOpen(false)} onBack={() => { setIsPlanningModalOpen(false); setIsTypeSelectionModalOpen(true); }} />}
-      {isClearPlanModalOpen && <ClearPlanModal onClear={handleClearPlan} onClose={() => setIsClearPlanModalOpen(false)} />}
+      {isPlanningModalOpen && planningType && (
+        <PlanningModal
+          planningType={planningType}
+          dishes={dishes}
+          ingredients={ingredients}
+          currentDishIds={currentPlan[getDayPlanSlotKey(planningType)] as string[]}
+          onConfirm={(dishIds) => {
+            handleUpdatePlan(planningType, dishIds);
+            setIsPlanningModalOpen(false);
+            notify.success('Đã cập nhật!', `Đã chọn ${dishIds.length} món cho ${MEAL_TYPE_LABELS[planningType]}`);
+          }}
+          onClose={() => setIsPlanningModalOpen(false)}
+          onBack={() => { setIsPlanningModalOpen(false); setIsTypeSelectionModalOpen(true); }}
+        />
+      )}
+      {isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={() => setIsClearPlanModalOpen(false)} />}
       {isGoalModalOpen && <GoalSettingsModal userProfile={userProfile} onUpdateProfile={setUserProfile} onClose={() => setIsGoalModalOpen(false)} />}
 
-      {/* Mobile Bottom Navigation Bar */}
-      <BottomNavBar activeTab={activeMainTab} onTabChange={setActiveMainTab} />
+      <BottomNavBar activeTab={activeMainTab} onTabChange={setActiveMainTab} showAIBadge={hasNewAIResult} />
     </div>
   );
 }

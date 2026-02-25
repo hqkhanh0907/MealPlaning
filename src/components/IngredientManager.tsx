@@ -3,6 +3,7 @@ import { Ingredient, Dish } from '../types';
 import { Plus, Trash2, Edit3, X, Save, Search, Apple, Sparkles, Loader2 } from 'lucide-react';
 import { suggestIngredientInfo } from '../services/geminiService';
 import { useNotification } from '../contexts/NotificationContext';
+import { ConfirmationModal } from './modals/ConfirmationModal';
 
 interface IngredientManagerProps {
   ingredients: Ingredient[];
@@ -13,7 +14,7 @@ interface IngredientManagerProps {
   isUsed: (id: string) => boolean;
 }
 
-export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, dishes: _dishes, onAdd, onUpdate, onDelete, isUsed }) => {
+export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, dishes = [], onAdd, onUpdate, onDelete, isUsed }) => {
   const notify = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIng, setEditingIng] = useState<Ingredient | null>(null);
@@ -134,6 +135,13 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
 
   const filteredIngredients = ingredients.filter(ing => ing.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  // Phase 5 - 6.3: Get dishes that use a specific ingredient
+  const getDishesUsingIngredient = (ingId: string): string[] => {
+    return dishes
+      .filter(d => d.ingredients.some(di => di.ingredientId === ingId))
+      .map(d => d.name);
+  };
+
   // Helper to get display unit for labels
   const getDisplayUnit = (unit: string) => {
     const lowerUnit = unit.toLowerCase().trim();
@@ -180,7 +188,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="bg-slate-50 rounded-lg p-2 flex items-center justify-between">
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Calories</span>
                 <span className="text-sm font-bold text-slate-700">{ing.caloriesPer100}</span>
@@ -198,6 +206,18 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
                 <span className="text-sm font-bold text-rose-700">{ing.fatPer100}g</span>
               </div>
             </div>
+
+            {/* Relationship tags - 6.3 */}
+            {(() => {
+              const usedIn = getDishesUsingIngredient(ing.id);
+              if (usedIn.length === 0) return null;
+              return (
+                <div className="mb-3 text-xs text-slate-500">
+                  <span className="font-medium">Dùng trong: </span>
+                  <span className="text-slate-600">{usedIn.length <= 2 ? usedIn.join(', ') : `${usedIn.slice(0, 2).join(', ')} +${usedIn.length - 2}`}</span>
+                </div>
+              );
+            })()}
 
             <div className="mt-auto flex items-center gap-2 pt-4 border-t border-slate-50">
               <button 
@@ -219,8 +239,24 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
           </div>
         ))}
         {filteredIngredients.length === 0 && (
-          <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-2xl border border-dashed border-slate-200">
-            Không tìm thấy nguyên liệu nào.
+          <div className="col-span-full bg-white rounded-2xl border border-dashed border-slate-200 p-8 sm:p-12 text-center">
+            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Apple className="w-8 h-8 text-emerald-300" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">
+              {searchQuery ? 'Không tìm thấy nguyên liệu' : 'Chưa có nguyên liệu nào'}
+            </h3>
+            <p className="text-sm text-slate-500 mb-4">
+              {searchQuery ? 'Thử tìm kiếm với từ khóa khác.' : 'Bắt đầu thêm nguyên liệu đầu tiên!'}
+            </p>
+            {!searchQuery && (
+              <button
+                onClick={() => handleOpenModal()}
+                className="inline-flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200"
+              >
+                <Plus className="w-5 h-5" /> Thêm nguyên liệu
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -327,40 +363,26 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
           </div>
         </div>
       )}
-      {deleteConfirmation.isOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-70">
-          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-8 h-8" />
-              </div>
-              <h4 className="font-bold text-slate-800 text-xl mb-2">Xóa nguyên liệu?</h4>
-              <p className="text-slate-600 mb-6">
-                Bạn có chắc chắn muốn xóa <span className="font-bold text-slate-800">"{deleteConfirmation.ingredientName}"</span>?
-                {deleteConfirmation.usageCount > 0 && (
-                  <span className="block mt-2 text-rose-600 font-medium text-sm bg-rose-50 p-3 rounded-xl">
-                    Cảnh báo: Nguyên liệu này đang được dùng trong {deleteConfirmation.usageCount} món ăn (ví dụ: {deleteConfirmation.exampleDish}). Xóa nó sẽ ảnh hưởng đến các món ăn này.
-                  </span>
-                )}
-              </p>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })}
-                  className="flex-1 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all"
-                >
-                  Hủy
-                </button>
-                <button 
-                  onClick={confirmDelete}
-                  className="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold shadow-sm shadow-rose-200 hover:bg-rose-600 transition-all"
-                >
-                  Xóa ngay
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        variant="danger"
+        title="Xóa nguyên liệu?"
+        message={
+          <p>
+            Bạn có chắc chắn muốn xóa <span className="font-bold text-slate-800">&quot;{deleteConfirmation.ingredientName}&quot;</span>?
+            {deleteConfirmation.usageCount > 0 && (
+              <span className="block mt-2 text-rose-600 font-medium text-sm bg-rose-50 p-3 rounded-xl">
+                Cảnh báo: Nguyên liệu này đang được dùng trong {deleteConfirmation.usageCount} món ăn
+                {deleteConfirmation.exampleDish ? ` (ví dụ: ${deleteConfirmation.exampleDish})` : ''}.
+                Xóa nó sẽ ảnh hưởng đến các món ăn này.
+              </span>
+            )}
+          </p>
+        }
+        confirmLabel="Xóa ngay"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })}
+      />
     </div>
   );
 };

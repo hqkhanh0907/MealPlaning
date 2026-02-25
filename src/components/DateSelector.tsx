@@ -37,7 +37,9 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
     const d = new Date(selectedDate);
     return Number.isNaN(d.getTime()) ? new Date() : d;
   });
-  const [viewMode, setViewMode] = useState<'calendar' | 'week'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'week'>(() =>
+    typeof window !== 'undefined' && window.innerWidth < 640 ? 'week' : 'calendar'
+  );
   const weekScrollRef = useRef<HTMLDivElement>(null);
 
   const getDaysInMonth = (year: number, month: number) => {
@@ -156,9 +158,9 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
             const dayLabel = weekDays[dayOfWeek === 0 ? 6 : dayOfWeek - 1];
 
             const plan = dayPlans.find(p => p.date === dateStr);
-            const hasBreakfast = !!plan?.breakfastId;
-            const hasLunch = !!plan?.lunchId;
-            const hasDinner = !!plan?.dinnerId;
+            const hasBreakfast = (plan?.breakfastDishIds?.length ?? 0) > 0;
+            const hasLunch = (plan?.lunchDishIds?.length ?? 0) > 0;
+            const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
 
             return (
               <button
@@ -209,9 +211,9 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
               const isToday = dateStr === new Date().toISOString().split('T')[0];
 
               const plan = dayPlans.find(p => p.date === dateStr);
-              const hasBreakfast = !!plan?.breakfastId;
-              const hasLunch = !!plan?.lunchId;
-              const hasDinner = !!plan?.dinnerId;
+              const hasBreakfast = (plan?.breakfastDishIds?.length ?? 0) > 0;
+              const hasLunch = (plan?.lunchDishIds?.length ?? 0) > 0;
+              const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
 
               return (
                 <button
@@ -242,8 +244,20 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
             })}
           </div>
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 font-medium gap-2 sm:gap-0">
-            <span className="hidden sm:inline">Mẹo: Nhấn đúp hoặc nhấn vào ngày đang chọn để lên kế hoạch</span>
-            <span className="sm:hidden">Nhấn vào ngày đang chọn để lên kế hoạch</span>
+            {(() => {
+              const selectedPlan = dayPlans.find(p => p.date === selectedDate);
+              const hasAnyPlan = selectedPlan && (
+                (selectedPlan.breakfastDishIds?.length ?? 0) > 0 ||
+                (selectedPlan.lunchDishIds?.length ?? 0) > 0 ||
+                (selectedPlan.dinnerDishIds?.length ?? 0) > 0
+              );
+              return !hasAnyPlan ? (
+                <>
+                  <span className="hidden sm:inline">Mẹo: Nhấn đúp hoặc nhấn vào ngày đang chọn để lên kế hoạch</span>
+                  <span className="sm:hidden">Nhấn vào ngày đang chọn để lên kế hoạch</span>
+                </>
+              ) : <span />;
+            })()}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Sáng</div>
               <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> Trưa</div>
