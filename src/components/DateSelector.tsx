@@ -114,14 +114,14 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all"
+            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
             title={viewMode === 'calendar' ? 'Chế độ cuộn ngang' : 'Chế độ lịch'}
           >
             {viewMode === 'calendar' ? <List className="w-5 h-5" /> : <CalendarIcon className="w-5 h-5" />}
           </button>
           <button
             onClick={goToToday}
-            className="px-3 py-1.5 text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 rounded-xl transition-all mr-1 sm:mr-2 min-h-9"
+            className="px-3 py-1.5 text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 rounded-xl transition-all mr-1 sm:mr-2 min-h-11 sm:min-h-9 flex items-center"
           >
             Hôm nay
           </button>

@@ -1,4 +1,7 @@
-# TEST PLAN — Smart Meal Planner
+# TEST PLAN — Smart Meal Planner v1.0 (Updated)
+
+> **Test Cases V2:** Xem `test-cases-v2.md` cho danh sách 201 TCs chi tiết (bao gồm edge cases).  
+> **Test Cases V1:** Xem `test-cases.md` cho 41 TCs gốc (đã thực thi 100% pass).
 
 ## 1. Thông tin chung
 

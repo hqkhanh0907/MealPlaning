@@ -34,7 +34,7 @@ export const Summary: React.FC<SummaryProps> = ({ dayNutrition, targetCalories, 
         {onEditGoals && (
           <button 
             onClick={onEditGoals}
-            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
+            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
             title="Chỉnh sửa mục tiêu"
           >
             <Edit3 className="w-5 h-5" />

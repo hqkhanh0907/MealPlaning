@@ -42,7 +42,7 @@ const MealCard: React.FC<MealCardProps> = ({ type, slot, dishes, onEdit }) => {
         </span>
         <button
           onClick={onEdit}
-          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all min-h-9 min-w-9 flex items-center justify-center"
+          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
         >
           <Edit3 className="w-4 h-4" />
         </button>
