@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
 import { DayPlan } from '../types';
 
@@ -32,15 +32,49 @@ const getDayButtonClass = (isSelected: boolean, isToday: boolean, variant: 'week
     : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200';
 };
 
+// Get Monday of the week containing the given date
+const getMonday = (date: Date): Date => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+// Get 7 dates (Mon–Sun) for a given week offset from selectedDate
+const getCurrentWeekDates = (selectedDate: string, weekOffset: number): Date[] => {
+  const base = new Date(selectedDate);
+  const monday = getMonday(base);
+  monday.setDate(monday.getDate() + weekOffset * 7);
+  const dates: Date[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+};
+
+// Format week label e.g. "24/02 - 02/03"
+const formatWeekLabel = (dates: Date[]): string => {
+  if (dates.length < 7) return '';
+  const fmt = (d: Date) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return `${fmt(dates[0])} - ${fmt(dates[6])}`;
+};
+
 export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = new Date(selectedDate);
     return Number.isNaN(d.getTime()) ? new Date() : d;
   });
   const [viewMode, setViewMode] = useState<'calendar' | 'week'>(() =>
-    typeof window !== 'undefined' && window.innerWidth < 640 ? 'week' : 'calendar'
+    typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640 ? 'week' : 'calendar'
   );
-  const weekScrollRef = useRef<HTMLDivElement>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const weekContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
@@ -76,30 +110,37 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
   const goToToday = () => {
     const today = new Date();
     setCurrentMonth(today);
+    setWeekOffset(0);
     onSelectDate(today.toISOString().split('T')[0]);
   };
 
-  const getWeekDates = () => {
-    const center = new Date(selectedDate);
-    const dates: Date[] = [];
-    for (let i = -14; i <= 14; i++) {
-      const d = new Date(center);
-      d.setDate(d.getDate() + i);
-      dates.push(d);
-    }
-    return dates;
-  };
+  const weekDates = getCurrentWeekDates(selectedDate, weekOffset);
+  const weekLabel = formatWeekLabel(weekDates);
 
-  const weekDates = getWeekDates();
+  const prevWeek = useCallback(() => setWeekOffset(prev => prev - 1), []);
+  const nextWeek = useCallback(() => setWeekOffset(prev => prev + 1), []);
 
-  useEffect(() => {
-    if (viewMode === 'week' && weekScrollRef.current) {
-      const selectedEl = weekScrollRef.current.querySelector('[data-selected="true"]');
-      if (selectedEl) {
-        selectedEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  // Touch swipe handlers for week view
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = e.changedTouches[0].clientX - touchStartX.current;
+    const diffY = e.changedTouches[0].clientY - touchStartY.current;
+    // Only swipe horizontally if X distance > Y distance and > 50px threshold
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+      if (diffX < 0) {
+        nextWeek(); // swipe left → next week
+      } else {
+        prevWeek(); // swipe right → previous week
       }
     }
-  }, [viewMode, selectedDate]);
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [nextWeek, prevWeek]);
 
   // Generate stable keys for empty cells
   const emptyCellKeys = Array.from({ length: firstDay }, (_, i) => `empty-start-${year}-${month}-${i}`);
@@ -109,13 +150,13 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2 text-slate-800 font-bold text-lg">
           <CalendarIcon className="w-5 h-5 text-emerald-500" />
-          <span>{viewMode === 'calendar' ? `Tháng ${month + 1}, ${year}` : 'Chọn ngày'}</span>
+          <span>{viewMode === 'calendar' ? `Tháng ${month + 1}, ${year}` : weekLabel}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
             className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
-            title={viewMode === 'calendar' ? 'Chế độ cuộn ngang' : 'Chế độ lịch'}
+            title={viewMode === 'calendar' ? 'Chế độ tuần' : 'Chế độ lịch'}
           >
             {viewMode === 'calendar' ? <List className="w-5 h-5" /> : <CalendarIcon className="w-5 h-5" />}
           </button>
@@ -125,30 +166,28 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           >
             Hôm nay
           </button>
-          {viewMode === 'calendar' && (
-            <>
-              <button
-                onClick={prevMonth}
-                className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-9 min-w-9 flex items-center justify-center"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={nextMonth}
-                className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-9 min-w-9 flex items-center justify-center"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </>
-          )}
+          <button
+            onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
+            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-9 min-w-9 flex items-center justify-center"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
+            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-9 min-w-9 flex items-center justify-center"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      {/* Horizontal Week Scroll View */}
+      {/* Week View — 7 days (Mon–Sun) */}
       {viewMode === 'week' && (
         <div
-          ref={weekScrollRef}
-          className="flex overflow-x-auto scrollbar-hide gap-2 pb-2 -mx-2 px-2"
+          ref={weekContainerRef}
+          className="grid grid-cols-7 gap-1.5 sm:gap-2"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {weekDates.map(date => {
             const dateStr = date.toISOString().split('T')[0];
@@ -173,7 +212,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                     onSelectDate(dateStr);
                   }
                 }}
-                className={`flex flex-col items-center justify-center min-w-13 py-2.5 px-2 rounded-2xl transition-all shrink-0 min-h-18 ${getDayButtonClass(isSelected, isToday, 'week')}`}
+                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl transition-all min-h-18 ${getDayButtonClass(isSelected, isToday, 'week')}`}
               >
                 <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-white/80' : 'text-slate-400'}`}>{dayLabel}</span>
                 <span className="text-lg font-bold">{date.getDate()}</span>
@@ -246,17 +285,18 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 font-medium gap-2 sm:gap-0">
             {(() => {
               const selectedPlan = dayPlans.find(p => p.date === selectedDate);
-              const hasAnyPlan = selectedPlan && (
+              const hasAnyPlan = Boolean(selectedPlan && (
                 (selectedPlan.breakfastDishIds?.length ?? 0) > 0 ||
                 (selectedPlan.lunchDishIds?.length ?? 0) > 0 ||
                 (selectedPlan.dinnerDishIds?.length ?? 0) > 0
-              );
-              return !hasAnyPlan ? (
+              ));
+              if (hasAnyPlan) return <span />;
+              return (
                 <>
                   <span className="hidden sm:inline">Mẹo: Nhấn đúp hoặc nhấn vào ngày đang chọn để lên kế hoạch</span>
                   <span className="sm:hidden">Nhấn vào ngày đang chọn để lên kế hoạch</span>
                 </>
-              ) : <span />;
+              );
             })()}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Sáng</div>
@@ -269,7 +309,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
 
       {viewMode === 'week' && (
         <div className="mt-3 flex items-center justify-between text-xs text-slate-400 font-medium">
-          <span>Vuốt ngang để xem thêm ngày</span>
+          <span>Vuốt ngang hoặc dùng mũi tên để chuyển tuần</span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Sáng</div>
             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> Trưa</div>

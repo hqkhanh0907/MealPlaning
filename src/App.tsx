@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { initialIngredients, initialDishes } from './data/initialData';
-import { Ingredient, Dish, DayPlan, MealType, DishIngredient, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
+import { Ingredient, Dish, DayPlan, MealType, DishIngredient, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary, MealPlanSuggestion } from './types';
 import { calculateDishesNutrition, calculateDishNutrition } from './utils/nutrition';
 import { GroceryList } from './components/GroceryList';
 import { AIImageAnalyzer } from './components/AIImageAnalyzer';
@@ -12,6 +12,7 @@ import { TypeSelectionModal } from './components/modals/TypeSelectionModal';
 import { ClearPlanModal } from './components/modals/ClearPlanModal';
 import { PlanningModal } from './components/modals/PlanningModal';
 import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
+import { AISuggestionPreviewModal } from './components/modals/AISuggestionPreviewModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   CalendarDays,
@@ -240,6 +241,14 @@ export default function App() {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [hasNewAIResult, setHasNewAIResult] = useState(false);
 
+  // AI Suggestion Preview state
+  const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<MealPlanSuggestion | null>(null);
+  const [aiSuggestionError, setAiSuggestionError] = useState<string | null>(null);
+
+  // AbortController ref for cancelling AI calls
+  const aiSuggestionAbortRef = useRef<AbortController | null>(null);
+
   const notify = useNotification();
 
   const currentPlan = useMemo(() =>
@@ -267,25 +276,135 @@ export default function App() {
     setIsPlanningModalOpen(true);
   }, []);
 
+  // Open AI Suggestion Preview Modal and start fetching
   const handleSuggestMealPlan = useCallback(async () => {
+    // Abort any existing request
+    if (aiSuggestionAbortRef.current) {
+      aiSuggestionAbortRef.current.abort();
+    }
+
+    // Create new AbortController
+    const abortController = new AbortController();
+    aiSuggestionAbortRef.current = abortController;
+
+    setIsAISuggestionModalOpen(true);
+    setAiSuggestion(null);
+    setAiSuggestionError(null);
+    setIsSuggesting(true);
+
     try {
-      setIsSuggesting(true);
       const availableDishes: AvailableDishInfo[] = dishes.map(d => {
         const n = calculateDishNutrition(d, ingredients);
         return { id: d.id, name: d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
       });
-      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableDishes);
-      if (suggestion.breakfastDishIds.length > 0 || suggestion.lunchDishIds.length > 0 || suggestion.dinnerDishIds.length > 0) {
-        setDayPlans(prev => applySuggestionToDayPlans(prev, selectedDate, suggestion));
-        notify.success('Đã gợi ý thực đơn!', suggestion.reasoning || 'AI đã chọn thực đơn phù hợp cho bạn.');
+      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableDishes, abortController.signal);
+
+      // Only update state if not aborted
+      if (!abortController.signal.aborted) {
+        setAiSuggestion(suggestion);
       }
     } catch (error) {
+      // Don't show error if request was intentionally aborted
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.log('AI suggestion request was cancelled');
+        return;
+      }
       console.error("Failed to suggest meal plan:", error);
-      notify.error('Gợi ý thất bại', 'Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng kiểm tra lại API Key.');
+      if (!abortController.signal.aborted) {
+        setAiSuggestionError('Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng thử lại.');
+      }
     } finally {
-      setIsSuggesting(false);
+      if (!abortController.signal.aborted) {
+        setIsSuggesting(false);
+      }
     }
-  }, [dishes, ingredients, userProfile.targetCalories, targetProtein, selectedDate, notify]);
+  }, [dishes, ingredients, userProfile.targetCalories, targetProtein]);
+
+  // Apply AI suggestion to day plans
+  const handleApplyAISuggestion = useCallback((selectedMeals: { breakfast: boolean; lunch: boolean; dinner: boolean }) => {
+    if (!aiSuggestion) return;
+
+    const filteredSuggestion = {
+      breakfastDishIds: selectedMeals.breakfast ? aiSuggestion.breakfastDishIds : [],
+      lunchDishIds: selectedMeals.lunch ? aiSuggestion.lunchDishIds : [],
+      dinnerDishIds: selectedMeals.dinner ? aiSuggestion.dinnerDishIds : [],
+      reasoning: aiSuggestion.reasoning,
+    };
+
+    setDayPlans(prev => applySuggestionToDayPlans(prev, selectedDate, filteredSuggestion));
+    setIsAISuggestionModalOpen(false);
+    setAiSuggestion(null);
+    aiSuggestionAbortRef.current = null;
+    notify.success('Đã cập nhật kế hoạch!', 'Thực đơn gợi ý từ AI đã được áp dụng.');
+  }, [aiSuggestion, selectedDate, notify]);
+
+  // Regenerate AI suggestion
+  const handleRegenerateAISuggestion = useCallback(async () => {
+    // Abort any existing request
+    if (aiSuggestionAbortRef.current) {
+      aiSuggestionAbortRef.current.abort();
+    }
+
+    // Create new AbortController
+    const abortController = new AbortController();
+    aiSuggestionAbortRef.current = abortController;
+
+    setAiSuggestion(null);
+    setAiSuggestionError(null);
+    setIsSuggesting(true);
+
+    try {
+      const availableDishes: AvailableDishInfo[] = dishes.map(d => {
+        const n = calculateDishNutrition(d, ingredients);
+        return { id: d.id, name: d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
+      });
+      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableDishes, abortController.signal);
+
+      if (!abortController.signal.aborted) {
+        setAiSuggestion(suggestion);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.log('AI regenerate request was cancelled');
+        return;
+      }
+      console.error("Failed to regenerate suggestion:", error);
+      if (!abortController.signal.aborted) {
+        setAiSuggestionError('Có lỗi xảy ra. Vui lòng thử lại.');
+      }
+    } finally {
+      if (!abortController.signal.aborted) {
+        setIsSuggesting(false);
+      }
+    }
+  }, [dishes, ingredients, userProfile.targetCalories, targetProtein]);
+
+  // Edit a meal in AI suggestion (opens planning modal for that meal type)
+  const handleEditAISuggestionMeal = useCallback((type: MealType) => {
+    // Abort any pending AI request when editing
+    if (aiSuggestionAbortRef.current) {
+      aiSuggestionAbortRef.current.abort();
+      aiSuggestionAbortRef.current = null;
+    }
+    // Close AI modal and open planning modal for edit
+    setIsAISuggestionModalOpen(false);
+    setIsSuggesting(false);
+    setPlanningType(type);
+    setIsPlanningModalOpen(true);
+  }, []);
+
+  // Close AI suggestion modal and abort any pending AI calls
+  const handleCloseAISuggestionModal = useCallback(() => {
+    // Abort any pending AI request
+    if (aiSuggestionAbortRef.current) {
+      aiSuggestionAbortRef.current.abort();
+      aiSuggestionAbortRef.current = null;
+    }
+    setIsAISuggestionModalOpen(false);
+    setAiSuggestion(null);
+    setAiSuggestionError(null);
+    setIsSuggesting(false);
+  }, []);
 
   const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month') => {
     setDayPlans(prev => clearPlansByScope(prev, selectedDate, scope));
@@ -449,6 +568,21 @@ export default function App() {
       )}
       {isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={() => setIsClearPlanModalOpen(false)} />}
       {isGoalModalOpen && <GoalSettingsModal userProfile={userProfile} onUpdateProfile={setUserProfile} onClose={() => setIsGoalModalOpen(false)} />}
+
+      <AISuggestionPreviewModal
+        isOpen={isAISuggestionModalOpen}
+        suggestion={aiSuggestion}
+        dishes={dishes}
+        ingredients={ingredients}
+        targetCalories={userProfile.targetCalories}
+        targetProtein={targetProtein}
+        isLoading={isSuggesting}
+        error={aiSuggestionError}
+        onClose={handleCloseAISuggestionModal}
+        onApply={handleApplyAISuggestion}
+        onRegenerate={handleRegenerateAISuggestion}
+        onEditMeal={handleEditAISuggestionMeal}
+      />
 
       <BottomNavBar activeTab={activeMainTab} onTabChange={setActiveMainTab} showAIBadge={hasNewAIResult} />
     </div>

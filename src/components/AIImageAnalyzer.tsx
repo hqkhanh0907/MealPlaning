@@ -63,6 +63,11 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDi
   const startCamera = async () => {
     setCameraError(null);
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraError("Thiết bị không hỗ trợ camera. Vui lòng sử dụng tính năng Tải ảnh lên.");
+        setIsCameraOpen(true);
+        return;
+      }
       setIsCameraOpen(true);
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -70,7 +75,7 @@ export const AIImageAnalyzer: React.FC<{ onAnalysisComplete: (result: AnalyzedDi
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
-      setCameraError("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập trên trình duyệt (biểu tượng ổ khóa/camera trên thanh địa chỉ) hoặc thử lại trên thiết bị khác.");
+      setCameraError("Không thể truy cập camera. Trên Android, hãy vào Cài đặt > Ứng dụng > Smart Meal Planner > Quyền > bật Camera. Trên trình duyệt, kiểm tra biểu tượng ổ khóa trên thanh địa chỉ.");
     }
   };
 

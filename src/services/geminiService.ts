@@ -18,8 +18,14 @@ export type AvailableDishInfo = {
 export const suggestMealPlan = async (
   targetCalories: number,
   targetProtein: number,
-  availableDishes: AvailableDishInfo[]
+  availableDishes: AvailableDishInfo[],
+  signal?: AbortSignal
 ): Promise<MealPlanSuggestion> => {
+  // Check if already aborted
+  if (signal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError');
+  }
+
   const ai = getAI();
 
   const prompt = `
@@ -33,7 +39,14 @@ export const suggestMealPlan = async (
     Trả về kết quả dưới dạng JSON.
   `;
 
-  const response = await ai.models.generateContent({
+  // Create a promise that rejects when abort signal is triggered
+  const abortPromise = signal
+    ? new Promise<never>((_, reject) => {
+        signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+      })
+    : null;
+
+  const apiCallPromise = ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
@@ -51,6 +64,10 @@ export const suggestMealPlan = async (
       }
     }
   });
+
+  const response = abortPromise
+    ? await Promise.race([apiCallPromise, abortPromise])
+    : await apiCallPromise;
 
   return JSON.parse(response.text || "{}") as MealPlanSuggestion;
 };

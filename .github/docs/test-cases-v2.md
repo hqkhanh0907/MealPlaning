@@ -1,9 +1,33 @@
 # TEST CASES V2 — Smart Meal Planner (Phân tích toàn diện)
 
-> **Phiên bản:** 2.0  
-> **Ngày tạo:** 2026-02-26  
-> **Tổng TC:** 147  
+> **Phiên bản:** 2.5  
+> **Ngày cập nhật:** 2026-02-26  
+> **Tổng TC:** 247  
 > **Phương pháp:** Phân tích theo từng luồng nghiệp vụ (Business Flow), từng component (UI/UX), và mọi edge case có thể xảy ra.
+> 
+> **Changelog v2.5:**
+> - F1: Món ăn bắt buộc phải có ít nhất 1 tag (+3 TCs)
+>   - DSH_C_02b~d: Label có *, inline error đỏ, clear error khi chọn tag
+>
+> **Changelog v2.4:**
+> - C4: AbortController — Đóng modal hoặc Regenerate sẽ cancel AI call đang chạy (+4 TCs)
+>   - PLAN_A_16~19: Cancel on close, cancel on edit, cancel old before regenerate, silent abort
+>
+> **Changelog v2.3:**
+> - C4: AI Suggestion Preview Modal — thay thế flow apply trực tiếp bằng Preview & Xác Nhận (+11 TCs)
+>   - Loading state, Reasoning card, Checkbox chọn từng bữa
+>   - Regenerate, Edit meal, Progress bars
+>   - Error/Empty states
+>
+> **Changelog v2.2:**
+> - E2: Layout Switcher (Grid/List view) + Sort dropdown cho Nguyên liệu (+6 TCs)
+> - F2: Layout Switcher (Grid/List view) + Sort dropdown cho Món ăn (+6 TCs)
+>
+> **Changelog v2.1:**
+> - B2: Refactor Week View từ 29-ngày scroll sang 7-ngày/tuần với swipe gesture (+10 TCs)
+> - E1: Unit mặc định trống, inline validation errors (+3 TCs), AI error kèm tên NL
+> - F1: Search clear → restore full list (+1 TC)
+> - H1: Android CAMERA permission, mediaDevices check (+2 TCs)
 
 ---
 
@@ -74,14 +98,24 @@
 | 35 | CAL_G_17 | Chuyển tháng 12→1 (năm mới) | Tháng 12/2026 → click "▶" → Tháng 1/2027 | |
 | 36 | CAL_G_18 | Chuyển tháng 1→12 (năm trước) | Tháng 1/2026 → click "◀" → Tháng 12/2025 | |
 
-### B2. DateSelector — Week Scroll Mode
+### B2. DateSelector — Week View Mode (7 ngày/tuần)
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 37 | CAL_W_01 | Hiển thị ±14 ngày quanh ngày chọn | 29 buttons cuộn ngang, mỗi button có label thứ + ngày | |
-| 38 | CAL_W_02 | Auto-scroll đến ngày chọn | `scrollIntoView({ behavior: 'smooth', inline: 'center' })` | |
-| 39 | CAL_W_03 | Click ngày → chọn ngày | Same as calendar grid | |
-| 40 | CAL_W_04 | Click ngày đang chọn → mở TypeSelection | Same behavior | |
+| 37 | CAL_W_01 | Hiển thị đúng 7 ngày (T2→CN) | Week view chỉ hiện 7 ô ngày dạng grid, bắt đầu từ thứ 2 kết thúc Chủ nhật | |
+| 38 | CAL_W_02 | Ngày chọn nằm trong tuần hiện tại | selectedDate = 25/02 (T4) → tuần 24/02–02/03 hiển thị, ngày 25 highlight | |
+| 39 | CAL_W_03 | Nút "▶" chuyển tuần tiếp theo | Click → weekOffset++ → hiển thị 7 ngày tuần sau | |
+| 40 | CAL_W_04 | Nút "◀" chuyển tuần trước | Click → weekOffset-- → hiển thị 7 ngày tuần trước | |
+| 41 | CAL_W_05 | Swipe trái → tuần sau (mobile) | Touch swipe left (>50px) → chuyển tuần tiếp theo | Mobile gesture |
+| 42 | CAL_W_06 | Swipe phải → tuần trước (mobile) | Touch swipe right (>50px) → chuyển tuần trước | Mobile gesture |
+| 43 | CAL_W_07 | Click ngày trong week view → chọn ngày | Tương tự calendar grid, Summary + MealCards cập nhật | |
+| 44 | CAL_W_08 | Click ngày đang chọn → mở TypeSelection | `isSelected && onPlanClick` → mở modal lên kế hoạch | |
+| 45 | CAL_W_09 | Nút "Hôm nay" reset weekOffset | Click "Hôm nay" → weekOffset=0 + selectedDate=today | |
+| 46 | CAL_W_10 | Meal indicator dots | 3 dots (amber/blue/indigo) hiển thị trên mỗi ngày có plan | |
+| 47 | CAL_W_11 | Tuần qua ranh giới tháng | T2=27/01, CN=02/02 → hiển thị đúng ngày tháng khác nhau | Edge: month boundary |
+| 48 | CAL_W_12 | Tuần qua ranh giới năm | T2=29/12/2025, CN=04/01/2026 → hiển thị đúng | Edge: year boundary |
+| 49 | CAL_W_13 | Label tuần | Header hiển thị range "24/02 - 02/03" thay vì "Chọn ngày" | |
+| 50 | CAL_W_14 | Swipe chỉ khi X > Y | Swipe chéo (diffY > diffX) → KHÔNG chuyển tuần, cho phép scroll dọc | Edge: diagonal swipe |
 
 ---
 
@@ -122,26 +156,41 @@
 | 59 | PLAN_M_03 | Nút edit (bút chì) → mở PlanningModal | Click bút → `onPlanMeal(type)` → TypeSelection SKIP, vào thẳng PlanningModal | |
 | 60 | PLAN_M_04 | Món bị xóa khỏi thư viện | Dish ID tồn tại trong plan nhưng dish đã bị xóa → `dishes.find(d => d.id === id)` return undefined → tên không hiện | Edge: orphan reference |
 
-### C4. AI Suggest & Clear
+### C4. AI Suggestion Preview Modal
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 61 | PLAN_A_01 | Nút "Gợi ý AI" — loading state | Button disabled + Loader2 spin khi `isSuggesting=true` | |
-| 62 | PLAN_A_02 | AI suggest thành công | `suggestion.breakfastDishIds.length > 0` → toast success + reasoning | |
-| 63 | PLAN_A_03 | AI suggest GIỮ bữa đã có plan | `suggestion.breakfastDishIds.length === 0` → giữ `existing?.breakfastDishIds` | Edge: chỉ fill bữa trống |
-| 64 | PLAN_A_04 | AI suggest thất bại | Toast error "Gợi ý thất bại" + "Vui lòng kiểm tra lại API Key" | |
+| 61 | PLAN_A_01 | Nút "Gợi ý AI" mở Preview Modal | Click → mở `AISuggestionPreviewModal` + bắt đầu loading | |
+| 62 | PLAN_A_02 | Loading state trong modal | Hiển thị animated Sparkles icon + "AI đang phân tích..." + progress bar | |
+| 63 | PLAN_A_03 | Preview Modal hiển thị gợi ý | Sau khi AI xong → hiển thị 3 meal cards với checkbox, tên món, nutrition | |
+| 64 | PLAN_A_04 | Reasoning card | Hiển thị lý do AI chọn thực đơn trong card highlight indigo | |
+| 65 | PLAN_A_05 | Checkbox chọn áp dụng từng bữa | Mặc định all checked nếu có gợi ý, uncheck → bữa đó không được áp dụng | |
+| 66 | PLAN_A_06 | Nutrition summary tổng hợp | Hiển thị tổng cal/protein của các bữa đã chọn vs mục tiêu + progress bars | |
+| 67 | PLAN_A_07 | Nút "Thay đổi" mở PlanningModal | Click → đóng Preview, mở PlanningModal cho bữa tương ứng | |
+| 68 | PLAN_A_08 | Nút "Gợi ý lại" (Regenerate) | Click → reset + gọi AI lại, hiển thị loading state | |
+| 69 | PLAN_A_09 | Nút "Hủy" đóng modal | Click → đóng modal, không thay đổi kế hoạch hiện tại | |
+| 70 | PLAN_A_10 | Nút "Áp dụng" — chỉ apply bữa đã chọn | Apply các bữa có checkbox checked → toast success "Đã cập nhật kế hoạch!" | |
+| 71 | PLAN_A_11 | "Áp dụng" disabled khi không chọn bữa nào | Uncheck tất cả → button "Áp dụng" disabled | Edge |
+| 72 | PLAN_A_12 | Empty suggestion state | AI trả về 0 món cho cả 3 bữa → hiển thị "Chưa tìm được gợi ý phù hợp" + Regenerate | |
+| 73 | PLAN_A_13 | Error state | API lỗi / timeout → hiển thị error message + nút "Thử lại" | |
+| 74 | PLAN_A_14 | Meal card bị ẩn khi không có gợi ý | Bữa không có gợi ý (dishIds=[]) → không hiển thị card đó | |
+| 75 | PLAN_A_15 | Progress bar màu động | Cal vượt mục tiêu → bar đỏ. Protein đạt → bar xanh emerald. Protein thấp → bar amber | |
+| 76 | PLAN_A_16 | Đóng modal → hủy AI call đang chạy | Click Hủy/X khi đang loading → `AbortController.abort()` → API call bị cancel, không update state | Critical |
+| 77 | PLAN_A_17 | Edit meal → hủy AI call đang chạy | Click "Thay đổi" khi đang loading → abort pending request + mở PlanningModal | Edge |
+| 78 | PLAN_A_18 | Regenerate → hủy AI call cũ trước khi gọi mới | Click Regenerate → abort request cũ (nếu còn) + tạo AbortController mới + gọi AI | |
+| 79 | PLAN_A_19 | Aborted request không hiện error | Request bị abort → không hiện error toast/message, silent cancel | |
 
 ### C5. ClearPlanModal
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 65 | PLAN_C_01 | 3 scope options với counter | Ngày (X ngày), Tuần (Y ngày), Tháng (Z ngày) — hiển thị số kế hoạch sẽ bị xóa | |
-| 66 | PLAN_C_02 | Scope disabled khi count=0 | `disabled={count === 0}` → opacity-50, cursor-not-allowed | |
-| 67 | PLAN_C_03 | Xóa scope ngày | Chỉ xóa plan của `selectedDate` | |
-| 68 | PLAN_C_04 | Xóa scope tuần | Tính T2→CN, xóa tất cả plans trong range | |
-| 69 | PLAN_C_05 | Xóa scope tháng | Xóa tất cả plans cùng year+month | |
-| 70 | PLAN_C_06 | Xóa tuần chứa Chủ Nhật | `day===0 ? -6 : 1` → CN tính về tuần trước | Edge: week boundary |
-| 71 | PLAN_C_07 | Xóa tháng cuối năm → scope chính xác | Tháng 12 chỉ xóa tháng 12, không ảnh hưởng tháng 1 năm sau | |
+| 80 | PLAN_C_01 | 3 scope options với counter | Ngày (X ngày), Tuần (Y ngày), Tháng (Z ngày) — hiển thị số kế hoạch sẽ bị xóa | |
+| 81 | PLAN_C_02 | Scope disabled khi count=0 | `disabled={count === 0}` → opacity-50, cursor-not-allowed | |
+| 82 | PLAN_C_03 | Xóa scope ngày | Chỉ xóa plan của `selectedDate` | |
+| 83 | PLAN_C_04 | Xóa scope tuần | Tính T2→CN, xóa tất cả plans trong range | |
+| 84 | PLAN_C_05 | Xóa scope tháng | Xóa tất cả plans cùng year+month | |
+| 85 | PLAN_C_06 | Xóa tuần chứa Chủ Nhật | `day===0 ? -6 : 1` → CN tính về tuần trước | Edge: week boundary |
+| 86 | PLAN_C_07 | Xóa tháng cuối năm → scope chính xác | Tháng 12 chỉ xóa tháng 12, không ảnh hưởng tháng 1 năm sau | |
 
 ---
 
@@ -208,13 +257,16 @@
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 105 | ING_C_01 | Mở modal "Thêm nguyên liệu mới" | Title đúng, form trống, unit mặc định "g" | |
-| 106 | ING_C_02 | Form validation — tên required | Submit không nhập tên → HTML5 required block | |
+| 105 | ING_C_01 | Mở modal "Thêm nguyên liệu mới" | Title đúng, form trống, unit mặc định **trống** (placeholder "g, ml, cái, quả...") | |
+| 106 | ING_C_02 | Validation tên trống | Submit không nhập tên → hiển thị text đỏ "Vui lòng nhập tên nguyên liệu" dưới field, border đỏ `border-rose-500` | |
+| 106b | ING_C_02b | Validation unit trống | Submit khi unit trống → hiển thị đỏ "Vui lòng nhập đơn vị tính" dưới field unit, border đỏ | |
+| 106c | ING_C_02c | Clear error khi nhập | User bắt đầu nhập vào field đang lỗi → error message biến mất, border trở về `border-slate-200` | |
+| 106d | ING_C_02d | Nhiều field lỗi cùng lúc | Cả tên lẫn unit trống → cả 2 field đều hiện error đỏ đồng thời | Edge: multiple errors |
 | 107 | ING_C_03 | Submit thành công | `onAdd({ ...formData, id: 'ing-{timestamp}' })` → modal đóng, NL mới xuất hiện | |
-| 108 | ING_C_04 | AI auto-fill dinh dưỡng | Nhập tên + click AI → loading → 5 fields auto-fill (cal/pro/carbs/fat/fiber) | |
-| 109 | ING_C_05 | AI button disabled khi chưa nhập tên | `disabled={!formData.name \|\| !formData.unit \|\| isSearchingAI}` | |
-| 110 | ING_C_06 | AI timeout → warning toast | Error.message === "Timeout" → "Phản hồi quá lâu. Vui lòng thử lại sau." | Edge: 5 phút timeout |
-| 111 | ING_C_07 | AI error (non-timeout) → error toast | "Tra cứu thất bại. Không thể tìm thấy thông tin" | |
+| 108 | ING_C_04 | AI auto-fill dinh dưỡng | Nhập tên + unit + click AI → loading → 5 fields auto-fill (cal/pro/carbs/fat/fiber) | |
+| 109 | ING_C_05 | AI button disabled khi chưa nhập tên HOẶC unit | `disabled={!formData.name \|\| !formData.unit \|\| isSearchingAI}` — unit mặc định trống nên button disabled ban đầu | |
+| 110 | ING_C_06 | AI timeout → warning toast với tên NL | Error.message === "Timeout" → `notify.warning('Phản hồi quá lâu', '"Tên NL" — Hệ thống phản hồi quá lâu. Vui lòng thử lại sau.')` | Edge: 5 phút timeout |
+| 111 | ING_C_07 | AI error (non-timeout) → error toast với tên NL | `notify.error('Tra cứu thất bại', '"Tên NL" — Không thể tìm thấy thông tin. Vui lòng thử lại.')` | |
 | 112 | ING_C_08 | AI response sau khi modal đóng | `isModalOpenRef.current === false` → KHÔNG update state → no crash | Edge: race condition |
 | 113 | ING_R_01 | Mở modal "Sửa nguyên liệu" | Title "Sửa nguyên liệu", form pre-filled dữ liệu hiện tại | |
 | 114 | ING_R_02 | Sửa thành công | `onUpdate({ ...formData, id: editingIng.id })` → card cập nhật | |
@@ -228,13 +280,19 @@
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
 | 119 | ING_U_01 | Search filter realtime | Nhập "gà" → chỉ hiện "Ức gà" | |
-| 120 | ING_U_02 | Search no results | Nhập "xyz" → empty state "Không tìm thấy nguyên liệu" + "Thử tìm kiếm với từ khóa khác" | |
+| 120 | ING_U_02 | Search no results → clear → full list | 1. Nhập "xyz" → empty state "Không tìm thấy nguyên liệu". 2. Xóa nội dung ô tìm kiếm → danh sách tất cả nguyên liệu hiển thị lại đầy đủ | |
 | 121 | ING_U_03 | Empty state (no data) | 0 NL → "Chưa có nguyên liệu nào" + CTA "Thêm nguyên liệu" | |
 | 122 | ING_U_04 | Relationship tags "Dùng trong:" | NL dùng trong 1 món → "Dùng trong: Tên món". 3+ món → "Tên1, Tên2 +1" | |
 | 123 | ING_U_05 | Display unit label dynamic | unit="g" → "100g", unit="kg" → "100g" (đã normalize), unit="quả" → "1 quả" | |
 | 124 | ING_U_06 | Nutrition values min=0 | `Math.max(0, Number(e.target.value))` — không cho âm | Edge: negative input |
 | 125 | ING_U_07 | Card layout responsive | 1 col mobile, 2 col sm, 3 col lg | |
 | 126 | ING_U_08 | AI giữ unit người dùng | AI trả về unit khác → app giữ nguyên `formData.unit` ban đầu | |
+| 127 | ING_U_09 | Layout Switcher toggle | Click Grid/List icon → layout thay đổi tương ứng, active state `bg-emerald-500 text-white` | |
+| 128 | ING_U_10 | Grid view layout | Grid: card view với nutrition details đầy đủ (Cal/Pro/Carbs/Fat) | |
+| 129 | ING_U_11 | List view layout — Desktop | Table với columns: Tên/Calo/Protein/Carbs/Fat/Thao tác | |
+| 130 | ING_U_12 | List view layout — Mobile | Simplified list với tên + nutrition tóm tắt + action buttons | |
+| 131 | ING_U_13 | Sort dropdown | 6 options: Tên A-Z/Z-A, Calo ↑/↓, Protein ↑/↓ | |
+| 132 | ING_U_14 | Sort + Search kết hợp | Search "gà" + Sort "Calo ↑" → kết quả filter + sorted đúng thứ tự | |
 
 ---
 
@@ -244,30 +302,40 @@
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 127 | DSH_C_01 | Mở modal "Tạo món ăn mới" | Title đúng, form trống, tags=[], selectedIngredients=[] | |
-| 128 | DSH_C_02 | Chọn/bỏ tag bữa | Toggle 3 tags: Sáng/Trưa/Tối — active `bg-emerald-500 text-white` | |
-| 129 | DSH_C_03 | Thêm NL từ danh sách | Click NL → thêm vào "Đã chọn" với amount=100. Click NL đã chọn → KHÔNG thêm trùng | Edge: duplicate check |
-| 130 | DSH_C_04 | Tìm kiếm NL trong modal | Input filter NL realtime | |
-| 131 | DSH_C_05 | Stepper +10 / -10 | "+" → amount+10, "-" → Math.max(0.1, amount-10) | |
-| 132 | DSH_C_06 | Nhập trực tiếp amount | Type số → `Math.max(0.1, Number(value) \|\| 0.1)` | Edge: NaN, 0, negative |
-| 133 | DSH_C_07 | Xóa NL khỏi danh sách chọn | Click trash icon → NL biến mất, "Chưa chọn nguyên liệu" nếu rỗng | |
-| 134 | DSH_C_08 | Submit validation | `!name \|\| selectedIngredients.length === 0` → return, không submit | Edge: thiếu NL |
-| 135 | DSH_C_09 | Submit thành công — tạo mới | `onAdd(dishData)` với id=`dish-{timestamp}` | |
-| 136 | DSH_R_01 | Mở modal sửa món | Pre-fill name, tags (spread copy), ingredients (spread copy) | |
-| 137 | DSH_R_02 | Sửa thành công | `onUpdate(dishData)` → card cập nhật | |
-| 138 | DSH_D_01 | Xóa món không dùng | ConfirmationModal "Xóa món ăn?" → "Xóa ngay" → món biến mất | |
-| 139 | DSH_D_02 | Xóa món đang dùng trong plan | `isDishUsed(id)=true` → toast warning "Không thể xóa" | |
+| 133 | DSH_C_01 | Mở modal "Tạo món ăn mới" | Title đúng, form trống, tags=[], selectedIngredients=[] | |
+| 134 | DSH_C_02 | Chọn/bỏ tag bữa | Toggle 3 tags: Sáng/Trưa/Tối — active `bg-emerald-500 text-white` | |
+| 135 | DSH_C_02b | Tag bắt buộc — label có dấu * đỏ | Label "Phù hợp cho bữa" có `<span className="text-rose-500">*</span>` | |
+| 136 | DSH_C_02c | Validation tag khi submit không chọn | Submit với tags=[] → hiển thị error đỏ "Vui lòng chọn ít nhất một bữa ăn phù hợp" | Critical |
+| 137 | DSH_C_02d | Clear error khi chọn tag | User chọn 1 tag → error message biến mất | |
+| 138 | DSH_C_03 | Thêm NL từ danh sách | Click NL → thêm vào "Đã chọn" với amount=100. Click NL đã chọn → KHÔNG thêm trùng | Edge: duplicate check |
+| 139 | DSH_C_04 | Tìm kiếm NL trong modal | Input filter NL realtime | |
+| 140 | DSH_C_05 | Stepper +10 / -10 | "+" → amount+10, "-" → Math.max(0.1, amount-10) | |
+| 141 | DSH_C_06 | Nhập trực tiếp amount | Type số → `Math.max(0.1, Number(value) \|\| 0.1)` | Edge: NaN, 0, negative |
+| 142 | DSH_C_07 | Xóa NL khỏi danh sách chọn | Click trash icon → NL biến mất, "Chưa chọn nguyên liệu" nếu rỗng | |
+| 143 | DSH_C_08 | Submit validation — name + NL + tags | `!name \|\| selectedIngredients.length === 0 \|\| tags.length === 0` → không submit | Edge: thiếu field |
+| 144 | DSH_C_09 | Submit thành công — tạo mới | `onAdd(dishData)` với id=`dish-{timestamp}`, có tags | |
+| 145 | DSH_R_01 | Mở modal sửa món | Pre-fill name, tags (spread copy), ingredients (spread copy) | |
+| 146 | DSH_R_02 | Sửa thành công | `onUpdate(dishData)` → card cập nhật | |
+| 147 | DSH_D_01 | Xóa món không dùng | ConfirmationModal "Xóa món ăn?" → "Xóa ngay" → món biến mất | |
+| 148 | DSH_D_02 | Xóa món đang dùng trong plan | `isDishUsed(id)=true` → toast warning "Không thể xóa" | |
 
 ### F2. UI/UX Món ăn
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 140 | DSH_U_01 | Tag filter chips | "Tất cả (X)" + 3 tag chips với counter — toggle filter | |
-| 141 | DSH_U_02 | Filter + Search kết hợp | Search "gà" + filter "Trưa" → chỉ hiện món có cả 2 điều kiện | |
-| 142 | DSH_U_03 | Card hiển thị NL count + nutrition | "3 nguyên liệu", Calories 332, Protein 25g | |
-| 143 | DSH_U_04 | Card hiển thị tag labels | "🌅 Sáng", "🌤️ Trưa" — flex wrap | |
-| 144 | DSH_U_05 | Empty state search | "Không tìm thấy món ăn" + "Thử tìm kiếm với từ khóa khác." | |
-| 145 | DSH_U_06 | Empty state no data | "Chưa có món ăn nào" + CTA "Tạo món ăn" | |
+| 149 | DSH_U_01 | Tag filter chips | "Tất cả (X)" + 3 tag chips với counter — toggle filter | |
+| 150 | DSH_U_02 | Filter + Search kết hợp | Search "gà" + filter "Trưa" → chỉ hiện món có cả 2 điều kiện | |
+| 151 | DSH_U_03 | Card hiển thị NL count + nutrition | "3 nguyên liệu", Calories 332, Protein 25g | |
+| 152 | DSH_U_04 | Card hiển thị tag labels | "🌅 Sáng", "🌤️ Trưa" — flex wrap | |
+| 153 | DSH_U_05 | Empty state search | "Không tìm thấy món ăn" + "Thử tìm kiếm với từ khóa khác." | |
+| 153b | DSH_U_05b | Search clear → hiện lại danh sách | Nhập "xyz" → empty state → xóa ô search → danh sách đầy đủ hiện lại | |
+| 154 | DSH_U_06 | Empty state no data | "Chưa có món ăn nào" + CTA "Tạo món ăn" | |
+| 155 | DSH_U_07 | Layout Switcher toggle | Click Grid/List icon → layout thay đổi tương ứng, active state `bg-emerald-500 text-white` | |
+| 156 | DSH_U_08 | Grid view layout | Grid: 1 col mobile, 2 col sm, 3 col lg — card view với nutrition + tags | |
+| 157 | DSH_U_09 | List view layout — Desktop | Table với columns: Tên/Tags/Calo/Protein/Thao tác | |
+| 158 | DSH_U_10 | List view layout — Mobile | Simplified list với tên + nutrition tóm tắt + action buttons | |
+| 159 | DSH_U_11 | Sort dropdown | 8 options: Tên A-Z/Z-A, Calo ↑/↓, Protein ↑/↓, Số NL ↑/↓ | |
+| 160 | DSH_U_12 | Sort + Filter + Tag kết hợp | Tag "Sáng" + Search "gà" + Sort "Protein ↓" → kết quả đúng | |
 
 ---
 
@@ -277,25 +345,25 @@
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 146 | GRC_L_01 | Scope "Hôm nay" | Chỉ collect NL từ `currentPlan` | |
-| 147 | GRC_L_02 | Scope "Tuần này" | T2→CN: filter `dayPlans` trong range | |
-| 148 | GRC_L_03 | Scope "Tất cả" | Toàn bộ `dayPlans` | |
-| 149 | GRC_L_04 | Gộp NL trùng tên | 2 bữa đều có Ức gà 200g → hiện 1 dòng "Ức gà 400g" | Edge: aggregation |
-| 150 | GRC_L_05 | Sort A-Z | `Object.values(map).sort((a, b) => a.name.localeCompare(b.name))` | |
-| 151 | GRC_L_06 | Empty state — hôm nay trống, tuần có data | Hôm nay empty → check nếu tuần cũng empty → mới hiện EmptyState CTA | |
-| 152 | GRC_L_07 | NL bị xóa khỏi thư viện | `allIngredients.find()` return undefined → skip, không crash | Edge: orphan |
-| 153 | GRC_L_08 | Dish bị xóa khỏi thư viện | `allDishes.find()` return undefined → skip, không crash | Edge: orphan |
+| 152 | GRC_L_01 | Scope "Hôm nay" | Chỉ collect NL từ `currentPlan` | |
+| 153 | GRC_L_02 | Scope "Tuần này" | T2→CN: filter `dayPlans` trong range | |
+| 154 | GRC_L_03 | Scope "Tất cả" | Toàn bộ `dayPlans` | |
+| 155 | GRC_L_04 | Gộp NL trùng tên | 2 bữa đều có Ức gà 200g → hiện 1 dòng "Ức gà 400g" | Edge: aggregation |
+| 156 | GRC_L_05 | Sort A-Z | `Object.values(map).sort((a, b) => a.name.localeCompare(b.name))` | |
+| 157 | GRC_L_06 | Empty state — hôm nay trống, tuần có data | Hôm nay empty → check nếu tuần cũng empty → mới hiện EmptyState CTA | |
+| 158 | GRC_L_07 | NL bị xóa khỏi thư viện | `allIngredients.find()` return undefined → skip, không crash | Edge: orphan |
+| 159 | GRC_L_08 | Dish bị xóa khỏi thư viện | `allDishes.find()` return undefined → skip, không crash | Edge: orphan |
 
 ### G2. Grocery UI/UX
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 154 | GRC_U_01 | 3 scope tabs | "Hôm nay" / "Tuần này" / "Tất cả" — active `bg-white text-emerald-600 shadow-sm` | |
-| 155 | GRC_U_02 | Checkbox toggle | Click item → checked (✅ emerald, line-through), click lại → uncheck | |
-| 156 | GRC_U_03 | Progress bar + counter | "Đã mua 2/5" + progress bar emerald | |
-| 157 | GRC_U_04 | All checked → celebration | "Đã mua đủ tất cả nguyên liệu! 🎉" footer emerald | |
-| 158 | GRC_U_05 | Copy to clipboard | Click copy → format text "✅/☐ Tên — Xg" → toast success | |
-| 159 | GRC_U_06 | Share (native) | `navigator.share` nếu có, fallback → copy | |
+| 160 | GRC_U_01 | 3 scope tabs | "Hôm nay" / "Tuần này" / "Tất cả" — active `bg-white text-emerald-600 shadow-sm` | |
+| 161 | GRC_U_02 | Checkbox toggle | Click item → checked (✅ emerald, line-through), click lại → uncheck | |
+| 162 | GRC_U_03 | Progress bar + counter | "Đã mua 2/5" + progress bar emerald | |
+| 163 | GRC_U_04 | All checked → celebration | "Đã mua đủ tất cả nguyên liệu! 🎉" footer emerald | |
+| 164 | GRC_U_05 | Copy to clipboard | Click copy → format text "✅/☐ Tên — Xg" → toast success | |
+| 165 | GRC_U_06 | Share (native) | `navigator.share` nếu có, fallback → copy | |
 | 160 | GRC_U_07 | Chuyển scope → reset checked | `setCheckedIds(new Set())` khi switch scope | |
 | 161 | GRC_U_08 | Amount hiển thị rounded | `Math.round(item.amount)` | |
 
@@ -308,11 +376,13 @@
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
 | 162 | AI_U_01 | Tải ảnh từ file | Input file → FileReader → base64 → preview hiển thị | |
-| 163 | AI_U_02 | Chụp ảnh từ camera | `getUserMedia` → video preview → "Chụp" → canvas capture → base64 | |
-| 164 | AI_U_03 | Camera bị từ chối quyền | `cameraError` → hiện message + nút "Đóng camera" | Edge: permission denied |
+| 163 | AI_U_02 | Chụp ảnh từ camera | `getUserMedia` → video preview → "Chụp" → canvas capture → base64. **Android**: App phải khai báo CAMERA permission trong AndroidManifest | |
+| 164 | AI_U_03 | Camera bị từ chối quyền — platform-specific | **Android**: "Không thể truy cập camera. Trên Android, hãy vào Cài đặt > Ứng dụng > Smart Meal Planner > Quyền > bật Camera." **Trình duyệt**: "Kiểm tra biểu tượng ổ khóa trên thanh địa chỉ" | Edge: permission denied |
 | 165 | AI_U_04 | Dán ảnh (Ctrl+V / Cmd+V) | `paste` event listener → clipboard image → base64 | |
 | 166 | AI_U_05 | "Chọn ảnh khác" | Reset image, clear result | |
 | 167 | AI_U_06 | Nút "Phân tích" disabled khi chưa có ảnh | `disabled` khi `!image` | |
+| 167b | AI_U_07 | Thiết bị không hỗ trợ camera | `navigator.mediaDevices` undefined → hiển thị "Thiết bị không hỗ trợ camera. Vui lòng sử dụng tính năng Tải ảnh lên" | Edge: WebView cũ |
+| 167c | AI_U_08 | Android CAMERA permission trong Manifest | `<uses-permission android:name="android.permission.CAMERA"/>` + `<uses-feature android:name="android.hardware.camera" android:required="false"/>` | Config |
 
 ### H2. Phân tích & Kết quả
 
@@ -435,30 +505,30 @@
 | Phần | Module | Số TC |
 |------|--------|-------|
 | A | Navigation & Layout | 18 |
-| B | Calendar — Chọn ngày | 22 |
-| C | Calendar — Kế hoạch bữa ăn | 24 |
+| B | Calendar — Chọn ngày | 32 |
+| C | Calendar — Kế hoạch bữa ăn | 39 |
 | D | Dinh dưỡng & Mục tiêu | 18 |
-| E | Quản lý Nguyên liệu | 22 |
-| F | Quản lý Món ăn | 20 |
+| E | Quản lý Nguyên liệu | 31 |
+| F | Quản lý Món ăn | 30 |
 | G | Đi chợ | 16 |
-| H | AI Phân tích | 18 |
+| H | AI Phân tích | 20 |
 | I | Data Backup & Persistence | 12 |
 | J | Error Handling & Notification | 11 |
 | K | Data Migration & Edge Cases | 8 |
 | L | Responsive & UI/UX | 12 |
-| **TỔNG** | | **201** |
+| **TỔNG** | | **247** |        
 
 ### So sánh với V1 (41 TCs)
 
 | Metric | V1 | V2 | Mới thêm |
 |--------|-----|-----|---------|
 | Navigation | 4 | 18 | +14 (badge detail, DOM structure, responsive) |
-| Calendar | 8 | 46 | +38 (week view, double-click, month boundaries, meal dots) |
-| Management | 15 | 42 | +27 (validation, AI timeout, race condition, duplicate check) |
+| Calendar | 8 | 71 | +63 (week view 7-ngày, AI Preview Modal với AbortController, Regenerate/Edit/Checkbox, month/year boundaries) |
+| Management | 15 | 61 | +46 (inline validation, required tag với error, AI error với tên NL, Layout Switcher Grid/List, Sort dropdown) |
 | Grocery | 3 | 16 | +13 (aggregation, copy, share, scope reset, orphan refs) |
-| AI | 4 | 18 | +14 (camera, paste, save modal detail, AI Research) |
+| AI | 4 | 20 | +16 (camera Android permission, paste, save modal detail, AI Research, mediaDevices check) |
 | Nutrition | 0 | 18 | +18 (calculation units, tips logic, progress bar colors) |
 | Data/Error | 3 + 4 = 7 | 31 | +24 (migration, persistence edge, notification limits) |
 | Responsive | 4 | 12 | +8 (modal variants, scrollbar, card layout) |
-| **TỔNG** | **41** | **201** | **+160 TCs** |
+| **TỔNG** | **41** | **247** | **+206 TCs** |
 

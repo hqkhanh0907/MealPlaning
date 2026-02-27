@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Dish, Ingredient, DishIngredient, MealType } from '../types';
 import { calculateDishNutrition } from '../utils/nutrition';
-import { Plus, Trash2, Edit3, X, Save, Search, ChefHat, Minus } from 'lucide-react';
+import { Plus, Trash2, Edit3, X, Save, Search, ChefHat, Minus, LayoutGrid, List } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
 import { ConfirmationModal } from './modals/ConfirmationModal';
+
+type ViewLayout = 'grid' | 'list';
+type SortOption = 'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc' | 'ing-asc' | 'ing-desc';
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'name-asc', label: 'Tên (A-Z)' },
+  { value: 'name-desc', label: 'Tên (Z-A)' },
+  { value: 'cal-asc', label: 'Calo (Thấp → Cao)' },
+  { value: 'cal-desc', label: 'Calo (Cao → Thấp)' },
+  { value: 'pro-asc', label: 'Protein (Thấp → Cao)' },
+  { value: 'pro-desc', label: 'Protein (Cao → Thấp)' },
+  { value: 'ing-asc', label: 'Số NL (Ít → Nhiều)' },
+  { value: 'ing-desc', label: 'Số NL (Nhiều → Ít)' },
+];
 
 const TAG_OPTIONS: { type: MealType; label: string; icon: string }[] = [
   { type: 'breakfast', label: 'Sáng', icon: '🌅' },
@@ -32,11 +46,16 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTag, setFilterTag] = useState<MealType | null>(null);
+  const [viewLayout, setViewLayout] = useState<ViewLayout>('grid');
+  const [sortBy, setSortBy] = useState<SortOption>('name-asc');
 
   const [name, setName] = useState('');
   const [selectedIngredients, setSelectedIngredients] = useState<DishIngredient[]>([]);
   const [tags, setTags] = useState<MealType[]>([]);
   const [ingredientSearch, setIngredientSearch] = useState('');
+
+  // Form validation errors
+  const [formErrors, setFormErrors] = useState<{ tags?: string }>({});
 
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean;
@@ -57,6 +76,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
       setTags([]);
     }
     setIngredientSearch('');
+    setFormErrors({});
     setIsModalOpen(true);
   };
 
@@ -75,6 +95,19 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    const errors: { tags?: string } = {};
+
+    if (tags.length === 0) {
+      errors.tags = 'Vui lòng chọn ít nhất một bữa ăn phù hợp';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     if (!name || selectedIngredients.length === 0) return;
 
     const dishData: Dish = {
@@ -109,14 +142,34 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     }
   };
 
-  const filteredDishes = dishes
-    .filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter(d => !filterTag || d.tags?.includes(filterTag));
+  const filteredDishes = useMemo(() => {
+    const filtered = dishes
+      .filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter(d => !filterTag || d.tags?.includes(filterTag));
+
+    return filtered.sort((a, b) => {
+      const nutritionA = calculateDishNutrition(a, ingredients);
+      const nutritionB = calculateDishNutrition(b, ingredients);
+
+      switch (sortBy) {
+        case 'name-asc': return a.name.localeCompare(b.name);
+        case 'name-desc': return b.name.localeCompare(a.name);
+        case 'cal-asc': return nutritionA.calories - nutritionB.calories;
+        case 'cal-desc': return nutritionB.calories - nutritionA.calories;
+        case 'pro-asc': return nutritionA.protein - nutritionB.protein;
+        case 'pro-desc': return nutritionB.protein - nutritionA.protein;
+        case 'ing-asc': return a.ingredients.length - b.ingredients.length;
+        case 'ing-desc': return b.ingredients.length - a.ingredients.length;
+        default: return 0;
+      }
+    });
+  }, [dishes, searchQuery, filterTag, sortBy, ingredients]);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full sm:w-96">
+      {/* Search and Actions Row */}
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+        <div className="relative w-full sm:w-80">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text"
@@ -126,12 +179,43 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-base sm:text-sm"
           />
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-11"
-        >
-          <Plus className="w-5 h-5" /> Thêm món ăn
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Sort Dropdown */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="flex-1 sm:flex-none sm:w-44 px-3 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none bg-white shadow-sm text-slate-700 font-medium text-sm min-h-11"
+          >
+            {SORT_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {/* Layout Switcher */}
+          <div className="flex rounded-xl border border-slate-200 overflow-hidden">
+            <button
+              onClick={() => setViewLayout('grid')}
+              className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'grid' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 hover:bg-slate-50'}`}
+              title="Xem dạng lưới"
+            >
+              <LayoutGrid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewLayout('list')}
+              className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'list' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 hover:bg-slate-50'}`}
+              title="Xem dạng danh sách"
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
+          {/* Add Button */}
+          <button
+            onClick={() => handleOpenModal()}
+            className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-11 whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Thêm món ăn</span>
+          </button>
+        </div>
       </div>
 
       {/* Tag filter chips */}
@@ -156,6 +240,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
         })}
       </div>
 
+      {/* Grid View */}
+      {viewLayout === 'grid' && (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredDishes.map(dish => {
           const nutrition = calculateDishNutrition(dish, ingredients);
@@ -237,6 +323,136 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
           </div>
         )}
       </div>
+      )}
+
+      {/* List View */}
+      {viewLayout === 'list' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          {/* Desktop Table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase">Món ăn</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase">Tags</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase">Calo</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase">Protein</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredDishes.map(dish => {
+                  const nutrition = calculateDishNutrition(dish, ingredients);
+                  return (
+                    <tr key={dish.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 shrink-0">
+                            <ChefHat className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800">{dish.name}</p>
+                            <p className="text-xs text-slate-500">{dish.ingredients.length} nguyên liệu</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1 flex-wrap">
+                          {dish.tags?.map(tag => (
+                            <span key={tag} className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                              {TAG_SHORT_LABELS[tag]}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-bold text-slate-700">{Math.round(nutrition.calories)}</span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="font-bold text-blue-600">{Math.round(nutrition.protein)}g</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleOpenModal(dish)}
+                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(dish.id, dish.name)}
+                            className={`p-2 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {/* Mobile List */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {filteredDishes.map(dish => {
+              const nutrition = calculateDishNutrition(dish, ingredients);
+              return (
+                <div key={dish.id} className="p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 shrink-0">
+                      <ChefHat className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-800 truncate">{dish.name}</p>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <span>{Math.round(nutrition.calories)} kcal</span>
+                        <span className="text-blue-600">{Math.round(nutrition.protein)}g Pro</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => handleOpenModal(dish)}
+                      className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(dish.id, dish.name)}
+                      className={`p-2.5 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Empty state for list view */}
+          {filteredDishes.length === 0 && (
+            <div className="p-8 sm:p-12 text-center">
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ChefHat className="w-8 h-8 text-emerald-300" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-700 mb-2">
+                {searchQuery ? 'Không tìm thấy món ăn' : 'Chưa có món ăn nào'}
+              </h3>
+              <p className="text-sm text-slate-500 mb-4">
+                {searchQuery ? 'Thử tìm kiếm với từ khóa khác.' : 'Bắt đầu tạo món ăn đầu tiên của bạn!'}
+              </p>
+              {!searchQuery && (
+                <button
+                  onClick={() => handleOpenModal()}
+                  className="inline-flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200"
+                >
+                  <Plus className="w-5 h-5" /> Tạo món ăn
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-60">
@@ -262,7 +478,9 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               </div>
 
               <div>
-                <p className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Phù hợp cho bữa</p>
+                <p className={`block text-xs font-bold uppercase mb-1.5 ${formErrors.tags ? 'text-rose-500' : 'text-slate-500'}`}>
+                  Phù hợp cho bữa <span className="text-rose-500">*</span>
+                </p>
                 <div className="flex gap-2 flex-wrap">
                   {TAG_OPTIONS.map(({ type, label, icon }) => {
                     const isActive = tags.includes(type);
@@ -270,7 +488,13 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                       <button
                         key={type}
                         type="button"
-                        onClick={() => setTags(prev => isActive ? prev.filter(t => t !== type) : [...prev, type])}
+                        onClick={() => {
+                          setTags(prev => isActive ? prev.filter(t => t !== type) : [...prev, type]);
+                          // Clear error when user selects a tag
+                          if (!isActive && formErrors.tags) {
+                            setFormErrors(prev => ({ ...prev, tags: undefined }));
+                          }
+                        }}
                         className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${isActive ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300'}`}
                       >
                         {icon} {label}
@@ -278,6 +502,9 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                     );
                   })}
                 </div>
+                {formErrors.tags && (
+                  <p className="text-xs text-rose-500 mt-1.5 font-medium">{formErrors.tags}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
