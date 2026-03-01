@@ -12,13 +12,17 @@ export interface ToastItem {
   message: string;
   onClick?: () => void;
   duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export interface NotifyAPI {
-  success: (title: string, message?: string, options?: { onClick?: () => void; duration?: number }) => void;
+  success: (title: string, message?: string, options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => void;
   error: (title: string, message?: string, options?: { duration?: number }) => void;
   warning: (title: string, message?: string, options?: { duration?: number }) => void;
-  info: (title: string, message?: string, options?: { onClick?: () => void; duration?: number }) => void;
+  info: (title: string, message?: string, options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => void;
   dismiss: (id: string) => void;
   dismissAll: () => void;
 }
@@ -26,10 +30,10 @@ export interface NotifyAPI {
 // --- Styles ---
 
 const TOAST_STYLES: Record<NotificationType, { border: string; iconBg: string; title: string; message: string; icon: React.ReactNode; progressBar: string }> = {
-  success: { border: 'border-emerald-200', iconBg: 'bg-emerald-50 text-emerald-600', title: 'text-emerald-800', message: 'text-emerald-600', icon: <CheckCircle2 className="w-5 h-5" />, progressBar: 'bg-emerald-500' },
-  error: { border: 'border-rose-200', iconBg: 'bg-rose-50 text-rose-600', title: 'text-rose-800', message: 'text-rose-600', icon: <XCircle className="w-5 h-5" />, progressBar: 'bg-rose-500' },
-  warning: { border: 'border-amber-200', iconBg: 'bg-amber-50 text-amber-600', title: 'text-amber-800', message: 'text-amber-600', icon: <AlertTriangle className="w-5 h-5" />, progressBar: 'bg-amber-500' },
-  info: { border: 'border-sky-200', iconBg: 'bg-sky-50 text-sky-600', title: 'text-sky-800', message: 'text-sky-600', icon: <Info className="w-5 h-5" />, progressBar: 'bg-sky-500' },
+  success: { border: 'border-emerald-200 dark:border-emerald-800', iconBg: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400', title: 'text-emerald-800 dark:text-emerald-300', message: 'text-emerald-600 dark:text-emerald-400', icon: <CheckCircle2 className="w-5 h-5" />, progressBar: 'bg-emerald-500' },
+  error: { border: 'border-rose-200 dark:border-rose-800', iconBg: 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400', title: 'text-rose-800 dark:text-rose-300', message: 'text-rose-600 dark:text-rose-400', icon: <XCircle className="w-5 h-5" />, progressBar: 'bg-rose-500' },
+  warning: { border: 'border-amber-200 dark:border-amber-800', iconBg: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400', title: 'text-amber-800 dark:text-amber-300', message: 'text-amber-600 dark:text-amber-400', icon: <AlertTriangle className="w-5 h-5" />, progressBar: 'bg-amber-500' },
+  info: { border: 'border-sky-200 dark:border-sky-800', iconBg: 'bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400', title: 'text-sky-800 dark:text-sky-300', message: 'text-sky-600 dark:text-sky-400', icon: <Info className="w-5 h-5" />, progressBar: 'bg-sky-500' },
 };
 
 const DEFAULT_DURATION: Record<NotificationType, number> = {
@@ -79,7 +83,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
       role={toast.onClick ? 'button' : undefined}
       tabIndex={toast.onClick ? 0 : undefined}
       className={`
-        bg-white rounded-2xl shadow-lg border ${styles.border}
+        bg-white dark:bg-slate-800 rounded-2xl shadow-lg border ${styles.border}
         px-4 py-3 flex items-start gap-3 w-full max-w-sm text-left
         transition-all duration-300 ease-out
         ${isExiting ? 'opacity-0 translate-x-full sm:translate-x-full' : 'opacity-100 translate-x-0'}
@@ -94,11 +98,20 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
       <div className="flex-1 min-w-0 py-0.5">
         <p className={`font-semibold text-sm leading-tight ${styles.title}`}>{toast.title}</p>
         {toast.message && <p className={`text-xs mt-0.5 leading-snug ${styles.message}`}>{toast.message}</p>}
+        {toast.action && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); toast.action!.onClick(); handleDismiss(); }}
+            className="mt-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 active:text-emerald-800 underline underline-offset-2 transition-colors min-h-8 flex items-center"
+          >
+            {toast.action.label}
+          </button>
+        )}
       </div>
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
-        className="p-1 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 shrink-0"
+        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500 shrink-0"
       >
         <X className="w-4 h-4" />
       </button>
@@ -113,9 +126,9 @@ const MAX_TOASTS = 5;
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const addToast = useCallback((type: NotificationType, title: string, message = '', options?: { onClick?: () => void; duration?: number }) => {
+  const addToast = useCallback((type: NotificationType, title: string, message = '', options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    const newToast: ToastItem = { id, type, title, message, onClick: options?.onClick, duration: options?.duration };
+    const newToast: ToastItem = { id, type, title, message, onClick: options?.onClick, duration: options?.duration, action: options?.action };
     setToasts(prev => [...prev.slice(-(MAX_TOASTS - 1)), newToast]);
   }, []);
 
@@ -152,4 +165,3 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
-

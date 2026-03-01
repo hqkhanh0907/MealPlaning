@@ -1,38 +1,60 @@
-Để triển khai react-i18next cho dự án React TypeScript một cách bài bản, trơn tru và đảm bảo khả năng mở rộng sau này, bạn có thể áp dụng bản kế hoạch 6 bước dưới đây. Kế hoạch này tập trung đặc biệt vào việc thiết lập Type-safety ngay từ đầu để tận dụng tối đa sức mạnh của TypeScript.
+KẾ HOẠCH TRIỂN KHAI TAB SETTINGS
+Tính năng bao gồm: Đa ngôn ngữ (i18n), Giao diện (Theme), và Quản lý Dữ liệu (Backup/Restore).
 
-Kế hoạch Triển khai Tab Settings (i18n + Theme)
 Giai đoạn 1: Chuẩn bị Thư viện và Cấu trúc
-Cài đặt cho i18n: Cài đặt i18next, react-i18next, và i18next-browser-languagedetector.
+Thư viện: Cài đặt i18next, react-i18next, i18next-browser-languagedetector cho i18n. (Theme và Backup sử dụng API có sẵn của trình duyệt, không cần cài thêm thư viện).
 
-Chuẩn bị cho Theme: Không cần cài thêm thư viện ngoài. Bạn hoàn toàn có thể tự viết một Custom Hook (ví dụ: useTheme) kết hợp React Context để quản lý việc này một cách nhẹ nhàng nhất.
+Thư mục:
 
-Thư mục: Tạo thư mục locales cho file JSON đa ngôn ngữ và thư mục contexts để chứa ThemeProvider.
+locales/: Chứa file JSON ngôn ngữ.
+
+contexts/: Chứa ThemeProvider và MealPlanProvider.
+
+utils/: (Mới) Thêm file backupUtils.ts để chứa logic xử lý file.
 
 Giai đoạn 2: Thiết lập Type-safety (An toàn kiểu dữ liệu)
-Định nghĩa kiểu cho i18n: Mở rộng module i18next để TypeScript tự động gợi ý các key dịch thuật từ file JSON.
+Kiểu i18n & Theme: Khai báo module cho i18next và type Theme = 'light' | 'dark' | 'system'.
 
-Định nghĩa kiểu cho Theme: Tạo một type rõ ràng: type Theme = 'light' | 'dark' | 'system';. Điều này giúp tránh việc gõ sai chuỗi trạng thái trong quá trình code.
+Kiểu Dữ liệu Sao lưu (Mới): Định nghĩa một Interface tổng quát cho file backup để TypeScript kiểm soát quá trình Import/Export.
 
-Giai đoạn 3: Xây dựng Core Logic (Context & Configuration)
-Cấu hình i18n: Khởi tạo instance i18next và cấu hình plugin detector để đọc/ghi ngôn ngữ từ localStorage.
+Ví dụ: interface BackupSchema { version: string; timestamp: number; settings: { theme: Theme; language: string }; mealPlans: MealPlan[]; }
 
-Xây dựng ThemeProvider: Tạo một React Context lưu trữ trạng thái theme hiện tại. Viết logic bên trong Provider này để xử lý việc đọc localStorage, kiểm tra matchMedia, áp dụng class CSS lên thẻ <html>, và lắng nghe sự thay đổi từ hệ điều hành.
+Giai đoạn 3: Xây dựng Core Logic (Trọng tâm xử lý dữ liệu)
+Logic i18n & Theme: Cấu hình instance i18next và xây dựng ThemeProvider (quản lý localStorage và matchMedia).
 
-Giai đoạn 4: Bọc ứng dụng với các Providers
-Tích hợp cả hai thiết lập trên vào file gốc (như main.tsx hoặc index.tsx).
+Logic Sao lưu (Export): Viết hàm exportToJson(). Hàm này sẽ gom toàn bộ state hiện tại (Cài đặt + Kế hoạch bữa ăn), chuyển thành chuỗi JSON (JSON.stringify), và dùng tạo một thẻ <a> ẩn để kích hoạt trình duyệt tải xuống file (VD: meal-planner-backup-2026.json).
 
-Bọc <App /> bên trong <ThemeProvider> để toàn bộ ứng dụng có thể truy cập được trạng thái giao diện và gọi hàm thay đổi theme. (Lưu ý: i18n provider thường được tự động liên kết qua file config, không nhất thiết phải bọc component).
+Logic Khôi phục (Import): Viết hàm importFromJson(file). Hàm này dùng FileReader API để đọc file, dùng JSON.parse để dịch ngược, và quan trọng nhất là kiểm tra tính hợp lệ (Validate) xem file có đúng cấu trúc BackupSchema hay không.
 
-Giai đoạn 5: Xây dựng UI cho Tab Settings
-Layout chung: Tạo một khung giao diện Settings có Sidebar (danh sách tab) và khu vực hiển thị nội dung bên phải.
+Giai đoạn 4: Xây dựng UI Tab Settings
+Khung giao diện Settings lúc này sẽ có 3 Tabs chính:
 
-Mục Ngôn ngữ: Sử dụng component Select (Dropdown) hoặc Radio group. Kết nối sự kiện onChange với hàm i18n.changeLanguage() từ hook useTranslation().
+Tab 1 - Ngôn ngữ: Dropdown/Radio chọn ngôn ngữ.
 
-Mục Giao diện: Xây dựng một nhóm 3 nút bấm (Sáng / Tối / Hệ thống). Kết nối sự kiện onClick với hàm setTheme() được lấy ra từ hook useTheme() của ThemeProvider.
+Tab 2 - Giao diện: Nút chọn Sáng / Tối / Hệ thống.
+
+Tab 3 - Dữ liệu (Mới):
+
+Nút "Xuất dữ liệu" (Export): Có icon tải xuống.
+
+Nút "Nhập dữ liệu" (Import): Bản chất là một thẻ <input type="file" accept=".json" /> được ẩn đi và kích hoạt qua một nút bấm tùy chỉnh.
+
+Giai đoạn 5: Tích hợp Cảnh báo & Trải nghiệm (UX cho Restore)
+Khi người dùng chọn file để Import, tuyệt đối không ghi đè ngay. Phải trải qua luồng sau:
+
+Chặn lại: Hiển thị một Modal/Dialog cảnh báo nguy hiểm (Màu đỏ/vàng): "Hành động này sẽ xóa toàn bộ kế hoạch bữa ăn hiện tại của bạn và thay thế bằng dữ liệu từ file. Bạn có chắc chắn muốn tiếp tục?"
+
+Xác nhận: Nếu người dùng bấm "Đồng ý", ứng dụng mới gọi hàm cập nhật lại State (của Theme, i18n, và MealPlan) và lưu vào localStorage.
+
+Thông báo: Hiển thị một Toast notification (thông báo nhỏ góc màn hình): "Khôi phục dữ liệu thành công!".
 
 Giai đoạn 6: Kiểm thử độ ổn định (Testing)
-Test Đa ngôn ngữ: Đổi ngôn ngữ trong Settings và kiểm tra xem toàn bộ các component khác có lập tức dịch theo không. Nhấn F5 để đảm bảo ngôn ngữ vẫn được giữ nguyên.
+Test Đa ngôn ngữ & Theme: Đổi ngôn ngữ/giao diện và F5 trình duyệt để kiểm tra lưu trữ.
 
-Test Theme - Manual: Chuyển đổi qua lại giữa Sáng và Tối, kiểm tra màu sắc toàn ứng dụng.
+Test Backup (Happy Path): Tạo vài món ăn -> Bấm Export -> Tải file về mở ra xem cấu trúc JSON có đúng không. Xóa hết món ăn trên app -> Bấm Import -> Chọn file vừa tải -> Các món ăn xuất hiện trở lại.
 
-Test Theme - System: Chọn chế độ 'Hệ thống'. Mở cài đặt hiển thị của máy tính (Windows/macOS), đổi theme của máy tính và quan sát xem ứng dụng web có tự động đổi màu theo thời gian thực (real-time) hay không.
+Test Restore (Edge Cases):
+
+Thử Import một file JSON linh tinh (không phải của app) xem hệ thống có báo lỗi "File không hợp lệ" thay vì bị crash không.
+
+Thử bấm Import nhưng chọn "Hủy" ở bảng Cảnh báo xem dữ liệu cũ có được giữ nguyên an toàn không.

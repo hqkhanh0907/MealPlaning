@@ -88,6 +88,7 @@ export type AnalyzedDishResult = {
 export type SaveAnalyzedDishPayload = {
   name: string;
   shouldCreateDish?: boolean;
+  tags?: MealType[];
   ingredients: AnalyzedIngredient[];
 };
 

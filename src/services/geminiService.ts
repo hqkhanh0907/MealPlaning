@@ -7,6 +7,32 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
+// --- Runtime validation helpers ---
+
+const parseJSON = <T>(text: string | undefined, validator: (v: unknown) => v is T, label: string): T => {
+  const parsed = JSON.parse(text || "{}");
+  if (!validator(parsed)) {
+    throw new Error(`Invalid ${label} response from AI`);
+  }
+  return parsed;
+};
+
+const isMealPlanSuggestion = (v: unknown): v is MealPlanSuggestion =>
+  typeof v === 'object' && v !== null &&
+  'breakfastDishIds' in v && Array.isArray((v as MealPlanSuggestion).breakfastDishIds) &&
+  'lunchDishIds' in v && Array.isArray((v as MealPlanSuggestion).lunchDishIds) &&
+  'dinnerDishIds' in v && Array.isArray((v as MealPlanSuggestion).dinnerDishIds);
+
+const isAnalyzedDishResult = (v: unknown): v is AnalyzedDishResult =>
+  typeof v === 'object' && v !== null &&
+  'name' in v && typeof (v as AnalyzedDishResult).name === 'string' &&
+  'ingredients' in v && Array.isArray((v as AnalyzedDishResult).ingredients);
+
+const isIngredientSuggestion = (v: unknown): v is IngredientSuggestion =>
+  typeof v === 'object' && v !== null &&
+  'calories' in v && typeof (v as IngredientSuggestion).calories === 'number' &&
+  'protein' in v && typeof (v as IngredientSuggestion).protein === 'number';
+
 export type AvailableDishInfo = {
   id: string;
   name: string;
@@ -15,6 +41,16 @@ export type AvailableDishInfo = {
   protein: number;
 };
 
+/**
+ * Suggest a daily meal plan (breakfast, lunch, dinner) using Gemini AI.
+ * @param targetCalories - Daily calorie target (kcal)
+ * @param targetProtein - Daily protein target (grams)
+ * @param availableDishes - Library of dishes the AI can choose from
+ * @param signal - Optional AbortSignal to cancel the request
+ * @returns Suggested dish IDs for each meal slot + AI reasoning
+ * @throws {DOMException} If the request was aborted (name === 'AbortError')
+ * @throws {Error} If AI response fails validation
+ */
 export const suggestMealPlan = async (
   targetCalories: number,
   targetProtein: number,
@@ -69,9 +105,16 @@ export const suggestMealPlan = async (
     ? await Promise.race([apiCallPromise, abortPromise])
     : await apiCallPromise;
 
-  return JSON.parse(response.text || "{}") as MealPlanSuggestion;
+  return parseJSON(response.text, isMealPlanSuggestion, 'MealPlanSuggestion');
 };
 
+/**
+ * Analyze a food image to extract dish name, ingredients, and nutritional data.
+ * @param base64Image - Base64-encoded image data (no data: prefix)
+ * @param mimeType - Image MIME type (e.g., 'image/jpeg', 'image/png')
+ * @returns Analyzed dish with name, description, total nutrition, and per-ingredient breakdown
+ * @throws {Error} If AI response fails validation
+ */
 export const analyzeDishImage = async (base64Image: string, mimeType: string): Promise<AnalyzedDishResult> => {
   const ai = getAI();
 
@@ -146,9 +189,17 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string): P
     }
   });
 
-  return JSON.parse(response.text || "{}") as AnalyzedDishResult;
+  return parseJSON(response.text, isAnalyzedDishResult, 'AnalyzedDishResult');
 };
 
+/**
+ * Look up nutritional information for an ingredient using Gemini AI + Google Search.
+ * Returns per-100g/100ml data for weight/volume units, or per-1-unit for countable units.
+ * @param ingredientName - Name of the ingredient (e.g., "Ức gà")
+ * @param unit - Measurement unit (e.g., "g", "ml", "quả")
+ * @returns Nutritional data (calories, protein, carbs, fat, fiber) and confirmed unit
+ * @throws {Error} Timeout after 30s or AI response validation failure
+ */
 export const suggestIngredientInfo = async (ingredientName: string, unit: string): Promise<IngredientSuggestion> => {
   const ai = getAI();
 
@@ -167,7 +218,7 @@ export const suggestIngredientInfo = async (ingredientName: string, unit: string
   `;
 
   const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Timeout")), 300000)
+    setTimeout(() => reject(new Error("Timeout")), 30000)
   );
 
   const apiCallPromise = ai.models.generateContent({
@@ -193,5 +244,5 @@ export const suggestIngredientInfo = async (ingredientName: string, unit: string
 
   const response = await Promise.race([apiCallPromise, timeoutPromise]);
 
-  return JSON.parse(response.text || "{}") as IngredientSuggestion;
+  return parseJSON(response.text, isIngredientSuggestion, 'IngredientSuggestion');
 };

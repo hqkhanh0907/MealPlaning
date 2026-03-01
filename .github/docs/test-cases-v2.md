@@ -1,10 +1,55 @@
 # TEST CASES V2 — Smart Meal Planner (Phân tích toàn diện)
 
-> **Phiên bản:** 2.5  
-> **Ngày cập nhật:** 2026-02-26  
-> **Tổng TC:** 247  
+> **Phiên bản:** 2.12  
+> **Ngày cập nhật:** 2026-03-01  
+> **Tổng TC:** 303  
 > **Phương pháp:** Phân tích theo từng luồng nghiệp vụ (Business Flow), từng component (UI/UX), và mọi edge case có thể xảy ra.
 > 
+> **Changelog v2.12:**
+> - M: Dark Mode / Theme Switcher (+8 TCs: THEME_01~08)
+>   - 3-mode cycling (light → dark → system), icon thay đổi (Sun/Moon/Monitor), persist localStorage, system preference auto-detect, dark class toggle trên `<html>`, áp dụng toàn bộ UI
+> - N: Lazy Loading & Code Splitting (+5 TCs: LAZY_01~05)
+>   - GroceryList & AIImageAnalyzer dùng `React.lazy` + `Suspense`, TabLoadingFallback spinner, conditional render vs hidden/block strategy
+> - O: Image Compression (+4 TCs: IMG_C_01~04)
+>   - Upload/Camera/Paste → compress ≤ 1024x1024 JPEG 0.8, canvas fail → fallback ảnh gốc
+> - A5: Management Sub-tabs (+4 TCs: MGT_S_01~04)
+>   - 2 sub-tabs Món ăn / Nguyên liệu, DataBackup section, responsive touch target
+> - J2: Notification nâng cao (+5 TCs: NOT_06~10)
+>   - Toast action button, responsive position, close button, keyboard a11y, import validation per-key
+>
+> **Changelog v2.11:**
+> - F1: Ingredient Picker — Ẩn NL đã chọn khỏi danh sách picker (+4 TCs: DSH_C_10~13)
+>   - Chọn NL → biến mất khỏi picker, xóa NL → hiện lại, chọn hết → empty "Đã chọn tất cả", search + filter kết hợp
+>
+> **Changelog v2.10:**
+> - E5/F5: Mobile Back Gesture Navigation (+8 TCs)
+>   - ING_BK_01~04: Nguyên liệu — Back đóng View, Back từ Edit (no change) → View, Back từ Edit (có change) → unsaved dialog, Back từ dialog → dismiss
+>   - DSH_BK_01~04: Món ăn — tương tự flow
+>   - Implementation: `useModalBackHandler` hook với `history.pushState` + `popstate` + `@capacitor/app` backButton
+>   - Tích hợp vào tất cả modals: DishManager, IngredientManager, PlanningModal, GoalSettingsModal, AISuggestionPreviewModal, ClearPlanModal, TypeSelectionModal, ConfirmationModal, AIImageAnalyzer
+>
+> **Changelog v2.9:**
+> - E3/F3: View Detail ↔ Edit Modal navigation flow (+12 TCs)
+>   - ING_VE_01~06: Nguyên liệu — Edit→Back quay lại View, detect thay đổi, dialog 3 nút (Lưu/Bỏ/Ở lại), Lưu→view mới, cameFromView=false bypass
+>   - DSH_VE_01~06: Món ăn — tương tự flow IngredientManager
+>
+> **Changelog v2.8:**
+> - E2/F2: View Detail Modal — click item trong thư viện mở modal xem chi tiết, có nút Edit chuyển sang chế độ sửa (+14 TCs)
+>   - ING_V_01~07: Nguyên liệu — click card/row/mobile → view modal, hiển thị nutrition, "Dùng trong", nút Edit header + footer, backdrop close
+>   - DSH_V_01~07: Món ăn — click card/row/mobile → view modal, hiển thị nutrition + ingredients list + tags, nút Edit header + footer, backdrop close
+>
+> **Changelog v2.7:**
+> - H3: AI Save Modal — bắt buộc chọn tags khi lưu món ăn (+5 TCs)
+>   - AI_S_10~14: Tags UI, validation, error clear, payload, skip khi chỉ lưu NL
+> - K: migrateDishes — `tags: []` hoặc thiếu tags → default `['lunch']` (cập nhật MIG_01, MIG_03)
+> - K: Thêm MIG_00 — validate init data phải có tags ≥ 1 (+1 TC)
+> - App.tsx: `handleSaveAnalyzedDish` dùng `result.tags` thay vì hardcode `tags: []`
+>
+> **Changelog v2.6:**
+> - B1/B2: Fix timezone bug — `toISOString()` trả UTC, gây sai ngày "hôm nay" ở timezone GMT+7 (+4 TCs)
+>   - CAL_G_22~23: Ngày hôm nay đúng local timezone (calendar + week)
+>   - CAL_W_18~19: Nút "Hôm nay" & khởi tạo selectedDate đúng local date
+>
 > **Changelog v2.5:**
 > - F1: Món ăn bắt buộc phải có ít nhất 1 tag (+3 TCs)
 >   - DSH_C_02b~d: Label có *, inline error đỏ, clear error khi chọn tag
@@ -31,7 +76,7 @@
 
 ---
 
-## PHẦN A: LUỒNG NAVIGATION & LAYOUT (18 TCs)
+## PHẦN A: LUỒNG NAVIGATION & LAYOUT (22 TCs)
 
 ### A1. Desktop Navigation (viewport ≥ 640px)
 
@@ -71,6 +116,15 @@
 | 17 | NAV_L_01 | Max-width container `max-w-5xl` | Content không bị kéo rộng quá 1024px trên màn hình lớn | |
 | 18 | NAV_L_02 | Sticky header `sticky top-0 z-20` | Scroll xuống → header dính trên cùng, z-index 20 | |
 
+### A5. Management Sub-tabs
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 19 | MGT_S_01 | 2 sub-tabs "Món ăn" / "Nguyên liệu" | Tab Thư viện có 2 sub-tabs: "Món ăn" (default) và "Nguyên liệu". Active state `bg-white dark:bg-slate-700 text-emerald-600 shadow-sm`, inactive `text-slate-500` | |
+| 20 | MGT_S_02 | Default sub-tab = "Món ăn" | Mở tab Thư viện lần đầu → sub-tab "Món ăn" (`dishes`) hiển thị, DishManager render | |
+| 21 | MGT_S_03 | DataBackup section luôn visible | Section "Sao lưu & Khôi phục" hiển thị bên dưới cả 2 sub-tabs (Món ăn lẫn Nguyên liệu), có border-top separator | |
+| 22 | MGT_S_04 | Sub-tabs responsive mobile | Mobile: `min-h-11` touch target (44px), `overflow-x-auto scrollbar-hide`, `flex-nowrap`. Desktop: `sm:py-1.5` compact | |
+
 ---
 
 ## PHẦN B: LUỒNG CALENDAR — CHỌN NGÀY (22 TCs)
@@ -97,6 +151,11 @@
 | 34 | CAL_G_16 | Tháng 2 năm nhuận | Năm nhuận: 29 ngày, năm thường: 28 ngày | Edge case quan trọng |
 | 35 | CAL_G_17 | Chuyển tháng 12→1 (năm mới) | Tháng 12/2026 → click "▶" → Tháng 1/2027 | |
 | 36 | CAL_G_18 | Chuyển tháng 1→12 (năm trước) | Tháng 1/2026 → click "◀" → Tháng 12/2025 | |
+| 37 | CAL_G_19 | Header CN màu rose | Header "CN" trong calendar grid hiển thị `text-rose-400`, T2–T7 giữ `text-slate-400` | |
+| 38 | CAL_G_20 | Ngày CN trong calendar có background rose | Ngày CN (unselected, not today) hiển thị `bg-rose-50 text-rose-600`, ngày thường `bg-slate-50 text-slate-700` | |
+| 39 | CAL_G_21 | Ngày CN selected → ưu tiên emerald | Khi click chọn ngày CN, style emerald-500 selected ưu tiên hơn rose | |
+| 40 | CAL_G_22 | Ngày hôm nay đúng local timezone (Calendar) | Ở timezone GMT+7, lúc 0:00–6:59 sáng, ngày highlight "hôm nay" vẫn phải là ngày local (ví dụ 27/02), KHÔNG bị lùi 1 ngày do UTC. Kiểm tra: `formatLocalDate(new Date())` thay vì `new Date().toISOString().split('T')[0]` | Edge: timezone offset |
+| 41 | CAL_G_23 | Khởi tạo selectedDate đúng local date | Khi app mở, `selectedDate` phải trùng với ngày local. Ví dụ: hôm nay thứ 6 27/02/2026 → selectedDate = "2026-02-27", KHÔNG phải "2026-02-26" | Edge: UTC midnight shift |
 
 ### B2. DateSelector — Week View Mode (7 ngày/tuần)
 
@@ -116,6 +175,11 @@
 | 48 | CAL_W_12 | Tuần qua ranh giới năm | T2=29/12/2025, CN=04/01/2026 → hiển thị đúng | Edge: year boundary |
 | 49 | CAL_W_13 | Label tuần | Header hiển thị range "24/02 - 02/03" thay vì "Chọn ngày" | |
 | 50 | CAL_W_14 | Swipe chỉ khi X > Y | Swipe chéo (diffY > diffX) → KHÔNG chuyển tuần, cho phép scroll dọc | Edge: diagonal swipe |
+| 51 | CAL_W_15 | Ngày CN trong week view có background rose | Ngày CN (unselected, not today) hiển thị `bg-rose-50 text-rose-600`, label "CN" = `text-rose-400` | |
+| 52 | CAL_W_16 | Ngày CN selected trong week → emerald | Khi click chọn CN, style emerald-500 ưu tiên, label white | |
+| 53 | CAL_W_17 | Responsive — layout không vỡ khi thêm rose style | Mobile 375px: 7 buttons không bị overflow, không horizontal scroll | |
+| 54 | CAL_W_18 | Ngày hôm nay đúng local timezone (Week) | Ở week view, ngày có `isToday=true` phải trùng ngày local thực tế. Kiểm tra: `formatLocalDate(date) === formatLocalDate(new Date())`. VD: hôm nay T6 27/02 → ô T6 ngày 27 phải highlight, KHÔNG phải ô T5 ngày 26 | Edge: timezone offset |
+| 55 | CAL_W_19 | Nút "Hôm nay" format đúng local date | Click "Hôm nay" → `onSelectDate(formatLocalDate(today))` → selectedDate = "2026-02-27" (local), KHÔNG bị lệch sang 26 do UTC | Edge: UTC midnight |
 
 ---
 
@@ -294,6 +358,38 @@
 | 131 | ING_U_13 | Sort dropdown | 6 options: Tên A-Z/Z-A, Calo ↑/↓, Protein ↑/↓ | |
 | 132 | ING_U_14 | Sort + Search kết hợp | Search "gà" + Sort "Calo ↑" → kết quả filter + sorted đúng thứ tự | |
 
+### E3. View Detail Modal — Nguyên liệu
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 133 | ING_V_01 | Click card (Grid) → mở View Detail Modal | Click vào card nguyên liệu trong grid view → modal hiển thị với title "Chi tiết nguyên liệu", icon Apple lớn, tên + unit + 5 nutrition metrics | |
+| 134 | ING_V_02 | Click row (List Desktop) → mở View Detail Modal | Click table row → modal tương tự, hiển thị đầy đủ thông tin | |
+| 135 | ING_V_03 | Click row (List Mobile) → mở View Detail Modal | Tap item trong mobile list → modal bottom sheet hiển thị | |
+| 136 | ING_V_04 | Nút Edit (icon) trên header modal | Header có icon Edit3 bên cạnh nút X. Click → đóng view modal + mở form edit (pre-filled dữ liệu) | |
+| 137 | ING_V_05 | Nút "Chỉnh sửa nguyên liệu" ở footer | Button full-width `bg-emerald-500` ở footer modal. Click → đóng view modal + mở form edit | |
+| 138 | ING_V_06 | Backdrop click → đóng modal | Click overlay bên ngoài → `setViewingIngredient(null)` | |
+| 139 | ING_V_07 | "Dùng trong" danh sách | NL dùng trong các món ăn → hiển thị danh sách tag chips với tên món. NL không dùng → không hiện section này | |
+
+### E4. View Detail ↔ Edit Navigation — Nguyên liệu
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 140 | ING_VE_01 | Edit từ View → đóng Edit không thay đổi → quay lại View | View Detail → click Edit → edit modal mở (cameFromView=true) → KHÔNG sửa gì → click X → edit đóng → View Detail mở lại (data gốc) | |
+| 141 | ING_VE_02 | Edit từ View → thay đổi data → click X → Unsaved dialog hiện | View Detail → Edit → sửa tên/nutrition → click X → dialog "Thay đổi chưa lưu" hiện 3 nút: Lưu & quay lại / Bỏ thay đổi / Ở lại chỉnh sửa | |
+| 142 | ING_VE_03 | Unsaved dialog → "Lưu & quay lại" | Click "Lưu & quay lại" → `onUpdate(savedIng)` → edit đóng → View Detail mở lại với data MỚI | Validation fail → quay lại edit |
+| 143 | ING_VE_04 | Unsaved dialog → "Bỏ thay đổi" | Click "Bỏ thay đổi" → KHÔNG lưu → edit đóng → View Detail mở lại với data CŨ | |
+| 144 | ING_VE_05 | Unsaved dialog → "Ở lại chỉnh sửa" | Click "Ở lại chỉnh sửa" → dialog đóng → giữ nguyên edit modal, form data không mất | |
+| 145 | ING_VE_06 | Lưu thành công từ Edit → quay lại View | Edit form → click "Lưu nguyên liệu" → `onUpdate` + edit đóng → View Detail mở lại với data mới (cameFromView=true) | |
+
+### E5. Mobile Back Gesture — Nguyên liệu
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 146 | ING_BK_01 | Back gesture trên View Detail → đóng modal | Mở View Detail → browser back / Android back → modal đóng, quay về danh sách. Không rời trang. | |
+| 147 | ING_BK_02 | Back gesture trên Edit (cameFromView, no changes) → quay View | View → Edit → back → Edit đóng → View Detail mở lại (data gốc) | |
+| 148 | ING_BK_03 | Back gesture trên Edit (cameFromView, có changes) → unsaved dialog | View → Edit → sửa data → back → dialog "Thay đổi chưa lưu" hiện | |
+| 149 | ING_BK_04 | Back gesture trên unsaved dialog → dismiss dialog | Dialog hiện → back → dialog đóng, giữ edit modal | |
+
 ---
 
 ## PHẦN F: LUỒNG QUẢN LÝ MÓN ĂN (20 TCs)
@@ -314,10 +410,14 @@
 | 142 | DSH_C_07 | Xóa NL khỏi danh sách chọn | Click trash icon → NL biến mất, "Chưa chọn nguyên liệu" nếu rỗng | |
 | 143 | DSH_C_08 | Submit validation — name + NL + tags | `!name \|\| selectedIngredients.length === 0 \|\| tags.length === 0` → không submit | Edge: thiếu field |
 | 144 | DSH_C_09 | Submit thành công — tạo mới | `onAdd(dishData)` với id=`dish-{timestamp}`, có tags | |
-| 145 | DSH_R_01 | Mở modal sửa món | Pre-fill name, tags (spread copy), ingredients (spread copy) | |
-| 146 | DSH_R_02 | Sửa thành công | `onUpdate(dishData)` → card cập nhật | |
-| 147 | DSH_D_01 | Xóa món không dùng | ConfirmationModal "Xóa món ăn?" → "Xóa ngay" → món biến mất | |
-| 148 | DSH_D_02 | Xóa món đang dùng trong plan | `isDishUsed(id)=true` → toast warning "Không thể xóa" | |
+| 145 | DSH_C_10 | Chọn NL → biến mất khỏi picker | Chọn "Trứng gà" → "Trứng gà" không còn trong danh sách picker, chỉ hiện trong "Đã chọn" | |
+| 146 | DSH_C_11 | Xóa NL đã chọn → hiện lại trong picker | Xóa "Trứng gà" khỏi "Đã chọn" → "Trứng gà" xuất hiện lại trong danh sách picker | |
+| 147 | DSH_C_12 | Chọn tất cả NL → empty state picker | Chọn hết 12 NL → picker hiển thị "Đã chọn tất cả nguyên liệu" | Edge: 0 available |
+| 148 | DSH_C_13 | Search + đã chọn kết hợp | "Ức gà" đã chọn → search "gà" → chỉ hiện "Trứng gà". Search "xyz" → "Không tìm thấy nguyên liệu" | |
+| 149 | DSH_R_01 | Mở modal sửa món | Pre-fill name, tags (spread copy), ingredients (spread copy) | |
+| 150 | DSH_R_02 | Sửa thành công | `onUpdate(dishData)` → card cập nhật | |
+| 151 | DSH_D_01 | Xóa món không dùng | ConfirmationModal "Xóa món ăn?" → "Xóa ngay" → món biến mất | |
+| 152 | DSH_D_02 | Xóa món đang dùng trong plan | `isDishUsed(id)=true` → toast warning "Không thể xóa" | |
 
 ### F2. UI/UX Món ăn
 
@@ -336,6 +436,38 @@
 | 158 | DSH_U_10 | List view layout — Mobile | Simplified list với tên + nutrition tóm tắt + action buttons | |
 | 159 | DSH_U_11 | Sort dropdown | 8 options: Tên A-Z/Z-A, Calo ↑/↓, Protein ↑/↓, Số NL ↑/↓ | |
 | 160 | DSH_U_12 | Sort + Filter + Tag kết hợp | Tag "Sáng" + Search "gà" + Sort "Protein ↓" → kết quả đúng | |
+
+### F3. View Detail Modal — Món ăn
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 161 | DSH_V_01 | Click card (Grid) → mở View Detail Modal | Click vào card món ăn trong grid view → modal hiển thị với title "Chi tiết món ăn", icon ChefHat lớn, tên + số NL + tags badges + 4 nutrition metrics + danh sách nguyên liệu chi tiết | |
+| 162 | DSH_V_02 | Click row (List Desktop) → mở View Detail Modal | Click table row → modal tương tự, hiển thị đầy đủ thông tin | |
+| 163 | DSH_V_03 | Click row (List Mobile) → mở View Detail Modal | Tap item trong mobile list → modal bottom sheet hiển thị | |
+| 164 | DSH_V_04 | Nút Edit (icon) trên header modal | Header có icon Edit3 bên cạnh nút X. Click → đóng view modal + mở form edit (pre-filled dữ liệu) | |
+| 165 | DSH_V_05 | Nút "Chỉnh sửa món ăn" ở footer | Button full-width `bg-emerald-500` ở footer modal. Click → đóng view modal + mở form edit | |
+| 166 | DSH_V_06 | Backdrop click → đóng modal | Click overlay bên ngoài → `setViewingDish(null)` | |
+| 167 | DSH_V_07 | Danh sách nguyên liệu chi tiết | Mỗi NL hiển thị: icon Apple + tên + lượng + đơn vị. NL bị xóa (orphan) → skip, không crash | Edge: orphan ingredient |
+
+### F4. View Detail ↔ Edit Navigation — Món ăn
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 168 | DSH_VE_01 | Edit từ View → đóng Edit không thay đổi → quay lại View | View Detail → click Edit → edit modal mở (cameFromView=true) → KHÔNG sửa gì → click X → edit đóng → View Detail mở lại (data gốc) | |
+| 169 | DSH_VE_02 | Edit từ View → thay đổi data → click X → Unsaved dialog hiện | View Detail → Edit → sửa tên/tags/NL → click X → dialog "Thay đổi chưa lưu" hiện 3 nút: Lưu & quay lại / Bỏ thay đổi / Ở lại chỉnh sửa | |
+| 170 | DSH_VE_03 | Unsaved dialog → "Lưu & quay lại" | Click "Lưu & quay lại" → `onUpdate(dishData)` → edit đóng → View Detail mở lại với data MỚI | Validation fail → quay lại edit |
+| 171 | DSH_VE_04 | Unsaved dialog → "Bỏ thay đổi" | Click "Bỏ thay đổi" → KHÔNG lưu → edit đóng → View Detail mở lại với data CŨ | |
+| 172 | DSH_VE_05 | Unsaved dialog → "Ở lại chỉnh sửa" | Click "Ở lại chỉnh sửa" → dialog đóng → giữ nguyên edit modal, form data không mất | |
+| 173 | DSH_VE_06 | Lưu thành công từ Edit → quay lại View | Edit form → click "Lưu món ăn" → `onUpdate` + edit đóng → View Detail mở lại với data mới (cameFromView=true) | |
+
+### F5. Mobile Back Gesture — Món ăn
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 174 | DSH_BK_01 | Back gesture trên View Detail → đóng modal | Mở View Detail → browser back / Android back → modal đóng, quay về danh sách. Không rời trang. | |
+| 175 | DSH_BK_02 | Back gesture trên Edit (cameFromView, no changes) → quay View | View → Edit → back → Edit đóng → View Detail mở lại (data gốc) | |
+| 176 | DSH_BK_03 | Back gesture trên Edit (cameFromView, có changes) → unsaved dialog | View → Edit → sửa data → back → dialog "Thay đổi chưa lưu" hiện | |
+| 177 | DSH_BK_04 | Back gesture trên unsaved dialog → dismiss dialog | Dialog hiện → back → dialog đóng, giữ edit modal | |
 
 ---
 
@@ -405,6 +537,11 @@
 | 177 | AI_S_07 | Edit nutrition fields inline | Spinbutton cho mỗi metric | |
 | 178 | AI_S_08 | Confirm → NL trùng tên không tạo mới | `processAnalyzedDish` → `find(i => i.name.toLowerCase() === aiIng.name.toLowerCase())` → dùng existing | Edge: duplicate NL detection |
 | 179 | AI_S_09 | Confirm → chuyển tab Thư viện | `shouldCreateDish=true` → tab dishes; `false` → tab ingredients | |
+| 180 | AI_S_10 | Tags UI — 3 nút chọn bữa ăn | Khi `saveDish=true`, hiển thị 3 nút "🌅 Sáng", "🌤️ Trưa", "🌙 Tối" với label có dấu `*` đỏ. Toggle active → `bg-emerald-500 text-white` | |
+| 181 | AI_S_11 | Tags validation — không chọn tag khi lưu | `saveDish=true` + `dishTags=[]` + click Xác nhận → hiển thị error đỏ "Vui lòng chọn ít nhất một bữa ăn phù hợp", KHÔNG đóng modal | Critical |
+| 182 | AI_S_12 | Tags error clear khi chọn tag | User chọn 1 tag → error message biến mất (`setTagError(null)`) | |
+| 183 | AI_S_13 | Tags truyền qua payload | `saveDish=true` + chọn Sáng+Tối → `payload.tags = ['breakfast', 'dinner']` → món ăn mới có tags đúng | |
+| 184 | AI_S_14 | Tags không bắt buộc khi chỉ lưu NL | `saveDish=false` → không cần chọn tag, confirm thành công → `payload.tags = undefined` | |
 
 ---
 
@@ -434,7 +571,7 @@
 
 ---
 
-## PHẦN J: ERROR HANDLING & NOTIFICATION (11 TCs)
+## PHẦN J: ERROR HANDLING & NOTIFICATION (16 TCs)
 
 ### J1. ErrorBoundary
 
@@ -456,16 +593,22 @@
 | 200 | NOT_03 | Hover pause timer | Mouse enter → `clearTimeout`, mouse leave → 2s mới dismiss | |
 | 201 | NOT_04 | Max 5 toasts | `prev.slice(-(MAX_TOASTS - 1))` → 6th toast đẩy toast cũ nhất ra | Edge: overflow |
 | 202 | NOT_05 | Click toast với onClick handler | Clickable toast → `handleClick()` + dismiss | |
+| 203 | NOT_06 | Toast action button | Toast có `action` prop → hiển thị button underline dưới message (ví dụ "Xem chi tiết"). Click → `action.onClick()` + dismiss. `e.stopPropagation()` để không trigger toast onClick | |
+| 204 | NOT_07 | Toast position responsive | Mobile: top, `top-[env(safe-area-inset-top)]`, full-width `left-0 right-0 p-3`. Desktop: `sm:bottom-6 sm:right-6`, max-w-sm | |
+| 205 | NOT_08 | Toast close button (X) | Mỗi toast có nút X nhỏ góc phải. Click X → dismiss ngay lập tức. `e.stopPropagation()` tránh trigger onClick handler của toast | |
+| 206 | NOT_09 | Keyboard accessibility trên clickable toast | Toast có onClick → `role="button"`, `tabIndex={0}`. Nhấn Enter hoặc Space → trigger `handleClick()` + dismiss | Edge: a11y |
+| 207 | NOT_10 | Import validation per-key | Import file có 4 keys, 1 key sai format (ví dụ `mp-ingredients` chứa string thay vì array) → key đó bị skip + toast warning "Dữ liệu không hợp lệ — Bỏ qua 'mp-ingredients' do sai format", các key hợp lệ vẫn import thành công | Edge: partial import |
 
 ---
 
-## PHẦN K: DATA MIGRATION & EDGE CASES (8 TCs)
+## PHẦN K: DATA MIGRATION & EDGE CASES (9 TCs)
 
 | # | ID | Tên | Mô tả chi tiết | Edge Case |
 |---|-----|------|----------------|-----------|
-| 203 | MIG_01 | migrateDishes — thêm tags=[] | Dữ liệu cũ thiếu `tags` → tự thêm `tags: []` | |
+| 203 | MIG_00 | Init data — tất cả món ăn phải có tags ≥ 1 | `initialDishes` trong `initialData.ts`: mỗi món đều có `tags` là mảng không rỗng (ví dụ `['breakfast']`, `['lunch','dinner']`). Không được có `tags: []` hoặc thiếu field `tags` | Critical — data integrity |
+| 204 | MIG_01 | migrateDishes — tags trống/thiếu → default 'lunch' | Dữ liệu cũ trong localStorage thiếu `tags` hoặc `tags: []` → tự gán `tags: ['lunch']` (default). Logic: `Array.isArray(rawTags) && rawTags.length > 0 ? rawTags : ['lunch']` | |
 | 204 | MIG_02 | migrateDayPlans — old format | Dữ liệu có `breakfastId` thay vì `breakfastDishIds` → tạo empty plan | |
-| 205 | MIG_03 | Persist migrated data | `useEffect` detect `needsMigration` → `setDishes(dishes)` → ghi lại localStorage | |
+| 205 | MIG_03 | Persist migrated data — detect empty tags | `useEffect` detect `needsMigration` (bao gồm `tags.length === 0`) → `setDishes(dishes)` → ghi lại localStorage | |
 | 206 | MIG_04 | processAnalyzedDish — NL trùng tên | AI trả về NL đã tồn tại (case-insensitive) → dùng existing, không tạo mới | |
 | 207 | MIG_05 | generateId uniqueness | `${prefix}-${Date.now()}-${random}` — 2 calls liên tiếp → 2 IDs khác nhau | |
 | 208 | MIG_06 | applySuggestionToDayPlans — new plan | Ngày chưa có plan → `[...plans, merged]` thêm mới | |
@@ -500,35 +643,78 @@
 
 ---
 
+## PHẦN M: DARK MODE / THEME SWITCHER (8 TCs)
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 223 | THEME_01 | Mặc định theme = `system` | App mở lần đầu (chưa có `mp-theme` trong localStorage) → theme = `system`, icon Monitor hiển thị trên header. Dark/light tùy thuộc OS preference `prefers-color-scheme` | |
+| 224 | THEME_02 | Cycle theme: light → dark → system | Click nút theme → cycle qua 3 mode: light (Sun icon) → dark (Moon icon) → system (Monitor icon) → light... Mỗi lần click, UI thay đổi ngay lập tức | |
+| 225 | THEME_03 | Persist theme vào localStorage | Chọn dark mode → `localStorage.setItem('mp-theme', 'dark')`. Reload trang → theme vẫn là dark. Xóa `mp-theme` → fallback về `system` | |
+| 226 | THEME_04 | Dark mode — class `dark` trên `<html>` | Theme = dark → `document.documentElement.classList.add('dark')`. Background `bg-slate-950`, text `text-slate-100`, cards `bg-slate-800`, borders `border-slate-700` | |
+| 227 | THEME_05 | System mode — auto-detect OS preference | Theme = system + OS dark mode → app dark. Thay đổi OS setting (macOS Appearance) → app auto cập nhật nhờ `matchMedia('prefers-color-scheme: dark')` change listener | Edge: realtime OS change |
+| 228 | THEME_06 | Tooltip/aria-label thay đổi theo theme | `aria-label="Chế độ hiển thị: Sáng"`, `title="Sáng — nhấn để đổi"`. Dark → "Tối — nhấn để đổi". System → "Theo hệ thống — nhấn để đổi" | |
+| 229 | THEME_07 | Dark mode áp dụng toàn bộ UI | Tất cả modals, cards, toasts, inputs, navigation, dropdowns đều có `dark:` variants. Kiểm tra: modal overlay `dark:bg-slate-800`, toast `dark:bg-slate-800 dark:border-*`, input `dark:bg-slate-800 dark:text-slate-100` | |
+| 230 | THEME_08 | localStorage fail → fallback system | `localStorage.getItem` throw (private browsing) → catch → default `system`. `localStorage.setItem` fail → catch → app vẫn hoạt động (state in memory) | Edge: storage blocked |
+
+---
+
+## PHẦN N: LAZY LOADING & CODE SPLITTING (5 TCs)
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 231 | LAZY_01 | Tab Grocery/AI dùng conditional render | `{activeMainTab === 'grocery' && <Suspense>...<GroceryList/></Suspense>}`. Rời tab → component unmount hoàn toàn. Quay lại → re-mount mới | |
+| 232 | LAZY_02 | Tab Calendar/Management dùng hidden/block | `<div className={activeMainTab === 'calendar' ? 'block' : 'hidden'}>`. Component luôn mount, giữ state khi switch tab (search query, scroll position, form data) | |
+| 233 | LAZY_03 | Loading fallback hiển thị | Lần đầu click tab Grocery hoặc AI → `TabLoadingFallback` hiển thị: spinner animate-spin + text "Đang tải..." cho đến khi lazy chunk load xong | |
+| 234 | LAZY_04 | Chuyển tab nhanh liên tục | Click Grocery → AI → Calendar → Grocery nhanh liên tục → không crash, không double render, Suspense boundary không bị stuck | Edge: race condition |
+| 235 | LAZY_05 | Network chậm → fallback kéo dài | Throttle network (Slow 3G) → click tab AI → fallback spinner hiển thị lâu hơn → chunk load xong → content hiện. Không timeout error | Edge: slow network |
+
+---
+
+## PHẦN O: IMAGE COMPRESSION (4 TCs)
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 236 | IMG_C_01 | Upload ảnh lớn → compress | Upload ảnh >2MB, kích thước >2000px → `compressImage()` resize về ≤ 1024x1024 (giữ tỷ lệ), convert JPEG quality 0.8. Ảnh preview nhỏ hơn ảnh gốc đáng kể | |
+| 237 | IMG_C_02 | Camera capture → compress | Chụp ảnh từ camera → canvas capture → `compressImage()` trước khi set vào state `image`. Preview hiển thị ảnh đã compress | |
+| 238 | IMG_C_03 | Paste từ clipboard → compress | Ctrl+V/Cmd+V ảnh → `compressImage()` xử lý. Nếu compress thành công → set ảnh compressed. Nếu fail → fallback dùng ảnh gốc (try-catch trong paste handler) | Edge: compress fail fallback |
+| 239 | IMG_C_04 | Canvas context fail → fallback | `canvas.getContext('2d')` return null → `compressImage()` reject với error "Failed to get canvas context" → caller catch → dùng ảnh gốc, app không crash | Edge: canvas unsupported |
+
+---
+
 ## TÓM TẮT
 
 | Phần | Module | Số TC |
 |------|--------|-------|
-| A | Navigation & Layout | 18 |
-| B | Calendar — Chọn ngày | 32 |
+| A | Navigation & Layout (A1~A5) | 22 |
+| B | Calendar — Chọn ngày | 36 |
 | C | Calendar — Kế hoạch bữa ăn | 39 |
 | D | Dinh dưỡng & Mục tiêu | 18 |
-| E | Quản lý Nguyên liệu | 31 |
-| F | Quản lý Món ăn | 30 |
+| E | Quản lý Nguyên liệu (E1~E5) | 41 |
+| F | Quản lý Món ăn (F1~F5) | 40 |
 | G | Đi chợ | 16 |
-| H | AI Phân tích | 20 |
+| H | AI Phân tích | 25 |
 | I | Data Backup & Persistence | 12 |
-| J | Error Handling & Notification | 11 |
-| K | Data Migration & Edge Cases | 8 |
+| J | Error Handling & Notification (J1~J2) | 16 |
+| K | Data Migration & Edge Cases | 9 |
 | L | Responsive & UI/UX | 12 |
-| **TỔNG** | | **247** |        
+| M | Dark Mode / Theme Switcher | 8 |
+| N | Lazy Loading & Code Splitting | 5 |
+| O | Image Compression | 4 |
+| **TỔNG** | | **303** |        
 
 ### So sánh với V1 (41 TCs)
 
 | Metric | V1 | V2 | Mới thêm |
 |--------|-----|-----|---------|
-| Navigation | 4 | 18 | +14 (badge detail, DOM structure, responsive) |
+| Navigation | 4 | 22 | +18 (badge detail, DOM structure, responsive, management sub-tabs) |
 | Calendar | 8 | 71 | +63 (week view 7-ngày, AI Preview Modal với AbortController, Regenerate/Edit/Checkbox, month/year boundaries) |
 | Management | 15 | 61 | +46 (inline validation, required tag với error, AI error với tên NL, Layout Switcher Grid/List, Sort dropdown) |
 | Grocery | 3 | 16 | +13 (aggregation, copy, share, scope reset, orphan refs) |
 | AI | 4 | 20 | +16 (camera Android permission, paste, save modal detail, AI Research, mediaDevices check) |
 | Nutrition | 0 | 18 | +18 (calculation units, tips logic, progress bar colors) |
-| Data/Error | 3 + 4 = 7 | 31 | +24 (migration, persistence edge, notification limits) |
+| Data/Error | 3 + 4 = 7 | 36 | +29 (migration, persistence edge, notification advanced, toast a11y) |
 | Responsive | 4 | 12 | +8 (modal variants, scrollbar, card layout) |
-| **TỔNG** | **41** | **247** | **+206 TCs** |
+| Dark Mode | 0 | 8 | +8 (3-mode cycling, persist, system auto-detect, dark class toggle) |
+| Performance | 0 | 9 | +9 (lazy loading, code splitting, image compression) |
+| **TỔNG** | **41** | **273** | **+232 TCs** |
 

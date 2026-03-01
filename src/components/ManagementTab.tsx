@@ -28,7 +28,7 @@ const SUB_TABS: { key: SubTab; label: string }[] = [
   { key: 'ingredients', label: 'Nguyên liệu' },
 ];
 
-export const ManagementTab: React.FC<ManagementTabProps> = ({
+export const ManagementTab: React.FC<ManagementTabProps> = React.memo(({
   activeSubTab, onSubTabChange,
   ingredients, dishes,
   onAddIngredient, onUpdateIngredient, onDeleteIngredient, isIngredientUsed,
@@ -37,17 +37,17 @@ export const ManagementTab: React.FC<ManagementTabProps> = ({
 }) => {
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
         <div className="flex items-center gap-3">
           <BookOpen className="w-6 h-6 text-emerald-500 shrink-0" />
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Thư viện dữ liệu</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">Thư viện dữ liệu</h2>
         </div>
-        <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide bg-slate-100 p-1 rounded-xl flex-nowrap">
+        <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex-nowrap">
           {SUB_TABS.map(tab => (
             <button
               key={tab.key}
               onClick={() => onSubTabChange(tab.key)}
-              className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 active:bg-slate-200'}`}
+              className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'}`}
             >
               {tab.label}
             </button>
@@ -71,9 +71,11 @@ export const ManagementTab: React.FC<ManagementTabProps> = ({
       )}
 
       {/* Data Backup */}
-      <div className="pt-4 border-t border-slate-200">
+      <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
         <DataBackup onImport={onImportData} />
       </div>
     </div>
   );
-};
+});
+
+ManagementTab.displayName = 'ManagementTab';

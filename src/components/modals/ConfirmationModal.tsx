@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trash2, AlertTriangle } from 'lucide-react';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 type ConfirmVariant = 'danger' | 'warning';
 
@@ -16,8 +17,8 @@ interface ConfirmationModalProps {
 }
 
 const VARIANT_STYLES: Record<ConfirmVariant, { iconBg: string; iconText: string; btnBg: string; btnHover: string; btnShadow: string }> = {
-  danger: { iconBg: 'bg-rose-100', iconText: 'text-rose-500', btnBg: 'bg-rose-500', btnHover: 'hover:bg-rose-600', btnShadow: 'shadow-rose-200' },
-  warning: { iconBg: 'bg-amber-100', iconText: 'text-amber-500', btnBg: 'bg-amber-500', btnHover: 'hover:bg-amber-600', btnShadow: 'shadow-amber-200' },
+  danger: { iconBg: 'bg-rose-100 dark:bg-rose-900/30', iconText: 'text-rose-500 dark:text-rose-400', btnBg: 'bg-rose-500', btnHover: 'hover:bg-rose-600', btnShadow: 'shadow-rose-200' },
+  warning: { iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconText: 'text-amber-500 dark:text-amber-400', btnBg: 'bg-amber-500', btnHover: 'hover:bg-amber-600', btnShadow: 'shadow-amber-200' },
 };
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -31,6 +32,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  useModalBackHandler(isOpen, onCancel);
+
   if (!isOpen) return null;
 
   const styles = VARIANT_STYLES[variant];
@@ -45,17 +48,17 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         onClick={onCancel}
         tabIndex={-1}
       />
-      <div className="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
+      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
         <div className="p-6 text-center">
           <div className={`w-16 h-16 ${styles.iconBg} ${styles.iconText} rounded-full flex items-center justify-center mx-auto mb-4`}>
             {icon || defaultIcon}
           </div>
-          <h4 className="font-bold text-slate-800 text-xl mb-2">{title}</h4>
-          <div className="text-slate-600 mb-6">{message}</div>
+          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-xl mb-2">{title}</h4>
+          <div className="text-slate-600 dark:text-slate-400 mb-6">{message}</div>
           <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition-all min-h-12"
+              className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 transition-all min-h-12"
             >
               {cancelLabel}
             </button>
@@ -71,4 +74,3 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     </div>
   );
 };
-

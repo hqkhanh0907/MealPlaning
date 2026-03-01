@@ -73,13 +73,13 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-      <h4 className="font-bold text-slate-800 mb-1">Sao lưu & Khôi phục</h4>
-      <p className="text-sm text-slate-500 mb-4">Xuất hoặc nhập dữ liệu dạng JSON để sao lưu.</p>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm">
+      <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-1">Sao lưu & Khôi phục</h4>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Xuất hoặc nhập dữ liệu dạng JSON để sao lưu.</p>
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={handleExport}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-bold hover:bg-emerald-100 active:scale-[0.98] transition-all min-h-11"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-xl font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:scale-[0.98] transition-all min-h-11"
         >
           <Download className="w-4 h-4" />
           Xuất dữ liệu
@@ -87,7 +87,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isImporting}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold hover:bg-indigo-100 active:scale-[0.98] transition-all disabled:opacity-50 min-h-11"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 active:scale-[0.98] transition-all disabled:opacity-50 min-h-11"
         >
           {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           Nhập dữ liệu
@@ -103,4 +103,3 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
     </div>
   );
 };
-

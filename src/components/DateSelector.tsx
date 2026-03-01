@@ -1,6 +1,15 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
 import { DayPlan } from '../types';
+import { parseLocalDate } from '../utils/helpers';
+
+/** Format a Date to local YYYY-MM-DD (avoids UTC shift from toISOString) */
+const formatLocalDate = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 
 interface DateSelectorProps {
   selectedDate: string;
@@ -16,20 +25,32 @@ const getMealDotClass = (hasMeal: boolean, isSelected: boolean, activeColor: str
 };
 
 // Helper to get day button style class without nested ternary
-const getDayButtonClass = (isSelected: boolean, isToday: boolean, variant: 'week' | 'calendar'): string => {
+const getDayButtonClass = (isSelected: boolean, isToday: boolean, variant: 'week' | 'calendar', isSunday = false): string => {
   if (isSelected) {
     return variant === 'week'
-      ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 scale-105'
-      : 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 scale-105 ring-4 ring-emerald-500/20';
+      ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900 scale-105'
+      : 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900 scale-105 ring-4 ring-emerald-500/20';
   }
   if (isToday) {
     return variant === 'week'
-      ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-      : 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100';
+      ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700'
+      : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50';
+  }
+  if (isSunday) {
+    return variant === 'week'
+      ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 active:bg-rose-200'
+      : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 border border-transparent hover:border-rose-200 dark:hover:border-rose-700';
   }
   return variant === 'week'
-    ? 'bg-slate-50 text-slate-700 hover:bg-slate-100 active:bg-slate-200'
-    : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200';
+    ? 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 active:bg-slate-200'
+    : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent hover:border-slate-200 dark:hover:border-slate-600';
+};
+
+// Helper to get week day label color class
+const getWeekDayLabelClass = (isSelected: boolean, isSunday: boolean): string => {
+  if (isSelected) return 'text-white/80';
+  if (isSunday) return 'text-rose-400';
+  return 'text-slate-400 dark:text-slate-500';
 };
 
 // Get Monday of the week containing the given date
@@ -44,7 +65,7 @@ const getMonday = (date: Date): Date => {
 
 // Get 7 dates (Mon–Sun) for a given week offset from selectedDate
 const getCurrentWeekDates = (selectedDate: string, weekOffset: number): Date[] => {
-  const base = new Date(selectedDate);
+  const base = parseLocalDate(selectedDate);
   const monday = getMonday(base);
   monday.setDate(monday.getDate() + weekOffset * 7);
   const dates: Date[] = [];
@@ -65,7 +86,7 @@ const formatWeekLabel = (dates: Date[]): string => {
 
 export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(() => {
-    const d = new Date(selectedDate);
+    const d = parseLocalDate(selectedDate);
     return Number.isNaN(d.getTime()) ? new Date() : d;
   });
   const [viewMode, setViewMode] = useState<'calendar' | 'week'>(() =>
@@ -111,7 +132,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
     const today = new Date();
     setCurrentMonth(today);
     setWeekOffset(0);
-    onSelectDate(today.toISOString().split('T')[0]);
+    onSelectDate(formatLocalDate(today));
   };
 
   const weekDates = getCurrentWeekDates(selectedDate, weekOffset);
@@ -146,35 +167,35 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
   const emptyCellKeys = Array.from({ length: firstDay }, (_, i) => `empty-start-${year}-${month}-${i}`);
 
   return (
-    <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-100 shadow-sm">
+    <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 sm:p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <div className="flex items-center gap-2 text-slate-800 font-bold text-lg">
+        <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-lg">
           <CalendarIcon className="w-5 h-5 text-emerald-500" />
           <span>{viewMode === 'calendar' ? `Tháng ${month + 1}, ${year}` : weekLabel}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
+            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
             title={viewMode === 'calendar' ? 'Chế độ tuần' : 'Chế độ lịch'}
           >
             {viewMode === 'calendar' ? <List className="w-5 h-5" /> : <CalendarIcon className="w-5 h-5" />}
           </button>
           <button
             onClick={goToToday}
-            className="px-3 py-1.5 text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 rounded-xl transition-all mr-1 sm:mr-2 min-h-11 sm:min-h-9 flex items-center"
+            className="px-3 py-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all mr-1 sm:mr-2 min-h-11 sm:min-h-9 flex items-center"
           >
             Hôm nay
           </button>
           <button
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-9 min-w-9 flex items-center justify-center"
+            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-9 min-w-9 flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-slate-500 transition-all min-h-9 min-w-9 flex items-center justify-center"
+            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-9 min-w-9 flex items-center justify-center"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -190,10 +211,11 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           onTouchEnd={handleTouchEnd}
         >
           {weekDates.map(date => {
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = formatLocalDate(date);
             const isSelected = dateStr === selectedDate;
-            const isToday = dateStr === new Date().toISOString().split('T')[0];
+            const isToday = dateStr === formatLocalDate(new Date());
             const dayOfWeek = date.getDay();
+            const isSunday = dayOfWeek === 0;
             const dayLabel = weekDays[dayOfWeek === 0 ? 6 : dayOfWeek - 1];
 
             const plan = dayPlans.find(p => p.date === dateStr);
@@ -212,9 +234,9 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                     onSelectDate(dateStr);
                   }
                 }}
-                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl transition-all min-h-18 ${getDayButtonClass(isSelected, isToday, 'week')}`}
+                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl transition-all min-h-18 ${getDayButtonClass(isSelected, isToday, 'week', isSunday)}`}
               >
-                <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-white/80' : 'text-slate-400'}`}>{dayLabel}</span>
+                <span className={`text-[10px] font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>{dayLabel}</span>
                 <span className="text-lg font-bold">{date.getDate()}</span>
                 <div className="flex gap-0.5 mt-0.5">
                   <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`} />
@@ -232,7 +254,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
         <>
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2">
             {weekDays.map(day => (
-              <div key={day} className="text-center text-xs font-bold text-slate-400 uppercase py-2">
+              <div key={day} className={`text-center text-xs font-bold uppercase py-2 ${day === 'CN' ? 'text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
                 {day}
               </div>
             ))}
@@ -247,12 +269,13 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
               const day = i + 1;
               const dateStr = formatDate(day);
               const isSelected = dateStr === selectedDate;
-              const isToday = dateStr === new Date().toISOString().split('T')[0];
+              const isToday = dateStr === formatLocalDate(new Date());
 
               const plan = dayPlans.find(p => p.date === dateStr);
               const hasBreakfast = (plan?.breakfastDishIds?.length ?? 0) > 0;
               const hasLunch = (plan?.lunchDishIds?.length ?? 0) > 0;
               const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
+              const isSunday = parseLocalDate(dateStr).getDay() === 0;
 
               return (
                 <button
@@ -269,7 +292,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                     if (onPlanClick) onPlanClick();
                   }}
                   title={isSelected ? "Nhấn lần nữa để lên kế hoạch" : "Chọn ngày"}
-                  className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all ${getDayButtonClass(isSelected, isToday, 'calendar')}`}
+                  className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)}`}
                 >
                   <span className="text-sm font-bold">{day}</span>
 
@@ -282,7 +305,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
               );
             })}
           </div>
-          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 font-medium gap-2 sm:gap-0">
+          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium gap-2 sm:gap-0">
             {(() => {
               const selectedPlan = dayPlans.find(p => p.date === selectedDate);
               const hasAnyPlan = Boolean(selectedPlan && (
@@ -308,7 +331,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
       )}
 
       {viewMode === 'week' && (
-        <div className="mt-3 flex items-center justify-between text-xs text-slate-400 font-medium">
+        <div className="mt-3 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium">
           <span>Vuốt ngang hoặc dùng mũi tên để chuyển tuần</span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Sáng</div>

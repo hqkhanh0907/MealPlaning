@@ -1,9 +1,17 @@
 @import "tailwindcss";
 
+/* Class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Safe area insets for native apps (Capacitor) */
 :root {
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
+}
+
+/* Dark mode base transition */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .pt-safe {
