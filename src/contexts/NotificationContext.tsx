@@ -37,7 +37,7 @@ const TOAST_STYLES: Record<NotificationType, { border: string; iconBg: string; t
 };
 
 const DEFAULT_DURATION: Record<NotificationType, number> = {
-  success: 15000,
+  success: 3000,
   error: 10000,
   warning: 5000,
   info: 4000,
@@ -47,6 +47,7 @@ const DEFAULT_DURATION: Record<NotificationType, number> = {
 
 const NotificationContext = createContext<NotifyAPI | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotification = (): NotifyAPI => {
   const ctx = useContext(NotificationContext);
   if (!ctx) throw new Error('useNotification must be used within <NotificationProvider>');
@@ -60,6 +61,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
   const duration = toast.duration ?? DEFAULT_DURATION[toast.type];
   const [isExiting, setIsExiting] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDismiss = useCallback(() => {
     setIsExiting(true);
@@ -71,6 +73,20 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
     return () => clearTimeout(timerRef.current);
   }, [duration, handleDismiss]);
 
+  // Pause/resume auto-dismiss on hover via native DOM listeners
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const pause = () => clearTimeout(timerRef.current);
+    const resume = () => { timerRef.current = setTimeout(handleDismiss, 2000); };
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+    return () => {
+      el.removeEventListener('mouseenter', pause);
+      el.removeEventListener('mouseleave', resume);
+    };
+  }, [handleDismiss]);
+
   const handleClick = () => {
     if (toast.onClick) {
       toast.onClick();
@@ -80,28 +96,26 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
 
   return (
     <div
-      role={toast.onClick ? 'button' : undefined}
-      tabIndex={toast.onClick ? 0 : undefined}
+      ref={containerRef}
       className={`
-        bg-white dark:bg-slate-800 rounded-2xl shadow-lg border ${styles.border}
+        relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg border ${styles.border}
         px-4 py-3 flex items-start gap-3 w-full max-w-sm text-left
         transition-all duration-300 ease-out
         ${isExiting ? 'opacity-0 translate-x-full sm:translate-x-full' : 'opacity-100 translate-x-0'}
         ${toast.onClick ? 'cursor-pointer hover:shadow-xl active:scale-[0.98]' : ''}
       `}
-      onClick={toast.onClick ? handleClick : undefined}
-      onKeyDown={toast.onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } } : undefined}
-      onMouseEnter={() => clearTimeout(timerRef.current)}
-      onMouseLeave={() => { timerRef.current = setTimeout(handleDismiss, 2000); }}
     >
-      <div className={`p-2 rounded-xl shrink-0 ${styles.iconBg}`}>{styles.icon}</div>
-      <div className="flex-1 min-w-0 py-0.5">
+      {toast.onClick && (
+        <button type="button" onClick={handleClick} className="absolute inset-0 w-full h-full cursor-pointer" aria-label={toast.title} />
+      )}
+      <div className={`relative z-10 p-2 rounded-xl shrink-0 ${styles.iconBg}`}>{styles.icon}</div>
+      <div className="relative z-10 flex-1 min-w-0 py-0.5">
         <p className={`font-semibold text-sm leading-tight ${styles.title}`}>{toast.title}</p>
         {toast.message && <p className={`text-xs mt-0.5 leading-snug ${styles.message}`}>{toast.message}</p>}
         {toast.action && (
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); toast.action!.onClick(); handleDismiss(); }}
+            onClick={(e) => { e.stopPropagation(); toast.action?.onClick(); handleDismiss(); }}
             className="mt-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 active:text-emerald-800 underline underline-offset-2 transition-colors min-h-8 flex items-center"
           >
             {toast.action.label}
@@ -111,7 +125,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
-        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500 shrink-0"
+        className="relative z-10 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500 shrink-0"
       >
         <X className="w-4 h-4" />
       </button>

@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, CalendarDays } from 'lucide-react';
 import { DayPlan } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { getWeekRange, isDateInRange, parseLocalDate } from '../../utils/helpers';
 
 interface ClearPlanModalProps {
@@ -11,18 +13,12 @@ interface ClearPlanModalProps {
   onClose: () => void;
 }
 
-const ModalBackdrop: React.FC<{ onClose: () => void; children: React.ReactNode }> = ({ onClose, children }) => (
-  <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-    <button type="button" aria-label="Close modal" className="absolute inset-0 w-full h-full cursor-default" onClick={onClose} tabIndex={-1} />
-    {children}
-  </div>
-);
-
 const hasPlan = (p: DayPlan): boolean =>
   p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0;
 
 
 export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, selectedDate, onClear, onClose }) => {
+  const { t } = useTranslation();
   useModalBackHandler(true, onClose);
 
   const counts = useMemo(() => {
@@ -43,9 +39,9 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
   }, [dayPlans, selectedDate]);
 
   const SCOPE_OPTIONS: { scope: 'day' | 'week' | 'month'; label: string; desc: string; count: number }[] = [
-    { scope: 'day', label: 'Ngày này', desc: 'Xóa kế hoạch của ngày đang chọn', count: counts.day },
-    { scope: 'week', label: 'Tuần này', desc: 'Xóa kế hoạch của tuần hiện tại', count: counts.week },
-    { scope: 'month', label: 'Tháng này', desc: 'Xóa kế hoạch của tháng hiện tại', count: counts.month },
+    { scope: 'day', label: t('clearPlan.scopeDay'), desc: t('clearPlan.scopeDayDesc'), count: counts.day },
+    { scope: 'week', label: t('clearPlan.scopeWeek'), desc: t('clearPlan.scopeWeekDesc'), count: counts.week },
+    { scope: 'month', label: t('clearPlan.scopeMonth'), desc: t('clearPlan.scopeMonthDesc'), count: counts.month },
   ];
 
   return (
@@ -53,8 +49,8 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col sm:mx-4">
         <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Xóa kế hoạch</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chọn phạm vi thời gian muốn xóa</p>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('clearPlan.title')}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('clearPlan.subtitle')}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
             <X className="w-6 h-6" />
@@ -83,7 +79,7 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
               </div>
               {count > 0 && (
                 <span className="text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-full shrink-0">
-                  {count} ngày
+                  {t('clearPlan.dayCount', { count })}
                 </span>
               )}
             </button>

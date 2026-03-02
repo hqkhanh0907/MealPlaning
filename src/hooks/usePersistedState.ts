@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '../utils/logger';
 
 /**
  * Drop-in replacement for useState that persists value to localStorage.
@@ -15,7 +16,7 @@ export function usePersistedState<T>(key: string, initialValue: T) {
       }
     } catch {
       // Corrupted data — ignore and use initial
-      console.warn(`[usePersistedState] Failed to parse "${key}", using initial value.`);
+      logger.warn({ component: 'usePersistedState', action: 'parse' }, `Failed to parse "${key}", using initial value.`);
     }
     return initialValue;
   });
@@ -24,7 +25,7 @@ export function usePersistedState<T>(key: string, initialValue: T) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      console.warn(`[usePersistedState] Failed to save "${key}" to localStorage.`);
+      logger.warn({ component: 'usePersistedState', action: 'save' }, `Failed to save "${key}" to localStorage.`);
     }
   }, [key, value]);
 

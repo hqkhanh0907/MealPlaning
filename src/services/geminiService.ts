@@ -7,6 +7,24 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey });
 };
 
+// --- Shared resilience utilities ---
+
+/** Default timeout for all AI API calls (ms) */
+const AI_CALL_TIMEOUT_MS = 30_000;
+
+/**
+ * Race a promise against a timeout. Rejects with a descriptive Error on timeout.
+ * @param promise - The async operation to wrap
+ * @param ms - Timeout duration in milliseconds
+ * @param label - Human-readable label for the timeout error message
+ */
+const callWithTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
+  );
+  return Promise.race([promise, timeout]);
+};
+
 // --- Runtime validation helpers ---
 
 const parseJSON = <T>(text: string | undefined, validator: (v: unknown) => v is T, label: string): T => {
@@ -101,9 +119,11 @@ export const suggestMealPlan = async (
     }
   });
 
-  const response = abortPromise
-    ? await Promise.race([apiCallPromise, abortPromise])
-    : await apiCallPromise;
+  // Race: abort signal, timeout, and API call
+  const withTimeout = callWithTimeout(apiCallPromise, AI_CALL_TIMEOUT_MS, 'Meal plan suggestion');
+  const response = abortPromise === null
+    ? await withTimeout
+    : await Promise.race([withTimeout, abortPromise]);
 
   return parseJSON(response.text, isMealPlanSuggestion, 'MealPlanSuggestion');
 };
@@ -134,7 +154,8 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string): P
     Trả về JSON.
   `;
 
-  const response = await ai.models.generateContent({
+  const response = await callWithTimeout(
+    ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: {
       parts: [
@@ -187,7 +208,10 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string): P
         required: ["name", "description", "totalNutrition", "ingredients"]
       }
     }
-  });
+  }),
+    AI_CALL_TIMEOUT_MS,
+    'Dish image analysis'
+  );
 
   return parseJSON(response.text, isAnalyzedDishResult, 'AnalyzedDishResult');
 };
@@ -198,7 +222,7 @@ export const analyzeDishImage = async (base64Image: string, mimeType: string): P
  * @param ingredientName - Name of the ingredient (e.g., "Ức gà")
  * @param unit - Measurement unit (e.g., "g", "ml", "quả")
  * @returns Nutritional data (calories, protein, carbs, fat, fiber) and confirmed unit
- * @throws {Error} Timeout after 30s or AI response validation failure
+ * @throws {Error} Timeout after AI_CALL_TIMEOUT_MS or AI response validation failure
  */
 export const suggestIngredientInfo = async (ingredientName: string, unit: string): Promise<IngredientSuggestion> => {
   const ai = getAI();
@@ -217,11 +241,8 @@ export const suggestIngredientInfo = async (ingredientName: string, unit: string
     - unit (chuỗi, trả về chính xác "${unit}")
   `;
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Timeout")), 30000)
-  );
-
-  const apiCallPromise = ai.models.generateContent({
+  const response = await callWithTimeout(
+    ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
@@ -240,9 +261,10 @@ export const suggestIngredientInfo = async (ingredientName: string, unit: string
         required: ["calories", "protein", "carbs", "fat", "fiber", "unit"]
       }
     }
-  });
-
-  const response = await Promise.race([apiCallPromise, timeoutPromise]);
+  }),
+    AI_CALL_TIMEOUT_MS,
+    'Ingredient info lookup'
+  );
 
   return parseJSON(response.text, isIngredientSuggestion, 'IngredientSuggestion');
 };

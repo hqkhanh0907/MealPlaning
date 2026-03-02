@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Utensils } from 'lucide-react';
 import { MealType, DayPlan } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface TypeSelectionModalProps {
   currentPlan: DayPlan;
@@ -9,29 +11,23 @@ interface TypeSelectionModalProps {
   onClose: () => void;
 }
 
-const ModalBackdrop: React.FC<{ onClose: () => void; children: React.ReactNode }> = ({ onClose, children }) => (
-  <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-    <button type="button" aria-label="Close modal" className="absolute inset-0 w-full h-full cursor-default" onClick={onClose} tabIndex={-1} />
-    {children}
-  </div>
-);
-
-const MEAL_OPTIONS: { type: MealType; planKey: keyof DayPlan; label: string; desc: string; colorClass: string }[] = [
-  { type: 'breakfast', planKey: 'breakfastDishIds', label: 'Bữa Sáng', desc: 'Bắt đầu ngày mới đầy năng lượng', colorClass: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' },
-  { type: 'lunch', planKey: 'lunchDishIds', label: 'Bữa Trưa', desc: 'Nạp lại năng lượng cho buổi chiều', colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
-  { type: 'dinner', planKey: 'dinnerDishIds', label: 'Bữa Tối', desc: 'Bữa ăn nhẹ nhàng, dễ tiêu hóa', colorClass: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' },
-];
-
 export const TypeSelectionModal: React.FC<TypeSelectionModalProps> = ({ currentPlan, onSelectType, onClose }) => {
+  const { t } = useTranslation();
   useModalBackHandler(true, onClose);
+
+  const MEAL_OPTIONS: { type: MealType; planKey: keyof DayPlan; label: string; desc: string; colorClass: string }[] = [
+    { type: 'breakfast', planKey: 'breakfastDishIds', label: t('meal.breakfastFull'), desc: t('typeSelection.breakfastDesc'), colorClass: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' },
+    { type: 'lunch', planKey: 'lunchDishIds', label: t('meal.lunchFull'), desc: t('typeSelection.lunchDesc'), colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
+    { type: 'dinner', planKey: 'dinnerDishIds', label: t('meal.dinnerFull'), desc: t('typeSelection.dinnerDesc'), colorClass: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' },
+  ];
 
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90vh] sm:mx-4">
         <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Lên kế hoạch</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chọn buổi bạn muốn lên kế hoạch</p>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('typeSelection.title')}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('typeSelection.subtitle')}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
             <X className="w-6 h-6" />
@@ -58,7 +54,7 @@ export const TypeSelectionModal: React.FC<TypeSelectionModalProps> = ({ currentP
                 </div>
                 {isPlanned && (
                   <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full shrink-0">
-                    {dishCount} món
+                    {dishCount} {t('common.item')}
                   </span>
                 )}
               </button>

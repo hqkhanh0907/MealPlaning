@@ -9,6 +9,9 @@
       "DOM",
       "DOM.Iterable"
     ],
+    "types": [
+      "vitest/globals"
+    ],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "isolatedModules": true,

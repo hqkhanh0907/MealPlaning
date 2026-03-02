@@ -1,0 +1,182 @@
+import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Plus, Trash2, Save, Search, Minus, X } from 'lucide-react';
+import { Dish, Ingredient, DishIngredient, MealType } from '../../types';
+import { generateId } from '../../utils/helpers';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
+import { getMealTagOptions } from '../../data/constants';
+
+interface DishEditModalProps {
+  /** Dish being edited, or null for creating a new dish. */
+  editingItem: Dish | null;
+  ingredients: Ingredient[];
+  /** Called when a valid dish is saved (both normal save and save-from-unsaved-dialog). */
+  onSubmit: (dish: Dish) => void;
+  /** Called when the modal closes without saving (clean close or discard). */
+  onClose: () => void;
+}
+
+export const DishEditModal: React.FC<DishEditModalProps> = ({
+  editingItem, ingredients, onSubmit, onClose,
+}) => {
+  const { t } = useTranslation();
+  const [name, setName] = useState(() => editingItem?.name ?? '');
+  const [selectedIngredients, setSelectedIngredients] = useState<DishIngredient[]>(
+    () => editingItem ? [...editingItem.ingredients] : [],
+  );
+  const [tags, setTags] = useState<MealType[]>(() => editingItem ? [...(editingItem.tags || [])] : []);
+  const [ingredientSearch, setIngredientSearch] = useState('');
+  const [formErrors, setFormErrors] = useState<{ tags?: string }>({});
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  const hasChanges = useCallback((): boolean => {
+    if (!editingItem) return name !== '' || selectedIngredients.length > 0 || tags.length > 0;
+    if (name !== editingItem.name) return true;
+    if (JSON.stringify(tags) !== JSON.stringify(editingItem.tags || [])) return true;
+    if (selectedIngredients.length !== editingItem.ingredients.length) return true;
+    return selectedIngredients.some((si, i) => {
+      const orig = editingItem.ingredients[i];
+      return si.ingredientId !== orig.ingredientId || si.amount !== orig.amount;
+    });
+  }, [editingItem, name, selectedIngredients, tags]);
+
+  const buildDish = (): Dish => ({
+    id: editingItem ? editingItem.id : generateId('dish'),
+    name,
+    ingredients: selectedIngredients,
+    tags,
+  });
+
+  const validate = (): boolean => {
+    const errors: { tags?: string } = {};
+    if (tags.length === 0) errors.tags = t('dish.validationSelectMeal');
+    if (Object.keys(errors).length > 0) { setFormErrors(errors); return false; }
+    return !(!name || selectedIngredients.length === 0);
+
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    onSubmit(buildDish());
+  };
+
+  const handleClose = () => {
+    if (hasChanges()) { setShowUnsavedDialog(true); return; }
+    onClose();
+  };
+
+  const handleSaveAndBack = () => {
+    if (!validate()) { setShowUnsavedDialog(false); return; }
+    onSubmit(buildDish());
+  };
+
+  const handleAddIngredient = (ingId: string) => {
+    if (selectedIngredients.some(si => si.ingredientId === ingId)) return;
+    setSelectedIngredients(prev => [...prev, { ingredientId: ingId, amount: 100 }]);
+  };
+
+  const handleRemoveIngredient = (ingId: string) => {
+    setSelectedIngredients(prev => prev.filter(si => si.ingredientId !== ingId));
+  };
+
+  const handleUpdateAmount = (ingId: string, amount: number) => {
+    setSelectedIngredients(prev => prev.map(si => si.ingredientId === ingId ? { ...si, amount } : si));
+  };
+
+  const handleTagToggle = (type: MealType, isActive: boolean) => {
+    setTags(prev => isActive ? prev.filter(t => t !== type) : [...prev, type]);
+    if (!isActive && formErrors.tags) setFormErrors(prev => ({ ...prev, tags: undefined }));
+  };
+
+  return (
+    <>
+    <ModalBackdrop onClose={handleClose} zIndex="z-60">
+      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col sm:mx-4">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{editingItem ? t('dish.editExisting') : t('dish.createNew')}</h4>
+          <button onClick={handleClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div>
+            <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
+            <input id="dish-name" required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+          </div>
+          <div>
+            <p className={`block text-xs font-bold uppercase mb-1.5 ${formErrors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>
+            <div className="flex gap-2 flex-wrap">
+              {getMealTagOptions(t).map(({ type, label, icon }) => {
+                const isActive = tags.includes(type);
+                return (
+                  <button key={type} type="button" onClick={() => handleTagToggle(type, isActive)} data-testid={`tag-${type}`} className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${isActive ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'}`}>
+                    {icon} {label}
+                  </button>
+                );
+              })}
+            </div>
+            {formErrors.tags && <p className="text-xs text-rose-500 mt-1.5 font-medium">{formErrors.tags}</p>}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Ingredient Selector */}
+            <div className="space-y-3">
+              <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('dish.selectIngredients')}</p>
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.searchIngredients')} />
+              </div>
+              <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-xl divide-y divide-slate-100 dark:divide-slate-700">
+                {(() => {
+                  const pickerSelectedIds = new Set(selectedIngredients.map(si => si.ingredientId));
+                  const available = ingredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => ing.name.toLowerCase().includes(ingredientSearch.toLowerCase()));
+                  if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === ingredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
+                  return available.map(ing => (
+                    <button key={ing.id} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
+                      <span className="text-slate-700 dark:text-slate-300 font-medium">{ing.name}</span>
+                      <Plus className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
+                    </button>
+                  ));
+                })()}
+              </div>
+            </div>
+            {/* Selected Ingredients */}
+            <div className="space-y-3">
+              <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('dish.selectedIngredients')}</p>
+              <div className="space-y-2">
+                {selectedIngredients.map(si => {
+                  const ing = ingredients.find(i => i.id === si.ingredientId);
+                  if (!ing) return null;
+                  return (
+                    <div key={si.ingredientId} className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600 flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{ing.name}</p>
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <button type="button" onClick={() => handleUpdateAmount(si.ingredientId, Math.max(0.1, si.amount - 10))} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
+                          <input type="number" min="0.1" step="0.1" value={si.amount} onChange={e => handleUpdateAmount(si.ingredientId, Math.max(0.1, Number(e.target.value) || 0.1))} className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
+                          <button type="button" onClick={() => handleUpdateAmount(si.ingredientId, si.amount + 10)} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
+                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{ing.unit}</span>
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  );
+                })}
+                {selectedIngredients.length === 0 && <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl">{t('dish.noIngredientSelected')}</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="p-6 border-t border-slate-100 dark:border-slate-700">
+          <button type="button" onClick={handleSubmit} data-testid="btn-save-dish" className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 dark:shadow-emerald-900 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 text-lg"><Save className="w-5 h-5" /> {t('dish.saveDish')}</button>
+        </div>
+      </div>
+    </ModalBackdrop>
+
+    <UnsavedChangesDialog
+      isOpen={showUnsavedDialog}
+      onSave={handleSaveAndBack}
+      onDiscard={onClose}
+      onCancel={() => setShowUnsavedDialog(false)}
+    />
+    </>
+  );
+};

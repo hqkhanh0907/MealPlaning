@@ -6,7 +6,6 @@
 import { DayPlan, MealType } from '../types';
 import { getWeekRange, isDateInRange, parseLocalDate } from '../utils/helpers';
 
-/** Create an empty day plan for a given date */
 export const createEmptyDayPlan = (date: string): DayPlan => ({
   date,
   breakfastDishIds: [],
@@ -14,7 +13,6 @@ export const createEmptyDayPlan = (date: string): DayPlan => ({
   dinnerDishIds: [],
 });
 
-/** Map MealType to the corresponding DayPlan key */
 export const getDayPlanSlotKey = (type: MealType): keyof DayPlan => {
   const map: Record<MealType, keyof DayPlan> = {
     breakfast: 'breakfastDishIds',
@@ -24,7 +22,6 @@ export const getDayPlanSlotKey = (type: MealType): keyof DayPlan => {
   return map[type];
 };
 
-/** Clear plans by scope: day, week, or month */
 export const clearPlansByScope = (
   plans: DayPlan[],
   selectedDate: string,
@@ -44,7 +41,7 @@ export const clearPlansByScope = (
   });
 };
 
-/** Apply AI suggestion to existing day plans, preserving non-suggested slots */
+// Preserves non-suggested slots so partial AI suggestions don't wipe existing meals
 export const applySuggestionToDayPlans = (
   plans: DayPlan[],
   selectedDate: string,
@@ -69,7 +66,6 @@ export const applySuggestionToDayPlans = (
   return [...plans, merged];
 };
 
-/** Update a specific meal slot in day plans */
 export const updateDayPlanSlot = (
   plans: DayPlan[],
   selectedDate: string,

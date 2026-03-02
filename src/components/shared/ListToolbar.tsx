@@ -20,6 +20,8 @@ interface ListToolbarProps {
   onAdd: () => void;
   addLabel: string;
   children?: React.ReactNode;
+  searchTestId?: string;
+  addTestId?: string;
 }
 
 export const ListToolbar: React.FC<ListToolbarProps> = ({
@@ -28,6 +30,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
   viewLayout, onLayoutChange,
   onAdd, addLabel,
   children,
+  searchTestId, addTestId,
 }) => (
   <>
     <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
@@ -39,6 +42,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-emerald-500 outline-none bg-white dark:bg-slate-800 dark:text-slate-100 shadow-sm text-base sm:text-sm"
+          {...(searchTestId ? { 'data-testid': searchTestId } : {})}
         />
       </div>
       <div className="flex items-center gap-2">
@@ -73,6 +77,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
         <button
           onClick={onAdd}
           className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-11 whitespace-nowrap"
+          {...(addTestId ? { 'data-testid': addTestId } : {})}
         >
           <Plus className="w-5 h-5" />
           <span className="hidden sm:inline">{addLabel}</span>

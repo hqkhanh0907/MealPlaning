@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Ingredient, Dish, DayPlan, MealType } from '../types';
-import { calculateDishNutrition, calculateDishesNutrition } from '../utils/nutrition';
+import { Ingredient, Dish, DayPlan, MealType, AnalyzedIngredient } from '../types';
+import { calculateDishNutrition, calculateDishesNutrition, toTempIngredient, calculateIngredientNutrition } from '../utils/nutrition';
 import { generateId } from '../utils/helpers';
 import { updateDayPlanSlot, clearPlansByScope, applySuggestionToDayPlans } from '../services/planService';
 import { removeIngredientFromDishes, migrateDishes, migrateDayPlans, processAnalyzedDish } from '../services/dataService';
@@ -257,6 +257,79 @@ describe('Flow: Multiple Dishes per Meal Slot', () => {
 
     // Com ga: 507.5 cal + Trung luoc: 310 cal = 817.5 cal
     expect(lunchNutrition.calories).toBeCloseTo(817.5);
+  });
+});
+
+describe('Flow: AI Analyzed → toTempIngredient → Nutrition Calculation', () => {
+  it('should correctly calculate nutrition through the full AI analysis pipeline', () => {
+    const analyzedIngredients: AnalyzedIngredient[] = [
+      {
+        name: 'Ức gà',
+        amount: 200,
+        unit: 'gram',
+        nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+      },
+      {
+        name: 'Cơm trắng',
+        amount: 150,
+        unit: 'g',
+        nutritionPerStandardUnit: { calories: 130, protein: 2.7, carbs: 28, fat: 0.3, fiber: 0.4 },
+      },
+    ];
+
+    // Simulate the AnalysisResultView flow: toTempIngredient → calculateIngredientNutrition
+    const nutritionResults = analyzedIngredients.map(ing => {
+      const temp = toTempIngredient(ing);
+      return calculateIngredientNutrition(temp, ing.amount);
+    });
+
+    // chicken 200g: 200/100 * 165 = 330 cal
+    expect(nutritionResults[0].calories).toBeCloseTo(330);
+    // rice 150g: 150/100 * 130 = 195 cal
+    expect(nutritionResults[1].calories).toBeCloseTo(195);
+
+    // Total
+    const totalCalories = nutritionResults.reduce((sum, n) => sum + n.calories, 0);
+    expect(totalCalories).toBeCloseTo(525);
+  });
+
+  it('should handle AI result with non-standard unit through toTempIngredient', () => {
+    const analyzed: AnalyzedIngredient = {
+      name: 'Trứng gà',
+      amount: 3,
+      unit: 'quả',
+      nutritionPerStandardUnit: { calories: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0 },
+    };
+    const temp = toTempIngredient(analyzed);
+    const nutrition = calculateIngredientNutrition(temp, analyzed.amount);
+    // Countable unit: 3 * 155 = 465 cal
+    expect(nutrition.calories).toBe(465);
+    expect(nutrition.protein).toBe(39);
+  });
+
+  it('should handle processAnalyzedDish + toTempIngredient for full save flow', () => {
+    const payload = {
+      name: 'AI Dish',
+      ingredients: [
+        {
+          name: 'Ức gà',
+          amount: 100,
+          unit: 'Grams',
+          nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+        },
+      ],
+    };
+
+    // processAnalyzedDish matches existing ingredient
+    const { newIngredients, dishIngredients } = processAnalyzedDish(payload, ingredients);
+    expect(newIngredients).toHaveLength(0);
+    expect(dishIngredients[0].ingredientId).toBe('ing-chicken');
+
+    // toTempIngredient should normalize "Grams" → "g" for preview
+    const temp = toTempIngredient(payload.ingredients[0]);
+    expect(temp.unit).toBe('g');
+    const nutrition = calculateIngredientNutrition(temp, 100);
+    expect(nutrition.calories).toBeCloseTo(165);
   });
 });
 

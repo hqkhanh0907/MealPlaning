@@ -1,9 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BookOpen } from 'lucide-react';
 import { Ingredient, Dish } from '../types';
 import { IngredientManager } from './IngredientManager';
 import { DishManager } from './DishManager';
-import { DataBackup } from './DataBackup';
 
 type SubTab = 'ingredients' | 'dishes';
 
@@ -20,27 +20,27 @@ interface ManagementTabProps {
   onUpdateDish: (dish: Dish) => void;
   onDeleteDish: (id: string) => void;
   isDishUsed: (id: string) => boolean;
-  onImportData: (data: Record<string, unknown>) => void;
 }
-
-const SUB_TABS: { key: SubTab; label: string }[] = [
-  { key: 'dishes', label: 'Món ăn' },
-  { key: 'ingredients', label: 'Nguyên liệu' },
-];
 
 export const ManagementTab: React.FC<ManagementTabProps> = React.memo(({
   activeSubTab, onSubTabChange,
   ingredients, dishes,
   onAddIngredient, onUpdateIngredient, onDeleteIngredient, isIngredientUsed,
   onAddDish, onUpdateDish, onDeleteDish, isDishUsed,
-  onImportData,
 }) => {
+  const { t } = useTranslation();
+
+  const SUB_TABS: { key: SubTab; label: string }[] = [
+    { key: 'dishes', label: t('management.subTabDish') },
+    { key: 'ingredients', label: t('management.subTabIngredient') },
+  ];
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
         <div className="flex items-center gap-3">
           <BookOpen className="w-6 h-6 text-emerald-500 shrink-0" />
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">Thư viện dữ liệu</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{t('management.title')}</h2>
         </div>
         <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex-nowrap">
           {SUB_TABS.map(tab => (
@@ -69,11 +69,6 @@ export const ManagementTab: React.FC<ManagementTabProps> = React.memo(({
           onDelete={onDeleteIngredient} isUsed={isIngredientUsed}
         />
       )}
-
-      {/* Data Backup */}
-      <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-        <DataBackup onImport={onImportData} />
-      </div>
     </div>
   );
 });

@@ -1,13 +1,15 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import { initialIngredients, initialDishes } from './data/initialData';
-import { Ingredient, Dish, DayPlan, MealType, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary, MealPlanSuggestion } from './types';
-import { calculateDishesNutrition, calculateDishNutrition } from './utils/nutrition';
+import { Ingredient, Dish, DayPlan, MealType, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
+import { calculateDishesNutrition } from './utils/nutrition';
 import { CalendarTab } from './components/CalendarTab';
 
-// Lazy load less-frequently used tabs for code splitting
+// Lazy-loaded to reduce initial bundle size — these tabs are visited less often
 const GroceryList = React.lazy(() => import('./components/GroceryList').then(m => ({ default: m.GroceryList })));
 const AIImageAnalyzer = React.lazy(() => import('./components/AIImageAnalyzer').then(m => ({ default: m.AIImageAnalyzer })));
 import { ManagementTab } from './components/ManagementTab';
+import { SettingsTab } from './components/SettingsTab';
 import { usePersistedState } from './hooks/usePersistedState';
 import { useNotification } from './contexts/NotificationContext';
 import { TypeSelectionModal } from './components/modals/TypeSelectionModal';
@@ -17,24 +19,21 @@ import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
 import { AISuggestionPreviewModal } from './components/modals/AISuggestionPreviewModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
-  CalendarDays,
-  Settings2,
   Utensils,
   Sparkles,
-  BookOpen,
   ShoppingCart,
   Moon,
   Sun,
   Monitor
 } from 'lucide-react';
-import { suggestMealPlan, AvailableDishInfo } from './services/geminiService';
 import { generateId } from './utils/helpers';
 import { useDarkMode } from './hooks/useDarkMode';
+import { useAISuggestion } from './hooks/useAISuggestion';
+import { useModalManager } from './hooks/useModalManager';
 import {
   createEmptyDayPlan,
   getDayPlanSlotKey,
   clearPlansByScope,
-  applySuggestionToDayPlans,
   updateDayPlanSlot,
 } from './services/planService';
 import {
@@ -42,107 +41,33 @@ import {
   migrateDayPlans,
   migrateDishes,
   processAnalyzedDish,
+  validateImportData,
 } from './services/dataService';
+import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navigation';
+import { getTabLabels } from './components/navigation/types';
+import type { MainTab } from './components/navigation';
 
-// --- Types ---
-
-type MainTab = 'calendar' | 'management' | 'ai-analysis' | 'grocery';
 type ManagementSubTab = 'ingredients' | 'dishes';
 
-const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  breakfast: 'Bữa Sáng',
-  lunch: 'Bữa Trưa',
-  dinner: 'Bữa Tối',
-};
+/** Default user profile values used on first launch. */
+const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetCalories: 1500 };
 
-
-// --- Extracted UI components ---
-
-const TAB_LABELS: Record<MainTab, string> = {
-  'calendar': 'Lịch trình',
-  'management': 'Thư viện',
-  'ai-analysis': 'AI Phân tích',
-  'grocery': 'Đi chợ',
-};
-
-const NAV_ITEMS: { tab: MainTab; icon: React.ReactNode; label: string }[] = [
-  { tab: 'calendar', icon: <CalendarDays className="w-6 h-6" />, label: 'Lịch trình' },
-  { tab: 'management', icon: <BookOpen className="w-6 h-6" />, label: 'Thư viện' },
-  { tab: 'ai-analysis', icon: <Sparkles className="w-6 h-6" />, label: 'AI' },
-  { tab: 'grocery', icon: <ShoppingCart className="w-6 h-6" />, label: 'Đi chợ' },
-];
-
-const DESKTOP_NAV_ITEMS: { tab: MainTab; icon: React.ReactNode; label: string }[] = [
-  { tab: 'calendar', icon: <CalendarDays className="w-4 h-4" />, label: 'Lịch trình' },
-  { tab: 'management', icon: <Settings2 className="w-4 h-4" />, label: 'Quản lý' },
-  { tab: 'ai-analysis', icon: <Sparkles className="w-4 h-4" />, label: 'AI Phân tích' },
-  { tab: 'grocery', icon: <ShoppingCart className="w-4 h-4" />, label: 'Đi chợ' },
-];
-
-const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }> = ({ activeTab, onTabChange, showAIBadge }) => (
-  <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 z-30 sm:hidden" aria-label="Điều hướng chính">
-    <div className="flex items-center justify-around px-2 py-1" role="tablist">
-      {NAV_ITEMS.map(({ tab, icon, label }) => (
-        <button
-          key={tab}
-          role="tab"
-          aria-selected={activeTab === tab}
-          aria-label={label}
-          onClick={() => onTabChange(tab)}
-          className={`flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-h-14 rounded-xl transition-all relative ${activeTab === tab ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 active:text-slate-600'}`}
-        >
-          <div className="relative">
-            {icon}
-            {tab === 'ai-analysis' && showAIBadge && (
-              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900" />
-            )}
-          </div>
-          <span className="text-[11px] font-bold">{label}</span>
-          {activeTab === tab && <div className="absolute -bottom-1 w-5 h-0.5 bg-emerald-500 rounded-full" />}
-        </button>
-      ))}
-    </div>
-    <div className="pb-safe" />
-  </nav>
-);
-
-const DesktopNav: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void }> = ({ activeTab, onTabChange }) => (
-  <nav className="hidden sm:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl" aria-label="Điều hướng chính">
-    {DESKTOP_NAV_ITEMS.map(({ tab, icon, label }) => (
-      <button
-        key={tab}
-        role="tab"
-        aria-selected={activeTab === tab}
-        onClick={() => onTabChange(tab)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-      >
-        {icon}<span>{label}</span>
-      </button>
-    ))}
-  </nav>
-);
-
-const TabLoadingFallback: React.FC = () => (
-  <div className="flex items-center justify-center py-20">
-    <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
-      <div className="w-8 h-8 border-3 border-emerald-200 dark:border-emerald-800 border-t-emerald-500 rounded-full animate-spin" />
-      <p className="text-sm font-medium">Đang tải...</p>
-    </div>
-  </div>
-);
 
 // --- Main App component ---
 
 export default function App() {
+  const { t } = useTranslation();
   const { theme, cycleTheme } = useDarkMode();
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('calendar');
   const activeMainTabRef = useRef(activeMainTab);
   useEffect(() => { activeMainTabRef.current = activeMainTab; }, [activeMainTab]);
 
-  // Clear AI badge when navigating to AI tab
-  useEffect(() => {
-    if (activeMainTab === 'ai-analysis') setHasNewAIResult(false);
-  }, [activeMainTab]);
+  const [hasNewAIResult, setHasNewAIResult] = useState(false);
+
+  const handleTabChange = useCallback((tab: MainTab) => {
+    setActiveMainTab(tab);
+    if (tab === 'ai-analysis') setHasNewAIResult(false);
+  }, []);
 
   const [activeManagementSubTab, setActiveManagementSubTab] = useState<ManagementSubTab>('dishes');
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -153,8 +78,7 @@ export default function App() {
     return `${y}-${m}-${d}`;
   });
 
-  const [userProfile, setUserProfile] = usePersistedState<UserProfile>('mp-user-profile', { weight: 83, proteinRatio: 2, targetCalories: 1500 });
-  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = usePersistedState<UserProfile>('mp-user-profile', DEFAULT_USER_PROFILE);
 
   const [ingredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', initialIngredients);
   const [rawDishes, setDishes] = usePersistedState<Dish[]>('mp-dishes', initialDishes);
@@ -178,20 +102,7 @@ export default function App() {
     }
   }, [rawDishes, dishes, setDishes]);
 
-  const [isPlanningModalOpen, setIsPlanningModalOpen] = useState(false);
-  const [isTypeSelectionModalOpen, setIsTypeSelectionModalOpen] = useState(false);
-  const [isClearPlanModalOpen, setIsClearPlanModalOpen] = useState(false);
-  const [planningType, setPlanningType] = useState<MealType | null>(null);
-  const [isSuggesting, setIsSuggesting] = useState(false);
-  const [hasNewAIResult, setHasNewAIResult] = useState(false);
-
-  // AI Suggestion Preview state
-  const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
-  const [aiSuggestion, setAiSuggestion] = useState<MealPlanSuggestion | null>(null);
-  const [aiSuggestionError, setAiSuggestionError] = useState<string | null>(null);
-
-  // AbortController ref for cancelling AI calls
-  const aiSuggestionAbortRef = useRef<AbortController | null>(null);
+  const modals = useModalManager();
 
   const notify = useNotification();
 
@@ -214,144 +125,24 @@ export default function App() {
 
   const targetProtein = Math.round(userProfile.weight * userProfile.proteinRatio);
 
+  const aiSuggestion = useAISuggestion({
+    dishes, ingredients, targetCalories: userProfile.targetCalories,
+    targetProtein, selectedDate, setDayPlans,
+  });
+
   const handlePlanMeal = useCallback((type: MealType) => {
-    setPlanningType(type);
-    setIsTypeSelectionModalOpen(false);
-    setIsPlanningModalOpen(true);
-  }, []);
+    modals.openPlanningModal(type);
+  }, [modals]);
 
-  // Open AI Suggestion Preview Modal and start fetching
-  const handleSuggestMealPlan = useCallback(async () => {
-    // Abort any existing request
-    if (aiSuggestionAbortRef.current) {
-      aiSuggestionAbortRef.current.abort();
-    }
-
-    // Create new AbortController
-    const abortController = new AbortController();
-    aiSuggestionAbortRef.current = abortController;
-
-    setIsAISuggestionModalOpen(true);
-    setAiSuggestion(null);
-    setAiSuggestionError(null);
-    setIsSuggesting(true);
-
-    try {
-      const availableDishes: AvailableDishInfo[] = dishes.map(d => {
-        const n = calculateDishNutrition(d, ingredients);
-        return { id: d.id, name: d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
-      });
-      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableDishes, abortController.signal);
-
-      // Only update state if not aborted
-      if (!abortController.signal.aborted) {
-        setAiSuggestion(suggestion);
-      }
-    } catch (error) {
-      // Don't show error if request was intentionally aborted
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        return;
-      }
-      console.error("Failed to suggest meal plan:", error);
-      if (!abortController.signal.aborted) {
-        setAiSuggestionError('Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng thử lại.');
-      }
-    } finally {
-      if (!abortController.signal.aborted) {
-        setIsSuggesting(false);
-      }
-    }
-  }, [dishes, ingredients, userProfile.targetCalories, targetProtein]);
-
-  // Apply AI suggestion to day plans
-  const handleApplyAISuggestion = useCallback((selectedMeals: { breakfast: boolean; lunch: boolean; dinner: boolean }) => {
-    if (!aiSuggestion) return;
-
-    const filteredSuggestion = {
-      breakfastDishIds: selectedMeals.breakfast ? aiSuggestion.breakfastDishIds : [],
-      lunchDishIds: selectedMeals.lunch ? aiSuggestion.lunchDishIds : [],
-      dinnerDishIds: selectedMeals.dinner ? aiSuggestion.dinnerDishIds : [],
-      reasoning: aiSuggestion.reasoning,
-    };
-
-    setDayPlans(prev => applySuggestionToDayPlans(prev, selectedDate, filteredSuggestion));
-    setIsAISuggestionModalOpen(false);
-    setAiSuggestion(null);
-    aiSuggestionAbortRef.current = null;
-    notify.success('Đã cập nhật kế hoạch!', 'Thực đơn gợi ý từ AI đã được áp dụng.');
-  }, [aiSuggestion, selectedDate, notify, setDayPlans]);
-
-  // Regenerate AI suggestion
-  const handleRegenerateAISuggestion = useCallback(async () => {
-    // Abort any existing request
-    if (aiSuggestionAbortRef.current) {
-      aiSuggestionAbortRef.current.abort();
-    }
-
-    // Create new AbortController
-    const abortController = new AbortController();
-    aiSuggestionAbortRef.current = abortController;
-
-    setAiSuggestion(null);
-    setAiSuggestionError(null);
-    setIsSuggesting(true);
-
-    try {
-      const availableDishes: AvailableDishInfo[] = dishes.map(d => {
-        const n = calculateDishNutrition(d, ingredients);
-        return { id: d.id, name: d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
-      });
-      const suggestion = await suggestMealPlan(userProfile.targetCalories, targetProtein, availableDishes, abortController.signal);
-
-      if (!abortController.signal.aborted) {
-        setAiSuggestion(suggestion);
-      }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        return;
-      }
-      console.error("Failed to regenerate suggestion:", error);
-      if (!abortController.signal.aborted) {
-        setAiSuggestionError('Có lỗi xảy ra. Vui lòng thử lại.');
-      }
-    } finally {
-      if (!abortController.signal.aborted) {
-        setIsSuggesting(false);
-      }
-    }
-  }, [dishes, ingredients, userProfile.targetCalories, targetProtein]);
-
-  // Edit a meal in AI suggestion (opens planning modal for that meal type)
   const handleEditAISuggestionMeal = useCallback((type: MealType) => {
-    // Abort any pending AI request when editing
-    if (aiSuggestionAbortRef.current) {
-      aiSuggestionAbortRef.current.abort();
-      aiSuggestionAbortRef.current = null;
-    }
-    // Close AI modal and open planning modal for edit
-    setIsAISuggestionModalOpen(false);
-    setIsSuggesting(false);
-    setPlanningType(type);
-    setIsPlanningModalOpen(true);
-  }, []);
-
-  // Close AI suggestion modal and abort any pending AI calls
-  const handleCloseAISuggestionModal = useCallback(() => {
-    // Abort any pending AI request
-    if (aiSuggestionAbortRef.current) {
-      aiSuggestionAbortRef.current.abort();
-      aiSuggestionAbortRef.current = null;
-    }
-    setIsAISuggestionModalOpen(false);
-    setAiSuggestion(null);
-    setAiSuggestionError(null);
-    setIsSuggesting(false);
-  }, []);
+    aiSuggestion.editMeal(type);
+    modals.openPlanningModal(type);
+  }, [aiSuggestion, modals]);
 
   const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month') => {
     setDayPlans(prev => clearPlansByScope(prev, selectedDate, scope));
-    setIsClearPlanModalOpen(false);
-  }, [selectedDate, setDayPlans]);
+    modals.closeClearPlan();
+  }, [selectedDate, setDayPlans, modals]);
 
   const handleUpdatePlan = useCallback((type: MealType, dishIds: string[]) => {
     setDayPlans(prev => updateDayPlanSlot(prev, selectedDate, type, dishIds));
@@ -376,59 +167,45 @@ export default function App() {
     if (newIngredients.length > 0) setIngredients(prev => [...prev, ...newIngredients]);
 
     if (result.shouldCreateDish === false) {
-      notify.success('Lưu thành công!', `Đã lưu ${newIngredients.length} nguyên liệu mới vào thư viện.`);
+      notify.success(t('notification.saveSuccess'), t('notification.savedIngredients', { count: newIngredients.length }));
       setActiveMainTab('management');
       setActiveManagementSubTab('ingredients');
     } else {
       setDishes(prev => [...prev, { id: generateId('dish'), name: result.name, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
-      notify.success('Lưu thành công!', `Đã lưu món "${result.name}" và ${newIngredients.length} nguyên liệu mới.`);
+      notify.success(t('notification.saveSuccess'), t('notification.savedDish', { name: result.name, count: newIngredients.length }));
       setActiveMainTab('management');
       setActiveManagementSubTab('dishes');
     }
-  }, [ingredients, notify, setIngredients, setDishes]);
+  }, [ingredients, notify, setIngredients, setDishes, t]);
 
-  const openTypeSelection = useCallback(() => setIsTypeSelectionModalOpen(true), []);
-  const openClearPlan = useCallback(() => setIsClearPlanModalOpen(true), []);
-  const openGoalModal = useCallback(() => setIsGoalModalOpen(true), []);
+  const openTypeSelection = useCallback(() => modals.openTypeSelection(), [modals]);
+  const openClearPlan = useCallback(() => modals.openClearPlan(), [modals]);
+  const openGoalModal = useCallback(() => modals.openGoalModal(), [modals]);
 
   const handleAnalysisComplete = useCallback(() => {
     if (activeMainTabRef.current !== 'ai-analysis') {
       setHasNewAIResult(true);
-      notify.success('Phân tích hoàn tất!', 'Nhấn để xem kết quả', { onClick: () => setActiveMainTab('ai-analysis') });
+      notify.success(t('notification.analysisComplete'), t('notification.analysisCompleteHint'), { onClick: () => setActiveMainTab('ai-analysis') });
     }
-  }, [notify]);
+  }, [notify, t]);
 
   const handleImportData = useCallback((data: Record<string, unknown>) => {
-    const validators: Record<string, (v: unknown) => boolean> = {
-      'mp-ingredients': (v) => Array.isArray(v) && v.every((i: unknown) =>
-        typeof i === 'object' && i !== null && 'id' in i && 'name' in i && 'unit' in i
-      ),
-      'mp-dishes': (v) => Array.isArray(v) && v.every((d: unknown) =>
-        typeof d === 'object' && d !== null && 'id' in d && 'name' in d && 'ingredients' in d
-      ),
-      'mp-day-plans': (v) => Array.isArray(v) && v.every((p: unknown) =>
-        typeof p === 'object' && p !== null && 'date' in p
-      ),
-      'mp-user-profile': (v) =>
-        typeof v === 'object' && v !== null && 'weight' in v && 'targetCalories' in v,
-    };
+    const { validEntries, invalidKeys } = validateImportData(data);
 
-    let importedCount = 0;
-    for (const [key, validate] of Object.entries(validators)) {
-      if (key in data) {
-        if (validate(data[key])) {
-          localStorage.setItem(key, JSON.stringify(data[key]));
-          importedCount++;
-        } else {
-          notify.warning('Dữ liệu không hợp lệ', `Bỏ qua "${key}" do sai format.`);
-        }
-      }
+    for (const key of invalidKeys) {
+      notify.warning(t('notification.invalidData'), t('notification.invalidDataDesc', { key }));
     }
 
+    if ('mp-ingredients' in validEntries) setIngredients(validEntries['mp-ingredients'] as Ingredient[]);
+    if ('mp-dishes' in validEntries) setDishes(validEntries['mp-dishes'] as Dish[]);
+    if ('mp-day-plans' in validEntries) setDayPlans(validEntries['mp-day-plans'] as DayPlan[]);
+    if ('mp-user-profile' in validEntries) setUserProfile(validEntries['mp-user-profile'] as UserProfile);
+
+    const importedCount = Object.keys(validEntries).length;
     if (importedCount > 0) {
-      window.location.reload();
+      notify.success(t('notification.importSuccess'), t('notification.importSuccessDesc', { count: importedCount }));
     }
-  }, [notify]);
+  }, [notify, setIngredients, setDishes, setDayPlans, setUserProfile, t]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
@@ -440,51 +217,57 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
-                <span className="sm:hidden">{TAB_LABELS[activeMainTab]}</span>
+                <span className="sm:hidden">{getTabLabels(t)[activeMainTab]}</span>
                 <span className="hidden sm:inline">Smart Meal Planner</span>
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">Dinh dưỡng chính xác cho {userProfile.weight}kg</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">{t('header.subtitle', { weight: userProfile.weight })}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={cycleTheme}
-              className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
-              aria-label={`Chế độ hiển thị: ${theme === 'light' ? 'Sáng' : theme === 'dark' ? 'Tối' : 'Hệ thống'}`}
-              title={theme === 'light' ? 'Sáng — nhấn để đổi' : theme === 'dark' ? 'Tối — nhấn để đổi' : 'Theo hệ thống — nhấn để đổi'}
-            >
-              {theme === 'light' && <Sun className="w-5 h-5" />}
-              {theme === 'dark' && <Moon className="w-5 h-5" />}
-              {theme === 'system' && <Monitor className="w-5 h-5" />}
-            </button>
-            <DesktopNav activeTab={activeMainTab} onTabChange={setActiveMainTab} />
+            {(() => {
+              const THEME_LABELS: Record<string, string> = { light: t('header.themeLight'), dark: t('header.themeDark'), system: t('header.themeSystem') };
+              const THEME_TITLES: Record<string, string> = { light: t('header.themeLightTitle'), dark: t('header.themeDarkTitle'), system: t('header.themeSystemTitle') };
+              return (
+                <button
+                  onClick={cycleTheme}
+                  className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
+                  aria-label={t('header.themeAriaLabel', { theme: THEME_LABELS[theme] })}
+                  title={THEME_TITLES[theme]}
+                >
+                  {theme === 'light' && <Sun className="w-5 h-5" />}
+                  {theme === 'dark' && <Moon className="w-5 h-5" />}
+                  {theme === 'system' && <Monitor className="w-5 h-5" />}
+                </button>
+              );
+            })()}
+            <DesktopNav activeTab={activeMainTab} onTabChange={handleTabChange} />
           </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-8">
-        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label="Lịch trình">
-          <ErrorBoundary fallbackTitle="Lỗi tab Lịch trình">
+        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')}>
+          <ErrorBoundary fallbackTitle={t('errorBoundary.calendarTab')}>
           <CalendarTab
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
             dishes={dishes} ingredients={ingredients} currentPlan={currentPlan}
             dayNutrition={dayNutrition}
             userWeight={userProfile.weight} targetCalories={userProfile.targetCalories} targetProtein={targetProtein}
-            isSuggesting={isSuggesting}
+            isSuggesting={aiSuggestion.isLoading}
             onOpenTypeSelection={openTypeSelection} onOpenClearPlan={openClearPlan}
-            onOpenGoalModal={openGoalModal} onPlanMeal={handlePlanMeal} onSuggestMealPlan={handleSuggestMealPlan}
+            onOpenGoalModal={openGoalModal} onPlanMeal={handlePlanMeal} onSuggestMealPlan={aiSuggestion.startSuggestion}
           />
           </ErrorBoundary>
         </div>
 
         {activeMainTab === 'grocery' && (
-          <ErrorBoundary fallbackTitle="Lỗi tab Đi chợ">
+          <ErrorBoundary fallbackTitle={t('errorBoundary.groceryTab')}>
           <Suspense fallback={<TabLoadingFallback />}>
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div className="flex items-center gap-3">
                 <ShoppingCart className="w-6 h-6 text-emerald-500" />
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Danh sách đi chợ</h2>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>
               </div>
             </div>
             <GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={selectedDate} allDishes={dishes} allIngredients={ingredients} />
@@ -493,8 +276,8 @@ export default function App() {
           </ErrorBoundary>
         )}
 
-        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label="Thư viện">
-          <ErrorBoundary fallbackTitle="Lỗi tab Thư viện">
+        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')}>
+          <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}
             ingredients={ingredients} dishes={dishes}
@@ -504,19 +287,18 @@ export default function App() {
             onAddDish={dish => setDishes(prev => [...prev, dish])}
             onUpdateDish={dish => setDishes(prev => prev.map(d => d.id === dish.id ? dish : d))}
             onDeleteDish={id => setDishes(prev => prev.filter(d => d.id !== id))} isDishUsed={isDishUsed}
-            onImportData={handleImportData}
           />
           </ErrorBoundary>
         </div>
 
         {activeMainTab === 'ai-analysis' && (
-          <ErrorBoundary fallbackTitle="Lỗi tab AI Phân tích">
+          <ErrorBoundary fallbackTitle={t('errorBoundary.aiTab')}>
           <Suspense fallback={<TabLoadingFallback />}>
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div className="flex items-center gap-3">
                 <Sparkles className="w-6 h-6 text-emerald-500" />
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">AI Phân tích hình ảnh</h2>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('ai.title')}</h2>
               </div>
             </div>
             <AIImageAnalyzer onAnalysisComplete={handleAnalysisComplete} onSave={handleSaveAnalyzedDish} />
@@ -524,43 +306,52 @@ export default function App() {
           </Suspense>
           </ErrorBoundary>
         )}
+
+        {activeMainTab === 'settings' && (
+          <ErrorBoundary fallbackTitle={t('errorBoundary.settingsTab')}>
+            <SettingsTab onImportData={handleImportData} />
+          </ErrorBoundary>
+        )}
       </main>
 
-      {isTypeSelectionModalOpen && <TypeSelectionModal currentPlan={currentPlan} onSelectType={handlePlanMeal} onClose={() => setIsTypeSelectionModalOpen(false)} />}
-      {isPlanningModalOpen && planningType && (
+      {modals.isTypeSelectionModalOpen && <TypeSelectionModal currentPlan={currentPlan} onSelectType={handlePlanMeal} onClose={modals.closeTypeSelection} />}
+      {modals.isPlanningModalOpen && modals.planningType && (
         <PlanningModal
-          planningType={planningType}
+          planningType={modals.planningType}
           dishes={dishes}
           ingredients={ingredients}
-          currentDishIds={currentPlan[getDayPlanSlotKey(planningType)] as string[]}
+          currentDishIds={currentPlan[getDayPlanSlotKey(modals.planningType)] as string[]}
           onConfirm={(dishIds) => {
-            handleUpdatePlan(planningType, dishIds);
-            setIsPlanningModalOpen(false);
-            notify.success('Đã cập nhật!', `Đã chọn ${dishIds.length} món cho ${MEAL_TYPE_LABELS[planningType]}`);
+            const plannedType = modals.planningType;
+            if (!plannedType) return;
+            handleUpdatePlan(plannedType, dishIds);
+            modals.closePlanningModal();
+            const mealLabel = t(`meal.${plannedType}Full`);
+            notify.success(t('notification.planUpdated'), t('notification.planUpdatedDesc', { count: dishIds.length, meal: mealLabel }));
           }}
-          onClose={() => setIsPlanningModalOpen(false)}
-          onBack={() => { setIsPlanningModalOpen(false); setIsTypeSelectionModalOpen(true); }}
+          onClose={modals.closePlanningModal}
+          onBack={modals.backToPlanningTypeSelection}
         />
       )}
-      {isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={() => setIsClearPlanModalOpen(false)} />}
-      {isGoalModalOpen && <GoalSettingsModal userProfile={userProfile} onUpdateProfile={setUserProfile} onClose={() => setIsGoalModalOpen(false)} />}
+      {modals.isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={modals.closeClearPlan} />}
+      {modals.isGoalModalOpen && <GoalSettingsModal userProfile={userProfile} onUpdateProfile={setUserProfile} onClose={modals.closeGoalModal} />}
 
       <AISuggestionPreviewModal
-        isOpen={isAISuggestionModalOpen}
-        suggestion={aiSuggestion}
+        isOpen={aiSuggestion.isModalOpen}
+        suggestion={aiSuggestion.suggestion}
         dishes={dishes}
         ingredients={ingredients}
         targetCalories={userProfile.targetCalories}
         targetProtein={targetProtein}
-        isLoading={isSuggesting}
-        error={aiSuggestionError}
-        onClose={handleCloseAISuggestionModal}
-        onApply={handleApplyAISuggestion}
-        onRegenerate={handleRegenerateAISuggestion}
+        isLoading={aiSuggestion.isLoading}
+        error={aiSuggestion.error}
+        onClose={aiSuggestion.close}
+        onApply={aiSuggestion.apply}
+        onRegenerate={aiSuggestion.regenerate}
         onEditMeal={handleEditAISuggestionMeal}
       />
 
-      <BottomNavBar activeTab={activeMainTab} onTabChange={setActiveMainTab} showAIBadge={hasNewAIResult} />
+      <BottomNavBar activeTab={activeMainTab} onTabChange={handleTabChange} showAIBadge={hasNewAIResult} />
     </div>
   );
 }

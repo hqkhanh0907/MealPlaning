@@ -1,10 +1,20 @@
 # TEST CASES V2 — Smart Meal Planner (Phân tích toàn diện)
 
-> **Phiên bản:** 2.12  
-> **Ngày cập nhật:** 2026-03-01  
-> **Tổng TC:** 303  
+> **Phiên bản:** 2.13  
+> **Ngày cập nhật:** 2026-03-02  
+> **Tổng TC:** 330  
 > **Phương pháp:** Phân tích theo từng luồng nghiệp vụ (Business Flow), từng component (UI/UX), và mọi edge case có thể xảy ra.
 > 
+> **Changelog v2.13:**
+> - P: Code Quality & Architecture — Principles Audit V5 (+27 TCs)
+>   - P1: useModalManager Hook — SRP extraction từ App.tsx (MOD_01~07)
+>   - P2: callWithTimeout & Named Constants — DRY/Magic Numbers (DRY_01~06)
+>   - P3: getTabLabels Dependency Injection — POLA (POLA_01~02)
+>   - P4: migrateDishes Resilience — filter thay vì throw (MIG_09~11)
+>   - P5: Logger Observability — debug(), traceId, generateTraceId (LOG_01~06)
+>   - P6: Architecture Decision Records (ADR_01~03)
+>   - Unit tests: 448 tests / 35 files — ALL PASSED
+>
 > **Changelog v2.12:**
 > - M: Dark Mode / Theme Switcher (+8 TCs: THEME_01~08)
 >   - 3-mode cycling (light → dark → system), icon thay đổi (Sun/Moon/Monitor), persist localStorage, system preference auto-detect, dark class toggle trên `<html>`, áp dụng toàn bộ UI
@@ -681,6 +691,67 @@
 
 ---
 
+## PHẦN P: CODE QUALITY & ARCHITECTURE — PRINCIPLES AUDIT V5 (27 TCs)
+
+### P1. SRP — useModalManager Hook
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 240 | MOD_01 | Initial state — tất cả modal đóng | `useModalManager()` khởi tạo: `isPlanningModalOpen=false`, `isTypeSelectionModalOpen=false`, `isClearPlanModalOpen=false`, `isGoalModalOpen=false`, `planningType=null` | |
+| 241 | MOD_02 | openTypeSelection / closeTypeSelection | `openTypeSelection()` → `isTypeSelectionModalOpen=true`. `closeTypeSelection()` → `false` | |
+| 242 | MOD_03 | openClearPlan / closeClearPlan | `openClearPlan()` → `isClearPlanModalOpen=true`. `closeClearPlan()` → `false` | |
+| 243 | MOD_04 | openGoalModal / closeGoalModal | `openGoalModal()` → `isGoalModalOpen=true`. `closeGoalModal()` → `false` | |
+| 244 | MOD_05 | openPlanningModal — set type + close type selection | `openPlanningModal('lunch')` → `planningType='lunch'`, `isTypeSelectionModalOpen=false`, `isPlanningModalOpen=true` | |
+| 245 | MOD_06 | closePlanningModal | `closePlanningModal()` → `isPlanningModalOpen=false` | |
+| 246 | MOD_07 | backToPlanningTypeSelection — quay lại chọn bữa | `backToPlanningTypeSelection()` → `isPlanningModalOpen=false`, `isTypeSelectionModalOpen=true` | |
+
+### P2. DRY — Shared Utilities & Named Constants
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 247 | DRY_01 | callWithTimeout — resolve khi promise thành công trước timeout | `callWithTimeout(Promise.resolve(data), 30000, 'test')` → trả về `data` | |
+| 248 | DRY_02 | callWithTimeout — reject khi timeout | Promise never resolves + 30s timeout → `Error('test timed out after 30s')` | Edge: hanging API |
+| 249 | DRY_03 | callWithTimeout — propagate lỗi gốc nếu promise reject trước timeout | `callWithTimeout(Promise.reject(err), 30000, 'test')` → throw `err` gốc, không phải timeout error | |
+| 250 | DRY_04 | AI_CALL_TIMEOUT_MS = 30_000 dùng chung cho 3 API calls | `suggestMealPlan`, `analyzeDishImage`, `suggestIngredientInfo` đều dùng `callWithTimeout(promise, AI_CALL_TIMEOUT_MS, label)`. Không có inline timeout riêng lẻ | |
+| 251 | DRY_05 | UNDO_TOAST_DURATION_MS — không magic number | `DishManager` và `IngredientManager` import `UNDO_TOAST_DURATION_MS` từ `constants.ts` thay vì hardcode `6000` | |
+| 252 | DRY_06 | Named constants trong tips.ts | `CALORIE_OVER_THRESHOLD=1.15`, `CALORIE_UNDER_THRESHOLD=0.7`, `PROTEIN_LOW_THRESHOLD=0.8`, `MIN_FIBER_GRAMS=15`, `FAT_CALORIE_PERCENT_LIMIT=40`, `MAX_TIPS_DISPLAYED=2`. Không có magic number trong logic | |
+
+### P3. POLA — Dependency Injection
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 253 | POLA_01 | getTabLabels(t: TFunction) — nhận TFunction, không import i18n singleton | Signature `getTabLabels(t: TFunction)`. Caller (App.tsx) pass `t` từ `useTranslation()`. Không có `import i18n from '../../i18n'` trong `navigation/types.ts` | |
+| 254 | POLA_02 | Factory functions nhận TFunction | `getMealTagOptions(t)`, `getMealTypeLabels(t)`, `getTagShortLabels(t)`, `getBaseSortOptions(t)` — tất cả nhận `t` thay vì dùng static constants. Không duplicate static/i18n | |
+
+### P4. Resilience — migrateDishes
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 255 | MIG_09 | migrateDishes filter dữ liệu invalid thay vì throw | Input chứa item thiếu `id` hoặc `name` → `.filter()` bỏ qua, trả về mảng rỗng. KHÔNG throw Error | Edge: corrupt localStorage |
+| 256 | MIG_10 | migrateDishes log warning cho item bị filter | Mỗi item invalid → `logger.warn({ component: 'DataService', action: 'migrateDishes' }, 'Skipping invalid dish...')` | |
+| 257 | MIG_11 | migrateDishes giữ dishes valid trong mixed input | Input = [valid1, invalid, valid2] → trả về [migrated1, migrated2], bỏ qua invalid. Tags migration vẫn hoạt động cho items valid | Edge: partial data |
+
+### P5. Observability — Logger Enhancements
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 258 | LOG_01 | logger.debug() — output trong DEV mode | `import.meta.env.DEV = true` → `console.debug('[Component] action', message)` được gọi | |
+| 259 | LOG_02 | logger.debug() — silent trong production | `import.meta.env.DEV = false` → `console.debug` KHÔNG được gọi. Không có log leak ra production | Edge: production build |
+| 260 | LOG_03 | traceId trong log prefix — khi có | `logger.warn({ component: 'X', action: 'Y', traceId: 'abc123' }, msg)` → prefix = `[X] Y [trace:abc123]` | |
+| 261 | LOG_04 | traceId không hiển thị khi omit | `logger.info({ component: 'X', action: 'Y' }, msg)` → prefix = `[X] Y` (không có `[trace:]`) | |
+| 262 | LOG_05 | generateTraceId() — 8 ký tự alphanumeric | `generateTraceId()` trả về string 8 ký tự, match `/^[a-z0-9]+$/` | |
+| 263 | LOG_06 | generateTraceId() — unique trên nhiều lần gọi | 20 lần gọi liên tiếp → 20 giá trị khác nhau (Set.size === 20) | Edge: collision probability |
+
+### P6. Architecture Decision Records
+
+| # | ID | Tên | Mô tả chi tiết | Edge Case |
+|---|-----|------|----------------|-----------|
+| 264 | ADR_01 | ADR 001 — Local Storage Only | File `docs/adr/001-local-storage-only.md` tồn tại, chứa: Title, Status (Accepted), Context, Decision, Consequences | |
+| 265 | ADR_02 | ADR 002 — Gemini AI Integration | File `docs/adr/002-gemini-ai-integration.md` tồn tại, chứa cùng structure | |
+| 266 | ADR_03 | ADR 003 — i18n with i18next | File `docs/adr/003-i18n-with-i18next.md` tồn tại, chứa cùng structure | |
+
+---
+
 ## TÓM TẮT
 
 | Phần | Module | Số TC |
@@ -700,7 +771,8 @@
 | M | Dark Mode / Theme Switcher | 8 |
 | N | Lazy Loading & Code Splitting | 5 |
 | O | Image Compression | 4 |
-| **TỔNG** | | **303** |        
+| P | Code Quality & Architecture (P1~P6) | 27 |
+| **TỔNG** | | **330** |        
 
 ### So sánh với V1 (41 TCs)
 
@@ -716,5 +788,6 @@
 | Responsive | 4 | 12 | +8 (modal variants, scrollbar, card layout) |
 | Dark Mode | 0 | 8 | +8 (3-mode cycling, persist, system auto-detect, dark class toggle) |
 | Performance | 0 | 9 | +9 (lazy loading, code splitting, image compression) |
-| **TỔNG** | **41** | **273** | **+232 TCs** |
+| Code Quality | 0 | 27 | +27 (SRP hook, DRY constants, POLA DI, resilience, observability, ADR) |
+| **TỔNG** | **41** | **330** | **+289 TCs** |
 

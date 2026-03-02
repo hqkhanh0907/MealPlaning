@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays } from 'lucide-react';
 import { Ingredient, Dish, DishIngredient, DayPlan } from '../types';
 import { useNotification } from '../contexts/NotificationContext';
@@ -49,36 +50,39 @@ const getDishIdsFromPlans = (plans: DayPlan[]): string[] => {
   return ids;
 };
 
-const SCOPE_TABS: { key: GroceryScope; label: string }[] = [
-  { key: 'day', label: 'Hôm nay' },
-  { key: 'week', label: 'Tuần này' },
-  { key: 'custom', label: 'Tất cả' },
-];
+const SCOPE_KEYS: GroceryScope[] = ['day', 'week', 'custom'];
 
-const getScopeHeader = (scope: GroceryScope, selectedDate: string): string => {
-  if (scope === 'day') return `🛒 Danh sách đi chợ — ${selectedDate}`;
-  if (scope === 'week') return '🛒 Danh sách đi chợ — Tuần này';
-  return '🛒 Danh sách đi chợ — Tất cả';
+const getScopeLabelKey = (scope: GroceryScope): string => {
+  if (scope === 'day') return 'grocery.scopeToday';
+  if (scope === 'week') return 'grocery.scopeWeek';
+  return 'grocery.scopeAll';
 };
 
-const EmptyState: React.FC = () => (
+const getScopeHeaderKey = (scope: GroceryScope): string => {
+  if (scope === 'day') return 'grocery.headerDay';
+  if (scope === 'week') return 'grocery.headerWeek';
+  return 'grocery.headerAll';
+};
+
+const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
   <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
       <ShoppingCart className="w-10 h-10 text-emerald-300" />
     </div>
-    <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">Chưa có gì cần mua</h3>
+    <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">{t('grocery.emptyTitle')}</h3>
     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
-      Hãy lên kế hoạch ít nhất một bữa ăn để xem danh sách nguyên liệu cần chuẩn bị.
+      {t('grocery.emptyDescription')}
     </p>
     <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
       <CalendarDays className="w-4 h-4" />
-      <span className="text-sm font-bold">Mở tab Lịch trình để bắt đầu</span>
+      <span className="text-sm font-bold">{t('grocery.emptyAction')}</span>
     </div>
   </div>
 );
 
 export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan, dayPlans, selectedDate, allDishes, allIngredients }) => {
   const notify = useNotification();
+  const { t } = useTranslation();
   const [scope, setScope] = useState<GroceryScope>('day');
   const [persistedCheckedIds, setPersistedCheckedIds] = usePersistedState<string[]>('mp-grocery-checked', []);
   const checkedIds = useMemo(() => new Set(persistedCheckedIds), [persistedCheckedIds]);
@@ -115,54 +119,55 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
     const text = groceryItems
       .map(item => `${checkedIds.has(item.id) ? '✅' : '☐'} ${item.name} — ${Math.round(item.amount)} ${item.unit}`)
       .join('\n');
-    const header = getScopeHeader(scope, selectedDate);
+    const header = scope === 'day' ? t('grocery.headerDay', { date: selectedDate }) : t(getScopeHeaderKey(scope));
     navigator.clipboard.writeText(`${header}\n\n${text}`).then(() => {
-      notify.success('Đã sao chép!', 'Danh sách đi chợ đã được sao chép vào clipboard.');
+      notify.success(t('common.copied'), t('grocery.copiedDesc'));
     }).catch(() => {
-      notify.error('Sao chép thất bại', 'Không thể sao chép. Vui lòng thử lại.');
+      notify.error(t('common.copyFailed'), t('grocery.copyFailedDesc'));
     });
-  }, [groceryItems, checkedIds, scope, selectedDate, notify]);
+  }, [groceryItems, checkedIds, scope, selectedDate, notify, t]);
 
   const handleShare = useCallback(async () => {
     const text = groceryItems
       .map(item => `• ${item.name} — ${Math.round(item.amount)} ${item.unit}`)
       .join('\n');
-    const header = getScopeHeader(scope, selectedDate);
+    const header = scope === 'day' ? t('grocery.headerDay', { date: selectedDate }) : t(getScopeHeaderKey(scope));
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Danh sách đi chợ', text: `${header}\n\n${text}` });
+        await navigator.share({ title: t('grocery.shareTitle'), text: `${header}\n\n${text}` });
       } catch { /* User cancelled */ }
     } else {
       handleCopyList();
     }
-  }, [groceryItems, scope, selectedDate, handleCopyList]);
+  }, [groceryItems, scope, selectedDate, handleCopyList, t]);
 
   if (groceryItems.length === 0 && scope === 'day') {
     // Check if other scopes have data
     const weekDishIds = getDishIdsFromPlans(dayPlans);
-    if (weekDishIds.length === 0) return <EmptyState />;
+    if (weekDishIds.length === 0) return <GroceryEmptyState t={t} />;
   }
 
   return (
     <div className="space-y-4">
       {/* Scope Tabs */}
       <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto scrollbar-hide">
-        {SCOPE_TABS.map(tab => (
+        {SCOPE_KEYS.map(key => (
           <button
-            key={tab.key}
-            onClick={() => { setScope(tab.key); setPersistedCheckedIds([]); }}
+            key={key}
+            onClick={() => { setScope(key); setPersistedCheckedIds([]); }}
+            data-testid={`tab-grocery-${key}`}
             className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap min-h-11 ${
-              scope === tab.key ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'
+              scope === key ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'
             }`}
           >
-            {tab.label}
+            {t(getScopeLabelKey(key))}
           </button>
         ))}
       </div>
 
       {groceryItems.length === 0 ? (
-        <EmptyState />
+        <GroceryEmptyState t={t} />
       ) : (
         <div className="bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 rounded-2xl overflow-hidden shadow-sm">
           {/* Header with counter and actions */}
@@ -171,11 +176,11 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
               <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-emerald-900 dark:text-emerald-200">
-                  {groceryItems.length} nguyên liệu
+                  {groceryItems.length} {t('grocery.ingredientCount')}
                 </h3>
                 {checkedCount > 0 && (
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                    Đã mua {checkedCount}/{groceryItems.length}
+                    {t('grocery.boughtCount', { count: checkedCount, total: groceryItems.length })}
                   </p>
                 )}
               </div>
@@ -183,15 +188,16 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
             <div className="flex items-center gap-1">
               <button
                 onClick={handleCopyList}
+                data-testid="btn-grocery-copy"
                 className="p-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
-                title="Sao chép danh sách"
+                title={t('common.copy')}
               >
                 <Copy className="w-4 h-4" />
               </button>
               <button
                 onClick={handleShare}
                 className="p-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
-                title="Chia sẻ danh sách"
+                title={t('common.share')}
               >
                 <Share2 className="w-4 h-4" />
               </button>
@@ -248,7 +254,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
             <div className="px-4 sm:px-6 py-4 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-center">
               <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
                 <CheckCircle2 className="w-5 h-5" />
-                <span>Đã mua đủ tất cả nguyên liệu! 🎉</span>
+                <span>{t('grocery.allBought')}</span>
               </div>
             </div>
           )}

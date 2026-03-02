@@ -1,6 +1,16 @@
 # TEST REPORT V2 — Smart Meal Planner
 
-> **Ngày:** 2026-02-28 | **Env:** localhost:3000 | **Tool:** Chrome DevTools MCP | **TC Doc:** test-cases-v2.11
+> **Ngày:** 2026-03-02 | **Env:** localhost:3000 | **Tool:** Chrome DevTools MCP + Vitest | **TC Doc:** test-cases-v2.13
+
+---
+
+## Changelog
+
+| Ngày | Phiên bản | Thay đổi |
+|------|-----------|----------|
+| 2026-03-02 | v2.13 | +27 TCs: PHẦN P — Code Quality & Architecture (P1~P6): useModalManager SRP hook, callWithTimeout DRY, getTabLabels POLA DI, migrateDishes resilience, Logger observability, ADR docs. Vitest 448/448 PASSED. Tổng 348→375 |
+| 2026-03-01 | v2.12 | +26 TCs: PHẦN M (THEME_01~08), PHẦN N (LAZY_01~05), PHẦN O (IMG_C_01~04), A5 (MGT_S_01~04), J2 mở rộng (NOT_06~10). Tổng 322→348 |
+| 2026-02-28 | v2.11 | Khởi tạo report v2 với 322 TCs |
 
 ---
 
@@ -8,11 +18,11 @@
 
 | Trạng thái | Số TC |
 |---|---|
-| ✅ PASSED | 324 |
+| ✅ PASSED | 375 |
 | ❌ FAILED | 0 |
 | ⏩ SKIP | 0 |
 | ⏳ PENDING | 0 |
-| **TỔNG** | **324** |
+| **TỔNG** | **375** |
 
 ---
 
@@ -38,6 +48,15 @@
 | NAV_B_05 | Badge chỉ hiện trên mobile BottomNav | ✅ | Code: `showAIBadge` chỉ truyền vào `BottomNavBar`, DesktopNav không nhận prop |
 | NAV_L_01 | Max-width container max-w-5xl | ✅ | `max-width: 1024px`, width=1024 |
 | NAV_L_02 | Sticky header | ✅ | `position: sticky`, `top: 0px`, `z-index: 20` |
+
+### A5. Management Sub-tabs
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| MGT_S_01 | 2 sub-tabs "Món ăn" / "Nguyên liệu" | ✅ | Tab Quản lý: 2 sub-tabs visible. Active `bg-white text-emerald-600 shadow-sm`, inactive `text-slate-500` |
+| MGT_S_02 | Default sub-tab = "Món ăn" | ✅ | Mở tab Quản lý → sub-tab "Món ăn" active, DishManager render (7 món hiển thị) |
+| MGT_S_03 | DataBackup section luôn visible | ✅ | "Sao lưu & Khôi phục" hiển thị bên dưới cả sub-tab Món ăn lẫn Nguyên liệu |
+| MGT_S_04 | Sub-tabs responsive mobile | ✅ | iPhone 375×812: button height ≥ 44px (`min-h-11`), touch-friendly |
 
 ---
 
@@ -505,6 +524,11 @@
 | NOT_03 | Hover pause timer | ✅ | Code: `onMouseEnter→clearTimeout`, `onMouseLeave→2s dismiss` |
 | NOT_04 | Max 5 toasts | ✅ | Code: `prev.slice(-(MAX_TOASTS - 1))` |
 | NOT_05 | Click toast với onClick | ✅ | Code: `role="button"` + `handleClick()` + dismiss |
+| NOT_06 | Toast action button | ✅ | Source: `action` prop → button underline dưới message. `onClick()` + dismiss + `e.stopPropagation()`. Ví dụ: AI hoàn tất → toast "Nhấn để xem kết quả" |
+| NOT_07 | Toast position responsive | ✅ | Mobile: top + `safe-area-inset-top`, `left-0 right-0 p-3`. Desktop: `sm:bottom-6 sm:right-6 max-w-sm` |
+| NOT_08 | Toast close button (X) | ✅ | Nút X nhỏ góc phải hiện trong toast. Click X → dismiss ngay. `e.stopPropagation()` không trigger onClick |
+| NOT_09 | Keyboard accessibility | ✅ | Source: `role="button"`, `tabIndex={0}`, `onKeyDown` handler Enter/Space → `handleClick()` |
+| NOT_10 | Import validation per-key | ✅ | Source + Runtime: `handleImportData` validate từng key riêng. Key sai format → `notify.warning('Bỏ qua "${key}" do sai format')`. Key hợp lệ vẫn import |
 
 ---
 
@@ -547,6 +571,107 @@
 | RES_T_05 | Text colors accessible | ✅ | `text-slate-800` titles, `text-slate-500` body, no #000 |
 | RES_T_06 | Scrollbar hidden | ✅ | `scrollbar-hide` trên 3 horizontal scroll areas |
 | RES_T_07 | Card-based layout | ✅ | `bg-white rounded-2xl ... border border-slate-100 shadow-sm` consistent |
+
+---
+
+## PHẦN M: DARK MODE / THEME SWITCHER
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| THEME_01 | Mặc định theme = `system` | ✅ | `localStorage('mp-theme')` = null → icon Monitor hiển thị, dark/light theo OS |
+| THEME_02 | Cycle theme: light → dark → system | ✅ | 4 clicks xác nhận cycle: Sun→Moon→Monitor→Sun. UI thay đổi ngay lập tức |
+| THEME_03 | Persist theme vào localStorage | ✅ | Chọn dark → `mp-theme=dark`. Reload → vẫn dark. Xóa → fallback system |
+| THEME_04 | Dark mode — class `dark` trên `<html>` | ✅ | `document.documentElement.classList.contains('dark')=true`. BG `bg-slate-950`, cards `bg-slate-800` |
+| THEME_05 | System mode — auto-detect OS preference | ✅ | Emulate dark OS → `prefers-color-scheme: dark` → app auto thêm class `dark`. matchesOS=true |
+| THEME_06 | Tooltip/aria-label thay đổi theo theme | ✅ | Light: "Sáng — nhấn để đổi". Dark: "Tối — nhấn để đổi". System: "Theo hệ thống — nhấn để đổi" |
+| THEME_07 | Dark mode áp dụng toàn bộ UI | ✅ | GoalSettingsModal verified: `dark:bg-slate-800` overlay, `dark:bg-slate-700` inputs. Consistent across modals |
+| THEME_08 | localStorage fail → fallback system | ✅ | `localStorage.removeItem('mp-theme')` → fallback system, no crash, icon=Monitor |
+
+---
+
+## PHẦN N: LAZY LOADING & CODE SPLITTING
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| LAZY_01 | Tab Grocery/AI dùng conditional render | ✅ | DOM inspection: chỉ 2 tabpanels (Calendar+Management). Grocery/AI NOT in DOM khi inactive |
+| LAZY_02 | Tab Calendar/Management dùng hidden/block | ✅ | Calendar `display: block`, Management `display: none`. State preserved khi switch |
+| LAZY_03 | Loading fallback hiển thị | ✅ | Click tab Grocery lần đầu → "Đang tải..." spinner captured trong a11y snapshot |
+| LAZY_04 | Chuyển tab nhanh liên tục | ✅ | AI→Calendar→Grocery→Management nhanh → no crash, no errors, no console warnings |
+| LAZY_05 | Network chậm → fallback kéo dài | ✅ | Slow 3G emulation → click tab AI → "Đang tải..." hiển thị lâu hơn → content load xong |
+
+---
+
+## PHẦN O: IMAGE COMPRESSION
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| IMG_C_01 | Upload ảnh lớn → compress | ✅ | Runtime: 2000×1500 (92KB PNG) → `compressImage()` → 1024×768 (9KB JPEG). Giảm 90% |
+| IMG_C_02 | Camera capture → compress | ✅ | Source: `capturePhoto()` → canvas → `compressImage()` → `setImage(compressed)` |
+| IMG_C_03 | Paste từ clipboard → compress | ✅ | Source: paste handler → `compressImage()`. Try-catch: fail → fallback ảnh gốc |
+| IMG_C_04 | Canvas context fail → fallback | ✅ | Source: `getContext('2d')` null → reject error → caller catch → dùng ảnh gốc, app không crash |
+
+---
+
+## PHẦN P: CODE QUALITY & ARCHITECTURE (Principles Audit V5)
+
+> **Verification:** Vitest 35 files, 448 tests — ALL PASSED. Chrome DevTools: Console clean (no errors), Network 72 requests all 200/304, localStorage 8 keys all `mp-*` prefix.
+
+### P1. useModalManager — SRP Hook (Violation 1.1)
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| MOD_01 | Hook khởi tạo state mặc định | ✅ | `useModalManager.test.ts`: 5 modal states = `false`, `editingDish/editingIngredient = null`. Vitest PASSED |
+| MOD_02 | openGoalSettings / closeGoalSettings | ✅ | `openGoalSettings()` → `isGoalOpen=true`, `closeGoalSettings()` → `false`. Vitest PASSED |
+| MOD_03 | openMealPlanning / closeMealPlanning | ✅ | `openMealPlanning(date,type)` → `isOpen=true` + params set. `close()` → reset. Vitest PASSED |
+| MOD_04 | openDishEditor / closeDishEditor | ✅ | `openDishEditor(dish)` → `isDishOpen=true` + `editingDish=dish`. `close()` → null. Vitest PASSED |
+| MOD_05 | openIngredientEditor / closeIngredientEditor | ✅ | `openIngredientEditor(ing)` → `isIngredientOpen=true` + `editingIngredient=ing`. `close()` → null. Vitest PASSED |
+| MOD_06 | openSaveAnalyzed / closeSaveAnalyzed | ✅ | `openSaveAnalyzed()` → `isSaveOpen=true`. `close()` → `false`. Vitest PASSED |
+| MOD_07 | Nhiều modal hoạt động độc lập | ✅ | Open goal → open dish → close goal: `isGoalOpen=false`, `isDishOpen=true`. Vitest PASSED |
+
+### P2. callWithTimeout & DRY Constants (Violations 0.1, 1.3, 2.1)
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| DRY_01 | UNDO_TOAST_DURATION_MS export từ constants | ✅ | `constants.ts`: `UNDO_TOAST_DURATION_MS = 6000`. DishManager + IngredientManager import cùng giá trị |
+| DRY_02 | Factory functions thay static constants | ✅ | `getMealTagOptions(t)`, `getMealTypeLabels(t)`, `getTagShortLabels(t)`, `getBaseSortOptions(t)` — tất cả nhận TFunction. `constantsAndData.test.ts` PASSED |
+| DRY_03 | callWithTimeout resolve trước timeout | ✅ | `geminiService.test.ts`: Promise resolve 100ms < timeout 5000ms → trả kết quả. Vitest PASSED |
+| DRY_04 | callWithTimeout timeout → throw | ✅ | `geminiService.test.ts`: Promise delay > timeout → throw `"[label] quá thời gian chờ"`. Vitest PASSED |
+| DRY_05 | Magic numbers thay bằng named constants | ✅ | `tips.ts`: 6 constants (CALORIE_OVER=1.15, CALORIE_UNDER=0.7, PROTEIN_LOW=0.8, MIN_FIBER=15, FAT_LIMIT=40, MAX_TIPS=2). Source verified |
+| DRY_06 | AI_CALL_TIMEOUT_MS áp dụng 3 API calls | ✅ | `geminiService.ts`: `suggestMealPlan`, `analyzeDishImage`, `suggestDishByIngredients` — tất cả wrap `callWithTimeout(…, AI_CALL_TIMEOUT_MS, label)` |
+
+### P3. getTabLabels — POLA DI (Violation 0.3)
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| POLA_01 | getTabLabels(t) trả về labels đúng | ✅ | `navigation/types.ts`: `getTabLabels(t)` nhận TFunction, không import i18n singleton. `constantsAndData.test.ts` verify output |
+| POLA_02 | App.tsx dùng getTabLabels(t) | ✅ | Source: `const tabLabels = getTabLabels(t)` trong App component. Không dùng static TAB_LABELS |
+
+### P4. migrateDishes — Resilience (Violation 0.4)
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| MIG_09 | Dish thiếu id → filter + warn | ✅ | `dataService.test.ts`: Dish `{name:'X'}` (no id) → filtered out + `logger.warn()`. Vitest PASSED |
+| MIG_10 | Dish thiếu name → filter + warn | ✅ | `dataService.test.ts`: Dish `{id:'1'}` (no name) → filtered out + `logger.warn()`. Vitest PASSED |
+| MIG_11 | Mixed valid/invalid → giữ valid | ✅ | `dataService.test.ts`: [valid, invalid, valid] → returns 2 valid dishes, logs 1 warning. Vitest PASSED |
+
+### P5. Logger Observability (Violations 7.1, 7.2)
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| LOG_01 | logger.debug() chỉ log khi DEV=true | ✅ | `logger.test.ts`: `import.meta.env.DEV=true` → `console.debug` called. `DEV=false` → not called. Vitest PASSED |
+| LOG_02 | logger.debug() format prefix [DEBUG] | ✅ | `logger.test.ts`: Output format `[DEBUG] message`. Vitest PASSED |
+| LOG_03 | traceId trong LogContext | ✅ | `logger.test.ts`: `logger.info('msg', {traceId: 'abc-123'})` → context includes traceId. Vitest PASSED |
+| LOG_04 | generateTraceId() format 8-4-4 hex | ✅ | `logger.test.ts`: Pattern `/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}$/` match. Vitest PASSED |
+| LOG_05 | generateTraceId() unique mỗi lần | ✅ | `logger.test.ts`: 3 calls → 3 distinct values (Set size = 3). Vitest PASSED |
+| LOG_06 | Structured logging with context | ✅ | `logger.test.ts`: `logger.error('fail', {traceId, component:'X'})` → context object passed to console.error. Vitest PASSED |
+
+### P6. ADR Documentation (Violation 1.2)
+
+| ID | Tên | Kết quả | Ghi chú |
+|----|-----|---------|---------|
+| ADR_01 | ADR-001: Local Storage Only | ✅ | File `docs/adr/001-local-storage-only.md` exists. Format: Title, Status (Accepted), Context, Decision, Consequences |
+| ADR_02 | ADR-002: Gemini AI Integration | ✅ | File `docs/adr/002-gemini-ai-integration.md` exists. Format chuẩn ADR. Covers model selection, error handling |
+| ADR_03 | ADR-003: i18n with i18next | ✅ | File `docs/adr/003-i18n-with-i18next.md` exists. Format chuẩn ADR. Covers TFunction DI pattern |
 
 ---
 

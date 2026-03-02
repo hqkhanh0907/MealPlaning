@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeUnit, calculateIngredientNutrition, calculateDishNutrition, calculateDishesNutrition } from '../utils/nutrition';
-import { Ingredient, Dish } from '../types';
+import { normalizeUnit, calculateIngredientNutrition, calculateDishNutrition, calculateDishesNutrition, toTempIngredient } from '../utils/nutrition';
+import { Ingredient, Dish, AnalyzedIngredient } from '../types';
 
 // --- Test fixtures ---
 
@@ -29,7 +29,12 @@ const butter: Ingredient = {
   caloriesPer100: 717, proteinPer100: 0.85, carbsPer100: 0.06, fatPer100: 81, fiberPer100: 0,
 };
 
-const allIngredients = [chicken, rice, egg, oil, butter];
+const vitaminC: Ingredient = {
+  id: 'ing-6', name: 'Vitamin C', unit: 'mg',
+  caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0,
+};
+
+const allIngredients = [chicken, rice, egg, oil, butter, vitaminC];
 
 // --- Tests ---
 
@@ -47,6 +52,12 @@ describe('normalizeUnit', () => {
     expect(normalizeUnit('kg')).toBe('kg');
     expect(normalizeUnit('kilogram')).toBe('kg');
     expect(normalizeUnit('kilograms')).toBe('kg');
+  });
+
+  it('should normalize mg', () => {
+    expect(normalizeUnit('mg')).toBe('mg');
+    expect(normalizeUnit('milligram')).toBe('mg');
+    expect(normalizeUnit('milligrams')).toBe('mg');
   });
 
   it('should normalize volume units', () => {
@@ -105,6 +116,12 @@ describe('calculateIngredientNutrition', () => {
     const result = calculateIngredientNutrition(butter, 0.1); // 100g
     expect(result.calories).toBeCloseTo(717);
     expect(result.fat).toBeCloseTo(81);
+  });
+
+  it('should handle mg unit (1mg = 0.001g, very small factor)', () => {
+    const result = calculateIngredientNutrition(vitaminC, 500); // 500mg
+    // factor = (500 * 0.001) / 100 = 0.005
+    expect(result.calories).toBeCloseTo(0);
   });
 
   it('should handle countable unit (quả) — amount used directly as factor', () => {
@@ -207,6 +224,71 @@ describe('calculateDishesNutrition', () => {
   it('should handle duplicate dish IDs (counts twice)', () => {
     const result = calculateDishesNutrition(['dish-2', 'dish-2'], dishes, allIngredients);
     expect(result.calories).toBe(620); // 310 * 2
+  });
+});
+
+describe('toTempIngredient', () => {
+  it('should map AnalyzedIngredient to Ingredient with empty id', () => {
+    const analyzed: AnalyzedIngredient = {
+      name: 'Ức gà',
+      amount: 150,
+      unit: 'gram',
+      nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+    };
+    const result = toTempIngredient(analyzed);
+    expect(result.id).toBe('');
+    expect(result.name).toBe('Ức gà');
+  });
+
+  it('should apply normalizeUnit to the unit field', () => {
+    const analyzed: AnalyzedIngredient = {
+      name: 'Bơ',
+      amount: 50,
+      unit: 'Grams',
+      nutritionPerStandardUnit: { calories: 717, protein: 0.85, carbs: 0.06, fat: 81, fiber: 0 },
+    };
+    const result = toTempIngredient(analyzed);
+    expect(result.unit).toBe('g'); // "Grams" → "g"
+  });
+
+  it('should map nutrition fields correctly', () => {
+    const analyzed: AnalyzedIngredient = {
+      name: 'Cà rốt',
+      amount: 100,
+      unit: 'g',
+      nutritionPerStandardUnit: { calories: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8 },
+    };
+    const result = toTempIngredient(analyzed);
+    expect(result.caloriesPer100).toBe(41);
+    expect(result.proteinPer100).toBe(0.9);
+    expect(result.carbsPer100).toBe(10);
+    expect(result.fatPer100).toBe(0.2);
+    expect(result.fiberPer100).toBe(2.8);
+  });
+
+  it('should preserve non-standard units as-is (lowercased)', () => {
+    const analyzed: AnalyzedIngredient = {
+      name: 'Trứng',
+      amount: 2,
+      unit: 'Quả',
+      nutritionPerStandardUnit: { calories: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0 },
+    };
+    const result = toTempIngredient(analyzed);
+    expect(result.unit).toBe('quả'); // Unknown unit → lowercased
+  });
+
+  it('should produce an Ingredient usable with calculateIngredientNutrition', () => {
+    const analyzed: AnalyzedIngredient = {
+      name: 'Ức gà',
+      amount: 200,
+      unit: 'g',
+      nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+    };
+    const temp = toTempIngredient(analyzed);
+    const nutrition = calculateIngredientNutrition(temp, 200);
+    // 200g / 100 * 165 = 330 cal
+    expect(nutrition.calories).toBeCloseTo(330);
+    expect(nutrition.protein).toBeCloseTo(62);
   });
 });
 

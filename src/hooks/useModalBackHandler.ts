@@ -28,13 +28,13 @@ export function useModalBackHandler(isOpen: boolean, onClose: () => void) {
       if (isPushedRef.current) {
         isPushedRef.current = false;
         programmaticBackCount++;
-        window.history.back();
+        globalThis.history.back();
       }
       return;
     }
 
     // Modal vừa mở → push history entry
-    window.history.pushState({ modal: true }, '');
+    globalThis.history.pushState({ modal: true }, '');
     isPushedRef.current = true;
 
     // Browser popstate (swipe back on iOS Safari, browser back)
@@ -50,26 +50,26 @@ export function useModalBackHandler(isOpen: boolean, onClose: () => void) {
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
+    globalThis.addEventListener('popstate', handlePopState);
 
     // Native Android back button via Capacitor
     let removeBackButtonListener: (() => void) | null = null;
 
     if (Capacitor.isNativePlatform()) {
-      App.addListener('backButton', ({ canGoBack }) => {
+      void App.addListener('backButton', ({ canGoBack }) => {
         if (isPushedRef.current) {
           // Trigger popstate which will call onClose
-          window.history.back();
+          globalThis.history.back();
         } else if (!canGoBack) {
-          App.exitApp();
+          void App.exitApp();
         }
       }).then(handle => {
-        removeBackButtonListener = () => handle.remove();
+        removeBackButtonListener = () => { void handle.remove(); };
       });
     }
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      globalThis.removeEventListener('popstate', handlePopState);
       if (removeBackButtonListener) {
         removeBackButtonListener();
       }

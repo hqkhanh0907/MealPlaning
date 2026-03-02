@@ -149,6 +149,49 @@ describe('applySuggestionToDayPlans', () => {
     });
     expect(plans[0].breakfastDishIds).toEqual(['d1']); // Unchanged
   });
+
+  it('should fallback to empty arrays when no existing plan and all suggestion slots empty', () => {
+    const suggestion = {
+      breakfastDishIds: [],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    };
+    const result = applySuggestionToDayPlans([], '2026-03-10', suggestion);
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe('2026-03-10');
+    expect(result[0].breakfastDishIds).toEqual([]);
+    expect(result[0].lunchDishIds).toEqual([]);
+    expect(result[0].dinnerDishIds).toEqual([]);
+  });
+
+  it('should fallback to empty for non-suggested slots when no existing plan', () => {
+    const suggestion = {
+      breakfastDishIds: ['s1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    };
+    const result = applySuggestionToDayPlans([], '2026-03-10', suggestion);
+    expect(result[0].breakfastDishIds).toEqual(['s1']);
+    expect(result[0].lunchDishIds).toEqual([]); // ?? [] fallback
+    expect(result[0].dinnerDishIds).toEqual([]); // ?? [] fallback
+  });
+
+  it('should only merge matching date and leave other plans untouched', () => {
+    const plans: DayPlan[] = [plan1, plan2]; // plan1: 2026-03-02, plan2: 2026-03-04
+    const suggestion = {
+      breakfastDishIds: ['new-b'],
+      lunchDishIds: ['new-l'],
+      dinnerDishIds: [],
+    };
+    const result = applySuggestionToDayPlans(plans, '2026-03-02', suggestion);
+    expect(result).toHaveLength(2);
+    // plan1 merged
+    expect(result[0].breakfastDishIds).toEqual(['new-b']);
+    expect(result[0].lunchDishIds).toEqual(['new-l']);
+    expect(result[0].dinnerDishIds).toEqual(['d3']); // Preserved from existing
+    // plan2 untouched (covers `: p` branch in map)
+    expect(result[1]).toEqual(plan2);
+  });
 });
 
 describe('updateDayPlanSlot', () => {
@@ -177,6 +220,15 @@ describe('updateDayPlanSlot', () => {
     const plans = [{ ...plan1 }];
     updateDayPlanSlot(plans, '2026-03-02', 'breakfast', ['new']);
     expect(plans[0].breakfastDishIds).toEqual(['d1']);
+  });
+
+  it('should not affect other dates when updating existing plan among multiple', () => {
+    const result = updateDayPlanSlot([plan1, plan2], '2026-03-02', 'lunch', ['updated']);
+    expect(result).toHaveLength(2);
+    expect(result[0].lunchDishIds).toEqual(['updated']);
+    // plan2 should remain unchanged
+    expect(result[1].date).toBe('2026-03-04');
+    expect(result[1].breakfastDishIds).toEqual(['d4']);
   });
 });
 
