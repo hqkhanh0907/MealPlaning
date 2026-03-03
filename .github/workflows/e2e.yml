@@ -59,8 +59,8 @@ jobs:
 
       - name: Install E2E test dependencies
         run: |
-          npm install @wdio/cli @wdio/local-runner @wdio/mocha-framework @wdio/appium-service webdriverio
-          ls -la node_modules/.bin/wdio && echo "wdio binary OK" || { echo "ERROR: wdio binary not found"; exit 1; }
+          npm install @wdio/cli @wdio/local-runner @wdio/mocha-framework @wdio/appium-service @wdio/spec-reporter webdriverio appium appium-uiautomator2-driver
+          ls -la node_modules/.bin/wdio && ls -la node_modules/.bin/appium && echo "E2E binaries OK" || { echo "ERROR: E2E binaries missing"; exit 1; }
 
       - name: Build web app
         run: npm run build
