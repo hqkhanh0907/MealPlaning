@@ -1,5 +1,6 @@
 export const config = {
   runner: 'local',
+  rootDir: process.cwd(),
   tsConfigPath: './e2e/tsconfig.json',
   specs: ['./e2e/specs/**/*.spec.ts'],
   maxInstances: 1,
