@@ -70,6 +70,17 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug
 
+      - name: Verify wdio installation
+        run: |
+          echo "=== node_modules/.bin/wdio ==="
+          ls -la node_modules/.bin/wdio 2>&1 || true
+          echo "=== @wdio/cli/bin/ ==="
+          ls -la node_modules/@wdio/cli/bin/ 2>&1 || true
+          echo "=== npm ls @wdio/cli ==="
+          npm ls @wdio/cli 2>&1 || true
+          echo "=== which npx ==="
+          which npx && npx --version
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -86,7 +97,9 @@ jobs:
           emulator-boot-timeout: 900
           force-avd-creation: false
           disable-animations: true
-          script: node node_modules/@wdio/cli/bin/wdio.js run e2e/wdio.conf.ts
+          script: |
+            export PATH="$PWD/node_modules/.bin:$PATH"
+            wdio run e2e/wdio.conf.ts
 
       - name: Upload test artifacts
         if: failure()
