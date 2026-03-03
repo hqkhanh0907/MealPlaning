@@ -7,7 +7,18 @@ describe('Grocery List — scope switching and copy', () => {
 
   before(async () => {
     await page.switchToWebview();
+    // navigate deterministically to avoid landing on a stale tab state
+    await page.navigateTo('calendar');
     await page.navigateTo('grocery');
+
+    await browser.waitUntil(
+      async () => (await page.isDisplayed('grocery-empty-state')) || (await page.isDisplayed('tab-grocery-day')),
+      {
+        timeout: 10_000,
+        interval: 500,
+        timeoutMsg: 'Grocery tab did not become visible in time',
+      }
+    );
   });
 
   it('should show empty state or day scope tab', async () => {
