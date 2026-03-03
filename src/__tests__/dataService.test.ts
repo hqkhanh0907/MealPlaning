@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { removeIngredientFromDishes, migrateDayPlans, migrateDishes, processAnalyzedDish } from '../services/dataService';
+import { removeIngredientFromDishes, migrateDayPlans, migrateDishes, processAnalyzedDish, validateImportData } from '../services/dataService';
 import { Dish, Ingredient, SaveAnalyzedDishPayload } from '../types';
 
 describe('removeIngredientFromDishes', () => {
@@ -192,3 +192,72 @@ describe('processAnalyzedDish', () => {
   });
 });
 
+describe('validateImportData', () => {
+  const validIngredients = [{ id: 'i1', name: 'Chicken', unit: 'g' }];
+  const validDishes = [{ id: 'd1', name: 'Salad', ingredients: [] }];
+  const validDayPlans = [{ date: '2025-01-01' }];
+  const validProfile = { weight: 70, targetCalories: 2000 };
+
+  it('accepts all four valid keys', () => {
+    const result = validateImportData({
+      'mp-ingredients': validIngredients,
+      'mp-dishes': validDishes,
+      'mp-day-plans': validDayPlans,
+      'mp-user-profile': validProfile,
+    });
+    expect(result.invalidKeys).toHaveLength(0);
+    expect(Object.keys(result.validEntries)).toHaveLength(4);
+  });
+
+  it('marks mp-ingredients invalid when entries lack required fields', () => {
+    const result = validateImportData({
+      'mp-ingredients': [{ name: 'Chicken' }], // missing id, unit
+    });
+    expect(result.invalidKeys).toContain('mp-ingredients');
+    expect(result.validEntries['mp-ingredients']).toBeUndefined();
+  });
+
+  it('marks mp-dishes invalid when entries lack required fields', () => {
+    const result = validateImportData({
+      'mp-dishes': [{ id: 'd1', name: 'Test' }], // missing ingredients
+    });
+    expect(result.invalidKeys).toContain('mp-dishes');
+  });
+
+  it('marks mp-day-plans invalid when entries lack date field', () => {
+    const result = validateImportData({
+      'mp-day-plans': [{ meals: [] }], // missing date
+    });
+    expect(result.invalidKeys).toContain('mp-day-plans');
+  });
+
+  it('marks mp-user-profile invalid when missing required fields', () => {
+    const result = validateImportData({
+      'mp-user-profile': { weight: 70 }, // missing targetCalories
+    });
+    expect(result.invalidKeys).toContain('mp-user-profile');
+  });
+
+  it('ignores unknown keys not in the validator map', () => {
+    const result = validateImportData({
+      'unknown-key': [{ id: 'x' }],
+    });
+    expect(result.invalidKeys).toHaveLength(0);
+    expect(result.validEntries['unknown-key']).toBeUndefined();
+  });
+
+  it('handles empty input object', () => {
+    const result = validateImportData({});
+    expect(result.invalidKeys).toHaveLength(0);
+    expect(Object.keys(result.validEntries)).toHaveLength(0);
+  });
+
+  it('accepts valid mp-ingredients and rejects invalid mp-dishes in same call', () => {
+    const result = validateImportData({
+      'mp-ingredients': validIngredients,
+      'mp-dishes': [{ id: 'd1' }], // missing name and ingredients
+    });
+    expect(result.validEntries['mp-ingredients']).toBeDefined();
+    expect(result.invalidKeys).toContain('mp-dishes');
+  });
+});

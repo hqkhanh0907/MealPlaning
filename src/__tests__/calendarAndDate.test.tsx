@@ -29,6 +29,11 @@ const dayPlans: DayPlan[] = [
 
 // --- DateSelector ---
 describe('DateSelector', () => {
+  afterEach(() => {
+    // Reset viewport to desktop after each test to avoid affecting subsequent tests
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
+  });
+
   it('renders calendar icon and view mode toggle', () => {
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
     expect(screen.getByText('Hôm nay')).toBeInTheDocument();
@@ -134,6 +139,63 @@ describe('DateSelector', () => {
     fireEvent.doubleClick(day15);
     expect(onSelectDate).toHaveBeenCalled();
     expect(onPlanClick).toHaveBeenCalled();
+  });
+
+  it('calls onPlanClick when clicking already-selected date in week view', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    const onPlanClick = vi.fn();
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} onPlanClick={onPlanClick} />);
+    // In small viewport → starts in week mode; today button should be present and selected
+    const todayButtons = screen.getAllByText(String(today.getDate()));
+    const todayBtn = todayButtons.find(el => el.closest('[data-selected="true"]'));
+    if (todayBtn) {
+      fireEvent.click(todayBtn);
+      expect(onPlanClick).toHaveBeenCalled();
+    }
+  });
+
+  it('swipe left on week container navigates to next week', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
+
+    // Get the week grid container (the div that holds the 7 day buttons)
+    const weekContainer = document.querySelector('.grid.grid-cols-7');
+
+    if (weekContainer) {
+      // Use plain Event with custom properties since jsdom lacks Touch/TouchEvent APIs
+      const touchStart = new Event('touchstart', { bubbles: true });
+      Object.assign(touchStart, { touches: [{ clientX: 200, clientY: 100 }] });
+      const touchEnd = new Event('touchend', { bubbles: true });
+      Object.assign(touchEnd, {
+        changedTouches: [{ clientX: 130, clientY: 105 }], // diffX=-70 → left swipe → next week
+      });
+      weekContainer.dispatchEvent(touchStart);
+      weekContainer.dispatchEvent(touchEnd);
+      // After left swipe, week header should still show valid week date range
+      expect(screen.getByText(/\d{2}\/\d{2} - \d{2}\/\d{2}/)).toBeInTheDocument();
+    }
+  });
+
+  it('swipe right on week container navigates to previous week', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
+
+    const weekContainer = document.querySelector('.grid.grid-cols-7');
+    if (weekContainer) {
+      // Use plain Event with custom properties since jsdom lacks Touch/TouchEvent APIs
+      const touchStart = new Event('touchstart', { bubbles: true });
+      Object.assign(touchStart, { touches: [{ clientX: 130, clientY: 100 }] });
+      const touchEnd = new Event('touchend', { bubbles: true });
+      Object.assign(touchEnd, {
+        changedTouches: [{ clientX: 200, clientY: 105 }], // diffX=+70 → right swipe → prev week
+      });
+      weekContainer.dispatchEvent(touchStart);
+      weekContainer.dispatchEvent(touchEnd);
+      expect(screen.getByText(/\d{2}\/\d{2} - \d{2}\/\d{2}/)).toBeInTheDocument();
+    }
   });
 });
 

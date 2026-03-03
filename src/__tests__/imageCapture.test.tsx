@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ImageCapture } from '../components/ImageCapture';
 
 // Mock compressImage
@@ -82,5 +82,101 @@ describe('ImageCapture', () => {
   it('shows supported formats hint text', () => {
     render(<ImageCapture {...defaultProps} />);
     expect(screen.getByText(/Hỗ trợ JPG, PNG/)).toBeInTheDocument();
+  });
+
+  it('opens camera when getUserMedia succeeds', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
+
+    // Camera UI is open — close button appears
+    await waitFor(() => expect(screen.getByLabelText('Đóng camera')).toBeInTheDocument());
+  });
+
+  it('closes camera and stops stream when close button clicked', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
+    await waitFor(() => expect(screen.getByLabelText('Đóng camera')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Đóng camera'));
+    expect(screen.getByText('Chụp ảnh')).toBeInTheDocument();
+  });
+
+  it('capturePhoto calls onImageReady with compressed data URL', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
+      writable: true,
+      configurable: true,
+    });
+
+    // Mock canvas getContext to return a fake 2d context
+    const mockDrawImage = vi.fn();
+    const mockToDataURL = vi.fn().mockReturnValue('data:image/png;base64,captured');
+    const mockGetContext = vi.fn().mockReturnValue({ drawImage: mockDrawImage });
+    HTMLCanvasElement.prototype.getContext = mockGetContext as typeof HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.toDataURL = mockToDataURL;
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
+    await waitFor(() => expect(screen.getByLabelText('Chụp ảnh')).toBeInTheDocument());
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Chụp ảnh'));
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onImageReady).toHaveBeenCalledWith(expect.stringContaining('captured'));
+    });
+  });
+
+  it('handles paste event with image data', async () => {
+    render(<ImageCapture {...defaultProps} />);
+
+    // Create a fake blob for the clipboard item
+    const blob = new Blob(['fake-image-data'], { type: 'image/png' });
+    const mockItem = {
+      type: 'image/png',
+      getAsFile: () => blob,
+    };
+
+    // Build a ClipboardEvent with a fake clipboardData
+    const pasteEvent = new Event('paste', { bubbles: true });
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      value: { items: [mockItem] },
+    });
+
+    await act(async () => {
+      globalThis.dispatchEvent(pasteEvent);
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onImageReady).toHaveBeenCalled();
+    });
   });
 });
