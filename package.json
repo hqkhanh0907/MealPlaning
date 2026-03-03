@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "sonar": "sonar-scanner",
+    "sonar:setup": "bash sonar-setup.sh",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
     "android:run": "npm run build && npx cap sync android && npx cap run android",
