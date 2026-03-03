@@ -112,11 +112,11 @@ describe('DataBackup', () => {
     const fileContent = JSON.stringify({ 'mp-dishes': [{ id: 'd1' }] });
     const file = new File([fileContent], 'backup.json', { type: 'application/json' });
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
 
     await waitFor(() => {
-      fireEvent.change(input, { target: { files: [file] } });
+      if (input) fireEvent.change(input, { target: { files: [file] } });
     });
 
     await waitFor(() => {
@@ -131,10 +131,11 @@ describe('DataBackup', () => {
     const fileContent = JSON.stringify({ 'invalid-key': true });
     const file = new File([fileContent], 'bad.json', { type: 'application/json' });
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).toBeTruthy();
 
     await waitFor(() => {
-      fireEvent.change(input, { target: { files: [file] } });
+      if (input) fireEvent.change(input, { target: { files: [file] } });
     });
 
     await waitFor(() => {
@@ -146,10 +147,11 @@ describe('DataBackup', () => {
   it('shows error for invalid JSON file', async () => {
     render(<DataBackup onImport={vi.fn()} />);
     const file = new File(['not json at all'], 'bad.json', { type: 'application/json' });
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).toBeTruthy();
 
     await waitFor(() => {
-      fireEvent.change(input, { target: { files: [file] } });
+      if (input) fireEvent.change(input, { target: { files: [file] } });
     });
 
     await waitFor(() => {
@@ -160,9 +162,9 @@ describe('DataBackup', () => {
   it('does nothing when no file is selected', async () => {
     const onImport = vi.fn();
     render(<DataBackup onImport={onImport} />);
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-    fireEvent.change(input, { target: { files: [] } });
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    if (input) fireEvent.change(input, { target: { files: [] } });
 
     expect(onImport).not.toHaveBeenCalled();
     expect(mockNotify.error).not.toHaveBeenCalled();
@@ -175,11 +177,11 @@ describe('DataBackup', () => {
     const partialData = { 'mp-dishes': [{ id: 'd1', name: 'Phở' }] };
     const file = new File([JSON.stringify(partialData)], 'partial.json', { type: 'application/json' });
 
-    const input = document.querySelector('input[type="file"]');
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
 
     await waitFor(() => {
-      fireEvent.change(input, { target: { files: [file] } });
+      if (input) fireEvent.change(input, { target: { files: [file] } });
     });
 
     await waitFor(() => {

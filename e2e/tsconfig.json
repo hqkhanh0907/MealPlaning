@@ -1,9 +1,17 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["@wdio/mocha-framework", "webdriverio", "@wdio/globals/types"],
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": [],
+    "skipLibCheck": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "outDir": "./dist",
     "rootDir": "."
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts", "./**/*.d.ts"]
 }
