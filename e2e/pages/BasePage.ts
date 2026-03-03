@@ -30,16 +30,27 @@ export class BasePage {
     return elem.getText();
   }
 
-  /** Switch driver context to WEBVIEW (Capacitor hybrid). */
+  /** Switch driver context to WEBVIEW (Capacitor hybrid).
+   *  With appium:autoWebview=true, driver starts in webview context already.
+   *  Falls back gracefully if context switching is not available. */
   async switchToWebview() {
-    const contexts = await browser.getContexts();
-    const webview = (contexts as string[]).find((c) => c.startsWith('WEBVIEW'));
-    if (webview) await browser.switchContext(webview);
+    try {
+      const b = browser as any;
+      const contexts = await b.getContexts();
+      const webview = (contexts as string[]).find((c: string) => c.startsWith('WEBVIEW'));
+      if (webview) await b.switchContext(webview);
+    } catch {
+      // autoWebview is enabled — already in webview context
+    }
   }
 
   /** Switch driver context back to NATIVE_APP. */
   async switchToNative() {
-    await browser.switchContext('NATIVE_APP');
+    try {
+      await (browser as any).switchContext('NATIVE_APP');
+    } catch {
+      // Ignore if context switching not available
+    }
   }
 
   /** Navigate to a tab via bottom nav. */
