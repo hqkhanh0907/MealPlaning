@@ -40,6 +40,7 @@ export const TypeSelectionModal: React.FC<TypeSelectionModalProps> = ({ currentP
             return (
               <button
                 key={type}
+                data-testid={`btn-type-${type}`}
                 onClick={() => onSelectType(type)}
                 className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between group min-h-16 active:scale-[0.98] ${isPlanned ? 'border-emerald-500 bg-white dark:bg-slate-800' : 'border-slate-100 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}
               >

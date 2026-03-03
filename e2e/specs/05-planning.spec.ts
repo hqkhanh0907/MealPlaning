@@ -9,7 +9,8 @@ describe('Planning — meal planning flow', () => {
   });
 
   it('should open planning modal', async () => {
-    await page.tapPlanMeal();
+    // the button opens a type-selection dialog first; choose breakfast by default
+    await page.openPlanning('breakfast');
     await expect(page.el('input-search-plan')).toBeDisplayed();
   });
 

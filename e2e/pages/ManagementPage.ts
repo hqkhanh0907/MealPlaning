@@ -41,5 +41,8 @@ export class ManagementPage extends BasePage {
 
   async saveIngredient() {
     await this.waitAndClick('btn-save-ingredient');
+    // wait for modal to disappear by ensuring input-ing-name is no longer displayed
+    const nameInput = this.el('input-ing-name');
+    await nameInput.waitForDisplayed({ reverse: true, timeout: 10000 });
   }
 }
