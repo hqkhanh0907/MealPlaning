@@ -86,7 +86,7 @@ jobs:
           emulator-boot-timeout: 900
           force-avd-creation: false
           disable-animations: true
-          script: npm run e2e
+          script: npx wdio run e2e/wdio.conf.ts
 
       - name: Upload test artifacts
         if: failure()
