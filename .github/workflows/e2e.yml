@@ -55,9 +55,12 @@ jobs:
           java-version: 21
 
       - name: Install dependencies
-        run: npm install
-        env:
-          NODE_ENV: development
+        run: npm ci
+
+      - name: Install E2E test dependencies
+        run: |
+          npm install @wdio/cli @wdio/local-runner @wdio/mocha-framework @wdio/appium-service webdriverio
+          ls -la node_modules/.bin/wdio && echo "wdio binary OK" || { echo "ERROR: wdio binary not found"; exit 1; }
 
       - name: Build web app
         run: npm run build
