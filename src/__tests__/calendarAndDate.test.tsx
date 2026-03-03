@@ -257,8 +257,8 @@ describe('CalendarTab', () => {
 
   it('date selector navigates across month boundary Dec→Jan', () => {
     const decDate = '2025-12-31';
-    const onDateChange = vi.fn();
-    render(<DateSelector selectedDate={decDate} onDateChange={onDateChange} dayPlans={[]} />);
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={decDate} onSelectDate={onSelectDate} dayPlans={[]} />);
     // Navigate to next month (January 2026) - button with ChevronRight icon
     const nextBtn = screen.getAllByRole('button').find(b => b.querySelector('.lucide-chevron-right'));
     if (nextBtn) fireEvent.click(nextBtn);
@@ -268,8 +268,8 @@ describe('CalendarTab', () => {
 
   it('date selector navigates across month boundary Jan→Dec', () => {
     const janDate = '2026-01-01';
-    const onDateChange = vi.fn();
-    render(<DateSelector selectedDate={janDate} onDateChange={onDateChange} dayPlans={[]} />);
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={janDate} onSelectDate={onSelectDate} dayPlans={[]} />);
     // Navigate to previous month (December 2025) - button with ChevronLeft icon
     const prevBtn = screen.getAllByRole('button').find(b => b.querySelector('.lucide-chevron-left'));
     if (prevBtn) fireEvent.click(prevBtn);
