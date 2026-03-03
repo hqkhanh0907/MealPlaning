@@ -1,11 +1,11 @@
 /**
  * BasePage — common helpers for all Appium Page Objects.
- * Uses `~testid` accessibility-id selector mapped to `data-testid`.
+ * Uses CSS `[data-testid]` selectors in webview context.
  */
 export class BasePage {
-  /** Return element by data-testid (accessibility id in webview). */
+  /** Return element by data-testid (CSS selector for webview context). */
   el(testid: string) {
-    return $(`~${testid}`);
+    return $(`[data-testid="${testid}"]`);
   }
 
   /** Wait for element and click. */
