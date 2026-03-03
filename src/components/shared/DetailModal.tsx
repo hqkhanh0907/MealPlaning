@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit3, X } from 'lucide-react';
+import { ModalBackdrop } from './ModalBackdrop';
 
 interface DetailModalProps {
   title: string;
@@ -10,8 +11,7 @@ interface DetailModalProps {
 }
 
 export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onClose, onEdit, children }) => (
-  <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-60">
-    <button type="button" aria-label="Close modal" className="absolute inset-0 w-full h-full cursor-default" onClick={onClose} tabIndex={-1} />
+  <ModalBackdrop onClose={onClose} zIndex="z-60">
     <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto sm:mx-4">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
@@ -45,6 +45,6 @@ export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onCl
         </button>
       </div>
     </div>
-  </div>
+  </ModalBackdrop>
 );
 

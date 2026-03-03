@@ -1,23 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Search, ChevronRight, CheckCircle2, ChefHat } from 'lucide-react';
 import { Dish, Ingredient, MealType, NutritionInfo } from '../../types';
 import { calculateDishNutrition, calculateDishesNutrition } from '../../utils/nutrition';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { getMealTypeLabels } from '../../data/constants';
 
 type SortOption = 'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc';
-
-const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  breakfast: 'Bữa Sáng',
-  lunch: 'Bữa Trưa',
-  dinner: 'Bữa Tối',
-};
-
-const ModalBackdrop: React.FC<{ onClose: () => void; children: React.ReactNode }> = ({ onClose, children }) => (
-  <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-    <button type="button" aria-label="Close modal" className="absolute inset-0 w-full h-full cursor-default" onClick={onClose} tabIndex={-1} />
-    {children}
-  </div>
-);
 
 const sortDishes = (a: { name: string; nutrition: NutritionInfo }, b: { name: string; nutrition: NutritionInfo }, sortBy: SortOption): number => {
   switch (sortBy) {
@@ -44,6 +34,8 @@ interface PlanningModalProps {
 export const PlanningModal: React.FC<PlanningModalProps> = ({
   planningType, dishes, ingredients, currentDishIds, onConfirm, onClose, onBack,
 }) => {
+  const { t } = useTranslation();
+  const mealTypeLabels = getMealTypeLabels(t);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [sortBy, setSortBy] = React.useState<SortOption>('name-asc');
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(() => new Set(currentDishIds));
@@ -82,8 +74,8 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
               <ChevronRight className="w-6 h-6 rotate-180" />
             </button>
             <div>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">Chọn món cho {MEAL_TYPE_LABELS[planningType]}</h3>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Chọn các món ăn cho bữa này</p>
+              <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">{t('planning.title', { meal: mealTypeLabels[planningType] })}</h3>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">{t('planning.subtitle')}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all min-h-11 min-w-11 flex items-center justify-center">
@@ -97,9 +89,10 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Tìm kiếm món ăn..."
+                placeholder={t('planning.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                data-testid="input-search-plan"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 dark:text-slate-100 shadow-sm text-base"
               />
             </div>
@@ -108,12 +101,12 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="w-full sm:w-48 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-base sm:text-sm min-h-11"
             >
-              <option value="name-asc">Tên (A-Z)</option>
-              <option value="name-desc">Tên (Z-A)</option>
-              <option value="cal-asc">Calo (Thấp → Cao)</option>
-              <option value="cal-desc">Calo (Cao → Thấp)</option>
-              <option value="pro-asc">Protein (Thấp → Cao)</option>
-              <option value="pro-desc">Protein (Cao → Thấp)</option>
+              <option value="name-asc">{t('sort.nameAsc')}</option>
+              <option value="name-desc">{t('sort.nameDesc')}</option>
+              <option value="cal-asc">{t('sort.calAsc')}</option>
+              <option value="cal-desc">{t('sort.calDesc')}</option>
+              <option value="pro-asc">{t('sort.proAsc')}</option>
+              <option value="pro-desc">{t('sort.proDesc')}</option>
             </select>
           </div>
         </div>
@@ -122,8 +115,8 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
           {filteredDishes.length === 0 && (
             <div className="text-center py-12">
               <ChefHat className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-500 dark:text-slate-400 font-medium">Chưa có món ăn phù hợp cho {MEAL_TYPE_LABELS[planningType]}.</p>
-              <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Hãy thêm món ăn và gắn tag &quot;{MEAL_TYPE_LABELS[planningType]}&quot; trong Thư viện.</p>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">{t('planning.noMatchTitle')}</p>
+              <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">{t('planning.noMatchHint')}</p>
             </div>
           )}
           {filteredDishes.map(({ dish, nutrition }) => {
@@ -157,7 +150,7 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
         <div className="px-4 py-4 sm:px-8 sm:py-5 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div className="flex items-center justify-between mb-3 text-sm">
             <span className="text-slate-500 dark:text-slate-400 font-medium">
-              Đã chọn: <span className="font-bold text-slate-800 dark:text-slate-100">{selectedCount} món</span>
+              {t('planning.selectedCount')} <span className="font-bold text-slate-800 dark:text-slate-100">{selectedCount} {t('common.item')}</span>
             </span>
             {selectedCount > 0 && (
               <span className="text-slate-500 dark:text-slate-400">
@@ -167,10 +160,11 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
           </div>
           <button
             onClick={() => onConfirm(Array.from(selectedIds))}
+            data-testid="btn-confirm-plan"
             className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 hover:bg-emerald-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg min-h-12"
           >
             <CheckCircle2 className="w-5 h-5" />
-            Xác nhận{selectedCount > 0 ? ` (${selectedCount})` : ''}
+            {t('common.confirm')}{selectedCount > 0 ? ` (${selectedCount})` : ''}
           </button>
         </div>
       </div>

@@ -14,7 +14,7 @@ function applyTheme(theme: Theme) {
 }
 
 export function useDarkMode() {
-  const [theme, setThemeState] = useState<Theme>(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
@@ -22,11 +22,11 @@ export function useDarkMode() {
     return 'system';
   });
 
-  const setTheme = useCallback((t: Theme) => {
-    setThemeState(t);
+  const persistTheme = useCallback((t: Theme) => {
+    setTheme(t);
     try { localStorage.setItem(STORAGE_KEY, t); } catch { /* ignore */ }
     applyTheme(t);
-  }, []);
+  }, [setTheme]);
 
   // Apply on mount + listen for system preference changes
   useEffect(() => {
@@ -43,9 +43,9 @@ export function useDarkMode() {
   const cycleTheme = useCallback(() => {
     const order: Theme[] = ['light', 'dark', 'system'];
     const next = order[(order.indexOf(theme) + 1) % order.length];
-    setTheme(next);
-  }, [theme, setTheme]);
+    persistTheme(next);
+  }, [theme, persistTheme]);
 
-  return { theme, isDark, setTheme, cycleTheme };
+  return { theme, isDark, setTheme: persistTheme, cycleTheme };
 }
 

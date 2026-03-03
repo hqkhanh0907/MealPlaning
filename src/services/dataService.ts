@@ -1,37 +1,64 @@
-/**
- * Data migration service — handles legacy format conversions.
- * Pure functions for testability.
- */
+// Handles legacy format conversions. Pure functions for testability.
 
 import { DayPlan, Dish, MealType, Ingredient, DishIngredient, SaveAnalyzedDishPayload } from '../types';
 import { createEmptyDayPlan } from './planService';
 import { generateId } from '../utils/helpers';
+import { logger } from '../utils/logger';
 
-/** Remove an ingredient from all dishes (used when deleting an ingredient) */
+// --- Type guards for runtime validation during migration ---
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null;
+
+const isDayPlan = (v: unknown): v is DayPlan =>
+  isRecord(v) &&
+  typeof v.date === 'string' &&
+  Array.isArray(v.breakfastDishIds) &&
+  Array.isArray(v.lunchDishIds) &&
+  Array.isArray(v.dinnerDishIds);
+
+const isDish = (v: unknown): v is Dish =>
+  isRecord(v) &&
+  typeof v.id === 'string' &&
+  typeof v.name === 'string' &&
+  Array.isArray(v.ingredients);
+
 export const removeIngredientFromDishes = (dishes: Dish[], ingredientId: string): Dish[] =>
   dishes.map(d => ({ ...d, ingredients: d.ingredients.filter(di => di.ingredientId !== ingredientId) }));
 
-/** Migrate old day plan format to new (breakfastId → breakfastDishIds) */
+// Legacy data used breakfastId (singular) → need migration to breakfastDishIds (array)
 export const migrateDayPlans = (plans: unknown[]): DayPlan[] => {
   return plans.map((p: unknown) => {
-    const plan = p as Record<string, unknown>;
-    if (Array.isArray(plan.breakfastDishIds)) return plan as unknown as DayPlan;
-    return createEmptyDayPlan(plan.date as string);
+    if (isDayPlan(p)) return p;
+    if (isRecord(p) && typeof p.date === 'string') return createEmptyDayPlan(p.date);
+    return createEmptyDayPlan(new Date().toISOString().split('T')[0]);
   });
 };
 
-/** Migrate old dish format — ensure tags is never empty */
+// Legacy dishes may lack tags — default to 'lunch' for backward compatibility.
+// Invalid entries are filtered out with a warning instead of throwing (fail-safe).
 export const migrateDishes = (dishes: unknown[]): Dish[] => {
-  return (dishes as Record<string, unknown>[]).map(d => {
-    const rawTags = (d as Record<string, unknown>).tags;
-    const tags = Array.isArray(rawTags) && rawTags.length > 0
-      ? (rawTags as MealType[])
-      : ['lunch' as MealType];
-    return { ...(d as unknown as Dish), tags };
-  });
+  return dishes
+    .filter(d => {
+      if (!isDish(d)) {
+        logger.warn(
+          { component: 'dataService', action: 'migrateDishes' },
+          `Invalid dish data skipped during migration: ${JSON.stringify(d)}`
+        );
+        return false;
+      }
+      return true;
+    })
+    .map(d => {
+      const dish = d as Dish;
+      const rawTags = dish.tags;
+      const tags: MealType[] = Array.isArray(rawTags) && rawTags.length > 0
+        ? rawTags
+        : ['lunch'];
+      return { ...dish, tags };
+    });
 };
 
-/** Process AI-analyzed dish result into ingredient + dish data */
 export const processAnalyzedDish = (
   result: SaveAnalyzedDishPayload,
   existingIngredients: Ingredient[]
@@ -62,3 +89,41 @@ export const processAnalyzedDish = (
   return { newIngredients, dishIngredients };
 };
 
+// --- Import data validation ---
+
+export interface ImportValidationResult {
+  validEntries: Record<string, unknown>;
+  invalidKeys: string[];
+}
+
+const IMPORT_VALIDATORS: Record<string, (v: unknown) => boolean> = {
+  'mp-ingredients': (v) => Array.isArray(v) && v.every((i: unknown) =>
+    isRecord(i) && 'id' in i && 'name' in i && 'unit' in i
+  ),
+  'mp-dishes': (v) => Array.isArray(v) && v.every((d: unknown) =>
+    isRecord(d) && 'id' in d && 'name' in d && 'ingredients' in d
+  ),
+  'mp-day-plans': (v) => Array.isArray(v) && v.every((p: unknown) =>
+    isRecord(p) && 'date' in p
+  ),
+  'mp-user-profile': (v) =>
+    isRecord(v) && 'weight' in v && 'targetCalories' in v,
+};
+
+/** Pure validation — separates valid/invalid keys from raw import data. */
+export const validateImportData = (data: Record<string, unknown>): ImportValidationResult => {
+  const validEntries: Record<string, unknown> = {};
+  const invalidKeys: string[] = [];
+
+  for (const [key, validate] of Object.entries(IMPORT_VALIDATORS)) {
+    if (key in data) {
+      if (validate(data[key])) {
+        validEntries[key] = data[key];
+      } else {
+        invalidKeys.push(key);
+      }
+    }
+  }
+
+  return { validEntries, invalidKeys };
+};

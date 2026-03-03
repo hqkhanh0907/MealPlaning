@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
 import { DayPlan } from '../types';
 import { parseLocalDate } from '../utils/helpers';
@@ -85,6 +86,7 @@ const formatWeekLabel = (dates: Date[]): string => {
 };
 
 export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }) => {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = parseLocalDate(selectedDate);
     return Number.isNaN(d.getTime()) ? new Date() : d;
@@ -126,7 +128,11 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
     return `${year}-${m}-${day}`;
   };
 
-  const weekDays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  const weekDays = [
+    t('calendar.weekdays.mon'), t('calendar.weekdays.tue'), t('calendar.weekdays.wed'),
+    t('calendar.weekdays.thu'), t('calendar.weekdays.fri'), t('calendar.weekdays.sat'),
+    t('calendar.weekdays.sun'),
+  ];
 
   const goToToday = () => {
     const today = new Date();
@@ -142,25 +148,35 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
   const nextWeek = useCallback(() => setWeekOffset(prev => prev + 1), []);
 
   // Touch swipe handlers for week view
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const diffX = e.changedTouches[0].clientX - touchStartX.current;
-    const diffY = e.changedTouches[0].clientY - touchStartY.current;
-    // Only swipe horizontally if X distance > Y distance and > 50px threshold
-    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-      if (diffX < 0) {
-        nextWeek(); // swipe left → next week
-      } else {
-        prevWeek(); // swipe right → previous week
+  // Swipe gesture handlers via native DOM listeners to avoid non-interactive element warnings
+  useEffect(() => {
+    const el = weekContainerRef.current;
+    if (!el) return;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+      const diffX = e.changedTouches[0].clientX - touchStartX.current;
+      const diffY = e.changedTouches[0].clientY - touchStartY.current;
+      // Only swipe horizontally if X distance > Y distance and > 50px threshold
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX < 0) {
+          nextWeek(); // swipe left → next week
+        } else {
+          prevWeek(); // swipe right → previous week
+        }
       }
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
+      touchStartX.current = null;
+      touchStartY.current = null;
+    };
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd);
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
   }, [nextWeek, prevWeek]);
 
   // Generate stable keys for empty cells
@@ -171,30 +187,33 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-lg">
           <CalendarIcon className="w-5 h-5 text-emerald-500" />
-          <span>{viewMode === 'calendar' ? `Tháng ${month + 1}, ${year}` : weekLabel}</span>
+          <span>{viewMode === 'calendar' ? t('calendar.monthYear', { month: month + 1, year }) : weekLabel}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
             className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
-            title={viewMode === 'calendar' ? 'Chế độ tuần' : 'Chế độ lịch'}
+            title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
           >
             {viewMode === 'calendar' ? <List className="w-5 h-5" /> : <CalendarIcon className="w-5 h-5" />}
           </button>
           <button
             onClick={goToToday}
+            data-testid="btn-today"
             className="px-3 py-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all mr-1 sm:mr-2 min-h-11 sm:min-h-9 flex items-center"
           >
-            Hôm nay
+            {t('calendar.today')}
           </button>
           <button
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
+            data-testid="btn-prev-date"
             className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-9 min-w-9 flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
+            data-testid="btn-next-date"
             className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-9 min-w-9 flex items-center justify-center"
           >
             <ChevronRight className="w-5 h-5" />
@@ -207,8 +226,6 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
         <div
           ref={weekContainerRef}
           className="grid grid-cols-7 gap-1.5 sm:gap-2"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
         >
           {weekDates.map(date => {
             const dateStr = formatLocalDate(date);
@@ -253,8 +270,8 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
       {viewMode === 'calendar' && (
         <>
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2">
-            {weekDays.map(day => (
-              <div key={day} className={`text-center text-xs font-bold uppercase py-2 ${day === 'CN' ? 'text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
+            {weekDays.map((day, idx) => (
+              <div key={day} className={`text-center text-xs font-bold uppercase py-2 ${idx === 6 ? 'text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
                 {day}
               </div>
             ))}
@@ -291,7 +308,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                     onSelectDate(dateStr);
                     if (onPlanClick) onPlanClick();
                   }}
-                  title={isSelected ? "Nhấn lần nữa để lên kế hoạch" : "Chọn ngày"}
+                  title={isSelected ? t('calendar.tapToPlan') : t('calendar.selectDay')}
                   className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)}`}
                 >
                   <span className="text-sm font-bold">{day}</span>
@@ -316,15 +333,15 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
               if (hasAnyPlan) return <span />;
               return (
                 <>
-                  <span className="hidden sm:inline">Mẹo: Nhấn đúp hoặc nhấn vào ngày đang chọn để lên kế hoạch</span>
-                  <span className="sm:hidden">Nhấn vào ngày đang chọn để lên kế hoạch</span>
+                  <span className="hidden sm:inline">{t('calendar.tipDoubleClick')}</span>
+                  <span className="sm:hidden">{t('calendar.tipTap')}</span>
                 </>
               );
             })()}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Sáng</div>
-              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> Trưa</div>
-              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-400"></div> Tối</div>
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}</div>
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}</div>
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}</div>
             </div>
           </div>
         </>
@@ -332,11 +349,11 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
 
       {viewMode === 'week' && (
         <div className="mt-3 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium">
-          <span>Vuốt ngang hoặc dùng mũi tên để chuyển tuần</span>
+          <span>{t('calendar.swipeHint')}</span>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> Sáng</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> Trưa</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-400"></div> Tối</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}</div>
           </div>
         </div>
       )}

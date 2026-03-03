@@ -1,4 +1,4 @@
-import { Ingredient, Dish, NutritionInfo } from '../types';
+import { Ingredient, Dish, NutritionInfo, AnalyzedIngredient } from '../types';
 
 const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
 
@@ -86,3 +86,15 @@ export const calculateDishesNutrition = (
     { ...ZERO_NUTRITION }
   );
 };
+
+// Bridge between AI analysis output and our Ingredient model for nutrition calculations
+export const toTempIngredient = (ing: AnalyzedIngredient): Ingredient => ({
+  id: '',
+  name: ing.name,
+  unit: normalizeUnit(ing.unit),
+  caloriesPer100: ing.nutritionPerStandardUnit.calories,
+  proteinPer100: ing.nutritionPerStandardUnit.protein,
+  carbsPer100: ing.nutritionPerStandardUnit.carbs,
+  fatPer100: ing.nutritionPerStandardUnit.fat,
+  fiberPer100: ing.nutritionPerStandardUnit.fiber,
+});

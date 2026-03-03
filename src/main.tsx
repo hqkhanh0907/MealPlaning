@@ -4,6 +4,7 @@ import App from './App.tsx';
 import { NotificationProvider } from './contexts/NotificationContext.tsx';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import './i18n';
 import './index.css';
 
 // Configure native status bar when running as a native app

@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 type ConfirmVariant = 'danger' | 'warning';
 
@@ -27,11 +29,12 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   icon,
   title,
   message,
-  confirmLabel = 'Xác nhận',
-  cancelLabel = 'Hủy',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   useModalBackHandler(isOpen, onCancel);
 
   if (!isOpen) return null;
@@ -40,14 +43,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const defaultIcon = variant === 'danger' ? <Trash2 className="w-8 h-8" /> : <AlertTriangle className="w-8 h-8" />;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-70">
-      <button
-        type="button"
-        aria-label="Close modal"
-        className="absolute inset-0 w-full h-full cursor-default"
-        onClick={onCancel}
-        tabIndex={-1}
-      />
+    <ModalBackdrop onClose={onCancel} zIndex="z-70">
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
         <div className="p-6 text-center">
           <div className={`w-16 h-16 ${styles.iconBg} ${styles.iconText} rounded-full flex items-center justify-center mx-auto mb-4`}>
@@ -60,17 +56,17 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               onClick={onCancel}
               className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 transition-all min-h-12"
             >
-              {cancelLabel}
+              {cancelLabel ?? t('common.cancel')}
             </button>
             <button
               onClick={onConfirm}
               className={`flex-1 ${styles.btnBg} text-white py-3 rounded-xl font-bold shadow-sm ${styles.btnShadow} ${styles.btnHover} active:scale-[0.98] transition-all min-h-12`}
             >
-              {confirmLabel}
+              {confirmLabel ?? t('common.confirm')}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </ModalBackdrop>
   );
 };

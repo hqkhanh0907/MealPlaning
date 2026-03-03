@@ -55,6 +55,25 @@ describe('migrateDayPlans', () => {
   it('should handle empty array', () => {
     expect(migrateDayPlans([])).toEqual([]);
   });
+
+  it('should fallback to today when entry has no date field', () => {
+    const plans = [{ randomField: 'no-date-here' }];
+    const result = migrateDayPlans(plans);
+    const today = new Date().toISOString().split('T')[0];
+    expect(result[0].date).toBe(today);
+    expect(result[0].breakfastDishIds).toEqual([]);
+    expect(result[0].lunchDishIds).toEqual([]);
+    expect(result[0].dinnerDishIds).toEqual([]);
+  });
+
+  it('should handle primitive values in the array', () => {
+    const plans = [null as unknown, 42 as unknown];
+    const result = migrateDayPlans(plans);
+    const today = new Date().toISOString().split('T')[0];
+    expect(result).toHaveLength(2);
+    expect(result[0].date).toBe(today);
+    expect(result[1].date).toBe(today);
+  });
 });
 
 describe('migrateDishes', () => {
@@ -78,6 +97,34 @@ describe('migrateDishes', () => {
 
   it('should handle empty array', () => {
     expect(migrateDishes([])).toEqual([]);
+  });
+
+  it('should filter out invalid dish data (missing id)', () => {
+    const result = migrateDishes([{ name: 'No ID', ingredients: [] }]);
+    expect(result).toEqual([]);
+  });
+
+  it('should filter out invalid dish data (missing name)', () => {
+    const result = migrateDishes([{ id: 'd1', ingredients: [] }]);
+    expect(result).toEqual([]);
+  });
+
+  it('should filter out invalid dish data (missing ingredients)', () => {
+    const result = migrateDishes([{ id: 'd1', name: 'Test' }]);
+    expect(result).toEqual([]);
+  });
+
+  it('should filter out primitive values', () => {
+    expect(migrateDishes([null as unknown])).toEqual([]);
+    expect(migrateDishes([42 as unknown])).toEqual([]);
+    expect(migrateDishes(['string' as unknown])).toEqual([]);
+  });
+
+  it('should keep valid dishes and filter invalid ones in mixed input', () => {
+    const validDish = { id: 'd1', name: 'Valid', ingredients: [], tags: ['lunch'] };
+    const result = migrateDishes([validDish, null as unknown, { id: 'd2' }]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('Valid');
   });
 });
 

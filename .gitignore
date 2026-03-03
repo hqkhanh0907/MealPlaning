@@ -6,3 +6,12 @@ coverage/
 *.log
 .env*
 !.env.example
+/android/
+
+# IDE & tools
+.idea/
+.scannerwork/
+sonar-project.properties
+
+# Build artifacts
+*.apk
