@@ -17,6 +17,10 @@ declare const browser: {
   switchContext(context: string): Promise<void>;
   url(path: string): Promise<void>;
   pause(ms: number): Promise<void>;
+  waitUntil(
+    condition: () => Promise<boolean>,
+    options?: { timeout?: number; interval?: number; timeoutMsg?: string }
+  ): Promise<boolean>;
 };
 
 // Mocha globals
