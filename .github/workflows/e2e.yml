@@ -60,15 +60,27 @@ jobs:
       - name: Build web app
         run: npm run build
 
+      - name: Check wdio after npm ci
+        run: ls node_modules/.bin/wdio && echo "wdio exists after npm ci" || echo "wdio MISSING after npm ci"
+
       - name: Add Android platform
         run: npx cap add android
+
+      - name: Check wdio after cap add
+        run: ls node_modules/.bin/wdio && echo "wdio exists after cap add" || echo "wdio MISSING after cap add"
 
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Check wdio after cap sync
+        run: ls node_modules/.bin/wdio && echo "wdio exists after cap sync" || echo "wdio MISSING after cap sync"
+
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
+
+      - name: Reinstall test dependencies
+        run: npm ci
 
       - name: Verify wdio installation
         run: |
