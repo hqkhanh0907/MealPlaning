@@ -6,6 +6,7 @@ describe('Ingredient CRUD', () => {
   before(async () => {
     await page.switchToWebview();
     await page.navigateTo('management');
+    await page.openIngredientsSubTab();
   });
 
   it('should open add ingredient modal', async () => {

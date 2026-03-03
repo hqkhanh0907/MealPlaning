@@ -2,6 +2,11 @@
  * BasePage — common helpers for all Appium Page Objects.
  * Uses CSS `[data-testid]` selectors in webview context.
  */
+type ContextCapableBrowser = typeof browser & {
+  getContexts: () => Promise<string[]>;
+  switchContext: (context: string) => Promise<void>;
+};
+
 export class BasePage {
   /** Return element by data-testid (CSS selector for webview context). */
   el(testid: string) {
@@ -30,14 +35,24 @@ export class BasePage {
     return elem.getText();
   }
 
+  /** Check whether a testid element is currently displayed. */
+  async isDisplayed(testid: string) {
+    try {
+      const elem = this.el(testid);
+      return (await elem.isExisting()) && (await elem.isDisplayed());
+    } catch {
+      return false;
+    }
+  }
+
   /** Switch driver context to WEBVIEW (Capacitor hybrid).
    *  With appium:autoWebview=true, driver starts in webview context already.
    *  Falls back gracefully if context switching is not available. */
   async switchToWebview() {
     try {
-      const b = browser as any;
+      const b = browser as unknown as ContextCapableBrowser;
       const contexts = await b.getContexts();
-      const webview = (contexts as string[]).find((c: string) => c.startsWith('WEBVIEW'));
+      const webview = contexts.find((c: string) => c.startsWith('WEBVIEW'));
       if (webview) await b.switchContext(webview);
     } catch {
       // autoWebview is enabled — already in webview context
@@ -47,7 +62,7 @@ export class BasePage {
   /** Switch driver context back to NATIVE_APP. */
   async switchToNative() {
     try {
-      await (browser as any).switchContext('NATIVE_APP');
+      await (browser as unknown as ContextCapableBrowser).switchContext('NATIVE_APP');
     } catch {
       // Ignore if context switching not available
     }

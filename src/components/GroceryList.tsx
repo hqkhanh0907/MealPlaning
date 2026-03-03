@@ -65,7 +65,7 @@ const getScopeHeaderKey = (scope: GroceryScope): string => {
 };
 
 const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
-  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
+  <div data-testid="grocery-empty-state" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
       <ShoppingCart className="w-10 h-10 text-emerald-300" />
     </div>

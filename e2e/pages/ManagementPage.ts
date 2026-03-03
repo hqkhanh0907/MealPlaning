@@ -1,6 +1,16 @@
 import { BasePage } from './BasePage';
 
+export type ManagementSubTab = 'ingredients' | 'dishes';
+
 export class ManagementPage extends BasePage {
+  async openSubTab(tab: ManagementSubTab) {
+    await this.waitAndClick(`tab-management-${tab}`);
+  }
+
+  async openIngredientsSubTab() {
+    await this.openSubTab('ingredients');
+  }
+
   // ----- Dish Management -----
   async searchDish(query: string) {
     await this.type('input-search-dish', query);
