@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ModalBackdropProps {
   /** Handler called when clicking the backdrop overlay. */
@@ -13,20 +13,31 @@ interface ModalBackdropProps {
  * Provides dark overlay, backdrop-blur, responsive alignment
  * (bottom-sheet on mobile, centered on desktop), and proper
  * ARIA roles for screen readers.
+ *
+ * Also locks body scroll while open to prevent background scroll
+ * bleeding on mobile (swipe up/down).
  */
-export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 'z-50', children }) => (
-  <dialog
-    open
-    className={`fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center ${zIndex} border-none p-0 m-0 max-w-none max-h-none`}
-    aria-modal="true"
-  >
-    <button
-      type="button"
-      aria-label="Đóng"
-      className="absolute inset-0 w-full h-full cursor-default"
-      onClick={onClose}
-      tabIndex={-1}
-    />
-    {children}
-  </dialog>
-);
+export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 'z-50', children }) => {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  return (
+    <dialog
+      open
+      className={`fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center ${zIndex} border-none p-0 m-0 max-w-none max-h-none`}
+      aria-modal="true"
+    >
+      <button
+        type="button"
+        aria-label="Đóng"
+        className="absolute inset-0 w-full h-full cursor-default"
+        onClick={onClose}
+        tabIndex={-1}
+      />
+      {children}
+    </dialog>
+  );
+};

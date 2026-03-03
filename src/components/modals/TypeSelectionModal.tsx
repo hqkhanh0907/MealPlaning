@@ -23,7 +23,7 @@ export const TypeSelectionModal: React.FC<TypeSelectionModalProps> = ({ currentP
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90vh] sm:mx-4">
+      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90dvh] sm:mx-4">
         <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('typeSelection.title')}</h3>

@@ -115,7 +115,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[95vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col sm:mx-4">
+      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[95dvh] sm:h-auto sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30">
           <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           {/* Loading State */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-16 space-y-4">

@@ -67,7 +67,7 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col sm:mx-4">
+      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90dvh] sm:h-auto sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
         <div className="px-4 py-4 sm:px-8 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 flex items-center justify-center">
@@ -111,7 +111,7 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-3">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 space-y-3">
           {filteredDishes.length === 0 && (
             <div className="text-center py-12">
               <ChefHat className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
