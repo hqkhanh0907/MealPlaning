@@ -16,7 +16,7 @@ NC='\033[0m'
 # ID lấy từ URL: https://drive.google.com/drive/folders/<FOLDER_ID>
 # Để trống "" nếu không muốn upload.
 # ============================================
-GOOGLE_DRIVE_FOLDER_ID=""
+GOOGLE_DRIVE_FOLDER_ID="17BHCjT_pHNLJN-r6yxvqa-GUI6ASA21G"
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ANDROID_DIR="$PROJECT_DIR/android"
@@ -135,7 +135,10 @@ if [ -n "$GOOGLE_DRIVE_FOLDER_ID" ]; then
         UPLOAD_RESULT=$(gdrive files upload --parent "$GOOGLE_DRIVE_FOLDER_ID" "$OUTPUT_APK" 2>&1)
 
         if [ $? -eq 0 ]; then
-            UPLOADED_FILE_ID=$(echo "$UPLOAD_RESULT" | grep -oE '[a-zA-Z0-9_-]{25,}' | head -1)
+            UPLOADED_FILE_ID=$(echo "$UPLOAD_RESULT" | grep -i "^Id:" | awk '{print $2}' | tr -d '[:space:]')
+            if [ -z "$UPLOADED_FILE_ID" ]; then
+                UPLOADED_FILE_ID=$(echo "$UPLOAD_RESULT" | grep -oE '[a-zA-Z0-9_-]{28,}' | grep -v '\.' | head -1)
+            fi
             DRIVE_LINK="https://drive.google.com/file/d/${UPLOADED_FILE_ID}/view"
             echo -e "${GREEN}Upload thanh cong!${NC}"
             UPLOAD_STATUS="THANH CONG"
