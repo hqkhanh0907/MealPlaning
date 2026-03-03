@@ -87,8 +87,9 @@ describe('SettingsTab', () => {
 
   it('switches language to English when clicked', () => {
     render(<SettingsTab {...defaultProps} />);
-    const enBtn = screen.getByText('English').closest('button')!;
-    fireEvent.click(enBtn);
+    const enBtn = screen.getByText('English').closest('button');
+    expect(enBtn).toBeTruthy();
+    if (enBtn) fireEvent.click(enBtn);
     expect(i18n.language).toBe('en');
     // Restore
     i18n.changeLanguage('vi');
@@ -98,28 +99,32 @@ describe('SettingsTab', () => {
     i18n.changeLanguage('en');
     render(<SettingsTab {...defaultProps} />);
     const viBtn = screen.getByText('Tiếng Việt').closest('button') ?? screen.getByText('Vietnamese').closest('button');
-    fireEvent.click(viBtn!);
+    expect(viBtn).toBeTruthy();
+    if (viBtn) fireEvent.click(viBtn);
     expect(i18n.language).toBe('vi');
   });
 
   it('calls setTheme when theme button is clicked', () => {
     render(<SettingsTab {...defaultProps} />);
-    const lightBtn = screen.getByText('Sáng').closest('button')!;
-    fireEvent.click(lightBtn);
+    const lightBtn = screen.getByText('Sáng').closest('button');
+    expect(lightBtn).toBeTruthy();
+    if (lightBtn) fireEvent.click(lightBtn);
     expect(mockSetTheme).toHaveBeenCalledWith('light');
   });
 
   it('calls setTheme with dark when dark button is clicked', () => {
     render(<SettingsTab {...defaultProps} />);
-    const darkBtn = screen.getByText('Tối').closest('button')!;
-    fireEvent.click(darkBtn);
+    const darkBtn = screen.getByText('Tối').closest('button');
+    expect(darkBtn).toBeTruthy();
+    if (darkBtn) fireEvent.click(darkBtn);
     expect(mockSetTheme).toHaveBeenCalledWith('dark');
   });
 
   it('calls setTheme with system when system button is clicked', () => {
     render(<SettingsTab {...defaultProps} />);
-    const sysBtn = screen.getByText('Hệ thống').closest('button')!;
-    fireEvent.click(sysBtn);
+    const sysBtn = screen.getByText('Hệ thống').closest('button');
+    expect(sysBtn).toBeTruthy();
+    if (sysBtn) fireEvent.click(sysBtn);
     expect(mockSetTheme).toHaveBeenCalledWith('system');
   });
 

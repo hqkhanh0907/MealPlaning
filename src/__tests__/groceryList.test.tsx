@@ -53,14 +53,18 @@ describe('GroceryList', () => {
   it('toggles check on item click', () => {
     render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
     const item = screen.getByText('Ức gà');
-    fireEvent.click(item.closest('button')!);
+    const itemBtn = item.closest('button');
+    expect(itemBtn).toBeTruthy();
+    if (itemBtn) fireEvent.click(itemBtn);
     expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
   });
 
   it('shows all done message when all items are checked', () => {
     render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
     // Check all 3 items
-    const buttons = screen.getAllByRole('listitem').map(li => li.querySelector('button')!);
+    const buttons = screen.getAllByRole('listitem')
+      .map(li => li.querySelector('button'))
+      .filter((btn): btn is HTMLButtonElement => btn !== null);
     buttons.forEach(btn => fireEvent.click(btn));
     expect(screen.getByText(/Đã mua đủ tất cả nguyên liệu/)).toBeInTheDocument();
   });
@@ -114,7 +118,9 @@ describe('GroceryList', () => {
     render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
     // Check an item
     const item = screen.getByText('Ức gà');
-    fireEvent.click(item.closest('button')!);
+    const resetBtn = item.closest('button');
+    expect(resetBtn).toBeTruthy();
+    if (resetBtn) fireEvent.click(resetBtn);
     expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
 
     // Switch scope
@@ -141,7 +147,9 @@ describe('GroceryList', () => {
     const { unmount } = render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
     // Check first item
     const item = screen.getByText('Ức gà');
-    fireEvent.click(item.closest('button')!);
+    const persistBtn = item.closest('button');
+    expect(persistBtn).toBeTruthy();
+    if (persistBtn) fireEvent.click(persistBtn);
     expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
 
     // Verify localStorage was updated

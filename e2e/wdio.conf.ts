@@ -1,6 +1,4 @@
-import type { Options } from '@wdio/types';
-
-export const config: Options.Testrunner = {
+export const config = {
   runner: 'local',
   tsConfigPath: './e2e/tsconfig.json',
   specs: ['./e2e/specs/**/*.spec.ts'],

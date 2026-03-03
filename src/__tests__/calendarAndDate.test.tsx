@@ -43,7 +43,7 @@ describe('DateSelector', () => {
 
   it('switches between calendar and week view mode', () => {
     // Default on desktop (>640px) is calendar
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1024 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
 
     // Title should show month in calendar mode
@@ -59,7 +59,7 @@ describe('DateSelector', () => {
   });
 
   it('selects a date when clicked in calendar view', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1024 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     const onSelectDate = vi.fn();
     render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
     // Click day 15 (should exist in any month)
@@ -69,7 +69,7 @@ describe('DateSelector', () => {
   });
 
   it('shows meal indicator dots for planned days', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1024 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} dayPlans={dayPlans} />);
     // The selected date should have meal dots (rendered in the button)
     // At least the today button should be present
@@ -77,29 +77,31 @@ describe('DateSelector', () => {
   });
 
   it('navigates months with prev/next buttons in calendar view', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1024 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     render(<DateSelector selectedDate="2025-06-15" onSelectDate={vi.fn()} />);
     expect(screen.getByText('Tháng 6, 2025')).toBeInTheDocument();
 
     // The "Hôm nay" button is followed by prev (<) and next (>) nav buttons
     const homNay = screen.getByText('Hôm nay');
-    const navContainer = homNay.parentElement!;
-    const navButtons = navContainer.querySelectorAll('button');
+    const navContainer = homNay.parentElement;
+    expect(navContainer).toBeTruthy();
+    const navButtons = navContainer ? Array.from(navContainer.querySelectorAll('button')) : [];
     // Last button in nav row is "next month"
-    const nextBtn = navButtons[navButtons.length - 1];
-    fireEvent.click(nextBtn);
+    const nextBtn = navButtons.at(-1);
+    expect(nextBtn).toBeTruthy();
+    if (nextBtn) fireEvent.click(nextBtn);
     expect(screen.getByText('Tháng 7, 2025')).toBeInTheDocument();
   });
 
   it('shows week day labels', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1024 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
     expect(screen.getByText('T2')).toBeInTheDocument();
     expect(screen.getByText('CN')).toBeInTheDocument();
   });
 
   it('calls onPlanClick when clicking selected date', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 300 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
     const onPlanClick = vi.fn();
     const onSelectDate = vi.fn();
     render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} onPlanClick={onPlanClick} />);
@@ -110,20 +112,20 @@ describe('DateSelector', () => {
   });
 
   it('navigates weeks with prev/next buttons in week view', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 300 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
     // Should start in week mode on small screen
     const weekHint = screen.queryByText(/Vuốt ngang/);
     if (weekHint) {
       // We're in week view, navigate
       const navButtons = screen.getAllByRole('button');
-      const nextBtn = navButtons[navButtons.length - 1];
-      fireEvent.click(nextBtn);
+      const nextBtn = navButtons.at(-1);
+      if (nextBtn) fireEvent.click(nextBtn);
     }
   });
 
   it('double clicking a date in calendar triggers onPlanClick', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1024 });
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     const onPlanClick = vi.fn();
     const onSelectDate = vi.fn();
     render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} onPlanClick={onPlanClick} />);

@@ -46,18 +46,18 @@ describe('PlanningModal', () => {
   it('shows pre-selected dishes from currentDishIds', () => {
     render(<PlanningModal {...defaultProps} currentDishIds={['d1']} />);
     // Text "Đã chọn:" and "1 món" are split across elements – use container textContent
-    const footer = screen.getByText(/Xác nhận/).closest('div')!.parentElement!;
-    expect(footer.textContent).toContain('1 món');
+    const footer = screen.getByText(/Xác nhận/).closest('div')?.parentElement;
+    expect(footer?.textContent).toContain('1 món');
   });
 
   it('toggles dish selection on click', () => {
     render(<PlanningModal {...defaultProps} currentDishIds={[]} />);
     fireEvent.click(screen.getByText('Gà nướng'));
-    const footer = screen.getByText(/Xác nhận/).closest('div')!.parentElement!;
-    expect(footer.textContent).toContain('1 món');
+    const footer = screen.getByText(/Xác nhận/).closest('div')?.parentElement;
+    expect(footer?.textContent).toContain('1 món');
     // Toggle off
     fireEvent.click(screen.getByText('Gà nướng'));
-    expect(footer.textContent).toContain('0 món');
+    expect(footer?.textContent).toContain('0 món');
   });
 
   it('calls onConfirm with selected dish ids', () => {
@@ -159,8 +159,8 @@ describe('PlanningModal', () => {
   it('shows accurate nutrition summary for multiple selected dishes', () => {
     render(<PlanningModal {...defaultProps} currentDishIds={['d1', 'd2']} />);
     // d1: 330 kcal, 62g pro + d2: 425 kcal, 36.4g pro = 755 kcal, 98.4g pro
-    const footer = screen.getByText(/Xác nhận/).closest('div')!.parentElement!;
-    expect(footer.textContent).toContain('2 món');
+    const footer = screen.getByText(/Xác nhận/).closest('div')?.parentElement;
+    expect(footer?.textContent).toContain('2 món');
     // Check total calories 755 appears somewhere
     const calMatches = screen.getAllByText(/755/);
     expect(calMatches.length).toBeGreaterThan(0);

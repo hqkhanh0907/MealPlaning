@@ -38,8 +38,8 @@ describe('SaveAnalyzedDishModal', () => {
 
   it('renders dish name and description fields when saveDish is checked', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
-    const nameInput = screen.getByLabelText(/Tên món ăn/i) as HTMLInputElement;
-    const descInput = screen.getByLabelText(/Mô tả/i) as HTMLTextAreaElement;
+    const nameInput = screen.getByLabelText<HTMLInputElement>(/Tên món ăn/i);
+    const descInput = screen.getByLabelText<HTMLTextAreaElement>(/Mô tả/i);
     expect(nameInput.value).toBe('Phở bò');
     expect(descInput.value).toBe('Món phở truyền thống');
   });
@@ -53,7 +53,7 @@ describe('SaveAnalyzedDishModal', () => {
 
   it('toggles saveDish checkbox', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
-    const checkbox = screen.getByLabelText('Lưu món ăn này') as HTMLInputElement;
+    const checkbox = screen.getByLabelText<HTMLInputElement>('Lưu món ăn này');
     expect(checkbox.checked).toBe(true);
     fireEvent.click(checkbox);
     expect(checkbox.checked).toBe(false);
@@ -139,7 +139,7 @@ describe('SaveAnalyzedDishModal', () => {
 
   it('edits dish name field', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
-    const nameInput = screen.getByLabelText(/Tên món ăn/i) as HTMLInputElement;
+    const nameInput = screen.getByLabelText<HTMLInputElement>(/Tên món ăn/i);
     fireEvent.change(nameInput, { target: { value: 'Phở gà' } });
     expect(nameInput.value).toBe('Phở gà');
   });
