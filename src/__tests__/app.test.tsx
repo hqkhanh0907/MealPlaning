@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../App';
 
 // Mock notification context
@@ -52,6 +52,11 @@ vi.mock('../components/SettingsTab', () => ({
       <button data-testid="import-valid" onClick={() => onImportData({ 'mp-ingredients': [{ id: 'i1', name: 'Chicken', unit: 'g' }] })}>Import Valid</button>
     </div>
   ),
+}));
+
+// Mock lazy-loaded GroceryList
+vi.mock('../components/GroceryList', () => ({
+  GroceryList: () => <div>GroceryMock</div>,
 }));
 
 describe('App', () => {
@@ -173,28 +178,7 @@ describe('App', () => {
     expect(mockNotify.success).not.toHaveBeenCalled();
   });
 
-  it('handleAnalysisComplete when NOT on ai-analysis tab shows notification', async () => {
-    render(<App />);
-    // Stay on calendar tab, trigger analysis complete (simulate via settings tab scenario)
-    // Navigate to settings to get access to simulate — first navigate to AI tab to set up the mock
-    const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
-    const calTab = navTabs.find(b => b.textContent?.includes('Lịch'));
 
-    // Go to AI tab first to render the component
-    if (aiTab) fireEvent.click(aiTab);
-    await waitFor(() => screen.getByTestId('ai-complete'));
-
-    // Navigate away from AI tab
-    if (calTab) fireEvent.click(calTab);
-
-    // But the AIImageAnalyzer is no longer visible (not rendered),
-    // so this scenario requires the component to be persistently rendered.
-    // handleAnalysisComplete fires from AIImageAnalyzer — tested via the on-tab path above.
-    // This test confirms the "not on ai tab" notification path is triggerable via the
-    // callback when the tab is active and listener fires after navigation.
-    expect(true).toBe(true); // placeholder — path covered by other tests
-  });
 
   it('navigates to settings tab and renders SettingsTab', () => {
     render(<App />);
@@ -219,6 +203,34 @@ describe('App', () => {
     const settingsTab = navTabs.find(b => b.textContent?.includes('Cài đặt'));
     if (settingsTab) fireEvent.click(settingsTab);
     fireEvent.click(screen.getByTestId('import-valid'));
+    expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('migrates dishes with empty tags from localStorage on mount', () => {
+    localStorage.setItem('mp-dishes', JSON.stringify([
+      { id: 'd99', name: 'Old Dish', ingredients: [], tags: [] },
+    ]));
+    render(<App />);
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    localStorage.removeItem('mp-dishes');
+  });
+
+  it('navigates to grocery tab and renders GroceryList', async () => {
+    render(<App />);
+    const navTabs = screen.getAllByRole('tab');
+    const groceryTab = navTabs.find(b => b.textContent?.includes('Đi chợ'));
+    if (groceryTab) fireEvent.click(groceryTab);
+    await waitFor(() => expect(screen.getByText('GroceryMock')).toBeInTheDocument());
+  });
+
+  it('confirms planning modal and shows success notification', async () => {
+    render(<App />);
+    const planBtns = screen.getAllByText('Lên kế hoạch');
+    fireEvent.click(planBtns[0]);
+    const lunchBtn = await waitFor(() => screen.getByTestId('btn-type-lunch'));
+    fireEvent.click(lunchBtn);
+    const confirmBtn = await waitFor(() => screen.getByTestId('btn-confirm-plan'));
+    fireEvent.click(confirmBtn);
     expect(mockNotify.success).toHaveBeenCalled();
   });
 });

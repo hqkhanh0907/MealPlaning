@@ -18,8 +18,8 @@ vi.mock('@capacitor/app', () => ({
 }));
 
 describe('useModalBackHandler', () => {
-  const pushStateSpy = vi.spyOn(window.history, 'pushState');
-  const backSpy = vi.spyOn(window.history, 'back');
+  const pushStateSpy = vi.spyOn(globalThis.history, 'pushState');
+  const backSpy = vi.spyOn(globalThis.history, 'back');
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -52,14 +52,14 @@ describe('useModalBackHandler', () => {
     renderHook(() => useModalBackHandler(true, onClose));
 
     // Simulate user pressing back
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    globalThis.dispatchEvent(new PopStateEvent('popstate'));
     // onClose might not fire because of programmaticBackCount reset,
     // but the handler should have been registered
     expect(pushStateSpy).toHaveBeenCalled();
   });
 
   it('cleans up event listeners on unmount', () => {
-    const removeEventSpy = vi.spyOn(window, 'removeEventListener');
+    const removeEventSpy = vi.spyOn(globalThis, 'removeEventListener');
     const { unmount } = renderHook(() => useModalBackHandler(true, vi.fn()));
     unmount();
     expect(removeEventSpy).toHaveBeenCalledWith('popstate', expect.any(Function));
@@ -74,14 +74,26 @@ describe('useModalBackHandler', () => {
     // First open→close cycle to reset programmaticBackCount
     // We need a clean state: open modal, no programmatic back happened
     // The hook pushed state. Now simulate user pressing back:
-    window.dispatchEvent(new PopStateEvent('popstate'));
-    // After first open→close cycle the programmaticBackCount might be >0
-    // because previous test did history.back(). Reset by opening fresh:
+    globalThis.dispatchEvent(new PopStateEvent('popstate'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('swallows the next popstate after a programmatic close (does not fire onClose)', () => {
+    const onClose = vi.fn();
+    const { rerender } = renderHook(
+      ({ isOpen }) => useModalBackHandler(isOpen, onClose),
+      { initialProps: { isOpen: true } },
+    );
+    // Programmatic close — increments programmaticBackCount
+    rerender({ isOpen: false });
+    // The subsequent popstate from history.back() should be swallowed
+    globalThis.dispatchEvent(new PopStateEvent('popstate'));
+    expect(onClose).not.toHaveBeenCalled();
   });
 });
 
 describe('useModalBackHandler (native)', () => {
-  const backSpy = vi.spyOn(window.history, 'back');
+  const backSpy = vi.spyOn(globalThis.history, 'back');
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -120,21 +132,35 @@ describe('useModalBackHandler (native)', () => {
     const { Capacitor } = await import('@capacitor/core');
     vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
 
-    // Open then close modal so isPushedRef is false
+    // Open modal so listener is registered and isPushedRef=true
     const { rerender } = renderHook(
-      ({ isOpen, onClose }) => useModalBackHandler(isOpen, onClose),
-      { initialProps: { isOpen: true, onClose: vi.fn() } },
+      ({ isOpen }) => useModalBackHandler(isOpen, vi.fn()),
+      { initialProps: { isOpen: true } },
     );
 
-    // Close modal first (isPushedRef becomes false after cleanup)
-    rerender({ isOpen: false, onClose: vi.fn() });
+    // Capture the registered back button callback
+    const backCallback = mockAddListener.mock.calls[0]?.[1] as ((info: { canGoBack: boolean }) => void) | undefined;
+    expect(backCallback).toBeDefined();
 
-    // Now re-open with native
-    mockAddListener.mockClear();
-    rerender({ isOpen: true, onClose: vi.fn() });
+    // Close modal → isPushedRef becomes false
+    rerender({ isOpen: false });
 
-    // Simulate scenario where isPushedRef was cleared somehow
-    // (this tests the canGoBack=false && !isPushedRef branch)
+    // Trigger back button with canGoBack=false while isPushedRef=false → exitApp
+    if (backCallback) backCallback({ canGoBack: false });
+    expect(mockExitApp).toHaveBeenCalledTimes(1);
+
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+  });
+
+  it('removes Capacitor back button listener on unmount', async () => {
+    const { Capacitor } = await import('@capacitor/core');
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+    const { unmount } = renderHook(() => useModalBackHandler(true, vi.fn()));
+    // Flush microtask so the .then() sets the remove reference
+    await Promise.resolve();
+    unmount();
+    expect(mockRemove).toHaveBeenCalled();
 
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
   });

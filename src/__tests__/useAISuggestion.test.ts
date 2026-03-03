@@ -230,4 +230,42 @@ describe('useAISuggestion', () => {
 
     expect(result.current.suggestion).toEqual(baseSuggestion);
   });
+
+  it('editMeal on fresh hook returns meal type without aborting', () => {
+    const { result } = renderHook(() => useAISuggestion(baseParams));
+    let returned = '';
+    act(() => {
+      returned = result.current.editMeal('lunch');
+    });
+    expect(returned).toBe('lunch');
+    expect(result.current.isModalOpen).toBe(false);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('close resets isLoading when a request is in-flight', () => {
+    mockSuggestMealPlan.mockImplementationOnce(() => new Promise(() => {})); // never resolves
+    const { result } = renderHook(() => useAISuggestion(baseParams));
+    act(() => { result.current.startSuggestion(); });
+    expect(result.current.isLoading).toBe(true);
+    act(() => { result.current.close(); });
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isModalOpen).toBe(false);
+  });
+
+  it('apply with all meals false calls setDayPlans with empty dish arrays', async () => {
+    mockSuggestMealPlan.mockResolvedValueOnce(baseSuggestion);
+    const { result } = renderHook(() => useAISuggestion(baseParams));
+    await act(async () => { result.current.startSuggestion(); });
+    expect(result.current.suggestion).toEqual(baseSuggestion);
+
+    act(() => {
+      result.current.apply({ breakfast: false, lunch: false, dinner: false });
+    });
+
+    // setDayPlans called (apply was not a no-op)
+    expect(baseParams.setDayPlans).toHaveBeenCalled();
+    // Modal closes and suggestion cleared
+    expect(result.current.isModalOpen).toBe(false);
+    expect(result.current.suggestion).toBeNull();
+  });
 });

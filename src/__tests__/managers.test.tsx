@@ -222,6 +222,38 @@ describe('DishManager', () => {
     // Edit modal should open
     expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
   });
+
+  it('calls onUpdate (not onAdd) when saving an edited dish', () => {
+    render(<DishManager {...defaultProps} />);
+    const editButtons = screen.getAllByText('Chỉnh sửa');
+    fireEvent.click(editButtons[0]); // Opens edit for Cơm gà (first sorted name-asc)
+    // Change the dish name
+    fireEvent.change(screen.getByPlaceholderText('VD: Ức gà áp chảo'), { target: { value: 'Cơm gà Updated' } });
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(defaultProps.onUpdate).toHaveBeenCalled();
+    expect(defaultProps.onAdd).not.toHaveBeenCalled();
+  });
+
+  it('shows ingredient details in view modal when dish name is clicked', () => {
+    render(<DishManager {...defaultProps} />);
+    // Click the dish name button to open view modal
+    const gaNuongButtons = screen.getAllByText('Gà nướng');
+    const nameBtn = gaNuongButtons.find(el => el.tagName === 'BUTTON');
+    if (nameBtn) fireEvent.click(nameBtn);
+    // View modal should show ingredient name and amount
+    expect(screen.getByText('Ức gà')).toBeInTheDocument();
+    expect(screen.getByText(/200/)).toBeInTheDocument();
+  });
+
+  it('sorts dishes by ingredient count descending (most ingredients first)', () => {
+    render(<DishManager {...defaultProps} />);
+    const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
+    fireEvent.change(sortSelect, { target: { value: 'ing-desc' } });
+    // Cơm gà (2 ingredients) should appear before Gà nướng (1 ingredient)
+    expect(document.body.innerHTML.indexOf('Cơm gà')).toBeLessThan(
+      document.body.innerHTML.indexOf('Gà nướng'),
+    );
+  });
 });
 
 // --- IngredientManager ---
@@ -341,6 +373,44 @@ describe('IngredientManager', () => {
     const editButtons = screen.getAllByText('Chỉnh sửa');
     fireEvent.click(editButtons[0]);
     expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('calls onUpdate (not onAdd) when saving an edited ingredient', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const editButtons = screen.getAllByText('Chỉnh sửa');
+    fireEvent.click(editButtons[0]); // Opens edit for Cơm trắng (first sorted name-asc)
+    fireEvent.click(screen.getByText('Lưu nguyên liệu'));
+    expect(defaultProps.onUpdate).toHaveBeenCalled();
+    expect(defaultProps.onAdd).not.toHaveBeenCalled();
+  });
+
+  it('truncates "Used in" when ingredient appears in 3+ dishes', () => {
+    const threeDishes: Dish[] = [
+      { id: 'd1', name: 'Gà nướng', ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch'] },
+      { id: 'd2', name: 'Cơm gà', ingredients: [{ ingredientId: 'i1', amount: 100 }], tags: ['lunch'] },
+      { id: 'd3', name: 'Bún gà', ingredients: [{ ingredientId: 'i1', amount: 150 }], tags: ['dinner'] },
+    ];
+    render(<IngredientManager {...defaultProps} dishes={threeDishes} />);
+    // Should show first 2 names and +1 for the third
+    expect(screen.getByText(/Gà nướng, Cơm gà \+1/)).toBeInTheDocument();
+  });
+
+  it('shows "100ml" display unit for ml ingredient', () => {
+    const mlIngredient: Ingredient = {
+      id: 'i3', name: 'Sữa', caloriesPer100: 61, proteinPer100: 3.2,
+      carbsPer100: 4.8, fatPer100: 3.3, fiberPer100: 0, unit: 'ml',
+    };
+    render(<IngredientManager {...defaultProps} ingredients={[mlIngredient]} />);
+    expect(screen.getByText('100ml')).toBeInTheDocument();
+  });
+
+  it('shows "1 cái" display unit for custom unit ingredient', () => {
+    const caiIngredient: Ingredient = {
+      id: 'i4', name: 'Trứng gà', caloriesPer100: 155, proteinPer100: 13,
+      carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0, unit: 'cái',
+    };
+    render(<IngredientManager {...defaultProps} ingredients={[caiIngredient]} />);
+    expect(screen.getByText('1 cái')).toBeInTheDocument();
   });
 
   it('calls onAdd when undo delete is triggered', () => {

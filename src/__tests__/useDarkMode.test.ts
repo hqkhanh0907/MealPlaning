@@ -111,7 +111,34 @@ describe('useDarkMode', () => {
     // The handler should have been registered for 'change' events
     expect(changeHandler).toBeDefined();
     // Calling the handler when theme is 'system' should re-apply theme
-    act(() => { changeHandler!(); });
+    act(() => { changeHandler?.(); });
     // No error means the handler executed correctly
+  });
+
+  it('defaults to system theme when localStorage.getItem throws', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
+      throw new DOMException('Blocked');
+    });
+    const { result } = renderHook(() => useDarkMode());
+    expect(result.current.theme).toBe('system');
+  });
+
+  it('still changes theme when localStorage.setItem throws', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+      throw new DOMException('QuotaExceededError');
+    });
+    const { result } = renderHook(() => useDarkMode());
+    act(() => { result.current.cycleTheme(); });
+    // Theme changed from 'system' to 'light' despite storage error
+    expect(result.current.theme).toBe('light');
+  });
+
+  it('does not crash when matchMedia is undefined', () => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: undefined,
+    });
+    expect(() => renderHook(() => useDarkMode())).not.toThrow();
   });
 });

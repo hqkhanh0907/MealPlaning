@@ -230,7 +230,54 @@ describe('NotificationContext', () => {
       // Mouse leave restarts with 2000ms
       fireEvent.mouseLeave(toastEl);
       act(() => { vi.advanceTimersByTime(2500); });
+      expect(screen.queryByText('Success!')).not.toBeInTheDocument();
     }
     vi.useRealTimers();
+  });
+
+  it('toast without onClick has no overlay button', async () => {
+    render(
+      <NotificationProvider>
+        <TestConsumer />
+      </NotificationProvider>,
+    );
+    await userEvent.click(screen.getByText('show-success'));
+    const toastContainer = screen.getByText('Success!').closest('[class*="rounded-2xl"]');
+    expect(toastContainer).toBeTruthy();
+    // No overlay button when there is no onClick option
+    const overlayBtn = toastContainer?.querySelector('button[class*="absolute"]');
+    expect(overlayBtn).toBeNull();
+  });
+
+  it('action button stopPropagation does not trigger toast onClick', async () => {
+    const toastOnClick = vi.fn();
+    const actionClick = vi.fn();
+    const BothConsumer: React.FC = () => {
+      const notify = useNotification();
+      return (
+        <button
+          onClick={() =>
+            notify.info('Both', 'msg', {
+              onClick: toastOnClick,
+              action: { label: 'Act', onClick: actionClick },
+            })
+          }
+        >
+          show-both
+        </button>
+      );
+    };
+
+    render(
+      <NotificationProvider>
+        <BothConsumer />
+      </NotificationProvider>,
+    );
+    await userEvent.click(screen.getByText('show-both'));
+    const actionBtn = screen.getByText('Act');
+    fireEvent.click(actionBtn);
+    expect(actionClick).toHaveBeenCalledTimes(1);
+    // toast onClick must NOT fire because action button stops propagation
+    expect(toastOnClick).not.toHaveBeenCalled();
   });
 });

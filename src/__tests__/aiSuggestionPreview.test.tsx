@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AISuggestionPreviewModal } from '../components/modals/AISuggestionPreviewModal';
 import { Dish, Ingredient, MealPlanSuggestion } from '../types';
 
-vi.mock('../../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
+vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const ingredients: Ingredient[] = [
   { id: 'i1', name: 'Ức gà', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: 'g' },

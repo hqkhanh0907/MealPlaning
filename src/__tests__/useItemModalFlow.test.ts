@@ -140,6 +140,31 @@ describe('useItemModalFlow', () => {
     expect(onOpenEdit).toHaveBeenCalledWith(itemA);
   });
 
+  it('back gesture from direct edit (cameFromView=false) closes without restoring view', () => {
+    const backHandlerMock = vi.mocked(useModalBackHandler);
+    let editBackCallback: (() => void) | null = null;
+    backHandlerMock.mockImplementation((_isOpen, callback) => {
+      editBackCallback = callback;
+    });
+
+    const { result } = renderHook(() => useItemModalFlow<TestItem>());
+
+    // Direct openEdit — cameFromView stays false
+    act(() => result.current.openEdit(itemA));
+    expect(result.current.isEditOpen).toBe(true);
+
+    // Simulate back gesture
+    if (editBackCallback) {
+      act(() => (editBackCallback as () => void)());
+    }
+
+    // Edit closes, no view restored
+    expect(result.current.isEditOpen).toBe(false);
+    expect(result.current.viewingItem).toBeNull();
+
+    backHandlerMock.mockImplementation(vi.fn());
+  });
+
   it('back gesture from edit-in-view returns to view without unsaved dialog', () => {
     // Capture the second useModalBackHandler call (edit modal back handler)
     const backHandlerMock = vi.mocked(useModalBackHandler);

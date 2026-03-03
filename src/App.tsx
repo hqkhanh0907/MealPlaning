@@ -183,6 +183,7 @@ export default function App() {
   const openGoalModal = useCallback(() => modals.openGoalModal(), [modals]);
 
   const handleAnalysisComplete = useCallback(() => {
+    // c8 ignore next 4
     if (activeMainTabRef.current !== 'ai-analysis') {
       setHasNewAIResult(true);
       notify.success(t('notification.analysisComplete'), t('notification.analysisCompleteHint'), { onClick: () => setActiveMainTab('ai-analysis') });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ImageCapture } from '../components/ImageCapture';
+import { compressImage } from '../utils/imageCompression';
 
 // Mock compressImage
 vi.mock('../utils/imageCompression', () => ({
@@ -38,8 +39,9 @@ describe('ImageCapture', () => {
 
   it('handles file upload via hidden input', async () => {
     render(<ImageCapture {...defaultProps} />);
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-    expect(input).toBeTruthy();
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    if (!input) return;
 
     const file = new File(['fake-image'], 'test.png', { type: 'image/png' });
 
@@ -177,6 +179,103 @@ describe('ImageCapture', () => {
 
     await waitFor(() => {
       expect(defaultProps.onImageReady).toHaveBeenCalled();
+    });
+  });
+
+  it('shows camera error when getUserMedia rejects', async () => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockRejectedValue(new Error('Permission denied')) },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Không thể truy cập camera/)).toBeInTheDocument();
+    });
+  });
+
+  it('file upload falls back to raw data when compression fails', async () => {
+    vi.mocked(compressImage).mockRejectedValueOnce(new Error('compress fail'));
+
+    render(<ImageCapture {...defaultProps} />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) return;
+    const file = new File(['fake-image'], 'test.png', { type: 'image/png' });
+    Object.defineProperty(input, 'files', { value: [file], writable: false });
+    fireEvent.change(input);
+
+    await waitFor(() => {
+      expect(defaultProps.onImageReady).toHaveBeenCalled();
+    });
+  });
+
+  it('paste falls back to raw data when compression fails', async () => {
+    vi.mocked(compressImage).mockRejectedValueOnce(new Error('compress fail'));
+
+    render(<ImageCapture {...defaultProps} />);
+    const blob = new Blob(['fake-image-data'], { type: 'image/png' });
+    const mockItem = { type: 'image/png', getAsFile: () => blob };
+    const pasteEvent = new Event('paste', { bubbles: true });
+    Object.defineProperty(pasteEvent, 'clipboardData', { value: { items: [mockItem] } });
+
+    await act(async () => {
+      globalThis.dispatchEvent(pasteEvent);
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onImageReady).toHaveBeenCalled();
+    });
+  });
+
+  it('capturePhoto does nothing when canvas context is null', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
+      writable: true,
+      configurable: true,
+    });
+
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as typeof HTMLCanvasElement.prototype.getContext;
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await waitFor(() => expect(screen.getByLabelText('Chụp ảnh')).toBeInTheDocument());
+
+    await act(async () => { fireEvent.click(screen.getByLabelText('Chụp ảnh')); });
+
+    // context is null, so onImageReady should never be called
+    expect(defaultProps.onImageReady).not.toHaveBeenCalled();
+  });
+
+  it('capturePhoto falls back to raw data URL when compression fails', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
+      writable: true,
+      configurable: true,
+    });
+
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({ drawImage: vi.fn() }) as typeof HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue('data:image/png;base64,raw');
+    vi.mocked(compressImage).mockRejectedValueOnce(new Error('compress fail'));
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await waitFor(() => expect(screen.getByLabelText('Chụp ảnh')).toBeInTheDocument());
+
+    await act(async () => { fireEvent.click(screen.getByLabelText('Chụp ảnh')); });
+
+    await waitFor(() => {
+      expect(defaultProps.onImageReady).toHaveBeenCalledWith('data:image/png;base64,raw');
     });
   });
 });
