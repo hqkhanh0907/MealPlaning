@@ -55,43 +55,20 @@ jobs:
           java-version: 21
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build web app
         run: npm run build
 
-      - name: Check wdio after npm ci
-        run: ls node_modules/.bin/wdio && echo "wdio exists after npm ci" || echo "wdio MISSING after npm ci"
-
       - name: Add Android platform
         run: npx cap add android
-
-      - name: Check wdio after cap add
-        run: ls node_modules/.bin/wdio && echo "wdio exists after cap add" || echo "wdio MISSING after cap add"
 
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Check wdio after cap sync
-        run: ls node_modules/.bin/wdio && echo "wdio exists after cap sync" || echo "wdio MISSING after cap sync"
-
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
-
-      - name: Reinstall test dependencies
-        run: npm ci
-
-      - name: Verify wdio installation
-        run: |
-          echo "=== node_modules/.bin/wdio ==="
-          ls -la node_modules/.bin/wdio 2>&1 || true
-          echo "=== @wdio/cli/bin/ ==="
-          ls -la node_modules/@wdio/cli/bin/ 2>&1 || true
-          echo "=== npm ls @wdio/cli ==="
-          npm ls @wdio/cli 2>&1 || true
-          echo "=== which npx ==="
-          which npx && npx --version
 
       - name: Enable KVM
         run: |
