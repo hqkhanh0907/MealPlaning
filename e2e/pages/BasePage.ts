@@ -34,12 +34,14 @@ export class BasePage {
       timeout: 15_000,
       interval: 200,
     });
-    // Use JavaScript click() to bypass WebDriver interactability restrictions
-    // that occur in Capacitor hybrid webview (Chrome 91, Android API 31).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (browser as unknown as ContextCapableBrowser).execute((el: any) => {
-      el.click();
-    }, elem);
+    // Use document.querySelector inside execute() to avoid WebElement
+    // deserialization failures in Chrome 91 Appium WebView — passing a
+    // WebElement object as execute() argument results in a plain JS object
+    // (not a DOM element) so el.click() would throw "not a function".
+    await (browser as unknown as ContextCapableBrowser).execute((tid: string) => {
+      const el = document.querySelector(`[data-testid="${tid}"]`) as HTMLElement;
+      if (el) el.click();
+    }, testid);
   }
 
   /**
@@ -55,18 +57,18 @@ export class BasePage {
       timeout: 15_000,
       interval: 200,
     });
-    // Use JavaScript to set value directly — bypasses WebDriver interactability
-    // checks that fail on Capacitor hybrid webview (Chrome 91, Android API 31).
-    // Also dispatches an 'input' event so React's onChange handler fires.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (browser as unknown as ContextCapableBrowser).execute((el: any, v: string) => {
-      const descriptor = Object.getOwnPropertyDescriptor(
-        Object.getPrototypeOf(el), 'value'
-      );
+    // Use document.querySelector inside execute() — passing a WebElement
+    // as execute() argument doesn't work in Chrome 91 Appium WebView
+    // (element is not deserialized to DOM node, so .value/.dispatchEvent fail).
+    // Also dispatches 'input' so React's onChange handler fires.
+    await (browser as unknown as ContextCapableBrowser).execute((tid: string, v: string) => {
+      const el = document.querySelector(`[data-testid="${tid}"]`) as HTMLInputElement;
+      if (!el) return;
+      const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value');
       descriptor?.set?.call(el, v);
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, elem, value);
+    }, testid, value);
   }
 
   /** Get text content of element. */
