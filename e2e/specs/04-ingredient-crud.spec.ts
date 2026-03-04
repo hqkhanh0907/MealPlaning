@@ -26,4 +26,35 @@ describe('Ingredient CRUD', () => {
   it('should search for the created ingredient', async () => {
     await page.searchIngredient('Gạo test');
   });
+
+  describe('Validation', () => {
+    before(async () => {
+      await page.tapAddIngredient();
+      await expect(page.el('input-ing-name')).toBeDisplayed();
+    });
+
+    it('should show error when submitting with empty name', async () => {
+      await page.saveIngredientWithoutWait();
+      await expect(page.el('error-ing-name')).toBeDisplayed();
+    });
+
+    it('should show per-field error when calories field is cleared on submit', async () => {
+      await page.fillIngName('Test vali');
+      await page.fillIngUnit('g');
+      await page.clearIngNutrition('calories');
+      await page.saveIngredientWithoutWait();
+      await expect(page.el('error-ing-calories')).toBeDisplayed();
+    });
+
+    it('should show per-field error when calories is negative on submit', async () => {
+      await page.fillIngNutrition('calories', '-10');
+      await page.saveIngredientWithoutWait();
+      await expect(page.el('error-ing-calories')).toBeDisplayed();
+    });
+
+    it('should allow entering zero in nutrition field', async () => {
+      await page.fillIngNutrition('calories', '0');
+      await expect(page.el('input-ing-calories')).toBeDisplayed();
+    });
+  });
 });

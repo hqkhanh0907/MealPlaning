@@ -18,6 +18,10 @@ interface IngredientEditModalProps {
   onClose: () => void;
 }
 
+const NUMERIC_FIELDS = ['caloriesPer100', 'proteinPer100', 'carbsPer100', 'fatPer100', 'fiberPer100'] as const;
+type NutritionField = typeof NUMERIC_FIELDS[number];
+type IngredientFormErrors = Partial<Record<'name' | 'unit' | NutritionField, string>>;
+
 const EMPTY_FORM: Omit<Ingredient, 'id'> = {
   name: { vi: '', en: '' }, caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: { vi: '', en: '' },
 };
@@ -39,7 +43,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   const [formData, setFormData] = useState<Omit<Ingredient, 'id'>>(
     () => editingItem ? { ...editingItem } : EMPTY_FORM,
   );
-  const [formErrors, setFormErrors] = useState<{ name?: string; unit?: string }>({});
+  const [formErrors, setFormErrors] = useState<IngredientFormErrors>({});
   const [isSearchingAI, setIsSearchingAI] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
@@ -51,7 +55,6 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   const enNameUserEdited = useRef(!!(editingItem && getLocalizedField(editingItem.name, 'en') !== getLocalizedField(editingItem.name, 'vi')));
 
   // String state for numeric inputs to allow clearing without snap-back on mobile
-  const NUMERIC_FIELDS = ['caloriesPer100', 'proteinPer100', 'carbsPer100', 'fatPer100', 'fiberPer100'] as const;
   const [numericInputs, setNumericInputs] = useState<Record<string, string>>(
     () => Object.fromEntries(NUMERIC_FIELDS.map(f => [f, String(editingItem ? editingItem[f] : 0)])),
   );
@@ -59,30 +62,43 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   const hasChanges = useCallback((): boolean => {
     const nameViVal = getLocalizedField(formData.name, 'vi');
     const unitViVal = getLocalizedField(formData.unit, 'vi');
-    if (!editingItem) return nameViVal !== '' || unitViVal !== '';
+    if (!editingItem) return nameViVal !== '' || unitViVal !== '' || NUMERIC_FIELDS.some(f => numericInputs[f] !== '0');
     return getLocalizedField(formData.name, 'vi') !== getLocalizedField(editingItem.name, 'vi') ||
       getLocalizedField(formData.name, 'en') !== getLocalizedField(editingItem.name, 'en') ||
       getLocalizedField(formData.unit, 'vi') !== getLocalizedField(editingItem.unit, 'vi') ||
       getLocalizedField(formData.unit, 'en') !== getLocalizedField(editingItem.unit, 'en') ||
-      formData.caloriesPer100 !== editingItem.caloriesPer100 || formData.proteinPer100 !== editingItem.proteinPer100 ||
-      formData.carbsPer100 !== editingItem.carbsPer100 || formData.fatPer100 !== editingItem.fatPer100 ||
-      formData.fiberPer100 !== editingItem.fiberPer100;
-  }, [editingItem, formData]);
+      NUMERIC_FIELDS.some(f => {
+        const orig = editingItem[f];
+        const str = numericInputs[f];
+        const n = Number.parseFloat(str);
+        if (str.trim() === '' || Number.isNaN(n)) return true;
+        return n !== orig;
+      });
+  }, [editingItem, formData, numericInputs]);
 
   const buildIngredient = (): Ingredient => ({
     ...formData,
-    caloriesPer100: Math.max(0, Number.parseFloat(numericInputs.caloriesPer100) || 0),
-    proteinPer100: Math.max(0, Number.parseFloat(numericInputs.proteinPer100) || 0),
-    carbsPer100: Math.max(0, Number.parseFloat(numericInputs.carbsPer100) || 0),
-    fatPer100: Math.max(0, Number.parseFloat(numericInputs.fatPer100) || 0),
-    fiberPer100: Math.max(0, Number.parseFloat(numericInputs.fiberPer100) || 0),
+    caloriesPer100: Number.parseFloat(numericInputs.caloriesPer100),
+    proteinPer100: Number.parseFloat(numericInputs.proteinPer100),
+    carbsPer100: Number.parseFloat(numericInputs.carbsPer100),
+    fatPer100: Number.parseFloat(numericInputs.fatPer100),
+    fiberPer100: Number.parseFloat(numericInputs.fiberPer100),
     id: editingItem ? editingItem.id : `ing-${Date.now()}`,
   });
 
   const validate = (): boolean => {
-    const errors: { name?: string; unit?: string } = {};
+    const errors: IngredientFormErrors = {};
     if (!getLocalizedField(formData.name, 'vi').trim()) errors.name = t('ingredient.validationName');
     if (!getLocalizedField(formData.unit, 'vi').trim()) errors.unit = t('ingredient.validationUnit');
+    for (const f of NUMERIC_FIELDS) {
+      const v = numericInputs[f];
+      if (v.trim() === '') {
+        errors[f] = t('ingredient.validationNumberRequired');
+      } else {
+        const n = Number.parseFloat(v);
+        if (Number.isNaN(n) || n < 0) errors[f] = t('ingredient.validationNumberNegative');
+      }
+    }
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return false; }
     return true;
   };
@@ -168,7 +184,8 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
               return (
                 <div key={field}>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(formData.unit, lang)}</label>
-                  <input type="number" step="0.1" min="0" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n)) { const clamped = Math.max(0, n); setFormData(prev => ({ ...prev, [field]: clamped })); if (clamped !== n) setNumericInputs(prev => ({ ...prev, [field]: String(clamped) })); } }} data-testid={`input-ing-${field.replace('Per100', '')}`} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
+                  <input type="number" step="0.1" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n) && n >= 0) { setFormData(prev => ({ ...prev, [field]: n })); } if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: undefined })); }} data-testid={`input-ing-${field.replace('Per100', '')}`} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors[field] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
+                  {formErrors[field] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-ing-${field.replace('Per100', '')}`}>{formErrors[field]}</p>}
                 </div>
               );
             })}

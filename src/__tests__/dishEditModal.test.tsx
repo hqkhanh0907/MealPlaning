@@ -182,7 +182,7 @@ describe('DishEditModal', () => {
     }
   });
 
-  it('decrements ingredient amount with - button, minimum 0.1', () => {
+  it('decrements ingredient amount with - button, minimum 0', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     const firstMinusBtn = screen.getAllByRole('button').find(b => b.querySelector('.lucide-minus') !== null);
     if (firstMinusBtn) {
@@ -192,18 +192,71 @@ describe('DishEditModal', () => {
     }
   });
 
-  it('clamps ingredient amount to minimum 0.1', () => {
+  it('allows zero amount input without clamping', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '0' } });
-    expect(screen.getByDisplayValue('0.1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('0')).toBeInTheDocument();
   });
 
-  it('clamps negative amount to 0.1', () => {
+  it('allows negative amount input without clamping', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '-5' } });
-    expect(screen.getByDisplayValue('0.1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('-5')).toBeInTheDocument();
+  });
+
+  it('shows amount validation error on submit when amount is negative', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    const amountInput = screen.getByDisplayValue('200');
+    fireEvent.change(amountInput, { target: { value: '-5' } });
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(screen.getByText('Số lượng không được âm')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows amount validation error on submit when amount is empty', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    const amountInput = screen.getByDisplayValue('200');
+    fireEvent.change(amountInput, { target: { value: '' } });
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(screen.getByText('Vui lòng nhập số lượng')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows name validation error when name is empty on submit', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    // Submit with no name — error should appear
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(screen.getByText('Vui lòng nhập tên món ăn')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows ingredients validation error when none selected on submit', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test dish' } });
+    fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(screen.getByText('Vui lòng chọn ít nhất một nguyên liệu')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('clears name error when user starts typing', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(screen.getByText('Vui lòng nhập tên món ăn')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'T' } });
+    expect(screen.queryByText('Vui lòng nhập tên món ăn')).not.toBeInTheDocument();
+  });
+
+  it('clears amount error when user types a valid amount', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    const amountInput = screen.getByDisplayValue('200');
+    fireEvent.change(amountInput, { target: { value: '-5' } });
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(screen.getByText('Số lượng không được âm')).toBeInTheDocument();
+    fireEvent.change(amountInput, { target: { value: '150' } });
+    expect(screen.queryByText('Số lượng không được âm')).not.toBeInTheDocument();
   });
 
   // --- Search Tests ---

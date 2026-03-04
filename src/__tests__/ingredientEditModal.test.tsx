@@ -110,12 +110,47 @@ describe('IngredientEditModal', () => {
 
   // --- Nutrition Field Tests ---
 
-  it('clamps nutrition value to minimum 0', () => {
+  it('allows negative input without immediate clamping', () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     const calorieInput = screen.getByDisplayValue('165');
     fireEvent.change(calorieInput, { target: { value: '-10' } });
-    // After clamping to 0, there will be multiple 0 values (carbs, fiber are also 0)
+    expect(calorieInput).toHaveValue(-10);
+  });
+
+  it('shows per-field error when nutrition field is negative on submit', () => {
+    render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const calorieInput = screen.getByDisplayValue('165');
+    fireEvent.change(calorieInput, { target: { value: '-10' } });
+    fireEvent.click(screen.getByText('Lưu nguyên liệu'));
+    expect(screen.getByText('Giá trị không được âm')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows per-field error when nutrition field is empty on submit', () => {
+    render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const calorieInput = screen.getByDisplayValue('165');
+    fireEvent.change(calorieInput, { target: { value: '' } });
+    fireEvent.click(screen.getByText('Lưu nguyên liệu'));
+    expect(screen.getByText('Vui lòng nhập giá trị')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('allows zero value in nutrition field and submits successfully', () => {
+    render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const calorieInput = screen.getByDisplayValue('165');
+    fireEvent.change(calorieInput, { target: { value: '0' } });
     expect(calorieInput).toHaveValue(0);
+    expect(screen.queryByText('Giá trị không được âm')).not.toBeInTheDocument();
+  });
+
+  it('clears nutrition error when user fixes the field', () => {
+    render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const calorieInput = screen.getByDisplayValue('165');
+    fireEvent.change(calorieInput, { target: { value: '-10' } });
+    fireEvent.click(screen.getByText('Lưu nguyên liệu'));
+    expect(screen.getByText('Giá trị không được âm')).toBeInTheDocument();
+    fireEvent.change(calorieInput, { target: { value: '100' } });
+    expect(screen.queryByText('Giá trị không được âm')).not.toBeInTheDocument();
   });
 
   it('updates nutrition field with valid number', () => {

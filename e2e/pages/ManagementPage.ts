@@ -49,10 +49,43 @@ export class ManagementPage extends BasePage {
     await this.type('input-ing-unit', unit);
   }
 
+  async fillIngNutrition(field: 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber', value: string) {
+    await this.type(`input-ing-${field}`, value);
+  }
+
+  async clearIngNutrition(field: 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber') {
+    const elem = this.el(`input-ing-${field}`);
+    await elem.waitForDisplayed({ timeout: 10_000 });
+    await elem.clearValue();
+  }
+
   async saveIngredient() {
     await this.waitAndClick('btn-save-ingredient');
     // wait for modal to disappear by ensuring input-ing-name is no longer displayed
     const nameInput = this.el('input-ing-name');
     await nameInput.waitForDisplayed({ reverse: true, timeout: 10000 });
+  }
+
+  async saveIngredientWithoutWait() {
+    await this.waitAndClick('btn-save-ingredient');
+  }
+
+  async getValidationError(testid: string): Promise<string> {
+    const elem = this.el(testid);
+    await elem.waitForDisplayed({ timeout: 5_000 });
+    return elem.getText();
+  }
+
+  async isValidationErrorDisplayed(testid: string): Promise<boolean> {
+    return this.isDisplayed(testid);
+  }
+
+  // ----- Dish amount helpers -----
+  async fillDishAmount(ingredientId: string, value: string) {
+    await this.type(`input-dish-amount-${ingredientId}`, value);
+  }
+
+  async saveDishWithoutWait() {
+    await this.waitAndClick('btn-save-dish');
   }
 }

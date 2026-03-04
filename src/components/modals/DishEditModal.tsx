@@ -30,7 +30,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   );
   const [tags, setTags] = useState<MealType[]>(() => editingItem ? [...(editingItem.tags || [])] : []);
   const [ingredientSearch, setIngredientSearch] = useState('');
-  const [formErrors, setFormErrors] = useState<{ tags?: string }>({});
+  const [formErrors, setFormErrors] = useState<{ name?: string; tags?: string; ingredients?: string; amounts?: Partial<Record<string, string>> }>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   // String state per ingredient amount to allow clearing/retyping without snap-back on mobile
@@ -46,22 +46,43 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     if (selectedIngredients.length !== editingItem.ingredients.length) return true;
     return selectedIngredients.some((si, i) => {
       const orig = editingItem.ingredients[i];
-      return si.ingredientId !== orig.ingredientId || si.amount !== orig.amount;
+      if (si.ingredientId !== orig.ingredientId) return true;
+      const amtStr = amountStrings[si.ingredientId] ?? String(si.amount);
+      const amtNum = Number.parseFloat(amtStr);
+      if (amtStr.trim() === '' || Number.isNaN(amtNum)) return true;
+      return amtNum !== orig.amount;
     });
-  }, [editingItem, nameVi, nameEn, selectedIngredients, tags]);
+  }, [editingItem, nameVi, nameEn, selectedIngredients, tags, amountStrings]);
 
   const buildDish = (): Dish => ({
     id: editingItem ? editingItem.id : generateId('dish'),
     name: { vi: nameVi.trim() || nameEn.trim(), en: nameEn.trim() || nameVi.trim() },
-    ingredients: selectedIngredients,
+    ingredients: selectedIngredients.map(si => ({
+      ...si,
+      amount: Number.parseFloat(amountStrings[si.ingredientId] ?? String(si.amount)),
+    })),
     tags,
   });
 
   const validate = (): boolean => {
-    const errors: { tags?: string } = {};
+    const errors: { name?: string; tags?: string; ingredients?: string; amounts?: Partial<Record<string, string>> } = {};
+    if (!nameVi.trim()) errors.name = t('dish.validationName');
     if (tags.length === 0) errors.tags = t('dish.validationSelectMeal');
+    if (selectedIngredients.length === 0) errors.ingredients = t('dish.validationIngredients');
+    const amtErrors: Partial<Record<string, string>> = {};
+    for (const si of selectedIngredients) {
+      const v = (amountStrings[si.ingredientId] ?? '').trim();
+      if (v === '') {
+        amtErrors[si.ingredientId] = t('dish.validationAmountRequired');
+      } else {
+        const n = Number.parseFloat(v);
+        if (Number.isNaN(n)) amtErrors[si.ingredientId] = t('dish.validationAmountRequired');
+        else if (n < 0) amtErrors[si.ingredientId] = t('dish.validationAmountNegative');
+      }
+    }
+    if (Object.keys(amtErrors).length > 0) errors.amounts = amtErrors;
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return false; }
-    return !(!nameVi.trim() || selectedIngredients.length === 0);
+    return true;
   };
 
   const handleSubmit = () => {
@@ -83,6 +104,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     if (selectedIngredients.some(si => si.ingredientId === ingId)) return;
     setSelectedIngredients(prev => [...prev, { ingredientId: ingId, amount: 100 }]);
     setAmountStrings(prev => ({ ...prev, [ingId]: '100' }));
+    if (formErrors.ingredients) setFormErrors(prev => ({ ...prev, ingredients: undefined }));
   };
 
   const handleRemoveIngredient = (ingId: string) => {
@@ -110,7 +132,8 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
-            <input id="dish-name" required value={nameVi} onChange={e => setNameVi(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+            <input id="dish-name" value={nameVi} onChange={e => { setNameVi(e.target.value); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+            {formErrors.name && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-name">{formErrors.name}</p>}
             <label htmlFor="dish-name-en" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5 mt-3">{t('dish.nameEnLabel', 'Tên món (EN)')}</label>
             <input id="dish-name-en" value={nameEn} onChange={e => setNameEn(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.nameEnPlaceholder', 'e.g. Grilled chicken')} data-testid="input-dish-name-en" />
           </div>
@@ -162,17 +185,23 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       <div className="flex-1">
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <button type="button" onClick={() => { const a = Math.max(0.1, si.amount - 10); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
-                          <input type="number" min="0.1" step="0.1" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n)) { const clamped = Math.max(0.1, n); handleUpdateAmount(si.ingredientId, clamped); if (clamped !== n) setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(clamped) })); } }} onBlur={() => { const v = amountStrings[si.ingredientId] ?? ''; const n = Number.parseFloat(v); const valid = !Number.isNaN(n) && n >= 0.1 ? n : 0.1; handleUpdateAmount(si.ingredientId, valid); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(valid) })); }} className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
+                          <button type="button" onClick={() => { const a = Math.max(0, si.amount - 10); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
+                          <input type="number" step="0.1" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
                           <button type="button" onClick={() => { const a = si.amount + 10; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
-                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
+                        {formErrors.amounts?.[si.ingredientId] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${si.ingredientId}`}>{formErrors.amounts[si.ingredientId]}</p>}
                       </div>
                       <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   );
                 })}
-                {selectedIngredients.length === 0 && <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl">{t('dish.noIngredientSelected')}</p>}
+                {selectedIngredients.length === 0 && (
+                  <div>
+                    <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl">{t('dish.noIngredientSelected')}</p>
+                    {formErrors.ingredients && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-ingredients">{formErrors.ingredients}</p>}
+                  </div>
+                )}
               </div>
             </div>
           </div>
