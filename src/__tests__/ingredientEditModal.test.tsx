@@ -14,13 +14,13 @@ vi.mock('../services/geminiService', () => ({
 
 const existingIngredient: Ingredient = {
   id: 'ing-1',
-  name: 'Ức gà',
+  name: { vi: 'Ức gà', en: 'Ức gà' },
   caloriesPer100: 165,
   proteinPer100: 31,
   carbsPer100: 0,
   fatPer100: 3.6,
   fiberPer100: 0,
-  unit: 'g',
+  unit: { vi: 'g', en: 'g' },
 };
 
 describe('IngredientEditModal', () => {
@@ -134,25 +134,25 @@ describe('IngredientEditModal', () => {
   });
 
   it('shows 100ml label for ml unit', () => {
-    const mlIngredient: Ingredient = { ...existingIngredient, unit: 'ml' };
+    const mlIngredient: Ingredient = { ...existingIngredient, unit: { vi: 'ml', en: 'ml' } };
     render(<IngredientEditModal editingItem={mlIngredient} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText(/Calories \/ 100ml/)).toBeInTheDocument();
   });
 
   it('shows "1 unit" label for custom units', () => {
-    const customIngredient: Ingredient = { ...existingIngredient, unit: 'cái' };
+    const customIngredient: Ingredient = { ...existingIngredient, unit: { vi: 'cái', en: 'cái' } };
     render(<IngredientEditModal editingItem={customIngredient} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText(/Calories \/ 1 cái/)).toBeInTheDocument();
   });
 
   it('shows 100g label for kg unit', () => {
-    const kgIngredient: Ingredient = { ...existingIngredient, unit: 'kg' };
+    const kgIngredient: Ingredient = { ...existingIngredient, unit: { vi: 'kg', en: 'kg' } };
     render(<IngredientEditModal editingItem={kgIngredient} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText(/Calories \/ 100g/)).toBeInTheDocument();
   });
 
   it('shows 100ml label for L unit', () => {
-    const lIngredient: Ingredient = { ...existingIngredient, unit: 'L' };
+    const lIngredient: Ingredient = { ...existingIngredient, unit: { vi: 'L', en: 'L' } };
     render(<IngredientEditModal editingItem={lIngredient} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText(/Calories \/ 100ml/)).toBeInTheDocument();
   });
@@ -238,8 +238,8 @@ describe('IngredientEditModal', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const saved = onSubmit.mock.calls[0][0];
-    expect(saved.name).toBe('Thịt bò');
-    expect(saved.unit).toBe('g');
+    expect(saved.name).toEqual({ vi: 'Thịt bò', en: 'Thịt bò' });
+    expect(saved.unit).toEqual({ vi: 'g', en: 'g' });
     expect(saved.caloriesPer100).toBe(0);
     expect(saved.id).toMatch(/^ing-/);
   });
@@ -326,7 +326,7 @@ describe('IngredientEditModal', () => {
 
     fireEvent.click(screen.getByText('Ở lại chỉnh sửa'));
     expect(screen.queryByText(/Thay đổi chưa lưu/)).not.toBeInTheDocument();
-    expect(screen.getByDisplayValue('Test')).toBeInTheDocument();
+    expect(screen.getByTestId('input-ing-name')).toHaveValue('Test');
   });
 
   it('detects changes in edited ingredient when nutrition values change', () => {

@@ -6,14 +6,14 @@ import type { Dish, Ingredient } from '../types';
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: 'Ức gà', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: 'g' },
-  { id: 'i2', name: 'Cơm trắng', caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: 'g' },
+  { id: 'i1', name: { vi: 'Ức gà', en: 'Ức gà' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
+  { id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
 ];
 
 const dishes: Dish[] = [
-  { id: 'd1', name: 'Gà nướng', ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-  { id: 'd2', name: 'Cơm gà', ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
-  { id: 'd3', name: 'Cháo gà', ingredients: [{ ingredientId: 'i1', amount: 50 }], tags: ['breakfast'] },
+  { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
+  { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
+  { id: 'd3', name: { vi: 'Cháo gà', en: 'Cháo gà' }, ingredients: [{ ingredientId: 'i1', amount: 50 }], tags: ['breakfast'] },
 ];
 
 describe('PlanningModal', () => {

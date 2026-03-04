@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays } from 'lucide-react';
-import { Ingredient, Dish, DishIngredient, DayPlan } from '../types';
+import { Ingredient, Dish, DishIngredient, DayPlan, SupportedLang } from '../types';
+import { getLocalizedField } from '../utils/localize';
 import { useNotification } from '../contexts/NotificationContext';
 import { getWeekRange, isDateInRange } from '../utils/helpers';
 import { usePersistedState } from '../hooks/usePersistedState';
@@ -27,7 +28,7 @@ const collectDishIngredients = (dishIds: string[], allDishes: Dish[]): DishIngre
   return result;
 };
 
-const buildGroceryList = (dishIngredients: DishIngredient[], allIngredients: Ingredient[]): GroceryItem[] => {
+const buildGroceryList = (dishIngredients: DishIngredient[], allIngredients: Ingredient[], lang: SupportedLang): GroceryItem[] => {
   const map: Record<string, GroceryItem> = {};
   for (const di of dishIngredients) {
     const ing = allIngredients.find(i => i.id === di.ingredientId);
@@ -35,7 +36,7 @@ const buildGroceryList = (dishIngredients: DishIngredient[], allIngredients: Ing
     if (map[ing.id]) {
       map[ing.id].amount += di.amount;
     } else {
-      map[ing.id] = { id: ing.id, name: ing.name, amount: di.amount, unit: ing.unit };
+      map[ing.id] = { id: ing.id, name: getLocalizedField(ing.name, lang), amount: di.amount, unit: getLocalizedField(ing.unit, lang) };
     }
   }
   return Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
@@ -82,7 +83,8 @@ const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
 
 export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan, dayPlans, selectedDate, allDishes, allIngredients }) => {
   const notify = useNotification();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
   const [scope, setScope] = useState<GroceryScope>('day');
   const [persistedCheckedIds, setPersistedCheckedIds] = usePersistedState<string[]>('mp-grocery-checked', []);
   const checkedIds = useMemo(() => new Set(persistedCheckedIds), [persistedCheckedIds]);
@@ -100,8 +102,8 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   const groceryItems = useMemo(() => {
     if (allDishIds.length === 0) return [];
     const dishIngredients = collectDishIngredients(allDishIds, allDishes);
-    return buildGroceryList(dishIngredients, allIngredients);
-  }, [allDishIds, allDishes, allIngredients]);
+    return buildGroceryList(dishIngredients, allIngredients, lang);
+  }, [allDishIds, allDishes, allIngredients, lang]);
 
   const checkedCount = useMemo(() =>
     groceryItems.filter(item => checkedIds.has(item.id)).length,

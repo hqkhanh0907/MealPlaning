@@ -18,13 +18,13 @@ vi.mock('../services/geminiService', () => ({
 }));
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: 'Ức gà', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: 'g' },
-  { id: 'i2', name: 'Cơm trắng', caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: 'g' },
+  { id: 'i1', name: { vi: 'Ức gà', en: 'Ức gà' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
+  { id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
 ];
 
 const dishes: Dish[] = [
-  { id: 'd1', name: 'Gà nướng', ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-  { id: 'd2', name: 'Cơm gà', ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
+  { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
+  { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
 ];
 
 // --- DishManager ---
@@ -162,8 +162,8 @@ describe('DishManager', () => {
 
   it('filters dishes by tag Sáng — only shows breakfast dishes', () => {
     const dishesWithBreakfast: Dish[] = [
-      { id: 'd1', name: 'Gà nướng', ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-      { id: 'd3', name: 'Bánh mì', ingredients: [{ ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
+      { id: 'd3', name: { vi: 'Bánh mì', en: 'Bánh mì' }, ingredients: [{ ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
     ];
     render(<DishManager {...defaultProps} dishes={dishesWithBreakfast} />);
     // Click the Sáng filter chip (contains count)
@@ -177,8 +177,8 @@ describe('DishManager', () => {
 
   it('removes tag filter when clicking the same tag again', () => {
     const dishesWithBreakfast: Dish[] = [
-      { id: 'd1', name: 'Gà nướng', ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-      { id: 'd3', name: 'Bánh mì', ingredients: [{ ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
+      { id: 'd3', name: { vi: 'Bánh mì', en: 'Bánh mì' }, ingredients: [{ ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
     ];
     render(<DishManager {...defaultProps} dishes={dishesWithBreakfast} />);
     // Click Sáng filter chip (contains count)
@@ -211,7 +211,7 @@ describe('DishManager', () => {
     // Trigger undo
     options.action.onClick();
     // onAdd should be called with the deleted dish
-    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'd2', name: 'Cơm gà' }));
+    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' } }));
   });
 
   it('opens edit modal when dish edit button is clicked', () => {
@@ -386,9 +386,9 @@ describe('IngredientManager', () => {
 
   it('truncates "Used in" when ingredient appears in 3+ dishes', () => {
     const threeDishes: Dish[] = [
-      { id: 'd1', name: 'Gà nướng', ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch'] },
-      { id: 'd2', name: 'Cơm gà', ingredients: [{ ingredientId: 'i1', amount: 100 }], tags: ['lunch'] },
-      { id: 'd3', name: 'Bún gà', ingredients: [{ ingredientId: 'i1', amount: 150 }], tags: ['dinner'] },
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch'] },
+      { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }], tags: ['lunch'] },
+      { id: 'd3', name: { vi: 'Bún gà', en: 'Bún gà' }, ingredients: [{ ingredientId: 'i1', amount: 150 }], tags: ['dinner'] },
     ];
     render(<IngredientManager {...defaultProps} dishes={threeDishes} />);
     // Should show first 2 names and +1 for the third
@@ -397,8 +397,8 @@ describe('IngredientManager', () => {
 
   it('shows "100ml" display unit for ml ingredient', () => {
     const mlIngredient: Ingredient = {
-      id: 'i3', name: 'Sữa', caloriesPer100: 61, proteinPer100: 3.2,
-      carbsPer100: 4.8, fatPer100: 3.3, fiberPer100: 0, unit: 'ml',
+      id: 'i3', name: { vi: 'Sữa', en: 'Sữa' }, caloriesPer100: 61, proteinPer100: 3.2,
+      carbsPer100: 4.8, fatPer100: 3.3, fiberPer100: 0, unit: { vi: 'ml', en: 'ml' },
     };
     render(<IngredientManager {...defaultProps} ingredients={[mlIngredient]} />);
     expect(screen.getByText('100ml')).toBeInTheDocument();
@@ -406,8 +406,8 @@ describe('IngredientManager', () => {
 
   it('shows "1 cái" display unit for custom unit ingredient', () => {
     const caiIngredient: Ingredient = {
-      id: 'i4', name: 'Trứng gà', caloriesPer100: 155, proteinPer100: 13,
-      carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0, unit: 'cái',
+      id: 'i4', name: { vi: 'Trứng gà', en: 'Trứng gà' }, caloriesPer100: 155, proteinPer100: 13,
+      carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0, unit: { vi: 'cái', en: 'cái' },
     };
     render(<IngredientManager {...defaultProps} ingredients={[caiIngredient]} />);
     expect(screen.getByText('1 cái')).toBeInTheDocument();
@@ -426,6 +426,6 @@ describe('IngredientManager', () => {
     // Trigger undo
     options.action.onClick();
     // onAdd should be called with the deleted ingredient (sorted: "Cơm trắng" first)
-    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'i2', name: 'Cơm trắng' }));
+    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' } }));
   });
 });

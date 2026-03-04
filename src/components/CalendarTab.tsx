@@ -4,7 +4,8 @@ import {
   CalendarDays, Plus, Edit3, Sparkles, Loader2, Trash2,
   Info, AlertCircle, CheckCircle2, ChefHat, MoreVertical
 } from 'lucide-react';
-import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary, SlotInfo } from '../types';
+import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary, SlotInfo, SupportedLang } from '../types';
+import { getLocalizedField } from '../utils/localize';
 import { Summary } from './Summary';
 import { DateSelector } from './DateSelector';
 import { getDynamicTips, NutritionTip } from '../utils/tips';
@@ -19,10 +20,11 @@ interface MealCardProps {
 }
 
 const MealCard: React.FC<MealCardProps> = ({ type, slot, dishes, onEdit }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
   const mealLabels = getMealTypeLabels(t);
   const dishNames = slot.dishIds
-    .map(id => dishes.find(d => d.id === id)?.name)
+    .map(id => { const d = dishes.find(x => x.id === id); return d ? getLocalizedField(d.name, lang) : undefined; })
     .filter(Boolean);
 
   return (

@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save, Sparkles, Loader2, X } from 'lucide-react';
-import { Ingredient } from '../../types';
+import { Ingredient, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
 import { suggestIngredientInfo } from '../../services/geminiService';
 import { useNotification } from '../../contexts/NotificationContext';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -18,20 +19,21 @@ interface IngredientEditModalProps {
 }
 
 const EMPTY_FORM: Omit<Ingredient, 'id'> = {
-  name: '', caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: '',
+  name: { vi: '', en: '' }, caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: { vi: '', en: '' },
 };
 
-const getDisplayUnit = (unit: string) => {
-  const u = unit.toLowerCase().trim();
+const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
+  const u = getLocalizedField(unit, lang).toLowerCase().trim();
   if (u === 'kg' || u === 'g') return '100g';
   if (u === 'l' || u === 'ml') return '100ml';
-  return `1 ${unit}`;
+  return `1 ${getLocalizedField(unit, lang)}`;
 };
 
 export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   editingItem, onSubmit, onClose,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
   const notify = useNotification();
 
   const [formData, setFormData] = useState<Omit<Ingredient, 'id'>>(
@@ -46,8 +48,13 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   useEffect(() => () => { isMountedRef.current = false; }, []);
 
   const hasChanges = useCallback((): boolean => {
-    if (!editingItem) return formData.name !== '' || formData.unit !== '';
-    return formData.name !== editingItem.name || formData.unit !== editingItem.unit ||
+    const nameViVal = getLocalizedField(formData.name, 'vi');
+    const unitViVal = getLocalizedField(formData.unit, 'vi');
+    if (!editingItem) return nameViVal !== '' || unitViVal !== '';
+    return getLocalizedField(formData.name, 'vi') !== getLocalizedField(editingItem.name, 'vi') ||
+      getLocalizedField(formData.name, 'en') !== getLocalizedField(editingItem.name, 'en') ||
+      getLocalizedField(formData.unit, 'vi') !== getLocalizedField(editingItem.unit, 'vi') ||
+      getLocalizedField(formData.unit, 'en') !== getLocalizedField(editingItem.unit, 'en') ||
       formData.caloriesPer100 !== editingItem.caloriesPer100 || formData.proteinPer100 !== editingItem.proteinPer100 ||
       formData.carbsPer100 !== editingItem.carbsPer100 || formData.fatPer100 !== editingItem.fatPer100 ||
       formData.fiberPer100 !== editingItem.fiberPer100;
@@ -60,8 +67,8 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
   const validate = (): boolean => {
     const errors: { name?: string; unit?: string } = {};
-    if (!formData.name.trim()) errors.name = t('ingredient.validationName');
-    if (!formData.unit.trim()) errors.unit = t('ingredient.validationUnit');
+    if (!getLocalizedField(formData.name, 'vi').trim()) errors.name = t('ingredient.validationName');
+    if (!getLocalizedField(formData.unit, 'vi').trim()) errors.unit = t('ingredient.validationUnit');
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return false; }
     return true;
   };
@@ -83,10 +90,12 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   };
 
   const handleAISearch = async () => {
-    if (!formData.name || !formData.unit) return;
+    const nameVi = getLocalizedField(formData.name, lang);
+    const unitVi = getLocalizedField(formData.unit, lang);
+    if (!nameVi || !unitVi) return;
     try {
       setIsSearchingAI(true);
-      const info = await suggestIngredientInfo(formData.name, formData.unit);
+      const info = await suggestIngredientInfo(nameVi, unitVi);
       if (!isMountedRef.current) return;
       setFormData(prev => ({
         ...prev,
@@ -97,9 +106,9 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
       logger.error({ component: 'IngredientEditModal', action: 'aiSearch' }, error);
       if (!isMountedRef.current) return;
       if (error instanceof Error && error.message === 'Timeout') {
-        notify.warning(t('ingredient.aiTimeout'), t('ingredient.aiTimeoutDesc', { name: formData.name }));
+        notify.warning(t('ingredient.aiTimeout'), t('ingredient.aiTimeoutDesc', { name: nameVi }));
       } else {
-        notify.error(t('ingredient.aiLookupFailed'), t('ingredient.aiLookupFailedDesc', { name: formData.name }));
+        notify.error(t('ingredient.aiLookupFailed'), t('ingredient.aiLookupFailedDesc', { name: nameVi }));
       }
     } finally {
       if (isMountedRef.current) setIsSearchingAI(false);
@@ -118,16 +127,20 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
           <div>
             <label htmlFor="ing-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.ingredientName')}</label>
             <div className="flex gap-2">
-              <input id="ing-name" value={formData.name} onChange={e => { setFormData({ ...formData, name: e.target.value }); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
-              <button type="button" onClick={handleAISearch} disabled={!formData.name || !formData.unit || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title={formData.unit ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
+              <input id="ing-name" value={getLocalizedField(formData.name, 'vi')} onChange={e => { setFormData({ ...formData, name: { ...formData.name, vi: e.target.value, en: formData.name.en || e.target.value } }); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
+              <button type="button" onClick={handleAISearch} disabled={!getLocalizedField(formData.name, lang) || !getLocalizedField(formData.unit, lang) || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title={getLocalizedField(formData.unit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
                 {isSearchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
               </button>
             </div>
             {formErrors.name && <p className="text-xs text-rose-500 mt-1">{formErrors.name}</p>}
           </div>
           <div>
+            <label htmlFor="ing-name-en" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.nameEnLabel', 'Tên (EN)')}</label>
+            <input id="ing-name-en" value={getLocalizedField(formData.name, 'en')} onChange={e => setFormData({ ...formData, name: { ...formData.name, en: e.target.value } })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('ingredient.nameEnPlaceholder', 'e.g. Chicken breast')} data-testid="input-ing-name-en" />
+          </div>
+          <div>
             <label htmlFor="ing-unit" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.unitLabel')}</label>
-            <input id="ing-unit" value={formData.unit} onChange={e => { setFormData({ ...formData, unit: e.target.value }); if (formErrors.unit) setFormErrors(prev => ({ ...prev, unit: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.unit ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.unitPlaceholder')} data-testid="input-ing-unit" />
+            <input id="ing-unit" value={getLocalizedField(formData.unit, 'vi')} onChange={e => { setFormData({ ...formData, unit: { ...formData.unit, vi: e.target.value, en: formData.unit.en || e.target.value } }); if (formErrors.unit) setFormErrors(prev => ({ ...prev, unit: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.unit ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.unitPlaceholder')} data-testid="input-ing-unit" />
             {formErrors.unit && <p className="text-xs text-rose-500 mt-1">{formErrors.unit}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -135,7 +148,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
               const labels: Record<string, string> = { caloriesPer100: 'Calories', proteinPer100: 'Protein', carbsPer100: 'Carbs', fatPer100: 'Fat', fiberPer100: 'Fiber' };
               return (
                 <div key={field}>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(formData.unit)}</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(formData.unit, lang)}</label>
                   <input type="number" required step="0.1" min="0" value={formData[field]} onChange={e => setFormData({ ...formData, [field]: Math.max(0, Number(e.target.value)) })} data-testid={`input-ing-${field.replace('Per100', '')}`} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
                 </div>
               );

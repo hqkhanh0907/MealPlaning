@@ -1,12 +1,15 @@
+export type SupportedLang = 'vi' | 'en';
+export type LocalizedString = Record<SupportedLang, string>;
+
 export type Ingredient = {
   id: string;
-  name: string;
+  name: LocalizedString;
   caloriesPer100: number;
   proteinPer100: number;
   carbsPer100: number;
   fatPer100: number;
   fiberPer100: number;
-  unit: string; // 'g' or 'ml'
+  unit: LocalizedString; // e.g. { vi: 'g', en: 'g' }
 };
 
 export type DishIngredient = {
@@ -18,7 +21,7 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner';
 
 export type Dish = {
   id: string;
-  name: string;
+  name: LocalizedString;
   ingredients: DishIngredient[];
   tags: MealType[]; // which meal slots this dish is suitable for
 };

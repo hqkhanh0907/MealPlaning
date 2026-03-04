@@ -27,10 +27,10 @@ vi.mock('../utils/nutrition', () => ({
 }));
 
 const makeDish = (id: string, name: string): Dish => ({
-  id, name, tags: ['lunch'], ingredients: [], 
+  id, name: { vi: name, en: name }, tags: ['lunch'], ingredients: [], 
 });
 const makeIngredient = (id: string, name: string): Ingredient => ({
-  id, name, unit: 'g', caloriesPer100: 50, proteinPer100: 5, carbsPer100: 20, fatPer100: 2, fiberPer100: 1,
+  id, name: { vi: name, en: name }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 50, proteinPer100: 5, carbsPer100: 20, fatPer100: 2, fiberPer100: 1,
 });
 
 const baseSuggestion: MealPlanSuggestion = {

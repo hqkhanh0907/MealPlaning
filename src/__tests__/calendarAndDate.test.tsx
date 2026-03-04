@@ -206,9 +206,9 @@ describe('CalendarTab', () => {
     onSelectDate: vi.fn(),
     dayPlans,
     dishes: [
-      { id: 'd1', name: 'Trứng chiên', ingredients: [], tags: ['breakfast' as const] },
-      { id: 'd2', name: 'Cơm gà', ingredients: [], tags: ['lunch' as const] },
-      { id: 'd3', name: 'Canh rau', ingredients: [], tags: ['dinner' as const] },
+      { id: 'd1', name: { vi: 'Trứng chiên', en: 'Trứng chiên' }, ingredients: [], tags: ['breakfast' as const] },
+      { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [], tags: ['lunch' as const] },
+      { id: 'd3', name: { vi: 'Canh rau', en: 'Canh rau' }, ingredients: [], tags: ['dinner' as const] },
     ],
     ingredients: [],
     currentPlan: dayPlans[0],

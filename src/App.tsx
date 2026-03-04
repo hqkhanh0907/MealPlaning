@@ -40,6 +40,7 @@ import {
   removeIngredientFromDishes,
   migrateDayPlans,
   migrateDishes,
+  migrateIngredients,
   processAnalyzedDish,
   validateImportData,
 } from './services/dataService';
@@ -80,11 +81,12 @@ export default function App() {
 
   const [userProfile, setUserProfile] = usePersistedState<UserProfile>('mp-user-profile', DEFAULT_USER_PROFILE);
 
-  const [ingredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', initialIngredients);
+  const [rawIngredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', initialIngredients);
   const [rawDishes, setDishes] = usePersistedState<Dish[]>('mp-dishes', initialDishes);
   const [rawDayPlans, setDayPlans] = usePersistedState<DayPlan[]>('mp-day-plans', []);
 
   // Migrate old data formats
+  const ingredients = useMemo(() => migrateIngredients(rawIngredients), [rawIngredients]);
   const dishes = useMemo(() => migrateDishes(rawDishes), [rawDishes]);
   const dayPlans = useMemo(() => migrateDayPlans(rawDayPlans), [rawDayPlans]);
 
@@ -92,15 +94,20 @@ export default function App() {
   const hasMigratedRef = useRef(false);
   useEffect(() => {
     if (hasMigratedRef.current) return;
-    const needsMigration = rawDishes.some((d: unknown) => {
+    const needsDishMigration = rawDishes.some((d: unknown) => {
       const tags = (d as Record<string, unknown>).tags;
       return !Array.isArray(tags) || tags.length === 0;
     });
-    if (needsMigration) {
+    const needsIngMigration = rawIngredients.some((i: unknown) => {
+      const name = (i as Record<string, unknown>).name;
+      return typeof name === 'string';
+    });
+    if (needsDishMigration || needsIngMigration) {
       hasMigratedRef.current = true;
-      setDishes(dishes);
+      if (needsDishMigration) setDishes(dishes);
+      if (needsIngMigration) setIngredients(ingredients);
     }
-  }, [rawDishes, dishes, setDishes]);
+  }, [rawDishes, rawIngredients, dishes, ingredients, setDishes, setIngredients]);
 
   const modals = useModalManager();
 
@@ -171,7 +178,7 @@ export default function App() {
       setActiveMainTab('management');
       setActiveManagementSubTab('ingredients');
     } else {
-      setDishes(prev => [...prev, { id: generateId('dish'), name: result.name, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
+      setDishes(prev => [...prev, { id: generateId('dish'), name: { vi: result.name, en: result.name }, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
       notify.success(t('notification.saveSuccess'), t('notification.savedDish', { name: result.name, count: newIngredients.length }));
       setActiveMainTab('management');
       setActiveManagementSubTab('dishes');

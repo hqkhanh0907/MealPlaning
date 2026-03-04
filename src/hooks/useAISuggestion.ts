@@ -48,7 +48,7 @@ export function useAISuggestion({
   const buildAvailableDishes = useCallback((): AvailableDishInfo[] =>
     dishes.map(d => {
       const n = calculateDishNutrition(d, ingredients);
-      return { id: d.id, name: d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
+      return { id: d.id, name: typeof d.name === 'object' ? d.name.vi : d.name, tags: d.tags, calories: Math.round(n.calories), protein: Math.round(n.protein) };
     }), [dishes, ingredients]);
 
   const fetchSuggestion = useCallback(async (openModal: boolean) => {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Search, ChevronRight, CheckCircle2, ChefHat } from 'lucide-react';
-import { Dish, Ingredient, MealType, NutritionInfo } from '../../types';
+import { Dish, Ingredient, MealType, NutritionInfo, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
 import { calculateDishNutrition, calculateDishesNutrition } from '../../utils/nutrition';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -34,7 +35,8 @@ interface PlanningModalProps {
 export const PlanningModal: React.FC<PlanningModalProps> = ({
   planningType, dishes, ingredients, currentDishIds, onConfirm, onClose, onBack,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
   const mealTypeLabels = getMealTypeLabels(t);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [sortBy, setSortBy] = React.useState<SortOption>('name-asc');
@@ -54,10 +56,10 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
   const filteredDishes = React.useMemo(() => {
     return dishes
       .filter(d => d.tags?.includes(planningType))
-      .filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter(d => Object.values(d.name).some((n: string) => n.toLowerCase().includes(searchQuery.toLowerCase())))
       .map(d => ({ dish: d, nutrition: calculateDishNutrition(d, ingredients) }))
-      .sort((a, b) => sortDishes({ name: a.dish.name, nutrition: a.nutrition }, { name: b.dish.name, nutrition: b.nutrition }, sortBy));
-  }, [dishes, planningType, searchQuery, ingredients, sortBy]);
+      .sort((a, b) => sortDishes({ name: getLocalizedField(a.dish.name, lang), nutrition: a.nutrition }, { name: getLocalizedField(b.dish.name, lang), nutrition: b.nutrition }, sortBy));
+  }, [dishes, planningType, searchQuery, ingredients, sortBy, lang]);
 
   const selectedNutrition = React.useMemo(() => {
     return calculateDishesNutrition(Array.from(selectedIds), dishes, ingredients);
@@ -132,7 +134,7 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
                     <ChefHat className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className={`font-bold text-base truncate ${isSelected ? 'text-emerald-900 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'}`}>{dish.name}</h4>
+                    <h4 className={`font-bold text-base truncate ${isSelected ? 'text-emerald-900 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'}`}>{getLocalizedField(dish.name, lang)}</h4>
                     <div className="flex gap-3 mt-0.5">
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{Math.round(nutrition.calories)} kcal</span>
                       <span className="text-xs font-bold text-blue-500 dark:text-blue-400">{Math.round(nutrition.protein)}g Pro</span>

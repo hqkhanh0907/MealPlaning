@@ -4,6 +4,7 @@ import { DayPlan, Dish, MealType, Ingredient, DishIngredient, SaveAnalyzedDishPa
 import { createEmptyDayPlan } from './planService';
 import { generateId } from '../utils/helpers';
 import { logger } from '../utils/logger';
+import { toLocalized, getLocalizedField } from '../utils/localize';
 
 // --- Type guards for runtime validation during migration ---
 
@@ -17,11 +18,19 @@ const isDayPlan = (v: unknown): v is DayPlan =>
   Array.isArray(v.lunchDishIds) &&
   Array.isArray(v.dinnerDishIds);
 
+// Accepts both old string names and new LocalizedString for backward compat
 const isDish = (v: unknown): v is Dish =>
   isRecord(v) &&
   typeof v.id === 'string' &&
-  typeof v.name === 'string' &&
+  (typeof v.name === 'string' || isRecord(v.name)) &&
   Array.isArray(v.ingredients);
+
+// Accepts both old string names/units and new LocalizedString for backward compat
+const isIngredient = (v: unknown): v is Ingredient =>
+  isRecord(v) &&
+  typeof v.id === 'string' &&
+  (typeof v.name === 'string' || isRecord(v.name)) &&
+  (typeof v.unit === 'string' || isRecord(v.unit));
 
 export const removeIngredientFromDishes = (dishes: Dish[], ingredientId: string): Dish[] =>
   dishes.map(d => ({ ...d, ingredients: d.ingredients.filter(di => di.ingredientId !== ingredientId) }));
@@ -36,6 +45,7 @@ export const migrateDayPlans = (plans: unknown[]): DayPlan[] => {
 };
 
 // Legacy dishes may lack tags — default to 'lunch' for backward compatibility.
+// Legacy dishes may also have string names — migrate to LocalizedString.
 // Invalid entries are filtered out with a warning instead of throwing (fail-safe).
 export const migrateDishes = (dishes: unknown[]): Dish[] => {
   return dishes
@@ -55,7 +65,26 @@ export const migrateDishes = (dishes: unknown[]): Dish[] => {
       const tags: MealType[] = Array.isArray(rawTags) && rawTags.length > 0
         ? rawTags
         : ['lunch'];
-      return { ...dish, tags };
+      return { ...dish, name: toLocalized(dish.name), tags };
+    });
+};
+
+// Migrates legacy ingredients that store name/unit as plain strings.
+export const migrateIngredients = (ingredients: unknown[]): Ingredient[] => {
+  return ingredients
+    .filter(i => {
+      if (!isIngredient(i)) {
+        logger.warn(
+          { component: 'dataService', action: 'migrateIngredients' },
+          `Invalid ingredient data skipped during migration: ${JSON.stringify(i)}`
+        );
+        return false;
+      }
+      return true;
+    })
+    .map(i => {
+      const ing = i as Ingredient;
+      return { ...ing, name: toLocalized(ing.name), unit: toLocalized(ing.unit) };
     });
 };
 
@@ -68,12 +97,18 @@ export const processAnalyzedDish = (
   const allIngredients = [...existingIngredients];
 
   for (const aiIng of result.ingredients) {
-    let existingIng = allIngredients.find(i => i.name.toLowerCase() === aiIng.name.toLowerCase());
+    const aiNameLower = aiIng.name.toLowerCase();
+    // Match against both vi and en variants (case-insensitive)
+    let existingIng = allIngredients.find(i => {
+      const viName = getLocalizedField(i.name, 'vi').toLowerCase();
+      const enName = getLocalizedField(i.name, 'en').toLowerCase();
+      return viName === aiNameLower || enName === aiNameLower;
+    });
     if (!existingIng) {
       const newIng: Ingredient = {
         id: generateId('ing'),
-        name: aiIng.name,
-        unit: aiIng.unit,
+        name: toLocalized(aiIng.name),
+        unit: toLocalized(aiIng.unit),
         caloriesPer100: aiIng.nutritionPerStandardUnit.calories,
         proteinPer100: aiIng.nutritionPerStandardUnit.protein,
         carbsPer100: aiIng.nutritionPerStandardUnit.carbs,

@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Sparkles, ChefHat, RefreshCw, CheckCircle2, AlertCircle, Edit3 } from 'lucide-react';
-import { Dish, Ingredient, MealType, MealPlanSuggestion } from '../../types';
+import { Dish, Ingredient, MealType, MealPlanSuggestion, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
 import { calculateDishesNutrition } from '../../utils/nutrition';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -43,7 +44,8 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
   onEditMeal,
 }) => {
   useModalBackHandler(isOpen, onClose);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
   const mealTypeLabels = getMealTypeLabels(t);
 
   const [selectedMeals, setSelectedMeals] = useState({
@@ -96,7 +98,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
 
   const getDishNames = (dishIds: string[] | undefined) => {
     if (!dishIds?.length) return [];
-    return dishIds.map(id => dishes.find(d => d.id === id)?.name).filter((name): name is string => !!name);
+    return dishIds.map(id => { const d = dishes.find(x => x.id === id); return d ? getLocalizedField(d.name, lang) : undefined; }).filter((name): name is string => !!name);
   };
 
   const toggleMeal = (type: MealType) => {

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dish, Ingredient, MealType, NutritionInfo } from '../types';
+import { Dish, Ingredient, MealType, NutritionInfo, SupportedLang } from '../types';
+import { getLocalizedField } from '../utils/localize';
 import { calculateDishNutrition } from '../utils/nutrition';
 import { Trash2, Edit3, ChefHat, Apple } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
@@ -29,7 +30,8 @@ const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 
 
 export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, onAdd, onUpdate, onDelete, isUsed }) => {
   const notify = useNotification();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
 
   const tagLabels = getTagShortLabels(t);
   const mealTagOptions = getMealTagOptions(t);
@@ -48,7 +50,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
   // --- Shared hooks ---
   const modal = useItemModalFlow<Dish>();
 
-  const searchFn = useCallback((d: Dish, q: string) => d.name.toLowerCase().includes(q.toLowerCase()), []);
+  const searchFn = useCallback((d: Dish, q: string) => {
+    const ql = q.toLowerCase();
+    return Object.values(d.name).some(n => n.toLowerCase().includes(ql));
+  }, []);
 
   // Pre-compute nutrition once per dishes/ingredients change — avoids O(N log N) recalculation in sort comparator
   const nutritionMap = useMemo(() => {
@@ -63,8 +68,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     const nA = nutritionMap.get(a.id) ?? ZERO_NUTRITION;
     const nB = nutritionMap.get(b.id) ?? ZERO_NUTRITION;
     switch (s) {
-      case 'name-asc': return a.name.localeCompare(b.name);
-      case 'name-desc': return b.name.localeCompare(a.name);
+      case 'name-asc': return getLocalizedField(a.name, lang).localeCompare(getLocalizedField(b.name, lang));
+      case 'name-desc': return getLocalizedField(b.name, lang).localeCompare(getLocalizedField(a.name, lang));
       case 'cal-asc': return nA.calories - nB.calories;
       case 'cal-desc': return nB.calories - nA.calories;
       case 'pro-asc': return nA.protein - nB.protein;
@@ -73,7 +78,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
       case 'ing-desc': return b.ingredients.length - a.ingredients.length;
       default: return 0;
     }
-  }, [nutritionMap]);
+  }, [nutritionMap, lang]);
   const extraFilter = useCallback((d: Dish) => !filterTag || (d.tags?.includes(filterTag) ?? false), [filterTag]);
 
   const list = useListManager<Dish, DishSortOption>({ items: dishes, searchFn, sortFn, defaultSort: 'name-asc', extraFilter });
@@ -99,9 +104,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     onDelete(deleteConfirmation.dishId);
     setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });
     if (deleted) {
-      notify.info(t('dish.deleted'), t('dish.deletedDesc', { name: deleted.name }), {
+      const displayName = getLocalizedField(deleted.name, lang);
+      notify.info(t('dish.deleted'), t('dish.deletedDesc', { name: displayName }), {
         duration: UNDO_TOAST_DURATION_MS,
-        action: { label: t('common.undo'), onClick: () => { onAdd(deleted); notify.success(t('common.undone'), t('dish.restoredDesc', { name: deleted.name })); } },
+        action: { label: t('common.undo'), onClick: () => { onAdd(deleted); notify.success(t('common.undone'), t('dish.restoredDesc', { name: displayName })); } },
       });
     }
   };
@@ -145,7 +151,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500"><ChefHat className="w-5 h-5" /></div>
                     <div>
-                      <button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-lg text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded">{dish.name}</button>
+                      <button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-lg text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded">{getLocalizedField(dish.name, lang)}</button>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{dish.ingredients.length} {t('dish.ingredients')}</p>
                       {dish.tags && dish.tags.length > 0 && (
                         <div className="flex gap-1 mt-1 flex-wrap">
@@ -161,7 +167,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 </div>
                 <div className="relative z-10 mt-auto flex items-center gap-2 pt-4 border-t border-slate-50 dark:border-slate-700">
                   <button onClick={() => modal.openEdit(dish)} className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all"><Edit3 className="w-4 h-4" /> {t('common.edit')}</button>
-                  <button onClick={() => handleDelete(dish.id, dish.name)} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed' : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /> {t('common.delete')}</button>
+                  <button onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed' : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /> {t('common.delete')}</button>
                 </div>
               </div>
             );
@@ -189,13 +195,13 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
                   return (
                     <tr key={dish.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                      <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-4 h-4" /></div><div><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-left cursor-pointer hover:text-emerald-600 transition-colors">{dish.name}</button><p className="text-xs text-slate-500 dark:text-slate-400">{dish.ingredients.length} {t('dish.ingredients')}</p></div></div></td>
+                      <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-4 h-4" /></div><div><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-left cursor-pointer hover:text-emerald-600 transition-colors">{getLocalizedField(dish.name, lang)}</button><p className="text-xs text-slate-500 dark:text-slate-400">{dish.ingredients.length} {t('dish.ingredients')}</p></div></div></td>
                       <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{dish.tags?.map(tag => <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-600 px-1.5 py-0.5 rounded">{tagLabels[tag]}</span>)}</div></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></td>
                       <td className="px-4 py-3"><div className="flex items-center justify-end gap-1">
                         <button onClick={() => modal.openEdit(dish)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(dish.id, dish.name)} className={`p-2 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} className={`p-2 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
                       </div></td>
                     </tr>
                   );
@@ -211,11 +217,11 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 <div key={dish.id} className="relative p-4 flex items-center justify-between gap-3 active:bg-slate-50 dark:active:bg-slate-700 transition-colors w-full text-left">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-5 h-5" /></div>
-                    <div className="min-w-0"><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 truncate text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">{dish.name}</button><div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span>{Math.round(nutrition.calories)} kcal</span><span className="text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g Pro</span></div></div>
+                    <div className="min-w-0"><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 truncate text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">{getLocalizedField(dish.name, lang)}</button><div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span>{Math.round(nutrition.calories)} kcal</span><span className="text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g Pro</span></div></div>
                   </div>
                   <div className="relative z-10 flex items-center gap-1 shrink-0">
                     <button onClick={() => modal.openEdit(dish)} className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(dish.id, dish.name)} className={`p-2.5 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} className={`p-2.5 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               );
@@ -234,7 +240,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-7 h-7" /></div>
               <div>
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{dish.name}</h3>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(dish.name, lang)}</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{dish.ingredients.length} {t('dish.ingredients')}</p>
                 {dish.tags && dish.tags.length > 0 && (
                   <div className="flex gap-1.5 mt-1.5 flex-wrap">{dish.tags.map(tag => <span key={tag} className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-lg">{tagLabels[tag]}</span>)}</div>
@@ -255,8 +261,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   if (!ing) return null;
                   return (
                     <div key={si.ingredientId} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3"><div className="w-8 h-8 bg-white dark:bg-slate-600 rounded-lg flex items-center justify-center text-emerald-500 border border-slate-100 dark:border-slate-500"><Apple className="w-4 h-4" /></div><span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{ing.name}</span></div>
-                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{si.amount} {ing.unit}</span>
+                      <div className="flex items-center gap-3"><div className="w-8 h-8 bg-white dark:bg-slate-600 rounded-lg flex items-center justify-center text-emerald-500 border border-slate-100 dark:border-slate-500"><Apple className="w-4 h-4" /></div><span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{getLocalizedField(ing.name, lang)}</span></div>
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{si.amount} {getLocalizedField(ing.unit, lang)}</span>
                     </div>
                   );
                 })}

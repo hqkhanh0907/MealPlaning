@@ -5,14 +5,14 @@ import { Dish, Ingredient, SaveAnalyzedDishPayload } from '../types';
 describe('removeIngredientFromDishes', () => {
   const dishes: Dish[] = [
     {
-      id: 'd1', name: 'Dish 1', tags: ['lunch'],
+      id: 'd1', name: { vi: 'Dish 1', en: 'Dish 1' }, tags: ['lunch'],
       ingredients: [
         { ingredientId: 'ing-1', amount: 100 },
         { ingredientId: 'ing-2', amount: 200 },
       ],
     },
     {
-      id: 'd2', name: 'Dish 2', tags: ['dinner'],
+      id: 'd2', name: { vi: 'Dish 2', en: 'Dish 2' }, tags: ['dinner'],
       ingredients: [{ ingredientId: 'ing-1', amount: 50 }],
     },
   ];
@@ -124,13 +124,13 @@ describe('migrateDishes', () => {
     const validDish = { id: 'd1', name: 'Valid', ingredients: [], tags: ['lunch'] };
     const result = migrateDishes([validDish, null as unknown, { id: 'd2' }]);
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('Valid');
+    expect(result[0].name).toEqual({ vi: 'Valid', en: 'Valid' });
   });
 });
 
 describe('processAnalyzedDish', () => {
   const existingIngredients: Ingredient[] = [
-    { id: 'ing-1', name: 'Ức gà', unit: 'g', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
+    { id: 'ing-1', name: { vi: 'Ức gà', en: 'Ức gà' }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
   ];
 
   it('should match existing ingredient by name (case-insensitive)', () => {
@@ -157,7 +157,7 @@ describe('processAnalyzedDish', () => {
     };
     const result = processAnalyzedDish(payload, existingIngredients);
     expect(result.newIngredients).toHaveLength(1);
-    expect(result.newIngredients[0].name).toBe('Cà rốt');
+    expect(result.newIngredients[0].name).toEqual({ vi: 'Cà rốt', en: 'Cà rốt' });
     expect(result.newIngredients[0].caloriesPer100).toBe(41);
     expect(result.dishIngredients[0].ingredientId).toBe(result.newIngredients[0].id);
   });

@@ -6,14 +6,14 @@ import type { Dish, Ingredient } from '../types';
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: 'Ức gà', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: 'g' },
-  { id: 'i2', name: 'Cơm trắng', caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: 'g' },
-  { id: 'i3', name: 'Rau xà lách', caloriesPer100: 15, proteinPer100: 1.4, carbsPer100: 2.9, fatPer100: 0.2, fiberPer100: 1.3, unit: 'g' },
+  { id: 'i1', name: { vi: 'Ức gà', en: 'Ức gà' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
+  { id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
+  { id: 'i3', name: { vi: 'Rau xà lách', en: 'Rau xà lách' }, caloriesPer100: 15, proteinPer100: 1.4, carbsPer100: 2.9, fatPer100: 0.2, fiberPer100: 1.3, unit: { vi: 'g', en: 'g' } },
 ];
 
 const existingDish: Dish = {
   id: 'dish-1',
-  name: 'Cơm gà',
+  name: { vi: 'Cơm gà', en: 'Cơm gà' },
   ingredients: [
     { ingredientId: 'i1', amount: 200 },
     { ingredientId: 'i2', amount: 300 },
@@ -248,7 +248,7 @@ describe('DishEditModal', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const saved = onSubmit.mock.calls[0][0];
-    expect(saved.name).toBe('Cơm gà mới');
+    expect(saved.name).toEqual({ vi: 'Cơm gà mới', en: 'Cơm gà mới' });
     expect(saved.tags).toContain('lunch');
     expect(saved.ingredients).toHaveLength(1);
     expect(saved.ingredients[0].ingredientId).toBe('i1');

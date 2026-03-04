@@ -31,9 +31,9 @@ const getConversionFactor = (unit: string): number => {
 
 export const calculateIngredientNutrition = (ingredient: Ingredient, amount: number): NutritionInfo => {
   let factor: number;
-  
-  if (isWeightOrVolume(ingredient.unit)) {
-    factor = (amount * getConversionFactor(ingredient.unit)) / 100;
+  const rawUnit = typeof ingredient.unit === 'string' ? ingredient.unit : ingredient.unit.vi;
+  if (isWeightOrVolume(rawUnit)) {
+    factor = (amount * getConversionFactor(rawUnit)) / 100;
   } else {
     factor = amount;
   }
@@ -90,8 +90,8 @@ export const calculateDishesNutrition = (
 // Bridge between AI analysis output and our Ingredient model for nutrition calculations
 export const toTempIngredient = (ing: AnalyzedIngredient): Ingredient => ({
   id: '',
-  name: ing.name,
-  unit: normalizeUnit(ing.unit),
+  name: { vi: ing.name, en: ing.name },
+  unit: { vi: normalizeUnit(ing.unit), en: normalizeUnit(ing.unit) },
   caloriesPer100: ing.nutritionPerStandardUnit.calories,
   proteinPer100: ing.nutritionPerStandardUnit.protein,
   carbsPer100: ing.nutritionPerStandardUnit.carbs,

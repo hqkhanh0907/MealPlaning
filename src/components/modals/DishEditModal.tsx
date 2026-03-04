@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Save, Search, Minus, X } from 'lucide-react';
-import { Dish, Ingredient, DishIngredient, MealType } from '../../types';
+import { Dish, Ingredient, DishIngredient, MealType, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
@@ -20,8 +21,10 @@ interface DishEditModalProps {
 export const DishEditModal: React.FC<DishEditModalProps> = ({
   editingItem, ingredients, onSubmit, onClose,
 }) => {
-  const { t } = useTranslation();
-  const [name, setName] = useState(() => editingItem?.name ?? '');
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
+  const [nameVi, setNameVi] = useState(() => editingItem ? getLocalizedField(editingItem.name, 'vi') : '');
+  const [nameEn, setNameEn] = useState(() => editingItem ? getLocalizedField(editingItem.name, 'en') : '');
   const [selectedIngredients, setSelectedIngredients] = useState<DishIngredient[]>(
     () => editingItem ? [...editingItem.ingredients] : [],
   );
@@ -31,19 +34,20 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   const hasChanges = useCallback((): boolean => {
-    if (!editingItem) return name !== '' || selectedIngredients.length > 0 || tags.length > 0;
-    if (name !== editingItem.name) return true;
+    if (!editingItem) return nameVi !== '' || nameEn !== '' || selectedIngredients.length > 0 || tags.length > 0;
+    if (nameVi !== getLocalizedField(editingItem.name, 'vi')) return true;
+    if (nameEn !== getLocalizedField(editingItem.name, 'en')) return true;
     if (JSON.stringify(tags) !== JSON.stringify(editingItem.tags || [])) return true;
     if (selectedIngredients.length !== editingItem.ingredients.length) return true;
     return selectedIngredients.some((si, i) => {
       const orig = editingItem.ingredients[i];
       return si.ingredientId !== orig.ingredientId || si.amount !== orig.amount;
     });
-  }, [editingItem, name, selectedIngredients, tags]);
+  }, [editingItem, nameVi, nameEn, selectedIngredients, tags]);
 
   const buildDish = (): Dish => ({
     id: editingItem ? editingItem.id : generateId('dish'),
-    name,
+    name: { vi: nameVi.trim() || nameEn.trim(), en: nameEn.trim() || nameVi.trim() },
     ingredients: selectedIngredients,
     tags,
   });
@@ -52,8 +56,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     const errors: { tags?: string } = {};
     if (tags.length === 0) errors.tags = t('dish.validationSelectMeal');
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return false; }
-    return !(!name || selectedIngredients.length === 0);
-
+    return !(!nameVi.trim() || selectedIngredients.length === 0);
   };
 
   const handleSubmit = () => {
@@ -100,7 +103,9 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
-            <input id="dish-name" required value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+            <input id="dish-name" required value={nameVi} onChange={e => setNameVi(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+            <label htmlFor="dish-name-en" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5 mt-3">{t('dish.nameEnLabel', 'Tên món (EN)')}</label>
+            <input id="dish-name-en" value={nameEn} onChange={e => setNameEn(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.nameEnPlaceholder', 'e.g. Grilled chicken')} data-testid="input-dish-name-en" />
           </div>
           <div>
             <p className={`block text-xs font-bold uppercase mb-1.5 ${formErrors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>
@@ -127,11 +132,11 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-xl divide-y divide-slate-100 dark:divide-slate-700">
                 {(() => {
                   const pickerSelectedIds = new Set(selectedIngredients.map(si => si.ingredientId));
-                  const available = ingredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => ing.name.toLowerCase().includes(ingredientSearch.toLowerCase()));
+                  const available = ingredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()));
                   if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === ingredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
                   return available.map(ing => (
                     <button key={ing.id} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
-                      <span className="text-slate-700 dark:text-slate-300 font-medium">{ing.name}</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-medium">{getLocalizedField(ing.name, lang)}</span>
                       <Plus className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
                     </button>
                   ));
@@ -148,12 +153,12 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   return (
                     <div key={si.ingredientId} className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600 flex items-center justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{ing.name}</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
                           <button type="button" onClick={() => handleUpdateAmount(si.ingredientId, Math.max(0.1, si.amount - 10))} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
                           <input type="number" min="0.1" step="0.1" value={si.amount} onChange={e => handleUpdateAmount(si.ingredientId, Math.max(0.1, Number(e.target.value) || 0.1))} className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
                           <button type="button" onClick={() => handleUpdateAmount(si.ingredientId, si.amount + 10)} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
-                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{ing.unit}</span>
+                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
                       </div>
                       <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
