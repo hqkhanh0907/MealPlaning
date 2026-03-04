@@ -88,13 +88,22 @@ export class ManagementPage extends BasePage {
     await this.waitAndClick('btn-save-dish');
   }
 
-  /** Close the dish edit modal if it is currently open (click X button). */
+  /** Close the dish edit modal if it is currently open (click X button).
+   *  If the UnsavedChangesDialog pops up (because there were unsaved changes),
+   *  click Discard so the modal fully closes and React state resets.
+   */
   async closeDishModal() {
     const closeBtn = this.el('btn-close-dish');
     try {
       if (await closeBtn.isExisting() && await closeBtn.isDisplayed()) {
         await this.waitAndClick('btn-close-dish');
-        // Wait for modal to disappear
+        // If there are unsaved changes an UnsavedChangesDialog will appear — click Discard
+        await browser.pause(500);
+        const discardBtn = this.el('btn-discard-unsaved');
+        if (await discardBtn.isExisting() && await discardBtn.isDisplayed()) {
+          await this.waitAndClick('btn-discard-unsaved');
+        }
+        // Wait for modal to fully disappear
         await (this.el('input-dish-name')).waitForDisplayed({ reverse: true, timeout: 5000 });
       }
     } catch {
@@ -102,12 +111,20 @@ export class ManagementPage extends BasePage {
     }
   }
 
-  /** Close the ingredient edit modal if it is currently open (click X button). */
+  /** Close the ingredient edit modal if it is currently open (click X button).
+   *  Handles the UnsavedChangesDialog by clicking Discard when it appears.
+   */
   async closeIngredientModal() {
     const closeBtn = this.el('btn-close-ingredient');
     try {
       if (await closeBtn.isExisting() && await closeBtn.isDisplayed()) {
         await this.waitAndClick('btn-close-ingredient');
+        // If there are unsaved changes an UnsavedChangesDialog will appear — click Discard
+        await browser.pause(500);
+        const discardBtn = this.el('btn-discard-unsaved');
+        if (await discardBtn.isExisting() && await discardBtn.isDisplayed()) {
+          await this.waitAndClick('btn-discard-unsaved');
+        }
         await (this.el('input-ing-name')).waitForDisplayed({ reverse: true, timeout: 5000 });
       }
     } catch {

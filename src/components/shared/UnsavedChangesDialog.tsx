@@ -35,6 +35,7 @@ export const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({ isOp
             </button>
             <button
               onClick={onDiscard}
+              data-testid="btn-discard-unsaved"
               className="w-full py-3 rounded-xl font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:scale-[0.98] transition-all min-h-12"
             >
               {t('unsavedChanges.discard')}
