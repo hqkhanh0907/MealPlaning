@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Ingredient, Dish, DayPlan, MealType, AnalyzedIngredient } from '../types';
+import { Ingredient, Dish, DayPlan, AnalyzedIngredient } from '../types';
 import { calculateDishNutrition, calculateDishesNutrition, toTempIngredient, calculateIngredientNutrition } from '../utils/nutrition';
 import { generateId } from '../utils/helpers';
 import { updateDayPlanSlot, clearPlansByScope, applySuggestionToDayPlans } from '../services/planService';
@@ -31,12 +31,12 @@ beforeEach(() => {
         { ingredientId: 'ing-chicken', amount: 150 },
         { ingredientId: 'ing-rice', amount: 200 },
       ],
-      tags: ['lunch' as MealType, 'dinner' as MealType],
+      tags: ['lunch', 'dinner'],
     },
     {
       id: 'dish-trung-luoc', name: { vi: 'Trứng luộc', en: 'Trứng luộc' },
       ingredients: [{ ingredientId: 'ing-egg', amount: 2 }],
-      tags: ['breakfast' as MealType],
+      tags: ['breakfast'],
     },
     {
       id: 'dish-salad', name: { vi: 'Salad gà', en: 'Salad gà' },
@@ -44,7 +44,7 @@ beforeEach(() => {
         { ingredientId: 'ing-chicken', amount: 100 },
         { ingredientId: 'ing-broccoli', amount: 150 },
       ],
-      tags: ['lunch' as MealType],
+      tags: ['lunch'],
     },
   ];
 
@@ -327,7 +327,7 @@ describe('Flow: AI Analyzed → toTempIngredient → Nutrition Calculation', () 
 
     // toTempIngredient should normalize "Grams" → "g" for preview
     const temp = toTempIngredient(payload.ingredients[0]);
-    expect(temp.unit).toEqual({ vi: 'g', en: 'g' }); // "Grams" → "g"
+    expect(temp.unit).toEqual({ vi: 'g', en: 'g' });
     const nutrition = calculateIngredientNutrition(temp, 100);
     expect(nutrition.calories).toBeCloseTo(165);
   });
