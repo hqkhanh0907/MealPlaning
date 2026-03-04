@@ -47,6 +47,15 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   const isMountedRef = useRef(true);
   useEffect(() => () => { isMountedRef.current = false; }, []);
 
+  // Track if EN name field was user-edited (controls VI→EN auto-fill)
+  const enNameUserEdited = useRef(!!(editingItem && getLocalizedField(editingItem.name, 'en') !== getLocalizedField(editingItem.name, 'vi')));
+
+  // String state for numeric inputs to allow clearing without snap-back on mobile
+  const NUMERIC_FIELDS = ['caloriesPer100', 'proteinPer100', 'carbsPer100', 'fatPer100', 'fiberPer100'] as const;
+  const [numericInputs, setNumericInputs] = useState<Record<string, string>>(
+    () => Object.fromEntries(NUMERIC_FIELDS.map(f => [f, String(editingItem ? editingItem[f] : 0)])),
+  );
+
   const hasChanges = useCallback((): boolean => {
     const nameViVal = getLocalizedField(formData.name, 'vi');
     const unitViVal = getLocalizedField(formData.unit, 'vi');
@@ -62,6 +71,11 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
   const buildIngredient = (): Ingredient => ({
     ...formData,
+    caloriesPer100: Math.max(0, Number.parseFloat(numericInputs.caloriesPer100) || 0),
+    proteinPer100: Math.max(0, Number.parseFloat(numericInputs.proteinPer100) || 0),
+    carbsPer100: Math.max(0, Number.parseFloat(numericInputs.carbsPer100) || 0),
+    fatPer100: Math.max(0, Number.parseFloat(numericInputs.fatPer100) || 0),
+    fiberPer100: Math.max(0, Number.parseFloat(numericInputs.fiberPer100) || 0),
     id: editingItem ? editingItem.id : `ing-${Date.now()}`,
   });
 
@@ -102,6 +116,11 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
         caloriesPer100: info.calories, proteinPer100: info.protein,
         carbsPer100: info.carbs, fatPer100: info.fat, fiberPer100: info.fiber,
       }));
+      setNumericInputs(prev => ({
+        ...prev,
+        caloriesPer100: String(info.calories), proteinPer100: String(info.protein),
+        carbsPer100: String(info.carbs), fatPer100: String(info.fat), fiberPer100: String(info.fiber),
+      }));
     } catch (error) {
       logger.error({ component: 'IngredientEditModal', action: 'aiSearch' }, error);
       if (!isMountedRef.current) return;
@@ -127,7 +146,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
           <div>
             <label htmlFor="ing-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.ingredientName')}</label>
             <div className="flex gap-2">
-              <input id="ing-name" value={getLocalizedField(formData.name, 'vi')} onChange={e => { setFormData({ ...formData, name: { ...formData.name, vi: e.target.value, en: formData.name.en || e.target.value } }); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
+              <input id="ing-name" value={getLocalizedField(formData.name, 'vi')} onChange={e => { const vi = e.target.value; setFormData(prev => ({ ...prev, name: { vi, en: enNameUserEdited.current ? prev.name.en : vi } })); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
               <button type="button" onClick={handleAISearch} disabled={!getLocalizedField(formData.name, lang) || !getLocalizedField(formData.unit, lang) || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title={getLocalizedField(formData.unit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
                 {isSearchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
               </button>
@@ -136,11 +155,11 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
           </div>
           <div>
             <label htmlFor="ing-name-en" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.nameEnLabel', 'Tên (EN)')}</label>
-            <input id="ing-name-en" value={getLocalizedField(formData.name, 'en')} onChange={e => setFormData({ ...formData, name: { ...formData.name, en: e.target.value } })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('ingredient.nameEnPlaceholder', 'e.g. Chicken breast')} data-testid="input-ing-name-en" />
+            <input id="ing-name-en" value={getLocalizedField(formData.name, 'en')} onChange={e => { enNameUserEdited.current = true; setFormData(prev => ({ ...prev, name: { ...prev.name, en: e.target.value } })); }} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('ingredient.nameEnPlaceholder', 'e.g. Chicken breast')} data-testid="input-ing-name-en" />
           </div>
           <div>
             <label htmlFor="ing-unit" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.unitLabel')}</label>
-            <input id="ing-unit" value={getLocalizedField(formData.unit, 'vi')} onChange={e => { setFormData({ ...formData, unit: { ...formData.unit, vi: e.target.value, en: formData.unit.en || e.target.value } }); if (formErrors.unit) setFormErrors(prev => ({ ...prev, unit: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.unit ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.unitPlaceholder')} data-testid="input-ing-unit" />
+            <input id="ing-unit" value={getLocalizedField(formData.unit, 'vi')} onChange={e => { const vi = e.target.value; setFormData(prev => ({ ...prev, unit: { vi, en: vi } })); if (formErrors.unit) setFormErrors(prev => ({ ...prev, unit: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.unit ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.unitPlaceholder')} data-testid="input-ing-unit" />
             {formErrors.unit && <p className="text-xs text-rose-500 mt-1">{formErrors.unit}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -149,7 +168,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
               return (
                 <div key={field}>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(formData.unit, lang)}</label>
-                  <input type="number" required step="0.1" min="0" value={formData[field]} onChange={e => setFormData({ ...formData, [field]: Math.max(0, Number(e.target.value)) })} data-testid={`input-ing-${field.replace('Per100', '')}`} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
+                  <input type="number" step="0.1" min="0" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n)) { const clamped = Math.max(0, n); setFormData(prev => ({ ...prev, [field]: clamped })); if (clamped !== n) setNumericInputs(prev => ({ ...prev, [field]: String(clamped) })); } }} data-testid={`input-ing-${field.replace('Per100', '')}`} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
                 </div>
               );
             })}

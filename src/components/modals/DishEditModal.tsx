@@ -33,6 +33,11 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const [formErrors, setFormErrors] = useState<{ tags?: string }>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
+  // String state per ingredient amount to allow clearing/retyping without snap-back on mobile
+  const [amountStrings, setAmountStrings] = useState<Record<string, string>>(
+    () => Object.fromEntries((editingItem?.ingredients ?? []).map(si => [si.ingredientId, String(si.amount)])),
+  );
+
   const hasChanges = useCallback((): boolean => {
     if (!editingItem) return nameVi !== '' || nameEn !== '' || selectedIngredients.length > 0 || tags.length > 0;
     if (nameVi !== getLocalizedField(editingItem.name, 'vi')) return true;
@@ -77,10 +82,12 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const handleAddIngredient = (ingId: string) => {
     if (selectedIngredients.some(si => si.ingredientId === ingId)) return;
     setSelectedIngredients(prev => [...prev, { ingredientId: ingId, amount: 100 }]);
+    setAmountStrings(prev => ({ ...prev, [ingId]: '100' }));
   };
 
   const handleRemoveIngredient = (ingId: string) => {
     setSelectedIngredients(prev => prev.filter(si => si.ingredientId !== ingId));
+    setAmountStrings(prev => { const r = { ...prev }; delete r[ingId]; return r; });
   };
 
   const handleUpdateAmount = (ingId: string, amount: number) => {
@@ -155,9 +162,9 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       <div className="flex-1">
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <button type="button" onClick={() => handleUpdateAmount(si.ingredientId, Math.max(0.1, si.amount - 10))} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
-                          <input type="number" min="0.1" step="0.1" value={si.amount} onChange={e => handleUpdateAmount(si.ingredientId, Math.max(0.1, Number(e.target.value) || 0.1))} className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
-                          <button type="button" onClick={() => handleUpdateAmount(si.ingredientId, si.amount + 10)} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
+                          <button type="button" onClick={() => { const a = Math.max(0.1, si.amount - 10); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
+                          <input type="number" min="0.1" step="0.1" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n)) { const clamped = Math.max(0.1, n); handleUpdateAmount(si.ingredientId, clamped); if (clamped !== n) setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(clamped) })); } }} onBlur={() => { const v = amountStrings[si.ingredientId] ?? ''; const n = Number.parseFloat(v); const valid = !Number.isNaN(n) && n >= 0.1 ? n : 0.1; handleUpdateAmount(si.ingredientId, valid); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(valid) })); }} className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100" />
+                          <button type="button" onClick={() => { const a = si.amount + 10; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
                           <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
                       </div>
