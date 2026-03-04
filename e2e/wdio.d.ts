@@ -54,7 +54,9 @@ declare namespace WebdriverIO {
     getAttribute(name: string): Promise<string>;
     isDisplayed(): Promise<boolean>;
     isExisting(): Promise<boolean>;
+    isEnabled(): Promise<boolean>;
     waitForDisplayed(opts?: { timeout?: number; reverse?: boolean }): Promise<void>;
+    waitForEnabled(opts?: { timeout?: number; reverse?: boolean }): Promise<void>;
     waitForExist(opts?: { timeout?: number; reverse?: boolean }): Promise<void>;
     $: (selector: string) => Element;
     $$: (selector: string) => Element[];

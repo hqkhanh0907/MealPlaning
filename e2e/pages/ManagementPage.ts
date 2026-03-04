@@ -54,9 +54,8 @@ export class ManagementPage extends BasePage {
   }
 
   async clearIngNutrition(field: 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber') {
-    const elem = this.el(`input-ing-${field}`);
-    await elem.waitForDisplayed({ timeout: 10_000 });
-    await elem.clearValue();
+    // Use type() with empty string — triggers JS setValue which works in Capacitor webview
+    await this.type(`input-ing-${field}`, '');
   }
 
   async saveIngredient() {
