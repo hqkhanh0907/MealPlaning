@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit3, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ModalBackdrop } from './ModalBackdrop';
 
 interface DetailModalProps {
@@ -10,7 +11,9 @@ interface DetailModalProps {
   children: React.ReactNode;
 }
 
-export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onClose, onEdit, children }) => (
+export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onClose, onEdit, children }) => {
+  const { t } = useTranslation();
+  return (
   <ModalBackdrop onClose={onClose} zIndex="z-60">
     <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto sm:mx-4">
       {/* Header */}
@@ -20,7 +23,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onCl
           <button
             onClick={onEdit}
             className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-full text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
-            title="Chỉnh sửa"
+            title={t('common.edit')}
           >
             <Edit3 className="w-5 h-5" />
           </button>
@@ -46,5 +49,5 @@ export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onCl
       </div>
     </div>
   </ModalBackdrop>
-);
-
+  );
+};

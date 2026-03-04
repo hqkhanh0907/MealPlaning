@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EmptyStateProps {
   icon: React.ReactNode;
@@ -10,16 +11,18 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ icon, searchQuery, entityName, actionLabel, onAction, className = '' }) => (
+export const EmptyState: React.FC<EmptyStateProps> = ({ icon, searchQuery, entityName, actionLabel, onAction, className = '' }) => {
+  const { t } = useTranslation();
+  return (
   <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-8 sm:p-12 text-center ${className}`}>
     <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
       {icon}
     </div>
     <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">
-      {searchQuery ? `Không tìm thấy ${entityName}` : `Chưa có ${entityName} nào`}
+      {searchQuery ? t('emptyState.notFound', { entity: entityName }) : t('emptyState.noItems', { entity: entityName })}
     </h3>
     <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-      {searchQuery ? 'Thử tìm kiếm với từ khóa khác.' : `Bắt đầu tạo ${entityName} đầu tiên của bạn!`}
+      {searchQuery ? t('emptyState.searchHint') : t('emptyState.createHint', { entity: entityName })}
     </p>
     {!searchQuery && actionLabel && onAction && (
       <button
@@ -30,5 +33,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ icon, searchQuery, entit
       </button>
     )}
   </div>
-);
+  );
+};
 

@@ -59,7 +59,7 @@ describe('AnalysisResultView', () => {
   it('shows note section', () => {
     render(<AnalysisResultView result={mockResult} isAnalyzing={false} />);
     expect(screen.getByText('Lưu ý:')).toBeInTheDocument();
-    expect(screen.getByText(/Kết quả phân tích chỉ mang tính chất tham khảo/)).toBeInTheDocument();
+    expect(screen.getByText(/Kết quả phân tích chỉ mang tính chất ước tính/)).toBeInTheDocument();
   });
 
   it('shows save button when onOpenSaveModal is provided', () => {

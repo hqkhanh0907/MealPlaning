@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Camera, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { compressImage } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
 
@@ -15,6 +16,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { t } = useTranslation();
 
   // Paste handler — allows Ctrl+V image input
   useEffect(() => {
@@ -66,7 +68,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
     setCameraError(null);
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        setCameraError("Thiết bị không hỗ trợ camera. Vui lòng sử dụng tính năng Tải ảnh lên.");
+        setCameraError(t('imageCapture.noCameraSupport'));
         setIsCameraOpen(true);
         return;
       }
@@ -77,7 +79,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
       }
     } catch (err) {
       logger.error({ component: 'ImageCapture', action: 'startCamera' }, err);
-      setCameraError("Không thể truy cập camera. Trên Android, hãy vào Cài đặt > Ứng dụng > Smart Meal Planner > Quyền > bật Camera. Trên trình duyệt, kiểm tra biểu tượng ổ khóa trên thanh địa chỉ.");
+      setCameraError(t('imageCapture.cameraAccessDenied'));
     }
   };
 
@@ -127,7 +129,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
                 onClick={stopCamera}
                 className="bg-white text-slate-900 px-6 py-2 rounded-xl font-bold hover:bg-slate-100 transition-all"
               >
-                Đóng camera
+                {t('imageCapture.closeCamera')}
               </button>
             </div>
           ) : (
@@ -139,14 +141,14 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
               <div className="absolute bottom-4 flex gap-4">
                 <button 
                   onClick={stopCamera}
-                  aria-label="Đóng camera"
+                  aria-label={t('imageCapture.closeCamera')}
                   className="bg-white/20 backdrop-blur text-white p-3 rounded-full hover:bg-white/30 transition-all"
                 >
                   <X className="w-6 h-6" />
                 </button>
                 <button 
                   onClick={capturePhoto}
-                  aria-label="Chụp ảnh"
+                  aria-label={t('imageCapture.takePhoto')}
                   className="bg-white text-emerald-600 p-4 rounded-full hover:bg-emerald-50 transition-all shadow-lg"
                 >
                   <Camera className="w-8 h-8" />
@@ -163,12 +165,12 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
         >
           {image ? (
             <div className="relative aspect-video">
-              <img src={image} alt="Uploaded dish" className="w-full h-full object-cover" />
+              <img src={image} alt={t('imageCapture.uploadedDishAlt')} className="w-full h-full object-cover" />
               <button 
                 onClick={onClear}
                 className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-white dark:hover:bg-slate-800 transition-all"
               >
-                Chọn ảnh khác
+                {t('imageCapture.chooseAnother')}
               </button>
             </div>
           ) : (
@@ -181,7 +183,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
                   <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center shadow-sm transition-all">
                     <Camera className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Chụp ảnh</span>
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t('imageCapture.takePhoto')}</span>
                 </button>
                 <div className="w-px bg-slate-200 dark:bg-slate-600 h-20 self-center"></div>
                 <button
@@ -191,11 +193,11 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
                   <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center transition-all">
                     <Upload className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                   </div>
-                  <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Tải ảnh lên</span>
+                  <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{t('imageCapture.uploadImage')}</span>
                 </button>
               </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-2">
-                <span className="hidden sm:inline">Hoặc dán ảnh (Ctrl+V) trực tiếp vào đây<br/></span>Hỗ trợ JPG, PNG
+                <span className="hidden sm:inline">{t('imageCapture.pasteHint')}<br/></span>{t('imageCapture.supportedFormats')}
               </p>
             </div>
           )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Plus, LayoutGrid, List } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export type ViewLayout = 'grid' | 'list';
 
@@ -31,7 +32,9 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
   onAdd, addLabel,
   children,
   searchTestId, addTestId,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <>
     <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
       <div className="relative w-full sm:w-80">
@@ -61,14 +64,14 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
           <button
             onClick={() => onLayoutChange('grid')}
             className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'grid' ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-            title="Xem dạng lưới"
+            title={t('listToolbar.gridView')}
           >
             <LayoutGrid className="w-5 h-5" />
           </button>
           <button
             onClick={() => onLayoutChange('list')}
             className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'list' ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-            title="Xem dạng danh sách"
+            title={t('listToolbar.listView')}
           >
             <List className="w-5 h-5" />
           </button>
@@ -86,5 +89,6 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
     </div>
     {children}
   </>
-);
+  );
+};
 

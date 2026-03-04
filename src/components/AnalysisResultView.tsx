@@ -1,5 +1,6 @@
 import React from 'react';
 import { Loader2, Image as ImageIcon, Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AnalyzedDishResult, AnalyzedIngredient } from '../types';
 import { toTempIngredient, calculateIngredientNutrition } from '../utils/nutrition';
 
@@ -9,7 +10,9 @@ interface AnalysisResultViewProps {
   onOpenSaveModal?: () => void;
 }
 
-const AnalysisSkeleton: React.FC = () => (
+const AnalysisSkeleton: React.FC = () => {
+  const { t } = useTranslation();
+  return (
   <div className="space-y-6 animate-pulse">
     <div>
       <div className="h-7 bg-slate-200 rounded-lg w-2/3 mb-3" />
@@ -37,17 +40,21 @@ const AnalysisSkeleton: React.FC = () => (
     </div>
     <div className="text-center text-sm text-slate-500 font-medium">
       <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
-      AI đang phân tích hình ảnh...
+      {t('ai.loadingHint')}
     </div>
   </div>
-);
+  );
+};
 
-const EmptyState: React.FC = () => (
+const EmptyState: React.FC = () => {
+  const { t } = useTranslation();
+  return (
   <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center space-y-4">
     <ImageIcon className="w-16 h-16 opacity-20" />
-    <p>Tải ảnh lên và nhấn "Phân tích món ăn"<br/>để xem thông tin dinh dưỡng</p>
+    <p>{t('ai.emptyHint')}</p>
   </div>
-);
+  );
+};
 
 const NutritionCard: React.FC<{ label: string; value: number; unit: string; color: string }> = ({ label, value, unit, color }) => (
   <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-600 shadow-sm">
@@ -72,6 +79,7 @@ const IngredientRow: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
 
 const IngredientCard: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
+  const { t } = useTranslation();
   return (
     <div className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-600">
       <div className="flex justify-between items-center mb-2">
@@ -80,19 +88,19 @@ const IngredientCard: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
       </div>
       <div className="grid grid-cols-4 gap-2">
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Calo</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.calories')}</p>
           <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Đạm</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.protein')}</p>
           <p className="text-sm font-bold text-blue-500">{Math.round(n.protein)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Carbs</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.carbs')}</p>
           <p className="text-sm font-bold text-amber-500">{Math.round(n.carbs)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Béo</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.fat')}</p>
           <p className="text-sm font-bold text-rose-500">{Math.round(n.fat)}g</p>
         </div>
       </div>
@@ -101,6 +109,7 @@ const IngredientCard: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
 };
 
 export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result, isAnalyzing, onOpenSaveModal }) => {
+  const { t } = useTranslation();
   if (isAnalyzing) return <AnalysisSkeleton />;
   if (!result) return <EmptyState />;
 
@@ -112,26 +121,26 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result, 
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <NutritionCard label="Ước tính Calo" value={result.totalNutrition?.calories} unit="kcal" color="text-orange-500" />
-        <NutritionCard label="Ước tính Protein" value={result.totalNutrition?.protein} unit="g" color="text-blue-500" />
-        <NutritionCard label="Ước tính Carbs" value={result.totalNutrition?.carbs} unit="g" color="text-amber-500" />
-        <NutritionCard label="Ước tính Fat" value={result.totalNutrition?.fat} unit="g" color="text-rose-500" />
+        <NutritionCard label={t('ai.estimateCalories')} value={result.totalNutrition?.calories} unit="kcal" color="text-orange-500" />
+        <NutritionCard label={t('ai.estimateProtein')} value={result.totalNutrition?.protein} unit="g" color="text-blue-500" />
+        <NutritionCard label={t('ai.estimateCarbs')} value={result.totalNutrition?.carbs} unit="g" color="text-amber-500" />
+        <NutritionCard label={t('ai.estimateFat')} value={result.totalNutrition?.fat} unit="g" color="text-rose-500" />
       </div>
 
       <div>
-        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-3">Chi tiết nguyên liệu & Dinh dưỡng:</h4>
+        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-3">{t('ai.ingredientDetail')}</h4>
 
         {/* Desktop: Table view */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-100 dark:bg-slate-800">
               <tr>
-                <th className="px-3 py-2 rounded-l-lg">Nguyên liệu</th>
-                <th className="px-3 py-2">Định lượng</th>
-                <th className="px-3 py-2">Calo</th>
-                <th className="px-3 py-2">Đạm</th>
-                <th className="px-3 py-2">Carbs</th>
-                <th className="px-3 py-2 rounded-r-lg">Béo</th>
+                <th className="px-3 py-2 rounded-l-lg">{t('ingredient.title')}</th>
+                <th className="px-3 py-2">{t('ingredient.quantity')}</th>
+                <th className="px-3 py-2">{t('common.calories')}</th>
+                <th className="px-3 py-2">{t('common.protein')}</th>
+                <th className="px-3 py-2">{t('common.carbs')}</th>
+                <th className="px-3 py-2 rounded-r-lg">{t('common.fat')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-600">
@@ -151,8 +160,8 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result, 
       </div>
       
       <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800 text-sm text-indigo-800 dark:text-indigo-300">
-        <p className="font-bold mb-1">Lưu ý:</p>
-        <p className="opacity-80">Kết quả phân tích chỉ mang tính chất tham khảo. Bạn có thể sử dụng thông tin này để thêm món ăn mới vào thư viện.</p>
+        <p className="font-bold mb-1">{t('ai.disclaimer')}</p>
+        <p className="opacity-80">{t('ai.disclaimerText')}</p>
       </div>
 
       {onOpenSaveModal && (
@@ -161,7 +170,7 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result, 
           className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
         >
           <Save className="w-5 h-5" />
-          Lưu vào thư viện món ăn
+          {t('ai.saveToLibrary')}
         </button>
       )}
     </div>

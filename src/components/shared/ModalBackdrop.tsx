@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ModalBackdropProps {
   /** Handler called when clicking the backdrop overlay. */
@@ -18,6 +19,7 @@ interface ModalBackdropProps {
  * bleeding on mobile (swipe up/down).
  */
 export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 'z-50', children }) => {
+  const { t } = useTranslation();
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -32,7 +34,7 @@ export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 
     >
       <button
         type="button"
-        aria-label="Đóng"
+        aria-label={t('common.close')}
         className="absolute inset-0 w-full h-full cursor-default"
         onClick={onClose}
         tabIndex={-1}

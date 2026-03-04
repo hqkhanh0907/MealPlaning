@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { analyzeDishImage } from '../services/geminiService';
 import { AnalyzedDishResult, SaveAnalyzedDishPayload } from '../types';
 import { useNotification } from '../contexts/NotificationContext';
@@ -15,6 +16,7 @@ interface AIImageAnalyzerProps {
 
 export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComplete, onSave }) => {
   const notify = useNotification();
+  const { t } = useTranslation();
   // Ref avoids stale closures in async callbacks
   const onAnalysisCompleteRef = useRef(onAnalysisComplete);
   useEffect(() => { onAnalysisCompleteRef.current = onAnalysisComplete; }, [onAnalysisComplete]);
@@ -47,7 +49,7 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
       onAnalysisCompleteRef.current(analysis);
     } catch (error) {
       logger.error({ component: 'AIImageAnalyzer', action: 'analyze' }, error);
-      notify.error('Phân tích thất bại', 'Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.');
+      notify.error(t('ai.analysisFailed'), t('ai.analysisError'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -67,12 +69,12 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Đang phân tích...
+                {t('ai.analyzing')}
               </>
             ) : (
               <>
                 <Sparkles className="w-5 h-5" />
-                Phân tích món ăn
+                {t('ai.analyzeDish')}
               </>
             )}
           </button>

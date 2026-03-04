@@ -25,7 +25,7 @@ describe('ImageCapture', () => {
 
   it('shows image preview and "Chọn ảnh khác" when image is provided', () => {
     render(<ImageCapture {...defaultProps} image="data:image/png;base64,abc123" />);
-    const img = screen.getByAltText('Uploaded dish');
+    const img = screen.getByAltText('Ảnh món ăn đã tải lên');
     expect(img).toBeInTheDocument();
     expect(img.getAttribute('src')).toBe('data:image/png;base64,abc123');
     expect(screen.getByText('Chọn ảnh khác')).toBeInTheDocument();

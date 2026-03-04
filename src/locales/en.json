@@ -252,7 +252,10 @@
     "uploadImage": "Upload image",
     "chooseAnother": "Choose another image",
     "pasteHint": "Or paste image (Ctrl+V)...",
-    "supportedFormats": "Supports JPG, PNG"
+    "supportedFormats": "Supports JPG, PNG",
+    "noCameraSupport": "Camera is not supported. Please use the Upload image feature.",
+    "cameraAccessDenied": "Cannot access camera. On Android, go to Settings > Apps > Smart Meal Planner > Permissions > enable Camera. In browser, check the lock icon in the address bar.",
+    "uploadedDishAlt": "Uploaded dish image"
   },
   "backup": {
     "title": "Backup & Restore",
