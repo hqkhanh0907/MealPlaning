@@ -102,17 +102,20 @@ describe('Flow: Delete Ingredient → Cascade to Dishes', () => {
     const updatedDishes = removeIngredientFromDishes(dishes, 'ing-chicken');
 
     // "Cơm gà" should only have rice left
-    const comGa = updatedDishes.find(d => d.id === 'dish-com-ga')!;
+    const comGa = updatedDishes.find(d => d.id === 'dish-com-ga');
+    if (!comGa) throw new Error('dish-com-ga not found in updated dishes');
     expect(comGa.ingredients).toHaveLength(1);
     expect(comGa.ingredients[0].ingredientId).toBe('ing-rice');
 
     // "Salad gà" should only have broccoli left
-    const salad = updatedDishes.find(d => d.id === 'dish-salad')!;
+    const salad = updatedDishes.find(d => d.id === 'dish-salad');
+    if (!salad) throw new Error('dish-salad not found in updated dishes');
     expect(salad.ingredients).toHaveLength(1);
     expect(salad.ingredients[0].ingredientId).toBe('ing-broccoli');
 
     // "Trứng luộc" should be unchanged
-    const trung = updatedDishes.find(d => d.id === 'dish-trung-luoc')!;
+    const trung = updatedDishes.find(d => d.id === 'dish-trung-luoc');
+    if (!trung) throw new Error('dish-trung-luoc not found in updated dishes');
     expect(trung.ingredients).toHaveLength(1);
   });
 });

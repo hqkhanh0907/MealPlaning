@@ -52,8 +52,8 @@ describe('getDynamicTips', () => {
     );
     const warn = tips.find(t => t.emoji === '⚠️');
     expect(warn).toBeDefined();
-    expect(warn!.type).toBe('warning');
-    expect(warn!.text).toContain('vượt');
+    expect(warn?.type).toBe('warning');
+    expect(warn?.text).toContain('vượt');
   });
 
   it('returns low calorie warning when complete and <70%', () => {
@@ -70,8 +70,8 @@ describe('getDynamicTips', () => {
     );
     const warn = tips.find(t => t.emoji === '📉');
     expect(warn).toBeDefined();
-    expect(warn!.type).toBe('warning');
-    expect(warn!.text).toContain('calo hôm nay thấp');
+    expect(warn?.type).toBe('warning');
+    expect(warn?.text).toContain('calo hôm nay thấp');
   });
 
   it('returns protein success when meeting target', () => {
@@ -87,8 +87,8 @@ describe('getDynamicTips', () => {
     );
     const success = tips.find(t => t.emoji === '💪');
     expect(success).toBeDefined();
-    expect(success!.type).toBe('success');
-    expect(success!.text).toContain('protein');
+    expect(success?.type).toBe('success');
+    expect(success?.text).toContain('protein');
   });
 
   it('returns low protein warning when complete and <80%', () => {
@@ -105,7 +105,7 @@ describe('getDynamicTips', () => {
     );
     const warn = tips.find(t => t.emoji === '🥩');
     expect(warn).toBeDefined();
-    expect(warn!.type).toBe('warning');
+    expect(warn?.type).toBe('warning');
   });
 
   it('returns fiber tip when complete and fiber <15', () => {
@@ -121,7 +121,7 @@ describe('getDynamicTips', () => {
     );
     const fiberTip = tips.find(t => t.emoji === '🥬');
     expect(fiberTip).toBeDefined();
-    expect(fiberTip!.type).toBe('info');
+    expect(fiberTip?.type).toBe('info');
   });
 
   it('returns fat percentage tip when >40% of calories', () => {
@@ -138,8 +138,8 @@ describe('getDynamicTips', () => {
     );
     const fatTip = tips.find(t => t.emoji === '🫒');
     expect(fatTip).toBeDefined();
-    expect(fatTip!.type).toBe('info');
-    expect(fatTip!.text).toContain('chất béo cao');
+    expect(fatTip?.type).toBe('info');
+    expect(fatTip?.text).toContain('chất béo cao');
   });
 
   it('returns all-good success when complete with no issues', () => {
@@ -174,9 +174,9 @@ describe('getDynamicTips', () => {
     );
     const missingTip = tips.find(t => t.emoji === '📝');
     expect(missingTip).toBeDefined();
-    expect(missingTip!.type).toBe('info');
-    expect(missingTip!.text).toContain('bữa trưa');
-    expect(missingTip!.text).toContain('bữa tối');
+    expect(missingTip?.type).toBe('info');
+    expect(missingTip?.text).toContain('bữa trưa');
+    expect(missingTip?.text).toContain('bữa tối');
   });
 
   it('returns missing meals tip listing only missing meals', () => {
@@ -193,9 +193,9 @@ describe('getDynamicTips', () => {
     );
     const missingTip = tips.find(t => t.emoji === '📝');
     expect(missingTip).toBeDefined();
-    expect(missingTip!.text).toContain('bữa sáng');
-    expect(missingTip!.text).not.toContain('bữa trưa');
-    expect(missingTip!.text).toContain('bữa tối');
+    expect(missingTip?.text).toContain('bữa sáng');
+    expect(missingTip?.text).not.toContain('bữa trưa');
+    expect(missingTip?.text).toContain('bữa tối');
   });
 
   it('returns max 2 tips even when multiple issues exist', () => {

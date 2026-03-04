@@ -38,7 +38,7 @@ describe('main.tsx', () => {
     await import('../main');
 
     expect(root.innerHTML).toBeDefined();
-    document.body.removeChild(root);
+    root.remove();
   });
 
   it('throws error when root element is missing', async () => {

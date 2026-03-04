@@ -23,7 +23,7 @@ describe('usePersistedState', () => {
       result.current[1]('new-value');
     });
     expect(result.current[0]).toBe('new-value');
-    expect(JSON.parse(localStorage.getItem('test-key')!)).toBe('new-value');
+    expect(JSON.parse(localStorage.getItem('test-key') ?? '')).toBe('new-value');
   });
 
   it('falls back to initial value on corrupted localStorage', () => {
