@@ -32,6 +32,9 @@ describe('Dish CRUD', () => {
 
   describe('Validation', () => {
     before(async () => {
+      // Close any stale dish modal (e.g. left open by a previous failed save) so we
+      // start with a fresh, empty form. If the modal is NOT open this is a no-op.
+      await page.closeDishModal();
       await page.tapAddDish();
       await expect(page.el('input-dish-name')).toBeDisplayed();
     });

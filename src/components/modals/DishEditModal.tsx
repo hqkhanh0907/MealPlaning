@@ -127,7 +127,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90dvh] sm:h-auto sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{editingItem ? t('dish.editExisting') : t('dish.createNew')}</h4>
-          <button onClick={handleClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
+          <button onClick={handleClose} data-testid="btn-close-dish" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>

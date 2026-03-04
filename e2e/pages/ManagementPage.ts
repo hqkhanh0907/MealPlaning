@@ -87,4 +87,31 @@ export class ManagementPage extends BasePage {
   async saveDishWithoutWait() {
     await this.waitAndClick('btn-save-dish');
   }
+
+  /** Close the dish edit modal if it is currently open (click X button). */
+  async closeDishModal() {
+    const closeBtn = this.el('btn-close-dish');
+    try {
+      if (await closeBtn.isExisting() && await closeBtn.isDisplayed()) {
+        await this.waitAndClick('btn-close-dish');
+        // Wait for modal to disappear
+        await (this.el('input-dish-name')).waitForDisplayed({ reverse: true, timeout: 5000 });
+      }
+    } catch {
+      // Modal was not open — ignore
+    }
+  }
+
+  /** Close the ingredient edit modal if it is currently open (click X button). */
+  async closeIngredientModal() {
+    const closeBtn = this.el('btn-close-ingredient');
+    try {
+      if (await closeBtn.isExisting() && await closeBtn.isDisplayed()) {
+        await this.waitAndClick('btn-close-ingredient');
+        await (this.el('input-ing-name')).waitForDisplayed({ reverse: true, timeout: 5000 });
+      }
+    } catch {
+      // Modal was not open — ignore
+    }
+  }
 }

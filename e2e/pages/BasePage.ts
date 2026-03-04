@@ -42,6 +42,8 @@ export class BasePage {
       const el = document.querySelector(`[data-testid="${tid}"]`) as HTMLElement;
       if (el) el.click();
     }, testid);
+    // Give React time to process the event and commit the state update to DOM
+    await browser.pause(300);
   }
 
   /**
