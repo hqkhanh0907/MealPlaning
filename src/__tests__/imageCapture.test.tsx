@@ -101,8 +101,24 @@ describe('ImageCapture', () => {
       fireEvent.click(screen.getByText('Chụp ảnh'));
     });
 
-    // Camera UI is open — close button appears
+    // Camera UI is open — full-screen overlay + close button appears
+    await waitFor(() => expect(screen.getByTestId('camera-overlay')).toBeInTheDocument());
     await waitFor(() => expect(screen.getByLabelText('Đóng camera')).toBeInTheDocument());
+  });
+
+  it('renders switch camera button when camera is open', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn().mockResolvedValue(mockStream) },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await waitFor(() => expect(screen.getByLabelText('Đổi camera')).toBeInTheDocument());
   });
 
   it('closes camera and stops stream when close button clicked', async () => {
@@ -123,6 +139,33 @@ describe('ImageCapture', () => {
 
     fireEvent.click(screen.getByLabelText('Đóng camera'));
     expect(screen.getByText('Chụp ảnh')).toBeInTheDocument();
+    expect(mockTrack.stop).toHaveBeenCalled();
+  });
+
+  it('switches between front and back camera', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+    const getUserMedia = vi.fn().mockResolvedValue(mockStream);
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await waitFor(() => expect(screen.getByLabelText('Đổi camera')).toBeInTheDocument());
+
+    // First call is with environment (back camera)
+    expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: 'environment' } });
+
+    await act(async () => { fireEvent.click(screen.getByLabelText('Đổi camera')); });
+
+    // After switch, called again with user (front camera)
+    await waitFor(() => {
+      expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: 'user' } });
+    });
   });
 
   it('capturePhoto calls onImageReady with compressed data URL', async () => {

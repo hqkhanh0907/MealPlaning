@@ -271,6 +271,7 @@
   },
   "imageCapture": {
     "closeCamera": "Close camera",
+    "switchCamera": "Switch camera",
     "takePhoto": "Take photo",
     "uploadImage": "Upload image",
     "chooseAnother": "Choose another image",

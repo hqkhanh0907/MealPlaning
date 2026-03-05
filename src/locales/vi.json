@@ -269,6 +269,7 @@
   },
   "imageCapture": {
     "closeCamera": "Đóng camera",
+    "switchCamera": "Đổi camera",
     "takePhoto": "Chụp ảnh",
     "uploadImage": "Tải ảnh lên",
     "chooseAnother": "Chọn ảnh khác",

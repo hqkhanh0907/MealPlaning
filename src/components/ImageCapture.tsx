@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Camera, X } from 'lucide-react';
+import { Upload, Camera, X, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { compressImage } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
@@ -13,9 +13,11 @@ interface ImageCaptureProps {
 export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady, onClear }) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const { t } = useTranslation();
 
   // Paste handler — allows Ctrl+V image input
@@ -64,7 +66,8 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
     }
   };
 
-  const startCamera = async () => {
+  const startCamera = async (mode?: 'environment' | 'user') => {
+    const resolvedMode: 'environment' | 'user' = mode ?? facingMode;
     setCameraError(null);
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -73,7 +76,8 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
         return;
       }
       setIsCameraOpen(true);
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: resolvedMode } });
+      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
@@ -84,13 +88,33 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
   };
 
   const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
+    if (videoRef.current) videoRef.current.srcObject = null;
     setIsCameraOpen(false);
     setCameraError(null);
+  };
+
+  const switchCamera = async () => {
+    const newMode = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(newMode);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) videoRef.current.srcObject = null;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      logger.error({ component: 'ImageCapture', action: 'switchCamera' }, err);
+      setCameraError(t('imageCapture.cameraAccessDenied'));
+    }
   };
 
   const capturePhoto = async () => {
@@ -118,7 +142,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
   return (
     <>
       {isCameraOpen ? (
-        <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center" data-testid="camera-overlay">
           {cameraError ? (
             <div className="text-center p-6 max-w-xs">
               <div className="w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -138,7 +162,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
                 <track kind="captions" />
               </video>
               <canvas ref={canvasRef} className="hidden" />
-              <div className="absolute bottom-4 flex gap-4">
+              <div className="absolute bottom-10 flex items-center gap-6">
                 <button 
                   onClick={stopCamera}
                   aria-label={t('imageCapture.closeCamera')}
@@ -149,9 +173,16 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
                 <button 
                   onClick={capturePhoto}
                   aria-label={t('imageCapture.takePhoto')}
-                  className="bg-white text-emerald-600 p-4 rounded-full hover:bg-emerald-50 transition-all shadow-lg"
+                  className="bg-white text-emerald-600 p-5 rounded-full hover:bg-emerald-50 transition-all shadow-2xl"
                 >
-                  <Camera className="w-8 h-8" />
+                  <Camera className="w-9 h-9" />
+                </button>
+                <button 
+                  onClick={switchCamera}
+                  aria-label={t('imageCapture.switchCamera')}
+                  className="bg-white/20 backdrop-blur text-white p-3 rounded-full hover:bg-white/30 transition-all"
+                >
+                  <RotateCcw className="w-6 h-6" />
                 </button>
               </div>
             </>
@@ -177,7 +208,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
             <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 dark:text-slate-400 p-8">
               <div className="flex gap-4">
                 <button 
-                  onClick={startCamera}
+                  onClick={() => startCamera()}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
                 >
                   <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center shadow-sm transition-all">
