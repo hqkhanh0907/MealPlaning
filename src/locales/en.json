@@ -402,5 +402,10 @@
     "themeSystem": "System",
     "data": "Data",
     "dataDesc": "Manage application data"
+  },
+  "translate": {
+    "loadingModels": "Loading translation models...",
+    "translating": "Translating {{count}} item(s)",
+    "done": "Translation complete"
   }
 }

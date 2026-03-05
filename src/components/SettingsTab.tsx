@@ -3,9 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, Globe, Sun, Moon, Monitor, Database } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { DataBackup } from './DataBackup';
+import { useTranslateQueue } from '../services/translateQueueService';
+import type { Ingredient, Dish } from '../types';
 
 interface SettingsTabProps {
   onImportData: (data: Record<string, unknown>) => void;
+  dishes: Dish[];
+  ingredients: Ingredient[];
 }
 
 const LANGUAGE_OPTIONS = [
@@ -19,12 +23,14 @@ const THEME_OPTIONS = [
   { value: 'system', labelKey: 'settings.themeSystem', icon: Monitor },
 ] as const;
 
-export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData }) => {
+export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, dishes, ingredients }) => {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useDarkMode();
+  const scanMissing = useTranslateQueue((s) => s.scanMissing);
 
   const handleLanguageChange = (lng: string) => {
     i18n.changeLanguage(lng);
+    scanMissing(dishes, ingredients, lng as 'vi' | 'en');
   };
 
   return (

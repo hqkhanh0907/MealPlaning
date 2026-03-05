@@ -59,6 +59,17 @@ vi.mock('../components/GroceryList', () => ({
   GroceryList: () => <div>GroceryMock</div>,
 }));
 
+// Mock translate hooks (Worker not available in jsdom)
+vi.mock('../hooks/useTranslateWorker', () => ({
+  useTranslateWorker: () => ({ sendJob: vi.fn() }),
+}));
+vi.mock('../hooks/useTranslateProcessor', () => ({
+  useTranslateProcessor: vi.fn(),
+}));
+vi.mock('../components/TranslateStatusBadge', () => ({
+  TranslateStatusBadge: () => null,
+}));
+
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks();

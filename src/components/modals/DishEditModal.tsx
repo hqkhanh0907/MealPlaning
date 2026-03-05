@@ -23,8 +23,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
-  const [nameVi, setNameVi] = useState(() => editingItem ? getLocalizedField(editingItem.name, 'vi') : '');
-  const [nameEn, setNameEn] = useState(() => editingItem ? getLocalizedField(editingItem.name, 'en') : '');
+  const [namePrimary, setNamePrimary] = useState(() => editingItem ? getLocalizedField(editingItem.name, lang) : '');
   const [selectedIngredients, setSelectedIngredients] = useState<DishIngredient[]>(
     () => editingItem ? [...editingItem.ingredients] : [],
   );
@@ -39,9 +38,8 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   );
 
   const hasChanges = useCallback((): boolean => {
-    if (!editingItem) return nameVi !== '' || nameEn !== '' || selectedIngredients.length > 0 || tags.length > 0;
-    if (nameVi !== getLocalizedField(editingItem.name, 'vi')) return true;
-    if (nameEn !== getLocalizedField(editingItem.name, 'en')) return true;
+    if (!editingItem) return namePrimary !== '' || selectedIngredients.length > 0 || tags.length > 0;
+    if (namePrimary !== getLocalizedField(editingItem.name, lang)) return true;
     if (JSON.stringify(tags) !== JSON.stringify(editingItem.tags || [])) return true;
     if (selectedIngredients.length !== editingItem.ingredients.length) return true;
     return selectedIngredients.some((si, i) => {
@@ -52,11 +50,14 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       if (amtStr.trim() === '' || Number.isNaN(Number.parseFloat(amtStr))) return true;
       return amtNum !== Math.round(orig.amount);
     });
-  }, [editingItem, nameVi, nameEn, selectedIngredients, tags, amountStrings]);
+  }, [editingItem, namePrimary, lang, selectedIngredients, tags, amountStrings]);
 
   const buildDish = (): Dish => ({
     id: editingItem ? editingItem.id : generateId('dish'),
-    name: { vi: nameVi.trim() || nameEn.trim(), en: nameEn.trim() || nameVi.trim() },
+    name: {
+      vi: lang === 'vi' ? namePrimary.trim() : (editingItem?.name.vi ?? namePrimary.trim()),
+      en: lang === 'en' ? namePrimary.trim() : (editingItem?.name.en ?? namePrimary.trim()),
+    },
     ingredients: selectedIngredients.map(si => ({
       ...si,
       amount: Math.round(Number.parseFloat(amountStrings[si.ingredientId] ?? String(si.amount))),
@@ -66,7 +67,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
 
   const validate = (): boolean => {
     const errors: { name?: string; tags?: string; ingredients?: string; amounts?: Partial<Record<string, string>> } = {};
-    if (!nameVi.trim()) errors.name = t('dish.validationName');
+    if (!namePrimary.trim()) errors.name = t('dish.validationName');
     if (tags.length === 0) errors.tags = t('dish.validationSelectMeal');
     if (selectedIngredients.length === 0) errors.ingredients = t('dish.validationIngredients');
     const amtErrors: Partial<Record<string, string>> = {};
@@ -132,10 +133,9 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
-            <input id="dish-name" value={nameVi} onChange={e => { setNameVi(e.target.value); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+            <input id="dish-name" value={namePrimary} onChange={e => { setNamePrimary(e.target.value); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
             {formErrors.name && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-name">{formErrors.name}</p>}
-            <label htmlFor="dish-name-en" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5 mt-3">{t('dish.nameEnLabel', 'Tên món (EN)')}</label>
-            <input id="dish-name-en" value={nameEn} onChange={e => setNameEn(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.nameEnPlaceholder', 'e.g. Grilled chicken')} data-testid="input-dish-name-en" />
+
           </div>
           <div>
             <p className={`block text-xs font-bold uppercase mb-1.5 ${formErrors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>

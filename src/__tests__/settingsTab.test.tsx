@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { SettingsTab } from '../components/SettingsTab';
 import i18n from '../i18n';
+import type { Dish, Ingredient } from '../types';
 
 // Mock notification
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
@@ -29,14 +30,22 @@ vi.mock('../components/DataBackup', () => ({
   ),
 }));
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  i18n.changeLanguage('vi');
-});
+const mockScanMissing = vi.fn();
+vi.mock('../services/translateQueueService', () => ({
+  useTranslateQueue: (selector: (s: { scanMissing: typeof mockScanMissing }) => unknown) =>
+    selector({ scanMissing: mockScanMissing }),
+}));
+
+const mockDishes: Dish[] = [];
+const mockIngredients: Ingredient[] = [];
+
+afterEach(cleanup);
 
 describe('SettingsTab', () => {
   const defaultProps = {
     onImportData: vi.fn(),
+    dishes: mockDishes,
+    ingredients: mockIngredients,
   };
 
   it('renders settings title', () => {
@@ -91,6 +100,7 @@ describe('SettingsTab', () => {
     expect(enBtn).toBeTruthy();
     if (enBtn) fireEvent.click(enBtn);
     expect(i18n.language).toBe('en');
+    expect(mockScanMissing).toHaveBeenCalledWith(mockDishes, mockIngredients, 'en');
     // Restore
     i18n.changeLanguage('vi');
   });

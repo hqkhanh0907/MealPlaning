@@ -47,6 +47,11 @@ import {
 import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navigation';
 import { getTabLabels } from './components/navigation/types';
 import type { MainTab } from './components/navigation';
+import { TranslateStatusBadge } from './components/TranslateStatusBadge';
+import { useTranslateWorker } from './hooks/useTranslateWorker';
+import { useTranslateProcessor } from './hooks/useTranslateProcessor';
+import { useTranslateQueue } from './services/translateQueueService';
+import type { SupportedLang } from './types';
 
 type ManagementSubTab = 'ingredients' | 'dishes';
 
@@ -57,7 +62,8 @@ const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetC
 // --- Main App component ---
 
 export default function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language as SupportedLang;
   const { theme, cycleTheme } = useDarkMode();
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('calendar');
   const activeMainTabRef = useRef(activeMainTab);
@@ -88,6 +94,42 @@ export default function App() {
   // Migrate old data formats
   const ingredients = useMemo(() => migrateIngredients(rawIngredients), [rawIngredients]);
   const dishes = useMemo(() => migrateDishes(rawDishes), [rawDishes]);
+
+  // ── Background translation ─────────────────────────────────────────────
+  /** Apply a translated field back into the persisted state */
+  const updateTranslatedField = useCallback(
+    (itemId: string, itemType: 'ingredient' | 'dish', direction: 'vi-en' | 'en-vi', translated: string) => {
+      const targetLang: SupportedLang = direction === 'vi-en' ? 'en' : 'vi';
+      if (itemType === 'ingredient') {
+        setIngredients((prev) =>
+          prev.map((ing) =>
+            ing.id === itemId
+              ? { ...ing, name: { ...ing.name, [targetLang]: translated } }
+              : ing,
+          ),
+        );
+      } else {
+        setDishes((prev) =>
+          prev.map((dish) =>
+            dish.id === itemId
+              ? { ...dish, name: { ...dish.name, [targetLang]: translated } }
+              : dish,
+          ),
+        );
+      }
+    },
+    [setIngredients, setDishes],
+  );
+
+  const { sendJob } = useTranslateWorker({
+    onTranslated: updateTranslatedField,
+    ingredients,
+    dishes,
+    currentLang,
+  });
+
+  useTranslateProcessor({ sendJob });
+  // ──────────────────────────────────────────────────────────────────────
   const dayPlans = useMemo(() => migrateDayPlans(rawDayPlans), [rawDayPlans]);
 
   // Persist migrated data back to localStorage if migration changed something (one-time on mount)
@@ -215,6 +257,34 @@ export default function App() {
     }
   }, [notify, setIngredients, setDishes, setDayPlans, setUserProfile, t]);
 
+  // Enqueue background translation for the "other" language after saving
+  const enqueueTranslation = useTranslateQueue.getState().enqueue;
+  const direction = currentLang === 'vi' ? 'vi-en' : 'en-vi';
+
+  const handleAddIngredient = useCallback((ing: Ingredient) => {
+    setIngredients(prev => [...prev, ing]);
+    const sourceText = ing.name[currentLang];
+    if (sourceText) enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
+  }, [setIngredients, currentLang, enqueueTranslation, direction]);
+
+  const handleUpdateIngredient = useCallback((ing: Ingredient) => {
+    setIngredients(prev => prev.map(i => i.id === ing.id ? ing : i));
+    const sourceText = ing.name[currentLang];
+    if (sourceText) enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
+  }, [setIngredients, currentLang, enqueueTranslation, direction]);
+
+  const handleAddDish = useCallback((dish: Dish) => {
+    setDishes(prev => [...prev, dish]);
+    const sourceText = dish.name[currentLang];
+    if (sourceText) enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
+  }, [setDishes, currentLang, enqueueTranslation, direction]);
+
+  const handleUpdateDish = useCallback((dish: Dish) => {
+    setDishes(prev => prev.map(d => d.id === dish.id ? dish : d));
+    const sourceText = dish.name[currentLang];
+    if (sourceText) enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
+  }, [setDishes, currentLang, enqueueTranslation, direction]);
+
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 pt-safe" role="banner">
@@ -289,11 +359,11 @@ export default function App() {
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}
             ingredients={ingredients} dishes={dishes}
-            onAddIngredient={ing => setIngredients(prev => [...prev, ing])}
-            onUpdateIngredient={ing => setIngredients(prev => prev.map(i => i.id === ing.id ? ing : i))}
+            onAddIngredient={handleAddIngredient}
+            onUpdateIngredient={handleUpdateIngredient}
             onDeleteIngredient={handleDeleteIngredient} isIngredientUsed={isIngredientUsed}
-            onAddDish={dish => setDishes(prev => [...prev, dish])}
-            onUpdateDish={dish => setDishes(prev => prev.map(d => d.id === dish.id ? dish : d))}
+            onAddDish={handleAddDish}
+            onUpdateDish={handleUpdateDish}
             onDeleteDish={id => setDishes(prev => prev.filter(d => d.id !== id))} isDishUsed={isDishUsed}
           />
           </ErrorBoundary>
@@ -317,7 +387,7 @@ export default function App() {
 
         {activeMainTab === 'settings' && (
           <ErrorBoundary fallbackTitle={t('errorBoundary.settingsTab')}>
-            <SettingsTab onImportData={handleImportData} />
+            <SettingsTab onImportData={handleImportData} dishes={dishes} ingredients={ingredients} />
           </ErrorBoundary>
         )}
       </main>
@@ -360,6 +430,7 @@ export default function App() {
       />
 
       <BottomNavBar activeTab={activeMainTab} onTabChange={handleTabChange} showAIBadge={hasNewAIResult} />
+      <TranslateStatusBadge />
     </div>
   );
 }
