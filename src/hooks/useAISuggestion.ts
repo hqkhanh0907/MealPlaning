@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dish, Ingredient, MealType, MealPlanSuggestion, DayPlan } from '../types';
+import { Dish, Ingredient, MealType, MealPlanSuggestion, DayPlan, AvailableDishInfo } from '../types';
 import { calculateDishNutrition } from '../utils/nutrition';
-import { suggestMealPlan, AvailableDishInfo } from '../services/geminiService';
+import { suggestMealPlan } from '../services/geminiService';
 import { applySuggestionToDayPlans } from '../services/planService';
 import { useNotification } from '../contexts/NotificationContext';
 import { logger } from '../utils/logger';

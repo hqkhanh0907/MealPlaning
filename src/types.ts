@@ -110,3 +110,11 @@ export type IngredientSuggestion = {
   fiber: number;
   unit: string;
 };
+
+export type AvailableDishInfo = {
+  id: string;
+  name: string;
+  tags: MealType[];
+  calories: number;
+  protein: number;
+};
