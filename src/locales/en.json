@@ -159,7 +159,20 @@
     "deletedDesc": "\"{{name}}\" has been deleted.",
     "restoredDesc": "\"{{name}}\" has been restored.",
     "confirmDelete": "Delete dish?",
-    "confirmDeleteMsg": "Are you sure you want to delete"
+    "confirmDeleteMsg": "Are you sure you want to delete",
+    "quickAddTitle": "Create new ingredient",
+    "quickAddNameVI": "Name (VI)",
+    "quickAddNameVIPlaceholder": "e.g. Ức gà",
+    "quickAddNameEN": "Name (EN, optional)",
+    "quickAddNameENPlaceholder": "e.g. Chicken breast",
+    "quickAddUnit": "Unit",
+    "quickAddUnitPlaceholder": "g, ml, pcs...",
+    "quickAddNutrition": "Nutrition (per 100g / 1 unit)",
+    "quickAddAiFilling": "AI filling...",
+    "quickAddSubmit": "Create & add to dish",
+    "quickAddCancel": "Cancel",
+    "quickAddValidationName": "Please enter ingredient name",
+    "quickAddCreated": "Created ingredient \"{{name}}\""
   },
   "ingredient": {
     "title": "Ingredient",

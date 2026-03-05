@@ -159,7 +159,20 @@
     "deletedDesc": "\"{{name}}\" đã được xóa.",
     "restoredDesc": "\"{{name}}\" đã được khôi phục.",
     "confirmDelete": "Xóa món ăn?",
-    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa món"
+    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa món",
+    "quickAddTitle": "Tạo nguyên liệu mới",
+    "quickAddNameVI": "Tên (VI)",
+    "quickAddNameVIPlaceholder": "VD: Ức gà",
+    "quickAddNameEN": "Tên (EN, tuỳ chọn)",
+    "quickAddNameENPlaceholder": "e.g. Chicken breast",
+    "quickAddUnit": "Đơn vị",
+    "quickAddUnitPlaceholder": "g, ml, cái...",
+    "quickAddNutrition": "Dinh dưỡng (per 100g/1 đơn vị)",
+    "quickAddAiFilling": "AI đang điền...",
+    "quickAddSubmit": "Tạo & thêm vào món",
+    "quickAddCancel": "Huỷ",
+    "quickAddValidationName": "Vui lòng nhập tên nguyên liệu",
+    "quickAddCreated": "Đã tạo nguyên liệu \"{{name}}\""
   },
   "ingredient": {
     "title": "Nguyên liệu",

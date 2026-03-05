@@ -61,6 +61,7 @@ export const ManagementTab: React.FC<ManagementTabProps> = React.memo(({
           dishes={dishes} ingredients={ingredients}
           onAdd={onAddDish} onUpdate={onUpdateDish}
           onDelete={onDeleteDish} isUsed={isDishUsed}
+          onCreateIngredient={onAddIngredient}
         />
       )}
       {activeSubTab === 'ingredients' && (

@@ -24,11 +24,12 @@ interface DishManagerProps {
   onUpdate: (dish: Dish) => void;
   onDelete: (id: string) => void;
   isUsed: (id: string) => boolean;
+  onCreateIngredient?: (ing: Ingredient) => void;
 }
 
 const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
 
-export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, onAdd, onUpdate, onDelete, isUsed }) => {
+export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, onAdd, onUpdate, onDelete, isUsed, onCreateIngredient }) => {
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
@@ -279,6 +280,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
           ingredients={ingredients}
           onSubmit={handleDishSubmit}
           onClose={handleEditClose}
+          onCreateIngredient={onCreateIngredient}
         />
       )}
 
