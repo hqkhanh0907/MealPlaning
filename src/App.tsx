@@ -305,10 +305,15 @@ export default function App() {
             {(() => {
               const THEME_LABELS: Record<string, string> = { light: t('header.themeLight'), dark: t('header.themeDark'), system: t('header.themeSystem') };
               const THEME_TITLES: Record<string, string> = { light: t('header.themeLightTitle'), dark: t('header.themeDarkTitle'), system: t('header.themeSystemTitle') };
+              const THEME_BUTTON_CLASSES: Record<string, string> = {
+                  light: 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600',
+                  dark:  'text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600',
+                  system: 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300',
+                };
               return (
                 <button
                   onClick={cycleTheme}
-                  className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
+                  className={`p-2 rounded-xl transition-all ${THEME_BUTTON_CLASSES[theme]}`}
                   aria-label={t('header.themeAriaLabel', { theme: THEME_LABELS[theme] })}
                   title={THEME_TITLES[theme]}
                 >

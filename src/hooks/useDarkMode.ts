@@ -19,7 +19,7 @@ export function useDarkMode() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
     } catch { /* ignore */ }
-    return 'system';
+    return 'light'; // First-install default: light theme
   });
 
   const persistTheme = useCallback((t: Theme) => {

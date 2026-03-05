@@ -25,9 +25,9 @@ describe('useDarkMode', () => {
     });
   });
 
-  it('defaults to system theme when no stored preference', () => {
+  it('defaults to light theme when no stored preference', () => {
     const { result } = renderHook(() => useDarkMode());
-    expect(result.current.theme).toBe('system');
+    expect(result.current.theme).toBe('light');
   });
 
   it('reads stored theme from localStorage', () => {
@@ -68,10 +68,10 @@ describe('useDarkMode', () => {
     expect(result.current.isDark).toBe(false);
   });
 
-  it('ignores invalid stored values and defaults to system', () => {
+  it('ignores invalid stored values and defaults to light', () => {
     localStorage.setItem('mp-theme', 'invalid-value');
     const { result } = renderHook(() => useDarkMode());
-    expect(result.current.theme).toBe('system');
+    expect(result.current.theme).toBe('light');
   });
 
   it('isDark true when system prefers dark and theme is system', () => {
@@ -86,6 +86,7 @@ describe('useDarkMode', () => {
         removeEventListener: vi.fn(),
       })),
     });
+    localStorage.setItem('mp-theme', 'system'); // explicitly use system mode
     const { result } = renderHook(() => useDarkMode());
     expect(result.current.theme).toBe('system');
     expect(result.current.isDark).toBe(true);
@@ -115,12 +116,12 @@ describe('useDarkMode', () => {
     // No error means the handler executed correctly
   });
 
-  it('defaults to system theme when localStorage.getItem throws', () => {
+  it('defaults to light theme when localStorage.getItem throws', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
       throw new DOMException('Blocked');
     });
     const { result } = renderHook(() => useDarkMode());
-    expect(result.current.theme).toBe('system');
+    expect(result.current.theme).toBe('light');
   });
 
   it('still changes theme when localStorage.setItem throws', () => {
@@ -129,8 +130,8 @@ describe('useDarkMode', () => {
     });
     const { result } = renderHook(() => useDarkMode());
     act(() => { result.current.cycleTheme(); });
-    // Theme changed from 'system' to 'light' despite storage error
-    expect(result.current.theme).toBe('light');
+    // Theme changed from 'light' to 'dark' despite storage error
+    expect(result.current.theme).toBe('dark');
   });
 
   it('does not crash when matchMedia is undefined', () => {
