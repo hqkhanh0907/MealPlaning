@@ -18,6 +18,8 @@ interface GroceryListProps {
 }
 
 type GroceryItem = { id: string; name: string; amount: number; unit: string };
+/** Snapshot stored in localStorage: ingredient id + amount at time of check */
+type CheckedSnapshot = { id: string; amount: number };
 
 const collectDishIngredients = (dishIds: string[], allDishes: Dish[]): DishIngredient[] => {
   const result: DishIngredient[] = [];
@@ -86,8 +88,8 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const [scope, setScope] = useState<GroceryScope>('day');
-  const [persistedCheckedIds, setPersistedCheckedIds] = usePersistedState<string[]>('mp-grocery-checked', []);
-  const checkedIds = useMemo(() => new Set(persistedCheckedIds), [persistedCheckedIds]);
+  // Store {id, amount} snapshots so stale checks (amount changed) auto-invalidate
+  const [persistedCheckedSnapshots, setPersistedCheckedSnapshots] = usePersistedState<CheckedSnapshot[]>('mp-grocery-checked', []);
 
   const filteredPlans = useMemo(() => {
     if (scope === 'day') return [currentPlan];
@@ -105,17 +107,35 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
     return buildGroceryList(dishIngredients, allIngredients, lang);
   }, [allDishIds, allDishes, allIngredients, lang]);
 
+  // Build a fast lookup: ingredientId → current rounded amount
+  const currentAmountMap = useMemo(
+    () => new Map(groceryItems.map(i => [i.id, Math.round(i.amount)])),
+    [groceryItems]
+  );
+
+  // Only treat an item as checked if its stored amount still matches current amount
+  const checkedIds = useMemo(
+    () => new Set(
+      persistedCheckedSnapshots
+        .filter(s => currentAmountMap.get(s.id) === Math.round(s.amount))
+        .map(s => s.id)
+    ),
+    [persistedCheckedSnapshots, currentAmountMap]
+  );
+
   const checkedCount = useMemo(() =>
     groceryItems.filter(item => checkedIds.has(item.id)).length,
     [groceryItems, checkedIds]
   );
 
   const toggleCheck = useCallback((id: string) => {
-    setPersistedCheckedIds(prev => {
-      if (prev.includes(id)) return prev.filter(x => x !== id);
-      return [...prev, id];
+    const item = groceryItems.find(i => i.id === id);
+    if (!item) return;
+    setPersistedCheckedSnapshots(prev => {
+      if (prev.some(s => s.id === id)) return prev.filter(s => s.id !== id);
+      return [...prev, { id, amount: item.amount }];
     });
-  }, [setPersistedCheckedIds]);
+  }, [groceryItems, setPersistedCheckedSnapshots]);
 
   const handleCopyList = useCallback(() => {
     const text = groceryItems
@@ -157,7 +177,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
         {SCOPE_KEYS.map(key => (
           <button
             key={key}
-            onClick={() => { setScope(key); setPersistedCheckedIds([]); }}
+            onClick={() => { setScope(key); setPersistedCheckedSnapshots([]); }}
             data-testid={`tab-grocery-${key}`}
             className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap min-h-11 ${
               scope === key ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'

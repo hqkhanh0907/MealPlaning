@@ -174,11 +174,47 @@ describe('GroceryList', () => {
     expect(screen.getByText('Ức gà')).toBeInTheDocument();
   });
 
-  it('displays correct amount units for different ingredient types', () => {
-    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
-    // All ingredients use 'g' unit
-    expect(screen.getByText('300 g')).toBeInTheDocument(); // Ức gà
-    expect(screen.getByText('200 g')).toBeInTheDocument(); // Cơm trắng
-    expect(screen.getByText('150 g')).toBeInTheDocument(); // Rau xà lách
+  it('auto-unchecks item when ingredient amount changes after dish plan update', () => {
+    const { rerender } = render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+
+    // Check Ức gà (currently 300g: 200 from d1 + 100 from d2)
+    const uccGaBtn = screen.getByText('Ức gà').closest('button');
+    expect(uccGaBtn).toBeTruthy();
+    fireEvent.click(uccGaBtn as HTMLElement);
+    expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
+
+    // Simulate dish plan change: d2 now needs 500g instead of 100g → Ức gà total becomes 700g
+    const updatedDishes: Dish[] = [
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch'] },
+      { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 500 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
+      { id: 'd3', name: { vi: 'Salad', en: 'Salad' }, ingredients: [{ ingredientId: 'i3', amount: 150 }], tags: ['dinner'] },
+    ];
+    rerender(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={updatedDishes} allIngredients={ingredients} />);
+
+    // Ức gà now shows 700g — check mark should be auto-removed (amount changed)
+    expect(screen.getByText('700 g')).toBeInTheDocument();
+    expect(screen.queryByText(/Đã mua/)).not.toBeInTheDocument();
+  });
+
+  it('keeps checked state when ingredient amount is unchanged after plan update', () => {
+    const { rerender } = render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+
+    // Check Rau xà lách (150g, only in d3)
+    const salladBtn = screen.getByText('Rau xà lách').closest('button');
+    expect(salladBtn).toBeTruthy();
+    fireEvent.click(salladBtn as HTMLElement);
+    expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
+
+    // Change d1/d2 amounts but leave d3 (Rau xà lách) untouched
+    const updatedDishes: Dish[] = [
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 250 }], tags: ['lunch'] },
+      { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
+      { id: 'd3', name: { vi: 'Salad', en: 'Salad' }, ingredients: [{ ingredientId: 'i3', amount: 150 }], tags: ['dinner'] },
+    ];
+    rerender(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={updatedDishes} allIngredients={ingredients} />);
+
+    // Rau xà lách still 150g → should remain checked
+    expect(screen.getByText('150 g')).toBeInTheDocument();
+    expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
   });
 });
