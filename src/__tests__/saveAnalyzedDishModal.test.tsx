@@ -13,6 +13,7 @@ vi.mock('../services/geminiService', () => ({
 }));
 
 const result: AnalyzedDishResult = {
+  isFood: true,
   name: 'Phở bò',
   description: 'Món phở truyền thống',
   totalNutrition: { calories: 500, protein: 30, fat: 10, carbs: 60 },

@@ -4,6 +4,7 @@ import { AnalysisResultView } from '../components/AnalysisResultView';
 import { AnalyzedDishResult } from '../types';
 
 const mockResult: AnalyzedDishResult = {
+  isFood: true,
   name: 'Phở bò',
   description: 'Món phở bò Hà Nội truyền thống',
   totalNutrition: { calories: 500, protein: 30, carbs: 60, fat: 15 },

@@ -265,7 +265,8 @@
     "suggestionApplied": "Đã cập nhật kế hoạch!",
     "suggestionAppliedDesc": "Thực đơn gợi ý từ AI đã được áp dụng.",
     "suggestionFetchError": "Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng thử lại.",
-    "aiResearch": "AI Research"
+    "aiResearch": "AI Research",
+    "notFoodTitle": "Ảnh không phải món ăn"
   },
   "imageCapture": {
     "closeCamera": "Đóng camera",

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { analyzeDishImage } from '../services/geminiService';
-import { AnalyzedDishResult, SaveAnalyzedDishPayload } from '../types';
+import { AnalyzedDishResult, SaveAnalyzedDishPayload, NotFoodImageError } from '../types';
 import { useNotification } from '../contexts/NotificationContext';
 import { ImageCapture } from './ImageCapture';
 import { AnalysisResultView } from './AnalysisResultView';
@@ -49,7 +49,11 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
       onAnalysisCompleteRef.current(analysis);
     } catch (error) {
       logger.error({ component: 'AIImageAnalyzer', action: 'analyze' }, error);
-      notify.error(t('ai.analysisFailed'), t('ai.analysisError'));
+      if (error instanceof NotFoodImageError) {
+        notify.warning(t('ai.notFoodTitle'), error.reason);
+      } else {
+        notify.error(t('ai.analysisFailed'), t('ai.analysisError'));
+      }
     } finally {
       setIsAnalyzing(false);
     }

@@ -267,7 +267,8 @@
     "suggestionApplied": "Plan updated!",
     "suggestionAppliedDesc": "AI-suggested menu has been applied.",
     "suggestionFetchError": "An error occurred while suggesting meals. Please try again.",
-    "aiResearch": "AI Research"
+    "aiResearch": "AI Research",
+    "notFoodTitle": "Not a food image"
   },
   "imageCapture": {
     "closeCamera": "Close camera",

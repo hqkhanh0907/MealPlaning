@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AIImageAnalyzer } from '../components/AIImageAnalyzer';
-import { AnalyzedDishResult } from '../types';
+import { AnalyzedDishResult, NotFoodImageError } from '../types';
 
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
 vi.mock('../contexts/NotificationContext', () => ({
@@ -41,6 +41,7 @@ vi.mock('../components/modals/SaveAnalyzedDishModal', () => ({
 }));
 
 const mockResult: AnalyzedDishResult = {
+  isFood: true,
   name: 'Test Dish',
   description: 'A test dish',
   totalNutrition: { calories: 100, protein: 10, carbs: 20, fat: 5 },
@@ -87,6 +88,23 @@ describe('AIImageAnalyzer', () => {
     await waitFor(() => {
       expect(defaultProps.onAnalysisComplete).toHaveBeenCalledWith(mockResult);
     });
+  });
+
+  it('shows warning notification when image is not food', async () => {
+    mockAnalyzeDishImage.mockRejectedValue(new NotFoodImageError('Đây là ảnh phong cảnh, không phải thực phẩm'));
+
+    render(<AIImageAnalyzer {...defaultProps} />);
+    fireEvent.click(screen.getByText('Select Image'));
+    fireEvent.click(screen.getByText('Phân tích món ăn'));
+
+    await waitFor(() => {
+      expect(mockNotify.warning).toHaveBeenCalledWith(
+        'Ảnh không phải món ăn',
+        'Đây là ảnh phong cảnh, không phải thực phẩm'
+      );
+    });
+    expect(mockNotify.error).not.toHaveBeenCalled();
+    expect(defaultProps.onAnalysisComplete).not.toHaveBeenCalled();
   });
 
   it('shows error notification on analysis failure', async () => {

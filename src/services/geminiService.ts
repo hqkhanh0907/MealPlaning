@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { AnalyzedDishResult, AvailableDishInfo, IngredientSuggestion, MealPlanSuggestion } from '../types';
+import { AnalyzedDishResult, AvailableDishInfo, IngredientSuggestion, MealPlanSuggestion, NotFoodImageError } from '../types';
 
 // ─── #4 Singleton AI client ───────────────────────────────────────────────────
 let _ai: GoogleGenAI | null = null;
@@ -106,11 +106,18 @@ const isMealPlanSuggestion = (v: unknown): v is MealPlanSuggestion =>
   'dinnerDishIds' in v && Array.isArray((v as MealPlanSuggestion).dinnerDishIds) &&
   'reasoning' in v && typeof (v as MealPlanSuggestion).reasoning === 'string';
 
-const isAnalyzedDishResult = (v: unknown): v is AnalyzedDishResult =>
-  typeof v === 'object' && v !== null &&
-  'name' in v && typeof (v as AnalyzedDishResult).name === 'string' &&
-  'description' in v && typeof (v as AnalyzedDishResult).description === 'string' &&
-  'ingredients' in v && Array.isArray((v as AnalyzedDishResult).ingredients);
+const isAnalyzedDishResult = (v: unknown): v is AnalyzedDishResult => {
+  if (typeof v !== 'object' || v === null) return false;
+  const r = v as Record<string, unknown>;
+  if (typeof r.isFood !== 'boolean') return false;
+  // When isFood=false, other fields are optional
+  if (!r.isFood) return true;
+  return (
+    typeof r.name === 'string' &&
+    typeof r.description === 'string' &&
+    Array.isArray(r.ingredients)
+  );
+};
 
 const isIngredientSuggestion = (v: unknown): v is IngredientSuggestion => {
   if (typeof v !== 'object' || v === null) return false;
@@ -230,8 +237,13 @@ export const analyzeDishImage = async (
   const ai = getAI();
 
   const prompt = `
-    Hãy phân tích hình ảnh món ăn này để tạo dữ liệu cho ứng dụng quản lý dinh dưỡng.
-    
+    Hãy phân tích hình ảnh này cho ứng dụng quản lý dinh dưỡng.
+
+    BƯỚC 1: Kiểm tra xem ảnh có chứa món ăn hoặc thực phẩm không.
+    - Nếu KHÔNG phải món ăn/thực phẩm: trả về isFood = false, điền notFoodReason giải thích ngắn gọn bằng tiếng Việt, bỏ trống các trường còn lại.
+    - Nếu LÀ món ăn/thực phẩm: trả về isFood = true rồi tiếp tục BƯỚC 2.
+
+    BƯỚC 2 (chỉ thực hiện khi isFood = true):
     1. Nhận diện tên món ăn và mô tả ngắn gọn.
     2. Ước tính tổng dinh dưỡng của cả món ăn (để tham khảo).
     3. QUAN TRỌNG: Liệt kê chi tiết từng nguyên liệu để tạo dữ liệu. Với mỗi nguyên liệu:
@@ -241,7 +253,7 @@ export const analyzeDishImage = async (
        - Thông tin dinh dưỡng chuẩn hóa (nutrition):
          + Nếu đơn vị là khối lượng/thể tích (g, kg, ml, l): Cung cấp dinh dưỡng cho **100g** hoặc **100ml**.
          + Nếu đơn vị là đếm được (cái, quả, lát...): Cung cấp dinh dưỡng cho **1 đơn vị** (1 cái, 1 quả...).
-    
+
     Trả về JSON.
   `;
 
@@ -268,6 +280,8 @@ export const analyzeDishImage = async (
             responseSchema: {
               type: Type.OBJECT,
               properties: {
+                isFood:        { type: Type.BOOLEAN, description: "true nếu ảnh chứa món ăn/thực phẩm, false nếu không phải" },
+                notFoodReason: { type: Type.STRING,  description: "Lý do ngắn gọn bằng tiếng Việt khi isFood = false" },
                 name:        { type: Type.STRING, description: "Tên món ăn" },
                 description: { type: Type.STRING, description: "Mô tả ngắn gọn" },
                 totalNutrition: {
@@ -305,7 +319,7 @@ export const analyzeDishImage = async (
                   }
                 }
               },
-              required: ["name", "description", "totalNutrition", "ingredients"]
+              required: ["isFood"]
             }
           }
         }),
@@ -320,6 +334,10 @@ export const analyzeDishImage = async (
       : await Promise.race([responsePromise, abortPromise]);
 
     const result = parseJSON(response.text, isAnalyzedDishResult, 'AnalyzedDishResult');
+    if (!result.isFood) {
+      logAICall('analyzeDishImage', start, false);
+      throw new NotFoodImageError(result.notFoodReason ?? 'Không phải món ăn');
+    }
     logAICall('analyzeDishImage', start, true);
     return result;
   } catch (err) {

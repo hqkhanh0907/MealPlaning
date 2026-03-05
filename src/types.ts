@@ -77,6 +77,8 @@ export type AnalyzedIngredient = {
 };
 
 export type AnalyzedDishResult = {
+  isFood: boolean;
+  notFoodReason?: string;
   name: string;
   description: string;
   totalNutrition: {
@@ -87,6 +89,14 @@ export type AnalyzedDishResult = {
   };
   ingredients: AnalyzedIngredient[];
 };
+
+/** Thrown by analyzeDishImage when AI determines the image does not contain food */
+export class NotFoodImageError extends Error {
+  constructor(public readonly reason: string) {
+    super(`Not a food image: ${reason}`);
+    this.name = 'NotFoodImageError';
+  }
+}
 
 export type SaveAnalyzedDishPayload = {
   name: string;

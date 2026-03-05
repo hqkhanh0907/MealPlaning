@@ -96,6 +96,7 @@ describe('geminiService', () => {
   describe('analyzeDishImage', () => {
     it('returns valid AnalyzedDishResult on success', async () => {
       const mockResult = {
+        isFood: true,
         name: 'Phở',
         description: 'Vietnamese soup',
         totalNutrition: { calories: 400, protein: 20, fat: 10, carbs: 50 },
@@ -106,6 +107,15 @@ describe('geminiService', () => {
       const result = await analyzeDishImage('base64data', 'image/jpeg');
       expect(result.name).toBe('Phở');
       expect(result.ingredients).toHaveLength(1);
+    });
+
+    it('throws NotFoodImageError when isFood is false', async () => {
+      const mockResult = { isFood: false, notFoodReason: 'Đây là ảnh con mèo' };
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockResult) });
+
+      const { NotFoodImageError } = await import('../types');
+      await expect(analyzeDishImage('base64data', 'image/jpeg')).rejects.toThrow(NotFoodImageError);
+      await expect(analyzeDishImage('base64data', 'image/jpeg')).rejects.toThrow('Đây là ảnh con mèo');
     });
 
     it('throws when response missing required fields', async () => {
