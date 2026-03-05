@@ -176,7 +176,7 @@ export const suggestMealPlan = async (
     const responsePromise = withRetry(
       () => callWithTimeout(
         ai.models.generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-2.5-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -256,7 +256,7 @@ export const analyzeDishImage = async (
     const responsePromise = withRetry(
       () => callWithTimeout(
         ai.models.generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-2.5-flash",
           contents: {
             parts: [
               { inlineData: { data: base64Image, mimeType } },
@@ -383,7 +383,7 @@ export const suggestIngredientInfo = async (
     const responsePromise = withRetry(
       () => callWithTimeout(
         ai.models.generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-2.5-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
