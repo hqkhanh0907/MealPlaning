@@ -10,35 +10,58 @@ interface ModalBackdropProps {
 }
 
 /**
+ * Reference-counted scroll lock depth.
+ * Keeps track of how many <ModalBackdrop> instances are currently mounted.
+ * We only apply the lock on the FIRST mount (depth 0 → 1) and only release
+ * it on the LAST unmount (depth 1 → 0).  This prevents the "double-restore"
+ * race condition that occurs when nested modals (e.g. IngredientEditModal +
+ * UnsavedChangesDialog) unmount simultaneously within the same React commit:
+ * without the counter the inner backdrop's cleanup would restore the locked
+ * body state AFTER the outer backdrop already unlocked it, permanently
+ * blocking scrolling across every page.
+ */
+let _scrollLockDepth = 0;
+let _savedScrollY = 0;
+
+/**
  * Shared modal backdrop with accessibility attributes.
  * Provides dark overlay, backdrop-blur, responsive alignment
  * (bottom-sheet on mobile, centered on desktop), and proper
  * ARIA roles for screen readers.
  *
  * Also locks body scroll while open to prevent background scroll
- * bleeding on mobile (swipe up/down).
+ * bleeding on mobile (swipe up/down).  Uses a reference-counted
+ * lock so that stacked modals (e.g. a confirmation dialog rendered
+ * over a form modal) do not fight over the body style on unmount.
  */
 export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 'z-50', children }) => {
   const { t } = useTranslation();
   useEffect(() => {
-    // iOS Safari ignores overflow:hidden on body — use position:fixed approach instead.
-    // Capture scroll position before locking so we can restore it on cleanup.
-    const scrollY = window.scrollY;
-    const body = document.body;
-    const prevOverflow = body.style.overflow;
-    const prevPosition = body.style.position;
-    const prevTop = body.style.top;
-    const prevWidth = body.style.width;
-    body.style.overflow = 'hidden';
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.width = '100%';
+    // Only apply the iOS-safe position:fixed lock when this is the first
+    // (outermost) modal.  Inner modals simply increment the counter.
+    if (_scrollLockDepth === 0) {
+      // iOS Safari ignores overflow:hidden on body — use position:fixed approach.
+      // Capture the real scroll position BEFORE locking.
+      _savedScrollY = window.scrollY;
+      const body = document.body;
+      body.style.overflow = 'hidden';
+      body.style.position = 'fixed';
+      body.style.top = `-${_savedScrollY}px`;
+      body.style.width = '100%';
+    }
+    _scrollLockDepth += 1;
+
     return () => {
-      body.style.overflow = prevOverflow;
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.width = prevWidth;
-      window.scrollTo(0, scrollY);
+      _scrollLockDepth = Math.max(0, _scrollLockDepth - 1);
+      if (_scrollLockDepth === 0) {
+        // Last modal closed — restore body scroll.
+        const body = document.body;
+        body.style.overflow = '';
+        body.style.position = '';
+        body.style.top = '';
+        body.style.width = '';
+        window.scrollTo(0, _savedScrollY);
+      }
     };
   }, []);
 
