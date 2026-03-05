@@ -1,4 +1,4 @@
-import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { AnalyzedDishResult, AvailableDishInfo, IngredientSuggestion, MealPlanSuggestion } from '../types';
 
 // ─── #4 Singleton AI client ───────────────────────────────────────────────────
@@ -176,10 +176,9 @@ export const suggestMealPlan = async (
     const responsePromise = withRetry(
       () => callWithTimeout(
         ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-2.0-flash",
           contents: prompt,
           config: {
-            thinkingConfig: { thinkingLevel: ThinkingLevel.MEDIUM }, // #10 was HIGH
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.OBJECT,
@@ -257,7 +256,7 @@ export const analyzeDishImage = async (
     const responsePromise = withRetry(
       () => callWithTimeout(
         ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-2.0-flash",
           contents: {
             parts: [
               { inlineData: { data: base64Image, mimeType } },
@@ -384,10 +383,9 @@ export const suggestIngredientInfo = async (
     const responsePromise = withRetry(
       () => callWithTimeout(
         ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-2.0-flash",
           contents: prompt,
           config: {
-            tools: [{ googleSearch: {} }],
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.OBJECT,
