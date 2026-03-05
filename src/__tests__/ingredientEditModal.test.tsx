@@ -375,4 +375,42 @@ describe('IngredientEditModal', () => {
 
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
   });
+
+  // --- Regression: BUG-002 — input snaps back when clearing name ---
+  // Root cause: getLocalizedField() had fallback to other lang, making it
+  // impossible to delete all characters. Fixed by using formData.name[lang] directly.
+
+  it('REGRESSION BUG-002: clearing name input stays empty (no fallback snap-back)', () => {
+    const ingredientWithBothLangs: Ingredient = {
+      ...existingIngredient,
+      name: { vi: 'Ức gà', en: 'Chicken breast' },
+    };
+    render(<IngredientEditModal editingItem={ingredientWithBothLangs} onSubmit={onSubmit} onClose={onClose} />);
+    const nameInput = screen.getByTestId('input-ing-name');
+
+    // Clear the VI name completely
+    fireEvent.change(nameInput, { target: { value: '' } });
+
+    // Must stay empty — must NOT snap back to 'Chicken breast' (EN fallback)
+    expect(nameInput).toHaveValue('');
+  });
+
+  it('REGRESSION BUG-002: can type new name after clearing (no snap-back mid-typing)', () => {
+    const ingredientWithBothLangs: Ingredient = {
+      ...existingIngredient,
+      name: { vi: 'Ức gà', en: 'Chicken breast' },
+    };
+    render(<IngredientEditModal editingItem={ingredientWithBothLangs} onSubmit={onSubmit} onClose={onClose} />);
+    const nameInput = screen.getByTestId('input-ing-name');
+
+    // Simulate deleting character by character then typing new name
+    fireEvent.change(nameInput, { target: { value: 'Ức g' } });
+    expect(nameInput).toHaveValue('Ức g');
+    fireEvent.change(nameInput, { target: { value: 'Ức ' } });
+    expect(nameInput).toHaveValue('Ức ');
+    fireEvent.change(nameInput, { target: { value: '' } });
+    expect(nameInput).toHaveValue('');
+    fireEvent.change(nameInput, { target: { value: 'Thịt bò' } });
+    expect(nameInput).toHaveValue('Thịt bò');
+  });
 });
