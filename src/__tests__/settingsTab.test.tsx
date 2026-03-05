@@ -13,14 +13,6 @@ vi.mock('../contexts/NotificationContext', () => ({
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const mockSetTheme = vi.fn();
-vi.mock('../hooks/useDarkMode', () => ({
-  useDarkMode: () => ({
-    theme: 'system',
-    isDark: false,
-    setTheme: mockSetTheme,
-    cycleTheme: vi.fn(),
-  }),
-}));
 
 vi.mock('../components/DataBackup', () => ({
   DataBackup: ({ onImport }: { onImport: (d: Record<string, unknown>) => void }) => (
@@ -46,6 +38,8 @@ describe('SettingsTab', () => {
     onImportData: vi.fn(),
     dishes: mockDishes,
     ingredients: mockIngredients,
+    theme: 'system' as const,
+    setTheme: mockSetTheme,
   };
 
   it('renders settings title', () => {

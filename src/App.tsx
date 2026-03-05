@@ -64,7 +64,7 @@ const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetC
 export default function App() {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language as SupportedLang;
-  const { theme, cycleTheme } = useDarkMode();
+  const { theme, setTheme, cycleTheme } = useDarkMode();
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('calendar');
   const activeMainTabRef = useRef(activeMainTab);
   useEffect(() => { activeMainTabRef.current = activeMainTab; }, [activeMainTab]);
@@ -392,7 +392,7 @@ export default function App() {
 
         {activeMainTab === 'settings' && (
           <ErrorBoundary fallbackTitle={t('errorBoundary.settingsTab')}>
-            <SettingsTab onImportData={handleImportData} dishes={dishes} ingredients={ingredients} />
+            <SettingsTab onImportData={handleImportData} dishes={dishes} ingredients={ingredients} theme={theme} setTheme={setTheme} />
           </ErrorBoundary>
         )}
       </main>

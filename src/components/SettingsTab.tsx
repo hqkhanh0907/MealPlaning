@@ -1,15 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, Globe, Sun, Moon, Monitor, Database } from 'lucide-react';
-import { useDarkMode } from '../hooks/useDarkMode';
 import { DataBackup } from './DataBackup';
 import { useTranslateQueue } from '../services/translateQueueService';
 import type { Ingredient, Dish } from '../types';
+
+type Theme = 'light' | 'dark' | 'system';
 
 interface SettingsTabProps {
   onImportData: (data: Record<string, unknown>) => void;
   dishes: Dish[];
   ingredients: Ingredient[];
+  theme: Theme;
+  setTheme: (t: Theme) => void;
 }
 
 const LANGUAGE_OPTIONS = [
@@ -23,9 +26,8 @@ const THEME_OPTIONS = [
   { value: 'system', labelKey: 'settings.themeSystem', icon: Monitor },
 ] as const;
 
-export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, dishes, ingredients }) => {
+export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, dishes, ingredients, theme, setTheme }) => {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme } = useDarkMode();
   const scanMissing = useTranslateQueue((s) => s.scanMissing);
 
   const handleLanguageChange = (lng: string) => {
