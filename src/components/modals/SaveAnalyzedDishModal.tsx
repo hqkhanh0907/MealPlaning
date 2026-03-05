@@ -238,8 +238,10 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         id={`ai-ing-amount-${idx}`}
                         type="number"
                         min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={ing.amount}
-                        onChange={e => handleUpdateIngredient(idx, 'amount', Math.max(0, Number(e.target.value)))}
+                        onChange={e => handleUpdateIngredient(idx, 'amount', Math.max(0, Math.round(Number(e.target.value))))}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                       />
                     </div>
@@ -261,9 +263,9 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">{t('common.calories')}</label>
                         <input
                           id={`ai-ing-cal-${idx}`}
-                          type="number" min="0"
+                          type="number" min="0" step="1" inputMode="numeric"
                           value={ing.nutritionPerStandardUnit.calories}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', Math.max(0, Number(e.target.value)))}
+                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', Math.max(0, Math.round(Number(e.target.value))))}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -271,9 +273,9 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <label htmlFor={`ai-ing-pro-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Protein</label>
                         <input
                           id={`ai-ing-pro-${idx}`}
-                          type="number" min="0"
+                          type="number" min="0" step="1" inputMode="numeric"
                           value={ing.nutritionPerStandardUnit.protein}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', Math.max(0, Number(e.target.value)))}
+                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', Math.max(0, Math.round(Number(e.target.value))))}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -281,9 +283,9 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <label htmlFor={`ai-ing-carbs-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Carbs</label>
                         <input
                           id={`ai-ing-carbs-${idx}`}
-                          type="number" min="0"
+                          type="number" min="0" step="1" inputMode="numeric"
                           value={ing.nutritionPerStandardUnit.carbs}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', Math.max(0, Number(e.target.value)))}
+                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', Math.max(0, Math.round(Number(e.target.value))))}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -291,9 +293,9 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <label htmlFor={`ai-ing-fat-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Fat</label>
                         <input
                           id={`ai-ing-fat-${idx}`}
-                          type="number" min="0"
+                          type="number" min="0" step="1" inputMode="numeric"
                           value={ing.nutritionPerStandardUnit.fat}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', Math.max(0, Number(e.target.value)))}
+                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', Math.max(0, Math.round(Number(e.target.value))))}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -301,9 +303,9 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <label htmlFor={`ai-ing-fiber-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Fiber</label>
                         <input
                           id={`ai-ing-fiber-${idx}`}
-                          type="number" min="0"
+                          type="number" min="0" step="1" inputMode="numeric"
                           value={ing.nutritionPerStandardUnit.fiber}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', Math.max(0, Number(e.target.value)))}
+                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', Math.max(0, Math.round(Number(e.target.value))))}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>

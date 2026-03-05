@@ -51,7 +51,8 @@ describe('IngredientEditModal', () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByDisplayValue('165')).toBeInTheDocument();
     expect(screen.getByDisplayValue('31')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('3.6')).toBeInTheDocument();
+    // fatPer100: 3.6 is rounded to 4 on display
+    expect(screen.getByDisplayValue('4')).toBeInTheDocument();
   });
 
   it('renders save button', () => {

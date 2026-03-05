@@ -35,7 +35,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
 
   // String state per ingredient amount to allow clearing/retyping without snap-back on mobile
   const [amountStrings, setAmountStrings] = useState<Record<string, string>>(
-    () => Object.fromEntries((editingItem?.ingredients ?? []).map(si => [si.ingredientId, String(si.amount)])),
+    () => Object.fromEntries((editingItem?.ingredients ?? []).map(si => [si.ingredientId, String(Math.round(si.amount))])),
   );
 
   const hasChanges = useCallback((): boolean => {
@@ -48,9 +48,9 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       const orig = editingItem.ingredients[i];
       if (si.ingredientId !== orig.ingredientId) return true;
       const amtStr = amountStrings[si.ingredientId] ?? String(si.amount);
-      const amtNum = Number.parseFloat(amtStr);
-      if (amtStr.trim() === '' || Number.isNaN(amtNum)) return true;
-      return amtNum !== orig.amount;
+      const amtNum = Math.round(Number.parseFloat(amtStr));
+      if (amtStr.trim() === '' || Number.isNaN(Number.parseFloat(amtStr))) return true;
+      return amtNum !== Math.round(orig.amount);
     });
   }, [editingItem, nameVi, nameEn, selectedIngredients, tags, amountStrings]);
 
@@ -59,7 +59,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     name: { vi: nameVi.trim() || nameEn.trim(), en: nameEn.trim() || nameVi.trim() },
     ingredients: selectedIngredients.map(si => ({
       ...si,
-      amount: Number.parseFloat(amountStrings[si.ingredientId] ?? String(si.amount)),
+      amount: Math.round(Number.parseFloat(amountStrings[si.ingredientId] ?? String(si.amount))),
     })),
     tags,
   });
@@ -186,7 +186,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
                           <button type="button" onClick={() => { const a = Math.max(0, si.amount - 10); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
-                          <input type="number" step="0.1" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
+                          <input type="number" step="1" inputMode="numeric" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
                           <button type="button" onClick={() => { const a = si.amount + 10; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>

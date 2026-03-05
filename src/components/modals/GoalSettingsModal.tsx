@@ -11,7 +11,7 @@ interface GoalSettingsModalProps {
   onClose: () => void;
 }
 
-const PROTEIN_PRESETS = [1.2, 1.6, 2, 2.2];
+const PROTEIN_PRESETS = [1, 2, 3, 4];
 
 export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfile, onUpdateProfile, onClose }) => {
   const { t } = useTranslation();
@@ -38,9 +38,9 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             <div className="relative">
               <input
                 id="goal-weight"
-                type="number" min="1" max="500"
+                type="number" min="1" max="500" step="1" inputMode="numeric"
                 value={userProfile.weight}
-                onChange={(e) => onUpdateProfile({ ...userProfile, weight: Math.max(1, Number(e.target.value) || 1) })}
+                onChange={(e) => onUpdateProfile({ ...userProfile, weight: Math.max(1, Math.round(Number(e.target.value)) || 1) })}
                 data-testid="input-goal-weight"
                 className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-base sm:text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
               />
@@ -59,9 +59,9 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <div className="relative">
                 <input
                   id="goal-protein"
-                  type="number" step="0.1" min="0.1" max="5"
+                  type="number" step="1" min="1" max="5" inputMode="numeric"
                   value={userProfile.proteinRatio}
-                  onChange={(e) => onUpdateProfile({ ...userProfile, proteinRatio: Math.max(0.1, Number(e.target.value) || 0.1) })}
+                  onChange={(e) => onUpdateProfile({ ...userProfile, proteinRatio: Math.max(1, Math.round(Number(e.target.value)) || 1) })}
                   data-testid="input-goal-protein"
                   className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
                 />
@@ -90,9 +90,9 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             <div className="relative">
               <input
                 id="goal-calories"
-                type="number" min="100" max="10000"
+                type="number" min="100" max="10000" step="1" inputMode="numeric"
                 value={userProfile.targetCalories}
-                onChange={(e) => onUpdateProfile({ ...userProfile, targetCalories: Math.max(100, Number(e.target.value) || 100) })}
+                onChange={(e) => onUpdateProfile({ ...userProfile, targetCalories: Math.max(100, Math.round(Number(e.target.value)) || 100) })}
                 data-testid="input-goal-calories"
                 className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
               />

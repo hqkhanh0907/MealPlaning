@@ -56,7 +56,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
   // String state for numeric inputs to allow clearing without snap-back on mobile
   const [numericInputs, setNumericInputs] = useState<Record<string, string>>(
-    () => Object.fromEntries(NUMERIC_FIELDS.map(f => [f, String(editingItem ? editingItem[f] : 0)])),
+    () => Object.fromEntries(NUMERIC_FIELDS.map(f => [f, String(editingItem ? Math.round(editingItem[f]) : 0)])),
   );
 
   const hasChanges = useCallback((): boolean => {
@@ -70,19 +70,19 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
       NUMERIC_FIELDS.some(f => {
         const orig = editingItem[f];
         const str = numericInputs[f];
-        const n = Number.parseFloat(str);
-        if (str.trim() === '' || Number.isNaN(n)) return true;
-        return n !== orig;
+        const n = Math.round(Number.parseFloat(str));
+        if (str.trim() === '' || Number.isNaN(Number.parseFloat(str))) return true;
+        return n !== Math.round(orig);
       });
   }, [editingItem, formData, numericInputs]);
 
   const buildIngredient = (): Ingredient => ({
     ...formData,
-    caloriesPer100: Number.parseFloat(numericInputs.caloriesPer100),
-    proteinPer100: Number.parseFloat(numericInputs.proteinPer100),
-    carbsPer100: Number.parseFloat(numericInputs.carbsPer100),
-    fatPer100: Number.parseFloat(numericInputs.fatPer100),
-    fiberPer100: Number.parseFloat(numericInputs.fiberPer100),
+    caloriesPer100: Math.round(Number.parseFloat(numericInputs.caloriesPer100)),
+    proteinPer100: Math.round(Number.parseFloat(numericInputs.proteinPer100)),
+    carbsPer100: Math.round(Number.parseFloat(numericInputs.carbsPer100)),
+    fatPer100: Math.round(Number.parseFloat(numericInputs.fatPer100)),
+    fiberPer100: Math.round(Number.parseFloat(numericInputs.fiberPer100)),
     id: editingItem ? editingItem.id : `ing-${Date.now()}`,
   });
 
@@ -129,13 +129,13 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
       if (!isMountedRef.current) return;
       setFormData(prev => ({
         ...prev,
-        caloriesPer100: info.calories, proteinPer100: info.protein,
-        carbsPer100: info.carbs, fatPer100: info.fat, fiberPer100: info.fiber,
+        caloriesPer100: Math.round(info.calories), proteinPer100: Math.round(info.protein),
+        carbsPer100: Math.round(info.carbs), fatPer100: Math.round(info.fat), fiberPer100: Math.round(info.fiber),
       }));
       setNumericInputs(prev => ({
         ...prev,
-        caloriesPer100: String(info.calories), proteinPer100: String(info.protein),
-        carbsPer100: String(info.carbs), fatPer100: String(info.fat), fiberPer100: String(info.fiber),
+        caloriesPer100: String(Math.round(info.calories)), proteinPer100: String(Math.round(info.protein)),
+        carbsPer100: String(Math.round(info.carbs)), fatPer100: String(Math.round(info.fat)), fiberPer100: String(Math.round(info.fiber)),
       }));
     } catch (error) {
       logger.error({ component: 'IngredientEditModal', action: 'aiSearch' }, error);
@@ -184,7 +184,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
               return (
                 <div key={field}>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(formData.unit, lang)}</label>
-                  <input type="number" step="0.1" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Number.parseFloat(v); if (!Number.isNaN(n) && n >= 0) { setFormData(prev => ({ ...prev, [field]: n })); } if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: undefined })); }} data-testid={`input-ing-${field.replace('Per100', '')}`} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors[field] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
+                  <input type="number" step="1" inputMode="numeric" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { setFormData(prev => ({ ...prev, [field]: n })); } if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: undefined })); }} data-testid={`input-ing-${field.replace('Per100', '')}`} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors[field] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
                   {formErrors[field] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-ing-${field.replace('Per100', '')}`}>{formErrors[field]}</p>}
                 </div>
               );

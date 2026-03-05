@@ -107,7 +107,7 @@ describe('ClearPlanModal', () => {
 
 // --- GoalSettingsModal ---
 describe('GoalSettingsModal', () => {
-  const defaultProfile: UserProfile = { weight: 70, proteinRatio: 1.6, targetCalories: 2000 };
+  const defaultProfile: UserProfile = { weight: 70, proteinRatio: 2, targetCalories: 2000 };
   const onUpdateProfile = vi.fn();
   const onClose = vi.fn();
 
@@ -123,8 +123,8 @@ describe('GoalSettingsModal', () => {
 
   it('shows computed protein target', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    // 70 * 1.6 = 112
-    expect(screen.getByText('112g / ngày')).toBeInTheDocument();
+    // 70 * 2 = 140
+    expect(screen.getByText('140g / ng\u00e0y')).toBeInTheDocument();
   });
 
   it('calls onUpdateProfile when weight changes', () => {
@@ -141,8 +141,8 @@ describe('GoalSettingsModal', () => {
 
   it('calls onUpdateProfile when protein preset is clicked', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    fireEvent.click(screen.getByText('2.2g'));
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 2.2 }));
+    fireEvent.click(screen.getByText('3g'));
+    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 3 }));
   });
 
   it('calls onUpdateProfile when calories changes', () => {
@@ -177,10 +177,10 @@ describe('GoalSettingsModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('enforces minimum protein ratio of 0.1', () => {
+  it('enforces minimum protein ratio of 1', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Lượng Protein mong muốn'), { target: { value: '0' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 0.1 }));
+    fireEvent.change(screen.getByLabelText('L\u01b0\u1ee3ng Protein mong mu\u1ed1n'), { target: { value: '0' } });
+    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 1 }));
   });
 
   it('enforces minimum calories of 100', () => {
@@ -198,7 +198,7 @@ describe('GoalSettingsModal', () => {
   it('handles NaN protein ratio input by defaulting to minimum', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Lượng Protein mong muốn'), { target: { value: 'xyz' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 0.1 }));
+    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 1 }));
   });
 
   it('handles NaN calories input by defaulting to minimum', () => {
@@ -209,16 +209,16 @@ describe('GoalSettingsModal', () => {
 
   it('renders all 4 protein preset buttons', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    expect(screen.getByText('1.2g')).toBeInTheDocument();
-    expect(screen.getByText('1.6g')).toBeInTheDocument();
+    expect(screen.getByText('1g')).toBeInTheDocument();
     expect(screen.getByText('2g')).toBeInTheDocument();
-    expect(screen.getByText('2.2g')).toBeInTheDocument();
+    expect(screen.getByText('3g')).toBeInTheDocument();
+    expect(screen.getByText('4g')).toBeInTheDocument();
   });
 
   it('calls onUpdateProfile with correct ratio for each preset', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    fireEvent.click(screen.getByText('1.2g'));
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 1.2 }));
+    fireEvent.click(screen.getByText('1g'));
+    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 1 }));
     onUpdateProfile.mockClear();
     fireEvent.click(screen.getByText('2g'));
     expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 2 }));
@@ -226,26 +226,26 @@ describe('GoalSettingsModal', () => {
 
   it('highlights the active protein preset button', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    // defaultProfile.proteinRatio = 1.6
-    const activeBtn = screen.getByText('1.6g').closest('button');
+    // defaultProfile.proteinRatio = 2
+    const activeBtn = screen.getByText('2g').closest('button');
     expect(activeBtn?.className).toContain('bg-blue-500');
-    const inactiveBtn = screen.getByText('1.2g').closest('button');
+    const inactiveBtn = screen.getByText('1g').closest('button');
     expect(inactiveBtn?.className).not.toContain('bg-blue-500');
   });
 
   it('updates computed protein display when weight changes', () => {
     const { rerender } = render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    expect(screen.getByText('112g / ngày')).toBeInTheDocument(); // 70 * 1.6 = 112
+    expect(screen.getByText('140g / ng\u00e0y')).toBeInTheDocument(); // 70 * 2 = 140
     // Simulate weight change via rerender (parent updates profile)
     rerender(<GoalSettingsModal userProfile={{ ...defaultProfile, weight: 80 }} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    expect(screen.getByText('128g / ngày')).toBeInTheDocument(); // 80 * 1.6 = 128
+    expect(screen.getByText('160g / ng\u00e0y')).toBeInTheDocument(); // 80 * 2 = 160
   });
 
   it('updates computed protein display when ratio changes', () => {
     const { rerender } = render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    expect(screen.getByText('112g / ngày')).toBeInTheDocument(); // 70 * 1.6 = 112
-    rerender(<GoalSettingsModal userProfile={{ ...defaultProfile, proteinRatio: 2.2 }} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    expect(screen.getByText('154g / ngày')).toBeInTheDocument(); // 70 * 2.2 = 154
+    expect(screen.getByText('140g / ng\u00e0y')).toBeInTheDocument(); // 70 * 2 = 140
+    rerender(<GoalSettingsModal userProfile={{ ...defaultProfile, proteinRatio: 4 }} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    expect(screen.getByText('280g / ng\u00e0y')).toBeInTheDocument(); // 70 * 4 = 280
   });
 
   it('shows auto-save hint text', () => {
@@ -256,6 +256,6 @@ describe('GoalSettingsModal', () => {
   it('preserves other profile fields when only weight changes', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Cân nặng hiện tại (kg)'), { target: { value: '90' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith({ weight: 90, proteinRatio: 1.6, targetCalories: 2000 });
+    expect(onUpdateProfile).toHaveBeenCalledWith({ weight: 90, proteinRatio: 2, targetCalories: 2000 });
   });
 });

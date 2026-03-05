@@ -21,8 +21,8 @@ describe('Goal Settings — edit nutrition goals', () => {
     await page.type('input-goal-calories', '2000');
   });
 
-  it('should select protein preset 1.6', async () => {
-    await page.waitAndClick('btn-preset-1.6');
+  it('should select protein preset 2', async () => {
+    await page.waitAndClick('btn-preset-2');
   });
 
   it('should close goal settings', async () => {

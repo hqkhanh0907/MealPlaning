@@ -310,7 +310,7 @@
     "proteinGoal": "Desired protein intake",
     "perDay": "g / day",
     "perKg": "g / kg",
-    "recommendation": "Recommended: 1.6–2.2g/kg for athletes, 0.8g/kg for average adults.",
+    "recommendation": "Recommended: 2–4g/kg for athletes, 1g/kg for average adults.",
     "caloriesGoal": "Calorie target (kcal)",
     "autoSaveHint": "Changes are saved immediately"
   },
