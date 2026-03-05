@@ -154,8 +154,30 @@ export const suggestMealPlan = async (
 
   const ai = getAI();
 
-  // #9 Token limit — cap at 100 dishes with slim fields to avoid prompt bloat
-  const dishSummaries = availableDishes.slice(0, 100).map(d => ({
+  // #9 Smart dish sampling — pick up to MAX_PER_SLOT dishes per meal slot (shuffled
+  //     for variety), then deduplicate. Keeps prompt lean even with 1000+ dish libraries.
+  const MAX_PER_SLOT = 20;
+  const shuffle = <T>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+
+  const seen = new Set<string>();
+  const addSlot = (tag: 'breakfast' | 'lunch' | 'dinner') =>
+    shuffle(availableDishes.filter(d => d.tags.includes(tag)))
+      .slice(0, MAX_PER_SLOT)
+      .filter(d => !seen.has(d.id) && (seen.add(d.id), true));
+
+  // Dishes without any tag — include a small fallback batch so they're not ignored
+  const fallback = shuffle(availableDishes.filter(d => d.tags.length === 0))
+    .slice(0, 10)
+    .filter(d => !seen.has(d.id) && (seen.add(d.id), true));
+
+  const selectedDishes = [
+    ...addSlot('breakfast'),
+    ...addSlot('lunch'),
+    ...addSlot('dinner'),
+    ...fallback,
+  ];
+
+  const dishSummaries = selectedDishes.map(d => ({
     id: d.id, name: d.name, tags: d.tags,
     cal: Math.round(d.calories), pro: Math.round(d.protein),
   }));
@@ -412,6 +434,7 @@ export const suggestIngredientInfo = async (
   const safeUnit = sanitizeForPrompt(unit);
 
   const prompt = `
+    Bạn là một chuyên gia dinh dưỡng. Hãy TÌM KIẾM THÔNG TIN DINH DƯỠNG CHÍNH XÁC cho nguyên liệu sau, dựa trên dữ liệu công khai và Google Search:
     Tìm kiếm thông tin dinh dưỡng chính xác cho ${targetAmount} của nguyên liệu '${safeName}' sử dụng Google Search.
     Trả về một đối tượng JSON với các trường sau:
     - calories (số, kcal trong ${targetAmount})
