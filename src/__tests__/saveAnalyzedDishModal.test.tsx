@@ -207,9 +207,11 @@ describe('SaveAnalyzedDishModal', () => {
 
   it('edits ingredient unit input', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
-    const unitInput = screen.getAllByDisplayValue('g')[0];
-    fireEvent.change(unitInput, { target: { value: 'ml' } });
-    expect((unitInput as HTMLInputElement).value).toBe('ml');
+    // Unit is now a <select> rendered by UnitSelector
+    const unitSelects = screen.getAllByRole('combobox');
+    const unitSelect = unitSelects[0];
+    fireEvent.change(unitSelect, { target: { value: 'ml' } });
+    expect((unitSelect as HTMLSelectElement).value).toBe('ml');
   });
 
   it('edits nutrition calories field for ingredient', () => {

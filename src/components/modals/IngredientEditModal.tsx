@@ -7,6 +7,7 @@ import { suggestIngredientInfo } from '../../services/geminiService';
 import { useNotification } from '../../contexts/NotificationContext';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
+import { UnitSelector } from '../shared/UnitSelector';
 import { logger } from '../../utils/logger';
 
 interface IngredientEditModalProps {
@@ -49,7 +50,10 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
   // Guard to prevent stale AI responses from updating a closed modal
   const isMountedRef = useRef(true);
-  useEffect(() => () => { isMountedRef.current = false; }, []);
+  useEffect(() => {
+    isMountedRef.current = true; // ensure true after StrictMode double-invoke
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   // String state for numeric inputs to allow clearing without snap-back on mobile
   const [numericInputs, setNumericInputs] = useState<Record<string, string>>(
@@ -177,7 +181,14 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
           <div>
             <label htmlFor="ing-unit" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.unitLabel')}</label>
-            <input id="ing-unit" value={formData.unit[lang]} onChange={e => { const val = e.target.value; setFormData(prev => ({ ...prev, unit: { ...prev.unit, [lang]: val } })); if (formErrors.unit) setFormErrors(prev => ({ ...prev, unit: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.unit ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.unitPlaceholder')} data-testid="input-ing-unit" />
+            <UnitSelector
+              mode="bilingual"
+              id="ing-unit"
+              value={formData.unit}
+              onChange={v => { setFormData(prev => ({ ...prev, unit: v })); if (formErrors.unit) setFormErrors(prev => ({ ...prev, unit: undefined })); }}
+              error={!!formErrors.unit}
+              data-testid="input-ing-unit"
+            />
             {formErrors.unit && <p className="text-xs text-rose-500 mt-1">{formErrors.unit}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">

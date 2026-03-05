@@ -322,7 +322,8 @@ describe('IngredientManager', () => {
     fireEvent.click(screen.getByText('Thêm nguyên liệu'));
 
     fireEvent.change(screen.getByPlaceholderText('Ví dụ: Thịt bò, Cà chua...'), { target: { value: 'Thịt bò' } });
-    fireEvent.change(screen.getByPlaceholderText('g, ml, cái, quả...'), { target: { value: 'g' } });
+    // Unit is now a <select> — pick 'g' from the dropdown
+    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
 
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
     expect(defaultProps.onAdd).toHaveBeenCalled();

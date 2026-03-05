@@ -7,6 +7,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { getMealTagOptions } from '../../data/constants';
+import { UnitSelector } from '../shared/UnitSelector';
 import { logger } from '../../utils/logger';
 
 interface SaveAnalyzedDishModalProps {
@@ -247,11 +248,11 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                     </div>
                     <div className="md:col-span-1">
                       <label htmlFor={`ai-ing-unit-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('common.unit')}</label>
-                      <input
-                        id={`ai-ing-unit-${idx}`}
+                      <UnitSelector
+                        mode="single"
                         value={ing.unit}
-                        onChange={e => handleUpdateIngredient(idx, 'unit', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                        onChange={v => handleUpdateIngredient(idx, 'unit', v)}
+                        data-testid={`ai-ing-unit-${idx}`}
                       />
                     </div>
                   </div>
