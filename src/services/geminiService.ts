@@ -237,24 +237,57 @@ export const analyzeDishImage = async (
   const ai = getAI();
 
   const prompt = `
-    Hãy phân tích hình ảnh này cho ứng dụng quản lý dinh dưỡng.
+    Bạn là AI thị giác chuyên phân tích hình ảnh món ăn cho ứng dụng quản lý dinh dưỡng.
+    Mục tiêu: xác định thực phẩm, ước tính dinh dưỡng, phân tích nguyên liệu. Trả về JSON hợp lệ.
 
-    BƯỚC 1: Kiểm tra xem ảnh có chứa món ăn hoặc thực phẩm không.
-    - Nếu KHÔNG phải món ăn/thực phẩm: trả về isFood = false, điền notFoodReason giải thích ngắn gọn bằng tiếng Việt, bỏ trống các trường còn lại.
-    - Nếu LÀ món ăn/thực phẩm: trả về isFood = true rồi tiếp tục BƯỚC 2.
+    ====================================================
+    BƯỚC 1 — KIỂM TRA THỰC PHẨM
+    ====================================================
 
-    BƯỚC 2 (chỉ thực hiện khi isFood = true):
-    1. Nhận diện tên món ăn và mô tả ngắn gọn.
-    2. Ước tính tổng dinh dưỡng của cả món ăn (để tham khảo).
-    3. QUAN TRỌNG: Liệt kê chi tiết từng nguyên liệu để tạo dữ liệu. Với mỗi nguyên liệu:
-       - Tên nguyên liệu.
-       - Khối lượng/Số lượng ước tính có trong món ăn này (amount).
-       - Đơn vị tính (unit) (ưu tiên g, ml, cái, quả, lát...).
-       - Thông tin dinh dưỡng chuẩn hóa (nutrition):
-         + Nếu đơn vị là khối lượng/thể tích (g, kg, ml, l): Cung cấp dinh dưỡng cho **100g** hoặc **100ml**.
-         + Nếu đơn vị là đếm được (cái, quả, lát...): Cung cấp dinh dưỡng cho **1 đơn vị** (1 cái, 1 quả...).
+    Nếu KHÔNG phải thực phẩm/đồ uống/nguyên liệu:
+    - Đặt isFood = false
+    - Điền notFoodReason (tiếng Việt)
+    - Đặt name = "", description = ""
+    - Đặt totalNutrition = { calories: 0, protein: 0, fat: 0, carbs: 0 }
+    - Đặt ingredients = []
+    - Kết thúc, không thực hiện bước tiếp.
 
-    Trả về JSON.
+    Nếu LÀ thực phẩm: đặt isFood = true, tiếp tục BƯỚC 2.
+
+    ====================================================
+    BƯỚC 2 — NHẬN DIỆN VÀ TỔNG DINH DƯỠNG
+    ====================================================
+
+    - name: tên món ăn phổ biến nhất
+    - description: mô tả ngắn gọn 1–2 câu
+
+    - totalNutrition: ước tính tổng dinh dưỡng của toàn bộ món ăn (kcal/g):
+      + calories (kcal)
+      + protein (g)
+      + fat (g)
+      + carbs (g)   ← tên field là "carbs", KHÔNG phải "carbohydrates"
+
+    ====================================================
+    BƯỚC 3 — PHÂN TÍCH TỪNG NGUYÊN LIỆU
+    ====================================================
+
+    ingredients là mảng, mỗi phần tử gồm:
+    - name: tên nguyên liệu
+    - amount: khối lượng/số lượng ước tính trong món (không để 0)
+    - unit: đơn vị (ưu tiên: g, ml, cái, quả, lát, muỗng)
+    - nutritionPerStandardUnit: dinh dưỡng chuẩn hóa ← tên field CHÍNH XÁC
+      + Nếu unit là g/kg/ml/l → giá trị cho 100g hoặc 100ml
+      + Nếu unit là cái/quả/lát/... → giá trị cho 1 đơn vị
+      + calories, protein, fat, carbs, fiber  ← "carbs" KHÔNG phải "carbohydrates"
+
+    ====================================================
+    QUY TẮC BẮT BUỘC
+    ====================================================
+
+    - Chỉ trả về JSON, không text ngoài JSON
+    - Dùng ĐÚNG tên field: "name", "totalNutrition", "carbs", "nutritionPerStandardUnit"
+    - Không bỏ field bắt buộc nào
+    - Nếu không chắc số liệu → vẫn đưa ra ước lượng hợp lý
   `;
 
   const abortPromise = signal
@@ -319,7 +352,7 @@ export const analyzeDishImage = async (
                   }
                 }
               },
-              required: ["isFood"]
+              required: ["isFood", "name", "description", "totalNutrition", "ingredients"]
             }
           }
         }),
@@ -335,7 +368,6 @@ export const analyzeDishImage = async (
 
     const result = parseJSON(response.text, isAnalyzedDishResult, 'AnalyzedDishResult');
     if (!result.isFood) {
-      logAICall('analyzeDishImage', start, false);
       throw new NotFoodImageError(result.notFoodReason ?? 'Không phải món ăn');
     }
     logAICall('analyzeDishImage', start, true);
