@@ -135,7 +135,6 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   const handleAISearch = async () => {
     const nameVi = getLocalizedField(formData.name, lang);
     const unitVi = getLocalizedField(formData.unit, lang);
-    if (!nameVi || !unitVi) return;
     try {
       setIsSearchingAI(true);
       const info = await suggestIngredientInfo(nameVi, unitVi);

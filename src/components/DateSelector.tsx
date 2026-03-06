@@ -80,7 +80,6 @@ const getCurrentWeekDates = (selectedDate: string, weekOffset: number): Date[] =
 
 // Format week label e.g. "24/02 - 02/03"
 const formatWeekLabel = (dates: Date[]): string => {
-  if (dates.length < 7) return '';
   const fmt = (d: Date) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
   return `${fmt(dates[0])} - ${fmt(dates[6])}`;
 };

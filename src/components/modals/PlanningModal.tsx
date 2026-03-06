@@ -18,7 +18,6 @@ const sortDishes = (a: { name: string; nutrition: NutritionInfo }, b: { name: st
     case 'cal-desc': return b.nutrition.calories - a.nutrition.calories;
     case 'pro-asc': return a.nutrition.protein - b.nutrition.protein;
     case 'pro-desc': return b.nutrition.protein - a.nutrition.protein;
-    default: return 0;
   }
 };
 

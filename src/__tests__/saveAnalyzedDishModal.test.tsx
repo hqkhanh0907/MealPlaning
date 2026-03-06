@@ -295,6 +295,32 @@ describe('SaveAnalyzedDishModal', () => {
     expect(payload.ingredients[0].name).toBe('Thịt bò');
   });
 
+  it('prevents double submission (line 57)', () => {
+    render(<SaveAnalyzedDishModal {...defaultProps} />);
+    fireEvent.click(screen.getByText(/Sáng/));
+    const saveBtn = screen.getByText('Xác nhận lưu');
+    fireEvent.click(saveBtn);
+    expect(defaultProps.onSave).toHaveBeenCalledTimes(1);
+    // Second click should be blocked by hasSubmittedRef
+    fireEvent.click(saveBtn);
+    expect(defaultProps.onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it('handleResearchIngredient returns early when name is empty (line 88)', async () => {
+    const resultWithEmptyName: AnalyzedDishResult = {
+      ...result,
+      ingredients: [
+        { name: '', amount: 200, unit: 'g', nutritionPerStandardUnit: { calories: 220, protein: 4, carbs: 44, fat: 0.8, fiber: 0.5 } },
+        { name: 'Thịt bò', amount: 100, unit: 'g', nutritionPerStandardUnit: { calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 } },
+      ],
+    };
+    render(<SaveAnalyzedDishModal {...defaultProps} result={resultWithEmptyName} />);
+    const researchBtns = screen.getAllByText(/AI Research/i);
+    fireEvent.click(researchBtns[0]); // Click research on the empty-name ingredient
+    // mockSuggestIngredientInfo should NOT be called because name is empty
+    expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
+  });
+
   it('submits with multiple tags (Sáng + Trưa)', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
     fireEvent.click(screen.getByText(/Sáng/));

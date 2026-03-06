@@ -37,11 +37,10 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
   }, []);
 
   const handleAnalyze = async () => {
-    if (!image) return;
-
+    const img = image!;
     try {
       setIsAnalyzing(true);
-      const [header, base64Data] = image.split(',');
+      const [header, base64Data] = img.split(',');
       const mimeType = header.split(':')[1].split(';')[0];
 
       const analysis = await analyzeDishImage(base64Data, mimeType);

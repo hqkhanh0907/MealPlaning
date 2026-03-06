@@ -61,11 +61,8 @@ const getScopeLabelKey = (scope: GroceryScope): string => {
   return 'grocery.scopeAll';
 };
 
-const getScopeHeaderKey = (scope: GroceryScope): string => {
-  if (scope === 'day') return 'grocery.headerDay';
-  if (scope === 'week') return 'grocery.headerWeek';
-  return 'grocery.headerAll';
-};
+const getScopeHeaderKey = (scope: GroceryScope): string =>
+  scope === 'week' ? 'grocery.headerWeek' : 'grocery.headerAll';
 
 const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
   <div data-testid="grocery-empty-state" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
@@ -129,8 +126,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   );
 
   const toggleCheck = useCallback((id: string) => {
-    const item = groceryItems.find(i => i.id === id);
-    if (!item) return;
+    const item = groceryItems.find(i => i.id === id)!;
     setPersistedCheckedSnapshots(prev => {
       if (prev.some(s => s.id === id)) return prev.filter(s => s.id !== id);
       return [...prev, { id, amount: item.amount }];

@@ -335,5 +335,108 @@ describe('geminiService', () => {
       });
       await expect(analyzeDishImage('base64', 'image/png')).rejects.toThrow('Invalid AnalyzedDishResult');
     });
+
+    it('AnalyzedDishResult validator returns false for non-object parsed value', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '"just a string"' });
+      await expect(analyzeDishImage('base64', 'image/png')).rejects.toThrow('Invalid AnalyzedDishResult');
+    });
+
+    it('IngredientSuggestion validator returns false for non-object parsed value', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '42' });
+      await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('Invalid IngredientSuggestion');
+    });
+  });
+
+  describe('isRetryableError branches', () => {
+    it('does NOT retry on validation errors (contains "response from AI")', async () => {
+      mockGenerateContent
+        .mockResolvedValueOnce({ text: JSON.stringify({ bad: 'data' }) })
+        .mockResolvedValue({ text: JSON.stringify({ calories: 100, protein: 5, carbs: 1, fat: 1, fiber: 0, unit: 'g' }) });
+      await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('Invalid IngredientSuggestion');
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT retry on API key errors', async () => {
+      mockGenerateContent.mockRejectedValueOnce(new Error('API key is invalid'));
+      await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('API key');
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT retry on AbortError thrown during request', async () => {
+      mockGenerateContent.mockRejectedValueOnce(new DOMException('Aborted', 'AbortError'));
+      await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('Aborted');
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT retry when Error has AbortError name', async () => {
+      const abortErr = new Error('Aborted');
+      abortErr.name = 'AbortError';
+      mockGenerateContent.mockRejectedValueOnce(abortErr);
+      await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('Aborted');
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT retry when error message includes "response from AI"', async () => {
+      mockGenerateContent.mockRejectedValueOnce(new Error('Invalid response from AI'));
+      await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('response from AI');
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('logAICall slow call warning', () => {
+    it('logs warning when successful call exceeds 10 seconds', async () => {
+      const mockResult = { calories: 100, protein: 5, carbs: 1, fat: 1, fiber: 0, unit: 'g' };
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockResult) });
+
+      const _realDateNow = Date.now;
+      let callCount = 0;
+      vi.spyOn(Date, 'now').mockImplementation(() => {
+        callCount++;
+        return callCount === 1 ? 0 : 15000;
+      });
+
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await suggestIngredientInfo('Slow test', 'g');
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('slow call'));
+      warnSpy.mockRestore();
+      vi.spyOn(Date, 'now').mockRestore();
+    });
+  });
+
+  describe('suggestMealPlan with diverse dish library', () => {
+    it('shuffles and deduplicates when given multiple dishes across tags and untagged', async () => {
+      const diverseDishes = [
+        { id: 'd1', name: 'Bún bò', tags: ['breakfast' as const], calories: 300, protein: 20 },
+        { id: 'd2', name: 'Phở', tags: ['breakfast' as const], calories: 350, protein: 25 },
+        { id: 'd3', name: 'Cơm tấm', tags: ['lunch' as const], calories: 500, protein: 30 },
+        { id: 'd4', name: 'Bún riêu', tags: ['lunch' as const], calories: 400, protein: 22 },
+        { id: 'd5', name: 'Canh chua', tags: ['dinner' as const], calories: 200, protein: 15 },
+        { id: 'd6', name: 'Gà rán', tags: ['dinner' as const], calories: 600, protein: 40 },
+        { id: 'd7', name: 'Bánh mì', tags: [] as ('breakfast' | 'lunch' | 'dinner')[], calories: 250, protein: 10 },
+        { id: 'd8', name: 'Xôi', tags: [] as ('breakfast' | 'lunch' | 'dinner')[], calories: 300, protein: 8 },
+      ];
+      const mockResult = {
+        breakfastDishIds: ['d1'], lunchDishIds: ['d3'], dinnerDishIds: ['d5'], reasoning: 'Varied menu',
+      };
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockResult) });
+
+      const result = await suggestMealPlan(2000, 100, diverseDishes);
+      expect(result.reasoning).toBe('Varied menu');
+    });
+  });
+
+  describe('analyzeDishImage abort during request', () => {
+    it('throws AbortError when signal aborts while API call is in progress', async () => {
+      const controller = new AbortController();
+      mockGenerateContent.mockImplementation(() =>
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            controller.abort();
+            reject(new DOMException('Aborted', 'AbortError'));
+          }, 10);
+        })
+      );
+      await expect(analyzeDishImage('base64', 'image/jpeg', controller.signal)).rejects.toThrow('Aborted');
+    });
   });
 });

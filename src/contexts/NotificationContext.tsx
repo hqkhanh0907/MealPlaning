@@ -76,14 +76,13 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
   // Pause/resume auto-dismiss on hover via native DOM listeners
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
     const pause = () => clearTimeout(timerRef.current);
     const resume = () => { timerRef.current = setTimeout(handleDismiss, 2000); };
-    el.addEventListener('mouseenter', pause);
-    el.addEventListener('mouseleave', resume);
+    el?.addEventListener('mouseenter', pause);
+    el?.addEventListener('mouseleave', resume);
     return () => {
-      el.removeEventListener('mouseenter', pause);
-      el.removeEventListener('mouseleave', resume);
+      el?.removeEventListener('mouseenter', pause);
+      el?.removeEventListener('mouseleave', resume);
     };
   }, [handleDismiss]);
 

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { removeIngredientFromDishes, migrateDayPlans, migrateDishes, processAnalyzedDish, validateImportData } from '../services/dataService';
+import { describe, it, expect, vi } from 'vitest';
+import { removeIngredientFromDishes, migrateDayPlans, migrateDishes, migrateIngredients, processAnalyzedDish, validateImportData } from '../services/dataService';
 import { Dish, Ingredient, SaveAnalyzedDishPayload } from '../types';
 
 describe('removeIngredientFromDishes', () => {
@@ -125,6 +125,44 @@ describe('migrateDishes', () => {
     const result = migrateDishes([validDish, null as unknown, { id: 'd2' }]);
     expect(result).toHaveLength(1);
     expect(result[0].name).toEqual({ vi: 'Valid', en: 'Valid' });
+  });
+});
+
+describe('migrateIngredients', () => {
+  it('should filter out invalid ingredient data and log warning', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = migrateIngredients([{ name: 'No ID or unit' }]);
+    expect(result).toEqual([]);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('migrateIngredients'),
+      expect.stringContaining('Invalid ingredient data skipped'),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('should migrate valid ingredients with string names to LocalizedString', () => {
+    const result = migrateIngredients([
+      { id: 'i1', name: 'Chicken', unit: 'g', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual({ vi: 'Chicken', en: 'Chicken' });
+    expect(result[0].unit).toEqual({ vi: 'g', en: 'g' });
+  });
+
+  it('should handle empty array', () => {
+    expect(migrateIngredients([])).toEqual([]);
+  });
+
+  it('should keep valid ingredients and filter invalid ones in mixed input', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = migrateIngredients([
+      { id: 'i1', name: 'Valid', unit: 'g' },
+      null as unknown,
+      42 as unknown,
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual({ vi: 'Valid', en: 'Valid' });
+    warnSpy.mockRestore();
   });
 });
 

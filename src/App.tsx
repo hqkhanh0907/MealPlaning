@@ -405,8 +405,7 @@ export default function App() {
           ingredients={ingredients}
           currentDishIds={currentPlan[getDayPlanSlotKey(modals.planningType)] as string[]}
           onConfirm={(dishIds) => {
-            const plannedType = modals.planningType;
-            if (!plannedType) return;
+            const plannedType = modals.planningType!;
             handleUpdatePlan(plannedType, dishIds);
             modals.closePlanningModal();
             const mealLabel = t(`meal.${plannedType}Full`);

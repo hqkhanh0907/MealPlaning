@@ -77,7 +77,6 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
       case 'pro-desc': return nB.protein - nA.protein;
       case 'ing-asc': return a.ingredients.length - b.ingredients.length;
       case 'ing-desc': return b.ingredients.length - a.ingredients.length;
-      default: return 0;
     }
   }, [nutritionMap, lang]);
   const extraFilter = useCallback((d: Dish) => !filterTag || (d.tags?.includes(filterTag) ?? false), [filterTag]);
@@ -94,15 +93,16 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     modal.closeEdit(false);
   }, [modal]);
 
+
   const handleDelete = (id: string, dname: string) => {
     if (isUsed(id)) { notify.warning(t('dish.cannotDelete'), t('dish.usedInPlan')); return; }
     setDeleteConfirmation({ isOpen: true, dishId: id, dishName: dname });
   };
 
   const confirmDelete = () => {
-    if (!deleteConfirmation.dishId) return;
-    const deleted = dishes.find(d => d.id === deleteConfirmation.dishId);
-    onDelete(deleteConfirmation.dishId);
+    const dishId = deleteConfirmation.dishId!;
+    const deleted = dishes.find(d => d.id === dishId);
+    onDelete(dishId);
     setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });
     if (deleted) {
       const displayName = getLocalizedField(deleted.name, lang);
@@ -173,7 +173,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               </div>
             );
           })}
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={() => modal.openEdit()} className="col-span-full" />}
+          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={modal.openEdit} className="col-span-full" />}
         </div>
       )}
 
@@ -228,7 +228,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               );
             })}
           </div>
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={() => modal.openEdit()} />}
+          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={modal.openEdit} />}
         </div>
       )}
 

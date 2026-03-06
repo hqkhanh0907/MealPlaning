@@ -230,6 +230,23 @@ describe('ImageCapture', () => {
     });
   });
 
+  it('handles paste event with no clipboardData items (line 27)', async () => {
+    render(<ImageCapture {...defaultProps} />);
+
+    // Build a paste event with null clipboardData items
+    const pasteEvent = new Event('paste', { bubbles: true });
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      value: { items: null },
+    });
+
+    await act(async () => {
+      globalThis.dispatchEvent(pasteEvent);
+    });
+
+    // onImageReady should NOT have been called because items was null
+    expect(defaultProps.onImageReady).not.toHaveBeenCalled();
+  });
+
   it('shows camera error when getUserMedia rejects', async () => {
     Object.defineProperty(navigator, 'mediaDevices', {
       value: { getUserMedia: vi.fn().mockRejectedValue(new Error('Permission denied')) },

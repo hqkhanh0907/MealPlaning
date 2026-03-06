@@ -255,6 +255,54 @@ describe('DishManager', () => {
     );
   });
 
+  it('sorts dishes by name descending', () => {
+    render(<DishManager {...defaultProps} />);
+    const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
+    fireEvent.change(sortSelect, { target: { value: 'name-desc' } });
+    expect(screen.getByDisplayValue('Tên (Z-A)')).toBeInTheDocument();
+  });
+
+  it('sorts dishes by protein descending', () => {
+    render(<DishManager {...defaultProps} />);
+    const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
+    fireEvent.change(sortSelect, { target: { value: 'pro-desc' } });
+    expect(screen.getByDisplayValue('Protein (Cao → Thấp)')).toBeInTheDocument();
+  });
+
+  it('clears tag filter by clicking the Tất cả tag button', () => {
+    render(<DishManager {...defaultProps} />);
+    // First activate a filter
+    const dinnerButtons = screen.getAllByText(/Tối/);
+    const filterChip = dinnerButtons.find(el => el.closest('button')?.textContent?.includes('('));
+    if (filterChip) fireEvent.click(filterChip);
+    // Now click the "Tất cả" filter chip
+    fireEvent.click(screen.getByTestId('btn-filter-all-dishes'));
+    // Both dishes should be visible
+    expect(screen.getByText('Gà nướng')).toBeInTheDocument();
+    expect(screen.getByText('Cơm gà')).toBeInTheDocument();
+  });
+
+  it('closes edit modal via edit close handler', () => {
+    render(<DishManager {...defaultProps} />);
+    const editButtons = screen.getAllByText('Chỉnh sửa');
+    fireEvent.click(editButtons[0]);
+    expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-close-dish'));
+    expect(screen.queryByText('Sửa món ăn')).not.toBeInTheDocument();
+  });
+
+  it('renders detail modal with missing ingredient gracefully', () => {
+    const dishWithMissingIng: Dish = {
+      id: 'dm-bad', name: { vi: 'Món lỗi', en: 'Bad Dish' },
+      ingredients: [{ ingredientId: 'nonexistent-ing', amount: 100 }],
+      tags: ['lunch'],
+    };
+    render(<DishManager {...defaultProps} dishes={[dishWithMissingIng]} />);
+    // Open detail modal
+    fireEvent.click(screen.getByText('Món lỗi'));
+    expect(screen.getByText('Chi tiết món ăn')).toBeInTheDocument();
+  });
+
   it('filters by lunch tag', () => {
     render(<DishManager {...defaultProps} />);
     const lunchButtons = screen.getAllByText(/Trưa/);
@@ -308,6 +356,116 @@ describe('DishManager', () => {
     // Cancel
     fireEvent.click(screen.getByText('Hủy'));
     expect(screen.queryByText('Xóa món ăn?')).not.toBeInTheDocument();
+  });
+
+  it('deletes dish via list view table delete button', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Both table rows and mobile items share testid; use the first match (table row)
+    const deleteBtns = screen.getAllByTestId('btn-delete-dish-d2');
+    fireEvent.click(deleteBtns[0]);
+    expect(screen.getByText('Xóa món ăn?')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Xóa ngay'));
+    expect(defaultProps.onDelete).toHaveBeenCalledWith('d2');
+  });
+
+  it('renders mobile list items in list view with dish info', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Mobile list items show "kcal" and "Pro" suffixes
+    const kcalTexts = screen.getAllByText(/kcal/);
+    expect(kcalTexts.length).toBeGreaterThan(0);
+    const proTexts = screen.getAllByText(/Pro/);
+    expect(proTexts.length).toBeGreaterThan(0);
+  });
+
+  it('opens detail modal from mobile list item name button', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Multiple buttons have the dish name; find one inside the mobile list (sm:hidden div)
+    const allNameBtns = screen.getAllByText('Gà nướng').filter(el => el.tagName === 'BUTTON');
+    // Click the last button (mobile list item renders after table row)
+    fireEvent.click(allNameBtns[allNameBtns.length - 1]);
+    expect(screen.getByText('Chi tiết món ăn')).toBeInTheDocument();
+  });
+
+  it('opens edit from detail modal via edit icon button', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByText('Gà nướng'));
+    expect(screen.getByText('Chi tiết món ăn')).toBeInTheDocument();
+    const editIcons = screen.getAllByTitle('Chỉnh sửa');
+    const modalEditBtn = editIcons.find(el => el.closest('[class*="z-60"]'));
+    if (modalEditBtn) fireEvent.click(modalEditBtn);
+    expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
+  });
+
+  it('clicks edit button in list view table row', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Table edit buttons use the same testid pattern
+    const editBtns = screen.getAllByTestId('btn-edit-dish-d1');
+    fireEvent.click(editBtns[0]);
+    expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
+  });
+
+  it('clicks edit button in mobile list view', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Mobile edit buttons are the second occurrence (after table row)
+    const editBtns = screen.getAllByTestId('btn-edit-dish-d1');
+    fireEvent.click(editBtns[editBtns.length - 1]);
+    expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
+  });
+
+  it('clicks delete button in mobile list view', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Mobile delete buttons are the second occurrence
+    const deleteBtns = screen.getAllByTestId('btn-delete-dish-d1');
+    fireEvent.click(deleteBtns[deleteBtns.length - 1]);
+    expect(screen.getByText('Xóa món ăn?')).toBeInTheDocument();
+  });
+
+  it('shows empty state action in grid view', () => {
+    render(<DishManager {...defaultProps} dishes={[]} />);
+    // Empty state shows add button with actionLabel; toolbar also has one.
+    // The EmptyState button has bg-emerald-500 class.
+    const btns = screen.getAllByText('Thêm món ăn');
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    expect(emptyBtn).toBeDefined();
+    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
+  });
+
+  it('shows empty state action in list view', () => {
+    render(<DishManager {...defaultProps} dishes={[]} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const btns = screen.getAllByText('Thêm món ăn');
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    expect(emptyBtn).toBeDefined();
+    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
+  });
+
+  it('submits a new dish through DishManager (handleDishSubmit onAdd path, line 89)', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByText('Thêm món ăn'));
+    // Fill form name
+    fireEvent.change(screen.getByPlaceholderText('VD: Ức gà áp chảo'), { target: { value: 'Món test mới' } });
+    // Add ingredient — same approach as existing test 'validates tag selection'
+    const ingPickerBtns = screen.getAllByText('Ức gà');
+    fireEvent.click(ingPickerBtns[0]);
+    // Select tag — find the Sáng tag button that does NOT contain a count "(N)"
+    const sangBtns = screen.getAllByText(/Sáng/);
+    const modalTagBtn = sangBtns.find(el => {
+      const btn = el.closest('button');
+      return btn && !btn.textContent?.match(/\(\d+\)/);
+    });
+    expect(modalTagBtn).toBeDefined();
+    fireEvent.click(modalTagBtn!.closest('button') as HTMLElement);
+    // Submit
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    expect(defaultProps.onAdd).toHaveBeenCalled();
   });
 });
 
@@ -424,6 +582,27 @@ describe('IngredientManager', () => {
     expect(screen.getByDisplayValue('Protein (Cao → Thấp)')).toBeInTheDocument();
   });
 
+  it('sorts ingredients by name descending', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
+    fireEvent.change(sortSelect, { target: { value: 'name-desc' } });
+    expect(screen.getByDisplayValue('Tên (Z-A)')).toBeInTheDocument();
+  });
+
+  it('sorts ingredients by calories descending', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
+    fireEvent.change(sortSelect, { target: { value: 'cal-desc' } });
+    expect(screen.getByDisplayValue('Calo (Cao → Thấp)')).toBeInTheDocument();
+  });
+
+  it('sorts ingredients by protein ascending', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
+    fireEvent.change(sortSelect, { target: { value: 'pro-asc' } });
+    expect(screen.getByDisplayValue('Protein (Thấp → Cao)')).toBeInTheDocument();
+  });
+
   it('opens edit modal when edit button is clicked', () => {
     render(<IngredientManager {...defaultProps} />);
     const editButtons = screen.getAllByText('Chỉnh sửa');
@@ -522,5 +701,101 @@ describe('IngredientManager', () => {
     expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Hủy'));
     expect(screen.queryByText('Xóa nguyên liệu?')).not.toBeInTheDocument();
+  });
+
+  it('renders mobile list items in list view with ingredient info', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Mobile list items show "kcal" and "Pro" suffixes
+    const kcalTexts = screen.getAllByText(/kcal/);
+    expect(kcalTexts.length).toBeGreaterThan(0);
+    const proTexts = screen.getAllByText(/Pro/);
+    expect(proTexts.length).toBeGreaterThan(0);
+  });
+
+  it('opens detail modal from mobile list item name button', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Find all buttons with ingredient name text
+    const allNameBtns = screen.getAllByText('Ức gà').filter(el => el.tagName === 'BUTTON');
+    // Click the last button (mobile list item renders after table row)
+    fireEvent.click(allNameBtns[allNameBtns.length - 1]);
+    expect(screen.getByText('Chi tiết nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('edits ingredient from mobile list item edit button', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Edit buttons in mobile list use same testid pattern
+    const editBtns = screen.getAllByTestId('btn-edit-ingredient-i1');
+    fireEvent.click(editBtns[editBtns.length - 1]);
+    expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('deletes ingredient from mobile list item delete button', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const deleteBtns = screen.getAllByTestId('btn-delete-ingredient-i2');
+    fireEvent.click(deleteBtns[deleteBtns.length - 1]);
+    expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Xóa ngay'));
+    expect(defaultProps.onDelete).toHaveBeenCalledWith('i2');
+  });
+
+  it('opens edit from detail modal via edit icon button', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByText('Ức gà'));
+    expect(screen.getByText('Chi tiết nguyên liệu')).toBeInTheDocument();
+    // Click the edit icon button in the detail modal header
+    const editIcons = screen.getAllByTitle('Chỉnh sửa');
+    const modalEditBtn = editIcons.find(el => el.closest('[class*="z-60"]'));
+    if (modalEditBtn) fireEvent.click(modalEditBtn);
+    expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('closes edit modal without saving to trigger onClose callback', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const editButtons = screen.getAllByText('Chỉnh sửa');
+    fireEvent.click(editButtons[0]);
+    expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
+    // Close via X button without changing anything
+    const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
+    if (xButton) fireEvent.click(xButton);
+    expect(screen.queryByText('Sửa nguyên liệu')).not.toBeInTheDocument();
+  });
+
+  it('shows empty state action in list view', () => {
+    render(<IngredientManager {...defaultProps} ingredients={[]} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const btns = screen.getAllByText('Thêm nguyên liệu');
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    expect(emptyBtn).toBeDefined();
+    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
+  });
+
+  it('shows empty state action in grid view', () => {
+    render(<IngredientManager {...defaultProps} ingredients={[]} />);
+    const btns = screen.getAllByText('Thêm nguyên liệu');
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    expect(emptyBtn).toBeDefined();
+    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
+  });
+
+  it('clicks edit button in list view table row (line 176)', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const editBtns = screen.getAllByTestId('btn-edit-ingredient-i1');
+    fireEvent.click(editBtns[0]); // Table row button
+    expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('clicks delete button in list view table row (line 177)', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const deleteBtns = screen.getAllByTestId('btn-delete-ingredient-i2');
+    fireEvent.click(deleteBtns[0]); // Table row button
+    expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
   });
 });

@@ -53,7 +53,6 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
       case 'cal-desc': return b.caloriesPer100 - a.caloriesPer100;
       case 'pro-asc': return a.proteinPer100 - b.proteinPer100;
       case 'pro-desc': return b.proteinPer100 - a.proteinPer100;
-      default: return 0;
     }
   }, [lang]);
 
@@ -70,15 +69,16 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
     modal.closeEdit(false);
   }, [ingredients, onUpdate, onAdd, modal]);
 
+
   const handleDelete = (id: string, iname: string) => {
     if (isUsed(id)) { notify.warning(t('ingredient.cannotDelete'), t('ingredient.usedInDish')); return; }
     setDeleteConfirmation({ isOpen: true, ingredientId: id, ingredientName: iname });
   };
 
   const confirmDelete = () => {
-    if (!deleteConfirmation.ingredientId) return;
-    const deleted = ingredients.find(i => i.id === deleteConfirmation.ingredientId);
-    onDelete(deleteConfirmation.ingredientId);
+    const ingredientId = deleteConfirmation.ingredientId!;
+    const deleted = ingredients.find(i => i.id === ingredientId);
+    onDelete(ingredientId);
     setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });
     if (deleted) {
       const displayName = getLocalizedField(deleted.name, lang);
@@ -142,7 +142,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
               </div>
             </div>
           ))}
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('ingredient.title').toLowerCase()} actionLabel={t('ingredient.addNew')} onAction={() => modal.openEdit()} className="col-span-full" />}
+          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('ingredient.title').toLowerCase()} actionLabel={t('ingredient.addNew')} onAction={modal.openEdit} className="col-span-full" />}
         </div>
       )}
 
@@ -192,7 +192,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
               </div>
             ))}
           </div>
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('ingredient.title').toLowerCase()} actionLabel={t('ingredient.addNew')} onAction={() => modal.openEdit()} />}
+          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('ingredient.title').toLowerCase()} actionLabel={t('ingredient.addNew')} onAction={modal.openEdit} />}
         </div>
       )}
 

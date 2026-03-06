@@ -76,9 +76,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       const orig = editingItem.ingredients[i];
       if (si.ingredientId !== orig.ingredientId) return true;
       const amtStr = amountStrings[si.ingredientId] ?? String(si.amount);
-      const amtNum = Math.round(Number.parseFloat(amtStr));
-      if (amtStr.trim() === '' || Number.isNaN(Number.parseFloat(amtStr))) return true;
-      return amtNum !== Math.round(orig.amount);
+      return amtStr.trim() === '' || Number.isNaN(Number.parseFloat(amtStr)) || Math.round(Number.parseFloat(amtStr)) !== Math.round(orig.amount);
     });
   }, [editingItem, namePrimary, lang, selectedIngredients, tags, amountStrings]);
 
@@ -103,12 +101,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     const amtErrors: Partial<Record<string, string>> = {};
     for (const si of selectedIngredients) {
       const v = (amountStrings[si.ingredientId] ?? '').trim();
-      if (v === '') {
+      if (v === '' || Number.isNaN(Number.parseFloat(v))) {
         amtErrors[si.ingredientId] = t('dish.validationAmountRequired');
-      } else {
-        const n = Number.parseFloat(v);
-        if (Number.isNaN(n)) amtErrors[si.ingredientId] = t('dish.validationAmountRequired');
-        else if (n < 0) amtErrors[si.ingredientId] = t('dish.validationAmountNegative');
+      } else if (Number.parseFloat(v) < 0) {
+        amtErrors[si.ingredientId] = t('dish.validationAmountNegative');
       }
     }
     if (Object.keys(amtErrors).length > 0) errors.amounts = amtErrors;
@@ -139,11 +135,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   };
 
   const handleAddIngredient = useCallback((ingId: string) => {
-    if (selectedIngredients.some(si => si.ingredientId === ingId)) return;
     setSelectedIngredients(prev => [...prev, { ingredientId: ingId, amount: 100 }]);
     setAmountStrings(prev => ({ ...prev, [ingId]: '100' }));
     if (formErrors.ingredients) setFormErrors(prev => ({ ...prev, ingredients: undefined }));
-  }, [selectedIngredients, formErrors.ingredients]);
+  }, [formErrors.ingredients]);
 
   const handleRemoveIngredient = (ingId: string) => {
     setSelectedIngredients(prev => prev.filter(si => si.ingredientId !== ingId));

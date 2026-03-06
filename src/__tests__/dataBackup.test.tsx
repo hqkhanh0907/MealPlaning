@@ -190,6 +190,16 @@ describe('DataBackup', () => {
     expect(mockNotify.error).not.toHaveBeenCalled();
   });
 
+  it('clicks import button which triggers fileInput click (line 121)', () => {
+    render(<DataBackup onImport={vi.fn()} />);
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(fileInput).not.toBeNull();
+    const clickSpy = vi.spyOn(fileInput as HTMLInputElement, 'click');
+    fireEvent.click(screen.getByText('Nhập dữ liệu'));
+    expect(clickSpy).toHaveBeenCalled();
+    clickSpy.mockRestore();
+  });
+
   it('exports successfully even when localStorage is empty', () => {
     // localStorage is already cleared in beforeEach
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:empty');

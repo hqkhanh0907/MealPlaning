@@ -116,6 +116,29 @@ describe('useDarkMode', () => {
     // No error means the handler executed correctly
   });
 
+  it('re-applies system theme when matchMedia change fires and theme is system', () => {
+    let changeHandler: (() => void) | undefined;
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: true,
+        media: query,
+        addEventListener: vi.fn((_event: string, handler: () => void) => {
+          changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+      })),
+    });
+
+    localStorage.setItem('mp-theme', 'system');
+    const { result } = renderHook(() => useDarkMode());
+    expect(result.current.theme).toBe('system');
+    expect(changeHandler).toBeDefined();
+    act(() => { changeHandler?.(); });
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
+
   it('defaults to light theme when localStorage.getItem throws', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
       throw new DOMException('Blocked');
