@@ -352,7 +352,8 @@
   },
   "listToolbar": {
     "gridView": "Xem dạng lưới",
-    "listView": "Xem dạng danh sách"
+    "listView": "Xem dạng danh sách",
+    "sortBy": "Sắp xếp theo"
   },
   "emptyState": {
     "notFound": "Không tìm thấy {{entity}}",

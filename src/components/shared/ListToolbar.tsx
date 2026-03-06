@@ -41,6 +41,9 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
         <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
           type="text"
+          id={searchTestId || 'list-search'}
+          name={searchTestId || 'list-search'}
+          aria-label={searchPlaceholder}
           placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -51,6 +54,9 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
       <div className="flex items-center gap-2">
         {/* Sort Dropdown */}
         <select
+          id="list-sort-select"
+          name="list-sort-select"
+          aria-label={t('listToolbar.sortBy')}
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value)}
           className="flex-1 sm:flex-none sm:w-44 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-emerald-500 outline-none bg-white dark:bg-slate-800 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-sm min-h-11"

@@ -76,7 +76,6 @@ export function useItemModalFlow<T extends { id: string }>(
     setIsEditOpen(false);
     const item = editingItem;
     setCameFromView(false);
-    // c8 ignore next — editingItem is always set when discardAndBack is reachable
     if (item) setViewingItem(item);
   }, [editingItem]);
 

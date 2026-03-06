@@ -251,7 +251,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.searchIngredients')} />
+                  <input id="dish-ingredient-search" name="dish-ingredient-search" aria-label={t('dish.searchIngredients')} value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.searchIngredients')} />
                 </div>
                 <button
                   type="button"
@@ -288,8 +288,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddNameVI')} <span className="text-rose-500">*</span></label>
+                        <label htmlFor="qa-name-vi" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddNameVI')} <span className="text-rose-500">*</span></label>
                         <input
+                          id="qa-name-vi"
+                          name="qa-name-vi"
                           data-testid="input-qa-name-vi"
                           value={qaNameVI}
                           onChange={e => { setQaNameVI(e.target.value); setQaError(''); }}
@@ -300,8 +302,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                         {qaError && <p className="text-xs text-rose-500 mt-0.5">{qaError}</p>}
                       </div>
                       <div>
-                        <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddNameEN')}</label>
+                        <label htmlFor="qa-name-en" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddNameEN')}</label>
                         <input
+                          id="qa-name-en"
+                          name="qa-name-en"
                           value={qaNameEN}
                           onChange={e => setQaNameEN(e.target.value)}
                           placeholder={t('dish.quickAddNameENPlaceholder')}
@@ -310,9 +314,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddUnit')}</label>
+                      <label htmlFor="qa-unit" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddUnit')}</label>
                       <UnitSelector
                         mode="bilingual"
+                        id="qa-unit"
                         value={qaUnit}
                         onChange={v => { setQaUnit(v); triggerAIFill(qaNameVI, v.vi); }}
                         data-testid="qa-unit"
@@ -337,8 +342,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                           { label: 'Fiber', value: qaFiber, setter: setQaFiber },
                         ].map(({ label, value, setter }) => (
                           <div key={label}>
-                            <label className="text-xs text-slate-400 block mb-0.5">{label}</label>
+                            <label htmlFor={`qa-${label.toLowerCase()}`} className="text-xs text-slate-400 block mb-0.5">{label}</label>
                             <input
+                              id={`qa-${label.toLowerCase()}`}
+                              name={`qa-${label.toLowerCase()}`}
                               type="number"
                               step="0.1"
                               inputMode="decimal"
@@ -377,7 +384,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
                           <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = Math.max(0, si.amount - step); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-3.5 h-3.5" /></button>
-                          <input type="number" step="1" inputMode="numeric" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
+                          <input type="number" step="1" inputMode="numeric" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} id={`dish-amount-${si.ingredientId}`} name={`dish-amount-${si.ingredientId}`} aria-label={getLocalizedField(ing.name, lang)} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
                           <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = si.amount + step; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-3.5 h-3.5" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>

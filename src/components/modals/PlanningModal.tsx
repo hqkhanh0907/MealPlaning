@@ -91,6 +91,8 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
+                id="planning-search"
+                name="planning-search"
                 placeholder={t('planning.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -99,6 +101,8 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
               />
             </div>
             <select
+              id="planning-sort"
+              name="planning-sort"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="w-full sm:w-48 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-base sm:text-sm min-h-11"

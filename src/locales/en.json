@@ -354,7 +354,8 @@
   },
   "listToolbar": {
     "gridView": "Grid view",
-    "listView": "List view"
+    "listView": "List view",
+    "sortBy": "Sort by"
   },
   "emptyState": {
     "notFound": "No {{entity}} found",
