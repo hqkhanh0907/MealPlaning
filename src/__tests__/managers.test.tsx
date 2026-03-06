@@ -458,6 +458,17 @@ describe('DishManager', () => {
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
+  it('opens edit modal via EmptyState onAction callback in list view', () => {
+    render(<DishManager {...defaultProps} dishes={[]} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const emptyContainer = document.querySelector('[class*="border-dashed"]');
+    expect(emptyContainer).toBeTruthy();
+    const actionBtn = emptyContainer!.querySelector('button');
+    expect(actionBtn).toBeTruthy();
+    fireEvent.click(actionBtn as HTMLElement);
+    expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
+  });
+
   it('submits a new dish through DishManager (handleDishSubmit onAdd path, line 89)', () => {
     render(<DishManager {...defaultProps} />);
     fireEvent.click(screen.getByText('Thêm món ăn'));
@@ -804,6 +815,17 @@ describe('IngredientManager', () => {
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
   });
 
+  it('opens edit modal via EmptyState onAction callback in list view', () => {
+    render(<IngredientManager {...defaultProps} ingredients={[]} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const emptyContainer = document.querySelector('[class*="border-dashed"]');
+    expect(emptyContainer).toBeTruthy();
+    const actionBtn = emptyContainer!.querySelector('button');
+    expect(actionBtn).toBeTruthy();
+    fireEvent.click(actionBtn as HTMLElement);
+    expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
+  });
+
   it('clicks edit button in list view table row (line 176)', () => {
     render(<IngredientManager {...defaultProps} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
@@ -818,5 +840,11 @@ describe('IngredientManager', () => {
     const deleteBtns = screen.getAllByTestId('btn-delete-ingredient-i2');
     fireEvent.click(deleteBtns[0]); // Table row button
     expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
+  });
+
+  it('shows empty state in list view when no ingredients match', () => {
+    render(<IngredientManager {...defaultProps} ingredients={[]} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    expect(screen.getByText(/Chưa có nguyên liệu nào/)).toBeInTheDocument();
   });
 });

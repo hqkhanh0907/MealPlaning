@@ -12,7 +12,7 @@ Code changes
      │
      ▼
 [1] Run unit tests (npm run test)
-     │ ✅ 863/863
+     │ ✅ 866/866
      ▼
 [2] Run linter (npm run lint)
      │ ✅ no errors, no warnings
@@ -45,7 +45,7 @@ Code changes
 Trước mỗi release, kiểm tra tất cả items:
 
 ```
-□ npm run test          → 863/863 pass
+□ npm run test          → 866/866 pass
 □ npm run lint          → 0 errors, 0 warnings
 □ npm run test:coverage → 100% Stmts/Funcs/Lines, ≥93% Branch
 □ npm run build         → build thành công, không warnings
@@ -174,7 +174,7 @@ Cập nhật `CHANGELOG.md` hoặc tạo file session mới trong `docs/`:
 - IngredientEditModal auto-focus on Android #36
 
 ## Tests
-- Unit: 863/863 pass
+- Unit: 866/866 pass
 - E2E: 10/10 pass (37 test cases)
 - Coverage: 100% Stmts/Funcs/Lines, 93.99% Branch
 ```

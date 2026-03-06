@@ -4,7 +4,7 @@
 **Date:** 2026-03-06  
 **Commit:** `d6bba1c`
 
-> **v3.0**: QA Cycle 2 — 195 tests mới (668→863), coverage đạt 100% Stmts/Funcs/Lines. Bổ sung BUG-FAVICON-001. Xem [Changelog](#6-changelog).
+> **v3.0**: QA Cycle 2 — 195 tests mới (668→866), coverage đạt 100% Stmts/Funcs/Lines. Bổ sung BUG-FAVICON-001. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -12,7 +12,7 @@
 
 | Chỉ số | Kết quả |
 |--------|---------|
-| Unit Tests | **863 / 863 Pass** ✅ |
+| Unit Tests | **866 / 866 Pass** ✅ |
 | Test Files | **40 / 40 Pass** ✅ |
 | E2E Tests | **10 / 10 Specs Pass** ✅ |
 | Lint | **0 errors, 0 warnings** ✅ |
@@ -72,7 +72,7 @@
  ✓ src/__tests__/usePersistedState.test.ts
 
  Test Files:  40 passed (40)
- Tests:      863 passed (863)
+ Tests:      866 passed (866)
  Duration:   ~7.2s
 ```
 
@@ -198,7 +198,7 @@
 | 2026-03-05 | 654/668 | 8/10 | ❌ | `a3f2b8c` | BUG-001 fix session |
 | 2026-03-06 | 668/668 | 10/10 | ✅ | `57e996d` | All green |
 | 2026-03-06 | 668/668 | 10/10 | ✅ | `2919cd0` | Docs sync, BUG-DOC-001 fixed |
-| 2026-03-06 | 863/863 | 10/10 | ✅ | `d6bba1c` | QA Cycle 2: 100% coverage, BUG-FAVICON-001 fixed |
+| 2026-03-06 | 866/866 | 10/10 | ✅ | `d6bba1c` | QA Cycle 2: 100% coverage, BUG-FAVICON-001 fixed |
 
 ---
 
@@ -208,4 +208,4 @@
 |---------|------|---------|
 | 1.0 | 2026-03-06 | Initial report |
 | 2.0 | 2026-03-06 | Coverage corrected từ actual run; BUG-DOC-001; file list đầy đủ 39 test files |
-| 3.0 | 2026-03-06 | QA Cycle 2: 863 tests (↑195), 40 files (↑1), 100% Stmts/Funcs/Lines coverage, BUG-FAVICON-001 |
+| 3.0 | 2026-03-06 | QA Cycle 2: 866 tests (↑195), 40 files (↑1), 100% Stmts/Funcs/Lines coverage, BUG-FAVICON-001 |

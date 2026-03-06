@@ -3,7 +3,7 @@
 **Version:** 3.0  
 **Date:** 2026-03-06  
 
-> **v3.0**: QA Cycle 2 — 863 tests (↑195), 40 files (↑1). Tất cả modules đạt 100% Stmts/Funcs/Lines coverage. Xem [Changelog](#changelog).
+> **v3.0**: QA Cycle 2 — 866 tests (↑195), 40 files (↑1). Tất cả modules đạt 100% Stmts/Funcs/Lines coverage. Xem [Changelog](#changelog).
 
 ---
 
@@ -157,7 +157,7 @@
 | `useModalBackHandler.test.ts` | ✓ | ✅ |
 | `useModalManager.test.ts` | ✓ | ✅ |
 | `usePersistedState.test.ts` | ✓ | ✅ |
-| **TOTAL (40 files)** | **863 tests** | **✅ 100%** |
+| **TOTAL (40 files)** | **866 tests** | **✅ 100%** |
 
 ### Các lĩnh vực test mới bổ sung trong QA Cycle 2
 
@@ -183,4 +183,4 @@
 |---------|------|---------|
 | 1.0 | 2026-03-06 | Initial test cases |
 | 2.0 | 2026-03-06 | Unit test list đầy đủ 39 files; version header cập nhật |
-| 3.0 | 2026-03-06 | QA Cycle 2: 863 tests (+195), 40 files (+1 navigationIndex.test.ts); enhanced test areas documented |
+| 3.0 | 2026-03-06 | QA Cycle 2: 866 tests (+195), 40 files (+1 navigationIndex.test.ts); enhanced test areas documented |
