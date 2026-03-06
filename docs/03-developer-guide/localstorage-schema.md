@@ -1,7 +1,10 @@
 # localStorage Schema Reference
 
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 2.0  
+**Date:** 2026-03-06  
+**Source of truth:** `src/types.ts` + `src/services/dataService.ts`
+
+> **v2.0 — Schema corrected**: Phiên bản 1.0 có schema sai so với code. Đã đồng bộ lại từ `src/types.ts` (xem BUG-DOC-001).
 
 ---
 
@@ -13,10 +16,10 @@
 
 | Key | Type | Mô tả | Migration |
 |-----|------|--------|-----------|
-| `mp-ingredients` | `Ingredient[]` | Danh sách nguyên liệu | v1 → v2 |
-| `mp-dishes` | `Dish[]` | Danh sách món ăn | v1 → v2 |
-| `mp-day-plans` | `DayPlan[]` | Kế hoạch bữa ăn theo ngày | v1 → v2 |
-| `mp-user-profile` | `UserProfile` | Hồ sơ người dùng | v1 → v2 |
+| `mp-ingredients` | `Ingredient[]` | Danh sách nguyên liệu | string names → LocalizedString |
+| `mp-dishes` | `Dish[]` | Danh sách món ăn | string names → LocalizedString, tags default `['lunch']` |
+| `mp-day-plans` | `DayPlan[]` | Kế hoạch bữa ăn theo ngày | `breakfastId` → `breakfastDishIds[]` |
+| `mp-user-profile` | `UserProfile` | Hồ sơ người dùng | — |
 
 ---
 
@@ -25,86 +28,101 @@
 ### `mp-ingredients` — `Ingredient[]`
 
 ```typescript
-interface Ingredient {
-  id: string;                    // UUID, ví dụ: "1709123456789"
-  name: LocalizedString;         // { vi: "Thịt bò", en: "Beef" }
-  unit: LocalizedString;         // { vi: "100g", en: "100g" }
-  calories: number;              // Calo (kcal) trên 1 đơn vị
-  protein: number;               // Protein (g) trên 1 đơn vị
-  tags?: string[];               // Nhãn phân loại, ví dụ: ["meat", "high-protein"]
-  imageBase64?: string;          // Ảnh base64 (optional, kích thước có thể lớn)
-}
+// src/types.ts
+type Ingredient = {
+  id: string;              // generateId('ing') → "ing-{timestamp}-{random}"
+  name: LocalizedString;   // { vi: "Thịt bò", en: "Beef" }
+  unit: LocalizedString;   // { vi: "g", en: "g" }
+  caloriesPer100: number;  // kcal per 100g (hoặc 100 đơn vị)
+  proteinPer100: number;   // g protein per 100
+  carbsPer100: number;     // g carbohydrate per 100
+  fatPer100: number;       // g fat per 100
+  fiberPer100: number;     // g dietary fiber per 100
+};
+
+type LocalizedString = Record<'vi' | 'en', string>;
 ```
 
 **Ví dụ:**
 ```json
 [
   {
-    "id": "1709123456789",
-    "name": { "vi": "Thịt bò", "en": "Beef" },
-    "unit": { "vi": "100g", "en": "100g" },
-    "calories": 250,
-    "protein": 26,
-    "tags": ["meat", "high-protein"]
+    "id": "ing-1709123456789-a3b2c1d",
+    "name": { "vi": "Ức gà", "en": "Chicken Breast" },
+    "unit": { "vi": "g", "en": "g" },
+    "caloriesPer100": 165,
+    "proteinPer100": 31,
+    "carbsPer100": 0,
+    "fatPer100": 3.6,
+    "fiberPer100": 0
   }
 ]
 ```
 
-**Migration v1 → v2:** Thêm trường `tags` (default `[]`). Thêm `unit` dạng `LocalizedString` thay vì `string`.
+**Migration (legacy → current):** Nếu `name` hoặc `unit` là `string` (không phải object), `migrateIngredients()` trong `dataService.ts` tự động convert sang `LocalizedString`.
 
 ---
 
 ### `mp-dishes` — `Dish[]`
 
 ```typescript
-interface Dish {
-  id: string;                    // UUID
-  name: LocalizedString;         // { vi: "Bò xào cần tây", en: "Beef with celery" }
-  ingredients: DishIngredient[]; // Danh sách nguyên liệu trong món
-  tags?: string[];               // Nhãn phân loại
-  imageBase64?: string;          // Ảnh món ăn (optional)
-}
+// src/types.ts
+type MealType = 'breakfast' | 'lunch' | 'dinner';
 
-interface DishIngredient {
-  ingredientId: string;          // FK → Ingredient.id
-  quantity: number;              // Số đơn vị (ví dụ: 2 = 2×100g)
-}
+type DishIngredient = {
+  ingredientId: string;  // FK → Ingredient.id
+  amount: number;        // Số lượng theo đơn vị của nguyên liệu (ví dụ: 150 cho 150g)
+};
+
+type Dish = {
+  id: string;                    // generateId('dish')
+  name: LocalizedString;         // { vi: "Ức gà hấp", en: "Steamed Chicken Breast" }
+  ingredients: DishIngredient[]; // Danh sách nguyên liệu và lượng
+  tags: MealType[];              // Bữa nào dùng được: ['breakfast'] | ['lunch','dinner'] | v.v.
+};
 ```
 
 **Ví dụ:**
 ```json
 [
   {
-    "id": "1709123456790",
-    "name": { "vi": "Bò xào cần tây", "en": "Beef with celery" },
+    "id": "dish-1709123456790-x7y8z",
+    "name": { "vi": "Ức gà hấp", "en": "Steamed Chicken Breast" },
     "ingredients": [
-      { "ingredientId": "1709123456789", "quantity": 2 },
-      { "ingredientId": "1709123456791", "quantity": 1 }
+      { "ingredientId": "ing-1709123456789-a3b2c1d", "amount": 150 }
     ],
-    "tags": ["beef", "stir-fry"]
+    "tags": ["lunch", "dinner"]
   }
 ]
 ```
 
-**Computed fields** (không lưu, tính realtime):
-- `totalCalories = sum(ingredient.calories × quantity)`
-- `totalProtein = sum(ingredient.protein × quantity)`
+**Lưu ý quan trọng:**
+- `tags` là `MealType[]` (không phải string[] tùy ý) — chỉ nhận: `"breakfast"`, `"lunch"`, `"dinner"`
+- `DishIngredient.amount` (không phải `quantity`) — giá trị tuyệt đối theo đơn vị của nguyên liệu
+- **Không có `imageBase64`** — ảnh không lưu vào localStorage
+
+**Computed fields** (không lưu, tính realtime bởi `calculateDishNutrition()`):
+```typescript
+// src/utils/nutrition.ts
+const nutrition = calculateDishNutrition(dish, allIngredients);
+// Với nguyên liệu đơn vị 'g': factor = amount / 100
+// nutrition.calories = sum(ingredient.caloriesPer100 × amount / 100)
+```
+
+**Migration (legacy → current):** Nếu `tags` thiếu hoặc rỗng, `migrateDishes()` set default `['lunch']`.
 
 ---
 
 ### `mp-day-plans` — `DayPlan[]`
 
 ```typescript
-interface DayPlan {
-  date: string;                  // ISO 8601, ví dụ: "2026-03-06"
-  meals: MealEntry[];            // Bữa ăn trong ngày
-}
-
-interface MealEntry {
-  mealType: MealType;            // "breakfast" | "lunch" | "dinner" | "snack"
-  dishId: string;                // FK → Dish.id
-  quantity: number;              // Số phần (thường = 1)
-}
+// src/types.ts
+type DayPlan = {
+  date: string;               // "YYYY-MM-DD", ví dụ: "2026-03-06"
+  breakfastDishIds: string[]; // IDs của món ăn trong bữa sáng (FK → Dish.id)
+  lunchDishIds: string[];     // IDs của món ăn trong bữa trưa
+  dinnerDishIds: string[];    // IDs của món ăn trong bữa tối
+};
 ```
 
 **Ví dụ:**
@@ -112,27 +130,31 @@ interface MealEntry {
 [
   {
     "date": "2026-03-06",
-    "meals": [
-      { "mealType": "breakfast", "dishId": "1709123456790", "quantity": 1 },
-      { "mealType": "lunch", "dishId": "1709123456792", "quantity": 1 }
-    ]
+    "breakfastDishIds": [],
+    "lunchDishIds": ["dish-1709123456790-x7y8z", "dish-1709123456793-p4q5r"],
+    "dinnerDishIds": ["dish-1709123456790-x7y8z"]
   }
 ]
 ```
 
-**Constraint:** Mỗi `date` chỉ xuất hiện 1 lần trong array. Nếu không có DayPlan cho ngày đó, ngày đó không có bữa ăn nào được lên kế hoạch.
+**Lưu ý quan trọng:**
+- Mỗi slot chứa **mảng IDs** (có thể nhiều món cùng bữa)
+- **Không có `meals[]` hay `MealEntry`** — đây là schema cũ đã được loại bỏ
+- Mỗi `date` chỉ xuất hiện 1 lần; ngày không có kế hoạch thì không có entry
+
+**Migration (legacy → current):** Nếu plan có `breakfastId` (singular), `migrateDayPlans()` tạo entry mới với `createEmptyDayPlan()`.
 
 ---
 
 ### `mp-user-profile` — `UserProfile`
 
 ```typescript
-interface UserProfile {
-  weight: number;               // Cân nặng (kg), default: 83
-  proteinRatio: number;         // Hệ số protein (g/kg), default: 2.0
-  targetCalories: number;       // Mục tiêu calo/ngày, default: 1500
-  language?: 'vi' | 'en';      // Ngôn ngữ giao diện, default: 'vi'
-}
+// src/types.ts
+type UserProfile = {
+  weight: number;          // Cân nặng (kg), default: 83
+  proteinRatio: number;    // Hệ số protein (g protein / kg cân nặng / ngày), default: 2
+  targetCalories: number;  // Mục tiêu calo/ngày, default: 1500
+};
 ```
 
 **Ví dụ:**
@@ -140,43 +162,56 @@ interface UserProfile {
 {
   "weight": 75,
   "proteinRatio": 2.0,
-  "targetCalories": 1800,
-  "language": "vi"
+  "targetCalories": 1800
 }
 ```
 
 **Business rule:**
 ```
-protein_target_per_day = weight × proteinRatio
+protein_target_g_per_day = weight × proteinRatio
 Ví dụ: 75kg × 2g/kg = 150g protein/ngày
 ```
+
+**Lưu ý:** Ngôn ngữ giao diện (`vi`/`en`) được quản lý bởi `i18next` trong `localStorage` key riêng (`i18nextLng`), **không nằm trong `UserProfile`**.
 
 ---
 
 ## Migration Strategy
 
-Khi schema thay đổi, `dataService.ts` chạy migration khi load data:
+Ba hàm migration trong `src/services/dataService.ts`, chạy mỗi lần app load qua `useMemo` trong `App.tsx`:
+
+```typescript
+// App.tsx
+const ingredients = useMemo(() => migrateIngredients(rawIngredients), [rawIngredients]);
+const dishes      = useMemo(() => migrateDishes(rawDishes), [rawDishes]);
+const dayPlans    = migrateDayPlans(rawDayPlans); // được xử lý inline
+```
+
+| Hàm | Xử lý |
+|-----|-------|
+| `migrateIngredients(raw)` | String names/units → `LocalizedString`; lọc invalid entries |
+| `migrateDishes(raw)` | String names → `LocalizedString`; `tags` rỗng → `['lunch']` |
+| `migrateDayPlans(raw)` | Schema cũ `breakfastId` → `createEmptyDayPlan(date)` |
+
+Migration **idempotent** — an toàn khi chạy nhiều lần.
+
+---
+
+## Import/Export Validation
+
+Khi import JSON backup, `validateImportData()` kiểm tra cấu trúc:
 
 ```typescript
 // src/services/dataService.ts
-function migrateIngredients(raw: unknown[]): Ingredient[] {
-  return raw.map(item => ({
-    // v1 defaults
-    tags: [],
-    // spread existing fields
-    ...item,
-    // v2: ensure LocalizedString for unit
-    unit: typeof item.unit === 'string'
-      ? { vi: item.unit, en: item.unit }
-      : item.unit,
-    name: typeof item.name === 'string'
-      ? { vi: item.name, en: '' }
-      : item.name,
-  }));
-}
+const IMPORT_VALIDATORS: Record<string, (v: unknown) => boolean> = {
+  'mp-ingredients': (v) => Array.isArray(v) && v.every(i => 'id' in i && 'name' in i && 'unit' in i),
+  'mp-dishes':      (v) => Array.isArray(v) && v.every(d => 'id' in d && 'name' in d && 'ingredients' in d),
+  'mp-day-plans':   (v) => Array.isArray(v) && v.every(p => 'date' in p),
+  'mp-user-profile':(v) => typeof v === 'object' && v !== null && 'weight' in v && 'targetCalories' in v,
+};
 ```
 
-Migration chạy **mỗi lần app khởi động**, idempotent (an toàn khi chạy nhiều lần).
+Keys không hợp lệ được báo lỗi và bỏ qua — **không ghi đè dữ liệu hiện tại**.
 
 ---
 
@@ -184,25 +219,26 @@ Migration chạy **mỗi lần app khởi động**, idempotent (an toàn khi ch
 
 | Vấn đề | Chi tiết |
 |--------|---------|
-| **Dung lượng** | localStorage tối đa ~5-10 MB/origin. `imageBase64` có thể chiếm nhiều dung lượng. Khuyến nghị: nén ảnh trước khi lưu. |
-| **Xóa data** | Clear browser data / uninstall app → mất toàn bộ. Dùng Export trước khi xóa. |
-| **Android WebView** | Dữ liệu lưu trong WebView storage của app `com.mealplaner.app`. Không chia sẻ với browser Chrome. |
-| **Import validation** | Khi import, `validateImportData()` kiểm tra cấu trúc trước khi ghi đè localStorage. |
-| **ID format** | Dùng `Date.now().toString()` làm ID — đủ unique trong single-user app. |
-| **Backup** | Export tạo file JSON toàn bộ có thể dùng `Share` (Android) hoặc download (web). |
+| **Dung lượng** | localStorage tối đa ~5-10 MB/origin. Với dữ liệu text thuần (không ảnh), thường < 1MB. |
+| **Xóa data** | Clear browser data / uninstall app → mất toàn bộ. Dùng Export/Backup trước khi xóa. |
+| **Android WebView** | Dữ liệu lưu trong WebView storage của `com.mealplaner.app`. Không chia sẻ với browser Chrome. |
+| **ID format** | `generateId(prefix)` = `"{prefix}-{Date.now()}-{Math.random().toString(36).slice(2,11)}"` |
+| **Backup** | Export tạo file JSON gồm tất cả 4 keys, có thể Share (Android) hoặc download (web). |
+| **Orphan references** | Nếu xóa Ingredient, tất cả `DishIngredient` chứa `ingredientId` đó cũng bị xóa (cascade). |
 
 ---
 
 ## Utility functions
 
 ```typescript
-// Đọc dữ liệu
+// Đọc dữ liệu (qua hook)
 import { usePersistedState } from '../hooks/usePersistedState';
 const [ingredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', []);
 
-// Tạo Ingredient mới
-import { createIngredient } from '../services/dataService';
-const newIng = createIngredient({ name: 'Trứng', unit: 'quả', calories: 70, protein: 6 });
+// Tính dinh dưỡng
+import { calculateDishNutrition } from '../utils/nutrition';
+const nutrition = calculateDishNutrition(dish, allIngredients);
+// → { calories, protein, carbs, fat, fiber }
 
 // Kiểm tra dung lượng dùng
 const totalBytes = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile']

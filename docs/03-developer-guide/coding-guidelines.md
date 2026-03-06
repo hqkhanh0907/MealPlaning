@@ -275,6 +275,48 @@ await management.addDish('Thịt bò xào');
 await $('button[data-testid="add-dish"]').click();
 ```
 
+### Coverage targets
+
+| Module | Target | Current |
+|--------|--------|---------|
+| `services/` | ≥ 90% | ~92% ✅ |
+| `utils/` | ≥ 90% | ~99% ✅ |
+| `hooks/` | ≥ 85% | ~100% ✅ |
+| `components/` | ≥ 75% | ~93% ✅ |
+| `App.tsx` | ≥ 65% | ~71% ✅ |
+| **Overall** | ≥ 80% | ~90.5% ✅ |
+
+---
+
+## 8.1 Quy tắc đồng bộ tài liệu (Documentation Sync Rule)
+
+> **Quy tắc bắt buộc** — phát sinh từ BUG-DOC-001 (2026-03-06)
+
+### Khi thay đổi `src/types.ts`
+
+Bắt buộc update đồng thời (cùng PR/commit):
+- `docs/03-developer-guide/localstorage-schema.md` — nếu type liên quan đến localStorage
+- `docs/02-architecture/data-model.md` — nếu thay đổi core domain types
+- `docs/01-requirements/PRD.md` — nếu thay đổi ảnh hưởng đến business logic
+
+```
+# PR checklist khi thay đổi types.ts
+- [ ] localstorage-schema.md đã được cập nhật?
+- [ ] data-model.md đã được cập nhật?
+- [ ] Test cho migration function đã được viết?
+```
+
+### Khi thay đổi API/Service
+
+Bắt buộc update:
+- `docs/02-architecture/sequence-diagrams.md` — nếu flow thay đổi
+- `docs/03-developer-guide/setup.md` — nếu env vars mới
+- `docs/04-testing/test-cases.md` — nếu behavior thay đổi
+
+### Quy tắc PR Review
+
+Reviewer **bắt buộc** kiểm tra: khi code thay đổi schema, service, hoặc behavior, tài liệu tương ứng phải được cập nhật trong cùng PR. **Không merge PR có code changes mà thiếu doc update.**
+
 ---
 
 ## 9. Linting & Formatting

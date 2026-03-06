@@ -1,7 +1,9 @@
 # Test Cases — Smart Meal Planner
 
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 2.0  
+**Date:** 2026-03-06  
+
+> **v2.0**: Cập nhật Unit Test summary với số test chính xác (668 tests, 39 files từ `npm run test`). Bổ sung TC_DM (Dark Mode) và TC_I18N (i18n). Xem [Changelog](#changelog).
 
 ---
 
@@ -115,13 +117,52 @@
 
 | File | Tests | Status |
 |------|-------|--------|
-| `aiImageAnalyzer.test.tsx` | ~35 | ✅ |
-| `geminiService.test.ts` | ~60 | ✅ |
-| `dataService.test.ts` | ~55 | ✅ |
-| `planService.test.ts` | ~40 | ✅ |
-| `calorieCalculator.test.ts` | ~30 | ✅ |
-| `IngredientEditModal.test.tsx` | ~45 | ✅ |
-| `CalendarTab.test.tsx` | ~50 | ✅ |
-| `usePersistedState.test.ts` | ~25 | ✅ |
-| (+ 31 other files) | ~328 | ✅ |
-| **TOTAL** | **668** | **✅ 100%** |
+| `aiImageAnalyzer.test.tsx` | ✓ | ✅ |
+| `aiSuggestionPreview.test.tsx` | ✓ | ✅ |
+| `analysisResultView.test.tsx` | ✓ | ✅ |
+| `app.test.tsx` | ✓ | ✅ |
+| `calendarAndDate.test.tsx` | ✓ | ✅ |
+| `components.test.tsx` | ✓ | ✅ |
+| `constantsAndData.test.ts` | ✓ | ✅ |
+| `dataBackup.test.tsx` | ✓ | ✅ |
+| `dataService.test.ts` | ✓ | ✅ |
+| `dishEditModal.test.tsx` | ✓ | ✅ |
+| `ErrorBoundary.test.tsx` | ✓ | ✅ |
+| `geminiService.test.ts` | ✓ | ✅ |
+| `groceryList.test.tsx` | ✓ | ✅ |
+| `helpers.test.ts` | ✓ | ✅ |
+| `imageCapture.test.tsx` | ✓ | ✅ |
+| `imageCompression.test.ts` | ✓ | ✅ |
+| `ingredientEditModal.test.tsx` | ✓ | ✅ |
+| `integration.test.ts` | ✓ | ✅ |
+| `logger.test.ts` | ✓ | ✅ |
+| `main.test.tsx` | ✓ | ✅ |
+| `managers.test.tsx` | ✓ | ✅ |
+| `modalBackdrop.test.tsx` | ✓ | ✅ |
+| `NotificationContext.test.tsx` | ✓ | ✅ |
+| `nutrition.test.ts` | ✓ | ✅ |
+| `planService.test.ts` | ✓ | ✅ |
+| `planningModal.test.tsx` | ✓ | ✅ |
+| `saveAnalyzedDishModal.test.tsx` | ✓ | ✅ |
+| `settingsTab.test.tsx` | ✓ | ✅ |
+| `smallModals.test.tsx` | ✓ | ✅ |
+| `summaryAndManagement.test.tsx` | ✓ | ✅ |
+| `tips.test.ts` | ✓ | ✅ |
+| `translateQueueService.test.ts` | ✓ | ✅ |
+| `useAISuggestion.test.ts` | ✓ | ✅ |
+| `useDarkMode.test.ts` | ✓ | ✅ |
+| `useItemModalFlow.test.ts` | ✓ | ✅ |
+| `useListManager.test.ts` | ✓ | ✅ |
+| `useModalBackHandler.test.ts` | ✓ | ✅ |
+| `useModalManager.test.ts` | ✓ | ✅ |
+| `usePersistedState.test.ts` | ✓ | ✅ |
+| **TOTAL (39 files)** | **668 tests** | **✅ 100%** |
+
+---
+
+## Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-03-06 | Initial test cases |
+| 2.0 | 2026-03-06 | Unit test list đầy đủ 39 files; version header cập nhật |

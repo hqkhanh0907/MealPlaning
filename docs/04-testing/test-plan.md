@@ -1,6 +1,6 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Date:** 2026-03-06  
 **Author:** Dev Team
 
@@ -83,13 +83,17 @@
 
 ## 4. Mức độ coverage yêu cầu
 
-| Level | Target | Current |
-|-------|--------|---------|
-| Overall | ≥ 80% | 90.5% ✅ |
-| Services | ≥ 90% | ~95% ✅ |
-| Utils | ≥ 90% | ~92% ✅ |
-| Components | ≥ 75% | ~88% ✅ |
-| Hooks | ≥ 85% | ~90% ✅ |
+| Level | Target | Actual (2026-03-06) |
+|-------|--------|---------------------|
+| Overall Statements | ≥ 80% | **90.51%** ✅ |
+| Overall Branches | ≥ 75% | **83.80%** ✅ |
+| Services | ≥ 90% | **91.85%** ✅ |
+| Utils | ≥ 90% | **99.37%** ✅ |
+| Components | ≥ 75% | **92.54%** ✅ |
+| Hooks | ≥ 85% | **99.58%** ✅ |
+| App.tsx | ≥ 65% | **70.87%** ✅ |
+
+> **Note:** `App.tsx` có coverage thấp hơn do là root component chứa nhiều UI conditional branches và lazy-loaded tabs. Target riêng ≥ 65%.
 
 ---
 
@@ -177,6 +181,8 @@ E2E tests tạo dữ liệu programmatically qua UI (không inject localStorage 
 | Emulator instability | Medium | High | noReset, reset localStorage trước mỗi spec |
 | localStorage race condition | Low | Medium | Synchronous read/write, không async |
 | WebView context switch failure | Medium | High | ensureWebviewsHavePages, wait strategies |
+| **Schema doc drift** | **Medium** | **Medium** | **Quy tắc: cập nhật localstorage-schema.md cùng PR khi thay đổi types.ts** |
+| Coverage drop dưới target | Low | Low | CI fail khi coverage < threshold |
 
 ---
 
@@ -185,6 +191,6 @@ E2E tests tạo dữ liệu programmatically qua UI (không inject localStorage 
 | Giai đoạn | Loại test | Khi nào chạy |
 |-----------|-----------|-------------|
 | Pre-commit | Unit tests | `npm run test` — developer local |
-| Pre-merge | Unit + lint | CI pipeline |
+| Pre-merge | Unit + lint + coverage | CI pipeline |
 | Release candidate | E2E full suite | Trước mỗi APK build |
 | Post-release | E2E smoke (01, 02, 07) | Sau khi cài APK lên device |
