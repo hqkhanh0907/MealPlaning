@@ -70,7 +70,6 @@ export const DesktopNav: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainT
           key={tab}
           role="tab"
           aria-selected={activeTab === tab}
-          data-testid={`nav-${tab}`}
           onClick={() => onTabChange(tab)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
         >

@@ -46,7 +46,8 @@ export class ManagementPage extends BasePage {
   }
 
   async fillIngUnit(unit: string) {
-    await this.type('input-ing-unit', unit);
+    // UnitSelector renders the <select> with data-testid="input-ing-unit-select"
+    await this.type('input-ing-unit-select', unit);
   }
 
   async fillIngNutrition(field: 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber', value: string) {
