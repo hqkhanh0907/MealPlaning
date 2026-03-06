@@ -140,7 +140,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
   };
 
   return (
-    <>
+    <div data-testid="image-capture">
       {isCameraOpen ? (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center" data-testid="camera-overlay">
           {cameraError ? (
@@ -241,6 +241,6 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
           />
         </div>
       )}
-    </>
+    </div>
   );
 };

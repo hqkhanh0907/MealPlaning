@@ -117,7 +117,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
   const emptyIcon = <ChefHat className="w-8 h-8 text-emerald-300" />;
 
   return (
-    <div className="space-y-6">
+    <div data-testid="dish-manager" className="space-y-6">
       <ListToolbar
         searchQuery={list.searchQuery} onSearchChange={list.setSearchQuery} searchPlaceholder={t('dish.searchPlaceholder')}
         sortOptions={dishSortOptions} sortBy={list.sortBy} onSortChange={v => list.setSortBy(v as DishSortOption)}

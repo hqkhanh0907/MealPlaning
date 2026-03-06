@@ -60,7 +60,7 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+    <div data-testid="ai-image-analyzer" className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <ImageCapture image={image} onImageReady={handleImageReady} onClear={handleClearImage} />
