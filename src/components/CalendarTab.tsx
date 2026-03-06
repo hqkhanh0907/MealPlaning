@@ -160,16 +160,21 @@ const MoreMenu: React.FC<{ onClearPlan: () => void }> = ({ onClearPlan }) => {
 
   React.useEffect(() => {
     if (!isOpen) return;
-    const handleClick = (e: MouseEvent) => {
+    const handleDismiss = (e: Event) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false);
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('mousedown', handleDismiss);
+    document.addEventListener('touchend', handleDismiss);
+    return () => {
+      document.removeEventListener('mousedown', handleDismiss);
+      document.removeEventListener('touchend', handleDismiss);
+    };
   }, [isOpen]);
 
   return (
     <div className="relative" ref={menuRef}>
       <button
+        data-testid="btn-more-menu"
         onClick={() => setIsOpen(prev => !prev)}
         className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 transition-all min-h-11 min-w-11"
         aria-label={t('calendar.addOption')}
@@ -179,6 +184,7 @@ const MoreMenu: React.FC<{ onClearPlan: () => void }> = ({ onClearPlan }) => {
       {isOpen && (
         <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 py-1 z-10 min-w-44">
           <button
+            data-testid="btn-clear-plan"
             onClick={() => { onClearPlan(); setIsOpen(false); }}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:bg-rose-100 transition-all"
           >

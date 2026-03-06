@@ -85,7 +85,7 @@ export const PlanningModal: React.FC<PlanningModalProps> = ({
           </button>
         </div>
 
-        <div className="px-4 py-3 sm:px-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="px-4 py-3 sm:px-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 sticky top-0 z-10">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
