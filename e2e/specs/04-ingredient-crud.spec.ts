@@ -2,7 +2,6 @@ import assert from 'node:assert';
 import { ManagementPage } from '../pages/ManagementPage';
 
 type ExecutableBrowser = typeof browser & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   execute: <T>(fn: () => T) => Promise<T>;
 };
 
@@ -40,18 +39,20 @@ describe('Ingredient CRUD', () => {
     });
 
     after(async () => {
-      // Close modal so subsequent describe blocks start with a clean UI
-      const closeBtn = page.el('btn-close-ingredient');
-      if (await closeBtn.isDisplayed()) {
-        await closeBtn.click();
-        await browser.pause(300);
-      }
+      // Close modal so subsequent describe blocks start with a clean UI.
+      // Use JS click — WebDriver click may fail with "element not interactable"
+      // on Chrome 91 if the button is partially obscured by soft keyboard.
+      await (browser as unknown as ExecutableBrowser).execute(() => {
+        const btn = document.querySelector('[data-testid="btn-close-ingredient"]') as HTMLElement | null;
+        btn?.click();
+      });
+      await browser.pause(300);
       // Dismiss unsaved-changes dialog if it appears
-      const discardBtn = page.el('btn-discard-unsaved');
-      if (await discardBtn.isExisting() && await discardBtn.isDisplayed()) {
-        await discardBtn.click();
-        await browser.pause(300);
-      }
+      await (browser as unknown as ExecutableBrowser).execute(() => {
+        const btn = document.querySelector('[data-testid="btn-discard-unsaved"]') as HTMLElement | null;
+        btn?.click();
+      });
+      await browser.pause(300);
     });
 
     it('should show error when submitting with empty name', async () => {
