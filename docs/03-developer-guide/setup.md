@@ -1,0 +1,261 @@
+# Hướng Dẫn Cài Đặt Môi Trường Dev
+
+**Version:** 1.0  
+**Date:** 2026-03-06
+
+---
+
+## 1. Yêu cầu hệ thống
+
+| Công cụ | Phiên bản tối thiểu | Ghi chú |
+|---------|---------------------|---------|
+| Node.js | 20 LTS | Dùng `nvm` để quản lý version |
+| npm | 10+ | Đi kèm với Node 20 |
+| Android Studio | Iguana 2023.2+ | Build Android APK |
+| JDK | 17 | Được bundle trong Android Studio |
+| Android SDK | API 36 | Cài qua Android Studio SDK Manager |
+| Git | 2.40+ | |
+| macOS / Linux | - | Windows cần thêm file `.bat` |
+
+---
+
+## 2. Cài đặt môi trường
+
+### 2.1 Clone project
+
+```bash
+git clone <repo-url>
+cd MealPlaning
+```
+
+### 2.2 Cài Node dependencies
+
+```bash
+npm install
+```
+
+### 2.3 Thiết lập biến môi trường
+
+Tạo file `.env.local` tại gốc project:
+
+```env
+VITE_GEMINI_API_KEY=your_google_gemini_api_key_here
+```
+
+Lấy API key tại: https://aistudio.google.com/app/apikey
+
+> **Lưu ý:** File `.env.local` đã được thêm vào `.gitignore`, không commit key vào repo.
+
+### 2.4 Chạy dev server
+
+```bash
+npm run dev
+```
+
+Ứng dụng chạy tại: http://localhost:5173
+
+---
+
+## 3. Cài đặt Android build
+
+### 3.1 Android Studio
+
+1. Tải Android Studio: https://developer.android.com/studio
+2. Trong Android Studio → **SDK Manager** → chọn:
+   - Android 15.0 (API 36) — `android-36`
+   - Android SDK Build-Tools 36.x
+   - Android Emulator
+   - Android SDK Platform-Tools
+
+### 3.2 Biến môi trường Android
+
+Thêm vào `~/.zshrc` hoặc `~/.bashrc`:
+
+```bash
+export ANDROID_HOME=$HOME/Library/Android/sdk    # macOS
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+```
+
+Tải lại: `source ~/.zshrc`
+
+### 3.3 Thiết lập `local.properties`
+
+```bash
+echo "sdk.dir=$HOME/Library/Android/sdk" > android/local.properties
+```
+
+### 3.4 Sync Capacitor
+
+```bash
+npm run build
+npx cap sync android
+```
+
+### 3.5 Tạo AVD (Android Virtual Device)
+
+Trong Android Studio → **Device Manager** → **Create Device**:
+- Device: `Medium Phone` (411×914px, xhdpi)
+- System Image: `API 36.1` (Google APIs / x86_64)
+- AVD Name: `Medium_Phone_API_36.1`
+
+---
+
+## 4. Cài đặt E2E testing
+
+### 4.1 Cài Appium
+
+```bash
+npm install -g appium
+appium driver install uiautomator2
+```
+
+### 4.2 Kiểm tra Appium doctor
+
+```bash
+npx appium-doctor --android
+```
+
+Tất cả checks phải ✓ hoặc ⚠ (không ✗).
+
+### 4.3 Cài Chrome driver
+
+```bash
+appium driver install chromedriver --source=npm --package=appium-chromedriver
+```
+
+### 4.4 Build APK cho E2E
+
+```bash
+bash build-apk.sh
+```
+
+APK output: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+### 4.5 Khởi động emulator
+
+```bash
+emulator -avd Medium_Phone_API_36.1 &
+```
+
+Đợi emulator boot hoàn toàn (Device Manager hiển thị ▶ Running).
+
+### 4.6 Cài APK lên emulator
+
+```bash
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### 4.7 Chạy E2E tests
+
+Terminal 1 — Appium server:
+```bash
+appium
+```
+
+Terminal 2 — E2E runner:
+```bash
+npm run test:e2e
+```
+
+---
+
+## 5. Lệnh hay dùng
+
+| Lệnh | Mô tả |
+|------|-------|
+| `npm run dev` | Dev server tại localhost:5173 |
+| `npm run build` | Build production bundle |
+| `npm run test` | Unit tests (Vitest, không watch) |
+| `npm run test:watch` | Unit tests watch mode |
+| `npm run test:coverage` | Unit tests + coverage report |
+| `npm run test:e2e` | E2E tests (cần Appium + emulator) |
+| `npm run lint` | ESLint check |
+| `npx cap sync android` | Sync web assets vào Android project |
+| `npx cap open android` | Mở Android Studio |
+| `bash build-apk.sh` | Build APK đầy đủ |
+
+---
+
+## 6. Cấu trúc thư mục quan trọng
+
+```
+src/
+├── components/       # React components
+│   ├── navigation/   # AppNavigation
+│   ├── modals/       # Modal dialogs (Edit, Save, Backup...)
+│   ├── tabs/         # CalendarTab, LibraryTab, GroceryTab, SettingsTab, AITab
+│   ├── ui/           # Shared UI primitives (Button, Input, Toast...)
+│   └── planning/     # Meal planning components
+├── contexts/         # React Context (không dùng do đơn giản)
+├── hooks/            # Custom hooks (usePersistedState, useAISuggestion...)
+├── services/         # Business logic (geminiService, dataService, planService)
+├── utils/            # Pure utilities (calorie, dates, validation)
+├── locales/          # i18n JSON (vi.json, en.json)
+├── types.ts          # Tất cả TypeScript interfaces
+└── App.tsx           # Root component, state management
+
+e2e/
+├── pages/            # Page Objects (BasePage, CalendarPage...)
+├── specs/            # Test specs 01-10
+└── wdio.conf.ts      # WebdriverIO config
+
+docs/
+├── 01-requirements/  # PRD, use cases
+├── 02-architecture/  # SAD, data model, sequence diagrams
+├── 03-developer-guide/ # Setup, guidelines, schema
+├── 04-testing/       # Test plan, cases, report, E2E guide
+├── 05-process/       # Release process
+├── 06-operations/    # Deployment
+└── adr/              # Architecture Decision Records
+```
+
+---
+
+## 7. VS Code extensions khuyến nghị
+
+```json
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}
+```
+
+---
+
+## 8. Troubleshooting
+
+### `VITE_GEMINI_API_KEY` không load
+
+Kiểm tra file `.env.local` tồn tại tại root (cùng cấp `package.json`). Restart dev server sau khi thêm.
+
+### `adb devices` không thấy emulator
+
+```bash
+adb kill-server
+adb start-server
+adb devices
+```
+
+### E2E test lỗi `WEBVIEW not found`
+
+1. Đảm bảo emulator đang chạy và APK đã cài
+2. App phải được mở và fully loaded trước khi chạy E2E
+3. Kiểm tra `chrome` trong `src/chromedriverArgs` trong `wdio.conf.ts`
+
+### Gradle build failed
+
+```bash
+cd android
+./gradlew clean
+cd ..
+npm run build
+npx cap sync android
+bash build-apk.sh
+```
