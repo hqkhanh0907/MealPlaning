@@ -64,10 +64,27 @@ export class BasePage {
     // (element is not deserialized to DOM node, so .value/.dispatchEvent fail).
     // Also dispatches 'input' so React's onChange handler fires.
     await (browser as unknown as ContextCapableBrowser).execute((tid: string, v: string) => {
-      const el = document.querySelector(`[data-testid="${tid}"]`) as HTMLInputElement;
+      const el = document.querySelector(`[data-testid="${tid}"]`) as HTMLInputElement & { _valueTracker?: { setValue: (v: string) => void } };
       if (!el) return;
-      const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value');
-      descriptor?.set?.call(el, v);
+      // Walk up prototype chain to find the native value setter (works for
+      // both HTMLInputElement and HTMLSelectElement on Chrome 91).
+      let proto = Object.getPrototypeOf(el);
+      let descriptor: PropertyDescriptor | undefined;
+      while (proto && !descriptor) {
+        descriptor = Object.getOwnPropertyDescriptor(proto, 'value');
+        if (!descriptor) proto = Object.getPrototypeOf(proto);
+      }
+      if (descriptor?.set) {
+        descriptor.set.call(el, v);
+      } else {
+        el.value = v;
+      }
+      // Invalidate React 18's internal value tracker so React detects the
+      // change and fires onChange (without this, React thinks the value
+      // hasn't changed and swallows the event).
+      if (el._valueTracker) {
+        el._valueTracker.setValue('');
+      }
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
     }, testid, value);

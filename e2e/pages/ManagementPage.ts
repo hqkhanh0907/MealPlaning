@@ -179,7 +179,7 @@ export class ManagementPage extends BasePage {
   }
 
   /** Return the displayed dish total calories value from the live nutrition preview.
-   *  Waits until the element contains a non-empty numeric text (React may need a render cycle).
+   *  Uses JS innerText to avoid Chrome 91 WebDriver getText() returning empty.
    */
   async getDishTotalCalories(): Promise<string> {
     const elem = this.el('dish-total-calories');
@@ -187,12 +187,18 @@ export class ManagementPage extends BasePage {
     // Poll until React has rendered a non-empty value
     await browser.waitUntil(
       async () => {
-        const text = await elem.getText();
+        const text = await (browser as unknown as { execute: (fn: () => string) => Promise<string> }).execute(() => {
+          const el = document.querySelector('[data-testid="dish-total-calories"]');
+          return el?.textContent ?? '';
+        });
         return text !== '' && text !== '0';
       },
       { timeout: 5_000, interval: 300, timeoutMsg: 'dish-total-calories never showed a non-empty value' },
     );
-    return elem.getText();
+    return (browser as unknown as { execute: (fn: () => string) => Promise<string> }).execute(() => {
+      const el = document.querySelector('[data-testid="dish-total-calories"]');
+      return el?.textContent ?? '';
+    });
   }
 
   /** Type in the ingredient search box inside the DishEditModal. */
