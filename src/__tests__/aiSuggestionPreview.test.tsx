@@ -119,4 +119,25 @@ describe('AISuggestionPreviewModal', () => {
     expect(screen.getByText(/Tổng cộng/)).toBeInTheDocument();
     expect(screen.getByText(/Mục tiêu/)).toBeInTheDocument();
   });
+
+  it('renders nutrition progress bars with percentages', () => {
+    render(<AISuggestionPreviewModal {...defaultProps} />);
+    // Should display calorie and protein percentage
+    const percentages = screen.getAllByText(/%$/);
+    expect(percentages.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('does not render meal card when meal type has no dishes', () => {
+    const partialSuggestion: MealPlanSuggestion = {
+      breakfastDishIds: [],
+      lunchDishIds: ['d2'],
+      dinnerDishIds: ['d1'],
+      reasoning: 'No breakfast today',
+    };
+    render(<AISuggestionPreviewModal {...defaultProps} suggestion={partialSuggestion} />);
+    // Should NOT render the breakfast meal card since it has no dishes
+    // Check that only lunch and dinner checkboxes are rendered
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(2);
+  });
 });

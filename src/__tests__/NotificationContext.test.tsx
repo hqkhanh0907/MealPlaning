@@ -222,13 +222,12 @@ describe('NotificationContext', () => {
     expect(toastEl).toBeTruthy();
 
     if (toastEl) {
-      // Mouse enter pauses timer
-      fireEvent.mouseEnter(toastEl);
+      // Use native dispatchEvent to ensure v8 coverage tracks DOM listeners
+      act(() => { toastEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true })); });
       act(() => { vi.advanceTimersByTime(5000); });
       expect(screen.getByText('Success!')).toBeInTheDocument();
 
-      // Mouse leave restarts with 2000ms
-      fireEvent.mouseLeave(toastEl);
+      act(() => { toastEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true })); });
       act(() => { vi.advanceTimersByTime(2500); });
       expect(screen.queryByText('Success!')).not.toBeInTheDocument();
     }

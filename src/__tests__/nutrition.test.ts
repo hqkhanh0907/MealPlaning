@@ -292,3 +292,27 @@ describe('toTempIngredient', () => {
   });
 });
 
+describe('calculateIngredientNutrition with plain string unit', () => {
+  it('handles ingredient with unit as a plain string (backward compat)', () => {
+    const legacyIngredient: Ingredient = {
+      id: 'ing-legacy', name: { vi: 'Test', en: 'Test' },
+      unit: 'g' as unknown as Ingredient['unit'],
+      caloriesPer100: 100, proteinPer100: 10, carbsPer100: 20, fatPer100: 5, fiberPer100: 2,
+    };
+    const result = calculateIngredientNutrition(legacyIngredient, 200);
+    expect(result.calories).toBe(200);
+    expect(result.protein).toBe(20);
+  });
+
+  it('handles ingredient with unit as a plain string for countable unit', () => {
+    const legacyCountable: Ingredient = {
+      id: 'ing-legacy2', name: { vi: 'Trứng', en: 'Egg' },
+      unit: 'quả' as unknown as Ingredient['unit'],
+      caloriesPer100: 155, proteinPer100: 13, carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0,
+    };
+    const result = calculateIngredientNutrition(legacyCountable, 2);
+    expect(result.calories).toBe(310);
+    expect(result.protein).toBe(26);
+  });
+});
+

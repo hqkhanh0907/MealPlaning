@@ -116,6 +116,37 @@ describe('ModalBackdrop', () => {
     expect(dialog?.className).toContain('bg-slate-900/50');
   });
 
+  it('calls onClose when Escape key is pressed', () => {
+    render(
+      <ModalBackdrop onClose={onClose}>
+        <div>Content</div>
+      </ModalBackdrop>,
+    );
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('only calls topmost modal onClose when nested modals are mounted and Escape is pressed', () => {
+    const onCloseOuter = vi.fn();
+    const onCloseInner = vi.fn();
+
+    render(
+      <ModalBackdrop onClose={onCloseOuter} zIndex="z-50">
+        <div>Outer</div>
+      </ModalBackdrop>,
+    );
+    render(
+      <ModalBackdrop onClose={onCloseInner} zIndex="z-60">
+        <div>Inner</div>
+      </ModalBackdrop>,
+    );
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    // Only topmost (inner) modal should respond
+    expect(onCloseInner).toHaveBeenCalledTimes(1);
+    expect(onCloseOuter).not.toHaveBeenCalled();
+  });
+
   /**
    * BUG: scroll-lock-nested-modal
    *

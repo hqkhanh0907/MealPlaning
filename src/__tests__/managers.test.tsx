@@ -254,6 +254,61 @@ describe('DishManager', () => {
       document.body.innerHTML.indexOf('Gà nướng'),
     );
   });
+
+  it('filters by lunch tag', () => {
+    render(<DishManager {...defaultProps} />);
+    const lunchButtons = screen.getAllByText(/Trưa/);
+    const filterChip = lunchButtons.find(el => el.closest('button')?.textContent?.includes('('));
+    expect(filterChip).toBeDefined();
+    fireEvent.click(filterChip ?? document);
+    // Both dishes have 'lunch' tag
+    expect(screen.getByText('Gà nướng')).toBeInTheDocument();
+    expect(screen.getByText('Cơm gà')).toBeInTheDocument();
+  });
+
+  it('filters by dinner tag', () => {
+    render(<DishManager {...defaultProps} />);
+    const dinnerButtons = screen.getAllByText(/Tối/);
+    const filterChip = dinnerButtons.find(el => el.closest('button')?.textContent?.includes('('));
+    expect(filterChip).toBeDefined();
+    fireEvent.click(filterChip ?? document);
+    // Only Gà nướng has 'dinner' tag
+    expect(screen.getByText('Gà nướng')).toBeInTheDocument();
+    expect(screen.queryByText('Cơm gà')).not.toBeInTheDocument();
+  });
+
+  it('renders list view with table rows for each dish', () => {
+    render(<DishManager {...defaultProps} />);
+    // Switch to list view
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Table should render dish names as buttons
+    const dishNameBtns = screen.getAllByRole('button').filter(btn =>
+      btn.textContent === 'Gà nướng' || btn.textContent === 'Cơm gà'
+    );
+    expect(dishNameBtns.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('opens detail modal from list view when dish name clicked', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Click the dish name in the table to open view detail
+    const nameBtn = screen.getAllByText('Gà nướng').find(el => el.tagName === 'BUTTON');
+    expect(nameBtn).toBeDefined();
+    if (nameBtn) fireEvent.click(nameBtn);
+    expect(screen.getByText('Chi tiết món ăn')).toBeInTheDocument();
+  });
+
+  it('confirms delete and calls onDelete through ConfirmationModal', () => {
+    render(<DishManager {...defaultProps} />);
+    // Click delete on first dish (sorted: Cơm gà first)
+    const deleteButtons = screen.getAllByText('Xóa');
+    fireEvent.click(deleteButtons[0]);
+    // Confirmation modal should appear
+    expect(screen.getByText('Xóa món ăn?')).toBeInTheDocument();
+    // Cancel
+    fireEvent.click(screen.getByText('Hủy'));
+    expect(screen.queryByText('Xóa món ăn?')).not.toBeInTheDocument();
+  });
 });
 
 // --- IngredientManager ---
@@ -428,5 +483,44 @@ describe('IngredientManager', () => {
     options.action.onClick();
     // onAdd should be called with the deleted ingredient (sorted: "Cơm trắng" first)
     expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' } }));
+  });
+
+  it('opens detail modal from list view when ingredient name clicked', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Click the ingredient name button in the table
+    const nameBtn = screen.getAllByText('Ức gà').find(el => el.tagName === 'BUTTON');
+    expect(nameBtn).toBeDefined();
+    if (nameBtn) fireEvent.click(nameBtn);
+    expect(screen.getByText('Chi tiết nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('shows no "used in" section for ingredients not used in any dish', () => {
+    const unusedIngredient: Ingredient = {
+      id: 'i99', name: { vi: 'Muối', en: 'Muối' }, caloriesPer100: 0, proteinPer100: 0,
+      carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: { vi: 'g', en: 'g' },
+    };
+    render(<IngredientManager {...defaultProps} ingredients={[unusedIngredient]} dishes={[]} />);
+    expect(screen.queryByText(/Dùng trong/)).not.toBeInTheDocument();
+  });
+
+  it('confirms delete and calls onDelete through ConfirmationModal', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const deleteButtons = screen.getAllByText('Xóa');
+    fireEvent.click(deleteButtons[0]);
+    // Confirmation modal should appear
+    expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
+    // Confirm
+    fireEvent.click(screen.getByText('Xóa ngay'));
+    expect(defaultProps.onDelete).toHaveBeenCalledWith('i2');
+  });
+
+  it('cancels delete confirmation modal', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const deleteButtons = screen.getAllByText('Xóa');
+    fireEvent.click(deleteButtons[0]);
+    expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Hủy'));
+    expect(screen.queryByText('Xóa nguyên liệu?')).not.toBeInTheDocument();
   });
 });

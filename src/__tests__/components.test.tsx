@@ -5,6 +5,8 @@ import { DetailModal } from '../components/shared/DetailModal';
 import { ListToolbar } from '../components/shared/ListToolbar';
 import { UnsavedChangesDialog } from '../components/shared/UnsavedChangesDialog';
 import { ConfirmationModal } from '../components/modals/ConfirmationModal';
+import { BottomNavBar, DesktopNav, TabLoadingFallback, getTabLabels } from '../components/navigation';
+import { UnitSelector } from '../components/shared/UnitSelector';
 
 // Mock useModalBackHandler to avoid history side effects
 vi.mock('../hooks/useModalBackHandler', () => ({
@@ -266,5 +268,130 @@ describe('ConfirmationModal', () => {
       />,
     );
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
+  });
+});
+
+// --- AppNavigation (via navigation/index.ts) ---
+describe('AppNavigation', () => {
+  it('BottomNavBar calls onTabChange when a tab is clicked', () => {
+    const onTabChange = vi.fn();
+    render(<BottomNavBar activeTab="calendar" onTabChange={onTabChange} />);
+    const groceryTab = screen.getByTestId('nav-grocery');
+    fireEvent.click(groceryTab);
+    expect(onTabChange).toHaveBeenCalledWith('grocery');
+  });
+
+  it('BottomNavBar renders all navigation tabs', () => {
+    const onTabChange = vi.fn();
+    render(<BottomNavBar activeTab="calendar" onTabChange={onTabChange} />);
+    expect(screen.getByTestId('nav-calendar')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-management')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-ai-analysis')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-grocery')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-settings')).toBeInTheDocument();
+  });
+
+  it('DesktopNav calls onTabChange when tab clicked', () => {
+    const onTabChange = vi.fn();
+    render(<DesktopNav activeTab="calendar" onTabChange={onTabChange} />);
+    // Click grocery tab in desktop nav
+    const tabs = screen.getAllByRole('tab');
+    const groceryTab = tabs.find(t => t.textContent?.includes('Đi chợ'));
+    expect(groceryTab).toBeDefined();
+    if (groceryTab) fireEvent.click(groceryTab);
+    expect(onTabChange).toHaveBeenCalledWith('grocery');
+  });
+
+  it('TabLoadingFallback renders loading state', () => {
+    render(<TabLoadingFallback />);
+    expect(screen.getByText('Đang tải...')).toBeInTheDocument();
+  });
+
+  it('getTabLabels returns correct labels', () => {
+    const mockT = (key: string) => {
+      const map: Record<string, string> = {
+        'nav.calendar': 'Lịch',
+        'nav.management': 'Quản lý',
+        'nav.aiAnalysis': 'AI',
+        'nav.grocery': 'Đi chợ',
+        'nav.settings': 'Cài đặt',
+      };
+      return map[key] ?? key;
+    };
+    const labels = getTabLabels(mockT as never);
+    expect(labels['calendar']).toBe('Lịch');
+    expect(labels['grocery']).toBe('Đi chợ');
+  });
+
+  it('BottomNavBar shows AI badge when showAIBadge is true', () => {
+    const onTabChange = vi.fn();
+    render(<BottomNavBar activeTab="calendar" onTabChange={onTabChange} showAIBadge={true} />);
+    const aiTab = screen.getByTestId('nav-ai-analysis');
+    // The badge is a small div with bg-rose-500
+    const badge = aiTab.querySelector('.bg-rose-500');
+    expect(badge).toBeTruthy();
+  });
+});
+
+// --- UnitSelector ---
+describe('UnitSelector', () => {
+  it('renders with empty value', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="single" value="" onChange={onChange} data-testid="unit" />);
+    const select = screen.getByTestId('unit-select');
+    expect(select).toBeInTheDocument();
+  });
+
+  it('selecting empty option emits empty string', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="single" value="g" onChange={onChange} data-testid="unit" />);
+    const select = screen.getByTestId('unit-select');
+    fireEvent.change(select, { target: { value: '' } });
+    expect(onChange).toHaveBeenCalledWith('');
+  });
+
+  it('selecting "Khác..." shows custom input and emits empty', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="single" value="" onChange={onChange} data-testid="unit" />);
+    const select = screen.getByTestId('unit-select');
+    fireEvent.change(select, { target: { value: '__custom__' } });
+    expect(screen.getByTestId('unit-custom')).toBeInTheDocument();
+    expect(onChange).toHaveBeenCalledWith('');
+  });
+
+  it('typing in custom input emits the value', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="single" value="" onChange={onChange} data-testid="unit" />);
+    const select = screen.getByTestId('unit-select');
+    fireEvent.change(select, { target: { value: '__custom__' } });
+    const customInput = screen.getByTestId('unit-custom');
+    fireEvent.change(customInput, { target: { value: 'muỗng' } });
+    expect(onChange).toHaveBeenCalledWith('muỗng');
+  });
+
+  it('bilingual mode emits {vi, en} object', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="bilingual" value={{ vi: '', en: '' }} onChange={onChange} data-testid="unit" />);
+    const select = screen.getByTestId('unit-select');
+    fireEvent.change(select, { target: { value: 'g' } });
+    expect(onChange).toHaveBeenCalledWith({ vi: 'g', en: 'g' });
+  });
+
+  it('shows custom input for unrecognized value', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="single" value="xyz_custom" onChange={onChange} data-testid="unit" />);
+    // "xyz_custom" is not in COMMON_UNITS, so it auto-selects "Khác..."
+    expect(screen.getByTestId('unit-custom')).toBeInTheDocument();
+    expect(screen.getByTestId('unit-custom')).toHaveValue('xyz_custom');
+  });
+
+  it('typing custom value in bilingual mode emits same text for both languages', () => {
+    const onChange = vi.fn();
+    render(<UnitSelector mode="bilingual" value={{ vi: '', en: '' }} onChange={onChange} data-testid="unit" />);
+    const select = screen.getByTestId('unit-select');
+    fireEvent.change(select, { target: { value: '__custom__' } });
+    const customInput = screen.getByTestId('unit-custom');
+    fireEvent.change(customInput, { target: { value: 'tách' } });
+    expect(onChange).toHaveBeenCalledWith({ vi: 'tách', en: 'tách' });
   });
 });

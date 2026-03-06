@@ -196,6 +196,35 @@ describe('GroceryList', () => {
     expect(screen.queryByText(/Đã mua/)).not.toBeInTheDocument();
   });
 
+  it('renders correct header for custom (all) scope', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    // Switch to "Tất cả" scope (which maps to 'custom' internally)
+    fireEvent.click(screen.getByText('Tất cả'));
+    // Items should still render
+    expect(screen.getByText('Ức gà')).toBeInTheDocument();
+    expect(screen.getByText('Cơm trắng')).toBeInTheDocument();
+  });
+
+  it('falls back to copy when navigator.share is undefined', async () => {
+    // Remove navigator.share
+    const originalShare = navigator.share;
+    Object.defineProperty(navigator, 'share', { value: undefined, writable: true, configurable: true });
+
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    const shareBtn = screen.getByTitle('Chia sẻ');
+    fireEvent.click(shareBtn);
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalled();
+      expect(mockNotify.success).toHaveBeenCalledWith('Đã sao chép!', expect.any(String));
+    });
+
+    Object.defineProperty(navigator, 'share', { value: originalShare, writable: true, configurable: true });
+  });
+
   it('keeps checked state when ingredient amount is unchanged after plan update', () => {
     const { rerender } = render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
 

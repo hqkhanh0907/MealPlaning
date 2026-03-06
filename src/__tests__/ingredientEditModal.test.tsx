@@ -376,6 +376,36 @@ describe('IngredientEditModal', () => {
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
   });
 
+  it('prevents double submission', () => {
+    render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const saveBtn = screen.getByText('Lưu nguyên liệu');
+    fireEvent.click(saveBtn);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    // Click save again — should be blocked by hasSubmittedRef guard
+    fireEvent.click(saveBtn);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('AI search returns early when name is empty', async () => {
+    render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+    // Only set unit, not name
+    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    // AI button should be disabled due to empty name
+    const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
+    expect(aiButton).toBeDisabled();
+    // Even if we force call it, mockSuggestIngredientInfo should not be called
+    expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
+  });
+
+  it('AI search returns early when unit is empty', async () => {
+    render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
+    // Unit is empty, button disabled with no-unit tooltip
+    const aiButton = screen.getByRole('button', { name: 'Vui lòng nhập đơn vị tính trước' });
+    expect(aiButton).toBeDisabled();
+    expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
+  });
+
   // --- Regression: BUG-002 — input snaps back when clearing name ---
   // Root cause: getLocalizedField() had fallback to other lang, making it
   // impossible to delete all characters. Fixed by using formData.name[lang] directly.

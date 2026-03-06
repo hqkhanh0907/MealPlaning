@@ -131,3 +131,44 @@ describe('isDateInRange', () => {
   });
 });
 
+// --- Localize utility tests ---
+import { getLocalizedField, toLocalized } from '../utils/localize';
+
+describe('getLocalizedField', () => {
+  it('returns the string as-is when field is a plain string', () => {
+    expect(getLocalizedField('plain text', 'vi')).toBe('plain text');
+    expect(getLocalizedField('plain text', 'en')).toBe('plain text');
+  });
+
+  it('returns vi value when lang is vi', () => {
+    expect(getLocalizedField({ vi: 'Ức gà', en: 'Chicken breast' }, 'vi')).toBe('Ức gà');
+  });
+
+  it('returns en value when lang is en', () => {
+    expect(getLocalizedField({ vi: 'Ức gà', en: 'Chicken breast' }, 'en')).toBe('Chicken breast');
+  });
+
+  it('falls back to vi when en is empty', () => {
+    expect(getLocalizedField({ vi: 'Ức gà', en: '' }, 'en')).toBe('Ức gà');
+  });
+
+  it('falls back to en when vi is empty', () => {
+    expect(getLocalizedField({ vi: '', en: 'Chicken breast' }, 'vi')).toBe('Chicken breast');
+  });
+
+  it('returns empty string when both languages are empty', () => {
+    expect(getLocalizedField({ vi: '', en: '' }, 'vi')).toBe('');
+  });
+});
+
+describe('toLocalized', () => {
+  it('wraps a plain string as a LocalizedString', () => {
+    expect(toLocalized('test')).toEqual({ vi: 'test', en: 'test' });
+  });
+
+  it('returns a LocalizedString as-is', () => {
+    const input = { vi: 'Ức gà', en: 'Chicken breast' };
+    expect(toLocalized(input)).toBe(input);
+  });
+});
+

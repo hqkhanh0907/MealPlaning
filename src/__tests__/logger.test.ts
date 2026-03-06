@@ -64,6 +64,15 @@ describe('logger.debug', () => {
     expect(spy).toHaveBeenCalledOnce();
     expect(spy).toHaveBeenCalledWith('[Tips] compute', 'Recalculating tips');
   });
+
+  it('should NOT call console.debug when import.meta.env.DEV is false', () => {
+    const spy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+    const originalDev = import.meta.env.DEV;
+    import.meta.env.DEV = false;
+    logger.debug({ component: 'Tips', action: 'compute' }, 'Should not log');
+    expect(spy).not.toHaveBeenCalled();
+    import.meta.env.DEV = originalDev;
+  });
 });
 
 describe('traceId support', () => {

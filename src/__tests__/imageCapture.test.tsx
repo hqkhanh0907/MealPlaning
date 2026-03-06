@@ -302,6 +302,80 @@ describe('ImageCapture', () => {
     expect(defaultProps.onImageReady).not.toHaveBeenCalled();
   });
 
+  it('shows error when getUserMedia is undefined (no camera support) and camera is started', async () => {
+    // Set getUserMedia to be present so the "Chụp ảnh" button renders
+    const getUserMediaFn = vi.fn();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: getUserMediaFn },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+
+    // Now remove getUserMedia before clicking "Chụp ảnh"
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: undefined },
+      writable: true,
+      configurable: true,
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Thiết bị không hỗ trợ camera/)).toBeInTheDocument();
+    });
+  });
+
+  it('shows error when switchCamera fails', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
+    const getUserMedia = vi.fn()
+      .mockResolvedValueOnce(mockStream) // startCamera succeeds
+      .mockRejectedValueOnce(new Error('Switch failed')); // switchCamera fails
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await waitFor(() => expect(screen.getByLabelText('Đổi camera')).toBeInTheDocument());
+
+    await act(async () => { fireEvent.click(screen.getByLabelText('Đổi camera')); });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Không thể truy cập camera/)).toBeInTheDocument();
+    });
+  });
+
+  it('upload button click triggers file input', () => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    render(<ImageCapture {...defaultProps} />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+
+    const clickSpy = vi.spyOn(input as HTMLInputElement, 'click');
+    fireEvent.click(screen.getByText('Tải ảnh lên'));
+    expect(clickSpy).toHaveBeenCalled();
+    clickSpy.mockRestore();
+
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn() },
+      writable: true,
+      configurable: true,
+    });
+  });
+
   it('capturePhoto falls back to raw data URL when compression fails', async () => {
     const mockTrack = { stop: vi.fn() };
     const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;

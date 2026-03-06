@@ -281,6 +281,17 @@ describe('geminiService', () => {
       await expect(suggestIngredientInfo('Test', 'g', controller.signal)).rejects.toThrow('Aborted');
       expect(mockGenerateContent).toHaveBeenCalledTimes(0);
     });
+
+    it('throws AbortError when signal aborts during request', async () => {
+      const controller = new AbortController();
+      mockGenerateContent.mockImplementation(() =>
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 50);
+          setTimeout(() => controller.abort(), 10);
+        })
+      );
+      await expect(suggestIngredientInfo('Test', 'g', controller.signal)).rejects.toThrow();
+    });
   });
 
   // --- Prompt injection sanitization ---

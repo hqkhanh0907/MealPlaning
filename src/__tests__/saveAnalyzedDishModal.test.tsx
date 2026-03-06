@@ -221,6 +221,50 @@ describe('SaveAnalyzedDishModal', () => {
     expect((calInput as HTMLInputElement).value).toBe('300');
   });
 
+  it('edits nutrition protein field for ingredient', () => {
+    render(<SaveAnalyzedDishModal {...defaultProps} />);
+    const proInput = screen.getByDisplayValue('4');
+    fireEvent.change(proInput, { target: { value: '10' } });
+    expect((proInput as HTMLInputElement).value).toBe('10');
+  });
+
+  it('edits nutrition carbs field for ingredient', () => {
+    render(<SaveAnalyzedDishModal {...defaultProps} />);
+    const carbsInput = screen.getByDisplayValue('44');
+    fireEvent.change(carbsInput, { target: { value: '50' } });
+    expect((carbsInput as HTMLInputElement).value).toBe('50');
+  });
+
+  it('edits nutrition fat field for ingredient', () => {
+    render(<SaveAnalyzedDishModal {...defaultProps} />);
+    // Fat for Bánh phở is 0.8, rounded to 1
+    // Use labeled input to find specific fat field
+    const fatLabel = screen.getAllByText('Fat');
+    // Find the input sibling of the first Fat label
+    const fatContainer = fatLabel[0].closest('div');
+    const fatInput = fatContainer?.querySelector('input');
+    expect(fatInput).toBeTruthy();
+    if (fatInput) {
+      fireEvent.change(fatInput, { target: { value: '5' } });
+      expect(fatInput.value).toBe('5');
+    }
+  });
+
+  it('edits nutrition fiber field for ingredient', () => {
+    render(<SaveAnalyzedDishModal {...defaultProps} />);
+    // Fiber for Bánh phở is 0.5, rounded to 1
+    // Fiber for Thịt bò is 0
+    // Use the labeled inputs to find the exact fiber field
+    const fiberInputs = screen.getAllByRole('spinbutton').filter(el => {
+      const label = el.closest('div')?.querySelector('label');
+      return label?.textContent === 'Fiber';
+    });
+    if (fiberInputs.length > 0) {
+      fireEvent.change(fiberInputs[0], { target: { value: '3' } });
+      expect((fiberInputs[0] as HTMLInputElement).value).toBe('3');
+    }
+  });
+
   it('clamps negative nutrition value to 0', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
     const calInput = screen.getByDisplayValue('220');

@@ -106,6 +106,31 @@ describe('useTranslateQueue', () => {
     expect(useTranslateQueue.getState().jobs).toHaveLength(1);
   });
 
+  it('setWorker stores the worker reference', () => {
+    const mockWorker = { postMessage: vi.fn() } as unknown as Worker;
+    const { setWorker } = useTranslateQueue.getState();
+    setWorker(mockWorker);
+    expect(useTranslateQueue.getState()._worker).toBe(mockWorker);
+  });
+
+  it('setWorker can clear the worker by passing null', () => {
+    const mockWorker = { postMessage: vi.fn() } as unknown as Worker;
+    const { setWorker } = useTranslateQueue.getState();
+    setWorker(mockWorker);
+    expect(useTranslateQueue.getState()._worker).toBe(mockWorker);
+    setWorker(null);
+    expect(useTranslateQueue.getState()._worker).toBeNull();
+  });
+
+  it('setWorkerReady updates the workerReady flag', () => {
+    const { setWorkerReady } = useTranslateQueue.getState();
+    expect(useTranslateQueue.getState().workerReady).toBe(false);
+    setWorkerReady(true);
+    expect(useTranslateQueue.getState().workerReady).toBe(true);
+    setWorkerReady(false);
+    expect(useTranslateQueue.getState().workerReady).toBe(false);
+  });
+
   describe('scanMissing', () => {
     const dishes = [
       { id: 'dish-1', name: { vi: 'Phở bò', en: '' } },
