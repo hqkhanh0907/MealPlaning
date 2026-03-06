@@ -23,6 +23,7 @@ interface ListToolbarProps {
   children?: React.ReactNode;
   searchTestId?: string;
   addTestId?: string;
+  sortTestId?: string;
 }
 
 export const ListToolbar: React.FC<ListToolbarProps> = ({
@@ -31,7 +32,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
   viewLayout, onLayoutChange,
   onAdd, addLabel,
   children,
-  searchTestId, addTestId,
+  searchTestId, addTestId, sortTestId,
 }) => {
   const { t } = useTranslation();
   return (
@@ -60,6 +61,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value)}
           className="flex-1 sm:flex-none sm:w-44 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-emerald-500 outline-none bg-white dark:bg-slate-800 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-sm min-h-11"
+          {...(sortTestId ? { 'data-testid': sortTestId } : {})}
         >
           {sortOptions.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -71,6 +73,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
             onClick={() => onLayoutChange('grid')}
             className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'grid' ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             title={t('listToolbar.gridView')}
+            data-testid="btn-view-grid"
           >
             <LayoutGrid className="w-5 h-5" />
           </button>
@@ -78,6 +81,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
             onClick={() => onLayoutChange('list')}
             className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'list' ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             title={t('listToolbar.listView')}
+            data-testid="btn-view-list"
           >
             <List className="w-5 h-5" />
           </button>

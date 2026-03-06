@@ -96,4 +96,75 @@ describe('Calendar — date navigation', () => {
       );
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────
+  // TC_CAL_06 — Clear week plan  |  TC_CAL_07 — Clear month plan
+  // ─────────────────────────────────────────────────────────────────
+  describe('Clear plan scopes (TC_CAL_06, TC_CAL_07)', () => {
+    before(async () => {
+      // Inject data for today so we can test clearing
+      const dk = new Date().toISOString().split('T')[0];
+      await page.injectTestData({
+        dateKey: dk,
+        mealSlot: 'lunch',
+        dishId: 'e2e-cal-dish-2',
+        ingredientPayload: {
+          id: 'e2e-cal-ing-2',
+          name: { vi: 'Gạo clear test', en: 'Clear Test Rice' },
+          caloriesPer100: 80,
+          proteinPer100: 1,
+          carbsPer100: 15,
+          fatPer100: 0.2,
+          fiberPer100: 0.3,
+          unit: { vi: 'g', en: 'g' },
+        },
+        dishPayload: {
+          id: 'e2e-cal-dish-2',
+          name: { vi: 'Món clear test', en: 'Clear Test Dish' },
+          ingredients: [{ ingredientId: 'e2e-cal-ing-2', amount: 100 }],
+          tags: ['lunch'],
+        },
+      });
+      await page.reloadApp();
+      await page.navigateTo('calendar');
+      await page.tapToday();
+    });
+
+    it('TC_CAL_06 — should clear the week plan', async () => {
+      await page.tapMoreMenu();
+      await page.tapClearPlan();
+      await page.tapClearScope('week');
+      await browser.pause(500);
+      const cal = await page.getTotalCalories();
+      assert.strictEqual(
+        Number.parseInt(cal, 10),
+        0,
+        `Expected summary-total-calories = 0 after clearing week, but got: "${cal}"`,
+      );
+    });
+
+    it('TC_CAL_07 — should clear the month plan', async () => {
+      // Re-inject data for month clear test
+      const dk = new Date().toISOString().split('T')[0];
+      await page.injectTestData({
+        dateKey: dk,
+        mealSlot: 'dinner',
+        dishId: 'e2e-cal-dish-2',
+      });
+      await page.reloadApp();
+      await page.navigateTo('calendar');
+      await page.tapToday();
+
+      await page.tapMoreMenu();
+      await page.tapClearPlan();
+      await page.tapClearScope('month');
+      await browser.pause(500);
+      const cal = await page.getTotalCalories();
+      assert.strictEqual(
+        Number.parseInt(cal, 10),
+        0,
+        `Expected summary-total-calories = 0 after clearing month, but got: "${cal}"`,
+      );
+    });
+  });
 });

@@ -2,20 +2,25 @@ import assert from 'node:assert';
 import { BasePage } from '../pages/BasePage';
 import { ManagementPage } from '../pages/ManagementPage';
 
-describe('AI Analysis — navigation (placeholder)', () => {
+describe('AI Analysis — navigation and states', () => {
   const page = new BasePage();
 
   before(async () => {
     await page.switchToWebview();
   });
 
-  it('should navigate to AI analysis tab', async () => {
+  it('TC_AI_01 — should navigate to AI analysis tab', async () => {
     await page.navigateTo('ai-analysis');
     await expect(page.el('nav-ai-analysis')).toBeDisplayed();
   });
 
-  // Note: Full AI analysis E2E tests require mocking the Gemini API
-  // or providing a test image. These are placeholder tests for now.
+  it('TC_AI_02 — should display AI image analyzer component', async () => {
+    await expect(page.el('ai-image-analyzer')).toBeDisplayed();
+  });
+
+  it('TC_AI_03 — should display image capture component', async () => {
+    await expect(page.el('image-capture')).toBeDisplayed();
+  });
 
   // ─────────────────────────────────────────────────────────────────
   // TC_AI_04 — btn-ai-search enabled when name + unit are filled
@@ -45,6 +50,26 @@ describe('AI Analysis — navigation (placeholder)', () => {
         isEnabled,
         true,
         'btn-ai-search should be enabled when both name and unit are filled',
+      );
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────
+  // TC_AI_05 — AI suggest button on calendar tab
+  // ─────────────────────────────────────────────────────────────────
+  describe('AI suggest button (TC_AI_05)', () => {
+    before(async () => {
+      await page.navigateTo('calendar');
+    });
+
+    it('TC_AI_05 — should display AI suggest button on calendar', async () => {
+      const aiSuggestBtn = page.el('btn-ai-suggest');
+      await aiSuggestBtn.waitForDisplayed({ timeout: 5_000 });
+      const isDisplayed = await aiSuggestBtn.isDisplayed();
+      assert.strictEqual(
+        isDisplayed,
+        true,
+        'btn-ai-suggest should be visible on calendar tab',
       );
     });
   });

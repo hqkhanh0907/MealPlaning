@@ -112,7 +112,7 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
         sortOptions={getBaseSortOptions(t)} sortBy={list.sortBy} onSortChange={v => list.setSortBy(v as BaseSortOption)}
         viewLayout={list.viewLayout} onLayoutChange={list.setViewLayout}
         onAdd={() => modal.openEdit()} addLabel={t('ingredient.addNew')}
-        searchTestId="input-search-ingredient" addTestId="btn-add-ingredient"
+        searchTestId="input-search-ingredient" addTestId="btn-add-ingredient" sortTestId="select-sort-ingredient"
       />
 
       {/* Grid View */}

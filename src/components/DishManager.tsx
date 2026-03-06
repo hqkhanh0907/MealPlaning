@@ -123,17 +123,17 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
         sortOptions={dishSortOptions} sortBy={list.sortBy} onSortChange={v => list.setSortBy(v as DishSortOption)}
         viewLayout={list.viewLayout} onLayoutChange={list.setViewLayout}
         onAdd={() => modal.openEdit()} addLabel={t('dish.addNew')}
-        searchTestId="input-search-dish" addTestId="btn-add-dish"
+        searchTestId="input-search-dish" addTestId="btn-add-dish" sortTestId="select-sort-dish"
       >
         {/* Tag filter chips */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mt-2">
-          <button onClick={() => setFilterTag(null)} className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all min-h-8 ${filterTag ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700' : 'bg-emerald-500 text-white'}`}>
+          <button onClick={() => setFilterTag(null)} data-testid="btn-filter-all-dishes" className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all min-h-8 ${filterTag ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700' : 'bg-emerald-500 text-white'}`}>
             {t('common.all')} ({dishes.length})
           </button>
           {mealTagOptions.map(({ type, label, icon }) => {
             const count = dishes.filter(d => d.tags?.includes(type)).length;
             return (
-              <button key={type} onClick={() => setFilterTag(filterTag === type ? null : type)} className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all min-h-8 ${filterTag === type ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
+              <button key={type} onClick={() => setFilterTag(filterTag === type ? null : type)} data-testid={`btn-filter-${type}`} className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all min-h-8 ${filterTag === type ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
                 {icon} {label} ({count})
               </button>
             );
