@@ -1,6 +1,6 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 2.0  
+**Version:** 3.0  
 **Date:** 2026-03-06  
 **Author:** Dev Team
 
@@ -85,15 +85,17 @@
 
 | Level | Target | Actual (2026-03-06) |
 |-------|--------|---------------------|
-| Overall Statements | ≥ 80% | **90.51%** ✅ |
-| Overall Branches | ≥ 75% | **83.80%** ✅ |
-| Services | ≥ 90% | **91.85%** ✅ |
-| Utils | ≥ 90% | **99.37%** ✅ |
-| Components | ≥ 75% | **92.54%** ✅ |
-| Hooks | ≥ 85% | **99.58%** ✅ |
-| App.tsx | ≥ 65% | **70.87%** ✅ |
+| Overall Statements | ≥ 80% | **100%** ✅ (↑ từ 90.51%) |
+| Overall Branches | ≥ 75% | **93.99%** ✅ (↑ từ 83.80%) |
+| Overall Functions | ≥ 85% | **100%** ✅ (↑ từ 87.76%) |
+| Overall Lines | ≥ 80% | **100%** ✅ (↑ từ 92.76%) |
+| Services | ≥ 90% | **100%** ✅ |
+| Utils | ≥ 90% | **100%** ✅ |
+| Components | ≥ 75% | **100%** ✅ |
+| Hooks | ≥ 85% | **100%** ✅ |
+| Contexts | ≥ 85% | **100%** ✅ |
 
-> **Note:** `App.tsx` có coverage thấp hơn do là root component chứa nhiều UI conditional branches và lazy-loaded tabs. Target riêng ≥ 65%.
+> **Note:** Tất cả modules đều đạt 100% Stmts/Funcs/Lines. Branch coverage 93.99% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Target coverage ≥80% đã được **vượt xa** (đạt 100%).
 
 ---
 
@@ -181,8 +183,9 @@ E2E tests tạo dữ liệu programmatically qua UI (không inject localStorage 
 | Emulator instability | Medium | High | noReset, reset localStorage trước mỗi spec |
 | localStorage race condition | Low | Medium | Synchronous read/write, không async |
 | WebView context switch failure | Medium | High | ensureWebviewsHavePages, wait strategies |
-| **Schema doc drift** | **Medium** | **Medium** | **Quy tắc: cập nhật localstorage-schema.md cùng PR khi thay đổi types.ts** |
-| Coverage drop dưới target | Low | Low | CI fail khi coverage < threshold |
+| **Schema doc drift** | **Low** | **Medium** | **Quy tắc: cập nhật localstorage-schema.md cùng PR khi thay đổi types.ts — BUG-DOC-001 CLOSED** |
+| Coverage drop dưới target | Low | Low | CI fail khi coverage < threshold; 100% đã đạt được |
+| **Console errors (favicon, etc.)** | **Low** | **Low** | **QA DevTools monitoring — BUG-FAVICON-001 CLOSED** |
 
 ---
 

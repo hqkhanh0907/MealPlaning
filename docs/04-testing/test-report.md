@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 2.0  
+**Version:** 3.0  
 **Date:** 2026-03-06  
-**Commit:** `2919cd0`
+**Commit:** `d6bba1c`
 
-> **v2.0**: Cập nhật coverage với số liệu chính xác từ `npm run test:coverage`. Bổ sung BUG-DOC-001 (schema mismatch). Xem [Changelog](#6-changelog).
+> **v3.0**: QA Cycle 2 — 195 tests mới (668→863), coverage đạt 100% Stmts/Funcs/Lines. Bổ sung BUG-FAVICON-001. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -12,14 +12,16 @@
 
 | Chỉ số | Kết quả |
 |--------|---------|
-| Unit Tests | **668 / 668 Pass** ✅ |
-| Test Files | **39 / 39 Pass** ✅ |
+| Unit Tests | **863 / 863 Pass** ✅ |
+| Test Files | **40 / 40 Pass** ✅ |
 | E2E Tests | **10 / 10 Specs Pass** ✅ |
 | Lint | **0 errors, 0 warnings** ✅ |
-| Code Coverage (Stmts) | **90.51%** ✅ |
-| Code Coverage (Branch) | **83.80%** ✅ |
+| Code Coverage (Stmts) | **100%** ✅ |
+| Code Coverage (Branch) | **93.99%** ✅ |
+| Code Coverage (Funcs) | **100%** ✅ |
+| Code Coverage (Lines) | **100%** ✅ |
 | Bugs mở | **0** ✅ |
-| Bugs đã đóng | **3** (BUG-001, BUG-002, BUG-DOC-001) |
+| Bugs đã đóng | **4** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001) |
 
 ---
 
@@ -50,6 +52,7 @@
  ✓ src/__tests__/main.test.tsx
  ✓ src/__tests__/managers.test.tsx
  ✓ src/__tests__/modalBackdrop.test.tsx
+ ✓ src/__tests__/navigationIndex.test.ts
  ✓ src/__tests__/NotificationContext.test.tsx
  ✓ src/__tests__/nutrition.test.ts
  ✓ src/__tests__/planService.test.ts
@@ -68,46 +71,28 @@
  ✓ src/__tests__/useModalManager.test.ts
  ✓ src/__tests__/usePersistedState.test.ts
 
- Test Files:  39 passed (39)
- Tests:      668 passed (668)
- Duration:   ~5.8s
+ Test Files:  40 passed (40)
+ Tests:      863 passed (863)
+ Duration:   ~7.2s
 ```
 
 ### Coverage chi tiết (từ `npm run test:coverage`)
 
 | Module / File | Stmts | Branch | Funcs | Lines | Ghi chú |
 |---------------|-------|--------|-------|-------|---------|
-| **All files** | **90.51%** | **83.80%** | **87.76%** | **92.76%** | ✅ Đạt target |
-| `src/App.tsx` | 70.87% | 63.95% | 54.83% | 78.67% | ⚠️ UI conditional branches |
-| `src/components/` | 92.54% | 82.87% | 87.22% | 94.04% | ✅ |
-| `components/DishEditModal.tsx` | 69.06% | 59.62% | 76.38% | 67.97% | ⚠️ Quick-Add flow |
-| `components/DishManager.tsx` | 81.81% | 73.43% | 70.00% | 82.75% | ⚠️ |
-| `components/IngredientManager.tsx` | 81.39% | 81.25% | 70.27% | 78.87% | ⚠️ |
-| `components/CalendarTab.tsx` | 96.29% | 81.81% | 100.0% | 100.0% | ✅ |
-| `components/GroceryList.tsx` | 90.82% | 76.27% | 94.44% | 95.40% | ✅ |
-| `components/AIImageAnalyzer.tsx` | 94.11% | 93.75% | 85.71% | 96.87% | ✅ |
-| `components/SettingsTab.tsx` | 100.0% | 100.0% | 100.0% | 100.0% | ✅ |
-| `components/Summary.tsx` | 100.0% | 100.0% | 100.0% | 100.0% | ✅ |
-| `src/services/` | 91.85% | 90.82% | 91.75% | 93.46% | ✅ |
-| `services/dataService.ts` | 97.18% | 98.30% | 100.0% | 97.01% | ✅ |
-| `services/geminiService.ts` | 86.70% | 84.44% | 83.78% | 90.00% | ✅ |
-| `services/planService.ts` | 100.0% | 100.0% | 100.0% | 100.0% | ✅ |
-| `src/hooks/` | 99.58% | 86.74% | 100.0% | 100.0% | ✅ |
-| `hooks/usePersistedState.ts` | 100.0% | 100.0% | 100.0% | 100.0% | ✅ |
-| `src/utils/` | 99.37% | 96.80% | 100.0% | 100.0% | ✅ |
-| `utils/helpers.ts` | 100.0% | 100.0% | 100.0% | 100.0% | ✅ |
-| `utils/nutrition.ts` | 100.0% | 93.75% | 100.0% | 100.0% | ✅ |
-| `src/data/` | 100.0% | 100.0% | 100.0% | 100.0% | ✅ |
-| `src/contexts/` | 98.50% | 89.47% | 100.0% | 100.0% | ✅ |
+| **All files** | **100%** | **93.99%** | **100%** | **100%** | ✅ Vượt target |
+| `src/` | 100% | 100% | 100% | 100% | ✅ |
+| `src/components/` | 100% | 90.86% | 100% | 100% | ✅ |
+| `src/components/modals/` | 100% | 94.27% | 100% | 100% | ✅ |
+| `src/components/navigation/` | 100% | 100% | 100% | 100% | ✅ |
+| `src/components/shared/` | 100% | 90.54% | 100% | 100% | ✅ |
+| `src/contexts/` | 100% | 94.11% | 100% | 100% | ✅ |
+| `src/data/` | 100% | 100% | 100% | 100% | ✅ |
+| `src/hooks/` | 100% | 87.95% | 100% | 100% | ✅ |
+| `src/services/` | 100% | 97.58% | 100% | 100% | ✅ |
+| `src/utils/` | 100% | 100% | 100% | 100% | ✅ |
 
-### Các file coverage thấp (< 85%) — cần cải thiện
-
-| File | Stmts | Branch | Vấn đề | Action |
-|------|-------|--------|--------|--------|
-| `App.tsx` | 70.87% | 63.95% | UI conditional branches, tab render paths | Tăng integration tests |
-| `DishEditModal.tsx` | 69.06% | 59.62% | Quick-Add ingredient flow (lines 297–353) | Bổ sung test cho quick-add |
-| `DishManager.tsx` | 81.81% | 73.43% | Sort/filter/search edge cases | Medium priority |
-| `IngredientManager.tsx` | 81.39% | 81.25% | Delete cascade, empty state paths | Medium priority |
+> **Lưu ý:** Tất cả Statements, Functions, Lines đều đạt **100%**. Branch coverage 93.99% do một số defensive branches (error handling, edge case guards) không thể trigger trong test environment.
 
 ---
 
@@ -185,14 +170,22 @@
 **Fix:** Rewrite toàn bộ `localstorage-schema.md` v2.0 từ `src/types.ts` làm source of truth  
 **Test để phòng ngừa:** Nên thêm schema validation test trong CI (future work)
 
+### BUG-FAVICON-001: Missing favicon.ico gây 404 console error (CLOSED)
+
+**Phát hiện:** QA Cycle 2 (2026-03-06) | **Mức độ:** Low | **Priority:** P4  
+**Component:** `index.html`, `public/`  
+**Root cause:** Trình duyệt tự động request `/favicon.ico` nhưng file không tồn tại, gây lỗi 404 liên tục trong Console tab của DevTools  
+**Fix:** Thêm `public/favicon.svg` (SVG meal planner icon) + `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />` trong `index.html`  
+**Commit:** `d6bba1c`  
+**Test coverage:** Verified qua DevTools Console — 0 errors sau fix
+
 ---
 
 ## 4. Known Limitations
 
 | Limitation | Ảnh hưởng | Priority |
 |-----------|-----------|---------|
-| `App.tsx` branch coverage thấp (63.95%) | Một số UI paths chưa được test (error boundary fallbacks, lazy load) | Medium |
-| `DishEditModal` quick-add coverage thấp (69.06%) | Quick-Add ingredient flow mới (lines 297–353) chưa có test | Medium |
+| Branch coverage 93.99% (không đạt 100%) | Một số defensive branches (error handlers, edge case guards) không thể trigger trong jsdom | Low — acceptable |
 | AI coverage dùng mock only | E2E `09-ai-analysis` dùng mock data, không test real Gemini | Low |
 | E2E không test offline mode | Chỉ test khi có kết nối internet | Low |
 
@@ -205,6 +198,7 @@
 | 2026-03-05 | 654/668 | 8/10 | ❌ | `a3f2b8c` | BUG-001 fix session |
 | 2026-03-06 | 668/668 | 10/10 | ✅ | `57e996d` | All green |
 | 2026-03-06 | 668/668 | 10/10 | ✅ | `2919cd0` | Docs sync, BUG-DOC-001 fixed |
+| 2026-03-06 | 863/863 | 10/10 | ✅ | `d6bba1c` | QA Cycle 2: 100% coverage, BUG-FAVICON-001 fixed |
 
 ---
 
@@ -214,3 +208,4 @@
 |---------|------|---------|
 | 1.0 | 2026-03-06 | Initial report |
 | 2.0 | 2026-03-06 | Coverage corrected từ actual run; BUG-DOC-001; file list đầy đủ 39 test files |
+| 3.0 | 2026-03-06 | QA Cycle 2: 863 tests (↑195), 40 files (↑1), 100% Stmts/Funcs/Lines coverage, BUG-FAVICON-001 |

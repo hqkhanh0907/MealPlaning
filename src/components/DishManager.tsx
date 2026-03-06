@@ -173,7 +173,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               </div>
             );
           })}
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={modal.openEdit} className="col-span-full" />}
+          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={() => modal.openEdit()} className="col-span-full" />}
         </div>
       )}
 
@@ -228,7 +228,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               );
             })}
           </div>
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={modal.openEdit} />}
+          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('dish.title').toLowerCase()} actionLabel={t('dish.addNew')} onAction={() => modal.openEdit()} />}
         </div>
       )}
 

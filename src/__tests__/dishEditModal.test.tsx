@@ -921,4 +921,64 @@ describe('DishEditModal', () => {
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
     vi.useRealTimers();
   });
+
+  it('validates NaN amount string on submit (branch: non-empty non-numeric)', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    const amountInput = screen.getByTestId('input-dish-amount-i1') as HTMLInputElement;
+    // jsdom sanitises non-numeric strings on type="number" inputs to '',
+    // so temporarily switch to "text" to set a truly non-numeric value
+    amountInput.setAttribute('type', 'text');
+    fireEvent.change(amountInput, { target: { value: 'abc' } });
+    amountInput.setAttribute('type', 'number');
+
+    fireEvent.click(screen.getByTestId('btn-save-dish'));
+    expect(screen.getByText('Vui lòng nhập số lượng')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('triggerAIFill clears previous timer on second blur (branch: aiTimerRef truthy)', async () => {
+    mockSuggestIngredientInfo.mockResolvedValue({
+      calories: 100, protein: 10, carbs: 20, fat: 5, fiber: 2, unit: 'g',
+    });
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
+
+    const viInput = screen.getByTestId('input-qa-name-vi');
+    // First blur — sets aiTimerRef.current via setTimeout
+    fireEvent.change(viInput, { target: { value: 'Thịt bò' } });
+    fireEvent.blur(viInput);
+    // Advance only 400ms (timer is 800ms), so the first timer is still pending
+    await act(async () => { await vi.advanceTimersByTimeAsync(400); });
+
+    // Second blur — triggerAIFill should clear the previous timer (line 175 branch)
+    fireEvent.change(viInput, { target: { value: 'Thịt heo' } });
+    fireEvent.blur(viInput);
+    // Advance past both debounce windows
+    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+
+    // The AI call should have been made with the SECOND name, not the first
+    const lastCall = mockSuggestIngredientInfo.mock.calls.at(-1);
+    expect(lastCall?.[0]).toBe('Thịt heo');
+  });
+
+  it('picker filters out already-selected ingredients (no duplicate add possible)', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    // i1 and i2 are already selected; only i3 should appear in the picker
+    expect(screen.getByTestId('btn-add-ing-i3')).toBeInTheDocument();
+    expect(screen.queryByTestId('btn-add-ing-i1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-add-ing-i2')).not.toBeInTheDocument();
+  });
+
+  it('clears tag validation error when an inactive tag is toggled on', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    // Fill name + ingredient so only tag error remains
+    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.click(screen.getByText('Ức gà').closest('button') as HTMLElement);
+    // Submit without tags → tag validation error appears
+    fireEvent.click(screen.getByTestId('btn-save-dish'));
+    expect(screen.getByText(/chọn ít nhất một bữa ăn phù hợp/i)).toBeInTheDocument();
+    // Toggle an inactive tag → error should clear (branch: !isActive && formErrors.tags)
+    fireEvent.click(screen.getByTestId('tag-breakfast'));
+    expect(screen.queryByText(/chọn ít nhất một bữa ăn phù hợp/i)).not.toBeInTheDocument();
+  });
 });

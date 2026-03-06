@@ -447,6 +447,17 @@ describe('DishManager', () => {
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
+  it('opens edit modal via EmptyState onAction callback in grid view', () => {
+    render(<DishManager {...defaultProps} dishes={[]} />);
+    // Target the EmptyState button inside the dashed-border container
+    const emptyContainer = document.querySelector('[class*="border-dashed"]');
+    expect(emptyContainer).toBeTruthy();
+    const actionBtn = emptyContainer!.querySelector('button');
+    expect(actionBtn).toBeTruthy();
+    fireEvent.click(actionBtn as HTMLElement);
+    expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
+  });
+
   it('submits a new dish through DishManager (handleDishSubmit onAdd path, line 89)', () => {
     render(<DishManager {...defaultProps} />);
     fireEvent.click(screen.getByText('Thêm món ăn'));
@@ -780,6 +791,16 @@ describe('IngredientManager', () => {
     const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
     expect(emptyBtn).toBeDefined();
     if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
+  });
+
+  it('opens edit modal via EmptyState onAction callback in grid view', () => {
+    render(<IngredientManager {...defaultProps} ingredients={[]} />);
+    const emptyContainer = document.querySelector('[class*="border-dashed"]');
+    expect(emptyContainer).toBeTruthy();
+    const actionBtn = emptyContainer!.querySelector('button');
+    expect(actionBtn).toBeTruthy();
+    fireEvent.click(actionBtn as HTMLElement);
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
   });
 

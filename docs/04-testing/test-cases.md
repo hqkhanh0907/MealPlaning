@@ -1,9 +1,9 @@
 # Test Cases — Smart Meal Planner
 
-**Version:** 2.0  
+**Version:** 3.0  
 **Date:** 2026-03-06  
 
-> **v2.0**: Cập nhật Unit Test summary với số test chính xác (668 tests, 39 files từ `npm run test`). Bổ sung TC_DM (Dark Mode) và TC_I18N (i18n). Xem [Changelog](#changelog).
+> **v3.0**: QA Cycle 2 — 863 tests (↑195), 40 files (↑1). Tất cả modules đạt 100% Stmts/Funcs/Lines coverage. Xem [Changelog](#changelog).
 
 ---
 
@@ -120,26 +120,27 @@
 | `aiImageAnalyzer.test.tsx` | ✓ | ✅ |
 | `aiSuggestionPreview.test.tsx` | ✓ | ✅ |
 | `analysisResultView.test.tsx` | ✓ | ✅ |
-| `app.test.tsx` | ✓ | ✅ |
-| `calendarAndDate.test.tsx` | ✓ | ✅ |
-| `components.test.tsx` | ✓ | ✅ |
+| `app.test.tsx` | ✓ (enhanced: ~47 tests, CRUD handlers, tab rendering, edge cases) | ✅ |
+| `calendarAndDate.test.tsx` | ✓ (enhanced: DateSelector edge cases) | ✅ |
+| `components.test.tsx` | ✓ (enhanced: UnitSelector, Navigation tests) | ✅ |
 | `constantsAndData.test.ts` | ✓ | ✅ |
-| `dataBackup.test.tsx` | ✓ | ✅ |
+| `dataBackup.test.tsx` | ✓ (enhanced: import/export edge cases) | ✅ |
 | `dataService.test.ts` | ✓ | ✅ |
-| `dishEditModal.test.tsx` | ✓ | ✅ |
+| `dishEditModal.test.tsx` | ✓ (enhanced: validation, quick-add, edge cases) | ✅ |
 | `ErrorBoundary.test.tsx` | ✓ | ✅ |
-| `geminiService.test.ts` | ✓ | ✅ |
-| `groceryList.test.tsx` | ✓ | ✅ |
+| `geminiService.test.ts` | ✓ (enhanced: retry, abort, cache tests) | ✅ |
+| `groceryList.test.tsx` | ✓ (enhanced: scope/share tests) | ✅ |
 | `helpers.test.ts` | ✓ | ✅ |
-| `imageCapture.test.tsx` | ✓ | ✅ |
+| `imageCapture.test.tsx` | ✓ (enhanced: camera edge cases) | ✅ |
 | `imageCompression.test.ts` | ✓ | ✅ |
 | `ingredientEditModal.test.tsx` | ✓ | ✅ |
 | `integration.test.ts` | ✓ | ✅ |
 | `logger.test.ts` | ✓ | ✅ |
 | `main.test.tsx` | ✓ | ✅ |
-| `managers.test.tsx` | ✓ | ✅ |
+| `managers.test.tsx` | ✓ (enhanced: list view, detail modal, delete tests) | ✅ |
 | `modalBackdrop.test.tsx` | ✓ | ✅ |
-| `NotificationContext.test.tsx` | ✓ | ✅ |
+| `navigationIndex.test.ts` | ✓ (NEW) | ✅ |
+| `NotificationContext.test.tsx` | ✓ (enhanced: pause/resume tests) | ✅ |
 | `nutrition.test.ts` | ✓ | ✅ |
 | `planService.test.ts` | ✓ | ✅ |
 | `planningModal.test.tsx` | ✓ | ✅ |
@@ -156,7 +157,23 @@
 | `useModalBackHandler.test.ts` | ✓ | ✅ |
 | `useModalManager.test.ts` | ✓ | ✅ |
 | `usePersistedState.test.ts` | ✓ | ✅ |
-| **TOTAL (39 files)** | **668 tests** | **✅ 100%** |
+| **TOTAL (40 files)** | **863 tests** | **✅ 100%** |
+
+### Các lĩnh vực test mới bổ sung trong QA Cycle 2
+
+| Lĩnh vực | File | Mô tả |
+|-----------|------|-------|
+| App.tsx CRUD handlers | `app.test.tsx` | Test toàn bộ add/edit/delete flows cho ingredients, dishes, plans |
+| DishEditModal validation | `dishEditModal.test.tsx` | Quick-add ingredient flow, validation rules, edge cases |
+| Manager list/detail views | `managers.test.tsx` | List view rendering, detail modal, delete confirmation |
+| Gemini retry/abort/cache | `geminiService.test.ts` | Retry logic, AbortController, response caching |
+| Camera edge cases | `imageCapture.test.tsx` | Permission denied, camera unavailable, format fallbacks |
+| Grocery scope/share | `groceryList.test.tsx` | Weekly/daily scope, share via Android Share sheet |
+| UnitSelector + Navigation | `components.test.tsx` | Custom unit dropdown, tab navigation indicators |
+| Notification pause/resume | `NotificationContext.test.tsx` | Toast queue pause during modals, resume on close |
+| DateSelector edge cases | `calendarAndDate.test.tsx` | Week boundary, year boundary, DST transitions |
+| Import/export edge cases | `dataBackup.test.tsx` | Corrupt JSON, large files, partial restore |
+| Navigation index | `navigationIndex.test.ts` | NEW file — navigation module barrel exports |
 
 ---
 
@@ -166,3 +183,4 @@
 |---------|------|---------|
 | 1.0 | 2026-03-06 | Initial test cases |
 | 2.0 | 2026-03-06 | Unit test list đầy đủ 39 files; version header cập nhật |
+| 3.0 | 2026-03-06 | QA Cycle 2: 863 tests (+195), 40 files (+1 navigationIndex.test.ts); enhanced test areas documented |

@@ -1,6 +1,6 @@
 # Release Process — Smart Meal Planner
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Date:** 2026-03-06
 
 ---
@@ -12,27 +12,30 @@ Code changes
      │
      ▼
 [1] Run unit tests (npm run test)
-     │ ✅ 668/668
+     │ ✅ 863/863
      ▼
 [2] Run linter (npm run lint)
-     │ ✅ no errors
+     │ ✅ no errors, no warnings
      ▼
-[3] Build web assets (npm run build)
+[3] Run coverage check (npm run test:coverage)
+     │ ✅ 100% Stmts/Funcs/Lines
+     ▼
+[4] Build web assets (npm run build)
      │ ✅ dist/ generated
      ▼
-[4] Sync to Android (npx cap sync android)
+[5] Sync to Android (npx cap sync android)
      │ ✅ web assets in android/
      ▼
-[5] Build APK (bash build-apk.sh)
+[6] Build APK (bash build-apk.sh)
      │ ✅ app-debug.apk generated
      ▼
-[6] Run E2E tests (npm run test:e2e)
-     │ ✅ 10/10 specs
+[7] Run E2E tests (npm run test:e2e)
+     │ ✅ 10/10 specs (37 test cases)
      ▼
-[7] Git commit + tag
+[8] Git commit + tag
      │
      ▼
-[8] Upload APK to Google Drive (optional)
+[9] Upload APK to Google Drive (optional)
 ```
 
 ---
@@ -42,19 +45,22 @@ Code changes
 Trước mỗi release, kiểm tra tất cả items:
 
 ```
-□ npm run test          → 668/668 pass
-□ npm run lint          → 0 errors
+□ npm run test          → 863/863 pass
+□ npm run lint          → 0 errors, 0 warnings
+□ npm run test:coverage → 100% Stmts/Funcs/Lines, ≥93% Branch
 □ npm run build         → build thành công, không warnings
 □ npx cap sync android  → sync OK
 □ bash build-apk.sh     → APK tạo được (≈147MB)
-□ npm run test:e2e      → 10/10 specs pass
+□ npm run test:e2e      → 10/10 specs pass (37 test cases)
 □ adb install APK       → cài thành công trên emulator
+□ DevTools Console      → 0 errors, 0 warnings
 □ Smoke test manual:
   □ App mở được
   □ Tab navigation OK
   □ Thêm/sửa nguyên liệu OK
   □ Lên kế hoạch bữa ăn OK
   □ AI tab hiển thị OK
+  □ Favicon hiển thị đúng
 □ git commit + push
 ```
 
@@ -168,9 +174,9 @@ Cập nhật `CHANGELOG.md` hoặc tạo file session mới trong `docs/`:
 - IngredientEditModal auto-focus on Android #36
 
 ## Tests
-- Unit: 668/668 pass
-- E2E: 10/10 pass
-- Coverage: 90.5%
+- Unit: 863/863 pass
+- E2E: 10/10 pass (37 test cases)
+- Coverage: 100% Stmts/Funcs/Lines, 93.99% Branch
 ```
 
 ---

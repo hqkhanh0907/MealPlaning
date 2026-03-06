@@ -1,6 +1,6 @@
 # PRD — Smart Meal Planner
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** 2026-03-06  
 **Status:** Live (Production)
 
@@ -57,6 +57,7 @@ Smart Meal Planner là ứng dụng di động (Android) + web giúp người d�
 | F-15 | Giao diện song ngữ (Tiếng Việt / Tiếng Anh) | P2 |
 | F-16 | Dịch tên nguyên liệu/món ăn offline (OPUS model) | P2 |
 | F-17 | Xoá kế hoạch theo ngày/tuần/tháng | P2 |
+| F-18 | Favicon/App icon hiển thị đúng trên browser và PWA | P3 |
 
 ### 2.2 Ngoài phạm vi (Out of Scope)
 
