@@ -200,8 +200,8 @@ describe('IngredientEditModal', () => {
     // Fill unit only
     fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
 
-    // When unit is filled, title is the AI tooltip but still disabled due to no name
-    const aiButton = screen.getByTitle('Tự động điền thông tin bằng AI');
+    // When unit is filled, aria-label is the AI tooltip but still disabled due to no name
+    const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
     expect(aiButton).toBeDisabled();
   });
 
@@ -209,14 +209,14 @@ describe('IngredientEditModal', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
 
-    // When unit is empty, title shows the no-unit tooltip
-    const aiButton = screen.getByTitle('Vui lòng nhập đơn vị tính trước');
+    // When unit is empty, aria-label shows the no-unit tooltip
+    const aiButton = screen.getByRole('button', { name: 'Vui lòng nhập đơn vị tính trước' });
     expect(aiButton).toBeDisabled();
   });
 
   it('AI button is enabled when both name and unit are filled', () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
-    const aiButton = screen.getByTitle('Tự động điền thông tin bằng AI');
+    const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
     expect(aiButton).not.toBeDisabled();
   });
 
@@ -226,7 +226,7 @@ describe('IngredientEditModal', () => {
     });
 
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
-    const aiButton = screen.getByTitle('Tự động điền thông tin bằng AI');
+    const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
     fireEvent.click(aiButton);
 
     await waitFor(() => {
@@ -240,7 +240,7 @@ describe('IngredientEditModal', () => {
     mockSuggestIngredientInfo.mockRejectedValueOnce(new Error('Network error'));
 
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.click(screen.getByTitle('Tự động điền thông tin bằng AI'));
+    fireEvent.click(screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' }));
 
     await waitFor(() => {
       expect(mockNotify.error).toHaveBeenCalledWith(
@@ -254,7 +254,7 @@ describe('IngredientEditModal', () => {
     mockSuggestIngredientInfo.mockRejectedValueOnce(new Error('Timeout'));
 
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.click(screen.getByTitle('Tự động điền thông tin bằng AI'));
+    fireEvent.click(screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' }));
 
     await waitFor(() => {
       expect(mockNotify.warning).toHaveBeenCalledWith(

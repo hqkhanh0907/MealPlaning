@@ -48,7 +48,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
         <div className="space-y-2 col-span-1">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-1">
             <div className="flex items-center gap-1.5 sm:gap-2 text-slate-700 dark:text-slate-300 font-medium">
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" /> <span className="text-sm sm:text-base">Calories</span>
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" /> <span className="text-sm sm:text-base">{t('common.calories')}</span>
             </div>
             <div className="text-left sm:text-right">
               <span data-testid="summary-total-calories" className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalCalories)}</span>
@@ -67,7 +67,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
         <div className="space-y-2 col-span-1">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-1">
             <div className="flex items-center gap-1.5 sm:gap-2 text-slate-700 dark:text-slate-300 font-medium">
-              <Beef className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" /> <span className="text-sm sm:text-base">Protein</span>
+              <Beef className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" /> <span className="text-sm sm:text-base">{t('common.protein')}</span>
             </div>
             <div className="text-left sm:text-right">
               <span className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalProtein)}</span>
@@ -83,27 +83,27 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-3 sm:p-4 border border-amber-100/50 dark:border-amber-800/30">
           <div className="flex items-center gap-1.5 sm:gap-2 text-amber-700 dark:text-amber-400 mb-1">
             <Wheat className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm font-medium">Carbs</span>
+            <span className="text-xs sm:text-sm font-medium">{t('common.carbs')}</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-amber-900 dark:text-amber-300">{Math.round(totalCarbs)}<span className="text-xs sm:text-sm font-normal text-amber-700/70 dark:text-amber-500/70 ml-1">g</span></p>
+          <p className="text-lg sm:text-2xl font-bold text-amber-900 dark:text-amber-300">{Math.round(totalCarbs)}<span className="text-xs sm:text-sm font-normal text-amber-700/70 dark:text-amber-500/70 ml-1">g</span></p>
         </div>
         <div className="bg-rose-50 dark:bg-rose-900/20 rounded-2xl p-3 sm:p-4 border border-rose-100/50 dark:border-rose-800/30">
           <div className="flex items-center gap-1.5 sm:gap-2 text-rose-700 dark:text-rose-400 mb-1">
             <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm font-medium">Fat</span>
+            <span className="text-xs sm:text-sm font-medium">{t('common.fat')}</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-rose-900 dark:text-rose-300">{Math.round(totalFat)}<span className="text-xs sm:text-sm font-normal text-rose-700/70 dark:text-rose-500/70 ml-1">g</span></p>
+          <p className="text-lg sm:text-2xl font-bold text-rose-900 dark:text-rose-300">{Math.round(totalFat)}<span className="text-xs sm:text-sm font-normal text-rose-700/70 dark:text-rose-500/70 ml-1">g</span></p>
         </div>
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-3 sm:p-4 border border-emerald-100/50 dark:border-emerald-800/30 col-span-2 sm:col-span-1">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-3 sm:p-4 border border-emerald-100/50 dark:border-emerald-800/30">
           <div className="flex items-center gap-1.5 sm:gap-2 text-emerald-700 dark:text-emerald-400 mb-1">
             <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium">{t('common.fiber')}</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-emerald-900 dark:text-emerald-300">{Math.round(totalFiber)}<span className="text-xs sm:text-sm font-normal text-emerald-700/70 dark:text-emerald-500/70 ml-1">g</span></p>
+          <p className="text-lg sm:text-2xl font-bold text-emerald-900 dark:text-emerald-300">{Math.round(totalFiber)}<span className="text-xs sm:text-sm font-normal text-emerald-700/70 dark:text-emerald-500/70 ml-1">g</span></p>
         </div>
       </div>
     </div>

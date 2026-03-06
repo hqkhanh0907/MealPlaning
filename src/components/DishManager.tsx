@@ -168,7 +168,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 </div>
                 <div className="relative z-10 mt-auto flex items-center gap-2 pt-4 border-t border-slate-50 dark:border-slate-700">
                   <button data-testid={`btn-edit-dish-${dish.id}`} onClick={() => modal.openEdit(dish)} className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all"><Edit3 className="w-4 h-4" /> {t('common.edit')}</button>
-                  <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed' : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /> {t('common.delete')}</button>
+                  <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} aria-disabled={isUsed(dish.id)} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(dish.id) ? 'text-slate-400 dark:text-slate-500 opacity-40' : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /> {t('common.delete')}</button>
                 </div>
               </div>
             );
@@ -202,7 +202,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                       <td className="px-4 py-3 text-right"><span className="font-bold text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></td>
                       <td className="px-4 py-3"><div className="flex items-center justify-end gap-1">
                         <button data-testid={`btn-edit-dish-${dish.id}`} onClick={() => modal.openEdit(dish)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                        <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} className={`p-2 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
+                        <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} aria-disabled={isUsed(dish.id)} className={`p-2 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-500 opacity-40' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
                       </div></td>
                     </tr>
                   );
@@ -222,7 +222,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   </div>
                   <div className="relative z-10 flex items-center gap-1 shrink-0">
                     <button data-testid={`btn-edit-dish-${dish.id}`} onClick={() => modal.openEdit(dish)} className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                    <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} className={`p-2.5 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-200 dark:text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
+                    <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} aria-disabled={isUsed(dish.id)} className={`p-2.5 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-500 opacity-40' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               );

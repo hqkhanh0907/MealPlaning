@@ -33,20 +33,22 @@ const MealCard: React.FC<MealCardProps> = ({ type, slot, dishes, onEdit }) => {
         <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           {mealLabels[type]}
         </span>
-        <button
-          onClick={onEdit}
-          aria-label={`${t('common.edit')} ${mealLabels[type]}`}
-          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
-        >
-          <Edit3 className="w-4 h-4" />
-        </button>
+        {dishNames.length > 0 && (
+          <button
+            onClick={onEdit}
+            aria-label={`${t('common.edit')} ${mealLabels[type]}`}
+            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
+          >
+            <Edit3 className="w-4 h-4" />
+          </button>
+        )}
       </div>
       {dishNames.length > 0 ? (
         <div className="space-y-2">
           {dishNames.map((name) => (
             <div key={name} className="flex items-center gap-2">
               <ChefHat className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-hidden="true" />
-              <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{name}</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200 text-sm truncate">{name}</span>
             </div>
           ))}
           <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-slate-50 dark:border-slate-700">

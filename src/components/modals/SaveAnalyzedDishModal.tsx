@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Save, Loader2, Sparkles } from 'lucide-react';
 import { AnalyzedDishResult, AnalyzedIngredient, SaveAnalyzedDishPayload, MealType } from '../../types';
@@ -51,12 +51,16 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
     setEditedResult({ ...editedResult, ingredients: newIngredients });
   };
 
+  const hasSubmittedRef = useRef(false);
+
   const handleConfirmSave = () => {
+    if (hasSubmittedRef.current) return;
     if (saveDish && dishTags.length === 0) {
       setTagError(t('saveAnalyzed.validationSelectMeal'));
       return;
     }
 
+    hasSubmittedRef.current = true;
     const finalIngredients = editedResult.ingredients.filter((_, idx) => selectedIngredients[idx]);
     const payload: SaveAnalyzedDishPayload = {
       ...editedResult,
@@ -223,7 +227,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                     </button>
                   </div>
                   
-                  <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!selectedIngredients[idx] && 'pointer-events-none grayscale'}`}>
+                  <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
                     <div className="md:col-span-1">
                       <label htmlFor={`ai-ing-name-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('common.name')}</label>
                       <input
@@ -257,7 +261,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                     </div>
                   </div>
                   
-                  <div className={`mt-3 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-600 ${!selectedIngredients[idx] && 'pointer-events-none grayscale opacity-50'}`}>
+                  <div className={`mt-3 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-600 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       <div>

@@ -18,9 +18,20 @@ describe('ImageCapture', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('renders upload and camera buttons when no image', () => {
+    const original = navigator.mediaDevices;
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: vi.fn() },
+      writable: true,
+      configurable: true,
+    });
     render(<ImageCapture {...defaultProps} />);
     expect(screen.getByText('Chụp ảnh')).toBeInTheDocument();
     expect(screen.getByText('Tải ảnh lên')).toBeInTheDocument();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: original,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it('shows image preview and "Chọn ảnh khác" when image is provided', () => {
@@ -54,7 +65,7 @@ describe('ImageCapture', () => {
     });
   });
 
-  it('shows camera error when getUserMedia is not available', async () => {
+  it('hides camera button when getUserMedia is not available', async () => {
     // Remove getUserMedia
     const original = navigator.mediaDevices;
     Object.defineProperty(navigator, 'mediaDevices', {
@@ -64,14 +75,8 @@ describe('ImageCapture', () => {
     });
 
     render(<ImageCapture {...defaultProps} />);
-    fireEvent.click(screen.getByText('Chụp ảnh'));
-
-    expect(screen.getByText(/Thiết bị không hỗ trợ camera/)).toBeInTheDocument();
-    expect(screen.getByText('Đóng camera')).toBeInTheDocument();
-
-    // Close camera error
-    fireEvent.click(screen.getByText('Đóng camera'));
-    expect(screen.getByText('Chụp ảnh')).toBeInTheDocument();
+    expect(screen.queryByText('Chụp ảnh')).not.toBeInTheDocument();
+    expect(screen.getByText('Tải ảnh lên')).toBeInTheDocument();
 
     // Restore
     Object.defineProperty(navigator, 'mediaDevices', {

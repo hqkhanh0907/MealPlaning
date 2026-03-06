@@ -207,16 +207,20 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
           ) : (
             <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 dark:text-slate-400 p-8">
               <div className="flex gap-4">
-                <button 
-                  onClick={() => startCamera()}
-                  className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
-                >
-                  <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center shadow-sm transition-all">
-                    <Camera className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t('imageCapture.takePhoto')}</span>
-                </button>
-                <div className="w-px bg-slate-200 dark:bg-slate-600 h-20 self-center"></div>
+                {typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia && (
+                  <>
+                    <button 
+                      onClick={() => startCamera()}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                    >
+                      <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center shadow-sm transition-all">
+                        <Camera className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t('imageCapture.takePhoto')}</span>
+                    </button>
+                    <div className="w-px bg-slate-200 dark:bg-slate-600 h-20 self-center"></div>
+                  </>
+                )}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"

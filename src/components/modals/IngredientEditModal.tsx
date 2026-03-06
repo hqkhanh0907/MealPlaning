@@ -112,9 +112,13 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
     return true;
   };
 
+  const hasSubmittedRef = useRef(false);
+
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (hasSubmittedRef.current) return;
     if (!validate()) return;
+    hasSubmittedRef.current = true;
     onSubmit(buildIngredient());
   };
 
@@ -172,7 +176,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
             <label htmlFor="ing-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.ingredientName')}</label>
             <div className="flex gap-2">
               <input id="ing-name" value={formData.name[lang]} onChange={e => { const val = e.target.value; setFormData(prev => ({ ...prev, name: { ...prev.name, [lang]: val } })); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
-              <button type="button" onClick={handleAISearch} disabled={!getLocalizedField(formData.name, lang) || !getLocalizedField(formData.unit, lang) || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title={getLocalizedField(formData.unit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
+              <button type="button" onClick={handleAISearch} disabled={!getLocalizedField(formData.name, lang) || !getLocalizedField(formData.unit, lang) || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" aria-label={getLocalizedField(formData.unit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
                 {isSearchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
               </button>
             </div>

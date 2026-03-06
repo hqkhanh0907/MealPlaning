@@ -32,10 +32,10 @@ describe('Summary', () => {
   it('renders all nutrition info', () => {
     render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
     expect(screen.getByText('Dinh dưỡng trong ngày')).toBeInTheDocument();
-    expect(screen.getByText('Calories')).toBeInTheDocument();
+    expect(screen.getByText('Calo')).toBeInTheDocument();
     expect(screen.getByText('Protein')).toBeInTheDocument();
     expect(screen.getByText('Carbs')).toBeInTheDocument();
-    expect(screen.getByText('Fat')).toBeInTheDocument();
+    expect(screen.getByText('Béo')).toBeInTheDocument();
     expect(screen.getByText('Chất xơ')).toBeInTheDocument();
   });
 
