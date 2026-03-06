@@ -166,7 +166,7 @@ export class ManagementPage extends BasePage {
   async getLastIngredientId(): Promise<string | null> {
     return (browser as unknown as ExecutableBrowser).execute(() => {
       const items = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
-      return items.at(-1)?.id ?? null;
+      return items.length > 0 ? items[items.length - 1].id : null;
     });
   }
 
@@ -174,14 +174,24 @@ export class ManagementPage extends BasePage {
   async getLastDishId(): Promise<string | null> {
     return (browser as unknown as ExecutableBrowser).execute(() => {
       const items = JSON.parse(localStorage.getItem('mp-dishes') || '[]') as Array<{ id: string }>;
-      return items.at(-1)?.id ?? null;
+      return items.length > 0 ? items[items.length - 1].id : null;
     });
   }
 
-  /** Return the displayed dish total calories value from the live nutrition preview. */
+  /** Return the displayed dish total calories value from the live nutrition preview.
+   *  Waits until the element contains a non-empty numeric text (React may need a render cycle).
+   */
   async getDishTotalCalories(): Promise<string> {
     const elem = this.el('dish-total-calories');
     await elem.waitForDisplayed({ timeout: 5_000 });
+    // Poll until React has rendered a non-empty value
+    await browser.waitUntil(
+      async () => {
+        const text = await elem.getText();
+        return text !== '' && text !== '0';
+      },
+      { timeout: 5_000, interval: 300, timeoutMsg: 'dish-total-calories never showed a non-empty value' },
+    );
     return elem.getText();
   }
 

@@ -59,6 +59,8 @@ describe('Dish Ingredient Amount — edit amounts in dish modal', () => {
 
   it('TC_DISH_AMT_03 — should update ingredient amount', async () => {
     await page.fillDishAmount(ING_ID, '250');
+    // Wait for React to re-render live nutrition preview after amount change
+    await browser.pause(1000);
     // Verify live nutrition preview updates
     const calories = await page.getDishTotalCalories();
     const calNum = Number.parseInt(calories, 10);
@@ -68,6 +70,8 @@ describe('Dish Ingredient Amount — edit amounts in dish modal', () => {
 
   it('TC_DISH_AMT_04 — should show live nutrition update after amount change', async () => {
     await page.fillDishAmount(ING_ID, '100');
+    // Wait for React to re-render live nutrition preview after amount change
+    await browser.pause(1000);
     const calories = await page.getDishTotalCalories();
     const calNum = Number.parseInt(calories, 10);
     // 100g × (200 kcal / 100g) = 200 kcal
