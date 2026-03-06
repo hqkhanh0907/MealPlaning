@@ -74,17 +74,20 @@ export class BasePage {
         descriptor = Object.getOwnPropertyDescriptor(proto, 'value');
         if (!descriptor) proto = Object.getPrototypeOf(proto);
       }
+      // 1. Set DOM value via native setter
       if (descriptor?.set) {
         descriptor.set.call(el, v);
       } else {
         el.value = v;
       }
-      // Invalidate React 18's internal value tracker so React detects the
-      // change and fires onChange (without this, React thinks the value
-      // hasn't changed and swallows the event).
+      // 2. Invalidate React 18's internal value tracker AFTER setting the
+      // new value. React compares tracker vs DOM value on each event —
+      // if they match it swallows the event. We set tracker to a value
+      // that differs from the new DOM value so React always sees a change.
       if (el._valueTracker) {
-        el._valueTracker.setValue('');
+        el._valueTracker.setValue(v === '' ? '__cleared__' : '');
       }
+      // 3. Dispatch events so React picks up the change
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
     }, testid, value);

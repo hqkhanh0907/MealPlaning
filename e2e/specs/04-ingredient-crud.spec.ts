@@ -39,6 +39,21 @@ describe('Ingredient CRUD', () => {
       await expect(page.el('input-ing-name')).toBeDisplayed();
     });
 
+    after(async () => {
+      // Close modal so subsequent describe blocks start with a clean UI
+      const closeBtn = page.el('btn-close-ingredient');
+      if (await closeBtn.isDisplayed()) {
+        await closeBtn.click();
+        await browser.pause(300);
+      }
+      // Dismiss unsaved-changes dialog if it appears
+      const discardBtn = page.el('btn-discard-unsaved');
+      if (await discardBtn.isExisting() && await discardBtn.isDisplayed()) {
+        await discardBtn.click();
+        await browser.pause(300);
+      }
+    });
+
     it('should show error when submitting with empty name', async () => {
       await page.saveIngredientWithoutWait();
       await expect(page.el('error-ing-name')).toBeDisplayed();
