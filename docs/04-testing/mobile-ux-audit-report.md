@@ -6,13 +6,13 @@
 |-------|-------|
 | **Ngày kiểm thử** | 2026-03-06 |
 | **Phiên bản** | v2.0 (Merged — Assessment + Audit) |
-| **Môi trường** | localhost:3000 / localhost:5173, Chrome DevTools MCP |
+| **Môi trường** | localhost:3000, Chrome DevTools MCP |
 | **Thiết bị giả lập** | iPhone 14 Pro / iPhone 15 — 390×844px, deviceScaleFactor: 3 |
 | **UserAgent** | `Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)` |
 | **Chế độ kiểm tra** | Light mode + Dark mode |
 | **Phương pháp** | Chrome DevTools MCP — trải nghiệm trực tiếp từng trang, từng element, từng interaction flow |
 | **Nguồn dữ liệu** | Merge từ 2 báo cáo: UX Assessment Report (tầm nhìn UX) + Technical Audit Report (kỹ thuật chi tiết) |
-| **Tổng phát hiện** | **57 issues** (5 P0 · 4 P1 · 22 P2 · 26 P3) |
+| **Tổng phát hiện** | **62 issues** (5 P0 · 7 P1 · 24 P2 · 26 P3) |
 | **Trạng thái** | ✅ Hoàn tất phân tích, chờ implement |
 
 ---
@@ -44,22 +44,22 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 
 | Tab | Trạng thái | Kỹ thuật | UX Nâng cao | Tổng |
 |-----|:----------:|:--------:|:-----------:|:----:|
-| Bottom Navigation | ✅ Hoàn tất | 3 | 1 | **4** |
-| Lịch trình (Calendar) | ✅ Hoàn tất | 14 | 5 | **19** |
-| Thư viện (Library) | ✅ Hoàn tất | 7 | 2 | **9** |
-| AI Phân tích | ✅ Hoàn tất | 4 | 1 | **5** |
-| Đi chợ (Shopping) | ✅ Hoàn tất | 3 | 3 | **6** |
-| Cài đặt (Settings) | ✅ Hoàn tất | 4 | 1 | **5** |
-| Cross-cutting | ✅ Hoàn tất | 12 | 2 | **14** |
+| Bottom Navigation | ✅ | 3 | 1 | **4** |
+| Lịch trình (Calendar) | ✅ | 14 | 5 | **19** |
+| Thư viện (Library) | ✅ | 7 | 2 | **9** |
+| AI Phân tích | ✅ | 4 | 1 | **5** |
+| Đi chợ (Shopping) | ✅ | 3 | 3 | **6** |
+| Cài đặt (Settings) | ✅ | 4 | 1 | **5** |
+| Cross-cutting | ✅ | 12 | 2 | **14** |
 | **Tổng** | | **47** | **15** | **62** |
 
-> **Ghi chú**: 5 issues trùng lặp giữa 2 nguồn đã được gộp → **57 issues duy nhất** sau dedup.
+> **Ghi chú**: 5 issues trùng lặp giữa 2 nguồn đã được gộp → **62 issues duy nhất** sau dedup.
 
 ### Tiêu chí đánh giá
 
 - **Thân thiện (Friendly)**: Giao diện gần gũi, dễ tiếp cận, có "nhân tính"
 - **Dễ sử dụng (Easy to use)**: Thao tác trực quan, ít bước, có shortcut cho flow phổ biến
-- **Không gây nhầm lẫn (No confusion)**: Không có yếu tố gây hiểu lầm, mọi element đều self-explanatory
+- **Không gây nhầm lẫn (No confusion)**: Mọi element đều self-explanatory
 - **Nhất quán (Consistent)**: Ngôn ngữ, style, behavior đồng bộ xuyên suốt
 - **Accessibility**: Hỗ trợ screen reader, focus management, contrast, touch targets
 - **Delight** ✨: Micro-interactions, animations, visual richness tạo trải nghiệm vượt mong đợi
@@ -72,6 +72,8 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 | Cao | 🟠 P1 | Ảnh hưởng tới trải nghiệm đáng kể, cần sửa sớm |
 | Trung bình | 🟡 P2 | Cải thiện UX rõ rệt, nên sửa trong sprint tiếp theo |
 | Thấp / Nâng cao | 🟢 P3 | Nice-to-have hoặc UX enhancement đưa trải nghiệm lên tầm cao mới |
+
+> Items đánh dấu ✨ là **UX Vision** — đề xuất nâng cấp trải nghiệm vượt mức "fix bug", hướng tới đỉnh cao mới.
 
 ---
 
@@ -88,12 +90,12 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 - `min-h-14` (56px) đạt chuẩn touch target Material Design (≥48px)
 - `pb-safe` xử lý iOS notch/home indicator
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| NAV-01 | **5 tab trên 390px hơi chật** — mỗi tab ~78px. Label "AI Phân tích" bị nén, khó đọc trên thiết bị nhỏ hơn (iPhone SE: 320px) | 🟡 P2 | `AppNavigation.tsx` | Rút gọn label mobile: "AI Phân tích" → "AI". Hoặc áp dụng iOS tab bar pattern: chỉ hiện icon khi inactive, hiện icon+label khi active |
-| NAV-02 | **Badge AI** (chấm đỏ `w-2.5 h-2.5` = 10px) nhỏ, dễ bỏ sót trên màn hình retina | 🟢 P3 | `AppNavigation.tsx` | Tăng `w-3 h-3` (12px) + thêm `animate-pulse` cho lần đầu xuất hiện |
-| NAV-03 | **Không có feedback animation** khi nhấn tab — chuyển tab tức thì, thiếu cảm giác tương tác | 🟢 P3 | `AppNavigation.tsx` | Thêm `active:scale-95 transition-transform duration-150` |
-| NAV-04 | ✨ **Không có badge/indicator trên tabs** — Grocery có items chưa mua nhưng tab không hiện badge count. Calendar có bữa thiếu nhưng không có visual cue | 🟢 P3 | `AppNavigation.tsx` | Thêm notification badges: Grocery tab hiện số items cần mua, Calendar tab hiện dot khi có bữa thiếu. Tạo awareness cross-tab mà không cần navigate |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| NAV-01 | **5 tab trên 390px hơi chật** — mỗi tab ~78px. Label "AI Phân tích" bị nén, khó đọc trên thiết bị nhỏ hơn (iPhone SE: 320px) | 🟡 P2 | `AppNavigation.tsx` | Rút gọn label mobile: "AI Phân tích" → "AI". Hoặc iOS tab bar pattern: chỉ hiện icon khi inactive, hiện icon+label khi active |
+| NAV-02 | **Badge AI** (chấm đỏ `w-2.5 h-2.5` = 10px) nhỏ, dễ bỏ sót trên retina | 🟢 P3 | `AppNavigation.tsx` | Tăng `w-3 h-3` (12px) + `animate-pulse` cho lần đầu xuất hiện |
+| NAV-03 | **Không có feedback animation** khi nhấn tab | 🟢 P3 | `AppNavigation.tsx` | Thêm `active:scale-95 transition-transform duration-150` |
+| NAV-04 | ✨ **Không có badge/indicator trên tabs** — Grocery có items chưa mua nhưng tab không hiện count. Calendar có bữa thiếu nhưng không có visual cue | 🟢 P3 | `AppNavigation.tsx` | Thêm notification badges: Grocery tab hiện số items, Calendar tab hiện dot khi có bữa thiếu |
 
 ---
 
@@ -113,77 +115,70 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 
 ##### 2.2.1 Internationalization (i18n) — Toàn app
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-01 | **Ngày hiển thị bằng tiếng Anh** ("Friday, March 6, 2026") khi app đang ở chế độ Tiếng Việt. `toLocaleDateString('vi-VN')` phụ thuộc vào ICU data của device/browser — trên một số thiết bị Android cũ hoặc WebView sẽ fallback về English | 🔴 P0 | `CalendarTab.tsx:221` | **Giải pháp 1** (Đề xuất): Dùng `date-fns` + `date-fns/locale/vi` cho format nhất quán cross-platform. **Giải pháp 2**: Manual format với i18n keys cho tên tháng/ngày trong `vi.json`. **Giải pháp 3**: Detect khi output chứa ký tự Latin/English → fallback manual format |
-| CAL-01b | **~40-50% UI text chưa được dịch** — vấn đề i18n hệ thống, không chỉ date format. Các text hardcoded tiếng Anh: "Morning/Noon/Evening", "BREAKFAST/LUNCH/DINNER", "Suggestions for you", "You're still missing...", "Plan meal", "Add dish for Lunch", "Daily nutrition", "Edit nutrition goals", "More options", "Clear plan", category tags "Breakfast/Lunch/Dinner" trong Library. Tạo trải nghiệm "nửa Anh nửa Việt" rất unprofessional | 🔴 P0 | `src/locales/vi.json`, `CalendarTab.tsx`, `DishManager.tsx`, `GroceryList.tsx` + toàn bộ components | Audit toàn bộ i18n keys — dùng `i18next-scanner` hoặc grep tất cả hardcoded strings. Bổ sung missing translation keys vào `vi.json` / `en.json`. Ước tính: 50-80 missing keys cần thêm |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-01 | **Ngày hiển thị bằng tiếng Anh** ("Friday, March 6, 2026") khi app ở chế độ Tiếng Việt. `toLocaleDateString('vi-VN')` phụ thuộc ICU data — fallback English trên một số device | 🔴 P0 | `CalendarTab.tsx` | **GS1** (Đề xuất): Dùng `date-fns` + `date-fns/locale/vi`. **GS2**: Manual format với i18n keys. **GS3**: Detect English output → fallback manual |
+| CAL-01b | **~40-50% UI text chưa được dịch** — i18n hệ thống. Hardcoded tiếng Anh: "Morning/Noon/Evening", "BREAKFAST/LUNCH/DINNER", "Suggestions for you", "You're still missing...", "Plan meal", "Add dish for Lunch", "Daily nutrition", "Edit nutrition goals", "More options", "Clear plan", category tags. Trải nghiệm "nửa Anh nửa Việt" rất unprofessional | 🔴 P0 | `src/locales/vi.json`, `CalendarTab.tsx`, toàn bộ components | Audit toàn bộ i18n keys — dùng `i18next-scanner` hoặc grep hardcoded strings. Bổ sung ~50-80 missing keys vào `vi.json`/`en.json` |
 
 ##### 2.2.2 Date Display
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-01 | **Ngày hiển thị bằng tiếng Anh** ("Friday, March 6, 2026") khi app đang ở chế độ Tiếng Việt. `toLocaleDateString('vi-VN')` phụ thuộc vào ICU data của device/browser — trên một số thiết bị Android cũ hoặc WebView sẽ fallback về English | 🔴 P0 | `CalendarTab.tsx:221` | **Giải pháp 1** (Đề xuất): Dùng `date-fns` + `date-fns/locale/vi` cho format nhất quán cross-platform. **Giải pháp 2**: Manual format với i18n keys cho tên tháng/ngày trong `vi.json`. **Giải pháp 3**: Detect khi output chứa ký tự Latin/English → fallback manual format |
-| CAL-02 | **Format ngày quá dài** trên mobile — text chiếm gần toàn bộ 390px width, có thể bị cắt trên thiết bị nhỏ hơn | 🟡 P2 | `CalendarTab.tsx:221` | Mobile format ngắn hơn: "T6, 06/03/2026" hoặc responsive — hiện full format chỉ trên sm+ |
-
-##### 2.2.2 Date Display
-
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-02 | **Format ngày quá dài** trên mobile — text chiếm gần toàn bộ 390px width, có thể bị cắt trên thiết bị nhỏ hơn | 🟡 P2 | `CalendarTab.tsx:221` | Mobile format ngắn hơn: "T6, 06/03/2026" hoặc responsive — hiện full format chỉ trên sm+ |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-02 | **Format ngày quá dài** trên mobile — text chiếm gần toàn bộ 390px, bị cắt trên thiết bị nhỏ | 🟡 P2 | `CalendarTab.tsx` | Mobile format ngắn: "T6, 06/03/2026". Full format chỉ trên sm+ |
 
 ##### 2.2.3 Week/Month View
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-03 | **Month view trên mobile**: ngày nhỏ, khó nhấn chính xác, chiếm nhiều không gian dọc | 🟡 P2 | `DateSelector.tsx` | Tăng cell height trong month view (min-h-10 → min-h-12), hoặc ẩn nút toggle month view khi width < 640px (giữ week view only) |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-03 | **Month view trên mobile**: ngày nhỏ, khó nhấn, chiếm nhiều không gian dọc | 🟡 P2 | `DateSelector.tsx` | Tăng cell height (min-h-10 → min-h-12), hoặc ẩn month view khi width < 640px |
 
 ##### 2.2.4 Nutrition Summary
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-04 | **"0/1500 kcal" và "0/166g"** khi chưa có plan — progress bar trống không truyền tải giá trị, gây cảm giác "chưa có gì" | 🟢 P3 | `CalendarTab.tsx` | Thêm micro-text khi tất cả macro = 0: "Thêm món ăn để theo dõi dinh dưỡng" |
-| CAL-05 | **Mini cards Carbs/Fat/Fiber** không có target để so sánh — chỉ hiện giá trị tuyệt đối | 🟡 P2 | `CalendarTab.tsx`, `GoalSettingsModal.tsx` | Mở rộng GoalSettingsModal cho Carbs/Fat/Fiber targets. Hiện tiến độ % trên mini cards |
-| CAL-06 | **Nút chỉnh sửa** (pencil icon) nhỏ, touch target hạn chế | 🟢 P3 | `CalendarTab.tsx` | Cho phép tap vào toàn bộ nutrition card để mở GoalSettingsModal (mở rộng hit area) |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-04 | **"0/1500 kcal"** khi chưa có plan — progress bar trống không truyền tải giá trị | 🟢 P3 | `CalendarTab.tsx` | Thêm micro-text: "Thêm món ăn để theo dõi dinh dưỡng" |
+| CAL-05 | **Mini cards Carbs/Fat/Fiber** không có target để so sánh — chỉ giá trị tuyệt đối | 🟡 P2 | `CalendarTab.tsx`, `GoalSettingsModal.tsx` | Mở rộng GoalSettingsModal cho Carbs/Fat/Fiber targets. Hiện % trên mini cards |
+| CAL-06 | **Nút chỉnh sửa** (pencil icon) nhỏ, touch target hạn chế | 🟡 P2 | `CalendarTab.tsx` | Cho phép tap toàn bộ nutrition card để mở GoalSettingsModal (mở rộng hit area) |
 
 ##### 2.2.5 Suggestion Card
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-07 | **Card "Gợi ý cho bạn"** hiện thông tin target nhưng không có CTA rõ ràng — người dùng mới không biết phải làm gì tiếp | 🟡 P2 | `CalendarTab.tsx` | Thêm CTA button trong card: "Xem gợi ý AI" hoặc "Lên kế hoạch nhanh" liên kết tới AI suggestion flow |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-07 | **Card "Gợi ý cho bạn"** không có CTA rõ ràng — người dùng mới không biết làm gì tiếp | 🟡 P2 | `CalendarTab.tsx` | Thêm CTA button: "Xem gợi ý AI" hoặc "Lên kế hoạch nhanh". Cho phép dismiss/snooze individual suggestions |
 
 ##### 2.2.6 Meal Plan Section
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-08 | **3 section bữa ăn empty state giống hệt nhau** — màn hình dài, lặp lại, gây cảm giác trống rỗng. Phải scroll qua 3 section trống để thấy action buttons | 🟡 P2 | `CalendarTab.tsx` | Khi TẤT CẢ bữa trống: gom thành 1 empty state chung "Chưa có kế hoạch cho ngày này" + CTA "Bắt đầu lên kế hoạch". Khi chỉ 1-2 bữa trống: giữ layout hiện tại |
-| CAL-09 | **Action buttons floating** ("+Lên kế hoạch", "AI", "...") ở bottom có thể bị che bởi bottom nav bar 56px | 🟠 P1 | `CalendarTab.tsx`, `App.tsx` | Kiểm tra và đảm bảo `pb-24` (`96px`) đủ clearance. Nếu floating buttons → thêm `bottom-20` để nằm trên nav bar |
-| CAL-10 | **Nút "AI" (tím)** chỉ có icon Sparkles, không label — người dùng mới không biết chức năng | 🟢 P3 | `CalendarTab.tsx` | Thêm tooltip "AI gợi ý thực đơn" hoặc label inline cho lần đầu sử dụng. Đổi text thành "Gợi ý AI 🤖" |
-| CAL-10b | ✨ **Nút "Plan meal" xuất hiện 2 lần** — 1 ở trên (dưới date), 1 ở header Meal plan section — gây nhầm lẫn, chiếm space | 🟡 P2 | `CalendarTab.tsx` | Giữ lại nút ở Meal plan section header (context rõ hơn), bỏ nút ở khu vực date selector |
-| CAL-10c | ✨ **"More options" dropdown chỉ chứa 1 item** ("Clear plan") — dropdown cho 1 item là overkill UX. Mở dropdown để thấy duy nhất 1 option gây thất vọng | 🟡 P2 | `CalendarTab.tsx` | **Option A**: Thêm actions hữu ích: "Copy kế hoạch sang ngày mai", "Chia sẻ menu hôm nay", "Xuất ảnh". **Option B**: Thay dropdown bằng icon button 🗑️ "Xóa kế hoạch" trực tiếp với confirm dialog |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-08 | **3 section bữa ăn empty state giống hệt nhau** — lặp lại, gây cảm giác trống rỗng, phải scroll qua 3 section trống | 🟡 P2 | `CalendarTab.tsx` | Khi TẤT CẢ bữa trống: gom thành 1 empty state "Chưa có kế hoạch cho ngày này" + CTA. Khi 1-2 bữa trống: giữ layout hiện tại |
+| CAL-09 | **Action buttons floating** có thể bị che bởi bottom nav bar 56px | 🟠 P1 | `CalendarTab.tsx`, `App.tsx` | Đảm bảo `pb-24` (96px) đủ clearance. Floating buttons → `bottom-20` để nằm trên nav bar |
+| CAL-10 | **Nút "AI" (tím)** chỉ có icon Sparkles, không label — không biết chức năng | 🟢 P3 | `CalendarTab.tsx` | Thêm tooltip hoặc đổi text thành "Gợi ý AI 🤖" |
+| CAL-10b | ✨ **Nút "Plan meal" xuất hiện 2 lần** — 1 dưới date, 1 ở header Meal plan — gây nhầm lẫn | 🟡 P2 | `CalendarTab.tsx` | Giữ nút ở Meal plan header (context rõ hơn), bỏ nút khu vực date |
+| CAL-10c | ✨ **"More options" dropdown chỉ 1 item** ("Clear plan") — dropdown cho 1 item là overkill | 🟡 P2 | `CalendarTab.tsx` | **A**: Thêm actions: "Copy sang ngày mai", "Chia sẻ menu", "Xuất ảnh". **B**: Thay bằng icon 🗑️ trực tiếp + confirm |
 
 ##### 2.2.7 Plan Meal Dialog Flow
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-14 | ✨ **Thừa bước chọn meal type** — khi tap "Thêm món cho Bữa trưa", dialog vẫn bắt chọn lại "Lunch" ở step 1. Context đã rõ ràng, bước này là friction không cần thiết | 🟠 P1 | `CalendarTab.tsx`, `App.tsx` | Skip dialog chọn meal type khi source đã xác định context (ví dụ: tap "Add dish for Lunch" → mở thẳng dialog "Choose dishes" đã pre-filter Lunch). Chỉ hiện step 1 khi tap nút "Plan meal" chung |
-| CAL-15 | ✨ **Dialog "Choose dishes" thiếu Recent/Quick-add** — người dùng thường ăn lặp lại các món quen. Phải scroll qua toàn bộ danh sách mỗi lần thêm món | 🟡 P2 | `CalendarTab.tsx` | Thêm section "Gần đây" (3-5 món hay chọn nhất) hiển thị trên cùng dialog. Giảm thời gian từ "mở dialog" → "chọn xong" từ 8-10 thao tác xuống 2-3 thao tác |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-14 | ✨ **Thừa bước chọn meal type** — tap "Thêm món cho Bữa trưa" vẫn bắt chọn lại "Lunch" ở step 1. Friction không cần thiết khi context đã rõ | 🟠 P1 | `CalendarTab.tsx`, `App.tsx` | Skip dialog chọn meal type khi source đã xác định context → mở thẳng "Choose dishes" đã pre-filter. Chỉ hiện step 1 khi tap "Plan meal" chung |
+| CAL-15 | ✨ **Dialog "Choose dishes" thiếu Recent/Quick-add** — người dùng ăn lặp lại, phải scroll toàn bộ danh sách mỗi lần | 🟡 P2 | `CalendarTab.tsx` | Section "Gần đây" (3-5 món hay chọn nhất) trên cùng dialog. Giảm thao tác từ 8-10 xuống 2-3 |
 
 ##### 2.2.8 Modal Issues
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-11 | **2 modal đồng thời**: AI Suggestion Preview + Breakfast Meal Picker mở cùng lúc khi load trang. Khi đóng 1 modal, modal kia vẫn hiển thị phía sau — UX anti-pattern nghiêm trọng | 🔴 P0 | `App.tsx:400-420`, `AISuggestionPreviewModal.tsx` | **Giải pháp 1** (Đề xuất): Implement modal queue/manager — chỉ render 1 modal tại một thời điểm, queue các modal khác. **Giải pháp 2**: AI Suggestion nên là inline card/banner thay vì modal (giảm modal density). **Giải pháp 3**: Thêm guard condition — nếu đã có modal đang mở, block modal mới |
-| CAL-12 | **GoalSettingsModal slider** trên mobile khó chỉnh chính xác (thumb nhỏ, drag area hẹp) | 🟢 P3 | `GoalSettingsModal.tsx` | Thêm nút stepper (+/-) hai bên slider. Cho phép tap vào giá trị để nhập trực tiếp |
-| CAL-13 | **"Tự động lưu" text** nhỏ ở bottom modal — dễ bỏ sót, không có visual feedback khi save xong | 🟢 P3 | `GoalSettingsModal.tsx` | Thêm subtle checkmark animation hoặc green flash khi giá trị thay đổi & saved |
-| CAL-16 | **Protein ratio validation bug** — giá trị 1.6 g/kg (hoàn toàn hợp lệ trong dinh dưỡng) hiển thị `invalid="true"` trên input field. Có thể do min/max/step validation không đúng | 🟠 P1 | `GoalSettingsModal.tsx` | Kiểm tra spinbutton min/max/step attributes. Protein multiplier hợp lệ: 0.8-3.0 g/kg. Đảm bảo step cho phép giá trị thập phân (step="0.1"). Thêm inline error message rõ ràng khi validation thực sự fail |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-11 | **2 modal đồng thời**: AI Suggestion + Meal Picker mở cùng lúc khi load. Đóng 1 → modal kia vẫn phía sau — anti-pattern nghiêm trọng | 🔴 P0 | `App.tsx:400-420`, `AISuggestionPreviewModal.tsx` | **GS1** (Đề xuất): Modal queue/manager — chỉ 1 modal tại một thời điểm. **GS2**: AI Suggestion → inline card/banner thay vì modal. **GS3**: Guard condition — block modal mới nếu đã có modal đang mở |
+| CAL-12 | **GoalSettingsModal slider** trên mobile khó chỉnh chính xác (thumb nhỏ, drag area hẹp) | 🟢 P3 | `GoalSettingsModal.tsx` | Thêm stepper (+/-) hai bên slider. Cho phép tap giá trị để nhập trực tiếp |
+| CAL-13 | **"Tự động lưu" text** nhỏ, không có visual feedback khi save xong | 🟢 P3 | `GoalSettingsModal.tsx` | Subtle checkmark animation hoặc green flash khi saved |
+| CAL-16 | **Protein ratio validation bug** — giá trị 1.6 g/kg (hoàn toàn hợp lệ) hiển thị `invalid="true"`. Có thể min/max/step validation sai | 🟠 P1 | `GoalSettingsModal.tsx` | Kiểm tra spinbutton attributes. Protein hợp lệ: 0.8-3.0 g/kg, step="0.1". Thêm inline error message rõ ràng |
 
-##### 2.2.9 Calendar UX Enhancements (Tầm nhìn nâng cao)
+##### 2.2.9 Calendar UX Enhancements ✨
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| CAL-17 | ✨ **Theme toggle ở vị trí không phù hợp** — đặt ở header Calendar tab chiếm không gian premium cho action hiếm dùng. Người dùng thay đổi theme 1-2 lần rồi thôi, không phải mỗi ngày | 🟡 P2 | `CalendarTab.tsx`, `SettingsTab.tsx` | Di chuyển theme toggle sang Settings tab (đã có section "Giao diện" phù hợp). Giải phóng header cho greeting hoặc actions thường xuyên hơn |
-| CAL-18 | ✨ **Greeting header thay thế** — thêm chất "nhân tính" cho app, tạo cảm giác personal | 🟢 P3 | `CalendarTab.tsx` | Thay tiêu đề "Calendar" bằng greeting theo thời gian: "Chào buổi sáng! ☀️" / "Chào buổi chiều! 🌤️" / "Chào buổi tối! 🌙️". Thêm tên user nếu có (future: user profile) |
-| CAL-19 | ✨ **Nutrition progress thiếu % completion** — người dùng phải tự tính "155/1500 = bao nhiêu %?" | 🟡 P2 | `CalendarTab.tsx` | Hiển thị % trên progress bar: "155 / 1500 kcal (10%)". Color-coded: xanh lá (<80%), vàng (80-100%), đỏ (>100%). Tương lai: thay progress bar Calories bằng donut chart — trực quan hơn, tiết kiệm không gian dọc |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| CAL-17 | ✨ **Theme toggle ở vị trí không phù hợp** — header Calendar chiếm space premium cho action hiếm dùng | 🟡 P2 | `CalendarTab.tsx`, `SettingsTab.tsx` | Di chuyển sang Settings tab (đã có section "Giao diện"). Giải phóng header |
+| CAL-18 | ✨ **Greeting header** — thêm chất "nhân tính", personal touch | 🟢 P3 | `CalendarTab.tsx` | "Chào buổi sáng! ☀️" / "Chào buổi chiều! 🌤️" / "Chào buổi tối! 🌙" theo thời gian |
+| CAL-19 | ✨ **Nutrition progress thiếu % completion** — phải tự tính "155/1500 = ?" | 🟡 P2 | `CalendarTab.tsx` | Hiển thị %: "155/1500 kcal (10%)". Color-coded: xanh (<80%), vàng (80-100%), đỏ (>100%). Future: donut chart |
 
 ---
 
@@ -198,58 +193,65 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 - Category filter với count badges (Tất cả 5, Sáng 2, Trưa 3, Tối 4)
 - Ingredient "Dùng trong:" cross-reference — rất hữu ích
 - Full macro breakdown per ingredient
+- Delete disabled cho ingredients in-use — excellent safety
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| LIB-01 | **Grid view cards quá dày thông tin** — icon, tên, ingredient count, meal tags, calories, protein, 2 action buttons trong ~170px width card. Information overload trên mobile | 🟡 P2 | `DishList.tsx` | Giảm thông tin trên card: chỉ hiện tên + calories + category tag. Chi tiết (protein, ingredient count) hiện khi tap vào card. Action buttons chuyển sang card detail view |
-| LIB-02 | **Edit + Delete buttons sát nhau** (khoảng cách ~8px) — dễ nhấn nhầm Delete trên mobile. Delete là hành động không thể hoàn tác | 🔴 P0 | `DishList.tsx`, `IngredientList.tsx` | **Giải pháp 1** (Đề xuất): Dùng swipe-to-reveal pattern — swipe trái để hiện Delete (iOS pattern). **Giải pháp 2**: Tăng khoảng cách giữa 2 buttons + Delete dùng màu xám (không đỏ), chỉ đổi đỏ khi hover/focus. **Giải pháp 3**: Gom Edit/Delete vào menu "..." (three-dot), mở action sheet |
-| LIB-03 | **List view**: tên món dài bị truncate, không có cách xem full name ngoài tap edit | 🟢 P3 | `DishList.tsx` | Cho phép text wrap (2 dòng max) hoặc tap row để expand inline |
-| LIB-04 | **Search bar** behavior khi scroll — nên sticky ở top thay vì scroll cùng content | 🟢 P3 | `ManagementTab.tsx` | Thêm `sticky top-0 z-10 bg-white dark:bg-slate-900` cho search section |
-| LIB-05 | **Ingredient hiện "per 100g"** — người dùng Việt Nam quen suy nghĩ theo đơn vị thực tế: "1 quả trứng", "1 muỗng" | 🟡 P2 | `IngredientList.tsx`, `types.ts` | Cho phép set "serving size" tùy chỉnh (ví dụ: 1 quả = 50g). Hiện macro theo cả serving lẫn 100g |
-| LIB-06 | **"Dùng trong:" list** dài nếu ingredient phổ biến → card bị kéo dài, phá layout grid | 🟢 P3 | `IngredientList.tsx` | Giới hạn hiện 2 dishes, thêm "+N khác" expandable |
-| LIB-07 | **Calendar + Management tabs luôn render trong DOM** (dùng `hidden` CSS class). Tất cả buttons/inputs vẫn tồn tại trong DOM tree — gây xung đột khi dùng `querySelector` hoặc assistive technology. Đã xác nhận: click "Chỉnh sửa" qua JS selector trên Library tab thực chất trigger button trên Calendar tab | 🔴 P0 | `App.tsx:332-363` | **Giải pháp 1** (Đề xuất): Thêm `inert` attribute cho hidden tab panels: `<div inert={activeTab !== 'calendar'}>`  — ngăn tất cả interaction + assistive tech. **Giải pháp 2**: Chuyển sang conditional rendering (`{activeTab === 'x' && <Component />}`) — nhưng mất state khi switch tab. **Giải pháp 3**: Giữ `hidden` nhưng thêm `aria-hidden="true"` + `tabIndex={-1}` cho tất cả interactive elements trong hidden tabs |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| LIB-01 | **Grid view cards quá dày thông tin** — information overload trên mobile | 🟡 P2 | `DishManager.tsx` | Chỉ hiện tên + calories + tag. Chi tiết khi tap card. Actions vào detail view |
+| LIB-02 | **Edit + Delete buttons sát nhau** (~8px) — dễ nhấn nhầm Delete | 🟠 P1 | `DishManager.tsx`, `IngredientManager.tsx` | **GS1** (Đề xuất): Tăng gap (gap-2 → gap-4, ≥16px) + Delete màu neutral, đỏ khi hover. **GS2**: Gom vào menu "...". **GS3** (Future): Swipe-to-reveal |
+| LIB-03 | **List view** tên dài bị truncate | 🟢 P3 | `DishManager.tsx` | Text wrap 2 dòng max hoặc tap expand inline |
+| LIB-04 | **Search bar** không sticky khi scroll | 🟢 P3 | `ManagementTab.tsx` | `sticky top-0 z-10 bg-white dark:bg-slate-900` |
+| LIB-05 | **Ingredient chỉ per 100g** — VN quen "1 quả", "1 muỗng" | 🟡 P2 | `IngredientManager.tsx`, `types.ts` | Serving size tùy chỉnh (1 quả = 50g). Hiện macro per serving + per 100g |
+| LIB-06 | **"Dùng trong:" list** dài phá layout grid | 🟢 P3 | `IngredientManager.tsx` | Giới hạn 2 dishes + "+N khác" expandable |
+| LIB-07 | **Hidden tabs vẫn nhận DOM interaction** — `hidden` CSS class nhưng buttons/inputs vẫn trong DOM. Click "Chỉnh sửa" trên Library thực chất trigger Calendar tab | 🔴 P0 | `App.tsx:332-363` | **GS1** (Đề xuất): `inert` attribute: `<div inert={activeTab !== 'calendar'}>`. **GS2**: Conditional rendering (mất state). **GS3**: `aria-hidden="true"` + `tabIndex={-1}` |
+| LIB-08 | ✨ **Dish cards thiếu hình ảnh** — food library thuần text, thiếu emotional appeal | 🟢 P3 | `DishManager.tsx` | Short-term: emoji theo meal type (🍳🍲🥗). Long-term: user upload ảnh hoặc auto từ AI. Grid: ảnh trên, text dưới (Pinterest) |
+| LIB-09 | ✨ **Create dish form dài** — single form, no draft save, close = mất input | 🟢 P3 | `ManagementTab.tsx` | Multi-step wizard (Tên → Ingredients → Review). Auto-save draft LocalStorage. Gợi ý ingredients theo meal type |
 
 ---
 
 ### 2.4 Tab AI Phân tích
 
-**Files liên quan**: `src/components/AIImageAnalyzer.tsx`
+**File liên quan**: `src/components/AIImageAnalyzer.tsx`
 
 #### Điểm tốt
 - Giao diện clean, focus vào action chính
 - Dashed upload area trực quan (camera icon + text)
-- CTA "Phân tích món ăn" nổi bật (emerald green, full width)
-- Lazy-loaded (`React.lazy`) — không tốn bundle size cho lần load đầu
+- CTA "Phân tích món ăn" nổi bật (emerald, full width)
+- Lazy-loaded (`React.lazy`) — không tốn bundle size
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| AI-01 | **Empty state preview area** chiếm space nhưng chỉ có placeholder — không truyền tải giá trị cho người dùng mới, không biết kết quả sẽ trông như thế nào | 🟡 P2 | `AIImageAnalyzer.tsx` | Thay placeholder bằng ví dụ minh họa: hiện 1 sample result card (ảnh món ăn → tên + bảng dinh dưỡng) để set user expectation |
-| AI-02 | **Không có hướng dẫn nhanh** — người dùng lần đầu không biết workflow (chụp → phân tích → lưu) | 🟡 P2 | `AIImageAnalyzer.tsx` | Thêm stepper mini: "1. Chụp/chọn ảnh → 2. AI phân tích → 3. Lưu vào thư viện" hiện phía trên upload area |
-| AI-03 | **Camera button** trên mobile web có thể fail nếu không phải HTTPS (trừ localhost). Không có error handling cho trường hợp camera API bị từ chối quyền | 🟢 P3 | `AIImageAnalyzer.tsx` | Hiện thông báo rõ ràng khi camera API không khả dụng: "Camera không khả dụng. Vui lòng chọn ảnh từ thư viện" |
-| AI-04 | **ONNX Runtime warnings** — 170+ warnings từ MarianTokenizer xuất hiện ngay khi app mount, dù user chưa navigate tới AI tab. Model pre-load tốn memory/CPU trên mobile | 🟡 P2 | `src/workers/`, `AIImageAnalyzer.tsx` | Lazy-load ONNX model CHỈ khi user navigate tới AI tab lần đầu. Suppress ONNX console warnings trong production build |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| AI-01 | **Empty state preview** chiếm space nhưng vô nghĩa — không set expectation cho user mới | 🟠 P1 | `AIImageAnalyzer.tsx` | Thay bằng ví dụ minh họa: sample result card (ảnh → tên + bảng dinh dưỡng). Heading: "Chụp ảnh món ăn, AI nhận diện ngay!" + stepper mini "1. Chụp → 2. Phân tích → 3. Lưu" |
+| AI-02 | **Không có hướng dẫn nhanh** — user lần đầu không biết workflow | 🟡 P2 | `AIImageAnalyzer.tsx` | Stepper: "1. Chụp/chọn ảnh → 2. AI phân tích → 3. Lưu vào thư viện" |
+| AI-03 | **Camera button** có thể fail nếu không HTTPS. Không error handling cho denied permission | 🟢 P3 | `AIImageAnalyzer.tsx` | Thông báo: "Camera không khả dụng. Vui lòng chọn ảnh từ thư viện" |
+| AI-04 | **ONNX Runtime warnings** — 170+ warnings từ MarianTokenizer ngay khi mount, dù chưa vào AI tab. Pre-load tốn ~50-100MB memory mobile | 🟡 P2 | `src/workers/`, `AIImageAnalyzer.tsx` | Lazy-load model CHỈ khi vào AI tab lần đầu. Suppress warnings trong production |
+| AI-05 | ✨ **Không có lịch sử phân tích** — mỗi lần scan xong, kết quả biến mất khi rời tab | 🟢 P3 | `AIImageAnalyzer.tsx` | Danh sách "Phân tích gần đây" — re-use kết quả, tránh scan lại cùng món |
 
 ---
 
 ### 2.5 Tab Đi chợ (Shopping)
 
-**Files liên quan**: `src/components/GroceryList.tsx`
+**File liên quan**: `src/components/GroceryList.tsx`
 
 #### Điểm tốt
 - Empty state rõ ràng: cart icon + "Chưa có gì cần mua"
 - CTA cross-navigation tới Lịch trình tab
 - Conditional rendering (`{activeTab === 'grocery' && ...}`) — đúng pattern
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| SHOP-01 | **Empty state quá tối giản** — không giải thích shopping list tự động generate từ đâu. Người dùng mới nghĩ cần tự thêm item | 🟡 P2 | `GroceryList.tsx` | Thêm explanation text: "Danh sách đi chợ tự động tạo từ kế hoạch bữa ăn. Hãy lên kế hoạch trước!" |
-| SHOP-02 | **CTA "Mở tab Lịch trình"** trông giống plain text, không rõ ràng là clickable link | 🟡 P2 | `GroceryList.tsx` | Style rõ hơn: thêm underline + emerald color + arrow icon. Hoặc đổi thành button primary style |
-| SHOP-03 | **Không có chức năng thêm manual item** — chỉ auto-generate từ meal plan. Người dùng muốn thêm "gia vị", "dầu ăn" ngoài plan | 🟡 P2 | `GroceryList.tsx`, `types.ts` | Thêm nút "+ Thêm mục" cho custom items. Lưu riêng biệt với auto-generated list |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| SHOP-01 | **Empty state thiếu explanation** — không giải thích list auto-generate từ đâu. User mới nghĩ cần tự thêm | 🟡 P2 | `GroceryList.tsx` | Thêm: "Danh sách tự động tạo từ kế hoạch bữa ăn. Hãy lên kế hoạch trước!" |
+| SHOP-02 | **CTA "Mở tab Lịch trình"** trông giống plain text, không rõ clickable | 🟡 P2 | `GroceryList.tsx` | Thêm underline + emerald color + arrow icon. Hoặc button primary style |
+| SHOP-03 | **Không có thêm manual item** — chỉ auto từ meal plan. User muốn thêm "gia vị", "dầu ăn" | 🟡 P2 | `GroceryList.tsx`, `types.ts` | Nút "+ Thêm mục" cho custom items. Lưu riêng với auto-generated |
+| SHOP-04 | ✨ **Không có checkboxes đánh dấu "đã mua"** — tính năng cốt lõi nhất của grocery list hoàn toàn thiếu | 🟠 P1 | `GroceryList.tsx` | Tap checkbox → strikethrough + xám. Section "Đã mua" collapse ở dưới. Persist trong localStorage |
+| SHOP-05 | ✨ **Không có quantity aggregation** — "Trứng gà" trong 3 bữa hiện 3 dòng riêng thay vì tổng hợp | 🟡 P2 | `GroceryList.tsx` | Gom cùng ingredient: "Trứng gà: 300g (tổng)". Gom nhóm: "Thịt", "Rau", "Gia vị" |
+| SHOP-06 | ✨ **Empty space rất lớn** khi ít items — lãng phí screen real estate | 🟢 P3 | `GroceryList.tsx` | Thêm tips/suggestions vào khoảng trống: "💡 Mẹo: Lên kế hoạch cả tuần để tiết kiệm thời gian đi chợ!" |
 
 ---
 
 ### 2.6 Tab Cài đặt (Settings)
 
-**Files liên quan**: `src/components/SettingsTab.tsx`
+**File liên quan**: `src/components/SettingsTab.tsx`
 
 #### Điểm tốt
 - 3 section cards tách bạch: Ngôn ngữ, Giao diện, Dữ liệu
@@ -258,12 +260,13 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 - Active theme green border highlight
 - Export/Import buttons rõ ràng
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| SET-01 | **Không có section "Về ứng dụng"** — thiếu version, changelog link, feedback channel | 🟢 P3 | `SettingsTab.tsx` | Thêm section cuối: app version + "Xem thay đổi" link + "Gửi phản hồi" button |
-| SET-02 | **Import dữ liệu** không có preview/confirm trước khi ghi đè — nguy cơ mất dữ liệu hiện tại nếu import sai file | 🟠 P1 | `SettingsTab.tsx` | Hiện preview dialog: "File chứa X món ăn, Y nguyên liệu. Data hiện tại sẽ bị ghi đè. Tiếp tục?" + option "Giữ data hiện tại + thêm mới" |
-| SET-03 | **Không có option "Reset tất cả dữ liệu"** — phải import file trống hoặc xóa localStorage thủ công | 🟢 P3 | `SettingsTab.tsx` | Thêm nút "Xóa tất cả dữ liệu" trong Data section, yêu cầu double-confirm |
-| SET-04 | **Theme switching** không có animation — chuyển tức thì gây flicker | 🟢 P3 | CSS/Tailwind | Thêm `transition-colors duration-300` cho `html` hoặc `body` element |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| SET-01 | **Không có section "Về ứng dụng"** — thiếu version, changelog, feedback | 🟢 P3 | `SettingsTab.tsx` | Thêm: app version + "Xem thay đổi" + "Gửi phản hồi" |
+| SET-02 | **Import dữ liệu** không preview/confirm — nguy cơ mất data nếu import sai file | 🟠 P1 | `SettingsTab.tsx` | Preview dialog: "File chứa X món, Y nguyên liệu. Data hiện tại bị ghi đè. Tiếp tục?" + option merge |
+| SET-03 | **Thiếu "Reset tất cả dữ liệu"** | 🟢 P3 | `SettingsTab.tsx` | Nút "Xóa tất cả" trong Data section, double-confirm |
+| SET-04 | **Theme switching** không animation — chuyển tức thì gây flicker | 🟢 P3 | CSS/Tailwind | `transition-colors duration-300` cho `html`/`body` |
+| SET-05 | ✨ **Settings quá ít options + Nutrition goals ẩn** — Nutrition goals đặt ở Calendar, user tìm "cài đặt mục tiêu" sẽ vào Settings nhưng không thấy | 🟡 P2 | `SettingsTab.tsx`, `GoalSettingsModal.tsx` | Thêm sections: "Mục tiêu dinh dưỡng" (shortcut/duplicate), "Cấu hình AI" (API key), "Thông tin cá nhân" (cân nặng, chiều cao cho TDEE), "Hỗ trợ" (FAQ, Contact) |
 
 ---
 
@@ -271,100 +274,119 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 
 #### 2.7.1 Accessibility
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| ACC-01 | **Color contrast** — `text-emerald-500` (#10B981) trên `bg-white` (#FFFFFF) = contrast ratio ~3.3:1, **KHÔNG ĐẠT** WCAG AA (yêu cầu 4.5:1 cho text nhỏ) | 🟠 P1 | Toàn bộ components | Đổi sang `text-emerald-700` (#047857) = ~6.6:1 ratio cho body text, giữ `emerald-500` cho decorative icons |
-| ACC-02 | **Focus ring** không rõ ràng khi keyboard navigation — một số buttons thiếu `focus-visible` styles | 🟡 P2 | Toàn bộ components | Thêm global style: `focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2` cho tất cả interactive elements |
-| ACC-03 | **Modal `<dialog open>`** thiếu `aria-labelledby` — screen reader không biết title modal | 🟢 P3 | `ModalBackdrop.tsx` | Thêm `aria-labelledby` prop trỏ tới heading ID cho mỗi ModalBackdrop instance |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| ACC-01 | **Color contrast** — `text-emerald-500` (#10B981) trên white = 3.3:1, **KHÔNG ĐẠT** WCAG AA (cần 4.5:1) | 🟠 P1 | Toàn bộ components | `text-emerald-700` (#047857) = 6.6:1 cho body text. Giữ `emerald-500` cho icons. Dark mode: `dark:text-emerald-300` |
+| ACC-02 | **Focus ring** không rõ ràng, thiếu `focus-visible` styles | 🟡 P2 | Toàn bộ | Global: `focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2` |
+| ACC-03 | **Modal `<dialog>`** thiếu `aria-labelledby` | 🟢 P3 | `ModalBackdrop.tsx` | Thêm `aria-labelledby` trỏ tới heading ID |
 
 #### 2.7.2 Mobile-Specific UX
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| MOB-01 | **Content bị che bởi bottom nav** — `pb-24` trong `<main>` (96px) có thể không đủ khi cộng safe area inset trên iPhone X+ | 🟡 P2 | `App.tsx:331` | Dùng `pb-[calc(6rem+env(safe-area-inset-bottom))]` hoặc CSS variable |
-| MOB-02 | **Không có pull-to-refresh** — gesture phổ biến trên mobile app, thiếu sẽ gây thất vọng cho native app users | 🟢 P3 | `CalendarTab.tsx` | Implement pull-to-refresh trên Calendar tab (recalculate nutrition, reload data) |
-| MOB-03 | **Không có onboarding/tutorial** cho người dùng mới — 5 tabs + nhiều CTA có thể overwhelming | 🟡 P2 | `App.tsx` | First-time user tour: highlight từng tab với tooltip giải thích chức năng (dùng thư viện như `react-joyride`) |
-| MOB-04 | **Page transitions** không có animation khi switch tab — chuyển đổi instant thiếu cảm giác "chuyển trang" | 🟢 P3 | `App.tsx` | Thêm fade-in animation: `animate-[fadeIn_200ms_ease-out]` cho mỗi tab panel |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| MOB-01 | **Content bị che bởi bottom nav** — `pb-24` có thể không đủ khi cộng safe area inset iPhone X+ | 🟡 P2 | `App.tsx:331` | `pb-[calc(6rem+env(safe-area-inset-bottom))]` |
+| MOB-02 | **Không có pull-to-refresh** — gesture phổ biến trên mobile app | 🟢 P3 | `CalendarTab.tsx` | Pull-to-refresh trên Calendar (recalculate nutrition) |
+| MOB-03 | **Không có onboarding/tutorial** cho user mới — 5 tabs + nhiều CTA overwhelming | 🟡 P2 | `App.tsx` | First-time tour: highlight từng tab với tooltip (lightweight custom, không cần thư viện lớn) |
+| MOB-04 | **Page transitions** không animation khi switch tab | 🟢 P3 | `App.tsx` | `animate-[fadeIn_200ms_ease-out]` cho mỗi tab panel |
 
 #### 2.7.3 Performance
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| PERF-01 | **ONNX model pre-load** — 170+ warnings ngay khi mount, AI model load trước khi cần → tốn ~50-100MB memory trên mobile | 🟡 P2 | `src/workers/`, Web Workers | Chuyển sang on-demand loading: chỉ init model khi user vào AI tab + hiện loading progress |
-| PERF-02 | **Calendar + Management always mounted** — re-renders khi bất kỳ prop nào thay đổi, dù tab đang hidden | 🟡 P2 | `App.tsx:332-363` | Kiểm tra profile renders với React DevTools. Nếu excessive → thêm `React.memo` boundary hoặc chuyển conditional rendering |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| PERF-01 | **ONNX model pre-load** — 170+ warnings ngay mount, tốn ~50-100MB memory mobile | 🟡 P2 | `src/workers/` | On-demand loading khi vào AI tab + loading progress (gộp với AI-04) |
+| PERF-02 | **Calendar + Management always mounted** — re-renders khi prop thay đổi dù hidden | 🟡 P2 | `App.tsx:332-363` | Profile với React DevTools. Thêm `React.memo` hoặc conditional rendering |
 
 #### 2.7.4 Error Handling
 
-| ID | Vấn đề | Mức độ | File ảnh hưởng | Đề xuất |
-|----|--------|:------:|----------------|---------|
-| ERR-01 | **Không có offline indicator** — app dùng localStorage (offline-first) nhưng AI analysis cần model files. Không rõ ràng feature nào cần online | 🟢 P3 | `App.tsx` | Hiện banner/toast "Đang offline — một số tính năng AI bị giới hạn" khi navigator.onLine = false |
-| ERR-02 | **ErrorBoundary fallback** — có per-tab (tốt!) nhưng fallback message có thể friendly hơn | 🟢 P3 | `ErrorBoundary.tsx` | Thêm retry button + friendly illustration trong error fallback UI |
+| ID | Vấn đề | Mức độ | File | Đề xuất |
+|----|--------|:------:|------|---------|
+| ERR-01 | **Không có offline indicator** — app offline-first nhưng AI cần online. Không rõ feature nào cần internet | 🟢 P3 | `App.tsx` | Banner: "Đang offline — tính năng AI bị giới hạn" khi `navigator.onLine = false` |
+| ERR-02 | **ErrorBoundary fallback** — có per-tab (tốt!) nhưng message có thể friendly hơn | 🟢 P3 | `ErrorBoundary.tsx` | Retry button + illustration trong error fallback |
 
 ---
 
 ## 3. Bảng tổng hợp theo mức độ ưu tiên
 
-### 🔴 P0 — Nghiêm trọng (4 issues) — Fix ngay
+### 🔴 P0 — Nghiêm trọng (5 issues) — Fix ngay
 
 | ID | Tóm tắt | Effort | Impact |
 |----|---------|:------:|:------:|
-| CAL-01 | Ngày hiển thị sai ngôn ngữ (English khi đang Vietnamese) | Nhỏ (1-2h) | Cao — i18n broken |
-| CAL-11 | 2 modal mở đồng thời, chồng chéo | Trung bình (3-4h) | Cao — UX anti-pattern |
-| LIB-02 | Edit/Delete buttons sát nhau, dễ nhấn nhầm Delete | Nhỏ (1-2h) | Cao — risk mất dữ liệu |
-| LIB-07 | Hidden tabs vẫn nhận DOM interaction (`inert` missing) | Nhỏ (1h) | Cao — accessibility + JS bugs |
+| CAL-01 | Ngày hiển thị sai ngôn ngữ | Nhỏ | Cao — i18n broken |
+| CAL-01b | ~40-50% UI text chưa dịch sang tiếng Việt | Trung bình | Cao — trải nghiệm "nửa Anh nửa Việt" |
+| CAL-11 | 2 modal mở đồng thời, chồng chéo | Trung bình | Cao — UX anti-pattern |
+| LIB-07 | Hidden tabs vẫn nhận DOM interaction | Nhỏ | Cao — accessibility + JS bugs |
+| LIB-02 | Edit/Delete buttons sát nhau → nhấn nhầm | Nhỏ | Cao — risk data |
 
-### 🟠 P1 — Cao (3 issues) — Sửa trong sprint hiện tại
+> **Ghi chú**: LIB-02 được nâng từ P1 lên P0 vì kết hợp proximity risk + thiếu confirm dialog đầy đủ trên một số flows.
+
+### 🟠 P1 — Cao (4 issues) — Sprint hiện tại
 
 | ID | Tóm tắt | Effort | Impact |
 |----|---------|:------:|:------:|
-| CAL-09 | Floating action buttons bị che bởi bottom nav | Nhỏ (30min) | Trung bình — usability |
-| SET-02 | Import data không có preview/confirm | Trung bình (2-3h) | Cao — risk mất data |
-| ACC-01 | Color contrast emerald-500 không đạt WCAG AA | Nhỏ (1h) | Trung bình — accessibility compliance |
+| CAL-09 | Floating buttons bị che bởi bottom nav | Nhỏ | Trung bình |
+| CAL-14 | ✨ Thừa bước chọn meal type khi context rõ | Nhỏ | Cao — giảm friction |
+| CAL-16 | Protein validation bug (1.6 → invalid) | Nhỏ | Trung bình — bug |
+| SET-02 | Import data không preview/confirm | Trung bình | Cao — risk mất data |
+| SHOP-04 | ✨ Grocery thiếu checkboxes đánh dấu "đã mua" | Trung bình | Cao — core feature |
+| ACC-01 | Color contrast không đạt WCAG AA | Nhỏ | Trung bình — a11y |
+| AI-01 | AI tab empty state kém, user mới mất phương hướng | Trung bình | Cao — learnability |
 
-### 🟡 P2 — Trung bình (17 issues) — Sprint tiếp theo
+### 🟡 P2 — Trung bình (22 issues) — Sprint tiếp theo
 
 | ID | Tóm tắt | Effort |
 |----|---------|:------:|
 | NAV-01 | Label navigation chật trên thiết bị nhỏ | Nhỏ |
-| CAL-02 | Format ngày quá dài trên mobile | Nhỏ |
-| CAL-03 | Month view cell nhỏ, khó nhấn | Nhỏ |
+| CAL-02 | Format ngày quá dài | Nhỏ |
+| CAL-03 | Month view cell nhỏ | Nhỏ |
 | CAL-05 | Carbs/Fat/Fiber thiếu target | Trung bình |
+| CAL-06 | Nutrition card touch area nhỏ | Nhỏ |
 | CAL-07 | Suggestion card thiếu CTA | Nhỏ |
-| CAL-08 | 3 bữa empty state lặp lại | Trung bình |
+| CAL-08 | 3 bữa empty state lặp | Trung bình |
+| CAL-10b | ✨ Plan meal button duplicate | Nhỏ |
+| CAL-10c | ✨ More options chỉ 1 item | Nhỏ |
+| CAL-15 | ✨ Thiếu Recent dishes shortcut | Trung bình |
+| CAL-17 | ✨ Theme toggle vị trí không phù hợp | Nhỏ |
+| CAL-19 | ✨ Nutrition thiếu % completion | Nhỏ |
 | LIB-01 | Grid card information overload | Trung bình |
-| LIB-05 | Chỉ hiện per 100g, thiếu serving size | Trung bình |
-| AI-01 | Empty state preview vô nghĩa | Nhỏ |
-| AI-02 | Thiếu hướng dẫn nhanh cho AI flow | Nhỏ |
+| LIB-05 | Chỉ per 100g, thiếu serving size | Trung bình |
+| AI-02 | Thiếu hướng dẫn nhanh AI flow | Nhỏ |
 | AI-04 | ONNX model pre-load tốn tài nguyên | Trung bình |
 | SHOP-01 | Empty state thiếu explanation | Nhỏ |
 | SHOP-02 | CTA link thiếu visual affordance | Nhỏ |
-| SHOP-03 | Không có thêm manual shopping item | Trung bình |
-| ACC-02 | Focus ring thiếu cho keyboard nav | Nhỏ |
+| SHOP-03 | Không có manual shopping item | Trung bình |
+| SHOP-05 | ✨ Quantity aggregation | Trung bình |
+| SET-05 | ✨ Settings quá ít + Nutrition goals ẩn | Trung bình |
+| ACC-02 | Focus ring thiếu | Nhỏ |
 | MOB-01 | Safe area inset chưa đủ | Nhỏ |
-| MOB-03 | Không có onboarding cho user mới | Lớn |
+| MOB-03 | Onboarding cho user mới | Lớn |
 | PERF-01 | Lazy-load ONNX model | Trung bình |
 | PERF-02 | Always-mounted tabs re-renders | Trung bình |
 
-### 🟢 P3 — Thấp (16 issues) — Backlog
+### 🟢 P3 — Thấp / UX Vision (26 issues) — Backlog
 
 | ID | Tóm tắt | Effort |
 |----|---------|:------:|
 | NAV-02 | Badge AI nhỏ | Nhỏ |
-| NAV-03 | Thiếu tab press animation | Nhỏ |
+| NAV-03 | Tab press animation | Nhỏ |
+| NAV-04 | ✨ Tab badges (count indicators) | Nhỏ |
 | CAL-04 | Nutrition 0 state message | Nhỏ |
-| CAL-06 | Nutrition card touch area | Nhỏ |
 | CAL-10 | AI button thiếu label | Nhỏ |
-| CAL-12 | Slider khó chỉnh trên mobile | Trung bình |
-| CAL-13 | Auto-save thiếu visual feedback | Nhỏ |
+| CAL-12 | Slider khó chỉnh mobile | Trung bình |
+| CAL-13 | Auto-save visual feedback | Nhỏ |
+| CAL-18 | ✨ Greeting header | Nhỏ |
 | LIB-03 | List view truncate tên | Nhỏ |
-| LIB-04 | Search bar không sticky | Nhỏ |
+| LIB-04 | Search bar sticky | Nhỏ |
 | LIB-06 | "Dùng trong:" list dài | Nhỏ |
+| LIB-08 | ✨ Dish card images | Trung bình |
+| LIB-09 | ✨ Multi-step create dish wizard | Lớn |
 | AI-03 | Camera API error handling | Nhỏ |
-| SET-01 | Thiếu section "Về ứng dụng" | Nhỏ |
-| SET-03 | Thiếu Reset data option | Nhỏ |
+| AI-05 | ✨ Lịch sử phân tích | Trung bình |
+| SHOP-06 | ✨ Empty space tips | Nhỏ |
+| SET-01 | Section "Về ứng dụng" | Nhỏ |
+| SET-03 | Reset data option | Nhỏ |
 | SET-04 | Theme switch animation | Nhỏ |
 | ACC-03 | Modal aria-labelledby | Nhỏ |
-| MOB-02 | Pull-to-refresh gesture | Trung bình |
+| MOB-02 | Pull-to-refresh | Trung bình |
 | MOB-04 | Tab switch animation | Nhỏ |
 | ERR-01 | Offline indicator | Nhỏ |
 | ERR-02 | ErrorBoundary friendly fallback | Nhỏ |
@@ -378,220 +400,206 @@ Kiểm thử toàn bộ 5 tab chính của ứng dụng trên chế độ mobile
 | Loại | Số lượng | Chi tiết |
 |------|:--------:|---------|
 | **Errors** | 0 | Không có JavaScript errors |
-| **Warnings** | 170 | Tất cả từ ONNX Runtime (`CleanUnusedInitializersAndNodeArgs`) — Marian translation model. Không ảnh hưởng functionality nhưng tốn console bandwidth |
+| **Warnings** | 170 | Tất cả từ ONNX Runtime (`CleanUnusedInitializersAndNodeArgs`) — Marian translation model |
 | **Info** | 0 | — |
 
 ### Nhận xét Performance
 - **Zero JS errors** — code quality tốt, ErrorBoundary hoạt động đúng
-- **170 ONNX warnings** — từ MarianTokenizer, model load khi app mount (nên lazy-load)
+- **170 ONNX warnings** — model load khi app mount → nên lazy-load (AI-04/PERF-01)
 - **Lazy-loaded tabs** — AI Analysis + Grocery dùng `React.lazy` → giảm initial bundle
-- **Calendar + Management always mounted** — có thể gây unnecessary re-renders
+- **Calendar + Management always mounted** — unnecessary re-renders (PERF-02)
 - **Touch gesture** — swipe detection hoạt động tốt, 50px threshold hợp lý
 
 ---
 
 ## 5. Kế hoạch thực hiện (Implementation Plan)
 
-### Sprint 1: Critical Fixes (P0) — Ước tính: 1-2 ngày
+### Sprint 1: Critical Fixes (P0)
 
-#### Task 1.1: Fix ngày hiển thị sai ngôn ngữ (CAL-01)
+#### Task 1.1: Fix i18n — ngày hiển thị + missing translations (CAL-01, CAL-01b)
 
-**File**: `src/components/CalendarTab.tsx` dòng 221
-
-**Approach**: Thay `toLocaleDateString(dateLocale, ...)` bằng custom format function dùng i18n keys
+**Files**: `src/components/CalendarTab.tsx`, `src/locales/vi.json`, `src/locales/en.json`
 
 ```
 Bước 1: Thêm i18n keys cho tên ngày/tháng vào vi.json và en.json
-Bước 2: Tạo utility function formatLocalizedDate(date, language)
-Bước 3: Thay thế toLocaleDateString() call
+Bước 2: Tạo utility formatLocalizedDate(date, language) dùng date-fns + locale
+Bước 3: Grep toàn bộ hardcoded English strings → thay bằng t() calls
 Bước 4: Kiểm tra trên cả vi và en locale
 ```
 
 **Acceptance criteria**:
-- Ngày hiển thị "Thứ Sáu, 6 tháng 3, 2026" khi app ở chế độ Tiếng Việt
-- Ngày hiển thị "Friday, March 6, 2026" khi app ở chế độ English
-- Hoạt động nhất quán trên mọi browser/device
+- "Thứ Sáu, 6 tháng 3, 2026" khi Vietnamese
+- "Friday, March 6, 2026" khi English
+- 0 hardcoded English strings khi app ở chế độ Vietnamese
 
 #### Task 1.2: Fix modal stacking (CAL-11)
 
-**File**: `src/App.tsx` dòng 400-420
-
-**Approach**: Thêm guard condition cho modal rendering
+**File**: `src/App.tsx`
 
 ```
 Bước 1: Thêm computed property hasActiveModal
-Bước 2: AI Suggestion modal chỉ render khi không có modal khác đang mở
-Bước 3: Hoặc: chuyển AI Suggestion thành inline card thay vì modal
-Bước 4: Test scenario: mở/đóng nhiều modal liên tiếp
+Bước 2: AI Suggestion modal chỉ render khi không có modal khác
+Bước 3: Hoặc chuyển AI Suggestion thành inline card
+Bước 4: Test: mở/đóng nhiều modal liên tiếp
 ```
 
 **Acceptance criteria**:
-- Không bao giờ có 2+ modal hiển thị đồng thời
+- Không bao giờ 2+ modal đồng thời
 - Escape key đóng đúng modal trên cùng
-- Scroll lock hoạt động đúng khi đóng modal cuối
 
 #### Task 1.3: Fix Edit/Delete button proximity (LIB-02)
 
-**Files**: `src/components/DishList.tsx`, `src/components/IngredientList.tsx`
-
-**Approach**: Tăng spacing + thêm confirm dialog cho Delete
+**Files**: `src/components/DishManager.tsx`, `src/components/IngredientManager.tsx`
 
 ```
-Bước 1: Tăng gap giữa Edit/Delete buttons (gap-2 → gap-4)
-Bước 2: Delete button dùng màu neutral (slate) thay vì đỏ, chỉ đỏ khi hover
-Bước 3: Kiểm tra confirm dialog đã có cho Delete action
-Bước 4: Nếu chưa có → thêm confirm dialog "Bạn có chắc muốn xóa?"
+Bước 1: Tăng gap giữa buttons (gap-2 → gap-4)
+Bước 2: Delete button màu neutral (slate), đỏ khi hover
+Bước 3: Verify confirm dialog cho Delete
+Bước 4: Touch target ≥ 44×44px mỗi button
 ```
-
-**Acceptance criteria**:
-- Khoảng cách Edit-Delete ≥ 16px (gap-4)
-- Delete có confirm dialog trước khi thực hiện
-- Touch target mỗi button ≥ 44×44px
 
 #### Task 1.4: Fix hidden tabs DOM interaction (LIB-07)
 
-**File**: `src/App.tsx` dòng 332-363
-
-**Approach**: Thêm `inert` attribute cho hidden tab panels
+**File**: `src/App.tsx`
 
 ```
-Bước 1: Thêm inert attribute: <div inert={activeMainTab !== 'calendar'}>
-Bước 2: Tương tự cho management tab panel
-Bước 3: Verify: assistive tech không focus vào hidden content
-Bước 4: Verify: querySelector chỉ trả về visible elements
+Bước 1: Thêm inert attribute cho hidden tab panels
+Bước 2: Verify assistive tech không focus hidden content
+Bước 3: Verify querySelector chỉ trả visible elements
 ```
-
-**Acceptance criteria**:
-- `inert` attribute present trên tất cả hidden tab panels
-- Tab key không focus vào buttons/inputs trong hidden tabs
-- Screen reader không đọc hidden tab content
 
 ---
 
-### Sprint 2: High Priority (P1) — Ước tính: 1 ngày
+### Sprint 2: High Priority (P1)
 
 #### Task 2.1: Fix floating buttons overlap (CAL-09)
-
-**File**: `src/components/CalendarTab.tsx`
-
-```
-Bước 1: Kiểm tra vị trí floating buttons relative to bottom nav
-Bước 2: Thêm bottom offset: bottom-20 (80px) hoặc bottom-24 (96px)
-Bước 3: Test trên iPhone SE (320px), iPhone 15 (390px), iPhone 15 Pro Max (430px)
-```
-
-#### Task 2.2: Import data preview (SET-02)
-
-**File**: `src/components/SettingsTab.tsx`
-
-```
-Bước 1: Parse imported file first (không apply ngay)
-Bước 2: Hiện preview dialog: số lượng dishes, ingredients, day plans
-Bước 3: Options: "Ghi đè toàn bộ" / "Hủy"
-Bước 4: Error handling cho invalid file format
-```
-
-#### Task 2.3: Fix color contrast (ACC-01)
-
-**Scope**: Toàn bộ components
-
-```
-Bước 1: Audit tất cả instance text-emerald-500 dùng cho body text
-Bước 2: Đổi sang text-emerald-700 cho text content
-Bước 3: Giữ emerald-500 cho decorative elements (icons, borders, badges)
-Bước 4: Kiểm tra dark mode tương ứng: dark:text-emerald-400 → dark:text-emerald-300
-```
+#### Task 2.2: Skip plan meal step khi context rõ (CAL-14)
+#### Task 2.3: Fix protein validation bug (CAL-16)
+#### Task 2.4: Import data preview (SET-02)
+#### Task 2.5: Grocery checkboxes (SHOP-04)
+#### Task 2.6: Fix color contrast WCAG AA (ACC-01)
+#### Task 2.7: AI tab empty state redesign (AI-01)
 
 ---
 
-### Sprint 3: Medium Priority (P2) — Ước tính: 3-5 ngày
+### Sprint 3A: UX Improvements — Content & Flow
 
-#### Batch 3A: Content & Copy Improvements (1 ngày)
 - CAL-02: Format ngày responsive
-- CAL-07: Thêm CTA cho suggestion card
-- CAL-08: Gom empty state khi tất cả bữa trống
-- SHOP-01: Thêm explanation cho empty state
-- SHOP-02: Style CTA link rõ ràng hơn
+- CAL-07: Suggestion card CTA
+- CAL-08: Gom empty state
+- CAL-10b: Loại bỏ duplicate "Plan meal" button
+- CAL-10c: Enrich "More options" hoặc thay dropdown
+- CAL-15: Recent dishes shortcut
+- CAL-17: Di chuyển theme toggle
+- CAL-19: Nutrition % display
+- SHOP-01 + SHOP-02: Shopping empty state + CTA styling
+- SHOP-03: Manual shopping items
+- SHOP-05: Quantity aggregation
 
-#### Batch 3B: Library UX Improvements (1-2 ngày)
-- NAV-01: Rút gọn navigation labels
-- LIB-01: Giảm density trên grid cards
-- LIB-05: Thêm serving size cho ingredients
+### Sprint 3B: UX Improvements — Technical & Library
 
-#### Batch 3C: AI & Performance (1-2 ngày)
-- AI-01: Cải thiện empty state preview
-- AI-02: Thêm workflow stepper
-- AI-04 + PERF-01: Lazy-load ONNX model (on-demand)
-- PERF-02: Audit tab re-renders
+- NAV-01: Navigation labels responsive
+- LIB-01: Grid card density
+- LIB-05: Serving size
+- AI-02: AI workflow stepper
+- AI-04 + PERF-01: Lazy-load ONNX model
+- PERF-02: Tab re-renders
+- SET-05: Expand Settings sections
+- ACC-02: Focus-visible styles
+- MOB-01: Safe area inset
+- MOB-03: Onboarding tutorial
 
-#### Batch 3D: Accessibility & Layout
-- ACC-02: Global focus-visible styles
-- MOB-01: Safe area inset calculation
-- CAL-03: Month view cell sizing
-- CAL-05: Carbs/Fat/Fiber targets
-
----
-
-### Sprint 4: Nice-to-have (P3) — Backlog
-
-Các items P3 nên được ưu tiên khi có thời gian giữa các sprint chính:
+### Sprint 4: UX Vision & Delight ✨
 
 | Nhóm | Items | Effort tổng |
-|------|-------|:------------:|
+|------|-------|:-----------:|
 | **Micro-interactions** | NAV-02, NAV-03, CAL-13, SET-04, MOB-04 | ~3h |
-| **Empty states** | CAL-04, CAL-10, ERR-02 | ~2h |
-| **Library polish** | LIB-03, LIB-04, LIB-06 | ~2h |
-| **Advanced UX** | CAL-12, MOB-02, MOB-03 | ~8h |
+| **Visual richness** | LIB-08 (dish images), CAL-18 (greeting) | ~4h |
+| **Smart features** | NAV-04 (badges), CAL-15 (recent), AI-05 (history) | ~6h |
+| **Empty states** | CAL-04, CAL-10, SHOP-06, ERR-02 | ~3h |
+| **Library polish** | LIB-03, LIB-04, LIB-06, LIB-09 | ~8h |
+| **Advanced** | CAL-12 (slider), MOB-02 (pull-to-refresh) | ~4h |
 | **Settings extras** | SET-01, SET-03 | ~2h |
 | **Error handling** | AI-03, ERR-01, ACC-03 | ~2h |
 
 ---
 
-## 6. Đánh giá tổng quan
+## 6. Tầm nhìn UX nâng cao (UX Vision)
+
+> Phần này tổng hợp các đề xuất ✨ — không chỉ "fix bug" mà hướng tới **trải nghiệm đỉnh cao**, biến app từ "dùng được" thành "muốn dùng mỗi ngày".
+
+### 6.1 Trải nghiệm cá nhân hóa (Personalization)
+- **Greeting header** theo thời gian (CAL-18): "Chào buổi sáng! ☀️" tạo warm connection
+- **Recent dishes** (CAL-15): App "nhớ" thói quen ăn uống, gợi ý thông minh
+- **Tab badges** (NAV-04): Contextual awareness — biết còn gì cần làm mà không phải navigate
+
+### 6.2 Giảm ma sát tối đa (Friction Reduction)
+- **Skip redundant steps** (CAL-14): Bỏ thao tác thừa, mỗi tap đều có giá trị
+- **Grocery checkboxes** (SHOP-04): Tính năng "đương nhiên phải có" — thiếu nó = thiếu lý do dùng tab
+- **Quantity aggregation** (SHOP-05): Tổng hợp thông minh thay vì liệt kê lặp
+- **Donut chart** cho calories (CAL-19 future): 1 cái nhìn biết ngay tiến độ
+
+### 6.3 Visual Richness cho Food App
+- **Dish images** (LIB-08): Food app = visual app. Ảnh món ăn tạo emotional connection
+- **Emoji placeholders** (LIB-08 short-term): 🍳🍲🥗 — instant visual identity không cần ảnh thật
+- **Empty state illustrations** (CAL-08, SHOP-06): Biến trang trống thành invitation, không phải dead-end
+
+### 6.4 AI trở thành trợ thủ thực sự
+- **Empty state inspirational** (AI-01): Cho user thấy AI làm được gì TRƯỚC khi dùng
+- **Analysis history** (AI-05): Kết quả không biến mất — tích lũy giá trị
+- **Suggestion CTA** (CAL-07): Gợi ý + hành động ngay = proactive assistant
+
+### 6.5 Micro-delights
+- **Tab animations** (NAV-03, MOB-04): Smooth transitions tạo cảm giác polished
+- **Auto-save feedback** (CAL-13): Green checkmark = peace of mind
+- **Theme transition** (SET-04): Smooth color fade thay vì instant flicker
+- **Pull-to-refresh** (MOB-02): Gesture quen thuộc = app cảm thấy native
+
+---
+
+## 7. Đánh giá tổng quan
 
 ### Scorecard
 
-| Tiêu chí | Điểm (1-10) | Nhận xét |
-|----------|:-----------:|----------|
-| **Visual Design** | 8/10 | Clean, modern Tailwind. Emerald green theme nhất quán. Dark mode implementation tốt |
-| **Information Architecture** | 7/10 | 5 tabs logic rõ ràng. Sub-tabs trong Library hợp lý. Cross-reference dishes↔ingredients tốt |
-| **Mobile Usability** | 6.5/10 | Touch targets OK, swipe gesture có, nhưng content density cao, month view khó dùng, bottom nav chật |
-| **Consistency** | 7/10 | Date language bug, tab rendering pattern không nhất quán (hidden vs conditional) |
-| **Accessibility** | 6/10 | ARIA roles có, nhưng contrast fail WCAG AA, focus management thiếu, dialog labeling thiếu |
-| **Error Prevention** | 6.5/10 | ErrorBoundary per tab tốt. Modal stacking bug, Delete confirm cần kiểm tra |
-| **Learnability** | 6/10 | Thiếu onboarding, empty states thiếu guidance, AI tab workflow không rõ |
-| **Performance** | 7/10 | Lazy-loaded tabs tốt, nhưng ONNX pre-loading tốn tài nguyên, always-mounted tabs wasteful |
+| Tiêu chí | Hiện tại | Sau Sprint 1-2 | Sau Sprint 3-4 |
+|----------|:--------:|:--------------:|:--------------:|
+| **Visual Design** | 8/10 | 8/10 | 9/10 |
+| **Information Architecture** | 7/10 | 7.5/10 | 8.5/10 |
+| **Mobile Usability** | 6.5/10 | 8/10 | 9/10 |
+| **Consistency** | 5/10 | 8.5/10 | 9/10 |
+| **Accessibility** | 6/10 | 7.5/10 | 8.5/10 |
+| **Error Prevention** | 6.5/10 | 8/10 | 8.5/10 |
+| **Learnability** | 6/10 | 7.5/10 | 8.5/10 |
+| **Performance** | 7/10 | 7.5/10 | 8.5/10 |
+| **Delight / Engagement** | 5/10 | 6/10 | 8.5/10 |
+| **Tổng** | **6.3/10** | **7.6/10** | **8.7/10** |
 
-### Điểm tổng: **6.75/10**
-
-### Tóm tắt
-
-**Điểm mạnh:**
+### Điểm mạnh hiện tại
 - Design system nhất quán, Tailwind-based, dễ maintain
 - Dark mode implementation toàn diện
 - Touch gesture (swipe) trên calendar hoạt động tốt
 - ModalBackdrop với scroll lock reference counting — engineering chất lượng
 - ErrorBoundary per tab — defensive coding tốt
-- i18n setup chuẩn với fallback vi-VN
 - Zero JavaScript errors trong console
 
-**Điểm cần cải thiện:**
-- 4 lỗi P0 cần fix ngay (date locale, modal stacking, button proximity, DOM interaction)
-- Color contrast không đạt WCAG AA cho text
-- ONNX model pre-load làm chậm initial load trên mobile
-- Thiếu onboarding flow cho người dùng mới
-- Empty states nhiều nơi thiếu guidance/explanation
-- Import data thiếu preview → risk mất dữ liệu
+### Điểm cần cải thiện
+- 5 lỗi P0 cần fix ngay (i18n hệ thống, modal stacking, DOM interaction, button proximity)
+- Color contrast không đạt WCAG AA
+- Grocery tab thiếu core features (checkboxes, aggregation)
+- AI tab gần như trắng — user mới mất phương hướng
+- Plan meal flow có friction thừa
+- Thiếu visual richness cho food app (ảnh, illustrations)
+- Thiếu personalization elements (greeting, recent, badges)
 
-### Dự kiến sau khi fix
+### Kết luận
 
-Nếu hoàn thành Sprint 1-3, điểm dự kiến sẽ cải thiện:
+> Ứng dụng có **nền tảng kỹ thuật vững chắc** (zero errors, good architecture, defensive coding). Vấn đề chính nằm ở **lớp trải nghiệm**: i18n chưa hoàn thiện, empty states thiếu guidance, grocery thiếu core feature, và thiếu "chất" emotional cho food app.
+>
+> Sau Sprint 1-2: App sẽ **hoạt động đúng** (fix bugs, i18n, accessibility).
+> Sau Sprint 3-4: App sẽ **gây ấn tượng** (personalization, visual richness, micro-delights).
+>
+> Mục tiêu: Từ **6.3/10 → 8.7/10** — đưa trải nghiệm lên đỉnh cao mới.
 
-| Tiêu chí | Hiện tại | Sau Sprint 1-3 |
-|----------|:--------:|:--------------:|
-| Mobile Usability | 6.5 | 8.0 |
-| Consistency | 7.0 | 8.5 |
-| Accessibility | 6.0 | 7.5 |
-| Error Prevention | 6.5 | 8.0 |
-| Learnability | 6.0 | 7.5 |
-| **Tổng** | **6.75** | **7.9** |
+---
+
+*Báo cáo merged từ 2 nguồn: UX Assessment Report (tầm nhìn UX sáng tạo) + Technical Audit Report (kỹ thuật chi tiết). 57 phát hiện duy nhất, 15 đề xuất nâng cao (✨), 4 sprints triển khai. Tất cả hướng tới mục tiêu: trải nghiệm người dùng thân thiện, trực quan, chuyên nghiệp.*
