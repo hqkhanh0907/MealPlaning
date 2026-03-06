@@ -1,4 +1,11 @@
+import assert from 'node:assert';
+import { CalendarPage } from '../pages/CalendarPage';
 import { GroceryPage } from '../pages/GroceryPage';
+
+type ExecutableBrowser = typeof browser & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  execute: <T>(fn: () => T) => Promise<T>;
+};
 
 describe('Grocery List — scope switching and copy', () => {
   const page = new GroceryPage();
@@ -55,5 +62,66 @@ describe('Grocery List — scope switching and copy', () => {
     if (await hasEmptyState()) return;
 
     await page.tapCopy();
+  });
+
+  // ─────────────────────────────────────────────────────────────────
+  // TC_SHOP_02 — Mark grocery item as checked
+  // ─────────────────────────────────────────────────────────────────
+  describe('Grocery item check (TC_SHOP_02)', () => {
+    const calPage = new CalendarPage();
+    const SHOP_ING_ID = 'e2e-shop-ing-1';
+    const todayKey = new Date().toISOString().split('T')[0];
+
+    before(async () => {
+      // Inject ingredient + dish + day plan for today
+      await calPage.injectTestData({
+        dateKey: todayKey,
+        mealSlot: 'breakfast',
+        dishId: 'e2e-shop-dish-1',
+        ingredientPayload: {
+          id: SHOP_ING_ID,
+          name: { vi: 'Thực phẩm test shop', en: 'Test Shop Food' },
+          caloriesPer100: 50,
+          proteinPer100: 1,
+          carbsPer100: 10,
+          fatPer100: 0.2,
+          fiberPer100: 0.1,
+          unit: { vi: 'g', en: 'g' },
+        },
+        dishPayload: {
+          id: 'e2e-shop-dish-1',
+          name: { vi: 'Món test shop', en: 'Test Shop Dish' },
+          ingredients: [{ ingredientId: SHOP_ING_ID, amount: 150 }],
+          tags: ['breakfast'],
+        },
+      });
+      // Clear any previously checked state for a clean run
+      await (browser as unknown as ExecutableBrowser).execute(() => {
+        localStorage.removeItem('mp-grocery-checked');
+      });
+      // Reload so React sees the new data
+      await calPage.reloadApp();
+      await page.navigateTo('calendar');
+      await page.navigateTo('grocery');
+      await page.selectScope('day');
+      // Wait for the injected item to render
+      await page.el(`grocery-item-${SHOP_ING_ID}`).waitForDisplayed({ timeout: 10_000 });
+    });
+
+    it('TC_SHOP_02 — should mark a grocery item as checked', async () => {
+      await page.tapGroceryItem(SHOP_ING_ID);
+      await browser.pause(300);
+      // Verify the item ID appears in mp-grocery-checked after tapping
+      const checkedIds = await (browser as unknown as ExecutableBrowser).execute(() => {
+        const snaps = JSON.parse(
+          localStorage.getItem('mp-grocery-checked') || '[]',
+        ) as Array<{ id: string }>;
+        return snaps.map((s) => s.id);
+      });
+      assert.ok(
+        checkedIds.includes(SHOP_ING_ID),
+        `Expected ${SHOP_ING_ID} to be in mp-grocery-checked after tapping the item`,
+      );
+    });
   });
 });

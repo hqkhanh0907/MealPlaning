@@ -53,12 +53,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <div className="text-slate-600 dark:text-slate-400 mb-6">{message}</div>
           <div className="flex gap-3">
             <button
+              data-testid="btn-cancel-action"
               onClick={onCancel}
               className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 transition-all min-h-12"
             >
               {cancelLabel ?? t('common.cancel')}
             </button>
             <button
+              data-testid="btn-confirm-action"
               onClick={onConfirm}
               className={`flex-1 ${styles.btnBg} text-white py-3 rounded-xl font-bold shadow-sm ${styles.btnShadow} ${styles.btnHover} active:scale-[0.98] transition-all min-h-12`}
             >

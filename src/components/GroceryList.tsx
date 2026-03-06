@@ -244,6 +244,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                 return (
                   <li key={item.id}>
                     <button
+                      data-testid={`grocery-item-${item.id}`}
                       onClick={() => toggleCheck(item.id)}
                       className={`w-full flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl transition-all min-h-12 active:scale-[0.99] ${
                         isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'

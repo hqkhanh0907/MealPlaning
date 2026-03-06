@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from './ModalBackdrop';
 
 interface UnsavedChangesDialogProps {
@@ -12,18 +13,9 @@ interface UnsavedChangesDialogProps {
 
 export const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({ isOpen, onSave, onDiscard, onCancel }) => {
   const { t } = useTranslation();
-
-  // Close on Escape key — does NOT use useModalBackHandler because this dialog
-  // is always nested inside another modal that already manages the history stack.
-  // Adding a second history entry would break the back-button sequence.
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onCancel]);
+  // Nested inside another modal — useModalBackHandler's programmaticBackCount
+  // mechanism correctly handles stacked history entries on Android.
+  useModalBackHandler(isOpen, onCancel);
 
   if (!isOpen) return null;
 

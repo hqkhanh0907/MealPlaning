@@ -51,7 +51,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
               <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" /> <span className="text-sm sm:text-base">Calories</span>
             </div>
             <div className="text-left sm:text-right">
-              <span className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalCalories)}</span>
+              <span data-testid="summary-total-calories" className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalCalories)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetCalories}</span>
             </div>
           </div>

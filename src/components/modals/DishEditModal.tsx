@@ -251,7 +251,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input id="dish-ingredient-search" name="dish-ingredient-search" aria-label={t('dish.searchIngredients')} value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.searchIngredients')} />
+                  <input id="dish-ingredient-search" data-testid="input-dish-ingredient-search" name="dish-ingredient-search" aria-label={t('dish.searchIngredients')} value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100" placeholder={t('dish.searchIngredients')} />
                 </div>
                 <button
                   type="button"
@@ -269,7 +269,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   const available = allIngredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()));
                   if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === allIngredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
                   return available.map(ing => (
-                    <button key={ing.id} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
+                    <button key={ing.id} data-testid={`btn-add-ing-${ing.id}`} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
                       <span className="text-slate-700 dark:text-slate-300 font-medium">{getLocalizedField(ing.name, lang)}</span>
                       <Plus className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
                     </button>
@@ -419,7 +419,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           }, { cal: 0, prot: 0, carbs: 0, fat: 0 });
           return (
             <div className="px-6 py-3 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 flex items-center justify-around gap-3 text-center">
-              <div><p className="text-xs text-slate-400 dark:text-slate-500">🔥 KCal</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.cal)}</p></div>
+              <div><p className="text-xs text-slate-400 dark:text-slate-500">🔥 KCal</p><p data-testid="dish-total-calories" className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.cal)}</p></div>
               <div><p className="text-xs text-slate-400 dark:text-slate-500">💪 Protein</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p></div>
               <div><p className="text-xs text-slate-400 dark:text-slate-500">🌾 Carbs</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p></div>
               <div><p className="text-xs text-slate-400 dark:text-slate-500">💧 Fat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p></div>

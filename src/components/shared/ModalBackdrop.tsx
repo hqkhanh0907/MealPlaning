@@ -24,6 +24,20 @@ let _scrollLockDepth = 0;
 let _savedScrollY = 0;
 
 /**
+ * Stack of Escape-key callbacks, one per mounted ModalBackdrop.
+ * Only the topmost (last) entry responds to Escape, so nested modals
+ * (e.g. UnsavedChangesDialog over IngredientEditModal) work correctly.
+ */
+const _escapeStack: Array<{ id: number; handler: () => void }> = [];
+let _nextEscapeId = 0;
+
+function _handleGlobalEscape(e: KeyboardEvent) {
+  if (e.key === 'Escape' && _escapeStack.length > 0) {
+    _escapeStack[_escapeStack.length - 1].handler();
+  }
+}
+
+/**
  * Shared modal backdrop with accessibility attributes.
  * Provides dark overlay, backdrop-blur, responsive alignment
  * (bottom-sheet on mobile, centered on desktop), and proper
@@ -36,6 +50,9 @@ let _savedScrollY = 0;
  */
 export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 'z-50', children }) => {
   const { t } = useTranslation();
+  const onCloseRef = React.useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     // Only apply the iOS-safe position:fixed lock when this is the first
     // (outermost) modal.  Inner modals simply increment the counter.
@@ -65,14 +82,26 @@ export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 
     };
   }, []);
 
-  // Close on Escape key press
+  // Stack-based Escape key handling: only the topmost modal responds.
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+    const id = _nextEscapeId++;
+    const entry = { id, handler: () => onCloseRef.current() };
+    _escapeStack.push(entry);
+
+    // Register the global listener only once (when first modal mounts).
+    if (_escapeStack.length === 1) {
+      document.addEventListener('keydown', _handleGlobalEscape);
+    }
+
+    return () => {
+      const idx = _escapeStack.findIndex(e => e.id === id);
+      if (idx !== -1) _escapeStack.splice(idx, 1);
+
+      if (_escapeStack.length === 0) {
+        document.removeEventListener('keydown', _handleGlobalEscape);
+      }
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, []);
 
   return (
     <dialog

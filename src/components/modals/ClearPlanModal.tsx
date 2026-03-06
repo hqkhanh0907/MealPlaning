@@ -60,6 +60,7 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
           {SCOPE_OPTIONS.map(({ scope, label, desc, count }) => (
             <button
               key={scope}
+              data-testid={`btn-clear-scope-${scope}`}
               onClick={() => onClear(scope)}
               disabled={count === 0}
               className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 group min-h-16 ${

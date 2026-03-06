@@ -2,6 +2,11 @@ import { BasePage } from './BasePage';
 
 export type ManagementSubTab = 'ingredients' | 'dishes';
 
+type ExecutableBrowser = typeof browser & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  execute: <T>(fn: () => T) => Promise<T>;
+};
+
 export class ManagementPage extends BasePage {
   async openSubTab(tab: ManagementSubTab) {
     await this.waitAndClick(`tab-management-${tab}`);
@@ -131,5 +136,64 @@ export class ManagementPage extends BasePage {
     } catch {
       // Modal was not open — ignore
     }
+  }
+
+  // ----- Edit / Delete by ID -----
+
+  /** Click the edit button for an ingredient identified by its data ID. */
+  async editIngredientById(id: string) {
+    await this.waitAndClick(`btn-edit-ingredient-${id}`);
+  }
+
+  /** Click the delete button for an ingredient and confirm the action. */
+  async deleteIngredientById(id: string) {
+    await this.waitAndClick(`btn-delete-ingredient-${id}`);
+    await this.waitAndClick('btn-confirm-action');
+  }
+
+  /** Click the edit button for a dish identified by its data ID. */
+  async editDishById(id: string) {
+    await this.waitAndClick(`btn-edit-dish-${id}`);
+  }
+
+  /** Click the delete button for a dish and confirm the action. */
+  async deleteDishById(id: string) {
+    await this.waitAndClick(`btn-delete-dish-${id}`);
+    await this.waitAndClick('btn-confirm-action');
+  }
+
+  /** Return the ID of the most recently created ingredient from localStorage. */
+  async getLastIngredientId(): Promise<string | null> {
+    return (browser as unknown as ExecutableBrowser).execute(() => {
+      const items = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
+      return items.at(-1)?.id ?? null;
+    });
+  }
+
+  /** Return the ID of the most recently created dish from localStorage. */
+  async getLastDishId(): Promise<string | null> {
+    return (browser as unknown as ExecutableBrowser).execute(() => {
+      const items = JSON.parse(localStorage.getItem('mp-dishes') || '[]') as Array<{ id: string }>;
+      return items.at(-1)?.id ?? null;
+    });
+  }
+
+  /** Return the displayed dish total calories value from the live nutrition preview. */
+  async getDishTotalCalories(): Promise<string> {
+    const elem = this.el('dish-total-calories');
+    await elem.waitForDisplayed({ timeout: 5_000 });
+    return elem.getText();
+  }
+
+  /** Type in the ingredient search box inside the DishEditModal. */
+  async searchDishIngredient(query: string) {
+    await this.type('input-dish-ingredient-search', query);
+    // Allow the filtered result list to re-render
+    await browser.pause(400);
+  }
+
+  /** Click the "Add" button for the given ingredient ID in the dish ingredient picker. */
+  async addIngredientToDish(ingId: string) {
+    await this.waitAndClick(`btn-add-ing-${ingId}`);
   }
 }

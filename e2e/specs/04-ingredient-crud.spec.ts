@@ -106,4 +106,39 @@ describe('Ingredient CRUD', () => {
       assert.strictEqual(bodyOverflow, '', 'BUG-001 regression: body.style.overflow must be empty after nested modal close');
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────
+  // TC_LIB_02 — Edit ingredient  |  TC_LIB_03 — Delete ingredient
+  // ─────────────────────────────────────────────────────────────────
+  describe('Edit & Delete ingredient (TC_LIB_02, TC_LIB_03)', () => {
+    let ingId: string | null = null;
+
+    before(async () => {
+      await page.openIngredientsSubTab();
+      // Clear search so all ingredients are visible
+      await page.searchIngredient('');
+      await browser.pause(300);
+      ingId = await page.getLastIngredientId();
+    });
+
+    it('TC_LIB_02 — should edit the last ingredient calories to 250', async () => {
+      if (!ingId) { throw new Error('No ingredient found in localStorage to edit'); }
+      await page.editIngredientById(ingId);
+      await expect(page.el('input-ing-name')).toBeDisplayed();
+      await page.fillIngNutrition('calories', '250');
+      await page.saveIngredient();
+    });
+
+    it('TC_LIB_03 — should delete the last ingredient after confirmation', async () => {
+      if (!ingId) { throw new Error('No ingredient found in localStorage to delete'); }
+      await page.deleteIngredientById(ingId);
+      await browser.pause(500);
+      const stillExists = await page.isDisplayed(`btn-edit-ingredient-${ingId}`);
+      assert.strictEqual(
+        stillExists,
+        false,
+        `Ingredient ${ingId} should no longer appear in the list after deletion`,
+      );
+    });
+  });
 });
