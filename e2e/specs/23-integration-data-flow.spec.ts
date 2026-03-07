@@ -127,9 +127,8 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
     await grocery.navigateTo('calendar');
     await grocery.navigateTo('grocery');
     await browser.pause(500);
-    await grocery.selectScope('day');
-    await browser.pause(500);
 
+    // After clearing plan, grocery may show empty state (no scope tabs visible)
     const hasItem = await grocery.isDisplayed(`grocery-item-${ING_ID}`);
     const isEmpty = await grocery.isDisplayed('grocery-empty-state');
     assert.ok(!hasItem || isEmpty, 'Grocery should be empty after clearing day plan');

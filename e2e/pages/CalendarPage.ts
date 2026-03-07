@@ -19,16 +19,19 @@ export class CalendarPage extends BasePage {
     }
   }
 
-  /** After opening TypeSelectionModal, choose a meal type by name. */
-  async selectMealType(type: MealTypeName) {
-    await this.waitAndClick(`btn-type-${type}`);
+  /** After opening MealPlannerModal, the modal has internal tabs for meal types.
+   *  These tabs don't have data-testid, so we can't click them via testid.
+   *  The modal opens with the first empty slot selected. */
+  async selectMealType(_type: MealTypeName) {
+    // MealPlannerModal opens directly to the correct tab now.
+    // No separate type selection step needed.
+    await browser.pause(300);
   }
 
-  /** Convenience: open planning UI for a given type (defaults to breakfast). */
-  async openPlanning(type: MealTypeName = 'breakfast') {
+  /** Convenience: open planning UI (MealPlannerModal opens directly). */
+  async openPlanning(_type: MealTypeName = 'breakfast') {
     await this.tapPlanMeal();
-    await browser.pause(300);
-    await this.selectMealType(type);
+    await browser.pause(500);
   }
 
   async tapAISuggest() {

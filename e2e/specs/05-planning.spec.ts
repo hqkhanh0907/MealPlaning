@@ -40,29 +40,23 @@ describe('Planning — meal planning flow', () => {
     await page.tapToday();
   });
 
-  it('TC_PLAN_01 — should open TypeSelectionModal via Plan Meal button', async () => {
+  it('TC_PLAN_01 — should open MealPlannerModal via Plan Meal button', async () => {
     await page.tapPlanMeal();
-    await browser.pause(300);
-    // Type selection buttons should be visible
-    await expect(page.el('btn-type-breakfast')).toBeDisplayed();
-    await expect(page.el('btn-type-lunch')).toBeDisplayed();
-    await expect(page.el('btn-type-dinner')).toBeDisplayed();
-  });
-
-  it('TC_PLAN_02 — should open planning modal for breakfast', async () => {
-    await page.selectMealType('breakfast');
+    await browser.pause(500);
+    // MealPlannerModal opens directly — search input should be visible
     await expect(page.el('input-search-plan')).toBeDisplayed();
+    await expect(page.el('btn-confirm-plan')).toBeDisplayed();
   });
 
-  it('TC_PLAN_03 — should search for a dish in planning modal', async () => {
+  it('TC_PLAN_02 — should search for a dish in planning modal', async () => {
     await page.searchPlan('Plan Test');
     await browser.pause(500);
-    // Search input should still be displayed after searching
     await expect(page.el('input-search-plan')).toBeDisplayed();
   });
 
-  it('TC_PLAN_04 — should confirm meal plan', async () => {
+  it('TC_PLAN_03 — should confirm meal plan', async () => {
     await page.confirmPlan();
+    await browser.pause(300);
   });
 
   // ─────────────────────────────────────────────────────────────────
@@ -76,6 +70,7 @@ describe('Planning — meal planning flow', () => {
         await page.openPlanning(mealType);
         await expect(page.el('input-search-plan')).toBeDisplayed();
         await page.confirmPlan();
+        await browser.pause(300);
       });
     }
   });
