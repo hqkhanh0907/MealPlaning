@@ -449,12 +449,12 @@ describe('DishEditModal', () => {
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
   });
 
-  it('renders quick-add form inputs for name VI and EN', () => {
+  it('renders quick-add form inputs for name and override toggle', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    expect(screen.getByTestId('input-qa-name-vi')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Tên \(EN/)).toBeInTheDocument();
+    expect(screen.getByTestId('input-qa-name')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-toggle-name-override')).toBeInTheDocument();
   });
 
   it('renders nutrition inputs in quick-add form', () => {
@@ -482,7 +482,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
     expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Bột mì' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Bột mì' } });
     expect(screen.queryByText('Vui lòng nhập tên nguyên liệu')).not.toBeInTheDocument();
   });
 
@@ -491,7 +491,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     // Fill name
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Bột mì' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Bột mì' } });
 
     // Fill nutrition
     fireEvent.change(screen.getByLabelText('Cal'), { target: { value: '364' } });
@@ -509,38 +509,40 @@ describe('DishEditModal', () => {
     expect(screen.getByText('Bột mì')).toBeInTheDocument();
   });
 
-  it('quick-add uses VI name for EN when EN is left empty', () => {
+  it('quick-add uses primary name for other language when override is empty', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Đậu phộng' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Đậu phộng' } });
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
     // Should be added and visible
     expect(screen.getByText('Đậu phộng')).toBeInTheDocument();
   });
 
-  it('quick-add allows filling EN name separately', () => {
+  it('quick-add allows filling override name via collapsible field', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Đậu phộng' } });
-    fireEvent.change(screen.getByLabelText(/Tên \(EN/), { target: { value: 'Peanut' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Đậu phộng' } });
+    // Expand the override field
+    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
+    fireEvent.change(screen.getByTestId('input-qa-name-other'), { target: { value: 'Peanut' } });
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
     expect(screen.getByText('Đậu phộng')).toBeInTheDocument();
   });
 
-  it('triggers AI fill on blur of VI name input', async () => {
+  it('triggers AI fill on blur of name input', async () => {
     mockSuggestIngredientInfo.mockResolvedValue({
       calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, unit: 'g',
     });
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    const viInput = screen.getByTestId('input-qa-name-vi');
-    fireEvent.change(viInput, { target: { value: 'Ức gà' } });
-    fireEvent.blur(viInput);
+    const nameInput = screen.getByTestId('input-qa-name');
+    fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+    fireEvent.blur(nameInput);
 
     // triggerAIFill has 800ms debounce
     await act(async () => { await vi.advanceTimersByTimeAsync(850); });
@@ -556,9 +558,9 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    const viInput = screen.getByTestId('input-qa-name-vi');
-    fireEvent.change(viInput, { target: { value: 'Ức gà' } });
-    fireEvent.blur(viInput);
+    const nameInput = screen.getByTestId('input-qa-name');
+    fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+    fireEvent.blur(nameInput);
 
     await act(async () => { await vi.advanceTimersByTimeAsync(850); });
 
@@ -584,9 +586,9 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    const viInput = screen.getByTestId('input-qa-name-vi');
-    fireEvent.change(viInput, { target: { value: 'Thịt bò' } });
-    fireEvent.blur(viInput);
+    const nameInput = screen.getByTestId('input-qa-name');
+    fireEvent.change(nameInput, { target: { value: 'Thịt bò' } });
+    fireEvent.blur(nameInput);
 
     await act(async () => { await vi.advanceTimersByTimeAsync(850); });
 
@@ -597,12 +599,12 @@ describe('DishEditModal', () => {
     expect(screen.getByLabelText('Fiber')).toHaveValue(3);
   });
 
-  it('does not trigger AI fill when VI name is empty on blur', async () => {
+  it('does not trigger AI fill when name is empty on blur', async () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    const viInput = screen.getByTestId('input-qa-name-vi');
-    fireEvent.blur(viInput);
+    const nameInput = screen.getByTestId('input-qa-name');
+    fireEvent.blur(nameInput);
 
     await act(async () => { await vi.advanceTimersByTimeAsync(850); });
     expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
@@ -614,9 +616,9 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    const viInput = screen.getByTestId('input-qa-name-vi');
-    fireEvent.change(viInput, { target: { value: 'Cà rốt' } });
-    fireEvent.blur(viInput);
+    const nameInput = screen.getByTestId('input-qa-name');
+    fireEvent.change(nameInput, { target: { value: 'Cà rốt' } });
+    fireEvent.blur(nameInput);
 
     await act(async () => { await vi.advanceTimersByTimeAsync(850); });
 
@@ -637,18 +639,50 @@ describe('DishEditModal', () => {
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
   });
 
+  it('triggers AI fill when manual AI button is clicked', async () => {
+    mockSuggestIngredientInfo.mockResolvedValue({
+      calories: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8, unit: 'g',
+    });
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
+
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Cà rốt' } });
+    fireEvent.click(screen.getByTestId('btn-qa-ai-fill'));
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Cà rốt', 'g', expect.any(AbortSignal));
+  });
+
   it('quick-add resets all fields after successful creation', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Bột mì' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Bột mì' } });
     fireEvent.change(screen.getByLabelText('Cal'), { target: { value: '364' } });
+    // Expand override
+    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
+    expect(screen.getByTestId('input-qa-name-other')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
-    // Re-open quick-add — fields should be reset
+    // Re-open quick-add — fields should be reset and override collapsed
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
-    expect(screen.getByTestId('input-qa-name-vi')).toHaveValue('');
+    expect(screen.getByTestId('input-qa-name')).toHaveValue('');
     expect(screen.getByLabelText('Cal')).toHaveValue(null);
+    expect(screen.queryByTestId('input-qa-name-other')).not.toBeInTheDocument();
+  });
+
+  it('toggles name override field visibility', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
+
+    // Override field not visible initially
+    expect(screen.queryByTestId('input-qa-name-other')).not.toBeInTheDocument();
+    // Click toggle to show
+    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
+    expect(screen.getByTestId('input-qa-name-other')).toBeInTheDocument();
+    // Click toggle to hide
+    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
+    expect(screen.queryByTestId('input-qa-name-other')).not.toBeInTheDocument();
   });
 
   it('calls onCreateIngredient for quick-added ingredients on dish save', () => {
@@ -656,7 +690,7 @@ describe('DishEditModal', () => {
 
     // Quick-add an ingredient
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Hành tím' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Hành tím' } });
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
     // Fill rest of dish form
@@ -676,7 +710,7 @@ describe('DishEditModal', () => {
 
     // Quick-add an ingredient
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Hành tím' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Hành tím' } });
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
     // Close without saving — discard
@@ -777,7 +811,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     // Fill name first
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Trứng gà' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Trứng gà' } });
 
     // Change unit — this triggers triggerAIFill via the onChange callback
     const unitSelect = screen.getByLabelText(/Đơn vị/);
@@ -885,7 +919,7 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
     // Quick-add an ingredient
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
-    fireEvent.change(screen.getByTestId('input-qa-name-vi'), { target: { value: 'Hành lá' } });
+    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Hành lá' } });
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
     // Fill form for valid save
     fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Món mới' } });
@@ -911,7 +945,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
     expect(screen.getByText('Tạo nguyên liệu mới')).toBeInTheDocument();
     // Fill name and blur to trigger triggerAIFill which sets aiTimerRef
-    const nameInput = screen.getByTestId('input-qa-name-vi');
+    const nameInput = screen.getByTestId('input-qa-name');
     fireEvent.change(nameInput, { target: { value: 'Test ingredient' } });
     fireEvent.blur(nameInput);
     // Now close the quick-add overlay; resetQuickAdd should clear the timer
@@ -943,7 +977,7 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
-    const viInput = screen.getByTestId('input-qa-name-vi');
+    const viInput = screen.getByTestId('input-qa-name');
     // First blur — sets aiTimerRef.current via setTimeout
     fireEvent.change(viInput, { target: { value: 'Thịt bò' } });
     fireEvent.blur(viInput);

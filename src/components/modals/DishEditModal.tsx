@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, ChevronDown, ChevronUp, Globe } from 'lucide-react';
 import { Dish, Ingredient, DishIngredient, MealType, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
@@ -50,9 +50,9 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
 
   // Quick-add ingredient inline form state
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [qaNameVI, setQaNameVI] = useState('');
-  const [qaNameEN, setQaNameEN] = useState('');
-  const [qaUnit, setQaUnit] = useState<{ vi: string; en: string }>({ vi: 'g', en: 'g' });
+  const [qaName, setQaName] = useState('');
+  const [qaNameOther, setQaNameOther] = useState('');
+  const [showNameOverride, setShowNameOverride] = useState(false);  const [qaUnit, setQaUnit] = useState<{ vi: string; en: string }>({ vi: 'g', en: 'g' });
   const [qaCal, setQaCal] = useState('');
   const [qaProtein, setQaProtein] = useState('');
   const [qaCarbs, setQaCarbs] = useState('');
@@ -157,8 +157,9 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     aiAbortRef.current?.abort();
     setShowQuickAdd(false);
-    setQaNameVI('');
-    setQaNameEN('');
+    setQaName('');
+    setQaNameOther('');
+    setShowNameOverride(false);
     setQaUnit({ vi: 'g', en: 'g' });
     setQaCal('');
     setQaProtein('');
@@ -196,10 +197,14 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   }, []);
 
   const handleQuickCreate = useCallback(() => {
-    if (!qaNameVI.trim()) { setQaError(t('dish.quickAddValidationName')); return; }
+    if (!qaName.trim()) { setQaError(t('dish.quickAddValidationName')); return; }
+    const otherLang: SupportedLang = lang === 'vi' ? 'en' : 'vi';
     const newIng: Ingredient = {
       id: generateId('ing'),
-      name: { vi: qaNameVI.trim(), en: qaNameEN.trim() || qaNameVI.trim() },
+      name: {
+        [lang]: qaName.trim(),
+        [otherLang]: qaNameOther.trim() || qaName.trim(),
+      } as Record<SupportedLang, string>,
       unit: { vi: qaUnit.vi.trim() || 'g', en: qaUnit.en.trim() || 'g' },
       caloriesPer100: Number(qaCal) || 0,
       proteinPer100: Number(qaProtein) || 0,
@@ -212,7 +217,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     // ingredients if user cancels before saving the dish.
     handleAddIngredient(newIng.id);
     resetQuickAdd();
-  }, [qaNameVI, qaNameEN, qaUnit, qaCal, qaProtein, qaCarbs, qaFat, qaFiber, t, handleAddIngredient, resetQuickAdd]);
+  }, [qaName, qaNameOther, qaUnit, qaCal, qaProtein, qaCarbs, qaFat, qaFiber, lang, t, handleAddIngredient, resetQuickAdd]);
 
   return (
     <>
@@ -288,32 +293,45 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{t('dish.quickAddTitle')}</p>
                       <button type="button" onClick={resetQuickAdd} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400"><X className="w-4 h-4" /></button>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="qa-name-vi" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddNameVI')} <span className="text-rose-500">*</span></label>
-                        <input
-                          id="qa-name-vi"
-                          name="qa-name-vi"
-                          data-testid="input-qa-name-vi"
-                          value={qaNameVI}
-                          onChange={e => { setQaNameVI(e.target.value); setQaError(''); }}
-                          onBlur={() => triggerAIFill(qaNameVI, qaUnit.vi)}
-                          placeholder={t('dish.quickAddNameVIPlaceholder')}
-                          className={`w-full px-3 py-2 text-sm rounded-xl border ${qaError ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all`}
-                        />
-                        {qaError && <p className="text-xs text-rose-500 mt-0.5">{qaError}</p>}
-                      </div>
-                      <div>
-                        <label htmlFor="qa-name-en" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddNameEN')}</label>
-                        <input
-                          id="qa-name-en"
-                          name="qa-name-en"
-                          value={qaNameEN}
-                          onChange={e => setQaNameEN(e.target.value)}
-                          placeholder={t('dish.quickAddNameENPlaceholder')}
-                          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all"
-                        />
-                      </div>
+                    <div>
+                      <label htmlFor="qa-name" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddName')} <span className="text-rose-500">*</span></label>
+                      <input
+                        id="qa-name"
+                        name="qa-name"
+                        data-testid="input-qa-name"
+                        value={qaName}
+                        onChange={e => { setQaName(e.target.value); setQaError(''); }}
+                        onBlur={() => triggerAIFill(qaName, qaUnit.vi)}
+                        placeholder={t('dish.quickAddNamePlaceholder')}
+                        className={`w-full px-3 py-2 text-sm rounded-xl border ${qaError ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all`}
+                      />
+                      {qaError && <p className="text-xs text-rose-500 mt-0.5">{qaError}</p>}
+                      <button
+                        type="button"
+                        data-testid="btn-toggle-name-override"
+                        onClick={() => setShowNameOverride(prev => !prev)}
+                        className="mt-1.5 flex items-center gap-1 text-xs text-sky-500 dark:text-sky-400 hover:text-sky-600 dark:hover:text-sky-300 transition-colors"
+                      >
+                        <Globe className="w-3 h-3" />
+                        {t('dish.quickAddAutoTranslate', { lang: lang === 'vi' ? 'English' : 'Tiếng Việt' })}
+                        {showNameOverride ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      </button>
+                      {showNameOverride && (
+                        <div className="mt-1.5">
+                          <label htmlFor="qa-name-other" className="text-xs text-slate-400 dark:text-slate-500 mb-0.5 block">
+                            {t('dish.quickAddNameOther', { lang: lang === 'vi' ? 'EN' : 'VI' })}
+                          </label>
+                          <input
+                            id="qa-name-other"
+                            name="qa-name-other"
+                            data-testid="input-qa-name-other"
+                            value={qaNameOther}
+                            onChange={e => setQaNameOther(e.target.value)}
+                            placeholder={lang === 'vi' ? 'e.g. Chicken breast' : 'VD: Ức gà'}
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all"
+                          />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label htmlFor="qa-unit" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddUnit')}</label>
@@ -321,7 +339,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                         mode="bilingual"
                         id="qa-unit"
                         value={qaUnit}
-                        onChange={v => { setQaUnit(v); triggerAIFill(qaNameVI, v.vi); }}
+                        onChange={v => { setQaUnit(v); triggerAIFill(qaName, v.vi); }}
                         data-testid="qa-unit"
                       />
                     </div>
@@ -338,8 +356,8 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                           {!qaAiLoading && (
                             <button
                               type="button"
-                              onClick={() => triggerAIFill(qaNameVI, qaUnit.vi)}
-                              disabled={!qaNameVI.trim()}
+                              onClick={() => triggerAIFill(qaName, qaUnit.vi)}
+                              disabled={!qaName.trim()}
                               data-testid="btn-qa-ai-fill"
                               title={t('dish.quickAddAiFillButton')}
                               className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-800/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
