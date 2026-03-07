@@ -99,7 +99,7 @@ export function useAISuggestion({
     notify.success(t('notification.aiSuggestionApplied'), t('notification.aiSuggestionAppliedDesc'));
   }, [suggestion, selectedDate, setDayPlans, notify, t]);
 
-  // Returns meal type so caller can open PlanningModal for manual editing
+  // Returns meal type so caller can open MealPlannerModal for manual editing
   const editMeal = useCallback((type: MealType): MealType => {
     if (abortRef.current) {
       abortRef.current.abort();

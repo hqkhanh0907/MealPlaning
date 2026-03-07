@@ -1,26 +1,25 @@
 import { useState, useCallback } from 'react';
 import { MealType } from '../types';
 
-/**
- * Manages all modal open/close states and the active planning type.
- * Extracted from App.tsx to respect SRP — App only composes, not manages modal state.
- */
 export const useModalManager = () => {
-  const [isPlanningModalOpen, setIsPlanningModalOpen] = useState(false);
-  const [isTypeSelectionModalOpen, setIsTypeSelectionModalOpen] = useState(false);
+  const [isMealPlannerOpen, setIsMealPlannerOpen] = useState(false);
   const [isClearPlanModalOpen, setIsClearPlanModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [planningType, setPlanningType] = useState<MealType | null>(null);
 
   const closeAll = useCallback(() => {
-    setIsPlanningModalOpen(false);
-    setIsTypeSelectionModalOpen(false);
+    setIsMealPlannerOpen(false);
     setIsClearPlanModalOpen(false);
     setIsGoalModalOpen(false);
   }, []);
 
-  const openTypeSelection = useCallback(() => { closeAll(); setIsTypeSelectionModalOpen(true); }, [closeAll]);
-  const closeTypeSelection = useCallback(() => setIsTypeSelectionModalOpen(false), []);
+  const openMealPlanner = useCallback((type: MealType) => {
+    closeAll();
+    setPlanningType(type);
+    setIsMealPlannerOpen(true);
+  }, [closeAll]);
+
+  const closeMealPlanner = useCallback(() => setIsMealPlannerOpen(false), []);
 
   const openClearPlan = useCallback(() => { closeAll(); setIsClearPlanModalOpen(true); }, [closeAll]);
   const closeClearPlan = useCallback(() => setIsClearPlanModalOpen(false), []);
@@ -28,34 +27,16 @@ export const useModalManager = () => {
   const openGoalModal = useCallback(() => { closeAll(); setIsGoalModalOpen(true); }, [closeAll]);
   const closeGoalModal = useCallback(() => setIsGoalModalOpen(false), []);
 
-  const openPlanningModal = useCallback((type: MealType) => {
-    closeAll();
-    setPlanningType(type);
-    setIsPlanningModalOpen(true);
-  }, [closeAll]);
-
-  const closePlanningModal = useCallback(() => setIsPlanningModalOpen(false), []);
-
-  const backToPlanningTypeSelection = useCallback(() => {
-    setIsPlanningModalOpen(false);
-    setIsTypeSelectionModalOpen(true);
-  }, []);
-
   return {
-    isPlanningModalOpen,
-    isTypeSelectionModalOpen,
+    isMealPlannerOpen,
     isClearPlanModalOpen,
     isGoalModalOpen,
     planningType,
-
-    openTypeSelection,
-    closeTypeSelection,
+    openMealPlanner,
+    closeMealPlanner,
     openClearPlan,
     closeClearPlan,
     openGoalModal,
     closeGoalModal,
-    openPlanningModal,
-    closePlanningModal,
-    backToPlanningTypeSelection,
   };
 };

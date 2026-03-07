@@ -306,7 +306,14 @@
     "noMatchTitle": "No dishes available for this meal",
     "noMatchHint": "Add dishes with appropriate tags in the Library.",
     "selectedCount": "Selected:",
-    "confirm": "Confirm ({{count}})"
+    "confirm": "Confirm ({{count}})",
+    "planTitle": "Meal Plan",
+    "planSubtitle": "Choose dishes for each meal",
+    "saveAll": "Save All",
+    "totalDay": "Day Total",
+    "mealsChanged": "{{count}} meals",
+    "mealCount": "{{count}} dishes",
+    "thisMeal": "This meal"
   },
   "typeSelection": {
     "title": "Plan meal",

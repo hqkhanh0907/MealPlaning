@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { TypeSelectionModal } from '../components/modals/TypeSelectionModal';
 import { ClearPlanModal } from '../components/modals/ClearPlanModal';
 import { GoalSettingsModal } from '../components/modals/GoalSettingsModal';
 import type { DayPlan, UserProfile } from '../types';
@@ -8,53 +7,6 @@ import type { DayPlan, UserProfile } from '../types';
 vi.mock('../hooks/useModalBackHandler', () => ({
   useModalBackHandler: vi.fn(),
 }));
-
-// --- TypeSelectionModal ---
-describe('TypeSelectionModal', () => {
-  const defaultPlan: DayPlan = {
-    date: '2024-01-15',
-    breakfastDishIds: ['d1'],
-    lunchDishIds: [],
-    dinnerDishIds: ['d2', 'd3'],
-  };
-  const onSelectType = vi.fn();
-  const onClose = vi.fn();
-
-  beforeEach(() => vi.clearAllMocks());
-
-  it('renders title and 3 meal options', () => {
-    render(<TypeSelectionModal currentPlan={defaultPlan} onSelectType={onSelectType} onClose={onClose} />);
-    expect(screen.getByText('Lên kế hoạch')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Sáng')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Trưa')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Tối')).toBeInTheDocument();
-  });
-
-  it('shows dish count badge for planned meals', () => {
-    render(<TypeSelectionModal currentPlan={defaultPlan} onSelectType={onSelectType} onClose={onClose} />);
-    expect(screen.getByText('1 món')).toBeInTheDocument(); // breakfast
-    expect(screen.getByText('2 món')).toBeInTheDocument(); // dinner
-  });
-
-  it('calls onSelectType when a meal is clicked', () => {
-    render(<TypeSelectionModal currentPlan={defaultPlan} onSelectType={onSelectType} onClose={onClose} />);
-    fireEvent.click(screen.getByText('Bữa Trưa'));
-    expect(onSelectType).toHaveBeenCalledWith('lunch');
-  });
-
-  it('calls onClose when X button is clicked', () => {
-    render(<TypeSelectionModal currentPlan={defaultPlan} onSelectType={onSelectType} onClose={onClose} />);
-    const xButton = screen.getByLabelText('Đóng');
-    fireEvent.click(xButton);
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it('calls onClose when backdrop is clicked', () => {
-    render(<TypeSelectionModal currentPlan={defaultPlan} onSelectType={onSelectType} onClose={onClose} />);
-    fireEvent.click(screen.getByLabelText('Đóng'));
-    expect(onClose).toHaveBeenCalled();
-  });
-});
 
 // --- ClearPlanModal ---
 describe('ClearPlanModal', () => {

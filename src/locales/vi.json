@@ -304,7 +304,14 @@
     "noMatchTitle": "Chưa có món ăn phù hợp cho {{meal}}.",
     "noMatchHint": "Hãy thêm món ăn và gắn tag \"{{meal}}\" trong Thư viện.",
     "selectedCount": "Đã chọn:",
-    "confirmButton": "Xác nhận"
+    "confirmButton": "Xác nhận",
+    "planTitle": "Kế hoạch bữa ăn",
+    "planSubtitle": "Chọn món cho từng bữa",
+    "saveAll": "Lưu tất cả",
+    "totalDay": "Tổng ngày",
+    "mealsChanged": "{{count}} bữa",
+    "mealCount": "{{count}} món",
+    "thisMeal": "Bữa này"
   },
   "typeSelection": {
     "title": "Lên kế hoạch",

@@ -12,9 +12,8 @@ import { ManagementTab } from './components/ManagementTab';
 import { SettingsTab } from './components/SettingsTab';
 import { usePersistedState } from './hooks/usePersistedState';
 import { useNotification } from './contexts/NotificationContext';
-import { TypeSelectionModal } from './components/modals/TypeSelectionModal';
+import { MealPlannerModal } from './components/modals/MealPlannerModal';
 import { ClearPlanModal } from './components/modals/ClearPlanModal';
-import { PlanningModal } from './components/modals/PlanningModal';
 import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
 import { AISuggestionPreviewModal } from './components/modals/AISuggestionPreviewModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -29,7 +28,6 @@ import { useAISuggestion } from './hooks/useAISuggestion';
 import { useModalManager } from './hooks/useModalManager';
 import {
   createEmptyDayPlan,
-  getDayPlanSlotKey,
   clearPlansByScope,
   updateDayPlanSlot,
 } from './services/planService';
@@ -177,12 +175,12 @@ export default function App() {
   });
 
   const handlePlanMeal = useCallback((type: MealType) => {
-    modals.openPlanningModal(type);
+    modals.openMealPlanner(type);
   }, [modals]);
 
   const handleEditAISuggestionMeal = useCallback((type: MealType) => {
     aiSuggestion.editMeal(type);
-    modals.openPlanningModal(type);
+    modals.openMealPlanner(type);
   }, [aiSuggestion, modals]);
 
   const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month') => {
@@ -229,11 +227,7 @@ export default function App() {
     if (currentPlan.breakfastDishIds.length === 0) emptySlots.push('breakfast');
     if (currentPlan.lunchDishIds.length === 0) emptySlots.push('lunch');
     if (currentPlan.dinnerDishIds.length === 0) emptySlots.push('dinner');
-    if (emptySlots.length === 1) {
-      modals.openPlanningModal(emptySlots[0]);
-    } else {
-      modals.openTypeSelection();
-    }
+    modals.openMealPlanner(emptySlots[0] ?? 'breakfast');
   }, [modals, currentPlan]);
   const openClearPlan = useCallback(() => modals.openClearPlan(), [modals]);
   const openGoalModal = useCallback(() => modals.openGoalModal(), [modals]);
@@ -383,22 +377,29 @@ export default function App() {
         )}
       </main>
 
-      {modals.isTypeSelectionModalOpen && <TypeSelectionModal currentPlan={currentPlan} onSelectType={handlePlanMeal} onClose={modals.closeTypeSelection} />}
-      {modals.isPlanningModalOpen && modals.planningType && (
-        <PlanningModal
-          planningType={modals.planningType}
+      {modals.isMealPlannerOpen && modals.planningType && (
+        <MealPlannerModal
           dishes={dishes}
           ingredients={ingredients}
-          currentDishIds={currentPlan[getDayPlanSlotKey(modals.planningType)] as string[]}
-          onConfirm={(dishIds) => {
-            const plannedType = modals.planningType!;
-            handleUpdatePlan(plannedType, dishIds);
-            modals.closePlanningModal();
-            const mealLabel = t(`meal.${plannedType}Full`);
-            notify.success(t('notification.planUpdated'), t('notification.planUpdatedDesc', { count: dishIds.length, meal: mealLabel }));
+          currentPlan={currentPlan}
+          selectedDate={selectedDate}
+          initialTab={modals.planningType}
+          onConfirm={(changes) => {
+            for (const [type, dishIds] of Object.entries(changes)) {
+              handleUpdatePlan(type as MealType, dishIds);
+            }
+            modals.closeMealPlanner();
+            const changedCount = Object.keys(changes).length;
+            const totalDishes = Object.values(changes).reduce((sum, ids) => sum + ids.length, 0);
+            if (changedCount === 1) {
+              const mealType = Object.keys(changes)[0] as MealType;
+              const mealLabel = t(`meal.${mealType}Full`);
+              notify.success(t('notification.planUpdated'), t('notification.planUpdatedDesc', { count: totalDishes, meal: mealLabel }));
+            } else {
+              notify.success(t('notification.planUpdated'), t('notification.planUpdatedDesc', { count: totalDishes, meal: `${changedCount} ${t('common.item')}` }));
+            }
           }}
-          onClose={modals.closePlanningModal}
-          onBack={modals.backToPlanningTypeSelection}
+          onClose={modals.closeMealPlanner}
         />
       )}
       {modals.isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={modals.closeClearPlan} />}

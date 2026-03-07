@@ -212,12 +212,12 @@ describe('App', () => {
     expect(screen.getByTestId('btn-theme-light')).toBeInTheDocument();
   });
 
-  it('opens type selection modal when "Lên kế hoạch" is clicked', () => {
+  it('opens meal planner modal when "Lên kế hoạch" is clicked', () => {
     render(<App />);
     const planButtons = screen.getAllByText('Lên kế hoạch');
     fireEvent.click(planButtons[0]);
-    // TypeSelectionModal subtitle
-    expect(screen.getByText('Chọn buổi bạn muốn lên kế hoạch')).toBeInTheDocument();
+    // MealPlannerModal subtitle
+    expect(screen.getByText('Chọn món cho từng bữa')).toBeInTheDocument();
   });
 
   it('renders user weight in subtitle', () => {
@@ -339,8 +339,7 @@ describe('App', () => {
     render(<App />);
     const planBtns = screen.getAllByText('Lên kế hoạch');
     fireEvent.click(planBtns[0]);
-    const lunchBtn = await waitFor(() => screen.getByTestId('btn-type-lunch'));
-    fireEvent.click(lunchBtn);
+    // MealPlannerModal opens with tabs — click confirm directly
     const confirmBtn = await waitFor(() => screen.getByTestId('btn-confirm-plan'));
     fireEvent.click(confirmBtn);
     expect(mockNotify.success).toHaveBeenCalled();
