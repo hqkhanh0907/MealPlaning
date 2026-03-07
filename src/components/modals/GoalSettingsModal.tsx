@@ -59,9 +59,13 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <div className="relative">
                 <input
                   id="goal-protein"
-                  type="number" step="1" min="1" max="5" inputMode="numeric"
+                  type="number" step="0.1" min="1" max="5" inputMode="decimal"
                   value={userProfile.proteinRatio}
-                  onChange={(e) => onUpdateProfile({ ...userProfile, proteinRatio: Math.max(1, Math.round(Number(e.target.value)) || 1) })}
+                  onChange={(e) => {
+                    const raw = Number(e.target.value);
+                    const rounded = Math.round(Math.max(1, raw || 1) * 10) / 10;
+                    onUpdateProfile({ ...userProfile, proteinRatio: rounded });
+                  }}
                   data-testid="input-goal-protein"
                   className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
                 />

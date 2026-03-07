@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Upload, Loader2 } from 'lucide-react';
+import { Download, Upload, Loader2, AlertTriangle } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { useNotification } from '../contexts/NotificationContext';
+import { ConfirmationModal } from './modals/ConfirmationModal';
 
 interface DataBackupProps {
   onImport: (data: Record<string, unknown>) => void;
@@ -34,6 +35,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [pendingImport, setPendingImport] = useState<{ data: Record<string, unknown>; summary: string } | null>(null);
 
   const exportWeb = (data: Record<string, unknown>, fileName: string) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -96,12 +98,24 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
         return;
       }
 
-      onImport(data);
+      const counts: string[] = [];
+      if (Array.isArray(data['mp-ingredients'])) counts.push(`${(data['mp-ingredients'] as unknown[]).length} ${t('ingredient.ingredients').toLowerCase()}`);
+      if (Array.isArray(data['mp-dishes'])) counts.push(`${(data['mp-dishes'] as unknown[]).length} ${t('dish.dishes').toLowerCase()}`);
+      if (Array.isArray(data['mp-day-plans'])) counts.push(`${(data['mp-day-plans'] as unknown[]).length} ${t('calendar.mealPlan').toLowerCase()}`);
+      const summary = counts.join(', ');
+      setPendingImport({ data, summary });
     } catch {
       notify.error(t('backup.importFailed'), '');
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const confirmImport = () => {
+    if (pendingImport) {
+      onImport(pendingImport.data);
+      setPendingImport(null);
     }
   };
 
@@ -134,6 +148,15 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
           className="hidden"
         />
       </div>
+      <ConfirmationModal
+        isOpen={!!pendingImport}
+        variant="warning"
+        title={t('backup.import')}
+        message={<p>{t('backup.importConfirmMsg', { summary: pendingImport?.summary ?? '' })}</p>}
+        confirmLabel={t('common.confirm')}
+        onConfirm={confirmImport}
+        onCancel={() => setPendingImport(null)}
+      />
     </div>
   );
 };

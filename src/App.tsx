@@ -227,7 +227,17 @@ export default function App() {
     }
   }, [ingredients, notify, setIngredients, setDishes, t]);
 
-  const openTypeSelection = useCallback(() => modals.openTypeSelection(), [modals]);
+  const openTypeSelection = useCallback(() => {
+    const emptySlots: MealType[] = [];
+    if (currentPlan.breakfastDishIds.length === 0) emptySlots.push('breakfast');
+    if (currentPlan.lunchDishIds.length === 0) emptySlots.push('lunch');
+    if (currentPlan.dinnerDishIds.length === 0) emptySlots.push('dinner');
+    if (emptySlots.length === 1) {
+      modals.openPlanningModal(emptySlots[0]);
+    } else {
+      modals.openTypeSelection();
+    }
+  }, [modals, currentPlan]);
   const openClearPlan = useCallback(() => modals.openClearPlan(), [modals]);
   const openGoalModal = useCallback(() => modals.openGoalModal(), [modals]);
 
@@ -329,7 +339,7 @@ export default function App() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-8">
-        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')}>
+        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} inert={activeMainTab !== 'calendar' ? true : undefined}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.calendarTab')}>
           <CalendarTab
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
@@ -359,7 +369,7 @@ export default function App() {
           </ErrorBoundary>
         )}
 
-        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')}>
+        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')} inert={activeMainTab !== 'management' ? true : undefined}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}

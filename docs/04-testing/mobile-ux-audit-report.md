@@ -12,8 +12,8 @@
 | **Chế độ kiểm tra** | Light mode + Dark mode |
 | **Phương pháp** | Chrome DevTools MCP — trải nghiệm trực tiếp từng trang, từng element, từng interaction flow |
 | **Nguồn dữ liệu** | Merge từ 2 báo cáo: UX Assessment Report (tầm nhìn UX) + Technical Audit Report (kỹ thuật chi tiết) |
-| **Tổng phát hiện** | **62 issues** (5 P0 · 7 P1 · 24 P2 · 26 P3) |
-| **Trạng thái** | ✅ Hoàn tất phân tích, chờ implement |
+| **Tổng phát hiện** | **65 issues** (5 P0 · 8 P1 · 26 P2 · 26 P3) — thêm 3 phát hiện mới từ double-check |
+| **Trạng thái** | ✅ Hoàn tất phân tích + xác minh lần 2, chờ implement |
 
 ---
 
@@ -32,7 +32,8 @@
 4. [Console & Performance](#4-console--performance)
 5. [Kế hoạch thực hiện (Implementation Plan)](#5-kế-hoạch-thực-hiện-implementation-plan)
 6. [Tầm nhìn UX nâng cao (UX Vision)](#6-tầm-nhìn-ux-nâng-cao-ux-vision)
-7. [Đánh giá tổng quan](#7-đánh-giá-tổng-quan)
+7. [Báo cáo xác minh (Verification Report)](#7-báo-cáo-xác-minh-verification-report--double-check)
+8. [Đánh giá tổng quan](#8-đánh-giá-tổng-quan)
 
 ---
 
@@ -557,7 +558,70 @@ Bước 3: Verify querySelector chỉ trả visible elements
 
 ---
 
-## 7. Đánh giá tổng quan
+## 7. Báo cáo xác minh (Verification Report — Double Check)
+
+> **Ngày xác minh**: 2026-03-07
+> **Phương pháp**: Chrome DevTools MCP, iPhone 14 Pro emulation (390×844), Vietnamese language mode
+> **Mục đích**: Kiểm tra lại tất cả các vấn đề đã báo cáo — xác nhận còn tồn tại, đã sửa, hoặc phát sinh mới
+
+### 7.1 Tổng kết xác minh
+
+| Loại | Số lượng | Chi tiết |
+|------|:--------:|----------|
+| ✅ Đã sửa hoàn toàn | 0 | — |
+| ⚠️ Sửa một phần | 2 | CAL-01, CAL-01b (i18n cải thiện đáng kể) |
+| ❌ Vẫn tồn tại | 17 | Tất cả P0/P1/P2 đã kiểm tra |
+| 🆕 Phát sinh mới | 3 | ACC-NEW-01, ACC-NEW-02, PWA-NEW-01 |
+
+### 7.2 Chi tiết kiểm tra P0 (Critical)
+
+| ID | Vấn đề | Trạng thái | Kết quả xác minh |
+|----|--------|:----------:|-------------------|
+| CAL-01 | Ngày hiển thị sai ngôn ngữ | ⚠️ Sửa một phần | **Cải thiện đáng kể**: "Thứ Sáu, 6 tháng 3, 2026" hiển thị đúng tiếng Việt. Tuy nhiên khi ở English mode, hệ thống hiển thị English — đúng hành vi |
+| CAL-01b | ~40-50% UI text chưa dịch | ⚠️ Sửa một phần | **Cải thiện từ ~60% → ~10% chưa dịch**. Còn lại: "CALORIES", "PROTEIN" badges, "Carbs", "g protein", progressbar aria-labels. Settings, Library, Navigation 100% translated |
+| CAL-11 | 2 modal mở đồng thời | ❌ Vẫn tồn tại | JS programmatic click tạo được 2 dialog đồng thời (Plan meal + AI Suggestion). Backdrop chặn visual click nhưng không chặn JS dispatch |
+| LIB-02 | Edit/Delete buttons sát nhau | ❌ Vẫn tồn tại | Gap = 8px (cần ≥24px). Button size 154×36px mỗi cái. Rủi ro mistouch trên mobile |
+| LIB-07 | Hidden tabs DOM interaction | ❌ Vẫn tồn tại | Tab panels dùng `display:none` nhưng KHÔNG có `inert` hoặc `aria-hidden`. 30 buttons trong Library tab tồn tại trong DOM khi Calendar active |
+
+### 7.3 Chi tiết kiểm tra P1 (High)
+
+| ID | Vấn đề | Trạng thái | Kết quả xác minh |
+|----|--------|:----------:|-------------------|
+| CAL-09 | Content bị che bởi bottom nav | ❌ Vẫn tồn tại | Trong dialog: "Thêm món ăn" button tại y=866 chồng lấp bottom nav (top=777) thêm 89px. "Xác nhận" chồng 52px |
+| CAL-14 | Thừa bước chọn meal type | ❌ Vẫn tồn tại | Plan meal vẫn yêu cầu 2 bước: chọn loại bữa → chọn món. Thừa 1 bước so với click trực tiếp vào slot trống |
+| CAL-16 | Protein validation bug | ❌ Vẫn tồn tại | `invalid="true"` với value `1.600000023841858` (floating point precision). min=1, max=5 nhưng 1.6 bị đánh dấu invalid |
+| SET-02 | Import data không preview | ❌ Vẫn tồn tại | Nút "Nhập dữ liệu" tồn tại, không có dialog preview/confirm trước khi ghi đè |
+| SHOP-04 | Grocery thiếu checkboxes | ❌ Vẫn tồn tại | Items hiển thị dạng button, không có checkbox đánh dấu đã mua |
+| ACC-01 | Color contrast WCAG AA | ❌ Vẫn tồn tại | emerald-500 contrast 2.54:1, emerald-600 contrast 3.77:1. Cả 2 đều fail WCAG AA 4.5:1. 49 elements sử dụng emerald class |
+| AI-01 | AI tab empty state kém | ❌ Vẫn tồn tại | Chỉ hiển thị text hướng dẫn, không có illustration, không có onboarding hấp dẫn |
+
+### 7.4 Chi tiết kiểm tra P2 (Medium) — Mẫu
+
+| ID | Vấn đề | Trạng thái | Kết quả xác minh |
+|----|--------|:----------:|-------------------|
+| CAL-08 | Empty state 3 bữa lặp | ❌ Vẫn tồn tại | 3 sections BỮA SÁNG/TRƯA/TỐI đều hiển thị "Thêm món cho..." — lặp, không engaging |
+| CAL-10b | Plan meal button duplicate | ❌ Vẫn tồn tại | Nút "Lên kế hoạch" xuất hiện 2 lần: header và section Meal plan |
+| CAL-10c | More options chỉ 1 item | ❌ Vẫn tồn tại | Dropdown "Thêm tùy chọn" chỉ chứa 1 action: "Xóa kế hoạch" |
+| CAL-17 | Theme toggle ở Calendar header | ❌ Vẫn tồn tại | Toggle cycles System→Light→Dark trong Calendar, không phải Settings |
+| NAV-01 | Navigation label chật | ❌ Vẫn tồn tại | Touch targets đạt (≥64×59px) nhưng "AI Phân tích" 86px chiếm nhiều space trên 390px |
+
+### 7.5 🆕 Phát hiện mới (New Findings)
+
+| ID | Priority | Vấn đề | Chi tiết |
+|----|:--------:|--------|----------|
+| ACC-NEW-01 | **P1** | `user-scalable=no` trong viewport meta | WCAG 1.4.4 violation. Viewport meta có `maximum-scale=1.0, user-scalable=no` → người dùng khuyết tật thị giác không thể pinch-to-zoom. **Khuyến nghị**: xóa `maximum-scale=1.0` và `user-scalable=no` |
+| ACC-NEW-02 | **P2** | 2 buttons không có accessible name | Nút prev/next week (`btn-prev-date`, `btn-next-date`) chỉ chứa SVG icon, không có `aria-label` hoặc text. Screen readers đọc là "button" không có tên |
+| PWA-NEW-01 | **P2** | Thiếu `<link rel="manifest">` | Không tìm thấy manifest link trong HTML. PWA cần manifest để hỗ trợ Add to Home Screen, splash screen, app-like experience |
+
+### 7.6 Kết luận xác minh
+
+> **i18n** là lĩnh vực có cải thiện đáng kể nhất (từ ~60% → ~10% text chưa dịch). Tuy nhiên, **tất cả các lỗi kỹ thuật và UX khác vẫn chưa được sửa**. Phát hiện thêm 3 vấn đề mới liên quan đến accessibility và PWA.
+>
+> **Tổng**: 19/19 vấn đề đã kiểm tra vẫn tồn tại (2 cải thiện một phần) + 3 phát hiện mới = **22 vấn đề cần xử lý**.
+
+---
+
+## 8. Đánh giá tổng quan
 
 ### Scorecard
 
@@ -583,23 +647,27 @@ Bước 3: Verify querySelector chỉ trả visible elements
 - Zero JavaScript errors trong console
 
 ### Điểm cần cải thiện
-- 5 lỗi P0 cần fix ngay (i18n hệ thống, modal stacking, DOM interaction, button proximity)
-- Color contrast không đạt WCAG AA
+- 5 lỗi P0 cần fix ngay (modal stacking, DOM interaction, button proximity — i18n đã cải thiện đáng kể)
+- Color contrast không đạt WCAG AA (emerald-500: 2.54:1, emerald-600: 3.77:1)
+- `user-scalable=no` chặn pinch-to-zoom (WCAG 1.4.4) — **phát hiện mới**
 - Grocery tab thiếu core features (checkboxes, aggregation)
 - AI tab gần như trắng — user mới mất phương hướng
 - Plan meal flow có friction thừa
 - Thiếu visual richness cho food app (ảnh, illustrations)
 - Thiếu personalization elements (greeting, recent, badges)
+- Thiếu PWA manifest — **phát hiện mới**
 
 ### Kết luận
 
-> Ứng dụng có **nền tảng kỹ thuật vững chắc** (zero errors, good architecture, defensive coding). Vấn đề chính nằm ở **lớp trải nghiệm**: i18n chưa hoàn thiện, empty states thiếu guidance, grocery thiếu core feature, và thiếu "chất" emotional cho food app.
+> Ứng dụng có **nền tảng kỹ thuật vững chắc** (zero errors, good architecture, defensive coding). Vấn đề chính nằm ở **lớp trải nghiệm**: i18n đã cải thiện đáng kể (~90% đã dịch) nhưng vẫn còn sót, empty states thiếu guidance, grocery thiếu core feature, và thiếu "chất" emotional cho food app.
 >
-> Sau Sprint 1-2: App sẽ **hoạt động đúng** (fix bugs, i18n, accessibility).
+> **Xác minh lần 2** phát hiện thêm 3 vấn đề mới: `user-scalable=no` (WCAG), unlabeled nav buttons, thiếu PWA manifest.
+>
+> Sau Sprint 1-2: App sẽ **hoạt động đúng** (fix bugs, i18n hoàn chỉnh, accessibility).
 > Sau Sprint 3-4: App sẽ **gây ấn tượng** (personalization, visual richness, micro-delights).
 >
 > Mục tiêu: Từ **6.3/10 → 8.7/10** — đưa trải nghiệm lên đỉnh cao mới.
 
 ---
 
-*Báo cáo merged từ 2 nguồn: UX Assessment Report (tầm nhìn UX sáng tạo) + Technical Audit Report (kỹ thuật chi tiết). 57 phát hiện duy nhất, 15 đề xuất nâng cao (✨), 4 sprints triển khai. Tất cả hướng tới mục tiêu: trải nghiệm người dùng thân thiện, trực quan, chuyên nghiệp.*
+*Báo cáo merged từ 2 nguồn: UX Assessment Report (tầm nhìn UX sáng tạo) + Technical Audit Report (kỹ thuật chi tiết) + Verification Report (xác minh lần 2). 65 phát hiện, 15 đề xuất nâng cao (✨), 4 sprints triển khai. Tất cả hướng tới mục tiêu: trải nghiệm người dùng thân thiện, trực quan, chuyên nghiệp.*

@@ -288,7 +288,8 @@
     "exportSuccess": "Xuất dữ liệu thành công!",
     "exportFailed": "Xuất thất bại",
     "invalidFile": "File không hợp lệ",
-    "importFailed": "Nhập thất bại"
+    "importFailed": "Nhập thất bại",
+    "importConfirmMsg": "Dữ liệu nhập sẽ ghi đè dữ liệu hiện tại ({{summary}}). Bạn có muốn tiếp tục?"
   },
   "planning": {
     "title": "Chọn món cho {{meal}}",

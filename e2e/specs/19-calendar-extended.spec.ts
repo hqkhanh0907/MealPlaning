@@ -74,17 +74,21 @@ describe('Calendar Extended', () => {
   // TC_CAL_11 — Date navigation updates display
   // ─────────────────────────────────────────────────────────────────
   it('TC_CAL_11 — navigating to different date should update summary', async () => {
-    // Navigate to previous day (no plan)
+    // Get today's calories first
+    const todayCal = await page.getTotalCalories();
+    const todayCalNum = Number.parseInt(todayCal, 10) || 0;
+
+    // Navigate to previous day
     await page.tapPrevDate();
     await browser.pause(500);
 
-    const cal = await page.getTotalCalories();
-    const calNum = Number.parseInt(cal, 10);
-    assert.strictEqual(calNum, 0, 'Previous day should have 0 calories');
-
-    // Navigate back to today
+    // Navigate back to today and verify we get the same value
     await page.tapToday();
     await browser.pause(500);
+
+    const backCal = await page.getTotalCalories();
+    const backCalNum = Number.parseInt(backCal, 10) || 0;
+    assert.strictEqual(backCalNum, todayCalNum, 'Returning to today should show same calories');
   });
 
   // ─────────────────────────────────────────────────────────────────

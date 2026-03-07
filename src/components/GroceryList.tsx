@@ -176,7 +176,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
             onClick={() => { setScope(key); setPersistedCheckedSnapshots([]); }}
             data-testid={`tab-grocery-${key}`}
             className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap min-h-11 ${
-              scope === key ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'
+              scope === key ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'
             }`}
           >
             {t(getScopeLabelKey(key))}
@@ -191,13 +191,13 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
           {/* Header with counter and actions */}
           <div className="bg-emerald-50 dark:bg-emerald-900/30 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-100 dark:border-emerald-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700 dark:text-emerald-400" />
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-emerald-900 dark:text-emerald-200">
                   {groceryItems.length} {t('grocery.ingredientCount')}
                 </h3>
                 {checkedCount > 0 && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
                     {t('grocery.boughtCount', { count: checkedCount, total: groceryItems.length })}
                   </p>
                 )}
@@ -207,14 +207,14 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
               <button
                 onClick={handleCopyList}
                 data-testid="btn-grocery-copy"
-                className="p-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
+                className="p-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
                 title={t('common.copy')}
               >
                 <Copy className="w-4 h-4" />
               </button>
               <button
                 onClick={handleShare}
-                className="p-2.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
+                className="p-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
                 title={t('common.share')}
               >
                 <Share2 className="w-4 h-4" />
@@ -271,7 +271,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
           {/* All done state */}
           {checkedCount === groceryItems.length && groceryItems.length > 0 && (
             <div data-testid="grocery-all-bought" className="px-4 sm:px-6 py-4 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-center">
-              <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
+              <div className="flex items-center justify-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold">
                 <CheckCircle2 className="w-5 h-5" />
                 <span>{t('grocery.allBought')}</span>
               </div>

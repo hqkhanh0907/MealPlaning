@@ -49,9 +49,14 @@ const AnalysisSkeleton: React.FC = () => {
 const EmptyState: React.FC = () => {
   const { t } = useTranslation();
   return (
-  <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center space-y-4">
-    <ImageIcon className="w-16 h-16 opacity-20" />
-    <p>{t('ai.emptyHint')}</p>
+  <div className="h-full flex flex-col items-center justify-center text-center space-y-5 py-8">
+    <div className="w-24 h-24 bg-gradient-to-br from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20 rounded-3xl flex items-center justify-center">
+      <ImageIcon className="w-12 h-12 text-emerald-400/60 dark:text-emerald-500/40" />
+    </div>
+    <div className="space-y-2">
+      <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300">{t('ai.title')}</h4>
+      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">{t('ai.emptyHint')}</p>
+    </div>
   </div>
   );
 };

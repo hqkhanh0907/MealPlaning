@@ -51,12 +51,19 @@ describe('Grocery Extended', () => {
         plans.push({ date: dateKey, meals: { breakfast: [], lunch: ['e2e-gro-ext-dish'], dinner: [] } });
       }
       localStorage.setItem('mp-day-plans', JSON.stringify(plans));
+
+      // Clear grocery checked state
+      localStorage.removeItem('mp-grocery-checked');
     }, ING_ID, today);
 
     await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
     await browser.pause(2000);
+    await page.switchToWebview();
     await page.navigateTo('grocery');
-    await browser.pause(500);
+    await browser.waitUntil(
+      async () => (await page.isDisplayed('grocery-empty-state')) || (await page.isDisplayed('tab-grocery-day')),
+      { timeout: 10_000, interval: 500 }
+    );
   });
 
   // ─────────────────────────────────────────────────────────────────
@@ -88,8 +95,13 @@ describe('Grocery Extended', () => {
     await browser.pause(500);
 
     const hasStrike = await (browser as unknown as ExecutableBrowser).execute((id: string) => {
-      const el = document.querySelector(`[data-testid="grocery-item-${id}"]`);
-      return el?.className.includes('line-through') || el?.querySelector('.line-through') !== null || false;
+      const btn = document.querySelector(`[data-testid="grocery-item-${id}"]`);
+      if (!btn) return false;
+      const spans = btn.querySelectorAll('span');
+      for (const s of spans) {
+        if (s.className.includes('line-through')) return true;
+      }
+      return false;
     }, ING_ID);
     assert.ok(hasStrike, 'Checked item should have strikethrough style');
   });

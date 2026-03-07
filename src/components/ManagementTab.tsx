@@ -48,7 +48,7 @@ export const ManagementTab: React.FC<ManagementTabProps> = React.memo(({
               key={tab.key}
               data-testid={`tab-management-${tab.key}`}
               onClick={() => onSubTabChange(tab.key)}
-              className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'}`}
+              className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'}`}
             >
               {tab.label}
             </button>

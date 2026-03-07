@@ -12,20 +12,27 @@ export const useModalManager = () => {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [planningType, setPlanningType] = useState<MealType | null>(null);
 
-  const openTypeSelection = useCallback(() => setIsTypeSelectionModalOpen(true), []);
+  const closeAll = useCallback(() => {
+    setIsPlanningModalOpen(false);
+    setIsTypeSelectionModalOpen(false);
+    setIsClearPlanModalOpen(false);
+    setIsGoalModalOpen(false);
+  }, []);
+
+  const openTypeSelection = useCallback(() => { closeAll(); setIsTypeSelectionModalOpen(true); }, [closeAll]);
   const closeTypeSelection = useCallback(() => setIsTypeSelectionModalOpen(false), []);
 
-  const openClearPlan = useCallback(() => setIsClearPlanModalOpen(true), []);
+  const openClearPlan = useCallback(() => { closeAll(); setIsClearPlanModalOpen(true); }, [closeAll]);
   const closeClearPlan = useCallback(() => setIsClearPlanModalOpen(false), []);
 
-  const openGoalModal = useCallback(() => setIsGoalModalOpen(true), []);
+  const openGoalModal = useCallback(() => { closeAll(); setIsGoalModalOpen(true); }, [closeAll]);
   const closeGoalModal = useCallback(() => setIsGoalModalOpen(false), []);
 
   const openPlanningModal = useCallback((type: MealType) => {
+    closeAll();
     setPlanningType(type);
-    setIsTypeSelectionModalOpen(false);
     setIsPlanningModalOpen(true);
-  }, []);
+  }, [closeAll]);
 
   const closePlanningModal = useCallback(() => setIsPlanningModalOpen(false), []);
 

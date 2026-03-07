@@ -55,7 +55,7 @@ describe('Summary', () => {
 
   it('renders progress bars with correct aria attributes', () => {
     render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
-    const calBar = screen.getByRole('progressbar', { name: 'Calories' });
+    const calBar = screen.getByRole('progressbar', { name: 'Calo' });
     expect(calBar).toHaveAttribute('value', '1500');
     expect(calBar).toHaveAttribute('max', '2000');
   });

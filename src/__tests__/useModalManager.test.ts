@@ -86,19 +86,19 @@ describe('useModalManager', () => {
     expect(result.current.isTypeSelectionModalOpen).toBe(true);
   });
 
-  // --- Independence ---
-  it('should manage each modal independently', () => {
+  // --- Mutual exclusion (prevents modal stacking) ---
+  it('should only allow one modal open at a time', () => {
     const { result } = renderHook(() => useModalManager());
 
     act(() => result.current.openGoalModal());
-    act(() => result.current.openClearPlan());
-
     expect(result.current.isGoalModalOpen).toBe(true);
+
+    act(() => result.current.openClearPlan());
+    expect(result.current.isGoalModalOpen).toBe(false);
     expect(result.current.isClearPlanModalOpen).toBe(true);
     expect(result.current.isPlanningModalOpen).toBe(false);
 
-    act(() => result.current.closeGoalModal());
-    expect(result.current.isGoalModalOpen).toBe(false);
-    expect(result.current.isClearPlanModalOpen).toBe(true);
+    act(() => result.current.closeClearPlan());
+    expect(result.current.isClearPlanModalOpen).toBe(false);
   });
 });

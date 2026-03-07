@@ -119,6 +119,12 @@ describe('DataBackup', () => {
       if (input) fireEvent.change(input, { target: { files: [file] } });
     });
 
+    // Confirmation dialog now appears — click confirm
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-confirm-action'));
+
     await waitFor(() => {
       expect(onImport).toHaveBeenCalledWith(expect.objectContaining({ 'mp-dishes': [{ id: 'd1' }] }));
     });
@@ -184,10 +190,38 @@ describe('DataBackup', () => {
       if (input) fireEvent.change(input, { target: { files: [file] } });
     });
 
+    // Confirmation dialog now appears — click confirm
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-confirm-action'));
+
     await waitFor(() => {
       expect(onImport).toHaveBeenCalledWith(expect.objectContaining({ 'mp-dishes': [{ id: 'd1', name: 'Phở' }] }));
     });
     expect(mockNotify.error).not.toHaveBeenCalled();
+  });
+
+  it('cancels import when user dismisses confirmation dialog', async () => {
+    const onImport = vi.fn();
+    render(<DataBackup onImport={onImport} />);
+
+    const fileContent = JSON.stringify({ 'mp-dishes': [{ id: 'd1' }] });
+    const file = new File([fileContent], 'backup.json', { type: 'application/json' });
+
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+
+    await waitFor(() => {
+      if (input) fireEvent.change(input, { target: { files: [file] } });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-cancel-action')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-cancel-action'));
+
+    expect(onImport).not.toHaveBeenCalled();
   });
 
   it('clicks import button which triggers fileInput click (line 121)', () => {

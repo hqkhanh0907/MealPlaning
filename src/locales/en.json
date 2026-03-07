@@ -290,7 +290,8 @@
     "exportSuccess": "Data exported successfully!",
     "exportFailed": "Export failed",
     "invalidFile": "Invalid file",
-    "importFailed": "Import failed"
+    "importFailed": "Import failed",
+    "importConfirmMsg": "Imported data will overwrite current data ({{summary}}). Do you want to continue?"
   },
   "planning": {
     "title": "Choose dishes for {{meal}}",

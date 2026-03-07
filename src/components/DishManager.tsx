@@ -163,10 +163,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                  <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Calories</span><span className="text-sm font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></div>
-                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-blue-400 font-bold uppercase">Protein</span><span className="text-sm font-bold text-blue-700 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></div>
+                  <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.calories')}</span><span className="text-sm font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></div>
+                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-blue-400 font-bold uppercase">{t('common.protein')}</span><span className="text-sm font-bold text-blue-700 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></div>
                 </div>
-                <div className="relative z-10 mt-auto flex items-center gap-2 pt-4 border-t border-slate-50 dark:border-slate-700">
+                <div className="relative z-10 mt-auto flex items-center gap-4 pt-4 border-t border-slate-50 dark:border-slate-700">
                   <button data-testid={`btn-edit-dish-${dish.id}`} onClick={() => modal.openEdit(dish)} className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all"><Edit3 className="w-4 h-4" /> {t('common.edit')}</button>
                   <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} aria-disabled={isUsed(dish.id)} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(dish.id) ? 'text-slate-400 dark:text-slate-500 opacity-40' : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /> {t('common.delete')}</button>
                 </div>
@@ -200,7 +200,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                       <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{dish.tags?.map(tag => <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-600 px-1.5 py-0.5 rounded">{tagLabels[tag]}</span>)}</div></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></td>
-                      <td className="px-4 py-3"><div className="flex items-center justify-end gap-1">
+                      <td className="px-4 py-3"><div className="flex items-center justify-end gap-3">
                         <button data-testid={`btn-edit-dish-${dish.id}`} onClick={() => modal.openEdit(dish)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
                         <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} aria-disabled={isUsed(dish.id)} className={`p-2 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-500 opacity-40' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
                       </div></td>
@@ -220,7 +220,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                     <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-5 h-5" /></div>
                     <div className="min-w-0"><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 truncate text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">{getLocalizedField(dish.name, lang)}</button><div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span>{Math.round(nutrition.calories)} kcal</span><span className="text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g Pro</span></div></div>
                   </div>
-                  <div className="relative z-10 flex items-center gap-1 shrink-0">
+                  <div className="relative z-10 flex items-center gap-3 shrink-0">
                     <button data-testid={`btn-edit-dish-${dish.id}`} onClick={() => modal.openEdit(dish)} className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
                     <button data-testid={`btn-delete-dish-${dish.id}`} onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))} aria-disabled={isUsed(dish.id)} className={`p-2.5 rounded-lg transition-all ${isUsed(dish.id) ? 'text-slate-300 dark:text-slate-500 opacity-40' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
                   </div>
@@ -249,10 +249,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3.5"><p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-1">Calories</p><p className="text-xl font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)} <span className="text-xs font-medium text-slate-400">kcal</span></p></div>
-              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3.5"><p className="text-[10px] text-blue-400 font-bold uppercase mb-1">Protein</p><p className="text-xl font-bold text-blue-700 dark:text-blue-400">{Math.round(nutrition.protein)}<span className="text-xs font-medium text-blue-400">g</span></p></div>
-              <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3.5"><p className="text-[10px] text-amber-400 font-bold uppercase mb-1">Carbs</p><p className="text-xl font-bold text-amber-700 dark:text-amber-400">{Math.round(nutrition.carbs)}<span className="text-xs font-medium text-amber-400">g</span></p></div>
-              <div className="bg-rose-50 dark:bg-rose-900/30 rounded-xl p-3.5"><p className="text-[10px] text-rose-400 font-bold uppercase mb-1">Fat</p><p className="text-xl font-bold text-rose-700 dark:text-rose-400">{Math.round(nutrition.fat)}<span className="text-xs font-medium text-rose-400">g</span></p></div>
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3.5"><p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-1">{t('common.calories')}</p><p className="text-xl font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)} <span className="text-xs font-medium text-slate-400">kcal</span></p></div>
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3.5"><p className="text-[10px] text-blue-400 font-bold uppercase mb-1">{t('common.protein')}</p><p className="text-xl font-bold text-blue-700 dark:text-blue-400">{Math.round(nutrition.protein)}<span className="text-xs font-medium text-blue-400">g</span></p></div>
+              <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3.5"><p className="text-[10px] text-amber-400 font-bold uppercase mb-1">{t('common.carbs')}</p><p className="text-xl font-bold text-amber-700 dark:text-amber-400">{Math.round(nutrition.carbs)}<span className="text-xs font-medium text-amber-400">g</span></p></div>
+              <div className="bg-rose-50 dark:bg-rose-900/30 rounded-xl p-3.5"><p className="text-[10px] text-rose-400 font-bold uppercase mb-1">{t('common.fat')}</p><p className="text-xl font-bold text-rose-700 dark:text-rose-400">{Math.round(nutrition.fat)}<span className="text-xs font-medium text-rose-400">g</span></p></div>
             </div>
             <div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3">{t('dish.ingredientList')}</p>
