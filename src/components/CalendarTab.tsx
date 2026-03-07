@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CalendarDays, Plus, Edit3, Sparkles, Loader2, Trash2,
-  Info, AlertCircle, CheckCircle2, ChefHat, MoreVertical
+  Info, AlertCircle, CheckCircle2, ChefHat
 } from 'lucide-react';
 import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary, SlotInfo, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
@@ -155,50 +155,6 @@ export interface CalendarTabProps {
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
 
-const MoreMenu: React.FC<{ onClearPlan: () => void }> = ({ onClearPlan }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
-
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleDismiss = (e: Event) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false);
-    };
-    document.addEventListener('mousedown', handleDismiss);
-    document.addEventListener('touchend', handleDismiss);
-    return () => {
-      document.removeEventListener('mousedown', handleDismiss);
-      document.removeEventListener('touchend', handleDismiss);
-    };
-  }, [isOpen]);
-
-  return (
-    <div className="relative" ref={menuRef}>
-      <button
-        data-testid="btn-more-menu"
-        onClick={() => setIsOpen(prev => !prev)}
-        className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 transition-all min-h-11 min-w-11"
-        aria-label={t('calendar.addOption')}
-      >
-        <MoreVertical className="w-5 h-5" />
-      </button>
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 py-1 z-10 min-w-44">
-          <button
-            data-testid="btn-clear-plan"
-            onClick={() => { onClearPlan(); setIsOpen(false); }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:bg-rose-100 transition-all"
-          >
-            <Trash2 className="w-4 h-4" />
-            {t('calendar.clearPlan')}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
 export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
   selectedDate, onSelectDate, dayPlans, dishes,
   dayNutrition, userWeight, targetCalories, targetProtein,
@@ -206,6 +162,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
 }) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+  const allEmpty = dayNutrition.breakfast.dishIds.length === 0 && dayNutrition.lunch.dishIds.length === 0 && dayNutrition.dinner.dishIds.length === 0;
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -216,18 +173,9 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
             <CalendarDays className="w-6 h-6 text-emerald-500" />
             <h2>{t('calendar.selectDate')}</h2>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <div className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full border border-slate-200 dark:border-slate-700 text-center">
-              {parseLocalDate(selectedDate).toLocaleDateString(dateLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </div>
-            <button
-              onClick={onOpenTypeSelection}
-              data-testid="btn-plan-meal"
-              className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full text-sm font-bold hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200 min-h-11"
-            >
-              <Plus className="w-4 h-4" />
-              {t('calendar.planMeal')}
-            </button>
+          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full border border-slate-200 dark:border-slate-700 text-center">
+            <span className="sm:hidden">{parseLocalDate(selectedDate).toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'numeric' })}</span>
+            <span className="hidden sm:inline">{parseLocalDate(selectedDate).toLocaleDateString(dateLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
           </div>
         </div>
         <DateSelector selectedDate={selectedDate} onSelectDate={onSelectDate} onPlanClick={onOpenTypeSelection} dayPlans={dayPlans} />
@@ -269,15 +217,52 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               <span className="hidden sm:inline">{t('calendar.aiSuggest')}</span>
               <span className="sm:hidden">AI</span>
             </button>
-            <MoreMenu onClearPlan={onOpenClearPlan} />
+            {!allEmpty && (
+              <button
+                onClick={onOpenClearPlan}
+                data-testid="btn-clear-plan"
+                className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:bg-rose-100 transition-all min-h-11 min-w-11"
+                aria-label={t('calendar.clearPlan')}
+                title={t('calendar.clearPlan')}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-          {MEAL_TYPES.map(type => (
-            <MealCard key={type} type={type} slot={dayNutrition[type]} dishes={dishes} onEdit={() => onPlanMeal(type)} />
-          ))}
-        </div>
+        {allEmpty ? (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 sm:p-12 border-2 border-dashed border-slate-200 dark:border-slate-700 text-center">
+            <CalendarDays className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">{t('calendar.emptyTitle')}</h3>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">{t('calendar.emptyDesc')}</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={onOpenTypeSelection}
+                data-testid="btn-plan-meal-empty"
+                className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-12"
+              >
+                <Plus className="w-4 h-4" />
+                {t('calendar.planMeal')}
+              </button>
+              <button
+                onClick={onSuggestMealPlan}
+                disabled={isSuggesting}
+                data-testid="btn-ai-suggest-empty"
+                className="flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-6 py-3 rounded-xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 active:scale-[0.98] transition-all disabled:opacity-50 min-h-12"
+              >
+                {isSuggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {t('calendar.aiSuggest')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {MEAL_TYPES.map(type => (
+              <MealCard key={type} type={type} slot={dayNutrition[type]} dishes={dishes} onEdit={() => onPlanMeal(type)} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

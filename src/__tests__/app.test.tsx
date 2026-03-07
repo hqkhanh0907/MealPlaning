@@ -121,7 +121,7 @@ vi.mock('../components/AIImageAnalyzer', () => ({
 
 // Mock SettingsTab to expose import callback
 vi.mock('../components/SettingsTab', () => ({
-  SettingsTab: ({ onImportData }: { onImportData: (d: Record<string, unknown>) => void }) => (
+  SettingsTab: ({ onImportData, theme, setTheme }: { onImportData: (d: Record<string, unknown>) => void; theme?: string; setTheme?: (t: string) => void }) => (
     <div data-testid="settings-tab">
       <button data-testid="import-invalid" onClick={() => onImportData({ 'mp-ingredients': 'not-an-array' })}>Import Invalid</button>
       <button data-testid="import-valid" onClick={() => onImportData({ 'mp-ingredients': [{ id: 'i1', name: 'Chicken', unit: 'g' }] })}>Import Valid</button>
@@ -131,6 +131,8 @@ vi.mock('../components/SettingsTab', () => ({
         'mp-day-plans': [{ date: '2025-01-01', breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }],
         'mp-user-profile': { weight: 75, targetCalories: 2000 },
       })}>Import All</button>
+      {theme && <span data-testid="current-theme">{theme}</span>}
+      {setTheme && <button data-testid="btn-theme-light" onClick={() => setTheme('light')}>Light</button>}
     </div>
   ),
 }));
@@ -200,10 +202,14 @@ describe('App', () => {
     expect(screen.getByText('Thư viện dữ liệu')).toBeInTheDocument();
   });
 
-  it('renders theme toggle button', () => {
+  it('theme toggle is in Settings tab', () => {
     render(<App />);
-    const themeBtn = screen.getByLabelText(/Chế độ hiển thị/);
-    expect(themeBtn).toBeInTheDocument();
+    const navTabs = screen.getAllByRole('tab');
+    const settingsTab = navTabs.find(b => b.textContent?.includes('Cài đặt'));
+    expect(settingsTab).toBeTruthy();
+    fireEvent.click(settingsTab!);
+    expect(screen.getByTestId('settings-tab')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-theme-light')).toBeInTheDocument();
   });
 
   it('opens type selection modal when "Lên kế hoạch" is clicked', () => {
@@ -219,11 +225,10 @@ describe('App', () => {
     expect(screen.getByText(/Dinh dưỡng chính xác cho/)).toBeInTheDocument();
   });
 
-  it('renders meal cards for breakfast, lunch, dinner', () => {
+  it('shows consolidated empty state when no meals planned', () => {
     render(<App />);
-    expect(screen.getByText('Bữa Sáng')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Trưa')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Tối')).toBeInTheDocument();
+    // Default state has no plans, so consolidated empty state shows
+    expect(screen.getByText('Chưa có kế hoạch cho ngày này')).toBeInTheDocument();
   });
 
   it('renders recommendation panel', () => {
@@ -475,15 +480,22 @@ describe('App', () => {
   });
 
   it('handleClearPlan clears plans via ClearPlanModal', async () => {
+    // Seed a day plan so the clear button is visible
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: new Date().toISOString().split('T')[0],
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
     render(<App />);
-    // Open the MoreMenu dropdown
-    fireEvent.click(screen.getByTestId('btn-more-menu'));
-    // Click "Clear Plan" to open ClearPlanModal
-    fireEvent.click(screen.getByTestId('btn-clear-plan'));
-    // The mocked ClearPlanModal should appear
+    // Clear plan button should be visible since there's a plan
+    await waitFor(() => {
+      expect(screen.getByLabelText('Xóa kế hoạch')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByLabelText('Xóa kế hoạch'));
+    // ClearPlanModal should appear
     await waitFor(() => screen.getByTestId('clear-plan-modal'));
     fireEvent.click(screen.getByTestId('clear-scope-day'));
-    // After clearing, modal should be closed (no crash)
     expect(screen.getByRole('tablist')).toBeInTheDocument();
   });
 

@@ -60,6 +60,15 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
 
   return (
     <div data-testid="ai-image-analyzer" className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+      {!image && !result && (
+        <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6 text-xs sm:text-sm text-slate-400 dark:text-slate-500">
+          <div className="flex items-center gap-1.5"><span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center text-xs font-bold">1</span><span>{t('ai.step1')}</span></div>
+          <span className="text-slate-300 dark:text-slate-600">→</span>
+          <div className="flex items-center gap-1.5"><span className="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center text-xs font-bold">2</span><span>{t('ai.step2')}</span></div>
+          <span className="text-slate-300 dark:text-slate-600">→</span>
+          <div className="flex items-center gap-1.5"><span className="w-6 h-6 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xs font-bold">3</span><span>{t('ai.step3')}</span></div>
+        </div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <ImageCapture image={image} onImageReady={handleImageReady} onClear={handleClearImage} />

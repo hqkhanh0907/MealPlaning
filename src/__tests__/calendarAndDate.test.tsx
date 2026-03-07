@@ -327,29 +327,21 @@ describe('CalendarTab', () => {
     expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
   });
 
-  it('shows Thêm món button for empty meal slots', () => {
+  it('shows consolidated empty state when all meals are empty', () => {
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }} />);
-    const addButtons = screen.getAllByText('Thêm món ăn');
-    expect(addButtons.length).toBe(3);
+    expect(screen.getByText('Chưa có kế hoạch cho ngày này')).toBeInTheDocument();
   });
 
-  it('renders MoreMenu and triggers onOpenClearPlan', () => {
+  it('renders clear plan button and triggers onOpenClearPlan', () => {
     render(<CalendarTab {...defaultProps} />);
-    const moreBtn = screen.getByLabelText('Thêm tùy chọn');
-    fireEvent.click(moreBtn);
-    const clearBtn = screen.getByText('Xóa kế hoạch');
+    const clearBtn = screen.getByLabelText('Xóa kế hoạch');
     fireEvent.click(clearBtn);
     expect(defaultProps.onOpenClearPlan).toHaveBeenCalled();
   });
 
-  it('MoreMenu closes when clicking outside', () => {
-    render(<CalendarTab {...defaultProps} />);
-    const moreBtn = screen.getByLabelText('Thêm tùy chọn');
-    fireEvent.click(moreBtn);
-    expect(screen.getByText('Xóa kế hoạch')).toBeInTheDocument();
-    // Click outside
-    fireEvent.mouseDown(document.body);
-    expect(screen.queryByText('Xóa kế hoạch')).not.toBeInTheDocument();
+  it('hides clear plan button when all meals are empty', () => {
+    render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }} />);
+    expect(screen.queryByLabelText('Xóa kế hoạch')).not.toBeInTheDocument();
   });
 
   it('shows plan complete message when all meals are filled', () => {
@@ -389,15 +381,14 @@ describe('CalendarTab', () => {
     expect(screen.getByText(/Tháng 12.*2025|12.*2025|December.*2025/i)).toBeInTheDocument();
   });
 
-  it('shows all 3 meal slots as empty when no plan exists', () => {
+  it('shows consolidated empty state when no plan exists', () => {
     const emptyNutrition: DayNutritionSummary = {
       breakfast: makeSlot([], 0, 0),
       lunch: makeSlot([], 0, 0),
       dinner: makeSlot([], 0, 0),
     };
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} />);
-    const addButtons = screen.getAllByText('Thêm món ăn');
-    expect(addButtons.length).toBe(3);
+    expect(screen.getByText('Chưa có kế hoạch cho ngày này')).toBeInTheDocument();
     // No plan complete message
     expect(screen.queryByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).not.toBeInTheDocument();
   });

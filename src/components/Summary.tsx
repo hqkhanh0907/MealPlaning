@@ -53,6 +53,9 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             <div className="text-left sm:text-right">
               <span data-testid="summary-total-calories" className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalCalories)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetCalories}</span>
+              <span className={`text-xs font-bold ml-1.5 ${totalCalories > targetCalories ? 'text-rose-500' : totalCalories >= targetCalories * 0.8 ? 'text-amber-500' : 'text-emerald-600'}`}>
+                ({Math.round((totalCalories / targetCalories) * 100)}%)
+              </span>
             </div>
           </div>
           <progress
@@ -73,6 +76,9 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             <div className="text-left sm:text-right">
               <span className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalProtein)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetProtein}g</span>
+              <span className={`text-xs font-bold ml-1.5 ${totalProtein >= targetProtein ? 'text-emerald-600' : totalProtein >= targetProtein * 0.8 ? 'text-amber-500' : 'text-blue-500'}`}>
+                ({Math.round((totalProtein / targetProtein) * 100)}%)
+              </span>
             </div>
           </div>
           <progress
