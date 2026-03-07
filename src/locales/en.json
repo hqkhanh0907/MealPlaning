@@ -487,5 +487,11 @@
     "savePrompt": "Enter template name:",
     "copyPlan": "Copy plan",
     "manageTemplates": "Meal templates"
+  },
+  "schedule": {
+    "mealsTab": "Meals",
+    "nutritionTab": "Nutrition",
+    "quickNutrition": "Quick nutrition",
+    "switchToMeals": "Switch to Meals tab to start"
   }
 }

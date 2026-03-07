@@ -190,7 +190,7 @@ describe('App', () => {
   it('starts on calendar tab', () => {
     render(<App />);
     expect(screen.getByText('Chọn ngày')).toBeInTheDocument();
-    expect(screen.getByText('Kế hoạch ăn uống')).toBeInTheDocument();
+    expect(screen.getByText('Bữa ăn')).toBeInTheDocument();
   });
 
   it('switches to management tab when clicked', () => {
@@ -229,11 +229,13 @@ describe('App', () => {
   it('shows consolidated empty state when no meals planned', () => {
     render(<App />);
     // Default state has no plans, so consolidated empty state shows
-    expect(screen.getByText('Chưa có kế hoạch cho ngày này')).toBeInTheDocument();
+    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
   });
 
   it('renders recommendation panel', () => {
     render(<App />);
+    // Switch to Nutrition sub-tab to see the recommendation panel
+    fireEvent.click(screen.getByTestId('subtab-nutrition'));
     expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
   });
 
@@ -244,7 +246,8 @@ describe('App', () => {
 
   it('opens goal settings modal', () => {
     render(<App />);
-    // Find and click the edit goals button (pencil icon on Summary)
+    // Switch to Nutrition sub-tab to access the edit goals button
+    fireEvent.click(screen.getByTestId('subtab-nutrition'));
     const editGoalsBtn = screen.getByLabelText('Chỉnh sửa mục tiêu dinh dưỡng');
     fireEvent.click(editGoalsBtn);
     expect(screen.getByText('Mục tiêu dinh dưỡng')).toBeInTheDocument();
@@ -490,9 +493,9 @@ describe('App', () => {
     render(<App />);
     // Clear plan button should be visible since there's a plan
     await waitFor(() => {
-      expect(screen.getByLabelText('Xóa kế hoạch')).toBeInTheDocument();
+      expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByLabelText('Xóa kế hoạch'));
+    fireEvent.click(screen.getByTestId('btn-clear-plan'));
     // ClearPlanModal should appear
     await waitFor(() => screen.getByTestId('clear-plan-modal'));
     fireEvent.click(screen.getByTestId('clear-scope-day'));

@@ -485,5 +485,11 @@
     "savePrompt": "Nhập tên cho mẫu bữa ăn:",
     "copyPlan": "Copy kế hoạch",
     "manageTemplates": "Mẫu bữa ăn"
+  },
+  "schedule": {
+    "mealsTab": "Bữa ăn",
+    "nutritionTab": "Dinh dưỡng",
+    "quickNutrition": "Dinh dưỡng nhanh",
+    "switchToMeals": "Chuyển sang tab Bữa ăn để bắt đầu"
   }
 }

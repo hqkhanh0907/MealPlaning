@@ -1,0 +1,73 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Flame, Beef } from 'lucide-react';
+import { DayNutritionSummary } from '../../types';
+
+export interface MiniNutritionBarProps {
+  dayNutrition: DayNutritionSummary;
+  targetCalories: number;
+  targetProtein: number;
+  onSwitchToNutrition: () => void;
+}
+
+export const MiniNutritionBar: React.FC<MiniNutritionBarProps> = React.memo(({
+  dayNutrition, targetCalories, targetProtein, onSwitchToNutrition,
+}) => {
+  const { t } = useTranslation();
+  const totalCal = Math.round(
+    dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories,
+  );
+  const totalPro = Math.round(
+    dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein,
+  );
+  const calPct = Math.min(100, Math.round((totalCal / targetCalories) * 100));
+  const proPct = Math.min(100, Math.round((totalPro / targetProtein) * 100));
+
+  return (
+    <button
+      type="button"
+      onClick={onSwitchToNutrition}
+      data-testid="mini-nutrition-bar"
+      className="w-full lg:hidden bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 rounded-2xl p-4 text-left cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/30 active:scale-[0.99] transition-all"
+      aria-label={t('schedule.quickNutrition')}
+    >
+      <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-2">
+        {t('schedule.quickNutrition')}
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+            <Flame className="w-3.5 h-3.5 text-orange-500" />
+            <span className="text-xs font-medium">
+              {totalCal}/{targetCalories} kcal
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-600 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-orange-400 transition-all"
+              style={{ width: `${calPct}%` }}
+              data-testid="mini-cal-bar"
+            />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+            <Beef className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-xs font-medium">
+              {totalPro}/{targetProtein}g Pro
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-600 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-blue-400 transition-all"
+              style={{ width: `${proPct}%` }}
+              data-testid="mini-pro-bar"
+            />
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+});
+
+MiniNutritionBar.displayName = 'MiniNutritionBar';
