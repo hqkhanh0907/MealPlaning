@@ -38,6 +38,15 @@ html {
   display: none;
 }
 
+/* Subtle pulse animation for today's date button */
+@keyframes pulse-subtle {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+}
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out 3;
+}
+
 /* Hide browser default number input spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

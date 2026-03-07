@@ -1,14 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Copy, Plus, Trash2 } from 'lucide-react';
-import { DayPlan } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { parseLocalDate } from '../../utils/helpers';
 
 interface CopyPlanModalProps {
   sourceDate: string;
-  sourcePlan: DayPlan;
   onCopy: (targetDates: string[]) => void;
   onClose: () => void;
 }
@@ -56,7 +54,7 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, onCopy
   const handleAddDate = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value;
     if (date && date !== sourceDate && !selectedDates.includes(date)) {
-      setSelectedDates(prev => [...prev, date].sort());
+      setSelectedDates(prev => [...prev, date].sort((a, b) => a.localeCompare(b)));
     }
     e.target.value = '';
   }, [sourceDate, selectedDates]);

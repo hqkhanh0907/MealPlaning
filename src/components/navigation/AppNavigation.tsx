@@ -15,16 +15,15 @@ interface NavItemConfig {
   tab: MainTab;
   mobileIcon: React.ReactNode;
   desktopIcon: React.ReactNode;
-  labelKey: string;       // i18n key for full label
-  mobileLabelKey: string; // i18n key for short mobile label (can be same)
+  labelKey: string;       // i18n key for label
 }
 
 const NAV_CONFIG: NavItemConfig[] = [
-  { tab: 'calendar', mobileIcon: <CalendarDays className="w-6 h-6" />, desktopIcon: <CalendarDays className="w-4 h-4" />, labelKey: 'nav.calendar', mobileLabelKey: 'nav.calendar' },
-  { tab: 'management', mobileIcon: <BookOpen className="w-6 h-6" />, desktopIcon: <Settings2 className="w-4 h-4" />, labelKey: 'nav.management', mobileLabelKey: 'nav.management' },
-  { tab: 'ai-analysis', mobileIcon: <Sparkles className="w-6 h-6" />, desktopIcon: <Sparkles className="w-4 h-4" />, labelKey: 'nav.aiAnalysis', mobileLabelKey: 'nav.aiAnalysis' },
-  { tab: 'grocery', mobileIcon: <ShoppingCart className="w-6 h-6" />, desktopIcon: <ShoppingCart className="w-4 h-4" />, labelKey: 'nav.grocery', mobileLabelKey: 'nav.grocery' },
-  { tab: 'settings', mobileIcon: <SlidersHorizontal className="w-6 h-6" />, desktopIcon: <SlidersHorizontal className="w-4 h-4" />, labelKey: 'nav.settings', mobileLabelKey: 'nav.settings' },
+  { tab: 'calendar', mobileIcon: <CalendarDays className="w-6 h-6" />, desktopIcon: <CalendarDays className="w-4 h-4" />, labelKey: 'nav.calendar' },
+  { tab: 'management', mobileIcon: <BookOpen className="w-6 h-6" />, desktopIcon: <Settings2 className="w-4 h-4" />, labelKey: 'nav.management' },
+  { tab: 'ai-analysis', mobileIcon: <Sparkles className="w-6 h-6" />, desktopIcon: <Sparkles className="w-4 h-4" />, labelKey: 'nav.aiAnalysis' },
+  { tab: 'grocery', mobileIcon: <ShoppingCart className="w-6 h-6" />, desktopIcon: <ShoppingCart className="w-4 h-4" />, labelKey: 'nav.grocery' },
+  { tab: 'settings', mobileIcon: <SlidersHorizontal className="w-6 h-6" />, desktopIcon: <SlidersHorizontal className="w-4 h-4" />, labelKey: 'nav.settings' },
 ];
 
 export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }> = ({ activeTab, onTabChange, showAIBadge }) => {
@@ -32,8 +31,8 @@ export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: Mai
   return (
     <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 z-30 sm:hidden" aria-label={t('nav.mainNav')}>
       <div className="flex items-center justify-around px-2 py-1" role="tablist">
-        {NAV_CONFIG.map(({ tab, mobileIcon, mobileLabelKey }) => {
-          const label = t(mobileLabelKey);
+        {NAV_CONFIG.map(({ tab, mobileIcon, labelKey }) => {
+          const label = t(labelKey);
           return (
             <button
               key={tab}
@@ -42,7 +41,7 @@ export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: Mai
               aria-label={label}
               data-testid={`nav-${tab}`}
               onClick={() => onTabChange(tab)}
-              className={`flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-h-14 rounded-xl transition-all relative ${activeTab === tab ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 active:text-slate-600'}`}
+              className={`flex flex-col items-center justify-center py-2.5 px-4 min-h-12 rounded-xl transition-all relative ${activeTab === tab ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 active:text-slate-600'}`}
             >
               <div className="relative">
                 {mobileIcon}
@@ -50,8 +49,7 @@ export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: Mai
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900" />
                 )}
               </div>
-              <span className="text-[11px] font-bold">{label}</span>
-              {activeTab === tab && <div className="absolute -bottom-1 w-5 h-0.5 bg-emerald-500 rounded-full" />}
+              {activeTab === tab && <div className="absolute -bottom-0.5 w-5 h-0.5 bg-emerald-500 rounded-full" />}
             </button>
           );
         })}

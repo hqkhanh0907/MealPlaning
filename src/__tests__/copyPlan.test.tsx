@@ -76,7 +76,6 @@ describe('useCopyPlan', () => {
 describe('CopyPlanModal', () => {
   const defaultProps = {
     sourceDate: '2025-01-15',
-    sourcePlan: makePlan('2025-01-15'),
     onCopy: vi.fn(),
     onClose: vi.fn(),
   };

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
 import { DayPlan } from '../types';
@@ -84,6 +84,8 @@ const formatWeekLabel = (dates: Date[]): string => {
   return `${fmt(dates[0])} - ${fmt(dates[6])}`;
 };
 
+const HINT_DISMISSED_KEY = 'mp-date-hint-dismissed';
+
 export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }) => {
   const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -94,9 +96,14 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
     typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640 ? 'week' : 'calendar'
   );
   const [weekOffset, setWeekOffset] = useState(0);
+  const [hintDismissed, setHintDismissed] = useState(() => {
+    try { return localStorage.getItem(HINT_DISMISSED_KEY) === '1'; } catch { return false; }
+  });
   const weekContainerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+
+  const todayStr = useMemo(() => formatLocalDate(new Date()), []);
 
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
@@ -132,6 +139,11 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
     t('calendar.weekdays.thu'), t('calendar.weekdays.fri'), t('calendar.weekdays.sat'),
     t('calendar.weekdays.sun'),
   ];
+
+  const dismissHint = useCallback(() => {
+    setHintDismissed(true);
+    try { localStorage.setItem(HINT_DISMISSED_KEY, '1'); } catch { /* quota exceeded */ }
+  }, []);
 
   const goToToday = () => {
     const today = new Date();
@@ -229,7 +241,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           {weekDates.map(date => {
             const dateStr = formatLocalDate(date);
             const isSelected = dateStr === selectedDate;
-            const isToday = dateStr === formatLocalDate(new Date());
+            const isToday = dateStr === todayStr;
             const dayOfWeek = date.getDay();
             const isSunday = dayOfWeek === 0;
             const dayLabel = weekDays[dayOfWeek === 0 ? 6 : dayOfWeek - 1];
@@ -248,9 +260,10 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                     onPlanClick();
                   } else {
                     onSelectDate(dateStr);
+                    if (!hintDismissed) dismissHint();
                   }
                 }}
-                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl transition-all min-h-18 ${getDayButtonClass(isSelected, isToday, 'week', isSunday)}`}
+                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl transition-all min-h-18 ${getDayButtonClass(isSelected, isToday, 'week', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
               >
                 <span className={`text-[10px] font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>{dayLabel}</span>
                 <span className="text-lg font-bold">{date.getDate()}</span>
@@ -285,7 +298,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
               const day = i + 1;
               const dateStr = formatDate(day);
               const isSelected = dateStr === selectedDate;
-              const isToday = dateStr === formatLocalDate(new Date());
+              const isToday = dateStr === todayStr;
 
               const plan = dayPlans.find(p => p.date === dateStr);
               const hasBreakfast = (plan?.breakfastDishIds?.length ?? 0) > 0;
@@ -301,6 +314,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                       onPlanClick();
                     } else {
                       onSelectDate(dateStr);
+                      if (!hintDismissed) dismissHint();
                     }
                   }}
                   onDoubleClick={() => {
@@ -308,14 +322,14 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
                     if (onPlanClick) onPlanClick();
                   }}
                   title={isSelected ? t('calendar.tapToPlan') : t('calendar.selectDay')}
-                  className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)}`}
+                  className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
                 >
                   <span className="text-sm font-bold">{day}</span>
 
                   <div className="absolute bottom-1 sm:bottom-2 flex gap-0.5">
-                    <div className={`w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`} />
-                    <div className={`w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`} />
-                    <div className={`w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`} />
                   </div>
                 </button>
               );
@@ -323,6 +337,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           </div>
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium gap-2 sm:gap-0">
             {(() => {
+              if (hintDismissed) return <span />;
               const selectedPlan = dayPlans.find(p => p.date === selectedDate);
               const hasAnyPlan = Boolean(selectedPlan && (
                 (selectedPlan.breakfastDishIds?.length ?? 0) > 0 ||
@@ -348,7 +363,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
 
       {viewMode === 'week' && (
         <div className="mt-3 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium">
-          <span>{t('calendar.swipeHint')}</span>
+          {!hintDismissed && <span>{t('calendar.swipeHint')}</span>}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}</div>
             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}</div>

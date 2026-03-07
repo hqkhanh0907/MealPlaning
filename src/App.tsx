@@ -429,7 +429,6 @@ export default function App() {
       {modals.isCopyPlanOpen && (
         <CopyPlanModal
           sourceDate={selectedDate}
-          sourcePlan={currentPlan}
           onCopy={(targetDates) => {
             copyPlanHook.copyPlan(selectedDate, targetDates);
             modals.closeCopyPlanModal();

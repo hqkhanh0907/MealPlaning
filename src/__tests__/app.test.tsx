@@ -582,4 +582,111 @@ describe('App', () => {
     expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({ direction: 'en-vi' }));
     await act(async () => { await i18n.changeLanguage('vi'); });
   });
+
+  it('opens copy plan modal and copies plan', async () => {
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: today,
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-copy-plan'));
+    await waitFor(() => expect(screen.getByTestId('copy-plan-modal')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
+    fireEvent.click(screen.getByTestId('btn-copy-confirm'));
+    expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('opens template manager modal', async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
+  });
+
+  it('saves current plan as template via globalThis.prompt', async () => {
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: today,
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    const originalPrompt = globalThis.prompt;
+    globalThis.prompt = vi.fn().mockReturnValue('My Template');
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    expect(mockNotify.success).toHaveBeenCalled();
+    globalThis.prompt = originalPrompt;
+  });
+
+  it('meal planner single-tab confirm shows meal-specific notification', async () => {
+    render(<App />);
+    const planBtns = screen.getAllByText('Lên kế hoạch');
+    fireEvent.click(planBtns[0]);
+    await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
+    // Select a breakfast dish (d1 has tag 'breakfast')
+    const dishButton = screen.getByText('Yến mạch sữa chua');
+    fireEvent.click(dishButton);
+    fireEvent.click(screen.getByTestId('btn-confirm-plan'));
+    expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('template manager applies, deletes and renames templates', async () => {
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: today,
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    // First save a template so the manager has data
+    const originalPrompt = globalThis.prompt;
+    globalThis.prompt = vi.fn().mockReturnValue('Test Template');
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    expect(mockNotify.success).toHaveBeenCalled();
+    mockNotify.success.mockClear();
+
+    // Open template manager
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
+    // Find the template item — id starts with 'tpl'
+    const applyBtns = screen.getAllByText('Áp dụng');
+    fireEvent.click(applyBtns[0]);
+    expect(mockNotify.success).toHaveBeenCalled();
+    mockNotify.success.mockClear();
+
+    // Re-open template manager for delete
+    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
+    // First save another template
+    globalThis.prompt = vi.fn().mockReturnValue('Template Delete');
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    mockNotify.success.mockClear();
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
+    const deleteBtns = screen.getAllByText('Xóa');
+    fireEvent.click(deleteBtns[0]);
+    expect(mockNotify.success).toHaveBeenCalled();
+    mockNotify.success.mockClear();
+
+    // Save another template for rename
+    globalThis.prompt = vi.fn().mockReturnValue('Template Rename');
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    mockNotify.success.mockClear();
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
+    const renameBtns = screen.getAllByText('Đổi tên');
+    fireEvent.click(renameBtns[0]);
+    const renameInput = screen.getByTestId('template-rename-input');
+    fireEvent.change(renameInput, { target: { value: 'Renamed Template' } });
+    fireEvent.click(screen.getByTestId('template-rename-confirm'));
+    expect(mockNotify.success).toHaveBeenCalled();
+    globalThis.prompt = originalPrompt;
+  });
 });
