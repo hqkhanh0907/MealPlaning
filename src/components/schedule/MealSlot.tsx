@@ -8,8 +8,6 @@ export interface MealSlotProps {
   type: MealType;
   slot: SlotInfo;
   dishes: Dish[];
-  targetCalories: number;
-  targetProtein: number;
   onEdit: () => void;
 }
 
@@ -28,18 +26,13 @@ const TEST_ID_MAP: Record<MealType, string> = {
 };
 
 export const MealSlot: React.FC<MealSlotProps> = React.memo(({
-  type, slot, dishes, targetCalories, targetProtein, onEdit,
+  type, slot, dishes, onEdit,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const hasDishes = slot.dishIds.length > 0;
   const icon = MEAL_ICONS[type];
   const label = t(`meal.${type}`);
-
-  const caloriesPerSlot = targetCalories / 3;
-  const proteinPerSlot = targetProtein / 3;
-  const calPercent = Math.min(100, Math.round((slot.calories / caloriesPerSlot) * 100));
-  const proPercent = Math.min(100, Math.round((slot.protein / proteinPerSlot) * 100));
 
   const resolvedDishes = useMemo(() => {
     return slot.dishIds
@@ -121,29 +114,6 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
         <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded uppercase">
           {Math.round(slot.protein)}g Pro
         </span>
-      </div>
-
-      <div className="flex gap-2 mt-2">
-        <div
-          className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-600 overflow-hidden"
-          title={`${slot.calories.toFixed(0)} kcal`}
-        >
-          <div
-            className="h-full rounded-full bg-orange-400 transition-all"
-            style={{ width: `${calPercent}%` }}
-            data-testid={`cal-bar-${type}`}
-          />
-        </div>
-        <div
-          className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-600 overflow-hidden"
-          title={`${slot.protein.toFixed(1)}g protein`}
-        >
-          <div
-            className="h-full rounded-full bg-blue-400 transition-all"
-            style={{ width: `${proPercent}%` }}
-            data-testid={`pro-bar-${type}`}
-          />
-        </div>
       </div>
     </div>
   );

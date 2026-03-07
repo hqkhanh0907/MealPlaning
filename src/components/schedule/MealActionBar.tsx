@@ -44,7 +44,7 @@ export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
         <button
           onClick={onOpenClearPlan}
           data-testid="btn-clear-plan"
-          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:bg-rose-100 transition-all min-h-11 min-w-11"
+          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:bg-rose-100 dark:active:bg-rose-900/30 transition-all min-h-11 min-w-11"
           aria-label={t('calendar.clearPlan')}
           title={t('calendar.clearPlan')}
         >
@@ -55,7 +55,7 @@ export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
         <button
           onClick={onCopyPlan}
           data-testid="btn-copy-plan"
-          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:bg-indigo-100 transition-all min-h-11 min-w-11"
+          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:bg-indigo-100 dark:active:bg-indigo-900/30 transition-all min-h-11 min-w-11"
           aria-label={t('template.copyPlan')}
           title={t('template.copyPlan')}
         >
@@ -66,7 +66,7 @@ export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
         <button
           onClick={onSaveTemplate}
           data-testid="btn-save-template"
-          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 active:bg-amber-100 transition-all min-h-11 min-w-11"
+          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 active:bg-amber-100 dark:active:bg-amber-900/30 transition-all min-h-11 min-w-11"
           aria-label={t('template.saveAs')}
           title={t('template.saveAs')}
         >
@@ -77,7 +77,7 @@ export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
         <button
           onClick={onOpenTemplateManager}
           data-testid="btn-template-manager"
-          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:bg-purple-100 transition-all min-h-11 min-w-11"
+          className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:bg-purple-100 dark:active:bg-purple-900/30 transition-all min-h-11 min-w-11"
           aria-label={t('template.manageTemplates')}
           title={t('template.manageTemplates')}
         >

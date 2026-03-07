@@ -40,8 +40,6 @@ describe('MealSlot', () => {
         type="breakfast"
         slot={makeSlot([])}
         dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
         onEdit={onEdit}
       />,
     );
@@ -58,8 +56,6 @@ describe('MealSlot', () => {
         type="breakfast"
         slot={makeSlot(['d1'], 400, 20)}
         dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
         onEdit={vi.fn()}
       />,
     );
@@ -74,8 +70,6 @@ describe('MealSlot', () => {
         type="breakfast"
         slot={makeSlot(['d1', 'd2', 'd3'], 900, 45)}
         dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
         onEdit={vi.fn()}
       />,
     );
@@ -92,8 +86,6 @@ describe('MealSlot', () => {
         type="lunch"
         slot={makeSlot(['d1', 'd2', 'd3', 'd4'], 1200, 60)}
         dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
         onEdit={vi.fn()}
       />,
     );
@@ -107,8 +99,6 @@ describe('MealSlot', () => {
         type="lunch"
         slot={makeSlot(['d2'], 600, 30)}
         dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
         onEdit={onEdit}
       />,
     );
@@ -117,34 +107,19 @@ describe('MealSlot', () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('renders progress bars with correct test IDs', () => {
-    render(
-      <MealSlot
-        type="dinner"
-        slot={makeSlot(['d3'], 500, 25)}
-        dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
-        onEdit={vi.fn()}
-      />,
-    );
-    expect(screen.getByTestId('cal-bar-dinner')).toBeInTheDocument();
-    expect(screen.getByTestId('pro-bar-dinner')).toBeInTheDocument();
-  });
-
   it('renders correct meal icons for each type', () => {
     const { rerender } = render(
-      <MealSlot type="breakfast" slot={makeSlot([])} dishes={[]} targetCalories={2000} targetProtein={140} onEdit={vi.fn()} />,
+      <MealSlot type="breakfast" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />,
     );
     expect(screen.getByText('Sáng')).toBeInTheDocument();
 
     rerender(
-      <MealSlot type="lunch" slot={makeSlot([])} dishes={[]} targetCalories={2000} targetProtein={140} onEdit={vi.fn()} />,
+      <MealSlot type="lunch" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />,
     );
     expect(screen.getByText('Trưa')).toBeInTheDocument();
 
     rerender(
-      <MealSlot type="dinner" slot={makeSlot([])} dishes={[]} targetCalories={2000} targetProtein={140} onEdit={vi.fn()} />,
+      <MealSlot type="dinner" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />,
     );
     expect(screen.getByText('Tối')).toBeInTheDocument();
   });
@@ -155,8 +130,6 @@ describe('MealSlot', () => {
         type="breakfast"
         slot={makeSlot(['d1', 'nonexistent'], 400, 20)}
         dishes={dishes}
-        targetCalories={2000}
-        targetProtein={140}
         onEdit={vi.fn()}
       />,
     );

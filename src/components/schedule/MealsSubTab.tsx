@@ -66,8 +66,6 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
               type={type}
               slot={dayNutrition[type]}
               dishes={dishes}
-              targetCalories={targetCalories}
-              targetProtein={targetProtein}
               onEdit={() => onPlanMeal(type)}
             />
           </div>

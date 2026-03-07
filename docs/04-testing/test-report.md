@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 4.0  
+**Version:** 5.0  
 **Date:** 2026-03-07  
-**Commit:** `102aed6`
+**Commit:** `ba8f9e9`
 
-> **v4.0**: QA Cycle 3 — E2E expanded from 10 to 24 specs (183 tests). 100% feature coverage with deep integration tests. MealPlannerModal direct flow adopted. Xem [Changelog](#6-changelog).
+> **v5.0**: QA Cycle 4 — Dark mode visual audit via Chrome DevTools. BUG-DM-001 fixed (4 components). Schedule sub-tabs refactor. Unit tests expanded to 995. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -12,16 +12,16 @@
 
 | Chỉ số | Kết quả |
 |--------|---------|
-| Unit Tests | **866 / 866 Pass** ✅ |
-| Test Files | **40 / 40 Pass** ✅ |
+| Unit Tests | **995 / 995 Pass** ✅ |
+| Test Files | **47 / 47 Pass** ✅ |
 | E2E Tests | **24 / 24 Specs Pass** ✅ |
 | Lint | **0 errors, 0 warnings** ✅ |
 | Code Coverage (Stmts) | **100%** ✅ |
-| Code Coverage (Branch) | **93.99%** ✅ |
+| Code Coverage (Branch) | **93.15%** ✅ |
 | Code Coverage (Funcs) | **100%** ✅ |
 | Code Coverage (Lines) | **100%** ✅ |
 | Bugs mở | **0** ✅ |
-| Bugs đã đóng | **7** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003) |
+| Bugs đã đóng | **8** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001) |
 
 ---
 
@@ -71,16 +71,16 @@
  ✓ src/__tests__/useModalManager.test.ts
  ✓ src/__tests__/usePersistedState.test.ts
 
- Test Files:  40 passed (40)
- Tests:      866 passed (866)
- Duration:   ~7.2s
+ Test Files:  47 passed (47)
+ Tests:      995 passed (995)
+ Duration:   ~5.3s
 ```
 
 ### Coverage chi tiết (từ `npm run test:coverage`)
 
 | Module / File | Stmts | Branch | Funcs | Lines | Ghi chú |
 |---------------|-------|--------|-------|-------|---------|
-| **All files** | **100%** | **93.99%** | **100%** | **100%** | ✅ Vượt target |
+| **All files** | **100%** | **93.15%** | **100%** | **100%** | ✅ Vượt target |
 | `src/` | 100% | 100% | 100% | 100% | ✅ |
 | `src/components/` | 100% | 90.86% | 100% | 100% | ✅ |
 | `src/components/modals/` | 100% | 94.27% | 100% | 100% | ✅ |
@@ -92,7 +92,7 @@
 | `src/services/` | 100% | 97.58% | 100% | 100% | ✅ |
 | `src/utils/` | 100% | 100% | 100% | 100% | ✅ |
 
-> **Lưu ý:** Tất cả Statements, Functions, Lines đều đạt **100%**. Branch coverage 93.99% do một số defensive branches (error handling, edge case guards) không thể trigger trong test environment.
+> **Lưu ý:** Tất cả Statements, Functions, Lines đều đạt **100%**. Branch coverage 93.15% do một số defensive branches (error handling, edge case guards) không thể trigger trong test environment.
 
 ---
 
@@ -217,13 +217,22 @@
 **Fix:** Updated CalendarPage `selectMealType()` to no-op; Updated spec 05 to verify `input-search-plan` and `btn-confirm-plan` directly.  
 **Commit:** `102aed6`
 
+### BUG-DM-001: Dark mode missing Tailwind variants — 4 components (CLOSED)
+
+**Phát hiện:** QA Cycle 4 (2026-03-07) via Chrome DevTools | **Mức độ:** Medium | **Priority:** P2  
+**Component:** `AISuggestionPreviewModal`, `MealActionBar`, `DateSelector`, `AnalysisResultView`  
+**Root cause:** Light-mode-only Tailwind classes (`bg-amber-50`, `active:bg-rose-100`, `bg-slate-200`, `bg-white`) without `dark:` variants caused bright flash/poor contrast in dark theme  
+**Fix:** Added `dark:bg-*`, `dark:active:bg-*`, `dark:border-*`, `dark:text-*` variants across 4 files (18 class additions total)  
+**Test coverage:** Visual verification via Chrome DevTools; Lint + 995 unit tests pass  
+**Chi tiết:** [docs/bug-reports/BUG-DM-001-dark-mode-missing-variants.md](../bug-reports/BUG-DM-001-dark-mode-missing-variants.md)
+
 ---
 
 ## 4. Known Limitations
 
 | Limitation | Ảnh hưởng | Priority |
 |-----------|-----------|---------|
-| Branch coverage 93.99% (không đạt 100%) | Một số defensive branches (error handlers, edge case guards) không thể trigger trong jsdom | Low — acceptable |
+| Branch coverage 93.15% (không đạt 100%) | Một số defensive branches (error handlers, edge case guards) không thể trigger trong jsdom | Low — acceptable |
 | AI coverage dùng mock only | E2E `09-ai-analysis` dùng mock data, không test real Gemini | Low |
 | E2E không test offline mode | Chỉ test khi có kết nối internet | Low |
 
@@ -240,6 +249,7 @@
 | 2026-03-06 | 866/866 | 22/22 | ✅ | `feba543` | QA Cycle 3: Coverage expanded to 22 specs |
 | 2026-03-07 | 866/866 | 22/24 | ✅ | `50553e8` | Deep integration specs added (23-24), spec 05 + 23 regression |
 | 2026-03-07 | 866/866 | 24/24 | ✅ | `102aed6` | All fixed: MealPlannerModal direct flow, grocery empty state |
+| 2026-03-07 | 995/995 | 24/24 | ✅ | `ba8f9e9` | QA Cycle 4: Dark mode audit, BUG-DM-001, sub-tabs refactor, +129 tests |
 
 ---
 
@@ -251,3 +261,4 @@
 | 2.0 | 2026-03-06 | Coverage corrected từ actual run; BUG-DOC-001; file list đầy đủ 39 test files |
 | 3.0 | 2026-03-06 | QA Cycle 2: 866 tests (↑195), 40 files (↑1), 100% Stmts/Funcs/Lines coverage, BUG-FAVICON-001 |
 | 4.0 | 2026-03-07 | QA Cycle 3: E2E expanded 10→24 specs (183 tests), deep integration tests, BUG-E2E-001/002/003, MealPlannerModal direct flow |
+| 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit via Chrome DevTools. BUG-DM-001 fixed (4 components, 18 dark: class additions). Schedule sub-tabs refactor. Unit tests 866→995 (+129), test files 40→47 (+7). Coverage: 100% Stmts/Funcs/Lines, 93.15% Branch |

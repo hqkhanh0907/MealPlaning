@@ -9,9 +9,9 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { getMealTypeLabels, MEAL_TYPE_ICONS } from '../../data/constants';
 
 const MEAL_TYPE_COLORS: Record<MealType, { bg: string; border: string; text: string }> = {
-  breakfast: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },
-  lunch: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
-  dinner: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700' },
+  breakfast: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-700', text: 'text-amber-700 dark:text-amber-400' },
+  lunch: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-700', text: 'text-blue-700 dark:text-blue-400' },
+  dinner: { bg: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-200 dark:border-indigo-700', text: 'text-indigo-700 dark:text-indigo-400' },
 };
 
 interface AISuggestionPreviewModalProps {
@@ -282,7 +282,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
                       </div>
 
                       {/* Nutrition summary */}
-                      <div className={`pt-3 border-t ${isSelected ? 'border-slate-200/50' : 'border-slate-200'}`}>
+                      <div className={`pt-3 border-t ${isSelected ? 'border-slate-200/50 dark:border-slate-600/50' : 'border-slate-200 dark:border-slate-600'}`}>
                         <div className="flex gap-4 text-sm">
                           <span className={`font-bold ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
                             {nutrition.calories} kcal

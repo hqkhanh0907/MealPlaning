@@ -1,6 +1,6 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 3.0  
+**Version:** 3.1  
 **Date:** 2026-03-07
 
 ---
@@ -10,6 +10,7 @@
 - **TypeScript strict mode** — tất cả file `.ts`/`.tsx`, không dùng `any` trừ khi cực kỳ cần thiết
 - **React 19 functional components** — không dùng class components
 - **Tailwind CSS v4** — không viết CSS inline, không dùng `style={}` trừ giá trị động
+- **Dark mode bắt buộc:** Khi thêm bất kỳ class `bg-*`, `text-*`, `border-*`, hoặc `active:bg-*` phải luôn kèm variant `dark:` tương ứng. Ví dụ: `bg-amber-50 dark:bg-amber-900/20`. Xem [BUG-DM-001](../bug-reports/BUG-DM-001-dark-mode-missing-variants.md) cho pattern chi tiết.
 - Mọi text hiển thị với user phải qua `t()` của i18next — **không hardcode string**
 
 ---
