@@ -1,9 +1,9 @@
 # Test Cases — Smart Meal Planner
 
-**Version:** 4.0  
+**Version:** 5.0  
 **Date:** 2026-03-07  
 
-> **v4.0**: QA Cycle 3 — 183 E2E tests across 24 specs (↑from 37/10). 100% feature coverage. Deep integration tests added. Xem [Changelog](#changelog).
+> **v5.0**: QA Cycle 4 — Dark mode visual audit via Chrome DevTools. Added TC_DM (Dark Mode) test cases. Unit tests 866→995 (47 files). BUG-DM-001 fixed. Xem [Changelog](#changelog).
 
 ---
 
@@ -190,6 +190,24 @@
 
 ---
 
+### TC_DM — Dark Mode Visual QA (Chrome DevTools)
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_DM_01 | Calendar dark mode | Dark mode bật | Tab Lịch trình → kiểm tra calendar, ngày, tuần | Background tối, text trắng/sáng, ngày selected có contrast tốt | ✅ Pass |
+| TC_DM_02 | Meal plan cards dark | Dark mode + có plan | Xem meal slots (Sáng/Trưa/Tối) | Cards có dark background, text đọc được, nutrition badges visible | ✅ Pass |
+| TC_DM_03 | Action bar active states | Dark mode + có plan | Nhấn giữ nút xóa/copy/save/template | Active state hiển thị `dark:active:bg-{color}-900/30`, không flash trắng | ✅ Pass (Fixed BUG-DM-001) |
+| TC_DM_04 | Date nav active states | Dark mode | Nhấn giữ nút prev/next/toggle view | Active state `dark:active:bg-slate-600`, không flash `bg-slate-200` | ✅ Pass (Fixed BUG-DM-001) |
+| TC_DM_05 | Library dark mode | Dark mode | Tab Thư viện → kiểm tra list nguyên liệu + món ăn | Cards, text, borders đều có dark variant | ✅ Pass |
+| TC_DM_06 | AI Analysis dark mode | Dark mode | Tab AI Phân tích → upload ảnh | Skeleton loader dùng `dark:bg-slate-700`, container dùng `dark:bg-slate-800` | ✅ Pass (Fixed BUG-DM-001) |
+| TC_DM_07 | Shopping list dark mode | Dark mode | Tab Đi chợ → kiểm tra danh sách | Background tối, ingredient text trắng, checkbox visible | ✅ Pass |
+| TC_DM_08 | Settings dark mode | Dark mode | Tab Cài đặt | Theme buttons, language buttons có contrast tốt | ✅ Pass |
+| TC_DM_09 | AI Suggestion modal dark | Dark mode + Calendar | Click "Gợi ý AI" → xem preview modal | Meal type cards dùng `dark:bg-{color}-900/20`, text `dark:text-{color}-400` | ✅ Pass (Fixed BUG-DM-001) |
+| TC_DM_10 | Nutrition progress dark | Dark mode + có plan | Xem Dinh dưỡng trong ngày | Progress bars, số liệu, labels đều đọc được | ✅ Pass |
+| TC_DM_11 | Console clean dark mode | Dark mode, tất cả tabs | Mở DevTools Console → navigate tất cả tabs | 0 errors, 0 warnings | ✅ Pass |
+
+---
+
 ## E2E Tests — Kết quả
 
 | Spec File | Số TCs | Pass | Fail | Status |
@@ -266,7 +284,7 @@
 | `useModalBackHandler.test.ts` | ✓ | ✅ |
 | `useModalManager.test.ts` | ✓ | ✅ |
 | `usePersistedState.test.ts` | ✓ | ✅ |
-| **TOTAL (40 files)** | **866 tests** | **✅ 100%** |
+| **TOTAL (47 files)** | **995 tests** | **✅ 100%** |
 
 ### Các lĩnh vực test mới bổ sung trong QA Cycle 2
 
@@ -294,3 +312,4 @@
 | 2.0 | 2026-03-06 | Unit test list đầy đủ 39 files; version header cập nhật |
 | 3.0 | 2026-03-06 | QA Cycle 2: 866 tests (+195), 40 files (+1 navigationIndex.test.ts); enhanced test areas documented |
 | 4.0 | 2026-03-07 | QA Cycle 3: 183 E2E tests across 24 specs (↑from 37/10). Added TC_RESP, TC_I18N, TC_DET, TC_DEL, TC_EDGE, TC_INTEG, TC_MULTI sections. 100% feature coverage with deep integration tests |
+| 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit. Added TC_DM (11 test cases). Unit tests 866→995, test files 40→47. BUG-DM-001 fixed (4 components). Chrome DevTools MCP used for visual QA |

@@ -1,6 +1,6 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 4.0  
+**Version:** 5.0  
 **Date:** 2026-03-07  
 **Author:** Dev Team
 
@@ -27,6 +27,7 @@
 | Delete Guard & Undo | ✅ | ✅ | ✅ |
 | Error Handling | ✅ | ✅ | - |
 | Deep Integration | - | ✅ | ✅ |
+| Dark Mode Visual QA | ✅ | - | ✅ (Chrome DevTools) |
 
 ### 1.2 Ngoài scope
 
@@ -91,7 +92,7 @@
 | Level | Target | Actual (2026-03-07) |
 |-------|--------|---------------------|
 | Overall Statements | ≥ 80% | **100%** ✅ (↑ từ 90.51%) |
-| Overall Branches | ≥ 75% | **93.99%** ✅ (↑ từ 83.80%) |
+| Overall Branches | ≥ 75% | **93.15%** ✅ (↑ từ 83.80%) |
 | Overall Functions | ≥ 85% | **100%** ✅ (↑ từ 87.76%) |
 | Overall Lines | ≥ 80% | **100%** ✅ (↑ từ 92.76%) |
 | Services | ≥ 90% | **100%** ✅ |
@@ -100,7 +101,7 @@
 | Hooks | ≥ 85% | **100%** ✅ |
 | Contexts | ≥ 85% | **100%** ✅ |
 
-> **Note:** Tất cả modules đều đạt 100% Stmts/Funcs/Lines. Branch coverage 93.99% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Target coverage ≥80% đã được **vượt xa** (đạt 100%).
+> **Note:** Tất cả modules đều đạt 100% Stmts/Funcs/Lines. Branch coverage 93.15% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Target coverage ≥80% đã được **vượt xa** (đạt 100%).
 
 ---
 
