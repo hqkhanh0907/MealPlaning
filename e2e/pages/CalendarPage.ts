@@ -9,6 +9,24 @@ type ExecutableBrowser = typeof browser & {
 export type MealTypeName = 'breakfast' | 'lunch' | 'dinner';
 
 export class CalendarPage extends BasePage {
+  /** Switch to the "Bữa ăn" (meals) sub-tab on mobile. */
+  async switchToMealsSubTab() {
+    const visible = await this.isDisplayed('subtab-meals');
+    if (visible) {
+      await this.waitAndClick('subtab-meals');
+      await browser.pause(300);
+    }
+  }
+
+  /** Switch to the "Dinh dưỡng" (nutrition) sub-tab on mobile. */
+  async switchToNutritionSubTab() {
+    const visible = await this.isDisplayed('subtab-nutrition');
+    if (visible) {
+      await this.waitAndClick('subtab-nutrition');
+      await browser.pause(300);
+    }
+  }
+
   /** Tap the Plan Meal button — tries section header first, then empty state. */
   async tapPlanMeal() {
     const sectionBtn = await this.isDisplayed('btn-plan-meal-section');
@@ -51,7 +69,7 @@ export class CalendarPage extends BasePage {
   }
 
   getMealCard(type: 'breakfast' | 'lunch' | 'dinner') {
-    return this.el(`meal-card-${type}`);
+    return this.el(`meal-slot-${type}`);
   }
 
   async searchPlan(query: string) {
@@ -79,9 +97,12 @@ export class CalendarPage extends BasePage {
 
   /** Return the displayed total calories from the Summary component. */
   async getTotalCalories(): Promise<string> {
+    await this.switchToNutritionSubTab();
     const elem = this.el('summary-total-calories');
     await elem.waitForDisplayed({ timeout: 5_000 });
-    return elem.getText();
+    const text = await elem.getText();
+    await this.switchToMealsSubTab();
+    return text;
   }
 
   /** Inject a day plan into localStorage for the given date key (YYYY-MM-DD).

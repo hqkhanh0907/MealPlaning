@@ -221,6 +221,13 @@ describe('App', () => {
     expect(screen.getByText('Chọn món cho từng bữa')).toBeInTheDocument();
   });
 
+  it('handlePlanMeal opens planner when meal slot add button is clicked', () => {
+    render(<App />);
+    const addButtons = screen.getAllByLabelText('Thêm');
+    fireEvent.click(addButtons[0]);
+    expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument();
+  });
+
   it('renders user weight in subtitle', () => {
     render(<App />);
     expect(screen.getByText(/Dinh dưỡng chính xác cho/)).toBeInTheDocument();
@@ -637,6 +644,24 @@ describe('App', () => {
     const dishButton = screen.getByText('Yến mạch sữa chua');
     fireEvent.click(dishButton);
     fireEvent.click(screen.getByTestId('btn-confirm-plan'));
+    expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('template apply adds new plan when no existing plan for date', async () => {
+    // No day plans seeded — applying template should create a new plan (line 449)
+    localStorage.setItem('meal-templates', JSON.stringify([{
+      id: 'tpl-test',
+      name: 'Preset',
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
+    const applyBtns = screen.getAllByText('Áp dụng');
+    fireEvent.click(applyBtns[0]);
     expect(mockNotify.success).toHaveBeenCalled();
   });
 

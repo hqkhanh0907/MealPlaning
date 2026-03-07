@@ -14,6 +14,7 @@ describe('Goal Settings — edit nutrition goals', () => {
   before(async () => {
     await page.switchToWebview();
     await page.navigateTo('calendar');
+    await calPage.switchToNutritionSubTab();
   });
 
   it('TC_GOAL_01 — should open goal settings modal', async () => {
@@ -56,6 +57,7 @@ describe('Goal Settings — edit nutrition goals', () => {
     it('TC_GOAL_07 — should show saved goals after reopening modal', async () => {
       await calPage.reloadApp();
       await page.navigateTo('calendar');
+      await calPage.switchToNutritionSubTab();
       await page.waitAndClick('btn-edit-goals');
       await expect(page.el('input-goal-weight')).toBeDisplayed();
       await expect(page.el('input-goal-calories')).toBeDisplayed();

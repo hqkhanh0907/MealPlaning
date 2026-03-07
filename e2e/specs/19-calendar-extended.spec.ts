@@ -46,6 +46,7 @@ describe('Calendar Extended', () => {
   // TC_CAL_08 — Progress bar displays calorie ratio
   // ─────────────────────────────────────────────────────────────────
   it('TC_CAL_08 — calorie progress bar should reflect planned meals', async () => {
+    await page.switchToNutritionSubTab();
     const progressValue = await (browser as unknown as ExecutableBrowser).execute(() => {
       const el = document.querySelector('[data-testid="progress-calories"]') as HTMLProgressElement;
       return el ? el.value : -1;
@@ -58,6 +59,7 @@ describe('Calendar Extended', () => {
   // ─────────────────────────────────────────────────────────────────
   it('TC_CAL_09 — protein progress bar should be displayed', async () => {
     await expect(page.el('progress-protein')).toBeDisplayed();
+    await page.switchToMealsSubTab();
   });
 
   // ─────────────────────────────────────────────────────────────────
@@ -99,7 +101,7 @@ describe('Calendar Extended', () => {
     await mealCard.waitForDisplayed({ timeout: 5000 });
 
     const hasDish = await (browser as unknown as ExecutableBrowser).execute(() => {
-      const card = document.querySelector('[data-testid="meal-card-breakfast"]');
+      const card = document.querySelector('[data-testid="meal-slot-breakfast"]');
       return card?.textContent?.includes('Cal Ext') || card?.textContent?.includes('Món Cal Ext') || false;
     });
     assert.ok(hasDish, 'Breakfast meal card should show the planned dish name');

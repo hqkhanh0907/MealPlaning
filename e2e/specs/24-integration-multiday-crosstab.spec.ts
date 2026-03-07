@@ -150,10 +150,10 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
       await settings.switchLang('vi');
       await browser.pause(500);
 
-      // Verify nav label changed to Vietnamese
+      // Verify nav label changed to Vietnamese (mobile nav uses aria-label, not text)
       const navText = await (browser as unknown as ExecutableBrowser).execute(() => {
         const nav = document.querySelector('[data-testid="nav-calendar"]');
-        return nav?.textContent || '';
+        return nav?.getAttribute('aria-label') || nav?.textContent || '';
       });
       assert.ok(
         navText.includes('Lịch') || navText.includes('Calendar'),
@@ -189,7 +189,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
 
       const navText = await (browser as unknown as ExecutableBrowser).execute(() => {
         const nav = document.querySelector('[data-testid="nav-calendar"]');
-        return nav?.textContent || '';
+        return nav?.getAttribute('aria-label') || nav?.textContent || '';
       });
       assert.ok(
         navText.includes('Calendar') || navText.includes('Lịch'),

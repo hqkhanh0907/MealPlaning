@@ -83,7 +83,7 @@ describe('i18n Language', () => {
 
     const navText = await (browser as unknown as ExecutableBrowser).execute(() => {
       const btn = document.querySelector('[data-testid="nav-calendar"]');
-      return btn?.textContent?.trim() || '';
+      return btn?.getAttribute('aria-label') || btn?.textContent?.trim() || '';
     });
     assert.ok(navText.includes('Calendar'), `Expected "Calendar" in nav, got: "${navText}"`);
 
@@ -92,7 +92,7 @@ describe('i18n Language', () => {
 
     const navTextVi = await (browser as unknown as ExecutableBrowser).execute(() => {
       const btn = document.querySelector('[data-testid="nav-calendar"]');
-      return btn?.textContent?.trim() || '';
+      return btn?.getAttribute('aria-label') || btn?.textContent?.trim() || '';
     });
     assert.ok(navTextVi.includes('Lịch trình'), `Expected "Lịch trình" in nav, got: "${navTextVi}"`);
   });

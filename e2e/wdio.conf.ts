@@ -14,6 +14,8 @@ export const config = {
       'appium:noReset': true,
       // Only return WEBVIEW contexts that have an actual loaded page
       'appium:ensureWebviewsHavePages': true,
+      'appium:uiautomator2ServerLaunchTimeout': 120000,
+      'appium:uiautomator2ServerInstallTimeout': 120000,
     },
   ],
 
