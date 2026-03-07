@@ -444,8 +444,8 @@ describe('DishEditModal', () => {
     // The X button inside the quick-add overlay (not the modal header X)
     const xButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-x'));
     // The last X button is the one in the quick-add overlay
-    const quickAddXBtn = xButtons[xButtons.length - 1];
-    fireEvent.click(quickAddXBtn);
+    const quickAddXBtn = xButtons.at(-1);
+    fireEvent.click(quickAddXBtn!);
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
   });
 
@@ -549,7 +549,7 @@ describe('DishEditModal', () => {
   });
 
   it('shows AI loading state in quick-add form', async () => {
-    let resolveFn: (v: unknown) => void;
+    let resolveFn: (v: unknown) => void = () => {};
     const promise = new Promise(resolve => { resolveFn = resolve; });
     mockSuggestIngredientInfo.mockReturnValue(promise);
 
@@ -570,7 +570,7 @@ describe('DishEditModal', () => {
 
     // Resolve AI call
     await act(async () => {
-      resolveFn!({ calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, unit: 'g' });
+      resolveFn({ calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, unit: 'g' });
     });
 
     expect(screen.queryByText('AI đang điền...')).not.toBeInTheDocument();
@@ -692,10 +692,10 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // i1 has amount 200. Step = 10 for amounts >= 100
     // Amount +/- buttons have rounded-lg; quick-add toggle has rounded-xl
-    const selectedPlusBtns = screen.getAllByRole('button').filter(btn =>
+    const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(selectedPlusBtns[0]);
+    fireEvent.click(selectedPlusBtn!);
     expect(screen.getByDisplayValue('210')).toBeInTheDocument();
   });
 
@@ -707,10 +707,10 @@ describe('DishEditModal', () => {
       tags: ['lunch'],
     };
     render(<DishEditModal editingItem={dishWith50} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const selectedPlusBtns = screen.getAllByRole('button').filter(btn =>
+    const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(selectedPlusBtns[0]);
+    fireEvent.click(selectedPlusBtn!);
     expect(screen.getByDisplayValue('55')).toBeInTheDocument();
   });
 
@@ -722,10 +722,10 @@ describe('DishEditModal', () => {
       tags: ['lunch'],
     };
     render(<DishEditModal editingItem={dishWith5} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const selectedPlusBtns = screen.getAllByRole('button').filter(btn =>
+    const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(selectedPlusBtns[0]);
+    fireEvent.click(selectedPlusBtn!);
     expect(screen.getByDisplayValue('6')).toBeInTheDocument();
   });
 
@@ -737,10 +737,10 @@ describe('DishEditModal', () => {
       tags: ['lunch'],
     };
     render(<DishEditModal editingItem={dishWith0} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const minusBtns = screen.getAllByRole('button').filter(btn =>
+    const minusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-minus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(minusBtns[0]);
+    fireEvent.click(minusBtn!);
     // Should stay at 0, not go negative
     expect(screen.getByDisplayValue('0')).toBeInTheDocument();
   });
@@ -791,8 +791,8 @@ describe('DishEditModal', () => {
   it('detects changes when ingredient count differs from original', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // existingDish has 2 ingredients. Remove one to trigger hasChanges ingredient length diff
-    const deleteButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-trash-2'));
-    fireEvent.click(deleteButtons[0]);
+    const deleteButton = screen.getAllByRole('button').find(btn => btn.querySelector('.lucide-trash-2'));
+    fireEvent.click(deleteButton!);
 
     // Close → unsaved dialog because ingredient count changed
     fireEvent.click(screen.getByLabelText('Đóng'));
@@ -916,15 +916,15 @@ describe('DishEditModal', () => {
     fireEvent.blur(nameInput);
     // Now close the quick-add overlay; resetQuickAdd should clear the timer
     const xButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-x'));
-    const quickAddXBtn = xButtons[xButtons.length - 1];
-    fireEvent.click(quickAddXBtn);
+    const quickAddXBtn = xButtons.at(-1);
+    fireEvent.click(quickAddXBtn!);
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
     vi.useRealTimers();
   });
 
   it('validates NaN amount string on submit (branch: non-empty non-numeric)', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const amountInput = screen.getByTestId('input-dish-amount-i1') as HTMLInputElement;
+    const amountInput = screen.getByTestId('input-dish-amount-i1');
     // jsdom sanitises non-numeric strings on type="number" inputs to '',
     // so temporarily switch to "text" to set a truly non-numeric value
     amountInput.setAttribute('type', 'text');

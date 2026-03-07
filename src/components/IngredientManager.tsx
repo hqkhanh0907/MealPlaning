@@ -76,7 +76,8 @@ export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredient
   };
 
   const confirmDelete = () => {
-    const ingredientId = deleteConfirmation.ingredientId!;
+    const ingredientId = deleteConfirmation.ingredientId;
+    if (!ingredientId) return;
     const deleted = ingredients.find(i => i.id === ingredientId);
     onDelete(ingredientId);
     setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });

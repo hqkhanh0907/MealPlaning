@@ -10,6 +10,18 @@ interface SummaryProps {
   onEditGoals?: () => void;
 }
 
+const getCaloriesColorClass = (totalCalories: number, targetCalories: number): string => {
+  if (totalCalories > targetCalories) return 'text-rose-500';
+  if (totalCalories >= targetCalories * 0.8) return 'text-amber-500';
+  return 'text-emerald-600';
+};
+
+const getProteinColorClass = (totalProtein: number, targetProtein: number): string => {
+  if (totalProtein >= targetProtein) return 'text-emerald-600';
+  if (totalProtein >= targetProtein * 0.8) return 'text-amber-500';
+  return 'text-blue-500';
+};
+
 export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targetCalories, targetProtein, onEditGoals }) => {
   const { t } = useTranslation();
   const totalCalories = dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories;
@@ -53,7 +65,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             <div className="text-left sm:text-right">
               <span data-testid="summary-total-calories" className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalCalories)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetCalories}</span>
-              <span className={`text-xs font-bold ml-1.5 ${totalCalories > targetCalories ? 'text-rose-500' : totalCalories >= targetCalories * 0.8 ? 'text-amber-500' : 'text-emerald-600'}`}>
+              <span className={`text-xs font-bold ml-1.5 ${getCaloriesColorClass(totalCalories, targetCalories)}`}>
                 ({Math.round((totalCalories / targetCalories) * 100)}%)
               </span>
             </div>
@@ -76,7 +88,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             <div className="text-left sm:text-right">
               <span className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalProtein)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetProtein}g</span>
-              <span className={`text-xs font-bold ml-1.5 ${totalProtein >= targetProtein ? 'text-emerald-600' : totalProtein >= targetProtein * 0.8 ? 'text-amber-500' : 'text-blue-500'}`}>
+              <span className={`text-xs font-bold ml-1.5 ${getProteinColorClass(totalProtein, targetProtein)}`}>
                 ({Math.round((totalProtein / targetProtein) * 100)}%)
               </span>
             </div>

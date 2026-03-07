@@ -207,7 +207,8 @@ describe('App', () => {
     const navTabs = screen.getAllByRole('tab');
     const settingsTab = navTabs.find(b => b.textContent?.includes('Cài đặt'));
     expect(settingsTab).toBeTruthy();
-    fireEvent.click(settingsTab!);
+    if (!settingsTab) return;
+    fireEvent.click(settingsTab);
     expect(screen.getByTestId('settings-tab')).toBeInTheDocument();
     expect(screen.getByTestId('btn-theme-light')).toBeInTheDocument();
   });

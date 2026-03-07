@@ -76,10 +76,10 @@ const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
     <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto mb-6">
       {t('grocery.emptyAutoHint')}
     </p>
-    <a href="#" onClick={(e) => { e.preventDefault(); }} className="inline-flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-h-11">
+    <button type="button" className="inline-flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-h-11">
       <CalendarDays className="w-4 h-4" />
       {t('grocery.emptyAction')}
-    </a>
+    </button>
   </div>
 );
 
@@ -129,7 +129,8 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   );
 
   const toggleCheck = useCallback((id: string) => {
-    const item = groceryItems.find(i => i.id === id)!;
+    const item = groceryItems.find(i => i.id === id);
+    if (!item) return;
     setPersistedCheckedSnapshots(prev => {
       if (prev.some(s => s.id === id)) return prev.filter(s => s.id !== id);
       return [...prev, { id, amount: item.amount }];

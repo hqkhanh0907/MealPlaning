@@ -33,7 +33,7 @@ let _nextEscapeId = 0;
 
 function _handleGlobalEscape(e: KeyboardEvent) {
   if (e.key === 'Escape' && _escapeStack.length > 0) {
-    _escapeStack[_escapeStack.length - 1].handler();
+    _escapeStack.at(-1)?.handler();
   }
 }
 

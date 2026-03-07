@@ -37,7 +37,8 @@ export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComp
   }, []);
 
   const handleAnalyze = async () => {
-    const img = image!;
+    if (!image) return;
+    const img = image;
     try {
       setIsAnalyzing(true);
       const [header, base64Data] = img.split(',');

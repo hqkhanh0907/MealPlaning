@@ -486,7 +486,7 @@ describe('IngredientEditModal', () => {
   });
 
   it('does not update state after unmount during AI search', async () => {
-    let resolveFn: (v: unknown) => void;
+    let resolveFn: (v: unknown) => void = () => {};
     const aiPromise = new Promise(resolve => { resolveFn = resolve; });
     mockSuggestIngredientInfo.mockReturnValueOnce(aiPromise);
 
@@ -499,7 +499,7 @@ describe('IngredientEditModal', () => {
 
     // Resolve after unmount — should not throw
     await act(async () => {
-      resolveFn!({ calories: 999, protein: 99, carbs: 9, fat: 9, fiber: 9 });
+      resolveFn({ calories: 999, protein: 99, carbs: 9, fat: 9, fiber: 9 });
     });
 
     // No error — component safely ignored the late resolution

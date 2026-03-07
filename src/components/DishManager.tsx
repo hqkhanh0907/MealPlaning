@@ -100,7 +100,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
   };
 
   const confirmDelete = () => {
-    const dishId = deleteConfirmation.dishId!;
+    const dishId = deleteConfirmation.dishId;
+    if (!dishId) return;
     const deleted = dishes.find(d => d.id === dishId);
     onDelete(dishId);
     setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });

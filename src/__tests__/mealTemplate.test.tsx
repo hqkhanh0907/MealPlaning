@@ -8,7 +8,7 @@ import { DayPlan, MealTemplate, Dish } from '../types';
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
-      if (opts && 'count' in opts) return `${key}_${opts.count}`;
+      if (opts && 'count' in opts) return `${key}_${String(opts.count)}`;
       return key;
     },
     i18n: { language: 'vi' },
@@ -127,10 +127,11 @@ describe('useMealTemplate', () => {
     });
 
     expect(plan).toBeDefined();
-    expect(plan!.date).toBe('2025-02-01');
-    expect(plan!.breakfastDishIds).toEqual(['d1']);
-    expect(plan!.lunchDishIds).toEqual(['d2']);
-    expect(plan!.dinnerDishIds).toEqual(['d3']);
+    if (!plan) return;
+    expect(plan.date).toBe('2025-02-01');
+    expect(plan.breakfastDishIds).toEqual(['d1']);
+    expect(plan.lunchDishIds).toEqual(['d2']);
+    expect(plan.dinnerDishIds).toEqual(['d3']);
   });
 });
 

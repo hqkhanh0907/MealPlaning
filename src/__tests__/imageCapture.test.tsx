@@ -381,7 +381,8 @@ describe('ImageCapture', () => {
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
 
-    const clickSpy = vi.spyOn(input as HTMLInputElement, 'click');
+    if (!input) return;
+    const clickSpy = vi.spyOn(input, 'click');
     fireEvent.click(screen.getByText('Tải ảnh lên'));
     expect(clickSpy).toHaveBeenCalled();
     clickSpy.mockRestore();

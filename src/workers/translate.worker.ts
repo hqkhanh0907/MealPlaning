@@ -30,40 +30,59 @@ const pipelines: Partial<Record<Direction, TranslationPipeline>> = {};
 const loading: Partial<Record<Direction, Promise<TranslationPipeline>>> = {};
 
 async function getPipeline(direction: Direction): Promise<TranslationPipeline> {
-  if (pipelines[direction]) return pipelines[direction]!;
+  const cached = pipelines[direction];
+  if (cached) return cached;
 
-  if (loading[direction]) return loading[direction]!;
+  const pending = loading[direction];
+  if (pending !== undefined) return pending;
 
-  loading[direction] = pipeline('translation', MODEL_IDS[direction], {
+  const loadPromise: Promise<TranslationPipeline> = pipeline('translation', MODEL_IDS[direction], {
     progress_callback: (p: { progress?: number }) => {
-      self.postMessage({
+      globalThis.postMessage({
         type: 'progress',
         direction,
         progress: Math.round(p.progress ?? 0),
       });
     },
-  }) as Promise<TranslationPipeline>;
+  });
 
-  const p = await loading[direction]!;
+  loading[direction] = loadPromise;
+
+  const p = await loadPromise;
   pipelines[direction] = p;
   return p;
 }
 
 // Signal that the worker script initialised correctly
-self.postMessage({ type: 'ready' });
+globalThis.postMessage({ type: 'ready' });
 
-self.addEventListener('message', async (event: MessageEvent) => {
-  const { type, id, text, direction } = event.data as {
-    type: string;
-    id: string;
-    text: string;
-    direction: Direction;
-  };
+interface TranslateMessageData {
+  type: string;
+  id: string;
+  text: string;
+  direction: Direction;
+}
+
+function isTranslateMessageData(data: unknown): data is TranslateMessageData {
+  if (typeof data !== 'object' || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return (
+    typeof obj.type === 'string' &&
+    typeof obj.id === 'string' &&
+    typeof obj.text === 'string' &&
+    typeof obj.direction === 'string'
+  );
+}
+
+globalThis.onmessage = async (event: MessageEvent) => {
+  if (!isTranslateMessageData(event.data)) return;
+
+  const { type, id, text, direction } = event.data;
 
   if (type !== 'translate') return;
 
-  if (!text || !text.trim()) {
-    self.postMessage({ type: 'result', id, text: '' });
+  if (!text?.trim()) {
+    globalThis.postMessage({ type: 'result', id, text: '' });
     return;
   }
 
@@ -74,9 +93,9 @@ self.addEventListener('message', async (event: MessageEvent) => {
       Array.isArray(output) && output.length > 0
         ? (output[0] as { translation_text: string }).translation_text
         : '';
-    self.postMessage({ type: 'result', id, text: translated });
+    globalThis.postMessage({ type: 'result', id, text: translated });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    self.postMessage({ type: 'error', id, message });
+    globalThis.postMessage({ type: 'error', id, message });
   }
-});
+};

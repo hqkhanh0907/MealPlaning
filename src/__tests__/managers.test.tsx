@@ -385,7 +385,7 @@ describe('DishManager', () => {
     // Multiple buttons have the dish name; find one inside the mobile list (sm:hidden div)
     const allNameBtns = screen.getAllByText('Gà nướng').filter(el => el.tagName === 'BUTTON');
     // Click the last button (mobile list item renders after table row)
-    fireEvent.click(allNameBtns[allNameBtns.length - 1]);
+    fireEvent.click(allNameBtns.at(-1)!);
     expect(screen.getByText('Chi tiết món ăn')).toBeInTheDocument();
   });
 
@@ -413,7 +413,7 @@ describe('DishManager', () => {
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     // Mobile edit buttons are the second occurrence (after table row)
     const editBtns = screen.getAllByTestId('btn-edit-dish-d1');
-    fireEvent.click(editBtns[editBtns.length - 1]);
+    fireEvent.click(editBtns.at(-1)!);
     expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
   });
 
@@ -422,7 +422,7 @@ describe('DishManager', () => {
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     // Mobile delete buttons are the second occurrence
     const deleteBtns = screen.getAllByTestId('btn-delete-dish-d1');
-    fireEvent.click(deleteBtns[deleteBtns.length - 1]);
+    fireEvent.click(deleteBtns.at(-1)!);
     expect(screen.getByText('Xóa món ăn?')).toBeInTheDocument();
   });
 
@@ -433,7 +433,8 @@ describe('DishManager', () => {
     const btns = screen.getAllByText('Thêm món ăn');
     const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
     expect(emptyBtn).toBeDefined();
-    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    const emptyBtnEl = emptyBtn?.closest('button');
+    if (emptyBtnEl) fireEvent.click(emptyBtnEl);
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
@@ -443,7 +444,8 @@ describe('DishManager', () => {
     const btns = screen.getAllByText('Thêm món ăn');
     const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
     expect(emptyBtn).toBeDefined();
-    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    const emptyBtnEl = emptyBtn?.closest('button');
+    if (emptyBtnEl) fireEvent.click(emptyBtnEl);
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
@@ -452,9 +454,11 @@ describe('DishManager', () => {
     // Target the EmptyState button inside the dashed-border container
     const emptyContainer = document.querySelector('[class*="border-dashed"]');
     expect(emptyContainer).toBeTruthy();
-    const actionBtn = emptyContainer!.querySelector('button');
+    if (!emptyContainer) return;
+    const actionBtn = emptyContainer.querySelector('button');
     expect(actionBtn).toBeTruthy();
-    fireEvent.click(actionBtn as HTMLElement);
+    if (!actionBtn) return;
+    fireEvent.click(actionBtn);
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
@@ -463,9 +467,11 @@ describe('DishManager', () => {
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const emptyContainer = document.querySelector('[class*="border-dashed"]');
     expect(emptyContainer).toBeTruthy();
-    const actionBtn = emptyContainer!.querySelector('button');
+    if (!emptyContainer) return;
+    const actionBtn = emptyContainer.querySelector('button');
     expect(actionBtn).toBeTruthy();
-    fireEvent.click(actionBtn as HTMLElement);
+    if (!actionBtn) return;
+    fireEvent.click(actionBtn);
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
@@ -481,10 +487,12 @@ describe('DishManager', () => {
     const sangBtns = screen.getAllByText(/Sáng/);
     const modalTagBtn = sangBtns.find(el => {
       const btn = el.closest('button');
-      return btn && !btn.textContent?.match(/\(\d+\)/);
+      return btn && !(btn.textContent && /\(\d+\)/.exec(btn.textContent));
     });
     expect(modalTagBtn).toBeDefined();
-    fireEvent.click(modalTagBtn!.closest('button') as HTMLElement);
+    const tagButton = modalTagBtn?.closest('button');
+    if (!tagButton) return;
+    fireEvent.click(tagButton);
     // Submit
     fireEvent.click(screen.getByText('Lưu món ăn'));
     expect(defaultProps.onAdd).toHaveBeenCalled();
@@ -741,7 +749,7 @@ describe('IngredientManager', () => {
     // Find all buttons with ingredient name text
     const allNameBtns = screen.getAllByText('Ức gà').filter(el => el.tagName === 'BUTTON');
     // Click the last button (mobile list item renders after table row)
-    fireEvent.click(allNameBtns[allNameBtns.length - 1]);
+    fireEvent.click(allNameBtns.at(-1)!);
     expect(screen.getByText('Chi tiết nguyên liệu')).toBeInTheDocument();
   });
 
@@ -750,7 +758,7 @@ describe('IngredientManager', () => {
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     // Edit buttons in mobile list use same testid pattern
     const editBtns = screen.getAllByTestId('btn-edit-ingredient-i1');
-    fireEvent.click(editBtns[editBtns.length - 1]);
+    fireEvent.click(editBtns.at(-1)!);
     expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
   });
 
@@ -758,7 +766,7 @@ describe('IngredientManager', () => {
     render(<IngredientManager {...defaultProps} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const deleteBtns = screen.getAllByTestId('btn-delete-ingredient-i2');
-    fireEvent.click(deleteBtns[deleteBtns.length - 1]);
+    fireEvent.click(deleteBtns.at(-1)!);
     expect(screen.getByText('Xóa nguyên liệu?')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Xóa ngay'));
     expect(defaultProps.onDelete).toHaveBeenCalledWith('i2');
@@ -809,9 +817,11 @@ describe('IngredientManager', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     const emptyContainer = document.querySelector('[class*="border-dashed"]');
     expect(emptyContainer).toBeTruthy();
-    const actionBtn = emptyContainer!.querySelector('button');
+    if (!emptyContainer) return;
+    const actionBtn = emptyContainer.querySelector('button');
     expect(actionBtn).toBeTruthy();
-    fireEvent.click(actionBtn as HTMLElement);
+    if (!actionBtn) return;
+    fireEvent.click(actionBtn);
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
   });
 
@@ -820,9 +830,11 @@ describe('IngredientManager', () => {
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const emptyContainer = document.querySelector('[class*="border-dashed"]');
     expect(emptyContainer).toBeTruthy();
-    const actionBtn = emptyContainer!.querySelector('button');
+    if (!emptyContainer) return;
+    const actionBtn = emptyContainer.querySelector('button');
     expect(actionBtn).toBeTruthy();
-    fireEvent.click(actionBtn as HTMLElement);
+    if (!actionBtn) return;
+    fireEvent.click(actionBtn);
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
   });
 

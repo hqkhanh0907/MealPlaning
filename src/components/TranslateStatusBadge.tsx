@@ -71,8 +71,7 @@ export const TranslateStatusBadge: React.FC = () => {
   const isDone = workerReady && pendingCount === 0 && showDone;
 
   return (
-    <div
-      role="status"
+    <output
       aria-live="polite"
       data-testid="translate-status-badge"
       className={`
@@ -88,6 +87,6 @@ export const TranslateStatusBadge: React.FC = () => {
       `}
     >
       {badgeContent}
-    </div>
+    </output>
   );
 };

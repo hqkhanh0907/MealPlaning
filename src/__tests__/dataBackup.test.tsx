@@ -228,7 +228,8 @@ describe('DataBackup', () => {
     render(<DataBackup onImport={vi.fn()} />);
     const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(fileInput).not.toBeNull();
-    const clickSpy = vi.spyOn(fileInput as HTMLInputElement, 'click');
+    if (!fileInput) return;
+    const clickSpy = vi.spyOn(fileInput, 'click');
     fireEvent.click(screen.getByText('Nhập dữ liệu'));
     expect(clickSpy).toHaveBeenCalled();
     clickSpy.mockRestore();
