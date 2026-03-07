@@ -19,9 +19,9 @@ export class CalendarPage extends BasePage {
     }
   }
 
-  /** After opening MealPlannerModal, select a meal type tab. */
+  /** After opening TypeSelectionModal, choose a meal type by name. */
   async selectMealType(type: MealTypeName) {
-    await this.waitAndClick(`tab-${type}`);
+    await this.waitAndClick(`btn-type-${type}`);
   }
 
   /** Convenience: open planning UI for a given type (defaults to breakfast). */

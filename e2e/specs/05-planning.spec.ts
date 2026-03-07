@@ -40,17 +40,16 @@ describe('Planning — meal planning flow', () => {
     await page.tapToday();
   });
 
-  it('TC_PLAN_01 — should open MealPlannerModal via Plan Meal button', async () => {
+  it('TC_PLAN_01 — should open TypeSelectionModal via Plan Meal button', async () => {
     await page.tapPlanMeal();
     await browser.pause(300);
-    // Meal type tabs should be visible inside the modal
-    await expect(page.el('tab-breakfast')).toBeDisplayed();
-    await expect(page.el('tab-lunch')).toBeDisplayed();
-    await expect(page.el('tab-dinner')).toBeDisplayed();
+    // Type selection buttons should be visible
+    await expect(page.el('btn-type-breakfast')).toBeDisplayed();
+    await expect(page.el('btn-type-lunch')).toBeDisplayed();
+    await expect(page.el('btn-type-dinner')).toBeDisplayed();
   });
 
-  it('TC_PLAN_02 — should display search input in planning modal', async () => {
-    // Modal is already open from TC_PLAN_01; select breakfast tab
+  it('TC_PLAN_02 — should open planning modal for breakfast', async () => {
     await page.selectMealType('breakfast');
     await expect(page.el('input-search-plan')).toBeDisplayed();
   });
