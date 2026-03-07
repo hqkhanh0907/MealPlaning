@@ -70,13 +70,14 @@ describe('MealPlannerModal', () => {
     expect(screen.queryByText('Cơm gà')).not.toBeInTheDocument();
   });
 
-  it('resets search when switching tabs', () => {
+  it('keeps search query when switching tabs', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
     const search = screen.getByTestId('input-search-plan');
     fireEvent.change(search, { target: { value: 'Cơm' } });
     expect(screen.queryByText('Gà nướng')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('Bữa Sáng'));
-    expect(screen.getByText('Cháo gà')).toBeInTheDocument();
+    // Search query persists across tab switch
+    expect((search as HTMLInputElement).value).toBe('Cơm');
   });
 
   it('toggles dish selection on click', () => {
@@ -178,40 +179,45 @@ describe('MealPlannerModal', () => {
 
   it('changes sort order', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
-    const select = screen.getByDisplayValue('Tên (A-Z)');
-    fireEvent.change(select, { target: { value: 'name-desc' } });
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('Tên (Z-A)'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
     expect(screen.getByText('Gà nướng')).toBeInTheDocument();
     expect(screen.getByText('Cơm gà')).toBeInTheDocument();
   });
 
   it('sorts dishes by calories ascending', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
-    const select = screen.getByDisplayValue('Tên (A-Z)');
-    fireEvent.change(select, { target: { value: 'cal-asc' } });
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('Calo (Thấp → Cao)'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
     const calMatches = screen.getAllByText(/kcal/);
     expect(calMatches[0].textContent).toContain('330');
   });
 
   it('sorts dishes by calories descending', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
-    const select = screen.getByDisplayValue('Tên (A-Z)');
-    fireEvent.change(select, { target: { value: 'cal-desc' } });
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('Calo (Cao → Thấp)'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
     const calMatches = screen.getAllByText(/kcal/);
     expect(calMatches[0].textContent).toContain('425');
   });
 
   it('sorts dishes by protein ascending', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
-    const select = screen.getByDisplayValue('Tên (A-Z)');
-    fireEvent.change(select, { target: { value: 'pro-asc' } });
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('Protein (Thấp → Cao)'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
     const dishNames = screen.getAllByText(/gà/i);
     expect(dishNames[0].textContent).toContain('Cơm gà');
   });
 
   it('sorts dishes by protein descending', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
-    const select = screen.getByDisplayValue('Tên (A-Z)');
-    fireEvent.change(select, { target: { value: 'pro-desc' } });
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('Protein (Cao → Thấp)'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
     const dishNames = screen.getAllByText(/gà/i);
     expect(dishNames[0].textContent).toContain('Gà nướng');
   });
@@ -228,8 +234,9 @@ describe('MealPlannerModal', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
     const search = screen.getByTestId('input-search-plan');
     fireEvent.change(search, { target: { value: 'gà' } });
-    const select = screen.getByDisplayValue('Tên (A-Z)');
-    fireEvent.change(select, { target: { value: 'cal-desc' } });
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('Calo (Cao → Thấp)'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
     expect(screen.getByText('Gà nướng')).toBeInTheDocument();
     expect(screen.getByText('Cơm gà')).toBeInTheDocument();
   });
@@ -251,5 +258,33 @@ describe('MealPlannerModal', () => {
   it('defaults to breakfast tab when no initialTab specified', () => {
     render(<MealPlannerModal {...defaultProps} initialTab={undefined} />);
     expect(screen.getByText('Cháo gà')).toBeInTheDocument();
+  });
+
+  it('clicking filter button opens FilterBottomSheet', () => {
+    render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
+    expect(screen.queryByTestId('filter-bottom-sheet')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    expect(screen.getByTestId('filter-bottom-sheet')).toBeInTheDocument();
+  });
+
+  it('applying calorie filter hides dishes exceeding the limit', () => {
+    render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
+    expect(screen.getByText('Gà nướng')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-filter'));
+    fireEvent.click(screen.getByText('< 300 kcal'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
+    expect(screen.queryByText('Gà nướng')).not.toBeInTheDocument();
+    expect(screen.queryByText('Cơm gà')).not.toBeInTheDocument();
+  });
+
+  it('shows active filter indicator dot on filter button', () => {
+    render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
+    const filterBtn = screen.getByTestId('btn-filter');
+    expect(filterBtn.querySelector('.bg-emerald-500')).toBeNull();
+    fireEvent.click(filterBtn);
+    fireEvent.click(screen.getByText('< 500 kcal'));
+    fireEvent.click(screen.getByTestId('filter-apply-btn'));
+    const dot = screen.getByTestId('btn-filter').querySelector('.bg-emerald-500');
+    expect(dot).toBeTruthy();
   });
 });

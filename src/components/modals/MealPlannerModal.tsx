@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Search, CheckCircle2, ChefHat } from 'lucide-react';
-import { Dish, Ingredient, MealType, DayPlan, NutritionInfo, SupportedLang } from '../../types';
+import { X, Search, CheckCircle2, ChefHat, SlidersHorizontal } from 'lucide-react';
+import { Dish, Ingredient, MealType, DayPlan, NutritionInfo, SupportedLang, FilterConfig } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { calculateDishNutrition, calculateDishesNutrition } from '../../utils/nutrition';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { FilterBottomSheet } from '../shared/FilterBottomSheet';
 
 type SortOption = 'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc';
 
@@ -62,7 +63,8 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
 
   const [activeTab, setActiveTab] = React.useState<MealType>(initialTab);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<SortOption>('name-asc');
+  const [filterConfig, setFilterConfig] = React.useState<FilterConfig>({ sortBy: 'name-asc' });
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
   const [selections, setSelections] = React.useState<Record<MealType, Set<string>>>(() => ({
     breakfast: new Set(currentPlan.breakfastDishIds),
     lunch: new Set(currentPlan.lunchDishIds),
@@ -73,7 +75,6 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
 
   const handleTabChange = (tab: MealType) => {
     setActiveTab(tab);
-    setSearchQuery('');
   };
 
   const toggleDish = (dishId: string) => {
@@ -99,6 +100,8 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
     return MEAL_TABS.filter(tab => hasTabChanged(tab.type));
   }, [hasTabChanged]);
 
+  const hasActiveFilters = filterConfig.maxCalories !== undefined || filterConfig.minProtein !== undefined || (filterConfig.tags !== undefined && filterConfig.tags.length > 0);
+
   const filteredDishes = React.useMemo(() => {
     return dishes
       .filter(d => d.tags?.includes(activeTab))
@@ -108,14 +111,19 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
         ),
       )
       .map(d => ({ dish: d, nutrition: calculateDishNutrition(d, ingredients) }))
+      .filter(({ nutrition }) => {
+        if (filterConfig.maxCalories && nutrition.calories > filterConfig.maxCalories) return false;
+        if (filterConfig.minProtein && nutrition.protein < filterConfig.minProtein) return false;
+        return true;
+      })
       .sort((a, b) =>
         sortDishes(
           { name: getLocalizedField(a.dish.name, lang), nutrition: a.nutrition },
           { name: getLocalizedField(b.dish.name, lang), nutrition: b.nutrition },
-          sortBy,
+          filterConfig.sortBy,
         ),
       );
-  }, [dishes, activeTab, searchQuery, ingredients, sortBy, lang]);
+  }, [dishes, activeTab, searchQuery, ingredients, filterConfig, lang]);
 
   const activeTabNutrition = React.useMemo(() => {
     return calculateDishesNutrition(Array.from(selections[activeTab]), dishes, ingredients);
@@ -219,7 +227,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
         </div>
 
         {/* Search + Sort */}
-        <div className="px-4 py-3 sm:px-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="px-4 py-3 sm:px-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 sticky top-0 z-10">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -234,20 +242,17 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 dark:text-slate-100 shadow-sm text-base"
               />
             </div>
-            <select
-              id="meal-planner-sort"
-              name="meal-planner-sort"
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as SortOption)}
-              className="w-full sm:w-48 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-base sm:text-sm min-h-11"
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              data-testid="btn-filter"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-sm min-h-11 hover:border-emerald-400 transition-all"
             >
-              <option value="name-asc">{t('sort.nameAsc')}</option>
-              <option value="name-desc">{t('sort.nameDesc')}</option>
-              <option value="cal-asc">{t('sort.calAsc')}</option>
-              <option value="cal-desc">{t('sort.calDesc')}</option>
-              <option value="pro-asc">{t('sort.proAsc')}</option>
-              <option value="pro-desc">{t('sort.proDesc')}</option>
-            </select>
+              <SlidersHorizontal className="w-4 h-4" />
+              {t('filter.button')}
+              {hasActiveFilters && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -357,6 +362,13 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
             {confirmButtonLabel}
           </button>
         </div>
+        {isFilterOpen && (
+          <FilterBottomSheet
+            config={filterConfig}
+            onChange={setFilterConfig}
+            onClose={() => setIsFilterOpen(false)}
+          />
+        )}
       </div>
     </ModalBackdrop>
   );

@@ -391,7 +391,13 @@
     "invalidDataDesc": "Skipped \"{{key}}\" due to invalid format.",
     "aiSuggestionError": "An error occurred while suggesting a menu. Please try again.",
     "aiSuggestionApplied": "Plan updated!",
-    "aiSuggestionAppliedDesc": "AI-suggested menu has been applied."
+    "aiSuggestionAppliedDesc": "AI-suggested menu has been applied.",
+    "planCopied": "Plan copied",
+    "planCopiedDesc": "Copied to {{count}} days",
+    "templateSaved": "Template saved",
+    "templateApplied": "Template applied",
+    "templateDeleted": "Template deleted",
+    "templateRenamed": "Template renamed"
   },
   "errorBoundary": {
     "defaultTitle": "An error occurred",
@@ -437,5 +443,49 @@
     "loadingModels": "Loading translation models...",
     "translating": "Translating {{count}} item(s)",
     "done": "Translation complete"
+  },
+  "filter": {
+    "button": "Filter",
+    "sortTitle": "Sort",
+    "filterTitle": "Quick Filters",
+    "lessThan300": "< 300 kcal",
+    "lessThan500": "< 500 kcal",
+    "highProtein": "High Protein (≥20g)",
+    "reset": "Reset",
+    "apply": "Apply"
+  },
+  "quickPreview": {
+    "title": "Meal Overview",
+    "empty": "No dishes",
+    "planAll": "Plan All Meals",
+    "edit": "Edit",
+    "add": "Add",
+    "more": "+{{count}} more"
+  },
+  "copyPlan": {
+    "title": "Copy plan",
+    "subtitle": "Select target dates to copy meals",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This week",
+    "custom": "Custom",
+    "selectedDates": "Selected dates",
+    "confirm": "Copy plan",
+    "noSelection": "No dates selected",
+    "addDate": "Add date",
+    "remove": "Remove"
+  },
+  "template": {
+    "title": "Manage meal templates",
+    "empty": "No templates yet",
+    "emptyHint": "Save your favorite meal combos from the current plan",
+    "apply": "Apply",
+    "rename": "Rename",
+    "delete": "Delete",
+    "saveAs": "Save as template",
+    "dishes": "{{count}} dishes",
+    "created": "Created",
+    "savePrompt": "Enter template name:",
+    "copyPlan": "Copy plan",
+    "manageTemplates": "Meal templates"
   }
 }

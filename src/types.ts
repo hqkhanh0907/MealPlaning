@@ -128,3 +128,19 @@ export type AvailableDishInfo = {
   calories: number;
   protein: number;
 };
+
+export type MealTemplate = {
+  id: string;
+  name: string;
+  breakfastDishIds: string[];
+  lunchDishIds: string[];
+  dinnerDishIds: string[];
+  createdAt: string;
+};
+
+export interface FilterConfig {
+  sortBy: 'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc';
+  maxCalories?: number;
+  minProtein?: number;
+  tags?: string[];
+}

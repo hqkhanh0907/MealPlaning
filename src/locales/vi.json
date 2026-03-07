@@ -389,7 +389,13 @@
     "invalidDataDesc": "Bỏ qua \"{{key}}\" do sai format.",
     "aiSuggestionError": "Có lỗi xảy ra khi gợi ý thực đơn. Vui lòng thử lại.",
     "aiSuggestionApplied": "Đã cập nhật kế hoạch!",
-    "aiSuggestionAppliedDesc": "Thực đơn gợi ý từ AI đã được áp dụng."
+    "aiSuggestionAppliedDesc": "Thực đơn gợi ý từ AI đã được áp dụng.",
+    "planCopied": "Đã copy kế hoạch",
+    "planCopiedDesc": "Đã copy sang {{count}} ngày",
+    "templateSaved": "Đã lưu mẫu",
+    "templateApplied": "Đã áp dụng mẫu",
+    "templateDeleted": "Đã xóa mẫu",
+    "templateRenamed": "Đã đổi tên mẫu"
   },
   "errorBoundary": {
     "defaultTitle": "Đã xảy ra lỗi",
@@ -435,5 +441,49 @@
     "loadingModels": "Đang tải mô hình dịch...",
     "translating": "Đang dịch {{count}} mục",
     "done": "Đã dịch xong"
+  },
+  "filter": {
+    "button": "Lọc",
+    "sortTitle": "Sắp xếp",
+    "filterTitle": "Bộ lọc nhanh",
+    "lessThan300": "< 300 kcal",
+    "lessThan500": "< 500 kcal",
+    "highProtein": "Protein cao (≥20g)",
+    "reset": "Đặt lại",
+    "apply": "Áp dụng"
+  },
+  "quickPreview": {
+    "title": "Tổng quan bữa ăn",
+    "empty": "Chưa có món",
+    "planAll": "Lên kế hoạch tất cả",
+    "edit": "Sửa",
+    "add": "Thêm",
+    "more": "+{{count}} món nữa"
+  },
+  "copyPlan": {
+    "title": "Copy kế hoạch",
+    "subtitle": "Chọn ngày đích để copy bữa ăn",
+    "tomorrow": "Ngày mai",
+    "thisWeek": "Cả tuần",
+    "custom": "Tùy chọn",
+    "selectedDates": "Ngày đã chọn",
+    "confirm": "Copy kế hoạch",
+    "noSelection": "Chưa chọn ngày nào",
+    "addDate": "Thêm ngày",
+    "remove": "Xóa"
+  },
+  "template": {
+    "title": "Quản lý mẫu bữa ăn",
+    "empty": "Chưa có mẫu nào",
+    "emptyHint": "Hãy lưu combo bữa ăn yêu thích từ kế hoạch hiện tại",
+    "apply": "Áp dụng",
+    "rename": "Đổi tên",
+    "delete": "Xóa",
+    "saveAs": "Lưu làm mẫu",
+    "dishes": "{{count}} món",
+    "created": "Tạo lúc",
+    "savePrompt": "Nhập tên cho mẫu bữa ăn:",
+    "copyPlan": "Copy kế hoạch",
+    "manageTemplates": "Mẫu bữa ăn"
   }
 }

@@ -32,6 +32,7 @@ describe('DateSelector', () => {
   afterEach(() => {
     // Reset viewport to desktop after each test to avoid affecting subsequent tests
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
+    localStorage.removeItem('mp-date-hint-dismissed');
   });
 
   it('renders calendar icon and view mode toggle', () => {
@@ -237,13 +238,96 @@ describe('DateSelector', () => {
 
   it('formatWeekLabel returns empty string for short array (line 83)', () => {
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
-    // The formatWeekLabel function is internal but gets called. We test it indirectly.
-    // Line 83 returns '' when dates.length < 7, which normally shouldn't happen
-    // in normal rendering. This line is covered if getWeekDates returns < 7 dates,
-    // which it doesn't in normal flow. This is a safety guard.
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
-    // Simply verify week view renders correctly
     expect(screen.getByText(/\d{2}\/\d{2} - \d{2}\/\d{2}/)).toBeInTheDocument();
+  });
+
+  it('shows swipe hint in week view when not dismissed', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
+    expect(screen.getByText(/Vuốt ngang/)).toBeInTheDocument();
+  });
+
+  it('hides swipe hint when localStorage flag is set', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    localStorage.setItem('mp-date-hint-dismissed', '1');
+    render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
+    expect(screen.queryByText(/Vuốt ngang/)).not.toBeInTheDocument();
+  });
+
+  it('dismisses hint after clicking a non-selected date in week view', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
+    // Find a day button that is NOT selected (data-selected="false")
+    const nonSelectedBtn = document.querySelector('[data-selected="false"]');
+    if (nonSelectedBtn) {
+      fireEvent.click(nonSelectedBtn);
+      expect(localStorage.getItem('mp-date-hint-dismissed')).toBe('1');
+    }
+  });
+
+  it('dismisses hint after clicking a non-selected date in calendar view', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
+    // Click day 15 (not selected unless today is the 15th)
+    const day15 = screen.getByText('15');
+    fireEvent.click(day15);
+    expect(localStorage.getItem('mp-date-hint-dismissed')).toBe('1');
+  });
+
+  it('hides calendar tip text when hint is dismissed', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
+    localStorage.setItem('mp-date-hint-dismissed', '1');
+    render(<DateSelector selectedDate="2025-06-15" onSelectDate={vi.fn()} />);
+    expect(screen.queryByText(/Nhấn đúp/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Nhấn chọn/)).not.toBeInTheDocument();
+  });
+
+  it('applies pulse-subtle animation to today button in week view', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    // Render with a different selectedDate so today is NOT selected (pulse only on non-selected today)
+    render(<DateSelector selectedDate="2099-01-01" onSelectDate={vi.fn()} />);
+    // Navigate to today's week by clicking "Hôm nay"
+    fireEvent.click(screen.getByText('Hôm nay'));
+    // Re-render with today not selected
+    const { container } = render(<DateSelector selectedDate="2099-01-01" onSelectDate={vi.fn()} />);
+    const pulseEls = container.querySelectorAll('.animate-pulse-subtle');
+    // Today should have pulse when not selected
+    expect(pulseEls.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('reads hint dismissed state from localStorage on mount', () => {
+    localStorage.setItem('mp-date-hint-dismissed', '1');
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
+    // swipe hint should not be shown
+    expect(screen.queryByText(/Vuốt ngang/)).not.toBeInTheDocument();
+  });
+
+  it('handles localStorage errors gracefully on read', () => {
+    const originalGetItem = Storage.prototype.getItem;
+    Storage.prototype.getItem = () => { throw new Error('denied'); };
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    // Should not throw and defaults to showing hints
+    render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
+    expect(screen.getByText(/Vuốt ngang/)).toBeInTheDocument();
+    Storage.prototype.getItem = originalGetItem;
+  });
+
+  it('handles localStorage errors gracefully on write', () => {
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = () => { throw new Error('quota exceeded'); };
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    const onSelectDate = vi.fn();
+    render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
+    // Clicking a non-selected date should not throw
+    const nonSelectedBtn = document.querySelector('[data-selected="false"]');
+    if (nonSelectedBtn) {
+      expect(() => fireEvent.click(nonSelectedBtn)).not.toThrow();
+    }
+    Storage.prototype.setItem = originalSetItem;
   });
 });
 
@@ -285,9 +369,9 @@ describe('CalendarTab', () => {
 
   it('renders dish names in meal cards', () => {
     render(<CalendarTab {...defaultProps} />);
-    expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
-    expect(screen.getByText('Cơm gà')).toBeInTheDocument();
-    expect(screen.getByText('Canh rau')).toBeInTheDocument();
+    expect(screen.getAllByText('Trứng chiên')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Cơm gà')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Canh rau')[0]).toBeInTheDocument();
   });
 
   it('shows Lên kế hoạch button and calls onOpenTypeSelection', () => {

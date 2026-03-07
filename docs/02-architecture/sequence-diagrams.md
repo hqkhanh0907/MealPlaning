@@ -1,7 +1,7 @@
 # Sequence Diagrams — Smart Meal Planner
 
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 1.1  
+**Date:** 2026-03-07
 
 ---
 
@@ -173,7 +173,85 @@ React            usePersistedState     localStorage    dataService
 
 ---
 
-## SD-07: Background translation (OPUS offline)
+## SD-07: Lên kế hoạch bữa ăn (Plan Meal — Direct Modal)
+
+> **v1.1 (2026-03-07):** Flow cũ qua TypeSelectionModal đã bị loại bỏ.
+> MealPlannerModal mở trực tiếp với `initialTab` là slot trống đầu tiên.
+
+```
+User         CalendarTab      App.tsx         useModalManager     MealPlannerModal
+ │                │               │                  │                   │
+ │──tap "Plan Meal"──►            │                  │                   │
+ │  (btn-plan-meal-section        │                  │                   │
+ │   or btn-plan-meal-empty)      │                  │                   │
+ │                │──onOpenTypeSelection()──►         │                   │
+ │                │               │─openTypeSelection()                  │
+ │                │               │  check currentPlan:                  │
+ │                │               │    breakfastDishIds.length === 0?    │
+ │                │               │    lunchDishIds.length === 0?        │
+ │                │               │    dinnerDishIds.length === 0?       │
+ │                │               │  → emptySlots = ['lunch','dinner']   │
+ │                │               │                  │                   │
+ │                │               │──openMealPlanner(emptySlots[0])─────►│
+ │                │               │                  │─isMealPlannerOpen = true
+ │                │               │                  │─planningType = 'lunch'
+ │                │               │                  │                   │
+ │                │               │                  │──render───────────►
+ │                │               │                  │   initialTab='lunch'
+ │◄──MealPlannerModal opens───────────────────────────────────────────────│
+ │    Tabs: ☀️ Breakfast │ 🌤️ Lunch │ 🌙 Dinner                         │
+ │    (activeTab = initialTab)                                           │
+ │                │               │                  │                   │
+ │──switch tab (optional)──────────────────────────────────────────────── │
+ │──tap dish card──────────────────────────────────────────────────────── │
+ │                │               │                  │  toggleDish(dishId)│
+ │                │               │                  │  selections[tab].add(id)
+ │                │               │                  │                   │
+ │──tap "Confirm"──────────────────────────────────────────────────────── │
+ │                │               │                  │  handleConfirm()  │
+ │                │               │◄──onConfirm(changes)─────────────────│
+ │                │               │─handleUpdatePlan()                   │
+ │                │               │  updateDayPlanSlot(dayPlans, date, type, ids)
+ │                │               │  setDayPlans()   │                   │
+ │                │               │──closeMealPlanner()─────────────────►│
+ │◄──toast success────────────────│                  │                   │
+```
+
+---
+
+## SD-08: Xóa kế hoạch (Clear Plan — Inline Button)
+
+> **v1.1 (2026-03-07):** MoreMenu (`btn-more-menu`) đã bị loại bỏ.
+> `btn-clear-plan` giờ là nút inline trong CalendarTab header.
+
+```
+User         CalendarTab      ClearPlanModal      App.tsx
+ │                │                  │                │
+ │──tap "Clear"───►                  │                │
+ │  (btn-clear-plan                  │                │
+ │   inline in header)               │                │
+ │                │──onOpenClearPlan()                 │
+ │                │──────────────────►│                │
+ │◄──modal appears────────────────── │                │
+ │    Scope options:                 │                │
+ │      • 🗓️ Day (selected day)      │                │
+ │      • 📅 Week (selected week)    │                │
+ │      • 🗓️ Month (selected month)  │                │
+ │                │                  │                │
+ │──select scope──────────────────── ►│                │
+ │──tap "Confirm"─────────────────── ►│                │
+ │                │                  │──onClear(scope)─►
+ │                │                  │         handleClearPlan(scope)
+ │                │                  │         clearDayPlans(dayPlans, date, scope)
+ │                │                  │         setDayPlans()
+ │                │◄─────────────────│◄──close modal──│
+ │◄──calendar updated────────────────                 │
+ │◄──toast success───────────────────                 │
+```
+
+---
+
+## SD-09: Background translation (OPUS offline)
 
 ```
 User        App.tsx      useTranslateProcessor  translateQueueService  OPUS Worker
