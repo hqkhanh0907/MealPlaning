@@ -57,11 +57,12 @@ describe('Delete Guard & Undo', () => {
       const today = new Date().toISOString().slice(0, 10);
       const plans = JSON.parse(localStorage.getItem('mp-day-plans') || '[]') as Array<{ date: string }>;
       if (!plans.some((p) => p.date === today)) {
-        plans.push({ date: today, meals: { breakfast: [usedDishId], lunch: [], dinner: [] } });
+        plans.push({ date: today, breakfastDishIds: [usedDishId], lunchDishIds: [], dinnerDishIds: [] });
       } else {
-        const plan = plans.find((p) => p.date === today) as { meals: { breakfast: string[] } };
-        if (!plan.meals.breakfast.includes(usedDishId)) {
-          plan.meals.breakfast.push(usedDishId);
+        const plan = plans.find((p) => p.date === today) as { breakfastDishIds: string[] };
+        if (!plan.breakfastDishIds) plan.breakfastDishIds = [];
+        if (!plan.breakfastDishIds.includes(usedDishId)) {
+          plan.breakfastDishIds.push(usedDishId);
         }
       }
       localStorage.setItem('mp-day-plans', JSON.stringify(plans));
@@ -70,6 +71,7 @@ describe('Delete Guard & Undo', () => {
     // Reload to pick up injected data
     await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
     await browser.pause(2000);
+    await page.switchToWebview();
     await page.navigateTo('management');
     await browser.pause(500);
   });
@@ -192,12 +194,16 @@ describe('Delete Guard & Undo', () => {
       }, TEST_ING_ID);
       await browser.pause(500);
 
-      // Click confirmation
+      // Wait for and click confirmation
+      await browser.waitUntil(
+        async () => page.isDisplayed('btn-confirm-action'),
+        { timeout: 5000, interval: 300 }
+      );
       await (browser as unknown as ExecutableBrowser).execute(() => {
         const btn = document.querySelector('[data-testid="btn-confirm-action"]') as HTMLElement;
         btn?.click();
       });
-      await browser.pause(500);
+      await browser.pause(1000);
 
       const exists = await page.isDisplayed(`btn-edit-ingredient-${TEST_ING_ID}`);
       assert.strictEqual(exists, false, 'Ingredient should be removed after delete');

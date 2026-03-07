@@ -43,12 +43,12 @@ describe('Grocery Extended', () => {
       }
 
       const plans = JSON.parse(localStorage.getItem('mp-day-plans') || '[]') as Array<{ date: string }>;
-      const existing = plans.find((p) => p.date === dateKey) as { meals: Record<string, string[]> } | undefined;
+      const existing = plans.find((p) => p.date === dateKey) as { breakfastDishIds?: string[]; lunchDishIds?: string[] } | undefined;
       if (existing) {
-        if (!existing.meals.lunch) existing.meals.lunch = [];
-        if (!existing.meals.lunch.includes('e2e-gro-ext-dish')) existing.meals.lunch.push('e2e-gro-ext-dish');
+        if (!existing.lunchDishIds) existing.lunchDishIds = [];
+        if (!existing.lunchDishIds.includes('e2e-gro-ext-dish')) existing.lunchDishIds.push('e2e-gro-ext-dish');
       } else {
-        plans.push({ date: dateKey, meals: { breakfast: [], lunch: ['e2e-gro-ext-dish'], dinner: [] } });
+        plans.push({ date: dateKey, breakfastDishIds: [], lunchDishIds: ['e2e-gro-ext-dish'], dinnerDishIds: [] });
       }
       localStorage.setItem('mp-day-plans', JSON.stringify(plans));
 
@@ -59,6 +59,8 @@ describe('Grocery Extended', () => {
     await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
     await browser.pause(2000);
     await page.switchToWebview();
+    await page.navigateTo('calendar');
+    await browser.pause(300);
     await page.navigateTo('grocery');
     await browser.waitUntil(
       async () => (await page.isDisplayed('grocery-empty-state')) || (await page.isDisplayed('tab-grocery-day')),
