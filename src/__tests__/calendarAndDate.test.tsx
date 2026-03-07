@@ -361,10 +361,13 @@ describe('CalendarTab', () => {
   it('renders main sections: date selection, summary, meal cards', () => {
     render(<CalendarTab {...defaultProps} />);
     expect(screen.getByText('Chọn ngày')).toBeInTheDocument();
-    expect(screen.getByText('Kế hoạch ăn uống')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Sáng')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Trưa')).toBeInTheDocument();
-    expect(screen.getByText('Bữa Tối')).toBeInTheDocument();
+    // Sub-tab buttons
+    expect(screen.getByText('Bữa ăn')).toBeInTheDocument();
+    expect(screen.getByText('Dinh dưỡng')).toBeInTheDocument();
+    // Meal slot labels
+    expect(screen.getAllByText('Sáng').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Trưa').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Tối').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders dish names in meal cards', () => {
@@ -383,49 +386,53 @@ describe('CalendarTab', () => {
 
   it('shows AI suggestion button and calls onSuggestMealPlan', () => {
     render(<CalendarTab {...defaultProps} />);
-    const aiBtn = screen.getByText('Gợi ý AI');
+    const aiBtn = screen.getByTestId('btn-ai-suggest');
     fireEvent.click(aiBtn);
     expect(defaultProps.onSuggestMealPlan).toHaveBeenCalled();
   });
 
   it('disables AI button when isSuggesting is true', () => {
     render(<CalendarTab {...defaultProps} isSuggesting={true} />);
-    const aiBtn = screen.getByText('Gợi ý AI').closest('button');
+    const aiBtn = screen.getByTestId('btn-ai-suggest');
     expect(aiBtn).toBeDisabled();
   });
 
   it('renders Summary with nutrition data', () => {
     render(<CalendarTab {...defaultProps} />);
+    // Switch to Nutrition sub-tab
+    fireEvent.click(screen.getByTestId('subtab-nutrition'));
     expect(screen.getByText('Dinh dưỡng trong ngày')).toBeInTheDocument();
   });
 
   it('calls onPlanMeal when edit button on meal card is clicked', () => {
     render(<CalendarTab {...defaultProps} />);
-    const editButtons = screen.getAllByLabelText(/Chỉnh sửa Bữa/);
+    const editButtons = screen.getAllByLabelText(/Chỉnh sửa/);
     fireEvent.click(editButtons[0]); // Edit breakfast
     expect(defaultProps.onPlanMeal).toHaveBeenCalledWith('breakfast');
   });
 
   it('shows recommendation panel with tips', () => {
     render(<CalendarTab {...defaultProps} />);
+    // Switch to Nutrition sub-tab
+    fireEvent.click(screen.getByTestId('subtab-nutrition'));
     expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
   });
 
   it('shows consolidated empty state when all meals are empty', () => {
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }} />);
-    expect(screen.getByText('Chưa có kế hoạch cho ngày này')).toBeInTheDocument();
+    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
   });
 
   it('renders clear plan button and triggers onOpenClearPlan', () => {
     render(<CalendarTab {...defaultProps} />);
-    const clearBtn = screen.getByLabelText('Xóa kế hoạch');
+    const clearBtn = screen.getByTestId('btn-clear-plan');
     fireEvent.click(clearBtn);
     expect(defaultProps.onOpenClearPlan).toHaveBeenCalled();
   });
 
   it('hides clear plan button when all meals are empty', () => {
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }} />);
-    expect(screen.queryByLabelText('Xóa kế hoạch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
   });
 
   it('shows plan complete message when all meals are filled', () => {
@@ -472,7 +479,7 @@ describe('CalendarTab', () => {
       dinner: makeSlot([], 0, 0),
     };
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} />);
-    expect(screen.getByText('Chưa có kế hoạch cho ngày này')).toBeInTheDocument();
+    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
     // No plan complete message
     expect(screen.queryByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).not.toBeInTheDocument();
   });
@@ -485,5 +492,19 @@ describe('CalendarTab', () => {
     };
     render(<CalendarTab {...defaultProps} dayNutrition={partialNutrition} />);
     expect(screen.getByText(/Bạn còn thiếu.*bữa sáng.*bữa tối/)).toBeInTheDocument();
+  });
+
+  it('switches to nutrition tab via MiniNutritionBar click', () => {
+    render(<CalendarTab {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('mini-nutrition-bar'));
+    expect(screen.getByTestId('nutrition-subtab')).toBeInTheDocument();
+  });
+
+  it('switches back to meals tab from nutrition via switch button', () => {
+    render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} />);
+    fireEvent.click(screen.getByTestId('subtab-nutrition'));
+    expect(screen.getByTestId('btn-switch-to-meals')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-switch-to-meals'));
+    expect(screen.getByTestId('meals-subtab')).toBeInTheDocument();
   });
 });

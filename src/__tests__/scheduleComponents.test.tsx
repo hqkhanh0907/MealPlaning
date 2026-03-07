@@ -1,0 +1,478 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MealSlot } from '../components/schedule/MealSlot';
+import { MealActionBar } from '../components/schedule/MealActionBar';
+import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
+import { MealsSubTab } from '../components/schedule/MealsSubTab';
+import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
+import type { DayNutritionSummary, Dish, SlotInfo } from '../types';
+
+const makeSlot = (dishIds: string[], cal = 0, pro = 0): SlotInfo => ({
+  dishIds, calories: cal, protein: pro, carbs: 0, fat: 0, fiber: 0,
+});
+
+const emptyNutrition: DayNutritionSummary = {
+  breakfast: makeSlot([]),
+  lunch: makeSlot([]),
+  dinner: makeSlot([]),
+};
+
+const filledNutrition: DayNutritionSummary = {
+  breakfast: makeSlot(['d1'], 400, 20),
+  lunch: makeSlot(['d2'], 600, 30),
+  dinner: makeSlot(['d3'], 500, 25),
+};
+
+const dishes: Dish[] = [
+  { id: 'd1', name: { vi: 'Trứng chiên', en: 'Fried Egg' }, ingredients: [], tags: ['breakfast'] },
+  { id: 'd2', name: { vi: 'Cơm gà', en: 'Chicken Rice' }, ingredients: [], tags: ['lunch'] },
+  { id: 'd3', name: { vi: 'Canh rau', en: 'Veggie Soup' }, ingredients: [], tags: ['dinner'] },
+  { id: 'd4', name: { vi: 'Phở bò', en: 'Beef Pho' }, ingredients: [], tags: ['breakfast'] },
+  { id: 'd5', name: { vi: 'Bún chả', en: 'Bun Cha' }, ingredients: [], tags: ['lunch'] },
+];
+
+// ─── MealSlot ────────────────────────────────────────────────────────
+describe('MealSlot', () => {
+  it('renders empty state with "Chưa có món" and "Thêm" button', () => {
+    const onEdit = vi.fn();
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot([])}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={onEdit}
+      />,
+    );
+    expect(screen.getByText('Chưa có món')).toBeInTheDocument();
+    const addBtn = screen.getByLabelText('Thêm');
+    expect(addBtn).toBeInTheDocument();
+    fireEvent.click(addBtn);
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders filled state with dish names', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
+    expect(screen.getByText('400 kcal')).toBeInTheDocument();
+    expect(screen.getByText('20g Pro')).toBeInTheDocument();
+  });
+
+  it('renders "+N món nữa" when more than 2 dishes', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1', 'd2', 'd3'], 900, 45)}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={vi.fn()}
+      />,
+    );
+    // Only first 2 visible
+    expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
+    expect(screen.getByText('Cơm gà')).toBeInTheDocument();
+    // Extra count text
+    expect(screen.getByText('+1 món nữa')).toBeInTheDocument();
+  });
+
+  it('renders "+N món nữa" with count > 1 when more than 3 dishes', () => {
+    render(
+      <MealSlot
+        type="lunch"
+        slot={makeSlot(['d1', 'd2', 'd3', 'd4'], 1200, 60)}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('+2 món nữa')).toBeInTheDocument();
+  });
+
+  it('fires onEdit when edit button clicked on filled card', () => {
+    const onEdit = vi.fn();
+    render(
+      <MealSlot
+        type="lunch"
+        slot={makeSlot(['d2'], 600, 30)}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={onEdit}
+      />,
+    );
+    const editBtn = screen.getByLabelText('Chỉnh sửa Trưa');
+    fireEvent.click(editBtn);
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders progress bars with correct test IDs', () => {
+    render(
+      <MealSlot
+        type="dinner"
+        slot={makeSlot(['d3'], 500, 25)}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('cal-bar-dinner')).toBeInTheDocument();
+    expect(screen.getByTestId('pro-bar-dinner')).toBeInTheDocument();
+  });
+
+  it('renders correct meal icons for each type', () => {
+    const { rerender } = render(
+      <MealSlot type="breakfast" slot={makeSlot([])} dishes={[]} targetCalories={2000} targetProtein={140} onEdit={vi.fn()} />,
+    );
+    expect(screen.getByText('Sáng')).toBeInTheDocument();
+
+    rerender(
+      <MealSlot type="lunch" slot={makeSlot([])} dishes={[]} targetCalories={2000} targetProtein={140} onEdit={vi.fn()} />,
+    );
+    expect(screen.getByText('Trưa')).toBeInTheDocument();
+
+    rerender(
+      <MealSlot type="dinner" slot={makeSlot([])} dishes={[]} targetCalories={2000} targetProtein={140} onEdit={vi.fn()} />,
+    );
+    expect(screen.getByText('Tối')).toBeInTheDocument();
+  });
+
+  it('filters out dishes not found in the dishes array', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1', 'nonexistent'], 400, 20)}
+        dishes={dishes}
+        targetCalories={2000}
+        targetProtein={140}
+        onEdit={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
+    expect(screen.queryByText('nonexistent')).not.toBeInTheDocument();
+  });
+});
+
+// ─── MealActionBar ────────────────────────────────────────────────────
+describe('MealActionBar', () => {
+  const baseProps = {
+    allEmpty: false,
+    isSuggesting: false,
+    onOpenTypeSelection: vi.fn(),
+    onSuggestMealPlan: vi.fn(),
+    onOpenClearPlan: vi.fn(),
+    onCopyPlan: vi.fn(),
+    onSaveTemplate: vi.fn(),
+    onOpenTemplateManager: vi.fn(),
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it('renders plan meal and AI suggest buttons', () => {
+    render(<MealActionBar {...baseProps} />);
+    expect(screen.getByTestId('btn-plan-meal-section')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-ai-suggest')).toBeInTheDocument();
+  });
+
+  it('renders clear, copy, save, template buttons when not empty', () => {
+    render(<MealActionBar {...baseProps} />);
+    expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-save-template')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument();
+  });
+
+  it('hides clear, copy, save buttons when allEmpty is true', () => {
+    render(<MealActionBar {...baseProps} allEmpty={true} />);
+    expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-copy-plan')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-save-template')).not.toBeInTheDocument();
+  });
+
+  it('disables AI button when isSuggesting is true', () => {
+    render(<MealActionBar {...baseProps} isSuggesting={true} />);
+    expect(screen.getByTestId('btn-ai-suggest')).toBeDisabled();
+  });
+
+  it('calls onOpenTypeSelection when plan button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-plan-meal-section'));
+    expect(baseProps.onOpenTypeSelection).toHaveBeenCalled();
+  });
+
+  it('calls onSuggestMealPlan when AI button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    expect(baseProps.onSuggestMealPlan).toHaveBeenCalled();
+  });
+
+  it('calls onOpenClearPlan when clear button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-clear-plan'));
+    expect(baseProps.onOpenClearPlan).toHaveBeenCalled();
+  });
+
+  it('calls onCopyPlan when copy button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-copy-plan'));
+    expect(baseProps.onCopyPlan).toHaveBeenCalled();
+  });
+
+  it('calls onSaveTemplate when save button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    expect(baseProps.onSaveTemplate).toHaveBeenCalled();
+  });
+
+  it('calls onOpenTemplateManager when template button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    expect(baseProps.onOpenTemplateManager).toHaveBeenCalled();
+  });
+
+  it('hides conditional buttons when callbacks are undefined', () => {
+    render(
+      <MealActionBar
+        allEmpty={false}
+        isSuggesting={false}
+        onOpenTypeSelection={vi.fn()}
+        onSuggestMealPlan={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-copy-plan')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-save-template')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-template-manager')).not.toBeInTheDocument();
+  });
+});
+
+// ─── MiniNutritionBar ────────────────────────────────────────────────
+describe('MiniNutritionBar', () => {
+  it('renders calorie and protein totals', () => {
+    const onSwitch = vi.fn();
+    render(
+      <MiniNutritionBar
+        dayNutrition={filledNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        onSwitchToNutrition={onSwitch}
+      />,
+    );
+    // 400 + 600 + 500 = 1500
+    expect(screen.getByText('1500/2000 kcal')).toBeInTheDocument();
+    // 20 + 30 + 25 = 75
+    expect(screen.getByText('75/140g Pro')).toBeInTheDocument();
+  });
+
+  it('fires onSwitchToNutrition when clicked', () => {
+    const onSwitch = vi.fn();
+    render(
+      <MiniNutritionBar
+        dayNutrition={filledNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        onSwitchToNutrition={onSwitch}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('mini-nutrition-bar'));
+    expect(onSwitch).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders progress bars', () => {
+    render(
+      <MiniNutritionBar
+        dayNutrition={filledNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        onSwitchToNutrition={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('mini-cal-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('mini-pro-bar')).toBeInTheDocument();
+  });
+
+  it('shows zero totals for empty nutrition', () => {
+    render(
+      <MiniNutritionBar
+        dayNutrition={emptyNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        onSwitchToNutrition={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('0/2000 kcal')).toBeInTheDocument();
+    expect(screen.getByText('0/140g Pro')).toBeInTheDocument();
+  });
+});
+
+// ─── MealsSubTab ─────────────────────────────────────────────────────
+describe('MealsSubTab', () => {
+  const baseProps = {
+    dayNutrition: filledNutrition,
+    dishes,
+    targetCalories: 2000,
+    targetProtein: 140,
+    isSuggesting: false,
+    onPlanMeal: vi.fn(),
+    onOpenTypeSelection: vi.fn(),
+    onSuggestMealPlan: vi.fn(),
+    onOpenClearPlan: vi.fn(),
+    onCopyPlan: vi.fn(),
+    onSaveTemplate: vi.fn(),
+    onOpenTemplateManager: vi.fn(),
+    onSwitchToNutrition: vi.fn(),
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it('renders meals-subtab with action bar and meal slots', () => {
+    render(<MealsSubTab {...baseProps} />);
+    expect(screen.getByTestId('meals-subtab')).toBeInTheDocument();
+    expect(screen.getByTestId('meal-action-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('meal-slot-breakfast')).toBeInTheDocument();
+    expect(screen.getByTestId('meal-slot-lunch')).toBeInTheDocument();
+    expect(screen.getByTestId('meal-slot-dinner')).toBeInTheDocument();
+  });
+
+  it('shows empty state tip when all meals are empty', () => {
+    render(<MealsSubTab {...baseProps} dayNutrition={emptyNutrition} />);
+    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
+  });
+
+  it('shows missing meals message when partially filled', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot([]),
+      dinner: makeSlot([]),
+    };
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} />);
+    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa.*bữa tối/)).toBeInTheDocument();
+  });
+
+  it('shows plan complete message when all meals filled', () => {
+    render(<MealsSubTab {...baseProps} />);
+    expect(screen.getByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).toBeInTheDocument();
+  });
+
+  it('integrates MiniNutritionBar', () => {
+    render(<MealsSubTab {...baseProps} />);
+    expect(screen.getByTestId('mini-nutrition-bar')).toBeInTheDocument();
+  });
+
+  it('calls onPlanMeal with correct type when meal slot edit is clicked', () => {
+    render(<MealsSubTab {...baseProps} />);
+    const editButtons = screen.getAllByLabelText(/Chỉnh sửa/);
+    fireEvent.click(editButtons[0]);
+    expect(baseProps.onPlanMeal).toHaveBeenCalledWith('breakfast');
+  });
+
+  it('shows missing only lunch when breakfast and dinner are filled', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot([]),
+      dinner: makeSlot(['d3'], 500, 25),
+    };
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} />);
+    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa/)).toBeInTheDocument();
+  });
+});
+
+// ─── NutritionSubTab ─────────────────────────────────────────────────
+describe('NutritionSubTab', () => {
+  const baseProps = {
+    dayNutrition: filledNutrition,
+    targetCalories: 2000,
+    targetProtein: 140,
+    userWeight: 70,
+    onEditGoals: vi.fn(),
+    onSwitchToMeals: vi.fn(),
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it('renders nutrition-subtab with Summary and RecommendationPanel', () => {
+    render(<NutritionSubTab {...baseProps} />);
+    expect(screen.getByTestId('nutrition-subtab')).toBeInTheDocument();
+    expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
+    expect(screen.getByText(/70kg/)).toBeInTheDocument();
+    expect(screen.getAllByText(/2000 kcal/).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows plan complete when all meals are filled', () => {
+    render(<NutritionSubTab {...baseProps} />);
+    expect(screen.getByText('Kế hoạch ngày hôm nay đã hoàn tất!')).toBeInTheDocument();
+  });
+
+  it('shows missing meals text for partial state (missing lunch)', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot([]),
+      dinner: makeSlot(['d3'], 500, 25),
+    };
+    render(<NutritionSubTab {...baseProps} dayNutrition={partial} />);
+    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa/)).toBeInTheDocument();
+  });
+
+  it('shows missing meals text for partial state (missing breakfast and dinner)', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot([]),
+      lunch: makeSlot(['d2'], 600, 30),
+      dinner: makeSlot([]),
+    };
+    render(<NutritionSubTab {...baseProps} dayNutrition={partial} />);
+    expect(screen.getByText(/Bạn còn thiếu.*bữa sáng.*bữa tối/)).toBeInTheDocument();
+  });
+
+  it('shows missing meals text for partial state (missing dinner only)', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot(['d2'], 600, 30),
+      dinner: makeSlot([]),
+    };
+    render(<NutritionSubTab {...baseProps} dayNutrition={partial} />);
+    expect(screen.getByText(/Bạn còn thiếu.*bữa tối/)).toBeInTheDocument();
+  });
+
+  it('shows switch-to-meals button when empty and callback provided', () => {
+    render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
+    const switchBtn = screen.getByTestId('btn-switch-to-meals');
+    expect(switchBtn).toBeInTheDocument();
+    expect(screen.getByText('Chuyển sang tab Bữa ăn để bắt đầu')).toBeInTheDocument();
+  });
+
+  it('fires onSwitchToMeals when switch button is clicked', () => {
+    render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
+    fireEvent.click(screen.getByTestId('btn-switch-to-meals'));
+    expect(baseProps.onSwitchToMeals).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show switch button when onSwitchToMeals is undefined', () => {
+    render(
+      <NutritionSubTab
+        dayNutrition={emptyNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        userWeight={70}
+        onEditGoals={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId('btn-switch-to-meals')).not.toBeInTheDocument();
+  });
+
+  it('does not show switch button when meals have data', () => {
+    render(<NutritionSubTab {...baseProps} />);
+    expect(screen.queryByTestId('btn-switch-to-meals')).not.toBeInTheDocument();
+  });
+});
