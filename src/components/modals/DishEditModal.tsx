@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Save, Search, Minus, X, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles } from 'lucide-react';
 import { Dish, Ingredient, DishIngredient, MealType, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
@@ -269,8 +269,11 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === allIngredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
                   return available.map(ing => (
                     <button key={ing.id} data-testid={`btn-add-ing-${ing.id}`} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
-                      <span className="text-slate-700 dark:text-slate-300 font-medium">{getLocalizedField(ing.name, lang)}</span>
-                      <Plus className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">{getLocalizedField(ing.name, lang)}</span>
+                        <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">{Math.round(ing.caloriesPer100)}cal · {Math.round(ing.proteinPer100)}g pro</span>
+                      </div>
+                      <Plus className="w-4 h-4 shrink-0 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
                     </button>
                   ));
                 })()}
@@ -325,12 +328,26 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="text-xs text-slate-500 dark:text-slate-400">{t('dish.quickAddNutrition')}</label>
-                        {qaAiLoading && (
-                          <span className="text-xs text-emerald-500 flex items-center gap-1">
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            {t('dish.quickAddAiFilling')}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {qaAiLoading && (
+                            <span className="text-xs text-emerald-500 flex items-center gap-1">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              {t('dish.quickAddAiFilling')}
+                            </span>
+                          )}
+                          {!qaAiLoading && (
+                            <button
+                              type="button"
+                              onClick={() => triggerAIFill(qaNameVI, qaUnit.vi)}
+                              disabled={!qaNameVI.trim()}
+                              data-testid="btn-qa-ai-fill"
+                              title={t('dish.quickAddAiFillButton')}
+                              className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-800/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
                         {[
@@ -387,6 +404,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                           <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = si.amount + step; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * si.amount / 100)}cal · {Math.round(ing.proteinPer100 * si.amount / 100)}g pro · {Math.round(ing.carbsPer100 * si.amount / 100)}g carb · {Math.round(ing.fatPer100 * si.amount / 100)}g fat</p>
                         {formErrors.amounts?.[si.ingredientId] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${si.ingredientId}`}>{formErrors.amounts[si.ingredientId]}</p>}
                       </div>
                       <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>

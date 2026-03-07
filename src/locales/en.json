@@ -175,7 +175,8 @@
     "quickAddSubmit": "Create & add to dish",
     "quickAddCancel": "Cancel",
     "quickAddValidationName": "Please enter ingredient name",
-    "quickAddCreated": "Created ingredient \"{{name}}\""
+    "quickAddCreated": "Created ingredient \"{{name}}\"",
+    "quickAddAiFillButton": "AI auto-fill nutrition"
   },
   "ingredient": {
     "title": "Ingredient",

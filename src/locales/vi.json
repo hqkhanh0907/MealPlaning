@@ -175,7 +175,8 @@
     "quickAddSubmit": "Tạo & thêm vào món",
     "quickAddCancel": "Huỷ",
     "quickAddValidationName": "Vui lòng nhập tên nguyên liệu",
-    "quickAddCreated": "Đã tạo nguyên liệu \"{{name}}\""
+    "quickAddCreated": "Đã tạo nguyên liệu \"{{name}}\"",
+    "quickAddAiFillButton": "AI tự điền dinh dưỡng"
   },
   "ingredient": {
     "title": "Nguyên liệu",
