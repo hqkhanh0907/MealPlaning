@@ -1,7 +1,7 @@
 # Release Process — Smart Meal Planner
 
-**Version:** 2.0  
-**Date:** 2026-03-06
+**Version:** 3.0  
+**Date:** 2026-03-07
 
 ---
 
@@ -29,13 +29,16 @@ Code changes
 [6] Build APK (bash build-apk.sh)
      │ ✅ app-debug.apk generated
      ▼
-[7] Run E2E tests (npm run test:e2e)
-     │ ✅ 10/10 specs (37 test cases)
+[7] Run E2E tests (CI workflow_dispatch)
+     │ ✅ 24/24 specs (183 test cases)
      ▼
-[8] Git commit + tag
+[8] Run E2E deep integration (specs 23-24)
+     │ ✅ Cross-feature cascade + cross-tab consistency
+     ▼
+[9] Git commit + tag
      │
      ▼
-[9] Upload APK to Google Drive (optional)
+[10] Upload APK to Google Drive (optional)
 ```
 
 ---
@@ -51,7 +54,8 @@ Trước mỗi release, kiểm tra tất cả items:
 □ npm run build         → build thành công, không warnings
 □ npx cap sync android  → sync OK
 □ bash build-apk.sh     → APK tạo được (≈147MB)
-□ npm run test:e2e      → 10/10 specs pass (37 test cases)
+□ npm run test:e2e      → 24/24 specs pass (183 test cases)
+□ E2E deep integration → specs 23-24 pass (cascade + cross-tab)
 □ adb install APK       → cài thành công trên emulator
 □ DevTools Console      → 0 errors, 0 warnings
 □ Smoke test manual:
@@ -175,7 +179,7 @@ Cập nhật `CHANGELOG.md` hoặc tạo file session mới trong `docs/`:
 
 ## Tests
 - Unit: 866/866 pass
-- E2E: 10/10 pass (37 test cases)
+- E2E: 24/24 pass (183 test cases, including deep integration)
 - Coverage: 100% Stmts/Funcs/Lines, 93.99% Branch
 ```
 

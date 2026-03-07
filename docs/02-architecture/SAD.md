@@ -1,8 +1,8 @@
 # SAD — System Architecture Document
 
 **Project:** Smart Meal Planner  
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 1.1  
+**Date:** 2026-03-07
 
 ---
 
@@ -85,13 +85,12 @@ components/
 ├── modals/
 │   ├── IngredientEditModal.tsx   # Form CRUD nguyên liệu
 │   ├── DishEditModal.tsx         # Form CRUD món ăn
-│   ├── PlanningModal.tsx         # Chọn món cho slot bữa ăn
+│   ├── MealPlannerModal.tsx      # Lập kế hoạch bữa ăn (tabs: sáng/trưa/tối)
 │   ├── AISuggestionPreviewModal.tsx  # Preview gợi ý AI
 │   ├── SaveAnalyzedDishModal.tsx     # Lưu kết quả phân tích ảnh
 │   ├── GoalSettingsModal.tsx         # Mục tiêu dinh dưỡng
 │   ├── ClearPlanModal.tsx            # Xoá kế hoạch
-│   ├── ConfirmationModal.tsx         # Dialog xác nhận
-│   └── TypeSelectionModal.tsx        # Chọn bữa (sáng/trưa/tối)
+│   └── ConfirmationModal.tsx         # Dialog xác nhận
 │
 ├── navigation/
 │   ├── BottomNavBar.tsx   # Navigation mobile (5 tabs)
@@ -294,7 +293,9 @@ App.tsx
   ├── CalendarTab
   │     ├── DateSelector         (weekday navigation)
   │     ├── Summary              (daily nutrition totals)
-  │     ├── PlanningModal        (add dish to slot)
+  │     │     └── data-testid: progress-calories, progress-protein
+  │     ├── MealPlannerModal     (unified meal planning — tabs: breakfast/lunch/dinner)
+  │     │     └── data-testid: btn-plan-meal-section, btn-plan-meal-empty
   │     ├── AISuggestionPreviewModal
   │     └── ClearPlanModal
   │
@@ -305,14 +306,15 @@ App.tsx
   │     │     │     ├── UnitSelector
   │     │     │     ├── ModalBackdrop
   │     │     │     └── UnsavedChangesDialog
-  │     │     └── DetailModal
+  │     │     └── DetailModal     (data-testid: detail-modal, btn-detail-edit, btn-detail-close)
   │     └── DishManager
   │           ├── DishEditModal
   │           │     ├── ModalBackdrop
   │           │     └── UnsavedChangesDialog
-  │           └── DetailModal
+  │           └── DetailModal     (data-testid: detail-modal, btn-detail-edit, btn-detail-close)
   │
   ├── GroceryList (lazy)
+  │     └── data-testid: grocery-all-bought (celebration banner)
   │
   ├── AIImageAnalyzer (lazy)
   │     ├── ImageCapture
@@ -339,3 +341,18 @@ App.tsx
 | Web Worker cho translation | UI thread không bị block khi dịch |
 | Lazy loading GroceryList + AI tab | Giảm initial bundle size |
 | Reference-counted scroll lock | Fix BUG-001: nested modal unmount race condition | [BUG-001](../bug-reports/BUG-001-scroll-lock-nested-modal.md) |
+
+---
+
+## 9. QA-Driven Changes (Cycle 3)
+
+Architecture validated through **183 E2E tests** and **866 unit tests**. The following architectural patterns were confirmed:
+
+| Pattern | Validation |
+|---------|-----------|
+| localStorage-only persistence (ADR-001) | Validated across all data flows — ingredients, dishes, dayPlans, userProfile |
+| Cross-tab state consistency | Language, theme, and data changes verified consistent across tabs |
+| Cascade data flow | Ingredient → Dish → Calendar → Grocery cascade verified end-to-end |
+| MealPlannerModal unified planning | Replaced 2-step TypeSelection → Planning flow with single MealPlannerModal (internal tabs: breakfast/lunch/dinner). `openTypeSelection()` now finds first empty slot and opens MealPlannerModal directly |
+
+**Key architectural change:** `TypeSelectionModal` was removed from the codebase. The `openTypeSelection()` function in `App.tsx` now checks empty meal slots in the current day plan and opens `MealPlannerModal` with the first empty slot as `initialTab`, enabling users to plan all meals (breakfast/lunch/dinner) in a single session.

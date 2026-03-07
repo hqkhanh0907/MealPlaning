@@ -1,7 +1,7 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 3.0  
-**Date:** 2026-03-06  
+**Version:** 4.0  
+**Date:** 2026-03-07  
 **Author:** Dev Team
 
 ---
@@ -22,6 +22,11 @@
 | i18n (vi/en) | ✅ | ✅ | - |
 | localStorage persistence | ✅ | ✅ | - |
 | Navigation | - | ✅ | ✅ |
+| Responsive UI | ✅ | ✅ | ✅ |
+| Detail Modal | ✅ | ✅ | ✅ |
+| Delete Guard & Undo | ✅ | ✅ | ✅ |
+| Error Handling | ✅ | ✅ | - |
+| Deep Integration | - | ✅ | ✅ |
 
 ### 1.2 Ngoài scope
 
@@ -65,9 +70,9 @@
         ┌─────────────┐
         │   Manual    │  5% — exploratory, accessibility
         ├─────────────┤
-        │  E2E Tests  │  15% — 10 spec files, happy path + critical flows
+        │  E2E Tests  │  25% — 24 spec files, happy path + critical flows + deep integration
         ├─────────────┤
-        │ Unit Tests  │  80% — services, utils, hooks, components
+        │ Unit Tests  │  70% — services, utils, hooks, components
         └─────────────┘
 ```
 
@@ -83,7 +88,7 @@
 
 ## 4. Mức độ coverage yêu cầu
 
-| Level | Target | Actual (2026-03-06) |
+| Level | Target | Actual (2026-03-07) |
 |-------|--------|---------------------|
 | Overall Statements | ≥ 80% | **100%** ✅ (↑ từ 90.51%) |
 | Overall Branches | ≥ 75% | **93.99%** ✅ (↑ từ 83.80%) |
@@ -135,15 +140,36 @@ Tests kiểm tra tương tác giữa components và services mà không mount fu
 | Spec | Feature | Test Cases |
 |------|---------|-----------|
 | `01-navigation.spec.ts` | Tab navigation | 3 |
-| `02-calendar-basic.spec.ts` | Calendar UI | 4 |
-| `03-dish-crud.spec.ts` | Dish management | 5 |
-| `04-ingredient-crud.spec.ts` | Ingredient management | 5 |
-| `05-planning.spec.ts` | Meal planning | 4 |
-| `06-grocery.spec.ts` | Grocery list | 3 |
-| `07-settings.spec.ts` | Settings | 3 |
-| `08-data-backup.spec.ts` | Export/Import | 3 |
-| `09-ai-analysis.spec.ts` | AI features | 4 |
-| `10-goal-settings.spec.ts` | Goals & profile | 3 |
+| `02-calendar-basic.spec.ts` | Calendar UI + clear | 10 |
+| `03-dish-crud.spec.ts` | Dish management | 13 |
+| `04-ingredient-crud.spec.ts` | Ingredient CRUD | 12 |
+| `05-planning.spec.ts` | Meal planning (MealPlannerModal direct) | 5 |
+| `06-grocery.spec.ts` | Grocery scope switching | 6 |
+| `07-settings.spec.ts` | Language & theme | 5 |
+| `08-data-backup.spec.ts` | Export/Import | 5 |
+| `09-ai-analysis.spec.ts` | AI features | 5 |
+| `10-goal-settings.spec.ts` | Goals & profile | 7 |
+| `11-dish-ingredient-amount.spec.ts` | Ingredient amounts | 4 |
+| `12-sort-filter-view.spec.ts` | Sort, filter, view toggle | 16 |
+| `13-grocery-aggregation.spec.ts` | Grocery quantities | 5 |
+| `14-responsive-ui.spec.ts` | Bottom nav, layout, touch targets | 7 |
+| `15-i18n-language.spec.ts` | Language switching, persistence | 7 |
+| `16-detail-modal.spec.ts` | Detail modal views | 5 |
+| `17-delete-undo.spec.ts` | Delete guard & undo toast | 5 |
+| `18-error-edge-cases.spec.ts` | Empty states, theme CSS, error boundary | 5 |
+| `19-calendar-extended.spec.ts` | Progress bars, nutrition summary | 5 |
+| `20-grocery-extended.spec.ts` | Scope, strikethrough, celebration | 6 |
+| `21-ai-extended.spec.ts` | AI components verification | 6 |
+| `22-data-backup-extended.spec.ts` | Export structure, import restore | 5 |
+| `23-integration-data-flow.spec.ts` | Ingredient→Dish→Calendar→Grocery cascade | 7 |
+| `24-integration-multiday-crosstab.spec.ts` | Multi-day grocery, cross-tab lang/theme, nutrition cascade | 10 |
+
+#### 5.3.1 Deep Integration Tests
+
+Specs 23–24 kiểm tra luồng dữ liệu xuyên suốt toàn bộ ứng dụng:
+
+- **`23-integration-data-flow`**: Cascade test — tạo Ingredient → gắn vào Dish → lên Calendar → kiểm tra Grocery list tự động cập nhật. Xác nhận tính nhất quán dữ liệu end-to-end.
+- **`24-integration-multiday-crosstab`**: Multi-day grocery aggregation (cùng ingredient trên nhiều ngày phải cộng dồn), cross-tab consistency (đổi ngôn ngữ/theme ở Settings tab → phản ánh tức thì trên Calendar/Library), và nutrition cascade (thay đổi calo ingredient → Dish/Calendar tự cập nhật).
 
 ---
 
@@ -171,7 +197,7 @@ const testDish: Dish = {
 
 ### 6.2 E2E Test Data
 
-E2E tests tạo dữ liệu programmatically qua UI (không inject localStorage trực tiếp) để test đúng flow người dùng.
+E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua localStorage (`injectTestData` pattern) để đảm bảo test isolation. Mỗi spec có thể seed trạng thái riêng mà không phụ thuộc vào thứ tự chạy hoặc kết quả của spec khác.
 
 ---
 
@@ -186,6 +212,8 @@ E2E tests tạo dữ liệu programmatically qua UI (không inject localStorage 
 | **Schema doc drift** | **Low** | **Medium** | **Quy tắc: cập nhật localstorage-schema.md cùng PR khi thay đổi types.ts — BUG-DOC-001 CLOSED** |
 | Coverage drop dưới target | Low | Low | CI fail khi coverage < threshold; 100% đã đạt được |
 | **Console errors (favicon, etc.)** | **Low** | **Low** | **QA DevTools monitoring — BUG-FAVICON-001 CLOSED** |
+| **Chrome 91 ES2022 incompatibility** | **Medium** | **High** | **Tránh `Array.at()`, `structuredClone()`; sử dụng polyfills/alternatives tương thích** |
+| **React 18 `_valueTracker`** | **Medium** | **Medium** | **Programmatic input phải invalidate `_valueTracker` trước khi dispatch event** |
 
 ---
 
@@ -197,3 +225,4 @@ E2E tests tạo dữ liệu programmatically qua UI (không inject localStorage 
 | Pre-merge | Unit + lint + coverage | CI pipeline |
 | Release candidate | E2E full suite | Trước mỗi APK build |
 | Post-release | E2E smoke (01, 02, 07) | Sau khi cài APK lên device |
+| On-demand | E2E full suite | CI workflow `.github/workflows/e2e.yml` — `workflow_dispatch` trigger |

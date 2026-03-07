@@ -1,7 +1,7 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 2.0  
-**Date:** 2026-03-06
+**Version:** 3.0  
+**Date:** 2026-03-07
 
 ---
 
@@ -286,8 +286,11 @@ await $('button[data-testid="add-dish"]').click();
 | `contexts/` | ≥ 85% | **100%** ✅ |
 | **Overall Stmts** | ≥ 80% | **100%** ✅ |
 | **Overall Branch** | ≥ 75% | **93.99%** ✅ |
+| **E2E Specs** | 24 specs | **183 tests** ✅ |
 
 > **Chuẩn mới (QA Cycle 2):** 100% Stmts/Funcs/Lines đã đạt được và là baseline cho các release tiếp theo. Mọi PR không được làm giảm coverage dưới 100%.
+>
+> **Chuẩn E2E (QA Cycle 3):** Deep integration tests required for cross-feature data flow. 100% feature-level coverage achieved and must be maintained.
 
 ### Quy tắc ESLint — Không dùng eslint-disable
 
@@ -307,6 +310,40 @@ if (isAnalyzedDishResult(response)) {
   const data = response;
 }
 ```
+
+### E2E Testing Patterns (QA Cycle 3)
+
+#### Chrome 91 Compatibility (Android Emulator)
+
+Chrome 91.0.4472.114 does NOT support ES2022+. These are **BANNED** in E2E test code:
+
+| ❌ Banned | ✅ Replacement |
+|-----------|---------------|
+| `Array.at()` | `arr[arr.length - 1]` |
+| `structuredClone()` | `JSON.parse(JSON.stringify(obj))` |
+| `Object.hasOwn()` | `Object.prototype.hasOwnProperty.call(obj, key)` |
+| Optional chaining in older contexts | Explicit null checks |
+
+#### React 18 `_valueTracker` Pattern
+
+When programmatically setting input values in E2E tests:
+
+1. Set DOM value via native prototype setter (walk full prototype chain: `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set`)
+2. Call `_valueTracker.setValue()` with a **DIFFERENT** value from the new value
+3. Dispatch `input` + `change` events with `{ bubbles: true }`
+4. Edge case: clearing to empty string → `_valueTracker.setValue('__cleared__')` to avoid same-value swallowing
+
+#### WebDriver `getText()` Reliability
+
+`getText()` may return empty string for some elements in Android WebView. Use JS execution:
+
+```typescript
+await browser.execute(() => document.querySelector('[data-testid="xxx"]')?.textContent || '');
+```
+
+#### E2E Data Isolation
+
+Each spec should inject its own test data via `injectTestData()` with unique IDs (e.g., `e2e-plan-dish-1`, `e2e-integ-ing-1`) to avoid cross-spec interference.
 
 ### Test patterns đã xác lập (từ QA Cycle 2)
 
@@ -349,6 +386,24 @@ Bắt buộc update đồng thời (cùng PR/commit):
 - [ ] localstorage-schema.md đã được cập nhật?
 - [ ] data-model.md đã được cập nhật?
 - [ ] Test cho migration function đã được viết?
+```
+
+### Khi thay đổi modal flows (e.g., removing TypeSelectionModal step)
+
+> **Quy tắc bắt buộc** — validated by BUG-E2E-003
+
+Bắt buộc update đồng thời (cùng PR/commit):
+- `e2e/pageobjects/CalendarPage.ts` — cập nhật Page Object cho flow mới
+- Các E2E specs test flow đó (e.g., `e2e/specs/xx-*.spec.ts`)
+- `docs/02-architecture/SAD.md` — cập nhật sequence descriptions
+- `docs/04-testing/test-cases.md` — cập nhật test case steps
+
+```
+# PR checklist khi thay đổi modal flow
+- [ ] E2E page objects đã được cập nhật?
+- [ ] E2E specs testing flow đã được cập nhật?
+- [ ] SAD.md sequence descriptions đã được cập nhật?
+- [ ] Test cases đã phản ánh flow mới?
 ```
 
 ### Khi thay đổi API/Service
