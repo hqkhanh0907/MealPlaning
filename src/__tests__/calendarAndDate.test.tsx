@@ -425,6 +425,8 @@ describe('CalendarTab', () => {
 
   it('renders clear plan button and triggers onOpenClearPlan', () => {
     render(<CalendarTab {...defaultProps} />);
+    const moreBtn = screen.getByTestId('btn-more-actions');
+    fireEvent.click(moreBtn);
     const clearBtn = screen.getByTestId('btn-clear-plan');
     fireEvent.click(clearBtn);
     expect(defaultProps.onOpenClearPlan).toHaveBeenCalled();

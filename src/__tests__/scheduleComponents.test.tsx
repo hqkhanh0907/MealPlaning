@@ -153,22 +153,30 @@ describe('MealActionBar', () => {
 
   beforeEach(() => vi.clearAllMocks());
 
+  const openMenu = () => {
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+  };
+
   it('renders plan meal and AI suggest buttons', () => {
     render(<MealActionBar {...baseProps} />);
     expect(screen.getByTestId('btn-plan-meal-section')).toBeInTheDocument();
     expect(screen.getByTestId('btn-ai-suggest')).toBeInTheDocument();
   });
 
-  it('renders clear, copy, save, template buttons when not empty', () => {
+  it('renders more actions button and shows menu items when clicked', () => {
     render(<MealActionBar {...baseProps} />);
+    expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument();
+    openMenu();
+    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
     expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
     expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument();
     expect(screen.getByTestId('btn-save-template')).toBeInTheDocument();
     expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument();
   });
 
-  it('hides clear, copy, save buttons when allEmpty is true', () => {
+  it('hides clear, copy, save items in menu when allEmpty is true', () => {
     render(<MealActionBar {...baseProps} allEmpty={true} />);
+    openMenu();
     expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
     expect(screen.queryByTestId('btn-copy-plan')).not.toBeInTheDocument();
     expect(screen.queryByTestId('btn-save-template')).not.toBeInTheDocument();
@@ -191,31 +199,35 @@ describe('MealActionBar', () => {
     expect(baseProps.onSuggestMealPlan).toHaveBeenCalled();
   });
 
-  it('calls onOpenClearPlan when clear button clicked', () => {
+  it('calls onOpenClearPlan when clear menu item clicked', () => {
     render(<MealActionBar {...baseProps} />);
+    openMenu();
     fireEvent.click(screen.getByTestId('btn-clear-plan'));
     expect(baseProps.onOpenClearPlan).toHaveBeenCalled();
   });
 
-  it('calls onCopyPlan when copy button clicked', () => {
+  it('calls onCopyPlan when copy menu item clicked', () => {
     render(<MealActionBar {...baseProps} />);
+    openMenu();
     fireEvent.click(screen.getByTestId('btn-copy-plan'));
     expect(baseProps.onCopyPlan).toHaveBeenCalled();
   });
 
-  it('calls onSaveTemplate when save button clicked', () => {
+  it('calls onSaveTemplate when save menu item clicked', () => {
     render(<MealActionBar {...baseProps} />);
+    openMenu();
     fireEvent.click(screen.getByTestId('btn-save-template'));
     expect(baseProps.onSaveTemplate).toHaveBeenCalled();
   });
 
-  it('calls onOpenTemplateManager when template button clicked', () => {
+  it('calls onOpenTemplateManager when template menu item clicked', () => {
     render(<MealActionBar {...baseProps} />);
+    openMenu();
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     expect(baseProps.onOpenTemplateManager).toHaveBeenCalled();
   });
 
-  it('hides conditional buttons when callbacks are undefined', () => {
+  it('hides more actions button when no callbacks are provided', () => {
     render(
       <MealActionBar
         allEmpty={false}
@@ -224,10 +236,31 @@ describe('MealActionBar', () => {
         onSuggestMealPlan={vi.fn()}
       />,
     );
-    expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('btn-copy-plan')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('btn-save-template')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('btn-template-manager')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-more-actions')).not.toBeInTheDocument();
+  });
+
+  it('closes menu after clicking a menu item', () => {
+    render(<MealActionBar {...baseProps} />);
+    openMenu();
+    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-clear-plan'));
+    expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
+  });
+
+  it('closes menu when clicking outside', () => {
+    render(<MealActionBar {...baseProps} />);
+    openMenu();
+    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
+  });
+
+  it('toggles menu open and closed on button clicks', () => {
+    render(<MealActionBar {...baseProps} />);
+    openMenu();
+    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
+    openMenu();
+    expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
   });
 });
 

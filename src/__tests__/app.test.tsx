@@ -498,7 +498,11 @@ describe('App', () => {
       dinnerDishIds: [],
     }]));
     render(<App />);
-    // Clear plan button should be visible since there's a plan
+    // Open more-actions menu first (buttons are in dropdown)
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => {
       expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
     });
@@ -603,6 +607,8 @@ describe('App', () => {
       dinnerDishIds: [],
     }]));
     render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-copy-plan'));
     await waitFor(() => expect(screen.getByTestId('copy-plan-modal')).toBeInTheDocument());
@@ -613,6 +619,8 @@ describe('App', () => {
 
   it('opens template manager modal', async () => {
     render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
@@ -629,6 +637,8 @@ describe('App', () => {
     const originalPrompt = globalThis.prompt;
     globalThis.prompt = vi.fn().mockReturnValue('My Template');
     render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-save-template'));
     expect(mockNotify.success).toHaveBeenCalled();
@@ -657,6 +667,8 @@ describe('App', () => {
       dinnerDishIds: [],
     }]));
     render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
@@ -677,12 +689,16 @@ describe('App', () => {
     const originalPrompt = globalThis.prompt;
     globalThis.prompt = vi.fn().mockReturnValue('Test Template');
     render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-save-template'));
     expect(mockNotify.success).toHaveBeenCalled();
     mockNotify.success.mockClear();
 
     // Open template manager
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
     // Find the template item — id starts with 'tpl'
@@ -691,12 +707,16 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
     mockNotify.success.mockClear();
 
-    // Re-open template manager for delete
-    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
+    // Re-open more-actions menu for save + template manager
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
     // First save another template
     globalThis.prompt = vi.fn().mockReturnValue('Template Delete');
     fireEvent.click(screen.getByTestId('btn-save-template'));
     mockNotify.success.mockClear();
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
     const deleteBtns = screen.getAllByText('Xóa');
@@ -706,8 +726,12 @@ describe('App', () => {
 
     // Save another template for rename
     globalThis.prompt = vi.fn().mockReturnValue('Template Rename');
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-save-template'));
     mockNotify.success.mockClear();
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
     const renameBtns = screen.getAllByText('Đổi tên');

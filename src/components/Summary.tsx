@@ -10,18 +10,6 @@ interface SummaryProps {
   onEditGoals?: () => void;
 }
 
-const getCaloriesColorClass = (totalCalories: number, targetCalories: number): string => {
-  if (totalCalories > targetCalories) return 'text-rose-500';
-  if (totalCalories >= targetCalories * 0.8) return 'text-amber-500';
-  return 'text-emerald-600';
-};
-
-const getProteinColorClass = (totalProtein: number, targetProtein: number): string => {
-  if (totalProtein >= targetProtein) return 'text-emerald-600';
-  if (totalProtein >= targetProtein * 0.8) return 'text-amber-500';
-  return 'text-blue-500';
-};
-
 export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targetCalories, targetProtein, onEditGoals }) => {
   const { t } = useTranslation();
   const totalCalories = dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories;
@@ -55,9 +43,9 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 sm:gap-8 mb-4 sm:mb-8">
+      <div className="flex flex-wrap gap-4 sm:gap-8 mb-4 sm:mb-8">
         {/* Calories Progress */}
-        <div className="space-y-2 col-span-1">
+        <div className="space-y-2 flex-1 min-w-[200px]">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-1">
             <div className="flex items-center gap-1.5 sm:gap-2 text-slate-700 dark:text-slate-300 font-medium">
               <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" /> <span className="text-sm sm:text-base">{t('common.calories')}</span>
@@ -65,9 +53,6 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             <div className="text-left sm:text-right">
               <span data-testid="summary-total-calories" className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalCalories)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetCalories}</span>
-              <span className={`text-xs font-bold ml-1.5 ${getCaloriesColorClass(totalCalories, targetCalories)}`}>
-                ({Math.round((totalCalories / targetCalories) * 100)}%)
-              </span>
             </div>
           </div>
           <progress
@@ -80,7 +65,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
         </div>
 
         {/* Protein Progress */}
-        <div className="space-y-2 col-span-1">
+        <div className="space-y-2 flex-1 min-w-[200px]">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-1">
             <div className="flex items-center gap-1.5 sm:gap-2 text-slate-700 dark:text-slate-300 font-medium">
               <Beef className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" /> <span className="text-sm sm:text-base">{t('common.protein')}</span>
@@ -88,9 +73,6 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             <div className="text-left sm:text-right">
               <span className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(totalProtein)}</span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400"> / {targetProtein}g</span>
-              <span className={`text-xs font-bold ml-1.5 ${getProteinColorClass(totalProtein, targetProtein)}`}>
-                ({Math.round((totalProtein / targetProtein) * 100)}%)
-              </span>
             </div>
           </div>
           <progress
