@@ -29,6 +29,14 @@ const getAmountStep = (amount: number): number => {
   return 10;
 };
 
+/** Display unit for nutrition labels: "100g" for g/kg, "100ml" for ml/l, "1 {unit}" for others. */
+const getDisplayUnit = (unit: { vi: string; en: string }, lang: SupportedLang) => {
+  const u = getLocalizedField(unit, lang).toLowerCase().trim();
+  if (u === 'kg' || u === 'g') return '100g';
+  if (u === 'l' || u === 'ml') return '100ml';
+  return `1 ${getLocalizedField(unit, lang)}`;
+};
+
 export const DishEditModal: React.FC<DishEditModalProps> = ({
   editingItem, ingredients, onSubmit, onClose, onCreateIngredient,
 }) => {
@@ -291,10 +299,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md p-6 space-y-4 max-h-[80dvh] overflow-y-auto overscroll-contain">
                     <div className="flex items-center justify-between">
                       <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{t('dish.quickAddTitle')}</p>
-                      <button type="button" onClick={resetQuickAdd} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400"><X className="w-4 h-4" /></button>
+                      <button type="button" onClick={resetQuickAdd} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
                     </div>
                     <div>
-                      <label htmlFor="qa-name" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddName')} <span className="text-rose-500">*</span></label>
+                      <label htmlFor="qa-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.quickAddName')} <span className="text-rose-500">*</span></label>
                       <input
                         id="qa-name"
                         name="qa-name"
@@ -334,7 +342,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       )}
                     </div>
                     <div>
-                      <label htmlFor="qa-unit" className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{t('dish.quickAddUnit')}</label>
+                      <label htmlFor="qa-unit" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.quickAddUnit')}</label>
                       <UnitSelector
                         mode="bilingual"
                         id="qa-unit"
@@ -345,7 +353,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs text-slate-500 dark:text-slate-400">{t('dish.quickAddNutrition')}</label>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('dish.quickAddNutrition')}</label>
                         <div className="flex items-center gap-2">
                           {qaAiLoading && (
                             <span className="text-xs text-emerald-500 flex items-center gap-1">
@@ -360,7 +368,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                               disabled={!qaName.trim()}
                               data-testid="btn-qa-ai-fill"
                               title={t('dish.quickAddAiFillButton')}
-                              className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-800/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
@@ -376,13 +384,13 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                           { label: 'Fiber', value: qaFiber, setter: setQaFiber },
                         ].map(({ label, value, setter }) => (
                           <div key={label}>
-                            <label htmlFor={`qa-${label.toLowerCase()}`} className="text-xs text-slate-400 block mb-0.5">{label}</label>
+                            <label htmlFor={`qa-${label.toLowerCase()}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-0.5">{label} / {getDisplayUnit(qaUnit, lang)}</label>
                             <input
                               id={`qa-${label.toLowerCase()}`}
                               name={`qa-${label.toLowerCase()}`}
                               type="number"
-                              step="0.1"
-                              inputMode="decimal"
+                              step="1"
+                              inputMode="numeric"
                               value={value}
                               onChange={e => setter(e.target.value)}
                               disabled={qaAiLoading}
