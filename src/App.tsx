@@ -16,16 +16,20 @@ import { MealPlannerModal } from './components/modals/MealPlannerModal';
 import { ClearPlanModal } from './components/modals/ClearPlanModal';
 import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
 import { AISuggestionPreviewModal } from './components/modals/AISuggestionPreviewModal';
+import { CopyPlanModal } from './components/modals/CopyPlanModal';
+import { TemplateManager } from './components/modals/TemplateManager';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   Utensils,
   Sparkles,
   ShoppingCart,
 } from 'lucide-react';
-import { generateId } from './utils/helpers';
+import { generateId, parseLocalDate } from './utils/helpers';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useAISuggestion } from './hooks/useAISuggestion';
 import { useModalManager } from './hooks/useModalManager';
+import { useCopyPlan } from './hooks/useCopyPlan';
+import { useMealTemplate } from './hooks/useMealTemplate';
 import {
   createEmptyDayPlan,
   clearPlansByScope,
@@ -150,6 +154,9 @@ export default function App() {
 
   const notify = useNotification();
 
+  const copyPlanHook = useCopyPlan(dayPlans, setDayPlans);
+  const mealTemplates = useMealTemplate();
+
   const currentPlan = useMemo(() =>
     dayPlans.find(p => p.date === selectedDate) || createEmptyDayPlan(selectedDate),
     [dayPlans, selectedDate]
@@ -231,6 +238,16 @@ export default function App() {
   }, [modals, currentPlan]);
   const openClearPlan = useCallback(() => modals.openClearPlan(), [modals]);
   const openGoalModal = useCallback(() => modals.openGoalModal(), [modals]);
+  const openCopyPlan = useCallback(() => modals.openCopyPlanModal(), [modals]);
+  const openTemplateManager = useCallback(() => modals.openTemplateManager(), [modals]);
+
+  const handleSaveTemplate = useCallback(() => {
+    const name = globalThis.prompt(t('template.savePrompt'));
+    if (name?.trim()) {
+      mealTemplates.saveTemplate(name.trim(), currentPlan);
+      notify.success(t('notification.templateSaved'));
+    }
+  }, [currentPlan, mealTemplates, notify, t]);
 
   const handleAnalysisComplete = useCallback(() => {
     // c8 ignore next 4
@@ -289,16 +306,19 @@ export default function App() {
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 pt-safe" role="banner">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-emerald-500 text-white p-2 rounded-xl shadow-sm" aria-hidden="true">
-              <Utensils className="w-6 h-6" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-emerald-500 text-white p-1.5 sm:p-2 rounded-xl shadow-sm" aria-hidden="true">
+              <Utensils className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
                 <span className="sm:hidden">{getTabLabels(t)[activeMainTab]}</span>
                 <span className="hidden sm:inline">Smart Meal Planner</span>
               </h1>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium sm:hidden">
+                {parseLocalDate(selectedDate).toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short', day: 'numeric', month: 'numeric' })}
+              </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">{t('header.subtitle', { weight: userProfile.weight })}</p>
             </div>
           </div>
@@ -308,8 +328,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-8 pb-safe">
-        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} inert={activeMainTab !== 'calendar' ? true : undefined}>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-8">
+        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} inert={activeMainTab === 'calendar' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.calendarTab')}>
           <CalendarTab
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
@@ -319,6 +339,7 @@ export default function App() {
             isSuggesting={aiSuggestion.isLoading}
             onOpenTypeSelection={openTypeSelection} onOpenClearPlan={openClearPlan}
             onOpenGoalModal={openGoalModal} onPlanMeal={handlePlanMeal} onSuggestMealPlan={aiSuggestion.startSuggestion}
+            onCopyPlan={openCopyPlan} onSaveTemplate={handleSaveTemplate} onOpenTemplateManager={openTemplateManager}
           />
           </ErrorBoundary>
         </div>
@@ -339,7 +360,7 @@ export default function App() {
           </ErrorBoundary>
         )}
 
-        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')} inert={activeMainTab !== 'management' ? true : undefined}>
+        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')} inert={activeMainTab === 'management' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}
@@ -404,6 +425,44 @@ export default function App() {
       )}
       {modals.isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={modals.closeClearPlan} />}
       {modals.isGoalModalOpen && <GoalSettingsModal userProfile={userProfile} onUpdateProfile={setUserProfile} onClose={modals.closeGoalModal} />}
+
+      {modals.isCopyPlanOpen && (
+        <CopyPlanModal
+          sourceDate={selectedDate}
+          sourcePlan={currentPlan}
+          onCopy={(targetDates) => {
+            copyPlanHook.copyPlan(selectedDate, targetDates);
+            modals.closeCopyPlanModal();
+            notify.success(t('notification.planCopied'), t('notification.planCopiedDesc', { count: targetDates.length }));
+          }}
+          onClose={modals.closeCopyPlanModal}
+        />
+      )}
+      {modals.isTemplateManagerOpen && (
+        <TemplateManager
+          templates={mealTemplates.templates}
+          dishes={dishes}
+          onApply={(template) => {
+            const plan = mealTemplates.applyTemplate(template, selectedDate);
+            setDayPlans(prev => {
+              const idx = prev.findIndex(p => p.date === selectedDate);
+              if (idx >= 0) { const u = [...prev]; u[idx] = plan; return u; }
+              return [...prev, plan];
+            });
+            modals.closeTemplateManager();
+            notify.success(t('notification.templateApplied'));
+          }}
+          onDelete={(id) => {
+            mealTemplates.deleteTemplate(id);
+            notify.success(t('notification.templateDeleted'));
+          }}
+          onRename={(id, newName) => {
+            mealTemplates.renameTemplate(id, newName);
+            notify.success(t('notification.templateRenamed'));
+          }}
+          onClose={modals.closeTemplateManager}
+        />
+      )}
 
       <AISuggestionPreviewModal
         isOpen={aiSuggestion.isModalOpen}

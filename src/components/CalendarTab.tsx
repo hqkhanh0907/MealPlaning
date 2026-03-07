@@ -2,12 +2,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CalendarDays, Plus, Edit3, Sparkles, Loader2, Trash2,
-  Info, AlertCircle, CheckCircle2, ChefHat
+  Info, AlertCircle, CheckCircle2, ChefHat, Copy, BookTemplate, Save
 } from 'lucide-react';
 import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary, SlotInfo, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { Summary } from './Summary';
 import { DateSelector } from './DateSelector';
+import { QuickPreviewPanel } from './QuickPreviewPanel';
 import { getDynamicTips, NutritionTip } from '../utils/tips';
 import { parseLocalDate } from '../utils/helpers';
 import { getMealTypeLabels } from '../data/constants';
@@ -151,14 +152,18 @@ export interface CalendarTabProps {
   onOpenGoalModal: () => void;
   onPlanMeal: (type: MealType) => void;
   onSuggestMealPlan: () => void;
+  onCopyPlan?: () => void;
+  onSaveTemplate?: () => void;
+  onOpenTemplateManager?: () => void;
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
 
 export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
-  selectedDate, onSelectDate, dayPlans, dishes,
-  dayNutrition, userWeight, targetCalories, targetProtein,
+  selectedDate, onSelectDate, dayPlans, dishes, ingredients,
+  currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
   isSuggesting, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
+  onCopyPlan, onSaveTemplate, onOpenTemplateManager,
 }) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
@@ -180,6 +185,15 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
         </div>
         <DateSelector selectedDate={selectedDate} onSelectDate={onSelectDate} onPlanClick={onOpenTypeSelection} dayPlans={dayPlans} />
       </section>
+
+      {/* Quick Preview */}
+      <QuickPreviewPanel
+        currentPlan={currentPlan}
+        dishes={dishes}
+        ingredients={ingredients}
+        onPlanMeal={onPlanMeal}
+        onPlanAll={onOpenTypeSelection}
+      />
 
       {/* Overview & Recommendation */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -228,6 +242,39 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
                 <Trash2 className="w-5 h-5" />
               </button>
             )}
+            {!allEmpty && onCopyPlan && (
+              <button
+                onClick={onCopyPlan}
+                data-testid="btn-copy-plan"
+                className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:bg-indigo-100 transition-all min-h-11 min-w-11"
+                aria-label={t('template.copyPlan')}
+                title={t('template.copyPlan')}
+              >
+                <Copy className="w-5 h-5" />
+              </button>
+            )}
+            {!allEmpty && onSaveTemplate && (
+              <button
+                onClick={onSaveTemplate}
+                data-testid="btn-save-template"
+                className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 active:bg-amber-100 transition-all min-h-11 min-w-11"
+                aria-label={t('template.saveAs')}
+                title={t('template.saveAs')}
+              >
+                <Save className="w-5 h-5" />
+              </button>
+            )}
+            {onOpenTemplateManager && (
+              <button
+                onClick={onOpenTemplateManager}
+                data-testid="btn-template-manager"
+                className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:bg-purple-100 transition-all min-h-11 min-w-11"
+                aria-label={t('template.manageTemplates')}
+                title={t('template.manageTemplates')}
+              >
+                <BookTemplate className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -257,9 +304,11 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-md:flex max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory max-md:scrollbar-hide max-md:-mx-4 max-md:px-4">
             {MEAL_TYPES.map(type => (
-              <MealCard key={type} type={type} slot={dayNutrition[type]} dishes={dishes} onEdit={() => onPlanMeal(type)} />
+              <div key={type} className="max-md:min-w-[80%] max-md:snap-start max-md:shrink-0">
+                <MealCard type={type} slot={dayNutrition[type]} dishes={dishes} onEdit={() => onPlanMeal(type)} />
+              </div>
             ))}
           </div>
         )}

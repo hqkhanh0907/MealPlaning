@@ -9,6 +9,8 @@ describe('useModalManager', () => {
     expect(result.current.isMealPlannerOpen).toBe(false);
     expect(result.current.isClearPlanModalOpen).toBe(false);
     expect(result.current.isGoalModalOpen).toBe(false);
+    expect(result.current.isCopyPlanOpen).toBe(false);
+    expect(result.current.isTemplateManagerOpen).toBe(false);
     expect(result.current.planningType).toBeNull();
   });
 
@@ -43,6 +45,26 @@ describe('useModalManager', () => {
     expect(result.current.isGoalModalOpen).toBe(false);
   });
 
+  it('should open and close copy plan modal', () => {
+    const { result } = renderHook(() => useModalManager());
+
+    act(() => result.current.openCopyPlanModal());
+    expect(result.current.isCopyPlanOpen).toBe(true);
+
+    act(() => result.current.closeCopyPlanModal());
+    expect(result.current.isCopyPlanOpen).toBe(false);
+  });
+
+  it('should open and close template manager', () => {
+    const { result } = renderHook(() => useModalManager());
+
+    act(() => result.current.openTemplateManager());
+    expect(result.current.isTemplateManagerOpen).toBe(true);
+
+    act(() => result.current.closeTemplateManager());
+    expect(result.current.isTemplateManagerOpen).toBe(false);
+  });
+
   it('should only allow one modal open at a time', () => {
     const { result } = renderHook(() => useModalManager());
 
@@ -61,5 +83,27 @@ describe('useModalManager', () => {
 
     act(() => result.current.closeMealPlanner());
     expect(result.current.isMealPlannerOpen).toBe(false);
+  });
+
+  it('copy plan modal closes other modals', () => {
+    const { result } = renderHook(() => useModalManager());
+
+    act(() => result.current.openGoalModal());
+    expect(result.current.isGoalModalOpen).toBe(true);
+
+    act(() => result.current.openCopyPlanModal());
+    expect(result.current.isGoalModalOpen).toBe(false);
+    expect(result.current.isCopyPlanOpen).toBe(true);
+  });
+
+  it('template manager closes other modals', () => {
+    const { result } = renderHook(() => useModalManager());
+
+    act(() => result.current.openCopyPlanModal());
+    expect(result.current.isCopyPlanOpen).toBe(true);
+
+    act(() => result.current.openTemplateManager());
+    expect(result.current.isCopyPlanOpen).toBe(false);
+    expect(result.current.isTemplateManagerOpen).toBe(true);
   });
 });
