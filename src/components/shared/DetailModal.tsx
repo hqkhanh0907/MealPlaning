@@ -15,19 +15,20 @@ export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onCl
   const { t } = useTranslation();
   return (
   <ModalBackdrop onClose={onClose} zIndex="z-60">
-    <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto sm:mx-4">
+    <div data-testid="detail-modal" className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto sm:mx-4">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
         <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{title}</h4>
         <div className="flex items-center gap-1">
           <button
             onClick={onEdit}
+            data-testid="btn-detail-edit"
             className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-full text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
             title={t('common.edit')}
           >
             <Edit3 className="w-5 h-5" />
           </button>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
+          <button onClick={onClose} data-testid="btn-detail-close" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
             <X className="w-5 h-5" />
           </button>
         </div>

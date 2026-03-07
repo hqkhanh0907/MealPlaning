@@ -270,7 +270,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
 
           {/* All done state */}
           {checkedCount === groceryItems.length && groceryItems.length > 0 && (
-            <div className="px-4 sm:px-6 py-4 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-center">
+            <div data-testid="grocery-all-bought" className="px-4 sm:px-6 py-4 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-center">
               <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
                 <CheckCircle2 className="w-5 h-5" />
                 <span>{t('grocery.allBought')}</span>

@@ -56,6 +56,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             </div>
           </div>
           <progress
+            data-testid="progress-calories"
             className={`h-2.5 sm:h-3 w-full rounded-full overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-slate-100 dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 ${totalCalories > targetCalories ? '[&::-webkit-progress-value]:bg-rose-500 [&::-moz-progress-bar]:bg-rose-500' : '[&::-webkit-progress-value]:bg-orange-500 [&::-moz-progress-bar]:bg-orange-500'}`}
             aria-label="Calories"
             value={Math.round(totalCalories)}
@@ -75,6 +76,7 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             </div>
           </div>
           <progress
+            data-testid="progress-protein"
             className="h-2.5 sm:h-3 w-full rounded-full overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-slate-100 dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-blue-500 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500"
             aria-label="Protein"
             value={Math.round(totalProtein)}
