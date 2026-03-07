@@ -9,18 +9,25 @@ type ExecutableBrowser = typeof browser & {
 export type MealTypeName = 'breakfast' | 'lunch' | 'dinner';
 
 export class CalendarPage extends BasePage {
+  /** Tap the Plan Meal button — tries section header first, then empty state. */
   async tapPlanMeal() {
-    await this.waitAndClick('btn-plan-meal');
+    const sectionBtn = await this.isDisplayed('btn-plan-meal-section');
+    if (sectionBtn) {
+      await this.waitAndClick('btn-plan-meal-section');
+    } else {
+      await this.waitAndClick('btn-plan-meal-empty');
+    }
   }
 
-  /** After opening type selection modal, choose a meal type by name. */
+  /** After opening MealPlannerModal, select a meal type tab. */
   async selectMealType(type: MealTypeName) {
-    await this.waitAndClick(`btn-type-${type}`);
+    await this.waitAndClick(`tab-${type}`);
   }
 
   /** Convenience: open planning UI for a given type (defaults to breakfast). */
   async openPlanning(type: MealTypeName = 'breakfast') {
     await this.tapPlanMeal();
+    await browser.pause(300);
     await this.selectMealType(type);
   }
 
@@ -52,12 +59,7 @@ export class CalendarPage extends BasePage {
     await this.waitAndClick('btn-confirm-plan');
   }
 
-  /** Open the MoreMenu (⋮ button) on the calendar header. */
-  async tapMoreMenu() {
-    await this.waitAndClick('btn-more-menu');
-  }
-
-  /** Tap "Clear Plan" inside the MoreMenu (must call tapMoreMenu first). */
+  /** Tap "Clear Plan" button (now inline, not in a dropdown). */
   async tapClearPlan() {
     await this.waitAndClick('btn-clear-plan');
   }

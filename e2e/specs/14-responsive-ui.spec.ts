@@ -33,7 +33,7 @@ describe('Responsive UI', () => {
 
       await settings.navigateTo('calendar');
       await browser.pause(500);
-      await expect(settings.el('btn-plan-meal')).toBeDisplayed();
+      await expect(settings.el('btn-today')).toBeDisplayed();
     });
   });
 

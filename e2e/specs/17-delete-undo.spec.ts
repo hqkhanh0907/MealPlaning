@@ -158,24 +158,26 @@ describe('Delete Guard & Undo', () => {
   // TC_DEL_05 — Delete ingredient with confirmation + undo
   // ─────────────────────────────────────────────────────────────────
   describe('Ingredient delete (TC_DEL_05)', () => {
+    const STANDALONE_ING_ID = 'e2e-del-standalone-ing';
+
     before(async () => {
-      // First re-inject the test ingredient if needed
+      // Inject a STANDALONE ingredient NOT used by any dish
       await (browser as unknown as ExecutableBrowser).execute((ingId: string) => {
         const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
         if (!ings.some((i) => i.id === ingId)) {
           ings.push({
             id: ingId,
-            name: { vi: 'NL Xóa Test', en: 'Del Ingredient' },
-            caloriesPer100: 100,
-            proteinPer100: 5,
-            carbsPer100: 20,
-            fatPer100: 1,
-            fiberPer100: 1,
+            name: { vi: 'NL Riêng Test', en: 'Standalone Ingredient' },
+            caloriesPer100: 50,
+            proteinPer100: 2,
+            carbsPer100: 10,
+            fatPer100: 0.5,
+            fiberPer100: 0.5,
             unit: { vi: 'g', en: 'g' },
           });
           localStorage.setItem('mp-ingredients', JSON.stringify(ings));
         }
-      }, TEST_ING_ID);
+      }, STANDALONE_ING_ID);
 
       await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
       await browser.pause(2000);
@@ -186,12 +188,12 @@ describe('Delete Guard & Undo', () => {
       await browser.pause(500);
     });
 
-    it('TC_DEL_05 — should delete ingredient and show undo option', async () => {
+    it('TC_DEL_05 — should delete standalone ingredient and confirm removal', async () => {
       // Click delete button via JS to avoid interactability issues
       await (browser as unknown as ExecutableBrowser).execute((id: string) => {
         const btn = document.querySelector(`[data-testid="btn-delete-ingredient-${id}"]`) as HTMLElement;
         btn?.click();
-      }, TEST_ING_ID);
+      }, STANDALONE_ING_ID);
       await browser.pause(500);
 
       // Wait for and click confirmation
@@ -205,8 +207,8 @@ describe('Delete Guard & Undo', () => {
       });
       await browser.pause(1000);
 
-      const exists = await page.isDisplayed(`btn-edit-ingredient-${TEST_ING_ID}`);
-      assert.strictEqual(exists, false, 'Ingredient should be removed after delete');
+      const exists = await page.isDisplayed(`btn-edit-ingredient-${STANDALONE_ING_ID}`);
+      assert.strictEqual(exists, false, 'Standalone ingredient should be removed after delete');
     });
   });
 });

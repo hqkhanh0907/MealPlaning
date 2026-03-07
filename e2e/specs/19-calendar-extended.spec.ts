@@ -106,10 +106,22 @@ describe('Calendar Extended', () => {
   });
 
   after(async () => {
-    // Clean up injected data
-    await page.tapMoreMenu();
-    await page.tapClearPlan();
-    await page.tapClearScope('day');
-    await browser.pause(300);
+    // Clean up injected data - clear plan if button is visible
+    const clearVisible = await page.isDisplayed('btn-clear-plan');
+    if (clearVisible) {
+      await (browser as unknown as ExecutableBrowser).execute(() => {
+        const btn = document.querySelector('[data-testid="btn-clear-plan"]') as HTMLElement;
+        btn?.click();
+      });
+      await browser.pause(300);
+      const scopeVisible = await page.isDisplayed('btn-clear-scope-day');
+      if (scopeVisible) {
+        await (browser as unknown as ExecutableBrowser).execute(() => {
+          const btn = document.querySelector('[data-testid="btn-clear-scope-day"]') as HTMLElement;
+          btn?.click();
+        });
+        await browser.pause(300);
+      }
+    }
   });
 });

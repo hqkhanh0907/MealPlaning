@@ -3,6 +3,7 @@ import { CalendarPage } from '../pages/CalendarPage';
 
 describe('Calendar — date navigation', () => {
   const page = new CalendarPage();
+  const todayKey = new Date().toISOString().split('T')[0];
 
   before(async () => {
     await page.switchToWebview();
@@ -24,15 +25,33 @@ describe('Calendar — date navigation', () => {
     await expect(page.el('btn-next-date')).toBeDisplayed();
   });
 
-  it('should display breakfast meal card', async () => {
+  it('should display meal cards when plan has data', async () => {
+    // Inject data so meal cards render (empty state hides them)
+    await page.injectTestData({
+      dateKey: todayKey,
+      mealSlot: 'breakfast',
+      dishId: 'e2e-cal-mc-dish',
+      ingredientPayload: {
+        id: 'e2e-cal-mc-ing',
+        name: { vi: 'Gạo MC', en: 'MC Rice' },
+        caloriesPer100: 50, proteinPer100: 1, carbsPer100: 10,
+        fatPer100: 0.1, fiberPer100: 0.1, unit: { vi: 'g', en: 'g' },
+      },
+      dishPayload: {
+        id: 'e2e-cal-mc-dish',
+        name: { vi: 'Món MC', en: 'MC Dish' },
+        ingredients: [{ ingredientId: 'e2e-cal-mc-ing', amount: 100 }],
+        tags: ['breakfast', 'lunch', 'dinner'],
+      },
+    });
+    // Also inject lunch and dinner slots
+    await page.injectTestData({ dateKey: todayKey, mealSlot: 'lunch', dishId: 'e2e-cal-mc-dish' });
+    await page.injectTestData({ dateKey: todayKey, mealSlot: 'dinner', dishId: 'e2e-cal-mc-dish' });
+    await page.reloadApp();
+    await page.navigateTo('calendar');
+    await page.tapToday();
     await expect(page.getMealCard('breakfast')).toBeDisplayed();
-  });
-
-  it('should display lunch meal card', async () => {
     await expect(page.getMealCard('lunch')).toBeDisplayed();
-  });
-
-  it('should display dinner meal card', async () => {
     await expect(page.getMealCard('dinner')).toBeDisplayed();
   });
 
@@ -82,8 +101,7 @@ describe('Calendar — date navigation', () => {
       );
     });
 
-    it('TC_CAL_04 — should clear the day plan via MoreMenu', async () => {
-      await page.tapMoreMenu();
+    it('TC_CAL_04 — should clear the day plan via clear button', async () => {
       await page.tapClearPlan();
       await page.tapClearScope('day');
       // After clearing the plan, summary should show 0 calories
@@ -131,7 +149,6 @@ describe('Calendar — date navigation', () => {
     });
 
     it('TC_CAL_06 — should clear the week plan', async () => {
-      await page.tapMoreMenu();
       await page.tapClearPlan();
       await page.tapClearScope('week');
       await browser.pause(500);
@@ -155,7 +172,6 @@ describe('Calendar — date navigation', () => {
       await page.navigateTo('calendar');
       await page.tapToday();
 
-      await page.tapMoreMenu();
       await page.tapClearPlan();
       await page.tapClearScope('month');
       await browser.pause(500);
