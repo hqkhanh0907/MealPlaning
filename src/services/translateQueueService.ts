@@ -146,7 +146,12 @@ export const useTranslateQueue = create<TranslateQueueState>()(
         ) => {
           const primary = name[newLang];
           const other = name[otherLang];
-          if (primary && !other) {
+
+          if (primary && other && primary === other) {
+            // Both names are identical — data was never translated.
+            // Source language is Vietnamese (app's origin language).
+            enqueue({ itemId: id, itemType, sourceText: name.vi, direction: 'vi-en' });
+          } else if (primary && !other) {
             enqueue({ itemId: id, itemType, sourceText: primary, direction: toOtherDir });
           } else if (other && !primary) {
             enqueue({ itemId: id, itemType, sourceText: other, direction: toNewDir });

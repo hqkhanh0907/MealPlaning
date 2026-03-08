@@ -1,7 +1,10 @@
 /**
  * translate.worker.ts
- * Web Worker that loads opus-mt models via @xenova/transformers (WASM, offline).
- * Models are bundled in public/models/ — no remote downloads at runtime.
+ * Web Worker for translating food-related terms between Vietnamese and English.
+ *
+ * Translation strategy (fastest first):
+ *   1. Static dictionary lookup (~0ms) — covers 200+ common food terms.
+ *   2. opus-mt WASM model fallback — for terms not in the dictionary.
  *
  * Message protocol:
  *   IN:  { type: 'translate', id: string, text: string, direction: 'vi-en' | 'en-vi' }
@@ -12,9 +15,9 @@
  */
 
 import { pipeline, env, type TranslationPipeline } from '@xenova/transformers';
+import { lookupFoodTranslation } from '../data/foodDictionary';
 
 // ── Offline configuration ──────────────────────────────────────────────────
-// Use only the local model files bundled in public/models/; never hit the internet.
 env.allowRemoteModels = false;
 env.localModelPath = '/models/';
 // ──────────────────────────────────────────────────────────────────────────
@@ -86,6 +89,14 @@ globalThis.onmessage = async (event: MessageEvent) => {
     return;
   }
 
+  // Fast path: static dictionary lookup (~0ms)
+  const dictResult = lookupFoodTranslation(text, direction);
+  if (dictResult) {
+    globalThis.postMessage({ type: 'result', id, text: dictResult });
+    return;
+  }
+
+  // Slow path: ML model translation
   try {
     const pipe = await getPipeline(direction);
     const output = await pipe(text, { max_new_tokens: 512 });

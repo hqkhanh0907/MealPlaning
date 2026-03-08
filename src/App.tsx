@@ -50,6 +50,7 @@ import { TranslateStatusBadge } from './components/TranslateStatusBadge';
 import { useTranslateWorker } from './hooks/useTranslateWorker';
 import { useTranslateProcessor } from './hooks/useTranslateProcessor';
 import { useTranslateQueue } from './services/translateQueueService';
+import { lookupFoodTranslation } from './data/foodDictionary';
 import type { SupportedLang } from './types';
 
 type ManagementSubTab = 'ingredients' | 'dishes';
@@ -275,33 +276,60 @@ export default function App() {
     }
   }, [notify, setIngredients, setDishes, setDayPlans, setUserProfile, t]);
 
-  // Enqueue background translation for the "other" language after saving
+  // Enqueue background translation for the "other" language after saving.
+  // If the static food dictionary has an instant match, apply it directly
+  // without waiting for the WASM translate worker.
   const enqueueTranslation = useTranslateQueue.getState().enqueue;
-  const direction = currentLang === 'vi' ? 'vi-en' : 'en-vi';
+  const direction: 'vi-en' | 'en-vi' = currentLang === 'vi' ? 'vi-en' : 'en-vi';
+  const otherLang: SupportedLang = currentLang === 'vi' ? 'en' : 'vi';
 
   const handleAddIngredient = useCallback((ing: Ingredient) => {
-    setIngredients(prev => [...prev, ing]);
     const sourceText = ing.name[currentLang];
-    if (sourceText) enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
-  }, [setIngredients, currentLang, enqueueTranslation, direction]);
+    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
+    const saved = dictResult
+      ? { ...ing, name: { ...ing.name, [otherLang]: dictResult } }
+      : ing;
+    setIngredients(prev => [...prev, saved]);
+    if (sourceText && !dictResult) {
+      enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
+    }
+  }, [setIngredients, currentLang, otherLang, enqueueTranslation, direction]);
 
   const handleUpdateIngredient = useCallback((ing: Ingredient) => {
-    setIngredients(prev => prev.map(i => i.id === ing.id ? ing : i));
     const sourceText = ing.name[currentLang];
-    if (sourceText) enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
-  }, [setIngredients, currentLang, enqueueTranslation, direction]);
+    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
+    const saved = dictResult
+      ? { ...ing, name: { ...ing.name, [otherLang]: dictResult } }
+      : ing;
+    setIngredients(prev => prev.map(i => i.id === ing.id ? saved : i));
+    if (sourceText && !dictResult) {
+      enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
+    }
+  }, [setIngredients, currentLang, otherLang, enqueueTranslation, direction]);
 
   const handleAddDish = useCallback((dish: Dish) => {
-    setDishes(prev => [...prev, dish]);
     const sourceText = dish.name[currentLang];
-    if (sourceText) enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
-  }, [setDishes, currentLang, enqueueTranslation, direction]);
+    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
+    const saved = dictResult
+      ? { ...dish, name: { ...dish.name, [otherLang]: dictResult } }
+      : dish;
+    setDishes(prev => [...prev, saved]);
+    if (sourceText && !dictResult) {
+      enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
+    }
+  }, [setDishes, currentLang, otherLang, enqueueTranslation, direction]);
 
   const handleUpdateDish = useCallback((dish: Dish) => {
-    setDishes(prev => prev.map(d => d.id === dish.id ? dish : d));
     const sourceText = dish.name[currentLang];
-    if (sourceText) enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
-  }, [setDishes, currentLang, enqueueTranslation, direction]);
+    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
+    const saved = dictResult
+      ? { ...dish, name: { ...dish.name, [otherLang]: dictResult } }
+      : dish;
+    setDishes(prev => prev.map(d => d.id === dish.id ? saved : d));
+    if (sourceText && !dictResult) {
+      enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
+    }
+  }, [setDishes, currentLang, otherLang, enqueueTranslation, direction]);
 
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
