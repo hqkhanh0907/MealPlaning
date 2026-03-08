@@ -154,10 +154,6 @@ vi.mock('../hooks/useTranslateWorker', () => ({
 vi.mock('../hooks/useTranslateProcessor', () => ({
   useTranslateProcessor: vi.fn(),
 }));
-vi.mock('../components/TranslateStatusBadge', () => ({
-  TranslateStatusBadge: () => null,
-}));
-
 // Mock ClearPlanModal to expose onClear callback for testing
 vi.mock('../components/modals/ClearPlanModal', () => ({
   ClearPlanModal: ({ onClear }: { onClear: (scope: 'day' | 'week' | 'month') => void }) => (

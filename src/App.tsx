@@ -46,7 +46,6 @@ import {
 import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navigation';
 import { getTabLabels } from './components/navigation/types';
 import type { MainTab } from './components/navigation';
-import { TranslateStatusBadge } from './components/TranslateStatusBadge';
 import { useTranslateWorker } from './hooks/useTranslateWorker';
 import { useTranslateProcessor } from './hooks/useTranslateProcessor';
 import { useTranslateQueue } from './services/translateQueueService';
@@ -507,7 +506,6 @@ export default function App() {
       />
 
       <BottomNavBar activeTab={activeMainTab} onTabChange={handleTabChange} showAIBadge={hasNewAIResult} />
-      <TranslateStatusBadge />
     </div>
   );
 }

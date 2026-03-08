@@ -262,4 +262,4 @@ Nguyên liệu mới xuất hiện trong danh sách, có thể dùng trong món 
 2. System enqueue task vào `translateQueueService`
 3. Background Web Worker (`translate.worker.ts`) xử lý với OPUS model (offline)
 4. Worker dịch xong → `updateTranslatedField()` cập nhật tên ngôn ngữ kia
-5. `TranslateStatusBadge` hiển thị trạng thái (đang dịch / hoàn tất)
+5. Quá trình dịch diễn ra hoàn toàn trong nền, user không cần theo dõi trạng thái

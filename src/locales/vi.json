@@ -447,11 +447,6 @@
     "data": "Dữ liệu",
     "dataDesc": "Quản lý dữ liệu ứng dụng"
   },
-  "translate": {
-    "loadingModels": "Đang tải mô hình dịch...",
-    "translating": "Đang dịch {{count}} mục",
-    "done": "Đã dịch xong"
-  },
   "filter": {
     "button": "Lọc",
     "sortTitle": "Sắp xếp",
