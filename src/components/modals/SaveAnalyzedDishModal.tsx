@@ -10,6 +10,14 @@ import { getMealTagOptions } from '../../data/constants';
 import { UnitSelector } from '../shared/UnitSelector';
 import { logger } from '../../utils/logger';
 
+/** Display unit for nutrition labels: "100g" for g/kg, "100ml" for ml/l, "1 {unit}" for others. */
+const getDisplayUnit = (unit: string) => {
+  const u = unit.toLowerCase().trim();
+  if (u === 'kg' || u === 'g') return '100g';
+  if (u === 'l' || u === 'ml') return '100ml';
+  return `1 ${unit}`;
+};
+
 interface SaveAnalyzedDishModalProps {
   onClose: () => void;
   result: AnalyzedDishResult;
@@ -262,7 +270,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                   </div>
                   
                   <div className={`mt-3 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-600 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')}</p>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(ing.unit)}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       <div>
                         <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">{t('common.calories')}</label>

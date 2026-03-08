@@ -60,7 +60,8 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [qaName, setQaName] = useState('');
   const [qaNameOther, setQaNameOther] = useState('');
-  const [showNameOverride, setShowNameOverride] = useState(false);  const [qaUnit, setQaUnit] = useState<{ vi: string; en: string }>({ vi: 'g', en: 'g' });
+  const [showNameOverride, setShowNameOverride] = useState(false);
+  const [qaUnit, setQaUnit] = useState<{ vi: string; en: string }>({ vi: 'g', en: 'g' });
   const [qaCal, setQaCal] = useState('');
   const [qaProtein, setQaProtein] = useState('');
   const [qaCarbs, setQaCarbs] = useState('');
@@ -206,13 +207,14 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
 
   const handleQuickCreate = useCallback(() => {
     if (!qaName.trim()) { setQaError(t('dish.quickAddValidationName')); return; }
-    const otherLang: SupportedLang = lang === 'vi' ? 'en' : 'vi';
+    const primaryName = qaName.trim();
+    const otherLang = lang === 'vi' ? 'en' : 'vi';
     const newIng: Ingredient = {
       id: generateId('ing'),
       name: {
-        [lang]: qaName.trim(),
-        [otherLang]: qaNameOther.trim() || qaName.trim(),
-      } as Record<SupportedLang, string>,
+        [lang]: primaryName,
+        [otherLang]: qaNameOther.trim() || primaryName,
+      } as { vi: string; en: string },
       unit: { vi: qaUnit.vi.trim() || 'g', en: qaUnit.en.trim() || 'g' },
       caloriesPer100: Number(qaCal) || 0,
       proteinPer100: Number(qaProtein) || 0,
@@ -221,8 +223,6 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       fiberPer100: Number(qaFiber) || 0,
     };
     setExtraIngredients(prev => [...prev, newIng]);
-    // onCreateIngredient is deferred — called in handleSubmit to avoid orphan
-    // ingredients if user cancels before saving the dish.
     handleAddIngredient(newIng.id);
     resetQuickAdd();
   }, [qaName, qaNameOther, qaUnit, qaCal, qaProtein, qaCarbs, qaFat, qaFiber, lang, t, handleAddIngredient, resetQuickAdd]);
@@ -326,7 +326,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       </button>
                       {showNameOverride && (
                         <div className="mt-1.5">
-                          <label htmlFor="qa-name-other" className="text-xs text-slate-400 dark:text-slate-500 mb-0.5 block">
+                          <label htmlFor="qa-name-other" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-0.5">
                             {t('dish.quickAddNameOther', { lang: lang === 'vi' ? 'EN' : 'VI' })}
                           </label>
                           <input
@@ -389,6 +389,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                               id={`qa-${label.toLowerCase()}`}
                               name={`qa-${label.toLowerCase()}`}
                               type="number"
+                              min="0"
                               step="1"
                               inputMode="numeric"
                               value={value}

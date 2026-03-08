@@ -333,4 +333,15 @@ describe('SaveAnalyzedDishModal', () => {
       }),
     );
   });
+
+  it('displays "1 unit" label for non-g/kg/ml/l units (line 18)', () => {
+    const customResult: AnalyzedDishResult = {
+      ...result,
+      ingredients: [
+        { name: 'Trứng gà', amount: 2, unit: 'quả', nutritionPerStandardUnit: { calories: 78, protein: 6, carbs: 0.6, fat: 5, fiber: 0 } },
+      ],
+    };
+    render(<SaveAnalyzedDishModal {...defaultProps} result={customResult} />);
+    expect(screen.getByText(/1 quả/)).toBeInTheDocument();
+  });
 });
