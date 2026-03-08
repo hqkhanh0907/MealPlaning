@@ -445,7 +445,7 @@ describe('DishEditModal', () => {
     const xButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-x'));
     // The last X button is the one in the quick-add overlay
     const quickAddXBtn = xButtons.at(-1);
-    fireEvent.click(quickAddXBtn!);
+    if (quickAddXBtn) fireEvent.click(quickAddXBtn);
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
   });
 
@@ -729,7 +729,7 @@ describe('DishEditModal', () => {
     const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(selectedPlusBtn!);
+    if (selectedPlusBtn) fireEvent.click(selectedPlusBtn);
     expect(screen.getByDisplayValue('210')).toBeInTheDocument();
   });
 
@@ -744,7 +744,7 @@ describe('DishEditModal', () => {
     const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(selectedPlusBtn!);
+    if (selectedPlusBtn) fireEvent.click(selectedPlusBtn);
     expect(screen.getByDisplayValue('55')).toBeInTheDocument();
   });
 
@@ -759,7 +759,7 @@ describe('DishEditModal', () => {
     const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(selectedPlusBtn!);
+    if (selectedPlusBtn) fireEvent.click(selectedPlusBtn);
     expect(screen.getByDisplayValue('6')).toBeInTheDocument();
   });
 
@@ -774,7 +774,7 @@ describe('DishEditModal', () => {
     const minusBtn = screen.getAllByRole('button').find(btn =>
       btn.querySelector('.lucide-minus') && btn.classList.contains('rounded-lg'),
     );
-    fireEvent.click(minusBtn!);
+    if (minusBtn) fireEvent.click(minusBtn);
     // Should stay at 0, not go negative
     expect(screen.getByDisplayValue('0')).toBeInTheDocument();
   });
@@ -826,7 +826,7 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // existingDish has 2 ingredients. Remove one to trigger hasChanges ingredient length diff
     const deleteButton = screen.getAllByRole('button').find(btn => btn.querySelector('.lucide-trash-2'));
-    fireEvent.click(deleteButton!);
+    if (deleteButton) fireEvent.click(deleteButton);
 
     // Close → unsaved dialog because ingredient count changed
     fireEvent.click(screen.getByLabelText('Đóng'));
@@ -950,8 +950,8 @@ describe('DishEditModal', () => {
     fireEvent.blur(nameInput);
     // Now close the quick-add overlay; resetQuickAdd should clear the timer
     const xButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-x'));
-    const quickAddXBtn = xButtons.at(-1);
-    fireEvent.click(quickAddXBtn!);
+    const quickAddXBtn2 = xButtons.at(-1);
+    if (quickAddXBtn2) fireEvent.click(quickAddXBtn2);
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
     vi.useRealTimers();
   });
