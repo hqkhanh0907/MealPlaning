@@ -1,7 +1,7 @@
 # Hướng Dẫn Cài Đặt Môi Trường Dev
 
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 1.1  
+**Date:** 2026-03-08
 
 ---
 
@@ -39,12 +39,21 @@ npm install
 Tạo file `.env.local` tại gốc project:
 
 ```env
-VITE_GEMINI_API_KEY=your_google_gemini_api_key_here
+GEMINI_API_KEY=your_google_gemini_api_key_here
 ```
 
 Lấy API key tại: https://aistudio.google.com/app/apikey
 
-> **Lưu ý:** File `.env.local` đã được thêm vào `.gitignore`, không commit key vào repo.
+> **Lưu ý:** API key được truy cập qua `process.env.GEMINI_API_KEY` (xem `src/services/geminiService.ts` dòng 9), **không** dùng prefix `VITE_`. File `.env.local` đã được thêm vào `.gitignore`, không commit key vào repo.
+
+### 2.3.1 Xác minh API key
+
+Sau khi cài đặt, verify API key hoạt động bằng cách:
+
+1. Chạy dev server: `npm run dev`
+2. Mở tab AI Analysis
+3. Upload bất kỳ ảnh thức ăn nào
+4. Nếu phân tích thành công → API key hoạt động
 
 ### 2.4 Chạy dev server
 
@@ -99,6 +108,8 @@ Trong Android Studio → **Device Manager** → **Create Device**:
 - Device: `Medium Phone` (411×914px, xhdpi)
 - System Image: `API 36.1` (Google APIs / x86_64)
 - AVD Name: `Medium_Phone_API_36.1`
+
+> **Apple Silicon (M1/M2/M3/M4):** Trên Apple Silicon Mac, Android emulator sử dụng arm64 images. Chọn system image có nhãn `arm64-v8a` thay vì `x86_64`.
 
 ---
 
@@ -187,6 +198,8 @@ src/
 │   ├── modals/       # Modal dialogs (Edit, Save, Backup...)
 │   ├── tabs/         # CalendarTab, LibraryTab, GroceryTab, SettingsTab, AITab
 │   ├── ui/           # Shared UI primitives (Button, Input, Toast...)
+│   ├── schedule/     # Schedule / meal plan display components
+│   ├── shared/       # Shared components across tabs
 │   └── planning/     # Meal planning components
 ├── contexts/         # React Context (không dùng do đơn giản)
 ├── hooks/            # Custom hooks (usePersistedState, useAISuggestion...)
@@ -231,9 +244,9 @@ docs/
 
 ## 8. Troubleshooting
 
-### `VITE_GEMINI_API_KEY` không load
+### `GEMINI_API_KEY` không load
 
-Kiểm tra file `.env.local` tồn tại tại root (cùng cấp `package.json`). Restart dev server sau khi thêm.
+Kiểm tra file `.env.local` tồn tại tại root (cùng cấp `package.json`). Đảm bảo biến tên `GEMINI_API_KEY` (không có prefix `VITE_`). Restart dev server sau khi thêm.
 
 ### `adb devices` không thấy emulator
 
@@ -259,3 +272,15 @@ npm run build
 npx cap sync android
 bash build-apk.sh
 ```
+
+---
+
+## 9. SonarQube Setup
+
+Chạy sonar analysis:
+
+```bash
+bash sonar-setup.sh
+```
+
+Config: `sonar-project.properties`

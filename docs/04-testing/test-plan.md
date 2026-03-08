@@ -1,7 +1,7 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 5.0  
-**Date:** 2026-03-07  
+**Version:** 5.1  
+**Date:** 2026-03-08  
 **Author:** Dev Team
 
 ---
@@ -91,9 +91,9 @@
 
 | Level | Target | Actual (2026-03-07) |
 |-------|--------|---------------------|
-| Overall Statements | ≥ 80% | **100%** ✅ (↑ từ 90.51%) |
-| Overall Branches | ≥ 75% | **93.15%** ✅ (↑ từ 83.80%) |
-| Overall Functions | ≥ 85% | **100%** ✅ (↑ từ 87.76%) |
+| Overall Statements | ≥ 80% | **99.53%** ✅ (↑ từ 90.51%) |
+| Overall Branches | ≥ 75% | **92.30%** ✅ (↑ từ 83.80%) |
+| Overall Functions | ≥ 85% | **99.66%** ✅ (↑ từ 87.76%) |
 | Overall Lines | ≥ 80% | **100%** ✅ (↑ từ 92.76%) |
 | Services | ≥ 90% | **100%** ✅ |
 | Utils | ≥ 90% | **100%** ✅ |
@@ -101,7 +101,7 @@
 | Hooks | ≥ 85% | **100%** ✅ |
 | Contexts | ≥ 85% | **100%** ✅ |
 
-> **Note:** Tất cả modules đều đạt 100% Stmts/Funcs/Lines. Branch coverage 93.15% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Target coverage ≥80% đã được **vượt xa** (đạt 100%).
+> **Note:** Unit tests: **1046 tests** across **49 test files** (cập nhật 2026-03-08). Coverage vượt xa target ≥80%. Branch coverage 92.30% — chấp nhận được do một số defensive code paths không thể trigger trong test environment.
 
 ---
 
@@ -215,6 +215,10 @@ E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua l
 | **Console errors (favicon, etc.)** | **Low** | **Low** | **QA DevTools monitoring — BUG-FAVICON-001 CLOSED** |
 | **Chrome 91 ES2022 incompatibility** | **Medium** | **High** | **Tránh `Array.at()`, `structuredClone()`; sử dụng polyfills/alternatives tương thích** |
 | **React 18 `_valueTracker`** | **Medium** | **Medium** | **Programmatic input phải invalidate `_valueTracker` trước khi dispatch event** |
+
+> **Tham khảo:** Xem [coding-guidelines.md](../03-developer-guide/coding-guidelines.md) để mitigate coding-related risks.
+>
+> **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 323 test cases across 15 scenarios.
 
 ---
 

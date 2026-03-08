@@ -265,3 +265,30 @@ WebdriverIO v9 tự động download chromedriver. Nếu vẫn lỗi:
 ```bash
 npx wdio run e2e/wdio.conf.ts --updateDriver
 ```
+
+---
+
+## 11. Debugging Tips
+
+### Chạy 1 spec cụ thể
+
+```bash
+npx wdio e2e/wdio.conf.ts --spec e2e/specs/01-navigation.spec.ts
+```
+
+### Xem DOM trong WebView
+
+Mở Chrome trên máy host và truy cập:
+
+```
+chrome://inspect/#devices
+```
+
+Chọn WebView của app `com.mealplaner.app` để inspect DOM, Console, Network.
+
+### Flaky test handling
+
+- Tăng timeout trong `wdio.conf.ts` (`waitforTimeout`, `connectionRetryTimeout`)
+- Sử dụng `browser.pause()` thay `waitForDisplayed` khi có animation
+- Check emulator CPU usage — giảm nếu > 80%
+- Dùng `--spec` để isolate flaky spec và debug riêng lẻ

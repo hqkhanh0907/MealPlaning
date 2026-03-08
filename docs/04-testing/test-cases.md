@@ -4,6 +4,32 @@
 **Date:** 2026-03-07  
 
 > **v5.0**: QA Cycle 4 — Dark mode visual audit via Chrome DevTools. Added TC_DM (Dark Mode) test cases. Unit tests 866→995 (47 files). BUG-DM-001 fixed. Xem [Changelog](#changelog).
+>
+> **Xem thêm:** Scenario-based test cases chi tiết (323 TCs, 15 scenarios): [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md)
+
+---
+
+## Mục lục
+
+- [Danh sách Test Cases (Browser QA Manual)](#danh-sách-test-cases-browser-qa-manual)
+  - [TC_NAV — Navigation](#tc_nav--navigation)
+  - [TC_CAL — Calendar / Meal Planning](#tc_cal--calendar--meal-planning)
+  - [TC_LIB — Library (Nguyên liệu & Món ăn)](#tc_lib--library-nguyên-liệu--món-ăn)
+  - [TC_AI — AI Features](#tc_ai--ai-features)
+  - [TC_SHOP — Grocery List](#tc_shop--grocery-list)
+  - [TC_SET — Settings](#tc_set--settings)
+  - [TC_BAK — Backup & Restore](#tc_bak--backup--restore)
+  - [TC_RESP — Responsive UI](#tc_resp--responsive-ui)
+  - [TC_I18N — i18n Language](#tc_i18n--i18n-language)
+  - [TC_DET — Detail Modal](#tc_det--detail-modal)
+  - [TC_DEL — Delete Guard & Undo](#tc_del--delete-guard--undo)
+  - [TC_EDGE — Error Handling & Edge Cases](#tc_edge--error-handling--edge-cases)
+  - [TC_INTEG — Deep Integration Tests](#tc_integ--deep-integration-tests)
+  - [TC_MULTI — Multi-day & Cross-tab](#tc_multi--multi-day--cross-tab)
+  - [TC_DM — Dark Mode Visual QA](#tc_dm--dark-mode-visual-qa-chrome-devtools)
+- [E2E Tests — Kết quả](#e2e-tests--kết-quả)
+- [Unit Test Summary](#unit-test-summary)
+- [Changelog](#changelog)
 
 ---
 
