@@ -1,9 +1,10 @@
 # localStorage Schema Reference
 
-**Version:** 2.0  
-**Date:** 2026-03-06  
+**Version:** 2.1  
+**Date:** 2026-03-08  
 **Source of truth:** `src/types.ts` + `src/services/dataService.ts`
 
+> **v2.1 — Translation update**: Thêm mô tả `foodDictionary.ts` cho instant translation. Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md).  
 > **v2.0 — Schema corrected**: Phiên bản 1.0 có schema sai so với code. Đã đồng bộ lại từ `src/types.ts` (xem BUG-DOC-001).
 
 ---
@@ -60,6 +61,8 @@ type LocalizedString = Record<'vi' | 'en', string>;
 ```
 
 **Migration (legacy → current):** Nếu `name` hoặc `unit` là `string` (không phải object), `migrateIngredients()` trong `dataService.ts` tự động convert sang `LocalizedString`.
+
+**Translation:** Khi thêm/sửa ingredient, `App.tsx` tự động dịch tên sang ngôn ngữ còn lại bằng `lookupFoodTranslation()` từ `src/data/foodDictionary.ts` (~0ms). Nếu không tìm thấy trong dictionary → enqueue cho translate worker (WASM fallback). Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md).
 
 ---
 

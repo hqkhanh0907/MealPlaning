@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 5.0  
-**Date:** 2026-03-07  
-**Commit:** `ba8f9e9`
+**Version:** 6.0  
+**Date:** 2026-03-08  
+**Commit:** `93fd037`
 
-> **v5.0**: QA Cycle 4 — Dark mode visual audit via Chrome DevTools. BUG-DM-001 fixed (4 components). Schedule sub-tabs refactor. Unit tests expanded to 995. Xem [Changelog](#6-changelog).
+> **v6.0**: QA Cycle 5 — Instant food translation via dictionary. BUG-TRANSLATE-001 fixed. Unit tests 995→1046 (+51), test files 47→49 (+2). Xem [Changelog](#6-changelog).
 
 ---
 
@@ -12,16 +12,16 @@
 
 | Chỉ số | Kết quả |
 |--------|---------|
-| Unit Tests | **995 / 995 Pass** ✅ |
-| Test Files | **47 / 47 Pass** ✅ |
+| Unit Tests | **1046 / 1046 Pass** ✅ |
+| Test Files | **49 / 49 Pass** ✅ |
 | E2E Tests | **24 / 24 Specs Pass** ✅ |
 | Lint | **0 errors, 0 warnings** ✅ |
-| Code Coverage (Stmts) | **100%** ✅ |
-| Code Coverage (Branch) | **93.15%** ✅ |
-| Code Coverage (Funcs) | **100%** ✅ |
+| Code Coverage (Stmts) | **99.53%** ✅ |
+| Code Coverage (Branch) | **92.30%** ✅ |
+| Code Coverage (Funcs) | **99.66%** ✅ |
 | Code Coverage (Lines) | **100%** ✅ |
 | Bugs mở | **0** ✅ |
-| Bugs đã đóng | **8** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001) |
+| Bugs đã đóng | **9** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001) |
 
 ---
 
@@ -250,6 +250,7 @@
 | 2026-03-07 | 866/866 | 22/24 | ✅ | `50553e8` | Deep integration specs added (23-24), spec 05 + 23 regression |
 | 2026-03-07 | 866/866 | 24/24 | ✅ | `102aed6` | All fixed: MealPlannerModal direct flow, grocery empty state |
 | 2026-03-07 | 995/995 | 24/24 | ✅ | `ba8f9e9` | QA Cycle 4: Dark mode audit, BUG-DM-001, sub-tabs refactor, +129 tests |
+| 2026-03-08 | 1046/1046 | 24/24 | ✅ | `93fd037` | QA Cycle 5: Instant food dictionary translation, BUG-TRANSLATE-001, +51 tests |
 
 ---
 
@@ -262,3 +263,4 @@
 | 3.0 | 2026-03-06 | QA Cycle 2: 866 tests (↑195), 40 files (↑1), 100% Stmts/Funcs/Lines coverage, BUG-FAVICON-001 |
 | 4.0 | 2026-03-07 | QA Cycle 3: E2E expanded 10→24 specs (183 tests), deep integration tests, BUG-E2E-001/002/003, MealPlannerModal direct flow |
 | 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit via Chrome DevTools. BUG-DM-001 fixed (4 components, 18 dark: class additions). Schedule sub-tabs refactor. Unit tests 866→995 (+129), test files 40→47 (+7). Coverage: 100% Stmts/Funcs/Lines, 93.15% Branch |
+| 6.0 | 2026-03-08 | QA Cycle 5: Instant food translation via static dictionary (200+ entries). BUG-TRANSLATE-001 fixed (all EN names were VI copies). New files: foodDictionary.ts, foodDictionary.test.ts. Unit tests 995→1046 (+51), test files 47→49 (+2). Coverage: 99.53% Stmts, 99.66% Funcs, 100% Lines, 92.30% Branch |

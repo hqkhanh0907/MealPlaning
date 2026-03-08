@@ -1,7 +1,7 @@
 # Sequence Diagrams — Smart Meal Planner
 
-**Version:** 1.1  
-**Date:** 2026-03-07
+**Version:** 1.2  
+**Date:** 2026-03-08
 
 ---
 
@@ -251,21 +251,69 @@ User         CalendarTab      ClearPlanModal      App.tsx
 
 ---
 
-## SD-09: Background translation (OPUS offline)
+## SD-09: Food Name Translation (Dictionary + OPUS fallback)
+
+> **v1.2** (2026-03-08): Updated with dictionary fast-path. Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md).
+
+### SD-09a: Instant translation via dictionary (happy path, ~0ms)
 
 ```
-User        App.tsx      useTranslateProcessor  translateQueueService  OPUS Worker
- │             │                  │                      │                  │
- │─save ing────►                  │                      │                  │
- │          setIngredients()       │                      │                  │
- │          ─detectMissing()──────►                      │                  │
- │                                │─enqueue({id, type, direction, text})────►
- │                                │                      │─dequeue next      │
- │                                │                      │─postMessage(task)─►
- │                                │                      │                 translate()
- │                                │                      │◄─'translated' event
- │          ◄─updateTranslatedField()                    │                  │
- │          setIngredients(prev => update name.en)       │                  │
- │          localStorage.setItem(...)                    │                  │
- │◄─TranslateStatusBadge updates                        │                  │
+User          App.tsx                  foodDictionary
+ │               │                          │
+ │─save ing──────►                          │
+ │            lookupFoodTranslation()──────►│
+ │                                    HIT ◄─│
+ │            setIngredients({...ing,       │
+ │              name: { vi, en: result }})  │
+ │            localStorage.setItem(...)     │
+ │◄──UI updates instantly                  │
+```
+
+### SD-09b: Worker fallback for unknown terms
+
+```
+User        App.tsx      useTranslateProcessor  translateQueueService  Worker
+ │             │                  │                      │                │
+ │─save ing────►                  │                      │                │
+ │          lookupFoodTranslation() → null (MISS)       │                │
+ │          setIngredients(ing)   │                      │                │
+ │          enqueue({itemId, direction, sourceText})─────►                │
+ │                                │                      │                │
+ │             [workerReady = true]                      │                │
+ │                                │─pick pending job─────►                │
+ │                                │                      │                │
+ │                                │        postMessage({type:'translate'})│
+ │                                │                      │      ┌─────────┤
+ │                                │                      │      │dictionary│
+ │                                │                      │      │  HIT?   │
+ │                                │                      │      ├─yes→result
+ │                                │                      │      └─no→WASM │
+ │                                │                      │       translate()
+ │                                │                      │◄─{type:'result'}
+ │          ◄─updateTranslatedField()                    │                │
+ │          setIngredients(prev => update name.en)       │                │
+ │          localStorage.setItem(...)                    │                │
+ │◄─UI re-renders with translated name                  │                │
+```
+
+### SD-09c: scanMissing on page load (repair corrupted data)
+
+```
+App.tsx            useTranslateWorker       translateQueueService    Worker
+  │                       │                         │                  │
+  │─mount─────────────────►                         │                  │
+  │                    new Worker()                  │                  │
+  │                       │◄────{type:'ready'}──────│──────────────────│
+  │                    setWorkerReady(true)          │                  │
+  │                    scanMissing(dishes, ings, lang)                  │
+  │                       │─────────────────────────►                  │
+  │                       │   for each: name.en === name.vi?           │
+  │                       │   YES → enqueue({sourceText: name.vi,      │
+  │                       │          direction: 'vi-en'})               │
+  │                       │                         │─dispatch to worker│
+  │                       │                         │──────────────────►│
+  │                       │                         │         dictionary│
+  │                       │                         │◄─{type:'result'}─│
+  │◄─updateTranslatedField()                        │                  │
+  │  setIngredients(prev => update name.en)         │                  │
 ```

@@ -139,7 +139,16 @@ Chứa business logic thuần túy (pure functions), không có side effects.
 | `geminiService.ts` | 3 AI endpoints: analyzeDishImage, suggestMealPlan, suggestIngredientInfo |
 | `translateQueueService.ts` | Queue/dequeue tasks dịch offline, phát events cho worker |
 
-### 2.4 Custom Hooks (`src/hooks/`)
+### 2.4 Data Layer (`src/data/`)
+
+| File | Mô tả |
+|------|-------|
+| `initialData.ts` | Dữ liệu mẫu ban đầu (ingredients + dishes) |
+| `constants.ts` | App constants, meal types, config values |
+| `units.ts` | Đơn vị đo lường (g, ml, quả, ...) |
+| `foodDictionary.ts` | Static bilingual dictionary 200+ Vietnamese↔English food terms. Lookup ~0ms via `lookupFoodTranslation()`. Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md) |
+
+### 2.5 Custom Hooks (`src/hooks/`)
 
 | Hook | Mô tả |
 |------|-------|
@@ -153,7 +162,7 @@ Chứa business logic thuần túy (pure functions), không có side effects.
 | `useTranslateWorker` | Khởi tạo + communicate với translate Web Worker |
 | `useTranslateProcessor` | Queue management: enqueue items cần dịch |
 
-### 2.5 Utilities (`src/utils/`)
+### 2.6 Utilities (`src/utils/`)
 
 | Utility | Mô tả |
 |---------|-------|
@@ -237,32 +246,59 @@ User Action (chụp ảnh / nhấn AI suggest)
 
 ## 5. Background Translation Architecture
 
+> **v2.1** (2026-03-08): Thêm static food dictionary layer cho instant translation (~0ms).
+> Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md).
+
+### 5.1 Translation Layers (priority order)
+
+| Layer | Latency | Coverage | Vị trí |
+|-------|---------|----------|--------|
+| 1. Dictionary tại save-time | ~0ms | 95%+ | `App.tsx` — `lookupFoodTranslation()` |
+| 2. Dictionary trong worker | ~0ms | 95%+ | `translate.worker.ts` — fast-path |
+| 3. WASM opus-mt model | 500ms–2s | ~100% | `translate.worker.ts` — fallback |
+
+### 5.2 Component Diagram
+
 ```
 App.tsx
   │
-  ├── useTranslateWorker    → khởi tạo Web Worker
-  │                           lắng nghe message 'translated'
+  ├── handleAddIngredient / handleUpdateIngredient
+  │     └── lookupFoodTranslation(text, direction)  ← Layer 1: instant dictionary
+  │           ├── HIT  → apply translation immediately, skip worker
+  │           └── MISS → enqueue to translateQueueService
   │
-  └── useTranslateProcessor → enqueue items thiếu translation
+  ├── useTranslateWorker    → khởi tạo Web Worker
+  │                           lắng nghe message 'result'
+  │
+  └── useTranslateProcessor → dispatch pending jobs khi workerReady
           │
           ▼
   translateQueueService.ts
-    queue: [{id, type, direction, text}]
+    queue: [{jobId, itemId, itemType, direction, sourceText, status}]
+    scanMissing(): detect name.en === name.vi → re-translate vi→en
           │
           ▼
   translate.worker.ts (Web Worker)
-    @xenova/transformers OPUS model
-    vi→en: opus-mt-vi-en
-    en→vi: opus-mt-en-vi
+    ├── lookupFoodTranslation()              ← Layer 2: dictionary fast-path
+    └── @xenova/transformers OPUS model       ← Layer 3: ML fallback
+        vi→en: opus-mt-vi-en
+        en→vi: opus-mt-en-vi
           │
           ▼
-  postMessage('translated', {id, type, direction, translated})
+  postMessage({type: 'result', id, text})
           │
           ▼
   App.tsx.updateTranslatedField()
     → setIngredients() hoặc setDishes()
     → persist vào localStorage
 ```
+
+### 5.3 Food Dictionary (`src/data/foodDictionary.ts`)
+
+- 200+ bilingual entries covering proteins, seafood, dairy, grains, vegetables, fruits, nuts, oils, condiments, dishes
+- Lookup: `lookupFoodTranslation(text: string, direction: 'vi-en' | 'en-vi'): string | null`
+- Case-insensitive, trimmed, first-entry-wins for reverse direction
+- Synonyms: Đậu phụ / Đậu hũ / Tàu hũ → Tofu
 
 ---
 
