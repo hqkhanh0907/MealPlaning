@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { AnalyzedDishResult, AvailableDishInfo, IngredientSuggestion, MealPlanSuggestion, NotFoodImageError } from '../types';
+import { AnalyzedDishResult, AvailableDishInfo, IngredientSuggestion, MealPlanSuggestion, NotFoodImageError, SuggestedDishIngredient } from '../types';
 
 // ─── #4 Singleton AI client ───────────────────────────────────────────────────
 let _ai: GoogleGenAI | null = null;
@@ -125,6 +125,24 @@ const isIngredientSuggestion = (v: unknown): v is IngredientSuggestion => {
     typeof s.fiber    === 'number' &&
     typeof s.unit     === 'string'
   );
+};
+
+const isSuggestedDishIngredients = (v: unknown): v is SuggestedDishIngredient[] => {
+  if (!Array.isArray(v)) return false;
+  return v.every(item => {
+    if (typeof item !== 'object' || item === null) return false;
+    const s = item as Record<string, unknown>;
+    return (
+      typeof s.name     === 'string' &&
+      typeof s.amount   === 'number' &&
+      typeof s.unit     === 'string' &&
+      typeof s.calories === 'number' &&
+      typeof s.protein  === 'number' &&
+      typeof s.carbs    === 'number' &&
+      typeof s.fat      === 'number' &&
+      typeof s.fiber    === 'number'
+    );
+  });
 };
 
 
@@ -490,6 +508,92 @@ export async function suggestIngredientInfo(
     },
   ).catch((err: unknown) => {
     logAICall('suggestIngredientInfo', start, false);
+    throw err;
+  });
+}
+
+/**
+ * Suggest ingredients for a dish based on its name using Gemini AI.
+ * @param dishName - Name of the dish (e.g., "Phở bò")
+ * @param signal   - Optional AbortSignal to cancel the request
+ * @returns Array of suggested ingredients with amounts and nutritional data
+ * @throws {DOMException} If the request was aborted (name === 'AbortError')
+ * @throws {Error} If AI response fails validation or times out
+ */
+export async function suggestDishIngredients(
+  dishName: string,
+  signal?: AbortSignal
+): Promise<SuggestedDishIngredient[]> {
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+  const ai = getAI();
+  const safeName = sanitizeForPrompt(dishName);
+
+  const prompt = `
+    Bạn là một chuyên gia dinh dưỡng và ẩm thực. Dựa trên tên món ăn '${safeName}', hãy liệt kê các nguyên liệu phổ biến thường có trong món này.
+    Với mỗi nguyên liệu, ghi rõ:
+    - name: tên nguyên liệu (tiếng Việt)
+    - amount: lượng ước tính cho 1 phần ăn (số)
+    - unit: đơn vị (g, ml, cái, quả, lát, muỗng, v.v.)
+    - calories: kcal per 100g hoặc 1 đơn vị (nếu unit là cái/quả/lát thì tính cho 1 đơn vị, nếu unit là g/ml thì tính cho 100g/100ml)
+    - protein: gram per 100g hoặc 1 đơn vị
+    - carbs: gram per 100g hoặc 1 đơn vị
+    - fat: gram per 100g hoặc 1 đơn vị
+    - fiber: gram per 100g hoặc 1 đơn vị
+    Trả về mảng JSON. Nếu không nhận ra món ăn, trả về mảng rỗng [].
+  `;
+
+  const abortPromise = signal
+    ? new Promise<never>((_, reject) => {
+        signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+      })
+    : null;
+
+  const start = Date.now();
+  const responsePromise = withRetry(
+    () => callWithTimeout(
+      ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name:     { type: Type.STRING, description: "Tên nguyên liệu" },
+                amount:   { type: Type.NUMBER, description: "Lượng cho 1 phần ăn" },
+                unit:     { type: Type.STRING, description: "Đơn vị (g, ml, cái, quả...)" },
+                calories: { type: Type.NUMBER, description: "Kcal per 100g hoặc 1 đơn vị" },
+                protein:  { type: Type.NUMBER, description: "Gram protein per 100g hoặc 1 đơn vị" },
+                carbs:    { type: Type.NUMBER, description: "Gram carbs per 100g hoặc 1 đơn vị" },
+                fat:      { type: Type.NUMBER, description: "Gram fat per 100g hoặc 1 đơn vị" },
+                fiber:    { type: Type.NUMBER, description: "Gram fiber per 100g hoặc 1 đơn vị" },
+              },
+              required: ["name", "amount", "unit", "calories", "protein", "carbs", "fat", "fiber"]
+            }
+          }
+        }
+      }),
+      AI_CALL_TIMEOUT_MS,
+      'Dish ingredients suggestion'
+    ),
+    signal
+  );
+
+  const effectivePromise = abortPromise === null
+    ? responsePromise
+    : Promise.race([responsePromise, abortPromise]);
+
+  return effectivePromise.then(
+    (response: { text: string }) => {
+      const result = parseJSON(response.text, isSuggestedDishIngredients, 'SuggestedDishIngredients');
+      logAICall('suggestDishIngredients', start, true);
+      return result;
+    },
+  ).catch((err: unknown) => {
+    logAICall('suggestDishIngredients', start, false);
     throw err;
   });
 }

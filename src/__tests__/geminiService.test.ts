@@ -15,7 +15,7 @@ vi.mock('@google/genai', () => {
 // Set env before import
 process.env.GEMINI_API_KEY = 'test-key';
 
-import { suggestMealPlan, analyzeDishImage, suggestIngredientInfo, _resetAISingleton, _clearNutritionCache } from '../services/geminiService';
+import { suggestMealPlan, analyzeDishImage, suggestIngredientInfo, suggestDishIngredients, _resetAISingleton, _clearNutritionCache } from '../services/geminiService';
 
 describe('geminiService', () => {
   beforeEach(() => {
@@ -437,6 +437,85 @@ describe('geminiService', () => {
         })
       );
       await expect(analyzeDishImage('base64', 'image/jpeg', controller.signal)).rejects.toThrow('Aborted');
+    });
+  });
+
+  // --- suggestDishIngredients ---
+  describe('suggestDishIngredients', () => {
+    const validResult = [
+      { name: 'Bánh phở', amount: 250, unit: 'g', calories: 356, protein: 3, carbs: 80, fat: 0.5, fiber: 1 },
+      { name: 'Thịt bò', amount: 150, unit: 'g', calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
+    ];
+
+    it('returns valid SuggestedDishIngredient[] on success', async () => {
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(validResult) });
+      const result = await suggestDishIngredients('Phở bò');
+      expect(result).toEqual(validResult);
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns empty array when AI returns []', async () => {
+      mockGenerateContent.mockResolvedValue({ text: '[]' });
+      const result = await suggestDishIngredients('Unknown dish');
+      expect(result).toEqual([]);
+    });
+
+    it('throws when response fails validation', async () => {
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify({ bad: 'data' }) });
+      await expect(suggestDishIngredients('Phở')).rejects.toThrow('Invalid SuggestedDishIngredients');
+    });
+
+    it('throws when array items have missing fields', async () => {
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify([{ name: 'Test' }]) });
+      await expect(suggestDishIngredients('Phở')).rejects.toThrow('Invalid SuggestedDishIngredients');
+    });
+
+    it('throws AbortError when signal is already aborted', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      await expect(suggestDishIngredients('Phở', controller.signal)).rejects.toThrow('Aborted');
+    });
+
+    it('throws AbortError when signal aborts during request', async () => {
+      const controller = new AbortController();
+      mockGenerateContent.mockImplementation(() =>
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            controller.abort();
+            reject(new DOMException('Aborted', 'AbortError'));
+          }, 10);
+        })
+      );
+      await expect(suggestDishIngredients('Phở', controller.signal)).rejects.toThrow('Aborted');
+    });
+
+    it('throws on invalid JSON', async () => {
+      mockGenerateContent.mockResolvedValue({ text: 'not json {{' });
+      await expect(suggestDishIngredients('Phở')).rejects.toThrow('Non-JSON');
+    });
+
+    it('throws on empty response', async () => {
+      mockGenerateContent.mockResolvedValue({ text: undefined });
+      await expect(suggestDishIngredients('Phở')).rejects.toThrow('Empty response');
+    });
+
+    it('handles timeout correctly', async () => {
+      vi.useFakeTimers();
+      mockGenerateContent.mockImplementation(() => new Promise(() => { /* never resolves */ }));
+      const promise = suggestDishIngredients('Phở');
+      vi.advanceTimersByTime(30001);
+      await expect(promise).rejects.toThrow('timed out after 30s');
+      vi.useRealTimers();
+    });
+
+    it('sanitizes dish name for prompt injection', async () => {
+      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(validResult) });
+      await suggestDishIngredients('Test `injection" attempt\\');
+      const callArg = mockGenerateContent.mock.calls[0][0];
+      const prompt = typeof callArg === 'string' ? callArg : callArg.contents;
+      expect(prompt).not.toContain('`');
+      expect(prompt).not.toContain('"');
+      expect(prompt).not.toContain('\\');
     });
   });
 });

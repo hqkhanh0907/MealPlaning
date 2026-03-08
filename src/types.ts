@@ -121,6 +121,17 @@ export type IngredientSuggestion = {
   unit: string;
 };
 
+export type SuggestedDishIngredient = {
+  name: string;
+  amount: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+};
+
 export type AvailableDishInfo = {
   id: string;
   name: string;

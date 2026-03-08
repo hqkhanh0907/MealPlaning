@@ -1,14 +1,15 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles } from 'lucide-react';
-import { Dish, Ingredient, DishIngredient, MealType, SupportedLang } from '../../types';
+import { Dish, Ingredient, DishIngredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { getMealTagOptions } from '../../data/constants';
-import { suggestIngredientInfo } from '../../services/geminiService';
+import { suggestIngredientInfo, suggestDishIngredients } from '../../services/geminiService';
 import { UnitSelector } from '../shared/UnitSelector';
+import { AISuggestIngredientsPreview, ConfirmedSuggestion } from './AISuggestIngredientsPreview';
 
 interface DishEditModalProps {
   /** Dish being edited, or null for creating a new dish. */
@@ -71,6 +72,12 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aiAbortRef = useRef<AbortController | null>(null);
 
+  // AI Suggest Ingredients state
+  const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<SuggestedDishIngredient[] | null>(null);
+  const [aiSuggestError, setAiSuggestError] = useState('');
+  const aiSuggestAbortRef = useRef<AbortController | null>(null);
+
   // Combine passed-in ingredients + any newly created inline ingredients
   const allIngredients = useMemo(() => [...ingredients, ...extraIngredients], [ingredients, extraIngredients]);
 
@@ -131,9 +138,60 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   };
 
   const handleClose = () => {
+    aiSuggestAbortRef.current?.abort();
     if (hasChanges()) { setShowUnsavedDialog(true); return; }
     onClose();
   };
+
+  const handleAiSuggest = useCallback(async () => {
+    if (!namePrimary.trim()) return;
+    aiSuggestAbortRef.current?.abort();
+    const ctrl = new AbortController();
+    aiSuggestAbortRef.current = ctrl;
+    setAiSuggestLoading(true);
+    setAiSuggestError('');
+    try {
+      const results = await suggestDishIngredients(namePrimary.trim(), ctrl.signal);
+      if (!ctrl.signal.aborted) {
+        setAiSuggestions(results);
+      }
+    } catch {
+      if (!ctrl.signal.aborted) {
+        setAiSuggestError(t('dish.aiSuggestError'));
+      }
+    } finally {
+      if (!ctrl.signal.aborted) setAiSuggestLoading(false);
+    }
+  }, [namePrimary, t]);
+
+  const handleAiSuggestConfirm = useCallback((selected: ConfirmedSuggestion[]) => {
+    for (const item of selected) {
+      if (item.matchedIngredient) {
+        const matchedId = item.matchedIngredient.id;
+        const alreadyAdded = selectedIngredients.some(si => si.ingredientId === matchedId);
+        if (!alreadyAdded) {
+          setSelectedIngredients(prev => [...prev, { ingredientId: matchedId, amount: item.amount }]);
+          setAmountStrings(prev => ({ ...prev, [matchedId]: String(item.amount) }));
+        }
+      } else {
+        const newIng: Ingredient = {
+          id: generateId('ing'),
+          name: { vi: item.suggestion.name, en: item.suggestion.name },
+          unit: { vi: item.suggestion.unit, en: item.suggestion.unit },
+          caloriesPer100: item.suggestion.calories,
+          proteinPer100: item.suggestion.protein,
+          carbsPer100: item.suggestion.carbs,
+          fatPer100: item.suggestion.fat,
+          fiberPer100: item.suggestion.fiber,
+        };
+        setExtraIngredients(prev => [...prev, newIng]);
+        setSelectedIngredients(prev => [...prev, { ingredientId: newIng.id, amount: item.amount }]);
+        setAmountStrings(prev => ({ ...prev, [newIng.id]: String(item.amount) }));
+      }
+    }
+    setAiSuggestions(null);
+    if (formErrors.ingredients) setFormErrors(prev => ({ ...prev, ingredients: undefined }));
+  }, [selectedIngredients, formErrors.ingredients]);
 
   const handleSaveAndBack = () => {
     if (!validate()) { setShowUnsavedDialog(false); return; }
@@ -230,9 +288,28 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
-            <input id="dish-name" value={namePrimary} onChange={e => { setNamePrimary(e.target.value); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+            <div className="flex items-center gap-2">
+              <input id="dish-name" value={namePrimary} onChange={e => { setNamePrimary(e.target.value); if (formErrors.name) { setFormErrors(prev => ({ ...prev, name: undefined })); } setAiSuggestError(''); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+              {aiSuggestLoading ? (
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center" data-testid="ai-suggest-loading">
+                  <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAiSuggest}
+                  disabled={!namePrimary.trim()}
+                  title={t('dish.aiSuggestButton')}
+                  data-testid="btn-ai-suggest"
+                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Sparkles className="w-5 h-5" />
+                </button>
+              )}
+            </div>
             {formErrors.name && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-name">{formErrors.name}</p>}
-
+            {aiSuggestError && <p className="text-xs text-rose-500 mt-1" data-testid="ai-suggest-error">{aiSuggestError}</p>}
+            {aiSuggestLoading && <p className="text-xs text-indigo-500 mt-1">{t('dish.aiSuggestLoading')}</p>}
           </div>
           <div>
             <p className={`block text-xs font-bold uppercase mb-1.5 ${formErrors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>
@@ -441,6 +518,16 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
         </div>
       </div>
     </ModalBackdrop>
+
+    {aiSuggestions !== null && (
+      <AISuggestIngredientsPreview
+        dishName={namePrimary}
+        suggestions={aiSuggestions}
+        existingIngredients={allIngredients}
+        onConfirm={handleAiSuggestConfirm}
+        onClose={() => setAiSuggestions(null)}
+      />
+    )}
 
     <UnsavedChangesDialog
       isOpen={showUnsavedDialog}

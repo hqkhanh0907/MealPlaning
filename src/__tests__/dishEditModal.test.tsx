@@ -6,8 +6,10 @@ import type { Dish, Ingredient } from '../types';
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const mockSuggestIngredientInfo = vi.fn();
+const mockSuggestDishIngredients = vi.fn();
 vi.mock('../services/geminiService', () => ({
   suggestIngredientInfo: (...args: unknown[]) => mockSuggestIngredientInfo(...args),
+  suggestDishIngredients: (...args: unknown[]) => mockSuggestDishIngredients(...args),
 }));
 
 const ingredients: Ingredient[] = [
@@ -982,5 +984,125 @@ describe('DishEditModal', () => {
     // Toggle an inactive tag → error should clear (branch: !isActive && formErrors.tags)
     fireEvent.click(screen.getByTestId('tag-breakfast'));
     expect(screen.queryByText(/chọn ít nhất một bữa ăn phù hợp/i)).not.toBeInTheDocument();
+  });
+
+  // --- AI Suggest Ingredients Tests ---
+
+  it('renders AI suggest button disabled when name is empty', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    const btn = screen.getByTestId('btn-ai-suggest');
+    expect(btn).toBeDisabled();
+  });
+
+  it('renders AI suggest button enabled when name has value', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Phở bò' } });
+    const btn = screen.getByTestId('btn-ai-suggest');
+    expect(btn).not.toBeDisabled();
+  });
+
+  it('shows loading state when AI suggest is called', async () => {
+    let resolvePromise: (value: unknown) => void;
+    mockSuggestDishIngredients.mockImplementation(() => new Promise(resolve => { resolvePromise = resolve; }));
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Phở bò' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    expect(screen.getByTestId('ai-suggest-loading')).toBeInTheDocument();
+    // Resolve to clear loading
+    await act(async () => { resolvePromise([]); });
+  });
+
+  it('opens preview popup after AI returns suggestions', async () => {
+    const aiSuggestions = [
+      { name: 'Ức gà', amount: 200, unit: 'g', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+      { name: 'Giá đỗ', amount: 50, unit: 'g', calories: 31, protein: 3, carbs: 5, fat: 0.2, fiber: 2 },
+    ];
+    mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Cơm gà' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    // Preview popup should be visible
+    expect(screen.getByTestId('ai-suggest-item-0')).toBeInTheDocument();
+    expect(screen.getByTestId('ai-suggest-item-1')).toBeInTheDocument();
+  });
+
+  it('adds selected ingredients from AI preview on confirm', async () => {
+    const aiSuggestions = [
+      { name: 'Giá đỗ', amount: 50, unit: 'g', calories: 31, protein: 3, carbs: 5, fat: 0.2, fiber: 2 },
+    ];
+    mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Phở' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    // Confirm the suggestion
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest-confirm'));
+    });
+    // The new ingredient should appear in selected list (as a new ingredient since 'Giá đỗ' is not in our test ingredients)
+    expect(screen.getByText('Giá đỗ')).toBeInTheDocument();
+  });
+
+  it('shows error message when AI suggest fails', async () => {
+    mockSuggestDishIngredients.mockRejectedValue(new Error('Network error'));
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Phở' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    expect(screen.getByTestId('ai-suggest-error')).toBeInTheDocument();
+  });
+
+  it('adds matched existing ingredient from AI preview', async () => {
+    const aiSuggestions = [
+      { name: 'Ức gà', amount: 200, unit: 'g', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+    ];
+    mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Gà rán' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest-confirm'));
+    });
+    // Should add existing ingredient 'Ức gà' (i1)
+    expect(screen.getByText('Ức gà')).toBeInTheDocument();
+  });
+
+  it('closes preview without changes when cancel is clicked', async () => {
+    const aiSuggestions = [
+      { name: 'Ức gà', amount: 200, unit: 'g', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+    ];
+    mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Gà' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    expect(screen.getByTestId('ai-suggest-item-0')).toBeInTheDocument();
+    // Cancel
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest-cancel'));
+    });
+    // Preview should be closed
+    expect(screen.queryByTestId('ai-suggest-item-0')).not.toBeInTheDocument();
+  });
+
+  it('clears AI suggest error when name changes', async () => {
+    mockSuggestDishIngredients.mockRejectedValue(new Error('fail'));
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'A' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    expect(screen.getByTestId('ai-suggest-error')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'AB' } });
+    expect(screen.queryByTestId('ai-suggest-error')).not.toBeInTheDocument();
   });
 });

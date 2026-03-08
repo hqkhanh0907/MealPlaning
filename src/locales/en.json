@@ -174,7 +174,17 @@
     "quickAddCancel": "Cancel",
     "quickAddValidationName": "Please enter ingredient name",
     "quickAddCreated": "Created ingredient \"{{name}}\"",
-    "quickAddAiFillButton": "AI auto-fill nutrition"
+    "quickAddAiFillButton": "AI auto-fill nutrition",
+    "aiSuggestButton": "AI suggest ingredients",
+    "aiSuggestLoading": "AI suggesting ingredients...",
+    "aiSuggestTitle": "AI Suggestions for: {{name}}",
+    "aiSuggestExisting": "Exists",
+    "aiSuggestNew": "New",
+    "aiSuggestConfirm": "Add {{count}} selected ingredients",
+    "aiSuggestCancel": "Cancel",
+    "aiSuggestEmpty": "No matching ingredients found",
+    "aiSuggestError": "Could not suggest, please try again",
+    "aiSuggestNameRequired": "Please enter dish name first"
   },
   "ingredient": {
     "title": "Ingredient",
