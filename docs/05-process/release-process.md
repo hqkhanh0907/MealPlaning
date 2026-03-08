@@ -1,7 +1,7 @@
 # Release Process — Smart Meal Planner
 
 **Version:** 3.0  
-**Date:** 2026-03-07
+**Date:** 2026-03-08
 
 ---
 
@@ -193,7 +193,22 @@ Cập nhật `CHANGELOG.md` hoặc tạo file session mới trong `docs/`:
 adb install android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Phương pháp 2: Google Drive upload
+### Phương pháp 2: Upload APK lên Google Drive (tự động)
+
+Script tự động upload APK lên Google Drive:
+
+```bash
+bash upload-apk-drive.sh
+```
+
+Script sử dụng Google Drive API với service account. File config: `metadata.json`
+
+#### Setup Google Drive API
+1. Tạo service account trong Google Cloud Console
+2. Share folder Drive với email service account
+3. Đặt credentials file path trong script
+
+### Phương pháp 3: Google Drive thủ công
 
 ```bash
 # Copy APK lên Google Drive (cần rclone hoặc Google Drive Desktop)
@@ -201,7 +216,7 @@ cp android/app/build/outputs/apk/debug/app-debug.apk \
    ~/Google\ Drive/MealPlaner-APKs/MealPlaner-v1.1.0.apk
 ```
 
-### Phương pháp 3: Chia sẻ qua Android Share (trong app)
+### Phương pháp 4: Chia sẻ qua Android Share (trong app)
 
 Dùng tính năng Export trong app để share file JSON backup.
 
@@ -223,3 +238,10 @@ Khi có bug nghiêm trọng sau release:
 9. Tag: git tag v1.0.1
 10. Build APK và distribute
 ```
+
+---
+
+## Tài liệu liên quan
+
+- [Deployment Guide](../06-operations/deployment.md) — Hướng dẫn triển khai chi tiết
+- [Coding Guidelines](../03-developer-guide/coding-guidelines.md) — Quy tắc code và testing

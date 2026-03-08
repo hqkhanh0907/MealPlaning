@@ -1,7 +1,7 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 3.1  
-**Date:** 2026-03-07
+**Version:** 3.2  
+**Date:** 2026-03-08
 
 ---
 
@@ -193,6 +193,12 @@ const newIng = createIngredient({ name: 'Thịt bò', unit: 'g', ... });
 const newIng: Ingredient = { id: Date.now().toString(), ... };
 ```
 
+### Quy tắc Translation
+
+- Mọi tên nguyên liệu/món ăn phải sử dụng `LocalizedString` (Record<'vi' | 'en', string>)
+- Khi thêm food term mới vào codebase, **bắt buộc** thêm vào `foodDictionary.ts` nếu biết dịch chính xác
+- Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md)
+
 ---
 
 ## 6. Quản lý state
@@ -292,6 +298,13 @@ await $('button[data-testid="add-dish"]').click();
 > **Chuẩn mới (QA Cycle 2):** 100% Stmts/Funcs/Lines đã đạt được và là baseline cho các release tiếp theo. Mọi PR không được làm giảm coverage dưới 100%.
 >
 > **Chuẩn E2E (QA Cycle 3):** Deep integration tests required for cross-feature data flow. 100% feature-level coverage achieved and must be maintained.
+
+### Quy tắc Test Coverage
+
+- Coverage **không được phép giảm** sau mỗi PR
+- Target: 100% lines, 100% functions, 100% statements
+- Branch coverage >= 90%
+- Mọi bug fix **phải kèm** test case regression
 
 ### Quy tắc ESLint — Không dùng eslint-disable
 

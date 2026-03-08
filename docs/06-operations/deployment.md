@@ -1,7 +1,7 @@
 # Hướng Dẫn Triển Khai (Deployment Guide)
 
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 1.1  
+**Date:** 2026-03-08
 
 ---
 
@@ -218,6 +218,27 @@ npx cap sync android
 bash build-apk.sh
 ```
 
+### Gradle Build Errors
+
+#### Error: "SDK not found"
+```bash
+echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+```
+
+#### Error: "Minimum SDK version"
+Kiểm tra `android/app/build.gradle`:
+```
+minSdkVersion 24
+targetSdkVersion 36
+```
+
+#### Error: "Java version mismatch"
+Đảm bảo JDK 17:
+```bash
+java -version
+# openjdk version "17.x.x"
+```
+
 ---
 
 ## 12. File structure quan trọng cho Android
@@ -233,3 +254,26 @@ android/
 ├── local.properties          # sdk.dir path (KHÔNG commit)
 └── variables.gradle          # SDK versions, dependencies
 ```
+
+---
+
+## 13. Kiểm tra App Storage trên Emulator
+
+```bash
+# Xem dung lượng app
+adb shell du -sh /data/data/com.mealplaner.app/
+
+# Xem WebView localStorage
+adb shell cat /data/data/com.mealplaner.app/app_webview/Default/Local\ Storage/leveldb/
+
+# Clear app data
+adb shell pm clear com.mealplaner.app
+```
+
+---
+
+## Tài liệu liên quan
+
+- [Release Process](../05-process/release-process.md) — Quy trình release và versioning
+- [Coding Guidelines](../03-developer-guide/coding-guidelines.md) — Quy tắc code, testing và ESLint
+- [Setup Guide](../03-developer-guide/setup.md) — Hướng dẫn cài đặt môi trường phát triển
