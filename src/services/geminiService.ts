@@ -243,8 +243,8 @@ export async function suggestMealPlan(
     : Promise.race([responsePromise, abortPromise]);
 
   return effectivePromise.then(
-    (response: { text: string }) => {
-      const result = parseJSON(response.text, isMealPlanSuggestion, 'MealPlanSuggestion');
+    (response: { text?: string }) => {
+      const result = parseJSON(response.text ?? '', isMealPlanSuggestion, 'MealPlanSuggestion');
       logAICall('suggestMealPlan', start, true);
       return result;
     },
@@ -402,8 +402,8 @@ export async function analyzeDishImage(
     : Promise.race([responsePromise, abortPromise]);
 
   return effectivePromise.then(
-    (response: { text: string }) => {
-      const result = parseJSON(response.text, isAnalyzedDishResult, 'AnalyzedDishResult');
+    (response: { text?: string }) => {
+      const result = parseJSON(response.text ?? '', isAnalyzedDishResult, 'AnalyzedDishResult');
       if (!result.isFood) {
         throw new NotFoodImageError(result.notFoodReason ?? 'Không phải món ăn');
       }
@@ -500,8 +500,8 @@ export async function suggestIngredientInfo(
     : Promise.race([responsePromise, abortPromise]);
 
   return effectivePromise.then(
-    (response: { text: string }) => {
-      const result = parseJSON(response.text, isIngredientSuggestion, 'IngredientSuggestion');
+    (response: { text?: string }) => {
+      const result = parseJSON(response.text ?? '', isIngredientSuggestion, 'IngredientSuggestion');
       nutritionCache.set(cacheKey, { data: result, ts: Date.now() });
       logAICall('suggestIngredientInfo', start, true);
       return result;
@@ -587,8 +587,8 @@ export async function suggestDishIngredients(
     : Promise.race([responsePromise, abortPromise]);
 
   return effectivePromise.then(
-    (response: { text: string }) => {
-      const result = parseJSON(response.text, isSuggestedDishIngredients, 'SuggestedDishIngredients');
+    (response: { text?: string }) => {
+      const result = parseJSON(response.text ?? '', isSuggestedDishIngredients, 'SuggestedDishIngredients');
       logAICall('suggestDishIngredients', start, true);
       return result;
     },

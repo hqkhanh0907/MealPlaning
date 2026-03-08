@@ -172,5 +172,14 @@ describe('useTranslateQueue', () => {
       // dish-2 has EN, missing VI → en-vi
       expect(jobs.some((j) => j.itemId === 'dish-2' && j.direction === 'en-vi')).toBe(true);
     });
+
+    it('enqueues vi-en job when both names are identical (never translated)', () => {
+      const { scanMissing } = useTranslateQueue.getState();
+      const untranslated = [{ id: 'dish-u', name: { vi: 'Ramen', en: 'Ramen' } }];
+      scanMissing(untranslated, [], 'vi');
+
+      const jobs = useTranslateQueue.getState().jobs;
+      expect(jobs.some((j) => j.itemId === 'dish-u' && j.direction === 'vi-en' && j.sourceText === 'Ramen')).toBe(true);
+    });
   });
 });
