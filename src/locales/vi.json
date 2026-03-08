@@ -166,8 +166,6 @@
     "quickAddTitle": "Tạo nguyên liệu mới",
     "quickAddName": "Tên nguyên liệu",
     "quickAddNamePlaceholder": "VD: Ức gà / Chicken breast",
-    "quickAddAutoTranslate": "Tự động dịch sang {{lang}}",
-    "quickAddNameOther": "Tên ({{lang}}, ghi đè bản dịch tự động)",
     "quickAddUnit": "Đơn vị",
     "quickAddUnitPlaceholder": "g, ml, cái...",
     "quickAddNutrition": "Dinh dưỡng (per 100g/1 đơn vị)",

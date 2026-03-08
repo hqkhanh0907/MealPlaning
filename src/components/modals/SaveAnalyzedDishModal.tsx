@@ -34,6 +34,20 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
   const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>(() => new Array(result.ingredients.length).fill(true));
   const [researchingIngredientIndex, setResearchingIngredientIndex] = useState<number | null>(null);
 
+  // String state for numeric inputs to allow clearing without snap-back on mobile
+  const [numericStrings, setNumericStrings] = useState<Record<string, string>>(() => {
+    const entries: Record<string, string> = {};
+    result.ingredients.forEach((ing, idx) => {
+      entries[`${idx}-amount`] = String(ing.amount);
+      entries[`${idx}-calories`] = String(ing.nutritionPerStandardUnit.calories);
+      entries[`${idx}-protein`] = String(ing.nutritionPerStandardUnit.protein);
+      entries[`${idx}-carbs`] = String(ing.nutritionPerStandardUnit.carbs);
+      entries[`${idx}-fat`] = String(ing.nutritionPerStandardUnit.fat);
+      entries[`${idx}-fiber`] = String(ing.nutritionPerStandardUnit.fiber);
+    });
+    return entries;
+  });
+
   useModalBackHandler(true, onClose);
 
   const toggleDishTag = (type: MealType) => {
@@ -110,6 +124,14 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
         },
       };
       setEditedResult({ ...editedResult, ingredients: newIngredients });
+      setNumericStrings(prev => ({
+        ...prev,
+        [`${index}-calories`]: String(info.calories),
+        [`${index}-protein`]: String(info.protein),
+        [`${index}-carbs`]: String(info.carbs),
+        [`${index}-fat`]: String(info.fat),
+        [`${index}-fiber`]: String(info.fiber),
+      }));
     } catch (error) {
       logger.error({ component: 'SaveAnalyzedDishModal', action: 'researchIngredient' }, error);
       notify.error(t('saveAnalyzed.lookupFailed'), t('saveAnalyzed.lookupFailedDesc'));
@@ -253,8 +275,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         min="0"
                         step="1"
                         inputMode="numeric"
-                        value={ing.amount}
-                        onChange={e => handleUpdateIngredient(idx, 'amount', Math.max(0, Math.round(Number(e.target.value))))}
+                        value={numericStrings[`${idx}-amount`] ?? String(ing.amount)}
+                        onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-amount`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'amount', n); }}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                       />
                     </div>
@@ -277,8 +299,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <input
                           id={`ai-ing-cal-${idx}`}
                           type="number" min="0" step="1" inputMode="numeric"
-                          value={ing.nutritionPerStandardUnit.calories}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', Math.max(0, Math.round(Number(e.target.value))))}
+                          value={numericStrings[`${idx}-calories`] ?? String(ing.nutritionPerStandardUnit.calories)}
+                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-calories`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', n); }}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -287,8 +309,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <input
                           id={`ai-ing-pro-${idx}`}
                           type="number" min="0" step="1" inputMode="numeric"
-                          value={ing.nutritionPerStandardUnit.protein}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', Math.max(0, Math.round(Number(e.target.value))))}
+                          value={numericStrings[`${idx}-protein`] ?? String(ing.nutritionPerStandardUnit.protein)}
+                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-protein`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', n); }}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -297,8 +319,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <input
                           id={`ai-ing-carbs-${idx}`}
                           type="number" min="0" step="1" inputMode="numeric"
-                          value={ing.nutritionPerStandardUnit.carbs}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', Math.max(0, Math.round(Number(e.target.value))))}
+                          value={numericStrings[`${idx}-carbs`] ?? String(ing.nutritionPerStandardUnit.carbs)}
+                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-carbs`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', n); }}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -307,8 +329,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <input
                           id={`ai-ing-fat-${idx}`}
                           type="number" min="0" step="1" inputMode="numeric"
-                          value={ing.nutritionPerStandardUnit.fat}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', Math.max(0, Math.round(Number(e.target.value))))}
+                          value={numericStrings[`${idx}-fat`] ?? String(ing.nutritionPerStandardUnit.fat)}
+                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-fat`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', n); }}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
@@ -317,8 +339,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         <input
                           id={`ai-ing-fiber-${idx}`}
                           type="number" min="0" step="1" inputMode="numeric"
-                          value={ing.nutritionPerStandardUnit.fiber}
-                          onChange={e => handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', Math.max(0, Math.round(Number(e.target.value))))}
+                          value={numericStrings[`${idx}-fiber`] ?? String(ing.nutritionPerStandardUnit.fiber)}
+                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-fiber`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', n); }}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>

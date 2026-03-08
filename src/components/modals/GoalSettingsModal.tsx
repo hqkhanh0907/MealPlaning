@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Target } from 'lucide-react';
 import { UserProfile } from '../../types';
@@ -16,6 +16,11 @@ const PROTEIN_PRESETS = [1, 2, 3, 4];
 export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfile, onUpdateProfile, onClose }) => {
   const { t } = useTranslation();
   useModalBackHandler(true, onClose);
+
+  // String state for numeric inputs to allow clearing without snap-back on mobile
+  const [weightStr, setWeightStr] = useState(() => String(userProfile.weight));
+  const [proteinStr, setProteinStr] = useState(() => String(userProfile.proteinRatio));
+  const [caloriesStr, setCaloriesStr] = useState(() => String(userProfile.targetCalories));
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-80">
@@ -39,8 +44,9 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <input
                 id="goal-weight"
                 type="number" min="1" max="500" step="1" inputMode="numeric"
-                value={userProfile.weight}
-                onChange={(e) => onUpdateProfile({ ...userProfile, weight: Math.max(1, Math.round(Number(e.target.value)) || 1) })}
+                value={weightStr}
+                onChange={(e) => { const v = e.target.value; setWeightStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 1) onUpdateProfile({ ...userProfile, weight: n }); }}
+                onBlur={() => { if (weightStr.trim() === '' || Number.isNaN(Number.parseFloat(weightStr))) setWeightStr(String(userProfile.weight)); }}
                 data-testid="input-goal-weight"
                 className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-base sm:text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
               />
@@ -60,12 +66,9 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
                 <input
                   id="goal-protein"
                   type="number" step="0.1" min="1" max="5" inputMode="decimal"
-                  value={userProfile.proteinRatio}
-                  onChange={(e) => {
-                    const raw = Number(e.target.value);
-                    const rounded = Math.round(Math.max(1, raw || 1) * 10) / 10;
-                    onUpdateProfile({ ...userProfile, proteinRatio: rounded });
-                  }}
+                  value={proteinStr}
+                  onChange={(e) => { const v = e.target.value; setProteinStr(v); const raw = Number.parseFloat(v); if (!Number.isNaN(raw) && raw >= 0.1) { const rounded = Math.round(Math.max(1, raw) * 10) / 10; onUpdateProfile({ ...userProfile, proteinRatio: rounded }); } }}
+                  onBlur={() => { if (proteinStr.trim() === '' || Number.isNaN(Number.parseFloat(proteinStr))) setProteinStr(String(userProfile.proteinRatio)); }}
                   data-testid="input-goal-protein"
                   className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
                 />
@@ -75,7 +78,7 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
                 {PROTEIN_PRESETS.map(ratio => (
                   <button
                     key={ratio}
-                    onClick={() => onUpdateProfile({ ...userProfile, proteinRatio: ratio })}
+                    onClick={() => { onUpdateProfile({ ...userProfile, proteinRatio: ratio }); setProteinStr(String(ratio)); }}
                     data-testid={`btn-preset-${ratio}`}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${userProfile.proteinRatio === ratio ? 'bg-blue-500 text-white border-blue-500' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-blue-300'}`}
                   >
@@ -95,8 +98,9 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <input
                 id="goal-calories"
                 type="number" min="100" max="10000" step="1" inputMode="numeric"
-                value={userProfile.targetCalories}
-                onChange={(e) => onUpdateProfile({ ...userProfile, targetCalories: Math.max(100, Math.round(Number(e.target.value)) || 100) })}
+                value={caloriesStr}
+                onChange={(e) => { const v = e.target.value; setCaloriesStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 100) onUpdateProfile({ ...userProfile, targetCalories: n }); }}
+                onBlur={() => { if (caloriesStr.trim() === '' || Number.isNaN(Number.parseFloat(caloriesStr))) setCaloriesStr(String(userProfile.targetCalories)); }}
                 data-testid="input-goal-calories"
                 className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
               />

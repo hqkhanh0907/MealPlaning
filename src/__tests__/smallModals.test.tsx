@@ -103,10 +103,10 @@ describe('GoalSettingsModal', () => {
     expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ targetCalories: 2500 }));
   });
 
-  it('enforces minimum weight of 1', () => {
+  it('does not propagate weight below minimum', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Cân nặng hiện tại (kg)'), { target: { value: '0' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ weight: 1 }));
+    expect(onUpdateProfile).not.toHaveBeenCalled();
   });
 
   it('calls onClose when "Hoàn tất" button is clicked', () => {
@@ -129,34 +129,58 @@ describe('GoalSettingsModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('enforces minimum protein ratio of 1', () => {
+  it('does not propagate protein ratio below minimum', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('L\u01b0\u1ee3ng Protein mong mu\u1ed1n'), { target: { value: '0' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 1 }));
+    fireEvent.change(screen.getByLabelText('Lượng Protein mong muốn'), { target: { value: '0' } });
+    expect(onUpdateProfile).not.toHaveBeenCalled();
   });
 
-  it('enforces minimum calories of 100', () => {
+  it('does not propagate calories below minimum', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText(/Mục tiêu Calo/), { target: { value: '50' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ targetCalories: 100 }));
+    expect(onUpdateProfile).not.toHaveBeenCalled();
   });
 
-  it('handles NaN weight input by defaulting to minimum', () => {
+  it('does not propagate NaN weight input', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Cân nặng hiện tại (kg)'), { target: { value: 'abc' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ weight: 1 }));
+    expect(onUpdateProfile).not.toHaveBeenCalled();
   });
 
-  it('handles NaN protein ratio input by defaulting to minimum', () => {
+  it('does not propagate NaN protein ratio input', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Lượng Protein mong muốn'), { target: { value: 'xyz' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ proteinRatio: 1 }));
+    expect(onUpdateProfile).not.toHaveBeenCalled();
   });
 
-  it('handles NaN calories input by defaulting to minimum', () => {
+  it('does not propagate NaN calories input', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText(/Mục tiêu Calo/), { target: { value: '' } });
-    expect(onUpdateProfile).toHaveBeenCalledWith(expect.objectContaining({ targetCalories: 100 }));
+    expect(onUpdateProfile).not.toHaveBeenCalled();
+  });
+
+  it('resets weight to profile value on blur when empty', () => {
+    render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const input = screen.getByLabelText('Cân nặng hiện tại (kg)');
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+    expect((input as HTMLInputElement).value).toBe(String(defaultProfile.weight));
+  });
+
+  it('resets protein ratio to profile value on blur when empty', () => {
+    render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const input = screen.getByLabelText('Lượng Protein mong muốn');
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+    expect((input as HTMLInputElement).value).toBe(String(defaultProfile.proteinRatio));
+  });
+
+  it('resets calories to profile value on blur when empty', () => {
+    render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const input = screen.getByLabelText(/Mục tiêu Calo/);
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+    expect((input as HTMLInputElement).value).toBe(String(defaultProfile.targetCalories));
   });
 
   it('renders all 4 protein preset buttons', () => {

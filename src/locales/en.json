@@ -166,8 +166,6 @@
     "quickAddTitle": "Create new ingredient",
     "quickAddName": "Ingredient name",
     "quickAddNamePlaceholder": "e.g. Chicken breast / Ức gà",
-    "quickAddAutoTranslate": "Auto-translate to {{lang}}",
-    "quickAddNameOther": "Name ({{lang}}, override auto-translate)",
     "quickAddUnit": "Unit",
     "quickAddUnitPlaceholder": "g, ml, pcs...",
     "quickAddNutrition": "Nutrition (per 100g / 1 unit)",

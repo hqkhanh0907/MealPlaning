@@ -198,11 +198,11 @@ describe('SaveAnalyzedDishModal', () => {
     expect((amountInput as HTMLInputElement).value).toBe('300');
   });
 
-  it('clamps ingredient amount to 0 when negative', () => {
+  it('does not propagate negative ingredient amount', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '-5' } });
-    expect((amountInput as HTMLInputElement).value).toBe('0');
+    expect((amountInput as HTMLInputElement).value).toBe('-5');
   });
 
   it('edits ingredient unit input', () => {
@@ -265,11 +265,11 @@ describe('SaveAnalyzedDishModal', () => {
     }
   });
 
-  it('clamps negative nutrition value to 0', () => {
+  it('does not propagate negative nutrition value', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
     const calInput = screen.getByDisplayValue('220');
     fireEvent.change(calInput, { target: { value: '-10' } });
-    expect((calInput as HTMLInputElement).value).toBe('0');
+    expect((calInput as HTMLInputElement).value).toBe('-10');
   });
 
   it('deselects one ingredient then submits with only selected', () => {

@@ -449,12 +449,11 @@ describe('DishEditModal', () => {
     expect(screen.queryByText('Tạo nguyên liệu mới')).not.toBeInTheDocument();
   });
 
-  it('renders quick-add form inputs for name and override toggle', () => {
+  it('renders quick-add form inputs for name', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     expect(screen.getByTestId('input-qa-name')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-toggle-name-override')).toBeInTheDocument();
   });
 
   it('renders nutrition inputs in quick-add form', () => {
@@ -509,7 +508,7 @@ describe('DishEditModal', () => {
     expect(screen.getByText('Bột mì')).toBeInTheDocument();
   });
 
-  it('quick-add uses primary name for other language when override is empty', () => {
+  it('quick-add uses primary name for both languages', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
@@ -517,19 +516,6 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
     // Should be added and visible
-    expect(screen.getByText('Đậu phộng')).toBeInTheDocument();
-  });
-
-  it('quick-add allows filling override name via collapsible field', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
-    fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
-
-    fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Đậu phộng' } });
-    // Expand the override field
-    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
-    fireEvent.change(screen.getByTestId('input-qa-name-other'), { target: { value: 'Peanut' } });
-    fireEvent.click(screen.getByTestId('btn-qa-submit'));
-
     expect(screen.getByText('Đậu phộng')).toBeInTheDocument();
   });
 
@@ -659,30 +645,12 @@ describe('DishEditModal', () => {
 
     fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Bột mì' } });
     fireEvent.change(screen.getByLabelText('Cal / 100g'), { target: { value: '364' } });
-    // Expand override
-    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
-    expect(screen.getByTestId('input-qa-name-other')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
-    // Re-open quick-add — fields should be reset and override collapsed
+    // Re-open quick-add — fields should be reset
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
     expect(screen.getByTestId('input-qa-name')).toHaveValue('');
     expect(screen.getByLabelText('Cal / 100g')).toHaveValue(null);
-    expect(screen.queryByTestId('input-qa-name-other')).not.toBeInTheDocument();
-  });
-
-  it('toggles name override field visibility', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
-
-    // Override field not visible initially
-    expect(screen.queryByTestId('input-qa-name-other')).not.toBeInTheDocument();
-    // Click toggle to show
-    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
-    expect(screen.getByTestId('input-qa-name-other')).toBeInTheDocument();
-    // Click toggle to hide
-    fireEvent.click(screen.getByTestId('btn-toggle-name-override'));
-    expect(screen.queryByTestId('input-qa-name-other')).not.toBeInTheDocument();
   });
 
   it('calls onCreateIngredient for quick-added ingredients on dish save', () => {
