@@ -1,7 +1,7 @@
 # Data Model — Smart Meal Planner
 
-**Version:** 1.0  
-**Date:** 2026-03-06  
+**Version:** 1.1  
+**Date:** 2026-03-08  
 **Source of truth:** `src/types.ts`
 
 ---
@@ -117,6 +117,34 @@ type UserProfile = {
 
 **Defaults:** `{ weight: 83, proteinRatio: 2, targetCalories: 1500 }`
 
+### 1.6 MealTemplate
+
+Mẫu kế hoạch bữa ăn, lưu trữ trong localStorage để tái sử dụng.
+
+```typescript
+type MealTemplate = {
+  id: string;
+  name: string;
+  breakfastDishIds: string[];
+  lunchDishIds: string[];
+  dinnerDishIds: string[];
+  createdAt: string;
+};
+```
+
+### 1.7 FilterConfig
+
+Cấu hình lọc và sắp xếp danh sách nguyên liệu/món ăn.
+
+```typescript
+interface FilterConfig {
+  sortBy: 'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc';
+  maxCalories?: number;
+  minProtein?: number;
+  tags?: string[];
+}
+```
+
 ---
 
 ## 2. Derived / Computed Types (không persist)
@@ -214,6 +242,23 @@ type IngredientSuggestion = {
 };
 ```
 
+### 3.4 SuggestedDishIngredient (Gemini → App)
+
+Nguyên liệu được AI gợi ý thêm vào món ăn, bao gồm thông tin dinh dưỡng đầy đủ.
+
+```typescript
+type SuggestedDishIngredient = {
+  name: string;
+  amount: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+};
+```
+
 ---
 
 ## 4. Entity Relationship Diagram
@@ -282,6 +327,16 @@ LSt = LocalizedString { vi: string, en: string }
 | v1 | `breakfastId: string` (singular) |
 | v2 | `breakfastDishIds: string[]` (array) |
 
+### 5.4 Migration Functions (`dataService.ts`)
+
+Ba hàm migration chạy tự động khi đọc dữ liệu từ localStorage:
+
+| Function | Mô tả |
+|----------|-------|
+| `migrateIngredients(ingredients: unknown[]): Ingredient[]` | Lọc dữ liệu invalid, chuyển `name` và `unit` sang `LocalizedString` qua `toLocalized()` |
+| `migrateDishes(dishes: unknown[]): Dish[]` | Lọc dữ liệu invalid, chuyển `name` sang `LocalizedString`, đảm bảo `tags` tồn tại (default: `['lunch']`) |
+| `migrateDayPlans(plans: unknown[]): DayPlan[]` | Chuyển đổi format cũ (singular dishId) sang format mới (dishIds arrays), tạo empty plan nếu format không nhận diện được |
+
 ---
 
 ## 6. localStorage Keys
@@ -292,6 +347,8 @@ LSt = LocalizedString { vi: string, en: string }
 | `mp-dishes` | `Dish[]` | Thư viện món ăn |
 | `mp-day-plans` | `DayPlan[]` | Kế hoạch bữa ăn (sparse — chỉ lưu ngày có plan) |
 | `mp-user-profile` | `UserProfile` | Mục tiêu dinh dưỡng cá nhân |
+| `mp-templates` | `MealTemplate[]` | Meal plan templates để tái sử dụng |
+| `mp-translate-queue` | `TranslateQueueState` | Zustand-persisted translation queue (pending/running jobs) |
 | `i18nextLng` | `string` | Ngôn ngữ hiện tại (managed by i18next) |
 | `theme` | `'light'\|'dark'\|'system'` | Theme (managed by useDarkMode) |
 

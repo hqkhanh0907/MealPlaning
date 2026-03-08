@@ -1,8 +1,8 @@
 # SAD — System Architecture Document
 
 **Project:** Smart Meal Planner  
-**Version:** 1.1  
-**Date:** 2026-03-07
+**Version:** 1.2  
+**Date:** 2026-03-08
 
 ---
 
@@ -79,6 +79,7 @@ components/
 ├── SettingsTab.tsx        # Cài đặt
 ├── Summary.tsx            # Tổng hợp dinh dưỡng ngày
 ├── DateSelector.tsx       # Thanh chọn ngày (week view)
+├── QuickPreviewPanel.tsx  # Panel xem nhanh chi tiết món ăn
 ├── ImageCapture.tsx       # Camera / file input
 ├── DataBackup.tsx         # Export/Import
 │
@@ -87,9 +88,12 @@ components/
 │   ├── DishEditModal.tsx         # Form CRUD món ăn
 │   ├── MealPlannerModal.tsx      # Lập kế hoạch bữa ăn (tabs: sáng/trưa/tối)
 │   ├── AISuggestionPreviewModal.tsx  # Preview gợi ý AI
+│   ├── AISuggestIngredientsPreview.tsx # Preview gợi ý nguyên liệu cho món ăn
 │   ├── SaveAnalyzedDishModal.tsx     # Lưu kết quả phân tích ảnh
 │   ├── GoalSettingsModal.tsx         # Mục tiêu dinh dưỡng
 │   ├── ClearPlanModal.tsx            # Xoá kế hoạch
+│   ├── CopyPlanModal.tsx            # Copy kế hoạch bữa ăn sang ngày khác
+│   ├── TemplateManager.tsx          # Quản lý CRUD meal templates
 │   └── ConfirmationModal.tsx         # Dialog xác nhận
 │
 ├── navigation/
@@ -103,12 +107,13 @@ components/
     ├── UnsavedChangesDialog.tsx  # Dialog cảnh báo thay đổi chưa lưu
     ├── ListToolbar.tsx       # Toolbar tìm kiếm + nút thêm
     ├── DetailModal.tsx       # Modal xem chi tiết đọc-chỉ
+    ├── FilterBottomSheet.tsx # Bottom sheet lọc/sắp xếp danh sách
     └── EmptyState.tsx        # Placeholder khi danh sách trống
 ```
 
 ### 2.2 State Management
 
-Không dùng global state (Redux/Zustand). State tập trung tại `App.tsx` và được truyền xuống qua props.
+Không dùng global state (Redux/Zustand) cho UI state chính. State tập trung tại `App.tsx` và được truyền xuống qua props. **Ngoại lệ:** `translateQueueService` sử dụng Zustand store với `persist` middleware cho translation queue (localStorage key: `mp-translate-queue`).
 
 ```
 App.tsx
@@ -161,6 +166,9 @@ Chứa business logic thuần túy (pure functions), không có side effects.
 | `useModalBackHandler` | Handle Android hardware back button trong modal |
 | `useTranslateWorker` | Khởi tạo + communicate với translate Web Worker |
 | `useTranslateProcessor` | Queue management: enqueue items cần dịch |
+| `useCopyPlan` | Logic copy kế hoạch bữa ăn sang ngày khác |
+| `useMealTemplate` | Template CRUD (tạo, đọc, cập nhật, xoá meal templates) |
+| `useIsDesktop` | Responsive breakpoint detection (desktop vs mobile) |
 
 ### 2.6 Utilities (`src/utils/`)
 
@@ -372,7 +380,7 @@ App.tsx
 | localStorage-only (không backend) | Zero cost, offline-first, privacy | [ADR-001](../adr/001-local-storage-only.md) |
 | Google Gemini API | Multimodal, Google Search tool, structured output | [ADR-002](../adr/002-gemini-ai-integration.md) |
 | react-i18next | Ecosystem mature, interpolation, TypeScript support | [ADR-003](../adr/003-i18n-with-i18next.md) |
-| State tại App.tsx (không Zustand) | App nhỏ, tránh over-engineering |
+| State tại App.tsx (Zustand chỉ cho translate queue) | App nhỏ, tránh over-engineering; translate queue cần persist độc lập |
 | Pure functions trong services | Dễ unit test, không side effects |
 | Web Worker cho translation | UI thread không bị block khi dịch |
 | Lazy loading GroceryList + AI tab | Giảm initial bundle size |
@@ -392,3 +400,14 @@ Architecture validated through **183 E2E tests** and **866 unit tests**. The fol
 | MealPlannerModal unified planning | Replaced 2-step TypeSelection → Planning flow with single MealPlannerModal (internal tabs: breakfast/lunch/dinner). `openTypeSelection()` now finds first empty slot and opens MealPlannerModal directly |
 
 **Key architectural change:** `TypeSelectionModal` was removed from the codebase. The `openTypeSelection()` function in `App.tsx` now checks empty meal slots in the current day plan and opens `MealPlannerModal` with the first empty slot as `initialTab`, enabling users to plan all meals (breakfast/lunch/dinner) in a single session.
+
+---
+
+## 10. Cross-References
+
+| Tài liệu | Đường dẫn |
+|-----------|-----------|
+| Scenario Analysis & Test Cases | [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md) |
+| UX Improvement Research | [ux-improvement-research.md](../ux-improvement-research.md) |
+| Data Model | [data-model.md](data-model.md) |
+| Sequence Diagrams | [sequence-diagrams.md](sequence-diagrams.md) |

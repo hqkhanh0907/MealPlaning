@@ -1,7 +1,7 @@
 # Use Cases — Smart Meal Planner
 
-**Version:** 1.0  
-**Date:** 2026-03-06
+**Version:** 1.1  
+**Date:** 2026-03-08
 
 ---
 
@@ -223,6 +223,22 @@ Nguyên liệu mới xuất hiện trong danh sách, có thể dùng trong món 
 5. User nhấn "Áp dụng" → System cập nhật kế hoạch ngày đang chọn
 6. System chỉ ghi đè slots AI đề xuất, giữ nguyên các slot AI để trống
 
+### Response Format
+
+AI trả về `MealPlanSuggestion` type:
+
+```typescript
+interface MealPlanSuggestion {
+  breakfastDishIds: string[];  // IDs món sáng được gợi ý
+  lunchDishIds: string[];      // IDs món trưa được gợi ý
+  dinnerDishIds: string[];     // IDs món tối được gợi ý
+  reasoning: string;           // Giải thích lý do chọn các món
+}
+```
+
+### Cross-references
+- Test cases: TC_AIS_01–TC_AIS_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+
 ---
 
 ## UC-11: Cài đặt mục tiêu dinh dưỡng
@@ -259,7 +275,109 @@ Nguyên liệu mới xuất hiện trong danh sách, có thể dùng trong món 
 
 ### Main Flow
 1. Khi User lưu nguyên liệu/món ăn chỉ có tên VI mà không có EN (hoặc ngược lại)
-2. System enqueue task vào `translateQueueService`
-3. Background Web Worker (`translate.worker.ts`) xử lý với OPUS model (offline)
-4. Worker dịch xong → `updateTranslatedField()` cập nhật tên ngôn ngữ kia
-5. Quá trình dịch diễn ra hoàn toàn trong nền, user không cần theo dõi trạng thái
+2. System tra cứu `foodDictionary.ts` (static dictionary 200+ entries) — nếu có kết quả, dùng ngay (O(1) lookup, ~0ms)
+3. Nếu dictionary không có kết quả → System enqueue task vào `translateQueueService`
+4. Background Web Worker (`translate.worker.ts`) xử lý với OPUS model (offline)
+5. Worker dịch xong → `updateTranslatedField()` cập nhật tên ngôn ngữ kia
+6. Quá trình dịch diễn ra hoàn toàn trong nền, user không cần theo dõi trạng thái
+
+> **Note:** Bước 2 (dictionary lookup) diễn ra tại save-time, trước khi gọi Worker fallback. Xem [ADR-004](../adr/004-food-dictionary-instant-translation.md) cho chi tiết kiến trúc.
+
+### Cross-references
+- Test cases: TC_TRN_01–TC_TRN_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+
+---
+
+## UC-14: Copy Plan — Sao chép kế hoạch bữa ăn
+
+**Actor:** User  
+**Trigger:** User nhấn nút Copy trên Calendar tab  
+**Precondition:** Ngày đang chọn có ít nhất 1 món ăn trong bất kỳ slot nào
+
+### Main Flow
+1. User nhấn nút "Copy" trên Calendar tab
+2. System mở `CopyPlanModal` hiển thị calendar multi-select
+3. User chọn một hoặc nhiều ngày đích
+4. System hiển thị preview: ngày nguồn → danh sách ngày đích
+5. User nhấn "Xác nhận"
+6. System gọi `useCopyPlan` hook → sao chép toàn bộ 3 slots (sáng/trưa/tối) từ ngày nguồn sang các ngày đích
+7. System persist kế hoạch mới vào `localStorage` (`mp-day-plans`)
+8. System hiển thị toast success: "Đã copy kế hoạch sang X ngày"
+
+### Alternative Flows
+- **A1: Ngày đích đã có kế hoạch** — System ghi đè (overwrite) toàn bộ slots của ngày đích
+- **A2: Không chọn ngày đích** — Nút "Xác nhận" bị disable
+- **A3: Copy sang nhiều ngày (tối đa 7)** — Xử lý batch, cùng một lần persist
+
+### Postcondition
+Các ngày đích có cùng kế hoạch bữa ăn như ngày nguồn. Tổng dinh dưỡng tự động tính lại cho mỗi ngày đích.
+
+### Cross-references
+- Test cases: TC_CPY_01–TC_CPY_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+
+---
+
+## UC-15: Template Management — Quản lý template bữa ăn
+
+**Actor:** User  
+**Trigger:** User nhấn nút Template trên Calendar tab
+
+### Main Flow — Lưu Template
+1. User nhấn nút "Lưu Template" khi ngày đang chọn có kế hoạch
+2. System mở dialog nhập tên template
+3. User nhập tên, nhấn "Lưu"
+4. System lưu template gồm: tên, 3 slots (sáng/trưa/tối) với dish IDs
+5. System persist vào `localStorage` (`mp-meal-templates`) thông qua `useMealTemplate` hook
+6. System hiển thị toast success
+
+### Main Flow — Áp dụng Template
+1. User nhấn nút "Template" → System hiển thị danh sách templates đã lưu
+2. User chọn một template
+3. System hiển thị preview nội dung template
+4. User nhấn "Áp dụng"
+5. System ghi đè kế hoạch ngày đang chọn bằng nội dung template
+6. System persist và tính lại tổng dinh dưỡng
+
+### Alternative Flows
+- **A1: Đổi tên template** — User nhấn icon edit → nhập tên mới → System cập nhật
+- **A2: Xoá template** — User nhấn icon delete → confirm → System xoá template
+- **A3: Danh sách rỗng** — Hiển thị empty state: "Chưa có template nào"
+
+### Postcondition
+Template được lưu/áp dụng/xoá thành công. Kế hoạch bữa ăn được cập nhật nếu áp dụng template.
+
+### Cross-references
+- Test cases: TC_TMP_01–TC_TMP_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+- Liên quan: TC_SVT_01–TC_SVT_20 (Save Template flow)
+
+---
+
+## UC-16: AI Gợi ý Nguyên liệu cho Món ăn
+
+**Actor:** User, Gemini AI  
+**Trigger:** User nhấn nút "AI" trong `DishEditModal`  
+**Precondition:** Đã nhập tên món ăn, đã có `GEMINI_API_KEY`
+
+### Main Flow
+1. User mở `DishEditModal` và nhập tên món ăn
+2. User nhấn nút "AI Gợi ý nguyên liệu"
+3. System gọi `suggestIngredientsForDish(dishName)` gửi tên món lên Gemini API
+4. Gemini API phân tích → trả về danh sách nguyên liệu kèm khối lượng gợi ý và thông tin dinh dưỡng
+5. System hiển thị preview danh sách nguyên liệu với checkbox cho từng item
+6. User xem, chỉnh sửa, bỏ chọn nguyên liệu không mong muốn
+7. User nhấn "Áp dụng"
+8. System kiểm tra từng nguyên liệu: nếu chưa tồn tại → tạo `Ingredient` mới
+9. System thêm các nguyên liệu đã chọn vào form `DishEditModal`
+10. System tính lại tổng dinh dưỡng món ăn realtime
+
+### Alternative Flows
+- **A1: Tên món trống** — Nút AI bị disable, hiển thị tooltip "Nhập tên món trước"
+- **A2: Timeout (>30s)** — Toast error "Gợi ý nguyên liệu thất bại — vui lòng thử lại"
+- **A3: Network error** — Toast warning với nút retry
+- **A4: User bỏ chọn tất cả** — Nút "Áp dụng" bị disable
+
+### Postcondition
+Nguyên liệu được gợi ý bởi AI đã được thêm vào form món ăn. Nguyên liệu mới (nếu có) đã được tạo trong hệ thống.
+
+### Cross-references
+- Test cases: TC_AIA_01–TC_AIA_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
