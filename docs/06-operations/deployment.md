@@ -203,7 +203,7 @@ adb shell dumpsys package com.google.android.webview | grep versionName
 
 ### AI không hoạt động
 
-1. Kiểm tra `VITE_GEMINI_API_KEY` đã được embed trong build
+1. Kiểm tra `GEMINI_API_KEY` đã được embed trong build (qua Vite `define` config, **không** dùng prefix `VITE_`)
 2. Kiểm tra thiết bị có kết nối internet
 3. Xem logs: `adb logcat | grep -i gemini`
 

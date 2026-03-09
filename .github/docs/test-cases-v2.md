@@ -1,5 +1,7 @@
 # TEST CASES V2 — Smart Meal Planner (Phân tích toàn diện)
 
+> ⚠️ **SUPERSEDED**: Tài liệu này đã được thay thế bởi phiên bản v2.0 (799 TCs) tại [docs/04-testing/scenario-analysis-and-testcases.md](../../docs/04-testing/scenario-analysis-and-testcases.md).
+
 > **Phiên bản:** 2.13  
 > **Ngày cập nhật:** 2026-03-02  
 > **Tổng TC:** 330  

@@ -1,11 +1,13 @@
 # Test Cases — Smart Meal Planner
 
-**Version:** 5.0  
-**Date:** 2026-03-07  
+**Version:** 6.0  
+**Date:** 2026-03-09  
 
-> **v5.0**: QA Cycle 4 — Dark mode visual audit via Chrome DevTools. Added TC_DM (Dark Mode) test cases. Unit tests 866→995 (47 files). BUG-DM-001 fixed. Xem [Changelog](#changelog).
+> **v6.0**: QA Cycle 5 — Comprehensive scenario expansion. Unit tests 995→1046 (49 files). Coverage 99.53% Stmts, 92.30% Branch. Xem [Changelog](#changelog).
 >
-> **Xem thêm:** Scenario-based test cases chi tiết (323 TCs, 15 scenarios): [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md)
+> **v5.0**: QA Cycle 4 — Dark mode visual audit via Chrome DevTools. Added TC_DM (Dark Mode) test cases. Unit tests 866→995 (47 files). BUG-DM-001 fixed.
+>
+> **Xem thêm:** Scenario-based test cases chi tiết (799 TCs, 15 scenarios × 50+ TCs): [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md)
 
 ---
 

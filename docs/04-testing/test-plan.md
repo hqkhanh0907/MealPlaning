@@ -218,7 +218,7 @@ E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua l
 
 > **Tham khảo:** Xem [coding-guidelines.md](../03-developer-guide/coding-guidelines.md) để mitigate coding-related risks.
 >
-> **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 323 test cases across 15 scenarios.
+> **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 799 test cases across 15 scenarios (v2.0, mỗi scenario 50+ TCs).
 
 ---
 

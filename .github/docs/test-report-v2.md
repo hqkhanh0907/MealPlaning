@@ -1,5 +1,7 @@
 # TEST REPORT V2 — Smart Meal Planner
 
+> ⚠️ **SUPERSEDED**: Tài liệu này đã được thay thế. Xem phiên bản chính tại [docs/04-testing/test-report.md](../../docs/04-testing/test-report.md).
+
 > **Ngày:** 2026-03-02 | **Env:** localhost:3000 | **Tool:** Chrome DevTools MCP + Vitest | **TC Doc:** test-cases-v2.13
 
 ---

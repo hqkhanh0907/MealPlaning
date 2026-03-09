@@ -256,7 +256,7 @@
 
 ## 6. Tài liệu liên quan
 
-- **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 323 test cases across 15 scenarios
+- **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 799 test cases across 15 scenarios (v2.0)
 - **Test Plan:** [test-plan.md](test-plan.md)
 - **Test Cases (manual QA):** [test-cases.md](test-cases.md)
 - **E2E Setup:** [e2e-setup.md](e2e-setup.md)

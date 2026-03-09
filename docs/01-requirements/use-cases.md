@@ -237,7 +237,7 @@ interface MealPlanSuggestion {
 ```
 
 ### Cross-references
-- Test cases: TC_AIS_01–TC_AIS_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+- Test cases: TC_AIS_01–TC_AIS_55 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
 
 ---
 
@@ -284,7 +284,7 @@ interface MealPlanSuggestion {
 > **Note:** Bước 2 (dictionary lookup) diễn ra tại save-time, trước khi gọi Worker fallback. Xem [ADR-004](../adr/004-food-dictionary-instant-translation.md) cho chi tiết kiến trúc.
 
 ### Cross-references
-- Test cases: TC_TRN_01–TC_TRN_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+- Test cases: TC_TRN_01–TC_TRN_52 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
 
 ---
 
@@ -313,7 +313,7 @@ interface MealPlanSuggestion {
 Các ngày đích có cùng kế hoạch bữa ăn như ngày nguồn. Tổng dinh dưỡng tự động tính lại cho mỗi ngày đích.
 
 ### Cross-references
-- Test cases: TC_CPY_01–TC_CPY_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+- Test cases: TC_CPY_01–TC_CPY_52 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
 
 ---
 
@@ -347,8 +347,8 @@ Các ngày đích có cùng kế hoạch bữa ăn như ngày nguồn. Tổng di
 Template được lưu/áp dụng/xoá thành công. Kế hoạch bữa ăn được cập nhật nếu áp dụng template.
 
 ### Cross-references
-- Test cases: TC_TMP_01–TC_TMP_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
-- Liên quan: TC_SVT_01–TC_SVT_20 (Save Template flow)
+- Test cases: TC_TMP_01–TC_TMP_52 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+- Liên quan: TC_SVT_01–TC_SVT_52 (Save Template flow)
 
 ---
 
@@ -380,4 +380,4 @@ Template được lưu/áp dụng/xoá thành công. Kế hoạch bữa ăn đư
 Nguyên liệu được gợi ý bởi AI đã được thêm vào form món ăn. Nguyên liệu mới (nếu có) đã được tạo trong hệ thống.
 
 ### Cross-references
-- Test cases: TC_AIA_01–TC_AIA_21 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+- Test cases: TC_AIA_01–TC_AIA_55 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)

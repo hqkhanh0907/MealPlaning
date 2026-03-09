@@ -1,5 +1,7 @@
 # TEST REPORT — Smart Meal Planner v1.0
 
+> ⚠️ **DEPRECATED**: Tài liệu này là phiên bản cũ (v1.0, 41 TCs). Xem phiên bản chính tại [docs/04-testing/test-report.md](../../docs/04-testing/test-report.md).
+
 ## Thông tin chung
 
 | Mục | Chi tiết |
