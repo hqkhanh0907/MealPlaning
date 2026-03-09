@@ -7,6 +7,7 @@ export const useModalManager = () => {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isCopyPlanOpen, setIsCopyPlanOpen] = useState(false);
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
+  const [isSaveTemplateOpen, setIsSaveTemplateOpen] = useState(false);
   const [planningType, setPlanningType] = useState<MealType | null>(null);
 
   const closeAll = useCallback(() => {
@@ -15,6 +16,7 @@ export const useModalManager = () => {
     setIsGoalModalOpen(false);
     setIsCopyPlanOpen(false);
     setIsTemplateManagerOpen(false);
+    setIsSaveTemplateOpen(false);
   }, []);
 
   const openMealPlanner = useCallback((type: MealType) => {
@@ -37,12 +39,16 @@ export const useModalManager = () => {
   const openTemplateManager = useCallback(() => { closeAll(); setIsTemplateManagerOpen(true); }, [closeAll]);
   const closeTemplateManager = useCallback(() => setIsTemplateManagerOpen(false), []);
 
+  const openSaveTemplate = useCallback(() => { closeAll(); setIsSaveTemplateOpen(true); }, [closeAll]);
+  const closeSaveTemplate = useCallback(() => setIsSaveTemplateOpen(false), []);
+
   return {
     isMealPlannerOpen,
     isClearPlanModalOpen,
     isGoalModalOpen,
     isCopyPlanOpen,
     isTemplateManagerOpen,
+    isSaveTemplateOpen,
     planningType,
     openMealPlanner,
     closeMealPlanner,
@@ -54,5 +60,7 @@ export const useModalManager = () => {
     closeCopyPlanModal,
     openTemplateManager,
     closeTemplateManager,
+    openSaveTemplate,
+    closeSaveTemplate,
   };
 };

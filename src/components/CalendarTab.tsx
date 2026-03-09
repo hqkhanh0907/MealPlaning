@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, UtensilsCrossed, BarChart3 } from 'lucide-react';
 import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary } from '../types';
@@ -30,18 +30,35 @@ export interface CalendarTabProps {
   onCopyPlan?: () => void;
   onSaveTemplate?: () => void;
   onOpenTemplateManager?: () => void;
+  onQuickAdd?: (type: MealType, dishId: string) => void;
 }
 
 export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
   selectedDate, onSelectDate, dayPlans, dishes, ingredients: _ingredients,
   currentPlan: _currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
   isSuggesting, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
-  onCopyPlan, onSaveTemplate, onOpenTemplateManager,
+  onCopyPlan, onSaveTemplate, onOpenTemplateManager, onQuickAdd,
 }) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   const [activeSubTab, setActiveSubTab] = useState<ScheduleSubTab>('meals');
   const isDesktop = useIsDesktop();
+
+  const recentDishIds = useMemo(() => {
+    const today = selectedDate;
+    const allIds: string[] = [];
+    const sorted = [...dayPlans]
+      .filter(p => p.date <= today)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 14);
+    for (const plan of sorted) {
+      for (const id of [...plan.breakfastDishIds, ...plan.lunchDishIds, ...plan.dinnerDishIds]) {
+        if (!allIds.includes(id)) allIds.push(id);
+      }
+      if (allIds.length >= 8) break;
+    }
+    return allIds.slice(0, 8);
+  }, [dayPlans, selectedDate]);
 
   const SUB_TABS: { key: ScheduleSubTab; label: string; icon: React.ReactNode }[] = [
     { key: 'meals', label: t('schedule.mealsTab'), icon: <UtensilsCrossed className="w-4 h-4" /> },
@@ -102,6 +119,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               onSaveTemplate={onSaveTemplate}
               onOpenTemplateManager={onOpenTemplateManager}
               onSwitchToNutrition={() => setActiveSubTab('nutrition')}
+              recentDishIds={recentDishIds}
+              onQuickAdd={onQuickAdd}
             />
           )}
           {activeSubTab === 'nutrition' && (
@@ -135,6 +154,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               onSaveTemplate={onSaveTemplate}
               onOpenTemplateManager={onOpenTemplateManager}
               onSwitchToNutrition={() => setActiveSubTab('nutrition')}
+              recentDishIds={recentDishIds}
+              onQuickAdd={onQuickAdd}
             />
           </div>
           <div>

@@ -497,6 +497,34 @@ describe('DishManager', () => {
     fireEvent.click(screen.getByText('Lưu món ăn'));
     expect(defaultProps.onAdd).toHaveBeenCalled();
   });
+
+  it('clones a dish in grid view', () => {
+    render(<DishManager {...defaultProps} />);
+    const cloneBtn = screen.getByTestId('btn-clone-dish-d1');
+    fireEvent.click(cloneBtn);
+    expect(defaultProps.onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ingredients: expect.any(Array),
+        tags: expect.any(Array),
+      })
+    );
+  });
+
+  it('clones a dish in list view (desktop)', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const cloneBtns = screen.getAllByTestId('btn-clone-dish-d1');
+    fireEvent.click(cloneBtns[0]);
+    expect(defaultProps.onAdd).toHaveBeenCalled();
+  });
+
+  it('clones a dish in mobile list view', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const cloneBtns = screen.getAllByTestId('btn-clone-dish-d1');
+    fireEvent.click(cloneBtns.at(-1)!);
+    expect(defaultProps.onAdd).toHaveBeenCalled();
+  });
 });
 
 // --- IngredientManager ---

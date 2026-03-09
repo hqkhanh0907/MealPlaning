@@ -1,12 +1,16 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Copy, Plus, Trash2 } from 'lucide-react';
+import { X, Copy, Plus, Trash2, ChefHat } from 'lucide-react';
+import { DayPlan, Dish, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { parseLocalDate } from '../../utils/helpers';
 
 interface CopyPlanModalProps {
   sourceDate: string;
+  sourcePlan: DayPlan;
+  dishes: Dish[];
   onCopy: (targetDates: string[]) => void;
   onClose: () => void;
 }
@@ -23,8 +27,9 @@ const addDays = (dateStr: string, days: number): string => {
   return `${y}-${m}-${day}`;
 };
 
-export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, onCopy, onClose }) => {
+export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, sourcePlan, dishes, onCopy, onClose }) => {
   const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   useModalBackHandler(true, onClose);
 
@@ -91,6 +96,40 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, onCopy
         </div>
 
         <div className="p-6 sm:p-8 space-y-5 overflow-y-auto">
+          {/* Source plan preview */}
+          {(() => {
+            const getDishNames = (ids: string[]): string[] => ids.map(id => dishes.find(d => d.id === id)).filter(Boolean).map(d => getLocalizedField(d!.name, lang));
+            const breakfast = getDishNames(sourcePlan.breakfastDishIds);
+            const lunch = getDishNames(sourcePlan.lunchDishIds);
+            const dinner = getDishNames(sourcePlan.dinnerDishIds);
+            const total = breakfast.length + lunch.length + dinner.length;
+            if (total === 0) return null;
+            const sections = [
+              { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-amber-600 dark:text-amber-400' },
+              { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-blue-600 dark:text-blue-400' },
+              { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-indigo-600 dark:text-indigo-400' },
+            ];
+            return (
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{t('copyPlan.sourcePreview')}</p>
+                <div className="space-y-1.5">
+                  {sections.filter(s => s.items.length > 0).map(({ key, label, items, color }) => (
+                    <div key={key} className="flex items-start gap-2">
+                      <span className={`text-xs font-bold ${color} min-w-14`}>{label}:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {items.map((name, idx) => (
+                          <span key={idx} className="inline-flex items-center gap-0.5 text-xs text-slate-600 dark:text-slate-300">
+                            <ChefHat className="w-3 h-3" />{name}{idx < items.length - 1 ? ',' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Quick select buttons */}
           <div className="flex gap-2">
             <button

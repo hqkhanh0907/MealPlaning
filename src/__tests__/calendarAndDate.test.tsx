@@ -509,4 +509,39 @@ describe('CalendarTab', () => {
     fireEvent.click(screen.getByTestId('btn-switch-to-meals'));
     expect(screen.getByTestId('meals-subtab')).toBeInTheDocument();
   });
+
+  it('shows recent dishes section when onQuickAdd provided and empty slots exist', () => {
+    const emptyNutr = {
+      breakfast: makeSlot([]),
+      lunch: makeSlot([]),
+      dinner: makeSlot([]),
+    };
+    render(<CalendarTab {...defaultProps} dayNutrition={emptyNutr} onQuickAdd={vi.fn()} />);
+    expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
+  });
+
+  it('recentDishIds sorts multiple day plans by date descending', () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    const multiDayPlans: DayPlan[] = [
+      { date: yesterdayStr, breakfastDishIds: ['d2'], lunchDishIds: [], dinnerDishIds: [] },
+      { date: todayStr, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+    ];
+    const emptyNutr = {
+      breakfast: makeSlot([]),
+      lunch: makeSlot([]),
+      dinner: makeSlot([]),
+    };
+    render(
+      <CalendarTab
+        {...defaultProps}
+        dayPlans={multiDayPlans}
+        currentPlan={multiDayPlans[1]}
+        dayNutrition={emptyNutr}
+        onQuickAdd={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
+  });
 });

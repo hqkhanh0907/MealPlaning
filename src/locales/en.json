@@ -184,7 +184,11 @@
     "aiSuggestCancel": "Cancel",
     "aiSuggestEmpty": "No matching ingredients found",
     "aiSuggestError": "Could not suggest, please try again",
-    "aiSuggestNameRequired": "Please enter dish name first"
+    "aiSuggestNameRequired": "Please enter dish name first",
+    "clone": "Clone",
+    "cloned": "Dish cloned",
+    "clonedDesc": "\"{{name}}\" has been duplicated",
+    "copySuffix": "(copy)"
   },
   "ingredient": {
     "title": "Ingredient",
@@ -341,7 +345,11 @@
     "scopeDayDesc": "Only clear the selected day's plan",
     "scopeWeekDesc": "Clear plans for 7 days in the current week",
     "scopeMonthDesc": "Clear all plans in the current month",
-    "dayCount": "{{count}} days"
+    "dayCount": "{{count}} days",
+    "affectedDates": "Affected dates",
+    "totalMeals": "{{count}} meals will be cleared",
+    "undoMessage": "Plan cleared. Undo?",
+    "undone": "Plan restored"
   },
   "goalSettings": {
     "title": "Nutrition goals",
@@ -407,7 +415,9 @@
     "templateSaved": "Template saved",
     "templateApplied": "Template applied",
     "templateDeleted": "Template deleted",
-    "templateRenamed": "Template renamed"
+    "templateRenamed": "Template renamed",
+    "planCleared": "Plan cleared",
+    "dishAdded": "Dish added"
   },
   "errorBoundary": {
     "defaultTitle": "An error occurred",
@@ -477,7 +487,9 @@
     "confirm": "Copy plan",
     "noSelection": "No dates selected",
     "addDate": "Add date",
-    "remove": "Remove"
+    "remove": "Remove",
+    "sourcePreview": "Source plan preview",
+    "noMeals": "No meals planned"
   },
   "template": {
     "title": "Manage meal templates",
@@ -491,12 +503,23 @@
     "created": "Created",
     "savePrompt": "Enter template name:",
     "copyPlan": "Copy plan",
-    "manageTemplates": "Meal templates"
+    "manageTemplates": "Meal templates",
+    "saveName": "Template name",
+    "saveTitle": "Save as template",
+    "saveSubtitle": "Save current meal plan as reusable template",
+    "namePlaceholder": "e.g. Weekday meals, Keto plan...",
+    "nameRequired": "Please enter a template name",
+    "preview": "Template preview",
+    "mealsCount": "{{count}} dishes",
+    "save": "Save template"
   },
   "schedule": {
     "mealsTab": "Meals",
     "nutritionTab": "Nutrition",
     "quickNutrition": "Quick nutrition",
     "switchToMeals": "Switch to Meals tab to start"
+  },
+  "recentDishes": {
+    "title": "Recently used"
   }
 }

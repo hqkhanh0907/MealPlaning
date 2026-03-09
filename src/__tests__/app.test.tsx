@@ -3,6 +3,14 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import App from '../App';
 import type { Dish, Ingredient } from '../types';
 
+const getLocalToday = () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 // Mock notification context
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
 vi.mock('../contexts/NotificationContext', () => ({
@@ -488,7 +496,7 @@ describe('App', () => {
   it('handleClearPlan clears plans via ClearPlanModal', async () => {
     // Seed a day plan so the clear button is visible
     localStorage.setItem('mp-day-plans', JSON.stringify([{
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalToday(),
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
@@ -507,6 +515,63 @@ describe('App', () => {
     await waitFor(() => screen.getByTestId('clear-plan-modal'));
     fireEvent.click(screen.getByTestId('clear-scope-day'));
     expect(screen.getByRole('tablist')).toBeInTheDocument();
+  });
+
+  it('undo restores plans after clear', async () => {
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: getLocalToday(),
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-clear-plan'));
+    await waitFor(() => screen.getByTestId('clear-plan-modal'));
+    fireEvent.click(screen.getByTestId('clear-scope-day'));
+    // The success notification should have been called with undo action
+    expect(mockNotify.success).toHaveBeenCalled();
+    const lastCall = mockNotify.success.mock.calls[mockNotify.success.mock.calls.length - 1];
+    const options = lastCall[2];
+    expect(options).toBeDefined();
+    expect(options.action).toBeDefined();
+    // Execute the undo callback
+    act(() => { options.action.onClick(); });
+    // Undo should trigger another success notification
+    expect(mockNotify.success).toHaveBeenCalledTimes(mockNotify.success.mock.calls.length);
+  });
+
+  it('handleQuickAdd adds dish to the correct slot', async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    localStorage.setItem('mp-day-plans', JSON.stringify([
+      { date: yesterdayStr, breakfastDishIds: ['quick1'], lunchDishIds: [], dinnerDishIds: [] },
+      { date: getLocalToday(), breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] },
+    ]));
+    localStorage.setItem('mp-dishes', JSON.stringify([
+      { id: 'quick1', name: { vi: 'Quick Dish', en: 'Quick Dish' }, ingredients: [], tags: [] },
+    ]));
+    render(<App />);
+    // Wait for the recent dishes section
+    await waitFor(() => {
+      expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
+    });
+    // Click the recent dish chip - since all 3 slots are empty, a dropdown should appear
+    fireEvent.click(screen.getByTestId('btn-recent-quick1'));
+    // Click the breakfast option from the dropdown
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-quick-add-breakfast-quick1')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-quick-add-breakfast-quick1'));
+    // Should trigger the success notification
+    expect(mockNotify.success).toHaveBeenCalled();
   });
 
   it('handleAnalysisComplete fires notification when called from non-AI tab', async () => {
@@ -595,7 +660,7 @@ describe('App', () => {
   });
 
   it('opens copy plan modal and copies plan', async () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalToday();
     localStorage.setItem('mp-day-plans', JSON.stringify([{
       date: today,
       breakfastDishIds: ['d1'],
@@ -622,23 +687,23 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
   });
 
-  it('saves current plan as template via globalThis.prompt', async () => {
-    const today = new Date().toISOString().split('T')[0];
+  it('saves current plan as template via save template modal', async () => {
+    const today = getLocalToday();
     localStorage.setItem('mp-day-plans', JSON.stringify([{
       date: today,
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
     }]));
-    const originalPrompt = globalThis.prompt;
-    globalThis.prompt = vi.fn().mockReturnValue('My Template');
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-save-template'));
+    await waitFor(() => expect(screen.getByTestId('save-template-modal')).toBeInTheDocument());
+    fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: 'My Template' } });
+    fireEvent.click(screen.getByTestId('btn-save-template'));
     expect(mockNotify.success).toHaveBeenCalled();
-    globalThis.prompt = originalPrompt;
   });
 
   it('meal planner single-tab confirm shows meal-specific notification', async () => {
@@ -674,43 +739,34 @@ describe('App', () => {
   });
 
   it('template manager applies, deletes and renames templates', async () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalToday();
     localStorage.setItem('mp-day-plans', JSON.stringify([{
       date: today,
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
     }]));
-    // First save a template so the manager has data
-    const originalPrompt = globalThis.prompt;
-    globalThis.prompt = vi.fn().mockReturnValue('Test Template');
+    // Pre-seed templates so the manager has data
+    localStorage.setItem('meal-templates', JSON.stringify([
+      { id: 'tpl-1', name: 'Test Template', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+      { id: 'tpl-2', name: 'Template Delete', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+      { id: 'tpl-3', name: 'Template Rename', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+    ]));
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('btn-more-actions'));
-    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(mockNotify.success).toHaveBeenCalled();
-    mockNotify.success.mockClear();
 
-    // Open template manager
+    // Open template manager and apply
     fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
-    // Find the template item — id starts with 'tpl'
     const applyBtns = screen.getAllByText('Áp dụng');
     fireEvent.click(applyBtns[0]);
     expect(mockNotify.success).toHaveBeenCalled();
     mockNotify.success.mockClear();
 
-    // Re-open more-actions menu for save + template manager
+    // Re-open template manager and delete
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('btn-more-actions'));
-    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
-    // First save another template
-    globalThis.prompt = vi.fn().mockReturnValue('Template Delete');
-    fireEvent.click(screen.getByTestId('btn-save-template'));
-    mockNotify.success.mockClear();
     fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
@@ -720,12 +776,7 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
     mockNotify.success.mockClear();
 
-    // Save another template for rename
-    globalThis.prompt = vi.fn().mockReturnValue('Template Rename');
-    fireEvent.click(screen.getByTestId('btn-more-actions'));
-    await waitFor(() => expect(screen.getByTestId('btn-save-template')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('btn-save-template'));
-    mockNotify.success.mockClear();
+    // Re-open template manager and rename
     fireEvent.click(screen.getByTestId('btn-more-actions'));
     await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
@@ -736,6 +787,5 @@ describe('App', () => {
     fireEvent.change(renameInput, { target: { value: 'Renamed Template' } });
     fireEvent.click(screen.getByTestId('template-rename-confirm'));
     expect(mockNotify.success).toHaveBeenCalled();
-    globalThis.prompt = originalPrompt;
   });
 });

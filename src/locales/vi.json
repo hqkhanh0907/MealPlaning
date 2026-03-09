@@ -184,7 +184,11 @@
     "aiSuggestCancel": "Huỷ",
     "aiSuggestEmpty": "Không tìm thấy nguyên liệu phù hợp",
     "aiSuggestError": "Không thể gợi ý, vui lòng thử lại",
-    "aiSuggestNameRequired": "Vui lòng nhập tên món trước"
+    "aiSuggestNameRequired": "Vui lòng nhập tên món trước",
+    "clone": "Nhân bản",
+    "cloned": "Đã nhân bản món",
+    "clonedDesc": "\"{{name}}\" đã được nhân bản",
+    "copySuffix": "(bản sao)"
   },
   "ingredient": {
     "title": "Nguyên liệu",
@@ -339,7 +343,11 @@
     "scopeDayDesc": "Chỉ xóa kế hoạch của ngày đang chọn",
     "scopeWeekDesc": "Xóa kế hoạch 7 ngày trong tuần hiện tại",
     "scopeMonthDesc": "Xóa tất cả kế hoạch trong tháng hiện tại",
-    "dayCount": "{{count}} ngày"
+    "dayCount": "{{count}} ngày",
+    "affectedDates": "Ngày bị ảnh hưởng",
+    "totalMeals": "{{count}} bữa ăn sẽ bị xóa",
+    "undoMessage": "Đã xóa kế hoạch. Hoàn tác?",
+    "undone": "Đã khôi phục kế hoạch"
   },
   "goalSettings": {
     "title": "Mục tiêu dinh dưỡng",
@@ -405,7 +413,9 @@
     "templateSaved": "Đã lưu mẫu",
     "templateApplied": "Đã áp dụng mẫu",
     "templateDeleted": "Đã xóa mẫu",
-    "templateRenamed": "Đã đổi tên mẫu"
+    "templateRenamed": "Đã đổi tên mẫu",
+    "planCleared": "Đã xóa kế hoạch",
+    "dishAdded": "Đã thêm món"
   },
   "errorBoundary": {
     "defaultTitle": "Đã xảy ra lỗi",
@@ -475,7 +485,9 @@
     "confirm": "Copy kế hoạch",
     "noSelection": "Chưa chọn ngày nào",
     "addDate": "Thêm ngày",
-    "remove": "Xóa"
+    "remove": "Xóa",
+    "sourcePreview": "Xem trước kế hoạch nguồn",
+    "noMeals": "Chưa có kế hoạch bữa ăn"
   },
   "template": {
     "title": "Quản lý mẫu bữa ăn",
@@ -489,12 +501,23 @@
     "created": "Tạo lúc",
     "savePrompt": "Nhập tên cho mẫu bữa ăn:",
     "copyPlan": "Copy kế hoạch",
-    "manageTemplates": "Mẫu bữa ăn"
+    "manageTemplates": "Mẫu bữa ăn",
+    "saveName": "Tên template",
+    "saveTitle": "Lưu thành template",
+    "saveSubtitle": "Lưu kế hoạch hiện tại thành template tái sử dụng",
+    "namePlaceholder": "vd: Bữa ăn ngày thường, Kế hoạch Keto...",
+    "nameRequired": "Vui lòng nhập tên template",
+    "preview": "Xem trước template",
+    "mealsCount": "{{count}} món",
+    "save": "Lưu template"
   },
   "schedule": {
     "mealsTab": "Bữa ăn",
     "nutritionTab": "Dinh dưỡng",
     "quickNutrition": "Dinh dưỡng nhanh",
     "switchToMeals": "Chuyển sang tab Bữa ăn để bắt đầu"
+  },
+  "recentDishes": {
+    "title": "Món gần đây"
   }
 }

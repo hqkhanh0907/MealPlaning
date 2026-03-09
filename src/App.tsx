@@ -18,6 +18,7 @@ import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
 import { AISuggestionPreviewModal } from './components/modals/AISuggestionPreviewModal';
 import { CopyPlanModal } from './components/modals/CopyPlanModal';
 import { TemplateManager } from './components/modals/TemplateManager';
+import { SaveTemplateModal } from './components/modals/SaveTemplateModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   Utensils,
@@ -25,6 +26,7 @@ import {
   ShoppingCart,
 } from 'lucide-react';
 import { generateId, parseLocalDate } from './utils/helpers';
+import { getLocalizedField } from './utils/localize';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useAISuggestion } from './hooks/useAISuggestion';
 import { useModalManager } from './hooks/useModalManager';
@@ -50,6 +52,7 @@ import { useTranslateWorker } from './hooks/useTranslateWorker';
 import { useTranslateProcessor } from './hooks/useTranslateProcessor';
 import { useTranslateQueue } from './services/translateQueueService';
 import { lookupFoodTranslation } from './data/foodDictionary';
+import { UNDO_TOAST_DURATION_MS } from './data/constants';
 import type { SupportedLang } from './types';
 
 type ManagementSubTab = 'ingredients' | 'dishes';
@@ -191,13 +194,37 @@ export default function App() {
   }, [aiSuggestion, modals]);
 
   const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month') => {
+    const backup = [...dayPlans];
     setDayPlans(prev => clearPlansByScope(prev, selectedDate, scope));
     modals.closeClearPlan();
-  }, [selectedDate, setDayPlans, modals]);
+    notify.success(t('notification.planCleared'), t('clearPlan.undoMessage'), {
+      duration: UNDO_TOAST_DURATION_MS,
+      action: {
+        label: t('common.undo'),
+        onClick: () => {
+          setDayPlans(backup);
+          notify.success(t('clearPlan.undone'));
+        },
+      },
+    });
+  }, [dayPlans, selectedDate, setDayPlans, modals, notify, t]);
 
   const handleUpdatePlan = useCallback((type: MealType, dishIds: string[]) => {
     setDayPlans(prev => updateDayPlanSlot(prev, selectedDate, type, dishIds));
   }, [selectedDate, setDayPlans]);
+
+  const handleQuickAdd = useCallback((type: MealType, dishId: string) => {
+    setDayPlans(prev => {
+      const existing = prev.find(p => p.date === selectedDate);
+      const slotKey = `${type}DishIds` as const;
+      const currentIds = existing?.[slotKey] ?? [];
+      return updateDayPlanSlot(prev, selectedDate, type, [...currentIds, dishId]);
+    });
+    const dish = dishes.find(d => d.id === dishId);
+    if (dish) {
+      notify.success(t('notification.dishAdded'), getLocalizedField(dish.name, i18n.language as SupportedLang));
+    }
+  }, [selectedDate, setDayPlans, dishes, notify, t, i18n.language]);
 
   const isDishUsed = useCallback((dishId: string) =>
     dayPlans.some(p =>
@@ -241,13 +268,11 @@ export default function App() {
   const openCopyPlan = useCallback(() => modals.openCopyPlanModal(), [modals]);
   const openTemplateManager = useCallback(() => modals.openTemplateManager(), [modals]);
 
-  const handleSaveTemplate = useCallback(() => {
-    const name = globalThis.prompt(t('template.savePrompt'));
-    if (name?.trim()) {
-      mealTemplates.saveTemplate(name.trim(), currentPlan);
-      notify.success(t('notification.templateSaved'));
-    }
-  }, [currentPlan, mealTemplates, notify, t]);
+  const handleSaveTemplate = useCallback((name: string) => {
+    mealTemplates.saveTemplate(name, currentPlan);
+    modals.closeSaveTemplate();
+    notify.success(t('notification.templateSaved'));
+  }, [currentPlan, mealTemplates, modals, notify, t]);
 
   const handleAnalysisComplete = useCallback(() => {
     // c8 ignore next 4
@@ -366,7 +391,8 @@ export default function App() {
             isSuggesting={aiSuggestion.isLoading}
             onOpenTypeSelection={openTypeSelection} onOpenClearPlan={openClearPlan}
             onOpenGoalModal={openGoalModal} onPlanMeal={handlePlanMeal} onSuggestMealPlan={aiSuggestion.startSuggestion}
-            onCopyPlan={openCopyPlan} onSaveTemplate={handleSaveTemplate} onOpenTemplateManager={openTemplateManager}
+            onCopyPlan={openCopyPlan} onSaveTemplate={modals.openSaveTemplate} onOpenTemplateManager={openTemplateManager}
+            onQuickAdd={handleQuickAdd}
           />
           </ErrorBoundary>
         </div>
@@ -456,6 +482,8 @@ export default function App() {
       {modals.isCopyPlanOpen && (
         <CopyPlanModal
           sourceDate={selectedDate}
+          sourcePlan={currentPlan}
+          dishes={dishes}
           onCopy={(targetDates) => {
             copyPlanHook.copyPlan(selectedDate, targetDates);
             modals.closeCopyPlanModal();
@@ -487,6 +515,14 @@ export default function App() {
             notify.success(t('notification.templateRenamed'));
           }}
           onClose={modals.closeTemplateManager}
+        />
+      )}
+      {modals.isSaveTemplateOpen && (
+        <SaveTemplateModal
+          currentPlan={currentPlan}
+          dishes={dishes}
+          onSave={handleSaveTemplate}
+          onClose={modals.closeSaveTemplate}
         />
       )}
 

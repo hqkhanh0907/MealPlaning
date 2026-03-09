@@ -393,6 +393,90 @@ describe('MealsSubTab', () => {
     render(<MealsSubTab {...baseProps} dayNutrition={partial} />);
     expect(screen.getByText(/Bạn còn thiếu.*bữa trưa/)).toBeInTheDocument();
   });
+
+  it('renders recent dishes section when recentDishIds and onQuickAdd provided with empty slots', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot([]),
+      dinner: makeSlot([]),
+    };
+    const onQuickAdd = vi.fn();
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={['d2', 'd4']} onQuickAdd={onQuickAdd} />);
+    expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
+    expect(screen.getByText('Cơm gà')).toBeInTheDocument();
+    expect(screen.getByText('Phở bò')).toBeInTheDocument();
+  });
+
+  it('does not render recent dishes when no empty slots', () => {
+    const onQuickAdd = vi.fn();
+    render(<MealsSubTab {...baseProps} recentDishIds={['d2']} onQuickAdd={onQuickAdd} />);
+    expect(screen.queryByTestId('recent-dishes-section')).not.toBeInTheDocument();
+  });
+
+  it('does not render recent dishes when recentDishIds is empty', () => {
+    const onQuickAdd = vi.fn();
+    const partial: DayNutritionSummary = { breakfast: makeSlot([]), lunch: makeSlot([]), dinner: makeSlot([]) };
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={[]} onQuickAdd={onQuickAdd} />);
+    expect(screen.queryByTestId('recent-dishes-section')).not.toBeInTheDocument();
+  });
+
+  it('quick-adds directly when only one empty slot', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot(['d2'], 600, 30),
+      dinner: makeSlot([]),
+    };
+    const onQuickAdd = vi.fn();
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={['d4']} onQuickAdd={onQuickAdd} />);
+    fireEvent.click(screen.getByTestId('btn-recent-d4'));
+    expect(onQuickAdd).toHaveBeenCalledWith('dinner', 'd4');
+  });
+
+  it('shows meal type dropdown when multiple empty slots', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot([]),
+      lunch: makeSlot([]),
+      dinner: makeSlot(['d3'], 500, 25),
+    };
+    const onQuickAdd = vi.fn();
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={['d4']} onQuickAdd={onQuickAdd} />);
+    fireEvent.click(screen.getByTestId('btn-recent-d4'));
+    expect(screen.getByTestId('btn-quick-add-breakfast-d4')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-quick-add-lunch-d4')).toBeInTheDocument();
+  });
+
+  it('calls onQuickAdd when meal type selected from dropdown', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot([]),
+      lunch: makeSlot([]),
+      dinner: makeSlot(['d3'], 500, 25),
+    };
+    const onQuickAdd = vi.fn();
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={['d4']} onQuickAdd={onQuickAdd} />);
+    fireEvent.click(screen.getByTestId('btn-recent-d4'));
+    fireEvent.click(screen.getByTestId('btn-quick-add-lunch-d4'));
+    expect(onQuickAdd).toHaveBeenCalledWith('lunch', 'd4');
+  });
+
+  it('toggles dropdown off when clicking same dish again', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot([]),
+      lunch: makeSlot([]),
+      dinner: makeSlot(['d3'], 500, 25),
+    };
+    const onQuickAdd = vi.fn();
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={['d4']} onQuickAdd={onQuickAdd} />);
+    fireEvent.click(screen.getByTestId('btn-recent-d4'));
+    expect(screen.getByTestId('btn-quick-add-breakfast-d4')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-recent-d4'));
+    expect(screen.queryByTestId('btn-quick-add-breakfast-d4')).not.toBeInTheDocument();
+  });
+
+  it('does not render recent dishes when onQuickAdd not provided', () => {
+    const partial: DayNutritionSummary = { breakfast: makeSlot([]), lunch: makeSlot([]), dinner: makeSlot([]) };
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} recentDishIds={['d2']} />);
+    expect(screen.queryByTestId('recent-dishes-section')).not.toBeInTheDocument();
+  });
 });
 
 // ─── NutritionSubTab ─────────────────────────────────────────────────

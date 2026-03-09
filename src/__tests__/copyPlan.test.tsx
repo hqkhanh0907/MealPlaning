@@ -76,6 +76,12 @@ describe('useCopyPlan', () => {
 describe('CopyPlanModal', () => {
   const defaultProps = {
     sourceDate: '2025-01-15',
+    sourcePlan: makePlan('2025-01-15'),
+    dishes: [
+      { id: 'd1', name: { vi: 'Món 1', en: 'Dish 1' }, ingredients: [], tags: [] },
+      { id: 'd2', name: { vi: 'Món 2', en: 'Dish 2' }, ingredients: [], tags: [] },
+      { id: 'd3', name: { vi: 'Món 3', en: 'Dish 3' }, ingredients: [], tags: [] },
+    ] as import('../types').Dish[],
     onCopy: vi.fn(),
     onClose: vi.fn(),
   };

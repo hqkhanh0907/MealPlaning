@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
-import { DayNutritionSummary, Dish, MealType } from '../../types';
+import { AlertCircle, CheckCircle2, Plus, Clock } from 'lucide-react';
+import { DayNutritionSummary, Dish, MealType, SupportedLang } from '../../types';
 import { MealSlot } from './MealSlot';
 import { MealActionBar } from './MealActionBar';
 import { MiniNutritionBar } from './MiniNutritionBar';
+import { getLocalizedField } from '../../utils/localize';
 
 export interface MealsSubTabProps {
   dayNutrition: DayNutritionSummary;
@@ -20,6 +21,8 @@ export interface MealsSubTabProps {
   onSaveTemplate?: () => void;
   onOpenTemplateManager?: () => void;
   onSwitchToNutrition: () => void;
+  recentDishIds?: string[];
+  onQuickAdd?: (type: MealType, dishId: string) => void;
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
@@ -29,8 +32,11 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
   targetCalories, targetProtein, isSuggesting,
   onPlanMeal, onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onSwitchToNutrition,
+  recentDishIds, onQuickAdd,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as SupportedLang;
+  const [quickAddDishId, setQuickAddDishId] = useState<string | null>(null);
   const allEmpty = dayNutrition.breakfast.dishIds.length === 0
     && dayNutrition.lunch.dishIds.length === 0
     && dayNutrition.dinner.dishIds.length === 0;
@@ -46,6 +52,32 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
     return missing.join(', ');
   }, [dayNutrition, t]);
 
+  const handleQuickAdd = useCallback((type: MealType, dishId: string) => {
+    onQuickAdd?.(type, dishId);
+    setQuickAddDishId(null);
+  }, [onQuickAdd]);
+
+  const recentDishes = useMemo(() => {
+    if (!recentDishIds?.length) return [];
+    return recentDishIds
+      .map(id => dishes.find(d => d.id === id))
+      .filter(Boolean) as Dish[];
+  }, [recentDishIds, dishes]);
+
+  const emptySlots = useMemo(() => {
+    const slots: MealType[] = [];
+    if (dayNutrition.breakfast.dishIds.length === 0) slots.push('breakfast');
+    if (dayNutrition.lunch.dishIds.length === 0) slots.push('lunch');
+    if (dayNutrition.dinner.dishIds.length === 0) slots.push('dinner');
+    return slots;
+  }, [dayNutrition]);
+
+  const mealTypeLabels: Record<MealType, string> = useMemo(() => ({
+    breakfast: t('calendar.morning'),
+    lunch: t('calendar.afternoon'),
+    dinner: t('calendar.evening'),
+  }), [t]);
+
   return (
     <div data-testid="meals-subtab" className="space-y-4">
       <MealActionBar
@@ -58,6 +90,49 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
         onSaveTemplate={onSaveTemplate}
         onOpenTemplateManager={onOpenTemplateManager}
       />
+
+      {recentDishes.length > 0 && emptySlots.length > 0 && onQuickAdd && (
+        <div data-testid="recent-dishes-section" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-3">
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5" />
+            {t('recentDishes.title')}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {recentDishes.map(dish => (
+              <div key={dish.id} className="relative">
+                <button
+                  data-testid={`btn-recent-${dish.id}`}
+                  onClick={() => {
+                    if (emptySlots.length === 1) {
+                      handleQuickAdd(emptySlots[0], dish.id);
+                    } else {
+                      setQuickAddDishId(prev => prev === dish.id ? null : dish.id);
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 transition-all"
+                >
+                  <Plus className="w-3 h-3 text-emerald-500" />
+                  {getLocalizedField(dish.name, lang)}
+                </button>
+                {quickAddDishId === dish.id && emptySlots.length > 1 && (
+                  <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl shadow-lg z-20 min-w-28 py-1">
+                    {emptySlots.map(type => (
+                      <button
+                        key={type}
+                        data-testid={`btn-quick-add-${type}-${dish.id}`}
+                        onClick={() => handleQuickAdd(type, dish.id)}
+                        className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                      >
+                        {mealTypeLabels[type]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-700">
         {MEAL_TYPES.map((type) => (

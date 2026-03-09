@@ -106,4 +106,25 @@ describe('useModalManager', () => {
     expect(result.current.isCopyPlanOpen).toBe(false);
     expect(result.current.isTemplateManagerOpen).toBe(true);
   });
+
+  it('save template modal opens and closes', () => {
+    const { result } = renderHook(() => useModalManager());
+
+    act(() => result.current.openSaveTemplate());
+    expect(result.current.isSaveTemplateOpen).toBe(true);
+
+    act(() => result.current.closeSaveTemplate());
+    expect(result.current.isSaveTemplateOpen).toBe(false);
+  });
+
+  it('save template modal closes other modals', () => {
+    const { result } = renderHook(() => useModalManager());
+
+    act(() => result.current.openTemplateManager());
+    expect(result.current.isTemplateManagerOpen).toBe(true);
+
+    act(() => result.current.openSaveTemplate());
+    expect(result.current.isTemplateManagerOpen).toBe(false);
+    expect(result.current.isSaveTemplateOpen).toBe(true);
+  });
 });
