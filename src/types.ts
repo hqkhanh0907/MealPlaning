@@ -155,3 +155,20 @@ export interface FilterConfig {
   minProtein?: number;
   tags?: string[];
 }
+
+// --- Auth & Sync Types ---
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  photoUrl: string | null;
+};
+
+export type SyncStatus = 'idle' | 'uploading' | 'downloading' | 'error';
+
+export type SyncMetadata = {
+  lastSyncAt: string | null;
+  syncStatus: SyncStatus;
+  errorMessage: string | null;
+};

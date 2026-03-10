@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, Globe, Sun, Moon, Monitor, Database } from 'lucide-react';
 import { DataBackup } from './DataBackup';
+import { GoogleDriveSync } from './GoogleDriveSync';
 import { useTranslateQueue } from '../services/translateQueueService';
 import type { Ingredient, Dish } from '../types';
 
@@ -101,6 +102,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, dishes, 
             </button>
           ))}
         </div>
+      </section>
+
+      {/* Cloud Sync Section */}
+      <section>
+        <GoogleDriveSync onImportData={onImportData} />
       </section>
 
       {/* Data Section */}

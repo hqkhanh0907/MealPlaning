@@ -519,5 +519,31 @@
   },
   "recentDishes": {
     "title": "Món gần đây"
+  },
+  "cloudSync": {
+    "title": "Đồng bộ đám mây",
+    "description": "Đăng nhập Google để sao lưu và đồng bộ dữ liệu qua Google Drive",
+    "signInWithGoogle": "Đăng nhập bằng Google",
+    "signInSuccess": "Đăng nhập thành công",
+    "signInError": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "signOutSuccess": "Đã đăng xuất",
+    "signOut": "Đăng xuất",
+    "uploadToDrive": "Tải lên Drive",
+    "downloadFromDrive": "Tải xuống từ Drive",
+    "uploadSuccess": "Dữ liệu đã tải lên Google Drive",
+    "uploadError": "Tải lên thất bại. Vui lòng thử lại.",
+    "downloadSuccess": "Dữ liệu đã tải xuống từ Google Drive",
+    "downloadError": "Tải xuống thất bại. Vui lòng thử lại.",
+    "noBackupFound": "Không tìm thấy bản sao lưu trên Google Drive",
+    "lastSync": "Đồng bộ lần cuối",
+    "syncError": "Lỗi đồng bộ"
+  },
+  "syncConflict": {
+    "title": "Xung đột dữ liệu",
+    "description": "Dữ liệu cục bộ và dữ liệu đám mây khác nhau. Bạn muốn giữ phiên bản nào?",
+    "localData": "Dữ liệu cục bộ",
+    "cloudData": "Dữ liệu đám mây",
+    "keepLocal": "Giữ cục bộ",
+    "useCloud": "Dùng dữ liệu đám mây"
   }
 }

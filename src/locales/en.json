@@ -521,5 +521,31 @@
   },
   "recentDishes": {
     "title": "Recently used"
+  },
+  "cloudSync": {
+    "title": "Cloud Sync",
+    "description": "Sign in with Google to backup and sync your data via Google Drive",
+    "signInWithGoogle": "Sign in with Google",
+    "signInSuccess": "Signed in successfully",
+    "signInError": "Sign in failed. Please try again.",
+    "signOutSuccess": "Signed out",
+    "signOut": "Sign out",
+    "uploadToDrive": "Upload to Drive",
+    "downloadFromDrive": "Download from Drive",
+    "uploadSuccess": "Data uploaded to Google Drive",
+    "uploadError": "Upload failed. Please try again.",
+    "downloadSuccess": "Data downloaded from Google Drive",
+    "downloadError": "Download failed. Please try again.",
+    "noBackupFound": "No backup found on Google Drive",
+    "lastSync": "Last sync",
+    "syncError": "Sync error occurred"
+  },
+  "syncConflict": {
+    "title": "Data Conflict",
+    "description": "Your local data and cloud data are different. Which version would you like to keep?",
+    "localData": "Local Data",
+    "cloudData": "Cloud Data",
+    "keepLocal": "Keep Local",
+    "useCloud": "Use Cloud Data"
   }
 }

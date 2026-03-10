@@ -22,6 +22,14 @@ vi.mock('../components/DataBackup', () => ({
   ),
 }));
 
+vi.mock('../components/GoogleDriveSync', () => ({
+  GoogleDriveSync: ({ onImportData }: { onImportData: (d: Record<string, unknown>) => void }) => (
+    <div data-testid="google-drive-sync">
+      <button onClick={() => onImportData({ 'mp-dishes': [] })}>SyncImport</button>
+    </div>
+  ),
+}));
+
 const mockScanMissing = vi.fn();
 vi.mock('../services/translateQueueService', () => ({
   useTranslateQueue: (selector: (s: { scanMissing: typeof mockScanMissing }) => unknown) =>
@@ -77,6 +85,17 @@ describe('SettingsTab', () => {
     expect(screen.getByText('Dữ liệu')).toBeInTheDocument();
     expect(screen.getByText('Quản lý dữ liệu ứng dụng')).toBeInTheDocument();
     expect(screen.getByTestId('data-backup')).toBeInTheDocument();
+  });
+
+  it('renders cloud sync section with GoogleDriveSync', () => {
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByTestId('google-drive-sync')).toBeInTheDocument();
+  });
+
+  it('passes onImportData to GoogleDriveSync', () => {
+    render(<SettingsTab {...defaultProps} />);
+    fireEvent.click(screen.getByText('SyncImport'));
+    expect(defaultProps.onImportData).toHaveBeenCalledWith({ 'mp-dishes': [] });
   });
 
   it('highlights active Vietnamese language button', () => {

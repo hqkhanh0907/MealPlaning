@@ -19,6 +19,9 @@ vi.mock('../App', () => ({
 vi.mock('../contexts/NotificationContext', () => ({
   NotificationProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
+vi.mock('../contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 import React from 'react';
 
