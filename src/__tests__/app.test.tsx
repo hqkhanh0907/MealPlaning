@@ -84,6 +84,9 @@ vi.mock('../components/ManagementTab', () => ({
 
 // Mock hooks
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
+vi.mock('../hooks/useAutoSync', () => ({
+  useAutoSync: () => ({ syncStatus: 'idle', lastSyncAt: null, triggerUpload: vi.fn(), triggerDownload: vi.fn() }),
+}));
 vi.mock('../hooks/useDarkMode', () => ({
   useDarkMode: () => ({ theme: mockThemeValue, cycleTheme: vi.fn(), setTheme: vi.fn() }),
 }));

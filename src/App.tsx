@@ -32,6 +32,7 @@ import { useAISuggestion } from './hooks/useAISuggestion';
 import { useModalManager } from './hooks/useModalManager';
 import { useCopyPlan } from './hooks/useCopyPlan';
 import { useMealTemplate } from './hooks/useMealTemplate';
+import { useAutoSync } from './hooks/useAutoSync';
 import {
   createEmptyDayPlan,
   clearPlansByScope,
@@ -299,6 +300,15 @@ export default function App() {
       notify.success(t('notification.importSuccess'), t('notification.importSuccessDesc', { count: importedCount }));
     }
   }, [notify, setIngredients, setDishes, setDayPlans, setUserProfile, t]);
+
+  // Auto-sync data to Google Drive when authenticated
+  useAutoSync({
+    ingredients,
+    dishes,
+    dayPlans: rawDayPlans,
+    userProfile,
+    onImportData: handleImportData,
+  });
 
   // Enqueue background translation for the "other" language after saving.
   // If the static food dictionary has an instant match, apply it directly
