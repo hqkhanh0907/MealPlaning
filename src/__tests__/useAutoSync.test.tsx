@@ -188,6 +188,9 @@ describe('useAutoSync', () => {
   it('should persist lastSyncAt to localStorage on upload', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
+    (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'f1', name: 'backup.json', modifiedTime: '2026-03-11T08:00:00Z',
+    });
 
     const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
 
@@ -195,7 +198,7 @@ describe('useAutoSync', () => {
       await result.current.triggerUpload();
     });
 
-    expect(localStorage.getItem(LAST_SYNC_KEY)).toBeTruthy();
+    expect(localStorage.getItem(LAST_SYNC_KEY)).toBe('2026-03-11T08:00:00Z');
   });
 
   it('should persist lastSyncAt to localStorage on download', async () => {
@@ -203,7 +206,7 @@ describe('useAutoSync', () => {
     mockAuthValues.accessToken = 'tok';
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { items: [] },
-      file: { id: 'f1', name: 'backup.json', modifiedTime: '2026-01-01T00:00:00Z' },
+      file: { id: 'f1', name: 'backup.json', modifiedTime: '2026-05-20T12:00:00Z' },
     });
 
     const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
@@ -212,7 +215,7 @@ describe('useAutoSync', () => {
       await result.current.triggerDownload();
     });
 
-    expect(localStorage.getItem(LAST_SYNC_KEY)).toBeTruthy();
+    expect(localStorage.getItem(LAST_SYNC_KEY)).toBe('2026-05-20T12:00:00Z');
   });
 
   it('should debounce auto-upload when data changes', async () => {

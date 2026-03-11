@@ -57,9 +57,8 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     setSyncStatus('uploading');
     try {
       const data = buildExportData();
-      await driveService.uploadBackup(accessToken, data);
-      const now = new Date().toISOString();
-      updateLastSync(now);
+      const result = await driveService.uploadBackup(accessToken, data);
+      updateLastSync(result.modifiedTime);
       setSyncStatus('idle');
     } catch {
       setSyncStatus('error');
@@ -75,7 +74,7 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
       const result = await driveService.downloadLatestBackup(accessToken);
       if (result) {
         optionsRef.current.onImportData(result.data);
-        updateLastSync(new Date().toISOString());
+        updateLastSync(result.file.modifiedTime);
       }
       setSyncStatus('idle');
     } catch {
@@ -96,7 +95,7 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
           const localSyncTime = localStorage.getItem(LAST_SYNC_KEY);
           if (!localSyncTime || remoteSyncTime > localSyncTime) {
             optionsRef.current.onImportData(result.data);
-            updateLastSync(new Date().toISOString());
+            updateLastSync(remoteSyncTime);
           }
         }
       } catch {

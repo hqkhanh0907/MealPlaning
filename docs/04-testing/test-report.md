@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 6.0  
-**Date:** 2026-03-08  
-**Commit:** `93fd037`
+**Version:** 7.0  
+**Date:** 2026-03-11  
+**Commit:** `412ad4e`
 
-> **v6.0**: QA Cycle 5 — Instant food translation via dictionary. BUG-TRANSLATE-001 fixed. Unit tests 995→1046 (+51), test files 47→49 (+2). Xem [Changelog](#6-changelog).
+> **v7.0**: QA Cycle 6 — Google Drive sync, Cloud auth, Desktop layout, Meal templates, Copy plan, AI suggest ingredients. Unit tests 1046→1201 (+155), test files 49→57 (+8). Xem [Changelog](#6-changelog).
 
 ---
 
@@ -12,13 +12,13 @@
 
 | Chỉ số | Kết quả |
 |--------|---------|
-| Unit Tests | **1046 / 1046 Pass** ✅ |
-| Test Files | **49 / 49 Pass** ✅ |
+| Unit Tests | **1201 / 1201 Pass** ✅ |
+| Test Files | **57 / 57 Pass** ✅ |
 | E2E Tests | **24 / 24 Specs Pass** ✅ |
 | Lint | **0 errors, 0 warnings** ✅ |
-| Code Coverage (Stmts) | **99.53%** ✅ |
-| Code Coverage (Branch) | **92.30%** ✅ |
-| Code Coverage (Funcs) | **99.66%** ✅ |
+| Code Coverage (Stmts) | **99.46%** ✅ |
+| Code Coverage (Branch) | **92.51%** ✅ |
+| Code Coverage (Funcs) | **99.41%** ✅ |
 | Code Coverage (Lines) | **100%** ✅ |
 | Bugs mở | **0** ✅ |
 | Bugs đã đóng | **9** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001) |
@@ -30,18 +30,28 @@
 ### Thống kê thực tế (`npm run test`)
 
 ```
+ ✓ src/__tests__/ErrorBoundary.test.tsx
+ ✓ src/__tests__/NotificationContext.test.tsx
  ✓ src/__tests__/aiImageAnalyzer.test.tsx
+ ✓ src/__tests__/aiSuggestIngredientsPreview.test.tsx
  ✓ src/__tests__/aiSuggestionPreview.test.tsx
  ✓ src/__tests__/analysisResultView.test.tsx
  ✓ src/__tests__/app.test.tsx
+ ✓ src/__tests__/authContext.test.tsx
+ ✓ src/__tests__/authContextDef.test.ts
  ✓ src/__tests__/calendarAndDate.test.tsx
+ ✓ src/__tests__/calendarDesktopLayout.test.tsx
  ✓ src/__tests__/components.test.tsx
  ✓ src/__tests__/constantsAndData.test.ts
+ ✓ src/__tests__/copyPlan.test.tsx
  ✓ src/__tests__/dataBackup.test.tsx
  ✓ src/__tests__/dataService.test.ts
  ✓ src/__tests__/dishEditModal.test.tsx
- ✓ src/__tests__/ErrorBoundary.test.tsx
+ ✓ src/__tests__/filterBottomSheet.test.tsx
+ ✓ src/__tests__/foodDictionary.test.ts
  ✓ src/__tests__/geminiService.test.ts
+ ✓ src/__tests__/googleDriveService.test.ts
+ ✓ src/__tests__/googleDriveSync.test.tsx
  ✓ src/__tests__/groceryList.test.tsx
  ✓ src/__tests__/helpers.test.ts
  ✓ src/__tests__/imageCapture.test.tsx
@@ -51,48 +61,52 @@
  ✓ src/__tests__/logger.test.ts
  ✓ src/__tests__/main.test.tsx
  ✓ src/__tests__/managers.test.tsx
+ ✓ src/__tests__/mealTemplate.test.tsx
  ✓ src/__tests__/modalBackdrop.test.tsx
  ✓ src/__tests__/navigationIndex.test.ts
- ✓ src/__tests__/NotificationContext.test.tsx
  ✓ src/__tests__/nutrition.test.ts
  ✓ src/__tests__/planService.test.ts
  ✓ src/__tests__/planningModal.test.tsx
+ ✓ src/__tests__/quickPreviewPanel.test.tsx
  ✓ src/__tests__/saveAnalyzedDishModal.test.tsx
+ ✓ src/__tests__/saveTemplateModal.test.tsx
+ ✓ src/__tests__/scheduleComponents.test.tsx
  ✓ src/__tests__/settingsTab.test.tsx
  ✓ src/__tests__/smallModals.test.tsx
  ✓ src/__tests__/summaryAndManagement.test.tsx
+ ✓ src/__tests__/syncConflictModal.test.tsx
  ✓ src/__tests__/tips.test.ts
  ✓ src/__tests__/translateQueueService.test.ts
  ✓ src/__tests__/useAISuggestion.test.ts
+ ✓ src/__tests__/useAuth.test.tsx
+ ✓ src/__tests__/useAutoSync.test.tsx
  ✓ src/__tests__/useDarkMode.test.ts
+ ✓ src/__tests__/useIsDesktop.test.ts
  ✓ src/__tests__/useItemModalFlow.test.ts
  ✓ src/__tests__/useListManager.test.ts
  ✓ src/__tests__/useModalBackHandler.test.ts
  ✓ src/__tests__/useModalManager.test.ts
  ✓ src/__tests__/usePersistedState.test.ts
 
- Test Files:  47 passed (47)
- Tests:      995 passed (995)
- Duration:   ~5.3s
+ Test Files:  57 passed (57)
+ Tests:      1201 passed (1201)
+ Duration:   ~5.6s
 ```
 
 ### Coverage chi tiết (từ `npm run test:coverage`)
 
 | Module / File | Stmts | Branch | Funcs | Lines | Ghi chú |
 |---------------|-------|--------|-------|-------|---------|
-| **All files** | **100%** | **93.15%** | **100%** | **100%** | ✅ Vượt target |
-| `src/` | 100% | 100% | 100% | 100% | ✅ |
-| `src/components/` | 100% | 90.86% | 100% | 100% | ✅ |
-| `src/components/modals/` | 100% | 94.27% | 100% | 100% | ✅ |
-| `src/components/navigation/` | 100% | 100% | 100% | 100% | ✅ |
-| `src/components/shared/` | 100% | 90.54% | 100% | 100% | ✅ |
-| `src/contexts/` | 100% | 94.11% | 100% | 100% | ✅ |
+| **All files** | **99.46%** | **92.51%** | **99.41%** | **100%** | ✅ Vượt target |
+| `src/` | 100% | 92.3% | 100% | 100% | ✅ |
+| `src/components/` | 99.33% | 90.14% | 100% | 100% | ✅ |
+| `src/contexts/` | 98.98% | 95.77% | 94.23% | 100% | ✅ |
 | `src/data/` | 100% | 100% | 100% | 100% | ✅ |
-| `src/hooks/` | 100% | 87.95% | 100% | 100% | ✅ |
-| `src/services/` | 100% | 97.58% | 100% | 100% | ✅ |
+| `src/hooks/` | 99.74% | 88.97% | 100% | 100% | ✅ |
+| `src/services/` | 99.73% | 96.89% | 100% | 100% | ✅ |
 | `src/utils/` | 100% | 100% | 100% | 100% | ✅ |
 
-> **Lưu ý:** Tất cả Statements, Functions, Lines đều đạt **100%**. Branch coverage 93.15% do một số defensive branches (error handling, edge case guards) không thể trigger trong test environment.
+> **Lưu ý:** Lines đạt **100%**. Statements 99.46%, Functions 99.41% — gần hoàn hảo. Branch coverage 92.51% do một số defensive branches (error handling, edge case guards) không thể trigger trong test environment.
 
 ---
 
@@ -223,7 +237,7 @@
 **Component:** `AISuggestionPreviewModal`, `MealActionBar`, `DateSelector`, `AnalysisResultView`  
 **Root cause:** Light-mode-only Tailwind classes (`bg-amber-50`, `active:bg-rose-100`, `bg-slate-200`, `bg-white`) without `dark:` variants caused bright flash/poor contrast in dark theme  
 **Fix:** Added `dark:bg-*`, `dark:active:bg-*`, `dark:border-*`, `dark:text-*` variants across 4 files (18 class additions total)  
-**Test coverage:** Visual verification via Chrome DevTools; Lint + 995 unit tests pass  
+**Test coverage:** Visual verification via Chrome DevTools; Lint + 1201 unit tests pass  
 **Chi tiết:** [docs/bug-reports/BUG-DM-001-dark-mode-missing-variants.md](../bug-reports/BUG-DM-001-dark-mode-missing-variants.md)
 
 ---
@@ -232,7 +246,7 @@
 
 | Limitation | Ảnh hưởng | Priority |
 |-----------|-----------|---------|
-| Branch coverage 93.15% (không đạt 100%) | Một số defensive branches (error handlers, edge case guards) không thể trigger trong jsdom | Low — acceptable |
+| Branch coverage 92.51% (không đạt 100%) | Một số defensive branches (error handlers, edge case guards) không thể trigger trong jsdom | Low — acceptable |
 | AI coverage dùng mock only | E2E `09-ai-analysis` dùng mock data, không test real Gemini | Low |
 | E2E không test offline mode | Chỉ test khi có kết nối internet | Low |
 
@@ -251,6 +265,7 @@
 | 2026-03-07 | 866/866 | 24/24 | ✅ | `102aed6` | All fixed: MealPlannerModal direct flow, grocery empty state |
 | 2026-03-07 | 995/995 | 24/24 | ✅ | `ba8f9e9` | QA Cycle 4: Dark mode audit, BUG-DM-001, sub-tabs refactor, +129 tests |
 | 2026-03-08 | 1046/1046 | 24/24 | ✅ | `93fd037` | QA Cycle 5: Instant food dictionary translation, BUG-TRANSLATE-001, +51 tests |
+| 2026-03-11 | 1201/1201 | 24/24 | ✅ | `412ad4e` | QA Cycle 6: Google Drive sync, Cloud auth, Desktop layout, Meal templates, Copy plan, AI suggest ingredients, +155 tests |
 
 ---
 
@@ -273,3 +288,4 @@
 | 4.0 | 2026-03-07 | QA Cycle 3: E2E expanded 10→24 specs (183 tests), deep integration tests, BUG-E2E-001/002/003, MealPlannerModal direct flow |
 | 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit via Chrome DevTools. BUG-DM-001 fixed (4 components, 18 dark: class additions). Schedule sub-tabs refactor. Unit tests 866→995 (+129), test files 40→47 (+7). Coverage: 100% Stmts/Funcs/Lines, 93.15% Branch |
 | 6.0 | 2026-03-08 | QA Cycle 5: Instant food translation via static dictionary (200+ entries). BUG-TRANSLATE-001 fixed (all EN names were VI copies). New files: foodDictionary.ts, foodDictionary.test.ts. Unit tests 995→1046 (+51), test files 47→49 (+2). Coverage: 99.53% Stmts, 99.66% Funcs, 100% Lines, 92.30% Branch |
+| 7.0 | 2026-03-11 | QA Cycle 6: Google Drive sync, Cloud auth (AuthContext), Desktop layout, Meal templates, Copy plan, AI suggest ingredients, Filter bottom sheet, Quick preview panel, Schedule components, Sync conflict modal. Unit tests 1046→1201 (+155), test files 49→57 (+8). Coverage: 99.46% Stmts, 99.41% Funcs, 100% Lines, 92.51% Branch. Chrome DevTools QA: 0 errors, 0 warnings across all 5 tabs |

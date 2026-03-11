@@ -1,7 +1,7 @@
 # Release Process — Smart Meal Planner
 
-**Version:** 3.0  
-**Date:** 2026-03-08
+**Version:** 4.0  
+**Date:** 2026-03-11
 
 ---
 
@@ -12,7 +12,7 @@ Code changes
      │
      ▼
 [1] Run unit tests (npm run test)
-     │ ✅ 866/866
+     │ ✅ 1201/1201
      ▼
 [2] Run linter (npm run lint)
      │ ✅ no errors, no warnings
@@ -48,7 +48,7 @@ Code changes
 Trước mỗi release, kiểm tra tất cả items:
 
 ```
-□ npm run test          → 866/866 pass
+□ npm run test          → 1201/1201 pass
 □ npm run lint          → 0 errors, 0 warnings
 □ npm run test:coverage → 100% Stmts/Funcs/Lines, ≥93% Branch
 □ npm run build         → build thành công, không warnings
@@ -178,9 +178,9 @@ Cập nhật `CHANGELOG.md` hoặc tạo file session mới trong `docs/`:
 - IngredientEditModal auto-focus on Android #36
 
 ## Tests
-- Unit: 866/866 pass
+- Unit: 1201/1201 pass
 - E2E: 24/24 pass (183 test cases, including deep integration)
-- Coverage: 100% Stmts/Funcs/Lines, 93.99% Branch
+- Coverage: 99.46% Stmts, 99.41% Funcs, 100% Lines, 92.51% Branch
 ```
 
 ---

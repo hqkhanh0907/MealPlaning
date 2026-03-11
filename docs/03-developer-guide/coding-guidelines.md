@@ -1,7 +1,7 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 3.2  
-**Date:** 2026-03-08
+**Version:** 4.0  
+**Date:** 2026-03-11
 
 ---
 
@@ -206,6 +206,8 @@ const newIng: Ingredient = { id: Date.now().toString(), ... };
 - **Tất cả state quan trọng** nằm tại `App.tsx` (single source of truth)
 - Pass state xuống via props — không dùng Context cho main data (ADR-001)
 - Dùng `usePersistedState<T>` thay cho `useState` khi cần persist vào localStorage
+- **Context Providers**: Dùng React Context cho cross-cutting concerns (AuthContext cho OAuth, NotificationContext cho toast). Không dùng Context cho domain data — dùng `usePersistedState` hoặc Zustand.
+- **Custom hooks naming**: Hooks trả về boolean dùng prefix `useIs` (ví dụ: `useIsDesktop`). Hooks cho CRUD dùng prefix `use` + noun (ví dụ: `useMealTemplate`, `useCopyPlan`).
 
 ```typescript
 // ✅ Dùng usePersistedState
@@ -305,12 +307,13 @@ await $('button[data-testid="add-dish"]').click();
 - Target: 100% lines, 100% functions, 100% statements
 - Branch coverage >= 90%
 - Mọi bug fix **phải kèm** test case regression
+- **Coverage threshold**: Duy trì ≥ 99% statement coverage và 100% line coverage. Mỗi PR phải chạy `npm run test:coverage` và không được giảm coverage.
 
 ### Quy tắc ESLint — Không dùng eslint-disable
 
 > **Quy tắc bắt buộc** — xác nhận lại trong QA Cycle 2 (2026-03-06)
 
-**Tuyệt đối không sử dụng** `eslint-disable`, `eslint-disable-next-line`, hoặc `eslint-disable-line` trong bất kỳ trường hợp nào. Nếu ESLint báo lỗi, bắt buộc phải sửa code để tuân thủ rule, không được suppress.
+**Tuyệt đối không sử dụng** `eslint-disable`, `eslint-disable-next-line`, `eslint-disable-line`, hoặc `@ts-ignore` để bỏ qua lỗi lint/TypeScript. Mọi lỗi phải được sửa triệt để. Nếu ESLint báo lỗi, bắt buộc phải sửa code để tuân thủ rule, không được suppress.
 
 ```typescript
 // ❌ KHÔNG BAO GIỜ

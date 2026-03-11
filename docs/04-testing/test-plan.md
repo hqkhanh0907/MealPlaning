@@ -1,7 +1,7 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 5.1  
-**Date:** 2026-03-08  
+**Version:** 6.0  
+**Date:** 2026-03-11  
 **Author:** Dev Team
 
 ---
@@ -44,7 +44,7 @@
 
 | | Chi tiết |
 |--|---------|
-| Framework | Vitest 3.x |
+| Framework | Vitest 4.x |
 | Môi trường | jsdom (Node.js) |
 | Mocking | `vi.mock()`, `vi.fn()` |
 | Coverage | V8 provider |
@@ -89,19 +89,19 @@
 
 ## 4. Mức độ coverage yêu cầu
 
-| Level | Target | Actual (2026-03-07) |
+| Level | Target | Actual (2026-03-11) |
 |-------|--------|---------------------|
-| Overall Statements | ≥ 80% | **99.53%** ✅ (↑ từ 90.51%) |
-| Overall Branches | ≥ 75% | **92.30%** ✅ (↑ từ 83.80%) |
-| Overall Functions | ≥ 85% | **99.66%** ✅ (↑ từ 87.76%) |
+| Overall Statements | ≥ 80% | **99.46%** ✅ (↑ từ 90.51%) |
+| Overall Branches | ≥ 75% | **92.51%** ✅ (↑ từ 83.80%) |
+| Overall Functions | ≥ 85% | **99.41%** ✅ (↑ từ 87.76%) |
 | Overall Lines | ≥ 80% | **100%** ✅ (↑ từ 92.76%) |
-| Services | ≥ 90% | **100%** ✅ |
+| Services | ≥ 90% | **99.73%** ✅ |
 | Utils | ≥ 90% | **100%** ✅ |
-| Components | ≥ 75% | **100%** ✅ |
-| Hooks | ≥ 85% | **100%** ✅ |
-| Contexts | ≥ 85% | **100%** ✅ |
+| Components | ≥ 75% | **99.33%** ✅ |
+| Hooks | ≥ 85% | **99.74%** ✅ |
+| Contexts | ≥ 85% | **98.98%** ✅ |
 
-> **Note:** Unit tests: **1046 tests** across **49 test files** (cập nhật 2026-03-08). Coverage vượt xa target ≥80%. Branch coverage 92.30% — chấp nhận được do một số defensive code paths không thể trigger trong test environment.
+> **Note:** Unit tests: **1201 tests** across **57 test files** (cập nhật 2026-03-11). Coverage vượt xa target ≥80%. Branch coverage 92.51% — chấp nhận được do một số defensive code paths không thể trigger trong test environment.
 
 ---
 

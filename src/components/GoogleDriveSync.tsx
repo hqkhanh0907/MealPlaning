@@ -8,6 +8,7 @@ import * as driveService from '../services/googleDriveService';
 import type { SyncStatus } from '../types';
 
 const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile'];
+const LAST_SYNC_KEY = 'mp-last-sync-at';
 
 const buildExportData = (): Record<string, unknown> => {
   const data: Record<string, unknown> = {};
@@ -30,7 +31,9 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
   const notify = useNotification();
 
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
-  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(() =>
+    localStorage.getItem(LAST_SYNC_KEY),
+  );
   const [conflictData, setConflictData] = useState<{
     local: Record<string, unknown>;
     remote: Record<string, unknown>;
@@ -51,24 +54,29 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
   const handleSignOut = useCallback(async () => {
     await signOut();
     setLastSyncAt(null);
+    localStorage.removeItem(LAST_SYNC_KEY);
     notify.success(t('cloudSync.signOutSuccess'));
   }, [signOut, notify, t]);
+
+  const updateLastSync = useCallback((timestamp: string) => {
+    setLastSyncAt(timestamp);
+    localStorage.setItem(LAST_SYNC_KEY, timestamp);
+  }, []);
 
   const handleUpload = useCallback(async () => {
     if (!accessToken) return;
     setSyncStatus('uploading');
     try {
       const data = buildExportData();
-      await driveService.uploadBackup(accessToken, data);
-      const now = new Date().toISOString();
-      setLastSyncAt(now);
+      const result = await driveService.uploadBackup(accessToken, data);
+      updateLastSync(result.modifiedTime);
       setSyncStatus('idle');
       notify.success(t('cloudSync.uploadSuccess'));
     } catch {
       setSyncStatus('error');
       notify.error(t('cloudSync.uploadError'));
     }
-  }, [accessToken, notify, t]);
+  }, [accessToken, notify, t, updateLastSync]);
 
   const handleDownload = useCallback(async () => {
     if (!accessToken) return;
@@ -80,11 +88,11 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
         notify.warning(t('cloudSync.noBackupFound'));
         return;
       }
-      const localData = buildExportData();
-      const localSyncTime = localData._syncedAt as string | undefined;
+      const storedSyncTime = localStorage.getItem(LAST_SYNC_KEY);
       const remoteSyncTime = result.file.modifiedTime;
 
-      if (localSyncTime && remoteSyncTime < localSyncTime) {
+      if (storedSyncTime && remoteSyncTime < storedSyncTime) {
+        const localData = buildExportData();
         setConflictData({
           local: localData,
           remote: result.data,
@@ -95,23 +103,23 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
       }
 
       onImportData(result.data);
-      setLastSyncAt(new Date().toISOString());
+      updateLastSync(remoteSyncTime);
       setSyncStatus('idle');
       notify.success(t('cloudSync.downloadSuccess'));
     } catch {
       setSyncStatus('error');
       notify.error(t('cloudSync.downloadError'));
     }
-  }, [accessToken, onImportData, notify, t]);
+  }, [accessToken, onImportData, notify, t, updateLastSync]);
 
   const handleConflictResolve = useCallback((choice: 'local' | 'cloud') => {
     if (choice === 'cloud' && conflictData) {
       onImportData(conflictData.remote);
-      setLastSyncAt(new Date().toISOString());
+      updateLastSync(conflictData.remoteModifiedTime);
       notify.success(t('cloudSync.downloadSuccess'));
     }
     setConflictData(null);
-  }, [conflictData, onImportData, notify, t]);
+  }, [conflictData, onImportData, notify, t, updateLastSync]);
 
   const statusIcon = useMemo(() => {
     if (syncStatus === 'uploading' || syncStatus === 'downloading') {

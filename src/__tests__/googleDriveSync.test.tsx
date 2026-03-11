@@ -163,6 +163,15 @@ describe('GoogleDriveSync', () => {
       expect(mockSignOut).toHaveBeenCalled();
       expect(mockNotify.success).toHaveBeenCalledWith('Đã đăng xuất');
     });
+
+    it('clears lastSyncAt from localStorage on sign out', async () => {
+      localStorage.setItem('mp-last-sync-at', '2024-01-01T00:00:00Z');
+      render(<GoogleDriveSync onImportData={onImportData} />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-google-sign-out'));
+      });
+      expect(localStorage.getItem('mp-last-sync-at')).toBeNull();
+    });
   });
 
   describe('Upload', () => {
@@ -261,6 +270,17 @@ describe('GoogleDriveSync', () => {
 
       expect(screen.getByText('Lỗi đồng bộ')).toBeInTheDocument();
     });
+
+    it('persists lastSyncAt to localStorage using Drive modifiedTime', async () => {
+      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.json', modifiedTime: '2024-06-15T10:30:00Z' });
+
+      render(<GoogleDriveSync onImportData={onImportData} />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-upload-drive'));
+      });
+
+      expect(localStorage.getItem('mp-last-sync-at')).toBe('2024-06-15T10:30:00Z');
+    });
   });
 
   describe('Download', () => {
@@ -320,6 +340,7 @@ describe('GoogleDriveSync', () => {
 
     it('shows conflict modal when local data is newer than remote', async () => {
       localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'local' }]));
+      localStorage.setItem('mp-last-sync-at', '2025-01-01T00:00:00Z');
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: { 'mp-dishes': [{ id: 'remote' }] },
         file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
@@ -338,6 +359,7 @@ describe('GoogleDriveSync', () => {
 
     it('imports remote data when choosing cloud in conflict modal', async () => {
       localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'local' }]));
+      localStorage.setItem('mp-last-sync-at', '2025-01-01T00:00:00Z');
 
       const remoteData = { 'mp-dishes': [{ id: 'remote' }] };
       mockDownloadLatestBackup.mockResolvedValueOnce({
@@ -364,6 +386,7 @@ describe('GoogleDriveSync', () => {
 
     it('keeps local data when choosing local in conflict modal', async () => {
       localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'local' }]));
+      localStorage.setItem('mp-last-sync-at', '2025-01-01T00:00:00Z');
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: { 'mp-dishes': [{ id: 'remote' }] },
         file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
@@ -388,6 +411,7 @@ describe('GoogleDriveSync', () => {
 
     it('closes conflict modal on cancel', async () => {
       localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'local' }]));
+      localStorage.setItem('mp-last-sync-at', '2025-01-01T00:00:00Z');
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: { 'mp-dishes': [{ id: 'remote' }] },
         file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
@@ -439,6 +463,48 @@ describe('GoogleDriveSync', () => {
       });
 
       expect(onImportData).toHaveBeenCalledWith(remoteData);
+    });
+
+    it('does not show conflict after upload then immediate download', async () => {
+      localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'd1' }]));
+      const driveModifiedTime = '2024-06-15T10:30:00Z';
+      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.json', modifiedTime: driveModifiedTime });
+
+      render(<GoogleDriveSync onImportData={onImportData} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-upload-drive'));
+      });
+
+      expect(localStorage.getItem('mp-last-sync-at')).toBe(driveModifiedTime);
+
+      const remoteData = { 'mp-dishes': [{ id: 'd1' }] };
+      mockDownloadLatestBackup.mockResolvedValueOnce({
+        data: remoteData,
+        file: { id: 'f1', name: 'b.json', modifiedTime: driveModifiedTime },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-download-drive'));
+      });
+
+      expect(onImportData).toHaveBeenCalledWith(remoteData);
+      expect(screen.queryByTestId('sync-conflict-modal')).not.toBeInTheDocument();
+    });
+
+    it('persists remote modifiedTime as lastSyncAt after download', async () => {
+      const remoteData = { 'mp-dishes': [{ id: 'remote' }] };
+      mockDownloadLatestBackup.mockResolvedValueOnce({
+        data: remoteData,
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2024-07-20T15:00:00Z' },
+      });
+
+      render(<GoogleDriveSync onImportData={onImportData} />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-download-drive'));
+      });
+
+      expect(localStorage.getItem('mp-last-sync-at')).toBe('2024-07-20T15:00:00Z');
     });
   });
 

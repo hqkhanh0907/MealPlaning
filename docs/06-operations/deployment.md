@@ -1,13 +1,13 @@
 # Hướng Dẫn Triển Khai (Deployment Guide)
 
-**Version:** 1.1  
-**Date:** 2026-03-08
+**Version:** 2.0  
+**Date:** 2026-03-11
 
 ---
 
 ## 1. Tổng quan
 
-App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor + React). Không có backend server — toàn bộ dữ liệu lưu trong localStorage của WebView.
+App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor + React). Không có backend server — dữ liệu lưu trong localStorage của WebView. Từ v2.0, hỗ trợ đồng bộ lên Google Drive (appDataFolder) qua Google OAuth2.
 
 | Môi trường | Mô tả |
 |-----------|-------|
@@ -269,6 +269,28 @@ adb shell cat /data/data/com.mealplaner.app/app_webview/Default/Local\ Storage/l
 # Clear app data
 adb shell pm clear com.mealplaner.app
 ```
+
+---
+
+## Google API Setup (Cloud Sync)
+
+Để sử dụng tính năng Cloud Sync, cần cấu hình Google OAuth2:
+
+### Yêu cầu
+- Google Cloud Console project
+- OAuth 2.0 Client ID (Web application type)
+- Authorized JavaScript origins: `http://localhost:3000` (dev), production domain
+- Google Drive API enabled trong project
+
+### Biến môi trường
+| Biến | Mô tả | Ví dụ |
+|------|--------|-------|
+| `VITE_GOOGLE_CLIENT_ID` | OAuth2 Client ID | `xxx.apps.googleusercontent.com` |
+
+### Lưu ý
+- App sử dụng `appDataFolder` scope — chỉ truy cập folder ẩn riêng của app trên Google Drive
+- Không cần Drive full access — chỉ cần scope `https://www.googleapis.com/auth/drive.appdata`
+- Token được lưu trong localStorage key `mp-auth-state`
 
 ---
 
