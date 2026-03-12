@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 9.0  
+**Version:** 10.0  
 **Date:** 2026-03-12  
 **Commit:** TBD
 
-> **v9.0**: QA Cycle 8 — Fixed critical code bug: templates not included in Data Backup export and Google Drive sync (added 'meal-templates' to EXPORT_KEYS in DataBackup.tsx, GoogleDriveSync.tsx, useAutoSync.ts). Fixed 8 scenario doc inaccuracies (SC03 progress bar colors, SC12 component name, SC15 file paths, SC16/SC17 template export). Manual testing expanded to 183 TCs across 17 scenarios — all 182 PASS, 1 DEFERRED, 0 FAIL. Zero console errors. Xem [Changelog](#6-changelog).
+> **v10.0**: QA Cycle 9 — Comprehensive manual testing expanded to 250 TCs across all 24 scenarios. Tested SC04 (AI Meal Suggestion: full suggest→apply flow), SC15 (Background Translation: dish+ingredient names), SC18 (Desktop/Mobile responsive layout), SC19 (Quick Preview: date switching, empty/full states), SC21 (AI Suggest Ingredients: 5 suggestions with New/Exists tags), SC24 (Data Migration: localStorage integrity). 249 PASS, 0 FAIL, 1 DEFERRED. Zero console errors. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -280,20 +280,21 @@
 
 ---
 
-## 7. Manual Testing Results (v9.0)
+## 7. Manual Testing Results (v10.0)
 
 **Method:** Chrome DevTools MCP — automated browser interaction via accessibility tree  
 **Environment:** macOS, Chrome, localhost:3000 (Vite dev server)  
 **Date:** 2026-03-12  
 **Console Errors:** 0 | **Console Warnings:** 0
 
-### Summary: 183 TCs tested, 182 PASS, 0 FAIL, 1 DEFERRED
+### Summary: 250 TCs tested, 249 PASS, 0 FAIL, 1 DEFERRED
 
 | Scenario | TCs Tested | Pass | Fail | Deferred | Coverage |
 |----------|-----------|------|------|----------|----------|
 | SC01 — Calendar & Meal Planning | 22 | 22 | 0 | 0 | Calendar grid, date selection, meal slots, nutrition bars, week view, more actions |
 | SC02 — Meal Planner Modal | 18 | 18 | 0 | 0 | Modal open/close, meal tabs, dish selection, search, nutrition preview, save |
 | SC03 — Nutrition Tracking | 19 | 18 | 0 | 1 | Zero plan, add/remove dish, progress bars (orange/blue), goals modal, target calculations |
+| SC04 — AI Meal Suggestion | 16 | 16 | 0 | 0 | AI Suggest button, loading state, reasoning, 3-meal cards, checkbox deselect/reselect, totals recalculate, Apply flow, calendar update, notification |
 | SC05 — AI Image Analysis | 5 | 5 | 0 | 0 | Tab load, 3-step workflow, upload/photo buttons, analyze state |
 | SC06 — Ingredient CRUD | 18 | 18 | 0 | 0 | Ingredient list, nutrition per 100g, used-in cross-ref, delete protection, search, sort, countable units |
 | SC07 — Dish CRUD | 14 | 14 | 0 | 0 | Dish list, meal filters, sort options, clone/edit/delete, meal tags, ingredient count |
@@ -304,11 +305,17 @@
 | SC12 — Template Manager | 13 | 13 | 0 | 0 | Template list, apply, rename, meal preview, notifications |
 | SC13 — Save Template | 4 | 4 | 0 | 0 | Template modal, name input, preview, save |
 | SC14 — Grocery List | 12 | 12 | 0 | 0 | Auto-generation, time filters (today/week/all), copy/share, ingredient aggregation |
+| SC15 — Background Translation | 9 | 9 | 0 | 0 | Language switch trigger, dish/ingredient name translation, UI labels, instant non-blocking |
 | SC16 — Data Backup | 9 | 9 | 0 | 0 | Export/import buttons, success notification, includes templates (bug fix verified) |
+| SC17 — Google Drive Sync | 2 | 2 | 0 | 0 | Sign-in button visible, Cloud Sync section description |
+| SC18 — Desktop Layout | 12 | 12 | 0 | 0 | Desktop 1200px grid, mobile 375px bottom tabs, resize transition, data preserved, no overlap |
+| SC19 — Quick Preview | 13 | 13 | 0 | 0 | Date tap→preview, date switching, empty/full states, nutrition summary, Add buttons |
 | SC20 — Filter & Sort | 8 | 8 | 0 | 0 | 8 sort options, search, meal filters, grid/list toggle |
+| SC21 — AI Suggest Ingredients | 12 | 12 | 0 | 0 | AI button in edit modal, loading state, 5 suggestions, New/Exists tags, deselect, amounts, cancel |
 | SC22 — Dark Mode | 7 | 7 | 0 | 0 | Dark theme activation, contrast, selected states, light/system switch |
 | SC23 — i18n Language | 8 | 8 | 0 | 0 | Vietnamese/English switch, full UI translation, tab names, persistence |
-| **TOTAL** | **183** | **182** | **0** | **1** | |
+| SC24 — Data Migration | 3 | 3 | 0 | 0 | Valid localStorage data, 5 keys intact, data preserved across operations |
+| **TOTAL** | **250** | **249** | **0** | **1** | |
 
 ### Bug Fixed in v9.0
 
@@ -339,3 +346,4 @@
 | 7.0 | 2026-03-11 | QA Cycle 6: Google Drive sync, Cloud auth (AuthContext), Desktop layout, Meal templates, Copy plan, AI suggest ingredients, Filter bottom sheet, Quick preview panel, Schedule components, Sync conflict modal. Unit tests 1046→1201 (+155), test files 49→57 (+8). Coverage: 99.46% Stmts, 99.41% Funcs, 100% Lines, 92.51% Branch. Chrome DevTools QA: 0 errors, 0 warnings across all 5 tabs |
 | 8.0 | 2026-03-12 | QA Cycle 7: Comprehensive manual testing via Chrome DevTools MCP — 108 TCs across 14 scenarios (SC01–SC14, SC20, SC22, SC23) all PASS. 24 expanded scenario docs (SC01–SC24, 2,520 TCs total) created in docs/04-testing/scenarios/. UX research document with 120 proposals. Doc fixes: PRD F-24 renamed to "Quick Copy Plan", Android API version aligned (minSdk 24, targetSdk 36), e2e-setup spec count 10→24. Zero console errors/warnings. No code bugs found |
 | 9.0 | 2026-03-12 | QA Cycle 8: BUG-EXPORT-001 fixed — templates missing from export/sync EXPORT_KEYS (3 files + useAutoSync interface). 8 scenario doc inaccuracies corrected (SC03 progress bar colors, SC12 component name, SC15 file paths). Manual testing expanded 108→183 TCs (+75) across 17 scenarios. Added SC03, SC12, SC16, SC20 deep coverage. 182 PASS, 0 FAIL, 1 DEFERRED |
+| 10.0 | 2026-03-12 | QA Cycle 9: Manual testing expanded 183→250 TCs (+67) across all 24 scenarios. New coverage: SC04 (AI Meal Suggestion — full suggest→apply flow with reasoning, meal checkboxes, nutrition recalculation), SC15 (Background Translation — instant dish/ingredient translation), SC17 (Google Drive — sign-in UI), SC18 (Desktop/Mobile responsive layout — 1200px/375px), SC19 (Quick Preview — date switching, empty/full states), SC21 (AI Suggest Ingredients — 5 suggestions with New/Exists tags), SC24 (Data Migration — localStorage integrity). 249 PASS, 0 FAIL, 1 DEFERRED. Zero console errors |
