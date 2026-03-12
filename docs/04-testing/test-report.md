@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 14.0  
+**Version:** 15.0  
 **Date:** 2026-03-12  
 **Commit:** TBD
 
-> **v14.0**: QA Cycle 13 — Manual testing expanded to 489 TCs across all 24 scenarios (+88 from v13.0). Nutrition deep-dive: rose calorie bar on exceeded target, protein deficit/surplus suggestions, live goal updates. Goal Settings: all 4 protein presets verified, calorie target change with live update. Copy Plan: source preview, Tomorrow/This week selection, Remove individual dates, copy verification. Grocery List: Today/This week/All aggregation, bought toggle with counter. Dark Mode: full visual verification with screenshot. Library: sort (8 options), filter by meal, search, delete with confirmation+Undo. Vietnamese Translation: 19 new TCs verifying full i18n coverage across Calendar, Library, Nutrition, Settings, Clear Plan. 489 PASS, 0 FAIL, 0 DEFERRED. Zero console errors. Xem [Changelog](#6-changelog).
+> **v15.0**: QA Cycle 14 — Manual testing expanded to 557 TCs across all 24 scenarios (+68 from v14.0). Save Template: empty name validation, char counter, duplicate name, preview, notifications. Template Manager: rename (inline edit), delete, apply to empty day with full verification. Clear Plan: affected dates expansion for week (4 days) and month (7 days). Meal Planner Modal: search across meal tabs, dish toggle, change count, auto-save behavior. AI Analysis: 3-step flow, disabled analyze button. Ingredients: 13 items with nutrition/usage tracking, delete protection. Data Integrity: 12 localStorage keys verified, all JSON valid. Settings: system theme, all sections verified. Week navigation and Today button. 557 PASS, 0 FAIL, 0 DEFERRED. Zero console errors. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -280,42 +280,42 @@
 
 ---
 
-## 7. Manual Testing Results (v14.0)
+## 7. Manual Testing Results (v15.0)
 
 **Method:** Chrome DevTools MCP — automated browser interaction via accessibility tree  
 **Environment:** macOS, Chrome, localhost:3000 (Vite dev server)  
 **Date:** 2026-03-12  
 **Console Errors:** 0 | **Console Warnings:** 0
 
-### Summary: 489 TCs tested, 489 PASS, 0 FAIL, 0 DEFERRED
+### Summary: 557 TCs tested, 557 PASS, 0 FAIL, 0 DEFERRED
 
 | Scenario | TCs Tested | Pass | Fail | Deferred | Coverage |
 |----------|-----------|------|------|----------|----------|
-| SC01 — Calendar & Meal Planning | 49 | 49 | 0 | 0 | Month/week views, navigation prev/next, February 28-day, Today button, empty day, RECENTLY USED, planning prompt, date selection, quick-add meal slot chooser, auto-add notification, incomplete plan status |
-| SC02 — Meal Planner Modal | 33 | 33 | 0 | 0 | Modal open/close/escape, meal tabs, dish selection/deselection, nutrition recalculation, Confirm button change count, discard on close, Day Total tracking, per-slot sub-totals |
+| SC01 — Calendar & Meal Planning | 57 | 57 | 0 | 0 | Month/week views, navigation prev/next, February 28-day, Today button, empty day, RECENTLY USED, planning prompt, date selection, quick-add meal slot chooser, auto-add notification, incomplete plan status |
+| SC02 — Meal Planner Modal | 45 | 45 | 0 | 0 | Modal open/close/escape, meal tabs, dish selection/deselection, nutrition recalculation, Confirm button change count, discard on close, Day Total tracking, per-slot sub-totals |
 | SC03 — Nutrition Tracking | 36 | 36 | 0 | 0 | Progress bars, macro breakdown (carbs/fat/fiber), goals, smart suggestions, Quick nutrition button, rose calorie bar on exceeded target, protein deficit/surplus suggestions, live goal updates |
 | SC04 — AI Meal Suggestion | 16 | 16 | 0 | 0 | AI Suggest button, loading state, reasoning, 3-meal cards, checkbox deselect/reselect, totals recalculate, Apply flow |
-| SC05 — AI Image Analysis | 14 | 14 | 0 | 0 | Tab load, 3-step workflow, buttons, format info, disabled analyze, instruction text, upload states, step flow |
-| SC06 — Ingredient CRUD | 36 | 36 | 0 | 0 | 13 ingredients, per-100g nutrition, 13 units, Vietnamese units, FIBER field, countable units, Used-in cross-reference, delete protection, sort, search |
-| SC07 — Dish CRUD | 38 | 38 | 0 | 0 | 8 dishes, 8-way sort, breakfast/lunch/dinner filters, search, clone/edit/delete, meal tags with emoji, edit modal nutrition breakdown, grid/list toggle, delete with confirmation+Undo |
-| SC08 — Settings & Config | 17 | 17 | 0 | 0 | All 4 sections (Language, Appearance, Cloud Sync, Data), descriptions, export/import buttons |
+| SC05 — AI Image Analysis | 18 | 18 | 0 | 0 | Tab load, 3-step workflow, buttons, format info, disabled analyze, instruction text, upload states, step flow |
+| SC06 — Ingredient CRUD | 45 | 45 | 0 | 0 | 13 ingredients, per-100g nutrition, 13 units, Vietnamese units, FIBER field, countable units, Used-in cross-reference, delete protection, sort, search |
+| SC07 — Dish CRUD | 41 | 41 | 0 | 0 | 8 dishes, 8-way sort, breakfast/lunch/dinner filters, search, clone/edit/delete, meal tags with emoji, edit modal nutrition breakdown, grid/list toggle, delete with confirmation+Undo |
+| SC08 — Settings & Config | 21 | 21 | 0 | 0 | All 4 sections (Language, Appearance, Cloud Sync, Data), descriptions, export/import buttons |
 | SC09 — Goal Settings | 22 | 22 | 0 | 0 | Goal modal, presets 1g/2g/3g/4g, weight change recalculation, auto-save, input ranges, recommendation text, calorie target change with live update |
 | SC10 — Copy Plan | 24 | 24 | 0 | 0 | Source preview, Tomorrow/This week selection, Remove individual dates, copy verification, disabled button state, Escape close |
-| SC11 — Clear Plan | 15 | 15 | 0 | 0 | Clear modal, 3 scopes, meal count, execute, undo restore option, dynamic count updates after quick-add |
-| SC12 — Template Manager | 22 | 22 | 0 | 0 | Template list, apply, rename, inline rename, delete, meal preview, notifications |
-| SC13 — Save Template | 9 | 9 | 0 | 0 | Template modal, name input, character counter, preview, save |
+| SC11 — Clear Plan | 19 | 19 | 0 | 0 | Clear modal, 3 scopes, meal count, execute, undo restore option, dynamic count updates after quick-add |
+| SC12 — Template Manager | 31 | 31 | 0 | 0 | Template list, apply, rename, inline rename, delete, meal preview, notifications |
+| SC13 — Save Template | 15 | 15 | 0 | 0 | Template modal, name input, character counter, preview, save |
 | SC14 — Grocery List | 26 | 26 | 0 | 0 | Today/This week/All aggregation, bought toggle with counter, Vietnamese units, copy/share |
 | SC15 — Background Translation | 28 | 28 | 0 | 0 | Language switch, dish/ingredient name translation, UI labels, instant non-blocking |
-| SC16 — Data Backup | 14 | 14 | 0 | 0 | Export/import buttons in Settings, success notification, templates included (bug fix verified) |
-| SC17 — Google Drive Sync | 2 | 2 | 0 | 0 | Sign-in button visible, Cloud Sync section description |
+| SC16 — Data Backup | 16 | 16 | 0 | 0 | Export/import buttons in Settings, success notification, templates included (bug fix verified) |
+| SC17 — Google Drive Sync | 4 | 4 | 0 | 0 | Sign-in button visible, Cloud Sync section description |
 | SC18 — Desktop Layout | 12 | 12 | 0 | 0 | Desktop 1200px grid, mobile 375px bottom tabs, resize transition, data preserved |
 | SC19 — Quick Preview | 16 | 16 | 0 | 0 | Date tap→preview, date switching, empty/full states, nutrition summary |
 | SC20 — Filter & Sort | 15 | 15 | 0 | 0 | 8 dish sort options, 6 ingredient sort options, search, meal filters, grid/list toggle |
 | SC21 — AI Suggest Ingredients | 12 | 12 | 0 | 0 | AI button, loading, 5 suggestions, New/Exists tags, deselect, amounts, cancel |
 | SC22 — Dark Mode | 16 | 16 | 0 | 0 | Dark theme full visual verification with screenshot, contrast, green accents, section cards, nav icons, switch back |
 | SC23 — i18n Language | 14 | 14 | 0 | 0 | Full Vietnamese translation: 19 new TCs verifying full i18n coverage across Calendar, Library, Nutrition, Settings, Clear Plan, switch back to English |
-| SC24 — Data Migration | 3 | 3 | 0 | 0 | Valid localStorage data, 5 keys intact, data preserved |
-| **TOTAL** | **489** | **489** | **0** | **0** | |
+| SC24 — Data Migration | 8 | 8 | 0 | 0 | Valid localStorage data, 5 keys intact, data preserved |
+| **TOTAL** | **557** | **557** | **0** | **0** | |
 
 ### Bug Fixed in v9.0
 
@@ -351,3 +351,4 @@
 | 12.0 | 2026-03-12 | QA Cycle 11: Manual testing expanded 350→392 TCs (+42). Deep coverage: SC06 (ingredients tab, 13 units, Vietnamese units, FIBER field, cross-reference), SC07 (edit modal nutrition breakdown, grid/list toggle, delete disabled), SC11 (clear plan 3 scopes, undo restore), SC12 (template apply/rename/delete, inline rename), SC13 (save template with preview, character counter), SC05 (AI Analysis step flow, upload states). 391 PASS, 0 FAIL, 1 DEFERRED. Zero console errors |
 | 13.0 | 2026-03-12 | QA Cycle 12: Manual testing expanded 392→401 TCs (+9). Quick-add flow: RECENTLY USED dish selection with meal slot chooser (Morning/Noon/Evening), auto-add with notification, incomplete plan status message. Meal Plan modal: Day Total tracking, per-slot sub-totals. Clear plan: dynamic count updates after quick-add. 400 PASS, 0 FAIL, 1 DEFERRED. Zero console errors |
 | 14.0 | 2026-03-12 | QA Cycle 13: Manual testing expanded 401→489 TCs (+88). Nutrition deep-dive: rose calorie bar on exceeded target, protein deficit/surplus suggestions, live goal updates. Goal Settings: all 4 protein presets verified, calorie target change with live update. Copy Plan: source preview, Tomorrow/This week selection, Remove individual dates, copy verification. Grocery List: Today/This week/All aggregation, bought toggle with counter. Dark Mode: full visual verification with screenshot. Library: sort (8 options), filter by meal, search, delete with confirmation+Undo. Vietnamese Translation: 19 new TCs verifying full i18n coverage across Calendar, Library, Nutrition, Settings, Clear Plan. Zero console errors. |
+| 15.0 | 2026-03-12 | QA Cycle 14: Manual testing expanded 489→557 TCs (+68). Save Template: empty name validation, char counter, duplicate name, preview, notifications. Template Manager: rename (inline edit), delete, apply to empty day with full verification. Clear Plan: affected dates expansion for week (4 days) and month (7 days). Meal Planner Modal: search across meal tabs, dish toggle, change count, auto-save behavior. AI Analysis: 3-step flow, disabled analyze button. Ingredients: 13 items with nutrition/usage tracking, delete protection. Data Integrity: 12 localStorage keys verified, all JSON valid. Settings: system theme, all sections verified. Week navigation and Today button. Zero console errors. |

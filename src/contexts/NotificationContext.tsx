@@ -61,16 +61,20 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
   const duration = toast.duration ?? DEFAULT_DURATION[toast.type];
   const [isExiting, setIsExiting] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDismiss = useCallback(() => {
     setIsExiting(true);
-    setTimeout(() => onDismiss(toast.id), 300);
+    exitTimerRef.current = setTimeout(() => onDismiss(toast.id), 300);
   }, [onDismiss, toast.id]);
 
   useEffect(() => {
     timerRef.current = setTimeout(handleDismiss, duration);
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      clearTimeout(timerRef.current);
+      clearTimeout(exitTimerRef.current);
+    };
   }, [duration, handleDismiss]);
 
   // Pause/resume auto-dismiss on hover via native DOM listeners
