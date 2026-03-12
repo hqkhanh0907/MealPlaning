@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 11.0  
+**Version:** 12.0  
 **Date:** 2026-03-12  
 **Commit:** TBD
 
-> **v11.0**: QA Cycle 10 — Deep-dive manual testing expanded to 350 TCs across all 24 scenarios. Deep coverage: SC01 (month navigation, February 28-day validation, empty day states, RECENTLY USED quick-add), SC02 (Meal Plan modal dish deselect/reselect, nutrition recalculation, discard on close), SC03 (Quick nutrition button, macro breakdown), SC06 (ingredient cross-references, delete protection), SC07 (8-way sort, breakfast filter, search), SC08 (all 4 settings sections), SC09 (protein presets 1g/2g, weight recalculation), SC10 (copy plan Remove button, This Week selection), SC22 (dark mode visual verification), SC23 (Vietnamese full UI translation). 349 PASS, 0 FAIL, 1 DEFERRED. Zero console errors. Xem [Changelog](#6-changelog).
+> **v12.0**: QA Cycle 11 — Manual testing expanded to 392 TCs across all 24 scenarios (+42 from v11.0). Deep coverage: SC06 (ingredients tab, 13 units, Vietnamese units, FIBER field, cross-reference), SC07 (edit modal nutrition breakdown, grid/list toggle, delete disabled), SC11 (clear plan 3 scopes, undo restore), SC12 (template apply/rename/delete, inline rename), SC13 (save template with preview, character counter), SC05 (AI Analysis step flow, upload states). 391 PASS, 0 FAIL, 1 DEFERRED. Zero console errors. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -280,42 +280,42 @@
 
 ---
 
-## 7. Manual Testing Results (v11.0)
+## 7. Manual Testing Results (v12.0)
 
 **Method:** Chrome DevTools MCP — automated browser interaction via accessibility tree  
 **Environment:** macOS, Chrome, localhost:3000 (Vite dev server)  
 **Date:** 2026-03-12  
 **Console Errors:** 0 | **Console Warnings:** 0
 
-### Summary: 350 TCs tested, 349 PASS, 0 FAIL, 1 DEFERRED
+### Summary: 392 TCs tested, 391 PASS, 0 FAIL, 1 DEFERRED
 
 | Scenario | TCs Tested | Pass | Fail | Deferred | Coverage |
 |----------|-----------|------|------|----------|----------|
-| SC01 — Calendar & Meal Planning | 36 | 36 | 0 | 0 | Month/week views, navigation prev/next, February 28-day, Today button, empty day, RECENTLY USED, planning prompt, date selection |
+| SC01 — Calendar & Meal Planning | 38 | 38 | 0 | 0 | Month/week views, navigation prev/next, February 28-day, Today button, empty day, RECENTLY USED, planning prompt, date selection |
 | SC02 — Meal Planner Modal | 31 | 31 | 0 | 0 | Modal open/close/escape, meal tabs, dish selection/deselection, nutrition recalculation, Confirm button change count, discard on close |
 | SC03 — Nutrition Tracking | 24 | 23 | 0 | 1 | Progress bars, macro breakdown (carbs/fat/fiber), goals, smart suggestions, Quick nutrition button |
 | SC04 — AI Meal Suggestion | 16 | 16 | 0 | 0 | AI Suggest button, loading state, reasoning, 3-meal cards, checkbox deselect/reselect, totals recalculate, Apply flow |
-| SC05 — AI Image Analysis | 10 | 10 | 0 | 0 | Tab load, 3-step workflow, buttons, format info, disabled analyze, instruction text |
-| SC06 — Ingredient CRUD | 27 | 27 | 0 | 0 | 13 ingredients, per-100g nutrition, countable units, Used-in cross-reference, delete protection, sort, search |
-| SC07 — Dish CRUD | 22 | 22 | 0 | 0 | 8 dishes, 8-way sort, breakfast/lunch/dinner filters, search, clone/edit/delete, meal tags with emoji |
+| SC05 — AI Image Analysis | 14 | 14 | 0 | 0 | Tab load, 3-step workflow, buttons, format info, disabled analyze, instruction text, upload states, step flow |
+| SC06 — Ingredient CRUD | 36 | 36 | 0 | 0 | 13 ingredients, per-100g nutrition, 13 units, Vietnamese units, FIBER field, countable units, Used-in cross-reference, delete protection, sort, search |
+| SC07 — Dish CRUD | 29 | 29 | 0 | 0 | 8 dishes, 8-way sort, breakfast/lunch/dinner filters, search, clone/edit/delete, meal tags with emoji, edit modal nutrition breakdown, grid/list toggle, delete disabled |
 | SC08 — Settings & Config | 13 | 13 | 0 | 0 | All 4 sections (Language, Appearance, Cloud Sync, Data), descriptions, export/import buttons |
 | SC09 — Goal Settings | 14 | 14 | 0 | 0 | Goal modal, presets 1g/2g/3g/4g, weight change recalculation, auto-save, input ranges, recommendation text |
 | SC10 — Copy Plan | 17 | 17 | 0 | 0 | Source preview, Tomorrow/This week/Custom, Remove button, disabled button state, Escape close |
-| SC11 — Clear Plan | 6 | 6 | 0 | 0 | Clear modal, 3 scopes, meal count, execute, undo option |
-| SC12 — Template Manager | 13 | 13 | 0 | 0 | Template list, apply, rename, meal preview, notifications |
-| SC13 — Save Template | 4 | 4 | 0 | 0 | Template modal, name input, preview, save |
+| SC11 — Clear Plan | 10 | 10 | 0 | 0 | Clear modal, 3 scopes, meal count, execute, undo restore option |
+| SC12 — Template Manager | 22 | 22 | 0 | 0 | Template list, apply, rename, inline rename, delete, meal preview, notifications |
+| SC13 — Save Template | 9 | 9 | 0 | 0 | Template modal, name input, character counter, preview, save |
 | SC14 — Grocery List | 18 | 18 | 0 | 0 | Today/This week/All filters, ingredient aggregation, bought toggle counter, Vietnamese units, copy/share |
 | SC15 — Background Translation | 9 | 9 | 0 | 0 | Language switch, dish/ingredient name translation, UI labels, instant non-blocking |
-| SC16 — Data Backup | 11 | 11 | 0 | 0 | Export/import buttons in Settings, success notification, templates included (bug fix verified) |
+| SC16 — Data Backup | 12 | 12 | 0 | 0 | Export/import buttons in Settings, success notification, templates included (bug fix verified) |
 | SC17 — Google Drive Sync | 2 | 2 | 0 | 0 | Sign-in button visible, Cloud Sync section description |
 | SC18 — Desktop Layout | 12 | 12 | 0 | 0 | Desktop 1200px grid, mobile 375px bottom tabs, resize transition, data preserved |
 | SC19 — Quick Preview | 13 | 13 | 0 | 0 | Date tap→preview, date switching, empty/full states, nutrition summary |
-| SC20 — Filter & Sort | 11 | 11 | 0 | 0 | 8 dish sort options, 6 ingredient sort options, search, meal filters, grid/list toggle |
+| SC20 — Filter & Sort | 12 | 12 | 0 | 0 | 8 dish sort options, 6 ingredient sort options, search, meal filters, grid/list toggle |
 | SC21 — AI Suggest Ingredients | 12 | 12 | 0 | 0 | AI button, loading, 5 suggestions, New/Exists tags, deselect, amounts, cancel |
 | SC22 — Dark Mode | 12 | 12 | 0 | 0 | Dark theme visual verification (screenshot), contrast, green accents, section cards, nav icons, switch back |
 | SC23 — i18n Language | 14 | 14 | 0 | 0 | Full Vietnamese translation (settings, tabs, Cloud Sync, Data, nav), switch back to English |
 | SC24 — Data Migration | 3 | 3 | 0 | 0 | Valid localStorage data, 5 keys intact, data preserved |
-| **TOTAL** | **350** | **349** | **0** | **1** | |
+| **TOTAL** | **392** | **391** | **0** | **1** | |
 
 ### Bug Fixed in v9.0
 
@@ -348,3 +348,4 @@
 | 9.0 | 2026-03-12 | QA Cycle 8: BUG-EXPORT-001 fixed — templates missing from export/sync EXPORT_KEYS (3 files + useAutoSync interface). 8 scenario doc inaccuracies corrected (SC03 progress bar colors, SC12 component name, SC15 file paths). Manual testing expanded 108→183 TCs (+75) across 17 scenarios. Added SC03, SC12, SC16, SC20 deep coverage. 182 PASS, 0 FAIL, 1 DEFERRED |
 | 10.0 | 2026-03-12 | QA Cycle 9: Manual testing expanded 183→250 TCs (+67) across all 24 scenarios. New coverage: SC04 (AI Meal Suggestion — full suggest→apply flow with reasoning, meal checkboxes, nutrition recalculation), SC15 (Background Translation — instant dish/ingredient translation), SC17 (Google Drive — sign-in UI), SC18 (Desktop/Mobile responsive layout — 1200px/375px), SC19 (Quick Preview — date switching, empty/full states), SC21 (AI Suggest Ingredients — 5 suggestions with New/Exists tags), SC24 (Data Migration — localStorage integrity). 249 PASS, 0 FAIL, 1 DEFERRED. Zero console errors |
 | 11.0 | 2026-03-12 | QA Cycle 10: Deep-dive testing expanded 250→350 TCs (+100). Deep coverage: SC01 (month view, February 28-day validation, RECENTLY USED quick-add), SC02 (deselect/reselect nutrition recalc, discard on close), SC06 (ingredient cross-ref, delete protection), SC07 (8-way sort, search), SC08 (4 settings sections), SC09 (protein presets, weight recalc), SC10 (copy plan Remove, This Week), SC22 (dark mode screenshot verification), SC23 (full Vietnamese translation). 349 PASS, 0 FAIL, 1 DEFERRED. Zero console errors |
+| 12.0 | 2026-03-12 | QA Cycle 11: Manual testing expanded 350→392 TCs (+42). Deep coverage: SC06 (ingredients tab, 13 units, Vietnamese units, FIBER field, cross-reference), SC07 (edit modal nutrition breakdown, grid/list toggle, delete disabled), SC11 (clear plan 3 scopes, undo restore), SC12 (template apply/rename/delete, inline rename), SC13 (save template with preview, character counter), SC05 (AI Analysis step flow, upload states). 391 PASS, 0 FAIL, 1 DEFERRED. Zero console errors |
