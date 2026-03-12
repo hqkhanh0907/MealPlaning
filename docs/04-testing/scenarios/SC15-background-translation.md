@@ -14,8 +14,9 @@ Background Translation dịch toàn bộ nội dung app (labels, dish names, ing
 
 | Component/Hook | File | Vai trò |
 |----------------|------|---------|
-| TranslateQueue | store/translateQueue.ts | Zustand store |
-| useTranslation | hooks/useTranslation.ts | Translation logic |
+| TranslateQueueService | services/translateQueueService.ts | Queue management |
+| useTranslateWorker | hooks/useTranslateWorker.ts | Worker orchestration |
+| useTranslateProcessor | hooks/useTranslateProcessor.ts | Translation processing |
 | TranslationProgress | components/ | Progress indicator |
 | geminiService | services/geminiService.ts | AI translation |
 

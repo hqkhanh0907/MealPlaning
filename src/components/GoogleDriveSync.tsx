@@ -7,7 +7,7 @@ import { SyncConflictModal } from './modals/SyncConflictModal';
 import * as driveService from '../services/googleDriveService';
 import type { SyncStatus } from '../types';
 
-const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile'];
+const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
 const LAST_SYNC_KEY = 'mp-last-sync-at';
 
 const buildExportData = (): Record<string, unknown> => {

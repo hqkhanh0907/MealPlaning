@@ -307,6 +307,7 @@ export default function App() {
     dishes,
     dayPlans: rawDayPlans,
     userProfile,
+    templates: mealTemplates.templates,
     onImportData: handleImportData,
   });
 

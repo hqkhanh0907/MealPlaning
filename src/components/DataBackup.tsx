@@ -11,7 +11,7 @@ interface DataBackupProps {
   onImport: (data: Record<string, unknown>) => void;
 }
 
-const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile'];
+const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
 
 const buildExportData = (): Record<string, unknown> => {
   const data: Record<string, unknown> = {};

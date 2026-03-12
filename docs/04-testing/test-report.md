@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 8.0  
+**Version:** 9.0  
 **Date:** 2026-03-12  
 **Commit:** TBD
 
-> **v8.0**: QA Cycle 7 — Comprehensive manual testing via Chrome DevTools MCP. 108 test cases across 14 scenarios manually verified. All 108 PASS, 0 FAIL. Zero console errors/warnings across all tab navigations. 24 expanded scenario docs (SC01–SC24, 2,520 TCs total). UX research with 120 proposals. Doc fixes: PRD F-24 rename, Android API alignment, e2e spec count. Xem [Changelog](#6-changelog).
+> **v9.0**: QA Cycle 8 — Fixed critical code bug: templates not included in Data Backup export and Google Drive sync (added 'meal-templates' to EXPORT_KEYS in DataBackup.tsx, GoogleDriveSync.tsx, useAutoSync.ts). Fixed 8 scenario doc inaccuracies (SC03 progress bar colors, SC12 component name, SC15 file paths, SC16/SC17 template export). Manual testing expanded to 183 TCs across 17 scenarios — all 182 PASS, 1 DEFERRED, 0 FAIL. Zero console errors. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -21,7 +21,7 @@
 | Code Coverage (Funcs) | **99.41%** ✅ |
 | Code Coverage (Lines) | **100%** ✅ |
 | Bugs mở | **0** ✅ |
-| Bugs đã đóng | **9** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001) |
+| Bugs đã đóng | **10** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001, BUG-EXPORT-001) |
 
 ---
 
@@ -280,32 +280,49 @@
 
 ---
 
-## 7. Manual Testing Results (v8.0)
+## 7. Manual Testing Results (v9.0)
 
 **Method:** Chrome DevTools MCP — automated browser interaction via accessibility tree  
 **Environment:** macOS, Chrome, localhost:3000 (Vite dev server)  
 **Date:** 2026-03-12  
 **Console Errors:** 0 | **Console Warnings:** 0
 
-### Summary: 108 TCs tested, 108 PASS, 0 FAIL
+### Summary: 183 TCs tested, 182 PASS, 0 FAIL, 1 DEFERRED
 
-| Scenario | TCs Tested | Pass | Fail | Coverage |
-|----------|-----------|------|------|----------|
-| SC01 — Calendar & Meal Planning | 22 | 22 | 0 | Calendar grid, date selection, meal slots, nutrition bars, week view, more actions |
-| SC02 — Meal Planner Modal | 18 | 18 | 0 | Modal open/close, meal tabs, dish selection, search, nutrition preview, save |
-| SC05 — AI Image Analysis | 5 | 5 | 0 | Tab load, 3-step workflow, upload/photo buttons, analyze state |
-| SC06 — Ingredient CRUD | 10 | 10 | 0 | Ingredient list, nutrition data, cross-reference, delete protection |
-| SC07 — Dish CRUD | 9 | 9 | 0 | Dish list, meal filters, sort options, clone/edit/delete |
-| SC08 — Settings & Config | 5 | 5 | 0 | Settings page, language, appearance, cloud sync, data sections |
-| SC09 — Goal Settings | 6 | 6 | 0 | Goal modal, weight/protein/calorie inputs, presets, auto-save |
-| SC10 — Copy Plan | 9 | 9 | 0 | Copy modal, source preview, quick select, execute, verify target |
-| SC11 — Clear Plan | 6 | 6 | 0 | Clear modal, 3 scopes, meal count, execute, undo option |
-| SC13 — Save Template | 4 | 4 | 0 | Template modal, name input, preview, save |
-| SC14 — Grocery List | 6 | 6 | 0 | Auto-generation, time filters, copy/share, ingredient display |
-| SC20 — Filter & Sort | 1 | 1 | 0 | Default sort Name A-Z |
-| SC22 — Dark Mode | 3 | 3 | 0 | Dark theme activation, contrast, selected states |
-| SC23 — i18n Language | 4 | 4 | 0 | Vietnamese switch, tab translation, instant change |
-| **TOTAL** | **108** | **108** | **0** | |
+| Scenario | TCs Tested | Pass | Fail | Deferred | Coverage |
+|----------|-----------|------|------|----------|----------|
+| SC01 — Calendar & Meal Planning | 22 | 22 | 0 | 0 | Calendar grid, date selection, meal slots, nutrition bars, week view, more actions |
+| SC02 — Meal Planner Modal | 18 | 18 | 0 | 0 | Modal open/close, meal tabs, dish selection, search, nutrition preview, save |
+| SC03 — Nutrition Tracking | 19 | 18 | 0 | 1 | Zero plan, add/remove dish, progress bars (orange/blue), goals modal, target calculations |
+| SC05 — AI Image Analysis | 5 | 5 | 0 | 0 | Tab load, 3-step workflow, upload/photo buttons, analyze state |
+| SC06 — Ingredient CRUD | 18 | 18 | 0 | 0 | Ingredient list, nutrition per 100g, used-in cross-ref, delete protection, search, sort, countable units |
+| SC07 — Dish CRUD | 14 | 14 | 0 | 0 | Dish list, meal filters, sort options, clone/edit/delete, meal tags, ingredient count |
+| SC08 — Settings & Config | 5 | 5 | 0 | 0 | Settings page, language, appearance, cloud sync, data sections |
+| SC09 — Goal Settings | 6 | 6 | 0 | 0 | Goal modal, weight/protein/calorie inputs, presets, auto-save |
+| SC10 — Copy Plan | 9 | 9 | 0 | 0 | Copy modal, source preview, quick select, execute, verify target |
+| SC11 — Clear Plan | 6 | 6 | 0 | 0 | Clear modal, 3 scopes, meal count, execute, undo option |
+| SC12 — Template Manager | 13 | 13 | 0 | 0 | Template list, apply, rename, meal preview, notifications |
+| SC13 — Save Template | 4 | 4 | 0 | 0 | Template modal, name input, preview, save |
+| SC14 — Grocery List | 12 | 12 | 0 | 0 | Auto-generation, time filters (today/week/all), copy/share, ingredient aggregation |
+| SC16 — Data Backup | 9 | 9 | 0 | 0 | Export/import buttons, success notification, includes templates (bug fix verified) |
+| SC20 — Filter & Sort | 8 | 8 | 0 | 0 | 8 sort options, search, meal filters, grid/list toggle |
+| SC22 — Dark Mode | 7 | 7 | 0 | 0 | Dark theme activation, contrast, selected states, light/system switch |
+| SC23 — i18n Language | 8 | 8 | 0 | 0 | Vietnamese/English switch, full UI translation, tab names, persistence |
+| **TOTAL** | **183** | **182** | **0** | **1** | |
+
+### Bug Fixed in v9.0
+
+#### BUG-EXPORT-001: Templates not included in Data Backup/Sync
+
+**Description:** `meal-templates` localStorage key was missing from `EXPORT_KEYS` constant in DataBackup.tsx, GoogleDriveSync.tsx, and useAutoSync.ts. This meant templates were never exported, imported, or synced to Google Drive.
+
+**Root Cause:** EXPORT_KEYS only contained 4 keys; templates were added as a feature later but never added to the export list.
+
+**Fix:** Added `'meal-templates'` to EXPORT_KEYS in all 3 files. Also added `templates` to `UseAutoSyncOptions` interface and dependency array to trigger auto-sync on template changes.
+
+**Files Changed:** `src/components/DataBackup.tsx`, `src/components/GoogleDriveSync.tsx`, `src/hooks/useAutoSync.ts`, `src/App.tsx`, `src/__tests__/useAutoSync.test.tsx`
+
+**Verification:** 1201/1201 unit tests pass, 100% line coverage, lint clean.
 
 ---
 
@@ -321,3 +338,4 @@
 | 6.0 | 2026-03-08 | QA Cycle 5: Instant food translation via static dictionary (200+ entries). BUG-TRANSLATE-001 fixed (all EN names were VI copies). New files: foodDictionary.ts, foodDictionary.test.ts. Unit tests 995→1046 (+51), test files 47→49 (+2). Coverage: 99.53% Stmts, 99.66% Funcs, 100% Lines, 92.30% Branch |
 | 7.0 | 2026-03-11 | QA Cycle 6: Google Drive sync, Cloud auth (AuthContext), Desktop layout, Meal templates, Copy plan, AI suggest ingredients, Filter bottom sheet, Quick preview panel, Schedule components, Sync conflict modal. Unit tests 1046→1201 (+155), test files 49→57 (+8). Coverage: 99.46% Stmts, 99.41% Funcs, 100% Lines, 92.51% Branch. Chrome DevTools QA: 0 errors, 0 warnings across all 5 tabs |
 | 8.0 | 2026-03-12 | QA Cycle 7: Comprehensive manual testing via Chrome DevTools MCP — 108 TCs across 14 scenarios (SC01–SC14, SC20, SC22, SC23) all PASS. 24 expanded scenario docs (SC01–SC24, 2,520 TCs total) created in docs/04-testing/scenarios/. UX research document with 120 proposals. Doc fixes: PRD F-24 renamed to "Quick Copy Plan", Android API version aligned (minSdk 24, targetSdk 36), e2e-setup spec count 10→24. Zero console errors/warnings. No code bugs found |
+| 9.0 | 2026-03-12 | QA Cycle 8: BUG-EXPORT-001 fixed — templates missing from export/sync EXPORT_KEYS (3 files + useAutoSync interface). 8 scenario doc inaccuracies corrected (SC03 progress bar colors, SC12 component name, SC15 file paths). Manual testing expanded 108→183 TCs (+75) across 17 scenarios. Added SC03, SC12, SC16, SC20 deep coverage. 182 PASS, 0 FAIL, 1 DEFERRED |

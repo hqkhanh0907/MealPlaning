@@ -28,7 +28,7 @@ Nutrition Tracking bao gồm toàn bộ luồng tính toán, hiển thị và th
 ## Quy tắc nghiệp vụ
 
 1. Calories round to integer, protein/carbs/fat to 1 decimal
-2. Progress bar: green (<=80%), yellow (80-100%), red (>100%)
+2. Progress bar: calories — orange (<=100%), rose/red (>100%); protein — always blue
 3. Zero division: 0 dishes = 0 nutrition, 0 target = no percentage
 4. targetProtein = weight x proteinRatio
 5. Nutrition memoized (useMemo) to avoid recalc on unrelated renders
@@ -50,9 +50,9 @@ Nutrition Tracking bao gồm toàn bộ luồng tính toán, hiển thị và th
 | TC_NUT_11 | Progress bar 50% | Positive | P2 |
 | TC_NUT_12 | Progress bar 100% | Positive | P2 |
 | TC_NUT_13 | Progress bar 150% (overflow) | Boundary | P1 |
-| TC_NUT_14 | Progress bar green khi <=80% | Positive | P2 |
-| TC_NUT_15 | Progress bar yellow khi 80-100% | Positive | P2 |
-| TC_NUT_16 | Progress bar red khi >100% | Positive | P2 |
+| TC_NUT_14 | Progress bar calories orange khi <=100% | Positive | P2 |
+| TC_NUT_15 | Progress bar calories rose khi >100% | Positive | P2 |
+| TC_NUT_16 | Progress bar protein always blue | Positive | P2 |
 | TC_NUT_17 | Target cal hiển thị từ userProfile | Positive | P1 |
 | TC_NUT_18 | Target protein = weight x ratio | Positive | P1 |
 | TC_NUT_19 | Change target → bars update | Positive | P1 |
@@ -160,7 +160,7 @@ Nutrition Tracking bao gồm toàn bộ luồng tính toán, hiển thị và th
 ##### TC_NUT_11–16: Progress Bar States
 - TC_NUT_11-12: Bars at 50% and 100% width
 - TC_NUT_13: 150% → bar capped at container, number shows actual
-- TC_NUT_14-16: Color coding: green/yellow/red
+- TC_NUT_14-16: Color coding: calories orange/rose, protein blue
 
 ##### TC_NUT_17–21: Goal Settings
 - TC_NUT_17-18: Targets display correctly from profile

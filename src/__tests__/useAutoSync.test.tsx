@@ -34,6 +34,7 @@ const defaultOptions = {
   dishes: [{ id: '2' }],
   dayPlans: [],
   userProfile: { weight: 70 },
+  templates: [],
   onImportData: vi.fn(),
 };
 

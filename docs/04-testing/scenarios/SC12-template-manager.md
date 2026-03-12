@@ -14,7 +14,7 @@ Template Manager cho phép user quản lý meal plan templates. Templates là im
 
 | Component/Hook | File | Vai trò |
 |----------------|------|---------|
-| TemplateManagerModal | modals/TemplateManagerModal.tsx | UI |
+| TemplateManager | modals/TemplateManager.tsx | UI |
 | useMealTemplate | hooks/useMealTemplate.ts | Template logic |
 
 ## Luồng nghiệp vụ
@@ -66,9 +66,9 @@ Template Manager cho phép user quản lý meal plan templates. Templates là im
 | TC_TM_25 | Modal closes after apply | Positive | P1 |
 | TC_TM_26 | Success notification | Positive | P1 |
 | TC_TM_27 | Multiple templates listed | Positive | P1 |
-| TC_TM_28 | Sort templates by name | Positive | P2 |
-| TC_TM_29 | Sort templates by date | Positive | P2 |
-| TC_TM_30 | Search templates | Positive | P2 |
+| TC_TM_28 | Sort templates by name | Positive | P2 | ⏳ Deferred — Not yet implemented |
+| TC_TM_29 | Sort templates by date | Positive | P2 | ⏳ Deferred — Not yet implemented |
+| TC_TM_30 | Search templates | Positive | P2 | ⏳ Deferred — Not yet implemented |
 | TC_TM_31 | Template with 1 meal | Positive | P2 |
 | TC_TM_32 | Template with 3 meals (full day) | Positive | P1 |
 | TC_TM_33 | Template with 21 meals (full week) | Positive | P1 |
@@ -120,8 +120,8 @@ Template Manager cho phép user quản lý meal plan templates. Templates là im
 | TC_TM_79 | Template nutrition badge | Positive | P2 |
 | TC_TM_80 | Apply loading state | Positive | P2 |
 | TC_TM_81 | Delete loading state | Positive | P3 |
-| TC_TM_82 | Template favorites/pin | Positive | P3 |
-| TC_TM_83 | Template categories | Positive | P3 |
+| TC_TM_82 | Template favorites/pin | Positive | P3 | ⏳ Deferred — Not yet implemented |
+| TC_TM_83 | Template categories | Positive | P3 | ⏳ Deferred — Not yet implemented |
 | TC_TM_84 | Template sharing | Positive | P3 |
 | TC_TM_85 | Template from AI suggestion | Positive | P3 |
 | TC_TM_86 | Duplicate template | Positive | P3 |

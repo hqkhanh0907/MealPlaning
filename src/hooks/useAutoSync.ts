@@ -3,7 +3,7 @@ import { useAuth } from './useAuth';
 import * as driveService from '../services/googleDriveService';
 import type { SyncStatus } from '../types';
 
-const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile'];
+const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
 const DEBOUNCE_DELAY_MS = 3000;
 const LAST_SYNC_KEY = 'mp-last-sync-at';
 
@@ -23,6 +23,7 @@ interface UseAutoSyncOptions {
   dishes: unknown[];
   dayPlans: unknown[];
   userProfile: unknown;
+  templates: unknown[];
   onImportData: (data: Record<string, unknown>) => void;
 }
 
@@ -128,6 +129,7 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     options.dishes,
     options.dayPlans,
     options.userProfile,
+    options.templates,
     triggerUpload,
   ]);
 
