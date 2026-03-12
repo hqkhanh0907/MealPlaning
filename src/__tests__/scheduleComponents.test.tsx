@@ -5,10 +5,15 @@ import { MealActionBar } from '../components/schedule/MealActionBar';
 import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
 import { MealsSubTab } from '../components/schedule/MealsSubTab';
 import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
+import { MacroChart } from '../components/schedule/MacroChart';
 import type { DayNutritionSummary, Dish, SlotInfo } from '../types';
 
 const makeSlot = (dishIds: string[], cal = 0, pro = 0): SlotInfo => ({
   dishIds, calories: cal, protein: pro, carbs: 0, fat: 0, fiber: 0,
+});
+
+const makeFullSlot = (dishIds: string[], cal: number, pro: number, carbs: number, fat: number): SlotInfo => ({
+  dishIds, calories: cal, protein: pro, carbs, fat, fiber: 0,
 });
 
 const emptyNutrition: DayNutritionSummary = {
@@ -730,5 +735,95 @@ describe('NutritionSubTab', () => {
   it('does not show switch button when meals have data', () => {
     render(<NutritionSubTab {...baseProps} />);
     expect(screen.queryByTestId('btn-switch-to-meals')).not.toBeInTheDocument();
+  });
+
+  it('renders macro chart within nutrition subtab', () => {
+    const nutritionWithMacros: DayNutritionSummary = {
+      breakfast: makeFullSlot(['d1'], 400, 20, 50, 10),
+      lunch: makeFullSlot(['d2'], 600, 30, 70, 15),
+      dinner: makeFullSlot(['d3'], 500, 25, 40, 20),
+    };
+    render(<NutritionSubTab {...baseProps} dayNutrition={nutritionWithMacros} />);
+    expect(screen.getByTestId('macro-chart')).toBeInTheDocument();
+  });
+
+  it('renders macro chart empty state when no nutrition data', () => {
+    render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
+    expect(screen.getByTestId('macro-chart-empty')).toBeInTheDocument();
+  });
+});
+
+// ─── MacroChart ──────────────────────────────────────────────────────
+describe('MacroChart', () => {
+  it('shows empty state when all macros are zero', () => {
+    render(<MacroChart dayNutrition={emptyNutrition} />);
+    expect(screen.getByTestId('macro-chart-empty')).toBeInTheDocument();
+    expect(screen.getByText('Chưa có dữ liệu dinh dưỡng')).toBeInTheDocument();
+  });
+
+  it('renders pie chart with macro percentages', () => {
+    const nutrition: DayNutritionSummary = {
+      breakfast: makeFullSlot(['d1'], 400, 25, 50, 10),
+      lunch: makeFullSlot([], 0, 0, 0, 0),
+      dinner: makeFullSlot([], 0, 0, 0, 0),
+    };
+    render(<MacroChart dayNutrition={nutrition} />);
+    expect(screen.getByTestId('macro-chart')).toBeInTheDocument();
+    expect(screen.getByText('Tỉ lệ dinh dưỡng')).toBeInTheDocument();
+    expect(screen.getByText('Protein')).toBeInTheDocument();
+    expect(screen.getByText('Carbs')).toBeInTheDocument();
+    expect(screen.getByText('Chất béo')).toBeInTheDocument();
+  });
+
+  it('calculates correct macro percentages', () => {
+    const nutrition: DayNutritionSummary = {
+      breakfast: makeFullSlot(['d1'], 500, 50, 50, 0),
+      lunch: makeFullSlot([], 0, 0, 0, 0),
+      dinner: makeFullSlot([], 0, 0, 0, 0),
+    };
+    render(<MacroChart dayNutrition={nutrition} />);
+    // protein: 50g * 4 = 200 cal, carbs: 50g * 4 = 200 cal, fat: 0
+    // total = 400 cal → protein 50%, carbs 50%, fat 0%
+    expect(screen.getByTestId('macro-percent-Protein')).toHaveTextContent('50%');
+    expect(screen.getByTestId('macro-percent-Carbs')).toHaveTextContent('50%');
+    expect(screen.getByTestId('macro-percent-Chất béo')).toHaveTextContent('0%');
+  });
+
+  it('aggregates macros across all meals', () => {
+    const nutrition: DayNutritionSummary = {
+      breakfast: makeFullSlot(['d1'], 200, 10, 20, 5),
+      lunch: makeFullSlot(['d2'], 300, 20, 30, 10),
+      dinner: makeFullSlot(['d3'], 400, 10, 50, 5),
+    };
+    render(<MacroChart dayNutrition={nutrition} />);
+    // protein: 40g, carbs: 100g, fat: 20g
+    // pCal: 160, cCal: 400, fCal: 180 → total: 740
+    // p%: 22, c%: 54, f%: 24
+    expect(screen.getByTestId('macro-percent-Protein')).toHaveTextContent('22%');
+    expect(screen.getByTestId('macro-percent-Carbs')).toHaveTextContent('54%');
+    expect(screen.getByTestId('macro-percent-Chất béo')).toHaveTextContent('24%');
+  });
+
+  it('displays gram values for each macro', () => {
+    const nutrition: DayNutritionSummary = {
+      breakfast: makeFullSlot(['d1'], 500, 30, 60, 15),
+      lunch: makeFullSlot([], 0, 0, 0, 0),
+      dinner: makeFullSlot([], 0, 0, 0, 0),
+    };
+    render(<MacroChart dayNutrition={nutrition} />);
+    expect(screen.getByText('30g')).toBeInTheDocument();
+    expect(screen.getByText('60g')).toBeInTheDocument();
+    expect(screen.getByText('15g')).toBeInTheDocument();
+  });
+
+  it('renders SVG circles for each macro segment', () => {
+    const nutrition: DayNutritionSummary = {
+      breakfast: makeFullSlot(['d1'], 400, 25, 40, 10),
+      lunch: makeFullSlot([], 0, 0, 0, 0),
+      dinner: makeFullSlot([], 0, 0, 0, 0),
+    };
+    const { container } = render(<MacroChart dayNutrition={nutrition} />);
+    const circles = container.querySelectorAll('circle');
+    expect(circles.length).toBe(3);
   });
 });

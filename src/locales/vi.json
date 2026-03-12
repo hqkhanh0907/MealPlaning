@@ -125,6 +125,13 @@
     "planComplete": "Kế hoạch ngày hôm nay đã hoàn tất!",
     "missing": "Bạn còn thiếu..."
   },
+  "macro": {
+    "title": "Tỉ lệ dinh dưỡng",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Chất béo",
+    "noData": "Chưa có dữ liệu dinh dưỡng"
+  },
   "summary": {
     "title": "Dinh dưỡng trong ngày",
     "goal": "Mục tiêu: {{cal}} kcal, {{pro}}g Protein",

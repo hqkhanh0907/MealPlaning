@@ -125,6 +125,13 @@
     "planComplete": "Today's meal plan is complete!",
     "missing": "You're still missing..."
   },
+  "macro": {
+    "title": "Macro Ratio",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "noData": "No nutrition data available"
+  },
   "summary": {
     "title": "Daily nutrition",
     "goal": "Goal: {{cal}} kcal, {{pro}}g Protein",

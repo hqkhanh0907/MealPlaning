@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info, AlertCircle, CheckCircle2, UtensilsCrossed } from 'lucide-react';
 import { Summary } from '../Summary';
+import { MacroChart } from './MacroChart';
 import { DayNutritionSummary } from '../../types';
 import { getDynamicTips, NutritionTip } from '../../utils/tips';
 
@@ -110,6 +111,7 @@ export const NutritionSubTab: React.FC<NutritionSubTabProps> = React.memo(({
         targetProtein={targetProtein}
         onEditGoals={onEditGoals}
       />
+      <MacroChart dayNutrition={dayNutrition} />
       <RecommendationPanel
         weight={userWeight}
         targetCalories={targetCalories}
