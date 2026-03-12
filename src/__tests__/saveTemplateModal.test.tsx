@@ -69,7 +69,7 @@ describe('SaveTemplateModal', () => {
     render(<SaveTemplateModal {...defaultProps} />);
     fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: '  My Template  ' } });
     fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(defaultProps.onSave).toHaveBeenCalledWith('My Template');
+    expect(defaultProps.onSave).toHaveBeenCalledWith('My Template', undefined);
   });
 
   it('shows validation error when submitting empty name', () => {
@@ -91,7 +91,7 @@ describe('SaveTemplateModal', () => {
     const input = screen.getByTestId('input-template-name');
     fireEvent.change(input, { target: { value: 'Enter Template' } });
     fireEvent.keyDown(input, { key: 'Enter' });
-    expect(defaultProps.onSave).toHaveBeenCalledWith('Enter Template');
+    expect(defaultProps.onSave).toHaveBeenCalledWith('Enter Template', undefined);
   });
 
   it('does not submit on other keys', () => {
@@ -126,5 +126,60 @@ describe('SaveTemplateModal', () => {
     const emptyPlan: DayPlan = { date: '2025-01-15', breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] };
     render(<SaveTemplateModal {...defaultProps} currentPlan={emptyPlan} />);
     expect(screen.getByText(/template\.mealsCount/)).toBeInTheDocument();
+  });
+
+  it('adds tag via preset button', () => {
+    render(<SaveTemplateModal {...defaultProps} />);
+    const presetButtons = screen.getAllByRole('button').filter(b => b.textContent?.startsWith('+'));
+    expect(presetButtons.length).toBeGreaterThan(0);
+    fireEvent.click(presetButtons[0]);
+    const tagText = presetButtons[0].textContent?.replace('+ ', '') ?? '';
+    expect(screen.getByText(tagText)).toBeInTheDocument();
+  });
+
+  it('adds custom tag via Enter key', () => {
+    render(<SaveTemplateModal {...defaultProps} />);
+    const tagInput = screen.getByTestId('input-template-tag');
+    fireEvent.change(tagInput, { target: { value: 'MyTag' } });
+    fireEvent.keyDown(tagInput, { key: 'Enter' });
+    expect(screen.getByText('MyTag')).toBeInTheDocument();
+  });
+
+  it('removes tag when X clicked', () => {
+    render(<SaveTemplateModal {...defaultProps} />);
+    const tagInput = screen.getByTestId('input-template-tag');
+    fireEvent.change(tagInput, { target: { value: 'RemoveMe' } });
+    fireEvent.keyDown(tagInput, { key: 'Enter' });
+    expect(screen.getByText('RemoveMe')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('remove-tag-RemoveMe'));
+    expect(screen.queryByText('RemoveMe')).not.toBeInTheDocument();
+  });
+
+  it('passes tags to onSave', () => {
+    render(<SaveTemplateModal {...defaultProps} />);
+    fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: 'Tagged Template' } });
+    const tagInput = screen.getByTestId('input-template-tag');
+    fireEvent.change(tagInput, { target: { value: 'TestTag' } });
+    fireEvent.keyDown(tagInput, { key: 'Enter' });
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    expect(defaultProps.onSave).toHaveBeenCalledWith('Tagged Template', ['TestTag']);
+  });
+
+  it('does not add duplicate tag', () => {
+    render(<SaveTemplateModal {...defaultProps} />);
+    const tagInput = screen.getByTestId('input-template-tag');
+    fireEvent.change(tagInput, { target: { value: 'Dup' } });
+    fireEvent.keyDown(tagInput, { key: 'Enter' });
+    fireEvent.change(tagInput, { target: { value: 'Dup' } });
+    fireEvent.keyDown(tagInput, { key: 'Enter' });
+    expect(screen.getAllByText('Dup').length).toBe(1);
+  });
+
+  it('adds tag via comma key', () => {
+    render(<SaveTemplateModal {...defaultProps} />);
+    const tagInput = screen.getByTestId('input-template-tag');
+    fireEvent.change(tagInput, { target: { value: 'CommaTag' } });
+    fireEvent.keyDown(tagInput, { key: ',' });
+    expect(screen.getByText('CommaTag')).toBeInTheDocument();
   });
 });

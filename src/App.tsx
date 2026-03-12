@@ -79,6 +79,18 @@ export default function App() {
     if (tab === 'ai-analysis') setHasNewAIResult(false);
   }, []);
 
+  const handleGlobalKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+    const tabs: MainTab[] = ['calendar', 'management', 'ai-analysis', 'grocery', 'settings'];
+    const digit = parseInt(e.key, 10);
+    if (digit >= 1 && digit <= 5) {
+      e.preventDefault();
+      handleTabChange(tabs[digit - 1]);
+    }
+  }, [handleTabChange]);
+
   const [activeManagementSubTab, setActiveManagementSubTab] = useState<ManagementSubTab>('dishes');
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
@@ -169,7 +181,7 @@ export default function App() {
   const dayNutrition = useMemo((): DayNutritionSummary => {
     const calc = (dishIds: string[]) => ({
       dishIds,
-      ...calculateDishesNutrition(dishIds, dishes, ingredients),
+      ...calculateDishesNutrition(dishIds, dishes, ingredients, currentPlan.servings),
     });
     return {
       breakfast: calc(currentPlan.breakfastDishIds),
@@ -227,6 +239,19 @@ export default function App() {
     }
   }, [selectedDate, setDayPlans, dishes, notify, t, i18n.language]);
 
+  const handleUpdateServings = useCallback((dishId: string, count: number) => {
+    setDayPlans(prev => prev.map(p => {
+      if (p.date !== selectedDate) return p;
+      const servings = { ...(p.servings ?? {}) };
+      if (count <= 1) {
+        delete servings[dishId];
+      } else {
+        servings[dishId] = count;
+      }
+      return { ...p, servings };
+    }));
+  }, [selectedDate, setDayPlans]);
+
   const isDishUsed = useCallback((dishId: string) =>
     dayPlans.some(p =>
       p.breakfastDishIds.includes(dishId) ||
@@ -269,8 +294,8 @@ export default function App() {
   const openCopyPlan = useCallback(() => modals.openCopyPlanModal(), [modals]);
   const openTemplateManager = useCallback(() => modals.openTemplateManager(), [modals]);
 
-  const handleSaveTemplate = useCallback((name: string) => {
-    mealTemplates.saveTemplate(name, currentPlan);
+  const handleSaveTemplate = useCallback((name: string, tags?: string[]) => {
+    mealTemplates.saveTemplate(name, currentPlan, tags);
     modals.closeSaveTemplate();
     notify.success(t('notification.templateSaved'));
   }, [currentPlan, mealTemplates, modals, notify, t]);
@@ -367,7 +392,7 @@ export default function App() {
   }, [setDishes, currentLang, otherLang, enqueueTranslation, direction]);
 
   return (
-    <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
+    <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors" onKeyDown={handleGlobalKeyDown}>
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 pt-safe" role="banner">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -400,10 +425,12 @@ export default function App() {
             dayNutrition={dayNutrition}
             userWeight={userProfile.weight} targetCalories={userProfile.targetCalories} targetProtein={targetProtein}
             isSuggesting={aiSuggestion.isLoading}
+            servings={currentPlan.servings}
             onOpenTypeSelection={openTypeSelection} onOpenClearPlan={openClearPlan}
             onOpenGoalModal={openGoalModal} onPlanMeal={handlePlanMeal} onSuggestMealPlan={aiSuggestion.startSuggestion}
             onCopyPlan={openCopyPlan} onSaveTemplate={modals.openSaveTemplate} onOpenTemplateManager={openTemplateManager}
             onQuickAdd={handleQuickAdd}
+            onUpdateServings={handleUpdateServings}
           />
           </ErrorBoundary>
         </div>
@@ -495,10 +522,23 @@ export default function App() {
           sourceDate={selectedDate}
           sourcePlan={currentPlan}
           dishes={dishes}
-          onCopy={(targetDates) => {
-            copyPlanHook.copyPlan(selectedDate, targetDates);
+          onCopy={(targetDates, mergeMode) => {
+            const snapshot = dayPlans.filter(p => targetDates.includes(p.date)).map(p => ({ ...p, breakfastDishIds: [...p.breakfastDishIds], lunchDishIds: [...p.lunchDishIds], dinnerDishIds: [...p.dinnerDishIds] }));
+            copyPlanHook.copyPlan(selectedDate, targetDates, mergeMode);
             modals.closeCopyPlanModal();
-            notify.success(t('notification.planCopied'), t('notification.planCopiedDesc', { count: targetDates.length }));
+            notify.success(t('notification.planCopied'), t('notification.planCopiedDesc', { count: targetDates.length }), {
+              duration: 30000,
+              action: {
+                label: t('action.undo'),
+                onClick: () => {
+                  setDayPlans(prev => {
+                    const updated = prev.filter(p => !targetDates.includes(p.date));
+                    return [...updated, ...snapshot];
+                  });
+                  notify.info(t('notification.undone'), t('notification.undoneDesc'));
+                },
+              },
+            });
           }}
           onClose={modals.closeCopyPlanModal}
         />

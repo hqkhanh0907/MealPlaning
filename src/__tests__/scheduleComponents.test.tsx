@@ -136,6 +136,141 @@ describe('MealSlot', () => {
     expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
     expect(screen.queryByText('nonexistent')).not.toBeInTheDocument();
   });
+
+  it('renders serving stepper when onUpdateServings is provided', () => {
+    const onUpdate = vi.fn();
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{}}
+        onEdit={vi.fn()}
+        onUpdateServings={onUpdate}
+      />,
+    );
+    expect(screen.getByTestId('serving-count-d1')).toHaveTextContent('1x');
+    expect(screen.getByTestId('btn-serving-plus-d1')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-serving-minus-d1')).toBeInTheDocument();
+  });
+
+  it('does not render serving stepper when onUpdateServings is absent', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        onEdit={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId('serving-count-d1')).not.toBeInTheDocument();
+  });
+
+  it('displays correct serving count from servings prop', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 3 }}
+        onEdit={vi.fn()}
+        onUpdateServings={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('serving-count-d1')).toHaveTextContent('3x');
+  });
+
+  it('calls onUpdateServings with incremented value on plus click', () => {
+    const onUpdate = vi.fn();
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 2 }}
+        onEdit={vi.fn()}
+        onUpdateServings={onUpdate}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('btn-serving-plus-d1'));
+    expect(onUpdate).toHaveBeenCalledWith('d1', 3);
+  });
+
+  it('calls onUpdateServings with decremented value on minus click', () => {
+    const onUpdate = vi.fn();
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 3 }}
+        onEdit={vi.fn()}
+        onUpdateServings={onUpdate}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('btn-serving-minus-d1'));
+    expect(onUpdate).toHaveBeenCalledWith('d1', 2);
+  });
+
+  it('disables minus button when serving is 1', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 1 }}
+        onEdit={vi.fn()}
+        onUpdateServings={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('btn-serving-minus-d1')).toBeDisabled();
+  });
+
+  it('disables plus button when serving is 10', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 10 }}
+        onEdit={vi.fn()}
+        onUpdateServings={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('btn-serving-plus-d1')).toBeDisabled();
+  });
+
+  it('does not call onUpdateServings when minus is clicked at 1 (disabled)', () => {
+    const onUpdate = vi.fn();
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 1 }}
+        onEdit={vi.fn()}
+        onUpdateServings={onUpdate}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('btn-serving-minus-d1'));
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it('does not call onUpdateServings when plus is clicked at 10 (disabled)', () => {
+    const onUpdate = vi.fn();
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        servings={{ d1: 10 }}
+        onEdit={vi.fn()}
+        onUpdateServings={onUpdate}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('btn-serving-plus-d1'));
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
 });
 
 // ─── MealActionBar ────────────────────────────────────────────────────

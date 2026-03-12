@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Pencil, Trash2, BookTemplate } from 'lucide-react';
+import { X, Check, Pencil, Trash2, BookTemplate, Search, Tag } from 'lucide-react';
 import { MealTemplate, Dish, SupportedLang } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -24,6 +24,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
 
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterTag, setFilterTag] = useState<string | null>(null);
 
   const startRename = useCallback((template: MealTemplate) => {
     setRenamingId(template.id);
@@ -54,6 +56,26 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
       .join(', ');
   }, [dishes, lang]);
 
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    for (const tmpl of templates) {
+      if (tmpl.tags) tmpl.tags.forEach(tag => tagSet.add(tag));
+    }
+    return Array.from(tagSet).sort();
+  }, [templates]);
+
+  const filteredTemplates = useMemo(() => {
+    let result = templates;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(tmpl => tmpl.name.toLowerCase().includes(q));
+    }
+    if (filterTag) {
+      result = result.filter(tmpl => tmpl.tags?.includes(filterTag));
+    }
+    return result;
+  }, [templates, searchQuery, filterTag]);
+
   return (
     <ModalBackdrop onClose={onClose}>
       <div
@@ -80,8 +102,52 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
               <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">{t('template.emptyHint')}</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {templates.map(template => (
+            <div className="space-y-4">
+              {/* Search + Tag Filter */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    data-testid="input-template-search"
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder={t('template.searchPlaceholder')}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                  />
+                </div>
+                {allTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5" data-testid="template-tag-filters">
+                    <button
+                      type="button"
+                      onClick={() => setFilterTag(null)}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all ${!filterTag ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}
+                    >
+                      {t('common.all')}
+                    </button>
+                    {allTags.map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        data-testid={`filter-tag-${tag}`}
+                        onClick={() => setFilterTag(prev => prev === tag ? null : tag)}
+                        className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg transition-all ${filterTag === tag ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}
+                      >
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {filteredTemplates.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-sm text-slate-400 dark:text-slate-500">{t('template.noResults')}</p>
+                </div>
+              ) : (
+              <div className="space-y-3">
+              {filteredTemplates.map(template => (
                 <div
                   key={template.id}
                   className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-600"
@@ -118,6 +184,15 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                         {t('template.dishes', { count: getDishCount(template) })} · {t('template.created')} {new Date(template.createdAt).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
                       </p>
+                      {template.tags && template.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {template.tags.map(tag => (
+                            <span key={tag} className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                              <Tag className="w-2.5 h-2.5" />{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -167,6 +242,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                   )}
                 </div>
               ))}
+              </div>
+              )}
             </div>
           )}
         </div>

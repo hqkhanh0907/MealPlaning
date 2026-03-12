@@ -71,6 +71,53 @@ describe('useCopyPlan', () => {
     expect(updated).toHaveLength(2);
     expect(updated[1].breakfastDishIds).toEqual(['new1']);
   });
+
+  it('merges dishes into existing plan when mergeMode is true', () => {
+    const plans = [
+      makePlan('2025-01-01', ['new1']),
+      { date: '2025-01-02', breakfastDishIds: ['old1'], lunchDishIds: ['d2'], dinnerDishIds: ['d4'] },
+    ];
+    const setPlans = vi.fn();
+    const { result } = renderHook(() => useCopyPlan(plans, setPlans));
+
+    act(() => result.current.copyPlan('2025-01-01', ['2025-01-02'], true));
+
+    const updater = setPlans.mock.calls[0][0];
+    const updated = updater(plans);
+    expect(updated).toHaveLength(2);
+    expect(updated[1].breakfastDishIds).toEqual(['old1', 'new1']);
+    expect(updated[1].lunchDishIds).toEqual(['d2']);
+    expect(updated[1].dinnerDishIds).toEqual(['d4', 'd3']);
+  });
+
+  it('merge mode does not add duplicate dish ids', () => {
+    const plans = [
+      makePlan('2025-01-01', ['d1']),
+      makePlan('2025-01-02', ['d1']),
+    ];
+    const setPlans = vi.fn();
+    const { result } = renderHook(() => useCopyPlan(plans, setPlans));
+
+    act(() => result.current.copyPlan('2025-01-01', ['2025-01-02'], true));
+
+    const updater = setPlans.mock.calls[0][0];
+    const updated = updater(plans);
+    expect(updated[1].breakfastDishIds).toEqual(['d1']);
+  });
+
+  it('merge mode creates new plan when target does not exist', () => {
+    const plans = [makePlan('2025-01-01', ['d1'])];
+    const setPlans = vi.fn();
+    const { result } = renderHook(() => useCopyPlan(plans, setPlans));
+
+    act(() => result.current.copyPlan('2025-01-01', ['2025-01-05'], true));
+
+    const updater = setPlans.mock.calls[0][0];
+    const updated = updater(plans);
+    expect(updated).toHaveLength(2);
+    expect(updated[1].date).toBe('2025-01-05');
+    expect(updated[1].breakfastDishIds).toEqual(['d1']);
+  });
 });
 
 describe('CopyPlanModal', () => {
@@ -112,12 +159,12 @@ describe('CopyPlanModal', () => {
     expect(screen.queryByText('copyPlan.noSelection')).not.toBeInTheDocument();
   });
 
-  it('calls onCopy with selected dates', () => {
+  it('calls onCopy with selected dates and default overwrite mode', () => {
     render(<CopyPlanModal {...defaultProps} />);
     fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
     fireEvent.click(screen.getByTestId('btn-copy-confirm'));
 
-    expect(defaultProps.onCopy).toHaveBeenCalledWith(['2025-01-16']);
+    expect(defaultProps.onCopy).toHaveBeenCalledWith(['2025-01-16'], false);
   });
 
   it('calls onClose when close button clicked', () => {
@@ -169,5 +216,33 @@ describe('CopyPlanModal', () => {
     // Try adding source date itself
     fireEvent.change(dateInput, { target: { value: '2025-01-15' } });
     expect(screen.getByText('copyPlan.noSelection')).toBeInTheDocument();
+  });
+
+  it('renders merge mode toggle', () => {
+    render(<CopyPlanModal {...defaultProps} />);
+    expect(screen.getByTestId('copy-mode-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-mode-overwrite')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-mode-merge')).toBeInTheDocument();
+  });
+
+  it('calls onCopy with mergeMode true when merge is selected', () => {
+    render(<CopyPlanModal {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('btn-mode-merge'));
+    fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
+    fireEvent.click(screen.getByTestId('btn-copy-confirm'));
+
+    expect(defaultProps.onCopy).toHaveBeenCalledWith(['2025-01-16'], true);
+  });
+
+  it('switches between overwrite and merge modes', () => {
+    render(<CopyPlanModal {...defaultProps} />);
+    const mergeBtn = screen.getByTestId('btn-mode-merge');
+    const overwriteBtn = screen.getByTestId('btn-mode-overwrite');
+
+    fireEvent.click(mergeBtn);
+    expect(mergeBtn.className).toContain('text-emerald-700');
+
+    fireEvent.click(overwriteBtn);
+    expect(overwriteBtn.className).toContain('text-emerald-700');
   });
 });

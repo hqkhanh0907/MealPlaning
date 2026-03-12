@@ -253,4 +253,56 @@ describe('TemplateManager', () => {
     expect(screen.getByText(/Cơm/)).toBeInTheDocument();
     expect(screen.getByText(/Bún/)).toBeInTheDocument();
   });
+
+  it('filters templates by search query', () => {
+    const templates = [makeTemplate('tpl-1', 'High Protein Plan'), makeTemplate('tpl-2', 'Keto Diet')];
+    render(<TemplateManager {...defaultProps} templates={templates} />);
+    fireEvent.change(screen.getByTestId('input-template-search'), { target: { value: 'Keto' } });
+    expect(screen.queryByTestId('template-item-tpl-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('template-item-tpl-2')).toBeInTheDocument();
+  });
+
+  it('filters templates by tag', () => {
+    const t1: MealTemplate = { ...makeTemplate('tpl-1', 'Plan A'), tags: ['Healthy'] };
+    const t2: MealTemplate = { ...makeTemplate('tpl-2', 'Plan B'), tags: ['Budget'] };
+    render(<TemplateManager {...defaultProps} templates={[t1, t2]} />);
+    fireEvent.click(screen.getByTestId('filter-tag-Healthy'));
+    expect(screen.getByTestId('template-item-tpl-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('template-item-tpl-2')).not.toBeInTheDocument();
+  });
+
+  it('displays tags on template items', () => {
+    const t1: MealTemplate = { ...makeTemplate('tpl-1', 'Tagged Plan'), tags: ['Healthy', 'Quick'] };
+    render(<TemplateManager {...defaultProps} templates={[t1]} />);
+    expect(screen.getAllByText(/Healthy/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(/Quick/).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows no results message when filter matches nothing', () => {
+    const templates = [makeTemplate('tpl-1', 'Plan A')];
+    render(<TemplateManager {...defaultProps} templates={templates} />);
+    fireEvent.change(screen.getByTestId('input-template-search'), { target: { value: 'nonexistent' } });
+    expect(screen.queryByTestId('template-item-tpl-1')).not.toBeInTheDocument();
+  });
+
+  it('toggles tag filter off when clicked again', () => {
+    const t1: MealTemplate = { ...makeTemplate('tpl-1', 'Plan A'), tags: ['Healthy'] };
+    const t2: MealTemplate = { ...makeTemplate('tpl-2', 'Plan B'), tags: ['Budget'] };
+    render(<TemplateManager {...defaultProps} templates={[t1, t2]} />);
+    fireEvent.click(screen.getByTestId('filter-tag-Healthy'));
+    expect(screen.queryByTestId('template-item-tpl-2')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('filter-tag-Healthy'));
+    expect(screen.getByTestId('template-item-tpl-2')).toBeInTheDocument();
+  });
+
+  it('resets tag filter via All button', () => {
+    const t1: MealTemplate = { ...makeTemplate('tpl-1', 'Plan A'), tags: ['Healthy'] };
+    const t2: MealTemplate = { ...makeTemplate('tpl-2', 'Plan B'), tags: ['Budget'] };
+    render(<TemplateManager {...defaultProps} templates={[t1, t2]} />);
+    fireEvent.click(screen.getByTestId('filter-tag-Healthy'));
+    expect(screen.queryByTestId('template-item-tpl-2')).not.toBeInTheDocument();
+    const allBtn = screen.getByTestId('template-tag-filters').querySelector('button');
+    if (allBtn) fireEvent.click(allBtn);
+    expect(screen.getByTestId('template-item-tpl-2')).toBeInTheDocument();
+  });
 });

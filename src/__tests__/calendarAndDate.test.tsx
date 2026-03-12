@@ -544,4 +544,31 @@ describe('CalendarTab', () => {
     );
     expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
   });
+
+  it('renders serving stepper and calls onUpdateServings when plus is clicked', () => {
+    const onUpdateServings = vi.fn();
+    render(
+      <CalendarTab
+        {...defaultProps}
+        servings={{ d1: 2 }}
+        onUpdateServings={onUpdateServings}
+      />,
+    );
+    expect(screen.getByTestId('serving-count-d1')).toHaveTextContent('2x');
+    fireEvent.click(screen.getByTestId('btn-serving-plus-d1'));
+    expect(onUpdateServings).toHaveBeenCalledWith('d1', 3);
+  });
+
+  it('renders serving stepper and calls onUpdateServings when minus is clicked', () => {
+    const onUpdateServings = vi.fn();
+    render(
+      <CalendarTab
+        {...defaultProps}
+        servings={{ d1: 3 }}
+        onUpdateServings={onUpdateServings}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('btn-serving-minus-d1'));
+    expect(onUpdateServings).toHaveBeenCalledWith('d1', 2);
+  });
 });

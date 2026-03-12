@@ -1105,4 +1105,73 @@ describe('DishEditModal', () => {
     fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'AB' } });
     expect(screen.queryByTestId('ai-suggest-error')).not.toBeInTheDocument();
   });
+
+  it('renders rating stars and notes fields', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('dish-rating')).toBeInTheDocument();
+    expect(screen.getByTestId('dish-notes')).toBeInTheDocument();
+    expect(screen.getByTestId('star-1')).toBeInTheDocument();
+    expect(screen.getByTestId('star-5')).toBeInTheDocument();
+  });
+
+  it('sets and clears rating via star clicks', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('star-3'));
+    expect(screen.getByTestId('star-3').className).toContain('text-amber-400');
+    fireEvent.click(screen.getByTestId('star-3'));
+    expect(screen.getByTestId('star-3').className).not.toContain('text-amber-400');
+  });
+
+  it('pre-populates rating and notes from existing dish', () => {
+    const ratedDish = { ...existingDish, rating: 4, notes: 'Delicious' };
+    render(<DishEditModal editingItem={ratedDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('star-4').className).toContain('text-amber-400');
+    expect(screen.getByTestId('star-5').className).not.toContain('text-amber-400');
+    expect(screen.getByTestId('dish-notes')).toHaveValue('Delicious');
+  });
+
+  it('includes rating and notes in submitted dish', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('star-5'));
+    fireEvent.change(screen.getByTestId('dish-notes'), { target: { value: 'Great meal' } });
+    fireEvent.click(screen.getByTestId('btn-save-dish'));
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ rating: 5, notes: 'Great meal' }));
+  });
+
+  it('detects rating change as unsaved change', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('star-4'));
+    fireEvent.click(screen.getByLabelText('Đóng'));
+    expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
+  });
+
+  it('detects notes change as unsaved change', () => {
+    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('dish-notes'), { target: { value: 'Some notes' } });
+    fireEvent.click(screen.getByLabelText('Đóng'));
+    expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
+  });
+
+  it('shows recently used section when allDishes is provided', () => {
+    const allDishes: Dish[] = [
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Grilled Chicken' }, ingredients: [{ ingredientId: 'i3', amount: 100 }], tags: ['lunch'] },
+      { id: 'd2', name: { vi: 'Salad', en: 'Salad' }, ingredients: [{ ingredientId: 'i3', amount: 50 }], tags: ['dinner'] },
+    ];
+    render(<DishEditModal editingItem={null} ingredients={ingredients} allDishes={allDishes} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('recently-used-header')).toBeInTheDocument();
+  });
+
+  it('hides recently used when search is active', () => {
+    const allDishes: Dish[] = [
+      { id: 'd1', name: { vi: 'Gà nướng', en: 'Grilled Chicken' }, ingredients: [{ ingredientId: 'i3', amount: 100 }], tags: ['lunch'] },
+    ];
+    render(<DishEditModal editingItem={null} ingredients={ingredients} allDishes={allDishes} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-ingredient-search'), { target: { value: 'gà' } });
+    expect(screen.queryByTestId('recently-used-header')).not.toBeInTheDocument();
+  });
+
+  it('does not show recently used when no allDishes', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.queryByTestId('recently-used-header')).not.toBeInTheDocument();
+  });
 });

@@ -68,19 +68,21 @@ export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[])
 export const calculateDishesNutrition = (
   dishIds: string[],
   allDishes: Dish[],
-  allIngredients: Ingredient[]
+  allIngredients: Ingredient[],
+  servings?: Record<string, number>,
 ): NutritionInfo => {
   return dishIds.reduce<NutritionInfo>(
     (acc, dishId) => {
       const dish = allDishes.find((d) => d.id === dishId);
       if (!dish) return acc;
       const nutrition = calculateDishNutrition(dish, allIngredients);
+      const multiplier = servings?.[dishId] ?? 1;
       return {
-        calories: acc.calories + nutrition.calories,
-        protein: acc.protein + nutrition.protein,
-        carbs: acc.carbs + nutrition.carbs,
-        fat: acc.fat + nutrition.fat,
-        fiber: acc.fiber + nutrition.fiber,
+        calories: acc.calories + nutrition.calories * multiplier,
+        protein: acc.protein + nutrition.protein * multiplier,
+        carbs: acc.carbs + nutrition.carbs * multiplier,
+        fat: acc.fat + nutrition.fat * multiplier,
+        fiber: acc.fiber + nutrition.fiber * multiplier,
       };
     },
     { ...ZERO_NUTRITION }

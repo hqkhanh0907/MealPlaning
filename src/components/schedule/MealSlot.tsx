@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Edit3, Plus, ChefHat } from 'lucide-react';
+import { Edit3, Plus, ChefHat, Minus } from 'lucide-react';
 import { Dish, MealType, SlotInfo, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 
@@ -8,7 +8,9 @@ export interface MealSlotProps {
   type: MealType;
   slot: SlotInfo;
   dishes: Dish[];
+  servings?: Record<string, number>;
   onEdit: () => void;
+  onUpdateServings?: (dishId: string, servings: number) => void;
 }
 
 const MEAL_ICONS: Record<MealType, string> = {
@@ -26,7 +28,7 @@ const TEST_ID_MAP: Record<MealType, string> = {
 };
 
 export const MealSlot: React.FC<MealSlotProps> = React.memo(({
-  type, slot, dishes, onEdit,
+  type, slot, dishes, servings, onEdit, onUpdateServings,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
@@ -39,6 +41,12 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
       .map((id) => dishes.find((d) => d.id === id))
       .filter((d): d is Dish => d !== undefined);
   }, [slot.dishIds, dishes]);
+
+  const handleServingChange = useCallback((dishId: string, delta: number) => {
+    const current = servings?.[dishId] ?? 1;
+    const next = Math.max(1, Math.min(10, current + delta));
+    onUpdateServings?.(dishId, next);
+  }, [servings, onUpdateServings]);
 
   const visibleDishes = resolvedDishes.slice(0, MAX_VISIBLE_DISHES);
   const extraCount = resolvedDishes.length - MAX_VISIBLE_DISHES;
@@ -92,14 +100,28 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
       </div>
 
       <div className="space-y-1 mb-2">
-        {visibleDishes.map((d) => (
-          <div key={d.id} className="flex items-center gap-2">
-            <ChefHat className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-hidden="true" />
-            <span className="font-medium text-slate-800 dark:text-slate-200 text-sm truncate">
-              {getLocalizedField(d.name, lang)}
-            </span>
-          </div>
-        ))}
+        {visibleDishes.map((d) => {
+          const s = servings?.[d.id] ?? 1;
+          return (
+            <div key={d.id} className="flex items-center gap-2">
+              <ChefHat className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-hidden="true" />
+              <span className="font-medium text-slate-800 dark:text-slate-200 text-sm truncate flex-1">
+                {getLocalizedField(d.name, lang)}
+              </span>
+              {onUpdateServings && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <button type="button" data-testid={`btn-serving-minus-${d.id}`} onClick={() => handleServingChange(d.id, -1)} disabled={s <= 1} className="w-5 h-5 rounded flex items-center justify-center text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-all">
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span data-testid={`serving-count-${d.id}`} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 min-w-[18px] text-center">{s}x</span>
+                  <button type="button" data-testid={`btn-serving-plus-${d.id}`} onClick={() => handleServingChange(d.id, 1)} disabled={s >= 10} className="w-5 h-5 rounded flex items-center justify-center text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-all">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
         {extraCount > 0 && (
           <span className="text-xs text-slate-400 dark:text-slate-500 ml-5.5">
             {t('quickPreview.more', { count: extraCount })}

@@ -60,7 +60,9 @@
     "proAsc": "Protein (Thấp → Cao)",
     "proDesc": "Protein (Cao → Thấp)",
     "ingredientCountAsc": "Số NL (Ít → Nhiều)",
-    "ingredientCountDesc": "Số NL (Nhiều → Ít)"
+    "ingredientCountDesc": "Số NL (Nhiều → Ít)",
+    "ratingAsc": "Đánh giá (Thấp → Cao)",
+    "ratingDesc": "Đánh giá (Cao → Thấp)"
   },
   "nav": {
     "calendar": "Lịch trình",
@@ -157,6 +159,8 @@
     "selectedIngredients": "Nguyên liệu đã chọn",
     "allIngredientsSelected": "Đã chọn tất cả nguyên liệu",
     "noIngredientFound": "Không tìm thấy nguyên liệu",
+    "recentlyUsed": "Thường dùng",
+    "allIngredients": "Tất cả nguyên liệu",
     "noIngredientSelected": "Chưa chọn nguyên liệu",
     "saveDish": "Lưu món ăn",
     "dishCount": "{{count}} món",
@@ -200,7 +204,11 @@
     "compare": "So sánh",
     "compareSelected": "So sánh ({{count}})",
     "maxCompare": "Tối đa 3 món",
-    "compareNutrition": "So sánh dinh dưỡng"
+    "compareNutrition": "So sánh dinh dưỡng",
+    "rating": "Đánh giá",
+    "notes": "Ghi chú",
+    "notesPlaceholder": "Ghi chú cá nhân...",
+    "stars": "sao"
   },
   "ingredient": {
     "title": "Nguyên liệu",
@@ -268,7 +276,8 @@
     "aisleGrains": "Ngũ cốc & Hạt",
     "aisleProduce": "Rau & Củ",
     "aisleOther": "Khác",
-    "groupByAisle": "Nhóm theo quầy"
+    "groupByAisle": "Nhóm theo quầy",
+    "usedIn": "Dùng trong"
   },
   "ai": {
     "title": "AI Phân tích hình ảnh",
@@ -438,7 +447,9 @@
     "templateDeleted": "Đã xóa mẫu",
     "templateRenamed": "Đã đổi tên mẫu",
     "planCleared": "Đã xóa kế hoạch",
-    "dishAdded": "Đã thêm món"
+    "dishAdded": "Đã thêm món",
+    "undone": "Đã hoàn tác",
+    "undoneDesc": "Kế hoạch đã được khôi phục"
   },
   "errorBoundary": {
     "defaultTitle": "Đã xảy ra lỗi",
@@ -512,7 +523,9 @@
     "addDate": "Thêm ngày",
     "remove": "Xóa",
     "sourcePreview": "Xem trước kế hoạch nguồn",
-    "noMeals": "Chưa có kế hoạch bữa ăn"
+    "noMeals": "Chưa có kế hoạch bữa ăn",
+    "overwriteMode": "Ghi đè",
+    "mergeMode": "Gộp thêm"
   },
   "template": {
     "title": "Quản lý mẫu bữa ăn",
@@ -534,7 +547,16 @@
     "nameRequired": "Vui lòng nhập tên template",
     "preview": "Xem trước template",
     "mealsCount": "{{count}} món",
-    "save": "Lưu template"
+    "save": "Lưu template",
+    "tags": "Nhãn",
+    "tagPlaceholder": "Nhập nhãn rồi nhấn Enter...",
+    "tagHighProtein": "High Protein",
+    "tagQuickMeals": "Bữa nhanh",
+    "tagWeekend": "Cuối tuần",
+    "tagHealthy": "Healthy",
+    "tagBudget": "Tiết kiệm",
+    "searchPlaceholder": "Tìm kiếm template...",
+    "noResults": "Không tìm thấy template phù hợp"
   },
   "schedule": {
     "mealsTab": "Bữa ăn",

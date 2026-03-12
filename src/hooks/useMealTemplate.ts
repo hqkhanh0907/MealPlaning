@@ -6,7 +6,7 @@ import { generateId } from '../utils/helpers';
 export const useMealTemplate = () => {
   const [templates, setTemplates] = usePersistedState<MealTemplate[]>('meal-templates', []);
 
-  const saveTemplate = useCallback((name: string, plan: DayPlan) => {
+  const saveTemplate = useCallback((name: string, plan: DayPlan, tags?: string[]) => {
     const template: MealTemplate = {
       id: generateId('tpl'),
       name,
@@ -14,6 +14,7 @@ export const useMealTemplate = () => {
       lunchDishIds: [...plan.lunchDishIds],
       dinnerDishIds: [...plan.dinnerDishIds],
       createdAt: new Date().toISOString(),
+      ...(tags && tags.length > 0 ? { tags } : {}),
     };
     setTemplates(prev => [...prev, template]);
   }, [setTemplates]);

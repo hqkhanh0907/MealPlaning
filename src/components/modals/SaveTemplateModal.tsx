@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Save, ChefHat } from 'lucide-react';
+import { X, Save, ChefHat, Tag } from 'lucide-react';
 import { DayPlan, Dish, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
@@ -9,7 +9,7 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 interface SaveTemplateModalProps {
   currentPlan: DayPlan;
   dishes: Dish[];
-  onSave: (name: string) => void;
+  onSave: (name: string, tags?: string[]) => void;
   onClose: () => void;
 }
 
@@ -22,6 +22,8 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
 
   const [name, setName] = useState('');
   const [touched, setTouched] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   const trimmedName = name.trim();
   const isValid = trimmedName.length > 0;
@@ -41,15 +43,39 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
   const handleSubmit = useCallback(() => {
     setTouched(true);
     if (isValid) {
-      onSave(trimmedName);
+      onSave(trimmedName, selectedTags.length > 0 ? selectedTags : undefined);
     }
-  }, [isValid, trimmedName, onSave]);
+  }, [isValid, trimmedName, selectedTags, onSave]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSubmit();
     }
   }, [handleSubmit]);
+
+  const PRESET_TAGS = useMemo(() => [
+    t('template.tagHighProtein'), t('template.tagQuickMeals'), t('template.tagWeekend'),
+    t('template.tagHealthy'), t('template.tagBudget'),
+  ], [t]);
+
+  const addTag = useCallback((tag: string) => {
+    const trimmed = tag.trim();
+    if (trimmed && !selectedTags.includes(trimmed)) {
+      setSelectedTags(prev => [...prev, trimmed]);
+    }
+    setTagInput('');
+  }, [selectedTags]);
+
+  const removeTag = useCallback((tag: string) => {
+    setSelectedTags(prev => prev.filter(t => t !== tag));
+  }, []);
+
+  const handleTagKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    }
+  }, [tagInput, addTag]);
 
   const mealSections: { key: string; label: string; items: string[]; color: string }[] = [
     { key: 'breakfast', label: t('calendar.morning'), items: preview.breakfast, color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400' },
@@ -97,6 +123,38 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
                 <span />
               )}
               <span className="text-xs text-slate-400 dark:text-slate-500">{name.length}/{MAX_NAME_LENGTH}</span>
+            </div>
+          </div>
+
+          {/* Template Tags */}
+          <div>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('template.tags')}</label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {selectedTags.map(tag => (
+                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                  <Tag className="w-3 h-3" />
+                  {tag}
+                  <button type="button" data-testid={`remove-tag-${tag}`} onClick={() => removeTag(tag)} className="ml-0.5 hover:text-rose-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              data-testid="input-template-tag"
+              type="text"
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              placeholder={t('template.tagPlaceholder')}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+            />
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {PRESET_TAGS.filter(pt => !selectedTags.includes(pt)).map(pt => (
+                <button key={pt} type="button" data-testid={`preset-tag-${pt}`} onClick={() => addTag(pt)} className="text-[10px] font-medium px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 transition-all">
+                  + {pt}
+                </button>
+              ))}
             </div>
           </div>
 

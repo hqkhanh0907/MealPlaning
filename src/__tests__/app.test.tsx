@@ -681,6 +681,29 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
+  it('undo copy plan restores previous state', async () => {
+    const today = getLocalToday();
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: today,
+      breakfastDishIds: ['d1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-copy-plan'));
+    await waitFor(() => expect(screen.getByTestId('copy-plan-modal')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
+    fireEvent.click(screen.getByTestId('btn-copy-confirm'));
+    const successCall = mockNotify.success.mock.calls[mockNotify.success.mock.calls.length - 1];
+    const undoAction = successCall[2]?.action;
+    expect(undoAction).toBeDefined();
+    act(() => { undoAction.onClick(); });
+    expect(mockNotify.info).toHaveBeenCalled();
+  });
+
   it('opens template manager modal', async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
@@ -790,5 +813,76 @@ describe('App', () => {
     fireEvent.change(renameInput, { target: { value: 'Renamed Template' } });
     fireEvent.click(screen.getByTestId('template-rename-confirm'));
     expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('switches to Library tab via Cmd+2 shortcut', async () => {
+    const { container } = render(<App />);
+    const mgmtNav = screen.getByTestId('nav-management');
+    expect(mgmtNav).toHaveAttribute('aria-selected', 'false');
+    await act(async () => {
+      fireEvent.keyDown(container.firstElementChild!, { key: '2', metaKey: true });
+    });
+    expect(mgmtNav).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('switches to Settings tab via Cmd+5 shortcut', async () => {
+    const { container } = render(<App />);
+    const settingsNav = screen.getByTestId('nav-settings');
+    expect(settingsNav).toHaveAttribute('aria-selected', 'false');
+    await act(async () => {
+      fireEvent.keyDown(container.firstElementChild!, { key: '5', metaKey: true });
+    });
+    expect(settingsNav).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('ignores keyboard shortcuts without modifier key', () => {
+    const { container } = render(<App />);
+    const calendarNav = screen.getByTestId('nav-calendar');
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(container.firstElementChild!, { key: '2' });
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('handleUpdateServings updates serving count for a dish', async () => {
+    localStorage.setItem('mp-dishes', JSON.stringify([
+      { id: 'srv1', name: { vi: 'Serving Dish', en: 'Serving Dish' }, ingredients: [], tags: ['breakfast'] },
+    ]));
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: getLocalToday(),
+      breakfastDishIds: ['srv1'],
+      lunchDishIds: [],
+      dinnerDishIds: [],
+    }]));
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByTestId('serving-count-srv1')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('serving-count-srv1')).toHaveTextContent('1x');
+    fireEvent.click(screen.getByTestId('btn-serving-plus-srv1'));
+    expect(screen.getByTestId('serving-count-srv1')).toHaveTextContent('2x');
+    fireEvent.click(screen.getByTestId('btn-serving-plus-srv1'));
+    expect(screen.getByTestId('serving-count-srv1')).toHaveTextContent('3x');
+    fireEvent.click(screen.getByTestId('btn-serving-minus-srv1'));
+    expect(screen.getByTestId('serving-count-srv1')).toHaveTextContent('2x');
+  });
+
+  it('handleUpdateServings removes serving entry when reset to 1', async () => {
+    localStorage.setItem('mp-dishes', JSON.stringify([
+      { id: 'srv2', name: { vi: 'Reset Dish', en: 'Reset Dish' }, ingredients: [], tags: ['lunch'] },
+    ]));
+    localStorage.setItem('mp-day-plans', JSON.stringify([{
+      date: getLocalToday(),
+      breakfastDishIds: [],
+      lunchDishIds: ['srv2'],
+      dinnerDishIds: [],
+      servings: { srv2: 2 },
+    }]));
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByTestId('serving-count-srv2')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('serving-count-srv2')).toHaveTextContent('2x');
+    fireEvent.click(screen.getByTestId('btn-serving-minus-srv2'));
+    expect(screen.getByTestId('serving-count-srv2')).toHaveTextContent('1x');
   });
 });

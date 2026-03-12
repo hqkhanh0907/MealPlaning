@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays } from 'lucide-react';
-import { Ingredient, Dish, DishIngredient, DayPlan, SupportedLang } from '../types';
+import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
+import { Ingredient, Dish, DayPlan, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { useNotification } from '../contexts/NotificationContext';
 import { getWeekRange, isDateInRange } from '../utils/helpers';
@@ -17,7 +17,8 @@ interface GroceryListProps {
   allIngredients: Ingredient[];
 }
 
-type GroceryItem = { id: string; name: string; amount: number; unit: string };
+type DishSource = { dishId: string; dishName: string; amount: number };
+type GroceryItem = { id: string; name: string; amount: number; unit: string; usedInDishes: DishSource[] };
 type CheckedSnapshot = { id: string; amount: number };
 
 type AisleCategory = 'protein' | 'dairy' | 'grains' | 'produce' | 'other';
@@ -59,25 +60,42 @@ function categorizeIngredient(name: string, ingredient: Ingredient | undefined):
 
 type GroceryItemWithCategory = GroceryItem & { category: AisleCategory };
 
-const collectDishIngredients = (dishIds: string[], allDishes: Dish[]): DishIngredient[] => {
-  const result: DishIngredient[] = [];
+type IngredientWithSource = { ingredientId: string; amount: number; dishId: string; dishName: string };
+
+const collectDishIngredients = (dishIds: string[], allDishes: Dish[], lang: SupportedLang): IngredientWithSource[] => {
+  const result: IngredientWithSource[] = [];
   for (const dishId of dishIds) {
     const dish = allDishes.find(d => d.id === dishId);
-    if (dish) result.push(...dish.ingredients);
+    if (dish) {
+      const dishName = getLocalizedField(dish.name, lang);
+      for (const di of dish.ingredients) {
+        result.push({ ingredientId: di.ingredientId, amount: di.amount, dishId: dish.id, dishName });
+      }
+    }
   }
   return result;
 };
 
-const buildGroceryList = (dishIngredients: DishIngredient[], allIngredients: Ingredient[], lang: SupportedLang): GroceryItemWithCategory[] => {
+const buildGroceryList = (dishIngredients: IngredientWithSource[], allIngredients: Ingredient[], lang: SupportedLang): GroceryItemWithCategory[] => {
   const map: Record<string, GroceryItemWithCategory> = {};
   for (const di of dishIngredients) {
     const ing = allIngredients.find(i => i.id === di.ingredientId);
     if (!ing) continue;
     if (map[ing.id]) {
       map[ing.id].amount += di.amount;
+      const existing = map[ing.id].usedInDishes.find(d => d.dishId === di.dishId);
+      if (existing) {
+        existing.amount += di.amount;
+      } else {
+        map[ing.id].usedInDishes.push({ dishId: di.dishId, dishName: di.dishName, amount: di.amount });
+      }
     } else {
       const name = getLocalizedField(ing.name, lang);
-      map[ing.id] = { id: ing.id, name, amount: di.amount, unit: getLocalizedField(ing.unit, lang), category: categorizeIngredient(name, ing) };
+      map[ing.id] = {
+        id: ing.id, name, amount: di.amount, unit: getLocalizedField(ing.unit, lang),
+        category: categorizeIngredient(name, ing),
+        usedInDishes: [{ dishId: di.dishId, dishName: di.dishName, amount: di.amount }],
+      };
     }
   }
   return Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
@@ -138,6 +156,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   const lang = i18n.language as SupportedLang;
   const [scope, setScope] = useState<GroceryScope>('day');
   const [groupByAisle, setGroupByAisle] = useState(false);
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
   const [persistedCheckedSnapshots, setPersistedCheckedSnapshots] = usePersistedState<CheckedSnapshot[]>('mp-grocery-checked', []);
 
   const filteredPlans = useMemo(() => {
@@ -152,7 +171,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   const allDishIds = useMemo(() => getDishIdsFromPlans(filteredPlans), [filteredPlans]);
   const groceryItems = useMemo(() => {
     if (allDishIds.length === 0) return [];
-    const dishIngredients = collectDishIngredients(allDishIds, allDishes);
+    const dishIngredients = collectDishIngredients(allDishIds, allDishes, lang);
     return buildGroceryList(dishIngredients, allIngredients, lang);
   }, [allDishIds, allDishes, allIngredients, lang]);
 
@@ -194,6 +213,68 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
       return [...prev, { id, amount: item.amount }];
     });
   }, [groceryItems, setPersistedCheckedSnapshots]);
+
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedItemId(prev => prev === id ? null : id);
+  }, []);
+
+  const renderGroceryItem = useCallback((item: GroceryItemWithCategory) => {
+    const isChecked = checkedIds.has(item.id);
+    const isExpanded = expandedItemId === item.id;
+    const hasDishes = item.usedInDishes.length > 0;
+    return (
+      <li key={item.id}>
+        <div className={`rounded-xl transition-all ${
+          isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
+        }`}>
+          <div className="flex items-center">
+            <button
+              data-testid={`grocery-item-${item.id}`}
+              onClick={() => toggleCheck(item.id)}
+              className="flex-1 flex items-center gap-3 px-3 sm:px-4 py-3 min-h-12 active:scale-[0.99]"
+            >
+              <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
+                isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'
+              }`}>
+                {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <span className={`flex-1 text-left font-medium text-sm sm:text-base transition-all ${
+                isChecked ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'
+              }`}>
+                {item.name}
+              </span>
+              <span className={`text-sm font-medium shrink-0 transition-all ${
+                isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
+              }`}>
+                {Math.round(item.amount)} {item.unit}
+              </span>
+            </button>
+            {hasDishes && (
+              <button
+                data-testid={`grocery-expand-${item.id}`}
+                onClick={() => toggleExpand(item.id)}
+                className="p-2.5 mr-1 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                title={t('grocery.usedIn')}
+              >
+                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+            )}
+          </div>
+          {isExpanded && hasDishes && (
+            <div data-testid={`grocery-dishes-${item.id}`} className="px-12 pb-3 space-y-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('grocery.usedIn')}</span>
+              {item.usedInDishes.map(d => (
+                <div key={d.dishId} className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                  <span className="font-medium">{d.dishName}</span>
+                  <span>{Math.round(d.amount)} {item.unit}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </li>
+    );
+  }, [checkedIds, expandedItemId, toggleCheck, toggleExpand, t]);
 
   const handleCopyList = useCallback(() => {
     const text = groceryItems
@@ -320,72 +401,14 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                       <span className="text-[10px] text-slate-400 dark:text-slate-500">({group.items.length})</span>
                     </div>
                     <ul className="space-y-1">
-                      {group.items.map(item => {
-                        const isChecked = checkedIds.has(item.id);
-                        return (
-                          <li key={item.id}>
-                            <button
-                              data-testid={`grocery-item-${item.id}`}
-                              onClick={() => toggleCheck(item.id)}
-                              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl transition-all min-h-12 active:scale-[0.99] ${
-                                isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
-                              }`}
-                            >
-                              <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
-                                isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'
-                              }`}>
-                                {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
-                              </div>
-                              <span className={`flex-1 text-left font-medium text-sm sm:text-base transition-all ${
-                                isChecked ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'
-                              }`}>
-                                {item.name}
-                              </span>
-                              <span className={`text-sm font-medium shrink-0 transition-all ${
-                                isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
-                              }`}>
-                                {Math.round(item.amount)} {item.unit}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
+                      {group.items.map(item => renderGroceryItem(item))}
                     </ul>
                   </div>
                 ))}
               </div>
             ) : (
             <ul className="space-y-1">
-              {groceryItems.map(item => {
-                const isChecked = checkedIds.has(item.id);
-                return (
-                  <li key={item.id}>
-                    <button
-                      data-testid={`grocery-item-${item.id}`}
-                      onClick={() => toggleCheck(item.id)}
-                      className={`w-full flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl transition-all min-h-12 active:scale-[0.99] ${
-                        isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
-                        isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'
-                      }`}>
-                        {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                      <span className={`flex-1 text-left font-medium text-sm sm:text-base transition-all ${
-                        isChecked ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'
-                      }`}>
-                        {item.name}
-                      </span>
-                      <span className={`text-sm font-medium shrink-0 transition-all ${
-                        isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
-                      }`}>
-                        {Math.round(item.amount)} {item.unit}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
+              {groceryItems.map(item => renderGroceryItem(item))}
             </ul>
             )}
           </div>

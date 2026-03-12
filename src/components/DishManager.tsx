@@ -16,7 +16,7 @@ import { getMealTagOptions, getTagShortLabels, getBaseSortOptions, UNDO_TOAST_DU
 import { generateId } from '../utils/helpers';
 import type { BaseSortOption } from '../data/constants';
 
-type DishSortOption = BaseSortOption | 'ing-asc' | 'ing-desc';
+type DishSortOption = BaseSortOption | 'ing-asc' | 'ing-desc' | 'rating-asc' | 'rating-desc';
 
 interface DishManagerProps {
   dishes: Dish[];
@@ -41,6 +41,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     ...getBaseSortOptions(t),
     { value: 'ing-asc', label: t('sort.ingredientCountAsc') },
     { value: 'ing-desc', label: t('sort.ingredientCountDesc') },
+    { value: 'rating-desc', label: t('sort.ratingDesc') },
+    { value: 'rating-asc', label: t('sort.ratingAsc') },
   ];
 
   const [filterTag, setFilterTag] = useState<MealType | null>(null);
@@ -92,6 +94,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
       case 'pro-desc': return nB.protein - nA.protein;
       case 'ing-asc': return a.ingredients.length - b.ingredients.length;
       case 'ing-desc': return b.ingredients.length - a.ingredients.length;
+      case 'rating-asc': return (a.rating ?? 0) - (b.rating ?? 0);
+      case 'rating-desc': return (b.rating ?? 0) - (a.rating ?? 0);
     }
   }, [nutritionMap, lang]);
   const extraFilter = useCallback((d: Dish) => !filterTag || (d.tags?.includes(filterTag) ?? false), [filterTag]);
@@ -197,6 +201,13 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                     </div>
                   </div>
                 </div>
+                {dish.rating && dish.rating > 0 && (
+                  <div className="flex items-center gap-0.5 mb-2" data-testid={`dish-rating-${dish.id}`}>
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-amber-400' : 'text-slate-200 dark:text-slate-700'}`}>★</span>
+                    ))}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.calories')}</span><span className="text-sm font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></div>
                   <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-blue-400 font-bold uppercase">{t('common.protein')}</span><span className="text-sm font-bold text-blue-700 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></div>
@@ -317,6 +328,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
         <DishEditModal
           editingItem={modal.editingItem}
           ingredients={ingredients}
+          allDishes={dishes}
           onSubmit={handleDishSubmit}
           onClose={handleEditClose}
           onCreateIngredient={onCreateIngredient}

@@ -396,4 +396,48 @@ describe('GroceryList', () => {
     if (itemBtn) fireEvent.click(itemBtn);
     expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
   });
+
+  it('shows expand button for items used in multiple dishes', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    expect(screen.getByTestId('grocery-expand-i1')).toBeInTheDocument();
+    expect(screen.getByTestId('grocery-expand-i3')).toBeInTheDocument();
+  });
+
+  it('expands to show which dishes use the ingredient', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('grocery-expand-i1'));
+    const panel = screen.getByTestId('grocery-dishes-i1');
+    expect(panel).toBeInTheDocument();
+    expect(panel.textContent).toContain('Gà nướng');
+    expect(panel.textContent).toContain('200 g');
+    expect(panel.textContent).toContain('Cơm gà');
+    expect(panel.textContent).toContain('100 g');
+  });
+
+  it('collapses expanded item on second click', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('grocery-expand-i1'));
+    expect(screen.getByTestId('grocery-dishes-i1')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('grocery-expand-i1'));
+    expect(screen.queryByTestId('grocery-dishes-i1')).not.toBeInTheDocument();
+  });
+
+  it('shows recipe links in grouped mode too', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle'));
+    fireEvent.click(screen.getByTestId('grocery-expand-i1'));
+    expect(screen.getByTestId('grocery-dishes-i1')).toBeInTheDocument();
+    expect(screen.getByTestId('grocery-dishes-i1').textContent).toContain('Gà nướng');
+  });
+
+  it('aggregates amounts when same dish appears multiple times', () => {
+    const planWithDuplicate: DayPlan = {
+      date: today, breakfastDishIds: ['d1'], lunchDishIds: ['d1'], dinnerDishIds: [],
+    };
+    render(<GroceryList currentPlan={planWithDuplicate} dayPlans={[planWithDuplicate]} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('grocery-expand-i1'));
+    const panel = screen.getByTestId('grocery-dishes-i1');
+    expect(panel.textContent).toContain('Gà nướng');
+    expect(panel.textContent).toContain('400 g');
+  });
 });

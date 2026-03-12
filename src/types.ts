@@ -23,7 +23,9 @@ export type Dish = {
   id: string;
   name: LocalizedString;
   ingredients: DishIngredient[];
-  tags: MealType[]; // which meal slots this dish is suitable for
+  tags: MealType[];
+  rating?: number;
+  notes?: string;
 };
 
 export type DayPlan = {
@@ -31,6 +33,7 @@ export type DayPlan = {
   breakfastDishIds: string[];
   lunchDishIds: string[];
   dinnerDishIds: string[];
+  servings?: Record<string, number>;
 };
 
 export type UserProfile = {
@@ -147,6 +150,7 @@ export type MealTemplate = {
   lunchDishIds: string[];
   dinnerDishIds: string[];
   createdAt: string;
+  tags?: string[];
 };
 
 export interface FilterConfig {

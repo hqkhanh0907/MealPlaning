@@ -22,6 +22,7 @@ export interface CalendarTabProps {
   targetCalories: number;
   targetProtein: number;
   isSuggesting: boolean;
+  servings?: Record<string, number>;
   onOpenTypeSelection: () => void;
   onOpenClearPlan: () => void;
   onOpenGoalModal: () => void;
@@ -31,13 +32,14 @@ export interface CalendarTabProps {
   onSaveTemplate?: () => void;
   onOpenTemplateManager?: () => void;
   onQuickAdd?: (type: MealType, dishId: string) => void;
+  onUpdateServings?: (dishId: string, servings: number) => void;
 }
 
 export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
   selectedDate, onSelectDate, dayPlans, dishes, ingredients: _ingredients,
   currentPlan: _currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
-  isSuggesting, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
-  onCopyPlan, onSaveTemplate, onOpenTemplateManager, onQuickAdd,
+  isSuggesting, servings, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
+  onCopyPlan, onSaveTemplate, onOpenTemplateManager, onQuickAdd, onUpdateServings,
 }) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
@@ -111,6 +113,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               targetCalories={targetCalories}
               targetProtein={targetProtein}
               isSuggesting={isSuggesting}
+              servings={servings}
               onPlanMeal={onPlanMeal}
               onOpenTypeSelection={onOpenTypeSelection}
               onSuggestMealPlan={onSuggestMealPlan}
@@ -121,6 +124,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               onSwitchToNutrition={() => setActiveSubTab('nutrition')}
               recentDishIds={recentDishIds}
               onQuickAdd={onQuickAdd}
+              onUpdateServings={onUpdateServings}
             />
           )}
           {activeSubTab === 'nutrition' && (
@@ -146,6 +150,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               targetCalories={targetCalories}
               targetProtein={targetProtein}
               isSuggesting={isSuggesting}
+              servings={servings}
               onPlanMeal={onPlanMeal}
               onOpenTypeSelection={onOpenTypeSelection}
               onSuggestMealPlan={onSuggestMealPlan}
@@ -156,6 +161,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               onSwitchToNutrition={() => setActiveSubTab('nutrition')}
               recentDishIds={recentDishIds}
               onQuickAdd={onQuickAdd}
+              onUpdateServings={onUpdateServings}
             />
           </div>
           <div>

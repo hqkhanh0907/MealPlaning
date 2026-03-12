@@ -11,7 +11,7 @@ interface CopyPlanModalProps {
   sourceDate: string;
   sourcePlan: DayPlan;
   dishes: Dish[];
-  onCopy: (targetDates: string[]) => void;
+  onCopy: (targetDates: string[], mergeMode: boolean) => void;
   onClose: () => void;
 }
 
@@ -35,6 +35,7 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
 
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [mergeMode, setMergeMode] = useState(false);
 
   const tomorrowDate = useMemo(() => addDays(sourceDate, 1), [sourceDate]);
 
@@ -70,9 +71,9 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
 
   const handleConfirm = useCallback(() => {
     if (selectedDates.length > 0) {
-      onCopy(selectedDates);
+      onCopy(selectedDates, mergeMode);
     }
-  }, [selectedDates, onCopy]);
+  }, [selectedDates, onCopy, mergeMode]);
 
   return (
     <ModalBackdrop onClose={onClose}>
@@ -151,6 +152,24 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium border-2 transition-all min-h-11 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-[0.98]"
             >
               {t('copyPlan.custom')}
+            </button>
+          </div>
+
+          {/* Copy mode toggle */}
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3" data-testid="copy-mode-toggle">
+            <button
+              data-testid="btn-mode-overwrite"
+              onClick={() => setMergeMode(false)}
+              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-10 ${!mergeMode ? 'bg-white dark:bg-slate-600 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+            >
+              {t('copyPlan.overwriteMode')}
+            </button>
+            <button
+              data-testid="btn-mode-merge"
+              onClick={() => setMergeMode(true)}
+              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-10 ${mergeMode ? 'bg-white dark:bg-slate-600 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+            >
+              {t('copyPlan.mergeMode')}
             </button>
           </div>
 

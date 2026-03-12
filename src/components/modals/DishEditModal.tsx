@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, Clock } from 'lucide-react';
 import { Dish, Ingredient, DishIngredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
@@ -15,6 +15,8 @@ interface DishEditModalProps {
   /** Dish being edited, or null for creating a new dish. */
   editingItem: Dish | null;
   ingredients: Ingredient[];
+  /** All dishes — used to compute ingredient usage frequency for "recently used" section. */
+  allDishes?: Dish[];
   /** Called when a valid dish is saved (both normal save and save-from-unsaved-dialog). */
   onSubmit: (dish: Dish) => void;
   /** Called when the modal closes without saving (clean close or discard). */
@@ -39,7 +41,7 @@ const getDisplayUnit = (unit: { vi: string; en: string }, lang: SupportedLang) =
 };
 
 export const DishEditModal: React.FC<DishEditModalProps> = ({
-  editingItem, ingredients, onSubmit, onClose, onCreateIngredient,
+  editingItem, ingredients, allDishes = [], onSubmit, onClose, onCreateIngredient,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
@@ -48,6 +50,8 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     () => editingItem ? [...editingItem.ingredients] : [],
   );
   const [tags, setTags] = useState<MealType[]>(() => editingItem ? [...(editingItem.tags || [])] : []);
+  const [rating, setRating] = useState<number>(() => editingItem?.rating ?? 0);
+  const [notes, setNotes] = useState<string>(() => editingItem?.notes ?? '');
   const [ingredientSearch, setIngredientSearch] = useState('');
   const [formErrors, setFormErrors] = useState<{ name?: string; tags?: string; ingredients?: string; amounts?: Partial<Record<string, string>> }>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -81,10 +85,22 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   // Combine passed-in ingredients + any newly created inline ingredients
   const allIngredients = useMemo(() => [...ingredients, ...extraIngredients], [ingredients, extraIngredients]);
 
+  const ingredientFrequency = useMemo(() => {
+    const freq = new Map<string, number>();
+    for (const dish of allDishes) {
+      for (const di of dish.ingredients) {
+        freq.set(di.ingredientId, (freq.get(di.ingredientId) ?? 0) + 1);
+      }
+    }
+    return freq;
+  }, [allDishes]);
+
   const hasChanges = useCallback((): boolean => {
-    if (!editingItem) return namePrimary !== '' || selectedIngredients.length > 0 || tags.length > 0;
+    if (!editingItem) return namePrimary !== '' || selectedIngredients.length > 0 || tags.length > 0 || rating > 0 || notes !== '';
     if (namePrimary !== getLocalizedField(editingItem.name, lang)) return true;
     if (JSON.stringify(tags) !== JSON.stringify(editingItem.tags || [])) return true;
+    if (rating !== (editingItem.rating ?? 0)) return true;
+    if (notes !== (editingItem.notes ?? '')) return true;
     if (selectedIngredients.length !== editingItem.ingredients.length) return true;
     return selectedIngredients.some((si, i) => {
       const orig = editingItem.ingredients[i];
@@ -92,7 +108,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       const amtStr = amountStrings[si.ingredientId] ?? String(si.amount);
       return amtStr.trim() === '' || Number.isNaN(Number.parseFloat(amtStr)) || Math.round(Number.parseFloat(amtStr)) !== Math.round(orig.amount);
     });
-  }, [editingItem, namePrimary, lang, selectedIngredients, tags, amountStrings]);
+  }, [editingItem, namePrimary, lang, selectedIngredients, tags, amountStrings, rating, notes]);
 
   const buildDish = (): Dish => ({
     id: editingItem ? editingItem.id : generateId('dish'),
@@ -105,6 +121,8 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       amount: Math.round(Number.parseFloat(amountStrings[si.ingredientId] ?? String(si.amount))),
     })),
     tags,
+    ...(rating > 0 ? { rating } : {}),
+    ...(notes.trim() ? { notes: notes.trim() } : {}),
   });
 
   const validate = (): boolean => {
@@ -325,6 +343,39 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
             </div>
             {formErrors.tags && <p className="text-xs text-rose-500 mt-1.5 font-medium">{formErrors.tags}</p>}
           </div>
+
+          {/* Rating & Notes */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.rating')}</p>
+              <div className="flex gap-1" data-testid="dish-rating">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    type="button"
+                    data-testid={`star-${star}`}
+                    onClick={() => setRating(prev => prev === star ? 0 : star)}
+                    className={`p-1 text-2xl transition-all min-h-11 min-w-11 flex items-center justify-center rounded-lg ${star <= rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-300'}`}
+                    aria-label={`${star} ${t('dish.stars')}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.notes')}</p>
+              <textarea
+                data-testid="dish-notes"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder={t('dish.notesPlaceholder')}
+                rows={2}
+                className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100 resize-none"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Ingredient Selector */}
             <div className="space-y-3">
@@ -349,7 +400,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   const pickerSelectedIds = new Set(selectedIngredients.map(si => si.ingredientId));
                   const available = allIngredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()));
                   if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === allIngredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
-                  return available.map(ing => (
+                  const recentlyUsed = available.filter(ing => ingredientFrequency.has(ing.id)).sort((a, b) => (ingredientFrequency.get(b.id) ?? 0) - (ingredientFrequency.get(a.id) ?? 0)).slice(0, 10);
+                  const recentIds = new Set(recentlyUsed.map(ing => ing.id));
+                  const rest = available.filter(ing => !recentIds.has(ing.id));
+                  const renderIngButton = (ing: Ingredient) => (
                     <button key={ing.id} data-testid={`btn-add-ing-${ing.id}`} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
                       <div className="flex-1 min-w-0">
                         <span className="text-slate-700 dark:text-slate-300 font-medium">{getLocalizedField(ing.name, lang)}</span>
@@ -357,7 +411,26 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       </div>
                       <Plus className="w-4 h-4 shrink-0 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
                     </button>
-                  ));
+                  );
+                  return (
+                    <>
+                      {recentlyUsed.length > 0 && !ingredientSearch && (
+                        <>
+                          <div data-testid="recently-used-header" className="px-4 py-2 bg-amber-50/50 dark:bg-amber-900/10 flex items-center gap-1.5">
+                            <Clock className="w-3 h-3 text-amber-500" />
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{t('dish.recentlyUsed')}</span>
+                          </div>
+                          {recentlyUsed.map(renderIngButton)}
+                          {rest.length > 0 && (
+                            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700/50">
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('dish.allIngredients')}</span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {ingredientSearch ? available.map(renderIngButton) : rest.map(renderIngButton)}
+                    </>
+                  );
                 })()}
               </div>
               {/* Quick-add bottom sheet overlay */}

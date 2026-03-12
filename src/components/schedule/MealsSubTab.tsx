@@ -13,6 +13,7 @@ export interface MealsSubTabProps {
   targetCalories: number;
   targetProtein: number;
   isSuggesting: boolean;
+  servings?: Record<string, number>;
   onPlanMeal: (type: MealType) => void;
   onOpenTypeSelection: () => void;
   onSuggestMealPlan: () => void;
@@ -23,6 +24,7 @@ export interface MealsSubTabProps {
   onSwitchToNutrition: () => void;
   recentDishIds?: string[];
   onQuickAdd?: (type: MealType, dishId: string) => void;
+  onUpdateServings?: (dishId: string, servings: number) => void;
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
@@ -30,9 +32,10 @@ const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
 export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
   dayNutrition, dishes,
   targetCalories, targetProtein, isSuggesting,
+  servings,
   onPlanMeal, onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onSwitchToNutrition,
-  recentDishIds, onQuickAdd,
+  recentDishIds, onQuickAdd, onUpdateServings,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
@@ -141,7 +144,9 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
               type={type}
               slot={dayNutrition[type]}
               dishes={dishes}
+              servings={servings}
               onEdit={() => onPlanMeal(type)}
+              onUpdateServings={onUpdateServings}
             />
           </div>
         ))}

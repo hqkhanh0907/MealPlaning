@@ -597,6 +597,45 @@ describe('DishManager', () => {
     fireEvent.click(compareBtns2.at(-1)!);
     expect(screen.getByTestId('btn-open-compare')).toBeInTheDocument();
   });
+
+  it('displays rating stars on dish cards', () => {
+    const ratedDishes: Dish[] = [
+      { ...dishes[0], rating: 4 },
+      { ...dishes[1], rating: 0 },
+    ];
+    render(<DishManager {...defaultProps} dishes={ratedDishes} />);
+    expect(screen.getByTestId('dish-rating-d1')).toBeInTheDocument();
+    expect(screen.queryByTestId('dish-rating-d2')).not.toBeInTheDocument();
+  });
+
+  it('sorts dishes by rating', () => {
+    const ratedDishes: Dish[] = [
+      { ...dishes[0], rating: 2 },
+      { ...dishes[1], rating: 5 },
+      { ...dishes[2], rating: 1 },
+    ];
+    render(<DishManager {...defaultProps} dishes={ratedDishes} />);
+    const sortSelect = screen.getByTestId('select-sort-dish');
+    fireEvent.change(sortSelect, { target: { value: 'rating-desc' } });
+    const allText = document.body.textContent ?? '';
+    const pos5 = allText.indexOf('Cơm gà');
+    const pos2 = allText.indexOf('Gà nướng');
+    expect(pos5).toBeLessThan(pos2);
+  });
+
+  it('sorts dishes by rating ascending', () => {
+    const ratedDishes: Dish[] = [
+      { ...dishes[0], rating: 5 },
+      { ...dishes[1], rating: 1 },
+    ];
+    render(<DishManager {...defaultProps} dishes={ratedDishes} />);
+    const sortSelect = screen.getByTestId('select-sort-dish');
+    fireEvent.change(sortSelect, { target: { value: 'rating-asc' } });
+    const allText = document.body.textContent ?? '';
+    const pos1 = allText.indexOf('Cơm gà');
+    const pos5 = allText.indexOf('Gà nướng');
+    expect(pos1).toBeLessThan(pos5);
+  });
 });
 
 // --- IngredientManager ---
