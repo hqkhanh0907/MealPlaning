@@ -140,7 +140,7 @@ WebdriverIO in kết quả ra terminal:
 [0-0] PASS  01-navigation.spec.ts
 [0-0] PASS  02-calendar-basic.spec.ts
 ...
-Spec Files:  10 passed, 0 failed, 0 skipped (10 total)
+Spec Files:  24 passed, 0 failed, 0 skipped (24 total)
 ```
 
 ---

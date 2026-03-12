@@ -89,7 +89,7 @@ adb logcat --pid=$(adb shell pidof com.mealplaner.app)
 
 | Yêu cầu | Giá trị tối thiểu |
 |---------|------------------|
-| Android | 10 (API 29) |
+| Android | 7.0+ (API 24, minSdkVersion) |
 | RAM | 2 GB |
 | Storage | 500 MB trống |
 | Internet | Cần để dùng AI features (Gemini API) |

@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 7.0  
-**Date:** 2026-03-11  
-**Commit:** `412ad4e`
+**Version:** 8.0  
+**Date:** 2026-03-12  
+**Commit:** TBD
 
-> **v7.0**: QA Cycle 6 — Google Drive sync, Cloud auth, Desktop layout, Meal templates, Copy plan, AI suggest ingredients. Unit tests 1046→1201 (+155), test files 49→57 (+8). Xem [Changelog](#6-changelog).
+> **v8.0**: QA Cycle 7 — Comprehensive manual testing via Chrome DevTools MCP. 108 test cases across 14 scenarios manually verified. All 108 PASS, 0 FAIL. Zero console errors/warnings across all tab navigations. 24 expanded scenario docs (SC01–SC24, 2,520 TCs total). UX research with 120 proposals. Doc fixes: PRD F-24 rename, Android API alignment, e2e spec count. Xem [Changelog](#6-changelog).
 
 ---
 
@@ -271,10 +271,41 @@
 
 ## 6. Tài liệu liên quan
 
-- **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 799 test cases across 15 scenarios (v2.0)
+- **Expanded scenario test cases (v8.0):** [scenarios/](scenarios/) — 2,520 test cases across 24 scenarios (SC01–SC24, 105 TCs each)
+- **UX Research Analysis:** [../ux-research-analysis.md](../ux-research-analysis.md) — 120 UX proposals across all scenarios
+- **Original scenario analysis:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 799 test cases across 15 scenarios (v2.0, superseded by expanded docs)
 - **Test Plan:** [test-plan.md](test-plan.md)
 - **Test Cases (manual QA):** [test-cases.md](test-cases.md)
 - **E2E Setup:** [e2e-setup.md](e2e-setup.md)
+
+---
+
+## 7. Manual Testing Results (v8.0)
+
+**Method:** Chrome DevTools MCP — automated browser interaction via accessibility tree  
+**Environment:** macOS, Chrome, localhost:3000 (Vite dev server)  
+**Date:** 2026-03-12  
+**Console Errors:** 0 | **Console Warnings:** 0
+
+### Summary: 108 TCs tested, 108 PASS, 0 FAIL
+
+| Scenario | TCs Tested | Pass | Fail | Coverage |
+|----------|-----------|------|------|----------|
+| SC01 — Calendar & Meal Planning | 22 | 22 | 0 | Calendar grid, date selection, meal slots, nutrition bars, week view, more actions |
+| SC02 — Meal Planner Modal | 18 | 18 | 0 | Modal open/close, meal tabs, dish selection, search, nutrition preview, save |
+| SC05 — AI Image Analysis | 5 | 5 | 0 | Tab load, 3-step workflow, upload/photo buttons, analyze state |
+| SC06 — Ingredient CRUD | 10 | 10 | 0 | Ingredient list, nutrition data, cross-reference, delete protection |
+| SC07 — Dish CRUD | 9 | 9 | 0 | Dish list, meal filters, sort options, clone/edit/delete |
+| SC08 — Settings & Config | 5 | 5 | 0 | Settings page, language, appearance, cloud sync, data sections |
+| SC09 — Goal Settings | 6 | 6 | 0 | Goal modal, weight/protein/calorie inputs, presets, auto-save |
+| SC10 — Copy Plan | 9 | 9 | 0 | Copy modal, source preview, quick select, execute, verify target |
+| SC11 — Clear Plan | 6 | 6 | 0 | Clear modal, 3 scopes, meal count, execute, undo option |
+| SC13 — Save Template | 4 | 4 | 0 | Template modal, name input, preview, save |
+| SC14 — Grocery List | 6 | 6 | 0 | Auto-generation, time filters, copy/share, ingredient display |
+| SC20 — Filter & Sort | 1 | 1 | 0 | Default sort Name A-Z |
+| SC22 — Dark Mode | 3 | 3 | 0 | Dark theme activation, contrast, selected states |
+| SC23 — i18n Language | 4 | 4 | 0 | Vietnamese switch, tab translation, instant change |
+| **TOTAL** | **108** | **108** | **0** | |
 
 ---
 
@@ -289,3 +320,4 @@
 | 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit via Chrome DevTools. BUG-DM-001 fixed (4 components, 18 dark: class additions). Schedule sub-tabs refactor. Unit tests 866→995 (+129), test files 40→47 (+7). Coverage: 100% Stmts/Funcs/Lines, 93.15% Branch |
 | 6.0 | 2026-03-08 | QA Cycle 5: Instant food translation via static dictionary (200+ entries). BUG-TRANSLATE-001 fixed (all EN names were VI copies). New files: foodDictionary.ts, foodDictionary.test.ts. Unit tests 995→1046 (+51), test files 47→49 (+2). Coverage: 99.53% Stmts, 99.66% Funcs, 100% Lines, 92.30% Branch |
 | 7.0 | 2026-03-11 | QA Cycle 6: Google Drive sync, Cloud auth (AuthContext), Desktop layout, Meal templates, Copy plan, AI suggest ingredients, Filter bottom sheet, Quick preview panel, Schedule components, Sync conflict modal. Unit tests 1046→1201 (+155), test files 49→57 (+8). Coverage: 99.46% Stmts, 99.41% Funcs, 100% Lines, 92.51% Branch. Chrome DevTools QA: 0 errors, 0 warnings across all 5 tabs |
+| 8.0 | 2026-03-12 | QA Cycle 7: Comprehensive manual testing via Chrome DevTools MCP — 108 TCs across 14 scenarios (SC01–SC14, SC20, SC22, SC23) all PASS. 24 expanded scenario docs (SC01–SC24, 2,520 TCs total) created in docs/04-testing/scenarios/. UX research document with 120 proposals. Doc fixes: PRD F-24 renamed to "Quick Copy Plan", Android API version aligned (minSdk 24, targetSdk 36), e2e-setup spec count 10→24. Zero console errors/warnings. No code bugs found |
