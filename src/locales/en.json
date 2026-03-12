@@ -76,9 +76,11 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
+    "themeSchedule": "Schedule",
     "themeLightTitle": "Light — tap to switch",
     "themeDarkTitle": "Dark — tap to switch",
     "themeSystemTitle": "System — tap to switch",
+    "themeScheduleTitle": "Auto by time (6PM-6AM) — tap to switch",
     "themeAriaLabel": "Display mode: {{theme}}"
   },
   "calendar": {
@@ -124,7 +126,13 @@
   "summary": {
     "title": "Daily nutrition",
     "goal": "Goal: {{cal}} kcal, {{pro}}g Protein",
-    "editGoal": "Edit nutrition goals"
+    "editGoal": "Edit nutrition goals",
+    "remaining": "Remaining: {{value}} {{unit}}",
+    "over": "Over: {{value}} {{unit}}",
+    "showDetails": "Per-meal details",
+    "hideDetails": "Hide details",
+    "meal": "Meal",
+    "total": "Total"
   },
   "dish": {
     "title": "Dish",
@@ -188,7 +196,11 @@
     "clone": "Clone",
     "cloned": "Dish cloned",
     "clonedDesc": "\"{{name}}\" has been duplicated",
-    "copySuffix": "(copy)"
+    "copySuffix": "(copy)",
+    "compare": "Compare",
+    "compareSelected": "Compare ({{count}})",
+    "maxCompare": "Max 3 dishes",
+    "compareNutrition": "Nutrition Comparison"
   },
   "ingredient": {
     "title": "Ingredient",
@@ -250,7 +262,13 @@
     "allBought": "All ingredients bought! 🎉",
     "shareTitle": "Grocery list",
     "boughtCount": "Bought {{count}}/{{total}}",
-    "headerDay": "🛒 Grocery list — {{date}}"
+    "headerDay": "🛒 Grocery list — {{date}}",
+    "aisleProtein": "Meat & Seafood",
+    "aisleDairy": "Dairy & Eggs",
+    "aisleGrains": "Grains & Seeds",
+    "aisleProduce": "Produce",
+    "aisleOther": "Other",
+    "groupByAisle": "Group by aisle"
   },
   "ai": {
     "title": "AI Image Analysis",
@@ -359,7 +377,12 @@
     "perKg": "g / kg",
     "recommendation": "Recommended: 2–4g/kg for athletes, 1g/kg for average adults.",
     "caloriesGoal": "Calorie target (kcal)",
-    "autoSaveHint": "Changes are saved immediately"
+    "autoSaveHint": "Changes are saved immediately",
+    "presets": "Quick presets",
+    "presetBalanced": "Balanced",
+    "presetHighProtein": "High Protein",
+    "presetLowCarb": "Low Carb",
+    "presetLightDiet": "Light Diet"
   },
   "saveAnalyzed": {
     "title": "Confirm save dish",
@@ -456,8 +479,10 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
+    "themeSchedule": "Schedule",
     "data": "Data",
-    "dataDesc": "Manage application data"
+    "dataDesc": "Manage application data",
+    "searchPlaceholder": "Search settings..."
   },
   "filter": {
     "button": "Filter",

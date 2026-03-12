@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Target } from 'lucide-react';
+import { X, Target, Zap } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -12,6 +12,20 @@ interface GoalSettingsModalProps {
 }
 
 const PROTEIN_PRESETS = [1, 2, 3, 4];
+
+interface GoalPreset {
+  labelKey: string;
+  emoji: string;
+  calories: number;
+  proteinRatio: number;
+}
+
+const GOAL_PRESETS: GoalPreset[] = [
+  { labelKey: 'goalSettings.presetBalanced', emoji: '⚖️', calories: 2000, proteinRatio: 1.6 },
+  { labelKey: 'goalSettings.presetHighProtein', emoji: '💪', calories: 2200, proteinRatio: 2.5 },
+  { labelKey: 'goalSettings.presetLowCarb', emoji: '🥑', calories: 1600, proteinRatio: 2 },
+  { labelKey: 'goalSettings.presetLightDiet', emoji: '🥗', calories: 1400, proteinRatio: 1.2 },
+];
 
 export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfile, onUpdateProfile, onClose }) => {
   const { t } = useTranslation();
@@ -37,7 +51,42 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto">
+          {/* Goal Presets */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('goalSettings.presets')}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {GOAL_PRESETS.map((preset) => {
+                const isActive = userProfile.targetCalories === preset.calories && userProfile.proteinRatio === preset.proteinRatio;
+                return (
+                  <button
+                    key={preset.labelKey}
+                    onClick={() => {
+                      const rounded = Math.round(preset.proteinRatio * 10) / 10;
+                      onUpdateProfile({ ...userProfile, targetCalories: preset.calories, proteinRatio: rounded });
+                      setCaloriesStr(String(preset.calories));
+                      setProteinStr(String(rounded));
+                    }}
+                    data-testid={`btn-goal-preset-${preset.calories}`}
+                    className={`flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all ${
+                      isActive
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                        : 'border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-700'
+                    }`}
+                  >
+                    <span className="text-lg">{preset.emoji}</span>
+                    <div>
+                      <p className={`text-sm font-bold ${isActive ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}>{t(preset.labelKey)}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{preset.calories} kcal · {preset.proteinRatio}g/kg</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div>
             <label htmlFor="goal-weight" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('goalSettings.weight')}</label>
             <div className="relative">

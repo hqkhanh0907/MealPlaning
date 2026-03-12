@@ -194,9 +194,9 @@ export default function App() {
     modals.openMealPlanner(type);
   }, [aiSuggestion, modals]);
 
-  const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month') => {
+  const handleClearPlan = useCallback((scope: 'day' | 'week' | 'month', meals?: MealType[]) => {
     const backup = [...dayPlans];
-    setDayPlans(prev => clearPlansByScope(prev, selectedDate, scope));
+    setDayPlans(prev => clearPlansByScope(prev, selectedDate, scope, meals));
     modals.closeClearPlan();
     notify.success(t('notification.planCleared'), t('clearPlan.undoMessage'), {
       duration: UNDO_TOAST_DURATION_MS,

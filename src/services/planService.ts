@@ -25,19 +25,32 @@ export const getDayPlanSlotKey = (type: MealType): keyof DayPlan => {
 export const clearPlansByScope = (
   plans: DayPlan[],
   selectedDate: string,
-  scope: 'day' | 'week' | 'month'
+  scope: 'day' | 'week' | 'month',
+  meals?: MealType[]
 ): DayPlan[] => {
-  if (scope === 'day') return plans.filter(p => p.date !== selectedDate);
+  const allMeals = !meals || meals.length === 3;
+  const clearMeals = (p: DayPlan): DayPlan => ({
+    ...p,
+    breakfastDishIds: meals?.includes('breakfast') ? [] : p.breakfastDishIds,
+    lunchDishIds: meals?.includes('lunch') ? [] : p.lunchDishIds,
+    dinnerDishIds: meals?.includes('dinner') ? [] : p.dinnerDishIds,
+  });
+  const filterOrClear = (predicate: (p: DayPlan) => boolean): DayPlan[] => {
+    if (allMeals) return plans.filter(p => !predicate(p));
+    return plans.map(p => predicate(p) ? clearMeals(p) : p);
+  };
+
+  if (scope === 'day') return filterOrClear(p => p.date === selectedDate);
   if (scope === 'week') {
     const { start, end } = getWeekRange(selectedDate);
-    return plans.filter(p => !isDateInRange(p.date, start, end));
+    return filterOrClear(p => isDateInRange(p.date, start, end));
   }
   const targetDate = parseLocalDate(selectedDate);
   const year = targetDate.getFullYear();
   const month = targetDate.getMonth();
-  return plans.filter(p => {
+  return filterOrClear(p => {
     const pDate = parseLocalDate(p.date);
-    return pDate.getFullYear() !== year || pDate.getMonth() !== month;
+    return pDate.getFullYear() === year && pDate.getMonth() === month;
   });
 };
 

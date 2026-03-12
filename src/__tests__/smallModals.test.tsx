@@ -36,7 +36,7 @@ describe('ClearPlanModal', () => {
   it('calls onClear with day scope when day button is clicked', () => {
     render(<ClearPlanModal dayPlans={dayPlans} selectedDate="2024-01-15" onClear={onClear} onClose={onClose} />);
     fireEvent.click(screen.getByText('Ngày này'));
-    expect(onClear).toHaveBeenCalledWith('day');
+    expect(onClear).toHaveBeenCalledWith('day', undefined);
   });
 
   it('disables button when count is 0', () => {
@@ -82,6 +82,37 @@ describe('ClearPlanModal', () => {
     const expandBtn = screen.getAllByTestId(/btn-expand/)[0];
     fireEvent.click(expandBtn);
     fireEvent.click(expandBtn);
+  });
+
+  it('renders meal toggle buttons', () => {
+    render(<ClearPlanModal dayPlans={dayPlans} selectedDate="2024-01-15" onClear={onClear} onClose={onClose} />);
+    expect(screen.getByTestId('meal-toggle-breakfast')).toBeInTheDocument();
+    expect(screen.getByTestId('meal-toggle-lunch')).toBeInTheDocument();
+    expect(screen.getByTestId('meal-toggle-dinner')).toBeInTheDocument();
+  });
+
+  it('deselects a meal when toggling off', () => {
+    render(<ClearPlanModal dayPlans={dayPlans} selectedDate="2024-01-15" onClear={onClear} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('meal-toggle-breakfast'));
+    fireEvent.click(screen.getByText('Ngày này'));
+    expect(onClear).toHaveBeenCalledWith('day', ['lunch', 'dinner']);
+  });
+
+  it('keeps at least one meal selected', () => {
+    render(<ClearPlanModal dayPlans={dayPlans} selectedDate="2024-01-15" onClear={onClear} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('meal-toggle-breakfast'));
+    fireEvent.click(screen.getByTestId('meal-toggle-lunch'));
+    fireEvent.click(screen.getByTestId('meal-toggle-dinner'));
+    fireEvent.click(screen.getByText('Ngày này'));
+    expect(onClear).toHaveBeenCalledWith('day', ['dinner']);
+  });
+
+  it('reselects a deselected meal', () => {
+    render(<ClearPlanModal dayPlans={dayPlans} selectedDate="2024-01-15" onClear={onClear} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('meal-toggle-breakfast'));
+    fireEvent.click(screen.getByTestId('meal-toggle-breakfast'));
+    fireEvent.click(screen.getByText('Ngày này'));
+    expect(onClear).toHaveBeenCalledWith('day', undefined);
   });
 });
 
@@ -261,5 +292,33 @@ describe('GoalSettingsModal', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Cân nặng hiện tại (kg)'), { target: { value: '90' } });
     expect(onUpdateProfile).toHaveBeenCalledWith({ weight: 90, proteinRatio: 2, targetCalories: 2000 });
+  });
+
+  it('renders goal preset buttons', () => {
+    render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    expect(screen.getByText('Chọn nhanh')).toBeInTheDocument();
+    expect(screen.getByText('Cân bằng')).toBeInTheDocument();
+    expect(screen.getByText('Tăng cơ')).toBeInTheDocument();
+    expect(screen.getByText('Low Carb')).toBeInTheDocument();
+    expect(screen.getByText('Ăn nhẹ')).toBeInTheDocument();
+  });
+
+  it('applies goal preset when clicked', () => {
+    render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('btn-goal-preset-2200'));
+    expect(onUpdateProfile).toHaveBeenCalledWith({ weight: 70, targetCalories: 2200, proteinRatio: 2.5 });
+  });
+
+  it('highlights active preset matching current profile', () => {
+    const balancedProfile: UserProfile = { weight: 70, proteinRatio: 1.6, targetCalories: 2000 };
+    render(<GoalSettingsModal userProfile={balancedProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const btn = screen.getByTestId('btn-goal-preset-2000');
+    expect(btn.className).toContain('border-emerald-500');
+  });
+
+  it('does not highlight preset when profile does not match', () => {
+    render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const btn = screen.getByTestId('btn-goal-preset-1400');
+    expect(btn.className).not.toContain('border-emerald-500');
   });
 });

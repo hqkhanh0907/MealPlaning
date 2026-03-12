@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Activity, Flame, Beef, Wheat, Droplet, Leaf, Edit3 } from 'lucide-react';
+import { Activity, Flame, Beef, Wheat, Droplet, Leaf, Edit3, ChevronDown } from 'lucide-react';
 import { DayNutritionSummary } from '../types';
 
 interface SummaryProps {
@@ -12,11 +12,14 @@ interface SummaryProps {
 
 export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targetCalories, targetProtein, onEditGoals }) => {
   const { t } = useTranslation();
+  const [showDetails, setShowDetails] = useState(false);
   const totalCalories = dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories;
   const totalProtein = dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein;
   const totalCarbs = dayNutrition.breakfast.carbs + dayNutrition.lunch.carbs + dayNutrition.dinner.carbs;
   const totalFat = dayNutrition.breakfast.fat + dayNutrition.lunch.fat + dayNutrition.dinner.fat;
   const totalFiber = dayNutrition.breakfast.fiber + dayNutrition.lunch.fiber + dayNutrition.dinner.fiber;
+  const remainingCalories = Math.round(targetCalories - totalCalories);
+  const remainingProtein = Math.round(targetProtein - totalProtein);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 p-4 sm:p-6 md:p-8 border border-slate-100 dark:border-slate-700">
@@ -62,6 +65,11 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             value={Math.round(totalCalories)}
             max={targetCalories}
           />
+          <p data-testid="remaining-calories" className={`text-xs font-medium ${remainingCalories >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            {remainingCalories >= 0
+              ? t('summary.remaining', { value: remainingCalories, unit: 'kcal' })
+              : t('summary.over', { value: Math.abs(remainingCalories), unit: 'kcal' })}
+          </p>
         </div>
 
         {/* Protein Progress */}
@@ -82,6 +90,11 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
             value={Math.round(totalProtein)}
             max={targetProtein}
           />
+          <p data-testid="remaining-protein" className={`text-xs font-medium ${remainingProtein >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            {remainingProtein >= 0
+              ? t('summary.remaining', { value: remainingProtein, unit: 'g' })
+              : t('summary.over', { value: Math.abs(remainingProtein), unit: 'g' })}
+          </p>
         </div>
       </div>
 
@@ -108,6 +121,57 @@ export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targe
           <p className="text-lg sm:text-2xl font-bold text-emerald-900 dark:text-emerald-300">{Math.round(totalFiber)}<span className="text-xs sm:text-sm font-normal text-emerald-700/70 dark:text-emerald-500/70 ml-1">g</span></p>
         </div>
       </div>
+
+      <button
+        type="button"
+        data-testid="btn-macro-details"
+        onClick={() => setShowDetails(prev => !prev)}
+        className="w-full flex items-center justify-center gap-1.5 mt-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-all"
+      >
+        <span>{showDetails ? t('summary.hideDetails') : t('summary.showDetails')}</span>
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showDetails ? 'rotate-180' : ''}`} />
+      </button>
+
+      {showDetails && (
+        <div data-testid="macro-details" className="mt-2 border-t border-slate-100 dark:border-slate-700 pt-3">
+          <table className="w-full text-xs sm:text-sm">
+            <thead>
+              <tr className="text-slate-500 dark:text-slate-400">
+                <th className="text-left font-medium pb-2">{t('summary.meal')}</th>
+                <th className="text-right font-medium pb-2">{t('common.carbs')}</th>
+                <th className="text-right font-medium pb-2">{t('common.fat')}</th>
+                <th className="text-right font-medium pb-2">{t('common.fiber')}</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-700 dark:text-slate-300">
+              <tr>
+                <td className="py-1">{t('meal.breakfast')}</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.breakfast.carbs)}g</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.breakfast.fat)}g</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.breakfast.fiber)}g</td>
+              </tr>
+              <tr>
+                <td className="py-1">{t('meal.lunch')}</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.lunch.carbs)}g</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.lunch.fat)}g</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.lunch.fiber)}g</td>
+              </tr>
+              <tr>
+                <td className="py-1">{t('meal.dinner')}</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.dinner.carbs)}g</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.dinner.fat)}g</td>
+                <td className="text-right py-1">{Math.round(dayNutrition.dinner.fiber)}g</td>
+              </tr>
+              <tr className="font-bold border-t border-slate-200 dark:border-slate-600">
+                <td className="pt-2">{t('summary.total')}</td>
+                <td className="text-right pt-2">{Math.round(totalCarbs)}g</td>
+                <td className="text-right pt-2">{Math.round(totalFat)}g</td>
+                <td className="text-right pt-2">{Math.round(totalFiber)}g</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 });

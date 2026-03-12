@@ -18,8 +18,46 @@ interface GroceryListProps {
 }
 
 type GroceryItem = { id: string; name: string; amount: number; unit: string };
-/** Snapshot stored in localStorage: ingredient id + amount at time of check */
 type CheckedSnapshot = { id: string; amount: number };
+
+type AisleCategory = 'protein' | 'dairy' | 'grains' | 'produce' | 'other';
+
+const AISLE_EMOJI: Record<AisleCategory, string> = {
+  protein: '🥩',
+  dairy: '🥛',
+  grains: '🌾',
+  produce: '🥬',
+  other: '📦',
+};
+
+const PROTEIN_KEYWORDS_VI = ['gà', 'bò', 'heo', 'lợn', 'cá', 'tôm', 'thịt', 'trứng'];
+const PROTEIN_KEYWORDS_EN = ['chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp', 'egg', 'meat'];
+const DAIRY_KEYWORDS_VI = ['sữa', 'phô mai', 'bơ'];
+const DAIRY_KEYWORDS_EN = ['milk', 'yogurt', 'cheese', 'butter', 'cream'];
+const GRAIN_KEYWORDS_VI = ['gạo', 'yến mạch', 'bột', 'bánh mì', 'hạt'];
+const GRAIN_KEYWORDS_EN = ['rice', 'oat', 'flour', 'bread', 'seed', 'chia', 'quinoa'];
+const PRODUCE_KEYWORDS_VI = ['rau', 'củ', 'cải', 'khoai', 'cam', 'chuối', 'bông', 'xà lách', 'bina'];
+const PRODUCE_KEYWORDS_EN = ['spinach', 'broccoli', 'lettuce', 'tomato', 'carrot', 'onion', 'sweet potato', 'orange', 'banana', 'vegetable'];
+
+function categorizeIngredient(name: string, ingredient: Ingredient | undefined): AisleCategory {
+  const lower = name.toLowerCase();
+  const viName = ingredient ? getLocalizedField(ingredient.name, 'vi').toLowerCase() : lower;
+  const enName = ingredient ? getLocalizedField(ingredient.name, 'en').toLowerCase() : lower;
+
+  if (PROTEIN_KEYWORDS_VI.some(k => viName.includes(k)) || PROTEIN_KEYWORDS_EN.some(k => enName.includes(k))) return 'protein';
+  if (DAIRY_KEYWORDS_VI.some(k => viName.includes(k)) || DAIRY_KEYWORDS_EN.some(k => enName.includes(k))) return 'dairy';
+  if (GRAIN_KEYWORDS_VI.some(k => viName.includes(k)) || GRAIN_KEYWORDS_EN.some(k => enName.includes(k))) return 'grains';
+  if (PRODUCE_KEYWORDS_VI.some(k => viName.includes(k)) || PRODUCE_KEYWORDS_EN.some(k => enName.includes(k))) return 'produce';
+
+  if (ingredient) {
+    if (ingredient.proteinPer100 > 15 && ingredient.carbsPer100 < 5) return 'protein';
+    if (ingredient.fiberPer100 > 2 && ingredient.carbsPer100 > 5) return 'produce';
+  }
+
+  return 'other';
+}
+
+type GroceryItemWithCategory = GroceryItem & { category: AisleCategory };
 
 const collectDishIngredients = (dishIds: string[], allDishes: Dish[]): DishIngredient[] => {
   const result: DishIngredient[] = [];
@@ -30,15 +68,16 @@ const collectDishIngredients = (dishIds: string[], allDishes: Dish[]): DishIngre
   return result;
 };
 
-const buildGroceryList = (dishIngredients: DishIngredient[], allIngredients: Ingredient[], lang: SupportedLang): GroceryItem[] => {
-  const map: Record<string, GroceryItem> = {};
+const buildGroceryList = (dishIngredients: DishIngredient[], allIngredients: Ingredient[], lang: SupportedLang): GroceryItemWithCategory[] => {
+  const map: Record<string, GroceryItemWithCategory> = {};
   for (const di of dishIngredients) {
     const ing = allIngredients.find(i => i.id === di.ingredientId);
     if (!ing) continue;
     if (map[ing.id]) {
       map[ing.id].amount += di.amount;
     } else {
-      map[ing.id] = { id: ing.id, name: getLocalizedField(ing.name, lang), amount: di.amount, unit: getLocalizedField(ing.unit, lang) };
+      const name = getLocalizedField(ing.name, lang);
+      map[ing.id] = { id: ing.id, name, amount: di.amount, unit: getLocalizedField(ing.unit, lang), category: categorizeIngredient(name, ing) };
     }
   }
   return Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
@@ -64,6 +103,16 @@ const getScopeLabelKey = (scope: GroceryScope): string => {
 const getScopeHeaderKey = (scope: GroceryScope): string =>
   scope === 'week' ? 'grocery.headerWeek' : 'grocery.headerAll';
 
+const AISLE_LABEL_KEYS: Record<AisleCategory, string> = {
+  protein: 'grocery.aisleProtein',
+  dairy: 'grocery.aisleDairy',
+  grains: 'grocery.aisleGrains',
+  produce: 'grocery.aisleProduce',
+  other: 'grocery.aisleOther',
+};
+
+const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', 'other'];
+
 const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
   <div data-testid="grocery-empty-state" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -88,7 +137,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const [scope, setScope] = useState<GroceryScope>('day');
-  // Store {id, amount} snapshots so stale checks (amount changed) auto-invalidate
+  const [groupByAisle, setGroupByAisle] = useState(false);
   const [persistedCheckedSnapshots, setPersistedCheckedSnapshots] = usePersistedState<CheckedSnapshot[]>('mp-grocery-checked', []);
 
   const filteredPlans = useMemo(() => {
@@ -127,6 +176,15 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
     groceryItems.filter(item => checkedIds.has(item.id)).length,
     [groceryItems, checkedIds]
   );
+
+  const groupedItems = useMemo(() => {
+    if (!groupByAisle) return null;
+    const groups: Record<AisleCategory, GroceryItemWithCategory[]> = { produce: [], protein: [], dairy: [], grains: [], other: [] };
+    for (const item of groceryItems) {
+      groups[item.category].push(item);
+    }
+    return AISLE_ORDER.filter(cat => groups[cat].length > 0).map(cat => ({ category: cat, items: groups[cat] }));
+  }, [groceryItems, groupByAisle]);
 
   const toggleCheck = useCallback((id: string) => {
     const item = groceryItems.find(i => i.id === id);
@@ -226,18 +284,77 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
             </div>
           </div>
 
-          {/* Progress bar */}
-          {checkedCount > 0 && (
-            <div className="h-1 bg-emerald-100 dark:bg-emerald-900/30">
-              <div
-                className="h-full bg-emerald-500 transition-all duration-300"
-                style={{ width: `${(checkedCount / groceryItems.length) * 100}%` }}
-              />
-            </div>
-          )}
+          {/* Group by aisle toggle + Progress bar */}
+          <div className="flex items-center justify-between px-4 sm:px-6 py-2 border-b border-slate-100 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setGroupByAisle(g => !g)}
+              data-testid="btn-group-aisle"
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                groupByAisle
+                  ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {t('grocery.groupByAisle')}
+            </button>
+            {checkedCount > 0 && (
+              <div className="flex-1 ml-3 h-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
+                  style={{ width: `${(checkedCount / groceryItems.length) * 100}%` }}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Items */}
           <div className="p-3 sm:p-4">
+            {groupByAisle && groupedItems ? (
+              <div className="space-y-4">
+                {groupedItems.map(group => (
+                  <div key={group.category}>
+                    <div className="flex items-center gap-2 mb-2 px-2">
+                      <span className="text-sm">{AISLE_EMOJI[group.category]}</span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t(AISLE_LABEL_KEYS[group.category])}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">({group.items.length})</span>
+                    </div>
+                    <ul className="space-y-1">
+                      {group.items.map(item => {
+                        const isChecked = checkedIds.has(item.id);
+                        return (
+                          <li key={item.id}>
+                            <button
+                              data-testid={`grocery-item-${item.id}`}
+                              onClick={() => toggleCheck(item.id)}
+                              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl transition-all min-h-12 active:scale-[0.99] ${
+                                isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
+                              }`}
+                            >
+                              <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
+                                isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'
+                              }`}>
+                                {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
+                              </div>
+                              <span className={`flex-1 text-left font-medium text-sm sm:text-base transition-all ${
+                                isChecked ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'
+                              }`}>
+                                {item.name}
+                              </span>
+                              <span className={`text-sm font-medium shrink-0 transition-all ${
+                                isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
+                              }`}>
+                                {Math.round(item.amount)} {item.unit}
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
             <ul className="space-y-1">
               {groceryItems.map(item => {
                 const isChecked = checkedIds.has(item.id);
@@ -270,6 +387,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                 );
               })}
             </ul>
+            )}
           </div>
 
           {/* All done state */}

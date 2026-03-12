@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Dish, Ingredient, MealType, NutritionInfo, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { calculateDishNutrition } from '../utils/nutrition';
-import { Trash2, Edit3, ChefHat, Apple, Copy } from 'lucide-react';
+import { Trash2, Edit3, ChefHat, Apple, Copy, GitCompareArrows, X } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
 import { ConfirmationModal } from './modals/ConfirmationModal';
 import { DishEditModal } from './modals/DishEditModal';
@@ -44,6 +44,20 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
   ];
 
   const [filterTag, setFilterTag] = useState<MealType | null>(null);
+
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [showCompare, setShowCompare] = useState(false);
+
+  const MAX_COMPARE = 3;
+  const toggleCompare = useCallback((id: string) => {
+    setCompareIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); }
+      else if (next.size < MAX_COMPARE) { next.add(id); }
+      else { notify.warning(t('dish.maxCompare')); return prev; }
+      return next;
+    });
+  }, [notify, t]);
 
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean; dishId: string | null; dishName: string;
@@ -165,7 +179,10 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
           {list.filteredItems.map(dish => {
             const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
             return (
-              <div key={dish.id} className="relative bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all flex flex-col group text-left w-full">
+              <div key={dish.id} className={`relative bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all flex flex-col group text-left w-full ${compareIds.has(dish.id) ? 'border-blue-400 dark:border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900/50' : 'border-slate-100 dark:border-slate-700'}`}>
+                <button data-testid={`btn-compare-${dish.id}`} onClick={() => toggleCompare(dish.id)} className={`absolute top-3 right-3 z-10 w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-all ${compareIds.has(dish.id) ? 'bg-blue-500 border-blue-500 text-white' : 'border-slate-200 dark:border-slate-600 text-transparent hover:border-blue-400 hover:text-blue-400'}`} aria-label={t('dish.compare')}>
+                  <GitCompareArrows className="w-4 h-4" />
+                </button>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500"><ChefHat className="w-5 h-5" /></div>
@@ -214,8 +231,8 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 {list.filteredItems.map(dish => {
                   const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
                   return (
-                    <tr key={dish.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                      <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-4 h-4" /></div><div><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-left cursor-pointer hover:text-emerald-600 transition-colors">{getLocalizedField(dish.name, lang)}</button><p className="text-xs text-slate-500 dark:text-slate-400">{dish.ingredients.length} {t('dish.ingredients')}</p></div></div></td>
+                    <tr key={dish.id} className={`transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
+                      <td className="px-4 py-3"><div className="flex items-center gap-3"><button data-testid={`btn-compare-${dish.id}`} onClick={() => toggleCompare(dish.id)} className={`w-6 h-6 rounded flex items-center justify-center border-2 shrink-0 transition-all ${compareIds.has(dish.id) ? 'bg-blue-500 border-blue-500 text-white' : 'border-slate-200 dark:border-slate-600 text-transparent hover:border-blue-400'}`} aria-label={t('dish.compare')}><GitCompareArrows className="w-3 h-3" /></button><div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-4 h-4" /></div><div><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-left cursor-pointer hover:text-emerald-600 transition-colors">{getLocalizedField(dish.name, lang)}</button><p className="text-xs text-slate-500 dark:text-slate-400">{dish.ingredients.length} {t('dish.ingredients')}</p></div></div></td>
                       <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{dish.tags?.map(tag => <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-600 px-1.5 py-0.5 rounded">{tagLabels[tag]}</span>)}</div></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></td>
@@ -235,8 +252,9 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
             {list.filteredItems.map(dish => {
               const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
               return (
-                <div key={dish.id} className="relative p-4 flex items-center justify-between gap-3 active:bg-slate-50 dark:active:bg-slate-700 transition-colors w-full text-left">
+                <div key={dish.id} className={`relative p-4 flex items-center justify-between gap-3 transition-colors w-full text-left ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'active:bg-slate-50 dark:active:bg-slate-700'}`}>
                   <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <button data-testid={`btn-compare-${dish.id}`} onClick={() => toggleCompare(dish.id)} className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 shrink-0 relative z-10 transition-all ${compareIds.has(dish.id) ? 'bg-blue-500 border-blue-500 text-white' : 'border-slate-200 dark:border-slate-600 text-transparent hover:border-blue-400'}`} aria-label={t('dish.compare')}><GitCompareArrows className="w-3.5 h-3.5" /></button>
                     <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-5 h-5" /></div>
                     <div className="min-w-0"><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 truncate text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">{getLocalizedField(dish.name, lang)}</button><div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span>{Math.round(nutrition.calories)} kcal</span><span className="text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g Pro</span></div></div>
                   </div>
@@ -306,6 +324,74 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
       )}
 
       <ConfirmationModal isOpen={deleteConfirmation.isOpen} variant="danger" title={t('dish.confirmDelete')} message={<p>{t('dish.confirmDeleteMsg')} <span className="font-bold text-slate-800 dark:text-slate-100">&quot;{deleteConfirmation.dishName}&quot;</span>?<br/>{t('common.cannotUndo')}</p>} confirmLabel={t('common.deleteNow')} onConfirm={confirmDelete} onCancel={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })} />
+
+      {/* Floating Compare Button */}
+      {compareIds.size >= 2 && !showCompare && (
+        <button data-testid="btn-open-compare" onClick={() => setShowCompare(true)} className="fixed bottom-24 right-4 z-40 bg-blue-500 hover:bg-blue-600 text-white rounded-full px-5 py-3 shadow-lg flex items-center gap-2 font-bold text-sm transition-all">
+          <GitCompareArrows className="w-5 h-5" />
+          {t('dish.compareSelected', { count: compareIds.size })}
+        </button>
+      )}
+
+      {/* Compare Panel */}
+      {showCompare && (() => {
+        const compareDishes = dishes.filter(d => compareIds.has(d.id));
+        const NUTRITION_KEYS = ['calories', 'protein', 'carbs', 'fat', 'fiber'] as const;
+        const NUTRITION_COLORS: Record<string, string> = {
+          calories: 'text-slate-700 dark:text-slate-300',
+          protein: 'text-blue-600 dark:text-blue-400',
+          carbs: 'text-amber-600 dark:text-amber-400',
+          fat: 'text-rose-600 dark:text-rose-400',
+          fiber: 'text-green-600 dark:text-green-400',
+        };
+        return (
+          <div data-testid="compare-panel" className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center" onClick={() => setShowCompare(false)}>
+            <div className="bg-white dark:bg-slate-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <GitCompareArrows className="w-5 h-5 text-blue-500" />
+                  {t('dish.compareNutrition')}
+                </h3>
+                <button onClick={() => setShowCompare(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-all" aria-label={t('common.close')}><X className="w-5 h-5" /></button>
+              </div>
+              <div className="p-4">
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left py-2 px-2 text-xs font-bold text-slate-400 uppercase">&nbsp;</th>
+                      {compareDishes.map(d => (
+                        <th key={d.id} className="text-center py-2 px-2 text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(d.name, lang)}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {NUTRITION_KEYS.map(key => {
+                      const values = compareDishes.map(d => {
+                        const n = nutritionMap.get(d.id) ?? ZERO_NUTRITION;
+                        return Math.round(n[key]);
+                      });
+                      const best = key === 'calories' ? Math.min(...values) : Math.max(...values);
+                      return (
+                        <tr key={key} className="border-t border-slate-50 dark:border-slate-700">
+                          <td className="py-2.5 px-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t(`common.${key}`)}</td>
+                          {values.map((v, i) => (
+                            <td key={compareDishes[i].id} className="text-center py-2.5 px-2">
+                              <span className={`text-lg font-bold ${NUTRITION_COLORS[key]} ${v === best ? 'underline decoration-2 decoration-blue-400' : ''}`}>
+                                {v}{key !== 'calories' ? 'g' : ''}
+                              </span>
+                              {key === 'calories' && <span className="text-xs text-slate-400 ml-0.5">kcal</span>}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

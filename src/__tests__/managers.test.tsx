@@ -25,6 +25,8 @@ const ingredients: Ingredient[] = [
 const dishes: Dish[] = [
   { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
   { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
+  { id: 'd3', name: { vi: 'Salad gà', en: 'Salad gà' }, ingredients: [{ ingredientId: 'i1', amount: 150 }], tags: ['dinner'] },
+  { id: 'd4', name: { vi: 'Cháo gà', en: 'Cháo gà' }, ingredients: [{ ingredientId: 'i1', amount: 50 }, { ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
 ];
 
 // --- DishManager ---
@@ -97,8 +99,8 @@ describe('DishManager', () => {
     const deleteButtons = screen.getAllByText('Xóa');
     fireEvent.click(deleteButtons[0]);
     fireEvent.click(screen.getByText('Xóa ngay'));
-    // Sorted by name-asc: "Cơm gà" (d2) appears before "Gà nướng" (d1)
-    expect(defaultProps.onDelete).toHaveBeenCalledWith('d2');
+    // Sorted by name-asc: "Cháo gà" (d4) appears first
+    expect(defaultProps.onDelete).toHaveBeenCalledWith('d4');
   });
 
   it('validates tag selection when saving dish', () => {
@@ -198,7 +200,7 @@ describe('DishManager', () => {
 
   it('calls onAdd when undo delete is triggered', () => {
     render(<DishManager {...defaultProps} />);
-    // Delete the first dish (sorted by name: "Cơm gà" first)
+    // Delete the first dish (sorted by name: "Cháo gà" first)
     const deleteButtons = screen.getAllByText('Xóa');
     fireEvent.click(deleteButtons[0]);
     fireEvent.click(screen.getByText('Xóa ngay'));
@@ -211,7 +213,7 @@ describe('DishManager', () => {
     // Trigger undo
     options.action.onClick();
     // onAdd should be called with the deleted dish
-    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' } }));
+    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'd4', name: { vi: 'Cháo gà', en: 'Cháo gà' } }));
   });
 
   it('opens edit modal when dish edit button is clicked', () => {
@@ -524,6 +526,76 @@ describe('DishManager', () => {
     const cloneBtns = screen.getAllByTestId('btn-clone-dish-d1');
     fireEvent.click(cloneBtns.at(-1)!);
     expect(defaultProps.onAdd).toHaveBeenCalled();
+  });
+
+  it('renders compare buttons on each dish card', () => {
+    render(<DishManager {...defaultProps} />);
+    expect(screen.getAllByTestId('btn-compare-d1').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('btn-compare-d2').length).toBeGreaterThan(0);
+  });
+
+  it('shows floating compare button when 2 dishes selected', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    expect(screen.queryByTestId('btn-open-compare')).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
+    expect(screen.getByTestId('btn-open-compare')).toBeInTheDocument();
+  });
+
+  it('opens compare panel with nutrition table', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
+    fireEvent.click(screen.getByTestId('btn-open-compare'));
+    expect(screen.getByTestId('compare-panel')).toBeInTheDocument();
+    expect(screen.getByText('So sánh dinh dưỡng')).toBeInTheDocument();
+  });
+
+  it('closes compare panel when X is clicked', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
+    fireEvent.click(screen.getByTestId('btn-open-compare'));
+    expect(screen.getByTestId('compare-panel')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Đóng'));
+    expect(screen.queryByTestId('compare-panel')).not.toBeInTheDocument();
+  });
+
+  it('deselects a dish from compare by clicking again', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
+    expect(screen.getByTestId('btn-open-compare')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    expect(screen.queryByTestId('btn-open-compare')).not.toBeInTheDocument();
+  });
+
+  it('warns when trying to select more than 3 dishes', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d3')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d4')[0]);
+    expect(mockNotify.warning).toHaveBeenCalledWith('Tối đa 3 món');
+  });
+
+  it('closes compare panel when backdrop is clicked', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
+    fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
+    fireEvent.click(screen.getByTestId('btn-open-compare'));
+    fireEvent.click(screen.getByTestId('compare-panel'));
+    expect(screen.queryByTestId('compare-panel')).not.toBeInTheDocument();
+  });
+
+  it('selects dish for compare in mobile list view', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    const compareBtns = screen.getAllByTestId('btn-compare-d1');
+    fireEvent.click(compareBtns.at(-1)!);
+    const compareBtns2 = screen.getAllByTestId('btn-compare-d2');
+    fireEvent.click(compareBtns2.at(-1)!);
+    expect(screen.getByTestId('btn-open-compare')).toBeInTheDocument();
   });
 });
 

@@ -82,6 +82,75 @@ describe('Summary', () => {
     render(<Summary dayNutrition={overNutrition} targetCalories={2000} targetProtein={100} />);
     expect(screen.getByText('3000')).toBeInTheDocument();
   });
+
+  it('shows remaining calories when under target', () => {
+    render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
+    // Remaining: 2000 - 1500 = 500
+    expect(screen.getByTestId('remaining-calories')).toHaveTextContent('500');
+    expect(screen.getByTestId('remaining-calories')).toHaveTextContent('kcal');
+  });
+
+  it('shows remaining protein when under target', () => {
+    render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
+    // Remaining: 100 - 75 = 25
+    expect(screen.getByTestId('remaining-protein')).toHaveTextContent('25');
+    expect(screen.getByTestId('remaining-protein')).toHaveTextContent('g');
+  });
+
+  it('shows over text when calories exceed target', () => {
+    const overNutrition: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 1000, 40),
+      lunch: makeSlot(['d2'], 1000, 40),
+      dinner: makeSlot(['d3'], 1000, 40),
+    };
+    render(<Summary dayNutrition={overNutrition} targetCalories={2000} targetProtein={100} />);
+    // Over: 3000 - 2000 = 1000
+    expect(screen.getByTestId('remaining-calories')).toHaveTextContent('1000');
+  });
+
+  it('shows over text when protein exceeds target', () => {
+    const overNutrition: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 500, 50),
+      lunch: makeSlot(['d2'], 500, 50),
+      dinner: makeSlot(['d3'], 500, 50),
+    };
+    render(<Summary dayNutrition={overNutrition} targetCalories={2000} targetProtein={100} />);
+    // Over: 150 - 100 = 50
+    expect(screen.getByTestId('remaining-protein')).toHaveTextContent('50');
+  });
+
+  it('shows per-meal details toggle button', () => {
+    render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
+    expect(screen.getByTestId('btn-macro-details')).toBeInTheDocument();
+    expect(screen.getByText('Chi tiết theo bữa')).toBeInTheDocument();
+  });
+
+  it('expands per-meal details table on toggle click', () => {
+    render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
+    expect(screen.queryByTestId('macro-details')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-macro-details'));
+    expect(screen.getByTestId('macro-details')).toBeInTheDocument();
+    expect(screen.getByText('Ẩn chi tiết')).toBeInTheDocument();
+  });
+
+  it('collapses per-meal details on second toggle click', () => {
+    render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} />);
+    fireEvent.click(screen.getByTestId('btn-macro-details'));
+    expect(screen.getByTestId('macro-details')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-macro-details'));
+    expect(screen.queryByTestId('macro-details')).not.toBeInTheDocument();
+  });
+
+  it('shows correct per-meal macro values in details table', () => {
+    const nutrition = makeNutrition();
+    render(<Summary dayNutrition={nutrition} targetCalories={2000} targetProtein={100} />);
+    fireEvent.click(screen.getByTestId('btn-macro-details'));
+    const table = screen.getByTestId('macro-details');
+    expect(table).toHaveTextContent('Sáng');
+    expect(table).toHaveTextContent('Trưa');
+    expect(table).toHaveTextContent('Tối');
+    expect(table).toHaveTextContent('Tổng');
+  });
 });
 
 // --- ManagementTab ---

@@ -76,9 +76,11 @@
     "themeLight": "Sáng",
     "themeDark": "Tối",
     "themeSystem": "Hệ thống",
+    "themeSchedule": "Tự động",
     "themeLightTitle": "Sáng — nhấn để đổi",
     "themeDarkTitle": "Tối — nhấn để đổi",
     "themeSystemTitle": "Theo hệ thống — nhấn để đổi",
+    "themeScheduleTitle": "Tự động theo giờ (18h-6h) — nhấn để đổi",
     "themeAriaLabel": "Chế độ hiển thị: {{theme}}"
   },
   "calendar": {
@@ -124,7 +126,13 @@
   "summary": {
     "title": "Dinh dưỡng trong ngày",
     "goal": "Mục tiêu: {{cal}} kcal, {{pro}}g Protein",
-    "editGoal": "Chỉnh sửa mục tiêu dinh dưỡng"
+    "editGoal": "Chỉnh sửa mục tiêu dinh dưỡng",
+    "remaining": "Còn lại: {{value}} {{unit}}",
+    "over": "Vượt: {{value}} {{unit}}",
+    "showDetails": "Chi tiết theo bữa",
+    "hideDetails": "Ẩn chi tiết",
+    "meal": "Bữa ăn",
+    "total": "Tổng"
   },
   "dish": {
     "title": "Món ăn",
@@ -188,7 +196,11 @@
     "clone": "Nhân bản",
     "cloned": "Đã nhân bản món",
     "clonedDesc": "\"{{name}}\" đã được nhân bản",
-    "copySuffix": "(bản sao)"
+    "copySuffix": "(bản sao)",
+    "compare": "So sánh",
+    "compareSelected": "So sánh ({{count}})",
+    "maxCompare": "Tối đa 3 món",
+    "compareNutrition": "So sánh dinh dưỡng"
   },
   "ingredient": {
     "title": "Nguyên liệu",
@@ -250,7 +262,13 @@
     "allBought": "Đã mua đủ tất cả nguyên liệu! 🎉",
     "shareTitle": "Danh sách đi chợ",
     "boughtCount": "Đã mua {{count}}/{{total}}",
-    "headerDay": "🛒 Danh sách đi chợ — {{date}}"
+    "headerDay": "🛒 Danh sách đi chợ — {{date}}",
+    "aisleProtein": "Thịt & Hải sản",
+    "aisleDairy": "Sữa & Trứng",
+    "aisleGrains": "Ngũ cốc & Hạt",
+    "aisleProduce": "Rau & Củ",
+    "aisleOther": "Khác",
+    "groupByAisle": "Nhóm theo quầy"
   },
   "ai": {
     "title": "AI Phân tích hình ảnh",
@@ -357,7 +375,12 @@
     "perKg": "g / kg",
     "recommendation": "Khuyến nghị: 2–4g/kg cho người tập thể thao, 1g/kg cho người bình thường.",
     "caloriesGoal": "Mục tiêu Calo (kcal)",
-    "autoSaveHint": "Thay đổi được tự động lưu ngay lập tức"
+    "autoSaveHint": "Thay đổi được tự động lưu ngay lập tức",
+    "presets": "Chọn nhanh",
+    "presetBalanced": "Cân bằng",
+    "presetHighProtein": "Tăng cơ",
+    "presetLowCarb": "Low Carb",
+    "presetLightDiet": "Ăn nhẹ"
   },
   "saveAnalyzed": {
     "title": "Xác nhận lưu món ăn",
@@ -454,8 +477,10 @@
     "themeLight": "Sáng",
     "themeDark": "Tối",
     "themeSystem": "Hệ thống",
+    "themeSchedule": "Tự động",
     "data": "Dữ liệu",
-    "dataDesc": "Quản lý dữ liệu ứng dụng"
+    "dataDesc": "Quản lý dữ liệu ứng dụng",
+    "searchPlaceholder": "Tìm kiếm cài đặt..."
   },
   "filter": {
     "button": "Lọc",

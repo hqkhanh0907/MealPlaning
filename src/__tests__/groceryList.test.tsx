@@ -323,4 +323,77 @@ describe('GroceryList', () => {
     expect(screen.getByText('Ức gà')).toBeInTheDocument();
     expect(screen.queryByText('nonexistent')).not.toBeInTheDocument();
   });
+
+  it('renders group-by-aisle toggle button', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    expect(screen.getByTestId('btn-group-aisle')).toBeInTheDocument();
+    expect(screen.getByText('Nhóm theo quầy')).toBeInTheDocument();
+  });
+
+  it('groups items by aisle category when toggled on', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle'));
+    // Ức gà → protein (keyword "gà"), Cơm trắng → other (no keyword match), Rau xà lách → produce (keyword "rau")
+    expect(screen.getByText('Thịt & Hải sản')).toBeInTheDocument();
+    expect(screen.getByText('Rau & Củ')).toBeInTheDocument();
+    expect(screen.getByText('Khác')).toBeInTheDocument();
+  });
+
+  it('ungroups items when toggled off', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle')); // on
+    expect(screen.getByText('Thịt & Hải sản')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-group-aisle')); // off
+    expect(screen.queryByText('Thịt & Hải sản')).not.toBeInTheDocument();
+  });
+
+  it('categorizes dairy ingredients correctly', () => {
+    const dairyIng: Ingredient[] = [
+      ...ingredients,
+      { id: 'i4', name: { vi: 'Sữa tươi', en: 'Fresh milk' }, caloriesPer100: 60, proteinPer100: 3, carbsPer100: 5, fatPer100: 3, fiberPer100: 0, unit: { vi: 'ml', en: 'ml' } },
+    ];
+    const dairyDish: Dish[] = [
+      ...dishes,
+      { id: 'd4', name: { vi: 'Sữa', en: 'Milk' }, ingredients: [{ ingredientId: 'i4', amount: 200 }], tags: ['breakfast'] },
+    ];
+    const planWithDairy: DayPlan = { date: today, breakfastDishIds: ['d4'], lunchDishIds: ['d1'], dinnerDishIds: [] };
+    render(<GroceryList currentPlan={planWithDairy} dayPlans={[planWithDairy]} selectedDate={today} allDishes={dairyDish} allIngredients={dairyIng} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle'));
+    expect(screen.getByText('Sữa & Trứng')).toBeInTheDocument();
+  });
+
+  it('categorizes grain ingredients correctly', () => {
+    const grainIng: Ingredient[] = [
+      { id: 'i5', name: { vi: 'Gạo lứt', en: 'Brown rice' }, caloriesPer100: 370, proteinPer100: 7, carbsPer100: 77, fatPer100: 3, fiberPer100: 3.5, unit: { vi: 'g', en: 'g' } },
+    ];
+    const grainDish: Dish[] = [
+      { id: 'd5', name: { vi: 'Cơm lứt', en: 'Brown rice' }, ingredients: [{ ingredientId: 'i5', amount: 150 }], tags: ['lunch'] },
+    ];
+    const planWithGrain: DayPlan = { date: today, breakfastDishIds: [], lunchDishIds: ['d5'], dinnerDishIds: [] };
+    render(<GroceryList currentPlan={planWithGrain} dayPlans={[planWithGrain]} selectedDate={today} allDishes={grainDish} allIngredients={grainIng} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle'));
+    expect(screen.getByText('Ngũ cốc & Hạt')).toBeInTheDocument();
+  });
+
+  it('categorizes produce ingredients by keyword', () => {
+    const produceIng: Ingredient[] = [
+      { id: 'i6', name: { vi: 'Rau bina', en: 'Spinach' }, caloriesPer100: 23, proteinPer100: 2.9, carbsPer100: 3.6, fatPer100: 0.4, fiberPer100: 2.2, unit: { vi: 'g', en: 'g' } },
+    ];
+    const produceDish: Dish[] = [
+      { id: 'd6', name: { vi: 'Rau luộc', en: 'Boiled spinach' }, ingredients: [{ ingredientId: 'i6', amount: 200 }], tags: ['dinner'] },
+    ];
+    const planWithProduce: DayPlan = { date: today, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: ['d6'] };
+    render(<GroceryList currentPlan={planWithProduce} dayPlans={[planWithProduce]} selectedDate={today} allDishes={produceDish} allIngredients={produceIng} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle'));
+    expect(screen.getByText('Rau & Củ')).toBeInTheDocument();
+  });
+
+  it('toggles check on item in grouped mode', () => {
+    render(<GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={today} allDishes={dishes} allIngredients={ingredients} />);
+    fireEvent.click(screen.getByTestId('btn-group-aisle'));
+    const itemBtn = screen.getByText('Ức gà').closest('button');
+    expect(itemBtn).toBeTruthy();
+    if (itemBtn) fireEvent.click(itemBtn);
+    expect(screen.getByText(/Đã mua 1\/3/)).toBeInTheDocument();
+  });
 });

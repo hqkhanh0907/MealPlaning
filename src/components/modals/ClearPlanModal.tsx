@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
-import { DayPlan } from '../../types';
+import { DayPlan, MealType } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { getWeekRange, isDateInRange, parseLocalDate } from '../../utils/helpers';
@@ -9,7 +9,7 @@ import { getWeekRange, isDateInRange, parseLocalDate } from '../../utils/helpers
 interface ClearPlanModalProps {
   dayPlans: DayPlan[];
   selectedDate: string;
-  onClear: (scope: 'day' | 'week' | 'month') => void;
+  onClear: (scope: 'day' | 'week' | 'month', meals?: MealType[]) => void;
   onClose: () => void;
 }
 
@@ -22,6 +22,25 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   useModalBackHandler(true, onClose);
   const [expandedScope, setExpandedScope] = useState<string | null>(null);
+  const [selectedMeals, setSelectedMeals] = useState<Set<MealType>>(new Set(['breakfast', 'lunch', 'dinner']));
+
+  const toggleMeal = (meal: MealType) => {
+    setSelectedMeals(prev => {
+      const next = new Set(prev);
+      if (next.has(meal)) {
+        if (next.size > 1) next.delete(meal);
+      } else {
+        next.add(meal);
+      }
+      return next;
+    });
+  };
+
+  const MEAL_LABELS: { type: MealType; labelKey: string }[] = [
+    { type: 'breakfast', labelKey: 'meal.breakfast' },
+    { type: 'lunch', labelKey: 'meal.lunch' },
+    { type: 'dinner', labelKey: 'meal.dinner' },
+  ];
 
   const scopeData = useMemo(() => {
     const dayPlansWithMeals = dayPlans.filter(hasPlan);
@@ -71,11 +90,30 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
           </button>
         </div>
         <div className="p-6 sm:p-8 space-y-4">
+          {/* Meal selection */}
+          <div className="flex gap-2" data-testid="meal-filter">
+            {MEAL_LABELS.map(({ type, labelKey }) => (
+              <button
+                key={type}
+                type="button"
+                data-testid={`meal-toggle-${type}`}
+                onClick={() => toggleMeal(type)}
+                className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all border-2 ${
+                  selectedMeals.has(type)
+                    ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300'
+                    : 'border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {t(labelKey)}
+              </button>
+            ))}
+          </div>
+
           {SCOPE_OPTIONS.map(({ scope, label, desc, count, mealCount, dates }) => (
             <div key={scope}>
               <button
                 data-testid={`btn-clear-scope-${scope}`}
-                onClick={() => onClear(scope)}
+                onClick={() => onClear(scope, selectedMeals.size === 3 ? undefined : Array.from(selectedMeals))}
                 disabled={count === 0}
                 className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 group min-h-16 ${
                   count === 0

@@ -321,6 +321,37 @@ describe('MiniNutritionBar', () => {
     expect(screen.getByText('0/2000 kcal')).toBeInTheDocument();
     expect(screen.getByText('0/140g Pro')).toBeInTheDocument();
   });
+
+  it('shows remaining calories in mini bar', () => {
+    render(
+      <MiniNutritionBar
+        dayNutrition={filledNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        onSwitchToNutrition={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('mini-remaining-cal')).toHaveTextContent('500');
+    expect(screen.getByTestId('mini-remaining-pro')).toHaveTextContent('65');
+  });
+
+  it('shows over text when exceeding targets in mini bar', () => {
+    const overNutrition: typeof filledNutrition = {
+      breakfast: { dishIds: ['d1'], calories: 1000, protein: 80, carbs: 50, fat: 15, fiber: 5 },
+      lunch: { dishIds: ['d2'], calories: 800, protein: 60, carbs: 70, fat: 20, fiber: 8 },
+      dinner: { dishIds: ['d3'], calories: 500, protein: 40, carbs: 60, fat: 18, fiber: 6 },
+    };
+    render(
+      <MiniNutritionBar
+        dayNutrition={overNutrition}
+        targetCalories={2000}
+        targetProtein={140}
+        onSwitchToNutrition={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('mini-remaining-cal')).toHaveTextContent('300');
+    expect(screen.getByTestId('mini-remaining-pro')).toHaveTextContent('40');
+  });
 });
 
 // ─── MealsSubTab ─────────────────────────────────────────────────────

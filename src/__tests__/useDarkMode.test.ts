@@ -47,7 +47,7 @@ describe('useDarkMode', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
-  it('cycleTheme cycles through light → dark → system', () => {
+  it('cycleTheme cycles through light → dark → system → schedule', () => {
     localStorage.setItem('mp-theme', 'light');
     const { result } = renderHook(() => useDarkMode());
     expect(result.current.theme).toBe('light');
@@ -57,6 +57,9 @@ describe('useDarkMode', () => {
 
     act(() => result.current.cycleTheme());
     expect(result.current.theme).toBe('system');
+
+    act(() => result.current.cycleTheme());
+    expect(result.current.theme).toBe('schedule');
 
     act(() => result.current.cycleTheme());
     expect(result.current.theme).toBe('light');
@@ -108,12 +111,10 @@ describe('useDarkMode', () => {
       })),
     });
 
+    localStorage.setItem('mp-theme', 'system');
     renderHook(() => useDarkMode());
-    // The handler should have been registered for 'change' events
     expect(changeHandler).toBeDefined();
-    // Calling the handler when theme is 'system' should re-apply theme
     act(() => { changeHandler?.(); });
-    // No error means the handler executed correctly
   });
 
   it('re-applies system theme when matchMedia change fires and theme is system', () => {
@@ -164,5 +165,39 @@ describe('useDarkMode', () => {
       value: undefined,
     });
     expect(() => renderHook(() => useDarkMode())).not.toThrow();
+  });
+
+  it('reads stored schedule theme from localStorage', () => {
+    localStorage.setItem('mp-theme', 'schedule');
+    const { result } = renderHook(() => useDarkMode());
+    expect(result.current.theme).toBe('schedule');
+  });
+
+  it('schedule mode is dark during night hours', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 0, 1, 21, 0, 0));
+    localStorage.setItem('mp-theme', 'schedule');
+    const { result } = renderHook(() => useDarkMode());
+    expect(result.current.isDark).toBe(true);
+    vi.useRealTimers();
+  });
+
+  it('schedule mode is light during day hours', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 0, 1, 12, 0, 0));
+    localStorage.setItem('mp-theme', 'schedule');
+    const { result } = renderHook(() => useDarkMode());
+    expect(result.current.isDark).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it('schedule mode sets up interval for periodic checks', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 0, 1, 12, 0, 0));
+    localStorage.setItem('mp-theme', 'schedule');
+    const { unmount } = renderHook(() => useDarkMode());
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    unmount();
+    vi.useRealTimers();
   });
 });

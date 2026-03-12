@@ -18,7 +18,7 @@ i18n
       escapeValue: false, // React already escapes
     },
     detection: {
-      order: ['localStorage'], // Only localStorage — navigator excluded so first-install always defaults to 'vi' via fallbackLng
+      order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'mp-language',
       caches: ['localStorage'],
     },

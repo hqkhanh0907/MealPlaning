@@ -22,6 +22,8 @@ export const MiniNutritionBar: React.FC<MiniNutritionBarProps> = React.memo(({
   );
   const calPct = Math.min(100, Math.round((totalCal / targetCalories) * 100));
   const proPct = Math.min(100, Math.round((totalPro / targetProtein) * 100));
+  const remainingCal = targetCalories - totalCal;
+  const remainingPro = targetProtein - totalPro;
 
   return (
     <button
@@ -49,6 +51,11 @@ export const MiniNutritionBar: React.FC<MiniNutritionBarProps> = React.memo(({
               data-testid="mini-cal-bar"
             />
           </div>
+          <p data-testid="mini-remaining-cal" className={`text-[10px] font-medium ${remainingCal >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            {remainingCal >= 0
+              ? t('summary.remaining', { value: remainingCal, unit: 'kcal' })
+              : t('summary.over', { value: Math.abs(remainingCal), unit: 'kcal' })}
+          </p>
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
@@ -64,6 +71,11 @@ export const MiniNutritionBar: React.FC<MiniNutritionBarProps> = React.memo(({
               data-testid="mini-pro-bar"
             />
           </div>
+          <p data-testid="mini-remaining-pro" className={`text-[10px] font-medium ${remainingPro >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            {remainingPro >= 0
+              ? t('summary.remaining', { value: remainingPro, unit: 'g' })
+              : t('summary.over', { value: Math.abs(remainingPro), unit: 'g' })}
+          </p>
         </div>
       </div>
     </button>

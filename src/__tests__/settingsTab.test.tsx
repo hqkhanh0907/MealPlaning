@@ -201,4 +201,45 @@ describe('SettingsTab', () => {
     expect(lightBtn?.className).not.toContain('border-emerald-500');
     expect(darkBtn?.className).not.toContain('border-emerald-500');
   });
+
+  it('calls setTheme with schedule when schedule button is clicked', () => {
+    render(<SettingsTab {...defaultProps} />);
+    const schedBtn = screen.getByText('Tự động').closest('button');
+    expect(schedBtn).toBeTruthy();
+    if (schedBtn) fireEvent.click(schedBtn);
+    expect(mockSetTheme).toHaveBeenCalledWith('schedule');
+  });
+
+  it('renders search input', () => {
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByTestId('settings-search')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Tìm kiếm cài đặt...')).toBeInTheDocument();
+  });
+
+  it('filters sections when typing in search', () => {
+    render(<SettingsTab {...defaultProps} />);
+    const searchInput = screen.getByTestId('settings-search');
+    fireEvent.change(searchInput, { target: { value: 'Ngôn ngữ' } });
+    expect(screen.getByText('Ngôn ngữ')).toBeInTheDocument();
+    expect(screen.queryByText('Giao diện')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dữ liệu')).not.toBeInTheDocument();
+  });
+
+  it('shows all sections when search is cleared', () => {
+    render(<SettingsTab {...defaultProps} />);
+    const searchInput = screen.getByTestId('settings-search');
+    fireEvent.change(searchInput, { target: { value: 'Ngôn ngữ' } });
+    expect(screen.queryByText('Giao diện')).not.toBeInTheDocument();
+    fireEvent.change(searchInput, { target: { value: '' } });
+    expect(screen.getByText('Giao diện')).toBeInTheDocument();
+    expect(screen.getByText('Ngôn ngữ')).toBeInTheDocument();
+  });
+
+  it('filters to theme section when searching for theme keyword', () => {
+    render(<SettingsTab {...defaultProps} />);
+    const searchInput = screen.getByTestId('settings-search');
+    fireEvent.change(searchInput, { target: { value: 'Giao diện' } });
+    expect(screen.getByText('Giao diện')).toBeInTheDocument();
+    expect(screen.queryByText('Ngôn ngữ')).not.toBeInTheDocument();
+  });
 });

@@ -105,6 +105,48 @@ describe('clearPlansByScope', () => {
     clearPlansByScope(allPlans, '2026-03-02', 'day');
     expect(allPlans).toEqual(original);
   });
+
+  it('selectively clears only breakfast when meals=[breakfast]', () => {
+    const plans: DayPlan[] = [
+      { date: '2026-03-02', breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] },
+    ];
+    const result = clearPlansByScope(plans, '2026-03-02', 'day', ['breakfast']);
+    expect(result).toHaveLength(1);
+    expect(result[0].breakfastDishIds).toEqual([]);
+    expect(result[0].lunchDishIds).toEqual(['d2']);
+    expect(result[0].dinnerDishIds).toEqual(['d3']);
+  });
+
+  it('selectively clears lunch and dinner, keeps breakfast', () => {
+    const plans: DayPlan[] = [
+      { date: '2026-03-02', breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] },
+    ];
+    const result = clearPlansByScope(plans, '2026-03-02', 'day', ['lunch', 'dinner']);
+    expect(result[0].breakfastDishIds).toEqual(['d1']);
+    expect(result[0].lunchDishIds).toEqual([]);
+    expect(result[0].dinnerDishIds).toEqual([]);
+  });
+
+  it('removes entire plan when meals includes all 3', () => {
+    const plans: DayPlan[] = [
+      { date: '2026-03-02', breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] },
+    ];
+    const result = clearPlansByScope(plans, '2026-03-02', 'day', ['breakfast', 'lunch', 'dinner']);
+    expect(result).toHaveLength(0);
+  });
+
+  it('selectively clears week scope for specific meals', () => {
+    const plans: DayPlan[] = [
+      { date: '2026-03-02', breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: [] },
+      { date: '2026-03-03', breakfastDishIds: [], lunchDishIds: ['d3'], dinnerDishIds: ['d4'] },
+    ];
+    const result = clearPlansByScope(plans, '2026-03-02', 'week', ['lunch']);
+    expect(result).toHaveLength(2);
+    expect(result[0].lunchDishIds).toEqual([]);
+    expect(result[0].breakfastDishIds).toEqual(['d1']);
+    expect(result[1].lunchDishIds).toEqual([]);
+    expect(result[1].dinnerDishIds).toEqual(['d4']);
+  });
 });
 
 describe('applySuggestionToDayPlans', () => {
