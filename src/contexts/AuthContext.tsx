@@ -43,6 +43,11 @@ interface GISTokenResponse {
   error?: string;
 }
 
+interface GISErrorResponse {
+  type: string;
+  message?: string;
+}
+
 interface GISTokenClient {
   requestAccessToken: (overrides?: { prompt?: string }) => void;
 }
@@ -52,6 +57,7 @@ interface GoogleAccountsOAuth2 {
     client_id: string;
     scope: string;
     callback: (response: GISTokenResponse) => void;
+    error_callback?: (error: GISErrorResponse) => void;
   }) => GISTokenClient;
   revoke: (token: string, done?: () => void) => void;
 }
@@ -215,6 +221,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const tokenClient = window.google!.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_WEB_CLIENT_ID,
         scope: `email profile ${DRIVE_APPDATA_SCOPE}`,
+        error_callback: (error: GISErrorResponse) => {
+          setState(prev => ({ ...prev, isLoading: false }));
+          const err = new Error(
+            error.type === 'popup_closed'
+              ? 'Sign-in popup was closed'
+              : `Google sign-in error: ${error.type}`,
+          );
+          signInResolverRef.current?.reject(err);
+          signInResolverRef.current = null;
+        },
         callback: async (tokenResponse: GISTokenResponse) => {
           if (tokenResponse.error) {
             setState(prev => ({ ...prev, isLoading: false }));

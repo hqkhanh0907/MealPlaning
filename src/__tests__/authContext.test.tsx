@@ -450,6 +450,78 @@ describe('AuthProvider', () => {
 
       mockFetch.mockRestore();
     });
+
+    it('should reset loading state when popup is closed (error_callback)', async () => {
+      let gisErrorCallback: ((error: { type: string }) => void) | null = null;
+      (window as unknown as Record<string, unknown>).google = {
+        accounts: {
+          oauth2: {
+            initTokenClient: (config: { callback: unknown; error_callback?: typeof gisErrorCallback }) => {
+              gisErrorCallback = config.error_callback ?? null;
+              return { requestAccessToken: vi.fn() };
+            },
+            revoke: vi.fn(),
+          },
+        },
+      };
+
+      renderApp();
+      await waitFor(() => {
+        expect(screen.getByTestId('initialized').textContent).toBe('true');
+      });
+
+      let signInError: Error | null = null;
+      await act(async () => {
+        const promise = ctxRef.current!.getCtx().signIn();
+        await new Promise<void>(r => setTimeout(r, 0));
+        gisErrorCallback!({ type: 'popup_closed' });
+        try {
+          await promise;
+        } catch (e) {
+          signInError = e as Error;
+        }
+      });
+
+      expect(signInError).toBeTruthy();
+      expect(signInError!.message).toContain('popup was closed');
+      expect(screen.getByTestId('loading').textContent).toBe('false');
+    });
+
+    it('should reset loading state on popup_failed_to_open error', async () => {
+      let gisErrorCallback: ((error: { type: string }) => void) | null = null;
+      (window as unknown as Record<string, unknown>).google = {
+        accounts: {
+          oauth2: {
+            initTokenClient: (config: { callback: unknown; error_callback?: typeof gisErrorCallback }) => {
+              gisErrorCallback = config.error_callback ?? null;
+              return { requestAccessToken: vi.fn() };
+            },
+            revoke: vi.fn(),
+          },
+        },
+      };
+
+      renderApp();
+      await waitFor(() => {
+        expect(screen.getByTestId('initialized').textContent).toBe('true');
+      });
+
+      let signInError: Error | null = null;
+      await act(async () => {
+        const promise = ctxRef.current!.getCtx().signIn();
+        await new Promise<void>(r => setTimeout(r, 0));
+        gisErrorCallback!({ type: 'popup_failed_to_open' });
+        try {
+          await promise;
+        } catch (e) {
+          signInError = e as Error;
+        }
+      });
+
+      expect(signInError).toBeTruthy();
+      expect(signInError!.message).toContain('popup_failed_to_open');
+      expect(screen.getByTestId('loading').textContent).toBe('false');
+    });
   });
 
   describe('signOut — native platform', () => {
