@@ -39,11 +39,11 @@ export const calculateIngredientNutrition = (ingredient: Ingredient, amount: num
   }
   
   return {
-    calories: ingredient.caloriesPer100 * factor,
-    protein: ingredient.proteinPer100 * factor,
-    carbs: ingredient.carbsPer100 * factor,
-    fat: ingredient.fatPer100 * factor,
-    fiber: ingredient.fiberPer100 * factor,
+    calories: (ingredient.caloriesPer100 || 0) * factor,
+    protein: (ingredient.proteinPer100 || 0) * factor,
+    carbs: (ingredient.carbsPer100 || 0) * factor,
+    fat: (ingredient.fatPer100 || 0) * factor,
+    fiber: (ingredient.fiberPer100 || 0) * factor,
   };
 };
 
