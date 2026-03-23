@@ -11,8 +11,19 @@ coverage/
 
 # IDE & tools
 .idea/
+.vscode/
 .scannerwork/
 sonar-project.properties
 
+# AI/Copilot skills
+.agents/
+skills-lock.json
+
+# Secrets
+client_secret*.json
+
 # Build artifacts
 *.apk
+
+# Bundle analysis
+stats.html

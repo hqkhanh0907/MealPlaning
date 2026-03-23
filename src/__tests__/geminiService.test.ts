@@ -13,7 +13,7 @@ vi.mock('@google/genai', () => {
 });
 
 // Set env before import
-process.env.GEMINI_API_KEY = 'test-key';
+(import.meta.env as Record<string, string>).VITE_GEMINI_API_KEY = 'test-key';
 
 import { suggestMealPlan, analyzeDishImage, suggestIngredientInfo, suggestDishIngredients, _resetAISingleton, _clearNutritionCache } from '../services/geminiService';
 
@@ -22,7 +22,7 @@ describe('geminiService', () => {
     vi.clearAllMocks();
     _resetAISingleton();       // Reset singleton so API-key changes apply per test
     _clearNutritionCache();    // Clear cache so cache tests are isolated
-    process.env.GEMINI_API_KEY = 'test-key';
+    (import.meta.env as Record<string, string>).VITE_GEMINI_API_KEY = 'test-key';
   });
 
   // --- suggestMealPlan ---
@@ -71,7 +71,7 @@ describe('geminiService', () => {
     });
 
     it('throws when API key is missing', async () => {
-      delete process.env.GEMINI_API_KEY;
+      delete (import.meta.env as Record<string, string>).VITE_GEMINI_API_KEY;
       await expect(suggestMealPlan(2000, 100, availableDishes)).rejects.toThrow('Gemini API key is missing');
     });
 
@@ -388,7 +388,6 @@ describe('geminiService', () => {
       const mockResult = { calories: 100, protein: 5, carbs: 1, fat: 1, fiber: 0, unit: 'g' };
       mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockResult) });
 
-      const _realDateNow = Date.now;
       let callCount = 0;
       vi.spyOn(Date, 'now').mockImplementation(() => {
         callCount++;

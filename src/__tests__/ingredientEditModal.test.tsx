@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { IngredientEditModal } from '../components/modals/IngredientEditModal';
 import type { Ingredient } from '../types';
@@ -20,7 +19,7 @@ const existingIngredient: Ingredient = {
   carbsPer100: 0,
   fatPer100: 3.6,
   fiberPer100: 0,
-  unit: { vi: 'g', en: 'g' },
+  unit: { vi: 'g' },
 };
 
 describe('IngredientEditModal', () => {
@@ -274,8 +273,8 @@ describe('IngredientEditModal', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const saved = onSubmit.mock.calls[0][0];
-    expect(saved.name).toEqual({ vi: 'Thịt bò', en: 'Thịt bò' });
-    expect(saved.unit).toEqual({ vi: 'g', en: 'g' });
+    expect(saved.name).toEqual({ vi: 'Thịt bò' });
+    expect(saved.unit).toEqual({ vi: 'g' });
     expect(saved.caloriesPer100).toBe(0);
     expect(saved.id).toMatch(/^ing-/);
   });

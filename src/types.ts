@@ -1,5 +1,5 @@
-export type SupportedLang = 'vi' | 'en';
-export type LocalizedString = Record<SupportedLang, string>;
+export type SupportedLang = 'vi';
+export type LocalizedString = Record<'vi', string> & Partial<Record<'en', string>>;
 
 export type Ingredient = {
   id: string;

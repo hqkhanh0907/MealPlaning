@@ -20,11 +20,6 @@ vi.mock('../contexts/NotificationContext', () => ({
 
 let mockThemeValue: 'light' | 'dark' | 'system' = 'light';
 
-// Mock translateQueueService to spy on enqueue calls
-const mockEnqueue = vi.fn();
-vi.mock('../services/translateQueueService', () => ({
-  useTranslateQueue: { getState: () => ({ enqueue: mockEnqueue }) },
-}));
 
 // Mock ManagementTab to expose dish + ingredient callbacks for testing
 vi.mock('../components/ManagementTab', () => ({
@@ -45,38 +40,38 @@ vi.mock('../components/ManagementTab', () => ({
       <span data-testid="dish-used-d1">{isDishUsed('d1') ? 'yes' : 'no'}</span>
       <span data-testid="ingredient-used-i1">{isIngredientUsed('i1') ? 'yes' : 'no'}</span>
       <button data-testid="add-dish-btn" onClick={() => onAddDish({
-        id: 'new-dish', name: { vi: 'Món mới', en: 'New dish' }, ingredients: [], tags: ['lunch'],
+        id: 'new-dish', name: { vi: 'Món mới' }, ingredients: [], tags: ['lunch'],
       })}>Add Dish</button>
       <button data-testid="add-dish-empty-name-btn" onClick={() => onAddDish({
-        id: 'empty-dish', name: { vi: '', en: '' }, ingredients: [], tags: ['lunch'],
+        id: 'empty-dish', name: { vi: '' }, ingredients: [], tags: ['lunch'],
       })}>Add Dish Empty Name</button>
       <button data-testid="update-dish-btn" onClick={() => onUpdateDish({
-        id: 'd1', name: { vi: 'Cập nhật', en: 'Updated' }, ingredients: [], tags: ['dinner'],
+        id: 'd1', name: { vi: 'Cập nhật' }, ingredients: [], tags: ['dinner'],
       })}>Update Dish</button>
       <button data-testid="update-dish-empty-name-btn" onClick={() => onUpdateDish({
-        id: 'd1', name: { vi: '', en: '' }, ingredients: [], tags: ['dinner'],
+        id: 'd1', name: { vi: '' }, ingredients: [], tags: ['dinner'],
       })}>Update Dish Empty Name</button>
       <button data-testid="delete-dish-btn" onClick={() => onDeleteDish('d1')}>Delete Dish</button>
       <button data-testid="delete-ingredient-btn" onClick={() => onDeleteIngredient('i1')}>Delete Ingredient</button>
       <button data-testid="add-ingredient-btn" onClick={() => onAddIngredient({
-        id: 'new-ing', name: { vi: 'Nguyên liệu mới', en: 'New ingredient' },
+        id: 'new-ing', name: { vi: 'Nguyên liệu mới' },
         caloriesPer100: 100, proteinPer100: 10, carbsPer100: 5, fatPer100: 3, fiberPer100: 1,
-        unit: { vi: 'g', en: 'g' },
+        unit: { vi: 'g' },
       })}>Add Ingredient</button>
       <button data-testid="add-ingredient-empty-btn" onClick={() => onAddIngredient({
-        id: 'empty-ing', name: { vi: '', en: '' },
+        id: 'empty-ing', name: { vi: '' },
         caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0,
-        unit: { vi: 'g', en: 'g' },
+        unit: { vi: 'g' },
       })}>Add Ingredient Empty</button>
       <button data-testid="update-ingredient-btn" onClick={() => onUpdateIngredient({
-        id: 'i1', name: { vi: 'Cập nhật NL', en: 'Updated Ing' },
+        id: 'i1', name: { vi: 'Cập nhật NL' },
         caloriesPer100: 100, proteinPer100: 10, carbsPer100: 5, fatPer100: 3, fiberPer100: 1,
-        unit: { vi: 'g', en: 'g' },
+        unit: { vi: 'g' },
       })}>Update Ingredient</button>
       <button data-testid="update-ingredient-empty-btn" onClick={() => onUpdateIngredient({
-        id: 'i1', name: { vi: '', en: '' },
+        id: 'i1', name: { vi: '' },
         caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0,
-        unit: { vi: 'g', en: 'g' },
+        unit: { vi: 'g' },
       })}>Update Ingredient Empty</button>
     </div>
   ),
@@ -153,18 +148,6 @@ vi.mock('../components/GroceryList', () => ({
   GroceryList: () => <div>GroceryMock</div>,
 }));
 
-// Mock translate hooks (Worker not available in jsdom)
-type OnTranslatedFn = (itemId: string, itemType: 'ingredient' | 'dish', direction: 'vi-en' | 'en-vi', translated: string) => void;
-let capturedOnTranslated: OnTranslatedFn | null = null;
-vi.mock('../hooks/useTranslateWorker', () => ({
-  useTranslateWorker: ({ onTranslated }: { onTranslated: OnTranslatedFn }) => {
-    capturedOnTranslated = onTranslated;
-    return { sendJob: vi.fn() };
-  },
-}));
-vi.mock('../hooks/useTranslateProcessor', () => ({
-  useTranslateProcessor: vi.fn(),
-}));
 // Mock ClearPlanModal to expose onClear callback for testing
 vi.mock('../components/modals/ClearPlanModal', () => ({
   ClearPlanModal: ({ onClear }: { onClear: (scope: 'day' | 'week' | 'month') => void }) => (
@@ -200,39 +183,37 @@ describe('App', () => {
     expect(screen.getByText('Bữa ăn')).toBeInTheDocument();
   });
 
-  it('switches to management tab when clicked', () => {
+  it('switches to management tab when clicked', async () => {
     render(<App />);
-    // Use desktop nav
     const navButtons = screen.getAllByRole('tab');
     const mgmtTab = navButtons.find(b => b.textContent?.includes('Thư viện'));
     if (mgmtTab) fireEvent.click(mgmtTab);
-    expect(screen.getByText('Thư viện dữ liệu')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Thư viện dữ liệu')).toBeInTheDocument());
   });
 
-  it('theme toggle is in Settings tab', () => {
+  it('theme toggle is in Settings tab', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
     const settingsTab = navTabs.find(b => b.textContent?.includes('Cài đặt'));
     expect(settingsTab).toBeTruthy();
     if (!settingsTab) return;
     fireEvent.click(settingsTab);
-    expect(screen.getByTestId('settings-tab')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
     expect(screen.getByTestId('btn-theme-light')).toBeInTheDocument();
   });
 
-  it('opens meal planner modal when "Lên kế hoạch" is clicked', () => {
+  it('opens meal planner modal when "Lên kế hoạch" is clicked', async () => {
     render(<App />);
     const planButtons = screen.getAllByText('Lên kế hoạch');
     fireEvent.click(planButtons[0]);
-    // MealPlannerModal subtitle
-    expect(screen.getByText('Chọn món cho từng bữa')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Chọn món cho từng bữa')).toBeInTheDocument());
   });
 
-  it('handlePlanMeal opens planner when meal slot add button is clicked', () => {
+  it('handlePlanMeal opens planner when meal slot add button is clicked', async () => {
     render(<App />);
     const addButtons = screen.getAllByLabelText('Thêm');
     fireEvent.click(addButtons[0]);
-    expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
   });
 
   it('renders user weight in subtitle', () => {
@@ -258,13 +239,12 @@ describe('App', () => {
     expect(screen.getByText('Hôm nay')).toBeInTheDocument();
   });
 
-  it('opens goal settings modal', () => {
+  it('opens goal settings modal', async () => {
     render(<App />);
-    // Switch to Nutrition sub-tab to access the edit goals button
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
     const editGoalsBtn = screen.getByLabelText('Chỉnh sửa mục tiêu dinh dưỡng');
     fireEvent.click(editGoalsBtn);
-    expect(screen.getByText('Mục tiêu dinh dưỡng')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Mục tiêu dinh dưỡng')).toBeInTheDocument());
   });
 
   it('navigates to AI analysis tab and renders AIImageAnalyzer', async () => {
@@ -363,39 +343,6 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
-  it('handleAddDish enqueues translation when dish name is non-empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('add-dish-btn'));
-    expect(mockEnqueue).toHaveBeenCalledWith({
-      itemId: 'new-dish',
-      itemType: 'dish',
-      sourceText: 'Món mới',
-      direction: 'vi-en',
-    });
-  });
-
-  it('handleAddDish does not enqueue translation when dish name is empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('add-dish-empty-name-btn'));
-    expect(mockEnqueue).not.toHaveBeenCalled();
-  });
-
-  it('handleUpdateDish enqueues translation when dish name is non-empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('update-dish-btn'));
-    expect(mockEnqueue).toHaveBeenCalledWith({
-      itemId: 'd1',
-      itemType: 'dish',
-      sourceText: 'Cập nhật',
-      direction: 'vi-en',
-    });
-  });
-
-  it('handleUpdateDish does not enqueue translation when dish name is empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('update-dish-empty-name-btn'));
-    expect(mockEnqueue).not.toHaveBeenCalled();
-  });
 
   it('onDeleteDish removes the dish from state', async () => {
     render(<App />);
@@ -406,52 +353,6 @@ describe('App', () => {
     });
   });
 
-  it('handleAddIngredient enqueues translation when ingredient name is non-empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('add-ingredient-btn'));
-    expect(mockEnqueue).toHaveBeenCalledWith({
-      itemId: 'new-ing',
-      itemType: 'ingredient',
-      sourceText: 'Nguyên liệu mới',
-      direction: 'vi-en',
-    });
-  });
-
-  it('handleAddIngredient does not enqueue translation when ingredient name is empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('add-ingredient-empty-btn'));
-    expect(mockEnqueue).not.toHaveBeenCalled();
-  });
-
-  it('handleUpdateIngredient enqueues translation when ingredient name is non-empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('update-ingredient-btn'));
-    expect(mockEnqueue).toHaveBeenCalledWith({
-      itemId: 'i1',
-      itemType: 'ingredient',
-      sourceText: 'Cập nhật NL',
-      direction: 'vi-en',
-    });
-  });
-
-  it('handleUpdateIngredient does not enqueue translation when ingredient name is empty', () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('update-ingredient-empty-btn'));
-    expect(mockEnqueue).not.toHaveBeenCalled();
-  });
-
-  it('updateTranslatedField updates ingredient name in the translated language', () => {
-    render(<App />);
-    expect(capturedOnTranslated).toBeTruthy();
-    act(() => { if (capturedOnTranslated) capturedOnTranslated('i1', 'ingredient', 'vi-en', 'Translated Name'); });
-    expect(screen.getByTestId('management-tab')).toBeInTheDocument();
-  });
-
-  it('updateTranslatedField updates dish name in the translated language', () => {
-    render(<App />);
-    act(() => { if (capturedOnTranslated) capturedOnTranslated('d1', 'dish', 'vi-en', 'Translated Dish'); });
-    expect(screen.getByTestId('management-tab')).toBeInTheDocument();
-  });
 
   it('isDishUsed returns true when dish is used in a plan', () => {
     render(<App />);
@@ -559,7 +460,7 @@ describe('App', () => {
       { date: getLocalToday(), breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] },
     ]));
     localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'quick1', name: { vi: 'Quick Dish', en: 'Quick Dish' }, ingredients: [], tags: [] },
+      { id: 'quick1', name: { vi: 'Quick Dish' }, ingredients: [], tags: [] },
     ]));
     render(<App />);
     // Wait for the recent dishes section
@@ -610,11 +511,6 @@ describe('App', () => {
     await waitFor(() => screen.getByTestId('btn-confirm-plan'));
   });
 
-  it('updateTranslatedField with en-vi direction updates vi name', () => {
-    render(<App />);
-    act(() => { if (capturedOnTranslated) capturedOnTranslated('i1', 'ingredient', 'en-vi', 'Tên VN'); });
-    expect(screen.getByTestId('management-tab')).toBeInTheDocument();
-  });
 
   it('handleSaveAnalyzedDish without tags defaults to lunch', async () => {
     render(<App />);
@@ -653,14 +549,6 @@ describe('App', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument();
   });
 
-  it('uses en-vi direction when language is en', async () => {
-    const i18n = (await import('../i18n')).default;
-    await act(async () => { await i18n.changeLanguage('en'); });
-    render(<App />);
-    fireEvent.click(screen.getByTestId('add-dish-btn'));
-    expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({ direction: 'en-vi' }));
-    await act(async () => { await i18n.changeLanguage('vi'); });
-  });
 
   it('opens copy plan modal and copies plan', async () => {
     const today = getLocalToday();
@@ -845,7 +733,7 @@ describe('App', () => {
 
   it('handleUpdateServings updates serving count for a dish', async () => {
     localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'srv1', name: { vi: 'Serving Dish', en: 'Serving Dish' }, ingredients: [], tags: ['breakfast'] },
+      { id: 'srv1', name: { vi: 'Serving Dish' }, ingredients: [], tags: ['breakfast'] },
     ]));
     localStorage.setItem('mp-day-plans', JSON.stringify([{
       date: getLocalToday(),
@@ -868,7 +756,7 @@ describe('App', () => {
 
   it('handleUpdateServings removes serving entry when reset to 1', async () => {
     localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'srv2', name: { vi: 'Reset Dish', en: 'Reset Dish' }, ingredients: [], tags: ['lunch'] },
+      { id: 'srv2', name: { vi: 'Reset Dish' }, ingredients: [], tags: ['lunch'] },
     ]));
     localStorage.setItem('mp-day-plans', JSON.stringify([{
       date: getLocalToday(),

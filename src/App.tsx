@@ -6,20 +6,24 @@ import { calculateDishesNutrition } from './utils/nutrition';
 import { CalendarTab } from './components/CalendarTab';
 
 // Lazy-loaded to reduce initial bundle size — these tabs are visited less often
+const importManagementTab = () => import('./components/ManagementTab').then(m => ({ default: m.ManagementTab }));
+const importSettingsTab = () => import('./components/SettingsTab').then(m => ({ default: m.SettingsTab }));
 const GroceryList = React.lazy(() => import('./components/GroceryList').then(m => ({ default: m.GroceryList })));
 const AIImageAnalyzer = React.lazy(() => import('./components/AIImageAnalyzer').then(m => ({ default: m.AIImageAnalyzer })));
-import { ManagementTab } from './components/ManagementTab';
-import { SettingsTab } from './components/SettingsTab';
+const ManagementTab = React.lazy(importManagementTab);
+const SettingsTab = React.lazy(importSettingsTab);
+
+// Lazy-loaded modals — only loaded when opened
+const MealPlannerModal = React.lazy(() => import('./components/modals/MealPlannerModal').then(m => ({ default: m.MealPlannerModal })));
+const ClearPlanModal = React.lazy(() => import('./components/modals/ClearPlanModal').then(m => ({ default: m.ClearPlanModal })));
+const GoalSettingsModal = React.lazy(() => import('./components/modals/GoalSettingsModal').then(m => ({ default: m.GoalSettingsModal })));
+const AISuggestionPreviewModal = React.lazy(() => import('./components/modals/AISuggestionPreviewModal').then(m => ({ default: m.AISuggestionPreviewModal })));
+const CopyPlanModal = React.lazy(() => import('./components/modals/CopyPlanModal').then(m => ({ default: m.CopyPlanModal })));
+const TemplateManager = React.lazy(() => import('./components/modals/TemplateManager').then(m => ({ default: m.TemplateManager })));
+const SaveTemplateModal = React.lazy(() => import('./components/modals/SaveTemplateModal').then(m => ({ default: m.SaveTemplateModal })));
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePersistedState } from './hooks/usePersistedState';
 import { useNotification } from './contexts/NotificationContext';
-import { MealPlannerModal } from './components/modals/MealPlannerModal';
-import { ClearPlanModal } from './components/modals/ClearPlanModal';
-import { GoalSettingsModal } from './components/modals/GoalSettingsModal';
-import { AISuggestionPreviewModal } from './components/modals/AISuggestionPreviewModal';
-import { CopyPlanModal } from './components/modals/CopyPlanModal';
-import { TemplateManager } from './components/modals/TemplateManager';
-import { SaveTemplateModal } from './components/modals/SaveTemplateModal';
-import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   Utensils,
   Sparkles,
@@ -33,6 +37,7 @@ import { useModalManager } from './hooks/useModalManager';
 import { useCopyPlan } from './hooks/useCopyPlan';
 import { useMealTemplate } from './hooks/useMealTemplate';
 import { useAutoSync } from './hooks/useAutoSync';
+import { usePrefetchAfterIdle } from './hooks/usePrefetchAfterIdle';
 import {
   createEmptyDayPlan,
   clearPlansByScope,
@@ -49,12 +54,7 @@ import {
 import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navigation';
 import { getTabLabels } from './components/navigation/types';
 import type { MainTab } from './components/navigation';
-import { useTranslateWorker } from './hooks/useTranslateWorker';
-import { useTranslateProcessor } from './hooks/useTranslateProcessor';
-import { useTranslateQueue } from './services/translateQueueService';
-import { lookupFoodTranslation } from './data/foodDictionary';
 import { UNDO_TOAST_DURATION_MS } from './data/constants';
-import type { SupportedLang } from './types';
 
 type ManagementSubTab = 'ingredients' | 'dishes';
 
@@ -65,9 +65,12 @@ const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetC
 // --- Main App component ---
 
 export default function App() {
-  const { t, i18n } = useTranslation();
-  const currentLang = i18n.language as SupportedLang;
+  const { t } = useTranslation();
   const { theme, setTheme } = useDarkMode();
+
+  const prefetchFns = useMemo(() => [importManagementTab, importSettingsTab], []);
+  usePrefetchAfterIdle(prefetchFns);
+
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('calendar');
   const activeMainTabRef = useRef(activeMainTab);
   useEffect(() => { activeMainTabRef.current = activeMainTab; }, [activeMainTab]);
@@ -110,41 +113,6 @@ export default function App() {
   const ingredients = useMemo(() => migrateIngredients(rawIngredients), [rawIngredients]);
   const dishes = useMemo(() => migrateDishes(rawDishes), [rawDishes]);
 
-  // ── Background translation ─────────────────────────────────────────────
-  /** Apply a translated field back into the persisted state */
-  const updateTranslatedField = useCallback(
-    (itemId: string, itemType: 'ingredient' | 'dish', direction: 'vi-en' | 'en-vi', translated: string) => {
-      const targetLang: SupportedLang = direction === 'vi-en' ? 'en' : 'vi';
-      if (itemType === 'ingredient') {
-        setIngredients((prev) =>
-          prev.map((ing) =>
-            ing.id === itemId
-              ? { ...ing, name: { ...ing.name, [targetLang]: translated } }
-              : ing,
-          ),
-        );
-      } else {
-        setDishes((prev) =>
-          prev.map((dish) =>
-            dish.id === itemId
-              ? { ...dish, name: { ...dish.name, [targetLang]: translated } }
-              : dish,
-          ),
-        );
-      }
-    },
-    [setIngredients, setDishes],
-  );
-
-  const { sendJob } = useTranslateWorker({
-    onTranslated: updateTranslatedField,
-    ingredients,
-    dishes,
-    currentLang,
-  });
-
-  useTranslateProcessor({ sendJob });
-  // ──────────────────────────────────────────────────────────────────────
   const dayPlans = useMemo(() => migrateDayPlans(rawDayPlans), [rawDayPlans]);
 
   // Persist migrated data back to localStorage if migration changed something (one-time on mount)
@@ -235,9 +203,9 @@ export default function App() {
     });
     const dish = dishes.find(d => d.id === dishId);
     if (dish) {
-      notify.success(t('notification.dishAdded'), getLocalizedField(dish.name, i18n.language as SupportedLang));
+      notify.success(t('notification.dishAdded'), getLocalizedField(dish.name));
     }
-  }, [selectedDate, setDayPlans, dishes, notify, t, i18n.language]);
+  }, [selectedDate, setDayPlans, dishes, notify, t]);
 
   const handleUpdateServings = useCallback((dishId: string, count: number) => {
     setDayPlans(prev => prev.map(p => {
@@ -336,60 +304,21 @@ export default function App() {
     onImportData: handleImportData,
   });
 
-  // Enqueue background translation for the "other" language after saving.
-  // If the static food dictionary has an instant match, apply it directly
-  // without waiting for the WASM translate worker.
-  const enqueueTranslation = useTranslateQueue.getState().enqueue;
-  const direction: 'vi-en' | 'en-vi' = currentLang === 'vi' ? 'vi-en' : 'en-vi';
-  const otherLang: SupportedLang = currentLang === 'vi' ? 'en' : 'vi';
-
   const handleAddIngredient = useCallback((ing: Ingredient) => {
-    const sourceText = ing.name[currentLang];
-    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
-    const saved = dictResult
-      ? { ...ing, name: { ...ing.name, [otherLang]: dictResult } }
-      : ing;
-    setIngredients(prev => [...prev, saved]);
-    if (sourceText && !dictResult) {
-      enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
-    }
-  }, [setIngredients, currentLang, otherLang, enqueueTranslation, direction]);
+    setIngredients(prev => [...prev, ing]);
+  }, [setIngredients]);
 
   const handleUpdateIngredient = useCallback((ing: Ingredient) => {
-    const sourceText = ing.name[currentLang];
-    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
-    const saved = dictResult
-      ? { ...ing, name: { ...ing.name, [otherLang]: dictResult } }
-      : ing;
-    setIngredients(prev => prev.map(i => i.id === ing.id ? saved : i));
-    if (sourceText && !dictResult) {
-      enqueueTranslation({ itemId: ing.id, itemType: 'ingredient', sourceText, direction });
-    }
-  }, [setIngredients, currentLang, otherLang, enqueueTranslation, direction]);
+    setIngredients(prev => prev.map(i => i.id === ing.id ? ing : i));
+  }, [setIngredients]);
 
   const handleAddDish = useCallback((dish: Dish) => {
-    const sourceText = dish.name[currentLang];
-    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
-    const saved = dictResult
-      ? { ...dish, name: { ...dish.name, [otherLang]: dictResult } }
-      : dish;
-    setDishes(prev => [...prev, saved]);
-    if (sourceText && !dictResult) {
-      enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
-    }
-  }, [setDishes, currentLang, otherLang, enqueueTranslation, direction]);
+    setDishes(prev => [...prev, dish]);
+  }, [setDishes]);
 
   const handleUpdateDish = useCallback((dish: Dish) => {
-    const sourceText = dish.name[currentLang];
-    const dictResult = sourceText ? lookupFoodTranslation(sourceText, direction) : null;
-    const saved = dictResult
-      ? { ...dish, name: { ...dish.name, [otherLang]: dictResult } }
-      : dish;
-    setDishes(prev => prev.map(d => d.id === dish.id ? saved : d));
-    if (sourceText && !dictResult) {
-      enqueueTranslation({ itemId: dish.id, itemType: 'dish', sourceText, direction });
-    }
-  }, [setDishes, currentLang, otherLang, enqueueTranslation, direction]);
+    setDishes(prev => prev.map(d => d.id === dish.id ? dish : d));
+  }, [setDishes]);
 
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors" onKeyDown={handleGlobalKeyDown}>
@@ -405,7 +334,7 @@ export default function App() {
                 <span className="hidden sm:inline">Smart Meal Planner</span>
               </h1>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium sm:hidden">
-                {parseLocalDate(selectedDate).toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short', day: 'numeric', month: 'numeric' })}
+                {parseLocalDate(selectedDate).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">{t('header.subtitle', { weight: userProfile.weight })}</p>
             </div>
@@ -453,6 +382,7 @@ export default function App() {
 
         <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')} inert={activeMainTab === 'management' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
+          <Suspense fallback={<TabLoadingFallback />}>
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}
             ingredients={ingredients} dishes={dishes}
@@ -463,6 +393,7 @@ export default function App() {
             onUpdateDish={handleUpdateDish}
             onDeleteDish={id => setDishes(prev => prev.filter(d => d.id !== id))} isDishUsed={isDishUsed}
           />
+          </Suspense>
           </ErrorBoundary>
         </div>
 
@@ -484,11 +415,14 @@ export default function App() {
 
         {activeMainTab === 'settings' && (
           <ErrorBoundary fallbackTitle={t('errorBoundary.settingsTab')}>
-            <SettingsTab onImportData={handleImportData} dishes={dishes} ingredients={ingredients} theme={theme} setTheme={setTheme} />
+            <Suspense fallback={<TabLoadingFallback />}>
+            <SettingsTab onImportData={handleImportData} theme={theme} setTheme={setTheme} />
+            </Suspense>
           </ErrorBoundary>
         )}
       </main>
 
+      <Suspense fallback={null}>
       {modals.isMealPlannerOpen && modals.planningType && (
         <MealPlannerModal
           dishes={dishes}
@@ -496,6 +430,8 @@ export default function App() {
           currentPlan={currentPlan}
           selectedDate={selectedDate}
           initialTab={modals.planningType}
+          targetCalories={userProfile.targetCalories}
+          targetProtein={targetProtein}
           onConfirm={(changes) => {
             for (const [type, dishIds] of Object.entries(changes)) {
               handleUpdatePlan(type as MealType, dishIds);
@@ -591,6 +527,7 @@ export default function App() {
         onRegenerate={aiSuggestion.regenerate}
         onEditMeal={handleEditAISuggestionMeal}
       />
+      </Suspense>
 
       <BottomNavBar activeTab={activeMainTab} onTabChange={handleTabChange} showAIBadge={hasNewAIResult} />
     </div>

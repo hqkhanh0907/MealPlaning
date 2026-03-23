@@ -44,8 +44,8 @@ interface SingleProps extends BaseProps {
 
 interface BilingualProps extends BaseProps {
   mode: 'bilingual';
-  value: { vi: string; en: string };
-  onChange: (value: { vi: string; en: string }) => void;
+  value: { vi: string; en?: string };
+  onChange: (value: { vi: string; en?: string }) => void;
 }
 
 type UnitSelectorProps = SingleProps | BilingualProps;
@@ -73,11 +73,11 @@ export const UnitSelector: React.FC<UnitSelectorProps> = (props) => {
   }
 
   // ── Emit change up ──────────────────────────────────────────────────────────
-  const emit = (vi: string, en: string) => {
+  const emit = (vi: string) => {
     if (props.mode === 'single') {
       props.onChange(vi);
     } else {
-      props.onChange({ vi, en });
+      props.onChange({ vi });
     }
   };
 
@@ -87,21 +87,17 @@ export const UnitSelector: React.FC<UnitSelectorProps> = (props) => {
     setSelectVal(val);
     if (val === '' || val === CUSTOM_VALUE) {
       setCustomText('');
-      emit('', '');
+      emit('');
     } else {
       const unit = COMMON_UNITS.find(u => u.vi === val);
-      if (unit) emit(unit.vi, unit.en);
+      if (unit) emit(unit.vi);
     }
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setCustomText(val);
-    // For custom values we use the same text for both vi and en.
-    // This keeps SaveAnalyzedDishModal (single mode) working correctly and
-    // gives a sensible default for bilingual mode (user can always edit the
-    // other language field separately if needed).
-    emit(val, val);
+    emit(val);
   };
 
   // ── Shared classes ──────────────────────────────────────────────────────────

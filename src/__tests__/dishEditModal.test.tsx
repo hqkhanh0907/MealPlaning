@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { DishEditModal } from '../components/modals/DishEditModal';
 import type { Dish, Ingredient } from '../types';
@@ -314,7 +313,7 @@ describe('DishEditModal', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const saved = onSubmit.mock.calls[0][0];
-    expect(saved.name).toEqual({ vi: 'Cơm gà mới', en: 'Cơm gà mới' });
+    expect(saved.name).toEqual({ vi: 'Cơm gà mới' });
     expect(saved.tags).toContain('lunch');
     expect(saved.ingredients).toHaveLength(1);
     expect(saved.ingredients[0].ingredientId).toBe('i1');

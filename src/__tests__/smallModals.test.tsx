@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClearPlanModal } from '../components/modals/ClearPlanModal';
 import { GoalSettingsModal } from '../components/modals/GoalSettingsModal';

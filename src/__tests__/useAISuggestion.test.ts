@@ -209,9 +209,8 @@ describe('useAISuggestion', () => {
 
   it('startSuggestion aborts previous request', async () => {
     // First request that never resolves
-    let _firstResolve: (v: MealPlanSuggestion) => void;
     mockSuggestMealPlan.mockImplementationOnce(
-      () => new Promise<MealPlanSuggestion>((resolve) => { _firstResolve = resolve; }),
+      () => new Promise<MealPlanSuggestion>(() => { /* intentionally unresolved */ }),
     );
 
     const { result } = renderHook(() => useAISuggestion(baseParams));

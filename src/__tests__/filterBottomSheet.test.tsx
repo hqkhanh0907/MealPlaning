@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterBottomSheet } from '../components/shared/FilterBottomSheet';
 import type { FilterConfig } from '../types';

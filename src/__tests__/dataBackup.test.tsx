@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataBackup } from '../components/DataBackup';
 
@@ -253,5 +252,58 @@ describe('DataBackup', () => {
     expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
 
     clickSpy.mockRestore();
+  });
+
+  describe('backup health indicator', () => {
+    it('shows critical status when never backed up', () => {
+      render(<DataBackup onImport={vi.fn()} />);
+      const health = screen.getByTestId('backup-health');
+      expect(health).toBeInTheDocument();
+      expect(health.textContent).toContain('Chưa từng sao lưu');
+    });
+
+    it('shows good status when backed up today', () => {
+      localStorage.setItem('mp-last-local-backup-at', new Date().toISOString());
+      render(<DataBackup onImport={vi.fn()} />);
+      const health = screen.getByTestId('backup-health');
+      expect(health.className).toContain('emerald');
+    });
+
+    it('shows warning status when backed up 5 days ago', () => {
+      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+      localStorage.setItem('mp-last-local-backup-at', fiveDaysAgo);
+      render(<DataBackup onImport={vi.fn()} />);
+      const health = screen.getByTestId('backup-health');
+      expect(health.className).toContain('amber');
+    });
+
+    it('shows critical status when backed up 10 days ago', () => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+      localStorage.setItem('mp-last-local-backup-at', tenDaysAgo);
+      render(<DataBackup onImport={vi.fn()} />);
+      const health = screen.getByTestId('backup-health');
+      expect(health.className).toContain('rose');
+    });
+
+    it('considers cloud sync time for health status', () => {
+      localStorage.setItem('mp-last-sync-at', new Date().toISOString());
+      render(<DataBackup onImport={vi.fn()} />);
+      const health = screen.getByTestId('backup-health');
+      expect(health.className).toContain('emerald');
+    });
+
+    it('updates last backup timestamp after successful export', () => {
+      const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
+      const mockRevokeObjectURL = vi.fn();
+      globalThis.URL.createObjectURL = mockCreateObjectURL;
+      globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+      render(<DataBackup onImport={vi.fn()} />);
+      fireEvent.click(screen.getByText('Xuất dữ liệu'));
+      expect(localStorage.getItem('mp-last-local-backup-at')).not.toBeNull();
+
+      clickSpy.mockRestore();
+    });
   });
 });

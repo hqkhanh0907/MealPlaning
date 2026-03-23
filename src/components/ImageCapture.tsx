@@ -207,7 +207,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
           ) : (
             <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 dark:text-slate-400 p-8">
               <div className="flex gap-4">
-                {typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia && (
+                {typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getUserMedia === 'function' && (
                   <>
                     <button 
                       onClick={() => startCamera()}

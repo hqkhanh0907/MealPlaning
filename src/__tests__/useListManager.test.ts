@@ -38,7 +38,7 @@ describe('useListManager', () => {
 
   it('changes sort order', () => {
     const { result } = renderHook(() =>
-      useListManager({ items, searchFn, sortFn, defaultSort: 'name' as const }),
+      useListManager({ items, searchFn, sortFn, defaultSort: 'name' as 'name' | 'value' }),
     );
     act(() => result.current.setSortBy('value'));
     expect(result.current.filteredItems[0].name).toBe('Banana'); // value=10

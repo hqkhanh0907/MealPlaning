@@ -124,7 +124,7 @@ describe('migrateDishes', () => {
     const validDish = { id: 'd1', name: 'Valid', ingredients: [], tags: ['lunch'] };
     const result = migrateDishes([validDish, null as unknown, { id: 'd2' }]);
     expect(result).toHaveLength(1);
-    expect(result[0].name).toEqual({ vi: 'Valid', en: 'Valid' });
+    expect(result[0].name).toEqual({ vi: 'Valid' });
   });
 });
 
@@ -145,8 +145,8 @@ describe('migrateIngredients', () => {
       { id: 'i1', name: 'Chicken', unit: 'g', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].name).toEqual({ vi: 'Chicken', en: 'Chicken' });
-    expect(result[0].unit).toEqual({ vi: 'g', en: 'g' });
+    expect(result[0].name).toEqual({ vi: 'Chicken' });
+    expect(result[0].unit).toEqual({ vi: 'g' });
   });
 
   it('should handle empty array', () => {
@@ -161,14 +161,14 @@ describe('migrateIngredients', () => {
       42 as unknown,
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].name).toEqual({ vi: 'Valid', en: 'Valid' });
+    expect(result[0].name).toEqual({ vi: 'Valid' });
     warnSpy.mockRestore();
   });
 });
 
 describe('processAnalyzedDish', () => {
   const existingIngredients: Ingredient[] = [
-    { id: 'ing-1', name: { vi: 'Ức gà', en: 'Ức gà' }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
+    { id: 'ing-1', name: { vi: 'Ức gà', en: 'Ức gà' }, unit: { vi: 'g' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
   ];
 
   it('should match existing ingredient by name (case-insensitive)', () => {
@@ -195,7 +195,7 @@ describe('processAnalyzedDish', () => {
     };
     const result = processAnalyzedDish(payload, existingIngredients);
     expect(result.newIngredients).toHaveLength(1);
-    expect(result.newIngredients[0].name).toEqual({ vi: 'Cà rốt', en: 'Cà rốt' });
+    expect(result.newIngredients[0].name).toEqual({ vi: 'Cà rốt' });
     expect(result.newIngredients[0].caloriesPer100).toBe(41);
     expect(result.dishIngredients[0].ingredientId).toBe(result.newIngredients[0].id);
   });

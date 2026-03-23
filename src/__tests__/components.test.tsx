@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EmptyState } from '../components/shared/EmptyState';
 import { DetailModal } from '../components/shared/DetailModal';
@@ -369,29 +368,28 @@ describe('UnitSelector', () => {
     expect(onChange).toHaveBeenCalledWith('muỗng');
   });
 
-  it('bilingual mode emits {vi, en} object', () => {
+  it('bilingual mode emits {vi} object', () => {
     const onChange = vi.fn();
-    render(<UnitSelector mode="bilingual" value={{ vi: '', en: '' }} onChange={onChange} data-testid="unit" />);
+    render(<UnitSelector mode="bilingual" value={{ vi: '' }} onChange={onChange} data-testid="unit" />);
     const select = screen.getByTestId('unit-select');
     fireEvent.change(select, { target: { value: 'g' } });
-    expect(onChange).toHaveBeenCalledWith({ vi: 'g', en: 'g' });
+    expect(onChange).toHaveBeenCalledWith({ vi: 'g' });
   });
 
   it('shows custom input for unrecognized value', () => {
     const onChange = vi.fn();
     render(<UnitSelector mode="single" value="xyz_custom" onChange={onChange} data-testid="unit" />);
-    // "xyz_custom" is not in COMMON_UNITS, so it auto-selects "Khác..."
     expect(screen.getByTestId('unit-custom')).toBeInTheDocument();
     expect(screen.getByTestId('unit-custom')).toHaveValue('xyz_custom');
   });
 
-  it('typing custom value in bilingual mode emits same text for both languages', () => {
+  it('typing custom value in bilingual mode emits vi-only text', () => {
     const onChange = vi.fn();
-    render(<UnitSelector mode="bilingual" value={{ vi: '', en: '' }} onChange={onChange} data-testid="unit" />);
+    render(<UnitSelector mode="bilingual" value={{ vi: '' }} onChange={onChange} data-testid="unit" />);
     const select = screen.getByTestId('unit-select');
     fireEvent.change(select, { target: { value: '__custom__' } });
     const customInput = screen.getByTestId('unit-custom');
     fireEvent.change(customInput, { target: { value: 'tách' } });
-    expect(onChange).toHaveBeenCalledWith({ vi: 'tách', en: 'tách' });
+    expect(onChange).toHaveBeenCalledWith({ vi: 'tách' });
   });
 });

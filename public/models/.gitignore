@@ -1,3 +1,0 @@
-# Ignore large binary model files — download via: bash scripts/download-opus-models.sh
-*.onnx
-*.spm

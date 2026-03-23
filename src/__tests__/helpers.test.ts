@@ -144,16 +144,16 @@ describe('getLocalizedField', () => {
     expect(getLocalizedField({ vi: 'Ức gà', en: 'Chicken breast' }, 'vi')).toBe('Ức gà');
   });
 
-  it('returns en value when lang is en', () => {
-    expect(getLocalizedField({ vi: 'Ức gà', en: 'Chicken breast' }, 'en')).toBe('Chicken breast');
+  it('returns vi value when lang is en (always vi-only)', () => {
+    expect(getLocalizedField({ vi: 'Ức gà', en: 'Chicken breast' }, 'en')).toBe('Ức gà');
   });
 
-  it('falls back to vi when en is empty', () => {
+  it('returns vi even when en is empty', () => {
     expect(getLocalizedField({ vi: 'Ức gà', en: '' }, 'en')).toBe('Ức gà');
   });
 
-  it('falls back to en when vi is empty', () => {
-    expect(getLocalizedField({ vi: '', en: 'Chicken breast' }, 'vi')).toBe('Chicken breast');
+  it('returns empty string when vi is empty', () => {
+    expect(getLocalizedField({ vi: '', en: 'Chicken breast' }, 'vi')).toBe('');
   });
 
   it('returns empty string when both languages are empty', () => {
@@ -163,7 +163,7 @@ describe('getLocalizedField', () => {
 
 describe('toLocalized', () => {
   it('wraps a plain string as a LocalizedString', () => {
-    expect(toLocalized('test')).toEqual({ vi: 'test', en: 'test' });
+    expect(toLocalized('test')).toEqual({ vi: 'test' });
   });
 
   it('returns a LocalizedString as-is', () => {

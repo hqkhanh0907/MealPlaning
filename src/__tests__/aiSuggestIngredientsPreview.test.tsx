@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AISuggestIngredientsPreview } from '../components/modals/AISuggestIngredientsPreview';
 import type { Ingredient, SuggestedDishIngredient } from '../types';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ImageCapture } from '../components/ImageCapture';
 import { compressImage } from '../utils/imageCompression';

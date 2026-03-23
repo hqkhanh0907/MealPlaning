@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SaveAnalyzedDishModal } from '../components/modals/SaveAnalyzedDishModal';
 import { AnalyzedDishResult } from '../types';

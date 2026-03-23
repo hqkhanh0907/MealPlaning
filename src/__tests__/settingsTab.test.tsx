@@ -1,8 +1,5 @@
-import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { SettingsTab } from '../components/SettingsTab';
-import i18n from '../i18n';
-import type { Dish, Ingredient } from '../types';
 
 // Mock notification
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
@@ -30,22 +27,13 @@ vi.mock('../components/GoogleDriveSync', () => ({
   ),
 }));
 
-const mockScanMissing = vi.fn();
-vi.mock('../services/translateQueueService', () => ({
-  useTranslateQueue: (selector: (s: { scanMissing: typeof mockScanMissing }) => unknown) =>
-    selector({ scanMissing: mockScanMissing }),
-}));
 
-const mockDishes: Dish[] = [];
-const mockIngredients: Ingredient[] = [];
 
 afterEach(cleanup);
 
 describe('SettingsTab', () => {
   const defaultProps = {
     onImportData: vi.fn(),
-    dishes: mockDishes,
-    ingredients: mockIngredients,
     theme: 'system' as const,
     setTheme: mockSetTheme,
   };
@@ -53,18 +41,6 @@ describe('SettingsTab', () => {
   it('renders settings title', () => {
     render(<SettingsTab {...defaultProps} />);
     expect(screen.getByText('Cài đặt')).toBeInTheDocument();
-  });
-
-  it('renders language section with both options', () => {
-    render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText('Ngôn ngữ')).toBeInTheDocument();
-    expect(screen.getByText('Tiếng Việt')).toBeInTheDocument();
-    expect(screen.getByText('English')).toBeInTheDocument();
-  });
-
-  it('renders language description', () => {
-    render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText('Chọn ngôn ngữ hiển thị cho ứng dụng')).toBeInTheDocument();
   });
 
   it('renders theme section with all options', () => {
@@ -98,35 +74,6 @@ describe('SettingsTab', () => {
     expect(defaultProps.onImportData).toHaveBeenCalledWith({ 'mp-dishes': [] });
   });
 
-  it('highlights active Vietnamese language button', () => {
-    render(<SettingsTab {...defaultProps} />);
-    const viBtn = screen.getByText('Tiếng Việt').closest('button');
-    expect(viBtn?.className).toContain('border-emerald-500');
-
-    const enBtn = screen.getByText('English').closest('button');
-    expect(enBtn?.className).not.toContain('border-emerald-500');
-  });
-
-  it('switches language to English when clicked', () => {
-    render(<SettingsTab {...defaultProps} />);
-    const enBtn = screen.getByText('English').closest('button');
-    expect(enBtn).toBeTruthy();
-    if (enBtn) fireEvent.click(enBtn);
-    expect(i18n.language).toBe('en');
-    expect(mockScanMissing).toHaveBeenCalledWith(mockDishes, mockIngredients, 'en');
-    // Restore
-    i18n.changeLanguage('vi');
-  });
-
-  it('switches language to Vietnamese when clicked', () => {
-    i18n.changeLanguage('en');
-    render(<SettingsTab {...defaultProps} />);
-    const viBtn = screen.getByText('Tiếng Việt').closest('button') ?? screen.getByText('Vietnamese').closest('button');
-    expect(viBtn).toBeTruthy();
-    if (viBtn) fireEvent.click(viBtn);
-    expect(i18n.language).toBe('vi');
-  });
-
   it('calls setTheme when theme button is clicked', () => {
     render(<SettingsTab {...defaultProps} />);
     const lightBtn = screen.getByText('Sáng').closest('button');
@@ -158,12 +105,6 @@ describe('SettingsTab', () => {
     expect(defaultProps.onImportData).toHaveBeenCalledWith({ 'mp-dishes': [] });
   });
 
-  it('shows flag emojis for language options', () => {
-    render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText('🇻🇳')).toBeInTheDocument();
-    expect(screen.getByText('🇬🇧')).toBeInTheDocument();
-  });
-
   it('highlights active system theme button', () => {
     render(<SettingsTab {...defaultProps} />);
     const sysBtn = screen.getByText('Hệ thống').closest('button');
@@ -171,26 +112,6 @@ describe('SettingsTab', () => {
 
     const lightBtn = screen.getByText('Sáng').closest('button');
     expect(lightBtn?.className).not.toContain('border-emerald-500');
-  });
-
-  it('shows English labels after switching to English', async () => {
-    await i18n.changeLanguage('en');
-    cleanup();
-    render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText('Language')).toBeInTheDocument();
-    expect(screen.getByText('Appearance')).toBeInTheDocument();
-    expect(screen.getByText('Data')).toBeInTheDocument();
-    await i18n.changeLanguage('vi');
-  });
-
-  it('restores Vietnamese labels after switching back from English', async () => {
-    await i18n.changeLanguage('en');
-    cleanup();
-    await i18n.changeLanguage('vi');
-    render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText('Ngôn ngữ')).toBeInTheDocument();
-    expect(screen.getByText('Giao diện')).toBeInTheDocument();
-    expect(screen.getByText('Dữ liệu')).toBeInTheDocument();
   });
 
   it('non-active theme buttons do not have border-emerald-500', () => {
@@ -219,20 +140,19 @@ describe('SettingsTab', () => {
   it('filters sections when typing in search', () => {
     render(<SettingsTab {...defaultProps} />);
     const searchInput = screen.getByTestId('settings-search');
-    fireEvent.change(searchInput, { target: { value: 'Ngôn ngữ' } });
-    expect(screen.getByText('Ngôn ngữ')).toBeInTheDocument();
-    expect(screen.queryByText('Giao diện')).not.toBeInTheDocument();
+    fireEvent.change(searchInput, { target: { value: 'Giao diện' } });
+    expect(screen.getByText('Giao diện')).toBeInTheDocument();
     expect(screen.queryByText('Dữ liệu')).not.toBeInTheDocument();
   });
 
   it('shows all sections when search is cleared', () => {
     render(<SettingsTab {...defaultProps} />);
     const searchInput = screen.getByTestId('settings-search');
-    fireEvent.change(searchInput, { target: { value: 'Ngôn ngữ' } });
-    expect(screen.queryByText('Giao diện')).not.toBeInTheDocument();
+    fireEvent.change(searchInput, { target: { value: 'Giao diện' } });
+    expect(screen.queryByText('Dữ liệu')).not.toBeInTheDocument();
     fireEvent.change(searchInput, { target: { value: '' } });
     expect(screen.getByText('Giao diện')).toBeInTheDocument();
-    expect(screen.getByText('Ngôn ngữ')).toBeInTheDocument();
+    expect(screen.getByText('Dữ liệu')).toBeInTheDocument();
   });
 
   it('filters to theme section when searching for theme keyword', () => {
@@ -240,6 +160,6 @@ describe('SettingsTab', () => {
     const searchInput = screen.getByTestId('settings-search');
     fireEvent.change(searchInput, { target: { value: 'Giao diện' } });
     expect(screen.getByText('Giao diện')).toBeInTheDocument();
-    expect(screen.queryByText('Ngôn ngữ')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dữ liệu')).not.toBeInTheDocument();
   });
 });

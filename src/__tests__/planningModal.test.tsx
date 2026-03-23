@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MealPlannerModal } from '../components/modals/MealPlannerModal';
 import type { Dish, Ingredient, DayPlan } from '../types';
@@ -286,5 +285,57 @@ describe('MealPlannerModal', () => {
     fireEvent.click(screen.getByTestId('filter-apply-btn'));
     const dot = screen.getByTestId('btn-filter').querySelector('.bg-emerald-500');
     expect(dot).toBeTruthy();
+  });
+
+  describe('remaining budget display', () => {
+    it('shows remaining calories when targetCalories provided and dishes selected', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
+      fireEvent.click(screen.getByText('Gà nướng'));
+      expect(screen.getByTestId('meal-planner-remaining-budget')).toBeInTheDocument();
+      expect(screen.getByTestId('meal-planner-remaining-cal')).toBeInTheDocument();
+      expect(screen.getByTestId('meal-planner-remaining-pro')).toBeInTheDocument();
+    });
+
+    it('does not show remaining budget when no targets provided', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
+      fireEvent.click(screen.getByText('Gà nướng'));
+      expect(screen.queryByTestId('meal-planner-remaining-budget')).not.toBeInTheDocument();
+    });
+
+    it('does not show remaining budget when no dishes selected', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
+      expect(screen.queryByTestId('meal-planner-remaining-budget')).not.toBeInTheDocument();
+    });
+
+    it('shows green text when remaining budget is positive', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
+      fireEvent.click(screen.getByText('Gà nướng'));
+      const calRemaining = screen.getByTestId('meal-planner-remaining-cal');
+      expect(calRemaining.className).toContain('text-emerald-600');
+      expect(calRemaining.textContent).toContain('Còn lại');
+    });
+
+    it('shows red text when budget is exceeded', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={100} targetProtein={10} />);
+      fireEvent.click(screen.getByText('Gà nướng'));
+      const calRemaining = screen.getByTestId('meal-planner-remaining-cal');
+      expect(calRemaining.className).toContain('text-rose-600');
+      expect(calRemaining.textContent).toContain('Vượt');
+    });
+
+    it('updates remaining budget as dishes are toggled on/off', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={200} />);
+      fireEvent.click(screen.getByText('Gà nướng'));
+      const calEl = screen.getByTestId('meal-planner-remaining-cal');
+      const initialText = calEl.textContent;
+      fireEvent.click(screen.getByText('Cơm gà'));
+      const updatedText = screen.getByTestId('meal-planner-remaining-cal').textContent;
+      expect(updatedText).not.toBe(initialText);
+    });
+
+    it('shows remaining budget for pre-populated plan', () => {
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
+      expect(screen.getByTestId('meal-planner-remaining-budget')).toBeInTheDocument();
+    });
   });
 });

@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CalendarTab } from '../components/CalendarTab';
 import type { DayPlan, DayNutritionSummary } from '../types';

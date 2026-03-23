@@ -231,7 +231,7 @@ describe('Flow: AI Analyzed Dish → Save to Library', () => {
 
     // Should create 1 new ingredient (Dầu ăn) and match 1 existing (Ức gà)
     expect(newIngredients).toHaveLength(1);
-    expect(newIngredients[0].name).toEqual({ vi: 'Dầu ăn', en: 'Dầu ăn' });
+    expect(newIngredients[0].name).toEqual({ vi: 'Dầu ăn' });
     expect(dishIngredients).toHaveLength(2);
     expect(dishIngredients[0].ingredientId).toBe('ing-chicken'); // Matched existing
     expect(dishIngredients[1].ingredientId).toBe(newIngredients[0].id); // New

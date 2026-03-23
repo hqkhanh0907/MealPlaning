@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Upload, Loader2 } from 'lucide-react';
+import { Download, Upload, Loader2, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -12,6 +12,23 @@ interface DataBackupProps {
 }
 
 const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
+const LAST_LOCAL_BACKUP_KEY = 'mp-last-local-backup-at';
+
+function getBackupHealthStatus(): { level: 'good' | 'warning' | 'critical'; daysSince: number | null } {
+  try {
+    const cloudTime = localStorage.getItem('mp-last-sync-at');
+    const localTime = localStorage.getItem(LAST_LOCAL_BACKUP_KEY);
+    const timestamps = [cloudTime, localTime].filter(Boolean).map(t => new Date(t!).getTime());
+    if (timestamps.length === 0) return { level: 'critical', daysSince: null };
+    const latest = Math.max(...timestamps);
+    const daysSince = Math.floor((Date.now() - latest) / (1000 * 60 * 60 * 24));
+    if (daysSince <= 3) return { level: 'good', daysSince };
+    if (daysSince <= 7) return { level: 'warning', daysSince };
+    return { level: 'critical', daysSince };
+  } catch {
+    return { level: 'critical', daysSince: null };
+  }
+}
 
 const buildExportData = (): Record<string, unknown> => {
   const data: Record<string, unknown> = {};
@@ -28,6 +45,28 @@ const buildExportData = (): Record<string, unknown> => {
 
 const exportFileName = () =>
   `meal-planner-backup-${new Date().toISOString().split('T')[0]}.json`;
+
+const HEALTH_STYLES = {
+  good: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-400', Icon: ShieldCheck },
+  warning: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-400', Icon: ShieldAlert },
+  critical: { bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-700 dark:text-rose-400', Icon: ShieldX },
+};
+
+const BackupHealthIndicator: React.FC = () => {
+  const { t } = useTranslation();
+  const { level, daysSince } = getBackupHealthStatus();
+  const style = HEALTH_STYLES[level];
+  const message = daysSince === null
+    ? t('backup.neverBackedUp')
+    : t('backup.lastBackupDays', { count: daysSince });
+
+  return (
+    <div data-testid="backup-health" className={`flex items-center gap-2 p-3 rounded-xl border ${style.bg} ${style.border} ${style.text} mb-3`}>
+      <style.Icon className="w-4 h-4 shrink-0" />
+      <span className="text-xs font-medium">{message}</span>
+    </div>
+  );
+};
 
 export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
   const { t } = useTranslation();
@@ -76,6 +115,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
       }
 
       notify.success(t('backup.exportSuccess'), '');
+      try { localStorage.setItem(LAST_LOCAL_BACKUP_KEY, new Date().toISOString()); } catch { /* ignore */ }
     } catch {
       notify.error(t('backup.exportFailed'), '');
     } finally {
@@ -121,6 +161,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
 
   return (
     <div data-testid="data-backup">
+      <BackupHealthIndicator />
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={handleExport}

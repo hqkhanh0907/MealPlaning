@@ -24,7 +24,7 @@ type NutritionField = typeof NUMERIC_FIELDS[number];
 type IngredientFormErrors = Partial<Record<'name' | 'unit' | NutritionField, string>>;
 
 const EMPTY_FORM: Omit<Ingredient, 'id'> = {
-  name: { vi: '', en: '' }, caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: { vi: '', en: '' },
+  name: { vi: '' }, caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: { vi: '' },
 };
 
 const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
@@ -77,15 +77,11 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
   const buildIngredient = (): Ingredient => ({
     ...formData,
-    // Set a fallback for the other language so the item is immediately usable.
-    // Background translation will later fill in the proper translated value.
     name: {
-      vi: formData.name.vi || formData.name.en,
-      en: formData.name.en || formData.name.vi,
+      vi: formData.name.vi,
     },
     unit: {
-      vi: formData.unit.vi || formData.unit.en,
-      en: formData.unit.en || formData.unit.vi,
+      vi: formData.unit.vi,
     },
     caloriesPer100: Math.round(Number.parseFloat(numericInputs.caloriesPer100)),
     proteinPer100: Math.round(Number.parseFloat(numericInputs.proteinPer100)),

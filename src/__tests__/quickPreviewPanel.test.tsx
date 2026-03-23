@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QuickPreviewPanel } from '../components/QuickPreviewPanel';
 import type { DayPlan, Dish, Ingredient, MealType } from '../types';

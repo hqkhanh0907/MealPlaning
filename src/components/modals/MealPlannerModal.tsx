@@ -45,6 +45,8 @@ interface MealPlannerModalProps {
   currentPlan: DayPlan;
   selectedDate: string;
   initialTab?: MealType;
+  targetCalories?: number;
+  targetProtein?: number;
   onConfirm: (changes: Record<MealType, string[]>) => void;
   onClose: () => void;
 }
@@ -55,6 +57,8 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
   currentPlan,
   selectedDate,
   initialTab = 'breakfast',
+  targetCalories,
+  targetProtein,
   onConfirm,
   onClose,
 }) => {
@@ -139,6 +143,13 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
   }, [selections, dishes, ingredients]);
 
   const totalDayDishCount = selections.breakfast.size + selections.lunch.size + selections.dinner.size;
+
+  const remainingBudget = React.useMemo(() => {
+    if (targetCalories === undefined && targetProtein === undefined) return null;
+    const remainingCal = targetCalories !== undefined ? Math.round(targetCalories - totalDayNutrition.calories) : null;
+    const remainingPro = targetProtein !== undefined ? Math.round(targetProtein - totalDayNutrition.protein) : null;
+    return { calories: remainingCal, protein: remainingPro };
+  }, [targetCalories, targetProtein, totalDayNutrition]);
 
   const handleConfirm = () => {
     const changes: Partial<Record<MealType, string[]>> = {};
@@ -340,6 +351,24 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
               </span>
             )}
           </div>
+          {remainingBudget && totalDayDishCount > 0 && (
+            <div data-testid="meal-planner-remaining-budget" className="flex items-center justify-between text-xs mb-1">
+              {remainingBudget.calories !== null && (
+                <span data-testid="meal-planner-remaining-cal" className={`font-medium ${remainingBudget.calories >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {remainingBudget.calories >= 0
+                    ? t('summary.remaining', { value: remainingBudget.calories, unit: 'kcal' })
+                    : t('summary.over', { value: Math.abs(remainingBudget.calories), unit: 'kcal' })}
+                </span>
+              )}
+              {remainingBudget.protein !== null && (
+                <span data-testid="meal-planner-remaining-pro" className={`font-medium ${remainingBudget.protein >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {remainingBudget.protein >= 0
+                    ? t('summary.remaining', { value: remainingBudget.protein, unit: 'g' })
+                    : t('summary.over', { value: Math.abs(remainingBudget.protein), unit: 'g' })}
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="text-slate-400 dark:text-slate-500">
               {activeTabLabel}:{' '}

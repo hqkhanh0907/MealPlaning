@@ -33,7 +33,7 @@ const getAmountStep = (amount: number): number => {
 };
 
 /** Display unit for nutrition labels: "100g" for g/kg, "100ml" for ml/l, "1 {unit}" for others. */
-const getDisplayUnit = (unit: { vi: string; en: string }, lang: SupportedLang) => {
+const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
   const u = getLocalizedField(unit, lang).toLowerCase().trim();
   if (u === 'kg' || u === 'g') return '100g';
   if (u === 'l' || u === 'ml') return '100ml';
@@ -64,7 +64,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   // Quick-add ingredient inline form state
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [qaName, setQaName] = useState('');
-  const [qaUnit, setQaUnit] = useState<{ vi: string; en: string }>({ vi: 'g', en: 'g' });
+  const [qaUnit, setQaUnit] = useState<{ vi: string; en?: string }>({ vi: 'g' });
   const [qaCal, setQaCal] = useState('');
   const [qaProtein, setQaProtein] = useState('');
   const [qaCarbs, setQaCarbs] = useState('');
@@ -113,8 +113,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const buildDish = (): Dish => ({
     id: editingItem ? editingItem.id : generateId('dish'),
     name: {
-      vi: lang === 'vi' ? namePrimary.trim() : (editingItem?.name.vi ?? namePrimary.trim()),
-      en: lang === 'en' ? namePrimary.trim() : (editingItem?.name.en ?? namePrimary.trim()),
+      vi: namePrimary.trim(),
     },
     ingredients: selectedIngredients.map(si => ({
       ...si,
@@ -283,7 +282,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     const newIng: Ingredient = {
       id: generateId('ing'),
       name: { vi: primaryName, en: primaryName },
-      unit: { vi: qaUnit.vi.trim() || 'g', en: qaUnit.en.trim() || 'g' },
+      unit: { vi: qaUnit.vi.trim() || 'g' },
       caloriesPer100: Number(qaCal) || 0,
       proteinPer100: Number(qaProtein) || 0,
       carbsPer100: Number(qaCarbs) || 0,
