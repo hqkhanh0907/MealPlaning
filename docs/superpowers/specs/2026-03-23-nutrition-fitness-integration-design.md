@@ -483,13 +483,13 @@ function getEntriesInWindow(
 
 ```typescript
 const AUTO_ADJUST_CONFIG = {
-  evaluation_period_days: 14,   // Đánh giá sau 2 tuần
-  min_weight_entries: 10,       // Cần ít nhất 10 lần cân trong 14 ngày
-  weight_change_threshold: 0.2, // kg — nếu thay đổi < 0.2kg → coi như không đổi
-  calorie_adjustment: 150,      // ±150 kcal mỗi lần điều chỉnh
-  max_deficit: 1000,            // Không giảm quá 1000 kcal dưới TDEE
-  min_calories: 1200,           // Floor: không dưới 1200 kcal
-  max_surplus: 700,             // Không tăng quá 700 kcal trên TDEE (bulk cap)
+  evaluationPeriodDays: 14,     // Đánh giá sau 2 tuần
+  minWeightEntries: 10,         // Cần ít nhất 10 lần cân trong 14 ngày
+  weightChangeThreshold: 0.2,   // kg — nếu thay đổi < 0.2kg → coi như không đổi
+  calorieAdjustment: 150,       // ±150 kcal mỗi lần điều chỉnh
+  maxDeficit: 1000,             // Không giảm quá 1000 kcal dưới TDEE
+  minCalories: 1200,            // Floor: không dưới 1200 kcal
+  maxSurplus: 700,              // Không tăng quá 700 kcal trên TDEE (bulk cap)
 };
 
 function evaluateAndSuggestAdjustment(
@@ -507,14 +507,18 @@ function evaluateAndSuggestAdjustment(
   
   if (!currentAvg || !previousAvg) return null;
   
+  // Enforce minimum total entries across both windows
+  const totalEntries = currentEntries.length + previousEntries.length;
+  if (totalEntries < AUTO_ADJUST_CONFIG.minWeightEntries) return null;
+  
   const weightChange = currentAvg - previousAvg;
-  const isStalled = Math.abs(weightChange) < AUTO_ADJUST_CONFIG.weight_change_threshold;
+  const isStalled = Math.abs(weightChange) < AUTO_ADJUST_CONFIG.weightChangeThreshold;
   
   if (goal.type === 'cut' && (isStalled || weightChange > 0)) {
     const newTarget = Math.max(
-      currentTarget - AUTO_ADJUST_CONFIG.calorie_adjustment,
-      AUTO_ADJUST_CONFIG.min_calories,
-      tdee - AUTO_ADJUST_CONFIG.max_deficit,
+      currentTarget - AUTO_ADJUST_CONFIG.calorieAdjustment,
+      AUTO_ADJUST_CONFIG.minCalories,
+      tdee - AUTO_ADJUST_CONFIG.maxDeficit,
     );
     if (newTarget === currentTarget) return null;
     return {
@@ -528,8 +532,8 @@ function evaluateAndSuggestAdjustment(
   
   if (goal.type === 'bulk' && (isStalled || weightChange < 0)) {
     const newTarget = Math.min(
-      currentTarget + AUTO_ADJUST_CONFIG.calorie_adjustment,
-      tdee + AUTO_ADJUST_CONFIG.max_surplus, // Cap surplus
+      currentTarget + AUTO_ADJUST_CONFIG.calorieAdjustment,
+      tdee + AUTO_ADJUST_CONFIG.maxSurplus, // Cap surplus
     );
     if (newTarget === currentTarget) return null;
     return {
@@ -651,9 +655,9 @@ Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRa
   "_legacyFormat": {
     "mp-ingredients": [...],
     "mp-dishes": [...],
-    "mp-dayPlans": [...],
-    "mp-mealTemplates": [...],
-    "mp-userProfile": {...}
+    "mp-day-plans": [...],
+    "meal-templates": [...],
+    "mp-user-profile": {...}
   },
   "tables": {
     "ingredients": [...],
