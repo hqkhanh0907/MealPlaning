@@ -30,8 +30,7 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 | Build | Vite 6 |
 | Mobile | Capacitor 8 (Android) |
 | AI | Google Gemini API (`gemini-2.0-flash-preview`) |
-| Offline Translation | `@xenova/transformers` (OPUS model, Web Worker) |
-| i18n | i18next (vi / en) |
+| i18n | i18next (Tiếng Việt) |
 | Testing | Vitest (unit) + WebdriverIO v9 + Appium 2 (E2E) |
 | Code Quality | ESLint + TypeScript strict + SonarQube |
 
@@ -41,7 +40,7 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 
 - 📅 **Calendar** — Lập kế hoạch bữa ăn theo tuần (sáng/trưa/tối)
 - 📊 **Nutrition Summary** — Tổng hợp calories/protein/carbs/fat theo ngày
-- 📦 **Quản lý Nguyên liệu** — CRUD nguyên liệu với dinh dưỡng per-100g, hỗ trợ song ngữ (vi/en)
+- 📦 **Quản lý Nguyên liệu** — CRUD nguyên liệu với dinh dưỡng per-100g
 - 🍽️ **Quản lý Món ăn** — CRUD món ăn từ các nguyên liệu, gắn tag bữa (sáng/trưa/tối)
 - 🛒 **Grocery List** — Tự động tổng hợp danh sách mua sắm từ kế hoạch bữa ăn
 - 🤖 **AI Phân tích ảnh** — Chụp hoặc upload ảnh món ăn → Gemini AI trích xuất nguyên liệu & dinh dưỡng
@@ -49,7 +48,7 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 - 🔍 **AI Tra cứu nguyên liệu** — Tự động điền dinh dưỡng cho nguyên liệu mới
 - 💾 **Backup/Restore** — Export/Import JSON, share qua hệ thống chia sẻ Android
 - 🌙 **Dark Mode** — Hỗ trợ light/dark/system theme
-- 🌐 **Bilingual** — Giao diện và dữ liệu song ngữ Việt/Anh
+- 🌐 **Ngôn ngữ** — Giao diện hoàn toàn bằng Tiếng Việt
 
 ---
 
@@ -69,7 +68,7 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 npm install
 
 # 2. Tạo file .env.local và thêm API key
-echo "GEMINI_API_KEY=your_key_here" > .env.local
+echo "VITE_GEMINI_API_KEY=your_key_here" > .env.local
 
 # 3. Chạy dev server (localhost:3000)
 npm run dev
@@ -80,9 +79,10 @@ npm run dev
 ```bash
 npm run build          # Build production bundle
 npm run lint           # TypeScript check + ESLint
-npm run test           # Unit tests (668 tests)
+npm run test           # Unit tests (1280 tests)
 npm run test:coverage  # Unit tests + coverage report
 npm run e2e            # E2E tests (Appium, cần emulator Android)
+npm run analyze        # Bundle analysis (visualizer)
 ```
 
 ---
@@ -118,9 +118,9 @@ npm run e2e
 ```
 
 **Kết quả hiện tại:**
-- Unit: **668/668** tests passing (39 test files)
-- E2E: **10/10** specs passing (Appium + WebdriverIO, Android)
-- Coverage: **90.5%** statements
+- Unit: **1280/1280** tests passing (56 test files)
+- E2E: **183/183** tests passing (24 specs, Appium + WebdriverIO, Android)
+- Coverage: **99.03%** statements, **100%** lines
 
 ---
 
@@ -133,12 +133,11 @@ src/
 │   ├── navigation/     # BottomNavBar + DesktopNav
 │   └── shared/         # Reusable: UnitSelector, ModalBackdrop, etc.
 ├── hooks/              # Custom React hooks
-├── services/           # Business logic (gemini, plan, data, translate)
+├── services/           # Business logic (gemini, plan, data)
 ├── contexts/           # React contexts (NotificationContext)
 ├── utils/              # Pure utilities (helpers, nutrition, logger)
 ├── data/               # Static data (initialData, units, constants)
-├── locales/            # i18n translations (vi.json, en.json)
-├── workers/            # Web Worker (offline translation)
+├── locales/            # i18n translations (vi.json)
 └── types.ts            # TypeScript type definitions
 
 docs/                   # Toàn bộ tài liệu dự án
@@ -158,7 +157,7 @@ docs/                   # Toàn bộ tài liệu dự án
 
 | Biến | Bắt buộc | Mô tả |
 |------|----------|-------|
-| `GEMINI_API_KEY` | ✅ | Google Gemini API key. Lấy tại [AI Studio](https://aistudio.google.com/apikey) |
+| `VITE_GEMINI_API_KEY` | ✅ | Google Gemini API key. Lấy tại [AI Studio](https://aistudio.google.com/apikey). Prefix `VITE_` bắt buộc để Vite expose lên client. |
 
 ---
 

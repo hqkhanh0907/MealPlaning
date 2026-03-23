@@ -1,7 +1,7 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 4.0  
-**Date:** 2026-03-11
+**Version:** 5.0  
+**Date:** 2026-03-13
 
 ---
 
@@ -50,7 +50,7 @@ const save = () => {};
 // ✅ PascalCase, đầy đủ domain prefix khi cần
 interface UserProfile { ... }
 interface AnalyzedDishResult { ... }
-type LocalizedString = { vi: string; en: string };
+type LocalizedString = { vi: string };
 
 // ❌ Không dùng prefix I
 interface IIngredient { ... }
@@ -91,7 +91,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 
   // 6. Event handlers (useCallback nếu pass xuống child)
   const handleSave = useCallback(() => {
-    onSave({ ...ingredient, name: { vi: name, en: '' } });
+    onSave({ ...ingredient, name: { vi: name } });
   }, [ingredient, name, onSave]);
 
   // 7. JSX return
@@ -168,17 +168,13 @@ t('common.save')
 ### LocalizedString type
 
 ```typescript
-// Tất cả content do user nhập phải có cả vi lẫn en
+// Ứng dụng chỉ hỗ trợ Tiếng Việt
 interface Ingredient {
-  name: LocalizedString;   // { vi: string; en: string }
+  name: LocalizedString;   // { vi: string }
   unit: LocalizedString;
 }
 
-// ✅ Display: dùng ngôn ngữ hiện tại
-import { getCurrentLang } from '../utils/langHelper';
-const displayName = ingredient.name[getCurrentLang()];
-
-// ❌ Luôn dùng .vi
+// ✅ Display: truy cập trực tiếp .vi
 const displayName = ingredient.name.vi;
 ```
 
@@ -195,9 +191,8 @@ const newIng: Ingredient = { id: Date.now().toString(), ... };
 
 ### Quy tắc Translation
 
-- Mọi tên nguyên liệu/món ăn phải sử dụng `LocalizedString` (Record<'vi' | 'en', string>)
-- Khi thêm food term mới vào codebase, **bắt buộc** thêm vào `foodDictionary.ts` nếu biết dịch chính xác
-- Xem [ADR 004](../adr/004-food-dictionary-instant-translation.md)
+- Mọi tên nguyên liệu/món ăn phải sử dụng `LocalizedString` (chỉ field `vi`)
+- Ứng dụng chỉ hỗ trợ Tiếng Việt — không cần dịch sang tiếng Anh
 
 ---
 
@@ -464,3 +459,48 @@ feat/ai-suggestion-preview
 fix/scroll-lock-regression
 docs/comprehensive-documentation
 ```
+
+---
+
+## 11. Vite + Build Best Practices
+
+### Environment Variables
+
+```typescript
+// ✅ Dùng import.meta.env với prefix VITE_
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+// ❌ KHÔNG dùng process.env (không hoạt động trong Vite)
+const apiKey = process.env.GEMINI_API_KEY;
+```
+
+- Type-safe env vars: khai báo trong `src/vite-env.d.ts` (interface `ImportMetaEnv`)
+- Prefix `VITE_` bắt buộc cho tất cả biến cần expose lên client
+
+### Lazy Loading
+
+```typescript
+// ✅ React.lazy cho tabs/modals không hiển thị ngay
+const SettingsTab = lazy(() => import('./components/tabs/SettingsTab'));
+const ManagementTab = lazy(() => import('./components/tabs/ManagementTab'));
+
+// ✅ Suspense wrapper
+<Suspense fallback={null}>
+  <SettingsTab />
+</Suspense>
+```
+
+### Code Splitting
+
+- Tabs không hiển thị ban đầu → lazy load (ManagementTab, SettingsTab)
+- Modals → lazy load (MealPlannerModal, SaveTemplateModal, etc.)
+- Prefetch sau 2s idle: `usePrefetchAfterIdle` hook
+- Manual chunks trong `vite.config.ts`: vendor-react, vendor-ui, vendor-i18n
+
+### Build
+
+- Target: `esnext` (Capacitor WebView)
+- Compression: gzip + brotli (`vite-plugin-compression`)
+- Bundle analysis: `npm run analyze` (rollup-plugin-visualizer)
+- Production: `esbuild.drop: ['console', 'debugger']`
+- Sourcemaps: `hidden` trong production

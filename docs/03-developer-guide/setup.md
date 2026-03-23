@@ -39,12 +39,12 @@ npm install
 Tạo file `.env.local` tại gốc project:
 
 ```env
-GEMINI_API_KEY=your_google_gemini_api_key_here
+VITE_GEMINI_API_KEY=your_google_gemini_api_key_here
 ```
 
 Lấy API key tại: https://aistudio.google.com/app/apikey
 
-> **Lưu ý:** API key được truy cập qua `process.env.GEMINI_API_KEY` (xem `src/services/geminiService.ts` dòng 9), **không** dùng prefix `VITE_`. File `.env.local` đã được thêm vào `.gitignore`, không commit key vào repo.
+> **Lưu ý:** API key được truy cập qua `import.meta.env.VITE_GEMINI_API_KEY` (xem `src/services/geminiService.ts` dòng 9). Prefix `VITE_` bắt buộc để Vite expose biến lên client-side code. File `.env.local` đã được thêm vào `.gitignore`, không commit key vào repo.
 
 ### 2.3.1 Xác minh API key
 
@@ -186,6 +186,7 @@ npm run test:e2e
 | `npx cap sync android` | Sync web assets vào Android project |
 | `npx cap open android` | Mở Android Studio |
 | `bash build-apk.sh` | Build APK đầy đủ |
+| `npm run analyze` | Bundle analysis (visualizer, cần ANALYZE=true) |
 
 ---
 
@@ -205,7 +206,7 @@ src/
 ├── hooks/            # Custom hooks (usePersistedState, useAISuggestion...)
 ├── services/         # Business logic (geminiService, dataService, planService)
 ├── utils/            # Pure utilities (calorie, dates, validation)
-├── locales/          # i18n JSON (vi.json, en.json)
+├── locales/          # i18n JSON (vi.json)
 ├── types.ts          # Tất cả TypeScript interfaces
 └── App.tsx           # Root component, state management
 
@@ -244,9 +245,9 @@ docs/
 
 ## 8. Troubleshooting
 
-### `GEMINI_API_KEY` không load
+### `VITE_GEMINI_API_KEY` không load
 
-Kiểm tra file `.env.local` tồn tại tại root (cùng cấp `package.json`). Đảm bảo biến tên `GEMINI_API_KEY` (không có prefix `VITE_`). Restart dev server sau khi thêm.
+Kiểm tra file `.env.local` tồn tại tại root (cùng cấp `package.json`). Đảm bảo biến tên `VITE_GEMINI_API_KEY` (phải có prefix `VITE_` để Vite expose). Restart dev server sau khi thêm/sửa biến.
 
 ### `adb devices` không thấy emulator
 

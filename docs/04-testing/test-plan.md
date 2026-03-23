@@ -19,7 +19,7 @@
 | Grocery List | ✅ | ✅ | ✅ |
 | Settings & Profile | ✅ | ✅ | ✅ |
 | Data Backup (Import/Export) | ✅ | ✅ | ✅ |
-| i18n (vi/en) | ✅ | ✅ | - |
+| i18n (Tiếng Việt) | ✅ | - | - |
 | localStorage persistence | ✅ | ✅ | - |
 | Navigation | - | ✅ | ✅ |
 | Responsive UI | ✅ | ✅ | ✅ |
@@ -89,19 +89,19 @@
 
 ## 4. Mức độ coverage yêu cầu
 
-| Level | Target | Actual (2026-03-11) |
+| Level | Target | Actual (2026-03-13) |
 |-------|--------|---------------------|
-| Overall Statements | ≥ 80% | **99.46%** ✅ (↑ từ 90.51%) |
-| Overall Branches | ≥ 75% | **92.51%** ✅ (↑ từ 83.80%) |
-| Overall Functions | ≥ 85% | **99.41%** ✅ (↑ từ 87.76%) |
-| Overall Lines | ≥ 80% | **100%** ✅ (↑ từ 92.76%) |
-| Services | ≥ 90% | **99.73%** ✅ |
+| Overall Statements | ≥ 80% | **99.03%** ✅ |
+| Overall Branches | ≥ 75% | **92.61%** ✅ |
+| Overall Functions | ≥ 85% | **98.33%** ✅ |
+| Overall Lines | ≥ 80% | **99.87%** ✅ |
+| Services | ≥ 90% | **99.70%** ✅ |
 | Utils | ≥ 90% | **100%** ✅ |
-| Components | ≥ 75% | **99.33%** ✅ |
-| Hooks | ≥ 85% | **99.74%** ✅ |
-| Contexts | ≥ 85% | **98.98%** ✅ |
+| Components | ≥ 75% | **99%+** ✅ |
+| Hooks | ≥ 85% | **99.29%** ✅ |
+| Contexts | ≥ 85% | **98%+** ✅ |
 
-> **Note:** Unit tests: **1201 tests** across **57 test files** (cập nhật 2026-03-11). Coverage vượt xa target ≥80%. Branch coverage 92.51% — chấp nhận được do một số defensive code paths không thể trigger trong test environment.
+> **Note:** Unit tests: **1280 tests** across **56 test files** (cập nhật 2026-03-13). Coverage vượt xa target ≥80%. Branch coverage 92.61% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Lazy loading + code splitting không ảnh hưởng coverage.
 
 ---
 
@@ -154,7 +154,7 @@ Tests kiểm tra tương tác giữa components và services mà không mount fu
 | `12-sort-filter-view.spec.ts` | Sort, filter, view toggle | 16 |
 | `13-grocery-aggregation.spec.ts` | Grocery quantities | 5 |
 | `14-responsive-ui.spec.ts` | Bottom nav, layout, touch targets | 7 |
-| `15-i18n-language.spec.ts` | Language switching, persistence | 7 |
+| `15-i18n-language.spec.ts` | Vietnamese-only UI verification, theme persistence | 7 |
 | `16-detail-modal.spec.ts` | Detail modal views | 5 |
 | `17-delete-undo.spec.ts` | Delete guard & undo toast | 5 |
 | `18-error-edge-cases.spec.ts` | Empty states, theme CSS, error boundary | 5 |
@@ -170,7 +170,7 @@ Tests kiểm tra tương tác giữa components và services mà không mount fu
 Specs 23–24 kiểm tra luồng dữ liệu xuyên suốt toàn bộ ứng dụng:
 
 - **`23-integration-data-flow`**: Cascade test — tạo Ingredient → gắn vào Dish → lên Calendar → kiểm tra Grocery list tự động cập nhật. Xác nhận tính nhất quán dữ liệu end-to-end.
-- **`24-integration-multiday-crosstab`**: Multi-day grocery aggregation (cùng ingredient trên nhiều ngày phải cộng dồn), cross-tab consistency (đổi ngôn ngữ/theme ở Settings tab → phản ánh tức thì trên Calendar/Library), và nutrition cascade (thay đổi calo ingredient → Dish/Calendar tự cập nhật).
+- **`24-integration-multiday-crosstab`**: Multi-day grocery aggregation (cùng ingredient trên nhiều ngày phải cộng dồn), cross-tab consistency (đổi theme ở Settings tab → phản ánh tức thì trên Calendar/Library), và nutrition cascade (thay đổi calo ingredient → Dish/Calendar tự cập nhật).
 
 ---
 
@@ -182,17 +182,16 @@ Specs 23–24 kiểm tra luồng dữ liệu xuyên suốt toàn bộ ứng dụ
 // Test data chuẩn được dùng trong unit tests
 const testIngredient: Ingredient = {
   id: 'test-ing-001',
-  name: { vi: 'Thịt bò test', en: 'Test Beef' },
-  unit: { vi: '100g', en: '100g' },
-  calories: 250,
-  protein: 26,
-  tags: ['meat'],
+  name: { vi: 'Thịt bò test' },
+  unit: { vi: '100g' },
+  caloriesPer100: 250,
+  proteinPer100: 26,
 };
 
 const testDish: Dish = {
   id: 'test-dish-001',
-  name: { vi: 'Món test', en: 'Test Dish' },
-  ingredients: [{ ingredientId: 'test-ing-001', quantity: 2 }],
+  name: { vi: 'Món test' },
+  ingredients: [{ ingredientId: 'test-ing-001', amount: 200 }],
 };
 ```
 

@@ -107,8 +107,7 @@
 | ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
 |----|-----|---------------------|----------------|-----------------|-----------|
 | TC_SET_01 | Cập nhật cân nặng | Tab Settings | Sửa cân nặng → lưu | Mục tiêu protein cập nhật (weight × ratio) | ✅ Pass |
-| TC_SET_02 | Đổi ngôn ngữ | Tab Settings | Chọn Tiếng Anh | Toàn bộ UI chuyển sang English | ✅ Pass |
-| TC_SET_03 | Đổi ngôn ngữ về Tiếng Việt | Ngôn ngữ đang là English | Chọn Tiếng Việt | UI chuyển lại tiếng Việt | ✅ Pass |
+| TC_SET_02 | ~~Đổi ngôn ngữ~~ | — | — | *Đã xóa — chỉ hỗ trợ Tiếng Việt (v7.0)* | N/A |
 | TC_SET_04 | Cập nhật mục tiêu calo | Tab Settings | Sửa targetCalories → lưu | Dashboard calo/ngày hiển thị target mới | ✅ Pass |
 
 ---
@@ -137,17 +136,15 @@
 
 ---
 
-### TC_I18N — i18n Language
+### TC_I18N — i18n (Vietnamese Only)
+
+> **v7.0**: Đã xóa tính năng chuyển đổi ngôn ngữ. Ứng dụng chỉ hỗ trợ Tiếng Việt. Các test case EN↔VI switching đã bị loại bỏ.
 
 | ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
 |----|-----|---------------------|----------------|-----------------|-----------|
-| TC_I18N_01 | Switch to English | App đang tiếng Việt | Settings → English | UI chuyển sang English | ✅ Pass |
-| TC_I18N_02 | Switch to Vietnamese | App đang English | Settings → Vietnamese | UI chuyển sang tiếng Việt | ✅ Pass |
-| TC_I18N_03 | Language persist | Đã chọn ngôn ngữ | Reload app | localStorage lưu language preference | ✅ Pass |
-| TC_I18N_04 | Nav labels change | Đổi ngôn ngữ | Kiểm tra nav labels | Labels thay đổi theo ngôn ngữ hiện tại | ✅ Pass |
-| TC_I18N_05 | Localized field rendering | Có ingredient data | Kiểm tra tên ingredient | Hiển thị đúng ngôn ngữ hiện tại | ✅ Pass |
-| TC_I18N_06 | Validation messages i18n | Đổi ngôn ngữ | Submit form rỗng | Lỗi validation hiển thị đúng ngôn ngữ | ✅ Pass |
-| TC_I18N_07 | Theme section labels | Đổi ngôn ngữ | Kiểm tra theme section | Labels thay đổi theo ngôn ngữ | ✅ Pass |
+| TC_I18N_01 | UI hiển thị Tiếng Việt | App mở | Kiểm tra tất cả labels, nav tabs | Toàn bộ UI hiển thị bằng Tiếng Việt | ✅ Pass |
+| TC_I18N_02 | Validation messages Tiếng Việt | App mở | Submit form rỗng | Lỗi validation hiển thị bằng Tiếng Việt | ✅ Pass |
+| TC_I18N_03 | t() function coverage | App mở | Navigate tất cả tabs | Không có hardcoded English text | ✅ Pass |
 
 ---
 
@@ -208,9 +205,7 @@
 | TC_MULTI_01 | Day scope grocery | Inject plan cho today | Grocery → Day scope | Chỉ hiển thị ingredients hôm nay | ✅ Pass |
 | TC_MULTI_02 | Week scope aggregation | Inject plan cho 2 ngày | Grocery → Week scope | Aggregates ingredients cả 2 ngày | ✅ Pass |
 | TC_MULTI_03 | Clear today keeps tomorrow | Có plan 2 ngày | Clear today → Week scope | Vẫn có ingredients ngày mai | ✅ Pass |
-| TC_LANG_INTEG_01 | Vietnamese nav labels | Đổi sang Vietnamese | Kiểm tra nav labels | Labels hiển thị tiếng Việt | ✅ Pass |
-| TC_LANG_INTEG_02 | Management tab language | Đổi ngôn ngữ | Tab Library | Tab labels thay đổi | ✅ Pass |
-| TC_LANG_INTEG_03 | English restore | Đổi sang English | Kiểm tra tất cả tabs | Labels tiếng Anh ở mọi tab | ✅ Pass |
+| TC_LANG_INTEG_01 | Vietnamese nav labels | App mở | Kiểm tra nav labels | Labels hiển thị tiếng Việt | ✅ Pass |
 | TC_THEME_INTEG_01 | Dark theme all tabs | Settings → Dark | Navigate tất cả tabs | Class "dark" áp dụng mọi nơi | ✅ Pass |
 | TC_THEME_INTEG_02 | Theme persist reload | Dark theme đang bật | Reload app | Dark theme vẫn giữ | ✅ Pass |
 | TC_THEME_INTEG_03 | Light theme restore | Settings → Light | Kiểm tra tất cả tabs | Class "dark" bị xóa | ✅ Pass |
@@ -341,3 +336,4 @@
 | 3.0 | 2026-03-06 | QA Cycle 2: 866 tests (+195), 40 files (+1 navigationIndex.test.ts); enhanced test areas documented |
 | 4.0 | 2026-03-07 | QA Cycle 3: 183 E2E tests across 24 specs (↑from 37/10). Added TC_RESP, TC_I18N, TC_DET, TC_DEL, TC_EDGE, TC_INTEG, TC_MULTI sections. 100% feature coverage with deep integration tests |
 | 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit. Added TC_DM (11 test cases). Unit tests 866→995, test files 40→47. BUG-DM-001 fixed (4 components). Chrome DevTools MCP used for visual QA |
+| 7.0 | 2026-03-13 | Removed English language support: deleted TC_SET_02/03 (EN switch), replaced TC_I18N_01-07 with Vietnamese-only TCs, removed TC_LANG_INTEG_02/03. Added BUG-NAN-001 fix documentation. Updated for Vite best practices audit changes (lazy loading, code splitting, strict mode). |
