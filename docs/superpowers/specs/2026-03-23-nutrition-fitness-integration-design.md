@@ -60,6 +60,27 @@ Platform detection tự động chọn implementation:
 - `Capacitor.isNativePlatform()` → native SQLite
 - Else → sql.js WASM
 
+### 3.2.1 Row ↔ Type Mapping
+
+SQLite schema dùng `snake_case` (SQL convention), TypeScript types dùng `camelCase` (JS convention). DatabaseService cung cấp helper tự động chuyển đổi:
+
+```typescript
+function rowToType<T>(row: Record<string, unknown>): T {
+  // calories_per_100 → caloriesPer100, weight_kg → weightKg
+  return Object.fromEntries(
+    Object.entries(row).map(([k, v]) => [snakeToCamel(k), v])
+  ) as T;
+}
+
+function typeToRow<T>(obj: T): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(obj as Record<string, unknown>).map(([k, v]) => [camelToSnake(k), v])
+  );
+}
+```
+
+Tất cả `query<T>()` calls sẽ tự động apply `rowToType` trước khi trả kết quả.
+
 ### 3.3 SQLite Schema
 
 #### Migrated Tables (từ localStorage)
@@ -133,8 +154,13 @@ CREATE TABLE goals (
   start_date TEXT NOT NULL,
   end_date TEXT,
   is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
 );
+
+-- Ensure only one active goal at a time via application-level check
+-- Before INSERT/UPDATE with is_active=1, deactivate others:
+-- UPDATE goals SET is_active = 0, updated_at = datetime('now') WHERE is_active = 1;
 
 CREATE TABLE exercises (
   id TEXT PRIMARY KEY,
@@ -142,7 +168,8 @@ CREATE TABLE exercises (
   name_en TEXT,
   muscle_group TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('compound', 'isolation', 'cardio')),
-  is_custom INTEGER NOT NULL DEFAULT 0
+  is_custom INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL
 );
 
 CREATE TABLE workouts (
@@ -160,9 +187,10 @@ CREATE TABLE workout_sets (
   exercise_id TEXT NOT NULL REFERENCES exercises(id),
   set_number INTEGER NOT NULL,
   reps INTEGER NOT NULL,
-  weight_kg REAL NOT NULL,
+  weight_kg REAL NOT NULL DEFAULT 0, -- 0 for cardio/bodyweight exercises
   rpe REAL, -- 1-10, nullable
   rest_seconds INTEGER,
+  updated_at TEXT NOT NULL,
   UNIQUE(workout_id, exercise_id, set_number)
 );
 
@@ -182,7 +210,8 @@ CREATE TABLE daily_log (
   target_protein REAL NOT NULL,
   actual_protein REAL NOT NULL,
   adherence_cal INTEGER NOT NULL DEFAULT 0, -- 0|1: within ±100kcal
-  adherence_protein INTEGER NOT NULL DEFAULT 0 -- 0|1: within ±10g
+  adherence_protein INTEGER NOT NULL DEFAULT 0, -- 0|1: within ±10g
+  updated_at TEXT NOT NULL
 );
 
 CREATE TABLE adjustments (
@@ -191,10 +220,21 @@ CREATE TABLE adjustments (
   reason TEXT NOT NULL,
   old_target_cal REAL NOT NULL,
   new_target_cal REAL NOT NULL,
-  trigger TEXT NOT NULL CHECK (trigger IN ('auto', 'manual')),
+  trigger_type TEXT NOT NULL CHECK (trigger_type IN ('auto', 'manual')),
   moving_avg_weight REAL,
   applied INTEGER NOT NULL DEFAULT 0
 );
+
+-- Performance Indexes
+CREATE INDEX idx_workout_sets_workout ON workout_sets(workout_id);
+CREATE INDEX idx_workout_sets_exercise ON workout_sets(exercise_id);
+CREATE INDEX idx_weight_log_date ON weight_log(date);
+CREATE INDEX idx_daily_log_date ON daily_log(date);
+CREATE INDEX idx_workouts_date ON workouts(date);
+CREATE INDEX idx_goals_active ON goals(is_active);
+CREATE INDEX idx_adjustments_date ON adjustments(date);
+CREATE INDEX idx_dish_ingredients_dish ON dish_ingredients(dish_id);
+CREATE INDEX idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id);
 ```
 
 ### 3.4 Seed Data
@@ -247,6 +287,14 @@ function getAutoAdjustedMultiplier(
   return auto * 0.7 + base * 0.3;
 }
 
+function sessionsToLevel(sessions: number): ActivityLevel {
+  if (sessions <= 0) return 'sedentary';
+  if (sessions <= 2) return 'light';
+  if (sessions <= 4) return 'moderate';
+  if (sessions <= 6) return 'active';
+  return 'extra_active';
+}
+
 function calculateTDEE(bmr: number, multiplier: number): number {
   return Math.round(bmr * multiplier);
 }
@@ -293,15 +341,20 @@ function calculateMacros(
   const carbs_cal = Math.max(0, targetCal - protein_cal - fat_cal);
   const carbs_g = Math.round(carbs_cal / 4);
 
-  return { protein_g, fat_g, carbs_g, protein_cal, fat_cal, carbs_cal };
+  // Safety: warn if protein+fat exceeds target (extreme weight + aggressive cut)
+  const isOverallocated = protein_cal + fat_cal > targetCal;
+
+  return { protein_g, fat_g, carbs_g, protein_cal, fat_cal, carbs_cal, isOverallocated };
 }
 ```
 
 ### 4.5 File Location
 
 ```
-src/services/nutritionEngine.ts  — Pure calculation functions (no side effects)
+src/services/nutritionEngine.ts  — Pure calculation functions (BMR, TDEE, Macros, auto-adjust)
 ```
+
+> **Note:** Existing `src/utils/nutrition.ts` handles ingredient/dish nutrition aggregation (calculateIngredientNutrition, calculateDishNutrition). `nutritionEngine.ts` handles personal nutrition targets. Clear boundary: **nutrition.ts** = "what's in the food", **nutritionEngine.ts** = "what the user needs".
 
 ## 5. Training System
 
@@ -350,6 +403,8 @@ function getSessionsThisWeek(workouts: Workout[]): number {
 
 ### 5.3 File Structure
 
+> **Architecture Note:** Dự án hiện tại dùng flat structure (`src/components/`, `src/hooks/`, `src/services/`). Các tính năng mới sẽ dùng `src/features/` (feature-based) để nhóm code theo domain, phù hợp với quy mô phát triển. Existing components **không** cần di chuyển — chỉ code mới dùng `src/features/`.
+
 ```
 src/features/fitness/
 ├── components/
@@ -361,8 +416,36 @@ src/features/fitness/
 │   └── WorkoutSummaryCard.tsx — Summary card (buổi/tuần, volume)
 ├── hooks/
 │   └── useWorkouts.ts         — CRUD workouts, sets, exercises
+├── store/
+│   └── fitnessStore.ts        — Zustand store (reactive UI state from SQLite)
 └── types.ts
 ```
+
+### 5.4 Zustand Integration
+
+Các feature hooks (`useWorkouts`, `useDashboard`, `useHealthProfile`) sử dụng pattern **SQLite as source of truth + Zustand for reactive UI**:
+
+```typescript
+// Pattern: SQLite → Zustand → React components
+const useFitnessStore = create<FitnessState>((set) => ({
+  workouts: [],
+  loading: false,
+  
+  loadWorkouts: async () => {
+    set({ loading: true });
+    const rows = await db.query<Workout>('SELECT * FROM workouts ORDER BY date DESC');
+    set({ workouts: rows, loading: false });
+  },
+  
+  addWorkout: async (workout: NewWorkout) => {
+    await db.execute('INSERT INTO workouts ...', [...]);
+    // Re-fetch to sync
+    get().loadWorkouts();
+  },
+}));
+```
+
+Điều này áp dụng cho tất cả feature stores: fitnessStore, dashboardStore, healthProfileStore.
 
 ## 6. Feedback Loop
 
@@ -370,10 +453,15 @@ src/features/fitness/
 
 ```typescript
 function calculateMovingAverage(entries: WeightEntry[], days: number = 7): number | null {
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  
+  // Filter to entries within the target window, then sort by date desc
   const recent = entries
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, days);
-  if (recent.length < 3) return null; // Not enough data
+    .filter(e => new Date(e.date) >= cutoff)
+    .sort((a, b) => b.date.localeCompare(a.date));
+  
+  if (recent.length < 3) return null; // Not enough data in window
   return recent.reduce((sum, e) => sum + e.weight_kg, 0) / recent.length;
 }
 ```
@@ -388,6 +476,7 @@ const AUTO_ADJUST_CONFIG = {
   calorie_adjustment: 150,      // ±150 kcal mỗi lần điều chỉnh
   max_deficit: 1000,            // Không giảm quá 1000 kcal dưới TDEE
   min_calories: 1200,           // Floor: không dưới 1200 kcal
+  max_surplus: 700,             // Không tăng quá 700 kcal trên TDEE (bulk cap)
 };
 
 function evaluateAndSuggestAdjustment(
@@ -396,8 +485,10 @@ function evaluateAndSuggestAdjustment(
   goal: Goal,
   tdee: number,
 ): Adjustment | null {
-  const currentAvg = calculateMovingAverage(weightLog.slice(0, 7));
-  const previousAvg = calculateMovingAverage(weightLog.slice(7, 14));
+  // Sort by date descending before slicing
+  const sorted = [...weightLog].sort((a, b) => b.date.localeCompare(a.date));
+  const currentAvg = calculateMovingAverage(sorted.slice(0, 7));
+  const previousAvg = calculateMovingAverage(sorted.slice(7, 14));
   
   if (!currentAvg || !previousAvg) return null;
   
@@ -415,18 +506,22 @@ function evaluateAndSuggestAdjustment(
       reason: `Cân nặng TB không giảm sau 2 tuần (${previousAvg.toFixed(1)} → ${currentAvg.toFixed(1)} kg)`,
       old_target_cal: currentTarget,
       new_target_cal: newTarget,
-      trigger: 'auto',
+      trigger_type: 'auto',
       moving_avg_weight: currentAvg,
     };
   }
   
   if (goal.type === 'bulk' && (isStalled || weightChange < 0)) {
-    const newTarget = currentTarget + AUTO_ADJUST_CONFIG.calorie_adjustment;
+    const newTarget = Math.min(
+      currentTarget + AUTO_ADJUST_CONFIG.calorie_adjustment,
+      tdee + AUTO_ADJUST_CONFIG.max_surplus, // Cap surplus
+    );
+    if (newTarget === currentTarget) return null;
     return {
       reason: `Cân nặng TB không tăng sau 2 tuần`,
       old_target_cal: currentTarget,
       new_target_cal: newTarget,
-      trigger: 'auto',
+      trigger_type: 'auto',
       moving_avg_weight: currentAvg,
     };
   }
@@ -471,6 +566,8 @@ src/features/dashboard/
 │   └── WeightQuickEntry.tsx     — Quick weight input
 ├── hooks/
 │   └── useDashboard.ts
+├── store/
+│   └── dashboardStore.ts        — Zustand store for dashboard data
 └── types.ts
 
 src/hooks/
@@ -511,8 +608,19 @@ src/features/health-profile/
 │   └── GoalPhaseSelector.tsx    — Chọn Cut/Bulk/Maintain + target
 ├── hooks/
 │   └── useHealthProfile.ts      — CRUD profile + goal
+├── store/
+│   └── healthProfileStore.ts    — Zustand store for profile data
 └── types.ts
 ```
+
+### 7.3 UserProfile Type Migration
+
+Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRatio, targetCalories }`. Migration plan:
+
+1. **Phase 1:** Tạo `user_profile` SQLite table với schema mới (đầy đủ fields)
+2. **Phase 2:** Migrate data: `weight` → `weight_kg`, `proteinRatio` → `protein_ratio`, `targetCalories` → `calorie_offset` (computed from TDEE)
+3. **Phase 3:** Deprecate old `UserProfile` type — redirect tất cả consumers sang `useHealthProfile()` hook
+4. **Phase 4:** Xóa old `UserProfile` type từ `src/types.ts` sau khi migration hoàn tất
 
 ## 8. Google Drive Sync Update
 
@@ -541,15 +649,46 @@ src/features/health-profile/
 }
 ```
 
-### 8.2 Migration Strategy
+### 8.2 Backward Compatibility
+
+| Import From | Export To | Behavior |
+|---|---|---|
+| v1.x (localStorage JSON) | v2.0 device | Auto-upgrade: transform v1.x format to v2.0 schema, populate defaults for new fields |
+| v2.0 (SQLite JSON) | v1.x device | Graceful degrade: export includes `_legacyFormat` fallback with old key structure; v1.x ignores unknown keys |
+| v2.0 | v2.0 | Direct import: all 13 tables |
+
+Version detection: check `_version` field in import JSON. If missing → v1.x format.
+
+### 8.3 Migration Strategy
 
 On app startup, check for localStorage data:
 1. If `mp-ingredients` exists in localStorage → run migration
 2. Read all 5 localStorage keys
 3. Transform to new schema (flatten LocalizedString, split dish_ingredients)
-4. Insert into SQLite tables
-5. Set `mp-migrated-to-sqlite = true` in localStorage
+4. **Wrap entire migration in a SQLite transaction** — if any INSERT fails (FK violation, data corruption), rollback all changes and keep localStorage as primary
+5. On success: Set `mp-migrated-to-sqlite = true` in localStorage
 6. Keep localStorage as fallback for 30 days, then clear
+
+```typescript
+async function migrateFromLocalStorage(): Promise<MigrationResult> {
+  try {
+    await db.transaction(async () => {
+      // All inserts happen inside a single transaction
+      await migrateIngredients();
+      await migrateDishes();
+      await migrateDishIngredients();
+      await migrateDayPlans();
+      await migrateMealTemplates();
+    });
+    localStorage.setItem('mp-migrated-to-sqlite', Date.now().toString());
+    return { success: true };
+  } catch (error) {
+    // Transaction auto-rolled-back — localStorage remains primary
+    console.error('Migration failed, falling back to localStorage:', error);
+    return { success: false, error: String(error) };
+  }
+}
+```
 
 ## 9. Migration Phases (Big Bang)
 
@@ -565,29 +704,30 @@ On app startup, check for localStorage data:
 - [ ] Update all existing hooks to use DatabaseService
 - [ ] Update existing components (zero visual change)
 
-### Phase 3: Nutrition Engine
+### Phase 3: Navigation Refactor
+- [ ] Restructure bottom nav: replace Đi chợ/Cài đặt with Fitness/Dashboard
+- [ ] Move Đi chợ to Calendar action button
+- [ ] Move Cài đặt to header icon
+- [ ] Update routing
+- [ ] Create empty placeholder pages for FitnessTab and DashboardTab
+
+### Phase 4: Nutrition Engine
 - [ ] Implement nutritionEngine.ts (BMR, TDEE, Macro Split)
 - [ ] Build HealthProfileForm in Settings
 - [ ] Build GoalPhaseSelector
 - [ ] Connect nutrition engine to existing CalendarTab/Summary
 
-### Phase 4: Training System
+### Phase 5: Training System
 - [ ] Seed exercises table
 - [ ] Build FitnessTab (WorkoutList, WorkoutLogger, ExerciseSelector)
 - [ ] Implement training metrics (volume, sessions/week)
 - [ ] Connect sessions/week → Activity Multiplier auto-adjust
 
-### Phase 5: Dashboard & Feedback Loop
+### Phase 6: Dashboard & Feedback Loop
 - [ ] Build DashboardTab (WeightChart, CalorieTrend, AdherenceCard)
 - [ ] Implement useFeedbackLoop (moving avg, auto-adjust)
 - [ ] Build AutoAdjustBanner + AdjustmentHistory
 - [ ] Build VolumeChart + MuscleGroupBars
-
-### Phase 6: Navigation Refactor
-- [ ] Restructure bottom nav: replace Đi chợ/Cài đặt with Fitness/Dashboard
-- [ ] Move Đi chợ to Calendar action button
-- [ ] Move Cài đặt to header icon
-- [ ] Update routing
 
 ### Phase 7: Polish & Testing
 - [ ] Unit tests for nutritionEngine (BMR, TDEE, Macro, auto-adjust)
@@ -618,6 +758,38 @@ On app startup, check for localStorage data:
 | New components | 0 | ~20 |
 | New hooks | 0 | ~5 |
 | New services | 0 | 2 (databaseService, nutritionEngine) |
+
+### Lazy-loading Strategy for sql.js WASM
+
+sql.js WASM binary (~500KB) must NOT be bundled unconditionally:
+
+```typescript
+// src/services/databaseService.ts
+async function createWebDatabase(): Promise<DatabaseService> {
+  // Dynamic import — sql.js WASM only loaded on web platform
+  const SQL = await import('sql.js');
+  const sqlPromise = SQL.default({
+    locateFile: (file: string) => `/wasm/${file}`,
+  });
+  // ...
+}
+
+async function createNativeDatabase(): Promise<DatabaseService> {
+  // Capacitor SQLite — no WASM needed
+  const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
+  // ...
+}
+
+// Platform-aware factory
+export async function initDatabase(): Promise<DatabaseService> {
+  if (Capacitor.isNativePlatform()) {
+    return createNativeDatabase(); // No WASM loaded
+  }
+  return createWebDatabase(); // WASM loaded only here
+}
+```
+
+Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 
 ## 11. Decisions Log
 
