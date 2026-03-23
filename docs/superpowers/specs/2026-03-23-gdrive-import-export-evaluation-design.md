@@ -28,7 +28,9 @@
 | Network requests audit | DevTools | ✅ No unexpected calls |
 | localStorage state audit | DevTools | ✅ Consistent |
 
-### 1.2 Tính năng CHƯA test được (cần tài khoản Google thật)
+### 1.2 Tính năng CHƯA test end-to-end trên trình duyệt (cần tài khoản Google thật)
+
+> **Lưu ý:** Các tính năng bên dưới đã được kiểm thử kỹ bằng unit tests với mocked APIs (39 tests cho GoogleDriveSync, 14 tests cho useAutoSync). Phần chưa test là **end-to-end trên trình duyệt** với tài khoản Google thật.
 
 | Tính năng | Lý do |
 |---|---|
@@ -107,13 +109,13 @@ GIS tokenClient.requestAccessToken()
 | Test File | Tests | Pass | Fail |
 |---|---|---|---|
 | authContext.test.tsx | 26 | 26 | 0 |
-| googleDriveService.test.ts | 26 | 26 | 0 |
-| GoogleDriveSync.test.tsx | 56 | 56 | 0 |
-| DataBackup.test.tsx | 29 | 29 | 0 |
+| googleDriveService.test.ts | 23 | 23 | 0 |
+| GoogleDriveSync.test.tsx | 39 | 39 | 0 |
+| DataBackup.test.tsx | 19 | 19 | 0 |
 | SyncConflictModal.test.tsx | 14 | 14 | 0 |
-| useAutoSync.test.ts | 19 | 19 | 0 |
+| useAutoSync.test.ts | 14 | 14 | 0 |
 | SettingsTab.test.tsx | 17 | 17 | 0 |
-| **Tổng** | **187** | **187** | **0** |
+| **Tổng** | **152** | **152** | **0** |
 
 ### 3.2 Coverage Report
 
@@ -124,7 +126,7 @@ GIS tokenClient.requestAccessToken()
 | SyncConflictModal.tsx | 100% | 100% | 100% | 100% |
 | DataBackup.tsx | 99% | 84.37% | 100% | 100% |
 | useAutoSync.ts | 98.71% | 87.5% | 100% | 100% |
-| AuthContext.tsx | 98.54% | 89.28% | 89.28% | 99.02% |
+| AuthContext.tsx | 98.54% | 96.42% | 89.28% | 100% |
 | SettingsTab.tsx | 100% | 100% | 100% | 100% |
 
 ### 3.3 ESLint
@@ -228,7 +230,7 @@ GIS tokenClient.requestAccessToken()
 |---|---|---|
 | **Code Quality** | 9/10 | TypeScript strict, clean ESLint, minor duplication issue |
 | **Architecture** | 9/10 | Clean separation, dual platform, good service layer |
-| **Test Coverage** | 9/10 | 95%+ stmts, 187 tests, branch coverage could improve |
+| **Test Coverage** | 9/10 | 95%+ stmts, 152 tests, branch coverage could improve |
 | **Error Handling** | 9/10 | Comprehensive try-catch, popup close handled (after fix) |
 | **UX/UI** | 8.5/10 | Good feedback, dark mode, search filter, health indicator |
 | **Security** | 8/10 | Minimal scope, token revocation; localStorage token concern |
@@ -239,7 +241,7 @@ GIS tokenClient.requestAccessToken()
 ### 5.2 Điểm mạnh
 
 1. **Kiến trúc sạch** — Service/Component/Hook tách biệt rõ ràng theo feature-based structure
-2. **Test coverage cao** — 187 tests chuyên biệt, 95%+ statements
+2. **Test coverage cao** — 152 tests chuyên biệt, 95%+ statements
 3. **Dual platform** — Web (GIS) + Native (Capacitor) cùng interface
 4. **Conflict resolution** — 3-option modal: keep-local, use-cloud, cancel
 5. **Backup health** — 3-level indicator (good/warning/critical) nhắc user backup
@@ -253,7 +255,7 @@ GIS tokenClient.requestAccessToken()
 | Priority | Issue | Đề xuất |
 |---|---|---|
 | P2 | `buildExportData()` duplicate 3 nơi | Extract thành shared utility trong `src/utils/` |
-| P2 | Branch coverage 81.87% | Thêm tests cho edge cases trong DataBackup, useAutoSync |
+| P2 | Branch coverage ~85.77% overall | Thêm tests cho edge cases trong DataBackup, useAutoSync |
 | P3 | Access token trong localStorage | Cân nhắc secure storage hoặc memory-only token |
 | P3 | Backup data không mã hóa | Cân nhắc AES encryption trước khi upload |
 | P3 | Thiếu aria-labels | Thêm accessibility attributes cho screen readers |
