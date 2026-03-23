@@ -80,8 +80,14 @@ export class CalendarPage extends BasePage {
     await this.waitAndClick('btn-confirm-plan');
   }
 
-  /** Tap "Clear Plan" button (now inline, not in a dropdown). */
+  /** Open the "More Actions" dropdown menu. */
+  async openMoreActions() {
+    await this.waitAndClick('btn-more-actions');
+  }
+
+  /** Tap "Clear Plan" button (inside the More Actions dropdown). */
   async tapClearPlan() {
+    await this.openMoreActions();
     await this.waitAndClick('btn-clear-plan');
   }
 

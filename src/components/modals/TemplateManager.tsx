@@ -61,7 +61,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
     for (const tmpl of templates) {
       if (tmpl.tags) tmpl.tags.forEach(tag => tagSet.add(tag));
     }
-    return Array.from(tagSet).sort();
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
   }, [templates]);
 
   const filteredTemplates = useMemo(() => {
@@ -121,7 +121,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                     <button
                       type="button"
                       onClick={() => setFilterTag(null)}
-                      className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all ${!filterTag ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all ${filterTag ? 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400' : 'bg-emerald-500 text-white'}`}
                     >
                       {t('common.all')}
                     </button>

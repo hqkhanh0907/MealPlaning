@@ -69,6 +69,26 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
     setSelectedDates(prev => prev.filter(d => d !== date));
   }, []);
 
+  const getDishInfo = useCallback((ids: string[]): { id: string; name: string }[] =>
+    ids.map(id => dishes.find(d => d.id === id))
+      .filter(Boolean)
+      .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
+  [dishes, lang]);
+
+  const sourcePreviewSections = useMemo(() => {
+    const breakfast = getDishInfo(sourcePlan.breakfastDishIds);
+    const lunch = getDishInfo(sourcePlan.lunchDishIds);
+    const dinner = getDishInfo(sourcePlan.dinnerDishIds);
+    const total = breakfast.length + lunch.length + dinner.length;
+    if (total === 0) return null;
+
+    return [
+      { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-amber-600 dark:text-amber-400' },
+      { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-blue-600 dark:text-blue-400' },
+      { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-indigo-600 dark:text-indigo-400' },
+    ];
+  }, [getDishInfo, sourcePlan, t]);
+
   const handleConfirm = useCallback(() => {
     if (selectedDates.length > 0) {
       onCopy(selectedDates, mergeMode);
@@ -98,38 +118,25 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
 
         <div className="p-6 sm:p-8 space-y-5 overflow-y-auto">
           {/* Source plan preview */}
-          {(() => {
-            const getDishNames = (ids: string[]): string[] => ids.map(id => dishes.find(d => d.id === id)).filter(Boolean).map(d => getLocalizedField(d!.name, lang));
-            const breakfast = getDishNames(sourcePlan.breakfastDishIds);
-            const lunch = getDishNames(sourcePlan.lunchDishIds);
-            const dinner = getDishNames(sourcePlan.dinnerDishIds);
-            const total = breakfast.length + lunch.length + dinner.length;
-            if (total === 0) return null;
-            const sections = [
-              { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-amber-600 dark:text-amber-400' },
-              { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-blue-600 dark:text-blue-400' },
-              { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-indigo-600 dark:text-indigo-400' },
-            ];
-            return (
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{t('copyPlan.sourcePreview')}</p>
-                <div className="space-y-1.5">
-                  {sections.filter(s => s.items.length > 0).map(({ key, label, items, color }) => (
-                    <div key={key} className="flex items-start gap-2">
-                      <span className={`text-xs font-bold ${color} min-w-14`}>{label}:</span>
-                      <div className="flex flex-wrap gap-1">
-                        {items.map((name, idx) => (
-                          <span key={idx} className="inline-flex items-center gap-0.5 text-xs text-slate-600 dark:text-slate-300">
-                            <ChefHat className="w-3 h-3" />{name}{idx < items.length - 1 ? ',' : ''}
-                          </span>
-                        ))}
-                      </div>
+          {sourcePreviewSections && (
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{t('copyPlan.sourcePreview')}</p>
+              <div className="space-y-1.5">
+                {sourcePreviewSections.filter(s => s.items.length > 0).map(({ key, label, items, color }) => (
+                  <div key={key} className="flex items-start gap-2">
+                    <span className={`text-xs font-bold ${color} min-w-14`}>{label}:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {items.map((item, idx) => (
+                        <span key={item.id} className="inline-flex items-center gap-0.5 text-xs text-slate-600 dark:text-slate-300">
+                          <ChefHat className="w-3 h-3" />{item.name}{idx < items.length - 1 ? ',' : ''}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            );
-          })()}
+            </div>
+          )}
 
           {/* Quick select buttons */}
           <div className="flex gap-2">
@@ -160,7 +167,7 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
             <button
               data-testid="btn-mode-overwrite"
               onClick={() => setMergeMode(false)}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-10 ${!mergeMode ? 'bg-white dark:bg-slate-600 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-10 ${mergeMode ? 'text-slate-500 dark:text-slate-400' : 'bg-white dark:bg-slate-600 text-emerald-700 dark:text-emerald-400 shadow-sm'}`}
             >
               {t('copyPlan.overwriteMode')}
             </button>

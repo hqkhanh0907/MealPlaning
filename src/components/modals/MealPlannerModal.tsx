@@ -146,8 +146,8 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
 
   const remainingBudget = React.useMemo(() => {
     if (targetCalories === undefined && targetProtein === undefined) return null;
-    const remainingCal = targetCalories !== undefined ? Math.round(targetCalories - totalDayNutrition.calories) : null;
-    const remainingPro = targetProtein !== undefined ? Math.round(targetProtein - totalDayNutrition.protein) : null;
+    const remainingCal = targetCalories === undefined ? null : Math.round(targetCalories - totalDayNutrition.calories);
+    const remainingPro = targetProtein === undefined ? null : Math.round(targetProtein - totalDayNutrition.protein);
     return { calories: remainingCal, protein: remainingPro };
   }, [targetCalories, targetProtein, totalDayNutrition]);
 

@@ -28,15 +28,15 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
   const trimmedName = name.trim();
   const isValid = trimmedName.length > 0;
 
-  const getDishNames = useCallback((ids: string[]): string[] =>
-    ids.map(id => dishes.find(d => d.id === id)).filter(Boolean).map(d => getLocalizedField(d!.name, lang)),
+  const getDishInfo = useCallback((ids: string[]): { id: string; name: string }[] =>
+    ids.map(id => dishes.find(d => d.id === id)).filter(Boolean).map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
   [dishes, lang]);
 
   const preview = useMemo(() => ({
-    breakfast: getDishNames(currentPlan.breakfastDishIds),
-    lunch: getDishNames(currentPlan.lunchDishIds),
-    dinner: getDishNames(currentPlan.dinnerDishIds),
-  }), [currentPlan, getDishNames]);
+    breakfast: getDishInfo(currentPlan.breakfastDishIds),
+    lunch: getDishInfo(currentPlan.lunchDishIds),
+    dinner: getDishInfo(currentPlan.dinnerDishIds),
+  }), [currentPlan, getDishInfo]);
 
   const totalDishes = preview.breakfast.length + preview.lunch.length + preview.dinner.length;
 
@@ -77,7 +77,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
     }
   }, [tagInput, addTag]);
 
-  const mealSections: { key: string; label: string; items: string[]; color: string }[] = [
+  const mealSections: { key: string; label: string; items: { id: string; name: string }[]; color: string }[] = [
     { key: 'breakfast', label: t('calendar.morning'), items: preview.breakfast, color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400' },
     { key: 'lunch', label: t('calendar.afternoon'), items: preview.lunch, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' },
     { key: 'dinner', label: t('calendar.evening'), items: preview.dinner, color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400' },
@@ -168,9 +168,9 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
                   <p className="text-xs font-bold uppercase mb-1">{label}</p>
                   {items.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
-                      {items.map((name, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1 text-sm font-medium">
-                          <ChefHat className="w-3 h-3" /> {name}
+                      {items.map((item) => (
+                        <span key={item.id} className="inline-flex items-center gap-1 text-sm font-medium">
+                          <ChefHat className="w-3 h-3" /> {item.name}
                         </span>
                       ))}
                     </div>

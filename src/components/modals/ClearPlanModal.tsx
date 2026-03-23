@@ -151,7 +151,7 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
               )}
               {expandedScope === scope && dates.length > 0 && (
                 <div className="ml-4 mt-1.5 flex flex-wrap gap-1.5">
-                  {dates.sort().map(d => (
+                  {[...dates].sort((a, b) => a.localeCompare(b)).map(d => (
                     <span key={d} className="text-xs bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full">
                       {formatShortDate(d)}
                     </span>

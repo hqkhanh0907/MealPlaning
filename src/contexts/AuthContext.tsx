@@ -72,11 +72,15 @@ declare global {
       accounts: GoogleAccountsNamespace;
     };
   }
+  // Typed global for globalThis access
+  var google: {
+    accounts: GoogleAccountsNamespace;
+  } | undefined;
 }
 
 const loadGISScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    if (window.google?.accounts?.oauth2) {
+    if (globalThis.google?.accounts?.oauth2) {
       resolve();
       return;
     }
@@ -173,15 +177,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Not logged in or init failed — continue as guest
         }
       } else {
-        // Load GIS script in background — don't block initialization
-        loadGISScript().catch(() => {
-          // GIS script failed to load — sign-in will check availability
-        });
+        void loadGISScript();
       }
       setState(prev => prev.isInitialized ? prev : { ...prev, isInitialized: true });
     };
-    init();
+    void init();
   }, []);
+
+  const processTokenResponse = async (tokenResponse: GISTokenResponse) => {
+    try {
+      const user = await fetchGoogleUserInfo(tokenResponse.access_token);
+      const authData = { user, accessToken: tokenResponse.access_token };
+      persistAuth(authData);
+      setState({ ...authData, isLoading: false, isInitialized: true });
+      signInResolverRef.current?.resolve();
+    } catch (error_) {
+      setState(prev => ({ ...prev, isLoading: false }));
+      persistAuth(null);
+      signInResolverRef.current?.reject(
+        error_ instanceof Error ? error_ : new Error('Failed to fetch user info'),
+      );
+    }
+    signInResolverRef.current = null;
+  };
 
   const signIn = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true }));
@@ -210,52 +228,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Web: use Google Identity Services
-    if (!window.google?.accounts?.oauth2) {
+    if (!globalThis.google?.accounts?.oauth2) {
       setState(prev => ({ ...prev, isLoading: false }));
       throw new Error('Google Identity Services not loaded');
     }
 
+    const handleTokenError = (error: GISErrorResponse) => {
+      setState(prev => ({ ...prev, isLoading: false }));
+      const err = new Error(
+        error.type === 'popup_closed'
+          ? 'Sign-in popup was closed'
+          : `Google sign-in error: ${error.type}`,
+      );
+      signInResolverRef.current?.reject(err);
+      signInResolverRef.current = null;
+    };
+
+    const handleTokenSuccess = (tokenResponse: GISTokenResponse) => {
+      if (tokenResponse.error) {
+        setState(prev => ({ ...prev, isLoading: false }));
+        persistAuth(null);
+        const err = new Error(`Google sign-in failed: ${tokenResponse.error}`);
+        signInResolverRef.current?.reject(err);
+        signInResolverRef.current = null;
+        return;
+      }
+
+      void processTokenResponse(tokenResponse);
+    };
+
     return new Promise<void>((resolve, reject) => {
       signInResolverRef.current = { resolve, reject };
 
-      const tokenClient = window.google!.accounts.oauth2.initTokenClient({
+      const tokenClient = globalThis.google!.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_WEB_CLIENT_ID,
         scope: `email profile ${DRIVE_APPDATA_SCOPE}`,
-        error_callback: (error: GISErrorResponse) => {
-          setState(prev => ({ ...prev, isLoading: false }));
-          const err = new Error(
-            error.type === 'popup_closed'
-              ? 'Sign-in popup was closed'
-              : `Google sign-in error: ${error.type}`,
-          );
-          signInResolverRef.current?.reject(err);
-          signInResolverRef.current = null;
-        },
-        callback: async (tokenResponse: GISTokenResponse) => {
-          if (tokenResponse.error) {
-            setState(prev => ({ ...prev, isLoading: false }));
-            persistAuth(null);
-            const err = new Error(`Google sign-in failed: ${tokenResponse.error}`);
-            signInResolverRef.current?.reject(err);
-            signInResolverRef.current = null;
-            return;
-          }
-
-          try {
-            const user = await fetchGoogleUserInfo(tokenResponse.access_token);
-            const authData = { user, accessToken: tokenResponse.access_token };
-            persistAuth(authData);
-            setState({ ...authData, isLoading: false, isInitialized: true });
-            signInResolverRef.current?.resolve();
-          } catch (fetchErr) {
-            setState(prev => ({ ...prev, isLoading: false }));
-            persistAuth(null);
-            signInResolverRef.current?.reject(
-              fetchErr instanceof Error ? fetchErr : new Error('Failed to fetch user info'),
-            );
-          }
-          signInResolverRef.current = null;
-        },
+        error_callback: handleTokenError,
+        callback: handleTokenSuccess,
       });
 
       gisTokenClientRef.current = tokenClient;
@@ -271,8 +280,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch {
         // Logout may fail if session already expired
       }
-    } else if (state.accessToken && window.google?.accounts?.oauth2) {
-      window.google.accounts.oauth2.revoke(state.accessToken);
+    } else if (state.accessToken && globalThis.google?.accounts?.oauth2) {
+      globalThis.google.accounts.oauth2.revoke(state.accessToken);
     }
     persistAuth(null);
     setState({ user: null, accessToken: null, isLoading: false, isInitialized: true });

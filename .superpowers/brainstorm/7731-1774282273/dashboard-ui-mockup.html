@@ -1,0 +1,426 @@
+<h2>📊 Tab Dashboard — UI Mockup</h2>
+<p class="subtitle">Tổng quan sức khỏe: cân nặng, calo, adherence, auto-adjust</p>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+  <!-- Screen 1: Dashboard Main -->
+  <div class="mockup">
+    <div class="mockup-header">Màn hình 1: Dashboard tổng quan</div>
+    <div class="mockup-body" style="padding:0; max-width:375px; margin:0 auto;">
+      <!-- Header -->
+      <div style="padding:12px 16px; background:#0f172a; border-bottom:1px solid #1e293b;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="color:white; font-weight:bold; font-size:16px;">Dashboard</div>
+            <div style="color:#64748b; font-size:11px;">Tuần 23/3 — 29/3</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <span style="background:#1e293b; color:#94a3b8; padding:4px 8px; border-radius:6px; font-size:10px;">7D</span>
+            <span style="background:#1e40af; color:white; padding:4px 8px; border-radius:6px; font-size:10px;">14D</span>
+            <span style="background:#1e293b; color:#94a3b8; padding:4px 8px; border-radius:6px; font-size:10px;">30D</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal Phase Banner -->
+      <div style="margin:10px 12px 6px; padding:10px 14px; background:linear-gradient(135deg, #1e3a5f, #0f2a4a); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="color:#fbbf24; font-size:10px; font-weight:bold;">🎯 GIAI ĐOẠN: CẮT GIẢM (CUT)</div>
+          <div style="color:#94a3b8; font-size:10px;">Mục tiêu: 83kg → 78kg • Còn 2.1kg</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:white; font-size:18px; font-weight:bold;">80.9<span style="font-size:11px; color:#64748b;">kg</span></div>
+          <div style="color:#4ade80; font-size:9px;">▼ 0.4kg tuần này</div>
+        </div>
+      </div>
+
+      <!-- Weight Chart -->
+      <div style="margin:6px 12px; background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <div style="color:white; font-size:12px; font-weight:bold;">⚖️ Xu hướng cân nặng</div>
+          <div style="color:#4ade80; font-size:10px;">▼ 0.4 kg/tuần</div>
+        </div>
+        <!-- Fake chart -->
+        <div style="position:relative; height:100px; background:#0f172a; border-radius:6px; padding:8px; overflow:hidden;">
+          <!-- Y axis labels -->
+          <div style="position:absolute; left:4px; top:8px; color:#64748b; font-size:8px;">82</div>
+          <div style="position:absolute; left:4px; top:40px; color:#64748b; font-size:8px;">81</div>
+          <div style="position:absolute; left:4px; top:72px; color:#64748b; font-size:8px;">80</div>
+          <!-- Grid lines -->
+          <div style="position:absolute; left:24px; right:4px; top:16px; border-top:1px dashed #1e293b;"></div>
+          <div style="position:absolute; left:24px; right:4px; top:48px; border-top:1px dashed #1e293b;"></div>
+          <div style="position:absolute; left:24px; right:4px; top:80px; border-top:1px dashed #1e293b;"></div>
+          <!-- Data points (daily weight - scattered) -->
+          <svg style="position:absolute; left:24px; top:0; width:calc(100% - 28px); height:100%;" viewBox="0 0 300 100" preserveAspectRatio="none">
+            <!-- Daily dots (scattered) -->
+            <circle cx="20" cy="20" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="60" cy="28" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="100" cy="22" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="140" cy="35" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="180" cy="30" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="220" cy="45" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="260" cy="40" r="3" fill="#60a5fa" opacity="0.5"/>
+            <circle cx="280" cy="48" r="3" fill="#60a5fa" opacity="0.5"/>
+            <!-- Moving average line (smooth) -->
+            <polyline points="20,22 60,25 100,27 140,30 180,33 220,38 260,42 280,46" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Target line -->
+            <line x1="0" y1="75" x2="300" y2="75" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+          </svg>
+          <div style="position:absolute; right:8px; bottom:12px; color:#fbbf24; font-size:8px; opacity:0.7;">← Mục tiêu 78kg</div>
+        </div>
+        <div style="display:flex; justify-content:center; gap:16px; margin-top:6px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <div style="width:6px; height:6px; border-radius:50%; background:#60a5fa;"></div>
+            <span style="color:#64748b; font-size:9px;">Cân hằng ngày</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <div style="width:12px; height:2px; background:#4ade80; border-radius:1px;"></div>
+            <span style="color:#64748b; font-size:9px;">TB trượt 7 ngày</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calorie Trend -->
+      <div style="margin:6px 12px; background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <div style="color:white; font-size:12px; font-weight:bold;">🔥 Calo hằng ngày</div>
+          <div style="color:#94a3b8; font-size:10px;">Target: 1,500 kcal</div>
+        </div>
+        <!-- Bar chart -->
+        <div style="display:flex; gap:4px; align-items:flex-end; height:60px; padding:0 4px;">
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1480</div>
+            <div style="width:100%; background:#4ade80; border-radius:3px 3px 0 0; height:55px;"></div>
+            <div style="font-size:8px; color:#64748b;">T2</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1620</div>
+            <div style="width:100%; background:#ef4444; border-radius:3px 3px 0 0; height:60px;"></div>
+            <div style="font-size:8px; color:#64748b;">T3</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1450</div>
+            <div style="width:100%; background:#4ade80; border-radius:3px 3px 0 0; height:53px;"></div>
+            <div style="font-size:8px; color:#64748b;">T4</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1510</div>
+            <div style="width:100%; background:#4ade80; border-radius:3px 3px 0 0; height:56px;"></div>
+            <div style="font-size:8px; color:#64748b;">T5</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1380</div>
+            <div style="width:100%; background:#4ade80; border-radius:3px 3px 0 0; height:50px;"></div>
+            <div style="font-size:8px; color:#64748b;">T6</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1850</div>
+            <div style="width:100%; background:#ef4444; border-radius:3px 3px 0 0; height:60px;"></div>
+            <div style="font-size:8px; color:#64748b;">T7</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">1490</div>
+            <div style="width:100%; background:#4ade80; border-radius:3px 3px 0 0; height:55px;"></div>
+            <div style="font-size:8px; color:#fbbf24;">CN</div>
+          </div>
+        </div>
+        <div style="color:#64748b; font-size:9px; text-align:center; margin-top:6px;">🟢 Trong mục tiêu (±100 kcal) &nbsp; 🔴 Vượt mục tiêu</div>
+      </div>
+
+      <!-- Adherence & Stats -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 12px 12px;">
+        <div style="background:#1e293b; border-radius:10px; padding:10px; text-align:center;">
+          <div style="color:#4ade80; font-size:24px; font-weight:bold;">71%</div>
+          <div style="color:#94a3b8; font-size:10px;">Tuân thủ Calo</div>
+          <div style="color:#64748b; font-size:9px;">5/7 ngày đạt</div>
+        </div>
+        <div style="background:#1e293b; border-radius:10px; padding:10px; text-align:center;">
+          <div style="color:#60a5fa; font-size:24px; font-weight:bold;">86%</div>
+          <div style="color:#94a3b8; font-size:10px;">Tuân thủ Protein</div>
+          <div style="color:#64748b; font-size:9px;">6/7 ngày đạt</div>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <div style="display:flex; background:#0f0f1a; border-top:1px solid #1e293b;">
+        <div style="flex:1; padding:8px 4px; text-align:center;">
+          <div style="font-size:16px;">📅</div>
+          <div style="color:#64748b; font-size:9px;">Lịch trình</div>
+        </div>
+        <div style="flex:1; padding:8px 4px; text-align:center;">
+          <div style="font-size:16px;">📋</div>
+          <div style="color:#64748b; font-size:9px;">Thư viện</div>
+        </div>
+        <div style="flex:1; padding:8px 4px; text-align:center;">
+          <div style="font-size:16px;">🤖</div>
+          <div style="color:#64748b; font-size:9px;">AI</div>
+        </div>
+        <div style="flex:1; padding:8px 4px; text-align:center;">
+          <div style="font-size:16px;">💪</div>
+          <div style="color:#64748b; font-size:9px;">Fitness</div>
+        </div>
+        <div style="flex:1; padding:8px 4px; text-align:center; border-top:2px solid #3b82f6;">
+          <div style="font-size:16px;">📊</div>
+          <div style="color:#3b82f6; font-size:9px; font-weight:bold;">Dashboard</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 2: Auto-Adjust Notification -->
+  <div class="mockup">
+    <div class="mockup-header">Màn hình 2: Auto-Adjust thông báo</div>
+    <div class="mockup-body" style="padding:0; max-width:375px; margin:0 auto;">
+      <div style="padding:12px 16px; background:#0f172a; border-bottom:1px solid #1e293b;">
+        <div style="color:white; font-weight:bold; font-size:16px;">Dashboard</div>
+      </div>
+
+      <!-- Auto-adjust banner -->
+      <div style="margin:12px; padding:14px; background:linear-gradient(135deg, #422006, #7c2d12); border-radius:12px; border:1px solid #ea580c;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="font-size:20px;">🔄</span>
+          <div style="color:#fdba74; font-weight:bold; font-size:13px;">Đề xuất điều chỉnh</div>
+        </div>
+        <div style="color:#fed7aa; font-size:11px; line-height:1.5; margin-bottom:10px;">
+          Sau <strong>2 tuần</strong>, cân nặng trung bình không thay đổi (80.9 → 80.8 kg). Hệ thống đề xuất <strong>giảm 150 kcal</strong> để đạt mục tiêu.
+        </div>
+        <div style="background:#1a0a00; border-radius:8px; padding:10px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="color:#94a3b8; font-size:10px;">Mục tiêu hiện tại</span>
+            <span style="color:white; font-size:12px; text-decoration:line-through;">1,500 kcal</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#4ade80; font-size:10px; font-weight:bold;">Mục tiêu mới</span>
+            <span style="color:#4ade80; font-size:14px; font-weight:bold;">1,350 kcal</span>
+          </div>
+          <div style="margin-top:6px; display:flex; justify-content:space-between;">
+            <span style="color:#94a3b8; font-size:9px;">Protein điều chỉnh</span>
+            <span style="color:#60a5fa; font-size:11px;">166g → 160g</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <div style="flex:1; background:#16a34a; padding:8px; border-radius:8px; text-align:center; cursor:pointer;">
+            <span style="color:white; font-weight:bold; font-size:12px;">✓ Áp dụng</span>
+          </div>
+          <div style="flex:1; background:#1e293b; padding:8px; border-radius:8px; text-align:center; cursor:pointer;">
+            <span style="color:#94a3b8; font-size:12px;">Bỏ qua</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adjustment History -->
+      <div style="margin:12px; background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="color:white; font-size:12px; font-weight:bold; margin-bottom:8px;">📋 Lịch sử điều chỉnh</div>
+        
+        <div style="border-left:2px solid #3b82f6; padding-left:12px; margin-left:4px;">
+          <div style="margin-bottom:12px; position:relative;">
+            <div style="position:absolute; left:-18px; top:2px; width:8px; height:8px; background:#3b82f6; border-radius:50%;"></div>
+            <div style="color:white; font-size:11px; font-weight:bold;">Hôm nay</div>
+            <div style="color:#64748b; font-size:10px;">Đề xuất: 1,500 → 1,350 kcal</div>
+            <div style="color:#fbbf24; font-size:9px;">⏳ Chưa áp dụng</div>
+          </div>
+          <div style="margin-bottom:12px; position:relative;">
+            <div style="position:absolute; left:-18px; top:2px; width:8px; height:8px; background:#4ade80; border-radius:50%;"></div>
+            <div style="color:white; font-size:11px; font-weight:bold;">9/3/2026</div>
+            <div style="color:#64748b; font-size:10px;">Auto: 1,600 → 1,500 kcal</div>
+            <div style="color:#4ade80; font-size:9px;">✓ Đã áp dụng</div>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute; left:-18px; top:2px; width:8px; height:8px; background:#4ade80; border-radius:50%;"></div>
+            <div style="color:white; font-size:11px; font-weight:bold;">23/2/2026</div>
+            <div style="color:#64748b; font-size:10px;">Bắt đầu Cut: TDEE 2,100 → Target 1,600</div>
+            <div style="color:#4ade80; font-size:9px;">✓ Manual</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weight log quick entry -->
+      <div style="margin:12px; background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="color:white; font-size:12px; font-weight:bold;">⚖️ Cân hôm nay</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="background:#0f172a; color:white; padding:6px 14px; border-radius:8px; font-size:16px; font-weight:bold;">80.9</span>
+            <span style="color:#64748b; font-size:12px;">kg</span>
+            <div style="background:#16a34a; padding:6px 12px; border-radius:8px; cursor:pointer;">
+              <span style="color:white; font-size:11px; font-weight:bold;">Lưu</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: Volume Progress -->
+  <div class="mockup">
+    <div class="mockup-header">Màn hình 3: Volume & Progressive Overload</div>
+    <div class="mockup-body" style="padding:0; max-width:375px; margin:0 auto;">
+      <div style="padding:12px 16px; background:#0f172a; border-bottom:1px solid #1e293b;">
+        <div style="color:white; font-weight:bold; font-size:14px;">📈 Progressive Overload</div>
+        <div style="color:#64748b; font-size:11px;">Training Volume theo tuần</div>
+      </div>
+
+      <!-- Volume chart -->
+      <div style="margin:12px; background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <div style="color:white; font-size:12px; font-weight:bold;">Total Weekly Volume</div>
+          <div style="color:#4ade80; font-size:10px;">▲ +8% vs tuần trước</div>
+        </div>
+        <div style="display:flex; gap:4px; align-items:flex-end; height:80px; padding:0 4px;">
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">8.2k</div>
+            <div style="width:100%; background:#334155; border-radius:3px 3px 0 0; height:35px;"></div>
+            <div style="font-size:8px; color:#64748b;">W1</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">9.1k</div>
+            <div style="width:100%; background:#334155; border-radius:3px 3px 0 0; height:42px;"></div>
+            <div style="font-size:8px; color:#64748b;">W2</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">9.8k</div>
+            <div style="width:100%; background:#334155; border-radius:3px 3px 0 0; height:48px;"></div>
+            <div style="font-size:8px; color:#64748b;">W3</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#64748b;">11.5k</div>
+            <div style="width:100%; background:#334155; border-radius:3px 3px 0 0; height:58px;"></div>
+            <div style="font-size:8px; color:#64748b;">W4</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:7px; color:#4ade80;">12.5k</div>
+            <div style="width:100%; background:linear-gradient(to top, #16a34a, #4ade80); border-radius:3px 3px 0 0; height:65px;"></div>
+            <div style="font-size:8px; color:#4ade80; font-weight:bold;">W5</div>
+          </div>
+        </div>
+        <div style="color:#4ade80; font-size:9px; text-align:center; margin-top:8px;">📈 Volume tăng đều — Progressive Overload đúng hướng!</div>
+      </div>
+
+      <!-- Per muscle group -->
+      <div style="margin:6px 12px; background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="color:white; font-size:12px; font-weight:bold; margin-bottom:8px;">Volume theo nhóm cơ (tuần này)</div>
+        
+        <div style="margin-bottom:6px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+            <span style="color:#94a3b8; font-size:10px;">Ngực</span>
+            <span style="color:#60a5fa; font-size:10px;">4,200 kg</span>
+          </div>
+          <div style="background:#0f172a; height:6px; border-radius:3px;">
+            <div style="background:#3b82f6; height:6px; border-radius:3px; width:75%;"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:6px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+            <span style="color:#94a3b8; font-size:10px;">Lưng</span>
+            <span style="color:#a78bfa; font-size:10px;">3,800 kg</span>
+          </div>
+          <div style="background:#0f172a; height:6px; border-radius:3px;">
+            <div style="background:#8b5cf6; height:6px; border-radius:3px; width:68%;"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:6px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+            <span style="color:#94a3b8; font-size:10px;">Chân</span>
+            <span style="color:#4ade80; font-size:10px;">5,600 kg</span>
+          </div>
+          <div style="background:#0f172a; height:6px; border-radius:3px;">
+            <div style="background:#22c55e; height:6px; border-radius:3px; width:100%;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+            <span style="color:#94a3b8; font-size:10px;">Vai + Tay</span>
+            <span style="color:#fb923c; font-size:10px;">1,900 kg</span>
+          </div>
+          <div style="background:#0f172a; height:6px; border-radius:3px;">
+            <div style="background:#ea580c; height:6px; border-radius:3px; width:34%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 4: TDEE/BMR Summary -->
+  <div class="mockup">
+    <div class="mockup-header">Màn hình 4: Thông số Nutrition Engine</div>
+    <div class="mockup-body" style="padding:12px; max-width:375px; margin:0 auto; background:#0f172a;">
+      
+      <div style="background:#1e293b; border-radius:10px; padding:12px; margin-bottom:8px;">
+        <div style="color:white; font-size:12px; font-weight:bold; margin-bottom:8px;">🧮 Thông số tính toán</div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+          <div style="background:#0f172a; padding:8px; border-radius:6px;">
+            <div style="color:#64748b; font-size:9px;">BMR (Mifflin-St Jeor)</div>
+            <div style="color:white; font-size:16px; font-weight:bold;">1,779 <span style="font-size:10px; color:#64748b;">kcal</span></div>
+          </div>
+          <div style="background:#0f172a; padding:8px; border-radius:6px;">
+            <div style="color:#64748b; font-size:9px;">Activity Multiplier</div>
+            <div style="color:#fbbf24; font-size:16px; font-weight:bold;">× 1.55</div>
+            <div style="color:#64748b; font-size:8px;">Auto (4 buổi/tuần)</div>
+          </div>
+          <div style="background:#0f172a; padding:8px; border-radius:6px;">
+            <div style="color:#64748b; font-size:9px;">TDEE</div>
+            <div style="color:#60a5fa; font-size:16px; font-weight:bold;">2,757 <span style="font-size:10px; color:#64748b;">kcal</span></div>
+          </div>
+          <div style="background:#0f172a; padding:8px; border-radius:6px;">
+            <div style="color:#64748b; font-size:9px;">Cut Offset</div>
+            <div style="color:#ef4444; font-size:16px; font-weight:bold;">-1,257 <span style="font-size:10px; color:#64748b;">kcal</span></div>
+          </div>
+        </div>
+
+        <div style="background:#052e16; padding:10px; border-radius:8px; margin-top:8px; text-align:center;">
+          <div style="color:#64748b; font-size:9px;">🎯 MỤC TIÊU HẰNG NGÀY</div>
+          <div style="color:#4ade80; font-size:24px; font-weight:bold;">1,500 <span style="font-size:12px;">kcal</span></div>
+        </div>
+      </div>
+
+      <!-- Macro Split -->
+      <div style="background:#1e293b; border-radius:10px; padding:12px;">
+        <div style="color:white; font-size:12px; font-weight:bold; margin-bottom:8px;">🥩 Macro Split (Priority-based)</div>
+        
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <div style="flex:1; background:#0f172a; padding:8px; border-radius:8px; text-align:center; border-top:3px solid #ef4444;">
+            <div style="color:#fca5a5; font-size:9px;">PROTEIN</div>
+            <div style="color:white; font-size:18px; font-weight:bold;">166<span style="font-size:10px; color:#64748b;">g</span></div>
+            <div style="color:#64748b; font-size:9px;">664 kcal • 44%</div>
+            <div style="color:#fca5a5; font-size:8px;">2.0 g/kg</div>
+          </div>
+          <div style="flex:1; background:#0f172a; padding:8px; border-radius:8px; text-align:center; border-top:3px solid #fbbf24;">
+            <div style="color:#fde68a; font-size:9px;">FAT</div>
+            <div style="color:white; font-size:18px; font-weight:bold;">42<span style="font-size:10px; color:#64748b;">g</span></div>
+            <div style="color:#64748b; font-size:9px;">375 kcal • 25%</div>
+            <div style="color:#fde68a; font-size:8px;">25% TDEE</div>
+          </div>
+          <div style="flex:1; background:#0f172a; padding:8px; border-radius:8px; text-align:center; border-top:3px solid #3b82f6;">
+            <div style="color:#93c5fd; font-size:9px;">CARBS</div>
+            <div style="color:white; font-size:18px; font-weight:bold;">115<span style="font-size:10px; color:#64748b;">g</span></div>
+            <div style="color:#64748b; font-size:9px;">461 kcal • 31%</div>
+            <div style="color:#93c5fd; font-size:8px;">Còn lại</div>
+          </div>
+        </div>
+
+        <div style="color:#64748b; font-size:9px; text-align:center;">Thứ tự: Protein (cân nặng) → Fat (% TDEE) → Carbs (phần còn lại)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h3>Dashboard UI có OK không?</h3>
+<p class="subtitle">Click chọn hoặc trả lời trong terminal</p>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✅</div>
+    <div class="content">
+      <h3>OK — Dashboard hợp lý</h3>
+      <p>Hoàn thành design, chuyển sang viết spec document</p>
+    </div>
+  </div>
+  <div class="option" data-choice="modify" onclick="toggleSelect(this)">
+    <div class="letter">✏️</div>
+    <div class="content">
+      <h3>Cần chỉnh sửa</h3>
+      <p>Mô tả trong terminal</p>
+    </div>
+  </div>
+</div>

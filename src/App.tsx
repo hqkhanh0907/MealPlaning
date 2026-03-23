@@ -82,16 +82,20 @@ export default function App() {
     if (tab === 'ai-analysis') setHasNewAIResult(false);
   }, []);
 
-  const handleGlobalKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!(e.metaKey || e.ctrlKey)) return;
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
-    const tabs: MainTab[] = ['calendar', 'management', 'ai-analysis', 'grocery', 'settings'];
-    const digit = parseInt(e.key, 10);
-    if (digit >= 1 && digit <= 5) {
-      e.preventDefault();
-      handleTabChange(tabs[digit - 1]);
-    }
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+      const tabs: MainTab[] = ['calendar', 'management', 'ai-analysis', 'grocery', 'settings'];
+      const digit = Number.parseInt(e.key, 10);
+      if (digit >= 1 && digit <= 5) {
+        e.preventDefault();
+        handleTabChange(tabs[digit - 1]);
+      }
+    };
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [handleTabChange]);
 
   const [activeManagementSubTab, setActiveManagementSubTab] = useState<ManagementSubTab>('dishes');
@@ -210,7 +214,7 @@ export default function App() {
   const handleUpdateServings = useCallback((dishId: string, count: number) => {
     setDayPlans(prev => prev.map(p => {
       if (p.date !== selectedDate) return p;
-      const servings = { ...(p.servings ?? {}) };
+      const servings = { ...p.servings };
       if (count <= 1) {
         delete servings[dishId];
       } else {
@@ -268,6 +272,29 @@ export default function App() {
     notify.success(t('notification.templateSaved'));
   }, [currentPlan, mealTemplates, modals, notify, t]);
 
+  const restoreDayPlans = useCallback((snapshot: DayPlan[]) => {
+    const dates = new Set(snapshot.map(p => p.date));
+    setDayPlans(prev => [...prev.filter(p => !dates.has(p.date)), ...snapshot]);
+  }, [setDayPlans]);
+
+  const handleCopyPlanAction = useCallback((targetDates: string[], mergeMode: boolean) => {
+    const snapshot = dayPlans
+      .filter(p => targetDates.includes(p.date))
+      .map(p => ({ ...p, breakfastDishIds: [...p.breakfastDishIds], lunchDishIds: [...p.lunchDishIds], dinnerDishIds: [...p.dinnerDishIds] }));
+    copyPlanHook.copyPlan(selectedDate, targetDates, mergeMode);
+    modals.closeCopyPlanModal();
+
+    const undoCopy = () => {
+      restoreDayPlans(snapshot);
+      notify.info(t('notification.undone'), t('notification.undoneDesc'));
+    };
+
+    notify.success(t('notification.planCopied'), t('notification.planCopiedDesc', { count: targetDates.length }), {
+      duration: 30000,
+      action: { label: t('action.undo'), onClick: undoCopy },
+    });
+  }, [dayPlans, selectedDate, copyPlanHook, modals, restoreDayPlans, notify, t]);
+
   const handleAnalysisComplete = useCallback(() => {
     // c8 ignore next 4
     if (activeMainTabRef.current !== 'ai-analysis') {
@@ -321,7 +348,7 @@ export default function App() {
   }, [setDishes]);
 
   return (
-    <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors" onKeyDown={handleGlobalKeyDown}>
+    <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 pt-safe" role="banner">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -458,24 +485,7 @@ export default function App() {
           sourceDate={selectedDate}
           sourcePlan={currentPlan}
           dishes={dishes}
-          onCopy={(targetDates, mergeMode) => {
-            const snapshot = dayPlans.filter(p => targetDates.includes(p.date)).map(p => ({ ...p, breakfastDishIds: [...p.breakfastDishIds], lunchDishIds: [...p.lunchDishIds], dinnerDishIds: [...p.dinnerDishIds] }));
-            copyPlanHook.copyPlan(selectedDate, targetDates, mergeMode);
-            modals.closeCopyPlanModal();
-            notify.success(t('notification.planCopied'), t('notification.planCopiedDesc', { count: targetDates.length }), {
-              duration: 30000,
-              action: {
-                label: t('action.undo'),
-                onClick: () => {
-                  setDayPlans(prev => {
-                    const updated = prev.filter(p => !targetDates.includes(p.date));
-                    return [...updated, ...snapshot];
-                  });
-                  notify.info(t('notification.undone'), t('notification.undoneDesc'));
-                },
-              },
-            });
-          }}
+          onCopy={handleCopyPlanAction}
           onClose={modals.closeCopyPlanModal}
         />
       )}

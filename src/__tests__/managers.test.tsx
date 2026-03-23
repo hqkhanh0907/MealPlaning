@@ -583,7 +583,7 @@ describe('DishManager', () => {
     fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
     fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
     fireEvent.click(screen.getByTestId('btn-open-compare'));
-    fireEvent.click(screen.getByTestId('compare-panel'));
+    fireEvent.click(screen.getByTestId('compare-backdrop'));
     expect(screen.queryByTestId('compare-panel')).not.toBeInTheDocument();
   });
 

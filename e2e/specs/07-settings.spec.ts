@@ -1,6 +1,6 @@
 import { SettingsPage } from '../pages/SettingsPage';
 
-describe('Settings — language and theme', () => {
+describe('Settings — theme switching', () => {
   const page = new SettingsPage();
 
   before(async () => {
@@ -8,14 +8,8 @@ describe('Settings — language and theme', () => {
     await page.navigateTo('settings');
   });
 
-  it('should switch language to English', async () => {
-    await page.switchLang('en');
-    await expect(page.el('btn-lang-en')).toBeDisplayed();
-  });
-
-  it('should switch language back to Vietnamese', async () => {
-    await page.switchLang('vi');
-    await expect(page.el('btn-lang-vi')).toBeDisplayed();
+  it('should display settings page with search field', async () => {
+    await expect(page.el('settings-search')).toBeDisplayed();
   });
 
   it('should switch theme to dark', async () => {

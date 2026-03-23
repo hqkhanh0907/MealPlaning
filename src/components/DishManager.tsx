@@ -357,8 +357,9 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
           fiber: 'text-green-600 dark:text-green-400',
         };
         return (
-          <div data-testid="compare-panel" className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center" onClick={() => setShowCompare(false)}>
-            <div className="bg-white dark:bg-slate-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+          <dialog data-testid="compare-panel" open className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center m-0 w-full h-full border-none p-0 bg-transparent" aria-label={t('dish.compareNutrition')}>
+            <div className="fixed inset-0 bg-black/50" aria-hidden="true"><button type="button" className="w-full h-full cursor-default border-none bg-transparent" onClick={() => setShowCompare(false)} aria-label={t('common.closeBackdrop')} data-testid="compare-backdrop" /></div>
+            <div className="bg-white dark:bg-slate-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl relative z-10">
               <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <GitCompareArrows className="w-5 h-5 text-blue-500" />
@@ -389,7 +390,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                           {values.map((v, i) => (
                             <td key={compareDishes[i].id} className="text-center py-2.5 px-2">
                               <span className={`text-lg font-bold ${NUTRITION_COLORS[key]} ${v === best ? 'underline decoration-2 decoration-blue-400' : ''}`}>
-                                {v}{key !== 'calories' ? 'g' : ''}
+                                {v}{key === 'calories' ? '' : 'g'}
                               </span>
                               {key === 'calories' && <span className="text-xs text-slate-400 ml-0.5">kcal</span>}
                             </td>
@@ -401,7 +402,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 </table>
               </div>
             </div>
-          </div>
+          </dialog>
         );
       })()}
     </div>
