@@ -113,7 +113,7 @@ GIS tokenClient.requestAccessToken()
 | GoogleDriveSync.test.tsx | 39 | 39 | 0 |
 | DataBackup.test.tsx | 19 | 19 | 0 |
 | SyncConflictModal.test.tsx | 14 | 14 | 0 |
-| useAutoSync.test.ts | 14 | 14 | 0 |
+| useAutoSync.test.tsx | 14 | 14 | 0 |
 | SettingsTab.test.tsx | 17 | 17 | 0 |
 | **Tổng** | **152** | **152** | **0** |
 
