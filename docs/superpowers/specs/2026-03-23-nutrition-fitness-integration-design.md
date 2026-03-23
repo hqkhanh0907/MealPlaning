@@ -139,7 +139,7 @@ CREATE TABLE user_profile (
   age INTEGER NOT NULL,
   height_cm REAL NOT NULL,
   weight_kg REAL NOT NULL,
-  activity_level TEXT NOT NULL DEFAULT 'moderate',
+  activity_level TEXT NOT NULL DEFAULT 'moderate' CHECK (activity_level IN ('sedentary', 'light', 'moderate', 'active', 'extra_active')),
   bmr_override REAL, -- nullable: user nhập BMR custom
   protein_ratio REAL NOT NULL DEFAULT 2.0, -- g/kg
   fat_pct REAL NOT NULL DEFAULT 0.25, -- % of target calories
@@ -178,7 +178,8 @@ CREATE TABLE workouts (
   name TEXT NOT NULL,
   duration_min INTEGER,
   notes TEXT,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
 );
 
 CREATE TABLE workout_sets (
@@ -199,7 +200,8 @@ CREATE TABLE weight_log (
   date TEXT NOT NULL UNIQUE,
   weight_kg REAL NOT NULL,
   notes TEXT,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
 );
 
 CREATE TABLE daily_log (
@@ -222,7 +224,8 @@ CREATE TABLE adjustments (
   new_target_cal REAL NOT NULL,
   trigger_type TEXT NOT NULL CHECK (trigger_type IN ('auto', 'manual')),
   moving_avg_weight REAL,
-  applied INTEGER NOT NULL DEFAULT 0
+  applied INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
 );
 
 -- Performance Indexes
@@ -257,10 +260,10 @@ CREATE INDEX idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id);
 
 ```typescript
 function calculateBMR(profile: UserProfile): number {
-  if (profile.bmr_override) return profile.bmr_override;
+  if (profile.bmrOverride) return profile.bmrOverride;
   
   const s = profile.gender === 'male' ? 5 : -161;
-  return 10 * profile.weight_kg + 6.25 * profile.height_cm - 5 * profile.age + s;
+  return 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age + s;
 }
 ```
 
@@ -304,7 +307,7 @@ function calculateTDEE(bmr: number, multiplier: number): number {
 
 ```typescript
 function calculateTarget(tdee: number, goal: Goal): number {
-  return tdee + goal.calorie_offset;
+  return tdee + goal.calorieOffset;
   // Cut: offset = -500 → target = TDEE - 500
   // Bulk: offset = +300 → target = TDEE + 300
   // Maintain: offset = 0
@@ -315,12 +318,13 @@ function calculateTarget(tdee: number, goal: Goal): number {
 
 ```typescript
 interface MacroSplit {
-  protein_g: number;
-  fat_g: number;
-  carbs_g: number;
-  protein_cal: number;
-  fat_cal: number;
-  carbs_cal: number;
+  proteinG: number;
+  fatG: number;
+  carbsG: number;
+  proteinCal: number;
+  fatCal: number;
+  carbsCal: number;
+  isOverallocated: boolean;
 }
 
 function calculateMacros(
@@ -330,21 +334,21 @@ function calculateMacros(
   fatPct: number,       // % of target, default 0.25
 ): MacroSplit {
   // Priority 1: Protein
-  const protein_g = Math.round(weightKg * proteinRatio);
-  const protein_cal = protein_g * 4;
+  const proteinG = Math.round(weightKg * proteinRatio);
+  const proteinCal = proteinG * 4;
 
   // Priority 2: Fat
-  const fat_cal = Math.round(targetCal * fatPct);
-  const fat_g = Math.round(fat_cal / 9);
+  const fatCal = Math.round(targetCal * fatPct);
+  const fatG = Math.round(fatCal / 9);
 
   // Priority 3: Carbs (remainder)
-  const carbs_cal = Math.max(0, targetCal - protein_cal - fat_cal);
-  const carbs_g = Math.round(carbs_cal / 4);
+  const carbsCal = Math.max(0, targetCal - proteinCal - fatCal);
+  const carbsG = Math.round(carbsCal / 4);
 
   // Safety: warn if protein+fat exceeds target (extreme weight + aggressive cut)
-  const isOverallocated = protein_cal + fat_cal > targetCal;
+  const isOverallocated = proteinCal + fatCal > targetCal;
 
-  return { protein_g, fat_g, carbs_g, protein_cal, fat_cal, carbs_cal, isOverallocated };
+  return { proteinG, fatG, carbsG, proteinCal, fatCal, carbsCal, isOverallocated };
 }
 ```
 
@@ -383,13 +387,13 @@ src/services/nutritionEngine.ts  — Pure calculation functions (BMR, TDEE, Macr
 ```typescript
 // Volume for a single exercise in a workout
 function calculateExerciseVolume(sets: WorkoutSet[]): number {
-  return sets.reduce((sum, s) => sum + s.reps * s.weight_kg, 0);
+  return sets.reduce((sum, s) => sum + s.reps * s.weightKg, 0);
 }
 
 // Weekly volume
 function calculateWeeklyVolume(workouts: Workout[], sets: WorkoutSet[]): number {
   return workouts.reduce((total, w) => {
-    const workoutSets = sets.filter(s => s.workout_id === w.id);
+    const workoutSets = sets.filter(s => s.workoutId === w.id);
     return total + calculateExerciseVolume(workoutSets);
   }, 0);
 }
@@ -452,17 +456,26 @@ const useFitnessStore = create<FitnessState>((set) => ({
 ### 6.1 Moving Average Weight
 
 ```typescript
-function calculateMovingAverage(entries: WeightEntry[], days: number = 7): number | null {
+// Pure average of passed entries — caller controls the time window
+function calculateMovingAverage(entries: WeightEntry[]): number | null {
+  if (entries.length < 3) return null; // Not enough data
+  return entries.reduce((sum, e) => sum + e.weightKg, 0) / entries.length;
+}
+
+// Get entries within a specific date range
+function getEntriesInWindow(
+  entries: WeightEntry[],
+  daysAgo: number,
+  windowSize: number = 7,
+): WeightEntry[] {
   const now = new Date();
-  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  const windowEnd = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+  const windowStart = new Date(windowEnd.getTime() - windowSize * 24 * 60 * 60 * 1000);
   
-  // Filter to entries within the target window, then sort by date desc
-  const recent = entries
-    .filter(e => new Date(e.date) >= cutoff)
-    .sort((a, b) => b.date.localeCompare(a.date));
-  
-  if (recent.length < 3) return null; // Not enough data in window
-  return recent.reduce((sum, e) => sum + e.weight_kg, 0) / recent.length;
+  return entries.filter(e => {
+    const d = new Date(e.date);
+    return d >= windowStart && d <= windowEnd;
+  });
 }
 ```
 
@@ -485,10 +498,12 @@ function evaluateAndSuggestAdjustment(
   goal: Goal,
   tdee: number,
 ): Adjustment | null {
-  // Sort by date descending before slicing
-  const sorted = [...weightLog].sort((a, b) => b.date.localeCompare(a.date));
-  const currentAvg = calculateMovingAverage(sorted.slice(0, 7));
-  const previousAvg = calculateMovingAverage(sorted.slice(7, 14));
+  // Get entries from two separate 7-day windows
+  const currentEntries = getEntriesInWindow(weightLog, 0, 7);   // last 7 days
+  const previousEntries = getEntriesInWindow(weightLog, 7, 7);  // days 8-14
+  
+  const currentAvg = calculateMovingAverage(currentEntries);
+  const previousAvg = calculateMovingAverage(previousEntries);
   
   if (!currentAvg || !previousAvg) return null;
   
@@ -504,10 +519,10 @@ function evaluateAndSuggestAdjustment(
     if (newTarget === currentTarget) return null;
     return {
       reason: `Cân nặng TB không giảm sau 2 tuần (${previousAvg.toFixed(1)} → ${currentAvg.toFixed(1)} kg)`,
-      old_target_cal: currentTarget,
-      new_target_cal: newTarget,
-      trigger_type: 'auto',
-      moving_avg_weight: currentAvg,
+      oldTargetCal: currentTarget,
+      newTargetCal: newTarget,
+      triggerType: 'auto',
+      movingAvgWeight: currentAvg,
     };
   }
   
@@ -519,10 +534,10 @@ function evaluateAndSuggestAdjustment(
     if (newTarget === currentTarget) return null;
     return {
       reason: `Cân nặng TB không tăng sau 2 tuần`,
-      old_target_cal: currentTarget,
-      new_target_cal: newTarget,
-      trigger_type: 'auto',
-      moving_avg_weight: currentAvg,
+      oldTargetCal: currentTarget,
+      newTargetCal: newTarget,
+      triggerType: 'auto',
+      movingAvgWeight: currentAvg,
     };
   }
   
@@ -537,11 +552,13 @@ function calculateAdherence(
   dailyLogs: DailyLog[],
   days: number = 7,
 ): { calorie: number; protein: number } {
-  const recent = dailyLogs.slice(0, days);
+  const recent = [...dailyLogs]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, days);
   if (recent.length === 0) return { calorie: 0, protein: 0 };
   
-  const calHit = recent.filter(d => d.adherence_cal).length;
-  const proHit = recent.filter(d => d.adherence_protein).length;
+  const calHit = recent.filter(d => d.adherenceCal).length;
+  const proHit = recent.filter(d => d.adherenceProtein).length;
   
   return {
     calorie: Math.round((calHit / recent.length) * 100),
@@ -631,6 +648,13 @@ Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRa
   "_version": "2.0",
   "_exportedAt": "2026-03-23T10:00:00.000Z",
   "_format": "sqlite-json",
+  "_legacyFormat": {
+    "mp-ingredients": [...],
+    "mp-dishes": [...],
+    "mp-dayPlans": [...],
+    "mp-mealTemplates": [...],
+    "mp-userProfile": {...}
+  },
   "tables": {
     "ingredients": [...],
     "dishes": [...],
