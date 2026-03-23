@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { CalendarPage, MealTypeName } from '../pages/CalendarPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,7 +9,7 @@ type ExecutableBrowser = typeof browser & {
 
 describe('Planning — meal planning flow', () => {
   const page = new CalendarPage();
-  const todayKey = new Date().toISOString().split('T')[0];
+  const todayKey = localDateKey();
 
   before(async () => {
     await page.switchToWebview();
@@ -89,7 +90,7 @@ describe('Planning — meal planning flow', () => {
         }>;
       });
       assert.ok(plans.length > 0, 'Expected at least one day plan in localStorage');
-      const todayPlan = plans.find(p => p.date === new Date().toISOString().split('T')[0]);
+      const todayPlan = plans.find(p => p.date === todayKey);
       assert.ok(todayPlan, 'Expected a plan entry for today');
     });
   });

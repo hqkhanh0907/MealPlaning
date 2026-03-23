@@ -1,9 +1,10 @@
 import assert from 'node:assert';
 import { CalendarPage } from '../pages/CalendarPage';
+import { localDateKey } from '../utils/dateKey';
 
 describe('Calendar — date navigation', () => {
   const page = new CalendarPage();
-  const todayKey = new Date().toISOString().split('T')[0];
+  const todayKey = localDateKey();
 
   before(async () => {
     await page.switchToWebview();
@@ -60,7 +61,7 @@ describe('Calendar — date navigation', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Clear plan & nutrition summary (TC_CAL_04, TC_CAL_05)', () => {
     // Compute today's date key at test-execution time
-    const todayKey = new Date().toISOString().split('T')[0];
+    const todayKey = localDateKey();
 
     before(async () => {
       // Inject ingredient (100 cal/100g) + dish (200g serving) + today's day plan
@@ -121,7 +122,7 @@ describe('Calendar — date navigation', () => {
   describe('Clear plan scopes (TC_CAL_06, TC_CAL_07)', () => {
     before(async () => {
       // Inject data for today so we can test clearing
-      const dk = new Date().toISOString().split('T')[0];
+      const dk = localDateKey();
       await page.injectTestData({
         dateKey: dk,
         mealSlot: 'lunch',
@@ -162,7 +163,7 @@ describe('Calendar — date navigation', () => {
 
     it('TC_CAL_07 — should clear the month plan', async () => {
       // Re-inject data for month clear test
-      const dk = new Date().toISOString().split('T')[0];
+      const dk = localDateKey();
       await page.injectTestData({
         dateKey: dk,
         mealSlot: 'dinner',

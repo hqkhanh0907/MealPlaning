@@ -3,6 +3,7 @@ import { CalendarPage } from '../pages/CalendarPage';
 import { GroceryPage } from '../pages/GroceryPage';
 import { SettingsPage } from '../pages/SettingsPage';
 import { ManagementPage } from '../pages/ManagementPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,8 +29,8 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
   const todayDate = new Date();
   const tomorrowDate = new Date(todayDate);
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const today = todayDate.toISOString().split('T')[0];
-  const tomorrow = tomorrowDate.toISOString().split('T')[0];
+  const today = localDateKey(todayDate);
+  const tomorrow = localDateKey(tomorrowDate);
 
   before(async () => {
     await cal.switchToWebview();
@@ -57,8 +58,8 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
         ];
         localStorage.setItem('mp-day-plans', JSON.stringify(plans));
 
-        // Ensure English language for consistent assertions
-        localStorage.setItem('mp-language', 'en');
+        // Ensure Vietnamese language (only supported language)
+        localStorage.setItem('mp-language', 'vi');
       },
       ING_A, ING_B, DISH_A, DISH_B, today, tomorrow,
     );
@@ -144,24 +145,22 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
       await cal.reloadApp();
     });
 
-    it('TC_LANG_INTEG_01 — switching to Vietnamese updates nav labels', async () => {
-      await settings.navigateTo('settings');
+    it('TC_LANG_INTEG_01 — Vietnamese nav labels are displayed', async () => {
+      await cal.navigateTo('calendar');
       await browser.pause(300);
-      await settings.switchLang('vi');
-      await browser.pause(500);
 
-      // Verify nav label changed to Vietnamese (mobile nav uses aria-label, not text)
+      // Verify nav label is in Vietnamese (the only supported language)
       const navText = await (browser as unknown as ExecutableBrowser).execute(() => {
         const nav = document.querySelector('[data-testid="nav-calendar"]');
         return nav?.getAttribute('aria-label') || nav?.textContent || '';
       });
       assert.ok(
-        navText.includes('Lịch') || navText.includes('Calendar'),
+        navText.includes('Lịch'),
         `Nav should show Vietnamese label, got: "${navText}"`,
       );
     });
 
-    it('TC_LANG_INTEG_02 — management tab reflects language change', async () => {
+    it('TC_LANG_INTEG_02 — management tab reflects Vietnamese language', async () => {
       await mgmt.navigateTo('management');
       await browser.pause(500);
 
@@ -173,27 +172,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
       // Vietnamese for "Dishes" is "Món ăn"
       assert.ok(
         tabText.length > 0,
-        `Management tab should have text content after lang switch, got: "${tabText}"`,
-      );
-    });
-
-    it('TC_LANG_INTEG_03 — switching back to English restores all tabs', async () => {
-      await settings.navigateTo('settings');
-      await browser.pause(300);
-      await settings.switchLang('en');
-      await browser.pause(500);
-
-      // Verify calendar tab in English
-      await cal.navigateTo('calendar');
-      await browser.pause(300);
-
-      const navText = await (browser as unknown as ExecutableBrowser).execute(() => {
-        const nav = document.querySelector('[data-testid="nav-calendar"]');
-        return nav?.getAttribute('aria-label') || nav?.textContent || '';
-      });
-      assert.ok(
-        navText.includes('Calendar') || navText.includes('Lịch'),
-        `Nav should show English label after switching back, got: "${navText}"`,
+        `Management tab should have text content in Vietnamese, got: "${tabText}"`,
       );
     });
   });
@@ -302,7 +281,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
   after(async () => {
     // Reset language and theme
     await (browser as unknown as ExecutableBrowser).execute(() => {
-      localStorage.setItem('mp-language', 'en');
+      localStorage.setItem('mp-language', 'vi');
       localStorage.setItem('mp-theme', 'light');
       document.documentElement.classList.remove('dark');
     });

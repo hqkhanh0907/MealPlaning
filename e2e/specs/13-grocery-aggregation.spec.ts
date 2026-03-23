@@ -1,16 +1,17 @@
 import assert from 'node:assert';
 import { CalendarPage } from '../pages/CalendarPage';
 import { GroceryPage } from '../pages/GroceryPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute: <T>(fn: () => T) => Promise<T>;
+  execute: <T>(fn: (...args: any[]) => T, ...args: unknown[]) => Promise<T>;
 };
 
 describe('Grocery Aggregation — verify item quantities match plan', () => {
   const calPage = new CalendarPage();
   const groceryPage = new GroceryPage();
-  const todayKey = new Date().toISOString().split('T')[0];
+  const todayKey = localDateKey();
 
   const ING_1_ID = 'e2e-groc-agg-ing-1';
   const ING_2_ID = 'e2e-groc-agg-ing-2';
@@ -19,7 +20,7 @@ describe('Grocery Aggregation — verify item quantities match plan', () => {
     await calPage.switchToWebview();
 
     // Inject 2 ingredients and 2 dishes that share 1 ingredient
-    await (browser as unknown as ExecutableBrowser).execute(() => {
+    await (browser as unknown as ExecutableBrowser).execute((dateKey: string) => {
       const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<Record<string, unknown>>;
       const testIngs = [
         { id: 'e2e-groc-agg-ing-1', name: { vi: 'Gạo grocery agg', en: 'Grocery Agg Rice' }, caloriesPer100: 130, proteinPer100: 3, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
@@ -41,11 +42,10 @@ describe('Grocery Aggregation — verify item quantities match plan', () => {
       localStorage.setItem('mp-dishes', JSON.stringify(dishes));
 
       // Set day plan with both dishes for today
-      const dk = new Date().toISOString().split('T')[0];
       const plans = JSON.parse(localStorage.getItem('mp-day-plans') || '[]') as Array<Record<string, unknown>>;
-      const idx = plans.findIndex(p => p.date === dk);
+      const idx = plans.findIndex(p => p.date === dateKey);
       const planEntry = {
-        date: dk,
+        date: dateKey,
         breakfastDishIds: ['e2e-groc-agg-dish-1'],
         lunchDishIds: ['e2e-groc-agg-dish-2'],
         dinnerDishIds: [] as string[],
@@ -56,7 +56,7 @@ describe('Grocery Aggregation — verify item quantities match plan', () => {
 
       // Clear grocery checked state
       localStorage.removeItem('mp-grocery-checked');
-    });
+    }, todayKey);
 
     await calPage.reloadApp();
     await groceryPage.navigateTo('calendar');

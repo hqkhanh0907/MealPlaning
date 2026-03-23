@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { GroceryPage } from '../pages/GroceryPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,7 +9,7 @@ type ExecutableBrowser = typeof browser & {
 
 describe('Grocery Extended', () => {
   const page = new GroceryPage();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateKey();
   const ING_ID = 'e2e-gro-ext-ing';
 
   before(async () => {

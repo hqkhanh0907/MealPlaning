@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { CalendarPage } from '../pages/CalendarPage';
 import { GroceryPage } from '../pages/GroceryPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,7 +71,7 @@ describe('Grocery List — scope switching and copy', () => {
   describe('Grocery item check (TC_SHOP_02)', () => {
     const calPage = new CalendarPage();
     const SHOP_ING_ID = 'e2e-shop-ing-1';
-    const todayKey = new Date().toISOString().split('T')[0];
+    const todayKey = localDateKey();
 
     before(async () => {
       // Inject ingredient + dish + day plan for today

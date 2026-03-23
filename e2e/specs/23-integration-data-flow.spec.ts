@@ -3,6 +3,7 @@ import { CalendarPage } from '../pages/CalendarPage';
 import { ManagementPage } from '../pages/ManagementPage';
 import { GroceryPage } from '../pages/GroceryPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +24,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
 
   const ING_ID = 'e2e-integ-ing';
   const DISH_ID = 'e2e-integ-dish';
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateKey();
 
   before(async () => {
     await cal.switchToWebview();

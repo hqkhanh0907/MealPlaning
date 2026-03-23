@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { SettingsPage } from '../pages/SettingsPage';
 import { CalendarPage } from '../pages/CalendarPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,7 +17,7 @@ describe('Data Backup — export and import', () => {
 
     // Inject known data so export has something meaningful
     await calPage.injectTestData({
-      dateKey: new Date().toISOString().split('T')[0],
+      dateKey: localDateKey(),
       mealSlot: 'breakfast',
       dishId: 'e2e-backup-dish-1',
       ingredientPayload: {

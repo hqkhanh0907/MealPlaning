@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { CalendarPage } from '../pages/CalendarPage';
+import { localDateKey } from '../utils/dateKey';
 
 type ExecutableBrowser = typeof browser & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,7 +9,7 @@ type ExecutableBrowser = typeof browser & {
 
 describe('Calendar Extended', () => {
   const page = new CalendarPage();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateKey();
 
   before(async () => {
     await page.switchToWebview();
