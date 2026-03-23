@@ -6,13 +6,16 @@ import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig(({mode}) => {
   const isProduction = mode === 'production';
+  const enableCompression = process.env.COMPRESS === 'true';
 
   return {
     plugins: [
       react(),
       tailwindcss(),
-      viteCompression({algorithm: 'gzip', ext: '.gz', threshold: 1024, deleteOriginFile: false}),
-      viteCompression({algorithm: 'brotliCompress', ext: '.br', threshold: 1024}),
+      enableCompression &&
+        viteCompression({algorithm: 'gzip', ext: '.gz', threshold: 1024, deleteOriginFile: false}),
+      enableCompression &&
+        viteCompression({algorithm: 'brotliCompress', ext: '.br', threshold: 1024}),
       process.env.ANALYZE === 'true' &&
         import('rollup-plugin-visualizer').then(m =>
           m.visualizer({filename: 'stats.html', gzipSize: true, brotliSize: true, template: 'treemap'}),

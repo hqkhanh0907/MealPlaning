@@ -21,7 +21,8 @@
     "android:run": "npm run build && npx cap sync android && npx cap run android",
     "e2e": "wdio run e2e/wdio.conf.ts",
     "e2e:android": "wdio run e2e/wdio.conf.ts",
-    "analyze": "ANALYZE=true vite build"
+    "analyze": "ANALYZE=true vite build",
+    "build:web": "COMPRESS=true vite build"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

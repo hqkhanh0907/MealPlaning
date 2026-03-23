@@ -1,0 +1,277 @@
+<h2>🚨 Vấn đề: 7 Tabs trên Mobile Bottom Nav</h2>
+<p class="subtitle">So sánh hiện trạng vs các giải pháp. Chọn phương án bạn thích nhất.</p>
+
+<div class="section">
+  <h3>❌ Hiện tại: 5 Tabs (đã đầy)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Bottom Navigation — 5 tabs hiện tại (OK)</div>
+    <div class="mockup-body" style="padding:0;">
+      <div style="display:flex; background:#1a1a2e; border-radius:0 0 8px 8px;">
+        <div style="flex:1; padding:10px 4px; text-align:center; border-top:2px solid #3b82f6;">
+          <div style="font-size:18px;">📅</div>
+          <div style="color:#3b82f6; font-size:10px; font-weight:bold;">Lịch trình</div>
+        </div>
+        <div style="flex:1; padding:10px 4px; text-align:center;">
+          <div style="font-size:18px;">📋</div>
+          <div style="color:#888; font-size:10px;">Thư viện</div>
+        </div>
+        <div style="flex:1; padding:10px 4px; text-align:center;">
+          <div style="font-size:18px;">🤖</div>
+          <div style="color:#888; font-size:10px;">AI Phân tích</div>
+        </div>
+        <div style="flex:1; padding:10px 4px; text-align:center;">
+          <div style="font-size:18px;">🛒</div>
+          <div style="color:#888; font-size:10px;">Đi chợ</div>
+        </div>
+        <div style="flex:1; padding:10px 4px; text-align:center;">
+          <div style="font-size:18px;">⚙️</div>
+          <div style="color:#888; font-size:10px;">Cài đặt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔴 Nếu thêm 2 tabs → 7 tabs</h3>
+  <div class="mockup">
+    <div class="mockup-header">Bottom Navigation — 7 tabs (BAD UX ❌)</div>
+    <div class="mockup-body" style="padding:0;">
+      <div style="display:flex; background:#2a0f0f; border-radius:0 0 8px 8px; border:2px solid #ef4444;">
+        <div style="flex:1; padding:8px 2px; text-align:center; border-top:2px solid #3b82f6;">
+          <div style="font-size:14px;">📅</div>
+          <div style="color:#3b82f6; font-size:8px; font-weight:bold;">Lịch trình</div>
+        </div>
+        <div style="flex:1; padding:8px 2px; text-align:center;">
+          <div style="font-size:14px;">📋</div>
+          <div style="color:#888; font-size:8px;">Thư viện</div>
+        </div>
+        <div style="flex:1; padding:8px 2px; text-align:center;">
+          <div style="font-size:14px;">🤖</div>
+          <div style="color:#888; font-size:8px;">AI</div>
+        </div>
+        <div style="flex:1; padding:8px 2px; text-align:center;">
+          <div style="font-size:14px;">🛒</div>
+          <div style="color:#888; font-size:8px;">Đi chợ</div>
+        </div>
+        <div style="flex:1; padding:8px 2px; text-align:center; background:#1a0a0a;">
+          <div style="font-size:14px;">📊</div>
+          <div style="color:#ef4444; font-size:8px;">Dashboard</div>
+        </div>
+        <div style="flex:1; padding:8px 2px; text-align:center; background:#1a0a0a;">
+          <div style="font-size:14px;">🏋️</div>
+          <div style="color:#ef4444; font-size:8px;">Tập</div>
+        </div>
+        <div style="flex:1; padding:8px 2px; text-align:center;">
+          <div style="font-size:14px;">⚙️</div>
+          <div style="color:#888; font-size:8px;">Cài đặt</div>
+        </div>
+      </div>
+      <div style="padding:8px; text-align:center; color:#ef4444; font-size:11px; background:#1a0808;">
+        ⚠️ Touch target quá nhỏ (< 44px) • Text bị cắt • Icon khó phân biệt • Violates HIG/Material guidelines
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr style="border-color:#333; margin: 24px 0;">
+
+<h2>✅ 4 Giải pháp — Chọn 1</h2>
+
+<div class="options">
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Sub-tabs trong Calendar ⭐ Recommended</h3>
+      <p>Giữ 5 tabs. Calendar có 3 sub-tabs: <strong>Meals | Nutrition | Luyện tập</strong>. Dashboard tích hợp vào Nutrition sub-tab (thêm charts/trends). Không cần thêm tab mới — mọi thứ liên quan đến "ngày hôm nay" đều ở Calendar.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Replace "Đi chợ" bằng "More" menu</h3>
+      <p>Giữ 5 tabs, nhưng tab cuối thành ☰ "Thêm" chứa: Đi chợ, Luyện tập, Dashboard, Cài đặt. Các feature ít dùng hằng ngày ẩn sau 1 tap. Pattern phổ biến (Instagram, Spotify).</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Swipeable tabs + dots indicator</h3>
+      <p>Giữ 5 tabs visible, 2 tabs ẩn ở bên phải (vuốt để reveal). Dùng dots indicator hiển thị có thêm tabs. Pattern giống TikTok (vuốt giữa For You và Following).</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="D" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Gộp Dashboard + Luyện tập thành 1 tab "Fitness"</h3>
+      <p>Thêm 1 tab "Fitness" (thay vì 2). Bên trong có 2 sub-tabs: Dashboard (charts/trends) và Luyện tập (workout log). Tổng 6 tabs — vẫn hơi đông nhưng chấp nhận được.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>📐 So sánh trực quan 4 phương án</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <!-- Option A -->
+    <div class="mockup">
+      <div class="mockup-header">A: Sub-tabs trong Calendar (5 tabs)</div>
+      <div class="mockup-body" style="padding:0;">
+        <div style="padding:8px; background:#0f172a;">
+          <div style="display:flex; gap:4px; margin-bottom:8px;">
+            <span style="background:#1e40af; color:white; padding:4px 8px; border-radius:12px; font-size:10px;">Meals</span>
+            <span style="background:#1e293b; color:#94a3b8; padding:4px 8px; border-radius:12px; font-size:10px;">Nutrition</span>
+            <span style="background:#052e16; color:#4ade80; padding:4px 8px; border-radius:12px; font-size:10px; border:1px solid #22c55e;">🆕 Luyện tập</span>
+          </div>
+          <div style="background:#1e293b; padding:16px; border-radius:6px; text-align:center; color:#64748b; font-size:10px;">
+            Meal slots / Nutrition charts / Training log<br>(tùy sub-tab đang active)
+          </div>
+        </div>
+        <div style="display:flex; background:#1a1a2e;">
+          <div style="flex:1; padding:8px; text-align:center; border-top:2px solid #3b82f6;">
+            <div style="font-size:16px;">📅</div>
+            <div style="color:#3b82f6; font-size:9px;">Lịch trình</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">📋</div>
+            <div style="color:#888; font-size:9px;">Thư viện</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">🤖</div>
+            <div style="color:#888; font-size:9px;">AI</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">🛒</div>
+            <div style="color:#888; font-size:9px;">Đi chợ</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">⚙️</div>
+            <div style="color:#888; font-size:9px;">Cài đặt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option B -->
+    <div class="mockup">
+      <div class="mockup-header">B: "More" menu (5 tabs)</div>
+      <div class="mockup-body" style="padding:0;">
+        <div style="padding:8px; background:#0f172a;">
+          <div style="background:#1e293b; padding:16px; border-radius:6px; text-align:center; color:#64748b; font-size:10px;">
+            Main content area
+          </div>
+        </div>
+        <div style="display:flex; background:#1a1a2e;">
+          <div style="flex:1; padding:8px; text-align:center; border-top:2px solid #3b82f6;">
+            <div style="font-size:16px;">📅</div>
+            <div style="color:#3b82f6; font-size:9px;">Lịch trình</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">📋</div>
+            <div style="color:#888; font-size:9px;">Thư viện</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">🤖</div>
+            <div style="color:#888; font-size:9px;">AI</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center; background:#0f2a0f; border-top:2px solid #22c55e;">
+            <div style="font-size:16px;">📊</div>
+            <div style="color:#4ade80; font-size:9px;">Dashboard</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">☰</div>
+            <div style="color:#888; font-size:9px;">Thêm</div>
+          </div>
+        </div>
+        <div style="padding:4px 8px; background:#1e293b; font-size:9px; color:#94a3b8; text-align:center;">
+          ☰ Thêm → 🛒 Đi chợ | 🏋️ Luyện tập | ⚙️ Cài đặt
+        </div>
+      </div>
+    </div>
+
+    <!-- Option C -->
+    <div class="mockup">
+      <div class="mockup-header">C: Swipeable tabs (5+2 hidden)</div>
+      <div class="mockup-body" style="padding:0;">
+        <div style="padding:8px; background:#0f172a;">
+          <div style="background:#1e293b; padding:16px; border-radius:6px; text-align:center; color:#64748b; font-size:10px;">
+            Main content area
+          </div>
+        </div>
+        <div style="display:flex; background:#1a1a2e; position:relative;">
+          <div style="flex:1; padding:8px; text-align:center; border-top:2px solid #3b82f6;">
+            <div style="font-size:16px;">📅</div>
+            <div style="color:#3b82f6; font-size:9px;">Lịch trình</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">📋</div>
+            <div style="color:#888; font-size:9px;">Thư viện</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">🤖</div>
+            <div style="color:#888; font-size:9px;">AI</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">🛒</div>
+            <div style="color:#888; font-size:9px;">Đi chợ</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:16px;">⚙️</div>
+            <div style="color:#888; font-size:9px;">Cài đặt</div>
+          </div>
+          <div style="position:absolute; right:2px; top:50%; transform:translateY(-50%); color:#666; font-size:12px;">›</div>
+        </div>
+        <div style="text-align:center; padding:4px; background:#0f172a;">
+          <span style="color:#3b82f6;">●</span>
+          <span style="color:#333;">●</span>
+          <span style="color:#333; font-size:8px;">← vuốt để xem thêm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option D -->
+    <div class="mockup">
+      <div class="mockup-header">D: Tab "Fitness" gộp (6 tabs)</div>
+      <div class="mockup-body" style="padding:0;">
+        <div style="padding:8px; background:#0f172a;">
+          <div style="display:flex; gap:4px; margin-bottom:8px;">
+            <span style="background:#7c2d12; color:#fb923c; padding:4px 8px; border-radius:12px; font-size:10px; border:1px solid #ea580c;">Dashboard</span>
+            <span style="background:#1e293b; color:#94a3b8; padding:4px 8px; border-radius:12px; font-size:10px;">Luyện tập</span>
+          </div>
+          <div style="background:#1e293b; padding:16px; border-radius:6px; text-align:center; color:#64748b; font-size:10px;">
+            Dashboard charts / Training log<br>(tùy sub-tab)
+          </div>
+        </div>
+        <div style="display:flex; background:#1a1a2e;">
+          <div style="flex:1; padding:8px; text-align:center; border-top:2px solid #3b82f6;">
+            <div style="font-size:15px;">📅</div>
+            <div style="color:#3b82f6; font-size:9px;">Lịch trình</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:15px;">📋</div>
+            <div style="color:#888; font-size:9px;">Thư viện</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:15px;">🤖</div>
+            <div style="color:#888; font-size:9px;">AI</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:15px;">🛒</div>
+            <div style="color:#888; font-size:9px;">Đi chợ</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center; background:#0f2a0f; border-top:2px solid #22c55e;">
+            <div style="font-size:15px;">💪</div>
+            <div style="color:#4ade80; font-size:9px;">Fitness</div>
+          </div>
+          <div style="flex:1; padding:8px; text-align:center;">
+            <div style="font-size:15px;">⚙️</div>
+            <div style="color:#888; font-size:9px;">Cài đặt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,248 @@
+<h2>Section 1: Data Architecture — SQLite Migration</h2>
+<p class="subtitle">Kiến trúc tổng thể: từ localStorage sang SQLite unified</p>
+
+<div class="section">
+  <h3>🏗️ System Architecture</h3>
+  <div class="mockup">
+    <div class="mockup-header">Architecture Overview — Smart Meal Planner v2.0</div>
+    <div class="mockup-body" style="padding:24px; font-family: monospace; font-size: 13px; line-height: 1.6;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <!-- UI Layer -->
+        <div style="background:#1e3a5f; padding:12px; border-radius:8px; text-align:center; grid-column:1/-1;">
+          <div style="color:#60a5fa; font-weight:bold; margin-bottom:8px;">📱 UI Layer (React Components)</div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            <span style="background:#2563eb; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">Calendar</span>
+            <span style="background:#2563eb; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">Thư viện</span>
+            <span style="background:#2563eb; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">AI Phân tích</span>
+            <span style="background:#2563eb; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">Đi chợ</span>
+            <span style="background:#16a34a; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">🆕 Dashboard</span>
+            <span style="background:#16a34a; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">🆕 Luyện tập</span>
+            <span style="background:#2563eb; color:white; padding:4px 10px; border-radius:4px; font-size:11px;">Cài đặt</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Business Logic Layer -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <div style="background:#1a2e1a; padding:10px; border-radius:8px; border:1px solid #22c55e;">
+          <div style="color:#4ade80; font-weight:bold; font-size:11px; margin-bottom:6px;">🧮 Nutrition Engine</div>
+          <div style="color:#86efac; font-size:10px;">BMR (Mifflin-St Jeor)<br>TDEE Calculator<br>Macro Split Algorithm<br>Caloric Target</div>
+        </div>
+        <div style="background:#2a1a1a; padding:10px; border-radius:8px; border:1px solid #ef4444;">
+          <div style="color:#f87171; font-weight:bold; font-size:11px; margin-bottom:6px;">🏋️ Training Engine</div>
+          <div style="color:#fca5a5; font-size:10px;">Volume Calculator<br>RPE Tracker<br>Progressive Overload<br>Activity Auto-Adjust</div>
+        </div>
+        <div style="background:#1a1a2e; padding:10px; border-radius:8px; border:1px solid #a855f7;">
+          <div style="color:#c084fc; font-weight:bold; font-size:11px; margin-bottom:6px;">🔄 Feedback Loop</div>
+          <div style="color:#d8b4fe; font-size:10px;">7-Day Moving Avg<br>Auto-Adjust ±200kcal<br>Adherence Rate<br>Trend Analysis</div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="text-align:center; color:#666; font-size:18px; margin:8px 0;">▼ ▼ ▼</div>
+
+      <!-- Data Abstraction Layer -->
+      <div style="background:#2d2d00; padding:12px; border-radius:8px; border:1px solid #eab308; margin-bottom:12px;">
+        <div style="color:#facc15; font-weight:bold; text-align:center; margin-bottom:8px;">🔌 Database Abstraction Layer (Platform Service)</div>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <div style="background:#422006; padding:8px 16px; border-radius:6px; text-align:center;">
+            <div style="color:#fb923c; font-size:11px; font-weight:bold;">Web</div>
+            <div style="color:#fdba74; font-size:10px;">sql.js (WASM)</div>
+          </div>
+          <div style="color:#666; align-self:center;">|</div>
+          <div style="background:#422006; padding:8px 16px; border-radius:6px; text-align:center;">
+            <div style="color:#fb923c; font-size:11px; font-weight:bold;">Mobile</div>
+            <div style="color:#fdba74; font-size:10px;">Capacitor SQLite</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SQLite Tables -->
+      <div style="background:#0f172a; padding:12px; border-radius:8px; border:1px solid #3b82f6;">
+        <div style="color:#93c5fd; font-weight:bold; text-align:center; margin-bottom:8px;">💾 SQLite Database</div>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
+          <div style="background:#1e293b; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#60a5fa; font-size:10px; font-weight:bold;">ingredients</div>
+          </div>
+          <div style="background:#1e293b; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#60a5fa; font-size:10px; font-weight:bold;">dishes</div>
+          </div>
+          <div style="background:#1e293b; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#60a5fa; font-size:10px; font-weight:bold;">day_plans</div>
+          </div>
+          <div style="background:#1e293b; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#60a5fa; font-size:10px; font-weight:bold;">meal_templates</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 user_profile</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 weight_log</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 workouts</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 exercises</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 workout_sets</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 goals</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 daily_log</div>
+          </div>
+          <div style="background:#052e16; padding:6px; border-radius:4px; text-align:center;">
+            <div style="color:#4ade80; font-size:10px; font-weight:bold;">🆕 adjustments</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync -->
+      <div style="text-align:center; color:#666; font-size:18px; margin:8px 0;">▼</div>
+      <div style="background:#1e1e2e; padding:10px; border-radius:8px; border:1px solid #8b5cf6; text-align:center;">
+        <div style="color:#a78bfa; font-weight:bold; font-size:11px;">☁️ Google Drive Sync (meal-planner-backup.sqlite.json)</div>
+        <div style="color:#c4b5fd; font-size:10px;">Full DB export → JSON → Upload | Download → Import → Merge</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📊 SQLite Schema — New Tables</h3>
+  <div class="mockup">
+    <div class="mockup-header">Database Schema (8 new tables)</div>
+    <div class="mockup-body" style="padding:20px; font-family:monospace; font-size:11px; line-height:1.5;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        
+        <div style="background:#0f2a0f; padding:10px; border-radius:6px; border:1px solid #22c55e;">
+          <div style="color:#4ade80; font-weight:bold; margin-bottom:4px;">user_profile</div>
+          <div style="color:#86efac;">
+            id TEXT PK<br>
+            gender TEXT ('male'|'female')<br>
+            age INTEGER<br>
+            height_cm REAL<br>
+            weight_kg REAL<br>
+            activity_level TEXT<br>
+            bmr_override REAL (nullable)<br>
+            protein_ratio REAL (g/kg)<br>
+            fat_pct REAL (% of TDEE)<br>
+            updated_at TEXT
+          </div>
+        </div>
+
+        <div style="background:#0f2a0f; padding:10px; border-radius:6px; border:1px solid #22c55e;">
+          <div style="color:#4ade80; font-weight:bold; margin-bottom:4px;">goals</div>
+          <div style="color:#86efac;">
+            id TEXT PK<br>
+            type TEXT ('cut'|'bulk'|'maintain')<br>
+            target_weight_kg REAL<br>
+            calorie_offset INTEGER (±kcal)<br>
+            start_date TEXT<br>
+            end_date TEXT (nullable)<br>
+            is_active INTEGER (0|1)<br>
+            created_at TEXT
+          </div>
+        </div>
+
+        <div style="background:#2a0f0f; padding:10px; border-radius:6px; border:1px solid #ef4444;">
+          <div style="color:#f87171; font-weight:bold; margin-bottom:4px;">exercises</div>
+          <div style="color:#fca5a5;">
+            id TEXT PK<br>
+            name TEXT (localized JSON)<br>
+            muscle_group TEXT<br>
+            type TEXT ('compound'|'isolation')<br>
+            is_custom INTEGER (0|1)
+          </div>
+        </div>
+
+        <div style="background:#2a0f0f; padding:10px; border-radius:6px; border:1px solid #ef4444;">
+          <div style="color:#f87171; font-weight:bold; margin-bottom:4px;">workouts</div>
+          <div style="color:#fca5a5;">
+            id TEXT PK<br>
+            date TEXT<br>
+            name TEXT<br>
+            duration_min INTEGER<br>
+            notes TEXT<br>
+            created_at TEXT
+          </div>
+        </div>
+
+        <div style="background:#2a0f0f; padding:10px; border-radius:6px; border:1px solid #ef4444;">
+          <div style="color:#f87171; font-weight:bold; margin-bottom:4px;">workout_sets</div>
+          <div style="color:#fca5a5;">
+            id TEXT PK<br>
+            workout_id TEXT FK→workouts<br>
+            exercise_id TEXT FK→exercises<br>
+            set_number INTEGER<br>
+            reps INTEGER<br>
+            weight_kg REAL<br>
+            rpe REAL (1-10)<br>
+            rest_seconds INTEGER
+          </div>
+        </div>
+
+        <div style="background:#0f0f2a; padding:10px; border-radius:6px; border:1px solid #8b5cf6;">
+          <div style="color:#c084fc; font-weight:bold; margin-bottom:4px;">weight_log</div>
+          <div style="color:#d8b4fe;">
+            id TEXT PK<br>
+            date TEXT UNIQUE<br>
+            weight_kg REAL<br>
+            notes TEXT<br>
+            created_at TEXT
+          </div>
+        </div>
+
+        <div style="background:#0f0f2a; padding:10px; border-radius:6px; border:1px solid #8b5cf6;">
+          <div style="color:#c084fc; font-weight:bold; margin-bottom:4px;">daily_log</div>
+          <div style="color:#d8b4fe;">
+            id TEXT PK<br>
+            date TEXT UNIQUE<br>
+            target_calories REAL<br>
+            actual_calories REAL<br>
+            target_protein REAL<br>
+            actual_protein REAL<br>
+            adherence_cal INTEGER (0|1)<br>
+            adherence_protein INTEGER (0|1)
+          </div>
+        </div>
+
+        <div style="background:#0f0f2a; padding:10px; border-radius:6px; border:1px solid #8b5cf6;">
+          <div style="color:#c084fc; font-weight:bold; margin-bottom:4px;">adjustments</div>
+          <div style="color:#d8b4fe;">
+            id TEXT PK<br>
+            date TEXT<br>
+            reason TEXT<br>
+            old_target_cal REAL<br>
+            new_target_cal REAL<br>
+            trigger TEXT ('auto'|'manual')<br>
+            moving_avg_weight REAL
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Section này có OK không?</h3>
+<p class="subtitle">Click để phản hồi, hoặc trả lời trong terminal</p>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✅</div>
+    <div class="content">
+      <h3>OK — Tiếp tục section tiếp</h3>
+      <p>Architecture và schema hợp lý, sang phần tiếp theo</p>
+    </div>
+  </div>
+  <div class="option" data-choice="modify" onclick="toggleSelect(this)">
+    <div class="letter">✏️</div>
+    <div class="content">
+      <h3>Cần chỉnh sửa</h3>
+      <p>Tôi muốn thay đổi schema hoặc architecture</p>
+    </div>
+  </div>
+</div>
