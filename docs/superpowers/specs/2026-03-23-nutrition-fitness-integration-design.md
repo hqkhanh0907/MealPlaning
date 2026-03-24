@@ -9,7 +9,7 @@
 Tích hợp 3 hệ thống vào meal planner hiện tại:
 1. **Nutrition Engine** — BMR (Mifflin-St Jeor) → TDEE → Caloric Target → Macro Split
 2. **Training System** — Workout logging với sets/reps/weight/RPE, progressive overload tracking
-3. **Feedback Loop** — Moving average weight (7 ngày), auto-adjust ±150-200 kcal sau 2 tuần, adherence rate
+3. **Feedback Loop** — Moving average weight (7 ngày), auto-adjust ±150 kcal sau 2 tuần, adherence rate
 
 **Approach:** Big Bang Migration — chuyển toàn bộ data từ localStorage sang SQLite (sql.js WASM cho web, @capacitor-community/sqlite cho mobile).
 
@@ -184,6 +184,28 @@ CREATE TABLE training_profile (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE training_plans (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  name TEXT NOT NULL,
+  status TEXT DEFAULT 'active' CHECK(status IN ('active', 'completed', 'paused')),
+  split_type TEXT NOT NULL,
+  duration_weeks INTEGER NOT NULL,
+  start_date TEXT NOT NULL,
+  end_date TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE training_plan_days (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  plan_id TEXT NOT NULL REFERENCES training_plans(id) ON DELETE CASCADE,
+  day_of_week INTEGER NOT NULL CHECK(day_of_week BETWEEN 0 AND 6),
+  workout_type TEXT NOT NULL,
+  muscle_groups TEXT,
+  exercises TEXT,
+  notes TEXT
+);
+
 CREATE TABLE exercises (
   id TEXT PRIMARY KEY,
   name_vi TEXT NOT NULL,
@@ -245,6 +267,10 @@ CREATE TABLE daily_log (
   actual_calories REAL NOT NULL,
   target_protein REAL NOT NULL,
   actual_protein REAL NOT NULL,
+  target_fat REAL,
+  actual_fat REAL DEFAULT 0,
+  target_carbs REAL,
+  actual_carbs REAL DEFAULT 0,
   adherence_cal INTEGER NOT NULL DEFAULT 0, -- 0|1: within ±100kcal
   adherence_protein INTEGER NOT NULL DEFAULT 0, -- 0|1: within ±10g
   updated_at TEXT NOT NULL
@@ -987,31 +1013,18 @@ function calculateAdherence(
 
 ### 6.4 File Structure
 
-```
-src/features/dashboard/
-├── components/
-│   ├── WeightChart.tsx          — SVG line chart (daily dots + moving avg line)
-│   ├── CalorieTrendChart.tsx    — Bar chart (daily cal vs target)
-│   ├── AdherenceCard.tsx        — % tuân thủ calo/protein
-│   ├── AutoAdjustBanner.tsx     — Thông báo đề xuất điều chỉnh
-│   ├── AdjustmentHistory.tsx    — Timeline lịch sử điều chỉnh
-│   ├── VolumeChart.tsx          — Weekly volume bar chart
-│   ├── MuscleGroupBars.tsx      — Volume theo nhóm cơ
-│   ├── NutritionEngineCard.tsx  — BMR/TDEE/Target/Macro display
-│   └── WeightQuickEntry.tsx     — Quick weight input
-├── hooks/
-│   └── useDashboard.ts
-├── store/
-│   └── dashboardStore.ts        — Zustand store for dashboard data
-└── types.ts
+> Dashboard file structure is defined in section 6.6.1. The feedback loop components (AutoAdjustBanner, AdjustmentHistory) are included there.
 
-src/hooks/
+Core feedback loop hook location (feature-based):
+
+```
+src/features/dashboard/hooks/
 └── useFeedbackLoop.ts           — Moving avg, auto-adjust, adherence
 ```
 
 ### 6.5 Nutrition ↔ Fitness Connection — Unified Daily Balance
 
-Một component `EnergyBalance` duy nhất hiển thị ở 2 vị trí:
+Một component `EnergyBalanceCard` duy nhất hiển thị ở 2 vị trí:
 1. **Calendar Tab** → Nutrition sub-tab (top section)
 2. **Fitness Tab** → Plan sub-tab (dưới workout card)
 
@@ -1033,6 +1046,208 @@ Một component `EnergyBalance` duy nhất hiển thị ở 2 vị trí:
 **Real-time sync:** Component updates immediately when user logs a meal (Calendar) or completes a workout (Fitness).
 
 **Collapsible:** User can collapse to a single-line summary bar if desired.
+
+### 6.6 Dashboard Tab — Daily Command Center
+
+**Concept:** Dashboard = TODAY's real-time snapshot. Shows current day's data only. Not a history view (that's Calendar for meals, Fitness Progress for training).
+
+**Information Hierarchy (5 Tiers, F-pattern):**
+
+#### Tier 1: Hero — Daily Score (0.5s glance)
+
+Gradient card with greeting + composite score 0-100.
+
+**Daily Score Formula:**
+```
+score = (cal_score × 0.30) + (protein_score × 0.25) + (workout_score × 0.25) + (weight_log_score × 0.10) + (streak_bonus × 0.10)
+```
+
+Factor scoring:
+- `cal_score`: Based on calorie deviation from target. ≤50 kcal → 100, ≤100 → 90, ≤200 → 70, ≤500 → 40, >500 → 10
+- `protein_score`: Ratio actual/target. ≥1.0 → 100, ≥0.9 → 80, ≥0.7 → 60, ≥0.5 → 40, <0.5 → 20
+- `workout_score`: completed → 100, rest day → 100, not yet (before 20:00) → 50, missed (after 20:00) → 0
+- `weight_log_score`: logged today → 100, yesterday → 50, >1 day ago → 0
+- `streak_bonus`: min(streak_days × 5, 100)
+
+**Null handling (morning/partial data):** When factors have no data (e.g., morning — no meals logged), exclude those factors and redistribute weights proportionally among available factors. Never show "0" score.
+
+**Visual treatment by score range:**
+- Green ≥80: Emerald gradient (#10b981 → #059669)
+- Amber 50-79: Amber gradient (#f59e0b → #d97706)
+- Slate <50: Slate gradient (#64748b → #475569)
+- **NEVER red** — avoid shame-driven design
+
+> **Note:** This no-red principle applies to all Dashboard components, including insight cards. P1 alerts use dark amber (#92400e background) for urgency without red.
+
+**Sub-scores** displayed as mini badges below greeting (🍽️90 🥩60 🏋️100 ⚖️100 🔥60).
+
+#### Tier 2: Key Metrics — Energy Balance + Protein (2s scan)
+
+**Energy Balance:** Reuses the `EnergyBalanceCard` component from section 6.5. Compact version (~80px) showing: Eaten − Burned = Net. Tap → macro detail bottom sheet with donut chart + BMR/TDEE/Target + per-meal breakdown.
+
+**Protein Progress:** Inline progress bar with current/target grams. Suggestion logic by deficit:
+- Deficit ≤20g: "Gần đạt!"
+- Deficit 20-50g: Specific food suggestion (e.g., "150g ức gà ~46g protein")
+- Deficit >50g: "Cần bổ sung đáng kể"
+
+#### Tier 3: Context — Today's Plan + Weight Mini + Streak Mini (5s read)
+
+**Today's Plan Card** — 4 states:
+
+| State | Condition | Workout Side | Meals Side |
+|---|---|---|---|
+| Training, not started | Has plan + not logged | Exercise name + "▶️ Bắt đầu" CTA → WorkoutLogger | "2/3 bữa" + "Log tối" CTA |
+| Training, completed | Workout session done | Summary (duration, sets, PR highlight) | "3/3 ✅ Đạt target" |
+| Rest day | Schedule says rest | Recovery tips + tomorrow preview | Meals CTA |
+| No plan | No training_plan exists | "Tạo plan →" CTA → FitnessOnboarding | Meals CTA |
+
+**Weight Mini** — Goal-aware color logic:
+- Cut + losing weight = Green ✅ (on track)
+- Cut + gaining weight = Amber ⚠️ (off track)
+- Bulk + gaining moderately = Green ✅
+- Bulk + gaining too fast (>0.5kg/week) = Amber ⚠️
+- Maintain + stable (±0.3kg/week) = Green ✅
+- 7-day sparkline. Tap → full weight chart bottom sheet.
+
+**Streak Mini** — Compact week dots (Mon-Sun), current streak count + personal record. Tap → month calendar + milestone progress bottom sheet.
+
+#### Tier 4: Insights — AI Insight Card (10s analyze)
+
+Priority-based insight engine. Shows exactly **1 insight** at a time, highest priority wins.
+
+| Priority | Trigger Condition | Type | Color |
+|---|---|---|---|
+| P1 | Auto-adjust triggered (14-day eval) | Alert | Dark amber bg |
+| P2 | Protein <70% target, after 18:00 | Action | Amber bg |
+| P3 | Weight not logged >3 days | Remind | Amber bg |
+| P4 | Streak within 2 days of personal record | Motivate | Blue bg |
+| P5 | PR achieved today | Celebrate | Blue bg |
+| P6 | Weekly adherence ≥85% | Praise | Green bg |
+| P7 | Weight trend correct direction ≥2 weeks | Progress | Green bg |
+| P8 | No specific trigger (default) | Tip | Gray bg |
+
+**Dismiss logic:**
+- Alert (P1): Persist until user taps "Xem chi tiết" or "Bỏ qua"
+- Action/Remind (P2-P3): Dismiss → show next priority. Reappear next session if condition still true
+- Motivate/Celebrate/Praise (P4-P7): Auto-dismiss after 24h or user swipe
+- Tip (P8): Random from pool of ~20 tips, rotate daily, no repeat within 7 days
+
+#### Tier 5: Actions — Quick Actions Bar (thumb zone)
+
+3 context-aware action buttons. Center button = most useful action right now (larger, emerald).
+
+| Context | Left | Center (primary) | Right |
+|---|---|---|---|
+| Morning (nothing logged) | ⚖️ Log cân | ➕ Log bữa sáng | 🏋️ Bắt đầu tập |
+| Already logged breakfast+lunch | ⚖️ Log cân | ➕ Log bữa tối | 🏋️ Bắt đầu tập |
+| Rest day | ⚖️ Log cân | ➕ Log bữa ăn | 🏃 Log cardio |
+| Workout completed | ⚖️ Log cân | ➕ Log bữa ăn | 📊 Xem kết quả |
+| All 3 meals logged | ⚖️ Log cân | 🏋️ Bắt đầu tập | ➕ Thêm snack |
+
+**Weight Quick Log:** Bottom sheet with ±0.1kg stepper buttons, recent values as quick-select chips, yesterday's weight + 7-day MA display.
+
+#### Edge Cases & Special States
+
+**State 1 — First-Time User (Day 0):**
+- Daily Score: Hidden (not "0")
+- Hero: Slate gradient + "Hãy bắt đầu nào! 🚀" + 3-step checklist (Profile → Weight → First Meal)
+- Components: Skeleton previews showing what dashboard WILL look like
+- Insight: Onboarding tip
+
+**State 2 — Morning (Partial Data):**
+- Exclude factors with no data, redistribute weights proportionally
+- Show score + "(cập nhật khi log thêm)" label
+- Quick Actions: Center = "➕ Log bữa sáng"
+
+**State 3 — Perfect Day (All Complete):**
+- Greeting: "Ngày hoàn hảo! 🎯"
+- Today's Plan: Green border + "✅ Ngày hoàn thành"
+- Insight: Praise type (celebrate, don't push more)
+- Quick Actions: Shift to review mode (Xem kết quả, Kế hoạch mai)
+
+**State 4 — Nutrition-Only User (No Training Plan):**
+- Daily Score: 4-factor formula (Cal 40%, Protein 30%, Weight 15%, Streak 15%)
+- Workout factor excluded, weights redistributed
+- Today's Plan: Only meals side (full width)
+- Quick Actions: Hide "Bắt đầu tập", replace with "📊 Macro detail"
+- Gentle upsell: After 14 days, show once: "💪 Kết hợp tập luyện giúp tối ưu kết quả — Khám phá"
+
+**State 5 — Goal Transition:**
+- 3-day transition banner in Tier 4 (replaces insight)
+- Auto-recalculate all targets immediately
+- Weight trend color logic auto-adapts
+- Streak does NOT reset across goal changes
+
+**State 6 — Error/Offline:**
+- Component-level isolation: each component has its own try/catch
+- One component failing → that component shows skeleton; others work normally
+- Offline: 100% functional (local SQLite, no network needed for dashboard)
+- Performance budget: Dashboard load <200ms, each SQL query <25ms
+- Lazy load Tier 4-5 after Tier 1-3 renders
+
+#### 6.6.1 Dashboard File Structure
+
+```
+src/features/dashboard/
+├── components/
+│   ├── DashboardTab.tsx          # Main container, orchestrates tiers
+│   ├── DailyScoreHero.tsx        # Tier 1: Score + greeting
+│   ├── EnergyBalanceMini.tsx     # Tier 2: Compact energy balance (reuses EnergyBalanceCard)
+│   ├── ProteinProgress.tsx       # Tier 2: Protein bar + suggestion
+│   ├── TodaysPlanCard.tsx        # Tier 3: Workout + meals status (4 states)
+│   ├── WeightMini.tsx            # Tier 3: Goal-aware weight display
+│   ├── StreakMini.tsx             # Tier 3: Week dots + count
+│   ├── AiInsightCard.tsx         # Tier 4: Priority-based insight
+│   ├── QuickActionsBar.tsx       # Tier 5: Context-aware 3 buttons
+│   ├── WeightQuickLog.tsx        # Bottom sheet for quick weight entry
+│   ├── AutoAdjustBanner.tsx      # Alert banner when targets auto-adjusted
+│   └── AdjustmentHistory.tsx     # History of all auto-adjustments
+├── hooks/
+│   ├── useDailyScore.ts          # Calculates 5-factor score with null handling
+│   ├── useTodaysPlan.ts          # Fetches today's workout + meal status
+│   ├── useInsightEngine.ts       # Priority-based insight selection (P1-P8)
+│   ├── useQuickActions.ts        # Context-aware action determination
+│   └── useFeedbackLoop.ts        # Moving average, auto-adjust logic
+├── utils/
+│   └── scoreCalculator.ts        # Pure functions for score factors
+├── types.ts                      # Dashboard-specific types
+└── store/
+    └── dashboardStore.ts         # Dashboard Zustand store
+```
+
+#### 6.6.2 Dashboard SQL Queries (6 core)
+
+```sql
+-- Q1: Energy Balance (today)
+SELECT actual_calories, actual_protein, actual_fat, actual_carbs,
+       target_calories, target_protein, target_fat, target_carbs
+FROM daily_log WHERE date = DATE('now');
+
+-- Q2: Workout Status (today)
+SELECT w.id, w.date, w.name, w.duration_min, w.notes,
+       (SELECT COUNT(*) FROM workout_sets wset WHERE wset.workout_id = w.id) as total_sets
+FROM workouts w WHERE w.date = DATE('now');
+
+-- Q3: Weight (last 7 days)
+SELECT date, weight_kg FROM weight_log
+WHERE date >= DATE('now', '-7 days') ORDER BY date;
+
+-- Q4: Streak (last 30 days activity)
+SELECT date, actual_calories > 0 as has_meal,
+       EXISTS(SELECT 1 FROM workouts w WHERE w.date = dl.date) as has_workout
+FROM daily_log dl WHERE date >= DATE('now', '-30 days');
+
+-- Q5: Training Plan (today's schedule)
+SELECT tp.name, tp.status, tpd.day_of_week, tpd.workout_type, tpd.exercises
+FROM training_plans tp
+JOIN training_plan_days tpd ON tp.id = tpd.plan_id
+WHERE tp.status = 'active' AND tpd.day_of_week = CAST(strftime('%w', 'now') AS INTEGER);
+
+-- Q6: Recent adjustments (for P1 insight)
+SELECT old_target_cal, new_target_cal, reason, created_at
+FROM adjustments WHERE created_at >= DATE('now', '-3 days')
+ORDER BY created_at DESC LIMIT 1;
+```
 
 ## 7. Health Profile
 
@@ -1113,6 +1328,8 @@ Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRa
     "goals": [...],
     "exercises": [...],
     "training_profile": [...],
+    "training_plans": [...],
+    "training_plan_days": [...],
     "workouts": [...],
     "workout_sets": [...],
     "weight_log": [...],
@@ -1128,7 +1345,7 @@ Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRa
 |---|---|---|
 | v1.x (localStorage JSON) | v2.0 device | Auto-upgrade: transform v1.x format to v2.0 schema, populate defaults for new fields |
 | v2.0 (SQLite JSON) | v1.x device | Graceful degrade: export includes `_legacyFormat` fallback with old key structure; v1.x ignores unknown keys |
-| v2.0 | v2.0 | Direct import: all 14 tables |
+| v2.0 | v2.0 | Direct import: all 16 tables |
 
 Version detection: check `_version` field in import JSON. If missing → v1.x format.
 
@@ -1209,10 +1426,20 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 - [ ] Connect sessions/week → Activity Multiplier auto-adjust
 
 ### Phase 6: Dashboard & Feedback Loop
-- [ ] Build DashboardTab (WeightChart, CalorieTrend, AdherenceCard)
 - [ ] Implement useFeedbackLoop (moving avg, auto-adjust)
 - [ ] Build AutoAdjustBanner + AdjustmentHistory
-- [ ] Build VolumeChart + MuscleGroupBars
+- [ ] Build DashboardTab container with 5-tier layout
+- [ ] Build DailyScoreHero (Tier 1) with 5-factor formula + null handling
+- [ ] Build EnergyBalanceMini (Tier 2) — compact version of EnergyBalanceCard
+- [ ] Build ProteinProgress (Tier 2) — bar + suggestion logic
+- [ ] Build TodaysPlanCard (Tier 3) — 4 states (training/completed/rest/no-plan)
+- [ ] Build WeightMini (Tier 3) — goal-aware colors + sparkline
+- [ ] Build StreakMini (Tier 3) — week dots + tap-for-detail
+- [ ] Build AiInsightCard (Tier 4) — priority engine P1-P8
+- [ ] Build QuickActionsBar (Tier 5) — context-aware 3 buttons
+- [ ] Build WeightQuickLog bottom sheet
+- [ ] Implement useDailyScore, useTodaysPlan, useInsightEngine, useQuickActions hooks
+- [ ] Handle 6 edge cases (first-time, morning, perfect day, nutrition-only, goal transition, error/offline)
 
 ### Phase 7: Polish & Testing
 - [ ] Unit tests for nutritionEngine (BMR, TDEE, Macro, auto-adjust)
@@ -1239,9 +1466,9 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 | Metric | Current | After |
 |---|---|---|
 | Bundle size | ~500KB | ~1MB (+500KB sql.js WASM) |
-| SQLite tables | 0 | 14 (+training_profile) |
-| New components | 0 | ~30 |
-| New hooks | 0 | ~8 |
+| SQLite tables | 0 | 16 (+training_profile, training_plans, training_plan_days) |
+| New components | 0 | ~40 |
+| New hooks | 0 | ~12 |
 | New services | 0 | 2 (databaseService, nutritionEngine) |
 | Pre-loaded data | 0 | ~150 exercises |
 | Data fields collected | 3 | 26 |
@@ -1308,3 +1535,9 @@ Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 | Progress dashboard | Insight-First (hero metric + sparkline cards + AI insights) | Stacked charts (scroll-heavy), Segmented tabs (confusing) | Glanceable in 2 seconds, tap-for-detail pattern, zero information overload |
 | Nutrition-Fitness bridge | Unified Daily Balance component (shared in 2 tabs) | Cross-tab banners (1-way info), Dedicated tab (too many tabs) | Single Source of Truth, auto-adjust calories on workout/rest days |
 | Gamification | MVP: Streak + PR Toast + Milestones (10 mốc) | Streak only (too minimal), Full badge system (overkill) | 3 elements cover Progress + Consistency + Achievement; grace period prevents all-or-nothing |
+| Dashboard concept | Daily Command Center (TODAY's snapshot) | Unified Health Hub (all analytics), Remove tab (merge) | Zero overlap with other tabs; each tab has clear purpose (Calendar=meals history, Fitness=training history, Dashboard=today) |
+| Daily Score | 5-factor weighted formula (Cal 30%, Protein 25%, Workout 25%, Weight 10%, Streak 10%) | Single metric (calories only), No score (just charts) | Composite score gamifies daily adherence; weight redistribution handles partial data fairly |
+| Score visual | Green/Amber/Slate (never red) | Traffic light (red/yellow/green), Numeric only | Avoid shame-driven design; slate for low scores is neutral, not punishing |
+| AI Insight engine | Priority-based single insight (P1-P8) | Multiple insights list, AI-generated text | Single insight prevents overwhelm; rule-based is deterministic and testable |
+| Quick Actions | Context-aware 3 buttons (center = primary) | Fixed buttons, FAB, swipe actions | Context awareness means most useful action is always prominent; 3 buttons fit thumb zone |
+| Dashboard edge cases | 6 states (first-time, morning, perfect, nutrition-only, goal-transition, error) | Generic empty state for all | Each state has specific UX treatment; never show empty or zero; component-level error isolation |
