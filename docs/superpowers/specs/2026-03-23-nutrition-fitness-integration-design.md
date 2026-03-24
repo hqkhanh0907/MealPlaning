@@ -276,7 +276,7 @@ CREATE INDEX idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id);
 
 ### 3.4 Seed Data
 
-~35 exercises pre-loaded:
+~150 exercises pre-loaded (representative examples below):
 
 | Muscle Group | Exercises |
 |---|---|
@@ -403,39 +403,51 @@ src/services/nutritionEngine.ts  — Pure calculation functions (BMR, TDEE, Macr
 
 ### 5.1 Navigation Architecture
 
-Fitness tab sử dụng **Sub-tabs + Modals** pattern (consistent với CalendarTab):
+Fitness tab sử dụng **Sub-tabs + Full-screen Pages** pattern (consistent với CalendarTab):
+
+- **WorkoutLogger** và **CardioLogger** là **full-screen pages** (KHÔNG phải modals) — header xanh "← Quay lại" + timer + "✕ Kết thúc"
+- **ExerciseSelector** là **bottom sheet** trong Logger (không phải modal riêng)
+- **Maximum navigation depth: 3 levels** — L1 (Fitness tab) → L2 (Plan/Progress/History sub-tabs) → L3 (Full-screen Logger with bottom sheets)
+- **Bottom tab hides** khi đang tập (focus mode)
+- History items **expand in-place** (không cần navigation)
 
 ```
-Fitness Tab
+Fitness Tab (L1)
 ├── Sub-tabs: [📋 Plan] [📊 Progress] [📜 History]
 │
-├── Plan sub-tab (home):
+├── Plan sub-tab (L2):
 │   ├── Weekly calendar strip (7 days, color-coded)
 │   ├── Today's workout card + "▶️ Bắt đầu" button
+│   │   └── Tap "▶️ Bắt đầu" → Full-screen WorkoutLogger (L3)
 │   └── Quick weight input bar (bottom)
 │
-├── Progress sub-tab:
-│   ├── Cycle progress bar (Week N of M)
-│   ├── Volume trend chart (line, 8 weeks)
-│   ├── Weight trend chart (moving avg + daily)
-│   └── Stats cards (adherence, 1RM estimates)
+├── Progress sub-tab (L2):
+│   ├── Hero metric card (gradient, e.g. "+12% Volume tuần này" with sparkline)
+│   ├── Swipeable metric cards: Weight | 1RM | Adherence | Sessions
+│   │   └── Tap card → Bottom sheet with full chart + time range filters (1W/1M/3M/All)
+│   ├── Cycle progress bar (Week N of M, % completion)
+│   └── AI Insights section (2-3 actionable insights with dismiss)
 │
-├── History sub-tab:
+├── History sub-tab (L2):
 │   ├── Reverse-chronological workout list
 │   ├── Filter chips: All | Strength | Cardio
-│   └── Tap → expanded read-only view
+│   └── Tap → expanded in-place read-only view (no navigation)
 │
-└── Full-screen modals:
+└── Full-screen pages (L3, bottom tab hidden):
     ├── WorkoutLogger (strength: sets/reps/weight)
-    ├── CardioLogger (duration/distance/HR)
-    └── ExerciseSelector (search + filter + custom)
+    │   ├── Green header: "← Quay lại" + ⏱️ timer + "✕ Kết thúc"
+    │   └── ExerciseSelector (bottom sheet within Logger)
+    └── CardioLogger (duration/distance/HR)
+        └── Green header: "← Quay lại" + ⏱️ timer + "✕ Kết thúc"
 ```
 
-First-time users see **FitnessOnboarding** wizard before Plan view.
+First-time users see **FitnessOnboarding** (B+C Hybrid) before Plan view.
+
+> **Phase 2:** Floating mini indicator khi user rời Fitness tab trong lúc đang tập: "🏋️ Đang tập — 12:34" — tap để quay lại Logger.
 
 ### 5.2 Training Profile Data Collection (14 fields)
 
-Collected during Fitness Onboarding (5-step wizard):
+Collected during Fitness Onboarding (**B+C Hybrid — Quick Start + Adaptive Expand**):
 
 | # | Field | Type | Options | Purpose |
 |---|---|---|---|---|
@@ -454,12 +466,25 @@ Collected during Fitness Onboarding (5-step wizard):
 | 13 | known_1rm | TEXT (JSON object, optional) | { squat, bench, deadlift, ohp } in kg | Precise weight assignment |
 | 14 | avg_sleep_hours | REAL (optional) | 4-12 | Recovery adjustment (-10% volume if <7h) |
 
-**Onboarding steps:**
-1. Experience level (3 cards)
-2. Schedule (days/week slider + session duration)
-3. Equipment + Injuries (multi-select chips)
-4. Training preferences (goal, periodization, cycle, cardio)
-5. Priority muscles (optional) + Review → "Tạo Plan"
+**B+C Hybrid Onboarding:**
+
+**Default mode: Quick Start** — 3 core fields always shown:
+1. `training_goal` (strength / hypertrophy / endurance / general)
+2. `training_experience` (beginner / intermediate / advanced)
+3. `days_per_week` (2-6)
+
+**Expandable "Tùy chỉnh thêm ▼"** section — adaptive by experience level:
+- **Beginner:** max 7 fields (core 3 + session_duration, equipment, injuries, cardio)
+- **Intermediate:** max 10 fields (+ periodization, cycle_weeks, priority_muscles)
+- **Advanced:** max 12 fields (+ known_1rm, avg_sleep_hours)
+
+**Smart Defaults Logic** — AI derives remaining 11 fields from 3 inputs:
+- beginner + hypertrophy + 3d → Full Body, Linear, 8 weeks, 45min, etc.
+- advanced + strength + 5d → Upper/Lower, Block, 12 weeks, 90min, etc.
+
+**Completion time:** Beginner ~20s, Intermediate ~45s, Advanced ~90s
+
+All fields always editable later in **Settings → Training Profile**.
 
 ### 5.3 Plan Generation Algorithm
 
@@ -554,6 +579,8 @@ function scheduleCardio(
   strengthDays: DayOfWeek[],
   cardioSessions: number,
   allDays: DayOfWeek[],
+  profile: TrainingProfile,
+  healthProfile: UserProfile,
 ): CardioSchedule {
   const restDays = allDays.filter(d => !strengthDays.includes(d));
 
@@ -625,6 +652,29 @@ function suggestNextSet(exercise: Exercise, lastSession: WorkoutSet[]): SetSugge
 - **Deload alert**: Reached end of plan_cycle_weeks → suggest deload week
 - **RPE trending**: Average RPE > 9 → overtraining warning, suggest intensity reduction
 
+#### Workout Logger UI — Quick Confirm Card
+
+Mỗi set hiển thị dạng **card xác nhận nhanh** (1-2 taps thay vì 6-8 taps form truyền thống):
+
+**Phase 1 (Manual):** Inline weight/reps row + RPE pills (1-10) + "Log" button (4-6 taps)
+**Phase 2 (Pre-fill):** Large pre-filled values displayed prominently + "✅ Xác nhận" / "✏️ Sửa" buttons (1-2 taps)
+**Phase 3 (Smart):** AI suggestion with insight banner + confirm (1-2 taps)
+
+**Edit Mode:** Bottom sheet with:
+- ±2.5kg increment buttons
+- Quick weight chips (5 most recent values)
+- Number pad fallback
+- RPE selector (pill-based, 6-10)
+
+**Workout Flow (5 screens):**
+1. Plan → Tap "▶️ Bắt đầu" → Full-screen Logger opens
+2. Logger → Set cards in sequence, swipe for next exercise
+3. Rest Timer → Auto-shows after each set (90-180s countdown, +30s / Skip buttons)
+4. Next Exercise → Transition card with exercise name + target sets/reps
+5. Workout Complete → Summary (duration, volume, sets, PRs highlighted in gold 🏆)
+
+**Performance:** 20 sets/session → ~30 taps (vs ~80 taps with traditional form)
+
 ### 5.5 Cardio Logger
 
 Different UI from strength training — fields for duration-based exercises:
@@ -640,6 +690,23 @@ Different UI from strength training — fields for duration-based exercises:
 Calories auto-estimated: `duration × MET_VALUE[type][intensity] × weight_kg / 60`.
 
 HIIT mode: Configurable work/rest intervals with audible timer.
+
+### 5.5.1 Empty States & Smart Content
+
+Không bao giờ hiện bare "Không có dữ liệu" — mọi trạng thái trống đều có nội dung hữu ích + CTA.
+
+| State | Khi nào | Nội dung | CTA |
+|---|---|---|---|
+| **Rest Day** | Ngày không có workout trong plan | Recovery tips (đi bộ, uống nước, protein), preview ngày mai, quick actions (log cardio, log weight) | "Ghi nhận cân nặng" / "Log cardio nhẹ" |
+| **First Time** | Chưa setup Training Profile | Welcome hero + 3 benefits (track, plan, improve) | "Bắt đầu setup →" (opens B+C Hybrid onboarding) |
+| **Plan Expired** | Hết chu kỳ training | Cycle summary (sessions completed, volume %, weight change, PRs) | "Tạo chu kỳ mới" / "Chỉnh mục tiêu" |
+| **No Data** | Progress/History tabs khi chưa có data | Skeleton preview (mờ) showing what charts/lists will look like | "Bắt đầu tập ngay →" |
+
+**Rest Day Detail:**
+- Gradient card (blue-green) with recovery illustration
+- 3 tips: "🚶 Đi bộ 20 phút", "💧 Uống đủ 2L nước", "🥩 Đạt 166g protein"
+- "📋 Ngày mai: Upper Body A — 6 bài tập, ~45 phút"
+- Quick action chips: "📝 Log cân nặng" / "🏃 Log cardio nhẹ"
 
 ### 5.6 Exercise Database
 
@@ -689,6 +756,31 @@ function estimate1RM(weight: number, reps: number): number {
 }
 ```
 
+### 5.7.1 Gamification MVP
+
+3 elements vừa đủ — motivate, không manipulate.
+
+**🔥 Streak Counter** (Fitness Plan sub-tab, top):
+- Weekly dots view (T2-CN): ✓ = tập xong, 😴 = nghỉ đúng plan, 📍 = hôm nay
+- Current streak + personal record display
+- **Grace Period:** 1 "cheat day"/tuần — lần đầu bỏ → warning "Streak sắp mất!", lần thứ 2 → reset
+- Ngày nghỉ đúng plan **vẫn tính streak** (tuân thủ = consistency)
+
+**🏆 PR Toast** (auto-show sau Workout Complete):
+- Gold gradient banner: "KỶ LỤC MỚI! Bench Press: 80kg × 5 reps (+5kg)"
+- Auto-dismiss sau 3s hoặc tap to dismiss
+- Trigger: weight tăng so với all-time max cho cùng exercise + rep range
+
+**🎯 Milestones** (Fitness Progress sub-tab, cuối, collapsible):
+- 10 mốc MVP:
+  - Sessions: 1 (🥇), 10 (💪), 25 (⚡), 50 (🔥), 100 (💎)
+  - Streaks: 7 (📅), 14 (🌟), 30 (🦁), 60 (👑), 90 (🏆)
+- Progress bar tới mốc kế tiếp
+- Completed milestones với date stamp
+
+**Phase 2 (tương lai):** Badges, Weekly Summary, Weight/Strength milestones
+**Never:** Leaderboard (gây pressure), badge inflation
+
 ### 5.8 File Structure
 
 > **Architecture Note:** Dự án hiện tại dùng flat structure (`src/components/`, `src/hooks/`, `src/services/`). Các tính năng mới sẽ dùng `src/features/` (feature-based) để nhóm code theo domain, phù hợp với quy mô phát triển. Existing components **không** cần di chuyển — chỉ code mới dùng `src/features/`.
@@ -697,13 +789,13 @@ function estimate1RM(weight: number, reps: number): number {
 src/features/fitness/
 ├── components/
 │   ├── FitnessTab.tsx           — Main tab with sub-tabs (Plan/Progress/History)
-│   ├── FitnessOnboarding.tsx    — First-time setup wizard (5 steps)
+│   ├── FitnessOnboarding.tsx    — B+C Hybrid onboarding (Quick Start + adaptive expand)
 │   ├── TrainingPlanView.tsx     — Sub-tab: Weekly plan + today's workout
-│   ├── ProgressDashboard.tsx    — Sub-tab: Charts + analytics
-│   ├── WorkoutHistory.tsx       — Sub-tab: Past workouts list
-│   ├── WorkoutLogger.tsx        — Full-screen modal: strength logging
-│   ├── CardioLogger.tsx         — Full-screen modal: cardio logging
-│   ├── ExerciseSelector.tsx     — Modal: search + filter + create
+│   ├── ProgressDashboard.tsx    — Sub-tab: Insight-first charts + analytics
+│   ├── WorkoutHistory.tsx       — Sub-tab: Past workouts list (in-place expand)
+│   ├── WorkoutLogger.tsx        — Full-screen page: strength logging (focus mode)
+│   ├── CardioLogger.tsx         — Full-screen page: cardio logging (focus mode)
+│   ├── ExerciseSelector.tsx     — Bottom sheet within Logger: search + filter + create
 │   ├── SetEditor.tsx            — Inline edit 1 set row
 │   ├── RestTimer.tsx            — Floating overlay countdown
 │   ├── DailyWeightInput.tsx     — Quick weight input bar
@@ -917,6 +1009,31 @@ src/hooks/
 └── useFeedbackLoop.ts           — Moving avg, auto-adjust, adherence
 ```
 
+### 6.5 Nutrition ↔ Fitness Connection — Unified Daily Balance
+
+Một component `EnergyBalance` duy nhất hiển thị ở 2 vị trí:
+1. **Calendar Tab** → Nutrition sub-tab (top section)
+2. **Fitness Tab** → Plan sub-tab (dưới workout card)
+
+**Component hiển thị:**
+- 🍽️ Calories IN (từ logged meals) − 🏋️ Calories OUT (từ logged workouts)
+- Combined progress bar (green=food, blue=exercise, gray=remaining)
+- Net calories vs Target
+- Protein progress bar (current/target)
+
+**Auto-Adjustment Logic:**
+
+| Ngày tập | Ngày nghỉ |
+|---|---|
+| exercise_cal = MET × min × kg / 60 | exercise_cal = 0 |
+| Target = TDEE + calorieOffset + exercise_cal | Target = TDEE + calorieOffset |
+| Carbs +5-10% | Carbs −5-10% |
+| Protein ≥2g/kg | Protein ≥2g/kg (recovery) |
+
+**Real-time sync:** Component updates immediately when user logs a meal (Calendar) or completes a workout (Fitness).
+
+**Collapsible:** User can collapse to a single-line summary bar if desired.
+
 ## 7. Health Profile
 
 ### 7.1 UI Location
@@ -939,6 +1056,9 @@ Settings Tab
 │   ├── Tốc độ thay đổi: Conservative (0.25kg/w) / Moderate (0.5kg/w) / Aggressive (1kg/w)
 │   ├── Cân nặng mục tiêu: [input] kg (optional — for progress tracking)
 │   └── Calorie offset: [auto-calculated from rate | custom override]
+├── 💪 Hồ sơ tập luyện (NEW — editable after onboarding)
+│   ├── 14 training profile fields from Section 5.2
+│   └── Smart defaults auto-filled, user can override any field
 ├── 🎨 Giao diện
 ├── ☁️ Đồng bộ đám mây
 └── 💾 Dữ liệu
@@ -1072,7 +1192,7 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 
 ### Phase 5: Training System
 - [ ] Create training_profile SQLite table
-- [ ] Build FitnessOnboarding wizard (5 steps, 14 fields)
+- [ ] Build FitnessOnboarding (B+C Hybrid: Quick Start 3 fields + adaptive expand, 14 total fields)
 - [ ] Seed exercises table (~150 pre-loaded exercises)
 - [ ] Implement plan generation algorithm (6 steps: split → volume → exercises → reps → cardio → deload)
 - [ ] Build FitnessTab with sub-tabs (Plan/Progress/History)
@@ -1172,7 +1292,7 @@ Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 | Migration | Big Bang | Incremental hybrid, feature-first | Clean architecture from start; user preference |
 | Goal phases | Cut/Bulk/Maintain with cycles | Single goal, no phases | Supports long-term fitness journey with phase transitions |
 | Training detail | Full (sets/reps/weight/RPE) | Simplified (sessions/week only) | User preference for comprehensive tracking |
-| Fitness tab nav | Sub-tabs (Plan/Progress/History) + modals | Stack navigation, single scroll, full-screen | Consistent with CalendarTab pattern; fast switching |
+| Fitness tab nav | Sub-tabs (Plan/Progress/History) + full-screen pages | Stack navigation, single scroll, modals | Consistent with CalendarTab sub-tab pattern; loggers as full-screen for focus mode |
 | Workout logging | Progressive Intelligence (3 phases) | Manual only, full AI | Combines user control with AI assistance; builds trust gradually |
 | Exercise database | Hybrid (pre-loaded ~150 + custom) | Pre-loaded only, user-created only, AI-generated | Reduces friction for new users while supporting custom exercises |
 | Periodization | User-selected (Linear/Undulating/Block) | Auto-select by experience, linear only | Respects advanced user knowledge; all 3 users groups served |
@@ -1180,4 +1300,11 @@ Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 | Focus muscle groups | Default balanced + optional priority (max 3) | Self-assessment, no customization | Low friction (skip = balanced), depth for advanced users |
 | Cardio tracking | Integrated in plan + free logging | Plan only, log only, no cardio | Comprehensive: plan suggestions + freedom to log extra sessions |
 | Rate of change | 3 speeds (0.25/0.5/1.0 kg/week) | Single default, full custom | Covers conservative to aggressive; scientifically grounded (7700 kcal/kg) |
-| Data collection | Hybrid onboarding (Mini 5 fields → Fitness 11 → Advanced 7) | All in Settings, full wizard, progressive | Fast start (30s), accurate results, depth available |
+| Data collection | B+C Hybrid onboarding (Quick Start 3 fields + adaptive expand by experience level) | All in Settings, full wizard, progressive | Fast start (~20s beginner), smart defaults reduce friction, depth available for advanced |
+| Onboarding UX | B+C Hybrid (Quick Start 3 fields + adaptive expand) | Full 5-step wizard (14 fields), Progressive (unlock over time) | Fast start (~20s beginner), smart defaults reduce friction, depth available for advanced |
+| Workout Logger UI | Quick Confirm Card (1-2 taps/set) | Traditional form (6-8 taps), Inline table (desktop-only) | 60% fewer taps, pre-fill enables confirm-only flow, edit via bottom sheet |
+| Navigation depth | Max 3 levels (Tab → Sub-tab → Full-screen page) | 4 levels with nested modals | Eliminates nested modals, Logger as full-screen for focus mode |
+| Empty states | Smart content (tips + CTA + previews) | Bare "no data" message, skeleton only | Never show empty; always motivation + actionable next step |
+| Progress dashboard | Insight-First (hero metric + sparkline cards + AI insights) | Stacked charts (scroll-heavy), Segmented tabs (confusing) | Glanceable in 2 seconds, tap-for-detail pattern, zero information overload |
+| Nutrition-Fitness bridge | Unified Daily Balance component (shared in 2 tabs) | Cross-tab banners (1-way info), Dedicated tab (too many tabs) | Single Source of Truth, auto-adjust calories on workout/rest days |
+| Gamification | MVP: Streak + PR Toast + Milestones (10 mốc) | Streak only (too minimal), Full badge system (overkill) | 3 elements cover Progress + Consistency + Achievement; grace period prevents all-or-nothing |
