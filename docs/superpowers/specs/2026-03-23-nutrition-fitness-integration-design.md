@@ -362,35 +362,273 @@ src/services/nutritionEngine.ts  — Pure calculation functions (BMR, TDEE, Macr
 
 ## 5. Training System
 
-### 5.1 Tab Fitness UI
+### 5.1 Navigation Architecture
 
-**Màn hình 1: Danh sách buổi tập**
-- Summary card: buổi tập/tuần, total volume, activity level hiện tại
-- Danh sách workouts theo ngày (scroll), mỗi entry hiển thị: tên, thời gian, số bài tập, total volume, tags bài tập
-- Nút "Thêm buổi tập"
+Fitness tab sử dụng **Sub-tabs + Modals** pattern (consistent với CalendarTab):
 
-**Màn hình 2: Log chi tiết buổi tập**
-- Header: tên workout, ngày, thời gian
-- Mỗi exercise: bảng SET | KG | REPS | RPE | ✓
-- Nút "Thêm set" cho mỗi exercise
-- Nút "Thêm bài tập" (mở Exercise Selector)
-- Rest Timer đếm ngược (mặc định 120s)
+```
+Fitness Tab
+├── Sub-tabs: [📋 Plan] [📊 Progress] [📜 History]
+│
+├── Plan sub-tab (home):
+│   ├── Weekly calendar strip (7 days, color-coded)
+│   ├── Today's workout card + "▶️ Bắt đầu" button
+│   └── Quick weight input bar (bottom)
+│
+├── Progress sub-tab:
+│   ├── Cycle progress bar (Week N of M)
+│   ├── Volume trend chart (line, 8 weeks)
+│   ├── Weight trend chart (moving avg + daily)
+│   └── Stats cards (adherence, 1RM estimates)
+│
+├── History sub-tab:
+│   ├── Reverse-chronological workout list
+│   ├── Filter chips: All | Strength | Cardio
+│   └── Tap → expanded read-only view
+│
+└── Full-screen modals:
+    ├── WorkoutLogger (strength: sets/reps/weight)
+    ├── CardioLogger (duration/distance/HR)
+    └── ExerciseSelector (search + filter + custom)
+```
 
-**Màn hình 3: Chọn bài tập**
-- Search bar
-- Filter chips theo nhóm cơ (Tất cả, Ngực, Lưng, Vai, Chân, Tay, Cardio)
-- Danh sách exercises nhóm theo muscle group
-- Nút "Tạo bài tập mới" ở cuối
+First-time users see **FitnessOnboarding** wizard before Plan view.
 
-### 5.2 Training Metrics
+### 5.2 Training Profile Data Collection (14 fields)
+
+Collected during Fitness Onboarding (5-step wizard):
+
+| # | Field | Type | Options | Purpose |
+|---|---|---|---|---|
+| 1 | training_experience | TEXT | beginner / intermediate / advanced | Volume Landmarks (MEV/MAV/MRV), overload rate |
+| 2 | days_per_week | INTEGER | 2-6 | Training Split selection |
+| 3 | session_duration_min | INTEGER | 30 / 45 / 60 / 90 | Max exercises per session |
+| 4 | training_goal | TEXT | strength / hypertrophy / endurance / general | Rep ranges, rest periods |
+| 5 | available_equipment | TEXT (JSON array) | barbell / dumbbell / machine / cable / bodyweight / bands | Exercise filter |
+| 6 | injury_restrictions | TEXT (JSON array) | shoulders / lower_back / knees / wrists / neck / hips | Exercise exclusion |
+| 7 | periodization_model | TEXT | linear / undulating / block | Plan structure + progression pattern |
+| 8 | plan_cycle_weeks | INTEGER | 4 / 6 / 8 / 12 | Deload timing, plan endpoint |
+| 9 | priority_muscles | TEXT (JSON array, max 3) | chest / back / shoulders / biceps / triceps / legs / core / glutes | Volume allocation (MAV vs MEV) |
+| 10 | cardio_sessions_week | INTEGER | 0-5 | Cardio scheduling in plan |
+| 11 | cardio_type_pref | TEXT | liss / hiit / mixed | Cardio exercise selection |
+| 12 | cardio_duration_min | INTEGER | 15 / 20 / 30 / 45 / 60 | Per-session cardio duration |
+| 13 | known_1rm | TEXT (JSON object, optional) | { squat, bench, deadlift, ohp } in kg | Precise weight assignment |
+| 14 | avg_sleep_hours | REAL (optional) | 4-12 | Recovery adjustment (-10% volume if <7h) |
+
+**Onboarding steps:**
+1. Experience level (3 cards)
+2. Schedule (days/week slider + session duration)
+3. Equipment + Injuries (multi-select chips)
+4. Training preferences (goal, periodization, cycle, cardio)
+5. Priority muscles (optional) + Review → "Tạo Plan"
+
+### 5.3 Plan Generation Algorithm
+
+```
+Input: TrainingProfile (14 fields) + HealthProfile (6 fields)
+```
+
+**Step 1: Training Split Selection**
+
+| days_per_week | Split | Sessions |
+|---|---|---|
+| 2-3 | Full Body | A/B alternating |
+| 4 | Upper/Lower | Upper A, Lower A, Upper B, Lower B |
+| 5-6 | Push/Pull/Legs | Push, Pull, Legs (×2 if 6 days) |
+
+**Step 2: Weekly Volume Calculation**
 
 ```typescript
-// Volume for a single exercise in a workout
+function calculateWeeklyVolume(
+  muscle: MuscleGroup,
+  profile: TrainingProfile,
+  healthProfile: HealthProfile,
+): number {
+  const base = VOLUME_TABLE[profile.training_experience][muscle];
+  let adjusted = base;
+
+  // Goal modifier
+  if (healthProfile.goal_type === 'cut') adjusted *= 0.8;
+  if (healthProfile.goal_type === 'bulk') adjusted *= 1.1;
+
+  // Age modifier
+  if (healthProfile.age > 40) adjusted *= 0.9;
+
+  // Sleep modifier
+  if (profile.avg_sleep_hours && profile.avg_sleep_hours < 7) adjusted *= 0.9;
+
+  // Priority muscles: MAV, others: MEV
+  if (profile.priority_muscles?.includes(muscle)) {
+    return Math.min(adjusted, MAV_TABLE[muscle]); // Cap at MAV
+  }
+  return Math.max(adjusted, MEV_TABLE[muscle]); // Floor at MEV
+}
+```
+
+Volume Landmarks reference (Schoenfeld 2017, Journal of Sports Sciences — verified):
+
+| Level | MEV (sets/muscle/week) | MAV | MRV |
+|---|---|---|---|
+| Beginner | 4-6 | 10-14 | 16-18 |
+| Intermediate | 6-8 | 12-18 | 20-22 |
+| Advanced | 8-10 | 16-22 | 24-28 |
+
+**Step 3: Exercise Selection**
+
+```typescript
+function selectExercises(
+  muscle: MuscleGroup,
+  setsNeeded: number,
+  profile: TrainingProfile,
+  exerciseDB: Exercise[],
+): SelectedExercise[] {
+  const available = exerciseDB
+    .filter(e => e.muscleGroup === muscle)
+    .filter(e => e.equipment.some(eq => profile.available_equipment.includes(eq)))
+    .filter(e => !e.contraindicated.some(c => profile.injury_restrictions.includes(c)));
+
+  // Priority order: compound → secondary → isolation
+  const sorted = available.sort((a, b) => PRIORITY[a.category] - PRIORITY[b.category]);
+
+  return distributeVolume(sorted, setsNeeded);
+}
+```
+
+Exercise database: **Hybrid** — ~150 pre-loaded exercises + user-created custom exercises.
+
+**Step 4: Rep Range Assignment**
+
+| Goal | Reps | % 1RM | Rest |
+|---|---|---|---|
+| Strength | 3-5 | 85-95% | 3-5 min |
+| Hypertrophy | 8-12 | 65-80% | 90-120s |
+| Endurance | 15-20 | 50-65% | 30-60s |
+| Undulating | Rotates Heavy (3-5) / Medium (8-12) / Light (15-20) per session |
+
+Weight assignment: If `known_1rm` provided, use exact percentages. Otherwise, estimate using Brzycki formula (validated, ±5% for <10 reps) from logged workout data.
+
+**Step 5: Cardio Integration**
+
+```typescript
+function scheduleCardio(
+  strengthDays: DayOfWeek[],
+  cardioSessions: number,
+  allDays: DayOfWeek[],
+): CardioSchedule {
+  const restDays = allDays.filter(d => !strengthDays.includes(d));
+
+  // Prefer rest days for cardio
+  const cardioDays = restDays.length >= cardioSessions
+    ? restDays.slice(0, cardioSessions)
+    : [...restDays, ...strengthDays.slice(0, cardioSessions - restDays.length)];
+
+  return cardioDays.map(day => ({
+    day,
+    type: profile.cardio_type_pref,
+    durationMin: profile.cardio_duration_min,
+    estimatedCalories: estimateCardioBurn(profile.cardio_type_pref, profile.cardio_duration_min, healthProfile.weight_kg),
+  }));
+}
+```
+
+**Step 6: Progressive Overload + Deload**
+
+Double Progression method (verified — ACSM 2009 Position Stand):
+
+| Level | Upper Body Rate | Lower Body Rate |
+|---|---|---|
+| Beginner | +2.5 kg/week | +5 kg/week |
+| Intermediate | +1.25 kg/2 weeks | +2.5 kg/2 weeks |
+| Advanced | +1.25 kg/month | +2.5 kg/month |
+
+Deload: Last week of `plan_cycle_weeks` → reduce volume 40%, reduce intensity 10%. Auto-scheduled.
+
+**Periodization models** (user-selected):
+- **Linear**: Same rep range, increase weight each week
+- **Undulating**: Rotate Heavy/Medium/Light within the week
+- **Block**: Entire cycle focuses on one goal, next cycle switches
+
+### 5.4 Workout Logger — Progressive Intelligence Flow
+
+Three phases of workout logging intelligence:
+
+**Phase 1 — First Time (Full Manual):**
+User selects exercise, manually enters weight/reps per set. RPE optional with tooltip. App records baseline.
+
+**Phase 2 — Repeat Sessions (AI Pre-filled):**
+App auto-fills from last session + shows progressive overload suggestion in green. One-tap ✓ to confirm or edit manually.
+
+```typescript
+function suggestNextSet(exercise: Exercise, lastSession: WorkoutSet[]): SetSuggestion {
+  const lastSet = lastSession[lastSession.length - 1];
+
+  if (lastSet.reps >= exercise.targetReps) {
+    // Achieved target → suggest weight increase
+    return {
+      weight: lastSet.weightKg + getOverloadIncrement(exercise, profile),
+      reps: exercise.targetRepsMin, // Reset to bottom of range
+      source: 'progressive_overload',
+    };
+  }
+  // Not at target yet → suggest same weight, aim for more reps
+  return {
+    weight: lastSet.weightKg,
+    reps: lastSet.reps + 1,
+    source: 'rep_progression',
+  };
+}
+```
+
+**Phase 3 — Smart Adjustments (2+ weeks data):**
+- **Plateau detection**: 3 weeks no weight increase → suggest exercise variation or rep range change
+- **Nutrition integration**: If cutting → auto-reduce volume 15%
+- **Deload alert**: Reached end of plan_cycle_weeks → suggest deload week
+- **RPE trending**: Average RPE > 9 → overtraining warning, suggest intensity reduction
+
+### 5.5 Cardio Logger
+
+Different UI from strength training — fields for duration-based exercises:
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| cardio_type | select | ✅ | running / cycling / swimming / hiit / walking / elliptical / rowing |
+| duration_min | number or timer | ✅ | Stopwatch mode or manual entry |
+| distance_km | number | optional | For running, cycling |
+| avg_heart_rate | number | optional | From wearable device |
+| intensity | select | ✅ | low / moderate / high |
+
+Calories auto-estimated: `duration × MET_VALUE[type][intensity] × weight_kg / 60`.
+
+HIIT mode: Configurable work/rest intervals with audible timer.
+
+### 5.6 Exercise Database
+
+**Pre-loaded exercises** (~150): Seeded on first app launch. Each exercise includes:
+
+```typescript
+type Exercise = {
+  id: string;
+  name: string;
+  muscleGroup: MuscleGroup; // chest, back, shoulders, legs, arms, core, glutes
+  secondaryMuscles: MuscleGroup[];
+  category: 'compound' | 'secondary' | 'isolation';
+  equipment: EquipmentType[];
+  contraindicated: BodyRegion[]; // injuries that make this exercise unsafe
+  type: 'strength' | 'cardio';
+  defaultReps: { min: number; max: number };
+  isCustom: boolean;
+};
+```
+
+**User-created exercises**: Same schema with `isCustom: true`. Created via "Tạo bài tập mới" button in Exercise Selector.
+
+### 5.7 Training Metrics
+
+```typescript
 function calculateExerciseVolume(sets: WorkoutSet[]): number {
   return sets.reduce((sum, s) => sum + s.reps * s.weightKg, 0);
 }
 
-// Weekly volume
 function calculateWeeklyVolume(workouts: Workout[], sets: WorkoutSet[]): number {
   return workouts.reduce((total, w) => {
     const workoutSets = sets.filter(s => s.workoutId === w.id);
@@ -398,58 +636,100 @@ function calculateWeeklyVolume(workouts: Workout[], sets: WorkoutSet[]): number 
   }, 0);
 }
 
-// Sessions per week → auto-adjust activity multiplier
 function getSessionsThisWeek(workouts: Workout[]): number {
   const weekAgo = subDays(new Date(), 7);
   return workouts.filter(w => new Date(w.date) >= weekAgo).length;
 }
+
+function estimate1RM(weight: number, reps: number): number {
+  // Brzycki formula (validated, ±5% for reps < 10)
+  return weight / (1.0278 - 0.0278 * reps);
+}
 ```
 
-### 5.3 File Structure
+### 5.8 File Structure
 
 > **Architecture Note:** Dự án hiện tại dùng flat structure (`src/components/`, `src/hooks/`, `src/services/`). Các tính năng mới sẽ dùng `src/features/` (feature-based) để nhóm code theo domain, phù hợp với quy mô phát triển. Existing components **không** cần di chuyển — chỉ code mới dùng `src/features/`.
 
 ```
 src/features/fitness/
 ├── components/
-│   ├── WorkoutList.tsx        — Danh sách buổi tập
-│   ├── WorkoutLogger.tsx      — Log chi tiết (sets/reps/weight)
-│   ├── ExerciseSelector.tsx   — Chọn/tạo bài tập
-│   ├── SetEditor.tsx          — Inline edit 1 set
-│   ├── RestTimer.tsx          — Đếm ngược thời gian nghỉ
-│   └── WorkoutSummaryCard.tsx — Summary card (buổi/tuần, volume)
+│   ├── FitnessTab.tsx           — Main tab with sub-tabs (Plan/Progress/History)
+│   ├── FitnessOnboarding.tsx    — First-time setup wizard (5 steps)
+│   ├── TrainingPlanView.tsx     — Sub-tab: Weekly plan + today's workout
+│   ├── ProgressDashboard.tsx    — Sub-tab: Charts + analytics
+│   ├── WorkoutHistory.tsx       — Sub-tab: Past workouts list
+│   ├── WorkoutLogger.tsx        — Full-screen modal: strength logging
+│   ├── CardioLogger.tsx         — Full-screen modal: cardio logging
+│   ├── ExerciseSelector.tsx     — Modal: search + filter + create
+│   ├── SetEditor.tsx            — Inline edit 1 set row
+│   ├── RestTimer.tsx            — Floating overlay countdown
+│   ├── DailyWeightInput.tsx     — Quick weight input bar
+│   └── WorkoutSummaryCard.tsx   — Summary card
 ├── hooks/
-│   └── useWorkouts.ts         — CRUD workouts, sets, exercises
+│   ├── useWorkouts.ts           — CRUD workouts, sets, exercises
+│   ├── useTrainingPlan.ts       — Plan generation algorithm (6 steps)
+│   └── useProgressiveOverload.ts — AI suggestions for sets
 ├── store/
-│   └── fitnessStore.ts        — Zustand store (reactive UI state from SQLite)
-└── types.ts
+│   └── fitnessStore.ts          — Zustand store (reactive UI from SQLite)
+├── data/
+│   └── exerciseDatabase.ts      — Pre-loaded ~150 exercises
+├── utils/
+│   ├── volumeCalculator.ts      — MEV/MAV/MRV formulas
+│   ├── periodization.ts         — Linear/Undulating/Block logic
+│   └── cardioEstimator.ts       — MET-based calorie estimation
+└── types.ts                     — All fitness types
 ```
 
-### 5.4 Zustand Integration
+### 5.9 Zustand Integration
 
-Các feature hooks (`useWorkouts`, `useDashboard`, `useHealthProfile`) sử dụng pattern **SQLite as source of truth + Zustand for reactive UI**:
+All feature hooks use pattern **SQLite as source of truth + Zustand for reactive UI**:
 
 ```typescript
-// Pattern: SQLite → Zustand → React components
-const useFitnessStore = create<FitnessState>((set) => ({
+const useFitnessStore = create<FitnessState>((set, get) => ({
   workouts: [],
+  trainingPlan: null,
+  trainingProfile: null,
   loading: false,
-  
+
   loadWorkouts: async () => {
     set({ loading: true });
     const rows = await db.query<Workout>('SELECT * FROM workouts ORDER BY date DESC');
     set({ workouts: rows, loading: false });
   },
-  
+
+  loadTrainingProfile: async () => {
+    const profile = await db.queryOne<TrainingProfile>('SELECT * FROM training_profile WHERE id = ?', ['default']);
+    set({ trainingProfile: profile });
+  },
+
+  saveTrainingProfile: async (profile: TrainingProfile) => {
+    await db.execute('INSERT OR REPLACE INTO training_profile ...', [...]);
+    set({ trainingProfile: profile });
+  },
+
   addWorkout: async (workout: NewWorkout) => {
     await db.execute('INSERT INTO workouts ...', [...]);
-    // Re-fetch to sync
     get().loadWorkouts();
   },
 }));
 ```
 
-Điều này áp dụng cho tất cả feature stores: fitnessStore, dashboardStore, healthProfileStore.
+Áp dụng cho tất cả feature stores: fitnessStore, dashboardStore, healthProfileStore.
+
+### 5.10 Scientific Evidence
+
+Formulas used in training system with verification status:
+
+| Formula | Source | Status | Key Finding |
+|---|---|---|---|
+| Volume Landmarks (MEV/MAV/MRV) | Schoenfeld et al. 2017, **Journal of Sports Sciences** | ✅ Verified | 10+ sets/muscle/week superior for hypertrophy |
+| Training Frequency | Schoenfeld et al. 2016, Sports Medicine 46(11):1689-1697 | ✅ Verified | 2×/week > 1×/week per muscle group |
+| Progressive Overload | ACSM 2009 Position Stand | ✅ Verified | Double Progression validated for all levels |
+| RPE/RIR Scale | Zourdos et al. 2016, J Strength Cond Res 30(1):267-275 | ✅ Verified | r = −0.88 (experienced), −0.77 (novice) |
+| 1RM Estimation | Brzycki 1993, JOPERD | ✅ Verified | ±5% accuracy for <10 reps |
+| Protein during cut | Helms et al. 2014, Int J Sport Nutr Exerc Metab 24(2):127-138 | ✅ Verified | 2.3-3.1 g/kg LBM |
+| Optimal protein | Morton et al. 2018, Br J Sports Med (DOI: 10.1136/bjsports-2017-097608) | ✅ Verified | 1.6 g/kg optimal, upper CI ~2.2 g/kg |
 
 ## 6. Feedback Loop
 
@@ -608,13 +888,15 @@ Settings Tab
 │   ├── Tuổi: [input]
 │   ├── Chiều cao: [input] cm
 │   ├── Cân nặng: [input] kg
-│   ├── Mức hoạt động: [5 options]
+│   ├── Mức hoạt động: [5 options: sedentary/light/moderate/active/extra_active]
+│   ├── Body fat %: [input] (optional, for LBM-based protein)
 │   ├── BMR: [auto-calculated | custom override]
 │   └── Protein ratio: [input] g/kg
 ├── 🎯 Mục tiêu (NEW)
 │   ├── Giai đoạn: Cut / Bulk / Maintain
-│   ├── Cân nặng mục tiêu: [input] kg
-│   └── Calorie offset: [auto | custom]
+│   ├── Tốc độ thay đổi: Conservative (0.25kg/w) / Moderate (0.5kg/w) / Aggressive (1kg/w)
+│   ├── Cân nặng mục tiêu: [input] kg (optional — for progress tracking)
+│   └── Calorie offset: [auto-calculated from rate | custom override]
 ├── 🎨 Giao diện
 ├── ☁️ Đồng bộ đám mây
 └── 💾 Dữ liệu
@@ -746,9 +1028,21 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 - [ ] Connect nutrition engine to existing CalendarTab/Summary
 
 ### Phase 5: Training System
-- [ ] Seed exercises table
-- [ ] Build FitnessTab (WorkoutList, WorkoutLogger, ExerciseSelector)
-- [ ] Implement training metrics (volume, sessions/week)
+- [ ] Create training_profile SQLite table
+- [ ] Build FitnessOnboarding wizard (5 steps, 14 fields)
+- [ ] Seed exercises table (~150 pre-loaded exercises)
+- [ ] Implement plan generation algorithm (6 steps: split → volume → exercises → reps → cardio → deload)
+- [ ] Build FitnessTab with sub-tabs (Plan/Progress/History)
+- [ ] Build TrainingPlanView (weekly calendar + today's workout)
+- [ ] Build WorkoutLogger with Progressive Intelligence (3 phases: manual → AI pre-fill → smart adjust)
+- [ ] Build CardioLogger (duration/distance/HR/intensity)
+- [ ] Build ExerciseSelector (search + filter + custom create)
+- [ ] Build RestTimer (floating overlay, auto-start on set confirm)
+- [ ] Build DailyWeightInput (quick entry + 7-day moving avg display)
+- [ ] Build ProgressDashboard (volume chart, weight trend, 1RM estimates, adherence)
+- [ ] Build WorkoutHistory (chronological list, filter by type)
+- [ ] Implement periodization logic (linear/undulating/block)
+- [ ] Implement progressive overload suggestions (double progression)
 - [ ] Connect sessions/week → Activity Multiplier auto-adjust
 
 ### Phase 6: Dashboard & Feedback Loop
@@ -782,10 +1076,12 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 | Metric | Current | After |
 |---|---|---|
 | Bundle size | ~500KB | ~1MB (+500KB sql.js WASM) |
-| SQLite tables | 0 | 13 |
-| New components | 0 | ~20 |
-| New hooks | 0 | ~5 |
+| SQLite tables | 0 | 15 (+training_profile, +cardio_sessions) |
+| New components | 0 | ~30 |
+| New hooks | 0 | ~8 |
 | New services | 0 | 2 (databaseService, nutritionEngine) |
+| Pre-loaded data | 0 | ~150 exercises |
+| Data fields collected | 3 | 26 |
 
 ### Lazy-loading Strategy for sql.js WASM
 
@@ -833,3 +1129,12 @@ Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 | Migration | Big Bang | Incremental hybrid, feature-first | Clean architecture from start; user preference |
 | Goal phases | Cut/Bulk/Maintain with cycles | Single goal, no phases | Supports long-term fitness journey with phase transitions |
 | Training detail | Full (sets/reps/weight/RPE) | Simplified (sessions/week only) | User preference for comprehensive tracking |
+| Fitness tab nav | Sub-tabs (Plan/Progress/History) + modals | Stack navigation, single scroll, full-screen | Consistent with CalendarTab pattern; fast switching |
+| Workout logging | Progressive Intelligence (3 phases) | Manual only, full AI | Combines user control with AI assistance; builds trust gradually |
+| Exercise database | Hybrid (pre-loaded ~150 + custom) | Pre-loaded only, user-created only, AI-generated | Reduces friction for new users while supporting custom exercises |
+| Periodization | User-selected (Linear/Undulating/Block) | Auto-select by experience, linear only | Respects advanced user knowledge; all 3 users groups served |
+| Plan cycle duration | Flexible (4/6/8/12 weeks) | Fixed 4 weeks, rolling/continuous | Adapts to different goals and experience levels |
+| Focus muscle groups | Default balanced + optional priority (max 3) | Self-assessment, no customization | Low friction (skip = balanced), depth for advanced users |
+| Cardio tracking | Integrated in plan + free logging | Plan only, log only, no cardio | Comprehensive: plan suggestions + freedom to log extra sessions |
+| Rate of change | 3 speeds (0.25/0.5/1.0 kg/week) | Single default, full custom | Covers conservative to aggressive; scientifically grounded (7700 kcal/kg) |
+| Data collection | Hybrid onboarding (Mini 5 fields → Fitness 11 → Advanced 7) | All in Settings, full wizard, progressive | Fast start (30s), accurate results, depth available |
