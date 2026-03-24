@@ -149,8 +149,10 @@ CREATE TABLE user_profile (
 CREATE TABLE goals (
   id TEXT PRIMARY KEY,
   type TEXT NOT NULL CHECK (type IN ('cut', 'bulk', 'maintain')),
-  target_weight_kg REAL,
-  calorie_offset INTEGER NOT NULL, -- ±kcal from TDEE
+  rate_of_change TEXT NOT NULL DEFAULT 'moderate' CHECK (rate_of_change IN ('conservative', 'moderate', 'aggressive')),
+  -- conservative=0.25kg/week (±275 kcal), moderate=0.5kg/week (±550 kcal), aggressive=1.0kg/week (±1100 kcal)
+  target_weight_kg REAL, -- optional, for progress tracking
+  calorie_offset INTEGER NOT NULL, -- ±kcal from TDEE (auto-computed from rate_of_change, or manual override)
   start_date TEXT NOT NULL,
   end_date TEXT,
   is_active INTEGER NOT NULL DEFAULT 1,
@@ -162,12 +164,37 @@ CREATE TABLE goals (
 -- Before INSERT/UPDATE with is_active=1, deactivate others:
 -- UPDATE goals SET is_active = 0, updated_at = datetime('now') WHERE is_active = 1;
 
+CREATE TABLE training_profile (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  training_experience TEXT NOT NULL CHECK (training_experience IN ('beginner', 'intermediate', 'advanced')),
+  days_per_week INTEGER NOT NULL CHECK (days_per_week BETWEEN 2 AND 6),
+  session_duration_min INTEGER NOT NULL CHECK (session_duration_min IN (30, 45, 60, 90)),
+  training_goal TEXT NOT NULL CHECK (training_goal IN ('strength', 'hypertrophy', 'endurance', 'general')),
+  available_equipment TEXT NOT NULL DEFAULT '[]', -- JSON array: ["barbell","dumbbell","machine","cable","bodyweight","bands"]
+  injury_restrictions TEXT DEFAULT '[]', -- JSON array: ["shoulders","lower_back","knees","wrists","neck","hips"]
+  periodization_model TEXT NOT NULL DEFAULT 'linear' CHECK (periodization_model IN ('linear', 'undulating', 'block')),
+  plan_cycle_weeks INTEGER NOT NULL DEFAULT 4 CHECK (plan_cycle_weeks IN (4, 6, 8, 12)),
+  priority_muscles TEXT DEFAULT '[]', -- JSON array, max 3: ["chest","back","shoulders","biceps","triceps","legs","core","glutes"]
+  cardio_sessions_week INTEGER NOT NULL DEFAULT 0 CHECK (cardio_sessions_week BETWEEN 0 AND 5),
+  cardio_type_pref TEXT DEFAULT 'mixed' CHECK (cardio_type_pref IN ('liss', 'hiit', 'mixed')),
+  cardio_duration_min INTEGER DEFAULT 30 CHECK (cardio_duration_min IN (15, 20, 30, 45, 60)),
+  known_1rm TEXT, -- JSON object: {"squat":100,"bench":80,"deadlift":120,"ohp":50} (nullable)
+  avg_sleep_hours REAL, -- nullable, 4-12
+  updated_at TEXT NOT NULL
+);
+
 CREATE TABLE exercises (
   id TEXT PRIMARY KEY,
   name_vi TEXT NOT NULL,
   name_en TEXT,
   muscle_group TEXT NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('compound', 'isolation', 'cardio')),
+  secondary_muscles TEXT DEFAULT '[]', -- JSON array of muscle groups
+  category TEXT NOT NULL CHECK (category IN ('compound', 'secondary', 'isolation')),
+  equipment TEXT NOT NULL DEFAULT '[]', -- JSON array: ["barbell","dumbbell","machine","cable","bodyweight","bands"]
+  contraindicated TEXT DEFAULT '[]', -- JSON array of body regions where exercise is unsafe
+  exercise_type TEXT NOT NULL CHECK (exercise_type IN ('strength', 'cardio')),
+  default_reps_min INTEGER NOT NULL DEFAULT 8,
+  default_reps_max INTEGER NOT NULL DEFAULT 12,
   is_custom INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL
 );
@@ -187,10 +214,16 @@ CREATE TABLE workout_sets (
   workout_id TEXT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
   exercise_id TEXT NOT NULL REFERENCES exercises(id),
   set_number INTEGER NOT NULL,
-  reps INTEGER NOT NULL,
-  weight_kg REAL NOT NULL DEFAULT 0, -- 0 for cardio/bodyweight exercises
+  reps INTEGER, -- nullable for cardio
+  weight_kg REAL DEFAULT 0, -- 0 for cardio/bodyweight exercises
   rpe REAL, -- 1-10, nullable
   rest_seconds INTEGER,
+  -- Cardio-specific fields (nullable for strength exercises)
+  duration_min REAL, -- for cardio exercises
+  distance_km REAL, -- optional, for running/cycling
+  avg_heart_rate INTEGER, -- optional, from wearable
+  intensity TEXT CHECK (intensity IN ('low', 'moderate', 'high')), -- for cardio
+  estimated_calories REAL, -- auto-calculated for cardio
   updated_at TEXT NOT NULL,
   UNIQUE(workout_id, exercise_id, set_number)
 );
@@ -443,13 +476,14 @@ function calculateWeeklyVolume(
   muscle: MuscleGroup,
   profile: TrainingProfile,
   healthProfile: HealthProfile,
+  activeGoal: Goal, // from goals table (is_active = 1)
 ): number {
   const base = VOLUME_TABLE[profile.training_experience][muscle];
   let adjusted = base;
 
-  // Goal modifier
-  if (healthProfile.goal_type === 'cut') adjusted *= 0.8;
-  if (healthProfile.goal_type === 'bulk') adjusted *= 1.1;
+  // Goal modifier (from active goal, not health profile)
+  if (activeGoal.type === 'cut') adjusted *= 0.8;
+  if (activeGoal.type === 'bulk') adjusted *= 1.1;
 
   // Age modifier
   if (healthProfile.age > 40) adjusted *= 0.9;
@@ -608,14 +642,16 @@ HIIT mode: Configurable work/rest intervals with audible timer.
 ```typescript
 type Exercise = {
   id: string;
-  name: string;
+  nameVi: string;
+  nameEn?: string;
   muscleGroup: MuscleGroup; // chest, back, shoulders, legs, arms, core, glutes
   secondaryMuscles: MuscleGroup[];
   category: 'compound' | 'secondary' | 'isolation';
   equipment: EquipmentType[];
   contraindicated: BodyRegion[]; // injuries that make this exercise unsafe
-  type: 'strength' | 'cardio';
-  defaultReps: { min: number; max: number };
+  exerciseType: 'strength' | 'cardio';
+  defaultRepsMin: number;
+  defaultRepsMax: number;
   isCustom: boolean;
 };
 ```
@@ -950,6 +986,7 @@ Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRa
     "user_profile": [...],
     "goals": [...],
     "exercises": [...],
+    "training_profile": [...],
     "workouts": [...],
     "workout_sets": [...],
     "weight_log": [...],
@@ -965,7 +1002,7 @@ Existing `UserProfile` type in `src/types.ts` có 3 fields: `{ weight, proteinRa
 |---|---|---|
 | v1.x (localStorage JSON) | v2.0 device | Auto-upgrade: transform v1.x format to v2.0 schema, populate defaults for new fields |
 | v2.0 (SQLite JSON) | v1.x device | Graceful degrade: export includes `_legacyFormat` fallback with old key structure; v1.x ignores unknown keys |
-| v2.0 | v2.0 | Direct import: all 13 tables |
+| v2.0 | v2.0 | Direct import: all 14 tables |
 
 Version detection: check `_version` field in import JSON. If missing → v1.x format.
 
@@ -1076,7 +1113,7 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 | Metric | Current | After |
 |---|---|---|
 | Bundle size | ~500KB | ~1MB (+500KB sql.js WASM) |
-| SQLite tables | 0 | 15 (+training_profile, +cardio_sessions) |
+| SQLite tables | 0 | 14 (+training_profile) |
 | New components | 0 | ~30 |
 | New hooks | 0 | ~8 |
 | New services | 0 | 2 (databaseService, nutritionEngine) |
