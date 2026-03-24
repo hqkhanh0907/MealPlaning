@@ -140,8 +140,9 @@ CREATE TABLE user_profile (
   height_cm REAL NOT NULL,
   weight_kg REAL NOT NULL,
   activity_level TEXT NOT NULL DEFAULT 'moderate' CHECK (activity_level IN ('sedentary', 'light', 'moderate', 'active', 'extra_active')),
+  body_fat_pct REAL, -- nullable: optional, for LBM-based protein calculation (Helms 2014)
   bmr_override REAL, -- nullable: user nhập BMR custom
-  protein_ratio REAL NOT NULL DEFAULT 2.0, -- g/kg
+  protein_ratio REAL NOT NULL DEFAULT 2.0, -- g/kg (or g/kg LBM when body_fat_pct is available)
   fat_pct REAL NOT NULL DEFAULT 0.25, -- % of target calories
   updated_at TEXT NOT NULL
 );
@@ -365,9 +366,14 @@ function calculateMacros(
   weightKg: number,
   proteinRatio: number, // g/kg, default 2.0
   fatPct: number,       // % of target, default 0.25
+  bodyFatPct?: number,  // optional: when available, use LBM for protein (Helms 2014)
 ): MacroSplit {
   // Priority 1: Protein
-  const proteinG = Math.round(weightKg * proteinRatio);
+  // When body_fat_pct is known, use Lean Body Mass for more accurate protein target
+  const effectiveWeight = bodyFatPct != null
+    ? weightKg * (1 - bodyFatPct) // LBM = weight × (1 - bf%)
+    : weightKg;
+  const proteinG = Math.round(effectiveWeight * proteinRatio);
   const proteinCal = proteinG * 4;
 
   // Priority 2: Fat
