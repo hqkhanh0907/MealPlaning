@@ -32,6 +32,76 @@ Tích hợp 3 hệ thống vào meal planner hiện tại:
 
 Đánh giá dựa trên 6 tiêu chí UX: Reachability (10/10), Discoverability (8/10), Touch Target (10/10), Cognitive Load (9/10), Task Frequency (10/10), Info Architecture (9/10).
 
+### 2.4 Custom Navigation Store (Zustand-based)
+
+App hiện tại dùng `activeMainTab` state trong App.tsx — không có React Router, không có history stack. Để hỗ trợ full-screen pages (WorkoutLogger, CardioLogger) mà vẫn tối ưu cho Capacitor mobile:
+
+**Giải pháp: Zustand Navigation Store** (không thêm react-router dependency)
+
+```typescript
+// src/store/navigationStore.ts
+interface NavigationState {
+  activeTab: MainTab;              // Bottom nav tab
+  pageStack: PageEntry[];          // Full-screen page stack
+  showBottomNav: boolean;          // Auto-hide when full-screen page active
+  tabScrollPositions: Record<MainTab, number>; // Preserve scroll per tab
+
+  navigateTab: (tab: MainTab) => void;
+  pushPage: (page: PageEntry) => void;   // Open full-screen page
+  popPage: () => void;                    // Back button
+  canGoBack: () => boolean;
+}
+
+type PageEntry = {
+  id: string;           // e.g. 'workout-logger', 'cardio-logger'
+  component: string;    // Lazy-loaded component name
+  props?: Record<string, unknown>;
+};
+```
+
+**Navigation Rules:**
+- Bottom nav → `navigateTab()` — switches tab, preserves scroll position via `tabScrollPositions`
+- Full-screen page → `pushPage()` — hides bottom nav, renders page on top
+- Back/← → `popPage()` — restores previous page or shows bottom nav
+- Android back button: extends existing `useModalBackHandler` to check `pageStack.length > 0`
+- Max depth: 2 (Tab → Full-screen page). No deeper nesting.
+
+**Bottom Nav hide/show:**
+```typescript
+// In BottomNavBar.tsx
+const showBottomNav = useNavigationStore(s => s.showBottomNav);
+if (!showBottomNav) return null;
+```
+
+### 2.5 Tab Transition Details (Phase 3)
+
+| Old Tab | New Location | Migration Details |
+|---|---|---|
+| 🛒 Đi chợ (`grocery`) | Calendar Tab → action button | `GroceryList.tsx` wrapped in bottom sheet, triggered from Calendar's toolbar "Đi chợ" button. Component unchanged, only mounting point moves. |
+| ⚙️ Cài đặt (`settings`) | Header icon (góc phải) | `SettingsTab.tsx` → full-screen overlay via `pushPage({ id: 'settings' })`. Close via ← back. Reuses existing component. |
+
+**MainTab Type Update:**
+```typescript
+// Before
+type MainTab = 'calendar' | 'management' | 'ai-analysis' | 'grocery' | 'settings';
+
+// After
+type MainTab = 'calendar' | 'library' | 'ai-analysis' | 'fitness' | 'dashboard';
+```
+
+**BottomNavBar Items Update:**
+```typescript
+const NAV_ITEMS: NavItem[] = [
+  { id: 'calendar',    icon: Calendar,       label: t('nav.calendar') },
+  { id: 'library',     icon: ClipboardList,  label: t('nav.library') },
+  { id: 'ai-analysis', icon: Bot,            label: t('nav.ai') },
+  { id: 'fitness',     icon: Dumbbell,       label: t('nav.fitness') },
+  { id: 'dashboard',   icon: BarChart3,      label: t('nav.dashboard') },
+];
+```
+
+**Settings Access:** Header icon (top-right) → rendered in all tabs → `pushPage({ id: 'settings' })` → full-screen overlay with ← back.
+
 ## 3. Data Architecture
 
 ### 3.1 Storage Strategy
@@ -81,7 +151,103 @@ function typeToRow<T>(obj: T): Record<string, unknown> {
 
 Tất cả `query<T>()` calls sẽ tự động apply `rowToType` trước khi trả kết quả.
 
-### 3.3 SQLite Schema
+### 3.3 State Migration Path
+
+Hiện tại app dùng `usePersistedState` (localStorage wrapper) cho 6 state slices trong App.tsx. Migration sang SQLite theo 3 bước:
+
+**Step 1 — Phase 0: usePersistedState → Zustand stores (localStorage backend giữ nguyên)**
+
+```typescript
+// BEFORE: App.tsx (~700 lines)
+const [rawIngredients, setRawIngredients] = usePersistedState('ingredients', []);
+const [rawDishes, setRawDishes] = usePersistedState('dishes', []);
+const [rawDayPlans, setRawDayPlans] = usePersistedState('dayPlans', []);
+// + 3 more slices + 20 handlers...
+
+// AFTER: Zustand stores (zero behavior change, only refactor)
+// src/store/ingredientStore.ts
+const useIngredientStore = create(persist(
+  (set) => ({
+    ingredients: [],
+    setIngredients: (items) => set({ ingredients: items }),
+    // ... handlers extracted from App.tsx
+  }),
+  { name: 'ingredients' } // localStorage key preserved
+));
+```
+
+Kết quả: App.tsx giảm từ ~700 → ~100 lines. State accessible từ mọi nơi (không cần props drilling).
+
+**Step 2 — Phase 1: Swap localStorage → SQLite backend**
+
+```typescript
+// Zustand store vẫn giữ nguyên API, chỉ thay persistence layer:
+const useIngredientStore = create(
+  (set) => ({
+    ingredients: [],
+    loadIngredients: async () => {
+      const rows = await db.query<Ingredient>('SELECT * FROM ingredients');
+      set({ ingredients: rows });
+    },
+    addIngredient: async (item) => {
+      await db.execute('INSERT INTO ingredients ...', [...]);
+      get().loadIngredients(); // refresh from SQLite
+    },
+  })
+);
+```
+
+**Step 3 — Phase 2+: New features dùng SQLite + Zustand pattern từ đầu**
+
+Pattern: `SQLite (source of truth) → Zustand (reactive cache) → React (render)`
+
+Xem §5.9 Zustand Integration cho code pattern chi tiết.
+
+#### 3.3.1 DatabaseProvider
+
+```typescript
+// src/contexts/DatabaseContext.tsx
+const DatabaseContext = createContext<DatabaseService | null>(null);
+
+export function DatabaseProvider({ children }: { children: React.ReactNode }) {
+  const [db, setDb] = useState<DatabaseService | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    initDatabase().then((instance) => {
+      setDb(instance);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <SplashScreen />; // Show app logo while WASM loads
+
+  return (
+    <DatabaseContext.Provider value={db}>
+      {children}
+    </DatabaseContext.Provider>
+  );
+}
+
+export function useDatabase(): DatabaseService {
+  const db = useContext(DatabaseContext);
+  if (!db) throw new Error('useDatabase must be used within DatabaseProvider');
+  return db;
+}
+```
+
+**App.tsx Provider Tree (sau Phase 0):**
+```
+<DatabaseProvider>           ← NEW: async DB init
+  <AuthProvider>             ← existing
+    <NotificationProvider>   ← existing
+      <AppShell />           ← TabRouter + NavigationStore
+    </NotificationProvider>
+  </AuthProvider>
+</DatabaseProvider>
+```
+
+### 3.4 SQLite Schema
 
 #### Migrated Tables (từ localStorage)
 
@@ -300,7 +466,7 @@ CREATE INDEX idx_dish_ingredients_dish ON dish_ingredients(dish_id);
 CREATE INDEX idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id);
 ```
 
-### 3.4 Seed Data
+### 3.5 Seed Data
 
 ~150 exercises pre-loaded (representative examples below):
 
@@ -811,6 +977,11 @@ function estimate1RM(weight: number, reps: number): number {
 
 > **Architecture Note:** Dự án hiện tại dùng flat structure (`src/components/`, `src/hooks/`, `src/services/`). Các tính năng mới sẽ dùng `src/features/` (feature-based) để nhóm code theo domain, phù hợp với quy mô phát triển. Existing components **không** cần di chuyển — chỉ code mới dùng `src/features/`.
 
+> **Reusable Sub-tab Pattern:** CalendarTab đã dùng sub-tabs (Meals/Nutrition). FitnessTab cũng dùng sub-tabs (Plan/Progress/History). Extract shared `SubTabBar` component:
+> ```
+> src/components/shared/SubTabBar.tsx  # Reusable sub-tab navigation bar
+> ```
+
 ```
 src/features/fitness/
 ├── components/
@@ -1047,6 +1218,16 @@ Một component `EnergyBalanceCard` duy nhất hiển thị ở 2 vị trí:
 
 **Collapsible:** User can collapse to a single-line summary bar if desired.
 
+> **Shared Component Rule:** Components used across ≥2 features live in `src/components/`. Components used by only 1 feature live in `src/features/[name]/components/`.
+>
+> **Shared nutrition components:**
+> ```
+> src/components/nutrition/
+> ├── EnergyBalanceCard.tsx    # Full version (Calendar Tab, Fitness Tab)
+> ├── EnergyBalanceMini.tsx    # Compact version (Dashboard Tab)
+> └── MacroDonutChart.tsx      # Reusable macro chart
+> ```
+
 ### 6.6 Dashboard Tab — Daily Command Center
 
 **Concept:** Dashboard = TODAY's real-time snapshot. Shows current day's data only. Not a history view (that's Calendar for meals, Fitness Progress for training).
@@ -1192,7 +1373,7 @@ src/features/dashboard/
 ├── components/
 │   ├── DashboardTab.tsx          # Main container, orchestrates tiers
 │   ├── DailyScoreHero.tsx        # Tier 1: Score + greeting
-│   ├── EnergyBalanceMini.tsx     # Tier 2: Compact energy balance (reuses EnergyBalanceCard)
+│   ├── EnergyBalanceMini.tsx     # Tier 2: Compact (imports from src/components/nutrition/)
 │   ├── ProteinProgress.tsx       # Tier 2: Protein bar + suggestion
 │   ├── TodaysPlanCard.tsx        # Tier 3: Workout + meals status (4 states)
 │   ├── WeightMini.tsx            # Tier 3: Goal-aware weight display
@@ -1211,6 +1392,7 @@ src/features/dashboard/
 ├── utils/
 │   └── scoreCalculator.ts        # Pure functions for score factors
 ├── types.ts                      # Dashboard-specific types
+├── constants.ts                  # Tip pool (20 tips), insight priorities (P1-P8), score thresholds
 └── store/
     └── dashboardStore.ts         # Dashboard Zustand store
 ```
@@ -1382,37 +1564,52 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 
 ## 9. Migration Phases (Big Bang)
 
-### Phase 1: Infrastructure
+### Phase 0: Foundation (NEW — prerequisite for all other phases)
+- [ ] Decompose App.tsx: extract state to Zustand stores (usePersistedState → Zustand with localStorage backend)
+- [ ] Create navigationStore.ts (Zustand-based tab + page stack navigation)
+- [ ] Refactor App.tsx from ~700 → ~100 lines (providers + TabRouter + Suspense)
+- [ ] Setup Design Tokens: CSS custom properties for spacing, color, shadow, radius, typography (§12.2-12.3)
+- [ ] Migrate all existing emoji to Lucide SVG icons in bottom nav and UI controls (§12.4)
+- [ ] Create SubTabBar.tsx reusable component (shared by Calendar, Fitness tabs)
+- [ ] Add accessibilityLabel to all existing interactive components (§12.1)
+- [ ] Unit tests for navigation store, Zustand store migration, design tokens
+
+### Phase 1: Infrastructure (SQLite)
 - [ ] Setup sql.js + Capacitor SQLite
-- [ ] Implement DatabaseService abstraction
+- [ ] Implement DatabaseService abstraction + DatabaseProvider context (§3.3.1)
 - [ ] Create all SQLite tables
-- [ ] Write localStorage → SQLite migration
+- [ ] Write localStorage → SQLite migration (swap Zustand persistence layer)
 - [ ] Update Google Drive sync for SQLite export/import
+- [ ] Update Vite chunk strategy (sql-wasm, vendor-state)
+- [ ] Unit tests for DatabaseService, migration utils, export/import
 
 ### Phase 2: Core Features Migration
-- [ ] Migrate ingredients/dishes/day_plans to SQLite
-- [ ] Update all existing hooks to use DatabaseService
+- [ ] Migrate ingredients/dishes/day_plans to SQLite-backed Zustand stores
+- [ ] Update all existing hooks to use DatabaseService via useDatabase()
 - [ ] Update existing components (zero visual change)
+- [ ] Unit tests for migrated stores
 
 ### Phase 3: Navigation Refactor
-- [ ] Restructure bottom nav: replace Đi chợ/Cài đặt with Fitness/Dashboard
-- [ ] Move Đi chợ to Calendar action button
-- [ ] Move Cài đặt to header icon
-- [ ] Update routing
+- [ ] Restructure bottom nav: replace Đi chợ/Cài đặt with Fitness/Dashboard (§2.5)
+- [ ] Move GroceryList to Calendar action button (bottom sheet wrapper)
+- [ ] Move Settings to header icon (full-screen overlay via pushPage)
+- [ ] Update BottomNavBar + DesktopNav items and icons
 - [ ] Create empty placeholder pages for FitnessTab and DashboardTab
+- [ ] Unit tests for tab transitions, navigation flows
 
 ### Phase 4: Nutrition Engine
 - [ ] Implement nutritionEngine.ts (BMR, TDEE, Macro Split)
 - [ ] Build HealthProfileForm in Settings
 - [ ] Build GoalPhaseSelector
 - [ ] Connect nutrition engine to existing CalendarTab/Summary
+- [ ] Unit tests for nutritionEngine (BMR, TDEE, Macro, auto-adjust)
 
 ### Phase 5: Training System
 - [ ] Create training_profile SQLite table
 - [ ] Build FitnessOnboarding (B+C Hybrid: Quick Start 3 fields + adaptive expand, 14 total fields)
-- [ ] Seed exercises table (~150 pre-loaded exercises)
+- [ ] Seed exercises table (~150 pre-loaded exercises, lazy-loaded)
 - [ ] Implement plan generation algorithm (6 steps: split → volume → exercises → reps → cardio → deload)
-- [ ] Build FitnessTab with sub-tabs (Plan/Progress/History)
+- [ ] Build FitnessTab with sub-tabs (Plan/Progress/History) using SubTabBar
 - [ ] Build TrainingPlanView (weekly calendar + today's workout)
 - [ ] Build WorkoutLogger with Progressive Intelligence (3 phases: manual → AI pre-fill → smart adjust)
 - [ ] Build CardioLogger (duration/distance/HR/intensity)
@@ -1424,13 +1621,14 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 - [ ] Implement periodization logic (linear/undulating/block)
 - [ ] Implement progressive overload suggestions (double progression)
 - [ ] Connect sessions/week → Activity Multiplier auto-adjust
+- [ ] Unit tests for plan generation, volumeCalculator, periodization, cardioEstimator, useWorkouts
 
 ### Phase 6: Dashboard & Feedback Loop
 - [ ] Implement useFeedbackLoop (moving avg, auto-adjust)
 - [ ] Build AutoAdjustBanner + AdjustmentHistory
 - [ ] Build DashboardTab container with 5-tier layout
 - [ ] Build DailyScoreHero (Tier 1) with 5-factor formula + null handling
-- [ ] Build EnergyBalanceMini (Tier 2) — compact version of EnergyBalanceCard
+- [ ] Build EnergyBalanceMini (Tier 2) — compact version in src/components/nutrition/
 - [ ] Build ProteinProgress (Tier 2) — bar + suggestion logic
 - [ ] Build TodaysPlanCard (Tier 3) — 4 states (training/completed/rest/no-plan)
 - [ ] Build WeightMini (Tier 3) — goal-aware colors + sparkline
@@ -1440,22 +1638,17 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 - [ ] Build WeightQuickLog bottom sheet
 - [ ] Implement useDailyScore, useTodaysPlan, useInsightEngine, useQuickActions hooks
 - [ ] Handle 6 edge cases (first-time, morning, perfect day, nutrition-only, goal transition, error/offline)
+- [ ] Unit tests for scoreCalculator, useInsightEngine, useFeedbackLoop
 
-### Phase 7: Polish & Testing
-- [ ] Unit tests for nutritionEngine (BMR, TDEE, Macro, auto-adjust)
-- [ ] Unit tests for training metrics
-- [ ] Unit tests for feedback loop
-- [ ] Integration tests for SQLite migration
-- [ ] Update Google Drive sync tests
-- [ ] ESLint + coverage validation
-- [ ] i18n keys for all new UI strings
-- [ ] Implement Design Tokens (spacing, color, shadow, radius, typography)
-- [ ] Migrate all emoji to Lucide icons
-- [ ] Add accessibilityLabel to all interactive components
+### Phase 7: Integration Testing & Polish
+- [ ] Integration tests for full SQLite migration pipeline
+- [ ] Integration tests for cross-feature data flow (Nutrition → Dashboard → Fitness)
+- [ ] Update Google Drive sync tests for SQLite format
+- [ ] E2E tests with WebdriverIO/Appium (critical flows)
 - [ ] Verify WCAG 2.1 AA compliance (contrast, color-not-only, keyboard nav)
-- [ ] Implement motion system with reduced-motion support
-- [ ] Add confirmation dialogs for destructive actions
-- [ ] Add undo toast for weight log and set confirm
+- [ ] Implement motion system with reduced-motion support (§12.5)
+- [ ] ESLint + SonarQube + 100% coverage validation
+- [ ] i18n keys for all new UI strings (vi.json)
 - [ ] Implement gesture conflict resolution (swipe thresholds)
 - [ ] Implement tab state preservation (scroll + UI state per tab)
 - [ ] Lock portrait orientation for MVP
@@ -1478,8 +1671,9 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 |---|---|---|
 | Bundle size | ~500KB | ~1MB (+500KB sql.js WASM) |
 | SQLite tables | 0 | 16 (+training_profile, training_plans, training_plan_days) |
-| New components | 0 | ~40 |
+| New components | 0 | ~42 (+SubTabBar, DatabaseProvider) |
 | New hooks | 0 | ~12 |
+| New stores (Zustand) | 0 | ~8 (navigation, ingredient, dish, dayPlan, fitness, dashboard, healthProfile, + existing refactored) |
 | New services | 0 | 2 (databaseService, nutritionEngine) |
 | Pre-loaded data | 0 | ~150 exercises |
 | Data fields collected | 3 | 26 |
@@ -1515,6 +1709,29 @@ export async function initDatabase(): Promise<DatabaseService> {
 ```
 
 Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
+
+### Vite Chunk Strategy Update
+
+```typescript
+// vite.config.ts — updated manualChunks
+manualChunks: {
+  'vendor-react': ['react', 'react-dom'],
+  'vendor-ui': ['lucide-react', 'motion'],
+  'vendor-i18n': ['i18next', 'react-i18next'],
+  'vendor-state': ['zustand'],
+  // Feature chunks (lazy loaded per tab)
+  // Fitness and Dashboard components are React.lazy() loaded
+  // so they automatically get separate chunks via Vite code splitting.
+  // sql.js WASM: served from public/wasm/, NOT bundled inline.
+}
+```
+
+**Chunk Loading Strategy:**
+- `vendor-*` chunks: loaded on initial page load (shared by all tabs)
+- Fitness tab code: lazy chunk, loaded on first tab switch to Fitness
+- Dashboard tab code: lazy chunk, loaded on first tab switch to Dashboard
+- sql.js WASM (~500KB): loaded async during `DatabaseProvider` init, served from `public/wasm/`
+- Exercise database (~150 items): lazy loaded within fitness chunk, not bundled with main
 
 ## 11. Decisions Log
 
@@ -1559,6 +1776,16 @@ Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 | Confirmation UX | Confirm destructive only + undo toast for logging | Confirm everything, no undo | Reduces friction for frequent actions (weight, sets); safety net via 5s undo toast |
 | Typography scale | 10px min, 14px body, tabular-nums for numbers | No scale (arbitrary sizes) | Prevents unreadable text on mobile; tabular-nums prevents layout shift when numbers update |
 | Accessibility | WCAG 2.1 AA: labels, color-not-only, dynamic type, reduced-motion | No a11y spec | Legal compliance; 15% of users have some disability; inclusive design benefits all users |
+| App.tsx decomposition | Phase 0 refactor to Zustand stores | Keep monolithic App.tsx, incremental extraction | App.tsx at 700 lines is unmaintainable; adding 2 new tabs would push to 1500+; must refactor before new features |
+| Navigation approach | Custom Zustand navigation store | React Router, no router | Capacitor mobile app — deep linking less important; custom store gives full control over bottom nav hide/show; zero new dependency; extends existing useModalBackHandler |
+| State migration path | 3-step: localStorage→Zustand→SQLite | Big Bang direct, incremental per-feature | Zero behavior change in Step 1 (refactor only); Step 2 swaps persistence layer; Step 3 new features use final pattern from start |
+| Phase 0 (Foundation) | New prerequisite phase before Phase 1 | No Phase 0, put in Phase 7 | Design Tokens must exist before building 40+ components; avoids refactoring all components later |
+| Shared component rule | Components used ≥2 features → src/components/ | All in features/, duplicate code | EnergyBalanceCard used in 3 tabs; duplication creates maintenance burden and inconsistency risk |
+| Test-per-phase | Each phase includes own unit tests | All tests in Phase 7 | Catch bugs early; each phase is CI-gated; Phase 7 focuses on integration/E2E only |
+| DatabaseProvider | React Context wrapping App tree | Global singleton, prop drilling | Async WASM init needs loading state; Context provides clean injection; SplashScreen during init |
+| SubTabBar reusable | Shared component for Calendar + Fitness | Inline per-tab, no shared component | CalendarTab already has sub-tabs; FitnessTab needs same pattern; DRY principle |
+| Vite chunk strategy | Separate chunks: vendor, fitness, dashboard, sql-wasm | Single bundle, auto-splitting only | Prevent loading fitness code when user only uses Calendar; sql.js WASM must not be bundled inline |
+| Settings access | Header icon → full-screen overlay via pushPage | Keep as tab, drawer/sidebar, modal | Pattern consistent with Instagram/X; frees bottom nav slot for Dashboard; infrequent access justifies non-tab placement |
 
 ## 12. UI/UX Standards
 
