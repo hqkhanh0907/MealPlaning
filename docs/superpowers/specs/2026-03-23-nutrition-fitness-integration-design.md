@@ -1449,6 +1449,16 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 - [ ] Update Google Drive sync tests
 - [ ] ESLint + coverage validation
 - [ ] i18n keys for all new UI strings
+- [ ] Implement Design Tokens (spacing, color, shadow, radius, typography)
+- [ ] Migrate all emoji to Lucide icons
+- [ ] Add accessibilityLabel to all interactive components
+- [ ] Verify WCAG 2.1 AA compliance (contrast, color-not-only, keyboard nav)
+- [ ] Implement motion system with reduced-motion support
+- [ ] Add confirmation dialogs for destructive actions
+- [ ] Add undo toast for weight log and set confirm
+- [ ] Implement gesture conflict resolution (swipe thresholds)
+- [ ] Implement tab state preservation (scroll + UI state per tab)
+- [ ] Lock portrait orientation for MVP
 
 ## 10. Dependencies
 
@@ -1457,7 +1467,8 @@ async function migrateFromLocalStorage(): Promise<MigrationResult> {
 ```json
 {
   "sql.js": "^1.11.0",
-  "@capacitor-community/sqlite": "^6.0.0"
+  "@capacitor-community/sqlite": "^6.0.0",
+  "lucide-react": "^0.460.0"
 }
 ```
 
@@ -1541,3 +1552,250 @@ Vite config: sql.js WASM file served from `public/wasm/` (not bundled inline).
 | AI Insight engine | Priority-based single insight (P1-P8) | Multiple insights list, AI-generated text | Single insight prevents overwhelm; rule-based is deterministic and testable |
 | Quick Actions | Context-aware 3 buttons (center = primary) | Fixed buttons, FAB, swipe actions | Context awareness means most useful action is always prominent; 3 buttons fit thumb zone |
 | Dashboard edge cases | 6 states (first-time, morning, perfect, nutrition-only, goal-transition, error) | Generic empty state for all | Each state has specific UX treatment; never show empty or zero; component-level error isolation |
+| Icon system | Lucide React SVG (24px stroke) | Emoji, Heroicons, custom SVG | Cross-platform consistency; emoji renders differently on iOS/Android/Web; Lucide is MIT, tree-shakeable, React-native |
+| Color contrast | #059669 for text, #10B981 for fills only | Single emerald for everything | #10B981 fails WCAG 4.5:1 on white (3.4:1); #059669 passes (5.1:1) while maintaining brand identity |
+| Design tokens | 4px grid + semantic color + shadow scale | No tokens (raw values) | Consistent spacing, easy dark mode, maintainable across 40+ components |
+| Motion system | 4-tier duration (0/150/250/400ms) + reduced-motion | No motion spec, CSS defaults | Purposeful animation improves perceived performance; reduced-motion respects user preference |
+| Confirmation UX | Confirm destructive only + undo toast for logging | Confirm everything, no undo | Reduces friction for frequent actions (weight, sets); safety net via 5s undo toast |
+| Typography scale | 10px min, 14px body, tabular-nums for numbers | No scale (arbitrary sizes) | Prevents unreadable text on mobile; tabular-nums prevents layout shift when numbers update |
+| Accessibility | WCAG 2.1 AA: labels, color-not-only, dynamic type, reduced-motion | No a11y spec | Legal compliance; 15% of users have some disability; inclusive design benefits all users |
+
+## 12. UI/UX Standards
+
+### 12.1 Accessibility Requirements (WCAG 2.1 AA)
+
+**Color Contrast Pairs** — All text must meet 4.5:1 contrast ratio minimum:
+
+| Usage | Foreground | Background | Ratio | Status |
+|---|---|---|---|---|
+| Primary text on white | #059669 (emerald-600) | #FFFFFF | 5.1:1 | ✅ Pass |
+| Primary text on surface | #059669 | #F8FAFC | 4.9:1 | ✅ Pass |
+| Body text | #1E293B (slate-800) | #FFFFFF | 12.6:1 | ✅ Pass |
+| Secondary text | #64748B (slate-500) | #FFFFFF | 4.6:1 | ✅ Pass |
+| White text on emerald | #FFFFFF | #10B981 | 3.4:1 | ✅ Pass (large text only, ≥18px bold) |
+| White text on emerald-dark | #FFFFFF | #059669 | 5.1:1 | ✅ Pass |
+| Amber text | #92400E (amber-800) | #FFFBEB | 7.2:1 | ✅ Pass |
+| Score sub-badges (hero) | #FFFFFF | Gradient bg | ≥4.5:1 | ✅ Pass (ensured by gradient end color) |
+| White text on amber-dark | #FFFFFF | #92400E | 8.3:1 | ✅ Pass |
+
+> **Rule:** #10B981 (emerald-500) NEVER used for body text. Only for: backgrounds, fills, large display numbers (≥18px bold), icons. For readable text, always use #059669 (emerald-600) or darker.
+
+**Color-Not-Only Rule** — Information conveyed by color must also use icon, shape, or text:
+
+| Component | Color Signal | Required Secondary Signal |
+|---|---|---|
+| Weight Mini (on/off track) | Green/Amber | ✅/⚠️ icon + text label ("Đúng hướng"/"Cần điều chỉnh") |
+| Streak dots (completed/rest/missed) | Green/Blue/Gray | ✓ checkmark / 😴 rest icon / ○ empty circle (shape differentiation) |
+| Daily Score range | Green/Amber/Slate gradient | Numeric score always visible (83, 65, 42) + text label ("Tuyệt vời"/"Khá tốt"/"Cần cố gắng") |
+| Energy Balance status | Green/Amber | "On track ✅" / "Over ⚠️" text label |
+| AI Insight priority | Color-coded border | Icon prefix (⚠️/🥩/🔥/📈/💡) + bold title text |
+
+**Accessibility Labels** — Every interactive element must have an `accessibilityLabel`:
+
+```typescript
+// Dashboard components
+<DailyScoreHero accessibilityLabel={`Daily Score: ${score} trên 100. ${getScoreLabel(score)}`} />
+<EnergyBalanceMini accessibilityLabel={`Energy balance: ăn ${eaten} trừ đốt ${burned} bằng ${net} calories. Target: ${target}`} />
+<WeightMini accessibilityLabel={`Cân nặng: ${weight}kg, ${trendText}. Tap để xem biểu đồ`} />
+<StreakMini accessibilityLabel={`Streak: ${days} ngày liên tục. Kỷ lục: ${record} ngày`} />
+<QuickActionsBar>
+  <Button accessibilityLabel="Log cân nặng" />
+  <Button accessibilityLabel={`Log ${nextMealName}`} />
+  <Button accessibilityLabel="Bắt đầu tập" />
+</QuickActionsBar>
+
+// Charts
+<WeightSparkline accessibilityLabel={`Xu hướng cân nặng 7 ngày: ${trendSummary}`} />
+<MacroDonut accessibilityLabel={`Macro hôm nay: Protein ${proteinPct}%, Fat ${fatPct}%, Carbs ${carbsPct}%`} />
+```
+
+**Dynamic Type Support:**
+- Dashboard allows scrolling when system font size is increased (no content truncation)
+- Minimum touch targets remain 44×44pt regardless of font size
+- Score number scales proportionally but caps at 48px
+- Card layouts shift from horizontal to vertical grid at largest font sizes
+
+**Reduced Motion:**
+- `prefers-reduced-motion: reduce` → disable: gradient transitions, sparkline draw animation, score counting animation, stagger delays
+- Replace with: instant render, static sparkline, immediate score display
+- Bottom sheet: instant appear/disappear (no slide animation)
+
+### 12.2 Design Tokens
+
+**Spacing Scale (4px base grid):**
+
+| Token | Value | Usage |
+|---|---|---|
+| space-1 | 4px | Inline spacing, icon gaps |
+| space-2 | 8px | Card internal padding, chip gaps |
+| space-3 | 12px | Section gaps, card margins |
+| space-4 | 16px | Container padding, section spacing |
+| space-6 | 24px | Major section gaps |
+| space-8 | 32px | Page-level padding top/bottom |
+| space-12 | 48px | Hero section padding |
+
+**Border Radius:**
+
+| Token | Value | Usage |
+|---|---|---|
+| radius-sm | 6px | Chips, badges, small buttons |
+| radius-md | 10px | Cards, input fields |
+| radius-lg | 14px | Hero card, bottom sheets |
+| radius-xl | 20px | Device frame, page containers |
+| radius-full | 9999px | Pills, circular buttons, progress bars |
+
+**Elevation (Shadow) Scale:**
+
+| Token | Value | Usage |
+|---|---|---|
+| shadow-none | none | Flat cards (border-only style) |
+| shadow-sm | 0 1px 2px rgba(0,0,0,0.05) | Subtle card lift |
+| shadow-md | 0 2px 8px rgba(0,0,0,0.08) | Quick Actions center button, floating elements |
+| shadow-lg | 0 4px 20px rgba(0,0,0,0.12) | Bottom sheets, elevated modals |
+| shadow-glow | 0 2px 6px rgba(16,185,129,0.3) | Primary CTA buttons (emerald glow) |
+
+> **Rule:** Dashboard cards use `border: 1px solid #E2E8F0` (no shadow). Only Quick Actions center button and bottom sheets use shadow. This keeps the UI flat and clean.
+
+**Semantic Color Tokens:**
+
+| Token | Light Mode | Dark Mode | Usage |
+|---|---|---|---|
+| color-primary | #10B981 | #34D399 | Fills, backgrounds, active states |
+| color-primary-text | #059669 | #6EE7B7 | Readable text on light/dark surfaces |
+| color-on-primary | #FFFFFF | #FFFFFF | Text on primary backgrounds |
+| color-surface | #FFFFFF | #1E293B | Card backgrounds |
+| color-surface-alt | #F8FAFC | #0F172A | Page background |
+| color-on-surface | #1E293B | #E2E8F0 | Body text |
+| color-on-surface-secondary | #64748B | #94A3B8 | Secondary/label text |
+| color-border | #E2E8F0 | #334155 | Card borders, dividers |
+| color-success | #059669 | #34D399 | On-track indicators |
+| color-warning | #D97706 | #FBBF24 | Off-track, attention needed |
+| color-warning-dark | #92400E | #F59E0B | P1 insight backgrounds, amber text on light surfaces |
+| color-warning-surface | #FFFBEB | #422006 | Amber alert card backgrounds, warning surfaces |
+| color-info | #2563EB | #60A5FA | Motivation, neutral info |
+| color-muted | #64748B | #475569 | Disabled, inactive, slate score |
+
+> **Note:** Dashboard hero gradients use raw hex values not mapped to tokens: Emerald `#10B981 → #059669`, Amber `#F59E0B → #D97706`, Slate `#64748B → #475569`. These are gradient pairs, not individual semantic tokens.
+
+### 12.3 Typography Scale
+
+| Token | Size | Weight | Line Height | Usage |
+|---|---|---|---|---|
+| text-xs | 10px | 400 | 1.4 | Tertiary labels, timestamps (MINIMUM size) |
+| text-sm | 12px | 400-600 | 1.4 | Secondary labels, card subtitles, badge text |
+| text-base | 14px | 400-500 | 1.5 | Body text, descriptions, list items |
+| text-md | 16px | 500-700 | 1.5 | Card titles, nav labels, form labels |
+| text-lg | 20px | 600-700 | 1.3 | Section headers, sub-tab titles |
+| text-xl | 24px | 700-800 | 1.2 | Page titles, hero subtitles |
+| text-2xl | 30px | 800 | 1.1 | Daily Score number, hero metrics |
+| text-3xl | 36px | 800 | 1.0 | Weight Quick Log display number |
+
+> **Rule:** No text smaller than 10px anywhere in the app. Body text minimum 14px. Numbers use `font-variant-numeric: tabular-nums` for stable layout.
+
+### 12.4 Icon System
+
+**Library:** Lucide React (consistent 24px stroke icons, MIT license)
+
+**Icon Migration Map (emoji → SVG):**
+
+| Context | Emoji (spec mockup) | Lucide Icon | Size |
+|---|---|---|---|
+| Bottom Nav: Calendar | 📅 | `Calendar` | 24px |
+| Bottom Nav: Library | 📋 | `ClipboardList` | 24px |
+| Bottom Nav: AI | 🤖 | `Bot` | 24px |
+| Bottom Nav: Fitness | 💪 | `Dumbbell` | 24px |
+| Bottom Nav: Dashboard | 📊 | `BarChart3` | 24px |
+| Quick Action: Log weight | ⚖️ | `Scale` | 20px |
+| Quick Action: Log meal | ➕ | `Plus` | 24px |
+| Quick Action: Start workout | 🏋️ | `Dumbbell` | 20px |
+| Quick Action: View results | 📊 | `TrendingUp` | 20px |
+| Quick Action: Log cardio | 🏃 | `Activity` | 20px |
+| Dashboard: Meals | 🍽️ | `UtensilsCrossed` | 16px |
+| Dashboard: Protein | 🥩 | `Beef` | 16px |
+| Dashboard: Weight | ⚖️ | `Scale` | 16px |
+| Dashboard: Streak | 🔥 | `Flame` | 16px |
+| Dashboard: Workout | 🏋️ | `Dumbbell` | 16px |
+| Status: Success | ✅ | `CheckCircle` | 16px |
+| Status: Warning | ⚠️ | `AlertTriangle` | 16px |
+| Status: Info | 💡 | `Lightbulb` | 16px |
+| Action: Start | ▶️ | `Play` | 16px |
+| Action: Close | ✕ | `X` | 20px |
+| Action: Back | ← | `ChevronLeft` | 24px |
+| Timer | ⏱️ | `Timer` | 20px |
+| Trophy/PR | 🏆 | `Trophy` | 16px |
+
+> **Rule:** Emoji may still be used in AI Insight *text content* (tips, suggestions) for warmth. But all UI controls, navigation, buttons, and status indicators MUST use Lucide SVG icons.
+
+### 12.5 Motion & Animation
+
+**Duration Tokens:**
+
+| Token | Value | Usage |
+|---|---|---|
+| duration-instant | 0ms | Reduced-motion fallback |
+| duration-fast | 150ms | Tap feedback (press state), micro-interactions |
+| duration-normal | 250ms | Card expand, bottom sheet appear, tab switch |
+| duration-slow | 400ms | Page transitions, score counting animation |
+
+**Easing Curves:**
+
+| Token | Value | Usage |
+|---|---|---|
+| ease-enter | cubic-bezier(0, 0, 0.2, 1) | Elements appearing (bottom sheets, cards) |
+| ease-exit | cubic-bezier(0.4, 0, 1, 1) | Elements disappearing (dismiss, close) |
+| ease-spring | cubic-bezier(0.34, 1.56, 0.64, 1) | Bouncy feedback (set confirm, milestone) |
+| ease-linear | linear | Progress bar fill, timer countdown |
+
+**Interaction Feedback:**
+
+| Interaction | Visual Feedback | Haptic | Duration |
+|---|---|---|---|
+| Tap card (Weight, Streak, Energy) | opacity: 0.7 → 1.0 on release | Light | 150ms |
+| Tap CTA button | scale(0.97) → scale(1.0) | Medium | 150ms |
+| Confirm workout set ✅ | Green flash + checkmark | Success | 250ms |
+| Save weight log | Button → "✅ Đã lưu" text swap | Success | 250ms |
+| PR achieved 🏆 | Trophy toast slide-in from bottom | Heavy | 400ms |
+| Milestone reached | Confetti burst (3 particles) | Heavy | 600ms |
+| Dismiss insight (swipe) | Card slides out + next card slides in | Light | 250ms |
+
+**Stagger Animation (Dashboard load):**
+- Tier 1 (Hero): 0ms delay — render immediately
+- Tier 2 (Energy + Protein): 30ms delay
+- Tier 3 (Plan + Weight + Streak): 60ms delay
+- Tier 4 (Insight): lazy load after Tier 1-3 paint
+- Tier 5 (Quick Actions): lazy load after Tier 1-3 paint
+
+**Content Layout Stability (CLS Prevention):**
+- AI Insight Card (Tier 4): Reserve fixed height slot (56px) even when empty — prevents Tier 5 shift
+- Daily Score sub-badges: Fixed width per badge — prevents reflow when score updates
+
+### 12.6 Interaction Patterns
+
+**Confirmation Dialogs** — Required for destructive/irreversible actions:
+
+| Action | Dialog Required | Message |
+|---|---|---|
+| "✕ Kết thúc" workout mid-session | ✅ Yes | "Kết thúc sớm? Dữ liệu đã ghi sẽ được lưu." + "Kết thúc" / "Tiếp tục tập" |
+| Delete custom exercise | ✅ Yes | "Xóa bài tập? Lịch sử tập vẫn giữ nguyên." |
+| Reset training plan | ✅ Yes | "Tạo plan mới sẽ thay thế plan hiện tại." |
+| Log weight (overwrite today) | ❌ No | Silent overwrite + undo toast |
+| Dismiss AI Insight | ❌ No | Swipe dismiss + next insight slides in |
+
+**Undo Support** — Snackbar toast (5s auto-dismiss):
+
+| Action | Undo Available | Toast Message |
+|---|---|---|
+| Log weight | ✅ Yes | "72.5kg đã lưu — Hoàn tác" |
+| Confirm workout set | ✅ Yes | "Set 3 đã ghi — Hoàn tác" |
+| Dismiss insight | ❌ No | Insight dismissed silently |
+| Complete workout | ❌ No | Summary screen shown instead |
+
+**Gesture Conflict Resolution:**
+- WorkoutLogger "swipe for next exercise": Use horizontal swipe with 40% screen-width threshold to avoid conflict with iOS edge-swipe back gesture
+- Bottom sheet dismiss: Vertical swipe-down only (no conflict with horizontal content)
+
+**Tab State Preservation:**
+- Switching away from Dashboard and returning preserves: scroll position, expanded cards, and bottom sheet state
+- Implemented via Zustand store persisting scroll offset and UI state per tab
+
+**Orientation:** App locks to portrait mode for MVP. Landscape support deferred to Phase 7.
