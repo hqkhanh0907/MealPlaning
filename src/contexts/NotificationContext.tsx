@@ -47,7 +47,6 @@ const DEFAULT_DURATION: Record<NotificationType, number> = {
 
 const NotificationContext = createContext<NotifyAPI | null>(null);
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useNotification = (): NotifyAPI => {
   const ctx = useContext(NotificationContext);
   if (!ctx) throw new Error('useNotification must be used within <NotificationProvider>');

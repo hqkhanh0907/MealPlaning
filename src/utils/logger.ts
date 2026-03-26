@@ -23,7 +23,6 @@ export const logger = {
   /** Verbose output — only emitted in development builds. */
   debug(ctx: LogContext, message: string): void {
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.debug(formatPrefix(ctx), message);
     }
   },
@@ -37,7 +36,6 @@ export const logger = {
   },
 
   info(ctx: LogContext, message: string): void {
-    // eslint-disable-next-line no-console
     console.info(formatPrefix(ctx), message);
   },
 };
