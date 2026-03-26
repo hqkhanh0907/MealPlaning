@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Sparkles, Loader2, Trash2, Copy, Save, BookTemplate, MoreVertical } from 'lucide-react';
+import { Plus, Sparkles, Loader2, Trash2, Copy, Save, BookTemplate, MoreVertical, ShoppingCart } from 'lucide-react';
 
 export interface MealActionBarProps {
   allEmpty: boolean;
@@ -11,6 +11,7 @@ export interface MealActionBarProps {
   onCopyPlan?: () => void;
   onSaveTemplate?: () => void;
   onOpenTemplateManager?: () => void;
+  onOpenGrocery?: () => void;
 }
 
 interface MenuItem {
@@ -25,7 +26,7 @@ interface MenuItem {
 export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
   allEmpty, isSuggesting,
   onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
-  onCopyPlan, onSaveTemplate, onOpenTemplateManager,
+  onCopyPlan, onSaveTemplate, onOpenTemplateManager, onOpenGrocery,
 }) => {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -107,6 +108,17 @@ export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
         <span className="hidden sm:inline">{t('calendar.aiSuggest')}</span>
         <span className="sm:hidden">AI</span>
       </button>
+      {onOpenGrocery && (
+        <button
+          onClick={onOpenGrocery}
+          data-testid="btn-open-grocery"
+          className="flex items-center justify-center gap-2 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-4 py-2.5 rounded-xl font-medium hover:bg-amber-100 dark:hover:bg-amber-900/50 active:scale-[0.98] transition-all min-h-11"
+        >
+          <ShoppingCart className="w-4 h-4" />
+          <span className="hidden sm:inline">{t('grocery.title')}</span>
+          <span className="sm:hidden">{t('grocery.titleShort')}</span>
+        </button>
+      )}
       {menuItems.length > 0 && (
         <div className="relative ml-auto" ref={menuRef}>
           <button

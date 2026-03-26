@@ -274,6 +274,7 @@
   },
   "grocery": {
     "title": "Danh sách đi chợ",
+    "titleShort": "Đi chợ",
     "scopeToday": "Hôm nay",
     "scopeWeek": "Tuần này",
     "scopeAll": "Tất cả",

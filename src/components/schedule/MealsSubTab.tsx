@@ -25,6 +25,7 @@ export interface MealsSubTabProps {
   recentDishIds?: string[];
   onQuickAdd?: (type: MealType, dishId: string) => void;
   onUpdateServings?: (dishId: string, servings: number) => void;
+  onOpenGrocery?: () => void;
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
@@ -35,7 +36,7 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
   servings,
   onPlanMeal, onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onSwitchToNutrition,
-  recentDishIds, onQuickAdd, onUpdateServings,
+  recentDishIds, onQuickAdd, onUpdateServings, onOpenGrocery,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
@@ -92,6 +93,7 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
         onCopyPlan={onCopyPlan}
         onSaveTemplate={onSaveTemplate}
         onOpenTemplateManager={onOpenTemplateManager}
+        onOpenGrocery={onOpenGrocery}
       />
 
       {recentDishes.length > 0 && emptySlots.length > 0 && onQuickAdd && (

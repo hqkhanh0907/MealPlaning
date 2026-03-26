@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CalendarDays, UtensilsCrossed, BarChart3 } from 'lucide-react';
+import { CalendarDays, UtensilsCrossed, BarChart3, X } from 'lucide-react';
 import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary } from '../types';
 import { DateSelector } from './DateSelector';
 import { MealsSubTab } from './schedule/MealsSubTab';
 import { NutritionSubTab } from './schedule/NutritionSubTab';
+import { GroceryList } from './GroceryList';
+import { ModalBackdrop } from './shared/ModalBackdrop';
 import { parseLocalDate } from '../utils/helpers';
 import { useIsDesktop } from '../hooks/useIsDesktop';
 
@@ -36,15 +38,19 @@ export interface CalendarTabProps {
 }
 
 export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
-  selectedDate, onSelectDate, dayPlans, dishes, ingredients: _ingredients,
-  currentPlan: _currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
+  selectedDate, onSelectDate, dayPlans, dishes, ingredients,
+  currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
   isSuggesting, servings, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onQuickAdd, onUpdateServings,
 }) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   const [activeSubTab, setActiveSubTab] = useState<ScheduleSubTab>('meals');
+  const [showGrocery, setShowGrocery] = useState(false);
   const isDesktop = useIsDesktop();
+
+  const handleOpenGrocery = useCallback(() => setShowGrocery(true), []);
+  const handleCloseGrocery = useCallback(() => setShowGrocery(false), []);
 
   const recentDishIds = useMemo(() => {
     const today = selectedDate;
@@ -125,6 +131,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               recentDishIds={recentDishIds}
               onQuickAdd={onQuickAdd}
               onUpdateServings={onUpdateServings}
+              onOpenGrocery={handleOpenGrocery}
             />
           )}
           {activeSubTab === 'nutrition' && (
@@ -162,6 +169,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
               recentDishIds={recentDishIds}
               onQuickAdd={onQuickAdd}
               onUpdateServings={onUpdateServings}
+              onOpenGrocery={handleOpenGrocery}
             />
           </div>
           <div>
@@ -174,6 +182,39 @@ export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
             />
           </div>
         </div>
+      )}
+
+      {showGrocery && (
+        <ModalBackdrop onClose={handleCloseGrocery} zIndex="z-50">
+          <div
+            data-testid="grocery-modal"
+            className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg overflow-hidden max-h-[90vh] flex flex-col sm:mx-4"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                {t('grocery.title')}
+              </h2>
+              <button
+                type="button"
+                onClick={handleCloseGrocery}
+                data-testid="btn-close-grocery"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-700 transition-all"
+                aria-label={t('common.close')}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1">
+              <GroceryList
+                currentPlan={currentPlan}
+                dayPlans={dayPlans}
+                selectedDate={selectedDate}
+                allDishes={dishes}
+                allIngredients={ingredients}
+              />
+            </div>
+          </div>
+        </ModalBackdrop>
       )}
     </div>
   );
