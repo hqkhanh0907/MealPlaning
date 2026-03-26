@@ -148,6 +148,14 @@ vi.mock('../components/GroceryList', () => ({
   GroceryList: () => <div>GroceryMock</div>,
 }));
 
+// Mock lazy-loaded FitnessTab and DashboardTab
+vi.mock('../features/fitness/components/FitnessTab', () => ({
+  FitnessTab: () => <div data-testid="fitness-tab">Fitness Content</div>,
+}));
+vi.mock('../features/dashboard/components/DashboardTab', () => ({
+  DashboardTab: () => <div data-testid="dashboard-tab">Dashboard Content</div>,
+}));
+
 // Mock ClearPlanModal to expose onClear callback for testing
 vi.mock('../components/modals/ClearPlanModal', () => ({
   ClearPlanModal: ({ onClear }: { onClear: (scope: 'day' | 'week' | 'month') => void }) => (
@@ -191,14 +199,16 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByText('Thư viện dữ liệu')).toBeInTheDocument());
   });
 
-  it('theme toggle was in Settings tab (Settings moved to header icon)', async () => {
+  it('opens settings overlay via header icon and closes with back button', async () => {
     render(<App />);
-    const navTabs = screen.getAllByRole('tab');
-    const dashboardTab = navTabs.find(b => b.textContent?.includes('Tổng quan'));
-    expect(dashboardTab).toBeTruthy();
-    if (!dashboardTab) return;
-    fireEvent.click(dashboardTab);
-    await waitFor(() => expect(screen.getByText('Dashboard Tab Coming Soon')).toBeInTheDocument());
+    const settingsBtn = screen.getByTestId('btn-open-settings');
+    expect(settingsBtn).toBeInTheDocument();
+    expect(settingsBtn).toHaveAttribute('aria-label', 'Cài đặt');
+    fireEvent.click(settingsBtn);
+    await waitFor(() => expect(screen.getByTestId('settings-overlay')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-close-settings'));
+    await waitFor(() => expect(screen.queryByTestId('settings-overlay')).not.toBeInTheDocument());
   });
 
   it('opens meal planner modal when "Lên kế hoạch" is clicked', async () => {
@@ -289,24 +299,28 @@ describe('App', () => {
 
 
 
-  it('navigates to dashboard tab and renders placeholder', () => {
+  it('navigates to dashboard tab and renders content', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
     const dashboardTab = navTabs.find(b => b.textContent?.includes('Tổng quan'));
     if (dashboardTab) fireEvent.click(dashboardTab);
-    expect(screen.getByText('Dashboard Tab Coming Soon')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('dashboard-tab')).toBeInTheDocument());
   });
 
-  it('handleImportData with invalid key shows warning notification (Settings removed)', () => {
+  it('handleImportData with invalid key shows warning notification via settings overlay', async () => {
     render(<App />);
-    // Settings tab removed; import functionality will be re-added via header icon
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-open-settings'));
+    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('import-invalid'));
+    expect(mockNotify.warning).toHaveBeenCalled();
   });
 
-  it('handleImportData with valid data shows success notification (Settings removed)', () => {
+  it('handleImportData with valid data shows success notification via settings overlay', async () => {
     render(<App />);
-    // Settings tab removed; import functionality will be re-added via header icon
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-open-settings'));
+    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('import-valid'));
+    expect(mockNotify.success).toHaveBeenCalled();
   });
 
   it('migrates dishes with empty tags from localStorage on mount', () => {
@@ -314,16 +328,16 @@ describe('App', () => {
       { id: 'd99', name: 'Old Dish', ingredients: [], tags: [] },
     ]));
     render(<App />);
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getAllByRole('tablist').length).toBeGreaterThanOrEqual(1);
     localStorage.removeItem('mp-dishes');
   });
 
-  it('navigates to fitness tab and renders placeholder', async () => {
+  it('navigates to fitness tab and renders content', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
     const fitnessTab = navTabs.find(b => b.textContent?.includes('Tập luyện'));
     if (fitnessTab) fireEvent.click(fitnessTab);
-    await waitFor(() => expect(screen.getByText('Fitness Tab Coming Soon')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('fitness-tab')).toBeInTheDocument());
   });
 
   it('confirms planning modal and shows success notification', async () => {
@@ -381,13 +395,12 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
-  it('handleImportData with all data keys imports everything', () => {
+  it('handleImportData with all data keys imports everything via settings overlay', async () => {
     render(<App />);
-    const navTabs = screen.getAllByRole('tab');
-    const dashboardTab = navTabs.find(b => b.textContent?.includes('Tổng quan'));
-    if (dashboardTab) fireEvent.click(dashboardTab);
-    // Dashboard is a placeholder now; import functionality moved to settings header icon (next task)
-    expect(screen.getByText('Dashboard Tab Coming Soon')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-open-settings'));
+    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('import-all'));
+    expect(mockNotify.success).toHaveBeenCalled();
   });
 
   it('handleClearPlan clears plans via ClearPlanModal', async () => {
@@ -411,7 +424,7 @@ describe('App', () => {
     // ClearPlanModal should appear
     await waitFor(() => screen.getByTestId('clear-plan-modal'));
     fireEvent.click(screen.getByTestId('clear-scope-day'));
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getAllByRole('tablist').length).toBeGreaterThanOrEqual(1);
   });
 
   it('undo restores plans after clear', async () => {

@@ -8,6 +8,9 @@ import { CalendarTab } from './components/CalendarTab';
 const importManagementTab = () => import('./components/ManagementTab').then(m => ({ default: m.ManagementTab }));
 const AIImageAnalyzer = React.lazy(() => import('./components/AIImageAnalyzer').then(m => ({ default: m.AIImageAnalyzer })));
 const ManagementTab = React.lazy(importManagementTab);
+const FitnessTab = React.lazy(() => import('./features/fitness/components/FitnessTab').then(m => ({ default: m.FitnessTab })));
+const DashboardTab = React.lazy(() => import('./features/dashboard/components/DashboardTab').then(m => ({ default: m.DashboardTab })));
+const SettingsTab = React.lazy(() => import('./components/SettingsTab').then(m => ({ default: m.SettingsTab })));
 
 // Lazy-loaded modals — only loaded when opened
 const MealPlannerModal = React.lazy(() => import('./components/modals/MealPlannerModal').then(m => ({ default: m.MealPlannerModal })));
@@ -22,6 +25,8 @@ import { useNotification } from './contexts/NotificationContext';
 import {
   Utensils,
   Bot,
+  SlidersHorizontal,
+  ChevronLeft,
 } from 'lucide-react';
 import { generateId, parseLocalDate } from './utils/helpers';
 import { getLocalizedField } from './utils/localize';
@@ -60,7 +65,7 @@ import { useNavigationStore } from './store/navigationStore';
 
 export default function App() {
   const { t } = useTranslation();
-  useDarkMode();
+  const { theme, setTheme } = useDarkMode();
 
   const prefetchFns = useMemo(() => [importManagementTab], []);
   usePrefetchAfterIdle(prefetchFns);
@@ -86,6 +91,15 @@ export default function App() {
   const { hasNewAIResult, setHasNewAIResult, activeManagementSubTab, setActiveManagementSubTab, selectedDate, setSelectedDate } = useUIStore();
   const activeMainTab = useNavigationStore(s => s.activeTab);
   const navigateTab = useNavigationStore(s => s.navigateTab);
+  const pageStack = useNavigationStore(s => s.pageStack);
+  const pushPage = useNavigationStore(s => s.pushPage);
+  const popPage = useNavigationStore(s => s.popPage);
+
+  const handleOpenSettings = useCallback(() => {
+    pushPage({ id: 'settings', component: 'SettingsTab' });
+  }, [pushPage]);
+
+  const isSettingsOpen = pageStack.length > 0 && pageStack[pageStack.length - 1].id === 'settings';
 
   const handleTabChange = useCallback((tab: MainTab) => {
     navigateTab(tab);
@@ -296,6 +310,15 @@ export default function App() {
           </div>
           <div className="flex items-center gap-2">
             <DesktopNav activeTab={activeMainTab} onTabChange={handleTabChange} />
+            <button
+              type="button"
+              aria-label="Cài đặt"
+              data-testid="btn-open-settings"
+              onClick={handleOpenSettings}
+              className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </header>
@@ -320,9 +343,11 @@ export default function App() {
         </div>
 
         {activeMainTab === 'fitness' && (
-          <div className="flex items-center justify-center py-20" role="tabpanel" aria-label={t('nav.fitness')}>
-            <p className="text-lg text-slate-400 dark:text-slate-500 font-medium">Fitness Tab Coming Soon</p>
-          </div>
+          <ErrorBoundary fallbackTitle={t('nav.fitness')}>
+          <Suspense fallback={<TabLoadingFallback />}>
+            <FitnessTab />
+          </Suspense>
+          </ErrorBoundary>
         )}
 
         <div className={activeMainTab === 'library' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.library')} inert={activeMainTab === 'library' ? undefined : true}>
@@ -359,9 +384,11 @@ export default function App() {
         )}
 
         {activeMainTab === 'dashboard' && (
-          <div className="flex items-center justify-center py-20" role="tabpanel" aria-label={t('nav.dashboard')}>
-            <p className="text-lg text-slate-400 dark:text-slate-500 font-medium">Dashboard Tab Coming Soon</p>
-          </div>
+          <ErrorBoundary fallbackTitle={t('nav.dashboard')}>
+          <Suspense fallback={<TabLoadingFallback />}>
+            <DashboardTab />
+          </Suspense>
+          </ErrorBoundary>
         )}
       </main>
 
@@ -456,6 +483,30 @@ export default function App() {
       </Suspense>
 
       <BottomNavBar activeTab={activeMainTab} onTabChange={handleTabChange} showAIBadge={hasNewAIResult} />
+
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 overflow-y-auto" data-testid="settings-overlay">
+          <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 pt-safe">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2 sm:py-4 flex items-center gap-3">
+              <button
+                type="button"
+                aria-label={t('common.back')}
+                data-testid="btn-close-settings"
+                onClick={popPage}
+                className="p-2 -ml-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('nav.settings')}</h2>
+            </div>
+          </div>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <Suspense fallback={<TabLoadingFallback />}>
+              <SettingsTab onImportData={handleImportData} theme={theme} setTheme={setTheme} />
+            </Suspense>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
