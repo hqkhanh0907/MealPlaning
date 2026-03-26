@@ -275,30 +275,29 @@ describe('AppNavigation', () => {
   it('BottomNavBar calls onTabChange when a tab is clicked', () => {
     const onTabChange = vi.fn();
     render(<BottomNavBar activeTab="calendar" onTabChange={onTabChange} />);
-    const groceryTab = screen.getByTestId('nav-grocery');
-    fireEvent.click(groceryTab);
-    expect(onTabChange).toHaveBeenCalledWith('grocery');
+    const fitnessTab = screen.getByTestId('nav-fitness');
+    fireEvent.click(fitnessTab);
+    expect(onTabChange).toHaveBeenCalledWith('fitness');
   });
 
   it('BottomNavBar renders all navigation tabs', () => {
     const onTabChange = vi.fn();
     render(<BottomNavBar activeTab="calendar" onTabChange={onTabChange} />);
     expect(screen.getByTestId('nav-calendar')).toBeInTheDocument();
-    expect(screen.getByTestId('nav-management')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-library')).toBeInTheDocument();
     expect(screen.getByTestId('nav-ai-analysis')).toBeInTheDocument();
-    expect(screen.getByTestId('nav-grocery')).toBeInTheDocument();
-    expect(screen.getByTestId('nav-settings')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-fitness')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-dashboard')).toBeInTheDocument();
   });
 
   it('DesktopNav calls onTabChange when tab clicked', () => {
     const onTabChange = vi.fn();
     render(<DesktopNav activeTab="calendar" onTabChange={onTabChange} />);
-    // Click grocery tab in desktop nav
     const tabs = screen.getAllByRole('tab');
-    const groceryTab = tabs.find(t => t.textContent?.includes('Đi chợ'));
-    expect(groceryTab).toBeDefined();
-    if (groceryTab) fireEvent.click(groceryTab);
-    expect(onTabChange).toHaveBeenCalledWith('grocery');
+    const fitnessTab = tabs.find(t => t.textContent?.includes('Tập luyện'));
+    expect(fitnessTab).toBeDefined();
+    if (fitnessTab) fireEvent.click(fitnessTab);
+    expect(onTabChange).toHaveBeenCalledWith('fitness');
   });
 
   it('TabLoadingFallback renders loading state', () => {
@@ -310,16 +309,16 @@ describe('AppNavigation', () => {
     const mockT = (key: string) => {
       const map: Record<string, string> = {
         'nav.calendar': 'Lịch',
-        'nav.management': 'Quản lý',
+        'nav.library': 'Thư viện',
         'nav.aiAnalysis': 'AI',
-        'nav.grocery': 'Đi chợ',
-        'nav.settings': 'Cài đặt',
+        'nav.fitness': 'Tập luyện',
+        'nav.dashboard': 'Tổng quan',
       };
       return map[key] ?? key;
     };
     const labels = getTabLabels(mockT as never);
     expect(labels['calendar']).toBe('Lịch');
-    expect(labels['grocery']).toBe('Đi chợ');
+    expect(labels['fitness']).toBe('Tập luyện');
   });
 
   it('BottomNavBar shows AI badge when showAIBadge is true', () => {

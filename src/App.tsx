@@ -6,11 +6,8 @@ import { CalendarTab } from './components/CalendarTab';
 
 // Lazy-loaded to reduce initial bundle size — these tabs are visited less often
 const importManagementTab = () => import('./components/ManagementTab').then(m => ({ default: m.ManagementTab }));
-const importSettingsTab = () => import('./components/SettingsTab').then(m => ({ default: m.SettingsTab }));
-const GroceryList = React.lazy(() => import('./components/GroceryList').then(m => ({ default: m.GroceryList })));
 const AIImageAnalyzer = React.lazy(() => import('./components/AIImageAnalyzer').then(m => ({ default: m.AIImageAnalyzer })));
 const ManagementTab = React.lazy(importManagementTab);
-const SettingsTab = React.lazy(importSettingsTab);
 
 // Lazy-loaded modals — only loaded when opened
 const MealPlannerModal = React.lazy(() => import('./components/modals/MealPlannerModal').then(m => ({ default: m.MealPlannerModal })));
@@ -24,8 +21,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { useNotification } from './contexts/NotificationContext';
 import {
   Utensils,
-  Sparkles,
-  ShoppingCart,
+  Bot,
 } from 'lucide-react';
 import { generateId, parseLocalDate } from './utils/helpers';
 import { getLocalizedField } from './utils/localize';
@@ -64,9 +60,9 @@ import { useNavigationStore } from './store/navigationStore';
 
 export default function App() {
   const { t } = useTranslation();
-  const { theme, setTheme } = useDarkMode();
+  useDarkMode();
 
-  const prefetchFns = useMemo(() => [importManagementTab, importSettingsTab], []);
+  const prefetchFns = useMemo(() => [importManagementTab], []);
   usePrefetchAfterIdle(prefetchFns);
 
   // Hydrate all stores from localStorage on mount (ensures test isolation
@@ -101,7 +97,7 @@ export default function App() {
       if (!(e.metaKey || e.ctrlKey)) return;
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
-      const tabs: MainTab[] = ['calendar', 'management', 'ai-analysis', 'grocery', 'settings'];
+      const tabs: MainTab[] = ['calendar', 'library', 'ai-analysis', 'fitness', 'dashboard'];
       const digit = Number.parseInt(e.key, 10);
       if (digit >= 1 && digit <= 5) {
         e.preventDefault();
@@ -197,12 +193,12 @@ export default function App() {
 
     if (result.shouldCreateDish === false) {
       notify.success(t('notification.saveSuccess'), t('notification.savedIngredients', { count: newIngredients.length }));
-      navigateTab('management');
+      navigateTab('library');
       setActiveManagementSubTab('ingredients');
     } else {
       setDishes(prev => [...prev, { id: generateId('dish'), name: { vi: result.name, en: result.name }, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
       notify.success(t('notification.saveSuccess'), t('notification.savedDish', { name: result.name, count: newIngredients.length }));
-      navigateTab('management');
+      navigateTab('library');
       setActiveManagementSubTab('dishes');
     }
   }, [ingredients, notify, setIngredients, setDishes, navigateTab, setActiveManagementSubTab, t]);
@@ -323,23 +319,13 @@ export default function App() {
           </ErrorBoundary>
         </div>
 
-        {activeMainTab === 'grocery' && (
-          <ErrorBoundary fallbackTitle={t('errorBoundary.groceryTab')}>
-          <Suspense fallback={<TabLoadingFallback />}>
-          <div className="space-y-8">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="w-6 h-6 text-emerald-500" />
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>
-              </div>
-            </div>
-            <GroceryList currentPlan={currentPlan} dayPlans={dayPlans} selectedDate={selectedDate} allDishes={dishes} allIngredients={ingredients} />
+        {activeMainTab === 'fitness' && (
+          <div className="flex items-center justify-center py-20" role="tabpanel" aria-label={t('nav.fitness')}>
+            <p className="text-lg text-slate-400 dark:text-slate-500 font-medium">Fitness Tab Coming Soon</p>
           </div>
-          </Suspense>
-          </ErrorBoundary>
         )}
 
-        <div className={activeMainTab === 'management' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.management')} inert={activeMainTab === 'management' ? undefined : true}>
+        <div className={activeMainTab === 'library' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.library')} inert={activeMainTab === 'library' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
           <Suspense fallback={<TabLoadingFallback />}>
           <ManagementTab
@@ -362,7 +348,7 @@ export default function App() {
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div className="flex items-center gap-3">
-                <Sparkles className="w-6 h-6 text-emerald-500" />
+                <Bot className="w-6 h-6 text-emerald-500" />
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('ai.title')}</h2>
               </div>
             </div>
@@ -372,12 +358,10 @@ export default function App() {
           </ErrorBoundary>
         )}
 
-        {activeMainTab === 'settings' && (
-          <ErrorBoundary fallbackTitle={t('errorBoundary.settingsTab')}>
-            <Suspense fallback={<TabLoadingFallback />}>
-            <SettingsTab onImportData={handleImportData} theme={theme} setTheme={setTheme} />
-            </Suspense>
-          </ErrorBoundary>
+        {activeMainTab === 'dashboard' && (
+          <div className="flex items-center justify-center py-20" role="tabpanel" aria-label={t('nav.dashboard')}>
+            <p className="text-lg text-slate-400 dark:text-slate-500 font-medium">Dashboard Tab Coming Soon</p>
+          </div>
         )}
       </main>
 

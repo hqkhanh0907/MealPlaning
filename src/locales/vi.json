@@ -74,9 +74,12 @@
   "nav": {
     "calendar": "Lịch trình",
     "management": "Thư viện",
+    "library": "Thư viện",
     "aiAnalysis": "AI Phân tích",
     "grocery": "Đi chợ",
     "settings": "Cài đặt",
+    "fitness": "Tập luyện",
+    "dashboard": "Tổng quan",
     "mainNav": "Điều hướng chính"
   },
   "header": {

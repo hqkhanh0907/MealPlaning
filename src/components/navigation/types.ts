@@ -1,12 +1,12 @@
 import { TFunction } from 'i18next';
 
-export type MainTab = 'calendar' | 'management' | 'ai-analysis' | 'grocery' | 'settings';
+export type MainTab = 'calendar' | 'library' | 'ai-analysis' | 'fitness' | 'dashboard';
 
 /** i18n-aware tab labels factory — callers pass `t` from useTranslation(). */
 export const getTabLabels = (t: TFunction): Record<MainTab, string> => ({
   'calendar': t('nav.calendar'),
-  'management': t('nav.management'),
+  'library': t('nav.library'),
   'ai-analysis': t('nav.aiAnalysis'),
-  'grocery': t('nav.grocery'),
-  'settings': t('nav.settings'),
+  'fitness': t('nav.fitness'),
+  'dashboard': t('nav.dashboard'),
 });

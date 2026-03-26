@@ -1,12 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  CalendarDays,
-  Settings2,
-  Sparkles,
-  BookOpen,
-  ShoppingCart,
-  SlidersHorizontal,
+  Calendar,
+  ClipboardList,
+  Bot,
+  Dumbbell,
+  LayoutDashboard,
 } from 'lucide-react';
 import type { MainTab } from './types';
 
@@ -19,11 +18,11 @@ interface NavItemConfig {
 }
 
 const NAV_CONFIG: NavItemConfig[] = [
-  { tab: 'calendar', mobileIcon: <CalendarDays className="w-6 h-6" />, desktopIcon: <CalendarDays className="w-4 h-4" />, labelKey: 'nav.calendar' },
-  { tab: 'management', mobileIcon: <BookOpen className="w-6 h-6" />, desktopIcon: <Settings2 className="w-4 h-4" />, labelKey: 'nav.management' },
-  { tab: 'ai-analysis', mobileIcon: <Sparkles className="w-6 h-6" />, desktopIcon: <Sparkles className="w-4 h-4" />, labelKey: 'nav.aiAnalysis' },
-  { tab: 'grocery', mobileIcon: <ShoppingCart className="w-6 h-6" />, desktopIcon: <ShoppingCart className="w-4 h-4" />, labelKey: 'nav.grocery' },
-  { tab: 'settings', mobileIcon: <SlidersHorizontal className="w-6 h-6" />, desktopIcon: <SlidersHorizontal className="w-4 h-4" />, labelKey: 'nav.settings' },
+  { tab: 'calendar', mobileIcon: <Calendar className="w-6 h-6" />, desktopIcon: <Calendar className="w-4 h-4" />, labelKey: 'nav.calendar' },
+  { tab: 'library', mobileIcon: <ClipboardList className="w-6 h-6" />, desktopIcon: <ClipboardList className="w-4 h-4" />, labelKey: 'nav.library' },
+  { tab: 'ai-analysis', mobileIcon: <Bot className="w-6 h-6" />, desktopIcon: <Bot className="w-4 h-4" />, labelKey: 'nav.aiAnalysis' },
+  { tab: 'fitness', mobileIcon: <Dumbbell className="w-6 h-6" />, desktopIcon: <Dumbbell className="w-4 h-4" />, labelKey: 'nav.fitness' },
+  { tab: 'dashboard', mobileIcon: <LayoutDashboard className="w-6 h-6" />, desktopIcon: <LayoutDashboard className="w-4 h-4" />, labelKey: 'nav.dashboard' },
 ];
 
 export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }> = ({ activeTab, onTabChange, showAIBadge }) => {
