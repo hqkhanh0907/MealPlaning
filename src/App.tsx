@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { initialIngredients, initialDishes } from './data/initialData';
-import { Ingredient, Dish, DayPlan, MealType, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
+import type { Ingredient, Dish, DayPlan, MealType, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
 import { calculateDishesNutrition } from './utils/nutrition';
 import { CalendarTab } from './components/CalendarTab';
 
@@ -22,7 +21,6 @@ const CopyPlanModal = React.lazy(() => import('./components/modals/CopyPlanModal
 const TemplateManager = React.lazy(() => import('./components/modals/TemplateManager').then(m => ({ default: m.TemplateManager })));
 const SaveTemplateModal = React.lazy(() => import('./components/modals/SaveTemplateModal').then(m => ({ default: m.SaveTemplateModal })));
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { usePersistedState } from './hooks/usePersistedState';
 import { useNotification } from './contexts/NotificationContext';
 import {
   Utensils,
@@ -35,7 +33,6 @@ import { useDarkMode } from './hooks/useDarkMode';
 import { useAISuggestion } from './hooks/useAISuggestion';
 import { useModalManager } from './hooks/useModalManager';
 import { useCopyPlan } from './hooks/useCopyPlan';
-import { useMealTemplate } from './hooks/useMealTemplate';
 import { useAutoSync } from './hooks/useAutoSync';
 import { usePrefetchAfterIdle } from './hooks/usePrefetchAfterIdle';
 import {
@@ -45,9 +42,6 @@ import {
 } from './services/planService';
 import {
   removeIngredientFromDishes,
-  migrateDayPlans,
-  migrateDishes,
-  migrateIngredients,
   processAnalyzedDish,
   validateImportData,
 } from './services/dataService';
@@ -56,10 +50,14 @@ import { getTabLabels } from './components/navigation/types';
 import type { MainTab } from './components/navigation';
 import { UNDO_TOAST_DURATION_MS } from './data/constants';
 
-type ManagementSubTab = 'ingredients' | 'dishes';
-
-/** Default user profile values used on first launch. */
-const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetCalories: 1500 };
+// Zustand stores
+import { useIngredientStore } from './store/ingredientStore';
+import { useDishStore } from './store/dishStore';
+import { useDayPlanStore } from './store/dayPlanStore';
+import { useUserProfileStore } from './store/userProfileStore';
+import { useMealTemplateStore } from './store/mealTemplateStore';
+import { useUIStore } from './store/uiStore';
+import { useNavigationStore } from './store/navigationStore';
 
 
 // --- Main App component ---
@@ -71,16 +69,32 @@ export default function App() {
   const prefetchFns = useMemo(() => [importManagementTab, importSettingsTab], []);
   usePrefetchAfterIdle(prefetchFns);
 
-  const [activeMainTab, setActiveMainTab] = useState<MainTab>('calendar');
-  const activeMainTabRef = useRef(activeMainTab);
-  useEffect(() => { activeMainTabRef.current = activeMainTab; }, [activeMainTab]);
+  // Hydrate all stores from localStorage on mount (ensures test isolation
+  // because Zustand stores are module-level singletons while tests clear localStorage between runs)
+  useState(() => {
+    useIngredientStore.getState().hydrate();
+    useDishStore.getState().hydrate();
+    useDayPlanStore.getState().hydrate();
+    useUserProfileStore.getState().hydrate();
+    useMealTemplateStore.getState().hydrate();
+    useUIStore.getState().hydrate();
+    useNavigationStore.setState({ activeTab: 'calendar', pageStack: [], showBottomNav: true, tabScrollPositions: {} });
+  });
 
-  const [hasNewAIResult, setHasNewAIResult] = useState(false);
+  // Read state from Zustand stores
+  const { ingredients, setIngredients, addIngredient, updateIngredient } = useIngredientStore();
+  const { dishes, setDishes, addDish, updateDish, deleteDish, isIngredientUsed } = useDishStore();
+  const { dayPlans, setDayPlans, isDishUsed, restoreDayPlans } = useDayPlanStore();
+  const { userProfile, setUserProfile } = useUserProfileStore();
+  const { templates, saveTemplate, deleteTemplate, renameTemplate, applyTemplate } = useMealTemplateStore();
+  const { hasNewAIResult, setHasNewAIResult, activeManagementSubTab, setActiveManagementSubTab, selectedDate, setSelectedDate } = useUIStore();
+  const activeMainTab = useNavigationStore(s => s.activeTab);
+  const navigateTab = useNavigationStore(s => s.navigateTab);
 
   const handleTabChange = useCallback((tab: MainTab) => {
-    setActiveMainTab(tab);
+    navigateTab(tab);
     if (tab === 'ai-analysis') setHasNewAIResult(false);
-  }, []);
+  }, [navigateTab, setHasNewAIResult]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -98,52 +112,9 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [handleTabChange]);
 
-  const [activeManagementSubTab, setActiveManagementSubTab] = useState<ManagementSubTab>('dishes');
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  });
-
-  const [userProfile, setUserProfile] = usePersistedState<UserProfile>('mp-user-profile', DEFAULT_USER_PROFILE);
-
-  const [rawIngredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', initialIngredients);
-  const [rawDishes, setDishes] = usePersistedState<Dish[]>('mp-dishes', initialDishes);
-  const [rawDayPlans, setDayPlans] = usePersistedState<DayPlan[]>('mp-day-plans', []);
-
-  // Migrate old data formats
-  const ingredients = useMemo(() => migrateIngredients(rawIngredients), [rawIngredients]);
-  const dishes = useMemo(() => migrateDishes(rawDishes), [rawDishes]);
-
-  const dayPlans = useMemo(() => migrateDayPlans(rawDayPlans), [rawDayPlans]);
-
-  // Persist migrated data back to localStorage if migration changed something (one-time on mount)
-  const hasMigratedRef = useRef(false);
-  useEffect(() => {
-    if (hasMigratedRef.current) return;
-    const needsDishMigration = rawDishes.some((d: unknown) => {
-      const tags = (d as Record<string, unknown>).tags;
-      return !Array.isArray(tags) || tags.length === 0;
-    });
-    const needsIngMigration = rawIngredients.some((i: unknown) => {
-      const name = (i as Record<string, unknown>).name;
-      return typeof name === 'string';
-    });
-    if (needsDishMigration || needsIngMigration) {
-      hasMigratedRef.current = true;
-      if (needsDishMigration) setDishes(dishes);
-      if (needsIngMigration) setIngredients(ingredients);
-    }
-  }, [rawDishes, rawIngredients, dishes, ingredients, setDishes, setIngredients]);
-
   const modals = useModalManager();
-
   const notify = useNotification();
-
   const copyPlanHook = useCopyPlan(dayPlans, setDayPlans);
-  const mealTemplates = useMealTemplate();
 
   const currentPlan = useMemo(() =>
     dayPlans.find(p => p.date === selectedDate) || createEmptyDayPlan(selectedDate),
@@ -195,8 +166,8 @@ export default function App() {
   }, [dayPlans, selectedDate, setDayPlans, modals, notify, t]);
 
   const handleUpdatePlan = useCallback((type: MealType, dishIds: string[]) => {
-    setDayPlans(prev => updateDayPlanSlot(prev, selectedDate, type, dishIds));
-  }, [selectedDate, setDayPlans]);
+    useDayPlanStore.getState().updatePlan(selectedDate, type, dishIds);
+  }, [selectedDate]);
 
   const handleQuickAdd = useCallback((type: MealType, dishId: string) => {
     setDayPlans(prev => {
@@ -212,26 +183,8 @@ export default function App() {
   }, [selectedDate, setDayPlans, dishes, notify, t]);
 
   const handleUpdateServings = useCallback((dishId: string, count: number) => {
-    setDayPlans(prev => prev.map(p => {
-      if (p.date !== selectedDate) return p;
-      const servings = { ...p.servings };
-      if (count <= 1) {
-        delete servings[dishId];
-      } else {
-        servings[dishId] = count;
-      }
-      return { ...p, servings };
-    }));
-  }, [selectedDate, setDayPlans]);
-
-  const isDishUsed = useCallback((dishId: string) =>
-    dayPlans.some(p =>
-      p.breakfastDishIds.includes(dishId) ||
-      p.lunchDishIds.includes(dishId) ||
-      p.dinnerDishIds.includes(dishId)
-    ), [dayPlans]);
-
-  const isIngredientUsed = useCallback((ingId: string) => dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)), [dishes]);
+    useDayPlanStore.getState().updateServings(selectedDate, dishId, count);
+  }, [selectedDate]);
 
   const handleDeleteIngredient = useCallback((id: string) => {
     setIngredients(prev => prev.filter(i => i.id !== id));
@@ -244,15 +197,15 @@ export default function App() {
 
     if (result.shouldCreateDish === false) {
       notify.success(t('notification.saveSuccess'), t('notification.savedIngredients', { count: newIngredients.length }));
-      setActiveMainTab('management');
+      navigateTab('management');
       setActiveManagementSubTab('ingredients');
     } else {
       setDishes(prev => [...prev, { id: generateId('dish'), name: { vi: result.name, en: result.name }, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
       notify.success(t('notification.saveSuccess'), t('notification.savedDish', { name: result.name, count: newIngredients.length }));
-      setActiveMainTab('management');
+      navigateTab('management');
       setActiveManagementSubTab('dishes');
     }
-  }, [ingredients, notify, setIngredients, setDishes, t]);
+  }, [ingredients, notify, setIngredients, setDishes, navigateTab, setActiveManagementSubTab, t]);
 
   const openTypeSelection = useCallback(() => {
     const emptySlots: MealType[] = [];
@@ -267,15 +220,10 @@ export default function App() {
   const openTemplateManager = useCallback(() => modals.openTemplateManager(), [modals]);
 
   const handleSaveTemplate = useCallback((name: string, tags?: string[]) => {
-    mealTemplates.saveTemplate(name, currentPlan, tags);
+    saveTemplate(name, currentPlan, tags);
     modals.closeSaveTemplate();
     notify.success(t('notification.templateSaved'));
-  }, [currentPlan, mealTemplates, modals, notify, t]);
-
-  const restoreDayPlans = useCallback((snapshot: DayPlan[]) => {
-    const dates = new Set(snapshot.map(p => p.date));
-    setDayPlans(prev => [...prev.filter(p => !dates.has(p.date)), ...snapshot]);
-  }, [setDayPlans]);
+  }, [currentPlan, saveTemplate, modals, notify, t]);
 
   const handleCopyPlanAction = useCallback((targetDates: string[], mergeMode: boolean) => {
     const snapshot = dayPlans
@@ -297,11 +245,11 @@ export default function App() {
 
   const handleAnalysisComplete = useCallback(() => {
     // c8 ignore next 4
-    if (activeMainTabRef.current !== 'ai-analysis') {
+    if (useNavigationStore.getState().activeTab !== 'ai-analysis') {
       setHasNewAIResult(true);
-      notify.success(t('notification.analysisComplete'), t('notification.analysisCompleteHint'), { onClick: () => setActiveMainTab('ai-analysis') });
+      notify.success(t('notification.analysisComplete'), t('notification.analysisCompleteHint'), { onClick: () => navigateTab('ai-analysis') });
     }
-  }, [notify, t]);
+  }, [setHasNewAIResult, notify, navigateTab, t]);
 
   const handleImportData = useCallback((data: Record<string, unknown>) => {
     const { validEntries, invalidKeys } = validateImportData(data);
@@ -325,27 +273,11 @@ export default function App() {
   useAutoSync({
     ingredients,
     dishes,
-    dayPlans: rawDayPlans,
+    dayPlans,
     userProfile,
-    templates: mealTemplates.templates,
+    templates,
     onImportData: handleImportData,
   });
-
-  const handleAddIngredient = useCallback((ing: Ingredient) => {
-    setIngredients(prev => [...prev, ing]);
-  }, [setIngredients]);
-
-  const handleUpdateIngredient = useCallback((ing: Ingredient) => {
-    setIngredients(prev => prev.map(i => i.id === ing.id ? ing : i));
-  }, [setIngredients]);
-
-  const handleAddDish = useCallback((dish: Dish) => {
-    setDishes(prev => [...prev, dish]);
-  }, [setDishes]);
-
-  const handleUpdateDish = useCallback((dish: Dish) => {
-    setDishes(prev => prev.map(d => d.id === dish.id ? dish : d));
-  }, [setDishes]);
 
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
@@ -413,12 +345,12 @@ export default function App() {
           <ManagementTab
             activeSubTab={activeManagementSubTab} onSubTabChange={setActiveManagementSubTab}
             ingredients={ingredients} dishes={dishes}
-            onAddIngredient={handleAddIngredient}
-            onUpdateIngredient={handleUpdateIngredient}
+            onAddIngredient={addIngredient}
+            onUpdateIngredient={updateIngredient}
             onDeleteIngredient={handleDeleteIngredient} isIngredientUsed={isIngredientUsed}
-            onAddDish={handleAddDish}
-            onUpdateDish={handleUpdateDish}
-            onDeleteDish={id => setDishes(prev => prev.filter(d => d.id !== id))} isDishUsed={isDishUsed}
+            onAddDish={addDish}
+            onUpdateDish={updateDish}
+            onDeleteDish={deleteDish} isDishUsed={isDishUsed}
           />
           </Suspense>
           </ErrorBoundary>
@@ -491,10 +423,10 @@ export default function App() {
       )}
       {modals.isTemplateManagerOpen && (
         <TemplateManager
-          templates={mealTemplates.templates}
+          templates={templates}
           dishes={dishes}
           onApply={(template) => {
-            const plan = mealTemplates.applyTemplate(template, selectedDate);
+            const plan = applyTemplate(template, selectedDate);
             setDayPlans(prev => {
               const idx = prev.findIndex(p => p.date === selectedDate);
               if (idx >= 0) { const u = [...prev]; u[idx] = plan; return u; }
@@ -504,11 +436,11 @@ export default function App() {
             notify.success(t('notification.templateApplied'));
           }}
           onDelete={(id) => {
-            mealTemplates.deleteTemplate(id);
+            deleteTemplate(id);
             notify.success(t('notification.templateDeleted'));
           }}
           onRename={(id, newName) => {
-            mealTemplates.renameTemplate(id, newName);
+            renameTemplate(id, newName);
             notify.success(t('notification.templateRenamed'));
           }}
           onClose={modals.closeTemplateManager}
