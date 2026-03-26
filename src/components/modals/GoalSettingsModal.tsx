@@ -46,7 +46,7 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('goalSettings.title')}</h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
+          <button onClick={onClose} aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>

@@ -40,7 +40,13 @@
     "change": "Thay đổi",
     "deleteNow": "Xóa ngay",
     "cannotUndo": "Hành động này không thể hoàn tác.",
-    "closeBackdrop": "Đóng nền"
+    "closeBackdrop": "Đóng nền",
+    "decrease": "Giảm",
+    "increase": "Tăng",
+    "select": "Chọn",
+    "deselect": "Bỏ chọn",
+    "clone": "Nhân bản",
+    "closeDialog": "Đóng hộp thoại"
   },
   "meal": {
     "breakfast": "Sáng",
@@ -118,7 +124,11 @@
       "fri": "T6",
       "sat": "T7",
       "sun": "CN"
-    }
+    },
+    "prevMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "prevWeek": "Tuần trước",
+    "nextWeek": "Tuần sau"
   },
   "recommendation": {
     "title": "Gợi ý cho bạn",
@@ -537,7 +547,8 @@
     "sourcePreview": "Xem trước kế hoạch nguồn",
     "noMeals": "Chưa có kế hoạch bữa ăn",
     "overwriteMode": "Ghi đè",
-    "mergeMode": "Gộp thêm"
+    "mergeMode": "Gộp thêm",
+    "selectDate": "Chọn ngày"
   },
   "template": {
     "title": "Quản lý mẫu bữa ăn",

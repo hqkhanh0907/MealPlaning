@@ -73,6 +73,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
             onClick={() => onLayoutChange('grid')}
             className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'grid' ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             title={t('listToolbar.gridView')}
+            aria-label={t('listToolbar.gridView')}
             data-testid="btn-view-grid"
           >
             <LayoutGrid className="w-5 h-5" />
@@ -81,6 +82,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
             onClick={() => onLayoutChange('list')}
             className={`p-2.5 transition-all min-h-11 min-w-11 flex items-center justify-center ${viewLayout === 'list' ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             title={t('listToolbar.listView')}
+            aria-label={t('listToolbar.listView')}
             data-testid="btn-view-list"
           >
             <List className="w-5 h-5" />
@@ -89,6 +91,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
         {/* Add Button */}
         <button
           onClick={onAdd}
+          aria-label={addLabel}
           className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-11 whitespace-nowrap"
           {...(addTestId ? { 'data-testid': addTestId } : {})}
         >

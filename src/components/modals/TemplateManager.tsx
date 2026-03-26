@@ -88,6 +88,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.closeDialog')}
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all min-h-11 min-w-11 flex items-center justify-center"
           >
             <X className="w-6 h-6" />
@@ -113,6 +114,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder={t('template.searchPlaceholder')}
+                    aria-label={t('template.searchPlaceholder')}
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
                   />
                 </div>
@@ -162,10 +164,12 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                         onKeyDown={e => { if (e.key === 'Enter') { confirmRename(); } else if (e.key === 'Escape') { cancelRename(); } }}
                         className="flex-1 px-3 py-2 rounded-lg border border-emerald-300 dark:border-emerald-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         data-testid="template-rename-input"
+                        aria-label={t('template.rename')}
                         autoFocus
                       />
                       <button
                         onClick={confirmRename}
+                        aria-label={t('common.confirm')}
                         className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all min-h-11 min-w-11 flex items-center justify-center"
                         data-testid="template-rename-confirm"
                       >
@@ -173,6 +177,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                       </button>
                       <button
                         onClick={cancelRename}
+                        aria-label={t('common.cancel')}
                         className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-all min-h-11 min-w-11 flex items-center justify-center"
                       >
                         <X className="w-4 h-4" />

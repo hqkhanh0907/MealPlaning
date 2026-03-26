@@ -131,6 +131,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.closeDialog')}
             className="p-2 hover:bg-white/50 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all"
           >
             <X className="w-5 h-5" />

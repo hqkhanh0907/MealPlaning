@@ -186,6 +186,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
           ref={fileInputRef}
           onChange={handleImport}
           accept=".json"
+          aria-label={t('backup.import')}
           className="hidden"
         />
       </div>

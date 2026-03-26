@@ -231,6 +231,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
             <button
               data-testid={`grocery-item-${item.id}`}
               onClick={() => toggleCheck(item.id)}
+              aria-label={`${isChecked ? t('common.deselect') : t('common.select')} ${item.name}`}
               className="flex-1 flex items-center gap-3 px-3 sm:px-4 py-3 min-h-12 active:scale-[0.99]"
             >
               <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
@@ -255,6 +256,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                 onClick={() => toggleExpand(item.id)}
                 className="p-2.5 mr-1 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                 title={t('grocery.usedIn')}
+                aria-label={`${t('grocery.usedIn')} ${item.name}`}
               >
                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
@@ -352,6 +354,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                 data-testid="btn-grocery-copy"
                 className="p-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
                 title={t('common.copy')}
+                aria-label={t('common.copy')}
               >
                 <Copy className="w-4 h-4" />
               </button>
@@ -359,6 +362,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                 onClick={handleShare}
                 className="p-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
                 title={t('common.share')}
+                aria-label={t('common.share')}
               >
                 <Share2 className="w-4 h-4" />
               </button>

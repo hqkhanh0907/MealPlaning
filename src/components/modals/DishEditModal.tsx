@@ -300,7 +300,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90dvh] sm:h-auto sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{editingItem ? t('dish.editExisting') : t('dish.createNew')}</h4>
-          <button onClick={handleClose} data-testid="btn-close-dish" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
+          <button onClick={handleClose} data-testid="btn-close-dish" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>
@@ -317,6 +317,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   onClick={handleAiSuggest}
                   disabled={!namePrimary.trim()}
                   title={t('dish.aiSuggestButton')}
+                  aria-label={t('dish.aiSuggestButton')}
                   data-testid="btn-ai-suggest"
                   className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
@@ -388,6 +389,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   type="button"
                   onClick={() => setShowQuickAdd(v => !v)}
                   title={t('dish.quickAddTitle')}
+                  aria-label={t('dish.quickAddTitle')}
                   data-testid="btn-quick-add-ingredient"
                   className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showQuickAdd ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
                 >
@@ -440,7 +442,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md p-6 space-y-4 max-h-[80dvh] overflow-y-auto overscroll-contain">
                     <div className="flex items-center justify-between">
                       <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{t('dish.quickAddTitle')}</p>
-                      <button type="button" onClick={resetQuickAdd} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
+                      <button type="button" onClick={resetQuickAdd} aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
                     </div>
                     <div>
                       <label htmlFor="qa-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.quickAddName')} <span className="text-rose-500">*</span></label>
@@ -483,6 +485,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                               disabled={!qaName.trim()}
                               data-testid="btn-qa-ai-fill"
                               title={t('dish.quickAddAiFillButton')}
+                              aria-label={t('dish.quickAddAiFillButton')}
                               className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
@@ -541,15 +544,15 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       <div className="flex-1">
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = Math.max(0, si.amount - step); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-4 h-4" /></button>
+                          <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = Math.max(0, si.amount - step); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-4 h-4" /></button>
                           <input type="number" step="1" inputMode="numeric" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} id={`dish-amount-${si.ingredientId}`} name={`dish-amount-${si.ingredientId}`} aria-label={getLocalizedField(ing.name, lang)} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
-                          <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = si.amount + step; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
+                          <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = si.amount + step; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * si.amount / 100)}cal · {Math.round(ing.proteinPer100 * si.amount / 100)}g pro · {Math.round(ing.carbsPer100 * si.amount / 100)}g carb · {Math.round(ing.fatPer100 * si.amount / 100)}g fat</p>
                         {formErrors.amounts?.[si.ingredientId] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${si.ingredientId}`}>{formErrors.amounts[si.ingredientId]}</p>}
                       </div>
-                      <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                      <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   );
                 })}

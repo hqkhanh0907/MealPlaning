@@ -241,6 +241,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
             ref={fileInputRef} 
             onChange={handleImageUpload} 
             accept="image/*" 
+            aria-label={t('imageCapture.uploadImage')}
             className="hidden" 
           />
         </div>

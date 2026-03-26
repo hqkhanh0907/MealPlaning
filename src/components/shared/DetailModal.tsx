@@ -23,12 +23,13 @@ export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onCl
           <button
             onClick={onEdit}
             data-testid="btn-detail-edit"
+            aria-label={t('common.edit')}
             className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-full text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
             title={t('common.edit')}
           >
             <Edit3 className="w-5 h-5" />
           </button>
-          <button onClick={onClose} data-testid="btn-detail-close" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
+          <button onClick={onClose} data-testid="btn-detail-close" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
             <X className="w-5 h-5" />
           </button>
         </div>

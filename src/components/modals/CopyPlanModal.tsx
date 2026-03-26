@@ -110,6 +110,7 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.closeDialog')}
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all min-h-11 min-w-11 flex items-center justify-center"
           >
             <X className="w-6 h-6" />
@@ -187,6 +188,7 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
                 type="date"
                 onChange={handleAddDate}
                 min={addDays(sourceDate, 1)}
+                aria-label={t('copyPlan.selectDate')}
                 className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 min-h-11"
               />
               <Plus className="w-5 h-5 text-slate-400" />

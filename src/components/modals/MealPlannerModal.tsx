@@ -188,6 +188,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.closeDialog')}
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all min-h-11 min-w-11 flex items-center justify-center"
           >
             <X className="w-6 h-6" />
@@ -247,6 +248,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                 id="meal-planner-search"
                 name="meal-planner-search"
                 placeholder={t('planning.searchPlaceholder')}
+                aria-label={t('planning.searchPlaceholder')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 data-testid="input-search-plan"

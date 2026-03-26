@@ -164,7 +164,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90dvh] overflow-y-auto overscroll-contain sm:mx-4">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}</h4>
-                <button onClick={handleClose} data-testid="btn-close-ingredient" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
+                <button onClick={handleClose} data-testid="btn-close-ingredient" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>

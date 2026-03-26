@@ -79,7 +79,7 @@ export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewPr
         <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg p-6 sm:mx-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
-            <button type="button" onClick={onClose} data-testid="btn-ai-suggest-close" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400"><X className="w-5 h-5" /></button>
+            <button type="button" onClick={onClose} data-testid="btn-ai-suggest-close" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400"><X className="w-5 h-5" /></button>
           </div>
           <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8" data-testid="ai-suggest-empty">{t('dish.aiSuggestEmpty')}</p>
           <button type="button" onClick={onClose} className="w-full py-2.5 rounded-xl text-sm font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">{t('dish.aiSuggestCancel')}</button>
@@ -93,7 +93,7 @@ export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewPr
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg h-[85dvh] sm:h-auto sm:max-h-[85dvh] overflow-hidden flex flex-col sm:mx-4">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
-          <button type="button" onClick={onClose} data-testid="btn-ai-suggest-close" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} data-testid="btn-ai-suggest-close" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400"><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-2">
           {items.map((item, index) => (
@@ -103,6 +103,7 @@ export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewPr
                   type="button"
                   onClick={() => handleToggle(index)}
                   data-testid={`ai-suggest-checkbox-${index}`}
+                  aria-label={`${item.checked ? t('common.deselect') : t('common.select')} ${item.suggestion.name}`}
                   className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-500'}`}
                 >
                   {item.checked && <Check className="w-4 h-4" />}
@@ -129,6 +130,7 @@ export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewPr
                     value={item.amount}
                     onChange={e => handleAmountChange(index, e.target.value)}
                     data-testid={`ai-suggest-amount-${index}`}
+                    aria-label={`${t('ingredient.quantity')} ${item.suggestion.name}`}
                     className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all"
                   />
                   <span className="text-xs text-slate-400 dark:text-slate-500">{item.suggestion.unit}</span>

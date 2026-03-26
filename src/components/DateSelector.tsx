@@ -205,6 +205,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
             className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
             title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
+            aria-label={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
           >
             {viewMode === 'calendar' ? <List className="w-5 h-5" /> : <CalendarIcon className="w-5 h-5" />}
           </button>
@@ -218,6 +219,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           <button
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
             data-testid="btn-prev-date"
+            aria-label={viewMode === 'calendar' ? t('calendar.prevMonth') : t('calendar.prevWeek')}
             className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-9 min-w-9 flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -225,6 +227,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
           <button
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
             data-testid="btn-next-date"
+            aria-label={viewMode === 'calendar' ? t('calendar.nextMonth') : t('calendar.nextWeek')}
             className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-9 min-w-9 flex items-center justify-center"
           >
             <ChevronRight className="w-5 h-5" />
@@ -255,6 +258,7 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
               <button
                 key={dateStr}
                 data-selected={isSelected}
+                aria-label={`${dayLabel} ${date.getDate()}`}
                 onClick={() => {
                   if (isSelected && onPlanClick) {
                     onPlanClick();

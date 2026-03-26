@@ -85,7 +85,7 @@ export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, select
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('clearPlan.title')}</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">{t('clearPlan.subtitle')}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
+          <button onClick={onClose} aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
             <X className="w-6 h-6" />
           </button>
         </div>
