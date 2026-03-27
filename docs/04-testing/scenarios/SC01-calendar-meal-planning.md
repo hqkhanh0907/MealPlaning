@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Date:** 2026-03-11  
-**Total Test Cases:** 105
+**Total Test Cases:** 210
 
 ---
 
@@ -48,7 +48,7 @@ Trên mobile, calendar sử dụng sub-tabs (Meals ↔ Nutrition) để tối ư
 8. dayPlans persist qua reload (localStorage)
 9. selectedDate KHÔNG persist (reset về today khi reload)
 
-## Test Cases (105 TCs)
+## Test Cases (210 TCs)
 
 | ID | Mô tả | Loại | Priority |
 |----|--------|------|----------|
@@ -157,6 +157,111 @@ Trên mobile, calendar sử dụng sub-tabs (Meals ↔ Nutrition) để tối ư
 | TC_CAL_103 | Split-screen mode Android | Edge | P3 |
 | TC_CAL_104 | Gesture nav conflict Android | Edge | P2 |
 | TC_CAL_105 | Scroll snap week view | Positive | P2 |
+| TC_CAL_106 | Calendar view mode hiển thị lưới tháng đầy đủ | Positive | P1 |
+| TC_CAL_107 | Week view mode hiển thị 7 ngày Mon-Sun | Positive | P1 |
+| TC_CAL_108 | Toggle calendar↔week view mode | Positive | P1 |
+| TC_CAL_109 | Calendar view navigation tháng tiến | Positive | P1 |
+| TC_CAL_110 | Calendar view navigation tháng lùi | Positive | P1 |
+| TC_CAL_111 | Go to Today button reset ngày về hôm nay | Positive | P0 |
+| TC_CAL_112 | Calendar hint hiển thị lần đầu tiên | Positive | P2 |
+| TC_CAL_113 | Dismiss calendar hint lưu vào localStorage | Positive | P2 |
+| TC_CAL_114 | Calendar hint không hiển thị sau khi dismiss | Positive | P2 |
+| TC_CAL_115 | Week label format dd/MM - dd/MM | Positive | P2 |
+| TC_CAL_116 | Double-click ngày trên calendar mở plan | Positive | P1 |
+| TC_CAL_117 | Meal indicator dots 3 màu cho 3 bữa | Positive | P1 |
+| TC_CAL_118 | Indicator dot chỉ breakfast → 1 dot | Positive | P2 |
+| TC_CAL_119 | Indicator dots cho 2 bữa → 2 dots | Positive | P2 |
+| TC_CAL_120 | Indicator dots cho 3 bữa → 3 dots | Positive | P2 |
+| TC_CAL_121 | Sunday text màu rose trong calendar | Positive | P2 |
+| TC_CAL_122 | Today date highlight/pulse animation | Positive | P1 |
+| TC_CAL_123 | Empty cells đúng cho month grid | Positive | P2 |
+| TC_CAL_124 | First day of month offset locale vi | Edge | P2 |
+| TC_CAL_125 | Swipe right week view → tuần trước | Positive | P1 |
+| TC_CAL_126 | Swipe left week view → tuần sau | Positive | P1 |
+| TC_CAL_127 | Swipe < 50px không trigger chuyển tuần | Edge | P2 |
+| TC_CAL_128 | Vertical swipe không trigger chuyển tuần | Edge | P2 |
+| TC_CAL_129 | Week dates Mon-Sun chính xác | Positive | P2 |
+| TC_CAL_130 | weekOffset reset khi chọn ngày mới | Edge | P2 |
+| TC_CAL_131 | Recent dishes hiển thị tối đa 8 món | Positive | P1 |
+| TC_CAL_132 | Recent dishes từ 14 ngày gần nhất | Positive | P2 |
+| TC_CAL_133 | Recent dishes không trùng lặp | Edge | P2 |
+| TC_CAL_134 | Recent dishes sorted by recency | Positive | P2 |
+| TC_CAL_135 | Quick add dish vào slot trống | Positive | P1 |
+| TC_CAL_136 | Quick add 1 slot trống → add trực tiếp | Positive | P1 |
+| TC_CAL_137 | Quick add nhiều slots trống → popover | Positive | P1 |
+| TC_CAL_138 | Quick add popover close sau chọn | Positive | P2 |
+| TC_CAL_139 | No recent dishes → section ẩn | Edge | P2 |
+| TC_CAL_140 | Recent dishes cập nhật khi thêm món | Positive | P2 |
+| TC_CAL_141 | Recent dishes across different dates | Positive | P2 |
+| TC_CAL_142 | Quick add cập nhật nutrition ngay | Positive | P1 |
+| TC_CAL_143 | Quick add ngày không có plan → tạo mới | Edge | P2 |
+| TC_CAL_144 | Recent dishes không gồm ngày tương lai | Edge | P2 |
+| TC_CAL_145 | Quick add dish đã xóa → graceful | Negative | P1 |
+| TC_CAL_146 | Mở Grocery list modal | Positive | P1 |
+| TC_CAL_147 | Grocery modal hiển thị nguyên liệu | Positive | P1 |
+| TC_CAL_148 | Grocery modal close button | Positive | P1 |
+| TC_CAL_149 | Grocery modal close backdrop | Positive | P2 |
+| TC_CAL_150 | Grocery list tổng hợp dishes | Positive | P1 |
+| TC_CAL_151 | Grocery list cập nhật khi đổi plan | Positive | P1 |
+| TC_CAL_152 | Grocery modal scroll danh sách dài | Positive | P2 |
+| TC_CAL_153 | Grocery list empty khi plan trống | Edge | P2 |
+| TC_CAL_154 | Grocery modal z-index z-50 | Positive | P2 |
+| TC_CAL_155 | Grocery modal rounded mobile/desktop | Positive | P2 |
+| TC_CAL_156 | Update servings cho dish | Positive | P1 |
+| TC_CAL_157 | Default servings = 1 | Positive | P2 |
+| TC_CAL_158 | Tăng servings → nutrition tăng | Positive | P1 |
+| TC_CAL_159 | Giảm servings → nutrition giảm | Positive | P1 |
+| TC_CAL_160 | Servings = 0 edge case | Edge | P1 |
+| TC_CAL_161 | Servings 0.5 nutrition đúng | Edge | P2 |
+| TC_CAL_162 | Servings persist qua reload | Positive | P1 |
+| TC_CAL_163 | Servings 100 boundary test | Boundary | P2 |
+| TC_CAL_164 | Servings negative không cho phép | Negative | P1 |
+| TC_CAL_165 | Servings update grocery list | Positive | P2 |
+| TC_CAL_166 | MealSlot breakfast icon/label | Positive | P2 |
+| TC_CAL_167 | MealSlot lunch icon/label | Positive | P2 |
+| TC_CAL_168 | MealSlot dinner icon/label | Positive | P2 |
+| TC_CAL_169 | MealSlot empty + button | Positive | P1 |
+| TC_CAL_170 | MealSlot có món hiển thị info | Positive | P1 |
+| TC_CAL_171 | MealSlot nhiều dishes count badge | Positive | P2 |
+| TC_CAL_172 | Copy Plan disabled plan trống | Negative | P2 |
+| TC_CAL_173 | Save Template disabled plan trống | Negative | P2 |
+| TC_CAL_174 | AI Suggest loading spinner | Positive | P2 |
+| TC_CAL_175 | Template Manager mở modal | Positive | P2 |
+| TC_CAL_176 | isSuggesting disable action buttons | Positive | P1 |
+| TC_CAL_177 | MealsSubTab tip all empty | Edge | P2 |
+| TC_CAL_178 | MealsSubTab tip incomplete | Positive | P2 |
+| TC_CAL_179 | MealsSubTab complete message | Positive | P2 |
+| TC_CAL_180 | MiniNutritionBar tỷ lệ đúng | Positive | P1 |
+| TC_CAL_181 | Desktop grid 3 columns | Positive | P1 |
+| TC_CAL_182 | Desktop không sub-tabs | Positive | P2 |
+| TC_CAL_183 | Desktop NutritionSubTab visible | Positive | P2 |
+| TC_CAL_184 | Mobile sub-tabs hiển thị | Positive | P1 |
+| TC_CAL_185 | Mobile sub-tab active styling | Positive | P2 |
+| TC_CAL_186 | Mobile sub-tab inactive styling | Positive | P2 |
+| TC_CAL_187 | Mobile Meals → MealsSubTab | Positive | P1 |
+| TC_CAL_188 | Mobile Nutrition → NutritionSubTab | Positive | P1 |
+| TC_CAL_189 | Breakpoint ≥1024px desktop | Boundary | P1 |
+| TC_CAL_190 | 1023px → mobile layout | Boundary | P1 |
+| TC_CAL_191 | 1024px → desktop layout | Boundary | P1 |
+| TC_CAL_192 | Resize mobile→desktop seamless | Positive | P2 |
+| TC_CAL_193 | Resize desktop→mobile seamless | Positive | P2 |
+| TC_CAL_194 | onSwitchToMeals callback | Positive | P2 |
+| TC_CAL_195 | onSwitchToNutrition callback | Positive | P2 |
+| TC_CAL_196 | parseLocalDate YYYY-MM-DD đúng | Positive | P1 |
+| TC_CAL_197 | parseLocalDate null không crash | Negative | P1 |
+| TC_CAL_198 | dateLocale vi-VN | Positive | P2 |
+| TC_CAL_199 | dateLocale en-US | Positive | P2 |
+| TC_CAL_200 | Mobile date format short | Positive | P2 |
+| TC_CAL_201 | Desktop date format long | Positive | P2 |
+| TC_CAL_202 | React.memo CalendarTab | Boundary | P2 |
+| TC_CAL_203 | useCallback grocery handlers | Boundary | P3 |
+| TC_CAL_204 | recentDishIds recalc dayPlans | Positive | P2 |
+| TC_CAL_205 | recentDishIds recalc date | Positive | P2 |
+| TC_CAL_206 | Missing breakfastDishIds no crash | Negative | P1 |
+| TC_CAL_207 | Invalid dishId graceful skip | Negative | P1 |
+| TC_CAL_208 | Rapid date changes final state | Edge | P1 |
+| TC_CAL_209 | showGrocery independent sub-tab | Edge | P2 |
+| TC_CAL_210 | displayName CalendarTab | Positive | P3 |
 
 ---
 
@@ -791,6 +896,1093 @@ Trên mobile, calendar sử dụng sub-tabs (Meals ↔ Nutrition) để tối ư
 - **Steps**: 1. Partial scroll between weeks 2. Release
 - **Expected**: Snaps to nearest full week
 - **Type**: Positive | **Priority**: P2
+
+---
+
+
+##### TC_CAL_106–130: DateSelector Component Features
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_106: Calendar view mode hiển thị lưới tháng đầy đủ
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Calendar view
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Calendar view mode hiển thị lưới tháng đầy đủ
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Calendar view mode hiển thị lưới tháng đầy đủ — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_107: Week view mode hiển thị 7 ngày Mon-Sun
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Week view mode hiển thị 7 ngày Mon-Sun
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Week view mode hiển thị 7 ngày Mon-Sun — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_108: Toggle calendar↔week view mode
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Quan sát trạng thái ban đầu
+  2. Thực hiện toggle/switch action
+  3. Verify trạng thái đã thay đổi đúng
+- **Expected Result**: Toggle calendar↔week view mode — trạng thái chuyển đổi đúng, UI phản ánh state mới
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_109: Calendar view navigation tháng tiến
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Calendar view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Calendar view navigation tháng tiến
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Calendar view navigation tháng tiến — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_110: Calendar view navigation tháng lùi
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Calendar view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Calendar view navigation tháng lùi
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Calendar view navigation tháng lùi — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_111: Go to Today button reset ngày về hôm nay
+- **Pre-conditions**: Calendar tab active, đang xem ngày khác (không phải hôm nay)
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Go to Today button reset ngày về hôm nay
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Go to Today button reset ngày về hôm nay — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_112: Calendar hint hiển thị lần đầu tiên
+- **Pre-conditions**: App mở lần đầu, localStorage chưa có flag hintDismissed
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Calendar hint hiển thị lần đầu tiên
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Calendar hint hiển thị lần đầu tiên — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_113: Dismiss calendar hint lưu vào localStorage
+- **Pre-conditions**: App mở lần đầu, localStorage chưa có flag hintDismissed
+- **Steps**:
+  1. Thực hiện thay đổi cần persist
+  2. Reload page hoặc restart app
+  3. Verify data vẫn đúng sau reload
+- **Expected Result**: Dismiss calendar hint lưu vào localStorage — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_114: Calendar hint không hiển thị sau khi dismiss
+- **Pre-conditions**: App mở lần đầu, localStorage chưa có flag hintDismissed
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Calendar hint không hiển thị sau khi dismiss
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Calendar hint không hiển thị sau khi dismiss — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_115: Week label format dd/MM - dd/MM
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Week label format dd/MM - dd/MM
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Week label format dd/MM - dd/MM — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_116: Double-click ngày trên calendar mở plan
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Navigate đến component chứa element cần test
+  2. Click/tap vào element: Double-click ngày trên calendar mở plan
+  3. Verify action được thực thi đúng
+- **Expected Result**: Double-click ngày trên calendar mở plan — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_117: Meal indicator dots 3 màu cho 3 bữa
+- **Pre-conditions**: Calendar tab active, có plan cho các ngày khác nhau
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Meal indicator dots 3 màu cho 3 bữa
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Meal indicator dots 3 màu cho 3 bữa — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_118: Indicator dot chỉ breakfast → 1 dot
+- **Pre-conditions**: Calendar tab active, có plan cho các ngày khác nhau
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Indicator dot chỉ breakfast → 1 dot
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Indicator dot chỉ breakfast → 1 dot — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_119: Indicator dots cho 2 bữa → 2 dots
+- **Pre-conditions**: Calendar tab active, có plan cho các ngày khác nhau
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Indicator dots cho 2 bữa → 2 dots
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Indicator dots cho 2 bữa → 2 dots — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_120: Indicator dots cho 3 bữa → 3 dots
+- **Pre-conditions**: Calendar tab active, có plan cho các ngày khác nhau
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Indicator dots cho 3 bữa → 3 dots
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Indicator dots cho 3 bữa → 3 dots — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_121: Sunday text màu rose trong calendar
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Sunday text màu rose trong calendar
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Sunday text màu rose trong calendar — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_122: Today date highlight/pulse animation
+- **Pre-conditions**: Calendar tab active, đang xem ngày khác (không phải hôm nay)
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Today date highlight/pulse animation
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Today date highlight/pulse animation — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_123: Empty cells đúng cho month grid
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Calendar view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Empty cells đúng cho month grid
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Empty cells đúng cho month grid — kết quả tính toán chính xác, không lỗi precision
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_124: First day of month offset locale vi
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Calendar view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: First day of month offset locale vi
+  3. Verify kết quả đúng như expected
+- **Expected Result**: First day of month offset locale vi — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_125: Swipe right week view → tuần trước
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Swipe right week view → tuần trước
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Swipe right week view → tuần trước — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_126: Swipe left week view → tuần sau
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Swipe left week view → tuần sau
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Swipe left week view → tuần sau — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_127: Swipe < 50px không trigger chuyển tuần
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến component chứa element cần test
+  2. Click/tap vào element: Swipe < 50px không trigger chuyển tuần
+  3. Verify action được thực thi đúng
+- **Expected Result**: Swipe < 50px không trigger chuyển tuần — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_128: Vertical swipe không trigger chuyển tuần
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến component chứa element cần test
+  2. Click/tap vào element: Vertical swipe không trigger chuyển tuần
+  3. Verify action được thực thi đúng
+- **Expected Result**: Vertical swipe không trigger chuyển tuần — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_129: Week dates Mon-Sun chính xác
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Week dates Mon-Sun chính xác
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Week dates Mon-Sun chính xác — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_130: weekOffset reset khi chọn ngày mới
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Week view
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: weekOffset reset khi chọn ngày mới
+  3. Verify kết quả đúng như expected
+- **Expected Result**: weekOffset reset khi chọn ngày mới — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_131–145: Quick Add & Recent Dishes
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_131: Recent dishes hiển thị tối đa 8 món
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Recent dishes hiển thị tối đa 8 món
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Recent dishes hiển thị tối đa 8 món — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_132: Recent dishes từ 14 ngày gần nhất
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Recent dishes từ 14 ngày gần nhất
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Recent dishes từ 14 ngày gần nhất — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_133: Recent dishes không trùng lặp
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Recent dishes không trùng lặp
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Recent dishes không trùng lặp — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_134: Recent dishes sorted by recency
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Recent dishes sorted by recency
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Recent dishes sorted by recency — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_135: Quick add dish vào slot trống
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Quick add dish vào slot trống
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Quick add dish vào slot trống — empty state hiển thị đúng, không crash, UI thân thiện
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_136: Quick add 1 slot trống → add trực tiếp
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Quick add 1 slot trống → add trực tiếp
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Quick add 1 slot trống → add trực tiếp — empty state hiển thị đúng, không crash, UI thân thiện
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_137: Quick add nhiều slots trống → popover
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Quick add nhiều slots trống → popover
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Quick add nhiều slots trống → popover — empty state hiển thị đúng, không crash, UI thân thiện
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_138: Quick add popover close sau chọn
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Quick add popover close sau chọn
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Quick add popover close sau chọn — component đóng đúng, state cleanup, không memory leak
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_139: No recent dishes → section ẩn
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: No recent dishes → section ẩn
+  3. Verify kết quả đúng như expected
+- **Expected Result**: No recent dishes → section ẩn — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_140: Recent dishes cập nhật khi thêm món
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: Recent dishes cập nhật khi thêm món — data/UI cập nhật ngay lập tức, đồng bộ chính xác
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_141: Recent dishes across different dates
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Recent dishes across different dates
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Recent dishes across different dates — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_142: Quick add cập nhật nutrition ngay
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: Quick add cập nhật nutrition ngay — data/UI cập nhật ngay lập tức, đồng bộ chính xác
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_143: Quick add ngày không có plan → tạo mới
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Quick add ngày không có plan → tạo mới
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Quick add ngày không có plan → tạo mới — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_144: Recent dishes không gồm ngày tương lai
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Recent dishes không gồm ngày tương lai
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Recent dishes không gồm ngày tương lai — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_145: Quick add dish đã xóa → graceful
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Thiết lập điều kiện lỗi/edge case
+  2. Trigger action gây lỗi
+  3. Verify app xử lý gracefully, không crash
+- **Expected Result**: Quick add dish đã xóa → graceful — app xử lý gracefully, hiển thị error message phù hợp, không crash
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_146–155: Grocery List Modal
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_146: Mở Grocery list modal
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến component chứa element cần test
+  2. Click/tap vào element: Mở Grocery list modal
+  3. Verify action được thực thi đúng
+- **Expected Result**: Mở Grocery list modal — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_147: Grocery modal hiển thị nguyên liệu
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Grocery modal hiển thị nguyên liệu
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Grocery modal hiển thị nguyên liệu — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_148: Grocery modal close button
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Grocery modal close button
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Grocery modal close button — component đóng đúng, state cleanup, không memory leak
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_149: Grocery modal close backdrop
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Grocery modal close backdrop
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Grocery modal close backdrop — component đóng đúng, state cleanup, không memory leak
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_150: Grocery list tổng hợp dishes
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Grocery list tổng hợp dishes
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Grocery list tổng hợp dishes — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_151: Grocery list cập nhật khi đổi plan
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: Grocery list cập nhật khi đổi plan — data/UI cập nhật ngay lập tức, đồng bộ chính xác
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_152: Grocery modal scroll danh sách dài
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Grocery modal scroll danh sách dài
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Grocery modal scroll danh sách dài — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_153: Grocery list empty khi plan trống
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Grocery list empty khi plan trống
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Grocery list empty khi plan trống — empty state hiển thị đúng, không crash, UI thân thiện
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_154: Grocery modal z-index z-50
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Grocery modal z-index z-50
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Grocery modal z-index z-50 — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_155: Grocery modal rounded mobile/desktop
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Grocery modal rounded mobile/desktop — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_156–165: Servings Functionality
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_156: Update servings cho dish
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: Update servings cho dish — data/UI cập nhật ngay lập tức, đồng bộ chính xác
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_157: Default servings = 1
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Default servings = 1
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Default servings = 1 — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_158: Tăng servings → nutrition tăng
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Tăng servings → nutrition tăng
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Tăng servings → nutrition tăng — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_159: Giảm servings → nutrition giảm
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Giảm servings → nutrition giảm
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Giảm servings → nutrition giảm — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_160: Servings = 0 edge case
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Servings = 0 edge case
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Servings = 0 edge case — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_161: Servings 0.5 nutrition đúng
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Servings 0.5 nutrition đúng
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Servings 0.5 nutrition đúng — kết quả tính toán chính xác, không lỗi precision
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_162: Servings persist qua reload
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Thực hiện thay đổi cần persist
+  2. Reload page hoặc restart app
+  3. Verify data vẫn đúng sau reload
+- **Expected Result**: Servings persist qua reload — data vẫn đúng sau reload/restart
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_163: Servings 100 boundary test
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Servings 100 boundary test
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Servings 100 boundary test — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Boundary
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_164: Servings negative không cho phép
+- **Pre-conditions**: Calendar tab active, plan có dish 'Phở bò' 300kcal với servings=1
+- **Steps**:
+  1. Thiết lập điều kiện: Servings negative không cho phép
+  2. Thử thực hiện action bị restrict
+  3. Verify action bị chặn/disabled đúng
+- **Expected Result**: Servings negative không cho phép — element bị disabled, user không thể tương tác, UI feedback rõ ràng
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_165: Servings update grocery list
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: Servings update grocery list — data/UI cập nhật ngay lập tức, đồng bộ chính xác
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_166–180: MealSlot & Action Bar Detail
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_166: MealSlot breakfast icon/label
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealSlot breakfast icon/label
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealSlot breakfast icon/label — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_167: MealSlot lunch icon/label
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealSlot lunch icon/label
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealSlot lunch icon/label — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_168: MealSlot dinner icon/label
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealSlot dinner icon/label
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealSlot dinner icon/label — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_169: MealSlot empty + button
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealSlot empty + button
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealSlot empty + button — empty state hiển thị đúng, không crash, UI thân thiện
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_170: MealSlot có món hiển thị info
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: MealSlot có món hiển thị info
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: MealSlot có món hiển thị info — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_171: MealSlot nhiều dishes count badge
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealSlot nhiều dishes count badge
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealSlot nhiều dishes count badge — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_172: Copy Plan disabled plan trống
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Thiết lập điều kiện: Copy Plan disabled plan trống
+  2. Thử thực hiện action bị restrict
+  3. Verify action bị chặn/disabled đúng
+- **Expected Result**: Copy Plan disabled plan trống — element bị disabled, user không thể tương tác, UI feedback rõ ràng
+- **Priority**: P2 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_173: Save Template disabled plan trống
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Thiết lập điều kiện: Save Template disabled plan trống
+  2. Thử thực hiện action bị restrict
+  3. Verify action bị chặn/disabled đúng
+- **Expected Result**: Save Template disabled plan trống — element bị disabled, user không thể tương tác, UI feedback rõ ràng
+- **Priority**: P2 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_174: AI Suggest loading spinner
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: AI Suggest loading spinner
+  3. Verify kết quả đúng như expected
+- **Expected Result**: AI Suggest loading spinner — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_175: Template Manager mở modal
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Navigate đến component chứa element cần test
+  2. Click/tap vào element: Template Manager mở modal
+  3. Verify action được thực thi đúng
+- **Expected Result**: Template Manager mở modal — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_176: isSuggesting disable action buttons
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: isSuggesting disable action buttons
+  3. Verify kết quả đúng như expected
+- **Expected Result**: isSuggesting disable action buttons — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_177: MealsSubTab tip all empty
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealsSubTab tip all empty
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealsSubTab tip all empty — empty state hiển thị đúng, không crash, UI thân thiện
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_178: MealsSubTab tip incomplete
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealsSubTab tip incomplete
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealsSubTab tip incomplete — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_179: MealsSubTab complete message
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MealsSubTab complete message
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MealsSubTab complete message — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_180: MiniNutritionBar tỷ lệ đúng
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: MiniNutritionBar tỷ lệ đúng
+  3. Verify kết quả đúng như expected
+- **Expected Result**: MiniNutritionBar tỷ lệ đúng — kết quả tính toán chính xác, không lỗi precision
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_181–195: Desktop vs Mobile Deep Tests
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_181: Desktop grid 3 columns
+- **Pre-conditions**: App đã mở, Calendar tab active, DateSelector ở chế độ Calendar view
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Desktop grid 3 columns — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_182: Desktop không sub-tabs
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Desktop không sub-tabs — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_183: Desktop NutritionSubTab visible
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Desktop NutritionSubTab visible — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_184: Mobile sub-tabs hiển thị
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: Mobile sub-tabs hiển thị
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: Mobile sub-tabs hiển thị — UI element hiển thị đúng, đầy đủ thông tin, không lỗi visual
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_185: Mobile sub-tab active styling
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Mobile sub-tab active styling — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_186: Mobile sub-tab inactive styling
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Mobile sub-tab inactive styling — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_187: Mobile Meals → MealsSubTab
+- **Pre-conditions**: Calendar tab active, MealsSubTab đang render với dayNutrition data
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Mobile Meals → MealsSubTab — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_188: Mobile Nutrition → NutritionSubTab
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Mobile Nutrition → NutritionSubTab — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_189: Breakpoint ≥1024px desktop
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Breakpoint ≥1024px desktop — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Boundary
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_190: 1023px → mobile layout
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: 1023px → mobile layout — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Boundary
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_191: 1024px → desktop layout
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: 1024px → desktop layout — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Boundary
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_192: Resize mobile→desktop seamless
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Resize mobile→desktop seamless — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_193: Resize desktop→mobile seamless
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Resize desktop→mobile seamless — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_194: onSwitchToMeals callback
+- **Pre-conditions**: CalendarTab component đã mount với đầy đủ props
+- **Steps**:
+  1. Quan sát trạng thái ban đầu
+  2. Thực hiện toggle/switch action
+  3. Verify trạng thái đã thay đổi đúng
+- **Expected Result**: onSwitchToMeals callback — trạng thái chuyển đổi đúng, UI phản ánh state mới
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_195: onSwitchToNutrition callback
+- **Pre-conditions**: CalendarTab component đã mount với đầy đủ props
+- **Steps**:
+  1. Quan sát trạng thái ban đầu
+  2. Thực hiện toggle/switch action
+  3. Verify trạng thái đã thay đổi đúng
+- **Expected Result**: onSwitchToNutrition callback — trạng thái chuyển đổi đúng, UI phản ánh state mới
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_196–210: Advanced Edge Cases & Integration
+- **Kết quả test thực tế**: | — |
+
+
+##### TC_CAL_196: parseLocalDate YYYY-MM-DD đúng
+- **Pre-conditions**: Calendar tab active, i18n đã cấu hình
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: parseLocalDate YYYY-MM-DD đúng
+  3. Verify kết quả đúng như expected
+- **Expected Result**: parseLocalDate YYYY-MM-DD đúng — kết quả tính toán chính xác, không lỗi precision
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_197: parseLocalDate null không crash
+- **Pre-conditions**: Calendar tab active, i18n đã cấu hình
+- **Steps**:
+  1. Thiết lập điều kiện lỗi/edge case
+  2. Trigger action gây lỗi
+  3. Verify app xử lý gracefully, không crash
+- **Expected Result**: parseLocalDate null không crash — app xử lý gracefully, hiển thị error message phù hợp, không crash
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_198: dateLocale vi-VN
+- **Pre-conditions**: Calendar tab active, i18n đã cấu hình
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: dateLocale vi-VN
+  3. Verify kết quả đúng như expected
+- **Expected Result**: dateLocale vi-VN — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_199: dateLocale en-US
+- **Pre-conditions**: Calendar tab active, i18n đã cấu hình
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: dateLocale en-US
+  3. Verify kết quả đúng như expected
+- **Expected Result**: dateLocale en-US — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_200: Mobile date format short
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Mobile date format short — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_201: Desktop date format long
+- **Pre-conditions**: Calendar tab active, viewport có thể điều chỉnh kích thước
+- **Steps**:
+  1. Điều chỉnh viewport/device cho phù hợp
+  2. Quan sát layout và styling
+  3. Verify layout đúng theo breakpoint
+- **Expected Result**: Desktop date format long — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_202: React.memo CalendarTab
+- **Pre-conditions**: CalendarTab component đã mount với đầy đủ props
+- **Steps**:
+  1. Mount component với initial props
+  2. Trigger re-render với props không thay đổi
+  3. Verify component không re-render không cần thiết
+- **Expected Result**: React.memo CalendarTab — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Boundary
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_203: useCallback grocery handlers
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Mount component với initial props
+  2. Trigger re-render với props không thay đổi
+  3. Verify component không re-render không cần thiết
+- **Expected Result**: useCallback grocery handlers — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P3 | **Type**: Boundary
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_204: recentDishIds recalc dayPlans
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: recentDishIds recalc dayPlans — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_205: recentDishIds recalc date
+- **Pre-conditions**: Calendar tab active, có plan trong 14 ngày gần đây với ít nhất 3 dishes
+- **Steps**:
+  1. Ghi nhận giá trị hiện tại
+  2. Thực hiện thay đổi trigger update
+  3. Verify giá trị mới đúng sau update
+- **Expected Result**: recentDishIds recalc date — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_206: Missing breakfastDishIds no crash
+- **Pre-conditions**: CalendarTab nhận data với DayPlan có lỗi/thiếu field
+- **Steps**:
+  1. Thiết lập điều kiện lỗi/edge case
+  2. Trigger action gây lỗi
+  3. Verify app xử lý gracefully, không crash
+- **Expected Result**: Missing breakfastDishIds no crash — app xử lý gracefully, hiển thị error message phù hợp, không crash
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_207: Invalid dishId graceful skip
+- **Pre-conditions**: CalendarTab nhận data với DayPlan có lỗi/thiếu field
+- **Steps**:
+  1. Thiết lập điều kiện lỗi/edge case
+  2. Trigger action gây lỗi
+  3. Verify app xử lý gracefully, không crash
+- **Expected Result**: Invalid dishId graceful skip — app xử lý gracefully, hiển thị error message phù hợp, không crash
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_208: Rapid date changes final state
+- **Pre-conditions**: App đã mở, Calendar tab active
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: Rapid date changes final state
+  3. Verify kết quả đúng như expected
+- **Expected Result**: Rapid date changes final state — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P1 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_209: showGrocery independent sub-tab
+- **Pre-conditions**: Calendar tab active, plan hiện tại có ít nhất 2 dishes với ingredients
+- **Steps**:
+  1. Navigate đến feature/component cần test
+  2. Thực hiện action: showGrocery independent sub-tab
+  3. Verify kết quả đúng như expected
+- **Expected Result**: showGrocery independent sub-tab — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P2 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_CAL_210: displayName CalendarTab
+- **Pre-conditions**: CalendarTab component đã mount với đầy đủ props
+- **Steps**:
+  1. Mở component/feature liên quan
+  2. Quan sát UI element: displayName CalendarTab
+  3. Verify element visible và nội dung đúng
+- **Expected Result**: displayName CalendarTab — hoạt động chính xác như mô tả, không lỗi, UI/data consistent
+- **Priority**: P3 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
 
 ---
 
