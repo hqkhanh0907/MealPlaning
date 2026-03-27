@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
+import i18n from '../../../i18n';
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { useUserProfileStore } from '../../../store/userProfileStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
+import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import { calculateBMR, calculateTDEE } from '../../../services/nutritionEngine';
 
 export interface FitnessNutritionInsight {
@@ -43,8 +44,11 @@ export function deriveInsight(
   if (isTrainingDay && todayCaloriesConsumed < todayCalorieBudget * 0.75) {
     return {
       type: 'deficit-on-training',
-      title: 'Thiếu hụt năng lượng ngày tập',
-      message: `Bạn mới nạp ${Math.round(todayCaloriesConsumed)} kcal — dưới 75% ngân sách ${Math.round(todayCalorieBudget)} kcal. Hãy nạp thêm năng lượng!`,
+      title: i18n.t('fitness.insight.deficitTitle'),
+      message: i18n.t('fitness.insight.deficitMessage', {
+        consumed: Math.round(todayCaloriesConsumed),
+        budget: Math.round(todayCalorieBudget),
+      }),
       severity: 'warning',
     };
   }
@@ -52,8 +56,11 @@ export function deriveInsight(
   if (proteinTarget > 0 && todayProteinConsumed < proteinTarget * 0.6) {
     return {
       type: 'protein-low',
-      title: 'Protein đang thấp',
-      message: `Đã nạp ${Math.round(todayProteinConsumed)}g / mục tiêu ${Math.round(proteinTarget)}g. Ưu tiên thực phẩm giàu protein.`,
+      title: i18n.t('fitness.insight.proteinTitle'),
+      message: i18n.t('fitness.insight.proteinMessage', {
+        consumed: Math.round(todayProteinConsumed),
+        target: Math.round(proteinTarget),
+      }),
       severity: 'warning',
     };
   }
@@ -61,8 +68,10 @@ export function deriveInsight(
   if (!isTrainingDay && weeklyTrainingLoad >= 4) {
     return {
       type: 'recovery-day',
-      title: 'Ngày nghỉ phục hồi',
-      message: `${weeklyTrainingLoad} buổi tập tuần này — hãy nghỉ ngơi và ăn đủ dinh dưỡng.`,
+      title: i18n.t('fitness.insight.recoveryTitle'),
+      message: i18n.t('fitness.insight.recoveryMessage', {
+        count: weeklyTrainingLoad,
+      }),
       severity: 'info',
     };
   }
@@ -80,7 +89,7 @@ export interface FitnessNutritionBridgeResult {
 export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
   const workouts = useFitnessStore((s) => s.workouts);
   const healthProfile = useHealthProfileStore((s) => s.profile);
-  const userProfile = useUserProfileStore((s) => s.userProfile);
+  const { eaten, protein } = useTodayNutrition();
 
   return useMemo(() => {
     const today = toDateString(new Date());
@@ -102,12 +111,10 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
     const tdee = calculateTDEE(bmr, healthProfile.activityLevel);
     const todayCalorieBudget = tdee;
 
-    const todayCaloriesConsumed = userProfile.targetCalories > 0
-      ? userProfile.targetCalories * 0.5
-      : 0;
+    const todayCaloriesConsumed = eaten;
 
     const proteinTarget = healthProfile.weightKg * 1.6;
-    const todayProteinConsumed = 0;
+    const todayProteinConsumed = protein;
 
     const insight = deriveInsight(
       isTrainingDay,
@@ -119,5 +126,5 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
     );
 
     return { insight, todayCalorieBudget, isTrainingDay, weeklyTrainingLoad };
-  }, [workouts, healthProfile, userProfile]);
+  }, [workouts, healthProfile, eaten, protein]);
 }

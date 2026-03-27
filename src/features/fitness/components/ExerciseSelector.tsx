@@ -31,14 +31,14 @@ const MUSCLE_GROUPS: MuscleGroup[] = [
   'glutes',
 ];
 
-const MUSCLE_GROUP_LABELS: Record<MuscleGroup, string> = {
-  chest: 'Ngực',
-  back: 'Lưng',
-  shoulders: 'Vai',
-  legs: 'Chân',
-  arms: 'Tay',
-  core: 'Bụng',
-  glutes: 'Mông',
+const MUSCLE_GROUP_I18N_KEYS: Record<MuscleGroup, string> = {
+  chest: 'fitness.exerciseSelector.muscleChest',
+  back: 'fitness.exerciseSelector.muscleBack',
+  shoulders: 'fitness.exerciseSelector.muscleShoulders',
+  legs: 'fitness.exerciseSelector.muscleLegs',
+  arms: 'fitness.exerciseSelector.muscleArms',
+  core: 'fitness.exerciseSelector.muscleCore',
+  glutes: 'fitness.exerciseSelector.muscleGlutes',
 };
 
 const CATEGORY_I18N_KEYS: Record<ExerciseCategory, string> = {
@@ -226,7 +226,7 @@ export function ExerciseSelector({
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                 }`}
               >
-                {MUSCLE_GROUP_LABELS[group]}
+                {t(MUSCLE_GROUP_I18N_KEYS[group])}
               </button>
             ))}
           </div>
@@ -258,7 +258,7 @@ export function ExerciseSelector({
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {MUSCLE_GROUP_LABELS[exercise.muscleGroup]}
+                        {t(MUSCLE_GROUP_I18N_KEYS[exercise.muscleGroup])}
                       </span>
                       <span className="text-xs text-slate-300 dark:text-slate-600">
                         •

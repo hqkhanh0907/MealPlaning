@@ -41,7 +41,7 @@ describe('deriveInsight', () => {
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('protein-low');
     expect((result as FitnessNutritionInsight).severity).toBe('warning');
-    expect((result as FitnessNutritionInsight).message).toContain('30g');
+    expect((result as FitnessNutritionInsight).message).toContain('30');
   });
 
   it('returns recovery-day on rest day with high weekly load', () => {
@@ -56,7 +56,7 @@ describe('deriveInsight', () => {
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('recovery-day');
     expect((result as FitnessNutritionInsight).severity).toBe('info');
-    expect((result as FitnessNutritionInsight).message).toContain('5 buổi tập');
+    expect((result as FitnessNutritionInsight).message).toContain('5');
   });
 
   it('returns null when everything is balanced', () => {

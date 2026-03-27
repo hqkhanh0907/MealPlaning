@@ -690,7 +690,14 @@
       "compoundCategory": "Đa khớp",
       "isolationCategory": "Cô lập",
       "cardioCategory": "Cardio",
-      "equipment": "Dụng cụ"
+      "equipment": "Dụng cụ",
+      "muscleChest": "Ngực",
+      "muscleBack": "Lưng",
+      "muscleShoulders": "Vai",
+      "muscleLegs": "Chân",
+      "muscleArms": "Tay",
+      "muscleCore": "Bụng",
+      "muscleGlutes": "Mông"
     },
     "plan": {
       "tab": "Kế hoạch",
@@ -747,7 +754,8 @@
       "missedSessions": "Bỏ lỡ {{count}} buổi tập tuần này",
       "volumeUp": "Khối lượng tăng {{percent}}%",
       "volumeDown": "Khối lượng giảm {{percent}}%",
-      "weightChange": "Cân nặng thay đổi {{delta}} kg"
+      "weightChange": "Cân nặng thay đổi {{delta}} kg",
+      "weekOf": "Tuần {{current}}/{{total}}"
     },
     "cardio": {
       "title": "Cardio",
