@@ -23,7 +23,10 @@ import {
   getWeekRepScheme,
   isDeloadWeek,
   getDeloadScheme,
+  shouldAutoDeload,
+  applyDeloadReduction,
 } from '../utils/periodization';
+import type { DeloadSuggestion } from '../utils/periodization';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
 import { EXERCISES as EXERCISE_SEEDS } from '../data/exerciseDatabase';
 import type { ExerciseSeed } from '../data/exerciseDatabase';
@@ -48,11 +51,13 @@ export interface PlanGenerationInput {
     goalType?: 'cut' | 'bulk' | 'maintain';
   };
   exerciseDB?: Exercise[];
+  weeklyIntensities?: number[];
 }
 
 export interface GeneratedPlan {
   plan: TrainingPlan;
   days: TrainingPlanDay[];
+  deloadSuggestion?: DeloadSuggestion;
 }
 
 /* ------------------------------------------------------------------ */
@@ -485,6 +490,24 @@ export function generateTrainingPlan(
 
   days.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
 
+  // Auto-deload check: detect consecutive high-RPE weeks
+  const deloadSuggestion = input.weeklyIntensities
+    ? shouldAutoDeload(input.weeklyIntensities)
+    : undefined;
+
+  // If deload is suggested, reduce volume across all days
+  if (deloadSuggestion?.shouldDeload) {
+    for (const day of days) {
+      if (!day.exercises) continue;
+      const parsed: SelectedExercise[] = JSON.parse(day.exercises);
+      const reduced = parsed.map((ex) => ({
+        ...ex,
+        sets: applyDeloadReduction(ex.sets),
+      }));
+      day.exercises = JSON.stringify(reduced);
+    }
+  }
+
   const plan: TrainingPlan = {
     id: planId,
     name: `${splitType} - ${trainingProfile.trainingGoal}`,
@@ -496,7 +519,7 @@ export function generateTrainingPlan(
     updatedAt: now,
   };
 
-  return { plan, days };
+  return { plan, days, deloadSuggestion };
 }
 
 /* ------------------------------------------------------------------ */
