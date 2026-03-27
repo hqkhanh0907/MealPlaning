@@ -46,8 +46,8 @@ export function isToday(dateStr: string): boolean {
   return dateStr === formatDate(new Date());
 }
 
-export function getWeekBounds(offset = 0): { start: string; end: string } {
-  const now = new Date();
+export function getWeekBounds(offset = 0, referenceDate?: Date): { start: string; end: string } {
+  const now = referenceDate ?? new Date();
   const day = now.getDay();
   const diffToMonday = (day + 6) % 7;
   const monday = new Date(now);

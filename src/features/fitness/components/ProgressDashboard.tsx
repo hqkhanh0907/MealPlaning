@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useMemo, useState, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   TrendingUp,
@@ -14,6 +14,7 @@ import {
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateWeeklyVolume, estimate1RM } from '../utils/trainingMetrics';
 import { getWeekBounds } from '../utils/dateUtils';
+import { useCurrentDate } from '../hooks/useCurrentDate';
 
 type MetricCardType = 'weight' | '1rm' | 'adherence' | 'sessions';
 type TimeRange = '1W' | '1M' | '3M' | 'all';
@@ -68,8 +69,9 @@ function ProgressDashboardInner() {
 
   const hasData = workouts.length > 0;
 
-  const thisWeek = useMemo(() => getWeekBounds(0), []);
-  const lastWeek = useMemo(() => getWeekBounds(-1), []);
+  const currentDate = useCurrentDate();
+  const thisWeek = useMemo(() => getWeekBounds(0, currentDate), [currentDate]);
+  const lastWeek = useMemo(() => getWeekBounds(-1, currentDate), [currentDate]);
 
   const thisWeekWorkouts = useMemo(
     () =>
