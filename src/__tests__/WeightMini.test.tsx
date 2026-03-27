@@ -73,7 +73,7 @@ describe('WeightMini', () => {
     expect(screen.queryByTestId('weight-mini')).not.toBeInTheDocument();
     expect(screen.getByText('Chưa có dữ liệu cân nặng')).toBeInTheDocument();
     expect(
-      screen.getByText('Ghi nhận cân nặng đầu tiên'),
+      screen.getByText('Ghi cân nặng đầu tiên'),
     ).toBeInTheDocument();
   });
 
@@ -83,7 +83,7 @@ describe('WeightMini', () => {
 
     expect(screen.getByTestId('weight-mini-empty')).toHaveAttribute(
       'aria-label',
-      'Chưa có dữ liệu cân nặng. Tap để ghi nhận',
+      'Chưa ghi cân nặng',
     );
   });
 
@@ -107,60 +107,60 @@ describe('WeightMini', () => {
 
   // ===== Goal-Aware Color States =====
 
-  it('Cut + Losing → green, TrendingDown, "Đúng hướng ✅"', () => {
+  it('Cut + Losing → green, TrendingDown, "Đúng tiến độ"', () => {
     const entries = makeWeightEntries([72, 71.8, 71.5, 71.2, 71, 70.8, 70.5]);
     setupStores(entries, makeGoal('cut'));
     render(<WeightMini />);
 
     const trendEl = screen.getByTestId('weight-trend');
-    expect(trendEl).toHaveTextContent('Đúng hướng ✅');
+    expect(trendEl).toHaveTextContent('Đúng tiến độ');
     const mini = screen.getByTestId('weight-mini');
     expect(mini.className).toContain('emerald');
   });
 
-  it('Cut + Gaining → amber, TrendingUp, "Cần điều chỉnh ⚠️"', () => {
+  it('Cut + Gaining → amber, TrendingUp, "Cần điều chỉnh"', () => {
     const entries = makeWeightEntries([70, 70.3, 70.6, 71, 71.3, 71.6, 72]);
     setupStores(entries, makeGoal('cut'));
     render(<WeightMini />);
 
     const trendEl = screen.getByTestId('weight-trend');
-    expect(trendEl).toHaveTextContent('Cần điều chỉnh ⚠️');
+    expect(trendEl).toHaveTextContent('Cần điều chỉnh');
     const mini = screen.getByTestId('weight-mini');
     expect(mini.className).toContain('amber');
   });
 
-  it('Bulk + Gaining moderate (≤0.5kg/wk) → green, "Đúng hướng ✅"', () => {
+  it('Bulk + Gaining moderate (≤0.5kg/wk) → green, "Đúng tiến độ"', () => {
     // 7 entries over 7 days, gaining ~0.42kg total = ~0.42kg/wk
     const entries = makeWeightEntries([70, 70.06, 70.12, 70.18, 70.24, 70.3, 70.42]);
     setupStores(entries, makeGoal('bulk'));
     render(<WeightMini />);
 
     const trendEl = screen.getByTestId('weight-trend');
-    expect(trendEl).toHaveTextContent('Đúng hướng ✅');
+    expect(trendEl).toHaveTextContent('Đúng tiến độ');
     const mini = screen.getByTestId('weight-mini');
     expect(mini.className).toContain('emerald');
   });
 
-  it('Bulk + Gaining fast (>0.5kg/wk) → amber, "Tăng hơi nhanh ⚠️"', () => {
+  it('Bulk + Gaining fast (>0.5kg/wk) → amber, "Tăng nhanh"', () => {
     // 7 entries over 7 days, gaining ~1kg total = ~1kg/wk
     const entries = makeWeightEntries([70, 70.15, 70.3, 70.5, 70.65, 70.85, 71]);
     setupStores(entries, makeGoal('bulk'));
     render(<WeightMini />);
 
     const trendEl = screen.getByTestId('weight-trend');
-    expect(trendEl).toHaveTextContent('Tăng hơi nhanh ⚠️');
+    expect(trendEl).toHaveTextContent('Tăng nhanh');
     const mini = screen.getByTestId('weight-mini');
     expect(mini.className).toContain('amber');
   });
 
-  it('Maintain + Stable (±0.3kg/wk) → green, Minus icon, "Ổn định ✅"', () => {
+  it('Maintain + Stable (±0.3kg/wk) → green, Minus icon, "Ổn định"', () => {
     // stable at 70kg with small fluctuations
     const entries = makeWeightEntries([70, 70.02, 69.98, 70.01, 70.03, 69.99, 70.05]);
     setupStores(entries, makeGoal('maintain'));
     render(<WeightMini />);
 
     const trendEl = screen.getByTestId('weight-trend');
-    expect(trendEl).toHaveTextContent('Ổn định ✅');
+    expect(trendEl).toHaveTextContent('Ổn định');
     const mini = screen.getByTestId('weight-mini');
     expect(mini.className).toContain('emerald');
   });
@@ -239,11 +239,11 @@ describe('WeightMini', () => {
     const mini = screen.getByTestId('weight-mini');
     expect(mini).toHaveAttribute(
       'aria-label',
-      expect.stringContaining('70.05kg'),
+      expect.stringContaining('70.05'),
     );
     expect(mini).toHaveAttribute(
       'aria-label',
-      expect.stringContaining('Ổn định ✅'),
+      expect.stringContaining('Ổn định'),
     );
   });
 
@@ -256,7 +256,7 @@ describe('WeightMini', () => {
     render(<WeightMini />);
 
     const trendEl = screen.getByTestId('weight-trend');
-    expect(trendEl).toHaveTextContent('Ổn định ✅');
+    expect(trendEl).toHaveTextContent('Ổn định');
   });
 
   it('does not fire onTap on other keys', () => {
@@ -277,7 +277,7 @@ describe('WeightMini', () => {
 
     const mini = screen.getByTestId('weight-mini');
     expect(mini.className).toContain('amber');
-    expect(screen.getByTestId('weight-trend')).toHaveTextContent('Cần điều chỉnh ⚠️');
+    expect(screen.getByTestId('weight-trend')).toHaveTextContent('Cần điều chỉnh');
   });
 
   it('bulk + not gaining shows amber adjust', () => {
@@ -286,7 +286,7 @@ describe('WeightMini', () => {
     setupStores(entries, makeGoal('bulk'));
     render(<WeightMini />);
 
-    expect(screen.getByTestId('weight-trend')).toHaveTextContent('Cần điều chỉnh ⚠️');
+    expect(screen.getByTestId('weight-trend')).toHaveTextContent('Cần điều chỉnh');
     expect(screen.getByTestId('weight-mini').className).toContain('amber');
   });
 });

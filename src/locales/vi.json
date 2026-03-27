@@ -870,7 +870,7 @@
       "gainingFast": "Tăng nhanh",
       "needsAdjust": "Cần điều chỉnh",
       "a11yEmpty": "Chưa ghi cân nặng",
-      "a11y": "Thay đổi hàng tuần {{weeklyChange}} kg, {{status}}"
+      "a11y": "Cân nặng {{weight}} kg, {{trend}}"
     },
     "streakMini": {
       "noData": "Chưa có chuỗi tập",
