@@ -563,6 +563,46 @@ describe('WorkoutLogger', () => {
     expect(mockSetWorkoutDraft).not.toHaveBeenCalled();
   });
 
+  it('assigns the same workoutId to all sets on batch save', () => {
+    const multiPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Full Body',
+      exercises: JSON.stringify(['bench-press', 'squat']),
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
+
+    fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
+      target: { value: '80' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input-bench-press'), {
+      target: { value: '5' },
+    });
+    fireEvent.click(screen.getByTestId('log-set-bench-press'));
+    fireEvent.click(screen.getByText('Skip'));
+
+    fireEvent.change(screen.getByTestId('weight-input-squat'), {
+      target: { value: '100' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input-squat'), {
+      target: { value: '8' },
+    });
+    fireEvent.click(screen.getByTestId('log-set-squat'));
+    fireEvent.click(screen.getByText('Skip'));
+
+    fireEvent.click(screen.getByTestId('finish-button'));
+    fireEvent.click(screen.getByTestId('save-workout-button'));
+
+    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
+    expect(mockAddWorkoutSet).toHaveBeenCalledTimes(2);
+
+    const savedWorkoutId = mockAddWorkout.mock.calls[0][0].id;
+    const firstSetWorkoutId = mockAddWorkoutSet.mock.calls[0][0].workoutId;
+    const secondSetWorkoutId = mockAddWorkoutSet.mock.calls[1][0].workoutId;
+
+    expect(firstSetWorkoutId).toBe(savedWorkoutId);
+    expect(secondSetWorkoutId).toBe(savedWorkoutId);
+  });
+
   it('clears draft on save', () => {
     render(
       <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,

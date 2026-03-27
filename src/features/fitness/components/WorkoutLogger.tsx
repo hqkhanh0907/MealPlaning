@@ -237,20 +237,19 @@ export function WorkoutLogger({
       createdAt: now,
       updatedAt: now,
     };
+    const sets = loggedSets.map((s) => ({ ...s, workoutId: workout.id }));
     addWorkout(workout);
-    for (const set of loggedSets) {
-      addWorkoutSet({ ...set, workoutId });
-    }
+    for (const set of sets) addWorkoutSet(set);
     clearWorkoutDraft();
     onComplete(workout);
   }, [
     elapsedSeconds,
+    planDay,
     loggedSets,
     addWorkout,
     addWorkoutSet,
     clearWorkoutDraft,
     onComplete,
-    planDay?.workoutType,
     t,
   ]);
 
