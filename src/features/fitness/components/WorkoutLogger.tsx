@@ -6,7 +6,6 @@ import { ExerciseSelector } from './ExerciseSelector';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EXERCISES } from '../data/exerciseDatabase';
 import { formatElapsed } from '../utils/timeFormat';
-import { safeJsonParse } from '../utils/safeJsonParse';
 import type { ExerciseSeed } from '../data/exerciseDatabase';
 import type {
   Exercise,
@@ -21,7 +20,7 @@ interface WorkoutLoggerProps {
   planDay?: {
     dayOfWeek: number;
     workoutType: string;
-    exercises?: string;
+    exercises?: string[];
     muscleGroups?: string;
   };
   onComplete: (workout: Workout) => void;
@@ -56,10 +55,12 @@ function seedToExercise(seed: ExerciseSeed): Exercise {
   };
 }
 
-function resolveExercises(exercisesJson?: string): Exercise[] {
-  if (!exercisesJson) return [];
-  const ids = safeJsonParse<string[]>(exercisesJson, []);
-  return EXERCISES.filter((e) => ids.includes(e.id)).map(seedToExercise);
+function resolveExercises(exerciseIds?: string[]): Exercise[] {
+  if (!exerciseIds || exerciseIds.length === 0) return [];
+  return exerciseIds
+    .map((id) => EXERCISES.find((e) => e.id === id))
+    .filter((e): e is ExerciseSeed => e !== undefined)
+    .map(seedToExercise);
 }
 
 export function WorkoutLogger({
@@ -68,10 +69,10 @@ export function WorkoutLogger({
   onBack,
 }: WorkoutLoggerProps): React.JSX.Element {
   const { t } = useTranslation();
-  const addWorkout = useFitnessStore((s) => s.addWorkout);
-  const addWorkoutSet = useFitnessStore((s) => s.addWorkoutSet);
+  const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
   const setWorkoutDraft = useFitnessStore((s) => s.setWorkoutDraft);
   const clearWorkoutDraft = useFitnessStore((s) => s.clearWorkoutDraft);
+  const loadWorkoutDraft = useFitnessStore((s) => s.loadWorkoutDraft);
 
   const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
@@ -101,6 +102,10 @@ export function WorkoutLogger({
     }, 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    loadWorkoutDraft();
+  }, [loadWorkoutDraft]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -225,7 +230,7 @@ export function WorkoutLogger({
     [loggedSets],
   );
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const durationMin = Math.floor(elapsedSeconds / 60);
     const now = new Date().toISOString();
     const workoutId = `workout-${Date.now()}`;
@@ -238,16 +243,19 @@ export function WorkoutLogger({
       updatedAt: now,
     };
     const sets = loggedSets.map((s) => ({ ...s, workoutId: workout.id }));
-    addWorkout(workout);
-    for (const set of sets) addWorkoutSet(set);
+    try {
+      await saveWorkoutAtomic(workout, sets);
+    } catch (error) {
+      console.error('[WorkoutLogger] Save failed, draft preserved:', error);
+      return;
+    }
     clearWorkoutDraft();
     onComplete(workout);
   }, [
     elapsedSeconds,
     planDay,
     loggedSets,
-    addWorkout,
-    addWorkoutSet,
+    saveWorkoutAtomic,
     clearWorkoutDraft,
     onComplete,
     t,

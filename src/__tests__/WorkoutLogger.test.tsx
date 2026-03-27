@@ -107,10 +107,10 @@ vi.mock('../features/fitness/components/ExerciseSelector', () => ({
   ),
 }));
 
-const mockAddWorkout = vi.fn();
-const mockAddWorkoutSet = vi.fn();
+const mockSaveWorkoutAtomic = vi.fn().mockResolvedValue(undefined);
 const mockSetWorkoutDraft = vi.fn();
 const mockClearWorkoutDraft = vi.fn();
+const mockLoadWorkoutDraft = vi.fn().mockResolvedValue(undefined);
 
 afterEach(cleanup);
 
@@ -120,19 +120,19 @@ describe('WorkoutLogger', () => {
     (useFitnessStore as unknown as Mock).mockImplementation(
       (selector: (s: Record<string, unknown>) => unknown) =>
         selector({
-          addWorkout: mockAddWorkout,
-          addWorkoutSet: mockAddWorkoutSet,
+          saveWorkoutAtomic: mockSaveWorkoutAtomic,
           setWorkoutDraft: mockSetWorkoutDraft,
           clearWorkoutDraft: mockClearWorkoutDraft,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
         }),
     );
     (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
       () => ({ workoutDraft: null }),
     );
-    mockAddWorkout.mockReset();
-    mockAddWorkoutSet.mockReset();
+    mockSaveWorkoutAtomic.mockReset().mockResolvedValue(undefined);
     mockSetWorkoutDraft.mockReset();
     mockClearWorkoutDraft.mockReset();
+    mockLoadWorkoutDraft.mockReset().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -147,7 +147,7 @@ describe('WorkoutLogger', () => {
   const planDayWithExercises = {
     dayOfWeek: 1,
     workoutType: 'Push Day',
-    exercises: JSON.stringify(['bench-press']),
+    exercises: ['bench-press'],
   };
 
   it('renders header with back button and timer', () => {
@@ -198,13 +198,13 @@ describe('WorkoutLogger', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows empty state for invalid exercises JSON', () => {
-    const invalidPlan = {
+  it('shows empty state for empty exercises array', () => {
+    const emptyPlan = {
       dayOfWeek: 1,
       workoutType: 'Test',
-      exercises: 'not-valid-json',
+      exercises: [] as string[],
     };
-    render(<WorkoutLogger {...defaultProps} planDay={invalidPlan} />);
+    render(<WorkoutLogger {...defaultProps} planDay={emptyPlan} />);
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
 
@@ -329,7 +329,7 @@ describe('WorkoutLogger', () => {
     );
   });
 
-  it('calls onComplete and stores workout on save', () => {
+  it('calls onComplete and stores workout on save', async () => {
     const onComplete = vi.fn();
     render(
       <WorkoutLogger
@@ -348,10 +348,24 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByTestId('log-set-bench-press'));
     fireEvent.click(screen.getByText('Skip'));
     fireEvent.click(screen.getByTestId('finish-button'));
-    fireEvent.click(screen.getByTestId('save-workout-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
 
-    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
-    expect(mockAddWorkoutSet).toHaveBeenCalledTimes(1);
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Push Day',
+        date: expect.any(String),
+      }),
+      expect.arrayContaining([
+        expect.objectContaining({
+          exerciseId: 'bench-press',
+          weightKg: 80,
+          reps: 5,
+        }),
+      ]),
+    );
     expect(onComplete).toHaveBeenCalledTimes(1);
     expect(onComplete).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -416,12 +430,14 @@ describe('WorkoutLogger', () => {
     expect(screen.getByText('RPE 9')).toBeInTheDocument();
   });
 
-  it('uses fallback workout name when no planDay', () => {
+  it('uses fallback workout name when no planDay', async () => {
     const onComplete = vi.fn();
     render(<WorkoutLogger {...defaultProps} onComplete={onComplete} />);
 
     fireEvent.click(screen.getByTestId('finish-button'));
-    fireEvent.click(screen.getByTestId('save-workout-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
 
     expect(onComplete).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -434,7 +450,7 @@ describe('WorkoutLogger', () => {
     const multiPlan = {
       dayOfWeek: 1,
       workoutType: 'Full Body',
-      exercises: JSON.stringify(['bench-press', 'squat']),
+      exercises: ['bench-press', 'squat'],
     };
     render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
 
@@ -563,11 +579,11 @@ describe('WorkoutLogger', () => {
     expect(mockSetWorkoutDraft).not.toHaveBeenCalled();
   });
 
-  it('assigns the same workoutId to all sets on batch save', () => {
+  it('assigns the same workoutId to all sets on batch save', async () => {
     const multiPlan = {
       dayOfWeek: 1,
       workoutType: 'Full Body',
-      exercises: JSON.stringify(['bench-press', 'squat']),
+      exercises: ['bench-press', 'squat'],
     };
     render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
 
@@ -590,20 +606,20 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByText('Skip'));
 
     fireEvent.click(screen.getByTestId('finish-button'));
-    fireEvent.click(screen.getByTestId('save-workout-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
 
-    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
-    expect(mockAddWorkoutSet).toHaveBeenCalledTimes(2);
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
 
-    const savedWorkoutId = mockAddWorkout.mock.calls[0][0].id;
-    const firstSetWorkoutId = mockAddWorkoutSet.mock.calls[0][0].workoutId;
-    const secondSetWorkoutId = mockAddWorkoutSet.mock.calls[1][0].workoutId;
-
-    expect(firstSetWorkoutId).toBe(savedWorkoutId);
-    expect(secondSetWorkoutId).toBe(savedWorkoutId);
+    const savedWorkout = mockSaveWorkoutAtomic.mock.calls[0][0] as { id: string };
+    const savedSets = mockSaveWorkoutAtomic.mock.calls[0][1] as { workoutId: string }[];
+    expect(savedSets).toHaveLength(2);
+    expect(savedSets[0].workoutId).toBe(savedWorkout.id);
+    expect(savedSets[1].workoutId).toBe(savedWorkout.id);
   });
 
-  it('clears draft on save', () => {
+  it('clears draft on save', async () => {
     render(
       <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
     );
@@ -611,9 +627,58 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByTestId('log-set-bench-press'));
     fireEvent.click(screen.getByText('Skip'));
     fireEvent.click(screen.getByTestId('finish-button'));
-    fireEvent.click(screen.getByTestId('save-workout-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
 
     expect(mockClearWorkoutDraft).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not clear draft on save failure (transaction rollback)', async () => {
+    const onComplete = vi.fn();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockSaveWorkoutAtomic.mockRejectedValueOnce(new Error('Simulated DB failure'));
+
+    render(
+      <WorkoutLogger
+        {...defaultProps}
+        onComplete={onComplete}
+        planDay={planDayWithExercises}
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
+      target: { value: '80' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input-bench-press'), {
+      target: { value: '8' },
+    });
+    fireEvent.click(screen.getByTestId('log-set-bench-press'));
+    fireEvent.click(screen.getByText('Skip'));
+
+    fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
+      target: { value: '80' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input-bench-press'), {
+      target: { value: '8' },
+    });
+    fireEvent.click(screen.getByTestId('log-set-bench-press'));
+    fireEvent.click(screen.getByText('Skip'));
+
+    fireEvent.click(screen.getByTestId('finish-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
+
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    expect(mockClearWorkoutDraft).not.toHaveBeenCalled();
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[WorkoutLogger] Save failed, draft preserved:',
+      expect.any(Error),
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('clears draft on back', () => {
@@ -633,5 +698,44 @@ describe('WorkoutLogger', () => {
     });
 
     expect(mockSetWorkoutDraft).not.toHaveBeenCalled();
+  });
+
+  it('resolves exercises from string[] without JSON.parse', () => {
+    const planDay = {
+      dayOfWeek: 1,
+      workoutType: 'Push Day',
+      exercises: ['bench-press', 'squat'],
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={planDay} />);
+
+    expect(
+      screen.getByTestId('exercise-section-bench-press'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('exercise-section-squat'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Đẩy tạ nằm')).toBeInTheDocument();
+    expect(screen.getByText('Gánh tạ')).toBeInTheDocument();
+  });
+
+  it('ignores unknown exercise IDs gracefully', () => {
+    const planDay = {
+      dayOfWeek: 1,
+      workoutType: 'Test',
+      exercises: ['bench-press', 'nonexistent-exercise'],
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={planDay} />);
+
+    expect(
+      screen.getByTestId('exercise-section-bench-press'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('exercise-section-nonexistent-exercise'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls loadWorkoutDraft on mount', () => {
+    render(<WorkoutLogger {...defaultProps} />);
+    expect(mockLoadWorkoutDraft).toHaveBeenCalledTimes(1);
   });
 });
