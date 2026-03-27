@@ -286,10 +286,8 @@ describe('ExerciseSelector', () => {
     // Check bench press details
     expect(screen.getByText('Đẩy tạ đòn nằm ngang')).toBeInTheDocument();
 
-    // Category badge should show compound
-    const compoundBadges = screen.getAllByText(
-      'fitness.exerciseSelector.compound',
-    );
+    // Category badge should show compound (translated)
+    const compoundBadges = screen.getAllByText('Đa khớp');
     expect(compoundBadges.length).toBeGreaterThan(0);
 
     // Equipment text
@@ -298,15 +296,24 @@ describe('ExerciseSelector', () => {
     // Muscle group label
     expect(screen.getAllByText('Ngực').length).toBeGreaterThan(0);
 
-    // Check secondary category
-    expect(
-      screen.getByText('fitness.exerciseSelector.secondary'),
-    ).toBeInTheDocument();
+    // Check secondary category (translated)
+    expect(screen.getByText('Phụ trợ')).toBeInTheDocument();
 
-    // Check isolation category
-    const isolationBadges = screen.getAllByText(
-      'fitness.exerciseSelector.isolation',
-    );
+    // Check isolation category (translated)
+    const isolationBadges = screen.getAllByText('Cô lập');
     expect(isolationBadges.length).toBeGreaterThan(0);
+  });
+
+  it('shows add custom exercise button', () => {
+    render(<ExerciseSelector {...defaultProps} />);
+    expect(screen.getByTestId('add-custom-exercise')).toBeInTheDocument();
+  });
+
+  it('opens custom exercise modal on button click', async () => {
+    const user = userEvent.setup();
+    render(<ExerciseSelector {...defaultProps} />);
+
+    await user.click(screen.getByTestId('add-custom-exercise'));
+    expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();
   });
 });

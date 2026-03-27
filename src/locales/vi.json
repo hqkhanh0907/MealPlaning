@@ -674,6 +674,22 @@
     "summary": {
       "title": "Tổng kết buổi tập",
       "newPR": "{{count}} kỷ lục cá nhân mới!"
+    },
+    "exerciseSelector": {
+      "title": "Chọn bài tập",
+      "search": "Tìm bài tập...",
+      "all": "Tất cả",
+      "noResults": "Không tìm thấy bài tập",
+      "compound": "Đa khớp",
+      "secondary": "Phụ trợ",
+      "isolation": "Cô lập",
+      "addCustom": "Bài tập tùy chỉnh",
+      "customName": "Tên bài tập",
+      "selectMuscle": "Chọn nhóm cơ",
+      "compoundCategory": "Đa khớp",
+      "isolationCategory": "Cô lập",
+      "cardioCategory": "Cardio",
+      "equipment": "Dụng cụ"
     }
   }
 }
