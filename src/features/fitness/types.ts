@@ -2,6 +2,13 @@
 export type MuscleGroup = 'chest' | 'back' | 'shoulders' | 'legs' | 'arms' | 'core' | 'glutes';
 export type EquipmentType = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'bands';
 export type BodyRegion = 'shoulders' | 'lower_back' | 'knees' | 'wrists' | 'neck' | 'hips';
+
+const BODY_REGIONS: readonly BodyRegion[] = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'];
+
+export function isBodyRegion(value: string): value is BodyRegion {
+  return (BODY_REGIONS as readonly string[]).includes(value);
+}
+
 export type ExerciseCategory = 'compound' | 'secondary' | 'isolation';
 export type ExerciseType = 'strength' | 'cardio';
 export type TrainingExperience = 'beginner' | 'intermediate' | 'advanced';
