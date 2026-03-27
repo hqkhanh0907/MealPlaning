@@ -1,0 +1,508 @@
+<h2>📊 Dashboard Components — Tier 1 & 2 Deep Dive</h2>
+<p class="subtitle">Hero (Daily Score) + Key Metrics (Energy Balance + Protein)</p>
+
+<!-- ============================================ -->
+<!-- COMPONENT 1: DAILY SCORE -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🎯 Component 1: Daily Score — Hero Card</h3>
+  
+  <div style="font-size:12px; color:#64748b; margin-bottom:16px;">
+    Con số duy nhất giúp user biết "hôm nay tôi đang làm tốt hay tệ" trong <strong>0.5 giây</strong>.
+  </div>
+  
+  <!-- Formula Breakdown -->
+  <div style="background:#1e293b; border-radius:16px; padding:20px; color:#fff; margin-bottom:16px;">
+    <div style="font-size:14px; font-weight:800; margin-bottom:12px;">📐 Công thức Daily Score (0 – 100)</div>
+    
+    <div style="font-family:monospace; font-size:12px; background:#0f172a; border-radius:10px; padding:14px; margin-bottom:12px;">
+      <span style="color:#f59e0b;">score</span> = (<span style="color:#10b981;">cal_score</span> × <span style="color:#94a3b8;">0.30</span>)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (<span style="color:#3b82f6;">protein_score</span> × <span style="color:#94a3b8;">0.25</span>)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (<span style="color:#8b5cf6;">workout_score</span> × <span style="color:#94a3b8;">0.25</span>)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (<span style="color:#f97316;">weight_log_score</span> × <span style="color:#94a3b8;">0.10</span>)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (<span style="color:#ef4444;">streak_bonus</span> × <span style="color:#94a3b8;">0.10</span>)
+    </div>
+    
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Factor</td>
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Weight</td>
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Tính thế nào (0-100)</td>
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Ví dụ</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px; color:#10b981; font-weight:600;">🍽️ Calories</td>
+          <td style="padding:8px;">30%</td>
+          <td style="padding:8px; font-size:10px;">
+            deviation = |actual - target|<br>
+            if ≤50 kcal → 100<br>
+            if ≤100 kcal → 90<br>
+            if ≤200 kcal → 70<br>
+            if ≤500 kcal → 40<br>
+            if >500 kcal → 10<br>
+            <em style="color:#64748b;">Chưa log bữa nào → null (không tính)</em>
+          </td>
+          <td style="padding:8px; font-size:10px;">
+            Target: 1500<br>
+            Actual: 1420<br>
+            Dev: 80 → <strong>90</strong>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px; color:#3b82f6; font-weight:600;">🥩 Protein</td>
+          <td style="padding:8px;">25%</td>
+          <td style="padding:8px; font-size:10px;">
+            ratio = actual / target<br>
+            if ≥1.0 → 100 (đạt hoặc vượt)<br>
+            if ≥0.9 → 80<br>
+            if ≥0.7 → 60<br>
+            if ≥0.5 → 40<br>
+            if <0.5 → 20<br>
+            <em style="color:#64748b;">Chưa log → null</em>
+          </td>
+          <td style="padding:8px; font-size:10px;">
+            Target: 166g<br>
+            Actual: 120g<br>
+            Ratio: 0.72 → <strong>60</strong>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px; color:#8b5cf6; font-weight:600;">🏋️ Workout</td>
+          <td style="padding:8px;">25%</td>
+          <td style="padding:8px; font-size:10px;">
+            if today is training day:<br>
+            &nbsp;&nbsp;completed → 100<br>
+            &nbsp;&nbsp;not yet → 50 (trước 20:00)<br>
+            &nbsp;&nbsp;missed → 0 (sau 20:00)<br>
+            if today is rest day:<br>
+            &nbsp;&nbsp;→ 100 (nghỉ đúng plan)
+          </td>
+          <td style="padding:8px; font-size:10px;">
+            Training day<br>
+            Completed ✅<br>
+            → <strong>100</strong>
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px; color:#f97316; font-weight:600;">⚖️ Weight Log</td>
+          <td style="padding:8px;">10%</td>
+          <td style="padding:8px; font-size:10px;">
+            Logged today → 100<br>
+            Logged yesterday → 50<br>
+            >1 day gap → 0
+          </td>
+          <td style="padding:8px; font-size:10px;">
+            Logged sáng nay<br>
+            → <strong>100</strong>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px; color:#ef4444; font-weight:600;">🔥 Streak</td>
+          <td style="padding:8px;">10%</td>
+          <td style="padding:8px; font-size:10px;">
+            min(streak_days × 5, 100)<br>
+            0 days → 0<br>
+            7 days → 35<br>
+            14 days → 70<br>
+            20+ days → 100
+          </td>
+          <td style="padding:8px; font-size:10px;">
+            12 days streak<br>
+            12 × 5 = 60<br>
+            → <strong>60</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div style="margin-top:12px; background:#0f172a; border-radius:8px; padding:10px; font-size:11px;">
+      <span style="color:#f59e0b; font-weight:600;">Ví dụ tổng:</span>
+      <span style="color:#94a3b8;"> (90 × 0.30) + (60 × 0.25) + (100 × 0.25) + (100 × 0.10) + (60 × 0.10) = </span>
+      <span style="color:#10b981; font-weight:800;">27 + 15 + 25 + 10 + 6 = 83</span>
+    </div>
+  </div>
+  
+  <!-- Null Handling -->
+  <div style="background:#fef3c7; border-radius:12px; padding:14px; margin-bottom:16px;">
+    <div style="font-weight:600; font-size:12px; color:#92400e; margin-bottom:6px;">⚠️ Edge Case: Chưa log đủ data (Buổi sáng)</div>
+    <div style="font-size:11px; line-height:1.8;">
+      <strong>Vấn đề:</strong> 8h sáng user mở app — chưa log bữa nào, chưa tập → cal_score & protein_score = null<br>
+      <strong>Giải pháp:</strong> Chỉ tính các factor có data. Redistribute weight:<br>
+      • Sáng (chưa log gì): Score = workout_score(50) × 0.50 + weight_log(100) × 0.25 + streak(60) × 0.25 = <strong>55</strong><br>
+      • Giữa ngày (đã log 2 bữa): Score tính bình thường với 5 factors<br>
+      • Tối (full data): Score tính đầy đủ → most accurate
+    </div>
+  </div>
+  
+  <!-- Visual Treatment: 3 Score Ranges -->
+  <div style="margin-bottom:16px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:10px;">🎨 Visual Treatment theo Score Range:</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+      <!-- High Score -->
+      <div style="text-align:center;">
+        <div style="background:linear-gradient(135deg, #10b981, #059669); border-radius:14px; padding:14px; color:#fff;">
+          <div style="font-size:10px; opacity:0.8;">Thứ Hai, 24/03</div>
+          <div style="font-size:12px; font-weight:600;">Chào Khanh! 👋</div>
+          <div style="font-size:32px; font-weight:800; margin:4px 0;">85</div>
+          <div style="font-size:10px; opacity:0.9;">Tuyệt vời! 🎉</div>
+        </div>
+        <div style="font-size:10px; color:#10b981; font-weight:600; margin-top:4px;">≥ 80: Green gradient</div>
+        <div style="font-size:9px; color:#64748b;">Emoji: 🎉 / 💪 / 🌟</div>
+      </div>
+      <!-- Medium Score -->
+      <div style="text-align:center;">
+        <div style="background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:14px; padding:14px; color:#fff;">
+          <div style="font-size:10px; opacity:0.8;">Thứ Hai, 24/03</div>
+          <div style="font-size:12px; font-weight:600;">Chào Khanh! 👋</div>
+          <div style="font-size:32px; font-weight:800; margin:4px 0;">62</div>
+          <div style="font-size:10px; opacity:0.9;">Cố thêm chút nữa!</div>
+        </div>
+        <div style="font-size:10px; color:#f59e0b; font-weight:600; margin-top:4px;">50-79: Amber gradient</div>
+        <div style="font-size:9px; color:#64748b;">Emoji: 💪 / 🎯 / 📈</div>
+      </div>
+      <!-- Low Score -->
+      <div style="text-align:center;">
+        <div style="background:linear-gradient(135deg, #64748b, #475569); border-radius:14px; padding:14px; color:#fff;">
+          <div style="font-size:10px; opacity:0.8;">Thứ Hai, 24/03</div>
+          <div style="font-size:12px; font-weight:600;">Chào Khanh! 👋</div>
+          <div style="font-size:32px; font-weight:800; margin:4px 0;">35</div>
+          <div style="font-size:10px; opacity:0.9;">Bắt đầu từ bây giờ!</div>
+        </div>
+        <div style="font-size:10px; color:#64748b; font-weight:600; margin-top:4px;">< 50: Slate gradient</div>
+        <div style="font-size:9px; color:#64748b;">Emoji: 🌱 / 💪 / 🚀</div>
+      </div>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color:#64748b; text-align:center;">
+      <strong>Nguyên tắc:</strong> Không bao giờ dùng màu đỏ cho score — tránh shame. Slate (xám) thay thế = neutral encouragement.
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- COMPONENT 2: ENERGY BALANCE -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>⚡ Component 2: Energy Balance — Key Metric</h3>
+  
+  <div style="font-size:12px; color:#64748b; margin-bottom:12px;">
+    Reuse từ Issue 6 (đã chốt). Component <code>EnergyBalance</code> hiện ở 3 vị trí: Calendar, Fitness, <strong>Dashboard</strong>.
+  </div>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <!-- Dashboard version (compact) -->
+    <div>
+      <div style="font-size:11px; font-weight:600; color:#3b82f6; margin-bottom:6px;">📊 Dashboard version (compact ~80px):</div>
+      <div style="background:#fff; border:2px solid #10b981; border-radius:14px; padding:12px; max-width:320px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:11px; font-weight:700;">⚡ Energy Balance</div>
+          <div style="font-size:10px; color:#10b981; font-weight:600;">On track ✅</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:4px; align-items:center; text-align:center;">
+          <div><div style="font-size:9px; color:#64748b;">Ăn vào</div><div style="font-size:16px; font-weight:800; color:#10b981;">1,200</div></div>
+          <div style="color:#94a3b8; font-size:12px;">−</div>
+          <div><div style="font-size:9px; color:#64748b;">Đốt cháy</div><div style="font-size:16px; font-weight:800; color:#3b82f6;">350</div></div>
+          <div style="color:#94a3b8; font-size:12px;">=</div>
+          <div><div style="font-size:9px; color:#64748b;">Net</div><div style="font-size:16px; font-weight:800;">850</div></div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:8px; margin-top:6px; overflow:hidden;">
+          <div style="background:linear-gradient(90deg, #10b981 55%, #3b82f6 55%, #3b82f6 75%); height:100%; width:75%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:3px; font-size:9px; color:#64748b;">
+          <span>65% ăn</span><span>19% tập</span><span>Còn: 650 kcal</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tap → Detail Bottom Sheet -->
+    <div>
+      <div style="font-size:11px; font-weight:600; color:#8b5cf6; margin-bottom:6px;">👆 Tap → Detail Bottom Sheet:</div>
+      <div style="background:#fff; border:2px solid #8b5cf6; border-radius:14px; padding:12px; max-width:320px;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:8px;">⚡ Chi tiết Energy Balance</div>
+        
+        <!-- Macro donut (reuse MacroChart) -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+          <div style="width:60px; height:60px; border-radius:50%; background:conic-gradient(#10b981 0% 40%, #3b82f6 40% 65%, #f59e0b 65% 100%); display:flex; align-items:center; justify-content:center;">
+            <div style="width:40px; height:40px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;">1200<br><span style="font-size:8px; color:#64748b;">kcal</span></div>
+          </div>
+          <div style="font-size:10px; line-height:1.8;">
+            <div><span style="color:#10b981;">●</span> Protein: 120g (480 kcal)</div>
+            <div><span style="color:#3b82f6;">●</span> Carbs: 110g (440 kcal)</div>
+            <div><span style="color:#f59e0b;">●</span> Fat: 31g (280 kcal)</div>
+          </div>
+        </div>
+        
+        <!-- BMR/TDEE/Target -->
+        <div style="background:#f8fafc; border-radius:8px; padding:8px; font-size:10px; margin-bottom:6px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; text-align:center;">
+            <div><div style="color:#64748b;">BMR</div><div style="font-weight:700;">1,580</div></div>
+            <div><div style="color:#64748b;">TDEE</div><div style="font-weight:700;">2,133</div></div>
+            <div><div style="color:#64748b;">Target</div><div style="font-weight:700; color:#10b981;">1,500</div></div>
+          </div>
+          <div style="text-align:center; margin-top:4px; font-size:9px; color:#64748b;">
+            TDEE (2133) + Offset (−500 cut) + Exercise (350) = 1,983 kcal
+          </div>
+        </div>
+        
+        <!-- Meals breakdown -->
+        <div style="font-size:10px;">
+          <div style="font-weight:600; margin-bottom:4px;">🍽️ Bữa ăn hôm nay:</div>
+          <div style="display:grid; gap:3px;">
+            <div style="display:flex; justify-content:space-between; background:#f0fdf4; border-radius:6px; padding:4px 8px;">
+              <span>🌅 Sáng: Phở bò</span><span style="font-weight:600;">480 kcal</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; background:#f0fdf4; border-radius:6px; padding:4px 8px;">
+              <span>☀️ Trưa: Cơm gà</span><span style="font-weight:600;">520 kcal</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; background:#f8fafc; border-radius:6px; padding:4px 8px;">
+              <span style="color:#64748b;">🌙 Tối: Chưa log</span><span style="color:#64748b;">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Status Indicators -->
+  <div style="margin-top:16px; background:#f8fafc; border-radius:12px; padding:14px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">🚦 Status Indicator Logic:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Tình huống</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Status</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Color</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Ví dụ</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Net ≤ target ± 100 kcal</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#10b981; font-weight:600;">On track ✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Green</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Net 850, target 1500, còn 650</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Ăn quá target 100-300 kcal</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#f59e0b; font-weight:600;">Sắp vượt ⚠️</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Amber</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Net 1650, target 1500 (+150)</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Ăn quá target > 300 kcal</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#ef4444; font-weight:600;">Vượt mức 🔴</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Red</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Net 1900, target 1500 (+400)</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Chưa log gì (sáng)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#64748b; font-weight:600;">Chờ data ⏳</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Slate</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Progress bar empty, "Log bữa sáng"</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Ăn quá ít (< 50% target khi đã tối)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#f59e0b; font-weight:600;">Ăn quá ít ⚠️</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Amber</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Net 600, target 1500, 20:00 rồi</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- COMPONENT 3: PROTEIN PROGRESS -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🥩 Component 3: Protein Progress — Key Metric</h3>
+  
+  <div style="font-size:12px; color:#64748b; margin-bottom:12px;">
+    Protein là macro quan trọng nhất cho mọi goal — tách riêng để user focus.
+  </div>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <!-- On-track -->
+    <div>
+      <div style="font-size:10px; font-weight:600; color:#10b981; margin-bottom:4px;">✅ On track (≥70% target):</div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px; max-width:320px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div style="font-size:11px; font-weight:600;">🥩 Protein</div>
+          <div style="font-size:11px; font-weight:700;">120<span style="color:#64748b; font-weight:400;">/166g</span></div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:8px; overflow:hidden;">
+          <div style="background:#10b981; height:100%; width:72%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:3px; font-size:9px; color:#64748b;">
+          <span>72% đạt</span>
+          <span>Còn 46g — ~150g ức gà</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Below target -->
+    <div>
+      <div style="font-size:10px; font-weight:600; color:#f59e0b; margin-bottom:4px;">⚠️ Below target (<50%, after 18:00):</div>
+      <div style="background:#fff; border:1px solid #fde68a; border-radius:12px; padding:10px; max-width:320px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div style="font-size:11px; font-weight:600;">🥩 Protein</div>
+          <div style="font-size:11px; font-weight:700; color:#f59e0b;">65<span style="color:#64748b; font-weight:400;">/166g</span></div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:8px; overflow:hidden;">
+          <div style="background:#f59e0b; height:100%; width:39%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:3px; font-size:9px;">
+          <span style="color:#f59e0b;">39% — cần bổ sung!</span>
+          <span style="color:#64748b;">Còn 101g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Protein suggestion logic -->
+  <div style="margin-top:12px; background:#f0fdf4; border-radius:10px; padding:12px; font-size:11px;">
+    <div style="font-weight:600; color:#166534; margin-bottom:6px;">💡 Protein Suggestion Logic (hiện trong AI Insight):</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <tr>
+        <td style="padding:4px; border:1px solid #e2e8f0;">Thiếu ≤30g</td>
+        <td style="padding:4px; border:1px solid #e2e8f0;">"Thêm 1 ly whey (25g) hoặc 2 quả trứng (12g)"</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; border:1px solid #e2e8f0;">Thiếu 30-60g</td>
+        <td style="padding:4px; border:1px solid #e2e8f0;">"Thêm 150g ức gà (46g) hoặc 200g cá hồi (40g)"</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; border:1px solid #e2e8f0;">Thiếu >60g</td>
+        <td style="padding:4px; border:1px solid #e2e8f0;">"Cần thêm 2 bữa giàu protein — xem gợi ý trong Calendar"</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- FULL MOCKUP: TIER 1+2 COMBINED -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>📱 Full Mockup — Tier 1 + 2 kết hợp (phần đầu Dashboard)</h3>
+  
+  <div style="max-width:360px; margin:0 auto;">
+    <div style="background:#f8fafc; border-radius:20px; padding:3px; border:2px solid #e2e8f0; box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+      
+      <!-- Status bar mockup -->
+      <div style="display:flex; justify-content:space-between; padding:8px 16px; font-size:10px; color:#64748b;">
+        <span>9:41</span>
+        <span>📶 🔋</span>
+      </div>
+      
+      <!-- Tier 1: Hero Card -->
+      <div style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius:16px; margin:0 8px; padding:16px; color:#fff;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; opacity:0.8;">Thứ Hai, 24/03/2026</div>
+            <div style="font-size:18px; font-weight:800;">Chào Khanh! 👋</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:36px; font-weight:800; line-height:1;">83</div>
+            <div style="font-size:9px; opacity:0.8;">Daily Score</div>
+          </div>
+        </div>
+        <!-- Score breakdown mini -->
+        <div style="display:flex; gap:4px; margin-top:8px;">
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:6px; padding:4px; text-align:center; font-size:9px;">🍽️ 90</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:6px; padding:4px; text-align:center; font-size:9px;">🥩 60</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:6px; padding:4px; text-align:center; font-size:9px;">🏋️ 100</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:6px; padding:4px; text-align:center; font-size:9px;">⚖️ 100</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:6px; padding:4px; text-align:center; font-size:9px;">🔥 60</div>
+        </div>
+      </div>
+      
+      <!-- Tier 2: Energy Balance -->
+      <div style="margin:8px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:11px; font-weight:700;">⚡ Energy Balance</div>
+          <div style="font-size:10px; color:#10b981; font-weight:600;">On track ✅</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:4px; align-items:center; text-align:center;">
+          <div><div style="font-size:9px; color:#64748b;">Ăn vào</div><div style="font-size:16px; font-weight:800; color:#10b981;">1,200</div></div>
+          <div style="color:#94a3b8; font-size:12px;">−</div>
+          <div><div style="font-size:9px; color:#64748b;">Đốt cháy</div><div style="font-size:16px; font-weight:800; color:#3b82f6;">350</div></div>
+          <div style="color:#94a3b8; font-size:12px;">=</div>
+          <div><div style="font-size:9px; color:#64748b;">Net</div><div style="font-size:16px; font-weight:800;">850</div></div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:8px; margin-top:6px; overflow:hidden;">
+          <div style="background:linear-gradient(90deg, #10b981 55%, #3b82f6 55%, #3b82f6 75%); height:100%; width:75%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:3px; font-size:9px; color:#64748b;">
+          <span>65% ăn</span><span>19% tập</span><span>Còn: 650 kcal</span>
+        </div>
+      </div>
+      
+      <!-- Tier 2: Protein -->
+      <div style="margin:0 8px 8px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div style="font-size:11px; font-weight:600;">🥩 Protein</div>
+          <div style="font-size:11px; font-weight:700;">120<span style="color:#64748b; font-weight:400;">/166g</span></div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:6px; overflow:hidden;">
+          <div style="background:#10b981; height:100%; width:72%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:3px; font-size:9px; color:#64748b;">
+          <span>72%</span>
+          <span>Còn 46g — ~150g ức gà 🍗</span>
+        </div>
+      </div>
+      
+      <!-- Placeholder for Tier 3-5 -->
+      <div style="margin:0 8px 12px; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:14px; padding:20px; text-align:center; color:#94a3b8; font-size:11px;">
+        📋 Tier 3: Today's Plan + Weight + Streak<br>
+        💡 Tier 4: AI Insight + Alert<br>
+        🔗 Tier 5: Quick Actions<br>
+        <div style="margin-top:4px; font-size:10px;">(→ Sẽ thiết kế tiếp)</div>
+      </div>
+      
+      <!-- Bottom nav mockup -->
+      <div style="display:flex; justify-content:space-around; padding:8px 0; border-top:1px solid #e2e8f0; font-size:9px; color:#94a3b8;">
+        <div style="text-align:center;">📅<br>Lịch</div>
+        <div style="text-align:center;">📋<br>Thư viện</div>
+        <div style="text-align:center;">🤖<br>AI</div>
+        <div style="text-align:center;">💪<br>Fitness</div>
+        <div style="text-align:center; color:#10b981; font-weight:600;">📊<br>Dashboard</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="text-align:center; margin-top:8px; font-size:10px; color:#64748b;">
+    Tier 1 + 2 chiếm <strong>~220px</strong> — còn ~350px cho Tier 3-5 trước khi scroll
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Tier 1 + 2 như vậy có phù hợp không?</h3>
+  <div style="font-size:11px; color:#64748b; margin-bottom:8px;">
+    Trọng tâm: Daily Score formula (5 factors, weighted), Energy Balance (reuse), Protein (tách riêng)
+  </div>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approve-tier12">
+    ✅ <strong>Chốt Tier 1+2 — Chuyển sang Tier 3 (Today's Plan + Weight + Streak)</strong><br>
+    <small>Daily Score (5-factor), Energy Balance (reuse), Protein Progress</small>
+  </div>
+  <div class="option" data-id="adjust-score">
+    🔄 <strong>Cần điều chỉnh Daily Score formula — (nêu chi tiết)</strong>
+  </div>
+  <div class="option" data-id="adjust-layout">
+    ✏️ <strong>Cần điều chỉnh layout hoặc visual — (nêu chi tiết)</strong>
+  </div>
+</div>

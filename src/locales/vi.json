@@ -709,7 +709,10 @@
       "minutes": "phút",
       "planExpired": "Kế hoạch đã hết hạn",
       "planExpiredMessage": "Chu kỳ tập luyện của bạn đã kết thúc. Tạo chu kỳ mới để tiếp tục tiến bộ!",
-      "createNewCycle": "Tạo chu kỳ mới"
+      "createNewCycle": "Tạo chu kỳ mới",
+      "generating": "Đang tạo...",
+      "planCreated": "Kế hoạch tập luyện đã được tạo thành công!",
+      "planError": "Không thể tạo kế hoạch. Vui lòng thử lại."
     },
     "workout": {
       "tab": "Buổi tập"

@@ -1,0 +1,348 @@
+<h2>🟡 Issue 5: Progress Visualization — Dashboard cho mobile</h2>
+<p class="subtitle">Charts nào glanceable nhất? Insight-first vs Data-first approach</p>
+
+<!-- PROBLEM -->
+<div class="section">
+  <h3>📌 Spec hiện tại — Scroll dọc dài</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px; padding:16px;">
+      <div style="font-weight:700; color:#dc2626; margin-bottom:8px;">Spec hiện tại (stack dọc):</div>
+      <div style="font-size:12px; line-height:1.8;">
+        1. Cycle Progress Bar<br>
+        2. Volume Trend Line Chart (8 tuần)<br>
+        3. Weight Trend Line Chart (daily + moving avg)<br>
+        4. Stats Cards row (adherence, 1RM, sessions)
+      </div>
+      <div style="margin-top:10px; padding:8px; background:#fee2e2; border-radius:8px; font-size:11px;">
+        ⚠️ 2 line charts liên tiếp → visual monotony<br>
+        ⚠️ Scroll 3-4 screens để xem hết<br>
+        ⚠️ Chỉ hiện raw data — user tự phải đọc trend<br>
+        ⚠️ Mobile screen nhỏ → chart detail bị mất
+      </div>
+    </div>
+    <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:16px;">
+      <div style="font-weight:700; color:#16a34a; margin-bottom:8px;">Fitness app benchmarks:</div>
+      <div style="font-size:12px; line-height:1.8;">
+        <strong>Strong App:</strong> Hero number + sparkline mini<br>
+        <strong>Hevy:</strong> Swipeable metric cards<br>
+        <strong>Apple Fitness:</strong> Activity rings + trends<br>
+        <strong>MyFitnessPal:</strong> Weekly summary banner<br><br>
+        <strong>Common pattern:</strong><br>
+        ✅ 1 hero metric lớn → glanceable 2 giây<br>
+        ✅ Sparklines thay vì full charts<br>
+        ✅ AI/text insights thay vì raw numbers<br>
+        ✅ Swipe horizontal thay vì scroll dọc
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3 APPROACHES -->
+<div class="section">
+  <h3>🔄 3 Phương án Dashboard</h3>
+  
+  <!-- Approach A: Current spec -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">A</span>
+      <span style="font-weight:700; font-size:16px;">Stacked Charts (spec hiện tại)</span>
+    </div>
+    
+    <div style="max-width:300px; margin:0 auto; border:2px solid #e2e8f0; border-radius:16px; padding:12px; background:#f8fafc;">
+      <!-- Cycle bar -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px; font-weight:600; margin-bottom:4px;">Cycle Progress</div>
+        <div style="background:#e2e8f0; border-radius:99px; height:8px; overflow:hidden;">
+          <div style="background:#10b981; height:100%; width:37%; border-radius:99px;"></div>
+        </div>
+        <div style="font-size:10px; color:#64748b; margin-top:2px;">Week 3 of 8</div>
+      </div>
+      <!-- Volume chart placeholder -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; height:120px; margin-bottom:10px; display:flex; align-items:center; justify-content:center;">
+        <div style="font-size:11px; color:#94a3b8;">📊 Volume Trend (8 weeks)<br><span style="font-size:9px;">Full line chart with axes</span></div>
+      </div>
+      <!-- Weight chart placeholder -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; height:120px; margin-bottom:10px; display:flex; align-items:center; justify-content:center;">
+        <div style="font-size:11px; color:#94a3b8;">📈 Weight Trend<br><span style="font-size:9px;">Moving avg + daily dots</span></div>
+      </div>
+      <!-- Stats row -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800;">85%</div>
+          <div style="font-size:8px; color:#64748b;">Adherence</div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800;">85kg</div>
+          <div style="font-size:8px; color:#64748b;">Bench 1RM</div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800;">4.2</div>
+          <div style="font-size:8px; color:#64748b;">Sessions/wk</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; font-size:11px; color:#dc2626; margin-top:8px;">❌ Scroll dài, 2 charts giống nhau, no insights</div>
+  </div>
+  
+  <!-- Approach B: Insight-first -->
+  <div style="background:#f0fdf4; border:3px solid #10b981; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">B ✅</span>
+      <span style="font-weight:700; font-size:16px;">Insight-First Dashboard</span>
+      <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:11px;">Recommended</span>
+    </div>
+    
+    <div style="max-width:320px; margin:0 auto; border:2px solid #10b981; border-radius:20px; padding:16px; background:#fff;">
+      
+      <!-- Hero Insight Card -->
+      <div style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius:14px; padding:16px; color:#fff; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+          <div>
+            <div style="font-size:11px; opacity:0.8;">Tuần này vs tuần trước</div>
+            <div style="font-size:28px; font-weight:900; margin-top:4px;">+12%</div>
+            <div style="font-size:12px; font-weight:600;">Volume tăng</div>
+          </div>
+          <!-- Mini sparkline -->
+          <div style="width:80px; height:40px; display:flex; align-items:end; gap:3px;">
+            <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:2px 2px 0 0; height:45%;"></div>
+            <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:2px 2px 0 0; height:55%;"></div>
+            <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:2px 2px 0 0; height:40%;"></div>
+            <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:2px 2px 0 0; height:60%;"></div>
+            <div style="flex:1; background:rgba(255,255,255,0.5); border-radius:2px 2px 0 0; height:50%;"></div>
+            <div style="flex:1; background:rgba(255,255,255,0.5); border-radius:2px 2px 0 0; height:70%;"></div>
+            <div style="flex:1; background:rgba(255,255,255,0.8); border-radius:2px 2px 0 0; height:65%;"></div>
+            <div style="flex:1; background:#fff; border-radius:2px 2px 0 0; height:80%;"></div>
+          </div>
+        </div>
+        <div style="margin-top:8px; font-size:11px; opacity:0.9;">
+          📊 Đúng tiến độ! Giữ vững trong 2 tuần nữa.
+        </div>
+      </div>
+      
+      <!-- Cycle Progress -->
+      <div style="margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div style="font-size:12px; font-weight:600;">Chu kỳ</div>
+          <div style="font-size:11px; color:#64748b;">Tuần 3/8</div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:6px; overflow:hidden;">
+          <div style="background:#10b981; height:100%; width:37%; border-radius:99px;"></div>
+        </div>
+      </div>
+      
+      <!-- Swipeable Metric Cards -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px; font-weight:600; color:#64748b; margin-bottom:6px;">METRICS <span style="font-size:9px; color:#94a3b8;">← swipe →</span></div>
+        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;">
+          <!-- Card 1: Weight -->
+          <div style="min-width:140px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; flex-shrink:0;">
+            <div style="font-size:10px; color:#64748b;">⚖️ Cân nặng</div>
+            <div style="display:flex; align-items:baseline; gap:4px; margin-top:2px;">
+              <div style="font-size:20px; font-weight:800;">81.5</div>
+              <div style="font-size:11px; color:#64748b;">kg</div>
+              <div style="font-size:10px; color:#16a34a; margin-left:auto;">↓ 1.5kg</div>
+            </div>
+            <!-- Mini sparkline -->
+            <div style="display:flex; align-items:end; gap:2px; height:24px; margin-top:4px;">
+              <div style="flex:1; background:#10b981; border-radius:1px; height:90%; opacity:0.3;"></div>
+              <div style="flex:1; background:#10b981; border-radius:1px; height:85%; opacity:0.4;"></div>
+              <div style="flex:1; background:#10b981; border-radius:1px; height:78%; opacity:0.5;"></div>
+              <div style="flex:1; background:#10b981; border-radius:1px; height:72%; opacity:0.6;"></div>
+              <div style="flex:1; background:#10b981; border-radius:1px; height:65%; opacity:0.8;"></div>
+              <div style="flex:1; background:#10b981; border-radius:1px; height:60%;"></div>
+            </div>
+          </div>
+          
+          <!-- Card 2: Strength -->
+          <div style="min-width:140px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; flex-shrink:0;">
+            <div style="font-size:10px; color:#64748b;">💪 Bench 1RM</div>
+            <div style="display:flex; align-items:baseline; gap:4px; margin-top:2px;">
+              <div style="font-size:20px; font-weight:800;">85</div>
+              <div style="font-size:11px; color:#64748b;">kg</div>
+              <div style="font-size:10px; color:#16a34a; margin-left:auto;">↑ 7.5kg</div>
+            </div>
+            <div style="display:flex; align-items:end; gap:2px; height:24px; margin-top:4px;">
+              <div style="flex:1; background:#3b82f6; border-radius:1px; height:50%; opacity:0.3;"></div>
+              <div style="flex:1; background:#3b82f6; border-radius:1px; height:55%; opacity:0.4;"></div>
+              <div style="flex:1; background:#3b82f6; border-radius:1px; height:60%; opacity:0.5;"></div>
+              <div style="flex:1; background:#3b82f6; border-radius:1px; height:70%; opacity:0.6;"></div>
+              <div style="flex:1; background:#3b82f6; border-radius:1px; height:80%; opacity:0.8;"></div>
+              <div style="flex:1; background:#3b82f6; border-radius:1px; height:90%;"></div>
+            </div>
+          </div>
+          
+          <!-- Card 3: Adherence -->
+          <div style="min-width:140px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; flex-shrink:0;">
+            <div style="font-size:10px; color:#64748b;">🎯 Tuân thủ</div>
+            <div style="display:flex; align-items:baseline; gap:4px; margin-top:2px;">
+              <div style="font-size:20px; font-weight:800;">85%</div>
+              <div style="font-size:10px; color:#16a34a; margin-left:auto;">Tốt</div>
+            </div>
+            <!-- Mini donut -->
+            <div style="width:28px; height:28px; border-radius:50%; background:conic-gradient(#10b981 85%, #e2e8f0 85%); margin-top:4px; display:flex; align-items:center; justify-content:center;">
+              <div style="width:18px; height:18px; border-radius:50%; background:#f8fafc;"></div>
+            </div>
+          </div>
+          
+          <!-- Card 4: Sessions -->
+          <div style="min-width:140px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; flex-shrink:0;">
+            <div style="font-size:10px; color:#64748b;">📅 Buổi/tuần</div>
+            <div style="display:flex; align-items:baseline; gap:4px; margin-top:2px;">
+              <div style="font-size:20px; font-weight:800;">4.2</div>
+              <div style="font-size:11px; color:#64748b;">/5</div>
+            </div>
+            <div style="display:flex; gap:2px; margin-top:6px;">
+              <div style="flex:1; height:4px; background:#10b981; border-radius:2px;"></div>
+              <div style="flex:1; height:4px; background:#10b981; border-radius:2px;"></div>
+              <div style="flex:1; height:4px; background:#10b981; border-radius:2px;"></div>
+              <div style="flex:1; height:4px; background:#10b981; border-radius:2px;"></div>
+              <div style="flex:1; height:4px; background:#e2e8f0; border-radius:2px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- AI Insight -->
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px; margin-bottom:12px;">
+        <div style="font-size:10px; font-weight:600; color:#2563eb; margin-bottom:4px;">🤖 AI Insights</div>
+        <div style="font-size:11px; line-height:1.6; color:#1e40af;">
+          • Bench Press volume tăng đều — sẵn sàng tăng weight tuần tới<br>
+          • Cân nặng giảm 0.3kg/tuần — đúng mục tiêu cutting<br>
+          • Squat volume giảm 5% — kiểm tra form hoặc tăng nghỉ
+        </div>
+      </div>
+      
+      <!-- Tap for detail -->
+      <div style="text-align:center; font-size:11px; color:#64748b;">
+        Tap vào metric card để xem chart chi tiết ↗️
+      </div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:12px;">
+      <div style="text-align:center; padding:6px; background:#dcfce7; border-radius:8px;">
+        <div style="font-size:16px; font-weight:800; color:#16a34a;">2s</div>
+        <div style="font-size:9px;">Glance time</div>
+      </div>
+      <div style="text-align:center; padding:6px; background:#dcfce7; border-radius:8px;">
+        <div style="font-size:16px; font-weight:800; color:#16a34a;">0</div>
+        <div style="font-size:9px;">Scroll needed</div>
+      </div>
+      <div style="text-align:center; padding:6px; background:#dcfce7; border-radius:8px;">
+        <div style="font-size:16px; font-weight:800; color:#16a34a;">AI</div>
+        <div style="font-size:9px;">Tự phân tích</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Approach C: Tabs within sub-tab -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">C</span>
+      <span style="font-weight:700; font-size:16px;">Segmented Tabs — Volume | Weight | Strength</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+        <div style="display:flex; gap:2px; margin-bottom:8px; background:#f1f5f9; border-radius:6px; padding:2px;">
+          <div style="flex:1; background:#fff; border-radius:4px; padding:4px; text-align:center; font-size:10px; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,0.1);">Volume</div>
+          <div style="flex:1; padding:4px; text-align:center; font-size:10px; color:#64748b;">Weight</div>
+          <div style="flex:1; padding:4px; text-align:center; font-size:10px; color:#64748b;">Strength</div>
+        </div>
+        <div style="background:#f8fafc; border-radius:8px; height:140px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#94a3b8;">
+          Full Volume Chart (8 weeks)
+        </div>
+      </div>
+      <div style="font-size:12px; line-height:1.8;">
+        <strong>Ưu điểm:</strong><br>
+        ✅ Full-size charts, detailed<br>
+        ✅ Clear segmentation<br><br>
+        <strong>Nhược điểm:</strong><br>
+        ❌ Tab trong sub-tab = confusing<br>
+        ❌ Không thấy tổng quan cùng lúc<br>
+        ❌ Thiếu AI insights<br>
+        ❌ Thêm 1 level navigation (L2b)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- METRIC CARD DETAIL VIEW -->
+<div class="section">
+  <h3>🔍 Khi user tap vào Metric Card → Detail View</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div style="border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px;">Tap "⚖️ Cân nặng" card →</div>
+      <div style="background:#f8fafc; border-radius:10px; padding:12px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:8px;">⚖️ Cân nặng chi tiết</div>
+        <!-- Full chart area -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; height:160px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#94a3b8; margin-bottom:8px;">
+          Full line chart<br>Daily dots + 7-day moving avg<br>With axes & labels
+        </div>
+        <!-- Time range filter -->
+        <div style="display:flex; gap:3px; margin-bottom:8px;">
+          <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">1T</div>
+          <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:4px; text-align:center; font-size:9px; font-weight:600;">1Th</div>
+          <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">3Th</div>
+          <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">All</div>
+        </div>
+        <div style="font-size:10px; color:#64748b;">
+          Min: 80.2kg • Max: 83.0kg • Avg: 81.7kg<br>
+          Trend: −0.3 kg/tuần
+        </div>
+      </div>
+    </div>
+    
+    <div style="border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px;">Tap "💪 Bench 1RM" card →</div>
+      <div style="background:#f8fafc; border-radius:10px; padding:12px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:8px;">💪 Strength Progress</div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; height:160px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#94a3b8; margin-bottom:8px;">
+          Bar chart: Estimated 1RM over time<br>Grouped by exercise
+        </div>
+        <!-- Exercise filter -->
+        <div style="display:flex; gap:3px; margin-bottom:8px; overflow-x:auto;">
+          <span style="background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:600; white-space:nowrap;">All</span>
+          <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">Bench</span>
+          <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">Squat</span>
+          <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">Deadlift</span>
+          <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">OHP</span>
+        </div>
+        <div style="font-size:10px; color:#64748b;">
+          🏆 PR Bench: 85kg (Mar 20)<br>
+          🏆 PR Squat: 120kg (Mar 18)
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top:10px; background:#dcfce7; border-radius:8px; padding:10px; font-size:11px;">
+    <strong>Pattern:</strong> Dashboard = overview (sparklines, hero number, AI insights) → Tap card → Detail view (full chart, filters, stats). <br>
+    Detail view = bottom sheet hoặc expand in-place (không navigate ra page mới).
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Bạn chọn phương án Dashboard nào?</h3>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approach-b">
+    ✅ <strong>B. Insight-First Dashboard — Chốt & chuyển Issue 6</strong><br>
+    <small>Hero card + Sparkline metrics (swipe) + AI Insights + Tap for detail</small>
+  </div>
+  <div class="option" data-id="approach-ab">
+    🔀 <strong>B nhưng thêm 1 full chart bên dưới (Volume hoặc Weight)</strong><br>
+    <small>Insight cards + 1 featured chart luôn hiển thị</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong>
+  </div>
+</div>

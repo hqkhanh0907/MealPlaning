@@ -101,6 +101,25 @@ vi.mock('../features/fitness/hooks/useProgressiveOverload', () => ({
   }),
 }));
 
+vi.mock('../features/fitness/hooks/useTrainingPlan', () => ({
+  useTrainingPlan: () => ({
+    generatePlan: vi.fn(() => null),
+    isGenerating: false,
+    generationError: null,
+  }),
+}));
+
+vi.mock('../store/userProfileStore', () => ({
+  useUserProfileStore: (selector: (state: { userProfile: { weight: number } }) => unknown) =>
+    selector({ userProfile: { weight: 83 } }),
+}));
+
+vi.mock('../contexts/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: vi.fn(),
+  }),
+}));
+
 interface MockFitnessState {
   isOnboarded: boolean;
   setOnboarded: Mock;
@@ -108,6 +127,9 @@ interface MockFitnessState {
   setWorkoutMode: Mock;
   trainingPlans: unknown[];
   trainingPlanDays: unknown[];
+  trainingProfile: unknown;
+  addTrainingPlan: Mock;
+  addPlanDays: Mock;
 }
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
@@ -118,10 +140,14 @@ describe('FitnessTab', () => {
   describe('when user is not onboarded', () => {
     const mockSetOnboarded = vi.fn();
     const mockSetWorkoutMode = vi.fn();
+    const mockAddTrainingPlan = vi.fn();
+    const mockAddPlanDays = vi.fn();
 
     beforeEach(() => {
       mockSetOnboarded.mockClear();
       mockSetWorkoutMode.mockClear();
+      mockAddTrainingPlan.mockClear();
+      mockAddPlanDays.mockClear();
       mockUseFitnessStore.mockImplementation(
         (selector: (state: MockFitnessState) => unknown) =>
           selector({
@@ -131,6 +157,9 @@ describe('FitnessTab', () => {
             setWorkoutMode: mockSetWorkoutMode,
             trainingPlans: [],
             trainingPlanDays: [],
+            trainingProfile: null,
+            addTrainingPlan: mockAddTrainingPlan,
+            addPlanDays: mockAddPlanDays,
           }),
       );
     });
@@ -162,10 +191,14 @@ describe('FitnessTab', () => {
   describe('when user is onboarded', () => {
     const mockSetOnboarded = vi.fn();
     const mockSetWorkoutMode = vi.fn();
+    const mockAddTrainingPlan = vi.fn();
+    const mockAddPlanDays = vi.fn();
 
     beforeEach(() => {
       mockSetOnboarded.mockClear();
       mockSetWorkoutMode.mockClear();
+      mockAddTrainingPlan.mockClear();
+      mockAddPlanDays.mockClear();
       mockUseFitnessStore.mockImplementation(
         (selector: (state: MockFitnessState) => unknown) =>
           selector({
@@ -175,6 +208,9 @@ describe('FitnessTab', () => {
             setWorkoutMode: mockSetWorkoutMode,
             trainingPlans: [],
             trainingPlanDays: [],
+            trainingProfile: null,
+            addTrainingPlan: mockAddTrainingPlan,
+            addPlanDays: mockAddPlanDays,
           }),
       );
     });
@@ -274,6 +310,9 @@ describe('FitnessTab', () => {
             setWorkoutMode: mockSetWorkoutMode,
             trainingPlans: [],
             trainingPlanDays: [],
+            trainingProfile: null,
+            addTrainingPlan: mockAddTrainingPlan,
+            addPlanDays: mockAddPlanDays,
           }),
       );
       render(<FitnessTab />);
@@ -299,6 +338,9 @@ describe('FitnessTab', () => {
             setWorkoutMode: mockSetWorkoutMode,
             trainingPlans: [],
             trainingPlanDays: [],
+            trainingProfile: null,
+            addTrainingPlan: mockAddTrainingPlan,
+            addPlanDays: mockAddPlanDays,
           }),
       );
       render(<FitnessTab />);

@@ -1,0 +1,335 @@
+<h2>🔬 Phân tích lỗ hổng thu thập dữ liệu</h2>
+<p class="subtitle">So sánh: Dữ liệu hiện có vs. Dữ liệu cần cho từng công thức</p>
+
+<!-- CURRENT STATE -->
+<div class="section">
+  <h3>📊 Hiện trạng: App chỉ thu thập 3 fields</h3>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
+  <div style="padding: 14px; background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 10px; text-align: center;">
+    <div style="font-size: 28px; margin-bottom: 6px;">⚖️</div>
+    <div style="font-weight: 700;">weight</div>
+    <div style="font-size: 12px; color: var(--text-muted);">83 kg (default)</div>
+  </div>
+  <div style="padding: 14px; background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 10px; text-align: center;">
+    <div style="font-size: 28px; margin-bottom: 6px;">🥩</div>
+    <div style="font-weight: 700;">proteinRatio</div>
+    <div style="font-size: 12px; color: var(--text-muted);">2.0 g/kg (default)</div>
+  </div>
+  <div style="padding: 14px; background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 10px; text-align: center;">
+    <div style="font-size: 28px; margin-bottom: 6px;">🔥</div>
+    <div style="font-weight: 700;">targetCalories</div>
+    <div style="font-size: 12px; color: var(--text-muted);">1500 kcal (hardcoded)</div>
+  </div>
+</div>
+
+<div style="padding: 14px; background: rgba(239,68,68,0.06); border: 2px solid #ef4444; border-radius: 10px; font-size: 13px; margin-bottom: 28px;">
+  <strong>⚠️ Vấn đề nghiêm trọng:</strong> <code>targetCalories = 1500</code> là con số <strong>hardcoded</strong>, không tính từ BMR/TDEE. Nghĩa là mọi user đều nhận gợi ý 1500 kcal bất kể giới tính, tuổi, chiều cao, mức độ vận động. <strong>Sai số có thể lên đến ±800 kcal/ngày</strong>.
+</div>
+
+<!-- FORMULA → INPUT MAPPING -->
+<div class="section">
+  <h3>🧮 Mapping: Công thức → Dữ liệu cần thiết → Trạng thái</h3>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card-bg); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: #334155; color: white;">
+      <th style="padding: 10px; text-align: left; width: 18%;">Công thức</th>
+      <th style="padding: 10px; text-align: left; width: 25%;">Input cần</th>
+      <th style="padding: 10px; text-align: center; width: 10%;">Có rồi?</th>
+      <th style="padding: 10px; text-align: center; width: 10%;">Đã plan?</th>
+      <th style="padding: 10px; text-align: left; width: 37%;">Ghi chú</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- BMR -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;" rowspan="4"><strong>BMR</strong><br>(Mifflin-St Jeor)</td>
+      <td style="padding: 10px;">gender</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Trong spec Health Profile</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">age</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Trong spec Health Profile</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">height_cm</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Trong spec Health Profile</td>
+    </tr>
+    <tr style="border-bottom: 2px solid var(--border-color);">
+      <td style="padding: 10px;">weight_kg</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Đã có, cần migrate</td>
+    </tr>
+    <!-- TDEE -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;" rowspan="2"><strong>TDEE</strong><br>(BMR × Multiplier)</td>
+      <td style="padding: 10px;">activity_level (nghề nghiệp/lối sống)</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Spec có, nhưng cần phân biệt rõ với days_per_week</td>
+    </tr>
+    <tr style="border-bottom: 2px solid var(--border-color);">
+      <td style="padding: 10px;">days_per_week (training)</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Training Profile — dùng Auto-Adjust Blending</td>
+    </tr>
+    <!-- Caloric Target — GAP -->
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(239,68,68,0.06);">
+      <td style="padding: 10px;" rowspan="3"><strong>Caloric Target</strong><br>(TDEE ± offset)</td>
+      <td style="padding: 10px;"><strong style="color: #ef4444;">goal_type</strong> (cut/bulk/maintain)</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">⚠️</td>
+      <td style="padding: 10px; color: #ef4444;"><strong>LỖ HỔNG #1:</strong> Spec có goals table nhưng chưa define rõ flow thu thập</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(239,68,68,0.06);">
+      <td style="padding: 10px;"><strong style="color: #ef4444;">rate_of_change</strong></td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; color: #ef4444;"><strong>LỖ HỔNG #2:</strong> Giảm 0.25 vs 0.5 vs 1 kg/tuần = rất khác nhau (±500 kcal)</td>
+    </tr>
+    <tr style="border-bottom: 2px solid var(--border-color); background: rgba(239,68,68,0.06);">
+      <td style="padding: 10px;"><strong style="color: #ef4444;">target_weight_kg</strong></td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">⚠️</td>
+      <td style="padding: 10px; color: #ef4444;"><strong>LỖ HỔNG #3:</strong> Spec có field nhưng chưa connect vào calculation</td>
+    </tr>
+    <!-- Protein -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;" rowspan="2"><strong>Protein</strong><br>(weight × ratio)</td>
+      <td style="padding: 10px;">weight_kg</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">OK</td>
+    </tr>
+    <tr style="border-bottom: 2px solid var(--border-color);">
+      <td style="padding: 10px;">body_fat_pct (LBM calc)</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">✅</td>
+      <td style="padding: 10px;">Optional advanced — dùng Helms formula khi cut</td>
+    </tr>
+    <!-- Feedback Loop — GAP -->
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(239,68,68,0.06);">
+      <td style="padding: 10px;" rowspan="2"><strong>Feedback Loop</strong><br>(Moving Avg + Adjust)</td>
+      <td style="padding: 10px;"><strong style="color: #ef4444;">daily_weight_entries</strong></td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; text-align: center;">❌</td>
+      <td style="padding: 10px; color: #ef4444;"><strong>LỖ HỔNG #4:</strong> Chưa có tính năng cân hàng ngày → không thể tính Moving Average</td>
+    </tr>
+    <tr style="border-bottom: 2px solid var(--border-color);">
+      <td style="padding: 10px;">meal_log_compliance</td>
+      <td style="padding: 10px; text-align: center;">⚠️</td>
+      <td style="padding: 10px; text-align: center;">⚠️</td>
+      <td style="padding: 10px;">Calendar tab có log bữa ăn, nhưng chưa tính Adherence Rate</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- THE 4 GAPS -->
+<div class="section" style="margin-top: 28px;">
+  <h3>🚨 4 Lỗ hổng cần quyết định</h3>
+</div>
+
+<!-- GAP 1: Goal Type + Rate -->
+<div style="padding: 16px; background: var(--card-bg); border: 2px solid #ef4444; border-radius: 12px; margin-bottom: 12px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+    <span style="padding: 3px 10px; background: #ef4444; color: white; border-radius: 6px; font-weight: 700; font-size: 12px;">CRITICAL</span>
+    <strong style="font-size: 15px;">Lỗ hổng #1: Goal Type chưa rõ ràng</strong>
+  </div>
+  <div style="font-size: 13px; line-height: 1.8;">
+    <strong>Hiện tại:</strong> User nhập <code>targetCalories = 1500</code> — một con số cố định, không biết đến từ đâu.<br>
+    <strong>Cần:</strong> Thu thập <strong>goal_type</strong> (Giảm mỡ / Tăng cơ / Giữ cân) → hệ thống <strong>tự tính</strong> caloric target từ TDEE.<br>
+    <strong>Ví dụ:</strong> TDEE = 2200 kcal, Goal = Cut → Target = 2200 - 500 = <strong>1700 kcal</strong> (tự động, chính xác).<br>
+    <strong>Impact nếu thiếu:</strong> Toàn bộ macro calculation sẽ dựa trên con số sai.
+  </div>
+</div>
+
+<!-- GAP 2: Rate of Change -->
+<div style="padding: 16px; background: var(--card-bg); border: 2px solid #ef4444; border-radius: 12px; margin-bottom: 12px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+    <span style="padding: 3px 10px; background: #ef4444; color: white; border-radius: 6px; font-weight: 700; font-size: 12px;">CRITICAL</span>
+    <strong style="font-size: 15px;">Lỗ hổng #2: Tốc độ thay đổi (Rate of Change)</strong>
+  </div>
+  <div style="font-size: 13px; line-height: 1.8;">
+    <strong>Vấn đề:</strong> "Giảm cân" nhưng <strong>giảm bao nhanh</strong>?<br>
+    <strong>Khoa học:</strong> 1 kg mỡ ≈ 7,700 kcal (Hall 2008 — đã verify ✅)<br>
+    <table style="width: 100%; margin: 8px 0; font-size: 12px; border-collapse: collapse;">
+      <tr style="background: rgba(51,65,85,0.3);">
+        <th style="padding: 6px; text-align: left;">Tốc độ</th>
+        <th style="padding: 6px; text-align: center;">kg/tuần</th>
+        <th style="padding: 6px; text-align: center;">Deficit/ngày</th>
+        <th style="padding: 6px; text-align: left;">Phù hợp</th>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+        <td style="padding: 6px;">🐢 Conservative</td>
+        <td style="padding: 6px; text-align: center;">0.25 kg</td>
+        <td style="padding: 6px; text-align: center;">−275 kcal</td>
+        <td style="padding: 6px;">Người ít mỡ, muốn giữ cơ</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+        <td style="padding: 6px;">🚶 Moderate</td>
+        <td style="padding: 6px; text-align: center;">0.5 kg</td>
+        <td style="padding: 6px; text-align: center;">−550 kcal</td>
+        <td style="padding: 6px;">Đa số người tập</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px;">🏃 Aggressive</td>
+        <td style="padding: 6px; text-align: center;">1.0 kg</td>
+        <td style="padding: 6px; text-align: center;">−1100 kcal</td>
+        <td style="padding: 6px;">Người béo phì, có giám sát y tế</td>
+      </tr>
+    </table>
+    <strong>Impact:</strong> Moderate vs Aggressive = chênh 550 kcal/ngày. Không thu thập = không biết recommend mức nào.
+  </div>
+</div>
+
+<!-- GAP 3: Target Weight -->
+<div style="padding: 16px; background: var(--card-bg); border: 2px solid #f59e0b; border-radius: 12px; margin-bottom: 12px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+    <span style="padding: 3px 10px; background: #f59e0b; color: white; border-radius: 6px; font-weight: 700; font-size: 12px;">IMPORTANT</span>
+    <strong style="font-size: 15px;">Lỗ hổng #3: Target Weight + Timeline</strong>
+  </div>
+  <div style="font-size: 13px; line-height: 1.8;">
+    <strong>Vấn đề:</strong> Không biết user muốn giảm/tăng đến bao nhiêu kg → không thể tính timeline.<br>
+    <strong>Ví dụ:</strong> 83kg → muốn 75kg = giảm 8kg. Ở tốc độ 0.5kg/tuần → <strong>~16 tuần</strong>.<br>
+    <strong>Giá trị:</strong> Cho user thấy progress bar "bạn đã đi được 40% quãng đường" → tăng motivation.<br>
+    <strong>Có thể optional:</strong> Một số user chỉ muốn "ăn healthy" mà không có target cụ thể.
+  </div>
+</div>
+
+<!-- GAP 4: Daily Weight Tracking -->
+<div style="padding: 16px; background: var(--card-bg); border: 2px solid #f59e0b; border-radius: 12px; margin-bottom: 12px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+    <span style="padding: 3px 10px; background: #f59e0b; color: white; border-radius: 6px; font-weight: 700; font-size: 12px;">IMPORTANT</span>
+    <strong style="font-size: 15px;">Lỗ hổng #4: Daily Weight → Feedback Loop bị đứt</strong>
+  </div>
+  <div style="font-size: 13px; line-height: 1.8;">
+    <strong>Vấn đề:</strong> Flow ban đầu bạn mô tả có <strong>Moving Average Weight</strong> (trung bình 7 ngày) để hệ thống tự điều chỉnh. Nhưng app <strong>chưa có chỗ nhập cân nặng hàng ngày</strong>.<br>
+    <strong>Cần:</strong> Một input đơn giản "Cân nặng hôm nay" (mỗi sáng) → hệ thống tính 7-day moving average → so sánh trend → auto-adjust calories nếu cần.<br>
+    <strong>Không có = Feedback Loop chỉ là lý thuyết</strong>, không thể thực thi thuật toán adjustment mỗi 2 tuần.
+  </div>
+</div>
+
+<!-- COMPLETE PIPELINE -->
+<div class="section" style="margin-top: 28px;">
+  <h3>🔄 Pipeline hoàn chỉnh: Input → Calculation → Output → Feedback</h3>
+</div>
+
+<div style="font-size: 12px;">
+  <!-- Phase 1: Onboarding -->
+  <div style="padding: 14px; background: rgba(59,130,246,0.08); border: 2px solid #3b82f6; border-radius: 10px; margin-bottom: 8px;">
+    <strong style="color: #3b82f6;">PHASE 1: Thu thập 1 lần (Onboarding / Settings)</strong>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; margin-top: 8px;">
+      <span style="padding: 4px 8px; background: #10b981; color: white; border-radius: 6px; text-align: center;">gender ✅</span>
+      <span style="padding: 4px 8px; background: #10b981; color: white; border-radius: 6px; text-align: center;">age ✅</span>
+      <span style="padding: 4px 8px; background: #10b981; color: white; border-radius: 6px; text-align: center;">height ✅</span>
+      <span style="padding: 4px 8px; background: #10b981; color: white; border-radius: 6px; text-align: center;">weight ✅</span>
+      <span style="padding: 4px 8px; background: #10b981; color: white; border-radius: 6px; text-align: center;">activity_level ✅</span>
+      <span style="padding: 4px 8px; background: #ef4444; color: white; border-radius: 6px; text-align: center;">goal_type ❌ NEW</span>
+      <span style="padding: 4px 8px; background: #ef4444; color: white; border-radius: 6px; text-align: center;">rate_of_change ❌ NEW</span>
+      <span style="padding: 4px 8px; background: #f59e0b; color: white; border-radius: 6px; text-align: center;">target_weight ⭐ OPT</span>
+      <span style="padding: 4px 8px; background: #8b5cf6; color: white; border-radius: 6px; text-align: center;">body_fat % 🔬 ADV</span>
+    </div>
+  </div>
+  
+  <div style="text-align: center; font-size: 20px;">↓</div>
+  
+  <!-- Phase 2: Auto-Calculate -->
+  <div style="padding: 14px; background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 10px; margin-bottom: 8px;">
+    <strong style="color: #10b981;">PHASE 2: Hệ thống tự tính (Auto-Calculate)</strong>
+    <div style="margin-top: 8px; line-height: 2;">
+      <code>BMR = 10×weight + 6.25×height − 5×age ± s</code><br>
+      <code>TDEE = BMR × blended_activity_multiplier</code><br>
+      <code>Target = TDEE − (rate × 7700 / 7)</code><br>
+      <code>Protein = weight × 2.0 g/kg</code> (hoặc LBM × 2.5 nếu có body_fat%)<br>
+      <code>Fat = Target × 25%</code><br>
+      <code>Carbs = Target − Protein_cal − Fat_cal</code>
+    </div>
+  </div>
+  
+  <div style="text-align: center; font-size: 20px;">↓</div>
+  
+  <!-- Phase 3: Daily Input -->
+  <div style="padding: 14px; background: rgba(245,158,11,0.08); border: 2px solid #f59e0b; border-radius: 10px; margin-bottom: 8px;">
+    <strong style="color: #f59e0b;">PHASE 3: Thu thập hàng ngày (Daily Input)</strong>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin-top: 8px;">
+      <span style="padding: 4px 8px; background: #ef4444; color: white; border-radius: 6px; text-align: center;">daily_weight ❌ NEW</span>
+      <span style="padding: 4px 8px; background: #10b981; color: white; border-radius: 6px; text-align: center;">meal_log ✅ (Calendar)</span>
+      <span style="padding: 4px 8px; background: #ef4444; color: white; border-radius: 6px; text-align: center;">workout_log ❌ NEW</span>
+    </div>
+  </div>
+  
+  <div style="text-align: center; font-size: 20px;">↓</div>
+  
+  <!-- Phase 4: Feedback -->
+  <div style="padding: 14px; background: rgba(139,92,246,0.08); border: 2px solid #8b5cf6; border-radius: 10px;">
+    <strong style="color: #8b5cf6;">PHASE 4: Feedback Loop (Mỗi 2 tuần)</strong>
+    <div style="margin-top: 8px; font-size: 12px; line-height: 2;">
+      <code>moving_avg = average(last_7_daily_weights)</code><br>
+      <code>trend = moving_avg_this_week − moving_avg_last_week</code><br>
+      <code>IF trend ≠ expected_rate FOR 2_weeks → adjust Target ±100-200 kcal</code><br>
+      <code>adherence = days_within_±100kcal / total_days × 100%</code>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section" style="margin-top: 28px;">
+  <h3>📝 Tổng kết: Cần bổ sung gì?</h3>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card-bg); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: #334155; color: white;">
+      <th style="padding: 10px; text-align: left;">Field mới</th>
+      <th style="padding: 10px; text-align: center;">Mức độ</th>
+      <th style="padding: 10px; text-align: left;">Lý do</th>
+      <th style="padding: 10px; text-align: left;">Khi nào thu thập</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">goal_type</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #ef4444; color: white; border-radius: 4px;">BẮT BUỘC</span></td>
+      <td style="padding: 10px;">Quyết định caloric target (deficit/surplus/maintain)</td>
+      <td style="padding: 10px;">Onboarding / Health Profile</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">rate_of_change</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #ef4444; color: white; border-radius: 4px;">BẮT BUỘC</span></td>
+      <td style="padding: 10px;">Xác định mức deficit/surplus (±275 vs ±1100 kcal)</td>
+      <td style="padding: 10px;">Onboarding / Health Profile</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">target_weight</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #f59e0b; color: white; border-radius: 4px;">NÊN CÓ</span></td>
+      <td style="padding: 10px;">Tính timeline + progress tracking</td>
+      <td style="padding: 10px;">Onboarding (optional)</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; font-weight: 700;">daily_weight_input</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #ef4444; color: white; border-radius: 4px;">BẮT BUỘC</span></td>
+      <td style="padding: 10px;">Feedback loop — Moving Average Weight</td>
+      <td style="padding: 10px;">Daily (quick input mỗi sáng)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 16px; padding: 14px; background: rgba(59,130,246,0.08); border: 2px solid #3b82f6; border-radius: 10px; font-size: 13px;">
+  <strong>💡 Đề xuất gộp:</strong> goal_type + rate_of_change + target_weight có thể gộp thành <strong>1 màn hình "Mục tiêu của bạn"</strong> trong onboarding:<br>
+  <div style="margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 8px; font-family: monospace; font-size: 12px;">
+    "Mục tiêu của bạn là gì?" → [Giảm mỡ] [Tăng cơ] [Giữ cân]<br>
+    "Bạn muốn giảm bao nhanh?" → [🐢 Chậm & an toàn] [🚶 Vừa phải] [🏃 Nhanh]<br>
+    "Cân nặng mục tiêu?" → [____ kg] hoặc [Bỏ qua]
+  </div>
+</div>

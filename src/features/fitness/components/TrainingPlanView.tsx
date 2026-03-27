@@ -14,6 +14,8 @@ import { safeJsonParse } from '../utils/safeJsonParse';
 
 interface TrainingPlanViewProps {
   onGeneratePlan: () => void;
+  isGenerating?: boolean;
+  onLogCardio?: () => void;
 }
 
 function parseExercises(exercises?: string): SelectedExercise[] {
@@ -50,6 +52,8 @@ function isPlanExpired(endDate?: string): boolean {
 
 function TrainingPlanViewInner({
   onGeneratePlan,
+  isGenerating = false,
+  onLogCardio,
 }: TrainingPlanViewProps): React.JSX.Element {
   const { t } = useTranslation();
   const trainingPlans = useFitnessStore((s) => s.trainingPlans);
@@ -173,10 +177,20 @@ function TrainingPlanViewInner({
             data-testid="create-plan-btn"
             type="button"
             onClick={onGeneratePlan}
-            className="flex items-center gap-1 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 active:scale-95"
+            disabled={isGenerating}
+            className="flex items-center gap-1 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 active:scale-95 disabled:opacity-60"
           >
-            {t('fitness.plan.createPlan')}
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            {isGenerating ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+                {t('fitness.plan.generating')}
+              </>
+            ) : (
+              <>
+                {t('fitness.plan.createPlan')}
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -323,6 +337,10 @@ function TrainingPlanViewInner({
               <button
                 data-testid="quick-log-weight"
                 type="button"
+                onClick={() => {
+                  const el = document.querySelector('[data-testid="daily-weight-input"]');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
                 className="rounded-full bg-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/30"
               >
                 {t('fitness.plan.logWeight')}
@@ -330,6 +348,7 @@ function TrainingPlanViewInner({
               <button
                 data-testid="quick-log-cardio"
                 type="button"
+                onClick={onLogCardio}
                 className="rounded-full bg-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/30"
               >
                 {t('fitness.plan.logLightCardio')}

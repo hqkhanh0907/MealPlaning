@@ -1,0 +1,519 @@
+<h2>📊 Dashboard Components — Tier 4 & 5 Deep Dive</h2>
+<p class="subtitle">AI Insight + Auto-Adjust Alert + Quick Actions</p>
+
+<!-- ============================================ -->
+<!-- COMPONENT 7: AI INSIGHT -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>💡 Component 7: AI Insight Card</h3>
+  
+  <div style="font-size:12px; color:#64748b; margin-bottom:12px;">
+    Trả lời Q4: "Có vấn đề gì cần điều chỉnh?" — 1-2 câu actionable, không generic.
+  </div>
+  
+  <!-- Insight Generation Rules -->
+  <div style="background:#1e293b; border-radius:16px; padding:20px; color:#fff; margin-bottom:16px;">
+    <div style="font-size:14px; font-weight:800; margin-bottom:12px;">🧠 Insight Engine — Priority Rules</div>
+    <div style="font-size:11px; opacity:0.8; margin-bottom:12px;">
+      Hệ thống chọn <strong>1 insight ưu tiên nhất</strong> theo priority descending. Không bao giờ hiện >1 insight cùng lúc.
+    </div>
+    
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <thead>
+        <tr style="border-bottom:1px solid #475569;">
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">P</td>
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Trigger Condition</td>
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Insight Message</td>
+          <td style="padding:8px; color:#94a3b8; font-weight:600;">Type</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#ef4444; font-weight:800;">P1</td>
+          <td style="padding:6px;">Auto-adjust triggered (14-day eval)</td>
+          <td style="padding:6px; color:#fbbf24;">"⚠️ Target đã điều chỉnh: 1500 → 1350 kcal — cân nặng không thay đổi 2 tuần qua"</td>
+          <td style="padding:6px;"><span style="background:#7f1d1d; padding:2px 6px; border-radius:4px;">Alert</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#f59e0b; font-weight:800;">P2</td>
+          <td style="padding:6px;">Protein &lt;70% target, after 18:00</td>
+          <td style="padding:6px; color:#fbbf24;">"🥩 Protein hôm nay mới 39%. Thêm 150g ức gà (~46g) vào bữa tối."</td>
+          <td style="padding:6px;"><span style="background:#78350f; padding:2px 6px; border-radius:4px;">Action</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#f59e0b; font-weight:800;">P3</td>
+          <td style="padding:6px;">Chưa log weight &gt;3 ngày</td>
+          <td style="padding:6px; color:#fbbf24;">"⚖️ Chưa log cân nặng 4 ngày — feedback loop cần data để hoạt động"</td>
+          <td style="padding:6px;"><span style="background:#78350f; padding:2px 6px; border-radius:4px;">Remind</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#3b82f6; font-weight:800;">P4</td>
+          <td style="padding:6px;">Streak sắp phá kỷ lục (≤2 ngày)</td>
+          <td style="padding:6px; color:#93c5fd;">"🔥 Còn 2 ngày nữa phá kỷ lục 21 ngày! Đừng bỏ cuộc 💪"</td>
+          <td style="padding:6px;"><span style="background:#1e3a5f; padding:2px 6px; border-radius:4px;">Motivate</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#3b82f6; font-weight:800;">P5</td>
+          <td style="padding:6px;">PR đạt được hôm nay</td>
+          <td style="padding:6px; color:#93c5fd;">"🏆 Chúc mừng PR mới! Bench Press 80kg × 5 — tăng 5kg so với trước"</td>
+          <td style="padding:6px;"><span style="background:#1e3a5f; padding:2px 6px; border-radius:4px;">Celebrate</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#10b981; font-weight:800;">P6</td>
+          <td style="padding:6px;">Weekly adherence ≥85%</td>
+          <td style="padding:6px; color:#6ee7b7;">"📈 Tuần này adherence 92%! Kiên trì tuyệt vời — keep going!"</td>
+          <td style="padding:6px;"><span style="background:#064e3b; padding:2px 6px; border-radius:4px;">Praise</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:6px; color:#10b981; font-weight:800;">P7</td>
+          <td style="padding:6px;">Weight trend đúng hướng ≥2 tuần</td>
+          <td style="padding:6px; color:#6ee7b7;">"✂️ Giảm 0.9kg trong 2 tuần — đúng tốc độ mục tiêu 0.5kg/tuần 👍"</td>
+          <td style="padding:6px;"><span style="background:#064e3b; padding:2px 6px; border-radius:4px;">Progress</span></td>
+        </tr>
+        <tr>
+          <td style="padding:6px; color:#64748b; font-weight:800;">P8</td>
+          <td style="padding:6px;">No specific trigger (default)</td>
+          <td style="padding:6px; color:#94a3b8;">"💡 Tip: Uống nước trước bữa ăn 30 phút giúp kiểm soát khẩu phần tốt hơn"</td>
+          <td style="padding:6px;"><span style="background:#1e293b; padding:2px 6px; border-radius:4px;">Tip</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Visual States -->
+  <div style="font-weight:700; font-size:13px; margin-bottom:10px;">🎨 Visual States cho Insight Card:</div>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+    <!-- Alert type -->
+    <div>
+      <div style="font-size:10px; font-weight:600; color:#ef4444; margin-bottom:4px;">🔴 Alert (P1):</div>
+      <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:10px;">
+        <div style="display:flex; gap:8px;">
+          <div style="font-size:18px;">⚠️</div>
+          <div style="font-size:11px;">
+            <div style="font-weight:600; color:#991b1b;">Target đã điều chỉnh</div>
+            <div style="color:#64748b; margin-top:2px;">1500 → 1350 kcal — cân nặng không đổi 2 tuần qua</div>
+            <div style="margin-top:4px;">
+              <span style="background:#dc2626; color:#fff; font-size:9px; padding:2px 8px; border-radius:99px; cursor:pointer;">Xem chi tiết</span>
+              <span style="color:#94a3b8; font-size:9px; margin-left:6px; cursor:pointer;">Bỏ qua</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action type -->
+    <div>
+      <div style="font-size:10px; font-weight:600; color:#f59e0b; margin-bottom:4px;">🟡 Action (P2-P3):</div>
+      <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:10px;">
+        <div style="display:flex; gap:8px;">
+          <div style="font-size:18px;">🥩</div>
+          <div style="font-size:11px;">
+            <div style="font-weight:600; color:#92400e;">Protein hôm nay thấp</div>
+            <div style="color:#64748b; margin-top:2px;">Mới 39%. Thêm 150g ức gà (~46g) vào bữa tối.</div>
+            <div style="margin-top:4px;">
+              <span style="background:#f59e0b; color:#fff; font-size:9px; padding:2px 8px; border-radius:99px; cursor:pointer;">Xem gợi ý món</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Motivate type -->
+    <div>
+      <div style="font-size:10px; font-weight:600; color:#3b82f6; margin-bottom:4px;">🔵 Motivate (P4-P5):</div>
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:10px;">
+        <div style="display:flex; gap:8px;">
+          <div style="font-size:18px;">🔥</div>
+          <div style="font-size:11px;">
+            <div style="font-weight:600; color:#1e40af;">Sắp phá kỷ lục!</div>
+            <div style="color:#64748b; margin-top:2px;">Còn 2 ngày nữa phá kỷ lục 21 ngày! Đừng bỏ cuộc 💪</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Praise/Progress type -->
+    <div>
+      <div style="font-size:10px; font-weight:600; color:#10b981; margin-bottom:4px;">🟢 Praise (P6-P7):</div>
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:10px;">
+        <div style="display:flex; gap:8px;">
+          <div style="font-size:18px;">📈</div>
+          <div style="font-size:11px;">
+            <div style="font-weight:600; color:#166534;">Tuần tuyệt vời!</div>
+            <div style="color:#64748b; margin-top:2px;">Adherence 92%. Giảm 0.3kg đúng mục tiêu. Keep going! 🎯</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Dismissal behavior -->
+  <div style="background:#f8fafc; border-radius:10px; padding:12px; font-size:11px;">
+    <div style="font-weight:600; margin-bottom:4px;">🔄 Dismiss & Refresh Logic:</div>
+    <div style="line-height:1.8;">
+      • <strong>Alert (P1):</strong> Persist cho đến khi user tap "Xem chi tiết" hoặc "Bỏ qua" — không auto-dismiss<br>
+      • <strong>Action (P2-P3):</strong> Dismiss → hiện insight P tiếp theo trong queue. Reappear next session nếu condition vẫn đúng<br>
+      • <strong>Motivate/Praise (P4-P7):</strong> Auto-dismiss sau 24h hoặc user swipe. Không reappear<br>
+      • <strong>Tip (P8):</strong> Random từ pool ~20 tips, rotate mỗi ngày, không repeat trong 7 ngày
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- COMPONENT 8: QUICK ACTIONS BAR -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🔗 Component 8: Quick Actions Bar</h3>
+  
+  <div style="font-size:12px; color:#64748b; margin-bottom:12px;">
+    3 hành động phổ biến nhất — <strong>sticky</strong> ở bottom (trên bottom nav), thumb-zone friendly.
+  </div>
+  
+  <!-- Quick Actions Mockup -->
+  <div style="max-width:360px; margin:0 auto 16px;">
+    <div style="background:#fff; border-top:1px solid #e2e8f0; padding:8px 16px; display:flex; justify-content:space-around;">
+      <div style="text-align:center; cursor:pointer;">
+        <div style="width:44px; height:44px; border-radius:12px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; font-size:18px; margin:0 auto;">⚖️</div>
+        <div style="font-size:9px; color:#64748b; margin-top:2px;">Log cân</div>
+      </div>
+      <div style="text-align:center; cursor:pointer;">
+        <div style="width:50px; height:50px; border-radius:14px; background:#10b981; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto; box-shadow:0 2px 8px rgba(16,185,129,0.3);">➕</div>
+        <div style="font-size:9px; color:#10b981; font-weight:600; margin-top:2px;">Log bữa ăn</div>
+      </div>
+      <div style="text-align:center; cursor:pointer;">
+        <div style="width:44px; height:44px; border-radius:12px; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:18px; margin:0 auto;">🏋️</div>
+        <div style="font-size:9px; color:#64748b; margin-top:2px;">Bắt đầu tập</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Context-aware actions -->
+  <div style="background:#f8fafc; border-radius:12px; padding:14px; margin-bottom:12px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">🧠 Context-Aware — Actions thay đổi theo ngữ cảnh:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Context</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Left</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Center (primary)</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Right</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Sáng (chưa log gì)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚖️ Log cân</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">➕ Log bữa sáng</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">🏋️ Bắt đầu tập</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Đã log sáng + trưa</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚖️ Log cân</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">➕ Log bữa tối</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">🏋️ Bắt đầu tập</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Ngày nghỉ</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚖️ Log cân</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">➕ Log bữa ăn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">🏃 Log cardio</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Đã tập xong</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚖️ Log cân</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">➕ Log bữa ăn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">📊 Xem kết quả</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">3/3 bữa đã log</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚖️ Log cân</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600; color:#3b82f6;">🏋️ Bắt đầu tập</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">➕ Thêm snack</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:6px; font-size:10px; color:#64748b;">
+      <strong>Rule:</strong> Center button = hành động có ích nhất lúc này. Nút lớn hơn + emerald color = visual weight.
+    </div>
+  </div>
+  
+  <!-- Weight Quick Log -->
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:12px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">⚖️ Weight Quick Log — Bottom Sheet:</div>
+    <div style="max-width:320px; margin:0 auto;">
+      <div style="background:#f8fafc; border-radius:14px; padding:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">⚖️ Ghi nhận cân nặng</div>
+        
+        <!-- Weight input -->
+        <div style="text-align:center; margin-bottom:12px;">
+          <div style="display:inline-flex; align-items:center; gap:8px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;">−</div>
+            <div>
+              <div style="font-size:36px; font-weight:800;">72.5</div>
+              <div style="font-size:11px; color:#64748b;">kg</div>
+            </div>
+            <div style="width:36px; height:36px; border-radius:10px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;">+</div>
+          </div>
+        </div>
+        
+        <!-- Recent values -->
+        <div style="display:flex; gap:4px; justify-content:center; margin-bottom:12px;">
+          <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-size:10px; cursor:pointer;">72.8</span>
+          <span style="background:#dcfce7; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:600; border:1px solid #86efac;">72.5</span>
+          <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-size:10px; cursor:pointer;">72.3</span>
+          <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-size:10px; cursor:pointer;">72.6</span>
+        </div>
+        
+        <!-- Save button -->
+        <div style="background:#10b981; color:#fff; text-align:center; padding:10px; border-radius:12px; font-weight:700; font-size:13px; cursor:pointer;">
+          ✅ Lưu
+        </div>
+        
+        <div style="text-align:center; margin-top:6px; font-size:10px; color:#64748b;">
+          Hôm qua: 72.8kg | MA(7d): 72.6kg
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- COMPLETE DASHBOARD MOCKUP -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>📱 COMPLETE Dashboard — All 5 Tiers</h3>
+  
+  <div style="max-width:360px; margin:0 auto;">
+    <div style="background:#f8fafc; border-radius:20px; padding:3px; border:2px solid #e2e8f0; box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+      
+      <!-- Status bar -->
+      <div style="display:flex; justify-content:space-between; padding:6px 16px; font-size:10px; color:#64748b;">
+        <span>9:41</span><span>📶 🔋</span>
+      </div>
+      
+      <!-- T1: Hero -->
+      <div style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius:14px; margin:0 8px; padding:12px; color:#fff;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; opacity:0.8;">Thứ Hai, 24/03</div>
+            <div style="font-size:16px; font-weight:800;">Chào Khanh! 👋</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:30px; font-weight:800; line-height:1;">83</div>
+            <div style="font-size:8px; opacity:0.8;">Daily Score</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:2px; margin-top:4px;">
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🍽️90</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🥩60</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🏋️100</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:3px; padding:2px; text-align:center; font-size:7px;">⚖️100</div>
+          <div style="flex:1; background:rgba(255,255,255,0.2); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🔥60</div>
+        </div>
+      </div>
+      
+      <!-- T2: Energy + Protein -->
+      <div style="margin:6px 8px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+          <div style="font-size:10px; font-weight:700;">⚡ Energy Balance</div>
+          <div style="font-size:8px; color:#10b981; font-weight:600;">On track ✅</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:2px; align-items:center; text-align:center;">
+          <div><div style="font-size:7px; color:#64748b;">Ăn</div><div style="font-size:13px; font-weight:800; color:#10b981;">1,200</div></div>
+          <div style="color:#94a3b8; font-size:9px;">−</div>
+          <div><div style="font-size:7px; color:#64748b;">Đốt</div><div style="font-size:13px; font-weight:800; color:#3b82f6;">350</div></div>
+          <div style="color:#94a3b8; font-size:9px;">=</div>
+          <div><div style="font-size:7px; color:#64748b;">Net</div><div style="font-size:13px; font-weight:800;">850</div></div>
+        </div>
+        <div style="background:#e2e8f0; border-radius:99px; height:5px; margin-top:3px; overflow:hidden;">
+          <div style="background:linear-gradient(90deg, #10b981 55%, #3b82f6 55%, #3b82f6 75%); height:100%; width:75%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:3px; margin-top:3px;">
+          <div style="font-size:8px; color:#64748b;">🥩</div>
+          <div style="flex:1; background:#e2e8f0; border-radius:99px; height:3px; overflow:hidden;"><div style="background:#10b981; height:100%; width:72%;"></div></div>
+          <div style="font-size:8px; font-weight:600;">120/166g</div>
+        </div>
+      </div>
+      
+      <!-- T3: Today's Plan -->
+      <div style="margin:0 8px 4px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+        <div style="font-size:9px; font-weight:700; margin-bottom:3px;">📋 Hôm nay</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+          <div style="background:#f0fdf4; border-radius:6px; padding:6px;">
+            <div style="font-size:12px;">🏋️</div>
+            <div style="font-size:9px; font-weight:700;">Upper Body A</div>
+            <div style="font-size:8px; color:#64748b;">6 bài • ~45'</div>
+            <div style="background:#10b981; color:#fff; font-size:8px; font-weight:600; padding:2px 6px; border-radius:99px; display:inline-block; margin-top:3px;">▶️ Bắt đầu</div>
+          </div>
+          <div style="background:#eff6ff; border-radius:6px; padding:6px;">
+            <div style="font-size:12px;">🍽️</div>
+            <div style="font-size:9px; font-weight:700;">2/3 bữa ✓</div>
+            <div style="font-size:8px; color:#64748b;">Còn: tối</div>
+            <div style="background:#3b82f6; color:#fff; font-size:8px; font-weight:600; padding:2px 6px; border-radius:99px; display:inline-block; margin-top:3px;">+ Log tối</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T3: Weight + Streak -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:0 8px 4px;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:12px;">⚖️</span>
+            <div>
+              <div style="font-size:14px; font-weight:800;">72.5<span style="font-size:9px; color:#64748b; font-weight:400;">kg</span></div>
+              <div style="font-size:7px; color:#10b981; font-weight:600;">↓ 0.3kg tuần này</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:12px;">🔥</span>
+            <div>
+              <div style="font-size:14px; font-weight:800; color:#f59e0b;">12<span style="font-size:9px; color:#64748b; font-weight:400;"> ngày</span></div>
+              <div style="font-size:7px; color:#64748b;">Kỷ lục: 21</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T4: AI Insight -->
+      <div style="margin:0 8px 4px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:8px;">
+        <div style="display:flex; gap:6px; align-items:start;">
+          <div style="font-size:14px;">🥩</div>
+          <div style="font-size:10px; flex:1;">
+            <span style="font-weight:600; color:#92400e;">Protein thấp.</span>
+            <span style="color:#64748b;"> Thêm 150g ức gà (~46g) vào bữa tối.</span>
+          </div>
+          <div style="font-size:8px; color:#94a3b8; cursor:pointer;">✕</div>
+        </div>
+      </div>
+      
+      <!-- T5: Quick Actions -->
+      <div style="margin:0 8px 4px; background:#fff; border-top:1px solid #e2e8f0; padding:6px 0; display:flex; justify-content:space-around;">
+        <div style="text-align:center;">
+          <div style="width:38px; height:38px; border-radius:10px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; font-size:14px; margin:0 auto;">⚖️</div>
+          <div style="font-size:7px; color:#64748b; margin-top:1px;">Log cân</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:44px; height:44px; border-radius:12px; background:#10b981; display:flex; align-items:center; justify-content:center; font-size:18px; margin:0 auto; box-shadow:0 2px 6px rgba(16,185,129,0.3);">➕</div>
+          <div style="font-size:7px; color:#10b981; font-weight:600; margin-top:1px;">Log bữa tối</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:38px; height:38px; border-radius:10px; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:14px; margin:0 auto;">🏋️</div>
+          <div style="font-size:7px; color:#64748b; margin-top:1px;">Bắt đầu tập</div>
+        </div>
+      </div>
+      
+      <!-- Bottom nav -->
+      <div style="display:flex; justify-content:space-around; padding:4px 0 6px; border-top:1px solid #e2e8f0; font-size:7px; color:#94a3b8;">
+        <div style="text-align:center;">📅<br>Lịch</div>
+        <div style="text-align:center;">📋<br>Thư viện</div>
+        <div style="text-align:center;">🤖<br>AI</div>
+        <div style="text-align:center;">💪<br>Fitness</div>
+        <div style="text-align:center; color:#10b981; font-weight:600;">📊<br>Dashboard</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="text-align:center; margin-top:10px; font-size:10px; color:#64748b;">
+    <strong>🎉 COMPLETE Dashboard — 8 components, 5 tiers, zero scroll trên iPhone SE</strong>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SUMMARY TABLE -->
+<div class="section">
+  <h3>📊 Tổng kết: 8 Components Dashboard</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Tier</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">#</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Component</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Data Source</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Interaction</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="background:#f0fdf4;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">1</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">1</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🎯 Daily Score</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">5-factor formula</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Glance only</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0;" rowspan="2">2</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">2</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">⚡ Energy Balance</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">daily_log + workout_sets</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tap → macro detail sheet</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0;">3</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🥩 Protein</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">daily_log.actual_protein</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Inline (no tap)</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;" rowspan="3">3</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">4</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">📋 Today's Plan</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">training_plan + day_plans</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">CTA → navigate to tab</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">5</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">⚖️ Weight Mini</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">weight_log + goals</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tap → weight chart sheet</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">6</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🔥 Streak Mini</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">streak calc</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tap → month calendar sheet</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0;">4</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">7</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">💡 AI Insight</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Cross-domain rules (P1-P8)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Dismiss / tap action</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">5</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">8</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🔗 Quick Actions</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Context-aware logic</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tap → navigate/sheet</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Dashboard design hoàn chỉnh — Bạn chốt không?</h3>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approve-all">
+    ✅ <strong>Chốt toàn bộ Dashboard — 8 components, 5 tiers</strong><br>
+    <small>Tiếp: Edge cases + Update spec + Review loop</small>
+  </div>
+  <div class="option" data-id="adjust-insight">
+    🔄 <strong>Cần điều chỉnh AI Insight rules — (nêu chi tiết)</strong>
+  </div>
+  <div class="option" data-id="adjust-actions">
+    ✏️ <strong>Cần điều chỉnh Quick Actions — (nêu chi tiết)</strong>
+  </div>
+</div>

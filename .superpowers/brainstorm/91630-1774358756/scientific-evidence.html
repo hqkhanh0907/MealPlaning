@@ -1,0 +1,414 @@
+<h2>🔬 Cơ sở khoa học của từng công thức</h2>
+<p class="subtitle">Mỗi công thức được đánh giá: Nguồn gốc, Nghiên cứu kiểm chứng, Độ chính xác, và Hạn chế</p>
+
+<div style="margin-bottom: 12px; padding: 12px; background: rgba(59,130,246,0.08); border: 1px solid #3b82f6; border-radius: 10px; font-size: 13px;">
+  <strong>Quy ước đánh giá:</strong>
+  <span style="margin-left: 12px; padding: 2px 8px; background: #10b981; color: white; border-radius: 4px; font-size: 11px;">A — Gold Standard</span>
+  <span style="margin-left: 4px; padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">B — Validated</span>
+  <span style="margin-left: 4px; padding: 2px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 11px;">C — Expert Consensus</span>
+  <span style="margin-left: 4px; padding: 2px 8px; background: #ef4444; color: white; border-radius: 4px; font-size: 11px;">D — Heuristic</span>
+</div>
+
+<!-- ==================== 1. BMR ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #10b981; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #10b981; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">1. BMR — Mifflin-St Jeor</div>
+      <div style="font-size: 12px; opacity: 0.9;">BMR = 10m + 6.25h − 5a + s</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">A</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📄 Nghiên cứu gốc:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Mifflin MD, St Jeor ST, et al. <em>"A new predictive equation for resting energy expenditure in healthy individuals."</em><br>
+          <strong>American Journal of Clinical Nutrition, 1990; 51(2): 241-247</strong><br>
+          498 người (251 nam, 247 nữ), tuổi 19-78
+        </div>
+      </div>
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">✅ Kiểm chứng:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Frankenfield DC, et al. <em>"Comparison of predictive equations for resting metabolic rate."</em><br>
+          <strong>J Am Diet Assoc, 2005; 105(5): 775-789</strong><br>
+          So sánh 5 phương trình BMR. Kết luận: <strong>Mifflin-St Jeor chính xác nhất</strong> — nằm trong ±10% của RMR thực tế ở 82% đối tượng.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(16,185,129,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>🏆 Chứng nhận:</strong> American Dietetic Association (ADA) năm 2005 khuyến nghị Mifflin-St Jeor là phương trình ước lượng BMR chính xác nhất cho người khỏe mạnh.<br>
+      <strong>⚠️ Hạn chế:</strong> Sai số lớn hơn ở người béo phì (BMI >35) và vận động viên có LBM rất cao. Vì vậy spec cho phép <code>bmrOverride</code> để user nhập BMR đo thực tế (indirect calorimetry).
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 2. TDEE Multipliers ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #3b82f6; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #3b82f6; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">2. TDEE Activity Multipliers</div>
+      <div style="font-size: 12px; opacity: 0.9;">TDEE = BMR × Multiplier (1.2 — 1.9)</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">B</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📄 Nguồn gốc:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Harris JA, Benedict FG. <em>"A Biometric Study of Human Basal Metabolism."</em><br>
+          <strong>Proc Natl Acad Sci, 1918</strong> (khái niệm activity factor)<br><br>
+          Tinh chỉnh bởi: Katch FI, McArdle WD. <em>"Introduction to Nutrition, Exercise, and Health."</em> 1993 — Hệ thống 5 mức hoạt động (1.2→1.9)
+        </div>
+      </div>
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">✅ Kiểm chứng:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Các multiplier được sử dụng rộng rãi trong lâm sàng dinh dưỡng (WHO, USDA). Tuy nhiên:<br><br>
+          Westerterp KR. <em>"Physical activity and physical activity induced energy expenditure in humans."</em><br>
+          <strong>Clinical Nutrition, 2003</strong> — Sai số cá nhân có thể ±15%.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(59,130,246,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>⚠️ Hạn chế:</strong> Multiplier là ước lượng trung bình. Cùng "tập 3 ngày/tuần" nhưng cardio 30 phút ≠ powerlifting 90 phút. Vì vậy spec dùng <strong>auto-adjust blending</strong> (70% auto từ sessions thực tế + 30% base level) + <strong>Feedback Loop</strong> (điều chỉnh sau 2 tuần dựa trên cân nặng thực tế) để bù sai số.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 3. Protein ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #10b981; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #10b981; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">3. Protein: 2g/kg thể trọng</div>
+      <div style="font-size: 12px; opacity: 0.9;">Priority-based Macro Split: Protein → Fat → Carbs</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">A</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📄 Meta-analysis chính:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Morton RW, et al. <em>"A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains."</em><br>
+          <strong>British Journal of Sports Medicine, 2018; 52(6): 376-384</strong><br>
+          49 nghiên cứu, 1,863 người. Kết luận: <strong>1.6g/kg</strong> là trung bình tối ưu, upper confidence interval = <strong>2.2g/kg</strong>.
+        </div>
+      </div>
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">✅ Cho người cut (calorie deficit):</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Helms ER, et al. <em>"A systematic review of dietary protein during caloric restriction in resistance trained lean athletes."</em><br>
+          <strong>Int J Sport Nutr Exerc Metab, 2014; 24(2): 127-138</strong><br>
+          Khuyến nghị: <strong>2.3-3.1g/kg LBM</strong> khi cut để bảo toàn cơ bắp tối đa.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(16,185,129,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>🎯 Tại sao chọn 2g/kg:</strong> Là điểm cân bằng — cao hơn mức trung bình tối ưu (1.6g) để có safety margin, nhưng thấp hơn mức "cut cực đoan" (3.1g). Phù hợp cho đa số user. Spec cho phép <code>proteinRatio</code> override (1.6–3.0g/kg) cho advanced users.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 4. Volume Landmarks ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #3b82f6; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #3b82f6; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">4. Weekly Volume (sets/muscle/week)</div>
+      <div style="font-size: 12px; opacity: 0.9;">MEV → MAV → MRV theo experience level</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">B</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📄 Nghiên cứu dose-response:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Schoenfeld BJ, et al. <em>"Dose-response relationship between weekly resistance training volume and increases in muscle mass."</em><br>
+          <strong>Medicine & Science in Sports & Exercise, 2017; 49(3): 457-465</strong><br>
+          Meta-analysis 15 nghiên cứu. Kết luận: <strong>10+ sets/cơ/tuần</strong> vượt trội so với <10 sets cho hypertrophy.<br><br>
+          Krieger JW. <em>"Single vs. Multiple Sets of Resistance Exercise for Muscle Hypertrophy: A Meta-Analysis."</em><br>
+          <strong>J Strength Cond Res, 2010; 24(4): 1150-1159</strong>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📚 Framework Volume Landmarks:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Dr. Mike Israetel, Renaissance Periodization.<br>
+          <em>"Scientific Principles of Hypertrophy Training"</em> (2nd Ed, 2020)<br><br>
+          Hệ thống MEV/MAV/MRV được phát triển từ:
+          <ul style="margin: 4px 0 0 16px;">
+            <li>Tổng hợp hàng trăm nghiên cứu về volume</li>
+            <li>Kinh nghiệm coaching 10,000+ VĐV</li>
+            <li>Được community khoa học tập luyện chấp nhận rộng rãi</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(59,130,246,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>⚠️ Hạn chế:</strong> Con số cụ thể (10/15/20 sets) là ước lượng trung bình. Cá nhân có thể cần nhiều/ít hơn ±30%. Vì vậy Feedback Loop trong spec dùng RPE thực tế để auto-adjust: RPE > 9 liên tục → quá nhiều volume → giảm sets. RPE < 7 → có thể tăng.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 5. Training Split ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #10b981; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #10b981; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">5. Training Split (frequency → split)</div>
+      <div style="font-size: 12px; opacity: 0.9;">3 ngày → Full Body | 4 → Upper/Lower | 5-6 → PPL</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">A</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="font-size: 13px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">📄 Nghiên cứu về training frequency:</div>
+      <div style="font-size: 12px; line-height: 1.6;">
+        Schoenfeld BJ, Ogborn D, Krieger JW. <em>"Effects of Resistance Training Frequency on Measures of Muscle Hypertrophy: A Systematic Review and Meta-Analysis."</em><br>
+        <strong>Sports Medicine, 2016; 46(11): 1689-1697</strong><br>
+        10 nghiên cứu, 276 đối tượng. Kết luận: <strong>Tập mỗi nhóm cơ 2×/tuần vượt trội đáng kể so với 1×/tuần</strong> cho hypertrophy (effect size: 0.69).<br><br>
+        → Đây là cơ sở cho việc: 4 ngày = Upper/Lower (mỗi nhóm cơ 2×), 6 ngày = PPL (mỗi nhóm cơ 2×). Full Body 3 ngày cũng đạt 2-3×/tuần tự nhiên.
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(16,185,129,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>🎯 Đây là Gold Standard</strong> vì logic đơn giản: phân bổ volume đều vào các ngày có sẵn. Không cần giả định phức tạp.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 6. Rep Ranges ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #3b82f6; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #3b82f6; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">6. Rep Ranges & %1RM</div>
+      <div style="font-size: 12px; opacity: 0.9;">Strength: 3-5 reps | Hypertrophy: 8-12 | Endurance: 15-20</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">A</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📄 Guideline chính thức:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          <strong>NSCA (National Strength & Conditioning Association)</strong><br>
+          <em>"Essentials of Strength Training and Conditioning"</em> (4th Ed, 2016)<br>
+          Textbook chuẩn được NSCA-CSCS certification dùng:<br>
+          • Strength: ≤6 reps, ≥85% 1RM<br>
+          • Hypertrophy: 6-12 reps, 67-85% 1RM<br>
+          • Endurance: ≥12 reps, ≤67% 1RM
+        </div>
+      </div>
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">✅ Kiểm chứng:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Schoenfeld BJ, et al. <em>"Effects of Low- vs. High-Load Resistance Training on Muscle Strength and Hypertrophy."</em><br>
+          <strong>J Strength Cond Res, 2017; 31(12): 3508-3523</strong><br><br>
+          <strong>Ghi chú quan trọng:</strong> Nghiên cứu gần đây cho thấy hypertrophy có thể xảy ra ở MỌI rep range (5-30 reps) nếu tập đến gần failure. Tuy nhiên 8-12 reps vẫn là <em>hiệu quả nhất về mặt thời gian</em>.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(59,130,246,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>📐 1RM Estimation:</strong> Brzycki Formula (1993): <code>1RM = weight × 36 / (37 − reps)</code> — Chính xác ±5% cho <10 reps.<br>
+      Nguồn: Brzycki M. <em>"Strength Testing—Predicting a One-Rep Max from Reps-to-Fatigue."</em> JOPERD, 1993; 64(1): 88-90.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 7. Progressive Overload ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #f59e0b; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #f59e0b; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">7. Progressive Overload Rates</div>
+      <div style="font-size: 12px; opacity: 0.9;">Beginner: +2.5kg/tuần | Intermediate: +1.25kg/2 tuần | Advanced: +1.25kg/tháng</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">C</div>
+  </div>
+  <div style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">📄 Nguồn gốc:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          Rippetoe M. <em>"Starting Strength: Basic Barbell Training"</em> (3rd Ed, 2011)<br>
+          — Beginner linear progression: +5 lbs (≈2.5kg) mỗi session<br><br>
+          <strong>ACSM Position Stand</strong> on Progression Models in Resistance Training:<br>
+          <strong>Med Sci Sports Exerc, 2009; 41(3): 687-708</strong>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight: 700; margin-bottom: 6px;">⚠️ Mức độ kiểm chứng:</div>
+        <div style="font-size: 12px; line-height: 1.6;">
+          <strong>Con số cụ thể (+2.5kg, +1.25kg) là expert consensus</strong>, không phải từ RCT riêng lẻ. Lý do: tốc độ tăng tải phụ thuộc vào rất nhiều yếu tố cá nhân (genetics, nutrition, sleep, stress).<br><br>
+          Đây là <em>điểm khởi đầu hợp lý</em> — Feedback Loop sẽ tự điều chỉnh nếu user đạt hoặc không đạt.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 10px; background: rgba(245,158,11,0.06); border-radius: 8px; font-size: 12px;">
+      <strong>🔄 Cách app bù sai số:</strong> Dùng <strong>Double Progression</strong> — không tăng weight cho đến khi user đạt đủ reps ở tất cả sets. Nếu không đạt → giữ nguyên weight → tăng reps trước. An toàn hơn fixed rate.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 8. RPE ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #3b82f6; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #3b82f6; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">8. RPE Scale (Rate of Perceived Exertion)</div>
+      <div style="font-size: 12px; opacity: 0.9;">Thang 1-10, dựa trên Repetitions in Reserve (RIR)</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">B</div>
+  </div>
+  <div style="padding: 16px; font-size: 13px;">
+    <div style="font-size: 12px; line-height: 1.6;">
+      <strong>📄 Nguồn:</strong> Zourdos MC, et al. <em>"Novel Resistance Training-Specific RPE Scale Measuring Repetitions in Reserve."</em>
+      <strong>J Strength Cond Res, 2016; 30(1): 267-275</strong><br>
+      Adapted từ Borg CR-10 scale cho resistance training. RPE 10 = failure, RPE 8 = còn 2 reps dự trữ (2 RIR).<br>
+      <strong>Validated</strong>: Correlation r = 0.88-0.94 giữa RPE và actual reps-in-reserve ở trained lifters.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 9. Deload ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #f59e0b; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #f59e0b; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">9. Deload Protocol (giảm tải)</div>
+      <div style="font-size: 12px; opacity: 0.9;">Giảm 40% volume mỗi 4-6 tuần</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">C</div>
+  </div>
+  <div style="padding: 16px; font-size: 13px;">
+    <div style="font-size: 12px; line-height: 1.6;">
+      <strong>📄 Nghiên cứu:</strong> Ogasawara R, et al. <em>"Effects of periodic and continued resistance training on muscle CSA and strength in previously untrained men."</em>
+      <strong>Clinical Physiology & Functional Imaging, 2013; 33(5): 344-348</strong><br>
+      Kết luận: Training có deload period → kết quả tương đương hoặc tốt hơn continuous training.<br><br>
+      <strong>⚠️ Tần suất cụ thể (mỗi 4-6 tuần) là expert consensus</strong> từ coaching community (Israetel, Helms, Nippard). Con số thực tế phụ thuộc vào individual recovery.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 10. Caloric Deficit ==================== -->
+<div style="margin-bottom: 20px; border: 2px solid #10b981; border-radius: 12px; overflow: hidden;">
+  <div style="padding: 12px 16px; background: #10b981; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-weight: 800; font-size: 16px;">10. Caloric Deficit: 7700 kcal ≈ 1kg mỡ</div>
+      <div style="font-size: 12px; opacity: 0.9;">Target = TDEE ± fixed kcal offset</div>
+    </div>
+    <div style="padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 6px; font-weight: 700;">A</div>
+  </div>
+  <div style="padding: 16px; font-size: 13px;">
+    <div style="font-size: 12px; line-height: 1.6;">
+      <strong>📄 Nghiên cứu:</strong> Hall KD. <em>"What is the required energy deficit per unit weight loss?"</em>
+      <strong>Int J Obesity, 2008; 32(3): 573-576</strong><br>
+      1 lb fat ≈ 3500 kcal (1 kg ≈ 7700 kcal) — hằng số sinh học được kiểm chứng.<br><br>
+      <strong>Tốc độ giảm cân an toàn:</strong> Helms ER, et al. <em>"Evidence-based recommendations for natural bodybuilding contest preparation."</em>
+      <strong>J Int Soc Sports Nutr, 2014; 11:20</strong> — Khuyến nghị <strong>0.5-1% body weight/tuần</strong> để bảo toàn cơ tối đa.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SUMMARY ==================== -->
+<div class="section" style="margin-top: 28px;">
+  <h3>📊 Tổng kết độ tin cậy</h3>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card-bg); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: #334155; color: white;">
+      <th style="padding: 10px; text-align: left;">Công thức</th>
+      <th style="padding: 10px; text-align: center;">Mức đánh giá</th>
+      <th style="padding: 10px; text-align: center;">Sai số</th>
+      <th style="padding: 10px; text-align: left;">Cách app bù sai số</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">BMR (Mifflin-St Jeor)</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #10b981; color: white; border-radius: 4px; font-size: 11px;">A</span></td>
+      <td style="padding: 10px; text-align: center;">±10%</td>
+      <td style="padding: 10px;">bmrOverride cho user đo thực tế</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">TDEE Multipliers</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">B</span></td>
+      <td style="padding: 10px; text-align: center;">±15%</td>
+      <td style="padding: 10px;">Auto-adjust blending + Feedback Loop 2 tuần</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">Protein 2g/kg</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #10b981; color: white; border-radius: 4px; font-size: 11px;">A</span></td>
+      <td style="padding: 10px; text-align: center;">Optimal range: 1.6-2.2g</td>
+      <td style="padding: 10px;">User override (1.6-3.0g/kg)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">Volume Landmarks</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">B</span></td>
+      <td style="padding: 10px; text-align: center;">±30% cá nhân</td>
+      <td style="padding: 10px;">RPE monitoring + auto-adjust volume</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">Training Split</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #10b981; color: white; border-radius: 4px; font-size: 11px;">A</span></td>
+      <td style="padding: 10px; text-align: center;">N/A (logic)</td>
+      <td style="padding: 10px;">Deterministic — không cần bù</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">Rep Ranges</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #10b981; color: white; border-radius: 4px; font-size: 11px;">A</span></td>
+      <td style="padding: 10px; text-align: center;">N/A (guideline)</td>
+      <td style="padding: 10px;">NSCA standard — wide acceptance</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">Progressive Overload Rate</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 11px;">C</span></td>
+      <td style="padding: 10px; text-align: center;">Varies widely</td>
+      <td style="padding: 10px;">Double Progression (data-driven)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">RPE / RIR</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">B</span></td>
+      <td style="padding: 10px; text-align: center;">r = 0.88-0.94</td>
+      <td style="padding: 10px;">Cải thiện theo kinh nghiệm tập</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px;">Deload Frequency</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 11px;">C</span></td>
+      <td style="padding: 10px; text-align: center;">±2 tuần</td>
+      <td style="padding: 10px;">RPE trend detection → auto-suggest deload</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px;">7700 kcal = 1kg fat</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #10b981; color: white; border-radius: 4px; font-size: 11px;">A</span></td>
+      <td style="padding: 10px; text-align: center;">Hằng số sinh học</td>
+      <td style="padding: 10px;">Moving average weight validation</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 16px; padding: 14px; background: rgba(16,185,129,0.06); border: 1px solid #10b981; border-radius: 10px; font-size: 13px;">
+  <strong>🔑 Triết lý thiết kế:</strong> Không có công thức nào chính xác 100% cho mọi người. Vì vậy hệ thống được thiết kế với 3 lớp bảo vệ:<br>
+  <strong>① Công thức validated</strong> → điểm khởi đầu hợp lý<br>
+  <strong>② User override</strong> → cho advanced user tự chỉnh<br>
+  <strong>③ Feedback Loop</strong> → auto-adjust dựa trên dữ liệu thực tế (không phụ thuộc hoàn toàn vào công thức)
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>Bạn thấy cơ sở khoa học này có đủ thuyết phục không?</h3>
+  <div class="options">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>Đủ thuyết phục, tiếp tục sang flow UI</h3>
+        <p>10 công thức đều có cơ sở, 3 lớp bảo vệ hợp lý</p>
+      </div>
+    </div>
+    <div class="option" data-choice="more-evidence" onclick="toggleSelect(this)">
+      <div class="letter">🔍</div>
+      <div class="content">
+        <h3>Cần thêm bằng chứng cho công thức cụ thể</h3>
+        <p>Muốn deep-dive vào công thức nào đó</p>
+      </div>
+    </div>
+  </div>
+</div>

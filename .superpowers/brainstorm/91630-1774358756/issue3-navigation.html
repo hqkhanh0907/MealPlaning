@@ -1,0 +1,360 @@
+<h2>🟡 Issue 3: Navigation Depth — 4 cấp có quá sâu?</h2>
+<p class="subtitle">Tab → Sub-tab → Modal → Nested Modal = User bị "lost"?</p>
+
+<!-- PROBLEM -->
+<div class="section">
+  <h3>📌 Vấn đề hiện tại trong Spec</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <!-- Current hierarchy -->
+    <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px; padding:16px;">
+      <div style="font-weight:700; color:#dc2626; margin-bottom:10px;">Spec hiện tại — 4 levels:</div>
+      <div style="font-family:monospace; font-size:12px; line-height:2.2;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L1</span>
+          Bottom Tab: <strong>Fitness</strong>
+        </div>
+        <div style="padding-left:20px; display:flex; align-items:center; gap:6px;">
+          ↓ <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L2</span>
+          Sub-tab: Plan / Progress / History
+        </div>
+        <div style="padding-left:40px; display:flex; align-items:center; gap:6px;">
+          ↓ <span style="background:#f59e0b; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L3</span>
+          Modal: <strong>WorkoutLogger</strong>
+        </div>
+        <div style="padding-left:60px; display:flex; align-items:center; gap:6px;">
+          ↓ <span style="background:#dc2626; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L4</span>
+          Nested Modal: <strong>ExerciseSelector</strong>
+        </div>
+      </div>
+      <div style="margin-top:10px; padding:8px; background:#fee2e2; border-radius:8px; font-size:11px;">
+        ⚠️ Nested modals = UX anti-pattern trên mobile<br>
+        ⚠️ User phải nhớ "close → close → back" để quay về<br>
+        ⚠️ iOS swipe-back gesture conflict
+      </div>
+    </div>
+    
+    <!-- Best practice -->
+    <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:16px;">
+      <div style="font-weight:700; color:#16a34a; margin-bottom:10px;">Best practice — Max 3 levels:</div>
+      <div style="font-size:12px; line-height:1.8;">
+        <strong>Google Material Design 3:</strong><br>
+        "Avoid nesting more than 2 levels of navigation within a single view."<br><br>
+        <strong>Apple HIG:</strong><br>
+        "People should always know where they are in your app and how to get to their next destination."<br><br>
+        <strong>Fitness apps benchmark:</strong><br>
+        • Strong App: Tab → Full-screen logger (2 levels)<br>
+        • JEFIT: Tab → List → Logger (3 levels)<br>
+        • Hevy: Tab → Full-screen logger (2 levels)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3 SOLUTIONS -->
+<div class="section">
+  <h3>🔄 3 Phương án giảm Navigation Depth</h3>
+  
+  <!-- Solution A -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">A</span>
+      <span style="font-weight:700; font-size:16px;">WorkoutLogger = Full-screen Page (thay vì Modal)</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div>
+        <div style="font-family:monospace; font-size:12px; line-height:2.2; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L1</span>
+            Bottom Tab: Fitness
+          </div>
+          <div style="padding-left:20px; display:flex; align-items:center; gap:6px;">
+            ↓ <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L2</span>
+            Sub-tab: Plan / Progress / History
+          </div>
+          <div style="padding-left:40px; display:flex; align-items:center; gap:6px;">
+            ↓ <span style="background:#f59e0b; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L3</span>
+            <strong>Full-screen: WorkoutLogger</strong>
+          </div>
+          <div style="padding-left:60px; display:flex; align-items:center; gap:6px;">
+            &nbsp;&nbsp; <span style="background:#e2e8f0; padding:2px 8px; border-radius:4px; font-size:10px;">L3b</span>
+            <em>Inline</em>: ExerciseSelector (bottom sheet)
+          </div>
+        </div>
+        <div style="background:#dcfce7; border-radius:8px; padding:8px; font-size:11px;">
+          ✅ Max 3 levels<br>
+          ✅ ExerciseSelector = bottom sheet trong Logger, không phải modal riêng<br>
+          ✅ Clear "Back" button trên header<br>
+          ✅ Bottom tab ẩn đi khi đang tập → focus mode
+        </div>
+      </div>
+      <div>
+        <!-- Mini mockup -->
+        <div style="max-width:240px; border:2px solid #e2e8f0; border-radius:16px; overflow:hidden; background:#fff;">
+          <!-- Full screen header -->
+          <div style="background:#10b981; color:#fff; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:12px; cursor:pointer;">← Quay lại</div>
+            <div style="font-size:12px; font-weight:600;">Upper Body A</div>
+            <div style="font-size:12px;">⏱ 12:34</div>
+          </div>
+          <!-- Content -->
+          <div style="padding:12px;">
+            <div style="font-size:11px; color:#64748b; margin-bottom:8px;">Bài 2/5 • Bent-over Row • Set 1/4</div>
+            <div style="background:#f0fdf4; border:2px solid #10b981; border-radius:10px; padding:10px; text-align:center; margin-bottom:8px;">
+              <div style="font-size:18px; font-weight:800;">60kg × 10</div>
+            </div>
+            <div style="display:flex; gap:4px; margin-bottom:8px;">
+              <div style="flex:2; background:#10b981; color:#fff; border-radius:6px; padding:8px; text-align:center; font-weight:700; font-size:11px;">✓ Xác nhận</div>
+              <div style="flex:1; background:#f1f5f9; border-radius:6px; padding:8px; text-align:center; font-size:10px;">✏️</div>
+            </div>
+            <div style="font-size:10px; color:#64748b; text-align:center;">Completed: Set history...</div>
+          </div>
+          <!-- NO bottom tab → focus mode -->
+          <div style="background:#f1f5f9; padding:6px; text-align:center; font-size:9px; color:#94a3b8;">
+            Bottom tab ẩn khi đang tập
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Solution B -->
+  <div style="background:#f0fdf4; border:3px solid #10b981; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">B ✅</span>
+      <span style="font-weight:700; font-size:16px;">A + ExerciseSelector tích hợp trong Logger</span>
+      <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:11px;">Recommended</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <!-- ExerciseSelector states -->
+      <div>
+        <div style="text-align:center; font-weight:600; font-size:11px; margin-bottom:6px; color:#64748b;">Trạng thái bình thường</div>
+        <div style="border:2px solid #e2e8f0; border-radius:12px; padding:10px; background:#fff;">
+          <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Bent-over Row</div>
+          <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Set 2/4</div>
+          <div style="background:#f0fdf4; border:2px solid #10b981; border-radius:8px; padding:8px; text-align:center; margin-bottom:6px;">
+            <div style="font-size:16px; font-weight:800;">60kg × 10</div>
+          </div>
+          <div style="display:flex; gap:3px; margin-bottom:6px;">
+            <div style="flex:2; background:#10b981; color:#fff; border-radius:6px; padding:6px; text-align:center; font-size:10px; font-weight:700;">✓</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:6px; padding:6px; text-align:center; font-size:9px;">✏️</div>
+          </div>
+          <!-- Add exercise button -->
+          <div style="border-top:1px dashed #e2e8f0; padding-top:6px; margin-top:6px;">
+            <div style="background:#eff6ff; color:#3b82f6; border-radius:6px; padding:6px; text-align:center; font-size:10px; font-weight:600; cursor:pointer;">
+              + Thêm bài tập
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div style="text-align:center; font-weight:600; font-size:11px; margin-bottom:6px; color:#3b82f6;">Bottom sheet mở lên</div>
+        <div style="border:2px solid #3b82f6; border-radius:12px; overflow:hidden; background:#fff;">
+          <!-- Dimmed background -->
+          <div style="background:rgba(0,0,0,0.1); padding:10px; opacity:0.4;">
+            <div style="font-size:10px;">Bent-over Row...</div>
+          </div>
+          <!-- Bottom sheet -->
+          <div style="background:#fff; border-top:2px solid #3b82f6; padding:10px; box-shadow:0 -4px 12px rgba(0,0,0,0.1);">
+            <div style="width:40px; height:4px; background:#cbd5e1; border-radius:99px; margin:0 auto 8px;"></div>
+            <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Chọn bài tập</div>
+            <!-- Search -->
+            <div style="background:#f1f5f9; border-radius:6px; padding:6px 8px; font-size:10px; color:#94a3b8; margin-bottom:6px;">
+              🔍 Tìm kiếm...
+            </div>
+            <!-- Filter chips -->
+            <div style="display:flex; gap:3px; margin-bottom:6px; overflow-x:auto;">
+              <span style="background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:2px 6px; font-size:9px; font-weight:600; white-space:nowrap;">Tất cả</span>
+              <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">Ngực</span>
+              <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">Lưng</span>
+              <span style="background:#f1f5f9; border-radius:4px; padding:2px 6px; font-size:9px; white-space:nowrap;">Vai</span>
+            </div>
+            <!-- Exercise list -->
+            <div style="font-size:10px; line-height:2.2;">
+              <div style="padding:2px 0; border-bottom:1px solid #f1f5f9;">🏋️ Incline Bench Press</div>
+              <div style="padding:2px 0; border-bottom:1px solid #f1f5f9;">💪 Dumbbell Fly</div>
+              <div style="padding:2px 0; border-bottom:1px solid #f1f5f9;">🔧 Cable Crossover</div>
+              <div style="padding:2px 0;">➕ <em>Tạo bài tập mới</em></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div style="text-align:center; font-weight:600; font-size:11px; margin-bottom:6px; color:#16a34a;">Sau khi chọn</div>
+        <div style="border:2px solid #10b981; border-radius:12px; padding:10px; background:#f0fdf4;">
+          <div style="font-size:12px; font-weight:700; margin-bottom:2px;">✅ Đã thêm:</div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Incline Bench Press</div>
+          <div style="font-size:10px; color:#64748b; margin-bottom:8px;">Bài 6/6 (thêm) • Set 1/3</div>
+          <div style="background:#fff; border:2px solid #e2e8f0; border-radius:8px; padding:8px; text-align:center; margin-bottom:6px;">
+            <div style="font-size:16px; font-weight:800; color:#94a3b8;">— kg × —</div>
+            <div style="font-size:9px; color:#94a3b8;">Nhập weight & reps</div>
+          </div>
+          <div style="font-size:10px; color:#16a34a; text-align:center;">
+            Bottom sheet tự đóng<br>
+            Focus vào bài tập mới
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <div style="background:#dcfce7; border-radius:8px; padding:10px; font-size:11px;">
+        <strong>✅ Ưu điểm:</strong><br>
+        • Max 3 levels (Tab → Sub-tab → Full-screen Logger)<br>
+        • ExerciseSelector = bottom sheet, không phải modal mới<br>
+        • User vẫn thấy context Logger phía trên<br>
+        • Consistent với app pattern (FilterBottomSheet)<br>
+        • Swipe down to dismiss — natural gesture
+      </div>
+      <div style="background:#fef3c7; border-radius:8px; padding:10px; font-size:11px;">
+        <strong>⚠️ Lưu ý:</strong><br>
+        • Bottom sheet cần đủ cao (~60% screen) cho search + list<br>
+        • Keyboard mở → sheet phải push up, không bị che<br>
+        • Filter chips cần horizontal scroll<br>
+        • "Tạo bài tập mới" → inline form trong sheet, không mở modal
+      </div>
+    </div>
+  </div>
+  
+  <!-- Solution C -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">C</span>
+      <span style="font-weight:700; font-size:16px;">Flatten — Bỏ sub-tabs, dùng scroll sections</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div>
+        <div style="font-family:monospace; font-size:12px; line-height:2.2; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L1</span>
+            Bottom Tab: Fitness
+          </div>
+          <div style="padding-left:20px; display:flex; align-items:center; gap:6px;">
+            ↓ <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L2</span>
+            Single scroll: Plan + Progress + History stacked
+          </div>
+          <div style="padding-left:40px; display:flex; align-items:center; gap:6px;">
+            ↓ <span style="background:#f59e0b; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px;">L3</span>
+            Full-screen: WorkoutLogger
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;">
+        <strong>Ưu điểm:</strong> Ít navigation, tất cả trên 1 trang<br>
+        <strong>Nhược điểm:</strong><br>
+        ❌ Scroll rất dài (Plan + Charts + History)<br>
+        ❌ Phá vỡ pattern CalendarTab (đã có sub-tabs)<br>
+        ❌ User phải scroll tìm section → chậm hơn tap tab<br>
+        ❌ Performance: render tất cả charts cùng lúc<br>
+        <div style="color:#dc2626; margin-top:4px;">→ Không khuyến nghị</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- NAVIGATION MAP -->
+<div class="section">
+  <h3>🗺️ Navigation Map hoàn chỉnh (sau khi chọn B)</h3>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:16px; font-family:monospace; font-size:11px; line-height:2.4;">
+    <div><span style="background:#10b981; color:#fff; padding:1px 6px; border-radius:3px;">L1</span> <strong>Fitness Tab</strong> (bottom nav)</div>
+    <div style="padding-left:16px;">├── <span style="background:#3b82f6; color:#fff; padding:1px 6px; border-radius:3px;">L2</span> <strong>Plan</strong> sub-tab (default)</div>
+    <div style="padding-left:32px;">│   ├── Weekly Calendar Strip</div>
+    <div style="padding-left:32px;">│   ├── Today's Workout Card → <span style="background:#f59e0b; color:#fff; padding:1px 6px; border-radius:3px;">L3</span> <strong>Full-screen WorkoutLogger</strong></div>
+    <div style="padding-left:48px;">│   │   ├── Quick Confirm Card (per set)</div>
+    <div style="padding-left:48px;">│   │   ├── Edit Bottom Sheet (weight/reps adjust)</div>
+    <div style="padding-left:48px;">│   │   ├── Exercise Selector Bottom Sheet (search + filter)</div>
+    <div style="padding-left:48px;">│   │   ├── Rest Timer Overlay</div>
+    <div style="padding-left:48px;">│   │   └── Workout Complete Summary</div>
+    <div style="padding-left:32px;">│   └── Quick Weight Input Bar</div>
+    <div style="padding-left:16px;">├── <span style="background:#3b82f6; color:#fff; padding:1px 6px; border-radius:3px;">L2</span> <strong>Progress</strong> sub-tab</div>
+    <div style="padding-left:32px;">│   ├── Insight Cards (swipeable)</div>
+    <div style="padding-left:32px;">│   ├── Charts (volume, weight, strength)</div>
+    <div style="padding-left:32px;">│   └── Stats Cards</div>
+    <div style="padding-left:16px;">└── <span style="background:#3b82f6; color:#fff; padding:1px 6px; border-radius:3px;">L2</span> <strong>History</strong> sub-tab</div>
+    <div style="padding-left:32px;">&nbsp;&nbsp;&nbsp; ├── Filter Chips (All/Strength/Cardio)</div>
+    <div style="padding-left:32px;">&nbsp;&nbsp;&nbsp; └── Workout List → <em>Expand in-place</em> (không navigate)</div>
+  </div>
+  
+  <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+    <div style="text-align:center; padding:8px; background:#dcfce7; border-radius:8px;">
+      <div style="font-size:18px; font-weight:800; color:#16a34a;">Max 3</div>
+      <div style="font-size:10px;">Navigation levels</div>
+    </div>
+    <div style="text-align:center; padding:8px; background:#dcfce7; border-radius:8px;">
+      <div style="font-size:18px; font-weight:800; color:#16a34a;">0</div>
+      <div style="font-size:10px;">Nested modals</div>
+    </div>
+    <div style="text-align:center; padding:8px; background:#dcfce7; border-radius:8px;">
+      <div style="font-size:18px; font-weight:800; color:#16a34a;">✅</div>
+      <div style="font-size:10px;">Consistent CalendarTab pattern</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- KEY INTERACTIONS -->
+<div class="section">
+  <h3>🔑 Interaction Details — Bottom Tab khi đang tập</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div style="border:2px solid #e2e8f0; border-radius:12px; padding:14px;">
+      <div style="font-weight:600; margin-bottom:8px; font-size:13px;">Option 1: Ẩn bottom tab hoàn toàn</div>
+      <div style="font-size:11px; line-height:1.8;">
+        Khi user ở WorkoutLogger (L3):<br>
+        • Bottom tab bar biến mất<br>
+        • Full screen cho logging<br>
+        • Back button ở header để quay lại<br>
+        • Prevent "tab vào Calendar giữa buổi tập"
+      </div>
+      <div style="background:#dcfce7; border-radius:6px; padding:6px; font-size:10px; margin-top:8px;">
+        ✅ Focus mode — không bị distract<br>
+        ✅ Nhiều screen space hơn cho logging
+      </div>
+    </div>
+    <div style="border:2px solid #e2e8f0; border-radius:12px; padding:14px;">
+      <div style="font-weight:600; margin-bottom:8px; font-size:13px;">Option 2: Mini floating indicator</div>
+      <div style="font-size:11px; line-height:1.8;">
+        Khi user navigate ra tab khác giữa buổi tập:<br>
+        • Floating mini bar ở bottom: "🏋️ Đang tập — 12:34"<br>
+        • Tap vào → quay lại Logger ngay<br>
+        • Giống Spotify mini player
+      </div>
+      <div style="background:#fef3c7; border-radius:6px; padding:6px; font-size:10px; margin-top:8px;">
+        ⚡ Nice-to-have cho Phase 2<br>
+        Phase 1: Ẩn tab + Back button đủ rồi
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Bạn chọn phương án nào?</h3>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="solution-b">
+    ✅ <strong>B. Full-screen Logger + Bottom Sheet ExerciseSelector — Chốt & chuyển Issue 4</strong><br>
+    <small>Max 3 levels, no nested modals, bottom tab ẩn khi tập</small>
+  </div>
+  <div class="option" data-id="solution-b-plus">
+    ⚡ <strong>B + Floating Mini Indicator cho Phase 1 luôn</strong><br>
+    <small>Thêm "Đang tập" mini bar khi user navigate ra tab khác</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong>
+  </div>
+</div>

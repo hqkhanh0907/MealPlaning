@@ -1,0 +1,207 @@
+<h2>🔄 Fitness Tab Brainstorm — Tổng kiểm tra tiến độ</h2>
+<p class="subtitle">Review toàn bộ những gì đã thảo luận + xác định gaps còn lại</p>
+
+<!-- STATUS OVERVIEW -->
+<div class="section">
+  <h3>📋 Những gì ĐÃ XÁC ĐỊNH (Decisions Made)</h3>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; margin-bottom: 24px;">
+  <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid #10b981; border-radius: 10px; font-size: 12px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 6px;">✅ 1. Target Users</div>
+    Cả 3 nhóm: Beginner + Intermediate + Advanced. Ưu tiên UX cho Advanced users.
+  </div>
+  <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid #10b981; border-radius: 10px; font-size: 12px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 6px;">✅ 2. Workout Logging Flow</div>
+    Progressive Intelligence: Phase 1 (Manual) → Phase 2 (AI Pre-fill) → Phase 3 (Smart Adjust). One-tap confirm.
+  </div>
+  <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid #10b981; border-radius: 10px; font-size: 12px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 6px;">✅ 3. Data Pipeline</div>
+    12 input fields → 6-step calculation → Auto-generated plan. Example output for 83kg Intermediate male.
+  </div>
+  <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid #10b981; border-radius: 10px; font-size: 12px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 6px;">✅ 4. Scientific Validation</div>
+    8/8 papers verified. 2 corrections: Schoenfeld 2017 journal name + Zourdos RPE correlation values.
+  </div>
+  <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid #10b981; border-radius: 10px; font-size: 12px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 6px;">✅ 5. Nutrition Gaps</div>
+    4 gaps: goal_type, rate_of_change, target_weight, daily_weight_input. Pipeline Phase 1-4 defined.
+  </div>
+  <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid #10b981; border-radius: 10px; font-size: 12px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 6px;">✅ 6. Location Options</div>
+    5 phương án A-E đã trình bày. E (Hybrid) được đề xuất.
+  </div>
+</div>
+
+<!-- PENDING DECISIONS -->
+<div class="section">
+  <h3>⏳ Câu hỏi đã hỏi nhưng CHƯA TRẢ LỜI</h3>
+</div>
+<div style="padding: 14px; background: rgba(245,158,11,0.08); border: 2px solid #f59e0b; border-radius: 10px; margin-bottom: 24px; font-size: 13px;">
+  <div style="margin-bottom: 8px;">❓ <strong>Phương án thu thập dữ liệu:</strong> Chọn A / B / C / D / E? (đã trình bày, chờ chọn)</div>
+</div>
+
+<!-- THE 8 TRAINING GAPS -->
+<div class="section">
+  <h3>🚨 8 Vấn đề CHƯA THẢO LUẬN cho Training Plan</h3>
+  <p style="font-size: 13px; color: var(--text-muted);">Những yếu tố này ảnh hưởng trực tiếp đến chất lượng kế hoạch tập luyện được tạo ra</p>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card-bg); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: #334155; color: white;">
+      <th style="padding: 10px; text-align: center; width: 5%;">#</th>
+      <th style="padding: 10px; text-align: left; width: 18%;">Vấn đề</th>
+      <th style="padding: 10px; text-align: center; width: 10%;">Mức độ</th>
+      <th style="padding: 10px; text-align: left; width: 35%;">Tại sao quan trọng?</th>
+      <th style="padding: 10px; text-align: left; width: 32%;">Ảnh hưởng nếu bỏ qua</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- 1. Cardio -->
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(239,68,68,0.04);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">1</td>
+      <td style="padding: 10px; font-weight: 700;">Cardio Tracking</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #ef4444; color: white; border-radius: 4px; font-size: 11px;">CRITICAL</span></td>
+      <td style="padding: 10px;">
+        Cardio (chạy bộ, đạp xe, bơi) log theo <strong>thời gian + cường độ</strong>, không phải weight × reps. <br>
+        Ảnh hưởng TDEE calculation (đốt thêm 200-600 kcal/session). <br>
+        Cần data input khác hoàn toàn so với strength training.
+      </td>
+      <td style="padding: 10px;">
+        • TDEE tính sai (thiếu calo cardio)<br>
+        • Không thể quản lý recovery giữa strength + cardio<br>
+        • User cardio-heavy không dùng được app
+      </td>
+    </tr>
+    <!-- 2. Exercise Database -->
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(239,68,68,0.04);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">2</td>
+      <td style="padding: 10px; font-weight: 700;">Exercise Database</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #ef4444; color: white; border-radius: 4px; font-size: 11px;">CRITICAL</span></td>
+      <td style="padding: 10px;">
+        Auto-generate plan cần chọn bài tập → từ đâu?<br>
+        <strong>Pre-loaded</strong>: ~100-200 exercises với muscle group tags<br>
+        <strong>User-created</strong>: User tự thêm<br>
+        <strong>Hybrid</strong>: Pre-loaded + user custom
+      </td>
+      <td style="padding: 10px;">
+        • Không có database = plan chỉ là text, không actionable<br>
+        • User phải nhập tay mọi bài tập = friction cao<br>
+        • AI không thể suggest bài tập thay thế
+      </td>
+    </tr>
+    <!-- 3. Periodization -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">3</td>
+      <td style="padding: 10px; font-weight: 700;">Periodization Model</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 11px;">IMPORTANT</span></td>
+      <td style="padding: 10px;">
+        <strong>Linear</strong>: Tăng dần mỗi tuần (đơn giản, tốt cho beginner)<br>
+        <strong>Undulating</strong>: Heavy/Light/Medium xen kẽ trong tuần (tốt cho intermediate+)<br>
+        <strong>Block</strong>: 4-6 tuần Strength → 4-6 tuần Hypertrophy → Peak (advanced)
+      </td>
+      <td style="padding: 10px;">
+        • Beginner: Linear OK, không ảnh hưởng<br>
+        • Intermediate+: Linear sẽ plateau nhanh<br>
+        • Advanced: PHẢI có periodization
+      </td>
+    </tr>
+    <!-- 4. Plan Cycle Duration -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">4</td>
+      <td style="padding: 10px; font-weight: 700;">Plan Cycle Duration</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 11px;">IMPORTANT</span></td>
+      <td style="padding: 10px;">
+        Plan tập có <strong>thời hạn</strong> không?<br>
+        <strong>Fixed block</strong>: 4/6/8 tuần → deload → plan mới<br>
+        <strong>Rolling/continuous</strong>: Chạy liên tục, deload khi cần
+      </td>
+      <td style="padding: 10px;">
+        • Không có endpoint → user không biết khi nào plan "xong"<br>
+        • Deload timing bị mơ hồ<br>
+        • Không thể đo progress per cycle
+      </td>
+    </tr>
+    <!-- 5. Warm-up -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">5</td>
+      <td style="padding: 10px; font-weight: 700;">Warm-up / Cool-down</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">NICE-TO-HAVE</span></td>
+      <td style="padding: 10px;">
+        Auto-generate warm-up sets trước bài tập nặng?<br>
+        Ví dụ: Bench 80kg → Warm-up: 20kg×10, 40kg×5, 60kg×3, 70kg×1
+      </td>
+      <td style="padding: 10px;">
+        • Không gây sai calculation<br>
+        • Nhưng thiếu = user mới có thể chấn thương<br>
+        • Có thể thêm sau (Phase 2)
+      </td>
+    </tr>
+    <!-- 6. Focus Muscle Groups -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">6</td>
+      <td style="padding: 10px; font-weight: 700;">Focus / Priority Muscles</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">NICE-TO-HAVE</span></td>
+      <td style="padding: 10px;">
+        User muốn ưu tiên nhóm cơ nào?<br>
+        "Tôi muốn tập trung vào lưng và vai" → thêm 2-3 sets cho lưng/vai, giảm ở nhóm khác
+      </td>
+      <td style="padding: 10px;">
+        • Plan vẫn balanced = OK cho đa số<br>
+        • Advanced users muốn customize = friction<br>
+        • Có thể thêm sau
+      </td>
+    </tr>
+    <!-- 7. Workout Time Pref -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; text-align: center; font-weight: 700;">7</td>
+      <td style="padding: 10px; font-weight: 700;">Workout Time Preference</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #6b7280; color: white; border-radius: 4px; font-size: 11px;">LOW</span></td>
+      <td style="padding: 10px;">
+        Sáng vs tối ảnh hưởng khả năng nâng nặng (cortisol cycle, body temperature).<br>
+        Sáng: nhẹ hơn 5-10%. Tối: peak performance.
+      </td>
+      <td style="padding: 10px;">
+        • Ảnh hưởng nhỏ (~5%)<br>
+        • User tự điều chỉnh<br>
+        • Bỏ qua ở giai đoạn này
+      </td>
+    </tr>
+    <!-- 8. Rest Day Programming -->
+    <tr>
+      <td style="padding: 10px; text-align: center; font-weight: 700;">8</td>
+      <td style="padding: 10px; font-weight: 700;">Rest Day Programming</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 2px 8px; background: #3b82f6; color: white; border-radius: 4px; font-size: 11px;">NICE-TO-HAVE</span></td>
+      <td style="padding: 10px;">
+        Ngày nghỉ có gợi ý hoạt động không?<br>
+        Active recovery: đi bộ 30 phút, yoga, mobility, foam rolling
+      </td>
+      <td style="padding: 10px;">
+        • Plan vẫn hoạt động tốt<br>
+        • Beginner không cần<br>
+        • Advanced tự biết recovery<br>
+        • Thêm sau khi core features xong
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- RECOMMENDATION -->
+<div style="margin-top: 24px; padding: 16px; background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 12px;">
+  <div style="font-weight: 800; font-size: 15px; margin-bottom: 10px;">💡 Đề xuất phân loại</div>
+  <div style="font-size: 13px; line-height: 1.8;">
+    <strong style="color: #ef4444;">🔴 Phase 1 — BẮT BUỘC giải quyết trước khi design:</strong><br>
+    &nbsp;&nbsp;① Cardio Tracking (ảnh hưởng data model + UI)<br>
+    &nbsp;&nbsp;② Exercise Database (ảnh hưởng toàn bộ plan generation)<br><br>
+    <strong style="color: #f59e0b;">🟡 Phase 1.5 — Cần quyết định nhưng có default hợp lý:</strong><br>
+    &nbsp;&nbsp;③ Periodization → Default: Linear cho Beginner, Undulating cho Intermediate+<br>
+    &nbsp;&nbsp;④ Plan Cycle → Default: 4-week blocks với auto-deload<br><br>
+    <strong style="color: #3b82f6;">🔵 Phase 2 — Thêm sau:</strong><br>
+    &nbsp;&nbsp;⑤ Warm-up auto-generation<br>
+    &nbsp;&nbsp;⑥ Focus muscle groups<br>
+    &nbsp;&nbsp;⑧ Rest day programming<br><br>
+    <strong style="color: #6b7280;">⚪ Bỏ qua:</strong><br>
+    &nbsp;&nbsp;⑦ Workout time preference (ảnh hưởng quá nhỏ)
+  </div>
+</div>

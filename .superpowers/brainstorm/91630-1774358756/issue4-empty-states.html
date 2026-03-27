@@ -1,0 +1,257 @@
+<h2>🟡 Issue 4: Rest Day & Empty States</h2>
+<p class="subtitle">Ngày nghỉ / chưa có plan / plan hết hạn — User nhìn thấy gì?</p>
+
+<!-- PROBLEM -->
+<div class="section">
+  <h3>📌 Các trạng thái "trống" cần xử lý</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;">
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:12px; text-align:center;">
+      <div style="font-size:22px; margin-bottom:4px;">📅</div>
+      <div style="font-size:12px; font-weight:600;">Rest Day</div>
+      <div style="font-size:10px; color:#64748b; margin-top:4px;">Ngày nghỉ theo plan</div>
+    </div>
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:12px; text-align:center;">
+      <div style="font-size:22px; margin-bottom:4px;">🆕</div>
+      <div style="font-size:12px; font-weight:600;">First Time</div>
+      <div style="font-size:10px; color:#64748b; margin-top:4px;">Chưa tạo plan</div>
+    </div>
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:12px; text-align:center;">
+      <div style="font-size:22px; margin-bottom:4px;">⏰</div>
+      <div style="font-size:12px; font-weight:600;">Plan Expired</div>
+      <div style="font-size:10px; color:#64748b; margin-top:4px;">Hết chu kỳ 8 tuần</div>
+    </div>
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:12px; text-align:center;">
+      <div style="font-size:22px; margin-bottom:4px;">📊</div>
+      <div style="font-size:12px; font-weight:600;">No Data Yet</div>
+      <div style="font-size:10px; color:#64748b; margin-top:4px;">Progress/History trống</div>
+    </div>
+  </div>
+  <div style="margin-top:10px; font-size:12px; color:#64748b;">
+    Nếu chỉ hiện "Không có dữ liệu" → wasted engagement opportunity. Mỗi trạng thái cần <strong>content hữu ích</strong>.
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- REST DAY -->
+<div class="section">
+  <h3>📅 State 1: Rest Day — 3 phương án</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+    <!-- Option A: Empty -->
+    <div style="border:2px solid #e2e8f0; border-radius:14px; overflow:hidden;">
+      <div style="background:#f1f5f9; padding:8px; text-align:center; font-weight:600; font-size:12px;">A. Trống + Icon</div>
+      <div style="padding:16px; text-align:center; min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size:40px; margin-bottom:8px;">😴</div>
+        <div style="font-size:14px; font-weight:600;">Ngày nghỉ</div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Hôm nay không có buổi tập</div>
+      </div>
+      <div style="padding:8px; background:#fef2f2; font-size:10px; text-align:center; color:#dc2626;">
+        ❌ Wasted space, zero value
+      </div>
+    </div>
+    
+    <!-- Option B: Smart Rest Day -->
+    <div style="border:3px solid #10b981; border-radius:14px; overflow:hidden;">
+      <div style="background:#10b981; color:#fff; padding:8px; text-align:center; font-weight:600; font-size:12px;">B. Smart Rest Day ✅</div>
+      <div style="padding:14px; min-height:200px;">
+        <!-- Recovery info -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <div style="font-size:28px;">🧘</div>
+          <div>
+            <div style="font-size:14px; font-weight:700;">Ngày phục hồi</div>
+            <div style="font-size:10px; color:#64748b;">Cơ bắp đang hồi phục</div>
+          </div>
+        </div>
+        
+        <!-- Recovery tips -->
+        <div style="background:#f0fdf4; border-radius:8px; padding:8px; margin-bottom:8px;">
+          <div style="font-size:10px; font-weight:600; color:#16a34a; margin-bottom:4px;">💡 Gợi ý phục hồi:</div>
+          <div style="font-size:10px; line-height:1.7;">
+            🚶 Đi bộ nhẹ 20 phút<br>
+            💧 Uống đủ 2.5L nước<br>
+            🥗 Ăn đủ 166g protein
+          </div>
+        </div>
+        
+        <!-- Tomorrow preview -->
+        <div style="background:#eff6ff; border-radius:8px; padding:8px; margin-bottom:8px;">
+          <div style="font-size:10px; font-weight:600; color:#2563eb; margin-bottom:4px;">📋 Ngày mai:</div>
+          <div style="font-size:11px; font-weight:600;">Upper Body B</div>
+          <div style="font-size:10px; color:#64748b;">5 bài tập • ~45 min</div>
+        </div>
+        
+        <!-- Quick actions -->
+        <div style="display:flex; gap:4px;">
+          <div style="flex:1; background:#f1f5f9; border-radius:6px; padding:6px; text-align:center; font-size:9px;">🏃 Log Cardio</div>
+          <div style="flex:1; background:#f1f5f9; border-radius:6px; padding:6px; text-align:center; font-size:9px;">⚖️ Cân nặng</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Option C: Quick Actions only -->
+    <div style="border:2px solid #e2e8f0; border-radius:14px; overflow:hidden;">
+      <div style="background:#f1f5f9; padding:8px; text-align:center; font-weight:600; font-size:12px;">C. Quick Actions</div>
+      <div style="padding:14px; min-height:200px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:6px;">💪 Ngày nghỉ</div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:12px;">Không có buổi tập hôm nay</div>
+        
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-size:12px;">🏃 Log cardio ngoài lịch</div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:6px; cursor:pointer;">
+          <div style="font-size:12px;">⚖️ Cập nhật cân nặng</div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px; cursor:pointer;">
+          <div style="font-size:12px;">📸 Ảnh tiến trình</div>
+        </div>
+      </div>
+      <div style="padding:8px; background:#fef3c7; font-size:10px; text-align:center; color:#d97706;">
+        Functional nhưng thiếu guidance/motivation
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FIRST TIME -->
+<div class="section">
+  <h3>🆕 State 2: First Time — Chưa tạo plan</h3>
+  
+  <div style="max-width:320px; margin:0 auto; border:2px solid #e2e8f0; border-radius:20px; padding:20px; background:#fff;">
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:48px; margin-bottom:8px;">🏋️</div>
+      <div style="font-size:18px; font-weight:800;">Bắt đầu hành trình</div>
+      <div style="font-size:13px; color:#64748b; margin-top:4px;">Tạo kế hoạch tập luyện cá nhân hóa</div>
+    </div>
+    
+    <div style="background:#f0fdf4; border-radius:12px; padding:12px; margin-bottom:16px;">
+      <div style="font-size:12px; line-height:1.8;">
+        ✅ AI tạo plan phù hợp với bạn<br>
+        ✅ Chỉ cần trả lời 3 câu hỏi<br>
+        ✅ Có thể điều chỉnh bất cứ lúc nào
+      </div>
+    </div>
+    
+    <div style="background:#10b981; color:#fff; border-radius:12px; padding:14px; text-align:center; font-weight:700; font-size:15px;">
+      🚀 Tạo kế hoạch tập luyện
+    </div>
+    <div style="text-align:center; margin-top:8px;">
+      <span style="font-size:12px; color:#64748b;">Chỉ mất ~30 giây</span>
+    </div>
+  </div>
+  <div style="text-align:center; font-size:11px; color:#16a34a; margin-top:8px;">
+    → Bấm CTA → Mở Onboarding B+C Hybrid (Issue 1)
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PLAN EXPIRED -->
+<div class="section">
+  <h3>⏰ State 3: Plan Expired — Hết chu kỳ</h3>
+  
+  <div style="max-width:320px; margin:0 auto; border:2px solid #f59e0b; border-radius:20px; padding:20px; background:#fef3c7;">
+    <div style="text-align:center; margin-bottom:12px;">
+      <div style="font-size:36px; margin-bottom:4px;">🎉</div>
+      <div style="font-size:16px; font-weight:800;">Chu kỳ 8 tuần hoàn thành!</div>
+    </div>
+    
+    <!-- Summary -->
+    <div style="background:#fff; border-radius:12px; padding:12px; margin-bottom:12px;">
+      <div style="font-size:12px; font-weight:600; margin-bottom:6px;">📊 Tổng kết chu kỳ:</div>
+      <div style="font-size:11px; line-height:1.8;">
+        🏋️ 24 buổi tập hoàn thành<br>
+        📈 Volume tăng 18% so với tuần đầu<br>
+        ⚖️ Cân nặng: 83kg → 81.5kg (−1.5kg)<br>
+        💪 Bench PR: 77.5kg → 85kg (+7.5kg)
+      </div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <div style="background:#10b981; color:#fff; border-radius:10px; padding:12px; text-align:center; font-weight:700; font-size:12px;">
+        🔄 Tạo chu kỳ mới
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px; text-align:center; font-size:12px;">
+        ⚙️ Chỉnh mục tiêu
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:6px;">
+      <span style="font-size:11px; color:#92400e;">AI sẽ điều chỉnh dựa trên progress</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- EMPTY DATA STATES -->
+<div class="section">
+  <h3>📊 State 4: Progress & History tabs khi chưa có data</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <!-- Progress empty -->
+    <div style="border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:10px;">Progress sub-tab (chưa có data)</div>
+      <div style="max-width:260px; margin:0 auto; background:#f8fafc; border-radius:12px; padding:16px; text-align:center;">
+        <div style="font-size:36px; margin-bottom:8px;">📈</div>
+        <div style="font-size:14px; font-weight:600;">Biểu đồ sẽ xuất hiện ở đây</div>
+        <div style="font-size:11px; color:#64748b; margin-top:4px; margin-bottom:12px;">Hoàn thành buổi tập đầu tiên để xem tiến trình</div>
+        
+        <!-- Skeleton chart -->
+        <div style="background:#e2e8f0; border-radius:8px; height:80px; display:flex; align-items:end; justify-content:center; gap:6px; padding:8px; margin-bottom:8px;">
+          <div style="width:16px; background:#cbd5e1; border-radius:3px 3px 0 0; height:20%;"></div>
+          <div style="width:16px; background:#cbd5e1; border-radius:3px 3px 0 0; height:35%;"></div>
+          <div style="width:16px; background:#cbd5e1; border-radius:3px 3px 0 0; height:50%;"></div>
+          <div style="width:16px; background:#cbd5e1; border-radius:3px 3px 0 0; height:40%;"></div>
+          <div style="width:16px; background:#94a3b8; border-radius:3px 3px 0 0; height:65%;"></div>
+        </div>
+        <div style="font-size:10px; color:#94a3b8;">Preview: Volume Trend sẽ trông như thế này</div>
+      </div>
+    </div>
+    
+    <!-- History empty -->
+    <div style="border:2px solid #e2e8f0; border-radius:14px; padding:14px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:10px;">History sub-tab (chưa có data)</div>
+      <div style="max-width:260px; margin:0 auto; background:#f8fafc; border-radius:12px; padding:16px; text-align:center;">
+        <div style="font-size:36px; margin-bottom:8px;">📜</div>
+        <div style="font-size:14px; font-weight:600;">Lịch sử tập luyện</div>
+        <div style="font-size:11px; color:#64748b; margin-top:4px; margin-bottom:12px;">Các buổi tập sẽ được ghi lại ở đây</div>
+        
+        <!-- Skeleton list -->
+        <div style="text-align:left;">
+          <div style="background:#e2e8f0; border-radius:6px; height:36px; margin-bottom:6px;"></div>
+          <div style="background:#e2e8f0; border-radius:6px; height:36px; margin-bottom:6px; opacity:0.6;"></div>
+          <div style="background:#e2e8f0; border-radius:6px; height:36px; opacity:0.3;"></div>
+        </div>
+        
+        <div style="margin-top:12px; background:#10b981; color:#fff; border-radius:8px; padding:8px; font-weight:600; font-size:12px;">
+          ▶️ Bắt đầu tập ngay
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top:12px; background:#dcfce7; border-radius:8px; padding:10px; font-size:11px;">
+    <strong>Pattern:</strong> Skeleton preview + CTA action → không bao giờ chỉ hiện text "Không có dữ liệu".<br>
+    User thấy <em>cái gì sẽ xuất hiện</em> (motivation) + <em>cách để có nó</em> (CTA rõ ràng).
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Xác nhận 4 Empty States</h3>
+  <p>Bạn đồng ý với cách xử lý từng state?</p>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approve-all">
+    ✅ <strong>Đồng ý tất cả — Chuyển Issue 5</strong><br>
+    <small>Rest Day (Smart), First Time (CTA), Expired (Summary+Renew), Empty (Skeleton+CTA)</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong>
+  </div>
+</div>

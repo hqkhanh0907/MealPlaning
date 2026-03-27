@@ -1,0 +1,92 @@
+/* ========================================================================
+   Shared CSS Animations — Motion System (§12.5)
+   ======================================================================== */
+
+/* ── Keyframes ── */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Utility Classes ── */
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 300ms ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 150ms ease-out both;
+}
+
+/* ── Stagger Delay Tiers (30ms per tier) ── */
+
+.animate-stagger-1 {
+  animation-delay: 30ms;
+}
+
+.animate-stagger-2 {
+  animation-delay: 60ms;
+}
+
+.animate-stagger-3 {
+  animation-delay: 90ms;
+}
+
+.animate-stagger-4 {
+  animation-delay: 120ms;
+}
+
+.animate-stagger-5 {
+  animation-delay: 150ms;
+}
+
+/* ── Reduced Motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-stagger-1,
+  .animate-stagger-2,
+  .animate-stagger-3,
+  .animate-stagger-4,
+  .animate-stagger-5 {
+    animation-delay: 0ms;
+  }
+}

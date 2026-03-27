@@ -1,0 +1,403 @@
+<h2>🧬 Training Plan Engine: Data → Calculation → Output</h2>
+<p class="subtitle">Toàn bộ dữ liệu cần thu thập, mục đích, và cách tính toán ra training plan</p>
+
+<!-- SECTION 1: DATA COLLECTION -->
+<div class="section">
+  <h3>📥 LỚP 1: Dữ liệu thu thập từ người dùng</h3>
+  <p style="font-size: 13px; opacity: 0.8; margin-bottom: 16px;">Mỗi dữ liệu phục vụ một mục đích cụ thể trong thuật toán. Không thu thập thừa.</p>
+</div>
+
+<!-- Data collection table -->
+<div style="overflow-x: auto;">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card-bg); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: #10b981; color: white;">
+      <th style="padding: 10px; text-align: left; width: 15%;">Dữ liệu</th>
+      <th style="padding: 10px; text-align: left; width: 15%;">Input type</th>
+      <th style="padding: 10px; text-align: left; width: 35%;">Mục đích & Ý nghĩa</th>
+      <th style="padding: 10px; text-align: left; width: 35%;">Ảnh hưởng đến Plan</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Already have -->
+    <tr style="background: rgba(16, 185, 129, 0.08);">
+      <td colspan="4" style="padding: 8px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; color: #10b981;">✅ Đã có trong Health Profile (Nutrition spec)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Giới tính</td>
+      <td style="padding: 10px;"><code>male / female</code></td>
+      <td style="padding: 10px;">Hormone profile → ảnh hưởng tốc độ phục hồi và khả năng phát triển cơ. Nam có testosterone cao hơn → volume tolerance cao hơn</td>
+      <td style="padding: 10px;">Nam: volume +10-15% so với nữ ở cùng experience level</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Tuổi</td>
+      <td style="padding: 10px;"><code>number</code></td>
+      <td style="padding: 10px;">Tuổi cao → recovery chậm hơn, khớp nhạy cảm hơn. Ảnh hưởng đến rest time và volume tối đa</td>
+      <td style="padding: 10px;">>40: giảm volume 10%, tăng rest time. >50: ưu tiên bài tập nhẹ khớp</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Cân nặng</td>
+      <td style="padding: 10px;"><code>kg</code></td>
+      <td style="padding: 10px;">Tính Relative Strength (sức mạnh tương đối = weight lifted / body weight). Người nặng hơn thường lift nặng hơn tuyệt đối</td>
+      <td style="padding: 10px;">Ước lượng weight khởi điểm cho bài tập (nếu chưa có history)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Mục tiêu (cut/bulk/maintain)</td>
+      <td style="padding: 10px;"><code>select</code></td>
+      <td style="padding: 10px;">Cut = calorie deficit → recovery giảm → volume phải giảm. Bulk = calorie surplus → recovery tốt → có thể push volume cao</td>
+      <td style="padding: 10px;">Cut: volume -20%. Bulk: volume có thể +10%. Maintain: volume chuẩn</td>
+    </tr>
+
+    <!-- NEW: Training-specific -->
+    <tr style="background: rgba(59, 130, 246, 0.08);">
+      <td colspan="4" style="padding: 8px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; color: #3b82f6;">🆕 Cần thu thập thêm (Training-specific)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">⭐ Kinh nghiệm tập</td>
+      <td style="padding: 10px;"><code>Beginner / Intermediate / Advanced</code></td>
+      <td style="padding: 10px;"><strong>Quan trọng nhất.</strong> Quyết định Volume Landmarks — bao nhiêu set/tuần là đủ để cơ phát triển mà không quá tải. Dựa trên nghiên cứu của Dr. Mike Israetel (RP Strength):
+        <br>• <strong>MEV</strong> (Minimum Effective Volume): Set tối thiểu để kích thích cơ
+        <br>• <strong>MAV</strong> (Maximum Adaptive Volume): Set tối ưu cho phát triển
+        <br>• <strong>MRV</strong> (Maximum Recoverable Volume): Set tối đa mà cơ thể còn phục hồi được
+      </td>
+      <td style="padding: 10px;">
+        <div style="font-size: 12px; line-height: 1.8;">
+          <div>Beginner: <strong>10 sets/cơ/tuần</strong></div>
+          <div>Intermediate: <strong>15 sets/cơ/tuần</strong></div>
+          <div>Advanced: <strong>20+ sets/cơ/tuần</strong></div>
+        </div>
+      </td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">⭐ Số ngày tập/tuần</td>
+      <td style="padding: 10px;"><code>2-6 days</code></td>
+      <td style="padding: 10px;"><strong>Quyết định Training Split</strong> — cách phân chia nhóm cơ vào các ngày. Tần suất cao → mỗi buổi nhẹ hơn nhưng tập đều hơn</td>
+      <td style="padding: 10px;">
+        <div style="font-size: 12px; line-height: 1.8;">
+          <div>2-3 ngày → <strong>Full Body</strong> (tập toàn thân)</div>
+          <div>4 ngày → <strong>Upper/Lower</strong> (trên/dưới)</div>
+          <div>5-6 ngày → <strong>Push/Pull/Legs</strong></div>
+        </div>
+      </td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">⭐ Thời gian mỗi buổi</td>
+      <td style="padding: 10px;"><code>30 / 45 / 60 / 90 phút</code></td>
+      <td style="padding: 10px;">Giới hạn số bài tập có thể làm. Mỗi bài tập compound (3 sets × 90s rest) mất ~8-10 phút. Isolation mất ~5-6 phút</td>
+      <td style="padding: 10px;">
+        <div style="font-size: 12px; line-height: 1.8;">
+          <div>30 min: <strong>3-4 bài tập</strong></div>
+          <div>45 min: <strong>4-5 bài tập</strong></div>
+          <div>60 min: <strong>5-7 bài tập</strong></div>
+          <div>90 min: <strong>7-9 bài tập</strong></div>
+        </div>
+      </td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">⭐ Mục tiêu tập luyện</td>
+      <td style="padding: 10px;"><code>Strength / Hypertrophy / Endurance / General</code></td>
+      <td style="padding: 10px;">Khác với mục tiêu cân nặng (cut/bulk). Đây là mục tiêu <em>khi tập</em>:
+        <br>• <strong>Strength</strong>: Tăng sức mạnh tối đa (powerlifting)
+        <br>• <strong>Hypertrophy</strong>: Tăng kích thước cơ (bodybuilding)
+        <br>• <strong>Endurance</strong>: Tăng sức bền cơ
+        <br>• <strong>General</strong>: Sức khỏe tổng quát
+      </td>
+      <td style="padding: 10px;">
+        <div style="font-size: 12px; line-height: 1.8;">
+          <div>Strength: <strong>3-5 reps, heavy, 3-5 min rest</strong></div>
+          <div>Hypertrophy: <strong>8-12 reps, moderate, 90-120s rest</strong></div>
+          <div>Endurance: <strong>15-20 reps, light, 30-60s rest</strong></div>
+          <div>General: <strong>Mixed ranges</strong></div>
+        </div>
+      </td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Thiết bị</td>
+      <td style="padding: 10px;"><code>multi-select chips</code></td>
+      <td style="padding: 10px;">Lọc danh sách bài tập. Không có barbell → không thể Barbell Squat → thay bằng Goblet Squat hoặc Leg Press</td>
+      <td style="padding: 10px;">Filter exercise database: Barbell, Dumbbell, Machine, Cable, Bodyweight, Bands</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Chấn thương/Hạn chế</td>
+      <td style="padding: 10px;"><code>multi-select: vùng cơ thể</code></td>
+      <td style="padding: 10px;">Loại trừ hoặc thay thế bài tập nguy hiểm cho vùng bị chấn thương. An toàn là ưu tiên số 1</td>
+      <td style="padding: 10px;">Vai đau → bỏ OHP, đổi Bench angle. Lưng dưới → bỏ Deadlift, dùng Leg Press</td>
+    </tr>
+
+    <!-- OPTIONAL: Advanced -->
+    <tr style="background: rgba(168, 85, 247, 0.08);">
+      <td colspan="4" style="padding: 8px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; color: #8b5cf6;">🔮 Tùy chọn nâng cao (Optional — cho Advanced user)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Body Fat %</td>
+      <td style="padding: 10px;"><code>% hoặc estimate</code></td>
+      <td style="padding: 10px;">Xác định Lean Body Mass (khối lượng cơ). LBM cao → volume tolerance cao hơn. Chính xác hơn dùng cân nặng thô</td>
+      <td style="padding: 10px;">LBM = weight × (1 - bf%). Dùng LBM thay weight cho protein calc</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">1RM đã biết</td>
+      <td style="padding: 10px;"><code>kg cho Squat/Bench/Deadlift/OHP</code></td>
+      <td style="padding: 10px;">1 Rep Max = mức tạ nặng nhất có thể nâng 1 lần. Nếu biết → tính chính xác weight cho mỗi rep range (ví dụ: 70% 1RM = weight cho set 10 reps)</td>
+      <td style="padding: 10px;">Set 5 reps → 85% 1RM. Set 10 reps → 70% 1RM. Không biết → ước lượng từ performance</td>
+    </tr>
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 600;">Giấc ngủ TB/ngày</td>
+      <td style="padding: 10px;"><code>hours</code></td>
+      <td style="padding: 10px;">Sleep < 7h → recovery giảm 20-30%. Ảnh hưởng trực tiếp đến khả năng chịu tải volume</td>
+      <td style="padding: 10px;"><7h: giảm volume 10%, tăng rest time, tăng deload frequency</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 2: CALCULATION PIPELINE -->
+<div class="section" style="margin-top: 32px;">
+  <h3>⚙️ LỚP 2: Thuật toán tính toán — 6 bước sinh Training Plan</h3>
+  <p style="font-size: 13px; opacity: 0.8; margin-bottom: 16px;">Dữ liệu đầu vào → 6 bước xử lý tuần tự → Output: Kế hoạch tập chi tiết từng ngày</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 0;">
+
+  <!-- Step 1 -->
+  <div style="display: flex; gap: 16px; padding: 16px; background: var(--card-bg); border: 2px solid #3b82f6; border-radius: 12px 12px 0 0;">
+    <div style="min-width: 48px; height: 48px; background: #3b82f6; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;">1</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Xác định Training Split</div>
+      <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Input: <code>số ngày tập/tuần</code></div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <code style="padding: 4px 10px; background: #dbeafe; color: #1e40af; border-radius: 6px; font-size: 12px;">2-3 ngày → Full Body</code>
+        <code style="padding: 4px 10px; background: #dbeafe; color: #1e40af; border-radius: 6px; font-size: 12px;">4 ngày → Upper/Lower</code>
+        <code style="padding: 4px 10px; background: #dbeafe; color: #1e40af; border-radius: 6px; font-size: 12px;">5-6 ngày → PPL</code>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 16px; color: var(--border-color);">│</div>
+
+  <!-- Step 2 -->
+  <div style="display: flex; gap: 16px; padding: 16px; background: var(--card-bg); border: 2px solid #8b5cf6;">
+    <div style="min-width: 48px; height: 48px; background: #8b5cf6; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;">2</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Tính Weekly Volume per Muscle Group</div>
+      <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Input: <code>kinh nghiệm</code> + <code>mục tiêu cân nặng</code> + <code>tuổi</code> + <code>giấc ngủ</code></div>
+      <div style="font-size: 13px;">
+        <div style="margin-bottom: 4px;"><strong>Công thức:</strong></div>
+        <code style="display: block; padding: 10px; background: rgba(139,92,246,0.1); border-radius: 8px; font-size: 12px; line-height: 1.6;">
+          base_volume = VOLUME_TABLE[experience_level][muscle_group]<br>
+          adjusted = base_volume<br>
+          &nbsp;&nbsp;× goal_modifier &nbsp;&nbsp;// cut: 0.8, bulk: 1.1, maintain: 1.0<br>
+          &nbsp;&nbsp;× age_modifier &nbsp;&nbsp;&nbsp;// >40: 0.9, >50: 0.8, else: 1.0<br>
+          &nbsp;&nbsp;× sleep_modifier &nbsp;// <7h: 0.9, else: 1.0
+        </code>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 16px; color: var(--border-color);">│</div>
+
+  <!-- Step 3 -->
+  <div style="display: flex; gap: 16px; padding: 16px; background: var(--card-bg); border: 2px solid #f59e0b;">
+    <div style="min-width: 48px; height: 48px; background: #f59e0b; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;">3</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Chọn bài tập (Exercise Selection)</div>
+      <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Input: <code>thiết bị</code> + <code>chấn thương</code> + <code>kinh nghiệm</code></div>
+      <div style="font-size: 13px;">
+        <strong>Thứ tự ưu tiên:</strong>
+        <ol style="margin: 4px 0 0 16px; line-height: 1.8;">
+          <li><strong>Compound</strong> (đa khớp): Squat, Bench, Deadlift, Row, OHP — luôn ưu tiên</li>
+          <li><strong>Secondary Compound</strong>: Incline Bench, RDL, Front Squat — bổ trợ</li>
+          <li><strong>Isolation</strong> (đơn khớp): Curl, Lateral Raise, Leg Curl — hoàn thiện</li>
+        </ol>
+        <div style="margin-top: 6px;">
+          <code style="padding: 4px 10px; background: #fef3c7; color: #92400e; border-radius: 6px; font-size: 12px;">Filter: equipment ∩ NOT(injuries) ∩ experience_appropriate</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 16px; color: var(--border-color);">│</div>
+
+  <!-- Step 4 -->
+  <div style="display: flex; gap: 16px; padding: 16px; background: var(--card-bg); border: 2px solid #ef4444;">
+    <div style="min-width: 48px; height: 48px; background: #ef4444; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;">4</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Gán Rep Range & Weight</div>
+      <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Input: <code>mục tiêu tập</code> + <code>1RM (nếu có)</code> + <code>cân nặng</code></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+        <div style="padding: 8px; background: rgba(239,68,68,0.08); border-radius: 8px;">
+          <div style="font-weight: 700;">🏋️ Strength</div>
+          <div>3-5 reps × 4-5 sets</div>
+          <div>85-95% 1RM</div>
+          <div>Rest: 3-5 min</div>
+        </div>
+        <div style="padding: 8px; background: rgba(239,68,68,0.08); border-radius: 8px;">
+          <div style="font-weight: 700;">💪 Hypertrophy</div>
+          <div>8-12 reps × 3-4 sets</div>
+          <div>65-80% 1RM</div>
+          <div>Rest: 90-120s</div>
+        </div>
+        <div style="padding: 8px; background: rgba(239,68,68,0.08); border-radius: 8px;">
+          <div style="font-weight: 700;">🫀 Endurance</div>
+          <div>15-20 reps × 3 sets</div>
+          <div>50-65% 1RM</div>
+          <div>Rest: 30-60s</div>
+        </div>
+        <div style="padding: 8px; background: rgba(239,68,68,0.08); border-radius: 8px;">
+          <div style="font-weight: 700;">⚡ General</div>
+          <div>Mixed: undulating</div>
+          <div>Varied intensity</div>
+          <div>Rest: 60-120s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 16px; color: var(--border-color);">│</div>
+
+  <!-- Step 5 -->
+  <div style="display: flex; gap: 16px; padding: 16px; background: var(--card-bg); border: 2px solid #10b981;">
+    <div style="min-width: 48px; height: 48px; background: #10b981; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;">5</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Thiết lập Progressive Overload</div>
+      <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Input: <code>kinh nghiệm</code> → tốc độ tăng tải</div>
+      <div style="font-size: 13px;">
+        <strong>Double Progression Method:</strong> Khi user đạt đủ reps ở tất cả sets → tăng weight ở buổi tiếp theo
+        <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+          <code style="padding: 4px 10px; background: #d1fae5; color: #065f46; border-radius: 6px; font-size: 12px;">Beginner: +2.5kg (upper) / +5kg (lower) mỗi tuần</code>
+          <code style="padding: 4px 10px; background: #d1fae5; color: #065f46; border-radius: 6px; font-size: 12px;">Intermediate: +1.25kg mỗi 2 tuần</code>
+          <code style="padding: 4px 10px; background: #d1fae5; color: #065f46; border-radius: 6px; font-size: 12px;">Advanced: +1.25kg mỗi tháng</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 16px; color: var(--border-color);">│</div>
+
+  <!-- Step 6 -->
+  <div style="display: flex; gap: 16px; padding: 16px; background: var(--card-bg); border: 2px solid #6366f1; border-radius: 0 0 12px 12px;">
+    <div style="min-width: 48px; height: 48px; background: #6366f1; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;">6</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Lên lịch Deload & Tích hợp Nutrition</div>
+      <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Input: <code>kinh nghiệm</code> + <code>nutrition data</code></div>
+      <div style="font-size: 13px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <div style="font-weight: 700; margin-bottom: 4px;">🔄 Deload Schedule:</div>
+            <div style="font-size: 12px; line-height: 1.8;">
+              Beginner: mỗi 6-8 tuần<br>
+              Intermediate: mỗi 4-6 tuần<br>
+              Advanced: mỗi 3-4 tuần<br>
+              <em>Giảm 40% volume, giữ nguyên weight</em>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <div style="font-weight: 700; margin-bottom: 4px;">🍽️ Nutrition Integration:</div>
+            <div style="font-size: 12px; line-height: 1.8;">
+              Ngày tập: carbs +20% (fuel)<br>
+              Ngày nghỉ: carbs -20%<br>
+              Protein: luôn 2g/kg mọi ngày<br>
+              TDEE auto-adjust theo sessions thực tế
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: OUTPUT EXAMPLE -->
+<div class="section" style="margin-top: 32px;">
+  <h3>📋 LỚP 3: Output — Ví dụ Plan được sinh ra</h3>
+  <p style="font-size: 13px; opacity: 0.8; margin-bottom: 16px;">
+    Input: Nam, 28 tuổi, 83kg, Intermediate, 4 ngày/tuần, 60 phút/buổi, Hypertrophy, Full gym, Không chấn thương
+  </p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+  <!-- Day 1 -->
+  <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+    <div style="font-weight: 700; color: #3b82f6; margin-bottom: 2px;">📅 Thứ 2 — Upper A</div>
+    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px;">Push-focused | ~60 min</div>
+    <div style="font-size: 12px; line-height: 2;">
+      1. Bench Press — 4×8 @ 70kg<br>
+      2. Incline DB Press — 3×10 @ 24kg<br>
+      3. OHP — 3×10 @ 40kg<br>
+      4. Lateral Raise — 3×15 @ 8kg<br>
+      5. Tricep Pushdown — 3×12 @ 25kg<br>
+      6. Cable Fly — 3×12 @ 15kg
+    </div>
+  </div>
+  <!-- Day 2 -->
+  <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+    <div style="font-weight: 700; color: #10b981; margin-bottom: 2px;">📅 Thứ 3 — Lower A</div>
+    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px;">Quad-focused | ~60 min</div>
+    <div style="font-size: 12px; line-height: 2;">
+      1. Squat — 4×8 @ 100kg<br>
+      2. Leg Press — 3×12 @ 160kg<br>
+      3. RDL — 3×10 @ 80kg<br>
+      4. Leg Extension — 3×15 @ 50kg<br>
+      5. Leg Curl — 3×12 @ 40kg<br>
+      6. Calf Raise — 4×15 @ 60kg
+    </div>
+  </div>
+  <!-- Day 3 -->
+  <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+    <div style="font-weight: 700; color: #8b5cf6; margin-bottom: 2px;">📅 Thứ 5 — Upper B</div>
+    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px;">Pull-focused | ~60 min</div>
+    <div style="font-size: 12px; line-height: 2;">
+      1. Barbell Row — 4×8 @ 70kg<br>
+      2. Lat Pulldown — 3×10 @ 55kg<br>
+      3. Seated Cable Row — 3×12 @ 50kg<br>
+      4. Face Pull — 3×15 @ 15kg<br>
+      5. Bicep Curl — 3×12 @ 14kg<br>
+      6. Hammer Curl — 3×12 @ 12kg
+    </div>
+  </div>
+  <!-- Day 4 -->
+  <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+    <div style="font-weight: 700; color: #f59e0b; margin-bottom: 2px;">📅 Thứ 7 — Lower B</div>
+    <div style="font-size: 11px; color: #64748b; margin-bottom: 10px;">Hamstring-focused | ~60 min</div>
+    <div style="font-size: 12px; line-height: 2;">
+      1. Deadlift — 4×6 @ 120kg<br>
+      2. Front Squat — 3×10 @ 70kg<br>
+      3. Lunges — 3×10/leg @ 20kg<br>
+      4. Leg Curl — 3×12 @ 45kg<br>
+      5. Hip Thrust — 3×12 @ 80kg<br>
+      6. Calf Raise — 4×15 @ 65kg
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 16px; padding: 14px; background: rgba(99, 102, 241, 0.08); border: 1px solid #6366f1; border-radius: 10px; font-size: 13px;">
+  <strong>🔗 Tích hợp Nutrition cho plan này:</strong><br>
+  TDEE = 2,646 kcal | Mục tiêu: Bulk +300 = <strong>2,946 kcal</strong><br>
+  Protein: 166g (2g/kg × 83kg) | Fat: 74g (22%) | Carbs: 401g<br>
+  Ngày tập (Thứ 2,3,5,7): Carbs +20% = <strong>481g</strong> | Ngày nghỉ: Carbs -20% = <strong>321g</strong>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>Bạn thấy data pipeline này có đủ chi tiết không?</h3>
+  <div class="options">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>Đủ chi tiết, tiếp tục sang flow UI</h3>
+        <p>Pipeline 3 lớp + 6 bước tính toán hợp lý</p>
+      </div>
+    </div>
+    <div class="option" data-choice="more-data" onclick="toggleSelect(this)">
+      <div class="letter">+</div>
+      <div class="content">
+        <h3>Cần thêm dữ liệu thu thập</h3>
+        <p>Thiếu thông tin quan trọng chưa liệt kê</p>
+      </div>
+    </div>
+    <div class="option" data-choice="adjust-calc" onclick="toggleSelect(this)">
+      <div class="letter">⚙</div>
+      <div class="content">
+        <h3>Cần điều chỉnh thuật toán</h3>
+        <p>Logic tính toán cần thay đổi ở bước nào đó</p>
+      </div>
+    </div>
+  </div>
+</div>

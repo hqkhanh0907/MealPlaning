@@ -1,0 +1,709 @@
+<h2>📊 Dashboard — Phân tích chuyên sâu 4 góc nhìn chuyên gia</h2>
+<p class="subtitle">BA/PM × UI/UX × Data Analyst × Data Engineer</p>
+
+<!-- ============================================ -->
+<!-- EXPERT 1: BA/PM -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>👔 1. Business Analyst / Product Manager — KPIs & User Pain Points</h3>
+  
+  <div style="background:linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius:16px; padding:20px; color:#fff; margin-bottom:16px;">
+    <div style="font-size:14px; font-weight:800; margin-bottom:12px;">🎯 Core Question: "Người dùng cần nhìn thấy gì để biết hành trình sức khỏe đang đi đúng hướng?"</div>
+    <div style="font-size:12px; opacity:0.8;">
+      Ứng dụng này phục vụ 3 nhóm mục tiêu: <strong>Giảm cân (Cut)</strong>, <strong>Tăng cân (Bulk)</strong>, <strong>Duy trì (Maintain)</strong>.<br>
+      Dashboard phải trả lời được <strong>5 câu hỏi then chốt</strong> trong <strong>&lt; 5 giây</strong>.
+    </div>
+  </div>
+  
+  <!-- 5 Questions Framework -->
+  <div style="display:grid; gap:10px; margin-bottom:16px;">
+    <div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:0 12px 12px 0; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#1e40af;">Q1: "Hôm nay tôi đang ở đâu?"</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">→ KPI: <strong>Energy Balance</strong> (Calories IN − OUT vs Target)</div>
+        </div>
+        <div style="background:#3b82f6; color:#fff; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:600;">REAL-TIME</div>
+      </div>
+    </div>
+    
+    <div style="background:#f0fdf4; border-left:4px solid #10b981; border-radius:0 12px 12px 0; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#166534;">Q2: "Tôi có đang tiến bộ không?"</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">→ KPI: <strong>Weight Trend</strong> (7-day moving avg direction) + <strong>Volume Trend</strong></div>
+        </div>
+        <div style="background:#10b981; color:#fff; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:600;">WEEKLY</div>
+      </div>
+    </div>
+    
+    <div style="background:#fef3c7; border-left:4px solid #f59e0b; border-radius:0 12px 12px 0; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#92400e;">Q3: "Tôi có kiên trì không?"</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">→ KPI: <strong>Adherence Rate</strong> (% ngày đạt calo/protein) + <strong>Streak</strong></div>
+        </div>
+        <div style="background:#f59e0b; color:#fff; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:600;">DAILY</div>
+      </div>
+    </div>
+    
+    <div style="background:#fef2f2; border-left:4px solid #ef4444; border-radius:0 12px 12px 0; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#991b1b;">Q4: "Có vấn đề gì cần điều chỉnh?"</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">→ KPI: <strong>Auto-Adjust Alerts</strong> + <strong>Plateau Detection</strong> + <strong>Overtraining Warning</strong></div>
+        </div>
+        <div style="background:#ef4444; color:#fff; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:600;">14-DAY</div>
+      </div>
+    </div>
+    
+    <div style="background:#f5f3ff; border-left:4px solid #8b5cf6; border-radius:0 12px 12px 0; padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#5b21b6;">Q5: "Tiếp theo tôi cần làm gì?"</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">→ KPI: <strong>Next Action</strong> (workout hôm nay, bữa ăn thiếu, log cân nặng)</div>
+        </div>
+        <div style="background:#8b5cf6; color:#fff; padding:4px 10px; border-radius:99px; font-size:10px; font-weight:600;">NOW</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Pain Points -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:16px;">
+    <div style="font-weight:700; margin-bottom:10px;">😤 User Pain Points mà Dashboard giải quyết:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0;">Pain Point</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0;">Hiện tại (không có Dashboard)</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0;">Giải quyết bằng</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">"Tôi ăn đủ chưa?"</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#dc2626;">Phải vào Calendar → tính tay</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#10b981;">Energy Balance bar ngay Dashboard</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">"Cân nặng đi đúng hướng chưa?"</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#dc2626;">Phải tự nhớ hoặc mở Progress</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#10b981;">Weight mini-card với trend arrow</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">"Hôm nay tập bài gì?"</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#dc2626;">Phải vào Fitness → Plan sub-tab</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#10b981;">Today's Workout card + CTA</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">"Protein hôm nay đủ chưa?"</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#dc2626;">Phải vào Calendar → nutrition detail</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#10b981;">Protein progress bar ngay Dashboard</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">"Streak của tôi bao nhiêu?"</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#dc2626;">Phải vào Fitness → Plan</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; color:#10b981;">Streak badge ngay Dashboard</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- KPI Matrix by Goal -->
+  <div style="margin-top:16px; background:#f8fafc; border-radius:12px; padding:16px;">
+    <div style="font-weight:700; margin-bottom:10px;">📊 KPI Matrix theo từng mục tiêu:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1;">KPI</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1; text-align:center;">✂️ Cut</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1; text-align:center;">💪 Bulk</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1; text-align:center;">⚖️ Maintain</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Primary metric</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Calorie Deficit</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Calorie Surplus</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Calorie Balance</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Weight direction</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#10b981;">↓ Giảm</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#3b82f6;">↑ Tăng</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#64748b;">↔ Ổn định</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Protein priority</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">🔴 Critical (giữ cơ)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">🟡 Important (tăng cơ)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">🟢 Standard</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Volume focus</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Duy trì (−15% nếu cần)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Tăng progressive</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Duy trì ổn định</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Danger signal</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Giảm quá nhanh (&gt;1kg/w)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Tăng quá nhanh (&gt;0.5kg/w)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">Biến động &gt;±0.5kg/w</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- EXPERT 2: UI/UX DESIGNER -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🎨 2. UI/UX Designer — Information Hierarchy & Visual Treatment</h3>
+  
+  <div style="background:linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); border-radius:16px; padding:20px; color:#fff; margin-bottom:16px;">
+    <div style="font-size:14px; font-weight:800; margin-bottom:8px;">📐 Nguyên tắc: Information Hierarchy theo F-Pattern</div>
+    <div style="font-size:12px; opacity:0.9;">
+      Mobile users scan theo pattern <strong>Z</strong> (top-left → top-right → bottom-left → bottom-right).<br>
+      Thông tin quan trọng nhất ở <strong>top 1/3 screen</strong>. CTAs ở <strong>thumb zone</strong> (bottom half).
+    </div>
+  </div>
+  
+  <!-- Visual Hierarchy Pyramid -->
+  <div style="max-width:380px; margin:0 auto 16px;">
+    <div style="text-align:center; margin-bottom:8px; font-weight:600; font-size:12px;">Visual Hierarchy — 5 tầng thông tin</div>
+    
+    <!-- Level 1: Hero -->
+    <div style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border-radius:16px 16px 0 0; padding:16px; text-align:center;">
+      <div style="font-size:10px; opacity:0.8; margin-bottom:2px;">TẦNG 1 — Glance (0.5s)</div>
+      <div style="font-size:11px; font-weight:700;">🎯 Daily Score + Greeting</div>
+      <div style="font-size:10px; opacity:0.8;">Tổng quan 1 con số — "Hôm nay bạn đạt 82/100"</div>
+      <div style="font-size:9px; margin-top:4px;">Font: 28-36px bold | Color: White on gradient | Space: ~80px height</div>
+    </div>
+    
+    <!-- Level 2: Key Metrics -->
+    <div style="background:#dcfce7; padding:12px; text-align:center;">
+      <div style="font-size:10px; color:#166534; margin-bottom:2px;">TẦNG 2 — Scan (2s)</div>
+      <div style="font-size:11px; font-weight:700; color:#166534;">⚡ Energy Balance + 🥩 Protein</div>
+      <div style="font-size:10px; color:#64748b;">2 metrics quan trọng nhất hôm nay — progress bars visual</div>
+      <div style="font-size:9px; color:#64748b; margin-top:4px;">Font: 16-20px | Color: Emerald/Blue | Space: ~100px</div>
+    </div>
+    
+    <!-- Level 3: Context Cards -->
+    <div style="background:#eff6ff; padding:12px; text-align:center;">
+      <div style="font-size:10px; color:#1e40af; margin-bottom:2px;">TẦNG 3 — Read (5s)</div>
+      <div style="font-size:11px; font-weight:700; color:#1e40af;">📋 Today's Plan + ⚖️ Weight + 🔥 Streak</div>
+      <div style="font-size:10px; color:#64748b;">Cards grid 2×2 — mỗi card 1 thông tin đọc nhanh</div>
+      <div style="font-size:9px; color:#64748b; margin-top:4px;">Font: 12-14px | Color: Neutral + accent | Space: ~120px</div>
+    </div>
+    
+    <!-- Level 4: Insights -->
+    <div style="background:#fef3c7; padding:12px; text-align:center;">
+      <div style="font-size:10px; color:#92400e; margin-bottom:2px;">TẦNG 4 — Analyze (10s)</div>
+      <div style="font-size:11px; font-weight:700; color:#92400e;">💡 AI Insight + ⚠️ Alerts</div>
+      <div style="font-size:10px; color:#64748b;">Insight text + warning banners (nếu có)</div>
+      <div style="font-size:9px; color:#64748b; margin-top:4px;">Font: 11-12px | Color: Amber/Red accent | Space: ~60px</div>
+    </div>
+    
+    <!-- Level 5: Actions -->
+    <div style="background:#f1f5f9; border-radius:0 0 16px 16px; padding:12px; text-align:center;">
+      <div style="font-size:10px; color:#475569; margin-bottom:2px;">TẦNG 5 — Act (optional)</div>
+      <div style="font-size:11px; font-weight:700; color:#475569;">🔗 Quick Actions (log weight, start workout, log meal)</div>
+      <div style="font-size:10px; color:#64748b;">Sticky bottom area trong thumb zone</div>
+      <div style="font-size:9px; color:#64748b; margin-top:4px;">Font: 11px | Color: Emerald buttons | Space: ~50px</div>
+    </div>
+    
+    <div style="text-align:center; margin-top:4px; font-size:10px; color:#64748b;">
+      Tổng: ~410px — vừa 1 screen iPhone SE (568px viewport) → <strong>Zero scroll cho core info</strong>
+    </div>
+  </div>
+  
+  <!-- Color Semantics -->
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:12px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">🎨 Color Semantics — Mỗi màu = 1 ý nghĩa duy nhất</div>
+    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;">
+      <div style="text-align:center;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#10b981; margin:0 auto 4px;"></div>
+        <div style="font-size:10px; font-weight:600;">Emerald</div>
+        <div style="font-size:9px; color:#64748b;">On track<br>Positive</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#3b82f6; margin:0 auto 4px;"></div>
+        <div style="font-size:10px; font-weight:600;">Blue</div>
+        <div style="font-size:9px; color:#64748b;">Exercise<br>Fitness</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#f59e0b; margin:0 auto 4px;"></div>
+        <div style="font-size:10px; font-weight:600;">Amber</div>
+        <div style="font-size:9px; color:#64748b;">Warning<br>Streak</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#ef4444; margin:0 auto 4px;"></div>
+        <div style="font-size:10px; font-weight:600;">Red</div>
+        <div style="font-size:9px; color:#64748b;">Danger<br>Off track</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#64748b; margin:0 auto 4px;"></div>
+        <div style="font-size:10px; font-weight:600;">Slate</div>
+        <div style="font-size:9px; color:#64748b;">Neutral<br>Secondary</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Psychological Principles -->
+  <div style="background:#f5f3ff; border-radius:12px; padding:16px;">
+    <div style="font-weight:600; font-size:12px; color:#5b21b6; margin-bottom:8px;">🧠 Tâm lý học hành vi áp dụng:</div>
+    <div style="display:grid; gap:6px; font-size:11px;">
+      <div style="background:#fff; border-radius:8px; padding:8px;">
+        <strong>Loss Aversion:</strong> Streak counter tạo động lực "không muốn mất" → hiệu quả hơn reward
+      </div>
+      <div style="background:#fff; border-radius:8px; padding:8px;">
+        <strong>Goal Gradient:</strong> Progress bar tới milestone — càng gần đích càng motivated (85% → 100%)
+      </div>
+      <div style="background:#fff; border-radius:8px; padding:8px;">
+        <strong>Anchoring:</strong> Daily Score (0-100) tạo "neo" tâm lý — user muốn duy trì ≥80
+      </div>
+      <div style="background:#fff; border-radius:8px; padding:8px;">
+        <strong>Zeigarnik Effect:</strong> "Protein còn thiếu 46g" — incomplete task gây urge to complete
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- EXPERT 3: DATA ANALYST -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>📈 3. Data Analyst / BI Specialist — Charts, Aggregations & Filters</h3>
+  
+  <div style="background:linear-gradient(135deg, #0369a1 0%, #0284c7 100%); border-radius:16px; padding:20px; color:#fff; margin-bottom:16px;">
+    <div style="font-size:14px; font-weight:800; margin-bottom:8px;">📊 Nguyên tắc: "Right chart for right data"</div>
+    <div style="font-size:12px; opacity:0.9;">
+      Mỗi loại dữ liệu cần loại biểu đồ phù hợp. Sai biểu đồ = misleading data = sai quyết định.
+    </div>
+  </div>
+  
+  <!-- Chart Selection Matrix -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
+    <div style="font-weight:700; margin-bottom:10px;">📊 Ma trận lựa chọn biểu đồ cho Dashboard:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Data Point</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Loại dữ liệu</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Chart Type</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Lý do</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Vị trí</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Energy Balance</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Part-of-whole (today)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#dcfce7; padding:2px 6px; border-radius:4px;">Stacked Progress Bar</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">So sánh IN vs OUT vs remaining — linear intuitive</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Dashboard Tầng 2</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Macro Split</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Proportion (3 parts)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#dbeafe; padding:2px 6px; border-radius:4px;">Donut Chart (SVG)</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">3 thành phần P/C/F — reuse MacroChart hiện có</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Tap Energy → Detail</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Weight Trend</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Time series</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">Line Chart (dual)</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Daily dots + 7-day moving avg line — show noise vs trend</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Tap Weight card → Detail</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Volume Trend</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Time series (weekly)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#fce7f3; padding:2px 6px; border-radius:4px;">Bar Chart (vertical)</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">So sánh volume tuần này vs tuần trước — discrete values</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Fitness Progress</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Calorie vs Target</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Comparison (daily)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#e0e7ff; padding:2px 6px; border-radius:4px;">Dual Bar Chart</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Actual (green/red) vs target (gray) — visual gap</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Tap Energy → History</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Adherence %</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Single value + trend</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#dcfce7; padding:2px 6px; border-radius:4px;">Ring Gauge + Sparkline</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Percentage → ring (0-100%); trend → sparkline mini</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Dashboard Tầng 3</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Protein progress</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Progress (today)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#dcfce7; padding:2px 6px; border-radius:4px;">Linear Progress Bar</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">current/target → simple linear bar (120/166g)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Dashboard Tầng 2</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Streak</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Counter + timeline</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">Number + Dot Array</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Big number (🔥12) + 7-day dots (✓/😴/📍)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Dashboard Tầng 3</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">1RM Estimates</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Multi-value comparison</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#e0e7ff; padding:2px 6px; border-radius:4px;">Horizontal Bar Chart</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Squat/Bench/Deadlift/OHP — so sánh các lift</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Fitness Progress</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">Muscle Group Balance</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Distribution</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">
+            <span style="background:#fce7f3; padding:2px 6px; border-radius:4px;">Radar/Spider Chart</span>
+          </td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">6 nhóm cơ — thấy imbalance ngay lập tức</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Fitness Progress</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Aggregation Formulas -->
+  <div style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:12px;">
+    <div style="font-weight:700; margin-bottom:10px;">🔢 Công thức tính toán (Aggregations):</div>
+    <div style="display:grid; gap:8px; font-size:11px;">
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px;">
+        <div style="font-weight:600; color:#3b82f6;">Daily Score (0-100)</div>
+        <code style="font-size:10px; background:#f1f5f9; padding:4px 8px; border-radius:4px; display:block; margin-top:4px;">
+          score = (calorie_adherence × 0.30) + (protein_adherence × 0.25) + (workout_completed × 0.25) + (weight_logged × 0.10) + (streak_bonus × 0.10)
+        </code>
+        <div style="font-size:10px; color:#64748b; margin-top:4px;">
+          calorie_adherence: 100 nếu ±100kcal, giảm tuyến tính | workout_completed: 100 nếu tập/nghỉ đúng plan | streak_bonus: min(streak_days × 2, 100)
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px;">
+        <div style="font-weight:600; color:#10b981;">Weekly Adherence Rate</div>
+        <code style="font-size:10px; background:#f1f5f9; padding:4px 8px; border-radius:4px; display:block; margin-top:4px;">
+          adherence_cal = COUNT(days WHERE |actual - target| ≤ 100) / 7 × 100%<br>
+          adherence_protein = COUNT(days WHERE |actual_protein - target_protein| ≤ 10g) / 7 × 100%
+        </code>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px;">
+        <div style="font-weight:600; color:#f59e0b;">Weight Moving Average</div>
+        <code style="font-size:10px; background:#f1f5f9; padding:4px 8px; border-radius:4px; display:block; margin-top:4px;">
+          moving_avg = SUM(weight_log.weight_kg WHERE date >= today-7) / COUNT(*)<br>
+          trend = current_7d_avg - previous_7d_avg  // &gt;0 = gaining, &lt;0 = losing
+        </code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time Range Filters -->
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">🔍 Filter Strategy — khi nào dùng filter nào:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Filter</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Áp dụng cho</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Mục đích</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;"><strong>Hôm nay</strong></td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Energy Balance, Protein, Score</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Real-time tracking (Dashboard main)</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;"><strong>1W (7 ngày)</strong></td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Adherence, Weight avg, Streak</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Short-term consistency check</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;"><strong>1M (30 ngày)</strong></td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Weight trend, Volume trend, Calorie trend</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">See if plan is working</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;"><strong>3M / Cycle</strong></td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Full cycle review, 1RM progress</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Phase evaluation</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;"><strong>All time</strong></td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Weight history, Total sessions, PRs</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Journey overview</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:6px; font-size:10px; color:#64748b;">
+      <strong>Note:</strong> Dashboard main view = "Hôm nay" only. Filters chỉ available khi tap card → expand detail view.
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- EXPERT 4: DATA ENGINEER -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>⚙️ 4. Data Engineer — Data Pipeline & SQL Queries</h3>
+  
+  <div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius:16px; padding:20px; color:#fff; margin-bottom:16px;">
+    <div style="font-size:14px; font-weight:800; margin-bottom:8px;">🔧 Architecture: Local-first SQLite Pipeline</div>
+    <div style="font-size:12px; opacity:0.9;">
+      Không có server/API — tất cả data nằm trong <strong>SQLite local</strong> (sql.js WASM trên web, Capacitor SQLite trên mobile).<br>
+      Dashboard queries chạy <strong>trực tiếp trên client</strong> → phải tối ưu cho mobile devices.
+    </div>
+  </div>
+  
+  <!-- Data Pipeline Diagram -->
+  <div style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:12px;">
+    <div style="font-weight:700; margin-bottom:10px;">🔄 Data Flow Pipeline:</div>
+    <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:6px; align-items:center; text-align:center; font-size:10px;">
+      <div style="background:#dbeafe; border-radius:8px; padding:8px;">
+        <div style="font-weight:600;">📥 Input Layer</div>
+        <div style="color:#64748b;">User actions<br>Log meal / workout / weight</div>
+      </div>
+      <div>→</div>
+      <div style="background:#fef3c7; border-radius:8px; padding:8px;">
+        <div style="font-weight:600;">⚙️ Compute Layer</div>
+        <div style="color:#64748b;">Zustand stores<br>Calculate metrics</div>
+      </div>
+      <div>→</div>
+      <div style="background:#dcfce7; border-radius:8px; padding:8px;">
+        <div style="font-weight:600;">📊 Display Layer</div>
+        <div style="color:#64748b;">Dashboard UI<br>Charts & cards</div>
+      </div>
+    </div>
+    
+    <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; font-size:9px;">
+      <div style="background:#e2e8f0; border-radius:6px; padding:6px; text-align:center;">
+        <strong>Tables:</strong><br>
+        daily_log, workout_sets, weight_log, adjustments
+      </div>
+      <div style="background:#e2e8f0; border-radius:6px; padding:6px; text-align:center;">
+        <strong>Stores:</strong><br>
+        dashboardStore, fitnessStore, healthProfileStore
+      </div>
+      <div style="background:#e2e8f0; border-radius:6px; padding:6px; text-align:center;">
+        <strong>Components:</strong><br>
+        EnergyBalance, WeightCard, StreakCounter...
+      </div>
+    </div>
+  </div>
+  
+  <!-- Key SQL Queries -->
+  <div style="background:#1e293b; border-radius:12px; padding:16px; color:#e2e8f0; margin-bottom:12px;">
+    <div style="font-weight:700; margin-bottom:10px; color:#10b981;">💾 Core SQL Queries cho Dashboard:</div>
+    <div style="display:grid; gap:8px; font-size:10px; font-family:monospace;">
+      <div style="background:#0f172a; border-radius:8px; padding:10px;">
+        <div style="color:#f59e0b; font-weight:600; margin-bottom:4px;">-- Q1: Today's Energy Balance</div>
+        <div style="color:#94a3b8;">SELECT target_calories, actual_calories, target_protein, actual_protein<br>FROM daily_log WHERE date = DATE('now');</div>
+      </div>
+      <div style="background:#0f172a; border-radius:8px; padding:10px;">
+        <div style="color:#f59e0b; font-weight:600; margin-bottom:4px;">-- Q2: Today's Exercise Calories</div>
+        <div style="color:#94a3b8;">SELECT SUM(estimated_calories) as total_burned<br>FROM workout_sets ws JOIN workouts w ON ws.workout_id = w.id<br>WHERE w.date = DATE('now');</div>
+      </div>
+      <div style="background:#0f172a; border-radius:8px; padding:10px;">
+        <div style="color:#f59e0b; font-weight:600; margin-bottom:4px;">-- Q3: 7-day Weight Moving Average</div>
+        <div style="color:#94a3b8;">SELECT AVG(weight_kg) as moving_avg,<br>&nbsp;&nbsp;MAX(weight_kg) - MIN(weight_kg) as fluctuation<br>FROM weight_log WHERE date >= DATE('now', '-7 days');</div>
+      </div>
+      <div style="background:#0f172a; border-radius:8px; padding:10px;">
+        <div style="color:#f59e0b; font-weight:600; margin-bottom:4px;">-- Q4: Weekly Adherence (Cal + Protein)</div>
+        <div style="color:#94a3b8;">SELECT<br>&nbsp;&nbsp;ROUND(AVG(adherence_cal) * 100, 1) as cal_adherence_pct,<br>&nbsp;&nbsp;ROUND(AVG(adherence_protein) * 100, 1) as protein_adherence_pct<br>FROM daily_log WHERE date >= DATE('now', '-7 days');</div>
+      </div>
+      <div style="background:#0f172a; border-radius:8px; padding:10px;">
+        <div style="color:#f59e0b; font-weight:600; margin-bottom:4px;">-- Q5: Streak Count (consecutive plan-adherent days)</div>
+        <div style="color:#94a3b8;">-- Computed in fitnessStore (not pure SQL)<br>-- Logic: walk backward from today, count consecutive<br>-- days where workout_logged OR planned_rest_day = true</div>
+      </div>
+      <div style="background:#0f172a; border-radius:8px; padding:10px;">
+        <div style="color:#f59e0b; font-weight:600; margin-bottom:4px;">-- Q6: Latest Auto-Adjustment</div>
+        <div style="color:#94a3b8;">SELECT reason, old_target_cal, new_target_cal, date<br>FROM adjustments WHERE applied = 1<br>ORDER BY created_at DESC LIMIT 1;</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Performance Optimization -->
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+    <div style="font-weight:700; margin-bottom:10px;">⚡ Performance Optimization:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Strategy</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Implementation</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Impact</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">SQLite Index</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;"><code>CREATE INDEX idx_daily_log_date ON daily_log(date)</code></td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Query time: ~50ms → ~2ms</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Zustand Cache</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">dashboardStore caches today's data, invalidate on new log</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Avoid re-query on tab switch</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Lazy Detail Charts</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">History charts (30d+) loaded on-demand khi tap card</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Initial render: ~3 queries vs ~8</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Batch Updates</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">When logging meal: update daily_log + dashboardStore in 1 transaction</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Single re-render, not cascading</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- SYNTHESIS: FINAL DASHBOARD BLUEPRINT -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🏗️ Tổng hợp: Dashboard Blueprint (4 experts)</h3>
+  
+  <div style="background:#f0fdf4; border:3px solid #10b981; border-radius:16px; padding:20px;">
+    <div style="font-weight:800; font-size:16px; color:#166534; margin-bottom:12px;">📊 Dashboard = "Daily Command Center"</div>
+    
+    <!-- Final component list -->
+    <table style="width:100%; border-collapse:collapse; font-size:10px; margin-bottom:12px;">
+      <thead>
+        <tr style="background:#dcfce7;">
+          <td style="padding:8px; font-weight:600; border:1px solid #86efac;">Tầng</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #86efac;">Component</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #86efac;">Chart/Visual</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #86efac;">Data Source</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #86efac;">Update</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#f0fdf4;">
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">1. Hero</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Greeting + Daily Score</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Gradient card + number (0-100)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Computed formula (5 inputs)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Real-time</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">2. Key</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚡ Energy Balance</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Stacked progress bar</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">daily_log + workout_sets</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Real-time</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">2. Key</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">🥩 Protein Progress</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Linear progress bar</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">daily_log.actual_protein</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Real-time</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">3. Context</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">📋 Today's Plan Card</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">2-column grid (Workout + Meals)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">training_plan + day_plans</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Daily</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">3. Context</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚖️ Weight Mini + 🔥 Streak</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Number + trend arrow + dots</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">weight_log + streak calc</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Daily</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">4. Insight</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">💡 AI Insight</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Text card (1-2 sentences)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Cross-domain analysis</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Daily</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">4. Insight</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">⚠️ Auto-Adjust Alert</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Warning banner (conditional)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">adjustments table</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">14-day trigger</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+          <td style="padding:6px; border:1px solid #e2e8f0; font-weight:600;">5. Action</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Quick Actions Bar</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">3 icon buttons (sticky bottom)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Navigation links</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Static</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div style="background:#dcfce7; border-radius:8px; padding:10px; font-size:11px;">
+      <strong>Boundary Rule:</strong><br>
+      • Dashboard = <strong>TODAY only</strong> (real-time snapshot)<br>
+      • Fitness Progress = <strong>TRAINING history</strong> (volume, 1RM, sessions, muscle balance)<br>
+      • Calendar = <strong>MEAL history</strong> (daily plans, weekly nutrition)<br>
+      → <strong>Zero overlap, clear purpose for each tab</strong>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Bạn đồng ý với phân tích 4 góc nhìn này không?</h3>
+  <div style="font-size:12px; color:#64748b; margin-bottom:12px;">
+    Nếu đồng ý, tôi sẽ tiếp tục đi sâu vào từng component — hỏi chi tiết hơn về Daily Score formula, 
+    Today's Plan card logic, AI Insight engine, và edge cases.
+  </div>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approve-all">
+    ✅ <strong>Đồng ý toàn bộ — Tiếp tục đi sâu từng component</strong><br>
+    <small>5 tầng hierarchy, 8 components, zero overlap</small>
+  </div>
+  <div class="option" data-id="adjust-hierarchy">
+    🔄 <strong>Cần điều chỉnh hierarchy — (cho biết tầng nào cần thay đổi)</strong>
+  </div>
+  <div class="option" data-id="question">
+    ❓ <strong>Có câu hỏi thêm — (cho biết cụ thể)</strong>
+  </div>
+</div>

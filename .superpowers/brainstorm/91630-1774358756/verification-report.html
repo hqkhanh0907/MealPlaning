@@ -1,0 +1,202 @@
+<h2>🔍 Xác minh độ đúng đắn — Transparency Report</h2>
+<p class="subtitle">Nguồn gốc thông tin, kết quả xác minh thực tế, và cách bạn tự verify</p>
+
+<!-- IMPORTANT DISCLAIMER -->
+<div style="padding: 16px; background: rgba(239,68,68,0.08); border: 2px solid #ef4444; border-radius: 12px; margin-bottom: 24px;">
+  <div style="font-weight: 800; font-size: 16px; color: #ef4444; margin-bottom: 8px;">⚠️ Disclaimer quan trọng</div>
+  <div style="font-size: 14px; line-height: 1.8;">
+    <strong>1. Nguồn thông tin của tôi:</strong> Kiến thức của tôi đến từ <strong>training data</strong> (sách, papers, websites được crawl trước cutoff date). Tôi KHÔNG truy cập trực tiếp vào PubMed hay journal databases khi trả lời.<br>
+    <strong>2. Rủi ro:</strong> AI có thể <strong>hallucinate</strong> — tạo ra tên paper, số liệu, hoặc kết luận không chính xác nhưng nghe rất thuyết phục.<br>
+    <strong>3. Vừa rồi tôi đã verify:</strong> Dùng web search thực tế để kiểm tra từng paper. Kết quả bên dưới — có <strong>2 lỗi cần sửa</strong>.
+  </div>
+</div>
+
+<!-- VERIFICATION RESULTS -->
+<div class="section">
+  <h3>📋 Kết quả xác minh từng nghiên cứu</h3>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card-bg); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: #334155; color: white;">
+      <th style="padding: 10px; text-align: left; width: 8%;">#</th>
+      <th style="padding: 10px; text-align: left; width: 22%;">Nghiên cứu</th>
+      <th style="padding: 10px; text-align: center; width: 10%;">Kết quả</th>
+      <th style="padding: 10px; text-align: left; width: 30%;">Chi tiết xác minh</th>
+      <th style="padding: 10px; text-align: left; width: 30%;">Link verify</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- 1. Mifflin -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">1</td>
+      <td style="padding: 10px;">Mifflin-St Jeor (1990)<br><em>Am J Clin Nutr</em></td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #10b981; color: white; border-radius: 6px; font-weight: 700;">✅ ĐÚNG</span></td>
+      <td style="padding: 10px;">Tồn tại thật. PubMed ID: 2305711. 498 subjects, ±100 kcal/day standard error. Kết luận đúng.</td>
+      <td style="padding: 10px;"><a href="https://pubmed.ncbi.nlm.nih.gov/2305711/" target="_blank" style="color: #3b82f6;">pubmed.ncbi.nlm.nih.gov/2305711</a></td>
+    </tr>
+    <!-- 2. Frankenfield -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">2</td>
+      <td style="padding: 10px;">Frankenfield (2005)<br><em>J Am Diet Assoc</em></td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #10b981; color: white; border-radius: 6px; font-weight: 700;">✅ ĐÚNG</span></td>
+      <td style="padding: 10px;">Tồn tại thật. So sánh 5 phương trình. Kết luận Mifflin-St Jeor chính xác nhất (±10% ở majority subjects) — đúng.</td>
+      <td style="padding: 10px;">Search PubMed: <code>Frankenfield 2005 predictive equations resting metabolic rate</code></td>
+    </tr>
+    <!-- 3. Morton -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">3</td>
+      <td style="padding: 10px;">Morton et al. (2018)<br><em>Br J Sports Med</em></td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #10b981; color: white; border-radius: 6px; font-weight: 700;">✅ ĐÚNG</span></td>
+      <td style="padding: 10px;">DOI: 10.1136/bjsports-2017-097608. 49 studies, 1,863 participants. <strong>1.6g/kg optimal</strong> — đúng. Upper CI ~2.2g/kg — đúng.</td>
+      <td style="padding: 10px;"><a href="https://doi.org/10.1136/bjsports-2017-097608" target="_blank" style="color: #3b82f6;">doi.org/10.1136/bjsports-2017-097608</a></td>
+    </tr>
+    <!-- 4. Helms -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">4</td>
+      <td style="padding: 10px;">Helms et al. (2014)<br><em>Int J Sport Nutr Exerc Metab</em></td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #10b981; color: white; border-radius: 6px; font-weight: 700;">✅ ĐÚNG</span></td>
+      <td style="padding: 10px;">Vol 24(2):127-138. <strong>2.3-3.1g/kg LBM</strong> khi cut — đúng. Chú ý: đơn vị là g/kg <em>lean body mass</em>, không phải total weight.</td>
+      <td style="padding: 10px;"><a href="https://journals.humankinetics.com/abstract/journals/ijsnem/24/2/article-p127.xml" target="_blank" style="color: #3b82f6;">journals.humankinetics.com</a></td>
+    </tr>
+    <!-- 5. Schoenfeld Volume — CORRECTION -->
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(245,158,11,0.06);">
+      <td style="padding: 10px; font-weight: 700;">5</td>
+      <td style="padding: 10px;">Schoenfeld et al. (2017)<br>Volume dose-response</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #f59e0b; color: white; border-radius: 6px; font-weight: 700;">⚠️ SỬA</span></td>
+      <td style="padding: 10px;">
+        Paper tồn tại thật, kết luận đúng (10+ sets/cơ/tuần vượt trội).<br><br>
+        <strong style="color: #ef4444;">❌ SAI journal name:</strong> Tôi ghi "Medicine & Science in Sports & Exercise"<br>
+        <strong style="color: #10b981;">✅ Thực tế:</strong> Published in <strong>"Journal of Sports Sciences"</strong>
+      </td>
+      <td style="padding: 10px;"><a href="https://www.academia.edu/42194294/" target="_blank" style="color: #3b82f6;">Full PDF trên Academia.edu</a></td>
+    </tr>
+    <!-- 6. Schoenfeld Frequency -->
+    <tr style="border-bottom: 1px solid var(--border-color);">
+      <td style="padding: 10px; font-weight: 700;">6</td>
+      <td style="padding: 10px;">Schoenfeld et al. (2016)<br><em>Sports Medicine</em></td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #10b981; color: white; border-radius: 6px; font-weight: 700;">✅ ĐÚNG</span></td>
+      <td style="padding: 10px;">Vol 46(11):1689-1697. 2×/tuần > 1×/tuần cho hypertrophy — đúng. 10 studies, 276 subjects.</td>
+      <td style="padding: 10px;">Search PubMed: <code>Schoenfeld 2016 training frequency hypertrophy meta-analysis</code></td>
+    </tr>
+    <!-- 7. Zourdos RPE — CORRECTION -->
+    <tr style="border-bottom: 1px solid var(--border-color); background: rgba(245,158,11,0.06);">
+      <td style="padding: 10px; font-weight: 700;">7</td>
+      <td style="padding: 10px;">Zourdos et al. (2016)<br>RPE/RIR Scale</td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #f59e0b; color: white; border-radius: 6px; font-weight: 700;">⚠️ SỬA</span></td>
+      <td style="padding: 10px;">
+        Paper tồn tại thật (J Strength Cond Res, 30(1):267-275), RPE scale validated.<br><br>
+        <strong style="color: #ef4444;">❌ SAI số liệu correlation:</strong> Tôi ghi "r = 0.88-0.94"<br>
+        <strong style="color: #10b981;">✅ Thực tế:</strong> r = <strong>−0.88</strong> (experienced) và r = <strong>−0.77</strong> (novice). Correlation là <em>âm</em> (RPE ↑ = velocity ↓). Không có 0.94.
+      </td>
+      <td style="padding: 10px;"><a href="https://europepmc.org/article/MED/26049792" target="_blank" style="color: #3b82f6;">europepmc.org/26049792</a></td>
+    </tr>
+    <!-- 8. Brzycki -->
+    <tr>
+      <td style="padding: 10px; font-weight: 700;">8</td>
+      <td style="padding: 10px;">Brzycki (1993)<br><em>JOPERD</em></td>
+      <td style="padding: 10px; text-align: center;"><span style="padding: 3px 10px; background: #10b981; color: white; border-radius: 6px; font-weight: 700;">✅ ĐÚNG</span></td>
+      <td style="padding: 10px;">Formula đúng (2 dạng tương đương toán học). Accurate ±5% cho <10 reps — đúng theo consensus. Paper JOPERD ít available online nhưng formula được cite rộng rãi.</td>
+      <td style="padding: 10px;">Search: <code>Brzycki 1RM formula validation</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 16px; padding: 14px; background: rgba(245,158,11,0.08); border: 2px solid #f59e0b; border-radius: 10px; font-size: 13px;">
+  <strong>📝 2 lỗi đã phát hiện và cần sửa trong spec:</strong><br>
+  <strong>① Schoenfeld 2017 Volume:</strong> Sửa journal name từ "Med Sci Sports Exerc" → <strong>"Journal of Sports Sciences"</strong><br>
+  <strong>② Zourdos RPE:</strong> Sửa correlation từ "r = 0.88-0.94" → <strong>"r = −0.88 (experienced), −0.77 (novice)"</strong>
+</div>
+
+<!-- HOW TO VERIFY YOURSELF -->
+<div class="section" style="margin-top: 28px;">
+  <h3>🛠️ Cách bạn tự verify bất kỳ nghiên cứu nào</h3>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+  <div style="padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;">
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px;">1️⃣ PubMed (miễn phí)</div>
+    <div style="font-size: 13px; line-height: 1.8;">
+      <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" style="color: #3b82f6; font-weight: 600;">pubmed.ncbi.nlm.nih.gov</a><br>
+      Database chính thức của NIH (US). Tìm bằng tên tác giả + năm + keywords.<br>
+      <strong>Ví dụ:</strong> Search <code>Mifflin 1990 resting energy expenditure</code><br>
+      → Thấy paper → có PMID → paper tồn tại thật.
+    </div>
+  </div>
+  <div style="padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;">
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px;">2️⃣ Google Scholar</div>
+    <div style="font-size: 13px; line-height: 1.8;">
+      <a href="https://scholar.google.com/" target="_blank" style="color: #3b82f6; font-weight: 600;">scholar.google.com</a><br>
+      Tìm paper + xem <strong>số lần được trích dẫn</strong>. Càng nhiều citation → càng uy tín.<br>
+      <strong>Ví dụ:</strong> Morton 2018 protein → <strong>1,500+ citations</strong> = rất uy tín.
+    </div>
+  </div>
+  <div style="padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;">
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px;">3️⃣ DOI (Digital Object Identifier)</div>
+    <div style="font-size: 13px; line-height: 1.8;">
+      Mỗi paper có 1 DOI duy nhất (giống CMND của paper).<br>
+      <strong>Ví dụ:</strong> <code>10.1136/bjsports-2017-097608</code><br>
+      Truy cập: <a href="https://doi.org/10.1136/bjsports-2017-097608" target="_blank" style="color: #3b82f6;">doi.org/10.1136/bjsports-2017-097608</a><br>
+      Nếu DOI resolve → paper tồn tại thật.
+    </div>
+  </div>
+  <div style="padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;">
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px;">4️⃣ Kiểm tra Kết luận</div>
+    <div style="font-size: 13px; line-height: 1.8;">
+      Paper tồn tại ≠ kết luận đúng như AI nói.<br>
+      <strong>Phải đọc Abstract</strong> trên PubMed (miễn phí) để xác nhận:<br>
+      • Con số cụ thể (1.6g/kg, ±10%...)<br>
+      • Kết luận (A > B hay A = B?)<br>
+      • Sample size đủ lớn không?
+    </div>
+  </div>
+</div>
+
+<!-- WHAT I GOT WRONG -->
+<div class="section" style="margin-top: 28px;">
+  <h3>🤖 Bài học về AI và nghiên cứu khoa học</h3>
+</div>
+
+<div style="padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; font-size: 13px; line-height: 1.8;">
+  <strong>Những gì tôi làm tốt:</strong>
+  <ul style="margin: 4px 0 12px 16px;">
+    <li>8/8 papers tồn tại thật (không hallucinate paper giả)</li>
+    <li>Tên tác giả, năm, và kết luận chính đều đúng</li>
+    <li>Các công thức toán học (BMR, Macro Split, Brzycki) đều chính xác</li>
+  </ul>
+  
+  <strong>Những gì tôi làm sai:</strong>
+  <ul style="margin: 4px 0 12px 16px;">
+    <li>❌ <strong>Nhầm tên journal</strong> (Schoenfeld 2017: J Sports Sciences ≠ Med Sci Sports Exerc) — 2 journals khác nhau nhưng nghe tương tự</li>
+    <li>❌ <strong>Sai số liệu cụ thể</strong> (Zourdos RPE: r = −0.88 & −0.77, không phải 0.88-0.94) — tôi "nhớ mang máng" và tạo range nghe hợp lý</li>
+  </ul>
+  
+  <strong style="color: #ef4444;">→ Kết luận: AI có thể đúng "hướng" nhưng sai "chi tiết". Luôn verify con số cụ thể bằng PubMed/DOI trước khi đưa vào production.</strong>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>Tiếp theo?</h3>
+  <div class="options">
+    <div class="option" data-choice="approve-continue" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>Chấp nhận, sửa 2 lỗi và tiếp tục flow UI</h3>
+        <p>Cơ sở khoa học đủ vững, 2 lỗi nhỏ sẽ sửa trong spec</p>
+      </div>
+    </div>
+    <div class="option" data-choice="verify-more" onclick="toggleSelect(this)">
+      <div class="letter">🔍</div>
+      <div class="content">
+        <h3>Verify thêm các công thức khác</h3>
+        <p>Chưa đủ tin tưởng, cần kiểm tra thêm</p>
+      </div>
+    </div>
+    <div class="option" data-choice="alternative" onclick="toggleSelect(this)">
+      <div class="letter">🔄</div>
+      <div class="content">
+        <h3>Tìm công thức thay thế có bằng chứng mạnh hơn</h3>
+        <p>Muốn xem có công thức nào mới hơn, chính xác hơn không</p>
+      </div>
+    </div>
+  </div>
+</div>

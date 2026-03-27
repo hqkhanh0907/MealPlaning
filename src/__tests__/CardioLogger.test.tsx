@@ -1,0 +1,339 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import type { Mock } from 'vitest';
+import { CardioLogger } from '../features/fitness/components/CardioLogger';
+import { useFitnessStore } from '../store/fitnessStore';
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+
+vi.mock('../store/fitnessStore', () => ({
+  useFitnessStore: vi.fn(),
+}));
+
+vi.mock('../features/health-profile/store/healthProfileStore', () => ({
+  useHealthProfileStore: vi.fn(),
+}));
+
+vi.mock('../features/fitness/utils/cardioEstimator', () => ({
+  estimateCardioBurn: vi.fn(
+    (_type: string, durationMin: number, _intensity: string, weightKg: number) =>
+      Math.round(durationMin * 8 * weightKg / 60),
+  ),
+}));
+
+const mockAddWorkout = vi.fn();
+const mockAddWorkoutSet = vi.fn();
+
+afterEach(cleanup);
+
+describe('CardioLogger', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: Record<string, unknown>) => unknown) =>
+        selector({
+          addWorkout: mockAddWorkout,
+          addWorkoutSet: mockAddWorkoutSet,
+        }),
+    );
+    (useHealthProfileStore as unknown as Mock).mockImplementation(
+      (selector: (s: { profile: { weightKg: number } }) => unknown) =>
+        selector({ profile: { weightKg: 70 } }),
+    );
+    mockAddWorkout.mockReset();
+    mockAddWorkoutSet.mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const defaultProps = {
+    onComplete: vi.fn(),
+    onBack: vi.fn(),
+  };
+
+  it('renders header with back button and timer', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('cardio-header')).toBeInTheDocument();
+    expect(screen.getByTestId('back-button')).toBeInTheDocument();
+    expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('00:00');
+    expect(screen.getByTestId('finish-button')).toBeInTheDocument();
+  });
+
+  it('calls onBack when back button is clicked', () => {
+    const onBack = vi.fn();
+    render(<CardioLogger {...defaultProps} onBack={onBack} />);
+    fireEvent.click(screen.getByTestId('back-button'));
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders all 7 cardio type pills', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('cardio-type-running')).toBeInTheDocument();
+    expect(screen.getByTestId('cardio-type-cycling')).toBeInTheDocument();
+    expect(screen.getByTestId('cardio-type-swimming')).toBeInTheDocument();
+    expect(screen.getByTestId('cardio-type-hiit')).toBeInTheDocument();
+    expect(screen.getByTestId('cardio-type-walking')).toBeInTheDocument();
+    expect(screen.getByTestId('cardio-type-elliptical')).toBeInTheDocument();
+    expect(screen.getByTestId('cardio-type-rowing')).toBeInTheDocument();
+  });
+
+  it('highlights selected cardio type', () => {
+    render(<CardioLogger {...defaultProps} />);
+    // Running is default selected
+    expect(screen.getByTestId('cardio-type-running')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('cardio-type-cycling')).not.toHaveClass('bg-emerald-500');
+
+    fireEvent.click(screen.getByTestId('cardio-type-cycling'));
+    expect(screen.getByTestId('cardio-type-cycling')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('cardio-type-running')).not.toHaveClass('bg-emerald-500');
+  });
+
+  it('stopwatch mode: start/pause/stop buttons work', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('stopwatch-display')).toHaveTextContent('00:00');
+
+    // Start stopwatch
+    fireEvent.click(screen.getByTestId('start-button'));
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByTestId('stopwatch-display')).toHaveTextContent('00:05');
+
+    // Pause
+    fireEvent.click(screen.getByTestId('pause-button'));
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByTestId('stopwatch-display')).toHaveTextContent('00:05');
+
+    // Resume then stop
+    fireEvent.click(screen.getByTestId('start-button'));
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByTestId('stopwatch-display')).toHaveTextContent('00:07');
+
+    fireEvent.click(screen.getByTestId('stop-button'));
+    expect(screen.getByTestId('stopwatch-display')).toHaveTextContent('00:00');
+  });
+
+  it('manual mode: shows number input for duration', () => {
+    render(<CardioLogger {...defaultProps} />);
+    // Switch to manual mode
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    expect(screen.getByTestId('manual-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('manual-duration-input')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '30' },
+    });
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue(30);
+  });
+
+  it('distance field shown for running/cycling/swimming', () => {
+    render(<CardioLogger {...defaultProps} />);
+    // Running is default — distance should be visible
+    expect(screen.getByTestId('distance-section')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('cardio-type-cycling'));
+    expect(screen.getByTestId('distance-section')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('cardio-type-swimming'));
+    expect(screen.getByTestId('distance-section')).toBeInTheDocument();
+  });
+
+  it('distance field hidden for HIIT and walking', () => {
+    render(<CardioLogger {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('cardio-type-hiit'));
+    expect(screen.queryByTestId('distance-section')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('cardio-type-walking'));
+    expect(screen.queryByTestId('distance-section')).not.toBeInTheDocument();
+  });
+
+  it('intensity pills are selectable (low/moderate/high)', () => {
+    render(<CardioLogger {...defaultProps} />);
+    // Default is moderate
+    expect(screen.getByTestId('intensity-moderate')).toHaveClass('bg-emerald-500');
+
+    fireEvent.click(screen.getByTestId('intensity-low'));
+    expect(screen.getByTestId('intensity-low')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('intensity-moderate')).not.toHaveClass('bg-emerald-500');
+
+    fireEvent.click(screen.getByTestId('intensity-high'));
+    expect(screen.getByTestId('intensity-high')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('intensity-low')).not.toHaveClass('bg-emerald-500');
+  });
+
+  it('calorie preview updates based on type and duration', () => {
+    render(<CardioLogger {...defaultProps} />);
+    // Initially 0 because duration is 0
+    expect(screen.getByTestId('calorie-value')).toHaveTextContent('0');
+
+    // Switch to manual mode and set duration
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '30' },
+    });
+    // Mock: Math.round(30 * 8 * 70 / 60) = 280
+    expect(screen.getByTestId('calorie-value')).toHaveTextContent('280');
+  });
+
+  it('save creates workout and calls onComplete', () => {
+    const onComplete = vi.fn();
+    render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
+
+    // Set manual duration
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '20' },
+    });
+
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
+    expect(mockAddWorkoutSet).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Ghi nhận Cardio',
+        date: expect.any(String),
+        durationMin: 20,
+      }),
+    );
+    expect(mockAddWorkoutSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        exerciseId: 'running',
+        durationMin: 20,
+        intensity: 'moderate',
+      }),
+    );
+  });
+
+  it('elapsed timer increments in stopwatch mode', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('00:00');
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('00:01');
+
+    act(() => {
+      vi.advanceTimersByTime(59000);
+    });
+    expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('01:00');
+  });
+
+  it('heart rate input accepts numbers', () => {
+    render(<CardioLogger {...defaultProps} />);
+    const hrInput = screen.getByTestId('heart-rate-input');
+
+    fireEvent.change(hrInput, { target: { value: '145' } });
+    expect(hrInput).toHaveValue(145);
+
+    fireEvent.change(hrInput, { target: { value: '' } });
+    expect(hrInput).toHaveValue(null);
+  });
+
+  it('save via finish button in header also works', () => {
+    const onComplete = vi.fn();
+    render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('distance input accepts values', () => {
+    render(<CardioLogger {...defaultProps} />);
+    const distInput = screen.getByTestId('distance-input');
+    fireEvent.change(distInput, { target: { value: '5.2' } });
+    expect(distInput).toHaveValue(5.2);
+
+    fireEvent.change(distInput, { target: { value: '' } });
+    expect(distInput).toHaveValue(null);
+  });
+
+  it('stopwatch mode button toggles correctly', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-emerald-500');
+
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    expect(screen.getByTestId('manual-mode-button')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('stopwatch-mode-button')).not.toHaveClass('bg-emerald-500');
+
+    fireEvent.click(screen.getByTestId('stopwatch-mode-button'));
+    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-emerald-500');
+  });
+
+  it('saves with distance and heart rate when provided', () => {
+    render(<CardioLogger {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '30' },
+    });
+    fireEvent.change(screen.getByTestId('distance-input'), {
+      target: { value: '5' },
+    });
+    fireEvent.change(screen.getByTestId('heart-rate-input'), {
+      target: { value: '150' },
+    });
+    fireEvent.click(screen.getByTestId('intensity-high'));
+
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    expect(mockAddWorkoutSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        distanceKm: 5,
+        avgHeartRate: 150,
+        intensity: 'high',
+        durationMin: 30,
+      }),
+    );
+  });
+
+  it('manual duration does not go below 0', () => {
+    render(<CardioLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '-5' },
+    });
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue(0);
+  });
+
+  it('distance hidden for elliptical and rowing', () => {
+    render(<CardioLogger {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('cardio-type-elliptical'));
+    expect(screen.queryByTestId('distance-section')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('cardio-type-rowing'));
+    expect(screen.queryByTestId('distance-section')).not.toBeInTheDocument();
+  });
+
+  it('calorie preview is 0 when duration is 0', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('calorie-value')).toHaveTextContent('0');
+  });
+
+  it('save with zero duration sends undefined durationMin', () => {
+    const onComplete = vi.fn();
+    render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    expect(mockAddWorkout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationMin: undefined,
+      }),
+    );
+    expect(mockAddWorkoutSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationMin: undefined,
+        estimatedCalories: undefined,
+      }),
+    );
+  });
+});

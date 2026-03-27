@@ -1,0 +1,302 @@
+<h2>🟡 Issue 6: Nutrition ↔ Fitness Connection</h2>
+<p class="subtitle">Hai tab riêng biệt nhưng data phụ thuộc nhau — làm sao bridge?</p>
+
+<!-- PROBLEM -->
+<div class="section">
+  <h3>📌 Tại sao cần kết nối?</h3>
+  
+  <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px; padding:16px; margin-bottom:12px;">
+    <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center;">
+      <div style="text-align:center;">
+        <div style="font-size:28px;">🍽️</div>
+        <div style="font-size:13px; font-weight:700;">Calendar Tab</div>
+        <div style="font-size:11px; color:#64748b;">Meals & Nutrition</div>
+        <div style="font-size:10px; margin-top:4px;">Calories IN<br>Protein intake<br>Macro split</div>
+      </div>
+      <div style="font-size:24px; color:#dc2626;">⚡<br><span style="font-size:11px;">DISCONNECT</span></div>
+      <div style="text-align:center;">
+        <div style="font-size:28px;">🏋️</div>
+        <div style="font-size:13px; font-weight:700;">Fitness Tab</div>
+        <div style="font-size:11px; color:#64748b;">Workouts & Progress</div>
+        <div style="font-size:10px; margin-top:4px;">Calories OUT<br>Volume load<br>TDEE adjustment</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; padding:8px; background:#fee2e2; border-radius:8px; font-size:11px; text-align:center;">
+      Nếu không kết nối → user phải tự tính "Hôm nay tập nặng, cần ăn thêm bao nhiêu?"<br>
+      → Sai sót dẫn đến kết quả kém (ăn quá ít khi tập nặng, ăn quá nhiều ngày nghỉ)
+    </div>
+  </div>
+  
+  <div style="background:#f0fdf4; border-radius:12px; padding:16px;">
+    <div style="font-weight:600; color:#16a34a; margin-bottom:8px;">Các điểm data cần bridge:</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#dcfce7;">
+          <td style="padding:6px; border:1px solid #86efac; font-weight:600;">Data point</td>
+          <td style="padding:6px; border:1px solid #86efac; font-weight:600;">Nguồn</td>
+          <td style="padding:6px; border:1px solid #86efac; font-weight:600;">Ảnh hưởng</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Exercise calories burned</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Fitness (MET × duration × weight)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">→ Tăng calorie target ngày tập</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Workout day vs Rest day</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Fitness (plan schedule)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">→ Carb cycling (nhiều carbs ngày tập)</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Cutting/Bulking phase</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Goals (goal_type)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">→ Volume giảm 15% khi cutting</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Protein adherence</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Calendar (daily meals)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">→ Recovery quality, muscle growth</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Weight trend</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">Fitness (daily weight)</td>
+          <td style="padding:6px; border:1px solid #e2e8f0;">→ Auto-adjust calorie target</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3 APPROACHES -->
+<div class="section">
+  <h3>🔄 3 Phương án kết nối</h3>
+  
+  <!-- Approach A: Cross-tab Banners -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">A</span>
+      <span style="font-weight:700; font-size:16px;">Cross-tab Banners — Mini info từ tab kia</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <!-- On Calendar tab -->
+      <div style="border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:6px;">Trên Calendar Tab:</div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:8px; font-size:11px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:16px;">🏋️</span>
+            <div>
+              <div style="font-weight:600; font-size:11px;">Hôm nay: Upper Body A</div>
+              <div style="font-size:10px; color:#64748b;">Đốt ~350 kcal → Target: 1850 kcal (+350)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- On Fitness tab -->
+      <div style="border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+        <div style="font-size:10px; color:#64748b; font-weight:600; margin-bottom:6px;">Trên Fitness Tab:</div>
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:11px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:16px;">🍽️</span>
+            <div>
+              <div style="font-weight:600; font-size:11px;">Đã ăn: 1200/1850 kcal</div>
+              <div style="font-size:10px; color:#64748b;">Protein: 120/166g — Còn thiếu 46g</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top:8px; font-size:11px; color:#64748b;">
+      ✅ Đơn giản implement • ⚠️ Chiếm space • ⚠️ Chỉ 1 chiều thông tin
+    </div>
+  </div>
+  
+  <!-- Approach B: Unified Daily Balance -->
+  <div style="background:#f0fdf4; border:3px solid #10b981; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">B ✅</span>
+      <span style="font-weight:700; font-size:16px;">Unified Daily Balance Component</span>
+      <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:11px;">Recommended</span>
+    </div>
+    
+    <div style="max-width:340px; margin:0 auto;">
+      <!-- The shared component -->
+      <div style="background:#fff; border:2px solid #10b981; border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(16,185,129,0.1);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div style="font-size:13px; font-weight:700;">⚡ Energy Balance</div>
+          <div style="font-size:10px; color:#64748b;">Hôm nay</div>
+        </div>
+        
+        <!-- Visual balance -->
+        <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:10px;">
+          <div style="text-align:center;">
+            <div style="font-size:10px; color:#64748b;">🍽️ Ăn vào</div>
+            <div style="font-size:20px; font-weight:800; color:#10b981;">1,200</div>
+            <div style="font-size:9px; color:#64748b;">kcal</div>
+          </div>
+          <div style="font-size:18px; color:#64748b;">−</div>
+          <div style="text-align:center;">
+            <div style="font-size:10px; color:#64748b;">🏋️ Đốt cháy</div>
+            <div style="font-size:20px; font-weight:800; color:#3b82f6;">350</div>
+            <div style="font-size:9px; color:#64748b;">kcal</div>
+          </div>
+        </div>
+        
+        <!-- Progress bar -->
+        <div style="margin-bottom:6px;">
+          <div style="background:#e2e8f0; border-radius:99px; height:10px; overflow:hidden; position:relative;">
+            <div style="background:linear-gradient(90deg, #10b981 0%, #10b981 55%, #3b82f6 55%, #3b82f6 75%); height:100%; border-radius:99px; width:75%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:2px;">
+            <div style="font-size:9px; color:#10b981;">Ăn: 65%</div>
+            <div style="font-size:9px; color:#3b82f6;">Tập: 19%</div>
+            <div style="font-size:9px; color:#64748b;">Còn: 650 kcal</div>
+          </div>
+        </div>
+        
+        <!-- Net & Target -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:8px; padding:6px 10px;">
+          <div>
+            <div style="font-size:10px; color:#64748b;">Net calo</div>
+            <div style="font-size:14px; font-weight:700;">850 kcal</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px; color:#64748b;">Target</div>
+            <div style="font-size:14px; font-weight:700;">1,500 kcal</div>
+          </div>
+        </div>
+        
+        <!-- Protein mini -->
+        <div style="margin-top:6px; display:flex; align-items:center; gap:6px;">
+          <div style="font-size:10px; color:#64748b;">🥩 Protein:</div>
+          <div style="flex:1; background:#e2e8f0; border-radius:99px; height:6px; overflow:hidden;">
+            <div style="background:#10b981; height:100%; width:72%; border-radius:99px;"></div>
+          </div>
+          <div style="font-size:10px; font-weight:600;">120/166g</div>
+        </div>
+      </div>
+      
+      <!-- Where it appears -->
+      <div style="background:#eff6ff; border-radius:10px; padding:10px; font-size:11px;">
+        <div style="font-weight:600; color:#2563eb; margin-bottom:4px;">📍 Component này xuất hiện ở:</div>
+        <div style="line-height:1.8;">
+          1. <strong>Calendar Tab</strong> → Nutrition sub-tab (top section)<br>
+          2. <strong>Fitness Tab</strong> → Plan sub-tab (dưới workout card)<br>
+          3. Cùng 1 component, cùng data source → <strong>always in sync</strong>
+        </div>
+      </div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+      <div style="background:#dcfce7; border-radius:8px; padding:8px; font-size:11px;">
+        <strong>✅ Ưu điểm:</strong><br>
+        • Single Source of Truth — 1 component, 2 vị trí<br>
+        • Visual balance giữa IN và OUT<br>
+        • Auto-adjust target khi có workout<br>
+        • Protein tracking cross-context
+      </div>
+      <div style="background:#fef3c7; border-radius:8px; padding:8px; font-size:11px;">
+        <strong>⚠️ Cần lưu ý:</strong><br>
+        • Component phải compact (max ~120px height)<br>
+        • Collapsible nếu user muốn ẩn<br>
+        • Real-time update khi log meal hoặc workout<br>
+        • Ngày nghỉ: "Đốt cháy" = 0, target thấp hơn
+      </div>
+    </div>
+  </div>
+  
+  <!-- Approach C: Dedicated Dashboard Tab -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">C</span>
+      <span style="font-weight:700; font-size:16px;">Dedicated "Dashboard" Tab — Tab riêng cho tổng hợp</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="font-size:12px; line-height:1.8;">
+        Thêm 1 tab mới "Dashboard" vào bottom nav:<br>
+        📅 Calendar | 🏋️ Fitness | <strong>📊 Dashboard</strong> | ⚙️ Settings<br><br>
+        Dashboard tab hiện:<br>
+        • Energy Balance (in/out)<br>
+        • Weight trend<br>
+        • Weekly summary<br>
+        • AI recommendations
+      </div>
+      <div style="font-size:12px;">
+        <strong>Ưu điểm:</strong><br>
+        ✅ Dedicated space cho tổng hợp<br><br>
+        <strong>Nhược điểm:</strong><br>
+        ❌ Thêm 1 tab nữa vào bottom nav (đã 4-5 tabs)<br>
+        ❌ Duplicate data từ Calendar + Fitness<br>
+        ❌ User phải navigate ra tab khác để xem tổng hợp<br>
+        ❌ Spec đã nói Dashboard tab → Fitness Progress overlap<br>
+        <div style="color:#dc2626; margin-top:4px;">→ Không khuyến nghị</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- AUTO-ADJUSTMENT LOGIC -->
+<div class="section">
+  <h3>🧠 Auto-Adjustment Logic</h3>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:16px;">
+    <div style="font-weight:600; margin-bottom:10px;">Khi user log workout → hệ thống tự động:</div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+        <div style="font-weight:600; font-size:12px; color:#10b981; margin-bottom:6px;">📅 Ngày tập (Workout Day)</div>
+        <div style="font-size:11px; line-height:1.8;">
+          1. Tính exercise calories: <code>MET × min × kg / 60</code><br>
+          2. Tăng calorie target: <code>TDEE + exercise_cal</code><br>
+          3. Tăng carbs proportion: +5-10%<br>
+          4. Giữ protein: ≥2g/kg<br>
+          5. Update Energy Balance component
+        </div>
+      </div>
+      <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+        <div style="font-weight:600; font-size:12px; color:#64748b; margin-bottom:6px;">😴 Ngày nghỉ (Rest Day)</div>
+        <div style="font-size:11px; line-height:1.8;">
+          1. Exercise calories = 0<br>
+          2. Calorie target = base TDEE<br>
+          3. Giảm carbs: −5-10%<br>
+          4. Giữ protein: ≥2g/kg (recovery)<br>
+          5. Giữ fat: ≥20% total kcal
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top:12px; background:#fef3c7; border-radius:8px; padding:10px; font-size:11px;">
+      <strong>📌 Feedback Loop (đã chốt ở spec):</strong><br>
+      Nếu 7-day moving avg weight không thay đổi theo mục tiêu sau 2 tuần → auto-adjust ±100-200 kcal.<br>
+      Energy Balance component sẽ hiện: "⚠️ Target đã được điều chỉnh: 1500 → 1400 kcal"
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Bạn chọn phương án kết nối nào?</h3>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approach-b">
+    ✅ <strong>B. Unified Daily Balance — Chốt & chuyển Issue 7</strong><br>
+    <small>1 component, 2 vị trí (Calendar + Fitness), auto-adjust target</small>
+  </div>
+  <div class="option" data-id="approach-ab">
+    🔀 <strong>A+B: Banner nhẹ (A) + Balance component ở Nutrition sub-tab (B)</strong><br>
+    <small>Banner 1 dòng trên Plan, full Balance trên Nutrition</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong>
+  </div>
+</div>

@@ -1,0 +1,702 @@
+<h2>🔍 UI/UX Expert Review — Smart Meal Planner Spec</h2>
+<p class="subtitle">50-year senior mobile UX audit • 10 categories × Priority checklist</p>
+
+<div style="background:#0f172a; color:#e2e8f0; border-radius:16px; padding:16px; margin-bottom:16px;">
+  <div style="font-size:14px; font-weight:800; margin-bottom:8px;">📊 Tổng quan Review</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; font-size:11px;">
+    <div style="background:#064e3b; border-radius:10px; padding:10px; text-align:center;">
+      <div style="font-size:24px; font-weight:800; color:#10b981;">23</div>
+      <div style="color:#6ee7b7;">✅ Đạt chuẩn</div>
+    </div>
+    <div style="background:#78350f; border-radius:10px; padding:10px; text-align:center;">
+      <div style="font-size:24px; font-weight:800; color:#fbbf24;">14</div>
+      <div style="color:#fde68a;">⚠️ Cần bổ sung</div>
+    </div>
+    <div style="background:#7f1d1d; border-radius:10px; padding:10px; text-align:center;">
+      <div style="font-size:24px; font-weight:800; color:#ef4444;">5</div>
+      <div style="color:#fca5a5;">🔴 Thiếu/Vi phạm</div>
+    </div>
+  </div>
+  <div style="margin-top:8px; font-size:10px; color:#94a3b8;">
+    Đánh giá dựa trên: Apple HIG, Material Design 3, WCAG 2.1 AA, UX Pro Max 99 guidelines
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 1: ACCESSIBILITY (CRITICAL) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>1️⃣ Accessibility (CRITICAL) — Score: 4/10</h3>
+  
+  <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:12px; margin-bottom:12px;">
+    <div style="font-size:12px; font-weight:700; color:#991b1b;">🔴 Spec thiếu nghiêm trọng về Accessibility</div>
+    <div style="font-size:11px; color:#64748b; margin-top:4px;">
+      Không có bất kỳ mention nào về: WCAG compliance, screen reader, VoiceOver, aria-labels, focus management, dynamic type support.
+    </div>
+  </div>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Spec hiện tại</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Recommendation</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">color-contrast 4.5:1</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Emerald #10b981 trên white = 3.4:1 ❌ FAIL. Cần dùng #059669 cho text (5.1:1)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Thêm bảng <code>Color Contrast Pairs</code> vào spec: text colors vs backgrounds cho cả light/dark mode</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">color-not-only</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#ef4444;">🔴</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Weight Mini dùng Green/Amber CHỈ bằng màu để phân biệt on-track/off-track</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Bắt buộc thêm icon + text (✅/⚠️ đã có nhưng phải có accessible label). Streak dots cũng cần shape khác nhau (✓ vs ○)</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">voiceover-sr</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#ef4444;">🔴</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">KHÔNG CÓ bất kỳ accessibilityLabel nào trong spec</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Thêm section <strong>"Accessibility Requirements"</strong> với label cho mọi interactive element</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">dynamic-type</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#ef4444;">🔴</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Dashboard fit iPhone SE "zero scroll" — sẽ BREAK với Dynamic Type lớn</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec cần định nghĩa behavior khi user tăng font size: cho phép scroll, không truncate nội dung quan trọng</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">reduced-motion</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Không mention prefers-reduced-motion</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Gradient transitions, sparkline animations phải có reduced-motion fallback</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">escape-routes</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">WorkoutLogger có "← Quay lại" + "✕ Kết thúc" — tốt</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Đạt chuẩn Apple HIG</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div style="background:#fef3c7; border-radius:8px; padding:10px; margin-top:8px; font-size:10px;">
+    <strong>💡 Đề xuất:</strong> Thêm section <code>A11y Requirements</code> vào spec với: contrast pairs table, accessibilityLabel cho tất cả components, dynamic type behavior, reduced-motion rules.
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 2: TOUCH & INTERACTION (CRITICAL) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>2️⃣ Touch & Interaction (CRITICAL) — Score: 8/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">touch-target-size (44×44pt)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Quick Actions: 44px (left/right), 50px (center) — đạt chuẩn Apple HIG</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">touch-spacing (8px+)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Quick Actions bar có spacing rõ ràng giữa 3 buttons</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">tap-feedback</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec KHÔNG define press states cho các cards/buttons. Cần thêm: opacity 0.7 on press hoặc scale(0.97)</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">haptic-feedback</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Workout Logger "✅ Xác nhận" set, Weight log save, Streak milestone — nên có haptic. Spec chưa mention</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">safe-area-awareness</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Quick Actions above bottom nav — tốt. WorkoutLogger green header respects status bar</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">gesture-conflicts</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Logger "swipe for next exercise" (horizontal) có thể conflict với iOS back swipe. Cần swipe threshold hoặc vertical scroll thay thế</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">standard-gestures</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Bottom sheets dismiss bằng swipe-down — đúng platform convention</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">Weight stepper (±0.1kg)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Stepper buttons + recent chips + number pad fallback — 3 input methods = excellent</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 3: PERFORMANCE (HIGH) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>3️⃣ Performance (HIGH) — Score: 9/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">Dashboard load <200ms</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Performance budget rõ ràng: <200ms total, <25ms/query, 6 parallel queries</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">progressive-loading</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tier 4-5 lazy load after Tier 1-3 — tuyệt vời</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">skeleton screens</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">First-time user, error states đều dùng skeleton — đúng pattern</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">offline-support</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">100% functional offline via local SQLite — xuất sắc</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">content-jumping (CLS)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Khi AI Insight card appear/dismiss, Tier 5 sẽ bị shift. Cần reserve fixed height hoặc animation slide</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">bundle-splitting</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">sql.js WASM lazy-loaded, dynamic import — đúng best practice</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 4: STYLE (HIGH) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>4️⃣ Style Selection (HIGH) — Score: 7/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">no-emoji-icons 🔴</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#ef4444;">🔴</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec sử dụng emoji TOÀN BỘ: ⚖️🍽️🏋️🔥📊 cho navigation, buttons, cards. Emoji render khác nhau trên iOS/Android/Web = <strong>inconsistent UX</strong></td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">icon-style-consistent</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#ef4444;">🔴</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Cần chọn 1 icon library: <strong>Lucide</strong> (recommended — consistent stroke width, MIT license, React component). Map tất cả emoji → SVG icons</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">style-match</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Clean/minimal style phù hợp health/fitness app. Emerald primary = trust + health</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">elevation-consistent</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec không define shadow/elevation scale. Cards dùng border vs shadow? Bottom sheets elevation? Cần token: shadow-sm/md/lg</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">dark-mode-pairing</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec mentions "dark mode" nhưng không define dark variant colors. Daily Score gradient trên dark bg?</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">primary-action</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Quick Actions center button = visual primary CTA — correct pattern (Apple HIG)</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div style="background:#fef3c7; border-radius:8px; padding:10px; margin-top:8px; font-size:10px;">
+    <strong>💡 Icon Migration Map (Emoji → Lucide SVG):</strong><br>
+    ⚖️ → <code>Scale</code> | 🍽️ → <code>UtensilsCrossed</code> | 🏋️ → <code>Dumbbell</code> | 🔥 → <code>Flame</code> | 📊 → <code>BarChart3</code> | 
+    📅 → <code>Calendar</code> | 📋 → <code>ClipboardList</code> | 🤖 → <code>Bot</code> | 💪 → <code>Biceps/Dumbbell</code> | 
+    🥩 → <code>Beef</code> | ➕ → <code>Plus</code> | ✅ → <code>CheckCircle</code> | ⚠️ → <code>AlertTriangle</code>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 5: LAYOUT (HIGH) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>5️⃣ Layout & Responsive (HIGH) — Score: 8/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">mobile-first</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Toàn bộ spec thiết kế cho mobile-first (iPhone SE as smallest target) — xuất sắc</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">spacing-scale (8dp)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec không define spacing tokens. Dashboard dùng margin: 4px, 6px, 8px — cần chuẩn hóa theo 4px grid</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">visual-hierarchy</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">5-tier F-pattern rất tốt. Gradient hero → metric cards → context → insight → actions = clear hierarchy</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">fixed-element-offset</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Quick Actions bar (Tier 5) + Bottom nav = 2 fixed bars at bottom. Content cần padding-bottom đủ lớn</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">content-priority</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Core content (Score, Energy, Protein) render first, secondary (Insights, Actions) lazy-loaded</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">orientation-support</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec không mention landscape mode. Dashboard should lock portrait or define landscape layout</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 6: TYPOGRAPHY & COLOR (MEDIUM) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>6️⃣ Typography & Color (MEDIUM) — Score: 6/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">font-scale</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec KHÔNG define type scale. Dashboard mockup dùng 7px-36px — 7px quá nhỏ! Minimum 10px body, 12px labels</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">color-semantic</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec dùng hex values trực tiếp (#10b981, #f59e0b). Cần define semantic tokens: primary, success, warning, surface</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">number-tabular</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Dashboard hiện nhiều số (calories, weight, score). Cần dùng tabular figures để tránh layout shift khi số thay đổi</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">weight-hierarchy</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Score 800, title 700, body 400 — font weight hierarchy rõ ràng</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">whitespace-balance</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Dashboard cards có padding rõ ràng, sections separated. Tier structure tạo natural breathing room</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div style="background:#f0fdf4; border-radius:8px; padding:10px; margin-top:8px; font-size:10px;">
+    <strong>💡 Đề xuất Type Scale cho app:</strong><br>
+    <code>xs: 10px</code> | <code>sm: 12px</code> | <code>base: 14px</code> | <code>md: 16px</code> | <code>lg: 20px</code> | <code>xl: 24px</code> | <code>2xl: 30px</code> | <code>3xl: 36px</code><br>
+    Min readable = 10px (chỉ cho secondary labels). Body text ≥14px.
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 7: ANIMATION (MEDIUM) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>7️⃣ Animation (MEDIUM) — Score: 5/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">motion-meaning</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec không define animation spec cho: Dashboard score counting, progress bars filling, insight card appearing. Cần thêm motion guidelines</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">navigation-direction</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Bottom sheet mở lên = slide-up, đóng = slide-down — đúng. Nhưng tab switch animation? Sub-tab transitions?</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">shared-element-transition</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Khi tap Weight Mini → Weight Chart bottom sheet: weight number nên animate từ mini card → sheet header (hero transition)</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">scale-feedback</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tappable cards (Weight, Streak, Energy) nên có subtle scale(0.97) on press + release</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">stagger-sequence</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅ (implied)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Tier 1-3 render first, 4-5 lazy load = natural stagger. Nhưng nên explicit: 30ms delay per tier</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div style="background:#fef3c7; border-radius:8px; padding:10px; margin-top:8px; font-size:10px;">
+    <strong>💡 Đề xuất Motion Tokens:</strong><br>
+    <code>duration-fast: 150ms</code> (tap feedback, micro) | <code>duration-normal: 250ms</code> (card expand, sheet appear) | <code>duration-slow: 400ms</code> (page transition)<br>
+    <code>easing-enter: ease-out</code> | <code>easing-exit: ease-in</code> | <code>easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1)</code>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 8: FORMS & FEEDBACK (MEDIUM) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>8️⃣ Forms & Feedback (MEDIUM) — Score: 8/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">empty-states</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">6 Dashboard edge cases + 4 Fitness empty states — toàn diện, mỗi state đều có CTA. XUẤT SẮC</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">progressive-disclosure</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">B+C Hybrid onboarding: 3 fields → expand by experience. Protein suggestion: 3 levels by deficit. Excellent</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">input-type-keyboard</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Weight input: stepper (no keyboard needed). Workout sets: number pad. Spec addresses correct input types</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">success-feedback</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">PR Toast 🏆, "Ngày hoàn hảo!" greeting, Milestone celebration — positive reinforcement throughout</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">confirmation-dialogs</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">WorkoutLogger "✕ Kết thúc" — khi mid-workout, cần confirm dialog: "Kết thúc sớm? Dữ liệu sẽ được lưu"</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">undo-support</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Weight log, set confirm — không có undo. Đề xuất: "Undo" toast 5s sau khi log weight hoặc confirm set</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 9: NAVIGATION (HIGH) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>9️⃣ Navigation Patterns (HIGH) — Score: 9/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">bottom-nav-limit (≤5)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">5 tabs exact: Calendar, Library, AI, Fitness, Dashboard. Scored 56/60 on UX criteria</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">nav-label-icon</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">All nav items have icon + label (📅 Lịch, 📋 Thư viện, etc.)</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">nav-hierarchy</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Clear: Bottom nav (L1) → Sub-tabs (L2) → Full-screen/Bottom sheet (L3). Max 3 levels — excellent</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">back-behavior</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">WorkoutLogger: "← Quay lại" predictable. Bottom sheets: swipe-down dismiss. History: expand in-place (no nav)</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">state-preservation</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Spec không mention: khi user rời Dashboard → quay lại, có giữ scroll position và expanded cards không?</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">modal-vs-navigation</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Decision: "full-screen pages, NOT modals" for loggers — đúng Apple HIG. Bottom sheets cho selectors — đúng</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CATEGORY 10: CHARTS & DATA (LOW) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🔟 Charts & Data (LOW) — Score: 7/10</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Rule</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Status</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Assessment</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">chart-type selection</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Weight: sparkline (trend) ✓ | Volume: bar chart (compare) ✓ | Macros: donut (part-to-whole) ✓ | Adherence: progress bar ✓</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">touch-target-chart (≥44pt)</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Weight sparkline (7-day) trong Mini card rất nhỏ. Tap target = card (OK), nhưng sparkline data points cần tooltip?</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">empty-data-state</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Progress tab: skeleton preview khi no data + "Bắt đầu tập ngay →" CTA</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">no-pie-overuse</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#10b981;">✅</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Macro donut = 3 categories (P/F/C) — perfect for donut. Không overuse</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">screen-reader-summary</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; color:#f59e0b;">⚠️</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Charts cần aria-label mô tả: "Cân nặng giảm 0.3kg trong 7 ngày qua, xu hướng đúng mục tiêu"</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- SUMMARY & PRIORITY ACTION ITEMS -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>📋 Tổng kết: 19 Action Items theo Priority</h3>
+  
+  <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+    Sắp xếp theo mức độ ảnh hưởng đến user experience. Implement từ trên xuống dưới.
+  </div>
+  
+  <!-- MUST FIX -->
+  <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:12px; margin-bottom:8px;">
+    <div style="font-size:12px; font-weight:700; color:#991b1b; margin-bottom:8px;">🔴 MUST FIX (5 items — block production)</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <tr>
+        <td style="padding:4px; font-weight:600; width:30px;">F1</td>
+        <td style="padding:4px;"><strong>Emoji → SVG Icons:</strong> Toàn bộ emoji trong nav, buttons, cards → Lucide icons. Cross-platform consistent</td>
+        <td style="padding:4px; width:60px; color:#991b1b;">§4 Style</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">F2</td>
+        <td style="padding:4px;"><strong>Color Contrast:</strong> Emerald #10b981 text trên white = 3.4:1 FAIL. Dùng #059669 cho text (5.1:1)</td>
+        <td style="padding:4px; color:#991b1b;">§1 A11y</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">F3</td>
+        <td style="padding:4px;"><strong>Accessibility Labels:</strong> Thêm accessibilityLabel cho mọi interactive element. Screen reader support</td>
+        <td style="padding:4px; color:#991b1b;">§1 A11y</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">F4</td>
+        <td style="padding:4px;"><strong>Color-Not-Only:</strong> Weight trend, streak dots, score range — bổ sung icon/shape/text ngoài color</td>
+        <td style="padding:4px; color:#991b1b;">§1 A11y</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">F5</td>
+        <td style="padding:4px;"><strong>Min Font Size:</strong> Dashboard labels 7-8px → tăng lên ≥10px. Body text ≥14px trên mobile</td>
+        <td style="padding:4px; color:#991b1b;">§6 Type</td>
+      </tr>
+    </table>
+  </div>
+  
+  <!-- SHOULD FIX -->
+  <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:12px; margin-bottom:8px;">
+    <div style="font-size:12px; font-weight:700; color:#92400e; margin-bottom:8px;">⚠️ SHOULD FIX (9 items — polish & standards)</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <tr>
+        <td style="padding:4px; font-weight:600; width:30px;">S1</td>
+        <td style="padding:4px;">Thêm <strong>Design Tokens section</strong>: spacing (4/8/12/16/24/32/48), shadows (sm/md/lg/xl), radii (sm/md/lg/xl)</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S2</td>
+        <td style="padding:4px;">Thêm <strong>Semantic Color Tokens</strong>: primary, on-primary, surface, on-surface, error, success, warning + dark variants</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S3</td>
+        <td style="padding:4px;">Thêm <strong>Motion Spec</strong>: duration tokens (fast/normal/slow), easing curves, reduced-motion fallbacks</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S4</td>
+        <td style="padding:4px;">Thêm <strong>Tap Feedback</strong>: tất cả tappable elements → opacity(0.7) hoặc scale(0.97) on press, 150ms duration</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S5</td>
+        <td style="padding:4px;">Thêm <strong>Haptic Feedback</strong> cho: set confirm, weight save, milestone achieved, PR toast</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S6</td>
+        <td style="padding:4px;"><strong>Confirmation dialog</strong> khi tap "✕ Kết thúc" workout mid-session</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S7</td>
+        <td style="padding:4px;"><strong>Undo toast</strong> (5s) sau khi log weight hoặc confirm set</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S8</td>
+        <td style="padding:4px;"><strong>CLS prevention</strong>: Reserve fixed height cho AI Insight card slot (dù empty)</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">S9</td>
+        <td style="padding:4px;"><strong>Dynamic Type support</strong>: Dashboard cho phép scroll khi font size lớn, không truncate</td>
+      </tr>
+    </table>
+  </div>
+  
+  <!-- NICE TO HAVE -->
+  <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:12px;">
+    <div style="font-size:12px; font-weight:700; color:#166534; margin-bottom:8px;">🟢 NICE TO HAVE (5 items — premium polish)</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <tr>
+        <td style="padding:4px; font-weight:600; width:30px;">N1</td>
+        <td style="padding:4px;">Shared element transition: Weight Mini → Weight Chart bottom sheet (number animates from card to sheet header)</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">N2</td>
+        <td style="padding:4px;">Dark mode color variants cho Dashboard gradient, cards, charts</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">N3</td>
+        <td style="padding:4px;">Landscape mode behavior definition (lock portrait hoặc 2-column layout)</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">N4</td>
+        <td style="padding:4px;">State preservation: giữ scroll position + expanded cards khi switch tabs rồi quay lại</td>
+      </tr>
+      <tr>
+        <td style="padding:4px; font-weight:600;">N5</td>
+        <td style="padding:4px;">Tabular figures (font-variant-numeric: tabular-nums) cho tất cả số liệu dashboard</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Review hoàn tất — Bước tiếp theo?</h3>
+  <div style="font-size:11px; color:#64748b; margin-bottom:10px;">
+    19 recommendations (5 Must Fix + 9 Should Fix + 5 Nice to Have)
+  </div>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="fix-all">
+    ✅ <strong>Cập nhật spec với tất cả 19 items → Commit → Writing-plans</strong><br>
+    <small>Thêm: A11y section, Design Tokens, Motion Spec, Icon migration map. Rồi chuyển sang implementation plan</small>
+  </div>
+  <div class="option" data-id="fix-must-should">
+    🔧 <strong>Fix MUST (5) + SHOULD (9) = 14 items — bỏ Nice to Have</strong><br>
+    <small>Tập trung vào compliance và standards, Nice to Have thêm sau khi implement</small>
+  </div>
+  <div class="option" data-id="discuss">
+    💬 <strong>Thảo luận thêm — có câu hỏi về recommendation</strong>
+  </div>
+</div>

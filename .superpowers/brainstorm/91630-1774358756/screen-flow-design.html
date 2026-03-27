@@ -1,0 +1,318 @@
+<h2>📱 Fitness Tab — Screen Flow Design</h2>
+<p class="subtitle">Tất cả màn hình cần thiết và cách navigate giữa chúng</p>
+
+<!-- SCREENS INVENTORY -->
+<div class="section">
+  <h3>🗂️ Danh sách màn hình cần thiết</h3>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 24px; font-size: 11px;">
+  <div style="padding: 10px; background: rgba(245,158,11,0.1); border: 1px solid #f59e0b; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">🎓</div>
+    <strong>1. Fitness Onboarding</strong><br>
+    Thu thập 11 fields lần đầu
+  </div>
+  <div style="padding: 10px; background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">📋</div>
+    <strong>2. Training Plan</strong><br>
+    Plan tuần hiện tại (Home)
+  </div>
+  <div style="padding: 10px; background: rgba(16,185,129,0.1); border: 1px solid #10b981; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">🏋️</div>
+    <strong>3. Workout Logger</strong><br>
+    Log bài tập set-by-set
+  </div>
+  <div style="padding: 10px; background: rgba(139,92,246,0.1); border: 1px solid #8b5cf6; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">🔍</div>
+    <strong>4. Exercise Selector</strong><br>
+    Chọn bài tập (modal)
+  </div>
+  <div style="padding: 10px; background: rgba(236,72,153,0.1); border: 1px solid #ec4899; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">📊</div>
+    <strong>5. Progress Dashboard</strong><br>
+    Charts + analytics
+  </div>
+  <div style="padding: 10px; background: rgba(107,114,128,0.1); border: 1px solid #6b7280; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">📜</div>
+    <strong>6. Workout History</strong><br>
+    Lịch sử tập luyện
+  </div>
+  <div style="padding: 10px; background: rgba(234,88,12,0.1); border: 1px solid #ea580c; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">⏱️</div>
+    <strong>7. Rest Timer</strong><br>
+    Đếm ngược (overlay)
+  </div>
+  <div style="padding: 10px; background: rgba(20,184,166,0.1); border: 1px solid #14b8a6; border-radius: 8px; text-align: center;">
+    <div style="font-size: 20px; margin-bottom: 4px;">⚖️</div>
+    <strong>8. Daily Weight</strong><br>
+    Input cân nặng nhanh
+  </div>
+</div>
+
+<!-- 3 APPROACHES -->
+<div class="section">
+  <h3>3 Phương án Navigation</h3>
+</div>
+
+<div class="options">
+  <!-- APPROACH A -->
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Stack Navigation — Push/Pop screens</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="padding: 12px; background: #1a1a2e; border-radius: 10px; color: white; font-size: 11px; max-width: 320px;">
+          <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 8px;">STACK: Home → Push screen → Back ←</div>
+          
+          <div style="padding: 8px; background: rgba(59,130,246,0.2); border: 1px solid #3b82f6; border-radius: 6px; margin-bottom: 4px;">
+            📋 <strong>Training Plan (Home)</strong>
+            <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 4px;">
+              Header: [📊 Progress] [⚖️ Weight] [📜 History]<br>
+              Content: Weekly plan cards<br>
+              Action: [▶️ Start Today's Workout]
+            </div>
+          </div>
+          
+          <div style="text-align: center; font-size: 14px;">↕️ push/pop</div>
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+            <div style="padding: 6px; background: rgba(16,185,129,0.2); border: 1px solid #10b981; border-radius: 6px; text-align: center; font-size: 10px;">
+              🏋️ Logger<br>(← Back to Plan)
+            </div>
+            <div style="padding: 6px; background: rgba(236,72,153,0.2); border: 1px solid #ec4899; border-radius: 6px; text-align: center; font-size: 10px;">
+              📊 Progress<br>(← Back to Plan)
+            </div>
+            <div style="padding: 6px; background: rgba(107,114,128,0.2); border: 1px solid #6b7280; border-radius: 6px; text-align: center; font-size: 10px;">
+              📜 History<br>(← Back to Plan)
+            </div>
+            <div style="padding: 6px; background: rgba(20,184,166,0.2); border: 1px solid #14b8a6; border-radius: 6px; text-align: center; font-size: 10px;">
+              ⚖️ Weight<br>(← Back to Plan)
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 10px;">
+          <span style="color: #10b981;">✅</span> Giống native mobile app (iOS/Android)<br>
+          <span style="color: #10b981;">✅</span> Màn hình rộng — không bị sub-tab chiếm chỗ<br>
+          <span style="color: #10b981;">✅</span> Deep navigation: Plan → Logger → Exercise Selector<br>
+          <span style="color: #ef4444;">❌</span> Cần nhiều tap để chuyển giữa Progress ↔ History<br>
+          <span style="color: #ef4444;">❌</span> Không thấy được nhiều sections cùng lúc
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROACH B -->
+  <div class="option selected" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Sub-tabs + Modals ⭐ Đề xuất</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="padding: 12px; background: #1a1a2e; border-radius: 10px; color: white; font-size: 11px; max-width: 320px;">
+          <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 8px;">SUB-TABS + MODAL OVERLAYS</div>
+          
+          <!-- Sub-tabs bar -->
+          <div style="display: flex; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 2px; margin-bottom: 10px;">
+            <div style="flex: 1; padding: 6px; background: #3b82f6; border-radius: 6px; text-align: center; font-weight: 700; font-size: 10px;">📋 Plan</div>
+            <div style="flex: 1; padding: 6px; text-align: center; font-size: 10px; opacity: 0.6;">📊 Progress</div>
+            <div style="flex: 1; padding: 6px; text-align: center; font-size: 10px; opacity: 0.6;">📜 History</div>
+          </div>
+          
+          <!-- Plan view (active) -->
+          <div style="padding: 8px; background: rgba(59,130,246,0.15); border-radius: 6px; margin-bottom: 6px;">
+            <div style="font-weight: 700;">📅 Tuần 3/8 — Upper/Lower</div>
+            <div style="margin-top: 6px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
+              <div style="padding: 4px 2px; background: #10b981; border-radius: 3px; text-align: center; font-size: 9px; color: white;">T2<br>✓</div>
+              <div style="padding: 4px 2px; background: #10b981; border-radius: 3px; text-align: center; font-size: 9px; color: white;">T3<br>✓</div>
+              <div style="padding: 4px 2px; background: rgba(255,255,255,0.1); border-radius: 3px; text-align: center; font-size: 9px;">T4<br>Rest</div>
+              <div style="padding: 4px 2px; background: #3b82f6; border-radius: 3px; text-align: center; font-size: 9px; color: white;">T5<br>→</div>
+              <div style="padding: 4px 2px; background: rgba(245,158,11,0.3); border-radius: 3px; text-align: center; font-size: 9px;">T6<br>🏃</div>
+              <div style="padding: 4px 2px; background: rgba(255,255,255,0.1); border-radius: 3px; text-align: center; font-size: 9px;">T7<br>Rest</div>
+              <div style="padding: 4px 2px; background: rgba(139,92,246,0.3); border-radius: 3px; text-align: center; font-size: 9px;">CN<br>🏋️</div>
+            </div>
+          </div>
+          
+          <!-- Today's workout preview -->
+          <div style="padding: 8px; background: rgba(59,130,246,0.25); border: 1px solid #3b82f6; border-radius: 6px; margin-bottom: 6px;">
+            <div style="font-weight: 700; font-size: 11px;">🏋️ Hôm nay: Upper A</div>
+            <div style="font-size: 10px; margin-top: 4px; color: rgba(255,255,255,0.7);">
+              Bench Press 4×8 · OHP 3×10 · Lat Pulldown 3×10...
+            </div>
+            <div style="margin-top: 6px; padding: 6px; background: #3b82f6; border-radius: 6px; text-align: center; font-weight: 700; font-size: 11px; cursor: pointer;">
+              ▶️ Bắt đầu buổi tập
+            </div>
+          </div>
+          
+          <!-- Quick weight -->
+          <div style="padding: 6px 8px; background: rgba(20,184,166,0.15); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px;">⚖️ Hôm nay: <strong>82.3 kg</strong></span>
+            <span style="font-size: 9px; color: #14b8a6;">Avg 7d: 82.5 kg ↓0.2</span>
+          </div>
+        </div>
+        
+        <div style="margin-top: 6px; font-size: 10px; color: var(--text-muted);">
+          Logger + Exercise Selector = full-screen modal (như hiện tại với dish editing)
+        </div>
+        
+        <div style="margin-top: 10px;">
+          <span style="color: #10b981;">✅</span> Chuyển nhanh giữa Plan ↔ Progress ↔ History (1 tap)<br>
+          <span style="color: #10b981;">✅</span> Daily weight tích hợp ngay trong Plan view<br>
+          <span style="color: #10b981;">✅</span> Consistent với CalendarTab (đã có sub-tabs meals/nutrition)<br>
+          <span style="color: #10b981;">✅</span> Logger = full-screen modal, không bị sub-tab che<br>
+          <span style="color: #f59e0b;">⚠️</span> Sub-tab bar chiếm ~36px vertical space
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROACH C -->
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Single View + Sections (Scrollable)</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="padding: 12px; background: #1a1a2e; border-radius: 10px; color: white; font-size: 11px; max-width: 320px;">
+          <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 8px;">ALL-IN-ONE SCROLLABLE VIEW</div>
+          
+          <div style="padding: 6px; background: rgba(59,130,246,0.15); border-radius: 6px; margin-bottom: 4px; font-size: 10px;">
+            📋 <strong>Today's Workout</strong> — Upper A<br>
+            [▶️ Start] — Bench, OHP, Lat Pulldown...
+          </div>
+          <div style="padding: 6px; background: rgba(20,184,166,0.15); border-radius: 6px; margin-bottom: 4px; font-size: 10px;">
+            ⚖️ <strong>Weight</strong> — 82.3 kg (7d avg: 82.5)
+          </div>
+          <div style="padding: 6px; background: rgba(236,72,153,0.15); border-radius: 6px; margin-bottom: 4px; font-size: 10px;">
+            📊 <strong>This Week</strong> — 3/4 sessions ✓ · Volume: 12,450 kg
+          </div>
+          <div style="padding: 6px; background: rgba(107,114,128,0.15); border-radius: 6px; font-size: 10px;">
+            📜 <strong>Recent</strong> — Yesterday: Lower A (45 min)
+          </div>
+          <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 4px;">↕️ scroll for more</div>
+        </div>
+        
+        <div style="margin-top: 10px;">
+          <span style="color: #10b981;">✅</span> Mọi thứ 1 trang — overview at a glance<br>
+          <span style="color: #10b981;">✅</span> Không cần sub-tabs, clean<br>
+          <span style="color: #ef4444;">❌</span> Scroll dài — Progress charts bị ẩn phía dưới<br>
+          <span style="color: #ef4444;">❌</span> History chỉ hiện vài entries, cần "See all" link<br>
+          <span style="color: #ef4444;">❌</span> Không scalable khi thêm features
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVIGATION FLOW DIAGRAM -->
+<div class="section" style="margin-top: 24px;">
+  <h3>🔄 Screen Flow Diagram (cho phương án B)</h3>
+</div>
+
+<div style="padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; font-size: 11px;">
+  <pre style="font-family: 'Courier New', monospace; line-height: 1.6; overflow-x: auto; font-size: 11px;">
+┌─────────────────────────────────────────────────────┐
+│                   BOTTOM NAV BAR                     │
+│  Calendar │ Library │ AI │ <strong style="color: #f59e0b;">Fitness</strong> │ Grocery │ Settings │
+└──────────────────────┬──────────────────────────────┘
+                       │
+         ┌─────────────▼──────────────┐
+         │     First time?            │
+         │   ┌─────┐  ┌───────────┐  │
+         │   │ YES │  │    NO     │  │
+         └───┴──┬──┘──┴─────┬─────┘──┘
+                │            │
+    ┌───────────▼──────┐     │
+    │ 🎓 ONBOARDING    │     │
+    │ Step 1: Experience│     │
+    │ Step 2: Schedule  │     │
+    │ Step 3: Equipment │     │
+    │ Step 4: Cardio    │     │
+    │ Step 5: Review    │     │
+    │ → Generate Plan   │     │
+    └───────┬──────────┘     │
+            │                │
+            ▼                ▼
+  ┌──────────────────────────────────┐
+  │   FITNESS TAB (Sub-tabs)         │
+  │  ┌──────┬──────────┬──────────┐  │
+  │  │ Plan │ Progress │ History  │  │
+  │  └──┬───┴────┬─────┴────┬────┘  │
+  │     │        │          │        │
+  │  ┌──▼────┐ ┌─▼──────┐ ┌▼─────┐ │
+  │  │Weekly │ │Charts: │ │Past  │  │
+  │  │Plan   │ │Volume  │ │Work- │  │
+  │  │Cards  │ │Weight  │ │outs  │  │
+  │  │Today  │ │1RM Est │ │List  │  │
+  │  │Weight │ │Streak  │ │      │  │
+  │  └──┬────┘ └────────┘ └──┬───┘  │
+  │     │                     │      │
+  │  [▶️Start]             [Tap]     │
+  │     │                     │      │
+  └─────┼─────────────────────┼──────┘
+        │                     │
+  ┌─────▼─────────────────────▼──────┐
+  │  🏋️ WORKOUT LOGGER (Full-screen) │
+  │  ┌─────────────────────────────┐ │
+  │  │ Exercise → Sets → ✓ Confirm │ │
+  │  │ [+ Add Exercise]            │ │
+  │  │    ↓ opens                  │ │
+  │  │ ┌──────────────────────┐    │ │
+  │  │ │ 🔍 EXERCISE SELECTOR │    │ │
+  │  │ │ Search + Filter chips │   │ │
+  │  │ │ Pre-loaded + Custom   │   │ │
+  │  │ └──────────────────────┘    │ │
+  │  │                             │ │
+  │  │ ⏱️ REST TIMER (overlay)     │ │
+  │  │ Floating countdown bottom   │ │
+  │  └─────────────────────────────┘ │
+  │  [✓ Finish Workout]             │
+  └──────────────────────────────────┘
+  </pre>
+</div>
+
+<!-- KEY INTERACTIONS -->
+<div class="section" style="margin-top: 20px;">
+  <h3>🎯 Key Interactions (Phương án B)</h3>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; font-size: 12px;">
+  <div style="padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+    <strong>1. Mở Fitness tab (lần đầu)</strong><br>
+    → Onboarding wizard (11 fields, 5 steps)<br>
+    → Auto-generate plan<br>
+    → Hiện Plan view với plan mới
+  </div>
+  <div style="padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+    <strong>2. "Bắt đầu buổi tập"</strong><br>
+    → Full-screen Logger mở lên<br>
+    → AI pre-fill sets (Phase 2+)<br>
+    → Rest Timer auto-start giữa sets<br>
+    → "Finish" → save + back to Plan
+  </div>
+  <div style="padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+    <strong>3. Nhập cân nặng</strong><br>
+    → Quick input ngay trong Plan view<br>
+    → Tap → number pad → save<br>
+    → 7-day avg cập nhật real-time
+  </div>
+  <div style="padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+    <strong>4. Xem Progress</strong><br>
+    → Tap sub-tab "Progress"<br>
+    → Charts: Volume/week, Weight trend<br>
+    → 1RM estimates, Adherence rate<br>
+    → Cycle progress bar (tuần 3/8)
+  </div>
+  <div style="padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+    <strong>5. Xem History</strong><br>
+    → Tap sub-tab "History"<br>
+    → List quá khứ (date, duration, volume)<br>
+    → Tap workout → view detail (read-only)<br>
+    → Filter by type: Strength / Cardio
+  </div>
+  <div style="padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+    <strong>6. Log Cardio</strong><br>
+    → "Bắt đầu buổi tập" → chọn Cardio<br>
+    → Different UI: Duration + Intensity<br>
+    → Optional: Distance, Heart Rate<br>
+    → Calories estimated auto
+  </div>
+</div>

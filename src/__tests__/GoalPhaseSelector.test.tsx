@@ -1,0 +1,197 @@
+import { render, screen, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { GoalPhaseSelector } from '../features/health-profile/components/GoalPhaseSelector';
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import type { DatabaseService } from '../services/databaseService';
+
+/* ------------------------------------------------------------------ */
+/*  Mocks                                                              */
+/* ------------------------------------------------------------------ */
+const mockDb: DatabaseService = {
+  initialize: vi.fn(),
+  execute: vi.fn(),
+  query: vi.fn().mockResolvedValue([]),
+  queryOne: vi.fn().mockResolvedValue(null),
+  transaction: vi.fn(),
+  exportToJSON: vi.fn(),
+  importFromJSON: vi.fn(),
+};
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  useDatabase: () => mockDb,
+}));
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+  useHealthProfileStore.setState({ activeGoal: null });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Tests                                                              */
+/* ------------------------------------------------------------------ */
+describe('GoalPhaseSelector', () => {
+  it('renders 3 goal type options', () => {
+    render(<GoalPhaseSelector />);
+
+    expect(screen.getByTestId('goal-type-cut')).toBeInTheDocument();
+    expect(screen.getByTestId('goal-type-maintain')).toBeInTheDocument();
+    expect(screen.getByTestId('goal-type-bulk')).toBeInTheDocument();
+
+    expect(screen.getByText('Giảm cân')).toBeInTheDocument();
+    expect(screen.getByText('Duy trì')).toBeInTheDocument();
+    expect(screen.getByText('Tăng cân')).toBeInTheDocument();
+  });
+
+  it('selecting Cut shows rate selector', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+
+    expect(screen.getByTestId('rate-selector')).toBeInTheDocument();
+    expect(screen.getByText('Tốc độ thay đổi')).toBeInTheDocument();
+  });
+
+  it('selecting Maintain hides rate selector', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    // First select Cut to show rate selector
+    await user.click(screen.getByTestId('goal-type-cut'));
+    expect(screen.getByTestId('rate-selector')).toBeInTheDocument();
+
+    // Then select Maintain to hide it
+    await user.click(screen.getByTestId('goal-type-maintain'));
+    expect(screen.queryByTestId('rate-selector')).not.toBeInTheDocument();
+  });
+
+  it('rate change updates calorie offset display', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+
+    // Default is moderate → -550
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+      '-550 kcal',
+    );
+
+    // Switch to conservative → -275
+    await user.click(screen.getByTestId('rate-conservative'));
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+      '-275 kcal',
+    );
+
+    // Switch to aggressive → -1100
+    await user.click(screen.getByTestId('rate-aggressive'));
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+      '-1100 kcal',
+    );
+  });
+
+  it('save button creates goal with correct offset', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    await user.click(screen.getByTestId('rate-moderate'));
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).not.toBeNull();
+    expect(activeGoal!.type).toBe('bulk');
+    expect(activeGoal!.rateOfChange).toBe('moderate');
+    expect(activeGoal!.calorieOffset).toBe(550);
+    expect(activeGoal!.isActive).toBe(true);
+  });
+
+  it('target weight field is optional', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    // Save without entering target weight
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).not.toBeNull();
+    expect(activeGoal!.targetWeightKg).toBeUndefined();
+
+    // Reset and save with target weight
+    useHealthProfileStore.setState({ activeGoal: null });
+    cleanup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '65');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const updated = useHealthProfileStore.getState().activeGoal;
+    expect(updated).not.toBeNull();
+    expect(updated!.targetWeightKg).toBe(65);
+  });
+
+  it('manual override toggle for calorie offset works', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+      '-550 kcal',
+    );
+
+    // Toggle to manual override
+    await user.click(screen.getByTestId('manual-override-toggle'));
+    expect(screen.getByTestId('custom-offset-input')).toBeInTheDocument();
+
+    // Custom input should be pre-filled with auto value
+    expect(screen.getByTestId('custom-offset-input')).toHaveValue('-550');
+
+    // Clear and type custom value
+    await user.clear(screen.getByTestId('custom-offset-input'));
+    await user.type(screen.getByTestId('custom-offset-input'), '-400');
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+      '-400 kcal',
+    );
+
+    // Save with custom offset
+    await user.click(screen.getByTestId('save-goal-button'));
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal!.calorieOffset).toBe(-400);
+  });
+
+  it('correct offset values for each rate × goal combo', async () => {
+    const user = userEvent.setup();
+
+    const expectedOffsets: [string, string, string][] = [
+      ['goal-type-cut', 'rate-conservative', '-275 kcal'],
+      ['goal-type-cut', 'rate-moderate', '-550 kcal'],
+      ['goal-type-cut', 'rate-aggressive', '-1100 kcal'],
+      ['goal-type-bulk', 'rate-conservative', '+275 kcal'],
+      ['goal-type-bulk', 'rate-moderate', '+550 kcal'],
+      ['goal-type-bulk', 'rate-aggressive', '+1100 kcal'],
+    ];
+
+    for (const [goalTestId, rateTestId, expected] of expectedOffsets) {
+      cleanup();
+      render(<GoalPhaseSelector />);
+
+      await user.click(screen.getByTestId(goalTestId));
+      await user.click(screen.getByTestId(rateTestId));
+
+      expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+        expected,
+      );
+    }
+
+    // Maintain should always show ±0
+    cleanup();
+    render(<GoalPhaseSelector />);
+    await user.click(screen.getByTestId('goal-type-maintain'));
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
+      '±0 kcal',
+    );
+  });
+});

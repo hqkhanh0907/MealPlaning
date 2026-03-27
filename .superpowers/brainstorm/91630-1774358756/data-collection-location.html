@@ -1,0 +1,204 @@
+<h2>📍 Câu hỏi gốc: Training Profile Data đặt ở đâu?</h2>
+<p class="subtitle">Giờ đã biết rõ WHAT + WHY + HOW → quay lại trả lời WHERE</p>
+
+<!-- RECAP -->
+<div style="padding: 16px; background: rgba(59,130,246,0.06); border: 2px solid #3b82f6; border-radius: 12px; margin-bottom: 24px;">
+  <div style="font-weight: 800; font-size: 15px; margin-bottom: 10px;">📋 Tóm tắt: 4 nhóm dữ liệu đã xác định</div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 12px;">
+    <div style="padding: 10px; background: rgba(59,130,246,0.1); border-radius: 8px;">
+      <strong style="color: #3b82f6;">Nhóm 1: Cơ thể</strong> (6 fields)<br>
+      gender, age, height, weight, activity_level, body_fat%
+    </div>
+    <div style="padding: 10px; background: rgba(16,185,129,0.1); border-radius: 8px;">
+      <strong style="color: #10b981;">Nhóm 2: Mục tiêu</strong> (3 fields)<br>
+      goal_type, rate_of_change, target_weight
+    </div>
+    <div style="padding: 10px; background: rgba(245,158,11,0.1); border-radius: 8px;">
+      <strong style="color: #f59e0b;">Nhóm 3: Tập luyện</strong> (8 fields)<br>
+      experience, days/week, duration, goal, equipment, injuries, 1RM, sleep
+    </div>
+    <div style="padding: 10px; background: rgba(139,92,246,0.1); border-radius: 8px;">
+      <strong style="color: #8b5cf6;">Nhóm 4: Hàng ngày</strong> (3 inputs)<br>
+      daily_weight, meal_log, workout_log
+    </div>
+  </div>
+</div>
+
+<!-- OPTIONS -->
+<div class="section">
+  <h3>Phương án đặt vị trí thu thập</h3>
+</div>
+
+<!-- Option A -->
+<div class="options">
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>All-in-Settings: Gộp tất cả vào Settings Tab</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: 1;">
+            <strong>Cách hoạt động:</strong>
+            <div style="margin-top: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8;">
+              Settings Tab<br>
+              ├── 📋 Hồ sơ sức khỏe (Nhóm 1)<br>
+              ├── 🎯 Mục tiêu (Nhóm 2)<br>
+              ├── 🏋️ Hồ sơ tập luyện (Nhóm 3)<br>
+              └── ⚙️ Cài đặt chung
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Một nơi duy nhất, dễ tìm</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> User cũ biết chỗ cập nhật</div>
+            <div style="margin-bottom: 6px;"><span style="color: #ef4444;">❌</span> Form quá dài (17 fields)</div>
+            <div style="margin-bottom: 6px;"><span style="color: #ef4444;">❌</span> Không contextual — training settings nằm xa Fitness tab</div>
+            <div><span style="color: #ef4444;">❌</span> User mới overwhelmed khi mở Settings lần đầu</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option selected" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Split Contextual: Health ở Settings, Training ở Fitness Tab ⭐ Đề xuất</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: 1;">
+            <strong>Cách hoạt động:</strong>
+            <div style="margin-top: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8;">
+              Settings Tab<br>
+              ├── 📋 Hồ sơ sức khỏe (Nhóm 1)<br>
+              ├── 🎯 Mục tiêu (Nhóm 2)<br>
+              └── ⚙️ Cài đặt chung<br><br>
+              Fitness Tab (lần đầu mở)<br>
+              └── 🏋️ "Thiết lập hồ sơ tập luyện"<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;(Nhóm 3: onboarding 3 bước)
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Contextual — training settings ngay trong Fitness</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Không overwhelm — chỉ hỏi khi user cần</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> User không cần Fitness vẫn dùng app bình thường</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Form nhỏ gọn ở mỗi vị trí</div>
+            <div><span style="color: #f59e0b;">⚠️</span> Training data scattered — edit ở Fitness, body data ở Settings</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Guided Onboarding: Wizard lần đầu mở app</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: 1;">
+            <strong>Cách hoạt động:</strong>
+            <div style="margin-top: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8;">
+              Lần đầu mở app:<br>
+              Step 1/5: "Bạn là..." (gender, age)<br>
+              Step 2/5: "Chỉ số cơ thể" (height, weight)<br>
+              Step 3/5: "Mục tiêu" (goal, rate, target)<br>
+              Step 4/5: "Về việc tập luyện" (exp, days, equipment)<br>
+              Step 5/5: "Xong! Đây là plan của bạn" ✨<br><br>
+              Sau đó: Edit trong Settings hoặc Fitness tab
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> UX tốt nhất — step-by-step, giáo dục</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> User hiểu TẠI SAO mỗi field quan trọng</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> "Wow effect" khi xem plan tự sinh ra</div>
+            <div style="margin-bottom: 6px;"><span style="color: #ef4444;">❌</span> Barrier lớn — phải trả lời 17 câu hỏi trước khi dùng app</div>
+            <div style="margin-bottom: 6px;"><span style="color: #ef4444;">❌</span> User mới có thể bỏ giữa chừng (high drop-off)</div>
+            <div><span style="color: #ef4444;">❌</span> Existing users cần migration flow phức tạp</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option D -->
+  <div class="option" data-choice="D" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Progressive Collection: Thu thập dần, không hỏi hết 1 lần</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: 1;">
+            <strong>Cách hoạt động:</strong>
+            <div style="margin-top: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8;">
+              Lần 1 dùng app: Chỉ hỏi weight (1 field)<br>
+              → Dùng defaults cho còn lại<br><br>
+              Khi mở Nutrition: "Để chính xác hơn,<br>
+              &nbsp;&nbsp;cho mình biết gender + age + height?"<br><br>
+              Khi mở Fitness: "Bạn tập bao lâu rồi?<br>
+              &nbsp;&nbsp;Bạn có thiết bị gì?"<br><br>
+              Sau 1 tuần: "Muốn auto-adjust? Nhập<br>
+              &nbsp;&nbsp;cân nặng hàng ngày nhé"
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Zero friction — dùng app ngay lập tức</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Hỏi đúng lúc cần → user hiểu context</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Không overwhelm</div>
+            <div style="margin-bottom: 6px;"><span style="color: #ef4444;">❌</span> Kết quả ban đầu kém chính xác (dùng defaults)</div>
+            <div style="margin-bottom: 6px;"><span style="color: #ef4444;">❌</span> Logic phức tạp — track "đã hỏi field nào chưa"</div>
+            <div><span style="color: #ef4444;">❌</span> User có thể không bao giờ hoàn thành profile</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option E — HYBRID -->
+  <div class="option" data-choice="E" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>Hybrid: Mini-Onboarding + Contextual Expansion</h3>
+      <div style="font-size: 12px; margin-top: 8px;">
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: 1;">
+            <strong>Kết hợp ưu điểm C + B + D:</strong>
+            <div style="margin-top: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 6px; font-family: monospace; font-size: 11px; line-height: 1.8;">
+              <strong>Bước 1: Mini-onboarding (5 fields bắt buộc)</strong><br>
+              Lần đầu mở app, 1 màn hình duy nhất:<br>
+              Gender · Age · Height · Weight · Goal type<br>
+              → <strong>BMR + TDEE + Target tính được ngay</strong><br><br>
+              <strong>Bước 2: Contextual khi mở Fitness (lần đầu)</strong><br>
+              "Để tạo plan tập, cho mình biết thêm..."<br>
+              → experience, days/week, equipment, injuries<br>
+              → <strong>Training plan tính được ngay</strong><br><br>
+              <strong>Bước 3: Upsell advanced (tuỳ chọn)</strong><br>
+              Settings có section "Nâng cao" cho:<br>
+              rate_of_change, target_weight, body_fat%,<br>
+              1RM, sleep hours
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Chỉ 5 câu hỏi ban đầu (~30 giây)</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Kết quả chính xác ngay từ đầu</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Training data hỏi đúng context</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Advanced users có chỗ fine-tune</div>
+            <div style="margin-bottom: 6px;"><span style="color: #10b981;">✅</span> Không cần Fitness = bỏ qua Bước 2</div>
+            <div><span style="color: #f59e0b;">⚠️</span> Cần design 2 flow riêng (onboarding + Fitness setup)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECOMMENDATION -->
+<div style="margin-top: 24px; padding: 16px; background: rgba(16,185,129,0.08); border: 2px solid #10b981; border-radius: 12px;">
+  <div style="font-weight: 800; font-size: 15px; margin-bottom: 10px;">💡 Đề xuất: Phương án E (Hybrid) hoặc B (Split Contextual)</div>
+  <div style="font-size: 13px; line-height: 1.8;">
+    <strong>Nếu muốn UX tốt nhất:</strong> Phương án <strong>E</strong> — Mini-onboarding 5 fields → Fitness onboarding khi cần → Advanced trong Settings. Kết quả chính xác ngay từ phút đầu, không overwhelm.<br><br>
+    <strong>Nếu muốn đơn giản hơn (ít dev):</strong> Phương án <strong>B</strong> — Health Profile trong Settings (mở rộng form hiện có), Training Profile khi mở Fitness tab lần đầu.<br><br>
+    <strong>Tránh A</strong> (quá dài) và <strong>C</strong> (barrier cao, drop-off lớn). <strong>D</strong> thú vị nhưng kết quả ban đầu kém chính xác.
+  </div>
+</div>

@@ -1,0 +1,610 @@
+<h2>🔴 Issue 2: Workout Logger Speed — Phân tích chi tiết</h2>
+<p class="subtitle">Core interaction: 15-25 sets/buổi tập → mỗi set phải nhanh nhất có thể</p>
+
+<!-- PROBLEM STATEMENT -->
+<div class="section">
+  <h3>📌 Tại sao đây là vấn đề quan trọng nhất?</h3>
+  <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px; padding:16px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;">
+      <div>
+        <div style="font-size:28px; font-weight:800; color:#dc2626;">15-25×</div>
+        <div style="font-size:11px; color:#64748b;">Sets mỗi buổi tập</div>
+      </div>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:#dc2626;">3-5×</div>
+        <div style="font-size:11px; color:#64748b;">Buổi tập mỗi tuần</div>
+      </div>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:#dc2626;">60-125×</div>
+        <div style="font-size:11px; color:#64748b;">Tương tác log/tuần</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; padding:10px; background:#fee2e2; border-radius:8px; font-size:12px; text-align:center;">
+      Nếu mỗi set mất <strong>5s thừa</strong> → lãng phí <strong>5-10 phút/tuần</strong> → user bỏ app sau 2 tuần
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CONTEXT: PROGRESSIVE INTELLIGENCE -->
+<div class="section">
+  <h3>🧠 Nhắc lại: Progressive Intelligence (đã chốt ở spec)</h3>
+  <div style="background:#f8fafc; border-radius:12px; padding:16px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div style="background:#fef3c7; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-weight:700; font-size:13px; color:#d97706;">Phase 1</div>
+        <div style="font-size:11px; margin-top:4px;">Buổi đầu tiên<br><strong>100% manual</strong></div>
+      </div>
+      <div style="background:#dbeafe; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-weight:700; font-size:13px; color:#2563eb;">Phase 2</div>
+        <div style="font-size:11px; margin-top:4px;">Buổi 2+<br><strong>AI pre-fill</strong> từ last session</div>
+      </div>
+      <div style="background:#dcfce7; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-weight:700; font-size:13px; color:#16a34a;">Phase 3</div>
+        <div style="font-size:11px; margin-top:4px;">2+ tuần<br><strong>Smart adjust</strong> + plateau detect</div>
+      </div>
+    </div>
+    <div style="margin-top:8px; font-size:12px; color:#64748b; text-align:center;">
+      → Vấn đề: Cả 3 phases đều cần UI nhanh. Phase 2-3 có lợi thế pre-fill, nhưng Phase 1 vẫn phải acceptable.
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3 UI APPROACHES -->
+<div class="section">
+  <h3>🔄 3 Phương án UI cho Workout Logger</h3>
+  
+  <!-- APPROACH A: Traditional Form -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">A</span>
+      <span style="font-weight:700; font-size:16px;">Traditional Form — Input fields riêng biệt</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <!-- Mockup -->
+      <div style="max-width:300px; border:2px solid #e2e8f0; border-radius:20px; padding:16px; background:#fff;">
+        <!-- Exercise Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div>
+            <div style="font-size:15px; font-weight:700;">Bench Press</div>
+            <div style="font-size:11px; color:#64748b;">Set 3 / 4</div>
+          </div>
+          <div style="font-size:11px; color:#64748b;">Last: 77.5kg × 8</div>
+        </div>
+        
+        <!-- Weight Input -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Weight (kg)</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 12px; font-size:14px; cursor:pointer;">−</div>
+            <div style="flex:1; border:2px solid #3b82f6; border-radius:8px; padding:8px; text-align:center; font-size:18px; font-weight:700;">80</div>
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 12px; font-size:14px; cursor:pointer;">+</div>
+          </div>
+        </div>
+        
+        <!-- Reps Input -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Reps</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 12px; font-size:14px;">−</div>
+            <div style="flex:1; border:2px solid #e2e8f0; border-radius:8px; padding:8px; text-align:center; font-size:18px; font-weight:700;">8</div>
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 12px; font-size:14px;">+</div>
+          </div>
+        </div>
+        
+        <!-- RPE -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">RPE</div>
+          <div style="display:flex; gap:3px;">
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:6px; text-align:center; font-size:11px;">6</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:6px; text-align:center; font-size:11px;">7</div>
+            <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:6px; text-align:center; font-size:11px; font-weight:600;">8</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:6px; text-align:center; font-size:11px;">9</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:6px; text-align:center; font-size:11px;">10</div>
+          </div>
+        </div>
+        
+        <!-- Log button -->
+        <div style="background:#10b981; color:#fff; border-radius:10px; padding:12px; text-align:center; font-weight:700; font-size:14px;">✓ Log Set</div>
+      </div>
+      
+      <!-- Analysis -->
+      <div style="font-size:12px;">
+        <div style="font-weight:600; margin-bottom:8px;">📊 Phân tích:</div>
+        <div style="line-height:1.8;">
+          <strong>Phase 1 (manual):</strong><br>
+          • Tap weight field → adjust +/- → tap reps → adjust → tap RPE → tap Log<br>
+          • <span style="color:#dc2626; font-weight:600;">~6-8 taps, 8-12 giây/set</span><br><br>
+          
+          <strong>Phase 2 (pre-fill):</strong><br>
+          • Fields đã có data → chỉ cần adjust nếu khác → tap RPE → tap Log<br>
+          • <span style="color:#f59e0b; font-weight:600;">~3-5 taps, 5-8 giây/set</span><br><br>
+          
+          <strong>Ưu điểm:</strong><br>
+          ✅ Familiar pattern, dễ hiểu<br>
+          ✅ +/- buttons → precise control<br><br>
+          
+          <strong>Nhược điểm:</strong><br>
+          ❌ Nhiều taps, đặc biệt Phase 1<br>
+          ❌ +/- phải tap nhiều lần (77.5→80 = 1 tap, nhưng 60→80 = 8 taps)<br>
+          ❌ Keyboard number pad → che mất nửa screen<br>
+          ❌ Scroll dọc nhiều trên small phones
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROACH B: Quick Confirm Card -->
+  <div style="background:#f0fdf4; border:3px solid #10b981; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">B ✅</span>
+      <span style="font-weight:700; font-size:16px;">Quick Confirm Card — Confirm-first, Edit-if-needed</span>
+      <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:11px;">Recommended</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <!-- Phase 1 Mockup -->
+      <div>
+        <div style="text-align:center; font-weight:600; font-size:12px; margin-bottom:6px; color:#d97706;">Phase 1: Manual</div>
+        <div style="border:2px solid #e2e8f0; border-radius:16px; padding:12px; background:#fff;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:2px;">Bench Press</div>
+          <div style="font-size:10px; color:#64748b; margin-bottom:10px;">Set 1/4 • Target: 8-12 reps</div>
+          
+          <!-- Inline weight/reps row -->
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div style="flex:1;">
+              <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">KG</div>
+              <div style="display:flex; align-items:center; border:2px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                <div style="padding:6px 8px; background:#f1f5f9; font-size:12px; cursor:pointer;">−</div>
+                <div style="flex:1; text-align:center; font-size:16px; font-weight:800; padding:4px;">80</div>
+                <div style="padding:6px 8px; background:#f1f5f9; font-size:12px; cursor:pointer;">+</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:end; padding-bottom:6px; font-size:16px; color:#94a3b8;">×</div>
+            <div style="flex:1;">
+              <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">REPS</div>
+              <div style="display:flex; align-items:center; border:2px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                <div style="padding:6px 8px; background:#f1f5f9; font-size:12px; cursor:pointer;">−</div>
+                <div style="flex:1; text-align:center; font-size:16px; font-weight:800; padding:4px;">8</div>
+                <div style="padding:6px 8px; background:#f1f5f9; font-size:12px; cursor:pointer;">+</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- RPE row -->
+          <div style="display:flex; gap:2px; margin-bottom:10px;">
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">6</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">7</div>
+            <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:5px; text-align:center; font-size:10px; font-weight:700;">8</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">9</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">10</div>
+          </div>
+          
+          <div style="background:#10b981; color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:700; font-size:13px;">✓ Log Set</div>
+          <div style="text-align:center; font-size:10px; color:#dc2626; margin-top:6px;">~4-6 taps (adjust + RPE + log)</div>
+        </div>
+      </div>
+      
+      <!-- Phase 2 Mockup -->
+      <div>
+        <div style="text-align:center; font-weight:600; font-size:12px; margin-bottom:6px; color:#2563eb;">Phase 2: Pre-fill ⚡</div>
+        <div style="border:2px solid #10b981; border-radius:16px; padding:12px; background:#f0fdf4;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:2px;">Bench Press</div>
+          <div style="font-size:10px; color:#64748b; margin-bottom:10px;">Set 3/4 • Last: 77.5kg × 8</div>
+          
+          <!-- Pre-filled display -->
+          <div style="background:#fff; border:2px solid #10b981; border-radius:10px; padding:12px; margin-bottom:8px; text-align:center;">
+            <div style="font-size:24px; font-weight:900; color:#0f172a;">80kg × 8</div>
+            <div style="display:inline-block; background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:10px; margin-top:4px;">
+              ↑ +2.5kg từ lần trước
+            </div>
+          </div>
+          
+          <!-- RPE quick select -->
+          <div style="display:flex; gap:2px; margin-bottom:8px;">
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">6</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">7</div>
+            <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:5px; text-align:center; font-size:10px; font-weight:700;">8</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">9</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">10</div>
+          </div>
+          
+          <!-- Two buttons -->
+          <div style="display:flex; gap:6px;">
+            <div style="flex:2; background:#10b981; color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:700; font-size:13px;">✓ Xác nhận</div>
+            <div style="flex:1; background:#f1f5f9; color:#475569; border-radius:8px; padding:10px; text-align:center; font-size:12px;">✏️ Sửa</div>
+          </div>
+          <div style="text-align:center; font-size:10px; color:#16a34a; font-weight:600; margin-top:6px;">⚡ 1-2 taps (RPE + Confirm)</div>
+        </div>
+      </div>
+      
+      <!-- Phase 3 Mockup -->
+      <div>
+        <div style="text-align:center; font-weight:600; font-size:12px; margin-bottom:6px; color:#16a34a;">Phase 3: Smart Adjust 🧠</div>
+        <div style="border:2px solid #10b981; border-radius:16px; padding:12px; background:#f0fdf4;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:2px;">Bench Press</div>
+          <div style="font-size:10px; color:#64748b; margin-bottom:10px;">Set 3/4 • Tuần 4/8</div>
+          
+          <!-- Smart suggestion -->
+          <div style="background:#fff; border:2px solid #10b981; border-radius:10px; padding:12px; margin-bottom:6px; text-align:center;">
+            <div style="font-size:24px; font-weight:900; color:#0f172a;">82.5kg × 8</div>
+            <div style="display:inline-block; background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:10px; margin-top:4px;">
+              🧠 AI gợi ý tăng 2.5kg (RPE trước: 7)
+            </div>
+          </div>
+          
+          <!-- Insight mini -->
+          <div style="background:#eff6ff; border-radius:8px; padding:6px 8px; margin-bottom:8px; font-size:10px; color:#2563eb;">
+            📊 3 tuần liên tiếp 80kg × 8 @ RPE 7 → sẵn sàng tăng
+          </div>
+          
+          <!-- RPE -->
+          <div style="display:flex; gap:2px; margin-bottom:8px;">
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">6</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">7</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">8</div>
+            <div style="flex:1; background:#fef3c7; border:1px solid #f59e0b; border-radius:4px; padding:5px; text-align:center; font-size:10px; font-weight:700;">9</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px; text-align:center; font-size:10px;">10</div>
+          </div>
+          
+          <div style="display:flex; gap:6px;">
+            <div style="flex:2; background:#10b981; color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:700; font-size:13px;">✓ Xác nhận</div>
+            <div style="flex:1; background:#f1f5f9; color:#475569; border-radius:8px; padding:10px; text-align:center; font-size:12px;">✏️ Sửa</div>
+          </div>
+          <div style="text-align:center; font-size:10px; color:#16a34a; font-weight:600; margin-top:6px;">⚡ 1-2 taps + AI insight</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- APPROACH C: Inline Table -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">C</span>
+      <span style="font-weight:700; font-size:16px;">Inline Table — Tất cả sets hiện cùng lúc</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div style="max-width:320px; border:2px solid #e2e8f0; border-radius:16px; padding:12px; background:#fff;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:8px;">Bench Press <span style="color:#64748b; font-weight:400; font-size:11px;">4 sets × 8-12 reps</span></div>
+        
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead>
+            <tr style="background:#f1f5f9;">
+              <td style="padding:6px; font-weight:600; font-size:10px;">SET</td>
+              <td style="padding:6px; font-weight:600; font-size:10px;">KG</td>
+              <td style="padding:6px; font-weight:600; font-size:10px;">REPS</td>
+              <td style="padding:6px; font-weight:600; font-size:10px;">RPE</td>
+              <td style="padding:6px; font-weight:600; font-size:10px;"></td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f0fdf4;">
+              <td style="padding:6px; font-weight:600;">1</td>
+              <td style="padding:6px;">80</td>
+              <td style="padding:6px;">10</td>
+              <td style="padding:6px;">7</td>
+              <td style="padding:6px; color:#10b981;">✓</td>
+            </tr>
+            <tr style="background:#f0fdf4;">
+              <td style="padding:6px; font-weight:600;">2</td>
+              <td style="padding:6px;">80</td>
+              <td style="padding:6px;">9</td>
+              <td style="padding:6px;">8</td>
+              <td style="padding:6px; color:#10b981;">✓</td>
+            </tr>
+            <tr style="background:#dbeafe; border:2px solid #3b82f6; border-radius:4px;">
+              <td style="padding:6px; font-weight:700;">3</td>
+              <td style="padding:6px;"><input style="width:40px; border:1px solid #3b82f6; border-radius:4px; padding:2px 4px; text-align:center; font-size:12px;" value="80"></td>
+              <td style="padding:6px;"><input style="width:32px; border:1px solid #3b82f6; border-radius:4px; padding:2px 4px; text-align:center; font-size:12px;" value=""></td>
+              <td style="padding:6px;"><input style="width:28px; border:1px solid #e2e8f0; border-radius:4px; padding:2px 4px; text-align:center; font-size:12px;" value=""></td>
+              <td style="padding:6px;"><div style="background:#10b981; color:#fff; border-radius:4px; padding:2px 6px; font-size:10px; text-align:center;">Log</div></td>
+            </tr>
+            <tr style="color:#94a3b8;">
+              <td style="padding:6px; font-weight:600;">4</td>
+              <td style="padding:6px;">80</td>
+              <td style="padding:6px;">—</td>
+              <td style="padding:6px;">—</td>
+              <td style="padding:6px;"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="font-size:12px;">
+        <div style="font-weight:600; margin-bottom:8px;">📊 Phân tích:</div>
+        <div style="line-height:1.8;">
+          <strong>Ưu điểm:</strong><br>
+          ✅ Nhìn tổng quan tất cả sets<br>
+          ✅ So sánh performance giữa sets ngay<br>
+          ✅ Compact — ít scroll<br><br>
+          
+          <strong>Nhược điểm:</strong><br>
+          ❌ Input fields nhỏ trên mobile → fat-finger errors<br>
+          ❌ Keyboard che mất bảng → mất context<br>
+          ❌ Không có chỗ cho AI suggestion / insight<br>
+          ❌ RPE khó chọn từ input box nhỏ<br>
+          ❌ Touch targets < 44px → vi phạm accessibility<br><br>
+          
+          <span style="color:#dc2626;">⚠️ Phù hợp desktop, <strong>KHÔNG phù hợp mobile</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FULL WORKOUT FLOW -->
+<div class="section">
+  <h3>📱 Flow hoàn chỉnh 1 buổi tập (Approach B)</h3>
+  
+  <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px;">
+    <!-- Screen 1: Today's Workout -->
+    <div style="min-width:200px; border:2px solid #e2e8f0; border-radius:16px; padding:14px; background:#fff; flex-shrink:0;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:6px;">① PLAN SUB-TAB</div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:4px;">Upper Body A</div>
+      <div style="font-size:11px; color:#64748b; margin-bottom:10px;">Tuần 3/8 • 5 bài tập • ~45 min</div>
+      
+      <div style="font-size:11px; line-height:2;">
+        1. Bench Press — 4×8-12<br>
+        2. Bent-over Row — 4×8-12<br>
+        3. OHP — 3×8-12<br>
+        4. Pull-ups — 3×6-10<br>
+        5. Face Pull — 3×15-20
+      </div>
+      
+      <div style="background:#10b981; color:#fff; border-radius:10px; padding:10px; text-align:center; font-weight:700; margin-top:12px; font-size:13px;">
+        ▶️ Bắt đầu tập
+      </div>
+    </div>
+    
+    <div style="display:flex; align-items:center; font-size:20px; color:#94a3b8; flex-shrink:0;">→</div>
+    
+    <!-- Screen 2: Workout Logger (full screen) -->
+    <div style="min-width:220px; border:2px solid #10b981; border-radius:16px; padding:14px; background:#f0fdf4; flex-shrink:0;">
+      <div style="font-size:10px; color:#16a34a; font-weight:600; margin-bottom:6px;">② WORKOUT LOGGER</div>
+      
+      <!-- Header with back -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-size:12px; color:#64748b;">← Back</div>
+        <div style="font-size:12px; color:#64748b;">⏱ 12:34</div>
+        <div style="font-size:12px; color:#dc2626;">✕ Kết thúc</div>
+      </div>
+      
+      <!-- Exercise progress -->
+      <div style="background:#dcfce7; border-radius:6px; padding:4px 8px; font-size:10px; margin-bottom:8px; text-align:center;">
+        Bài 1/5 • Bench Press • Set 3/4
+      </div>
+      
+      <!-- Quick confirm card -->
+      <div style="background:#fff; border:2px solid #10b981; border-radius:10px; padding:10px; margin-bottom:8px; text-align:center;">
+        <div style="font-size:18px; font-weight:800;">80kg × 8</div>
+        <div style="font-size:9px; color:#16a34a;">↑ +2.5kg</div>
+      </div>
+      
+      <div style="display:flex; gap:2px; margin-bottom:6px; font-size:9px;">
+        <div style="flex:1; background:#f1f5f9; border-radius:3px; padding:4px; text-align:center;">7</div>
+        <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:3px; padding:4px; text-align:center; font-weight:700;">8</div>
+        <div style="flex:1; background:#f1f5f9; border-radius:3px; padding:4px; text-align:center;">9</div>
+      </div>
+      
+      <div style="display:flex; gap:4px;">
+        <div style="flex:2; background:#10b981; color:#fff; border-radius:6px; padding:8px; text-align:center; font-weight:700; font-size:11px;">✓ Xác nhận</div>
+        <div style="flex:1; background:#f1f5f9; border-radius:6px; padding:8px; text-align:center; font-size:10px;">✏️</div>
+      </div>
+      
+      <!-- Completed sets -->
+      <div style="margin-top:8px; font-size:9px; color:#64748b;">
+        Set 1: 80×10 @RPE7 ✓<br>
+        Set 2: 80×9 @RPE8 ✓
+      </div>
+    </div>
+    
+    <div style="display:flex; align-items:center; font-size:20px; color:#94a3b8; flex-shrink:0;">→</div>
+    
+    <!-- Screen 3: Rest Timer -->
+    <div style="min-width:180px; border:2px solid #f59e0b; border-radius:16px; padding:14px; background:#fef3c7; flex-shrink:0;">
+      <div style="font-size:10px; color:#d97706; font-weight:600; margin-bottom:6px;">③ REST TIMER</div>
+      <div style="text-align:center; margin:16px 0;">
+        <div style="font-size:36px; font-weight:900; color:#d97706;">1:32</div>
+        <div style="font-size:11px; color:#92400e;">/ 2:00 phút</div>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; text-align:center; font-size:10px;">+30s</div>
+        <div style="flex:1; background:#d97706; color:#fff; border-radius:6px; padding:6px; text-align:center; font-size:10px; font-weight:600;">Skip →</div>
+      </div>
+      <div style="margin-top:8px; font-size:9px; color:#92400e; text-align:center;">
+        Auto-show sau mỗi set<br>
+        Tự chuyển về Logger khi hết giờ
+      </div>
+    </div>
+    
+    <div style="display:flex; align-items:center; font-size:20px; color:#94a3b8; flex-shrink:0;">→</div>
+    
+    <!-- Screen 4: Exercise Complete -->
+    <div style="min-width:200px; border:2px solid #e2e8f0; border-radius:16px; padding:14px; background:#fff; flex-shrink:0;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:6px;">④ BÀI TẬP TIẾP THEO</div>
+      <div style="text-align:center; margin:8px 0;">
+        <div style="font-size:24px;">✅</div>
+        <div style="font-size:13px; font-weight:600;">Bench Press hoàn thành!</div>
+        <div style="font-size:11px; color:#64748b;">4/4 sets • Volume: 2,920 kg</div>
+      </div>
+      
+      <div style="border-top:1px solid #e2e8f0; padding-top:8px; margin-top:8px;">
+        <div style="font-size:12px; font-weight:600;">Tiếp theo:</div>
+        <div style="font-size:14px; font-weight:700; margin-top:4px;">Bent-over Row</div>
+        <div style="font-size:11px; color:#64748b;">4 sets × 8-12 reps</div>
+      </div>
+      
+      <div style="background:#10b981; color:#fff; border-radius:8px; padding:8px; text-align:center; font-weight:700; font-size:12px; margin-top:8px;">
+        ▶️ Bắt đầu bài tiếp
+      </div>
+    </div>
+    
+    <div style="display:flex; align-items:center; font-size:20px; color:#94a3b8; flex-shrink:0;">→</div>
+    
+    <!-- Screen 5: Workout Complete -->
+    <div style="min-width:200px; border:2px solid #10b981; border-radius:16px; padding:14px; background:#f0fdf4; flex-shrink:0;">
+      <div style="font-size:10px; color:#16a34a; font-weight:600; margin-bottom:6px;">⑤ HOÀN THÀNH!</div>
+      <div style="text-align:center; margin:8px 0;">
+        <div style="font-size:32px;">🎉</div>
+        <div style="font-size:15px; font-weight:700;">Upper Body A</div>
+        <div style="font-size:11px; color:#64748b;">Hoàn thành!</div>
+      </div>
+      <div style="background:#fff; border-radius:8px; padding:8px; font-size:11px; line-height:1.8;">
+        ⏱ Tổng: 43 phút<br>
+        📊 Volume: 12,450 kg<br>
+        🔥 Calories: ~280 kcal<br>
+        💪 PR: Bench 80×10 (mới!) 🏆
+      </div>
+      <div style="background:#10b981; color:#fff; border-radius:8px; padding:8px; text-align:center; font-weight:700; font-size:12px; margin-top:8px;">
+        📸 Chia sẻ kết quả
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- EDIT MODE DETAIL -->
+<div class="section">
+  <h3>✏️ Chi tiết nút "Sửa" — Khi user bấm chỉnh weight/reps</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="border:2px solid #3b82f6; border-radius:16px; padding:16px; background:#eff6ff;">
+      <div style="font-weight:600; color:#2563eb; margin-bottom:8px; font-size:14px;">Edit Mode — Bottom Sheet expand</div>
+      <div style="max-width:280px; margin:0 auto; background:#fff; border-radius:16px; padding:16px; box-shadow:0 -4px 12px rgba(0,0,0,0.1);">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px;">Chỉnh sửa Set 3</div>
+        
+        <!-- Weight -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Weight (kg)</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer;">−2.5</div>
+            <div style="flex:1; border:2px solid #3b82f6; border-radius:8px; padding:8px; text-align:center; font-size:20px; font-weight:800;">80</div>
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer;">+2.5</div>
+          </div>
+          <!-- Quick weight chips -->
+          <div style="display:flex; gap:3px; margin-top:6px;">
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">70</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">75</div>
+            <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:4px; padding:4px; text-align:center; font-size:9px; font-weight:600;">80</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">82.5</div>
+            <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:4px; text-align:center; font-size:9px;">85</div>
+          </div>
+        </div>
+        
+        <!-- Reps -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Reps</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 12px; font-size:13px;">−1</div>
+            <div style="flex:1; border:2px solid #e2e8f0; border-radius:8px; padding:8px; text-align:center; font-size:20px; font-weight:800;">8</div>
+            <div style="background:#f1f5f9; border-radius:8px; padding:8px 12px; font-size:13px;">+1</div>
+          </div>
+        </div>
+        
+        <div style="background:#10b981; color:#fff; border-radius:10px; padding:10px; text-align:center; font-weight:700; font-size:14px;">
+          ✓ Áp dụng
+        </div>
+      </div>
+    </div>
+    
+    <div style="font-size:12px; line-height:1.8;">
+      <div style="font-weight:600; margin-bottom:8px;">Thiết kế Edit Mode:</div>
+      
+      <strong>+/- buttons:</strong><br>
+      • Weight: bước nhảy ±2.5kg (standard plate)<br>
+      • Reps: bước nhảy ±1<br><br>
+      
+      <strong>Quick weight chips:</strong><br>
+      • Hiện 5 giá trị gần nhất đã từng dùng<br>
+      • Tap 1 lần → chọn ngay, không cần +/- nhiều lần<br>
+      • Giải quyết vấn đề "60→80 phải tap 8 lần"<br><br>
+      
+      <strong>Bottom sheet pattern:</strong><br>
+      • Slide up từ dưới (consistent với app pattern)<br>
+      • Không phải full modal → user vẫn thấy context phía trên<br>
+      • Swipe down hoặc bấm "Áp dụng" để đóng<br><br>
+      
+      <strong>Keyboard:</strong><br>
+      • Tap vào số weight/reps → hiện number pad<br>
+      • Nhập trực tiếp nếu muốn (power users)
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- COMPARISON -->
+<div class="section">
+  <h3>📊 So sánh tốc độ log — Taps mỗi set</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:12px;">
+    <thead>
+      <tr style="background:#f1f5f9; font-weight:600;">
+        <td style="padding:8px; border:1px solid #e2e8f0;">Scenario</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">A. Form</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; background:#f0fdf4;">B. Quick Confirm ✅</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">C. Table</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:8px; border:1px solid #e2e8f0;">Phase 1: Manual (buổi đầu)</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">6-8 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; background:#f0fdf4;">4-6 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">5-7 taps</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border:1px solid #e2e8f0;">Phase 2: Pre-fill (weight giữ nguyên)</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">3-5 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; color:#16a34a; font-weight:600; background:#f0fdf4;">1-2 taps ⚡</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">3-4 taps</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border:1px solid #e2e8f0;">Phase 2: Pre-fill (weight đổi)</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">4-6 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; background:#f0fdf4;">3-4 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">4-5 taps</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border:1px solid #e2e8f0;">Phase 3: Smart suggest (đồng ý)</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">3-5 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; color:#16a34a; font-weight:600; background:#f0fdf4;">1-2 taps ⚡</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">N/A</td>
+      </tr>
+      <tr style="background:#f8fafc; font-weight:600;">
+        <td style="padding:8px; border:1px solid #e2e8f0;">Avg (20 sets/buổi, Phase 2+)</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; color:#dc2626;">~80 taps</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center; color:#16a34a; background:#f0fdf4;">~30 taps ⚡</td>
+        <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">~70 taps</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Bạn chọn phương án nào cho Workout Logger?</h3>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approach-b">
+    ✅ <strong>B. Quick Confirm Card — Chốt & chuyển Issue 3</strong><br>
+    <small>Pre-fill + Confirm-first + Bottom sheet edit + Rest timer auto</small>
+  </div>
+  <div class="option" data-id="approach-a-b">
+    🔀 <strong>Kết hợp A+B: Table overview + Quick Confirm cho active set</strong><br>
+    <small>Thấy tổng quan sets (table) + confirm card cho set đang tập</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong>
+  </div>
+</div>

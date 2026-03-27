@@ -1,0 +1,445 @@
+<h2>🏋️ Fitness Tab — Phân tích UX Deep Dive</h2>
+<p class="subtitle">Đánh giá flow hiện tại trong spec vs. best practices cho mobile fitness UX</p>
+
+<!-- OVERVIEW -->
+<div class="section">
+  <h3>📋 Tổng quan: 7 vấn đề UX cần phân tích sâu</h3>
+  <p>Dựa trên spec hiện tại, tôi đã identify 7 điểm mà UX flow có thể được cải thiện đáng kể để thân thiện và trực quan hơn cho user mobile:</p>
+  
+  <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+    <thead>
+      <tr style="background:#f1f5f9; font-weight:600;">
+        <td style="padding:10px; border:1px solid #e2e8f0;">#</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Vấn đề</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Mức độ</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Ảnh hưởng</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">1</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Onboarding 14 fields / 5 steps</strong> — Có thể overwhelm user mới</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🔴 Cao</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Drop-off rate, first impression</td>
+      </tr>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">2</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Workout Logger — Tốc độ logging</strong> — Core interaction cần <3 taps/set</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🔴 Cao</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Daily retention, user satisfaction</td>
+      </tr>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">3</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Navigation depth</strong> — Tab→Sub-tab→Modal→Selector = 4 levels deep</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🟡 Trung bình</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Cognitive load, "lost" feeling</td>
+      </tr>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">4</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Empty states & Rest days</strong> — Plan sub-tab trống vào ngày nghỉ</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🟡 Trung bình</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">User confusion, missed engagement</td>
+      </tr>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">5</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Progress visualization trên mobile</strong> — Charts nào glanceable nhất?</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🟡 Trung bình</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Motivation, goal tracking</td>
+      </tr>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">6</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Nutrition ↔ Fitness kết nối</strong> — Hai tab riêng nhưng data liên quan</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🟡 Trung bình</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Holistic view, calorie balance</td>
+      </tr>
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0;">7</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;"><strong>Gamification / Motivation</strong> — Thiếu yếu tố thúc đẩy user quay lại</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">🟢 Thấp</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">Long-term retention, engagement</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 1: ONBOARDING -->
+<div class="section">
+  <h3>🔴 Vấn đề 1: Onboarding Flow — 14 fields / 5 bước có quá nặng?</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
+    <!-- Current -->
+    <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px; padding:16px;">
+      <div style="font-weight:700; color:#dc2626; margin-bottom:8px;">❌ Flow hiện tại (spec)</div>
+      <div style="font-size:13px; line-height:1.6;">
+        <div style="padding:6px 0; border-bottom:1px dashed #fca5a5;">Step 1: Experience Level (1 field)</div>
+        <div style="padding:6px 0; border-bottom:1px dashed #fca5a5;">Step 2: Schedule (2 fields: days + duration)</div>
+        <div style="padding:6px 0; border-bottom:1px dashed #fca5a5;">Step 3: Equipment & Injuries (2 fields)</div>
+        <div style="padding:6px 0; border-bottom:1px dashed #fca5a5;">Step 4: Preferences (4 fields: goal, periodization, cycle, cardio)</div>
+        <div style="padding:6px 0;">Step 5: Priority Muscles + Review (1 field + confirm)</div>
+        <div style="margin-top:8px; padding:8px; background:#fee2e2; border-radius:8px; font-size:12px;">
+          ⚠️ <strong>14 fields × 5 steps = ~2-3 phút</strong><br>
+          Nghiên cứu UX: >60s onboarding → 40% drop-off trên mobile
+        </div>
+      </div>
+    </div>
+    
+    <!-- Proposed -->
+    <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:16px;">
+      <div style="font-weight:700; color:#16a34a; margin-bottom:8px;">✅ Flow đề xuất: Progressive Disclosure</div>
+      <div style="font-size:13px; line-height:1.6;">
+        <div style="padding:6px 0; border-bottom:1px dashed #86efac;"><strong>Quick Start (3 fields, 30s):</strong></div>
+        <div style="padding:4px 0 4px 12px; border-bottom:1px dashed #86efac;">① Mục tiêu (tăng cơ/giảm mỡ/duy trì)</div>
+        <div style="padding:4px 0 4px 12px; border-bottom:1px dashed #86efac;">② Kinh nghiệm (mới/trung bình/nâng cao)</div>
+        <div style="padding:4px 0 4px 12px; border-bottom:1px dashed #86efac;">③ Số ngày tập/tuần (slider 2-6)</div>
+        <div style="padding:6px 0; border-bottom:1px dashed #86efac;"><strong>→ AI tự chọn defaults thông minh cho 11 fields còn lại</strong></div>
+        <div style="padding:6px 0;"><em>User có thể tinh chỉnh sau trong Settings</em></div>
+        <div style="margin-top:8px; padding:8px; background:#dcfce7; border-radius:8px; font-size:12px;">
+          ✅ <strong>3 fields × 1 bước = ~30s</strong><br>
+          "Cho tôi tập ngay, tôi sẽ điều chỉnh sau"
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:#eff6ff; border-radius:12px; padding:16px; margin-top:12px;">
+    <div style="font-weight:600; color:#2563eb; margin-bottom:8px;">💡 Smart Defaults Logic:</div>
+    <div style="font-size:13px; line-height:1.8;">
+      Với chỉ 3 inputs, AI có thể suy ra:<br>
+      • <code>goal=hypertrophy + experience=beginner + days=3</code> → Full Body, Linear, 8 weeks, 45min, RPE 6-7<br>
+      • <code>goal=strength + experience=advanced + days=5</code> → PPL, Undulating, 6 weeks, 60min, RPE 8-9<br>
+      • <code>goal=fat_loss + experience=intermediate + days=4</code> → Upper/Lower + 2 Cardio, Block, 8 weeks
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 2: WORKOUT LOGGER SPEED -->
+<div class="section">
+  <h3>🔴 Vấn đề 2: Workout Logger — Tốc độ ghi log mỗi set</h3>
+  
+  <p>Đây là <strong>core interaction</strong> — user sẽ thực hiện 15-25 lần/buổi tập. Nếu mỗi set mất >5 taps → frustration.</p>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:16px 0;">
+    <!-- Option A -->
+    <div style="background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; color:#334155; margin-bottom:8px; font-size:14px;">A. Form-based (truyền thống)</div>
+      <div style="background:#f8fafc; border-radius:8px; padding:12px; font-size:12px; text-align:center;">
+        <div style="border:1px solid #cbd5e1; border-radius:6px; padding:8px; margin-bottom:6px;">
+          <div style="color:#94a3b8; font-size:10px;">WEIGHT (kg)</div>
+          <div style="font-size:18px; font-weight:700;">80</div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:6px;">
+          <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+            <div style="color:#94a3b8; font-size:10px;">REPS</div>
+            <div style="font-size:16px; font-weight:700;">8</div>
+          </div>
+          <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+            <div style="color:#94a3b8; font-size:10px;">RPE</div>
+            <div style="font-size:16px; font-weight:700;">7</div>
+          </div>
+        </div>
+        <div style="background:#10b981; color:#fff; border-radius:6px; padding:6px; font-weight:600; font-size:11px;">✓ Log Set</div>
+      </div>
+      <div style="margin-top:8px; font-size:11px; color:#64748b;">
+        Taps: <strong style="color:#dc2626;">6-8 taps</strong> (tap field → type → next field → type → RPE → log)<br>
+        ⚠️ Keyboard mở/đóng liên tục → jarring
+      </div>
+    </div>
+    
+    <!-- Option B -->
+    <div style="background:#f0fdf4; border:2px solid #10b981; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; color:#16a34a; margin-bottom:8px; font-size:14px;">B. Quick-confirm (đề xuất ✅)</div>
+      <div style="background:#f8fafc; border-radius:8px; padding:12px; font-size:12px;">
+        <div style="color:#94a3b8; font-size:10px; margin-bottom:4px;">SET 3 of 4 — Bench Press</div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <div style="font-size:22px; font-weight:800;">80kg × 8</div>
+          <div style="background:#dcfce7; color:#16a34a; border-radius:99px; padding:2px 8px; font-size:10px;">+2.5kg ↑</div>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <div style="flex:2; background:#10b981; color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:700;">✓ Xác nhận</div>
+          <div style="flex:1; background:#f1f5f9; color:#475569; border-radius:8px; padding:10px; text-align:center; font-size:11px;">✏️ Sửa</div>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <div style="flex:1; text-align:center; padding:4px; border-radius:4px; background:#f1f5f9; font-size:10px;">RPE 6</div>
+          <div style="flex:1; text-align:center; padding:4px; border-radius:4px; background:#f1f5f9; font-size:10px;">RPE 7</div>
+          <div style="flex:1; text-align:center; padding:4px; border-radius:4px; background:#dbeafe; border:1px solid #3b82f6; font-size:10px; font-weight:600;">RPE 8</div>
+          <div style="flex:1; text-align:center; padding:4px; border-radius:4px; background:#f1f5f9; font-size:10px;">RPE 9</div>
+        </div>
+      </div>
+      <div style="margin-top:8px; font-size:11px; color:#64748b;">
+        Taps: <strong style="color:#16a34a;">1-2 taps</strong> (RPE + Confirm) nếu weight/reps đúng<br>
+        ✅ AI pre-fill → user chỉ confirm hoặc adjust
+      </div>
+    </div>
+    
+    <!-- Option C -->
+    <div style="background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; color:#334155; margin-bottom:8px; font-size:14px;">C. Swipe-based</div>
+      <div style="background:#f8fafc; border-radius:8px; padding:12px; font-size:12px; text-align:center;">
+        <div style="color:#94a3b8; font-size:10px; margin-bottom:4px;">SWIPE TO ADJUST</div>
+        <div style="font-size:20px; font-weight:800; margin-bottom:4px;">80kg × 8</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:8px;">
+          <div style="color:#94a3b8;">← swipe trái: -2.5kg</div>
+          <div style="color:#94a3b8;">swipe phải: +2.5kg →</div>
+        </div>
+        <div style="color:#94a3b8; font-size:10px;">⬆ swipe lên: +1 rep | ⬇ swipe xuống: -1 rep</div>
+      </div>
+      <div style="margin-top:8px; font-size:11px; color:#64748b;">
+        Taps: <strong style="color:#f59e0b;">2-4 swipes</strong><br>
+        ⚠️ Learning curve cao, dễ nhầm, không có standard gesture
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 3: NAVIGATION DEPTH -->
+<div class="section">
+  <h3>🟡 Vấn đề 3: Navigation Depth — 4 cấp có quá sâu?</h3>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:16px; margin:12px 0;">
+    <div style="font-weight:600; margin-bottom:8px;">Cấu trúc navigation hiện tại:</div>
+    <div style="font-family:monospace; font-size:13px; line-height:2;">
+      <span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px;">Level 1</span> Bottom Tab: Fitness<br>
+      &nbsp;&nbsp;↓<br>
+      <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px;">Level 2</span> Sub-tab: Plan / Progress / History<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      <span style="background:#f59e0b; color:#fff; padding:2px 8px; border-radius:4px;">Level 3</span> Modal: WorkoutLogger<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      <span style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:4px;">Level 4</span> Nested Modal: ExerciseSelector<br>
+    </div>
+  </div>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0;">
+    <div style="background:#fef2f2; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; color:#dc2626; margin-bottom:8px;">⚠️ Rủi ro:</div>
+      <ul style="font-size:13px; margin:0; padding-left:16px; line-height:1.8;">
+        <li>User mất phương hướng (đang ở đâu?)</li>
+        <li>Nút Back/Close không rõ ràng</li>
+        <li>Nested modals (modal trong modal) → UX anti-pattern</li>
+        <li>iOS gesture conflict (swipe back vs swipe in app)</li>
+      </ul>
+    </div>
+    <div style="background:#f0fdf4; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; color:#16a34a; margin-bottom:8px;">✅ Giải pháp đề xuất:</div>
+      <ul style="font-size:13px; margin:0; padding-left:16px; line-height:1.8;">
+        <li><strong>ExerciseSelector không phải modal riêng</strong> → Inline trong WorkoutLogger (bottom sheet expand)</li>
+        <li>WorkoutLogger là <strong>full-screen page</strong> thay vì modal → có header + back rõ ràng</li>
+        <li>Breadcrumb nhẹ: "Fitness → Workout → ..."</li>
+        <li>Max depth: 3 levels (Tab → Sub-tab → Full-screen)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 4: EMPTY / REST DAY STATES -->
+<div class="section">
+  <h3>🟡 Vấn đề 4: Ngày nghỉ & Empty States</h3>
+  
+  <p>Khi user mở Plan sub-tab vào ngày nghỉ, nhìn thấy gì?</p>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:16px 0;">
+    <div style="border:2px solid #e2e8f0; border-radius:12px; padding:16px; text-align:center;">
+      <div style="font-weight:600; margin-bottom:12px; font-size:13px;">A. Trống hoàn toàn</div>
+      <div style="background:#f8fafc; border-radius:8px; padding:32px 16px; color:#94a3b8;">
+        <div style="font-size:32px; margin-bottom:8px;">😴</div>
+        <div style="font-size:13px;">"Hôm nay là ngày nghỉ"</div>
+      </div>
+      <div style="font-size:11px; color:#dc2626; margin-top:8px;">❌ Wasted engagement opportunity</div>
+    </div>
+    
+    <div style="border:2px solid #10b981; border-radius:12px; padding:16px; text-align:center;">
+      <div style="font-weight:600; margin-bottom:12px; font-size:13px; color:#16a34a;">B. Smart Rest Day ✅</div>
+      <div style="background:#f0fdf4; border-radius:8px; padding:12px; text-align:left; font-size:12px;">
+        <div style="font-size:16px; margin-bottom:4px;">🧘 Ngày phục hồi</div>
+        <div style="color:#64748b; margin-bottom:8px;">Cơ bắp đang hồi phục từ buổi tập hôm qua</div>
+        <div style="border-top:1px solid #86efac; padding-top:8px;">
+          <div style="font-weight:600; font-size:11px; color:#16a34a; margin-bottom:4px;">GỢI Ý:</div>
+          <div>• 🚶 Đi bộ nhẹ 20 phút</div>
+          <div>• 💧 Uống đủ 2.5L nước</div>
+          <div>• 🥗 Ăn đủ protein hôm nay</div>
+        </div>
+        <div style="border-top:1px solid #86efac; padding-top:8px; margin-top:8px;">
+          <div style="font-weight:600; font-size:11px; margin-bottom:4px;">📊 NHANH:</div>
+          <div>Ngày mai: Upper Body B • 5 bài tập</div>
+        </div>
+      </div>
+      <div style="font-size:11px; color:#16a34a; margin-top:8px;">✅ Engagement + health tips</div>
+    </div>
+    
+    <div style="border:2px solid #e2e8f0; border-radius:12px; padding:16px; text-align:center;">
+      <div style="font-weight:600; margin-bottom:12px; font-size:13px;">C. Quick Actions</div>
+      <div style="background:#f8fafc; border-radius:8px; padding:12px; text-align:left; font-size:12px;">
+        <div style="font-size:16px; margin-bottom:8px;">💪 Ngày nghỉ</div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:8px; margin-bottom:4px;">🏃 Log cardio ngoài lịch</div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:8px; margin-bottom:4px;">⚖️ Cân nặng hôm nay</div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:8px;">📸 Ảnh tiến trình</div>
+      </div>
+      <div style="font-size:11px; color:#64748b; margin-top:8px;">Functional nhưng thiếu guidance</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 5: PROGRESS CHARTS -->
+<div class="section">
+  <h3>🟡 Vấn đề 5: Progress Visualization — Charts nào tối ưu cho mobile?</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0;">
+    <!-- Current spec -->
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; color:#dc2626; margin-bottom:8px;">Spec hiện tại (3 charts + cards):</div>
+      <div style="font-size:12px; line-height:1.8;">
+        1. Cycle Progress Bar (dạng thanh)<br>
+        2. Volume Trend (line chart 8 tuần)<br>
+        3. Weight Trend (line + dots)<br>
+        4. Stats Cards row (adherence, 1RM, sessions)
+      </div>
+      <div style="margin-top:8px; padding:8px; background:#fee2e2; border-radius:8px; font-size:11px;">
+        ⚠️ Scroll dài → user phải cuộn để xem hết<br>
+        ⚠️ 2 line charts liên tiếp → visual monotony<br>
+        ⚠️ Không rõ "insight" — chỉ hiện data
+      </div>
+    </div>
+    
+    <!-- Proposed -->
+    <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; color:#16a34a; margin-bottom:8px;">Đề xuất: Insight-First Dashboard</div>
+      <div style="font-size:12px; line-height:1.8;">
+        1. <strong>Hero metric</strong>: Một con số chính (tuần này vs tuần trước)<br>
+        2. <strong>Mini sparkline</strong>: Trend 4 tuần, height 40px, không cần axes<br>
+        3. <strong>Insight card</strong>: "Volume tăng 12% — đúng tiến độ!" (AI-generated)<br>
+        4. <strong>Swipeable cards</strong>: Volume | Weight | Strength | Adherence
+      </div>
+      <div style="margin-top:8px; padding:8px; background:#dcfce7; border-radius:8px; font-size:11px;">
+        ✅ Glanceable — thấy ngay trong 2s<br>
+        ✅ Swipe horizontal thay vì scroll dọc<br>
+        ✅ AI tóm tắt thay vì user tự đọc chart
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 6: NUTRITION-FITNESS CONNECTION -->
+<div class="section">
+  <h3>🟡 Vấn đề 6: Kết nối Nutrition ↔ Fitness</h3>
+  
+  <p>Hai tab riêng biệt (Calendar cho Nutrition, Fitness cho Training) nhưng data phụ thuộc nhau mạnh:</p>
+  
+  <div style="background:#eff6ff; border-radius:12px; padding:16px; margin:12px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="font-size:24px;">🍽️</span>
+      <span style="font-size:20px; color:#3b82f6;">←→</span>
+      <span style="font-size:24px;">🏋️</span>
+    </div>
+    <div style="font-size:13px; line-height:1.8;">
+      • <strong>Workout day</strong>: Cần ăn nhiều hơn (TDEE + Exercise calories)<br>
+      • <strong>Rest day</strong>: Có thể giảm carbs, giữ protein<br>
+      • <strong>Cutting phase</strong>: Volume giảm 15% nếu calo quá thấp<br>
+      • <strong>Daily balance</strong>: Calories In (meals) - Calories Out (workout) = Net
+    </div>
+  </div>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0;">
+    <div style="border:2px solid #e2e8f0; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; margin-bottom:8px; font-size:14px;">A. Cross-tab Banner</div>
+      <div style="font-size:12px; line-height:1.6;">
+        Trên Calendar tab, hiện banner nhỏ:<br>
+        <div style="background:#dbeafe; border-radius:8px; padding:8px; margin:8px 0; font-size:11px;">
+          🏋️ Hôm nay: Upper Body A (-350 kcal) → Target: 1850 kcal
+        </div>
+        Trên Fitness tab, hiện banner nhỏ:<br>
+        <div style="background:#dcfce7; border-radius:8px; padding:8px; margin:8px 0; font-size:11px;">
+          🍽️ Đã ăn: 1200/1850 kcal — Còn thiếu 650 kcal
+        </div>
+      </div>
+    </div>
+    <div style="border:2px solid #10b981; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; margin-bottom:8px; font-size:14px; color:#16a34a;">B. Unified Daily Summary ✅</div>
+      <div style="font-size:12px; line-height:1.6;">
+        Ở cả 2 tabs, cùng 1 component "Daily Balance":<br>
+        <div style="background:#f0fdf4; border-radius:8px; padding:8px; margin:8px 0; font-size:11px;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>🍽️ In: 1200 kcal</span>
+            <span>🏋️ Out: 350 kcal</span>
+          </div>
+          <div style="background:#e2e8f0; border-radius:99px; height:8px; margin:6px 0; overflow:hidden;">
+            <div style="background:linear-gradient(90deg, #10b981 65%, #3b82f6 65%, #3b82f6 84%); height:100%; border-radius:99px; width:84%;"></div>
+          </div>
+          <div style="text-align:center; color:#64748b; font-size:10px;">Net: 850 kcal | Target: 1500 kcal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISSUE 7: GAMIFICATION -->
+<div class="section">
+  <h3>🟢 Vấn đề 7: Gamification & Motivation</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0;">
+    <div style="border:2px solid #e2e8f0; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; margin-bottom:8px;">Spec hiện tại:</div>
+      <div style="font-size:13px; color:#64748b; text-align:center; padding:24px 0;">
+        <div style="font-size:32px; margin-bottom:8px;">🤷</div>
+        Không có yếu tố gamification
+      </div>
+    </div>
+    
+    <div style="border:2px solid #f59e0b; border-radius:12px; padding:16px;">
+      <div style="font-weight:600; margin-bottom:8px; color:#d97706;">Đề xuất MVP Gamification:</div>
+      <div style="font-size:12px; line-height:1.8;">
+        <div style="padding:4px 0;">🔥 <strong>Streak counter</strong>: "Tập liên tục 5 ngày"</div>
+        <div style="padding:4px 0;">🏆 <strong>Weekly summary</strong>: Popup cuối tuần tổng kết</div>
+        <div style="padding:4px 0;">📈 <strong>Personal Records</strong>: Highlight khi đạt 1RM mới</div>
+        <div style="padding:4px 0;">💪 <strong>Milestone badges</strong>: 10/50/100 buổi tập</div>
+        <div style="margin-top:8px; padding:8px; background:#fef3c7; border-radius:8px; font-size:11px;">
+          ⚡ Chỉ cần Streak + PR highlight cho MVP<br>
+          Badges & Weekly Summary → Phase 2
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- QUESTION -->
+<div class="section">
+  <h3>❓ Câu hỏi cho bạn</h3>
+  <p>Tôi muốn đi sâu vào từng vấn đề. Hãy bắt đầu với vấn đề nào bạn quan tâm nhất:</p>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="issue1">
+    🔴 <strong>Vấn đề 1: Onboarding</strong><br>
+    <small>Phân tích chi tiết Quick Start 3 fields vs Full 14 fields</small>
+  </div>
+  <div class="option" data-id="issue2">
+    🔴 <strong>Vấn đề 2: Workout Logger Speed</strong><br>
+    <small>Mockup chi tiết Quick-confirm UI flow</small>
+  </div>
+  <div class="option" data-id="issue3-4">
+    🟡 <strong>Vấn đề 3+4: Navigation + Rest Days</strong><br>
+    <small>Giải quyết navigation depth và empty states</small>
+  </div>
+  <div class="option" data-id="issue5-6">
+    🟡 <strong>Vấn đề 5+6: Progress Charts + Nutrition Link</strong><br>
+    <small>Thiết kế dashboard và kết nối 2 tabs</small>
+  </div>
+  <div class="option" data-id="all-sequential">
+    📋 <strong>Đi qua tất cả theo thứ tự</strong><br>
+    <small>Phân tích từng vấn đề, bắt đầu từ #1</small>
+  </div>
+</div>

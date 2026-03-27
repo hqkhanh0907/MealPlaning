@@ -1,0 +1,391 @@
+<h2>🟢 Issue 7: Gamification MVP</h2>
+<p class="subtitle">Động lực duy trì thói quen tập luyện — vừa đủ, không gimmick</p>
+
+<!-- PROBLEM -->
+<div class="section">
+  <h3>📌 Vấn đề: Dropout Rate</h3>
+  
+  <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px; padding:16px; margin-bottom:12px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;">
+      <div>
+        <div style="font-size:32px; font-weight:800; color:#dc2626;">50%</div>
+        <div style="font-size:11px; color:#64748b;">bỏ tập sau<br><strong>6 tháng</strong></div>
+      </div>
+      <div>
+        <div style="font-size:32px; font-weight:800; color:#f59e0b;">73%</div>
+        <div style="font-size:11px; color:#64748b;">bỏ New Year<br>resolution trước <strong>tháng 2</strong></div>
+      </div>
+      <div>
+        <div style="font-size:32px; font-weight:800; color:#10b981;">4×</div>
+        <div style="font-size:11px; color:#64748b;">tăng adherence<br>với <strong>streak tracking</strong></div>
+      </div>
+    </div>
+    <div style="margin-top:10px; font-size:11px; text-align:center; color:#64748b;">
+      Nguồn: Dishman & Buckworth (1996), Hamari et al. (2014) — Gamification tăng engagement 4× khi dùng đúng
+    </div>
+  </div>
+  
+  <div style="background:#fff7ed; border-radius:10px; padding:12px; font-size:12px;">
+    <strong>🎯 Nguyên tắc:</strong> Gamification phải <em>motivate</em>, không <em>manipulate</em>.<br>
+    MVP chỉ cần 3 yếu tố: <strong>Progress visibility</strong> (thấy tiến bộ), <strong>Consistency reward</strong> (thưởng kiên trì), <strong>Achievement recognition</strong> (ghi nhận đạt mốc).
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3 APPROACHES -->
+<div class="section">
+  <h3>🎮 3 Phương án Gamification</h3>
+  
+  <!-- Approach A: Streak Only -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">A</span>
+      <span style="font-weight:700; font-size:16px;">Streak Counter Only — Ultra minimal</span>
+    </div>
+    
+    <div style="max-width:320px; margin:0 auto;">
+      <div style="background:#f8fafc; border-radius:12px; padding:16px; text-align:center;">
+        <div style="font-size:40px;">🔥</div>
+        <div style="font-size:36px; font-weight:800; color:#f59e0b;">12</div>
+        <div style="font-size:13px; color:#64748b;">ngày liên tiếp</div>
+        <div style="margin-top:8px; display:flex; justify-content:center; gap:4px;">
+          <span style="width:8px; height:8px; border-radius:99px; background:#10b981;"></span>
+          <span style="width:8px; height:8px; border-radius:99px; background:#10b981;"></span>
+          <span style="width:8px; height:8px; border-radius:99px; background:#10b981;"></span>
+          <span style="width:8px; height:8px; border-radius:99px; background:#10b981;"></span>
+          <span style="width:8px; height:8px; border-radius:99px; background:#10b981;"></span>
+          <span style="width:8px; height:8px; border-radius:99px; background:#e2e8f0;"></span>
+          <span style="width:8px; height:8px; border-radius:99px; background:#e2e8f0;"></span>
+        </div>
+        <div style="font-size:10px; color:#64748b; margin-top:4px;">Tuần này: 5/7 ngày</div>
+      </div>
+    </div>
+    
+    <div style="margin-top:12px; font-size:11px; color:#64748b;">
+      ✅ Rất đơn giản • ✅ Proven motivation • ⚠️ Thiếu depth • ⚠️ Không ghi nhận PR/mốc
+    </div>
+  </div>
+  
+  <!-- Approach B: Streak + PR + Milestones -->
+  <div style="background:#f0fdf4; border:3px solid #10b981; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">B ✅</span>
+      <span style="font-weight:700; font-size:16px;">Streak + PR Highlights + Milestones</span>
+      <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:11px;">Recommended</span>
+    </div>
+    
+    <div style="max-width:340px; margin:0 auto;">
+      
+      <!-- 1. Streak component -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="font-size:28px;">🔥</div>
+            <div>
+              <div style="font-size:22px; font-weight:800; color:#f59e0b;">12 ngày</div>
+              <div style="font-size:10px; color:#64748b;">streak liên tiếp</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px; color:#64748b;">Kỷ lục</div>
+            <div style="font-size:14px; font-weight:700; color:#10b981;">21 ngày</div>
+          </div>
+        </div>
+        
+        <!-- Week dots -->
+        <div style="margin-top:8px; display:flex; justify-content:space-between; padding:0 4px;">
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">T2</div><div style="width:20px; height:20px; border-radius:99px; background:#10b981; margin-top:2px; display:flex; align-items:center; justify-content:center;"><span style="color:#fff; font-size:9px;">✓</span></div></div>
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">T3</div><div style="width:20px; height:20px; border-radius:99px; background:#10b981; margin-top:2px; display:flex; align-items:center; justify-content:center;"><span style="color:#fff; font-size:9px;">✓</span></div></div>
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">T4</div><div style="width:20px; height:20px; border-radius:99px; background:#dcfce7; margin-top:2px; display:flex; align-items:center; justify-content:center;"><span style="color:#10b981; font-size:9px;">😴</span></div></div>
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">T5</div><div style="width:20px; height:20px; border-radius:99px; background:#10b981; margin-top:2px; display:flex; align-items:center; justify-content:center;"><span style="color:#fff; font-size:9px;">✓</span></div></div>
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">T6</div><div style="width:20px; height:20px; border-radius:99px; background:#10b981; margin-top:2px; display:flex; align-items:center; justify-content:center;"><span style="color:#fff; font-size:9px;">✓</span></div></div>
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">T7</div><div style="width:20px; height:20px; border-radius:99px; background:#fef3c7; margin-top:2px; display:flex; align-items:center; justify-content:center;"><span style="font-size:9px;">📍</span></div></div>
+          <div style="text-align:center;"><div style="font-size:9px; color:#64748b;">CN</div><div style="width:20px; height:20px; border-radius:99px; background:#f1f5f9; margin-top:2px;"></div></div>
+        </div>
+        <div style="margin-top:4px; font-size:9px; color:#64748b; text-align:center;">
+          ✓ = Tập xong &nbsp; 😴 = Ngày nghỉ (vẫn tính streak) &nbsp; 📍 = Hôm nay
+        </div>
+      </div>
+      
+      <!-- 2. PR Highlight Toast -->
+      <div style="background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius:14px; padding:14px; margin-bottom:10px; color:#fff;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="font-size:32px;">🏆</div>
+          <div>
+            <div style="font-size:14px; font-weight:800;">KỶ LỤC MỚI!</div>
+            <div style="font-size:12px; opacity:0.9;">Bench Press: 80kg × 5 reps</div>
+            <div style="font-size:10px; opacity:0.7; margin-top:2px;">Tăng 5kg so với lần trước (75kg)</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 3. Milestones -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px; margin-bottom:10px;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:8px;">🎯 Mốc tiếp theo</div>
+        
+        <div style="display:grid; gap:8px;">
+          <!-- Next milestone -->
+          <div style="background:#eff6ff; border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:#3b82f6; display:flex; align-items:center; justify-content:center; font-size:16px;">💪</div>
+            <div style="flex:1;">
+              <div style="font-size:11px; font-weight:600;">50 buổi tập</div>
+              <div style="background:#e2e8f0; border-radius:99px; height:6px; margin-top:4px; overflow:hidden;">
+                <div style="background:#3b82f6; height:100%; width:86%; border-radius:99px;"></div>
+              </div>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:#3b82f6;">43/50</div>
+          </div>
+          
+          <!-- Completed milestone -->
+          <div style="background:#f0fdf4; border-radius:10px; padding:10px; display:flex; align-items:center; gap:8px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:#10b981; display:flex; align-items:center; justify-content:center; font-size:16px;">✅</div>
+            <div style="flex:1;">
+              <div style="font-size:11px; font-weight:600; color:#16a34a;">30 buổi tập</div>
+              <div style="font-size:10px; color:#64748b;">Hoàn thành 15/03/2026</div>
+            </div>
+            <div style="font-size:14px;">🎖️</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- WHERE THEY APPEAR -->
+      <div style="background:#eff6ff; border-radius:10px; padding:10px; font-size:11px;">
+        <div style="font-weight:600; color:#2563eb; margin-bottom:4px;">📍 Vị trí hiển thị:</div>
+        <div style="line-height:1.8;">
+          🔥 <strong>Streak</strong> → Fitness Plan sub-tab (top, trên workout card)<br>
+          🏆 <strong>PR Toast</strong> → Auto-show sau Workout Complete screen (3s, dismissible)<br>
+          🎯 <strong>Milestones</strong> → Fitness Progress sub-tab (cuối trang, collapsible)
+        </div>
+      </div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+      <div style="background:#dcfce7; border-radius:8px; padding:8px; font-size:11px;">
+        <strong>✅ Ưu điểm:</strong><br>
+        • 3 yếu tố đủ: Progress + Consistency + Achievement<br>
+        • PR Toast tạo dopamine hit tự nhiên<br>
+        • Milestone progress bar → clear next goal<br>
+        • Ngày nghỉ vẫn tính streak → không gây pressure
+      </div>
+      <div style="background:#fef3c7; border-radius:8px; padding:8px; font-size:11px;">
+        <strong>⚠️ Scope control:</strong><br>
+        • MVP: chỉ 3 component này<br>
+        • Phase 2: Badges, Weekly Summary email<br>
+        • Phase 3: Social (share PR), Challenges<br>
+        • Không bao giờ: Leaderboard (pressure)
+      </div>
+    </div>
+  </div>
+  
+  <!-- Approach C: Full Badge System -->
+  <div style="background:#fff; border:2px solid #e2e8f0; border-radius:16px; padding:20px; margin:16px 0;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span style="background:#e2e8f0; padding:4px 10px; border-radius:99px; font-weight:700; font-size:13px;">C</span>
+      <span style="font-weight:700; font-size:16px;">Full Badge System — Heavy gamification</span>
+    </div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="font-size:12px;">
+        <div style="margin-bottom:8px;">Bao gồm tất cả của B, cộng thêm:</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+          <div style="background:#f8fafc; border-radius:8px; padding:8px; text-align:center;">
+            <div style="font-size:20px;">🥇</div>
+            <div style="font-size:9px;">First<br>Workout</div>
+          </div>
+          <div style="background:#f8fafc; border-radius:8px; padding:8px; text-align:center;">
+            <div style="font-size:20px;">⚡</div>
+            <div style="font-size:9px;">Speed<br>Demon</div>
+          </div>
+          <div style="background:#f8fafc; border-radius:8px; padding:8px; text-align:center;">
+            <div style="font-size:20px;">🦁</div>
+            <div style="font-size:9px;">30 Day<br>Streak</div>
+          </div>
+          <div style="background:#f8fafc; border-radius:8px; padding:8px; text-align:center;">
+            <div style="font-size:20px;">💎</div>
+            <div style="font-size:9px;">100<br>Sessions</div>
+          </div>
+          <div style="background:#f8fafc; border-radius:8px; padding:8px; text-align:center;">
+            <div style="font-size:20px;">🎯</div>
+            <div style="font-size:9px;">Perfect<br>Week</div>
+          </div>
+          <div style="background:#f8fafc; border-radius:8px; padding:8px; text-align:center; opacity:0.4;">
+            <div style="font-size:20px;">🔒</div>
+            <div style="font-size:9px;">+20 more<br>badges</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;">
+        <strong>Nhược điểm:</strong><br>
+        ❌ Quá nhiều effort cho MVP<br>
+        ❌ Badge inflation → mất ý nghĩa<br>
+        ❌ Cần Badge Gallery page riêng<br>
+        ❌ Có thể gây "game hóa" quá mức<br>
+        ❌ Design 25+ badge icons<br>
+        <div style="color:#dc2626; margin-top:6px;">→ Defer to Phase 2-3</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- STREAK LOGIC -->
+<div class="section">
+  <h3>📐 Streak Logic Detail</h3>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:16px;">
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1;">Tình huống</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1;">Streak</td>
+          <td style="padding:8px; font-weight:600; border:1px solid #cbd5e1;">Lý do</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Tập đúng ngày trong plan</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; color:#10b981; font-weight:600;">+1 ✅</td>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Tuân thủ kế hoạch</td>
+        </tr>
+        <tr>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Ngày nghỉ theo plan</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; color:#10b981; font-weight:600;">Giữ nguyên ✅</td>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Nghỉ đúng = tuân thủ plan</td>
+        </tr>
+        <tr>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Tập thêm ngày nghỉ (tự ý)</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; color:#f59e0b; font-weight:600;">Giữ nguyên ⚠️</td>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Không phạt nhưng không thưởng (prevent overtraining)</td>
+        </tr>
+        <tr>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Bỏ ngày tập (không log)</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; color:#dc2626; font-weight:600;">Reset → 0 ❌</td>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Không tuân thủ → mất streak</td>
+        </tr>
+        <tr>
+          <td style="padding:8px; border:1px solid #e2e8f0;">Bỏ 1 ngày nhưng quay lại</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; color:#f59e0b; font-weight:600;">Grace period 💛</td>
+          <td style="padding:8px; border:1px solid #e2e8f0;">1 "cheat day" miễn phí / tuần (lần đầu bỏ → warning, chưa reset)</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div style="margin-top:10px; background:#fff7ed; border-radius:8px; padding:10px; font-size:11px;">
+      <strong>💡 Grace Period:</strong> Lần đầu bỏ ngày tập trong tuần → hiện warning "Streak sắp mất! Tập lại ngày mai để giữ 🔥12".<br>
+      Lần thứ 2 bỏ → reset. Tránh all-or-nothing mindset (nghiên cứu cho thấy rigid streaks gây bỏ cuộc nhanh hơn).
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- MILESTONES LIST -->
+<div class="section">
+  <h3>🎯 MVP Milestones (10 mốc)</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px;">
+      <div style="font-weight:600; font-size:12px; color:#10b981; margin-bottom:6px;">🏋️ Sessions</div>
+      <div style="font-size:11px; line-height:2;">
+        1. Buổi tập đầu tiên 🥇<br>
+        10. 10 buổi tập 💪<br>
+        25. 25 buổi tập ⚡<br>
+        50. 50 buổi tập 🔥<br>
+        100. 100 buổi tập 💎
+      </div>
+    </div>
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px;">
+      <div style="font-weight:600; font-size:12px; color:#f59e0b; margin-bottom:6px;">🔥 Streaks</div>
+      <div style="font-size:11px; line-height:2;">
+        7. 1 tuần liên tiếp 📅<br>
+        14. 2 tuần liên tiếp 🌟<br>
+        30. 1 tháng liên tiếp 🦁<br>
+        60. 2 tháng liên tiếp 👑<br>
+        90. 3 tháng liên tiếp 🏆
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top:8px; font-size:11px; color:#64748b; text-align:center;">
+    Phase 2 sẽ thêm: Weight milestones (Body Recomp), Strength milestones (1RM PRs), Nutrition milestones (Adherence)
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- COMPARISON -->
+<div class="section">
+  <h3>📊 So sánh 3 phương án</h3>
+  
+  <table style="width:100%; border-collapse:collapse; font-size:11px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0;">Tiêu chí</td>
+        <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0;">A. Streak Only</td>
+        <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0; background:#dcfce7;">B. Streak+PR+Mile</td>
+        <td style="padding:8px; font-weight:600; border:1px solid #e2e8f0;">C. Full Badges</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Components</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">1</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4; font-weight:600;">3</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">10+</td>
+      </tr>
+      <tr>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Effort</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Thấp</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4; font-weight:600;">Vừa</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Rất cao</td>
+      </tr>
+      <tr>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Progress visibility</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">⭐⭐</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4; font-weight:600;">⭐⭐⭐⭐</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">⭐⭐⭐⭐⭐</td>
+      </tr>
+      <tr>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Consistency reward</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">⭐⭐⭐</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4; font-weight:600;">⭐⭐⭐⭐</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">⭐⭐⭐⭐⭐</td>
+      </tr>
+      <tr>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Achievement recognition</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">⭐</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4; font-weight:600;">⭐⭐⭐⭐</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">⭐⭐⭐⭐⭐</td>
+      </tr>
+      <tr>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Gimmick risk</td>
+        <td style="padding:6px; border:1px solid #e2e8f0;">Không</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4; font-weight:600;">Thấp</td>
+        <td style="padding:6px; border:1px solid #e2e8f0; color:#dc2626;">Cao ⚠️</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Bạn chọn mức gamification nào cho MVP?</h3>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approach-b">
+    ✅ <strong>B. Streak + PR + Milestones — Chốt & hoàn tất 7 issues</strong><br>
+    <small>3 components vừa đủ: 🔥Streak, 🏆PR Toast, 🎯Milestones (10 mốc)</small>
+  </div>
+  <div class="option" data-id="approach-a">
+    🔢 <strong>A. Streak Only — Ultra minimal</strong><br>
+    <small>Chỉ 1 streak counter, thêm PR/Milestones sau</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong>
+  </div>
+</div>

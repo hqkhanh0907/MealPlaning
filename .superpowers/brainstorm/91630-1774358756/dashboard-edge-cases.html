@@ -1,0 +1,550 @@
+<h2>📱 Dashboard Edge Cases & Special States</h2>
+<p class="subtitle">Xử lý mọi tình huống — đảm bảo Dashboard không bao giờ "trống" hoặc "lỗi"</p>
+
+<!-- ============================================ -->
+<!-- STATE 1: FIRST-TIME USER (Day 0) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🆕 State 1: First-Time User (Day 0 — Zero Data)</h3>
+  
+  <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+    User vừa tạo account, chưa có bất kỳ data nào. Dashboard phải <strong>hướng dẫn</strong> chứ không được <strong>trống trơn</strong>.
+  </div>
+  
+  <div style="max-width:360px; margin:0 auto;">
+    <div style="background:#f8fafc; border-radius:20px; padding:3px; border:2px solid #e2e8f0;">
+      
+      <!-- Status bar -->
+      <div style="display:flex; justify-content:space-between; padding:6px 16px; font-size:10px; color:#64748b;">
+        <span>9:41</span><span>📶 🔋</span>
+      </div>
+      
+      <!-- T1: Hero — Welcome state -->
+      <div style="background:linear-gradient(135deg, #64748b 0%, #475569 100%); border-radius:14px; margin:0 8px; padding:14px; color:#fff;">
+        <div style="font-size:10px; opacity:0.8;">Chào mừng!</div>
+        <div style="font-size:16px; font-weight:800;">Hãy bắt đầu nào! 🚀</div>
+        <div style="font-size:11px; opacity:0.7; margin-top:4px;">Hoàn thành 3 bước để kích hoạt Dashboard</div>
+        <!-- Progress steps -->
+        <div style="display:flex; gap:4px; margin-top:8px;">
+          <div style="flex:1; background:rgba(255,255,255,0.15); border-radius:8px; padding:6px; text-align:center;">
+            <div style="font-size:14px;">📝</div>
+            <div style="font-size:8px; margin-top:2px;">Cập nhật profile</div>
+            <div style="font-size:7px; opacity:0.6;">Bước 1</div>
+          </div>
+          <div style="flex:1; background:rgba(255,255,255,0.15); border-radius:8px; padding:6px; text-align:center;">
+            <div style="font-size:14px;">⚖️</div>
+            <div style="font-size:8px; margin-top:2px;">Log cân nặng</div>
+            <div style="font-size:7px; opacity:0.6;">Bước 2</div>
+          </div>
+          <div style="flex:1; background:rgba(255,255,255,0.15); border-radius:8px; padding:6px; text-align:center;">
+            <div style="font-size:14px;">🍽️</div>
+            <div style="font-size:8px; margin-top:2px;">Log bữa đầu tiên</div>
+            <div style="font-size:7px; opacity:0.6;">Bước 3</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T2: Empty Energy — Skeleton preview -->
+      <div style="margin:6px 8px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; opacity:0.5;">
+        <div style="font-size:10px; font-weight:600; color:#94a3b8;">⚡ Energy Balance</div>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <div style="flex:1; background:#f1f5f9; height:20px; border-radius:6px;"></div>
+          <div style="width:20px; color:#cbd5e1; text-align:center; font-size:9px;">−</div>
+          <div style="flex:1; background:#f1f5f9; height:20px; border-radius:6px;"></div>
+          <div style="width:20px; color:#cbd5e1; text-align:center; font-size:9px;">=</div>
+          <div style="flex:1; background:#f1f5f9; height:20px; border-radius:6px;"></div>
+        </div>
+        <div style="text-align:center; margin-top:6px; font-size:9px; color:#94a3b8;">Log bữa ăn đầu tiên để kích hoạt</div>
+      </div>
+      
+      <!-- T3: No plan — CTA cards -->
+      <div style="margin:0 8px 4px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px;">
+        <div style="font-size:9px; font-weight:700; margin-bottom:4px;">📋 Bắt đầu từ đâu?</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+          <div style="background:#f0fdf4; border-radius:8px; padding:8px; text-align:center; cursor:pointer; border:1px dashed #86efac;">
+            <div style="font-size:16px;">🍽️</div>
+            <div style="font-size:10px; font-weight:600; color:#166534;">Log bữa ăn</div>
+            <div style="font-size:8px; color:#64748b; margin-top:2px;">Bắt đầu theo dõi dinh dưỡng</div>
+          </div>
+          <div style="background:#eff6ff; border-radius:8px; padding:8px; text-align:center; cursor:pointer; border:1px dashed #93c5fd;">
+            <div style="font-size:16px;">💪</div>
+            <div style="font-size:10px; font-weight:600; color:#1e40af;">Tạo Training Plan</div>
+            <div style="font-size:8px; color:#64748b; margin-top:2px;">Thiết lập lịch tập luyện</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T4: Insight = Tip -->
+      <div style="margin:0 8px 4px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+        <div style="display:flex; gap:6px;">
+          <div style="font-size:14px;">💡</div>
+          <div style="font-size:10px; color:#64748b;">
+            <strong>Tip:</strong> Log ít nhất 1 bữa ăn mỗi ngày để Dashboard bắt đầu tracking tiến độ cho bạn!
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bottom nav -->
+      <div style="display:flex; justify-content:space-around; padding:4px 0 6px; border-top:1px solid #e2e8f0; font-size:7px; color:#94a3b8;">
+        <div style="text-align:center;">📅<br>Lịch</div>
+        <div style="text-align:center;">📋<br>Thư viện</div>
+        <div style="text-align:center;">🤖<br>AI</div>
+        <div style="text-align:center;">💪<br>Fitness</div>
+        <div style="text-align:center; color:#10b981; font-weight:600;">📊<br>Dashboard</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:#f0fdf4; border-radius:8px; padding:10px; margin-top:10px; font-size:10px;">
+    <strong>🔑 Nguyên tắc Day 0:</strong><br>
+    • Slate gradient (không emerald) → chưa "earned" color<br>
+    • Skeleton preview → cho thấy dashboard SẼ trông thế nào khi có data<br>
+    • 3-step checklist → micro-goals (hoàn thành 1 → emerald glow)<br>
+    • Daily Score = hidden (không hiện "0" — tránh demotivation)
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- STATE 2: MORNING (Partial Data) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🌅 State 2: Morning State (7:00 AM — Before Any Activity)</h3>
+  
+  <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+    User mở app buổi sáng, chưa ăn gì, chưa tập. Daily Score phải <strong>fair</strong> (redistribute weights).
+  </div>
+  
+  <div style="background:#1e293b; border-radius:12px; padding:14px; color:#fff; margin-bottom:12px;">
+    <div style="font-size:12px; font-weight:700; margin-bottom:8px;">🧮 Daily Score — Morning Recalculation</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <thead>
+        <tr style="border-bottom:1px solid #475569;">
+          <td style="padding:6px; color:#94a3b8;">Factor</td>
+          <td style="padding:6px; color:#94a3b8;">Normal Weight</td>
+          <td style="padding:6px; color:#94a3b8;">7AM (no meal/workout)</td>
+          <td style="padding:6px; color:#94a3b8;">Status</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:5px;">🍽️ Calories</td>
+          <td style="padding:5px;">30%</td>
+          <td style="padding:5px; color:#64748b;">—<span style="font-size:8px;"> (excluded)</span></td>
+          <td style="padding:5px; color:#fbbf24;">Chưa ăn</td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:5px;">🥩 Protein</td>
+          <td style="padding:5px;">25%</td>
+          <td style="padding:5px; color:#64748b;">—<span style="font-size:8px;"> (excluded)</span></td>
+          <td style="padding:5px; color:#fbbf24;">Chưa ăn</td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:5px;">🏋️ Workout</td>
+          <td style="padding:5px;">25%</td>
+          <td style="padding:5px; font-weight:600; color:#10b981;">50% → 62.5%</td>
+          <td style="padding:5px; color:#93c5fd;">Pending (50pts vì before 20:00)</td>
+        </tr>
+        <tr style="border-bottom:1px solid #334155;">
+          <td style="padding:5px;">⚖️ Weight</td>
+          <td style="padding:5px;">10%</td>
+          <td style="padding:5px; font-weight:600; color:#10b981;">100% → 12.5%</td>
+          <td style="padding:5px; color:#6ee7b7;">Vừa log sáng ✅</td>
+        </tr>
+        <tr>
+          <td style="padding:5px;">🔥 Streak</td>
+          <td style="padding:5px;">10%</td>
+          <td style="padding:5px; font-weight:600; color:#10b981;">60% → 25%</td>
+          <td style="padding:5px; color:#6ee7b7;">12 ngày (60pts)</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px; padding:6px; background:#0f172a; border-radius:8px; font-size:10px; font-family:monospace;">
+      <div style="color:#94a3b8;">// Morning: Cal + Protein excluded (no data)</div>
+      <div style="color:#94a3b8;">// Available: Workout(50) + Weight(100) + Streak(60)</div>
+      <div style="color:#fbbf24;">availableWeight = 25% + 10% + 10% = 45%</div>
+      <div style="color:#fbbf24;">redistFactor = 100% / 45% = 2.22</div>
+      <div style="color:#10b981;">morningScore = (50×0.556) + (100×0.222) + (60×0.222)</div>
+      <div style="color:#10b981;">morningScore = 27.8 + 22.2 + 13.3 = <strong>63</strong></div>
+      <div style="margin-top:4px; color:#fbbf24; font-size:9px;">→ Amber range (50-79) — "Ngày mới bắt đầu!" message</div>
+    </div>
+  </div>
+  
+  <div style="background:#f8fafc; border-radius:10px; padding:12px; font-size:11px;">
+    <div style="font-weight:600; margin-bottom:4px;">📝 Morning-specific behaviors:</div>
+    <div style="line-height:1.8;">
+      • <strong>Daily Score:</strong> Hiện score + "(cập nhật khi log thêm)" label<br>
+      • <strong>Energy Balance:</strong> "0 / 1500 kcal" — progress bar 0%, "Log bữa sáng" CTA<br>
+      • <strong>Today's Plan:</strong> Full training card + meals "0/3 bữa"<br>
+      • <strong>Insight:</strong> P8 Tip (no trigger conditions met yet)<br>
+      • <strong>Quick Actions:</strong> Center = "➕ Log bữa sáng"
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- STATE 3: ALL-DAY COMPLETE (Perfect Day) -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🎉 State 3: All-Day Complete (21:00 PM — Perfect Day)</h3>
+  
+  <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+    User đã hoàn thành mọi thứ: 3 bữa logged, workout done, weight logged. Dashboard = <strong>celebration mode</strong>.
+  </div>
+  
+  <div style="max-width:360px; margin:0 auto;">
+    <div style="background:#f8fafc; border-radius:20px; padding:3px; border:2px solid #e2e8f0;">
+      
+      <div style="display:flex; justify-content:space-between; padding:6px 16px; font-size:10px; color:#64748b;">
+        <span>21:15</span><span>📶 🔋</span>
+      </div>
+      
+      <!-- T1: Hero — HIGH score with celebration -->
+      <div style="background:linear-gradient(135deg, #10b981 0%, #047857 100%); border-radius:14px; margin:0 8px; padding:12px; color:#fff;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; opacity:0.8;">Thứ Hai, 24/03</div>
+            <div style="font-size:16px; font-weight:800;">Ngày hoàn hảo! 🎯</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:30px; font-weight:800; line-height:1;">96</div>
+            <div style="font-size:8px; opacity:0.8;">Daily Score ⭐</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:2px; margin-top:4px;">
+          <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🍽️95</div>
+          <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🥩90</div>
+          <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🏋️100</div>
+          <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:3px; padding:2px; text-align:center; font-size:7px;">⚖️100</div>
+          <div style="flex:1; background:rgba(255,255,255,0.3); border-radius:3px; padding:2px; text-align:center; font-size:7px;">🔥100</div>
+        </div>
+      </div>
+      
+      <!-- T2: Energy — Complete -->
+      <div style="margin:6px 8px; background:#fff; border:1px solid #dcfce7; border-radius:10px; padding:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+          <div style="font-size:10px; font-weight:700;">⚡ Energy Balance</div>
+          <div style="font-size:8px; color:#10b981; font-weight:600;">Hoàn hảo ✅</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:2px; align-items:center; text-align:center;">
+          <div><div style="font-size:7px; color:#64748b;">Ăn</div><div style="font-size:13px; font-weight:800; color:#10b981;">1,480</div></div>
+          <div style="color:#94a3b8; font-size:9px;">−</div>
+          <div><div style="font-size:7px; color:#64748b;">Đốt</div><div style="font-size:13px; font-weight:800; color:#3b82f6;">350</div></div>
+          <div style="color:#94a3b8; font-size:9px;">=</div>
+          <div><div style="font-size:7px; color:#64748b;">Net</div><div style="font-size:13px; font-weight:800; color:#10b981;">1,130</div></div>
+        </div>
+        <div style="background:#dcfce7; border-radius:99px; height:5px; margin-top:3px; overflow:hidden;">
+          <div style="background:#10b981; height:100%; width:98%; border-radius:99px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:3px; margin-top:3px;">
+          <div style="font-size:8px; color:#64748b;">🥩</div>
+          <div style="flex:1; background:#dcfce7; border-radius:99px; height:3px; overflow:hidden;"><div style="background:#10b981; height:100%; width:95%;"></div></div>
+          <div style="font-size:8px; font-weight:600; color:#10b981;">158/166g ✓</div>
+        </div>
+      </div>
+      
+      <!-- T3: Today's Plan — ALL DONE -->
+      <div style="margin:0 8px 4px; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:8px;">
+        <div style="font-size:9px; font-weight:700; color:#166534; margin-bottom:3px;">✅ Ngày hoàn thành</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+          <div style="background:#fff; border-radius:6px; padding:6px;">
+            <div style="font-size:12px;">✅</div>
+            <div style="font-size:9px; font-weight:700; color:#166534;">Upper Body A</div>
+            <div style="font-size:8px; color:#64748b;">42' • 18 sets • 🏆 PR!</div>
+          </div>
+          <div style="background:#fff; border-radius:6px; padding:6px;">
+            <div style="font-size:12px;">✅</div>
+            <div style="font-size:9px; font-weight:700; color:#166534;">3/3 bữa ✓</div>
+            <div style="font-size:8px; color:#64748b;">1,480 kcal • 158g protein</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T3: Weight + Streak -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:0 8px 4px;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:12px;">⚖️</span>
+            <div>
+              <div style="font-size:14px; font-weight:800;">72.5<span style="font-size:9px; color:#64748b; font-weight:400;">kg</span></div>
+              <div style="font-size:7px; color:#10b981; font-weight:600;">↓ 0.3kg tuần này ✅</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:12px;">🔥</span>
+            <div>
+              <div style="font-size:14px; font-weight:800; color:#f59e0b;">13<span style="font-size:9px; color:#64748b; font-weight:400;"> ngày</span></div>
+              <div style="font-size:7px; color:#64748b;">Kỷ lục: 21</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T4: Insight — Praise mode -->
+      <div style="margin:0 8px 4px; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:8px;">
+        <div style="display:flex; gap:6px;">
+          <div style="font-size:14px;">🏆</div>
+          <div style="font-size:10px;">
+            <span style="font-weight:600; color:#166534;">PR Bench Press!</span>
+            <span style="color:#64748b;"> 80kg × 5 — tăng 5kg so với lần trước. Tuyệt vời! 💪</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- T5: Quick Actions — Evening context -->
+      <div style="margin:0 8px 4px; background:#fff; border-top:1px solid #e2e8f0; padding:6px 0; display:flex; justify-content:space-around;">
+        <div style="text-align:center;">
+          <div style="width:38px; height:38px; border-radius:10px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; font-size:14px; margin:0 auto;">📊</div>
+          <div style="font-size:7px; color:#64748b; margin-top:1px;">Xem kết quả</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:44px; height:44px; border-radius:12px; background:#10b981; display:flex; align-items:center; justify-content:center; font-size:18px; margin:0 auto; box-shadow:0 2px 6px rgba(16,185,129,0.3);">➕</div>
+          <div style="font-size:7px; color:#10b981; font-weight:600; margin-top:1px;">Thêm snack</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:38px; height:38px; border-radius:10px; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:14px; margin:0 auto;">📅</div>
+          <div style="font-size:7px; color:#64748b; margin-top:1px;">Kế hoạch mai</div>
+        </div>
+      </div>
+      
+      <!-- Bottom nav -->
+      <div style="display:flex; justify-content:space-around; padding:4px 0 6px; border-top:1px solid #e2e8f0; font-size:7px; color:#94a3b8;">
+        <div style="text-align:center;">📅<br>Lịch</div>
+        <div style="text-align:center;">📋<br>Thư viện</div>
+        <div style="text-align:center;">🤖<br>AI</div>
+        <div style="text-align:center;">💪<br>Fitness</div>
+        <div style="text-align:center; color:#10b981; font-weight:600;">📊<br>Dashboard</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:#f0fdf4; border-radius:8px; padding:10px; margin-top:10px; font-size:10px;">
+    <strong>🎯 Perfect Day behaviors:</strong><br>
+    • Greeting → "Ngày hoàn hảo! 🎯" (thay vì "Chào [name]")<br>
+    • Today's Plan card → green border + "✅ Ngày hoàn thành"<br>
+    • Insight → Praise type (P5/P6) — celebrate, không push thêm<br>
+    • Quick Actions → shift to review mode (Xem kết quả, Kế hoạch mai)
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- STATE 4: NUTRITION-ONLY USER -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🥗 State 4: Nutrition-Only User (No Training Plan)</h3>
+  
+  <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+    User chỉ dùng meal tracking, không tạo training plan. Dashboard phải <strong>adapt</strong>, không ép tập.
+  </div>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:14px; margin-bottom:12px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">🧮 Daily Score Adjustment (No Fitness):</div>
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Factor</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Normal</td>
+          <td style="padding:6px; font-weight:600; border:1px solid #cbd5e1;">Nutrition-Only</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:5px; border:1px solid #e2e8f0;">🍽️ Calories</td>
+          <td style="padding:5px; border:1px solid #e2e8f0;">30%</td>
+          <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">40%</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #e2e8f0;">🥩 Protein</td>
+          <td style="padding:5px; border:1px solid #e2e8f0;">25%</td>
+          <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">30%</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #e2e8f0;">🏋️ Workout</td>
+          <td style="padding:5px; border:1px solid #e2e8f0;">25%</td>
+          <td style="padding:5px; border:1px solid #e2e8f0; color:#94a3b8;">0% (excluded)</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #e2e8f0;">⚖️ Weight</td>
+          <td style="padding:5px; border:1px solid #e2e8f0;">10%</td>
+          <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">15%</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #e2e8f0;">🔥 Streak</td>
+          <td style="padding:5px; border:1px solid #e2e8f0;">10%</td>
+          <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600; color:#10b981;">15%</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:6px; font-size:9px; color:#64748b;">
+      <strong>Rule:</strong> Nếu <code>training_plans</code> table trống → redistribute workout weight
+    </div>
+  </div>
+  
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:8px;">📱 UI Differences:</div>
+    <div style="font-size:10px; line-height:1.8;">
+      • <strong>Today's Plan card:</strong> Chỉ hiện meals side (full width), ẩn workout side<br>
+      • <strong>Quick Actions:</strong> Ẩn "🏋️ Bắt đầu tập", thay bằng "📊 Macro detail" hoặc "📸 Scan food"<br>
+      • <strong>Insight P2:</strong> Protein suggestion vẫn hoạt động bình thường<br>
+      • <strong>Insight P4-P5:</strong> Streak/PR workout insights bị skip → fallback P6/P7/P8<br>
+      • <strong>Gentle upsell:</strong> Sau 14 ngày sử dụng, hiện 1 lần: "💪 Kết hợp tập luyện giúp tối ưu kết quả — Khám phá"
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- STATE 5: GOAL TRANSITION -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>🔄 State 5: Goal Transition (Cut → Bulk → Maintain)</h3>
+  
+  <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+    User thay đổi mục tiêu. Dashboard phải <strong>acknowledge</strong> transition, không silent switch.
+  </div>
+  
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:10px;">🔄 Transition Handling:</div>
+    
+    <!-- Transition banner mockup -->
+    <div style="max-width:340px; margin:0 auto 12px;">
+      <div style="background:linear-gradient(90deg, #eff6ff, #f0fdf4); border:1px solid #bfdbfe; border-radius:12px; padding:10px;">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <div style="font-size:16px;">🔄</div>
+          <div style="font-size:10px; flex:1;">
+            <div style="font-weight:700; color:#1e40af;">Mục tiêu đã thay đổi!</div>
+            <div style="color:#64748b; margin-top:2px;">
+              <span style="text-decoration:line-through;">Cutting (−500 kcal)</span> → 
+              <span style="color:#166534; font-weight:600;">Lean Bulk (+300 kcal)</span>
+            </div>
+            <div style="color:#64748b; margin-top:2px; font-size:9px;">Target mới: 2,100 kcal • 166g protein</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="font-size:10px; line-height:1.8;">
+      <strong>Khi user đổi goal trong Settings:</strong><br>
+      1. Hiện transition banner ở T4 (thay insight) trong 3 ngày<br>
+      2. Reset Daily Score calculation với target mới ngay lập tức<br>
+      3. Weight trend color logic tự adapt (Cut→Bulk: gaining = green)<br>
+      4. Energy Balance target update tự động<br>
+      5. Streak KHÔNG reset — continuity across goals<br>
+      6. Sau 3 ngày, banner tự dismiss → normal insight
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- STATE 6: ERROR/OFFLINE -->
+<!-- ============================================ -->
+<div class="section">
+  <h3>📴 State 6: Error & Offline Handling</h3>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:14px; font-size:10px; line-height:1.8;">
+    <div style="font-weight:600; font-size:12px; margin-bottom:6px;">🛡️ Resilience Rules:</div>
+    
+    <strong>SQLite failure (rare):</strong><br>
+    • Hiện cached data từ last successful read + "(dữ liệu cũ)" label<br>
+    • Silent retry mỗi 30s, max 3 retries, sau đó hiện "Đang gặp sự cố — kéo xuống để thử lại"<br><br>
+    
+    <strong>Component-level failure:</strong><br>
+    • Nếu 1 component fail (ví dụ: weight_log query lỗi), chỉ component đó hiện skeleton<br>
+    • Các component khác vẫn hoạt động bình thường — KHÔNG cascade failure<br>
+    • Mỗi component có try/catch riêng, fallback = compact skeleton + "Thử lại"<br><br>
+    
+    <strong>Offline mode (no network):</strong><br>
+    • 100% functional — vì dùng local SQLite, không cần network cho dashboard<br>
+    • Chỉ ảnh hưởng nếu user dùng Google Drive sync → hiện "📴 Offline — data chưa đồng bộ" ở top<br><br>
+    
+    <strong>Performance budget:</strong><br>
+    • Dashboard load target: &lt;200ms (8 queries song song)<br>
+    • Mỗi SQL query target: &lt;25ms<br>
+    • Lazy load T4-T5 (AI Insight + Quick Actions) sau khi T1-T3 render
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SUMMARY TABLE -->
+<div class="section">
+  <h3>📋 Tổng kết: 6 Edge Cases</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:10px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">#</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">State</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Key Behavior</td>
+        <td style="padding:6px; font-weight:600; border:1px solid #e2e8f0;">Daily Score</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0;">1</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🆕 First-Time</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">3-step checklist + skeleton preview</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Hidden</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">2</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🌅 Morning</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Redistribute weights, "cập nhật khi log"</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Partial (fair calc)</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0;">3</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🎉 Perfect Day</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Celebration mode + review actions</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">90-100 (green)</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">4</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🥗 Nutrition-Only</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Exclude workout, redistribute to 4 factors</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">4-factor formula</td>
+      </tr>
+      <tr>
+        <td style="padding:5px; border:1px solid #e2e8f0;">5</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">🔄 Goal Transition</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">3-day banner + auto-adapt targets</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Recalc with new targets</td>
+      </tr>
+      <tr style="background:#f8fafc;">
+        <td style="padding:5px; border:1px solid #e2e8f0;">6</td>
+        <td style="padding:5px; border:1px solid #e2e8f0; font-weight:600;">📴 Error/Offline</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Component-level isolation, cached fallback</td>
+        <td style="padding:5px; border:1px solid #e2e8f0;">Cached / stale label</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- DECISION -->
+<div class="section">
+  <h3>❓ Edge Cases — Bạn chốt không?</h3>
+  <div style="font-size:11px; color:#64748b; margin-bottom:10px;">
+    Sau khi chốt → Update spec document + Spec review loop → User review → Writing-plans
+  </div>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approve-all">
+    ✅ <strong>Chốt toàn bộ Edge Cases — Chuyển sang Update Spec</strong><br>
+    <small>Cập nhật spec document với toàn bộ Dashboard design (8 components + 6 edge cases)</small>
+  </div>
+  <div class="option" data-id="adjust">
+    🔄 <strong>Cần điều chỉnh — (nêu chi tiết state nào cần sửa)</strong>
+  </div>
+</div>

@@ -255,7 +255,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             type="button"
             aria-label={t('common.decrease')}
             onClick={handleDecrement}
-            className="flex h-11 w-11 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+            className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -270,7 +270,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             value={inputValue || ''}
             onChange={handleInputChange}
             style={{ fontVariantNumeric: 'tabular-nums' }}
-            className="w-16 rounded-md border border-slate-200 bg-white px-2 py-1 text-center text-lg font-bold text-slate-800 outline-none transition-colors focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+            className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-lg font-bold text-slate-800 outline-none transition-colors focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           />
 
           <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -281,7 +281,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             type="button"
             aria-label={t('common.increase')}
             onClick={handleIncrement}
-            className="flex h-11 w-11 items-center justify-center rounded-md bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+            className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -294,7 +294,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             }
             disabled={!isValid}
             onClick={handleSave}
-            className={`ml-1 flex h-11 w-11 items-center justify-center rounded-md transition-colors active:scale-95 disabled:opacity-40 ${
+            className={`ml-1 flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95 disabled:opacity-40 ${
               isSaved
                 ? 'bg-emerald-500 text-white'
                 : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-400 dark:hover:bg-emerald-800/50'

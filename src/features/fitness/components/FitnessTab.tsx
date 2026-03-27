@@ -4,6 +4,7 @@ import { ClipboardList, Dumbbell, History, BarChart3 } from 'lucide-react';
 import { SubTabBar } from '../../../components/shared/SubTabBar';
 import type { SubTab } from '../../../components/shared/SubTabBar';
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { useUserProfileStore } from '../../../store/userProfileStore';
 import type { SelectedExercise } from '../types';
 import { FitnessOnboarding } from './FitnessOnboarding';
 import { TrainingPlanView } from './TrainingPlanView';
@@ -16,6 +17,8 @@ import { SmartInsightBanner } from './SmartInsightBanner';
 import { useFitnessNutritionBridge } from '../hooks/useFitnessNutritionBridge';
 import { QuickConfirmCard } from './QuickConfirmCard';
 import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
+import { useTrainingPlan } from '../hooks/useTrainingPlan';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 type FitnessSubTab = 'plan' | 'workout' | 'history' | 'progress';
 
@@ -30,6 +33,12 @@ const FitnessTabInner: React.FC = () => {
   const { suggestNextSet } = useProgressiveOverload();
   const trainingPlans = useFitnessStore((s) => s.trainingPlans);
   const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
+  const trainingProfile = useFitnessStore((s) => s.trainingProfile);
+  const addTrainingPlan = useFitnessStore((s) => s.addTrainingPlan);
+  const addPlanDays = useFitnessStore((s) => s.addPlanDays);
+  const userProfile = useUserProfileStore((s) => s.userProfile);
+  const { generatePlan, isGenerating } = useTrainingPlan();
+  const { showNotification } = useNotification();
   const [confirmedExercises, setConfirmedExercises] = useState<Set<string>>(
     () => new Set(),
   );
@@ -86,6 +95,22 @@ const FitnessTabInner: React.FC = () => {
     setOnboarded(true);
   }, [setOnboarded]);
 
+  const hasGeneratedAfterOnboard = React.useRef(false);
+
+  React.useEffect(() => {
+    if (isOnboarded && trainingProfile && !hasGeneratedAfterOnboard.current && trainingPlans.length === 0) {
+      hasGeneratedAfterOnboard.current = true;
+      const result = generatePlan({
+        trainingProfile,
+        healthProfile: { age: 30, weightKg: userProfile.weight },
+      });
+      if (result) {
+        addTrainingPlan(result.plan);
+        addPlanDays(result.days);
+      }
+    }
+  }, [isOnboarded, trainingProfile, trainingPlans.length, generatePlan, userProfile.weight, addTrainingPlan, addPlanDays]);
+
   const handleTabChange = useCallback((id: string) => {
     setActiveSubTab(id as FitnessSubTab);
   }, []);
@@ -101,8 +126,20 @@ const FitnessTabInner: React.FC = () => {
   }, [setWorkoutMode]);
 
   const handleGeneratePlan = useCallback(() => {
+    if (!trainingProfile) return;
+    const result = generatePlan({
+      trainingProfile,
+      healthProfile: { age: 30, weightKg: userProfile.weight },
+    });
+    if (result) {
+      addTrainingPlan(result.plan);
+      addPlanDays(result.days);
+      showNotification(t('fitness.plan.planCreated'), 'success');
+    } else {
+      showNotification(t('fitness.plan.planError'), 'error');
+    }
     setActiveSubTab('plan');
-  }, []);
+  }, [trainingProfile, generatePlan, userProfile.weight, addTrainingPlan, addPlanDays, showNotification, t]);
 
   const handleWorkoutComplete = useCallback(() => {
     setActiveSubTab('history');
@@ -111,6 +148,11 @@ const FitnessTabInner: React.FC = () => {
   const handleWorkoutBack = useCallback(() => {
     setActiveSubTab('plan');
   }, []);
+
+  const handleLogCardio = useCallback(() => {
+    setWorkoutMode('cardio');
+    setActiveSubTab('workout');
+  }, [setWorkoutMode]);
 
   if (!isOnboarded) {
     return <FitnessOnboarding onComplete={handleOnboardingComplete} />;
@@ -135,7 +177,11 @@ const FitnessTabInner: React.FC = () => {
             role="tabpanel"
             id="tabpanel-plan"
           >
-            <TrainingPlanView onGeneratePlan={handleGeneratePlan} />
+            <TrainingPlanView
+              onGeneratePlan={handleGeneratePlan}
+              isGenerating={isGenerating}
+              onLogCardio={handleLogCardio}
+            />
             {strengthExercises.length > 0 && (
               <div className="mt-4 space-y-3" data-testid="quick-confirm-list">
                 {strengthExercises.map((ex) => (

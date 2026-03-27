@@ -1,0 +1,430 @@
+<h2>✅ Issue 1 — Quyết định: B+C Hybrid Onboarding</h2>
+<p class="subtitle">Quick Start mặc định + "Tùy chỉnh thêm?" expandable cho user muốn control</p>
+
+<!-- DECISION SUMMARY -->
+<div class="section">
+  <h3>📌 Flow hoàn chỉnh: B+C Hybrid</h3>
+  <div style="background:#f0fdf4; border:2px solid #10b981; border-radius:16px; padding:20px; margin-bottom:16px;">
+    <div style="font-size:14px; line-height:2; font-weight:500;">
+      <span style="background:#10b981; color:#fff; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700;">1</span> 
+      User mở Fitness tab lần đầu → hiện <strong>Quick Start screen</strong> (3 fields, ~20s)<br>
+      <span style="background:#10b981; color:#fff; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700;">2</span> 
+      AI hiện <strong>Smart Defaults preview</strong> (user thấy AI đã chọn gì)<br>
+      <span style="background:#3b82f6; color:#fff; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700;">3</span> 
+      User có thể bấm <strong>"Tùy chỉnh thêm ↓"</strong> → expand thêm fields theo level<br>
+      <span style="background:#10b981; color:#fff; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700;">4</span> 
+      Bấm <strong>"Tạo kế hoạch"</strong> → Plan được generate<br>
+      <span style="background:#64748b; color:#fff; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700;">5</span> 
+      Mọi field đều chỉnh được sau trong <strong>Settings → Training Profile</strong>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FULL MOCKUP -->
+<div class="section">
+  <h3>📱 Mockup chi tiết — Trạng thái mặc định (collapsed)</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <!-- STATE 1: Collapsed (Quick Start only) -->
+    <div>
+      <div style="text-align:center; font-weight:600; font-size:13px; margin-bottom:8px; color:#16a34a;">State 1: Mặc định — Chỉ 3 fields</div>
+      <div style="max-width:340px; margin:0 auto; border:2px solid #e2e8f0; border-radius:28px; padding:24px 20px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:20px;">
+          <div style="font-size:36px; margin-bottom:6px;">🏋️</div>
+          <div style="font-size:20px; font-weight:800; color:#0f172a;">Bắt đầu tập luyện</div>
+          <div style="font-size:13px; color:#64748b; margin-top:4px;">Chỉ 3 câu hỏi — AI tạo plan cho bạn</div>
+        </div>
+        
+        <!-- Q1: Goal -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:#334155;">Mục tiêu của bạn?</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div style="border:2px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center; cursor:pointer; transition:all 0.15s;">
+              <div style="font-size:22px;">🔥</div>
+              <div style="font-size:12px; font-weight:600; margin-top:2px;">Giảm mỡ</div>
+            </div>
+            <div style="border:2px solid #10b981; background:#f0fdf4; border-radius:12px; padding:12px; text-align:center;">
+              <div style="font-size:22px;">💪</div>
+              <div style="font-size:12px; font-weight:600; color:#16a34a; margin-top:2px;">Tăng cơ</div>
+            </div>
+            <div style="border:2px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center;">
+              <div style="font-size:22px;">⚡</div>
+              <div style="font-size:12px; font-weight:600; margin-top:2px;">Sức mạnh</div>
+            </div>
+            <div style="border:2px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center;">
+              <div style="font-size:22px;">🏃</div>
+              <div style="font-size:12px; font-weight:600; margin-top:2px;">Sức khỏe chung</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Q2: Experience -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:#334155;">Kinh nghiệm tập?</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+            <div style="border:2px solid #10b981; background:#f0fdf4; border-radius:12px; padding:10px; text-align:center;">
+              <div style="font-size:18px;">🌱</div>
+              <div style="font-size:11px; font-weight:600; color:#16a34a;">Mới</div>
+              <div style="font-size:9px; color:#64748b;">&lt;6 tháng</div>
+            </div>
+            <div style="border:2px solid #e2e8f0; border-radius:12px; padding:10px; text-align:center;">
+              <div style="font-size:18px;">💪</div>
+              <div style="font-size:11px; font-weight:600;">Trung bình</div>
+              <div style="font-size:9px; color:#64748b;">6-24 tháng</div>
+            </div>
+            <div style="border:2px solid #e2e8f0; border-radius:12px; padding:10px; text-align:center;">
+              <div style="font-size:18px;">🏆</div>
+              <div style="font-size:11px; font-weight:600;">Nâng cao</div>
+              <div style="font-size:9px; color:#64748b;">&gt;2 năm</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Q3: Days/week -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:#334155;">Số ngày tập / tuần?</div>
+          <div style="display:flex; gap:6px;">
+            <div style="flex:1; border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-size:15px; font-weight:700;">2</div>
+            <div style="flex:1; border:2px solid #10b981; background:#f0fdf4; border-radius:10px; padding:10px; text-align:center; font-size:15px; font-weight:700; color:#16a34a;">3</div>
+            <div style="flex:1; border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-size:15px; font-weight:700;">4</div>
+            <div style="flex:1; border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-size:15px; font-weight:700;">5</div>
+            <div style="flex:1; border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-size:15px; font-weight:700;">6</div>
+          </div>
+        </div>
+        
+        <!-- AI Preview -->
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:12px; margin-bottom:16px;">
+          <div style="font-size:11px; color:#16a34a; font-weight:700; margin-bottom:6px;">🤖 AI đã tạo plan:</div>
+          <div style="font-size:12px; line-height:1.7; color:#334155;">
+            📋 Full Body × 3 ngày/tuần<br>
+            ⏱️ 45 phút/buổi • Linear progression<br>
+            🔄 Chu kỳ 8 tuần • RPE 6-7
+          </div>
+        </div>
+        
+        <!-- Expand toggle -->
+        <div style="text-align:center; margin-bottom:14px;">
+          <div style="display:inline-flex; align-items:center; gap:4px; color:#3b82f6; font-size:13px; font-weight:600; cursor:pointer; padding:6px 12px; border-radius:8px; background:#eff6ff;">
+            ⚙️ Tùy chỉnh thêm ▼
+          </div>
+        </div>
+        
+        <!-- CTA -->
+        <div style="background:#10b981; color:#fff; border-radius:14px; padding:14px; text-align:center; font-weight:700; font-size:15px; box-shadow:0 2px 8px rgba(16,185,129,0.3);">
+          🚀 Tạo kế hoạch tập luyện
+        </div>
+      </div>
+    </div>
+    
+    <!-- STATE 2: Expanded (Additional fields) -->
+    <div>
+      <div style="text-align:center; font-weight:600; font-size:13px; margin-bottom:8px; color:#3b82f6;">State 2: Sau khi bấm "Tùy chỉnh thêm"</div>
+      <div style="max-width:340px; margin:0 auto; border:2px solid #e2e8f0; border-radius:28px; padding:24px 20px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <!-- Header collapsed -->
+        <div style="text-align:center; margin-bottom:12px;">
+          <div style="font-size:20px; font-weight:800; color:#0f172a;">🏋️ Bắt đầu tập luyện</div>
+          <div style="font-size:12px; color:#64748b;">3 câu hỏi cơ bản đã chọn ✅</div>
+        </div>
+        
+        <!-- Mini summary of 3 core fields -->
+        <div style="background:#f0fdf4; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; gap:8px; justify-content:center;">
+          <span style="background:#dcfce7; padding:3px 8px; border-radius:6px; font-size:11px;">💪 Tăng cơ</span>
+          <span style="background:#dcfce7; padding:3px 8px; border-radius:6px; font-size:11px;">🌱 Mới</span>
+          <span style="background:#dcfce7; padding:3px 8px; border-radius:6px; font-size:11px;">3 ngày/tuần</span>
+        </div>
+        
+        <!-- Expand toggle (now ▲) -->
+        <div style="text-align:center; margin-bottom:12px;">
+          <div style="display:inline-flex; align-items:center; gap:4px; color:#3b82f6; font-size:13px; font-weight:600; cursor:pointer; padding:6px 12px; border-radius:8px; background:#eff6ff;">
+            ⚙️ Tùy chỉnh thêm ▲
+          </div>
+        </div>
+        
+        <!-- EXPANDED FIELDS -->
+        <div style="border:2px solid #dbeafe; border-radius:14px; padding:14px; margin-bottom:14px; background:#f8fafc;">
+          
+          <!-- Session Duration -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:#334155;">⏱️ Thời gian mỗi buổi</div>
+            <div style="display:flex; gap:4px;">
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px; text-align:center; font-size:12px;">30'</div>
+              <div style="flex:1; background:#dbeafe; border:2px solid #3b82f6; border-radius:8px; padding:6px; text-align:center; font-size:12px; font-weight:600;">45'</div>
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px; text-align:center; font-size:12px;">60'</div>
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px; text-align:center; font-size:12px;">90'</div>
+            </div>
+          </div>
+          
+          <!-- Equipment -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:#334155;">🏋️ Thiết bị có sẵn</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+              <span style="background:#dcfce7; border:1px solid #10b981; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">✓ Barbell</span>
+              <span style="background:#dcfce7; border:1px solid #10b981; border-radius:6px; padding:4px 8px; font-size:11px;">✓ Dumbbell</span>
+              <span style="background:#dcfce7; border:1px solid #10b981; border-radius:6px; padding:4px 8px; font-size:11px;">✓ Machine</span>
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Cable</span>
+              <span style="background:#dcfce7; border:1px solid #10b981; border-radius:6px; padding:4px 8px; font-size:11px;">✓ Bodyweight</span>
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Bands</span>
+            </div>
+          </div>
+          
+          <!-- Injuries -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:#334155;">⚠️ Vùng chấn thương (nếu có)</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Vai</span>
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Lưng dưới</span>
+              <span style="background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:4px 8px; font-size:11px; color:#dc2626;">✓ Gối</span>
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Cổ tay</span>
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Cổ</span>
+              <span style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; color:#94a3b8;">Hông</span>
+            </div>
+          </div>
+          
+          <!-- Cardio -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:#334155;">🏃 Cardio</div>
+            <div style="display:flex; gap:4px; margin-bottom:6px;">
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px; text-align:center; font-size:11px;">0 buổi</div>
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px; text-align:center; font-size:11px;">1 buổi</div>
+              <div style="flex:1; background:#dbeafe; border:2px solid #3b82f6; border-radius:8px; padding:6px; text-align:center; font-size:11px; font-weight:600;">2 buổi</div>
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px; text-align:center; font-size:11px;">3+</div>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <div style="flex:1; background:#dbeafe; border:2px solid #3b82f6; border-radius:8px; padding:4px; text-align:center; font-size:10px; font-weight:600;">LISS</div>
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:4px; text-align:center; font-size:10px;">HIIT</div>
+              <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:4px; text-align:center; font-size:10px;">Kết hợp</div>
+            </div>
+          </div>
+          
+          <!-- Advanced section (only for Intermediate/Advanced) -->
+          <div style="border-top:1px dashed #cbd5e1; padding-top:12px; margin-top:4px;">
+            <div style="font-size:11px; color:#64748b; font-weight:600; margin-bottom:8px;">🔬 Nâng cao (tùy chọn)</div>
+            
+            <div style="margin-bottom:8px;">
+              <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Periodization:</div>
+              <div style="display:flex; gap:4px;">
+                <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:6px; padding:4px; text-align:center; font-size:10px; font-weight:600;">Linear</div>
+                <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px; text-align:center; font-size:10px;">Undulating</div>
+                <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px; text-align:center; font-size:10px;">Block</div>
+              </div>
+            </div>
+            
+            <div style="margin-bottom:8px;">
+              <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Chu kỳ:</div>
+              <div style="display:flex; gap:4px;">
+                <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px; text-align:center; font-size:10px;">4 tuần</div>
+                <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px; text-align:center; font-size:10px;">6 tuần</div>
+                <div style="flex:1; background:#dbeafe; border:1px solid #3b82f6; border-radius:6px; padding:4px; text-align:center; font-size:10px; font-weight:600;">8 tuần</div>
+                <div style="flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px; text-align:center; font-size:10px;">12 tuần</div>
+              </div>
+            </div>
+            
+            <div>
+              <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Nhóm cơ ưu tiên (max 3):</div>
+              <div style="display:flex; flex-wrap:wrap; gap:3px;">
+                <span style="background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px;">Ngực</span>
+                <span style="background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px;">Lưng</span>
+                <span style="background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px;">Vai</span>
+                <span style="background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px;">Chân</span>
+                <span style="background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px;">Core</span>
+                <span style="background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px;">Mông</span>
+                <span style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:4px; padding:2px 6px; font-size:9px; color:#94a3b8;">Cân bằng ← mặc định</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Updated AI Preview -->
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:10px; margin-bottom:14px;">
+          <div style="font-size:11px; color:#16a34a; font-weight:700; margin-bottom:4px;">🤖 Plan cập nhật:</div>
+          <div style="font-size:11px; line-height:1.7; color:#334155;">
+            📋 Full Body × 3 ngày + 2 Cardio LISS<br>
+            ⏱️ 45'/buổi • Linear • 8 tuần<br>
+            ⚠️ Bỏ Squat (chấn thương gối) → Leg Press thay thế
+          </div>
+        </div>
+        
+        <!-- CTA -->
+        <div style="background:#10b981; color:#fff; border-radius:14px; padding:14px; text-align:center; font-weight:700; font-size:15px; box-shadow:0 2px 8px rgba(16,185,129,0.3);">
+          🚀 Tạo kế hoạch tập luyện
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ADAPTIVE LOGIC -->
+<div class="section">
+  <h3>🧠 Adaptive Logic — "Tùy chỉnh thêm" hiện fields nào?</h3>
+  
+  <div style="background:#f8fafc; border-radius:12px; padding:16px;">
+    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+      <thead>
+        <tr style="background:#f1f5f9; font-weight:600;">
+          <td style="padding:8px; border:1px solid #e2e8f0;">Field</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">🌱 Beginner</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">💪 Intermediate</td>
+          <td style="padding:8px; border:1px solid #e2e8f0; text-align:center;">🏆 Advanced</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#f0fdf4;">
+          <td style="padding:6px; border:1px solid #e2e8f0;" colspan="4"><strong>Luôn hiện (Quick Start — 3 core fields):</strong></td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">training_goal</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">experience_level</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">days_per_week</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅</td>
+        </tr>
+        <tr style="background:#eff6ff;">
+          <td style="padding:6px; border:1px solid #e2e8f0;" colspan="4"><strong>Expand section — "Tùy chỉnh thêm":</strong></td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">session_duration_min</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">available_equipment</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">injury_restrictions</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">cardio_sessions + type</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr style="background:#fef3c7;">
+          <td style="padding:6px; border:1px solid #e2e8f0;" colspan="4"><strong>Advanced sub-section (chỉ hiện nếu Intermediate/Advanced):</strong></td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">periodization_model</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">plan_cycle_weeks</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">priority_muscles</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">known_1rm</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+        <tr>
+          <td style="padding:6px; border:1px solid #e2e8f0;">avg_sleep_hours</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; color:#94a3b8;">ẩn</td>
+          <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">✅ hiện</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div style="margin-top:12px; padding:10px; background:#dcfce7; border-radius:8px; font-size:12px;">
+      <strong>Tổng kết fields theo level:</strong><br>
+      🌱 Beginner: 3 core + expand → <strong>tối đa 7 fields</strong> (equipment, injuries, cardio, duration)<br>
+      💪 Intermediate: 3 core + expand → <strong>tối đa 10 fields</strong> (+ periodization, cycle, muscles)<br>
+      🏆 Advanced: 3 core + expand → <strong>tối đa 12 fields</strong> (+ 1RM, sleep)
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- USER JOURNEY -->
+<div class="section">
+  <h3>🗺️ User Journey — 3 personas</h3>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+    <div style="background:#dcfce7; border-radius:12px; padding:14px;">
+      <div style="font-weight:700; font-size:13px; margin-bottom:8px;">🌱 Mai — Beginner</div>
+      <div style="font-size:11px; line-height:1.8; color:#334155;">
+        1. Chọn: Giảm mỡ → Mới → 3 ngày<br>
+        2. Thấy AI preview → "OK hợp lý"<br>
+        3. <strong>Không bấm "Tùy chỉnh"</strong><br>
+        4. Bấm "Tạo plan" → <strong>20s xong</strong><br>
+        5. Bắt đầu tập ngay!<br>
+        <span style="color:#16a34a; font-weight:600;">✅ Zero friction</span>
+      </div>
+    </div>
+    <div style="background:#dbeafe; border-radius:12px; padding:14px;">
+      <div style="font-weight:700; font-size:13px; margin-bottom:8px;">💪 Tuấn — Intermediate</div>
+      <div style="font-size:11px; line-height:1.8; color:#334155;">
+        1. Chọn: Tăng cơ → Trung bình → 4 ngày<br>
+        2. Bấm "Tùy chỉnh thêm"<br>
+        3. Chỉnh: 60'/buổi, chỉ Dumbbell + Bodyweight<br>
+        4. Thêm: 1 buổi cardio HIIT<br>
+        5. Bấm "Tạo plan" → <strong>45s xong</strong><br>
+        <span style="color:#2563eb; font-weight:600;">✅ Chỉ chỉnh cái cần</span>
+      </div>
+    </div>
+    <div style="background:#fef3c7; border-radius:12px; padding:14px;">
+      <div style="font-weight:700; font-size:13px; margin-bottom:8px;">🏆 Hùng — Advanced</div>
+      <div style="font-size:11px; line-height:1.8; color:#334155;">
+        1. Chọn: Sức mạnh → Nâng cao → 5 ngày<br>
+        2. Bấm "Tùy chỉnh thêm"<br>
+        3. Chỉnh equipment, cardio<br>
+        4. Thấy Advanced section → chọn Undulating, 6 tuần<br>
+        5. Nhập 1RM: Squat 180, Bench 120<br>
+        6. Bấm "Tạo plan" → <strong>90s xong</strong><br>
+        <span style="color:#d97706; font-weight:600;">✅ Full control nếu muốn</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CONFIRMATION -->
+<div class="section">
+  <h3>✅ Xác nhận Issue 1</h3>
+  <p>Flow B+C Hybrid này có đáp ứng kỳ vọng của bạn không?</p>
+</div>
+
+<div class="options" data-style="cards">
+  <div class="option" data-id="approve">
+    ✅ <strong>Hợp lý — Chuyển sang Issue 2 (Workout Logger Speed)</strong><br>
+    <small>Lock decision, ghi vào spec</small>
+  </div>
+  <div class="option" data-id="adjust">
+    ✏️ <strong>Cần điều chỉnh — (cho biết cụ thể)</strong><br>
+    <small>Chỉnh sửa trước khi lock</small>
+  </div>
+</div>
