@@ -669,7 +669,8 @@
       "reps": "Reps",
       "rpe": "RPE",
       "logSet": "Ghi nhận set",
-      "addExercise": "Thêm bài tập"
+      "addExercise": "Thêm bài tập",
+      "nextUp": "Tiếp theo"
     },
     "summary": {
       "title": "Tổng kết buổi tập",
@@ -705,7 +706,10 @@
       "restDayTip3": "Có thể đi bộ nhẹ hoặc kéo giãn",
       "logWeight": "Ghi cân nặng",
       "logLightCardio": "Ghi cardio nhẹ",
-      "minutes": "phút"
+      "minutes": "phút",
+      "planExpired": "Kế hoạch đã hết hạn",
+      "planExpiredMessage": "Chu kỳ tập luyện của bạn đã kết thúc. Tạo chu kỳ mới để tiếp tục tiến bộ!",
+      "createNewCycle": "Tạo chu kỳ mới"
     },
     "workout": {
       "tab": "Buổi tập"

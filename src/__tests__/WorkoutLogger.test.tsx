@@ -476,7 +476,9 @@ describe('WorkoutLogger', () => {
       screen.getByTestId('exercise-section-squat'),
     ).toBeInTheDocument();
     expect(screen.getByText('Đẩy tạ nằm')).toBeInTheDocument();
-    expect(screen.getByText('Gánh tạ')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('exercise-section-squat'),
+    ).toHaveTextContent('Gánh tạ');
   });
 
   /* ---------- workout draft persistence ---------- */
@@ -730,7 +732,9 @@ describe('WorkoutLogger', () => {
       screen.getByTestId('exercise-section-squat'),
     ).toBeInTheDocument();
     expect(screen.getByText('Đẩy tạ nằm')).toBeInTheDocument();
-    expect(screen.getByText('Gánh tạ')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('exercise-section-squat'),
+    ).toHaveTextContent('Gánh tạ');
   });
 
   it('ignores unknown exercise IDs gracefully', () => {

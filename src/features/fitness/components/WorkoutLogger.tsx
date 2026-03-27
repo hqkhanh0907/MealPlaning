@@ -361,7 +361,7 @@ export function WorkoutLogger({
             </p>
           </div>
         ) : (
-          currentExercises.map((exercise) => {
+          currentExercises.map((exercise, exerciseIndex) => {
             const exerciseSets = loggedSets.filter(
               (s) => s.exerciseId === exercise.id,
             );
@@ -373,9 +373,10 @@ export function WorkoutLogger({
             );
             const overloadSuggestion =
               suggestion.weight > 0 ? suggestion : null;
+            const nextExercise = currentExercises[exerciseIndex + 1];
             return (
+              <React.Fragment key={exercise.id}>
               <section
-                key={exercise.id}
                 className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
                 data-testid={`exercise-section-${exercise.id}`}
               >
@@ -502,6 +503,21 @@ export function WorkoutLogger({
                   </button>
                 </div>
               </section>
+
+              {nextExercise && (
+                <div
+                  data-testid={`transition-card-${exercise.id}`}
+                  className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-2.5 dark:bg-slate-700/50"
+                >
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
+                    {exerciseIndex + 2}
+                  </div>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    {t('fitness.logger.nextUp')}: <span className="font-medium text-slate-700 dark:text-slate-200">{nextExercise.nameVi}</span>
+                  </span>
+                </div>
+              )}
+              </React.Fragment>
             );
           })
         )}

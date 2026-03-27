@@ -1,10 +1,13 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Dumbbell, Moon, ChevronRight, Calendar } from 'lucide-react';
+import { Play, Dumbbell, Moon, ChevronRight, Calendar, RefreshCw } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
 import { DailyWeightInput } from './DailyWeightInput';
 import { StreakCounter } from './StreakCounter';
+import { EnergyBalanceCard } from '../../../components/nutrition/EnergyBalanceCard';
+import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
+import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import type { SelectedExercise, TrainingPlanDay } from '../types';
 import { DAY_LABELS } from '../constants';
 import { safeJsonParse } from '../utils/safeJsonParse';
@@ -36,6 +39,15 @@ function getTomorrowDow(todayDow: number): number {
   return todayDow === 7 ? 1 : todayDow + 1;
 }
 
+function isPlanExpired(endDate?: string): boolean {
+  if (!endDate) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+  return today > end;
+}
+
 function TrainingPlanViewInner({
   onGeneratePlan,
 }: TrainingPlanViewProps): React.JSX.Element {
@@ -43,12 +55,19 @@ function TrainingPlanViewInner({
   const trainingPlans = useFitnessStore((s) => s.trainingPlans);
   const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
   const pushPage = useNavigationStore((s) => s.pushPage);
+  const { targetCalories, targetProtein } = useNutritionTargets();
+  const { eaten, protein } = useTodayNutrition();
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const activePlan = useMemo(
     () => trainingPlans.find((p) => p.status === 'active'),
     [trainingPlans],
+  );
+
+  const planExpired = useMemo(
+    () => (activePlan ? isPlanExpired(activePlan.endDate) : false),
+    [activePlan],
   );
 
   const planDays = useMemo(
@@ -105,6 +124,37 @@ function TrainingPlanViewInner({
     setSelectedDay((prev) => (prev === dayNum ? null : dayNum));
   }, []);
 
+  if (activePlan && planExpired) {
+    return (
+      <div
+        data-testid="training-plan-view"
+        className="flex flex-col items-center justify-center py-12 text-center"
+      >
+        <div
+          data-testid="plan-expired-cta"
+          className="flex flex-col items-center gap-4"
+        >
+          <RefreshCw className="h-12 w-12 text-amber-400 dark:text-amber-500" aria-hidden="true" />
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            {t('fitness.plan.planExpired')}
+          </h3>
+          <p className="max-w-xs text-sm text-slate-500 dark:text-slate-400">
+            {t('fitness.plan.planExpiredMessage')}
+          </p>
+          <button
+            data-testid="create-new-cycle-btn"
+            type="button"
+            onClick={onGeneratePlan}
+            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 active:scale-95"
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            {t('fitness.plan.createNewCycle')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!activePlan) {
     return (
       <div
@@ -136,6 +186,15 @@ function TrainingPlanViewInner({
   return (
     <div data-testid="training-plan-view" className="flex flex-col gap-4">
       <StreakCounter />
+
+      <EnergyBalanceCard
+        caloriesIn={eaten}
+        caloriesOut={0}
+        targetCalories={targetCalories}
+        proteinCurrent={protein}
+        proteinTarget={targetProtein}
+        isCollapsible
+      />
 
       <div data-testid="calendar-strip" className="flex gap-1.5">
         {Array.from({ length: 7 }, (_, i) => {
