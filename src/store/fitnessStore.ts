@@ -39,6 +39,7 @@ export interface FitnessState {
   addWorkout: (workout: Workout) => void;
   updateWorkout: (id: string, updates: Partial<Workout>) => void;
   addWorkoutSet: (workoutSet: WorkoutSet) => void;
+  saveWorkoutAtomic: (workout: Workout, sets: WorkoutSet[]) => Promise<void>;
   updateWorkoutSet: (id: string, updates: Partial<WorkoutSet>) => void;
   removeWorkoutSet: (id: string) => void;
   getWorkoutSets: (workoutId: string) => WorkoutSet[];
@@ -49,6 +50,7 @@ export interface FitnessState {
   setWorkoutMode: (mode: 'strength' | 'cardio') => void;
   setWorkoutDraft: (draft: FitnessState['workoutDraft']) => void;
   clearWorkoutDraft: () => void;
+  loadWorkoutDraft: () => Promise<void>;
   getActivePlan: () => TrainingPlan | undefined;
   getLatestWeight: () => WeightEntry | undefined;
   getWorkoutsByDateRange: (startDate: string, endDate: string) => Workout[];
@@ -164,6 +166,54 @@ export const useFitnessStore = create<FitnessState>()(
         }
       },
 
+      saveWorkoutAtomic: async (workout, sets) => {
+        if (_db) {
+          await _db.transaction(async () => {
+            await _db!.execute(
+              `INSERT INTO workouts (id, date, name, duration_min, notes, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              [
+                workout.id,
+                workout.date,
+                workout.name,
+                workout.durationMin ?? null,
+                workout.notes ?? null,
+                workout.createdAt,
+                workout.updatedAt,
+              ],
+            );
+            for (const s of sets) {
+              await _db!.execute(
+                `INSERT INTO workout_sets
+                   (id, workout_id, exercise_id, set_number, reps, weight_kg, rpe, rest_seconds,
+                    duration_min, distance_km, avg_heart_rate, intensity, estimated_calories, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                  s.id,
+                  s.workoutId,
+                  s.exerciseId,
+                  s.setNumber,
+                  s.reps ?? null,
+                  s.weightKg,
+                  s.rpe ?? null,
+                  s.restSeconds ?? null,
+                  s.durationMin ?? null,
+                  s.distanceKm ?? null,
+                  s.avgHeartRate ?? null,
+                  s.intensity ?? null,
+                  s.estimatedCalories ?? null,
+                  s.updatedAt,
+                ],
+              );
+            }
+          });
+        }
+        set((state) => ({
+          workouts: [...state.workouts, workout],
+          workoutSets: [...state.workoutSets, ...sets],
+        }));
+      },
+
       updateWorkoutSet: (id, updates) =>
         set((state) => ({
           workoutSets: state.workoutSets.map((s) =>
@@ -200,9 +250,57 @@ export const useFitnessStore = create<FitnessState>()(
 
       setWorkoutMode: (mode) => set({ workoutMode: mode }),
 
-      setWorkoutDraft: (draft) => set({ workoutDraft: draft }),
+      setWorkoutDraft: (draft) => {
+        set({ workoutDraft: draft });
+        if (_db && draft) {
+          _db
+            .execute(
+              `INSERT OR REPLACE INTO workout_drafts (id, exercises_json, sets_json, start_time, updated_at)
+               VALUES ('current', ?, ?, ?, ?)`,
+              [
+                JSON.stringify(draft.exercises),
+                JSON.stringify(draft.sets),
+                new Date().toISOString(),
+                new Date().toISOString(),
+              ],
+            )
+            .catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite write failed for workout draft:', error);
+            });
+        }
+      },
 
-      clearWorkoutDraft: () => set({ workoutDraft: null }),
+      clearWorkoutDraft: () => {
+        set({ workoutDraft: null });
+        if (_db) {
+          _db
+            .execute(`DELETE FROM workout_drafts WHERE id = 'current'`)
+            .catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite delete failed for workout draft:', error);
+            });
+        }
+      },
+
+      loadWorkoutDraft: async () => {
+        if (!_db) return;
+        try {
+          const rows = await _db.query<Record<string, unknown>>(
+            `SELECT * FROM workout_drafts WHERE id = 'current'`,
+          );
+          if (rows.length > 0) {
+            const row = rows[0];
+            set({
+              workoutDraft: {
+                exercises: JSON.parse(row.exercisesJson as string) as Exercise[],
+                sets: JSON.parse(row.setsJson as string) as WorkoutSet[],
+                elapsedSeconds: 0,
+              },
+            });
+          }
+        } catch (error) {
+          console.warn('[fitnessStore] Failed to load workout draft from SQLite:', error);
+        }
+      },
 
       getActivePlan: () =>
         get().trainingPlans.find((p) => p.status === 'active'),

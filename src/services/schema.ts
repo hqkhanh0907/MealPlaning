@@ -21,6 +21,7 @@ export const SCHEMA_TABLES = new Set([
   'adjustments',
   'fitness_profiles',
   'fitness_preferences',
+  'workout_drafts',
 ]);
 
 export async function getSchemaVersion(db: DatabaseService): Promise<number> {
@@ -292,6 +293,17 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       default_rest_seconds INTEGER NOT NULL DEFAULT 90,
       show_rpe INTEGER NOT NULL DEFAULT 1,
       enable_notifications INTEGER NOT NULL DEFAULT 1,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS workout_drafts (
+      id TEXT PRIMARY KEY DEFAULT 'current',
+      exercises_json TEXT NOT NULL DEFAULT '[]',
+      sets_json TEXT NOT NULL DEFAULT '[]',
+      start_time TEXT NOT NULL,
+      plan_day_id TEXT,
       updated_at TEXT NOT NULL
     )
   `);

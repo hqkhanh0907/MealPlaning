@@ -678,3 +678,152 @@ describe('fitnessStore dual-layer SQLite', () => {
     consoleSpy.mockRestore();
   });
 });
+
+/* ------------------------------------------------------------------ */
+/*  SQLite draft persistence tests                                      */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore SQLite draft persistence', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+  });
+
+  const mockExercise: Exercise = {
+    id: 'ex-bench',
+    nameVi: 'Đẩy tạ nằm',
+    nameEn: 'Bench Press',
+    muscleGroup: 'chest',
+    secondaryMuscles: ['shoulders'],
+    category: 'compound',
+    equipment: ['barbell'],
+    contraindicated: [],
+    exerciseType: 'strength',
+    defaultRepsMin: 8,
+    defaultRepsMax: 12,
+    isCustom: false,
+    updatedAt: '2026-03-27T10:00:00Z',
+  };
+
+  const mockSet: WorkoutSet = {
+    id: 'set-draft-1',
+    workoutId: '',
+    exerciseId: 'ex-bench',
+    setNumber: 1,
+    reps: 10,
+    weightKg: 80,
+    updatedAt: '2026-03-27T10:00:00Z',
+  };
+
+  it('setWorkoutDraft persists draft to SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.setWorkoutDraft({
+        exercises: [mockExercise],
+        sets: [mockSet],
+        elapsedSeconds: 120,
+      });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      `SELECT * FROM workout_drafts WHERE id = 'current'`,
+    );
+    expect(rows).toHaveLength(1);
+    expect(JSON.parse(rows[0].exercisesJson as string)).toHaveLength(1);
+    expect(JSON.parse(rows[0].setsJson as string)).toHaveLength(1);
+  });
+
+  it('clearWorkoutDraft deletes draft from SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.setWorkoutDraft({
+        exercises: [mockExercise],
+        sets: [mockSet],
+        elapsedSeconds: 60,
+      });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    act(() => {
+      result.current.clearWorkoutDraft();
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      `SELECT * FROM workout_drafts WHERE id = 'current'`,
+    );
+    expect(rows).toHaveLength(0);
+    expect(result.current.workoutDraft).toBeNull();
+  });
+
+  it('draft persists in SQLite after store reset', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.setWorkoutDraft({
+        exercises: [mockExercise],
+        sets: [mockSet],
+        elapsedSeconds: 120,
+      });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Simulate app refresh: clear Zustand state
+    act(() => useFitnessStore.setState({ workoutDraft: null }));
+    expect(useFitnessStore.getState().workoutDraft).toBeNull();
+
+    // Reload from SQLite
+    await act(async () => {
+      await result.current.loadWorkoutDraft();
+    });
+
+    expect(result.current.workoutDraft).not.toBeNull();
+    expect(result.current.workoutDraft?.exercises).toHaveLength(1);
+    expect(result.current.workoutDraft?.exercises[0].id).toBe('ex-bench');
+    expect(result.current.workoutDraft?.sets).toHaveLength(1);
+    expect(result.current.workoutDraft?.sets[0].weightKg).toBe(80);
+  });
+
+  it('loadWorkoutDraft does nothing when no draft exists', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await act(async () => {
+      await result.current.loadWorkoutDraft();
+    });
+
+    expect(result.current.workoutDraft).toBeNull();
+  });
+
+  it('loadWorkoutDraft does nothing when db is not initialized', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+
+    await act(async () => {
+      await result.current.loadWorkoutDraft();
+    });
+
+    expect(result.current.workoutDraft).toBeNull();
+  });
+});
