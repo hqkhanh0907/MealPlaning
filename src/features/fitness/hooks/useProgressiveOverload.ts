@@ -3,6 +3,8 @@ import { useFitnessStore } from '../../../store/fitnessStore';
 import type { WorkoutSet, TrainingExperience, SetSuggestion } from '../types';
 import { getOverloadIncrement } from '../utils/periodization';
 import { EXERCISES } from '../data/exerciseDatabase';
+import { analyzePlateau } from '../utils/plateauAnalysis';
+import type { PlateauResult } from '../utils/plateauAnalysis';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -176,6 +178,7 @@ export function useProgressiveOverload(): {
   checkPlateau: (
     exerciseId: string,
   ) => { isPlateaued: boolean; weeks: number };
+  analyzeExercisePlateau: (exerciseId: string) => PlateauResult;
   checkAcuteFatigue: (
     exerciseId: string,
     recentSets: WorkoutSet[],
@@ -252,6 +255,12 @@ export function useProgressiveOverload(): {
       return detectPlateau(groupedSets);
     },
     [workoutSets, workouts, workoutSetsByWorkoutId],
+  );
+
+  const analyzeExercisePlateauFn = useCallback(
+    (exerciseId: string): PlateauResult =>
+      analyzePlateau(workouts, workoutSets, exerciseId),
+    [workouts, workoutSets],
   );
 
   const checkAcuteFatigueFn = useCallback(
@@ -332,6 +341,7 @@ export function useProgressiveOverload(): {
     suggestNextSet: suggestNextSetFn,
     getLastSets,
     checkPlateau: checkPlateauFn,
+    analyzeExercisePlateau: analyzeExercisePlateauFn,
     checkAcuteFatigue: checkAcuteFatigueFn,
     checkChronicOvertraining: checkChronicOvertrainingFn,
     acuteFatigue,

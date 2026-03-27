@@ -15,6 +15,7 @@ import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateWeeklyVolume, estimate1RM } from '../utils/trainingMetrics';
 import { getWeekBounds } from '../utils/dateUtils';
 import { useCurrentDate } from '../hooks/useCurrentDate';
+import { analyzePlateau } from '../utils/plateauAnalysis';
 
 type MetricCardType = 'weight' | '1rm' | 'adherence' | 'sessions';
 type TimeRange = '1W' | '1M' | '3M' | 'all';
@@ -178,6 +179,18 @@ function ProgressDashboardInner() {
     return days;
   }, [workouts, workoutSets]);
 
+  const plateauInsights = useMemo(() => {
+    const exerciseIds = [...new Set(workoutSets.map((s) => s.exerciseId))];
+    const results: { id: string; text: string }[] = [];
+    for (const eid of exerciseIds) {
+      const result = analyzePlateau(workouts, workoutSets, eid);
+      if (result.strengthPlateau || result.volumePlateau) {
+        results.push({ id: `plateau-${eid}`, text: result.message });
+      }
+    }
+    return results;
+  }, [workouts, workoutSets]);
+
   const insights = useMemo(() => {
     const result: { id: string; text: string }[] = [];
 
@@ -217,7 +230,7 @@ function ProgressDashboardInner() {
       });
     }
 
-    return result;
+    return [...result, ...plateauInsights];
   }, [
     volumeChangePercent,
     completedSessions,
@@ -225,6 +238,7 @@ function ProgressDashboardInner() {
     latestWeight,
     weight7DaysAgo,
     weightDelta,
+    plateauInsights,
     t,
   ]);
 
