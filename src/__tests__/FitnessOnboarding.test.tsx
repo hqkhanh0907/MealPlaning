@@ -85,7 +85,7 @@ describe('FitnessOnboarding', () => {
     expect(screen.getByText('Thời lượng buổi tập (phút)')).toBeInTheDocument();
   });
 
-  it('beginner shows only 4 extra fields', () => {
+  it('beginner shows base fields plus 1RM toggle (no ORM inputs)', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
@@ -96,15 +96,17 @@ describe('FitnessOnboarding', () => {
     expect(screen.getByTestId('field-equipment')).toBeInTheDocument();
     expect(screen.getByTestId('field-injuries')).toBeInTheDocument();
     expect(screen.getByTestId('field-cardio-sessions')).toBeInTheDocument();
+    expect(screen.getByTestId('field-known-1rm')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-toggle')).toBeInTheDocument();
+    expect(screen.queryByTestId('orm-inputs')).not.toBeInTheDocument();
 
     expect(screen.queryByTestId('field-periodization')).not.toBeInTheDocument();
     expect(screen.queryByTestId('field-cycle-weeks')).not.toBeInTheDocument();
     expect(screen.queryByTestId('field-priority-muscles')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('field-known-1rm')).not.toBeInTheDocument();
     expect(screen.queryByTestId('field-avg-sleep')).not.toBeInTheDocument();
   });
 
-  it('intermediate shows 7 extra fields (4 base + 3 intermediate)', () => {
+  it('intermediate shows intermediate fields plus 1RM toggle', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
@@ -118,12 +120,14 @@ describe('FitnessOnboarding', () => {
     expect(screen.getByTestId('field-periodization')).toBeInTheDocument();
     expect(screen.getByTestId('field-cycle-weeks')).toBeInTheDocument();
     expect(screen.getByTestId('field-priority-muscles')).toBeInTheDocument();
+    expect(screen.getByTestId('field-known-1rm')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-toggle')).toBeInTheDocument();
+    expect(screen.queryByTestId('orm-inputs')).not.toBeInTheDocument();
 
-    expect(screen.queryByTestId('field-known-1rm')).not.toBeInTheDocument();
     expect(screen.queryByTestId('field-avg-sleep')).not.toBeInTheDocument();
   });
 
-  it('advanced shows all 9 extra fields', () => {
+  it('advanced shows all fields with 1RM auto-enabled', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
@@ -138,6 +142,7 @@ describe('FitnessOnboarding', () => {
     expect(screen.getByTestId('field-cycle-weeks')).toBeInTheDocument();
     expect(screen.getByTestId('field-priority-muscles')).toBeInTheDocument();
     expect(screen.getByTestId('field-known-1rm')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-inputs')).toBeInTheDocument();
     expect(screen.getByTestId('field-avg-sleep')).toBeInTheDocument();
   });
 
@@ -346,6 +351,45 @@ describe('FitnessOnboarding', () => {
     expect(screen.getByLabelText('bench')).toBeInTheDocument();
     expect(screen.getByLabelText('deadlift')).toBeInTheDocument();
     expect(screen.getByLabelText('ohp')).toBeInTheDocument();
+  });
+
+  it('shows 1RM toggle for intermediate users', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
+    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+
+    expect(screen.getByTestId('orm-toggle')).toBeInTheDocument();
+  });
+
+  it('1RM fields hidden until toggle enabled', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+
+    expect(screen.queryByTestId('orm-inputs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('orm-squat')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('orm-toggle'));
+
+    expect(screen.getByTestId('orm-inputs')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-squat')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-bench')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-deadlift')).toBeInTheDocument();
+    expect(screen.getByTestId('orm-ohp')).toBeInTheDocument();
+  });
+
+  it('auto-enables 1RM for advanced users', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Nâng cao' }));
+    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+
+    expect(screen.getByTestId('orm-toggle')).toBeChecked();
+    expect(screen.getByTestId('orm-squat')).toBeInTheDocument();
   });
 });
 

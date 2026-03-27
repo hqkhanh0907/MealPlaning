@@ -61,6 +61,12 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
   const [priorityMuscles, setPriorityMuscles] = useState<MuscleGroup[]>([]);
   const [known1rm, setKnown1rm] = useState<Record<string, string>>({});
   const [avgSleepHours, setAvgSleepHours] = useState('');
+  const [showOrm, setShowOrm] = useState(false);
+
+  const handleExperienceChange = useCallback((exp: TrainingExperience) => {
+    setExperience(exp);
+    if (exp === 'advanced') setShowOrm(true);
+  }, []);
 
   const toggleEquipment = useCallback((item: EquipmentType) => {
     setEquipment((prev) =>
@@ -179,7 +185,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
               type="button"
               role="radio"
               aria-checked={experience === e}
-              onClick={() => setExperience(e)}
+              onClick={() => handleExperienceChange(e)}
               className={pillClass(experience === e)}
             >
               {t(`fitness.onboarding.${e}`)}
@@ -377,39 +383,57 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
             </>
           )}
 
+          {/* Known 1RM — toggle accessible to all levels */}
+          <fieldset data-testid="field-known-1rm">
+            <legend className={labelClass}>
+              {t('fitness.onboarding.known1rm')}
+            </legend>
+            <div className="mt-1">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showOrm}
+                  onChange={(e) => setShowOrm(e.target.checked)}
+                  className="rounded border-slate-300"
+                  data-testid="orm-toggle"
+                />
+                <span className="text-sm text-slate-600 dark:text-slate-300">
+                  {t('fitness.onboarding.knowMyOrm')}
+                </span>
+              </label>
+            </div>
+            {showOrm && (
+              <div className="mt-3 grid grid-cols-2 gap-2" data-testid="orm-inputs">
+                {ORM_LIFTS.map((lift) => (
+                  <div key={lift}>
+                    <label
+                      htmlFor={`orm-${lift}`}
+                      className="block text-xs text-slate-500 dark:text-slate-400 mb-1 capitalize"
+                    >
+                      {lift}
+                    </label>
+                    <input
+                      id={`orm-${lift}`}
+                      type="number"
+                      min={0}
+                      step={2.5}
+                      placeholder="kg"
+                      value={known1rm[lift] ?? ''}
+                      onChange={(e) =>
+                        setKnown1rm((prev) => ({ ...prev, [lift]: e.target.value }))
+                      }
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+                      data-testid={`orm-${lift}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </fieldset>
+
           {/* Advanced fields */}
           {showAdvanced && (
             <>
-              {/* Known 1RM */}
-              <fieldset data-testid="field-known-1rm">
-                <legend className={labelClass}>
-                  {t('fitness.onboarding.known1rm')}
-                </legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {ORM_LIFTS.map((lift) => (
-                    <div key={lift}>
-                      <label
-                        htmlFor={`orm-${lift}`}
-                        className="block text-xs text-slate-500 dark:text-slate-400 mb-1 capitalize"
-                      >
-                        {lift}
-                      </label>
-                      <input
-                        id={`orm-${lift}`}
-                        type="number"
-                        min={0}
-                        placeholder="kg"
-                        value={known1rm[lift] ?? ''}
-                        onChange={(e) =>
-                          setKnown1rm((prev) => ({ ...prev, [lift]: e.target.value }))
-                        }
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </fieldset>
-
               {/* Avg sleep hours */}
               <div data-testid="field-avg-sleep">
                 <label

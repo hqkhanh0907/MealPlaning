@@ -619,5 +619,60 @@
     "cloudData": "Dữ liệu đám mây",
     "keepLocal": "Giữ cục bộ",
     "useCloud": "Dùng dữ liệu đám mây"
+  },
+  "fitness": {
+    "onboarding": {
+      "title": "Thiết lập tập luyện",
+      "subtitle": "Chọn 3 thông tin cơ bản để bắt đầu",
+      "goal": "Mục tiêu tập luyện",
+      "strength": "Sức mạnh",
+      "hypertrophy": "Phát triển cơ",
+      "endurance": "Sức bền",
+      "general": "Tổng hợp",
+      "experience": "Trình độ",
+      "beginner": "Mới bắt đầu",
+      "intermediate": "Trung cấp",
+      "advanced": "Nâng cao",
+      "daysPerWeek": "Số ngày tập/tuần",
+      "customize": "Tùy chỉnh thêm",
+      "sessionDuration": "Thời lượng buổi tập (phút)",
+      "equipment": "Thiết bị tập",
+      "injuries": "Vùng chấn thương",
+      "cardioSessions": "Số buổi cardio/tuần",
+      "periodization": "Mô hình phân kỳ",
+      "cycleWeeks": "Số tuần một chu kỳ",
+      "priorityMuscles": "Nhóm cơ ưu tiên",
+      "known1rm": "1RM đã biết",
+      "knowMyOrm": "Tôi biết 1RM của mình",
+      "sleepHours": "Giờ ngủ trung bình",
+      "start": "Bắt đầu →"
+    },
+    "deload": {
+      "title": "Đề xuất giảm tải",
+      "explanation": "Hệ thống phát hiện bạn đã tập với cường độ cao liên tục nhiều tuần. Giảm tải 40% khối lượng giúp phục hồi và tránh chấn thương.",
+      "accept": "Chấp nhận giảm tải",
+      "override": "Bỏ qua"
+    },
+    "logger": {
+      "title": "Ghi nhận buổi tập",
+      "summary": "Tổng kết buổi tập",
+      "duration": "Thời lượng",
+      "totalVolume": "Tổng khối lượng",
+      "setsCompleted": "Số set hoàn thành",
+      "save": "Lưu buổi tập",
+      "back": "Quay lại",
+      "finish": "Hoàn thành",
+      "noExercises": "Chưa có bài tập nào",
+      "set": "Set",
+      "weight": "Cân nặng",
+      "reps": "Reps",
+      "rpe": "RPE",
+      "logSet": "Ghi nhận set",
+      "addExercise": "Thêm bài tập"
+    },
+    "summary": {
+      "title": "Tổng kết buổi tập",
+      "newPR": "{{count}} kỷ lục cá nhân mới!"
+    }
   }
 }
