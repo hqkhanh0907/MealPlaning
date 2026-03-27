@@ -137,6 +137,7 @@ function mkActivePlan(overrides: Partial<TrainingPlan> = {}): TrainingPlan {
     status: 'active',
     splitType: 'Push/Pull/Legs',
     durationWeeks: 8,
+    currentWeek: 1,
     startDate: '2025-01-01',
     createdAt: now,
     updatedAt: now,

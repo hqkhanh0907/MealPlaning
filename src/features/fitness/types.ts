@@ -63,6 +63,7 @@ export interface TrainingPlan {
   status: PlanStatus;
   splitType: string;
   durationWeeks: number;
+  currentWeek: number;
   startDate: string;
   endDate?: string;
   createdAt: string;

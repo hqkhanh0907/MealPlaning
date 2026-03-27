@@ -69,6 +69,7 @@ function samplePlan(overrides: Partial<TrainingPlan> = {}): TrainingPlan {
     status: 'active',
     splitType: 'push-pull-legs',
     durationWeeks: 8,
+    currentWeek: 1,
     startDate: '2025-06-01',
     createdAt: '2025-06-01T00:00:00.000Z',
     updatedAt: '2025-06-01T00:00:00.000Z',

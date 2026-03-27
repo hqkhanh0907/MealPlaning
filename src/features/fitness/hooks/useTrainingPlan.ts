@@ -52,6 +52,8 @@ export interface PlanGenerationInput {
   };
   exerciseDB?: Exercise[];
   weeklyIntensities?: number[];
+  currentWeek?: number;
+  planStartDate?: string;
 }
 
 export interface GeneratedPlan {
@@ -86,6 +88,18 @@ const CATEGORY_ORDER: Record<ExerciseCategory, number> = {
   secondary: 1,
   isolation: 2,
 };
+
+const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+/* ------------------------------------------------------------------ */
+/*  Week computation                                                    */
+/* ------------------------------------------------------------------ */
+
+export function computeCurrentWeek(startDate: string): number {
+  const elapsed = Date.now() - new Date(startDate).getTime();
+  if (elapsed < 0) return 1;
+  return Math.floor(elapsed / MS_PER_WEEK) + 1;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Seed → Exercise conversion                                          */
@@ -289,11 +303,12 @@ function applyRepScheme(
   exercises: SelectedExercise[],
   profile: TrainingProfile,
   sessionIndex: number,
+  weekNumber: number,
 ): SelectedExercise[] {
   const scheme = getWeekRepScheme(
     profile.periodizationModel,
     profile.trainingGoal,
-    1,
+    weekNumber,
     sessionIndex + 1,
   );
 
@@ -409,6 +424,14 @@ export function generateTrainingPlan(
   const { trainingProfile, healthProfile } = input;
   const exerciseDB = input.exerciseDB ?? getDefaultExercises();
 
+  // Resolve the current week of the training cycle
+  let resolvedWeek = 1;
+  if (input.currentWeek != null && input.currentWeek >= 1) {
+    resolvedWeek = input.currentWeek;
+  } else if (input.planStartDate) {
+    resolvedWeek = computeCurrentWeek(input.planStartDate);
+  }
+
   // Step 1
   const { splitType, sessions } = determineSplit(
     trainingProfile.daysPerWeek,
@@ -448,6 +471,7 @@ export function generateTrainingPlan(
       rawExercises,
       trainingProfile,
       index,
+      resolvedWeek,
     );
 
     return {
@@ -514,6 +538,7 @@ export function generateTrainingPlan(
     status: 'active',
     splitType,
     durationWeeks: trainingProfile.planCycleWeeks,
+    currentWeek: resolvedWeek,
     startDate: now,
     createdAt: now,
     updatedAt: now,

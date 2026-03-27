@@ -61,6 +61,7 @@ function setActiveTrainingPlan() {
         status: 'active' as const,
         splitType: 'push-pull-legs',
         durationWeeks: 8,
+        currentWeek: 1,
         startDate: today,
         createdAt: today,
         updatedAt: today,

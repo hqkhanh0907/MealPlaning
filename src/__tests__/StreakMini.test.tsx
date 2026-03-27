@@ -57,6 +57,7 @@ function makePlan(): TrainingPlan {
     status: 'active',
     splitType: 'push_pull',
     durationWeeks: 8,
+    currentWeek: 1,
     startDate: '2024-01-01',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',

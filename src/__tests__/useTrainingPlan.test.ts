@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import {
   generateTrainingPlan,
   useTrainingPlan,
+  computeCurrentWeek,
 } from '../features/fitness/hooks/useTrainingPlan';
 import type {
   TrainingProfile,
@@ -666,7 +667,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      // Week 1 → phase index 0 → hypertrophy (block phase order)
+      // Default (week 1) → phase index 0 → hypertrophy (block phase order)
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -675,6 +676,108 @@ describe('generateTrainingPlan', () => {
         expect(exercises[0].repsMin).toBe(8);
         expect(exercises[0].repsMax).toBe(12);
       }
+      expect(result.plan.currentWeek).toBe(1);
+    });
+
+    it('block periodization uses week 5 strength phase when currentWeek=5', () => {
+      const result = generateTrainingPlan({
+        trainingProfile: createProfile({
+          daysPerWeek: 3,
+          trainingGoal: 'strength',
+          periodizationModel: 'block',
+        }),
+        exerciseDB: mockDB,
+        currentWeek: 5,
+      });
+
+      // Week 5 → phase index 1 → strength (3-5 reps)
+      const training = result.days.filter(
+        (d) => d.workoutType !== 'Cardio',
+      );
+      const exercises = parseExercises(training[0]);
+      if (exercises.length > 0) {
+        expect(exercises[0].repsMin).toBe(3);
+        expect(exercises[0].repsMax).toBe(5);
+      }
+      expect(result.plan.currentWeek).toBe(5);
+    });
+
+    it('block periodization uses week 9 endurance phase when currentWeek=9', () => {
+      const result = generateTrainingPlan({
+        trainingProfile: createProfile({
+          daysPerWeek: 3,
+          trainingGoal: 'strength',
+          periodizationModel: 'block',
+        }),
+        exerciseDB: mockDB,
+        currentWeek: 9,
+      });
+
+      // Week 9 → phase index 2 → endurance (15-20 reps)
+      const training = result.days.filter(
+        (d) => d.workoutType !== 'Cardio',
+      );
+      const exercises = parseExercises(training[0]);
+      if (exercises.length > 0) {
+        expect(exercises[0].repsMin).toBe(15);
+        expect(exercises[0].repsMax).toBe(20);
+      }
+      expect(result.plan.currentWeek).toBe(9);
+    });
+
+    it('computes currentWeek from planStartDate', () => {
+      const threeWeeksAgo = new Date(
+        Date.now() - 3 * 7 * 24 * 60 * 60 * 1000,
+      ).toISOString();
+
+      const result = generateTrainingPlan({
+        trainingProfile: createProfile({
+          daysPerWeek: 3,
+          periodizationModel: 'block',
+        }),
+        exerciseDB: mockDB,
+        planStartDate: threeWeeksAgo,
+      });
+
+      expect(result.plan.currentWeek).toBe(4);
+    });
+
+    it('currentWeek input takes priority over planStartDate', () => {
+      const result = generateTrainingPlan({
+        trainingProfile: createProfile({
+          daysPerWeek: 3,
+          periodizationModel: 'block',
+        }),
+        exerciseDB: mockDB,
+        currentWeek: 7,
+        planStartDate: new Date().toISOString(),
+      });
+
+      expect(result.plan.currentWeek).toBe(7);
+    });
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  computeCurrentWeek                                                */
+  /* ---------------------------------------------------------------- */
+
+  describe('computeCurrentWeek', () => {
+    it('returns 1 for a start date of today', () => {
+      expect(computeCurrentWeek(new Date().toISOString())).toBe(1);
+    });
+
+    it('returns 2 after exactly 7 days', () => {
+      const sevenDaysAgo = new Date(
+        Date.now() - 7 * 24 * 60 * 60 * 1000,
+      ).toISOString();
+      expect(computeCurrentWeek(sevenDaysAgo)).toBe(2);
+    });
+
+    it('returns 1 for a future start date', () => {
+      const tomorrow = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ).toISOString();
+      expect(computeCurrentWeek(tomorrow)).toBe(1);
     });
   });
 
