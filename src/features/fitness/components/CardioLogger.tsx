@@ -61,7 +61,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
   }, [selectedType, durationMin, intensity, weightKg]);
 
   const showDistance = useMemo(
-    () => DISTANCE_TYPES.includes(selectedType),
+    () => DISTANCE_CARDIO_TYPES.includes(selectedType),
     [selectedType],
   );
 
