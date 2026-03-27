@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { RestTimer } from './RestTimer';
@@ -70,16 +70,30 @@ export function WorkoutLogger({
   const { t } = useTranslation();
   const addWorkout = useFitnessStore((s) => s.addWorkout);
   const addWorkoutSet = useFitnessStore((s) => s.addWorkoutSet);
+  const setWorkoutDraft = useFitnessStore((s) => s.setWorkoutDraft);
+  const clearWorkoutDraft = useFitnessStore((s) => s.clearWorkoutDraft);
 
-  const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() =>
-    resolveExercises(planDay?.exercises),
-  );
-  const [loggedSets, setLoggedSets] = useState<WorkoutSet[]>([]);
+  const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
+    const draft = useFitnessStore.getState().workoutDraft;
+    return draft ? draft.exercises : resolveExercises(planDay?.exercises);
+  });
+  const [loggedSets, setLoggedSets] = useState<WorkoutSet[]>(() => {
+    const draft = useFitnessStore.getState().workoutDraft;
+    return draft ? draft.sets : [];
+  });
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(() => {
+    const draft = useFitnessStore.getState().workoutDraft;
+    return draft ? draft.elapsedSeconds : 0;
+  });
   const [setInputs, setSetInputs] = useState<Record<string, SetInput>>({});
+  const elapsedRef = useRef(0);
+
+  useEffect(() => {
+    elapsedRef.current = elapsedSeconds;
+  }, [elapsedSeconds]);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -87,6 +101,19 @@ export function WorkoutLogger({
     }, 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (currentExercises.length > 0 || loggedSets.length > 0) {
+        setWorkoutDraft({
+          exercises: currentExercises,
+          sets: loggedSets,
+          elapsedSeconds: elapsedRef.current,
+        });
+      }
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [currentExercises, loggedSets, setWorkoutDraft]);
 
   const getInput = useCallback(
     (exerciseId: string): SetInput =>
@@ -184,6 +211,11 @@ export function WorkoutLogger({
     setShowSummary(true);
   }, []);
 
+  const handleBack = useCallback(() => {
+    clearWorkoutDraft();
+    onBack();
+  }, [clearWorkoutDraft, onBack]);
+
   const totalVolume = useMemo(
     () =>
       loggedSets.reduce(
@@ -209,12 +241,14 @@ export function WorkoutLogger({
     for (const set of loggedSets) {
       addWorkoutSet({ ...set, workoutId });
     }
+    clearWorkoutDraft();
     onComplete(workout);
   }, [
     elapsedSeconds,
     loggedSets,
     addWorkout,
     addWorkoutSet,
+    clearWorkoutDraft,
     onComplete,
     planDay?.workoutType,
     t,
@@ -286,7 +320,7 @@ export function WorkoutLogger({
       >
         <button
           type="button"
-          onClick={onBack}
+          onClick={handleBack}
           className="flex items-center gap-1 text-sm font-medium"
           data-testid="back-button"
         >

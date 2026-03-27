@@ -7,6 +7,7 @@ import type {
   Workout,
   WorkoutSet,
   WeightEntry,
+  Exercise,
 } from '../features/fitness/types';
 
 export interface FitnessState {
@@ -18,6 +19,11 @@ export interface FitnessState {
   weightEntries: WeightEntry[];
   isOnboarded: boolean;
   workoutMode: 'strength' | 'cardio';
+  workoutDraft: {
+    exercises: Exercise[];
+    sets: WorkoutSet[];
+    elapsedSeconds: number;
+  } | null;
 
   setTrainingProfile: (profile: TrainingProfile) => void;
   addTrainingPlan: (plan: TrainingPlan) => void;
@@ -36,6 +42,8 @@ export interface FitnessState {
   removeWeightEntry: (id: string) => void;
   setOnboarded: (value: boolean) => void;
   setWorkoutMode: (mode: 'strength' | 'cardio') => void;
+  setWorkoutDraft: (draft: FitnessState['workoutDraft']) => void;
+  clearWorkoutDraft: () => void;
   getActivePlan: () => TrainingPlan | undefined;
   getLatestWeight: () => WeightEntry | undefined;
   getWorkoutsByDateRange: (startDate: string, endDate: string) => Workout[];
@@ -52,6 +60,7 @@ export const useFitnessStore = create<FitnessState>()(
       weightEntries: [],
       isOnboarded: false,
       workoutMode: 'strength',
+      workoutDraft: null,
 
       setTrainingProfile: (profile) => set({ trainingProfile: profile }),
 
@@ -134,6 +143,10 @@ export const useFitnessStore = create<FitnessState>()(
       setOnboarded: (value) => set({ isOnboarded: value }),
 
       setWorkoutMode: (mode) => set({ workoutMode: mode }),
+
+      setWorkoutDraft: (draft) => set({ workoutDraft: draft }),
+
+      clearWorkoutDraft: () => set({ workoutDraft: null }),
 
       getActivePlan: () =>
         get().trainingPlans.find((p) => p.status === 'active'),

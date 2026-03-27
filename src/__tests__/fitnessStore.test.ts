@@ -8,6 +8,7 @@ import type {
   Workout,
   WorkoutSet,
   WeightEntry,
+  Exercise,
 } from '../features/fitness/types';
 
 /* ------------------------------------------------------------------ */
@@ -22,6 +23,7 @@ const INITIAL_STATE = {
   weightEntries: [] as WeightEntry[],
   isOnboarded: false,
   workoutMode: 'strength' as const,
+  workoutDraft: null,
 };
 
 function resetStore() {
@@ -130,6 +132,7 @@ describe('fitnessStore', () => {
     expect(state.weightEntries).toEqual([]);
     expect(state.isOnboarded).toBe(false);
     expect(state.workoutMode).toBe('strength');
+    expect(state.workoutDraft).toBeNull();
   });
 
   /* ---------- setTrainingProfile ---------- */
@@ -408,5 +411,52 @@ describe('fitnessStore', () => {
   it('getWorkoutsByDateRange returns empty when no workouts exist', () => {
     const result = useFitnessStore.getState().getWorkoutsByDateRange('2025-01-01', '2025-12-31');
     expect(result).toEqual([]);
+  });
+
+  /* ---------- workoutDraft CRUD ---------- */
+  it('setWorkoutDraft stores draft', () => {
+    const draft = {
+      exercises: [] as Exercise[],
+      sets: [] as WorkoutSet[],
+      elapsedSeconds: 120,
+    };
+    useFitnessStore.getState().setWorkoutDraft(draft);
+    expect(useFitnessStore.getState().workoutDraft).toEqual(draft);
+  });
+
+  it('setWorkoutDraft overwrites previous draft', () => {
+    const first = {
+      exercises: [] as Exercise[],
+      sets: [] as WorkoutSet[],
+      elapsedSeconds: 60,
+    };
+    const second = {
+      exercises: [] as Exercise[],
+      sets: [] as WorkoutSet[],
+      elapsedSeconds: 300,
+    };
+    useFitnessStore.getState().setWorkoutDraft(first);
+    useFitnessStore.getState().setWorkoutDraft(second);
+    expect(useFitnessStore.getState().workoutDraft).toEqual(second);
+  });
+
+  it('clearWorkoutDraft sets draft to null', () => {
+    useFitnessStore.getState().setWorkoutDraft({
+      exercises: [] as Exercise[],
+      sets: [] as WorkoutSet[],
+      elapsedSeconds: 60,
+    });
+    useFitnessStore.getState().clearWorkoutDraft();
+    expect(useFitnessStore.getState().workoutDraft).toBeNull();
+  });
+
+  it('setWorkoutDraft accepts null', () => {
+    useFitnessStore.getState().setWorkoutDraft({
+      exercises: [] as Exercise[],
+      sets: [] as WorkoutSet[],
+      elapsedSeconds: 60,
+    });
+    useFitnessStore.getState().setWorkoutDraft(null);
+    expect(useFitnessStore.getState().workoutDraft).toBeNull();
   });
 });
