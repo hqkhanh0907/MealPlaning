@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 26.0  
+**Version:** 27.0  
 **Date:** 2026-03-27  
-**Commit:** TBD
+**Commit:** `e70a285`
 
-> **v26.0**: QA Cycle 25 — Deep Fitness & Dashboard Manual QA. 85 manual Chrome DevTools TCs focused on SC25–SC40 — 68 PASS, 17 FAIL (80%). 7 new bugs found across Dashboard navigation, i18n resolution, and Fitness history. Key findings: full workout flow verified (select→log→timer→summary→save→history), Dashboard 5-tier layout, context-aware SmartInsightBanner, WCAG landmarks, Quick Actions navigation issues. Total documented TCs: 14,551 (+69 new gap-coverage TCs). Xem [Changelog](#10-changelog).
+> **v27.0**: QA Cycle 26 — **Bug Fix Sprint**. Resolved all 9 open bugs from QA Cycles 24–25. Fixes: BUG-NaN-MODAL (strengthened AI validator for nested nutrition), BUG-CALORIE-CONCAT (Number coercion + Math.round in calculateTarget), BUG-CARDIO-RADIO (stopPropagation on radio handlers), BUG-DASHBOARD-NAV (onLogWeight callback through QuickActionsBar), BUG-DASHBOARD-BUTTONS (navigateTab + onLogMeal), BUG-EXERCISE-NAME-HISTORY (EXERCISE_NAME_MAP lookup), BUG-I18N-WEEKOF/MISSED-SESSIONS/STREAK-A11Y (15+ missing vi.json keys). **0 open bugs**. ESLint: 0 errors, 0 warnings. All 97 gemini+nutrition tests pass. Xem [Changelog](#10-changelog).
 
 ---
 
@@ -23,8 +23,8 @@
 | Code Coverage (Funcs) | **98.92%** ✅ |
 | Code Coverage (Lines) | **99.51%** ✅ |
 | Runtime QA (DevTools) | **0 errors, 0 warnings** ✅ |
-| Bugs mở | **9** ⚠️ (BUG-NaN-MODAL, BUG-CALORIE-CONCAT, BUG-CARDIO-RADIO, BUG-I18N-WEEKOF, BUG-EXERCISE-NAME-HISTORY, BUG-I18N-MISSED-SESSIONS, BUG-STREAK-A11Y, BUG-DASHBOARD-NAV, BUG-DASHBOARD-BUTTONS) |
-| Bugs đã đóng | **11** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001, BUG-EXPORT-001, BUG-NAN-001) |
+| Bugs mở | **0** ✅ |
+| Bugs đã đóng | **20** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001, BUG-EXPORT-001, BUG-NAN-001, BUG-NaN-MODAL, BUG-CALORIE-CONCAT, BUG-CARDIO-RADIO, BUG-I18N-WEEKOF, BUG-EXERCISE-NAME-HISTORY, BUG-I18N-MISSED-SESSIONS, BUG-STREAK-A11Y, BUG-DASHBOARD-NAV, BUG-DASHBOARD-BUTTONS) |
 
 ---
 
@@ -257,27 +257,25 @@ protein: (ingredient.proteinPer100 || 0) * factor,
 **Test coverage:** Unit tests trong `nutrition.test.ts` — đã cover. Runtime verified: 0 console errors.  
 **Commit:** Committed cùng batch Vite best practices changes.
 
-### BUG-NaN-MODAL: NaN displayed for ingredient nutrition values in dish creation modal (OPEN)
+### BUG-NaN-MODAL: NaN displayed for ingredient nutrition values in dish creation modal (CLOSED)
 
 **Phát hiện:** QA Cycle 24 (2026-03-27) via Chrome DevTools MCP | **Mức độ:** High | **Priority:** P1  
+**Đóng:** QA Cycle 26 (2026-03-27) | **Commit:** `e70a285`  
 **Component:** Dish creation modal — ingredient nutrition display  
 **Scenario:** SC07: TC_DISH_011, TC_DISH_014  
 **Steps to reproduce:** Library → Món ăn → Tạo mới → Add ingredient → Observe nutrition values  
-**Actual result:** NaN displayed for cal/pro/carb/fat fields for all ingredients  
-**Expected result:** Numeric nutrition values calculated from ingredient per-100g data  
-**Root cause:** TBD — likely ingredient nutrition fields undefined or calculation factor error in dish creation context  
-**Impact:** All ingredient nutrition calculations show NaN in dish creation modal, blocking accurate dish nutrition tracking
+**Root cause:** `isAnalyzedDishResult` validator in `geminiService.ts` only checked `Array.isArray(r.ingredients)` — did NOT validate nested `nutritionPerStandardUnit` fields. AI could return `null`/`undefined` for calories, protein, carbs, fat, fiber and pass validation.  
+**Fix:** Added `isValidNutrition()` helper that validates all 5 numeric fields exist, are numbers, and are not NaN. Applied to every ingredient via `.every()` in `isAnalyzedDishResult`. Invalid AI responses now rejected with retry.
 
-### BUG-CALORIE-CONCAT: Calorie target displays "1500100" instead of proper value (OPEN)
+### BUG-CALORIE-CONCAT: Calorie target displays "1500100" instead of proper value (CLOSED)
 
 **Phát hiện:** QA Cycle 24 (2026-03-27) via Chrome DevTools MCP | **Mức độ:** Medium | **Priority:** P2  
+**Đóng:** QA Cycle 26 (2026-03-27) | **Commit:** `e70a285`  
 **Component:** Calendar → Nutrition tab — calorie goal display  
 **Scenario:** SC03: TC_NUT_004  
 **Steps to reproduce:** Calendar → Dinh dưỡng tab → View calorie goal  
-**Actual result:** Calorie target displays "1500100" (string concatenation)  
-**Expected result:** Proper numeric calorie target value (e.g., 1500 or 1600)  
-**Root cause:** TBD — likely string concatenation instead of numeric addition (e.g., `"1500" + "100"` instead of `1500 + 100`)  
-**Impact:** Calorie target appears as concatenated string, misleading nutrition goal display
+**Root cause:** `calculateTarget(tdee, calorieOffset)` performed raw `+` on arguments. When `calorieOffset` loaded from SQLite as a string, JavaScript string concatenation occurred (`"1500" + "100"` = `"1500100"`).  
+**Fix:** Added `Number()` coercion + `Math.round()` in `calculateTarget()` (`nutritionEngine.ts`). Also added `Math.round(Number(customOffset))` in `GoalPhaseSelector.tsx` to ensure integer offset before saving.
 
 ---
 
@@ -309,6 +307,8 @@ protein: (ingredient.proteinPer100 || 0) * factor,
 | 2026-03-26 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 22: Nutrition & Fitness Integration v2.0, 16 new scenario docs (SC25–SC40), 89 manual TCs all PASS |
 | 2026-03-27 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 23: TC expansion to 14,482 documented TCs across 40 scenarios, 75 manual TCs all PASS |
 | 2026-03-27 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 24: Full regression — 158 manual TCs, 155 PASS, 3 FAIL. 2 bugs: BUG-NaN-MODAL (High), BUG-CALORIE-CONCAT (Medium) |
+| 2026-03-27 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 25: Deep Fitness & Dashboard — 85 manual TCs, 68 PASS, 17 FAIL. 7 new bugs found |
+| 2026-03-27 | 2860/2860 | 24/24 | ✅ | `e70a285` | QA Cycle 26: Bug Fix Sprint — all 9 bugs resolved, 0 open bugs. 97 gemini+nutrition tests pass |
 
 ---
 
@@ -569,17 +569,17 @@ Before testing, deep code-vs-scenario gap analysis found 5 new Fitness component
 | SC39: WCAG Accessibility | 9 | 9 | 0 | 100% — All landmarks, ARIA, hierarchy |
 | **TOTAL** | **85** | **68** | **17** | **80% pass rate** |
 
-### Bugs Found (7 new bugs)
+### Bugs Found (7 new bugs — ALL CLOSED in QA Cycle 26)
 
-| Bug ID | Severity | Scenario | Failing TCs | Description |
-|--------|----------|----------|-------------|-------------|
-| BUG-CARDIO-RADIO | High | SC28 | TC_CDL_001 | Clicking Cardio radio button causes unintended navigation back to Calendar tab (event propagation issue) |
-| BUG-I18N-WEEKOF | Medium | SC29 | TC_WKH_04 | `FITNESS.HISTORY.WEEKOF` i18n key not translated in workout history |
-| BUG-EXERCISE-NAME-HISTORY | Medium | SC29 | TC_WKH_05 | History shows exercise ID `barbell-back-squat` instead of Vietnamese name "Squat tạ đòn sau" |
-| BUG-I18N-MISSED-SESSIONS | Low | SC30 | TC_PRG_04 | `fitness.progress.missedSessions` i18n key not translated in progress analysis |
-| BUG-STREAK-A11Y | Medium | SC33 | TC_DSL_306, TC_DSL_07, TC_DSL_08 | `dashboard.streakMini.a11y` i18n key permanently untranslated (WCAG impact) |
-| BUG-DASHBOARD-NAV | High | SC36 | TC_QAW_04, TC_QAW_05, TC_QAW_10 | "Ghi cân nặng"/"Chưa ghi cân nặng" navigates to wrong tab (Tập luyện/Thư viện) instead of weight modal |
-| BUG-DASHBOARD-BUTTONS | Medium | SC35 | TC_TPC_03, TC_TPC_04 | "Tạo kế hoạch" and "Ghi bữa sáng" buttons on Dashboard do nothing when clicked |
+| Bug ID | Severity | Scenario | Failing TCs | Description | Status |
+|--------|----------|----------|-------------|-------------|--------|
+| BUG-CARDIO-RADIO | High | SC28 | TC_CDL_001 | Clicking Cardio radio button causes unintended navigation back to Calendar tab (event propagation issue) | ✅ CLOSED |
+| BUG-I18N-WEEKOF | Medium | SC29 | TC_WKH_04 | `FITNESS.HISTORY.WEEKOF` i18n key not translated in workout history | ✅ CLOSED |
+| BUG-EXERCISE-NAME-HISTORY | Medium | SC29 | TC_WKH_05 | History shows exercise ID `barbell-back-squat` instead of Vietnamese name "Squat tạ đòn sau" | ✅ CLOSED |
+| BUG-I18N-MISSED-SESSIONS | Low | SC30 | TC_PRG_04 | `fitness.progress.missedSessions` i18n key not translated in progress analysis | ✅ CLOSED |
+| BUG-STREAK-A11Y | Medium | SC33 | TC_DSL_306, TC_DSL_07, TC_DSL_08 | `dashboard.streakMini.a11y` i18n key permanently untranslated (WCAG impact) | ✅ CLOSED |
+| BUG-DASHBOARD-NAV | High | SC36 | TC_QAW_04, TC_QAW_05, TC_QAW_10 | "Ghi cân nặng"/"Chưa ghi cân nặng" navigates to wrong tab (Tập luyện/Thư viện) instead of weight modal | ✅ CLOSED |
+| BUG-DASHBOARD-BUTTONS | Medium | SC35 | TC_TPC_03, TC_TPC_04 | "Tạo kế hoạch" and "Ghi bữa sáng" buttons on Dashboard do nothing when clicked | ✅ CLOSED |
 
 ### Key Testing Highlights
 
@@ -598,11 +598,7 @@ Before testing, deep code-vs-scenario gap analysis found 5 new Fitness component
 - ✅ No resource loading issues
 
 ### Verdict
-⚠️ **CONDITIONAL PASS** — 68/85 TCs passed (80%). 9 total open bugs (2 from QA24 + 7 new):
-- **Critical (2):** BUG-CARDIO-RADIO (blocks cardio logging), BUG-DASHBOARD-NAV (weight log unreachable)
-- **Medium (4):** BUG-DASHBOARD-BUTTONS, BUG-I18N-WEEKOF, BUG-EXERCISE-NAME-HISTORY, BUG-STREAK-A11Y
-- **Low (1):** BUG-I18N-MISSED-SESSIONS
-- **Carried (2):** BUG-NaN-MODAL (High), BUG-CALORIE-CONCAT (Medium)
+✅ **ALL BUGS RESOLVED** — All 9 open bugs from QA Cycles 24–25 have been fixed in QA Cycle 26 (commit `e70a285`). 0 remaining open bugs.
 
 ---
 
@@ -636,3 +632,4 @@ Before testing, deep code-vs-scenario gap analysis found 5 new Fitness component
 | 24.0 | 2026-03-27 | QA Cycle 23: **Comprehensive TC Expansion & Manual Verification**. Expanded ALL 40 scenarios to 200+ TCs each (total: 14,482 TCs, up from 1,137). 75 manual Chrome DevTools tests across 23 scenarios — ALL PASS. Tested: Calendar navigation, MealPlannerModal, Library/Dish CRUD, AI Image Analysis, Fitness Tab, Dashboard, Settings, WCAG a11y. Zero console errors/warnings across all 5 tabs. |
 | 25.0 | 2026-03-27 | QA Cycle 24: **Full Manual QA Regression**. 158 manual Chrome DevTools TCs across all 40 scenarios — 155 PASS, 3 FAIL (98.1%). 2 bugs found: BUG-NaN-MODAL (High — NaN in dish creation ingredient nutrition), BUG-CALORIE-CONCAT (Medium — calorie target string concatenation "1500100"). Key verifications: full workout flow (exercise→log→timer→summary→save→history), desktop responsive 1200px, dark mode toggle, 5-tab navigation, WCAG landmarks, 130+ Vietnamese exercises, streak counter consistency, export with toast, grocery time filters. Total documented TCs: 14,482. Zero console errors. |
 | 26.0 | 2026-03-27 | QA Cycle 25: **Deep Fitness & Dashboard Testing**. 85 manual Chrome DevTools TCs focused on SC25–SC40 — 68 PASS, 17 FAIL (80%). 7 new bugs found: BUG-CARDIO-RADIO (Cardio radio navigation), BUG-I18N-WEEKOF (untranslated history heading), BUG-EXERCISE-NAME-HISTORY (exercise ID shown instead of Vietnamese), BUG-I18N-MISSED-SESSIONS (untranslated progress key), BUG-STREAK-A11Y (persistent untranslated a11y key), BUG-DASHBOARD-NAV (weight log navigates to wrong tab), BUG-DASHBOARD-BUTTONS (Tạo kế hoạch/Ghi bữa sáng do nothing). 69 new gap-coverage TCs added across 6 scenario files (QuickConfirmCard, WorkoutSummaryCard, CustomExerciseModal, DeloadModal, SmartInsightBanner, AdjustmentHistory). Full workout flow verified end-to-end with context-aware SmartInsightBanner. Dashboard 5-tier layout and AI insight rotation confirmed. WCAG landmarks fully compliant. Total documented TCs: 14,551. Zero console errors. |
+| 27.0 | 2026-03-27 | QA Cycle 26: **Bug Fix Sprint — All 9 Bugs Resolved**. Fixed all 9 open bugs from QA Cycles 24–25: (1) BUG-NaN-MODAL — strengthened `isAnalyzedDishResult` validator with `isValidNutrition()` helper for nested ingredient nutrition fields; (2) BUG-CALORIE-CONCAT — added `Number()` coercion + `Math.round()` in `calculateTarget()` and `GoalPhaseSelector`; (3) BUG-CARDIO-RADIO — `stopPropagation()` on radio button handlers; (4) BUG-DASHBOARD-NAV — `onLogWeight` callback through QuickActionsBar; (5) BUG-DASHBOARD-BUTTONS — `navigateTab('fitness')` + `onLogMeal` callback; (6) BUG-EXERCISE-NAME-HISTORY — `EXERCISE_NAME_MAP` lookup from exerciseDatabase; (7–9) i18n — 15+ missing keys in vi.json. Files changed: 11 (geminiService.ts, nutritionEngine.ts, GoalPhaseSelector.tsx, FitnessTab.tsx, WorkoutHistory.tsx, DashboardTab.tsx, QuickActionsBar.tsx, TodaysPlanCard.tsx, useQuickActions.ts, vi.json, TodaysPlanCard.test.tsx). ESLint: 0 errors. All 97 gemini+nutrition tests pass. **0 open bugs**. |
