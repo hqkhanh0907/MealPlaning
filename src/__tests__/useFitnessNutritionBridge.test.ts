@@ -14,7 +14,7 @@ describe('deriveInsight', () => {
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('deficit-on-training');
     expect((result as FitnessNutritionInsight).severity).toBe('warning');
-    expect((result as FitnessNutritionInsight).title).toContain('deficit');
+    expect((result as FitnessNutritionInsight).title).toContain('Thiếu hụt');
   });
 
   it('returns null on training day when calories are adequate', () => {
@@ -56,7 +56,7 @@ describe('deriveInsight', () => {
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('recovery-day');
     expect((result as FitnessNutritionInsight).severity).toBe('info');
-    expect((result as FitnessNutritionInsight).message).toContain('5 workouts');
+    expect((result as FitnessNutritionInsight).message).toContain('5 buổi tập');
   });
 
   it('returns null when everything is balanced', () => {

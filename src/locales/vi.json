@@ -690,6 +690,247 @@
       "isolationCategory": "Cô lập",
       "cardioCategory": "Cardio",
       "equipment": "Dụng cụ"
+    },
+    "plan": {
+      "tab": "Kế hoạch",
+      "noPlan": "Chưa có kế hoạch tập luyện",
+      "createPlan": "Tạo kế hoạch",
+      "todayWorkout": "Buổi tập hôm nay",
+      "tomorrow": "Ngày mai",
+      "exercises": "bài tập",
+      "startWorkout": "Bắt đầu tập",
+      "restDay": "Ngày nghỉ",
+      "restDayTip1": "Ngủ đủ 7-9 giờ để phục hồi cơ bắp",
+      "restDayTip2": "Uống đủ nước và ăn giàu protein",
+      "restDayTip3": "Có thể đi bộ nhẹ hoặc kéo giãn",
+      "logWeight": "Ghi cân nặng",
+      "logLightCardio": "Ghi cardio nhẹ",
+      "minutes": "phút"
+    },
+    "workout": {
+      "tab": "Buổi tập"
+    },
+    "history": {
+      "title": "Lịch sử",
+      "noHistory": "Chưa có lịch sử tập luyện",
+      "emptySubtitle": "Bắt đầu tập để xem lịch sử tại đây",
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "all": "Tất cả",
+      "strength": "Sức mạnh",
+      "cardio": "Cardio",
+      "volume": "Khối lượng",
+      "minutes": "phút",
+      "completedAt": "Hoàn thành lúc"
+    },
+    "progress": {
+      "title": "Tiến trình",
+      "noData": "Chưa có dữ liệu",
+      "startTraining": "Bắt đầu tập luyện để theo dõi tiến trình",
+      "volumeThisWeek": "Khối lượng tuần này",
+      "sessions": "buổi tập",
+      "adherence": "Tuân thủ",
+      "cycleProgress": "Tiến trình chu kỳ",
+      "estimated1rm": "1RM ước tính",
+      "insights": "Phân tích",
+      "dismiss": "Bỏ qua",
+      "weight": "Cân nặng"
+    },
+    "cardio": {
+      "title": "Cardio",
+      "type": "Loại cardio",
+      "duration": "Thời lượng (phút)",
+      "distance": "Khoảng cách (km)",
+      "heartRate": "Nhịp tim",
+      "calories": "Calories đốt",
+      "intensity": "Cường độ",
+      "start": "Bắt đầu",
+      "stop": "Dừng",
+      "pause": "Tạm dừng",
+      "save": "Lưu",
+      "manual": "Nhập thủ công",
+      "stopwatch": "Đồng hồ bấm giờ"
+    },
+    "editor": {
+      "title": "Chỉnh sửa set",
+      "weight": "Cân nặng (kg)",
+      "kg": "kg",
+      "reps": "Số lần",
+      "rpe": "RPE",
+      "recentWeights": "Cân nặng gần đây",
+      "save": "Lưu",
+      "cancel": "Hủy"
+    },
+    "gamification": {
+      "streak": "Chuỗi ngày tập",
+      "longestStreak": "Chuỗi dài nhất",
+      "streakAtRisk": "Chuỗi sắp mất!",
+      "milestones": "Cột mốc",
+      "nextMilestone": "Cột mốc tiếp theo",
+      "achieved": "Đã đạt",
+      "newPR": "Kỷ lục mới!"
+    },
+    "timer": {
+      "rest": "Nghỉ giữa set",
+      "skip": "Bỏ qua",
+      "addTime": "Thêm thời gian"
+    },
+    "weight": {
+      "todayWeight": "Cân nặng hôm nay",
+      "selectWeight": "Chọn cân nặng",
+      "kg": "kg",
+      "saved": "Đã lưu",
+      "trend": "Xu hướng",
+      "avg7d": "TB 7 ngày",
+      "yesterday": "Hôm qua",
+      "quickLogTitle": "Ghi nhanh cân nặng",
+      "savedWeight": "Đã lưu cân nặng",
+      "undoAction": "Hoàn tác"
+    },
+    "quickConfirm": {
+      "title": "Gợi ý buổi tập"
+    },
+    "insight": {
+      "deficitTitle": "Thiếu hụt năng lượng ngày tập",
+      "deficitMessage": "Bạn mới nạp {{consumed}} kcal — dưới 75% ngân sách {{budget}} kcal. Hãy nạp thêm năng lượng!",
+      "proteinTitle": "Protein đang thấp",
+      "proteinMessage": "Đã nạp {{consumed}}g / mục tiêu {{target}}g. Ưu tiên thực phẩm giàu protein.",
+      "recoveryTitle": "Ngày nghỉ phục hồi",
+      "recoveryMessage": "{{count}} buổi tập tuần này — hãy nghỉ ngơi và ăn đủ dinh dưỡng."
     }
+  },
+  "dashboard": {
+    "hero": {
+      "firstTime": {
+        "title": "Bắt đầu hành trình sức khỏe",
+        "step1": "Thiết lập hồ sơ dinh dưỡng",
+        "step2": "Lên kế hoạch bữa ăn đầu tiên",
+        "step3": "Ghi nhận buổi tập luyện",
+        "a11y": "Hướng dẫn bắt đầu"
+      },
+      "partialData": "Một số dữ liệu chưa đầy đủ"
+    },
+    "error": {
+      "hero": "Không thể tải tổng quan",
+      "energy": "Không thể tải năng lượng",
+      "plan": "Không thể tải kế hoạch",
+      "insight": "Không thể tải phân tích",
+      "quickActions": "Không thể tải thao tác nhanh"
+    },
+    "todaysPlan": {
+      "title": "Kế hoạch hôm nay",
+      "noPlan": "Chưa có kế hoạch tập luyện",
+      "createPlan": "Tạo kế hoạch",
+      "startCta": "Bắt đầu tập",
+      "workout": "Buổi tập",
+      "completed": "Hoàn thành",
+      "meals": "Bữa ăn",
+      "mealsReachedTarget": "Đã đạt mục tiêu bữa ăn",
+      "logBreakfast": "Ghi bữa sáng",
+      "logWeight": "Ghi cân nặng",
+      "logCardio": "Ghi cardio",
+      "mealsProgress": "Tiến trình bữa ăn",
+      "restDayTitle": "Ngày nghỉ phục hồi",
+      "recoveryTip1": "Ngủ đủ giấc và uống đủ nước",
+      "recoveryTip2": "Ăn giàu protein để phục hồi cơ",
+      "tomorrowRest": "Ngày mai nghỉ",
+      "prHighlight": "Kỷ lục cá nhân mới!"
+    },
+    "weightMini": {
+      "noData": "Chưa có dữ liệu cân nặng",
+      "logFirst": "Ghi cân nặng đầu tiên",
+      "unit": "kg",
+      "onTrack": "Đúng tiến độ",
+      "stable": "Ổn định",
+      "gainingFast": "Tăng nhanh",
+      "needsAdjust": "Cần điều chỉnh",
+      "a11yEmpty": "Chưa ghi cân nặng"
+    },
+    "streakMini": {
+      "noData": "Chưa có chuỗi tập",
+      "startFirst": "Bắt đầu tập để tạo chuỗi",
+      "a11yEmpty": "Chưa có chuỗi tập luyện"
+    }
+  },
+  "nutrition": {
+    "caloriesIn": "Nạp vào",
+    "caloriesOut": "Tiêu hao",
+    "netCalories": "Cân bằng",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Chất béo",
+    "energyBalance": "Cân bằng năng lượng",
+    "kcal": "kcal",
+    "grams": "g",
+    "target": "Mục tiêu",
+    "remaining": "Còn lại",
+    "proteinGoalMet": "Đã đạt mục tiêu protein!",
+    "proteinNearGoal": "Gần đạt mục tiêu protein",
+    "proteinNeedSignificant": "Cần bổ sung thêm protein",
+    "proteinSuggestion": "Gợi ý: thêm thịt, trứng, đậu"
+  },
+  "quickActions": {
+    "ariaLabel": "Thao tác nhanh",
+    "logWeight": "Ghi cân nặng",
+    "logBreakfast": "Ghi bữa sáng",
+    "logLunch": "Ghi bữa trưa",
+    "logDinner": "Ghi bữa tối",
+    "logMeal": "Ghi bữa ăn",
+    "logCardio": "Ghi cardio",
+    "startWorkout": "Bắt đầu tập",
+    "addSnack": "Thêm snack",
+    "viewResults": "Xem kết quả"
+  },
+  "action": {
+    "undo": "Hoàn tác"
+  },
+  "adjustBanner": {
+    "title": "Đề xuất điều chỉnh",
+    "apply": "Áp dụng",
+    "dismiss": "Bỏ qua",
+    "ariaLabel": "Banner đề xuất điều chỉnh",
+    "directionIncrease": "Tăng",
+    "directionDecrease": "Giảm"
+  },
+  "adjustmentHistory": {
+    "title": "Lịch sử điều chỉnh",
+    "ariaLabel": "Lịch sử các điều chỉnh dinh dưỡng",
+    "applied": "Đã áp dụng",
+    "declined": "Đã từ chối",
+    "auto": "Tự động",
+    "manual": "Thủ công",
+    "noData": "Chưa có điều chỉnh nào"
+  },
+  "goal": {
+    "title": "Mục tiêu",
+    "targetWeight": "Cân nặng mục tiêu",
+    "targetWeightOptional": "Cân nặng mục tiêu (tùy chọn)",
+    "rateOfChange": "Tốc độ thay đổi",
+    "calorieOffset": "Chênh lệch calories",
+    "calorieOffsetAuto": "Tự động",
+    "calorieOffsetCustom": "Tùy chỉnh",
+    "save": "Lưu",
+    "saved": "Đã lưu"
+  },
+  "healthProfile": {
+    "title": "Hồ sơ sức khỏe",
+    "age": "Tuổi",
+    "gender": "Giới tính",
+    "height": "Chiều cao (cm)",
+    "weight": "Cân nặng (kg)",
+    "bodyFat": "Tỉ lệ mỡ cơ thể (%)",
+    "bodyFatOptional": "Tỉ lệ mỡ (tùy chọn)",
+    "activityLevel": "Mức độ vận động",
+    "bmr": "BMR",
+    "bmrAuto": "Tự động tính",
+    "bmrCustom": "Nhập thủ công",
+    "tdee": "TDEE",
+    "proteinRatio": "Tỉ lệ protein (g/kg)",
+    "macroPreview": "Xem trước macros",
+    "save": "Lưu",
+    "saved": "Đã lưu"
+  },
+  "insightCard": {
+    "dismiss": "Bỏ qua"
   }
 }

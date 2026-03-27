@@ -43,8 +43,8 @@ export function deriveInsight(
   if (isTrainingDay && todayCaloriesConsumed < todayCalorieBudget * 0.75) {
     return {
       type: 'deficit-on-training',
-      title: 'Calorie deficit on training day',
-      message: `You've consumed ${Math.round(todayCaloriesConsumed)} kcal — below 75% of your ${Math.round(todayCalorieBudget)} kcal budget. Fuel your workout!`,
+      title: 'Thiếu hụt năng lượng ngày tập',
+      message: `Bạn mới nạp ${Math.round(todayCaloriesConsumed)} kcal — dưới 75% ngân sách ${Math.round(todayCalorieBudget)} kcal. Hãy nạp thêm năng lượng!`,
       severity: 'warning',
     };
   }
@@ -52,8 +52,8 @@ export function deriveInsight(
   if (proteinTarget > 0 && todayProteinConsumed < proteinTarget * 0.6) {
     return {
       type: 'protein-low',
-      title: 'Protein intake is low',
-      message: `${Math.round(todayProteinConsumed)}g consumed vs ${Math.round(proteinTarget)}g target. Prioritize protein-rich foods.`,
+      title: 'Protein đang thấp',
+      message: `Đã nạp ${Math.round(todayProteinConsumed)}g / mục tiêu ${Math.round(proteinTarget)}g. Ưu tiên thực phẩm giàu protein.`,
       severity: 'warning',
     };
   }
@@ -61,8 +61,8 @@ export function deriveInsight(
   if (!isTrainingDay && weeklyTrainingLoad >= 4) {
     return {
       type: 'recovery-day',
-      title: 'Recovery day',
-      message: `${weeklyTrainingLoad} workouts this week — rest well and keep nutrition on track.`,
+      title: 'Ngày nghỉ phục hồi',
+      message: `${weeklyTrainingLoad} buổi tập tuần này — hãy nghỉ ngơi và ăn đủ dinh dưỡng.`,
       severity: 'info',
     };
   }
