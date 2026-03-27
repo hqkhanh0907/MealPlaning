@@ -6,6 +6,7 @@ import { ExerciseSelector } from './ExerciseSelector';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EXERCISES } from '../data/exerciseDatabase';
 import { formatElapsed } from '../utils/timeFormat';
+import { safeJsonParse } from '../utils/safeJsonParse';
 import type { ExerciseSeed } from '../data/exerciseDatabase';
 import type {
   Exercise,
@@ -57,12 +58,8 @@ function seedToExercise(seed: ExerciseSeed): Exercise {
 
 function resolveExercises(exercisesJson?: string): Exercise[] {
   if (!exercisesJson) return [];
-  try {
-    const ids = JSON.parse(exercisesJson) as string[];
-    return EXERCISES.filter((e) => ids.includes(e.id)).map(seedToExercise);
-  } catch {
-    return [];
-  }
+  const ids = safeJsonParse<string[]>(exercisesJson, []);
+  return EXERCISES.filter((e) => ids.includes(e.id)).map(seedToExercise);
 }
 
 export function WorkoutLogger({

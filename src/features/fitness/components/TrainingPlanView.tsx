@@ -7,6 +7,7 @@ import { DailyWeightInput } from './DailyWeightInput';
 import { StreakCounter } from './StreakCounter';
 import type { SelectedExercise, TrainingPlanDay } from '../types';
 import { DAY_LABELS } from '../constants';
+import { safeJsonParse } from '../utils/safeJsonParse';
 
 interface TrainingPlanViewProps {
   onGeneratePlan: () => void;
@@ -14,11 +15,7 @@ interface TrainingPlanViewProps {
 
 function parseExercises(exercises?: string): SelectedExercise[] {
   if (!exercises) return [];
-  try {
-    return JSON.parse(exercises) as SelectedExercise[];
-  } catch {
-    return [];
-  }
+  return safeJsonParse<SelectedExercise[]>(exercises, []);
 }
 
 function estimateDuration(exercises: SelectedExercise[]): number {
