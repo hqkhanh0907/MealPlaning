@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-This design covers the systematic implementation of 32 fixes for the fitness module, derived from the deep analysis in `fitness-module-solutions-spec.md`. Each fix uses the recommended ("⭐") solution identified in that document.
+This design covers the systematic implementation of 32 fixes for the fitness module, derived from the deep analysis in `fitness-module-solutions-spec.md`. Each fix uses the recommended ("⭐") solution unless noted otherwise (e.g., ONBOARD-03 uses S2 Back/Next wizard instead of S1 single-page form — lower complexity, better incremental UX).
 
 **Architecture constraints:**
 - Follow existing feature-based structure under `src/features/fitness/`
@@ -201,6 +201,7 @@ This design covers the systematic implementation of 32 fixes for the fitness mod
 ### G-02: Quick Confirm Card
 - **New file:** `src/features/fitness/components/QuickConfirmCard.tsx`
 - **Change:** Show suggested workout based on training plan + last session. "Start" button pre-fills WorkoutLogger, "Edit" opens blank logger
+- **Depends on:** G-06 (uses progressive overload data for suggestions) — must be sequential within Phase 6
 - **Test:** Suggestion accuracy, pre-fill data matches plan
 
 ### G-04/G-05: Exercise DB + Custom Exercise
@@ -213,10 +214,11 @@ This design covers the systematic implementation of 32 fixes for the fitness mod
 - **Change:** Import `useProgressiveOverload`, show inline suggestions ("+2.5kg from last session") next to each exercise
 - **Test:** Suggestion shows when previous data exists, hidden when no history
 
-### G-07: Nutrition integration bridge
-- **New file:** `src/features/fitness/hooks/useFitnessNutritionBridge.ts`
-- **Change:** Hook that reads nutrition state (calorie surplus/deficit) and adjusts workout intensity suggestions. Show `SmartInsightBanner` with nutrition-aware tips
-- **Depends on:** G-06
+### G-07: Nutrition integration bridge + SmartInsightBanner
+- **New files:** `src/features/fitness/hooks/useFitnessNutritionBridge.ts`, `src/features/fitness/components/SmartInsightBanner.tsx`
+- **Change:** Hook that reads nutrition state (calorie surplus/deficit) and adjusts workout intensity suggestions. `SmartInsightBanner` component shows overload tips + nutrition-aware insights
+- **Depends on:** G-06, §4 Nutrition Engine (already implemented at 100%)
+- **Note:** This corresponds to PR2+PR3 from the solutions spec 3-PR roadmap
 - **Test:** Deficit state → suggest lower volume, surplus → suggest progressive overload
 
 ---
@@ -254,3 +256,5 @@ This design covers the systematic implementation of 32 fixes for the fitness mod
 | Parallel fixes in same file conflict | Compatibility matrix enforced (§9 of solutions spec) |
 | Coverage drops during refactor | Run coverage after every single task, block if <100% on changed files |
 | Timer hook breaks CardioLogger UX | Manual smoke test after CARDIO-01 |
+| G-07 nutrition engine dependency | §4 Nutrition Engine already at 100% — verify API contract before starting |
+| Phase 6 internal ordering | G-06 → G-02 → G-07 must be sequential (not parallel) |
