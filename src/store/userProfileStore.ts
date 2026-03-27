@@ -5,12 +5,17 @@ const STORAGE_KEY = 'mp-user-profile';
 
 export const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetCalories: 1500 };
 
-/** Coerce all numeric fields so string values from localStorage are safe. */
+/** Coerce all numeric fields so string values from localStorage are safe.
+ *  Also clamp targetCalories to a sane range (500–10000) to auto-repair
+ *  corrupted data from the old string-concatenation bug (e.g. "1500100"). */
 function coerceNumericFields(raw: UserProfile): UserProfile {
+  const calories = Number(raw.targetCalories);
   return {
     weight: Number(raw.weight),
     proteinRatio: Number(raw.proteinRatio),
-    targetCalories: Number(raw.targetCalories),
+    targetCalories: calories > 10000 || calories < 500 || Number.isNaN(calories)
+      ? DEFAULT_USER_PROFILE.targetCalories
+      : calories,
   };
 }
 
