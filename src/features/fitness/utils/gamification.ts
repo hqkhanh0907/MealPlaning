@@ -1,0 +1,258 @@
+import type { Workout, WorkoutSet } from '../types';
+
+// ===== Interfaces =====
+
+export interface StreakInfo {
+  currentStreak: number;
+  longestStreak: number;
+  weekDots: Array<{
+    day: number;
+    status: 'completed' | 'rest' | 'missed' | 'today' | 'upcoming';
+  }>;
+  gracePeriodUsed: boolean;
+  streakAtRisk: boolean;
+}
+
+export interface Milestone {
+  id: string;
+  emoji: string;
+  label: string;
+  threshold: number;
+  type: 'sessions' | 'streak';
+  achievedDate?: string;
+}
+
+export interface PRDetection {
+  exerciseId: string;
+  exerciseName: string;
+  newWeight: number;
+  previousWeight: number;
+  reps: number;
+  improvement: number;
+}
+
+// ===== Constants =====
+
+export const MILESTONES: Milestone[] = [
+  { id: 'sessions-1', emoji: '🥇', label: 'sessions1', threshold: 1, type: 'sessions' },
+  { id: 'sessions-10', emoji: '💪', label: 'sessions10', threshold: 10, type: 'sessions' },
+  { id: 'sessions-25', emoji: '⚡', label: 'sessions25', threshold: 25, type: 'sessions' },
+  { id: 'sessions-50', emoji: '🔥', label: 'sessions50', threshold: 50, type: 'sessions' },
+  { id: 'sessions-100', emoji: '💎', label: 'sessions100', threshold: 100, type: 'sessions' },
+  { id: 'streak-7', emoji: '📅', label: 'streak7', threshold: 7, type: 'streak' },
+  { id: 'streak-14', emoji: '🌟', label: 'streak14', threshold: 14, type: 'streak' },
+  { id: 'streak-30', emoji: '🦁', label: 'streak30', threshold: 30, type: 'streak' },
+  { id: 'streak-60', emoji: '👑', label: 'streak60', threshold: 60, type: 'streak' },
+  { id: 'streak-90', emoji: '🏆', label: 'streak90', threshold: 90, type: 'streak' },
+];
+
+// ===== Date Helpers =====
+
+function formatDate(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseDate(dateStr: string): Date {
+  const raw = dateStr.split('T')[0];
+  const parts = raw.split('-');
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+}
+
+function getDayOfWeek(dateStr: string): number {
+  const day = parseDate(dateStr).getDay();
+  return day === 0 ? 7 : day;
+}
+
+function addDays(dateStr: string, n: number): string {
+  const d = parseDate(dateStr);
+  d.setDate(d.getDate() + n);
+  return formatDate(d);
+}
+
+function getMondayOfWeek(dateStr: string): string {
+  const d = parseDate(dateStr);
+  const day = d.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate() - diff);
+  return formatDate(d);
+}
+
+function dateDiff(from: string, to: string): number {
+  return Math.round(
+    (parseDate(to).getTime() - parseDate(from).getTime()) / 86400000,
+  );
+}
+
+// ===== Core Functions =====
+
+export function calculateStreak(
+  workouts: Workout[],
+  planDays: number[],
+  today?: string,
+): StreakInfo {
+  const todayStr = today ?? formatDate(new Date());
+  const workoutDates = new Set(workouts.map((w) => w.date.split('T')[0]));
+  const planDaySet = new Set(planDays);
+  const hasPlan = planDaySet.size > 0;
+
+  // Weekly dots (Mon–Sun)
+  const monday = getMondayOfWeek(todayStr);
+  const weekDots: StreakInfo['weekDots'] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(monday, i);
+    const dow = i + 1;
+    if (d === todayStr) {
+      weekDots.push({ day: dow, status: 'today' });
+    } else if (d > todayStr) {
+      weekDots.push({ day: dow, status: 'upcoming' });
+    } else if (workoutDates.has(d)) {
+      weekDots.push({ day: dow, status: 'completed' });
+    } else if (hasPlan && !planDaySet.has(dow)) {
+      weekDots.push({ day: dow, status: 'rest' });
+    } else {
+      weekDots.push({ day: dow, status: 'missed' });
+    }
+  }
+
+  if (workouts.length === 0) {
+    return {
+      currentStreak: 0,
+      longestStreak: 0,
+      weekDots,
+      gracePeriodUsed: false,
+      streakAtRisk: false,
+    };
+  }
+
+  // --- Current streak (backward from today) ---
+  let currentStreak = 0;
+  let graceUsed = false;
+  let atRisk = false;
+
+  for (let i = 0; i <= 365; i++) {
+    const d = addDays(todayStr, -i);
+    const dow = getDayOfWeek(d);
+    const hasWorkout = workoutDates.has(d);
+
+    if (hasPlan) {
+      const isRestDay = !planDaySet.has(dow);
+      if (hasWorkout || isRestDay) {
+        currentStreak++;
+      } else if (d === todayStr) {
+        // Today is planned but no workout yet — don't penalize
+      } else if (!graceUsed) {
+        graceUsed = true;
+        atRisk = true;
+      } else {
+        break;
+      }
+    } else {
+      if (hasWorkout) {
+        currentStreak++;
+      } else if (d === todayStr) {
+        // No plan, no workout today — skip
+      } else {
+        break;
+      }
+    }
+  }
+
+  // --- Longest streak (forward scan) ---
+  let longestStreak = 0;
+  const sorted = [...workoutDates].sort();
+  const earliest = sorted[0];
+  const totalDays = dateDiff(earliest, todayStr);
+  let tempStreak = 0;
+  let tempGrace = false;
+
+  for (let i = 0; i <= totalDays; i++) {
+    const d = addDays(earliest, i);
+    const dow = getDayOfWeek(d);
+    const hasWorkout = workoutDates.has(d);
+
+    if (hasPlan) {
+      const isRestDay = !planDaySet.has(dow);
+      if (hasWorkout || isRestDay) {
+        tempStreak++;
+      } else if (d === todayStr) {
+        // skip today — day not over
+      } else if (!tempGrace) {
+        tempGrace = true;
+      } else {
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 0;
+        tempGrace = false;
+      }
+    } else {
+      if (hasWorkout) {
+        tempStreak++;
+      } else if (d === todayStr) {
+        // skip today
+      } else {
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 0;
+      }
+    }
+  }
+  longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
+
+  return {
+    currentStreak,
+    longestStreak,
+    weekDots,
+    gracePeriodUsed: graceUsed,
+    streakAtRisk: atRisk,
+  };
+}
+
+export function checkMilestones(
+  totalSessions: number,
+  longestStreak: number,
+): Milestone[] {
+  const today = formatDate(new Date());
+  return MILESTONES.map((m) => {
+    const value = m.type === 'sessions' ? totalSessions : longestStreak;
+    return {
+      ...m,
+      achievedDate: value >= m.threshold ? today : undefined,
+    };
+  });
+}
+
+export function detectPRs(
+  currentSets: WorkoutSet[],
+  allPreviousSets: WorkoutSet[],
+  exercises: Map<string, string>,
+): PRDetection[] {
+  const prs: PRDetection[] = [];
+  const seen = new Set<string>();
+
+  for (const set of currentSets) {
+    if (seen.has(set.exerciseId) || !set.reps || set.weightKg <= 0) {
+      continue;
+    }
+
+    const prevForExercise = allPreviousSets.filter(
+      (s) => s.exerciseId === set.exerciseId && s.reps === set.reps,
+    );
+    if (prevForExercise.length === 0) continue;
+
+    const previousMax = Math.max(...prevForExercise.map((s) => s.weightKg));
+    if (set.weightKg > previousMax) {
+      seen.add(set.exerciseId);
+      prs.push({
+        exerciseId: set.exerciseId,
+        exerciseName: exercises.get(set.exerciseId) ?? set.exerciseId,
+        newWeight: set.weightKg,
+        previousWeight: previousMax,
+        reps: set.reps,
+        improvement: set.weightKg - previousMax,
+      });
+    }
+  }
+
+  return prs;
+}
