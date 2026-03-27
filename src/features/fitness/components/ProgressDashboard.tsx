@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateWeeklyVolume, estimate1RM } from '../utils/trainingMetrics';
+import { getWeekBounds } from '../utils/dateUtils';
 
 type MetricCardType = 'weight' | '1rm' | 'adherence' | 'sessions';
 type TimeRange = '1W' | '1M' | '3M' | 'all';
@@ -32,21 +33,6 @@ function getCutoffDate(range: TimeRange): string {
   const d = new Date();
   d.setDate(d.getDate() - daysMap[range]);
   return d.toISOString().split('T')[0];
-}
-
-function getWeekBounds(offset: number): { start: string; end: string } {
-  const now = new Date();
-  const day = now.getDay();
-  const diffToMonday = (day + 6) % 7;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - diffToMonday + offset * 7);
-  monday.setHours(0, 0, 0, 0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  return {
-    start: monday.toISOString().split('T')[0],
-    end: sunday.toISOString().split('T')[0],
-  };
 }
 
 function SimpleBarChart({ data }: { data: number[] }) {

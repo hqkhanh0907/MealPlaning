@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateExerciseVolume } from '../utils/trainingMetrics';
+import { parseDate, getMondayOfWeek } from '../utils/dateUtils';
 import type { Workout, WorkoutSet } from '../types';
 import { DAY_LABELS_SUNDAY_FIRST } from '../constants';
 
@@ -24,12 +25,7 @@ function getRelativeDate(
   dateStr: string,
   t: (key: string, opts?: Record<string, unknown>) => string,
 ): string {
-  const parts = dateStr.split('-');
-  const target = new Date(
-    Number(parts[0]),
-    Number(parts[1]) - 1,
-    Number(parts[2]),
-  );
+  const target = parseDate(dateStr);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const diffDays = Math.floor(
@@ -41,37 +37,19 @@ function getRelativeDate(
   if (diffDays >= 2 && diffDays <= 6)
     return t('fitness.history.daysAgo', { count: diffDays });
 
+  const parts = dateStr.split('-');
   const dayName = DAY_LABELS_SUNDAY_FIRST[target.getDay()];
   return `${dayName}, ${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-function getMondayOfWeek(dateStr: string): Date {
-  const parts = dateStr.split('-');
-  const date = new Date(
-    Number(parts[0]),
-    Number(parts[1]) - 1,
-    Number(parts[2]),
-  );
-  const day = date.getDay();
-  const diff = day === 0 ? 6 : day - 1;
-  const monday = new Date(date);
-  monday.setDate(monday.getDate() - diff);
-  return monday;
-}
-
 function getWeekKey(dateStr: string): string {
-  const monday = getMondayOfWeek(dateStr);
-  const y = monday.getFullYear();
-  const m = String(monday.getMonth() + 1).padStart(2, '0');
-  const d = String(monday.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return getMondayOfWeek(dateStr);
 }
 
 function getWeekLabel(dateStr: string): string {
   const monday = getMondayOfWeek(dateStr);
-  const dd = String(monday.getDate()).padStart(2, '0');
-  const mm = String(monday.getMonth() + 1).padStart(2, '0');
-  return `${dd}/${mm}`;
+  const parts = monday.split('-');
+  return `${parts[2]}/${parts[1]}`;
 }
 
 function formatCompletionTime(isoStr: string): string {
