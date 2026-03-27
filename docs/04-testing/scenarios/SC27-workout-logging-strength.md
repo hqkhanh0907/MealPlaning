@@ -112,158 +112,158 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 | TC_WLS_056 | Search partial text "gáy" → tìm thấy exercises chứa "gáy" | Positive | P1 |
 | TC_WLS_057 | Search Vietnamese diacritics "đẩy" → match chính xác | Positive | P1 |
 | TC_WLS_058 | Search English name "bench press" | Positive | P1 |
-| TC_WLS_059 | Search case-insensitive "SQUAT" | Positive | P1 |
-| TC_WLS_060 | Search with spaces " squat " → trimmed | Edge | P2 |
-| TC_WLS_061 | Search empty string → tất cả exercises hiển thị | Positive | P1 |
-| TC_WLS_062 | Search "xyznonexistent" → empty state | Negative | P1 |
+| TC_WLS_059 | Search case-insensitive "SQUAT" | Edge | P2 |
+| TC_WLS_060 | Search with spaces " squat " → trimmed | Edge | P3 |
+| TC_WLS_061 | Search empty string → tất cả exercises hiển thị | Boundary | P2 |
+| TC_WLS_062 | Search "xyznonexistent" → empty state | Negative | P2 |
 | TC_WLS_063 | Search + filter chest → chỉ chest exercises match "đẩy" | Positive | P1 |
-| TC_WLS_064 | Search + filter back | Positive | P2 |
-| TC_WLS_065 | Search + filter legs | Positive | P2 |
-| TC_WLS_066 | Filter muscle group: Ngực (chest) | Positive | P2 |
-| TC_WLS_067 | Filter muscle group: Lưng (back) | Positive | P2 |
-| TC_WLS_068 | Filter muscle group: Vai (shoulders) | Positive | P2 |
-| TC_WLS_069 | Filter muscle group: Chân (legs) | Positive | P2 |
-| TC_WLS_070 | Filter muscle group: Tay (arms) | Positive | P2 |
-| TC_WLS_071 | Filter muscle group: Bụng (core) | Positive | P2 |
-| TC_WLS_072 | Filter muscle group: Mông (glutes) | Positive | P2 |
-| TC_WLS_073 | Clear search → full list restored | Positive | P2 |
+| TC_WLS_064 | Search + filter back | Negative | P2 |
+| TC_WLS_065 | Search + filter legs | Negative | P2 |
+| TC_WLS_066 | Filter muscle group: Ngực (chest) | Negative | P2 |
+| TC_WLS_067 | Filter muscle group: Lưng (back) | Negative | P2 |
+| TC_WLS_068 | Filter muscle group: Vai (shoulders) | Negative | P3 |
+| TC_WLS_069 | Filter muscle group: Chân (legs) | Negative | P2 |
+| TC_WLS_070 | Filter muscle group: Tay (arms) | Negative | P3 |
+| TC_WLS_071 | Filter muscle group: Bụng (core) | Edge | P3 |
+| TC_WLS_072 | Filter muscle group: Mông (glutes) | Edge | P3 |
+| TC_WLS_073 | Clear search → full list restored | Edge | P3 |
 | TC_WLS_074 | Search: type rồi xóa từng ký tự | Edge | P3 |
-| TC_WLS_075 | Search special chars "%" → không crash | Edge | P2 |
+| TC_WLS_075 | Search special chars "%" → không crash | Negative | P2 |
 | TC_WLS_076 | Filter "all" → shows everything | Positive | P1 |
-| TC_WLS_077 | Switch specific group về "all" | Positive | P2 |
+| TC_WLS_077 | Switch specific group về "all" | Edge | P2 |
 | TC_WLS_078 | Switch nhanh 7 muscle groups | Edge | P2 |
-| TC_WLS_079 | Equipment filter: barbell only | Positive | P2 |
-| TC_WLS_080 | Equipment filter: bodyweight only | Positive | P2 |
-| TC_WLS_081 | Equipment filter: multiple | Positive | P2 |
+| TC_WLS_079 | Equipment filter: barbell only | Negative | P2 |
+| TC_WLS_080 | Equipment filter: bodyweight only | Negative | P2 |
+| TC_WLS_081 | Equipment filter: multiple | Edge | P3 |
 | TC_WLS_082 | Combined: search + muscleGroup + equipment | Positive | P1 |
-| TC_WLS_083 | Filter → no results → empty state | Negative | P1 |
+| TC_WLS_083 | Filter → no results → empty state | Negative | P2 |
 | TC_WLS_084 | Select exercise → selector đóng | Positive | P0 |
-| TC_WLS_085 | Select exercise → close callback | Positive | P1 |
-| TC_WLS_086 | Modal backdrop click → đóng | Positive | P1 |
-| TC_WLS_087 | Back gesture → đóng selector | Positive | P2 |
-| TC_WLS_088 | Drag handle visible | Positive | P3 |
-| TC_WLS_089 | Exercise item: nameVi, group, category, equipment | Positive | P1 |
-| TC_WLS_090 | ExerciseSelector isOpen=false → null | Negative | P1 |
+| TC_WLS_085 | Select exercise → close callback | Negative | P2 |
+| TC_WLS_086 | Modal backdrop click → đóng | Negative | P2 |
+| TC_WLS_087 | Back gesture → đóng selector | Negative | P2 |
+| TC_WLS_088 | Drag handle visible | Edge | P3 |
+| TC_WLS_089 | Exercise item: nameVi, group, category, equipment | Negative | P2 |
+| TC_WLS_090 | ExerciseSelector isOpen=false → null | Edge | P3 |
 | TC_WLS_091 | Weight = 0 (min boundary) | Boundary | P1 |
-| TC_WLS_092 | Weight = 2.5 | Positive | P2 |
+| TC_WLS_092 | Weight = 2.5 | Boundary | P2 |
 | TC_WLS_093 | Weight = 100 | Positive | P1 |
-| TC_WLS_094 | Weight = 200 (heavy) | Boundary | P2 |
+| TC_WLS_094 | Weight = 200 (heavy) | Edge | P2 |
 | TC_WLS_095 | Weight = 500 (extreme) | Boundary | P3 |
-| TC_WLS_096 | Weight=0, minus → stays 0 | Boundary | P0 |
-| TC_WLS_097 | Weight=100, plus 10 lần → 125 | Positive | P2 |
+| TC_WLS_096 | Weight=0, minus → stays 0 | Boundary | P1 |
+| TC_WLS_097 | Weight=100, plus 10 lần → 125 | Edge | P2 |
 | TC_WLS_098 | Weight=5, minus 3 lần → 0 | Boundary | P1 |
-| TC_WLS_099 | Direct input weight=67.5 | Positive | P2 |
-| TC_WLS_100 | Direct input weight negative → 0 | Negative | P1 |
+| TC_WLS_099 | Direct input weight=67.5 | Edge | P2 |
+| TC_WLS_100 | Direct input weight negative → 0 | Negative | P0 |
 | TC_WLS_101 | Direct input weight=0 | Boundary | P2 |
 | TC_WLS_102 | Direct input weight decimal 0.5 | Edge | P3 |
-| TC_WLS_103 | Direct input weight=999 | Boundary | P3 |
-| TC_WLS_104 | Weight plus: +2.5 each | Positive | P1 |
+| TC_WLS_103 | Direct input weight=999 | Edge | P3 |
+| TC_WLS_104 | Weight plus: +2.5 each | Positive | P0 |
 | TC_WLS_105 | Weight minus: -2.5 each | Positive | P1 |
-| TC_WLS_106 | Weight input type="number" | Positive | P2 |
-| TC_WLS_107 | Weight display "Xkg × Y" | Positive | P1 |
-| TC_WLS_108 | Multiple exercises: independent weight | Positive | P1 |
-| TC_WLS_109 | Rapid weight increment 20x | Edge | P2 |
-| TC_WLS_110 | Weight persist across sets | Positive | P1 |
-| TC_WLS_111 | Reps=0 (WorkoutLogger boundary) | Boundary | P1 |
-| TC_WLS_112 | Reps=1 (SetEditor min) | Boundary | P2 |
+| TC_WLS_106 | Weight input type="number" | Edge | P3 |
+| TC_WLS_107 | Weight display "Xkg × Y" | Negative | P2 |
+| TC_WLS_108 | Multiple exercises: independent weight | Negative | P2 |
+| TC_WLS_109 | Rapid weight increment 20x | Edge | P3 |
+| TC_WLS_110 | Weight persist across sets | Edge | P3 |
+| TC_WLS_111 | Reps=0 (WorkoutLogger boundary) | Boundary | P2 |
+| TC_WLS_112 | Reps=1 (SetEditor min) | Boundary | P1 |
 | TC_WLS_113 | Reps=5 | Positive | P1 |
 | TC_WLS_114 | Reps=12 | Positive | P2 |
-| TC_WLS_115 | Reps=50 | Boundary | P3 |
-| TC_WLS_116 | Reps=100 | Boundary | P3 |
+| TC_WLS_115 | Reps=50 | Edge | P3 |
+| TC_WLS_116 | Reps=100 | Edge | P3 |
 | TC_WLS_117 | Reps negative → Math.max(0) | Negative | P1 |
-| TC_WLS_118 | Reps input type="number" | Positive | P3 |
-| TC_WLS_119 | Reps display in logged set | Positive | P2 |
-| TC_WLS_120 | Multiple exercises: independent reps | Positive | P2 |
-| TC_WLS_121 | Reps=0 → volume contribution = 0 | Edge | P2 |
-| TC_WLS_122 | SetEditor: reps min 1, decrement at 1 | Boundary | P1 |
+| TC_WLS_118 | Reps input type="number" | Edge | P3 |
+| TC_WLS_119 | Reps display in logged set | Negative | P2 |
+| TC_WLS_120 | Multiple exercises: independent reps | Negative | P2 |
+| TC_WLS_121 | Reps=0 → volume contribution = 0 | Boundary | P2 |
+| TC_WLS_122 | SetEditor: reps min 1, decrement at 1 | Boundary | P0 |
 | TC_WLS_123 | SetEditor: reps 1→2 | Positive | P2 |
-| TC_WLS_124 | SetEditor: input reps=0 → 1 | Boundary | P1 |
+| TC_WLS_124 | SetEditor: input reps=0 → 1 | Negative | P1 |
 | TC_WLS_125 | Rapid reps increment 20x | Edge | P3 |
-| TC_WLS_126 | Select RPE 6 | Positive | P2 |
+| TC_WLS_126 | Select RPE 6 | Boundary | P2 |
 | TC_WLS_127 | Select RPE 7 | Positive | P2 |
 | TC_WLS_128 | Select RPE 8 | Positive | P2 |
 | TC_WLS_129 | Select RPE 9 | Positive | P2 |
-| TC_WLS_130 | Select RPE 10 | Positive | P2 |
-| TC_WLS_131 | RPE toggle: 8 → deselect | Positive | P1 |
-| TC_WLS_132 | RPE switch: 7→9 | Positive | P2 |
-| TC_WLS_133 | No RPE → undefined in set | Positive | P1 |
+| TC_WLS_130 | Select RPE 10 | Boundary | P2 |
+| TC_WLS_131 | RPE toggle: 8 → deselect | Edge | P1 |
+| TC_WLS_132 | RPE switch: 7→9 | Edge | P2 |
+| TC_WLS_133 | No RPE → undefined in set | Negative | P3 |
 | TC_WLS_134 | RPE display "RPE X" | Positive | P2 |
 | TC_WLS_135 | RPE not shown when undefined | Negative | P2 |
-| TC_WLS_136 | RPE styling: selected emerald | Positive | P3 |
-| TC_WLS_137 | SetEditor RPE aria-pressed | Positive | P2 |
-| TC_WLS_138 | SetEditor RPE toggle | Positive | P2 |
-| TC_WLS_139 | Multiple exercises: independent RPE | Positive | P2 |
-| TC_WLS_140 | RPE options: 5 buttons render | Positive | P1 |
+| TC_WLS_136 | RPE styling: selected emerald | Edge | P3 |
+| TC_WLS_137 | SetEditor RPE aria-pressed | Edge | P3 |
+| TC_WLS_138 | SetEditor RPE toggle | Edge | P2 |
+| TC_WLS_139 | Multiple exercises: independent RPE | Negative | P2 |
+| TC_WLS_140 | RPE options: 5 buttons render | Boundary | P1 |
 | TC_WLS_141 | RestTimer starts 90s | Positive | P0 |
 | TC_WLS_142 | Countdown: 90→89→88 | Positive | P0 |
 | TC_WLS_143 | Timer reaches 0 → onComplete | Positive | P0 |
-| TC_WLS_144 | Display "1:30" at start | Positive | P2 |
+| TC_WLS_144 | Display "1:30" at start | Edge | P1 |
 | TC_WLS_145 | Display "0:01" near end | Boundary | P2 |
 | TC_WLS_146 | Display "0:00" at zero | Boundary | P2 |
 | TC_WLS_147 | +30s: 90→120 | Positive | P1 |
-| TC_WLS_148 | +30s at 10s → 40s | Positive | P2 |
-| TC_WLS_149 | +30s twice → +60s | Positive | P2 |
-| TC_WLS_150 | +30s updates progress ring | Positive | P2 |
+| TC_WLS_148 | +30s at 10s → 40s | Edge | P2 |
+| TC_WLS_149 | +30s twice → +60s | Edge | P2 |
+| TC_WLS_150 | +30s updates progress ring | Edge | P2 |
 | TC_WLS_151 | Skip → immediate close | Positive | P0 |
-| TC_WLS_152 | Skip at 90s | Positive | P1 |
-| TC_WLS_153 | Skip at 1s | Edge | P2 |
-| TC_WLS_154 | Progress ring 100% at start | Positive | P1 |
-| TC_WLS_155 | Progress ring 50% | Positive | P2 |
+| TC_WLS_152 | Skip at 90s | Edge | P2 |
+| TC_WLS_153 | Skip at 1s | Edge | P3 |
+| TC_WLS_154 | Progress ring 100% at start | Boundary | P2 |
+| TC_WLS_155 | Progress ring 50% | Edge | P3 |
 | TC_WLS_156 | Progress ring 0% | Boundary | P2 |
-| TC_WLS_157 | Progress ring SVG role="progressbar" | Positive | P2 |
+| TC_WLS_157 | Progress ring SVG role="progressbar" | Edge | P3 |
 | TC_WLS_158 | Timer isVisible=false → null | Negative | P1 |
-| TC_WLS_159 | Timer overlay bg-black/60 | Positive | P2 |
-| TC_WLS_160 | Timer dialog role="dialog" | Positive | P2 |
-| TC_WLS_161 | Timer aria-label | Positive | P3 |
-| TC_WLS_162 | +30s button text | Positive | P3 |
-| TC_WLS_163 | Skip button text | Positive | P3 |
-| TC_WLS_164 | Timer icon present | Positive | P3 |
-| TC_WLS_165 | Multiple rest timers sequence | Positive | P1 |
+| TC_WLS_159 | Timer overlay bg-black/60 | Edge | P3 |
+| TC_WLS_160 | Timer dialog role="dialog" | Edge | P3 |
+| TC_WLS_161 | Timer aria-label | Edge | P3 |
+| TC_WLS_162 | +30s button text | Negative | P3 |
+| TC_WLS_163 | Skip button text | Negative | P3 |
+| TC_WLS_164 | Timer icon present | Edge | P3 |
+| TC_WLS_165 | Multiple rest timers sequence | Edge | P2 |
 | TC_WLS_166 | SetEditor opens with initials | Positive | P0 |
 | TC_WLS_167 | SetEditor weight dec: 100→97.5 | Positive | P1 |
 | TC_WLS_168 | SetEditor weight inc: 100→102.5 | Positive | P1 |
 | TC_WLS_169 | SetEditor weight 0→minus stays 0 | Boundary | P1 |
-| TC_WLS_170 | SetEditor weight direct input | Positive | P2 |
+| TC_WLS_170 | SetEditor weight direct input | Edge | P2 |
 | TC_WLS_171 | SetEditor reps dec: 5→4 | Positive | P1 |
 | TC_WLS_172 | SetEditor reps inc: 5→6 | Positive | P1 |
 | TC_WLS_173 | SetEditor reps 1→minus stays 1 | Boundary | P1 |
 | TC_WLS_174 | SetEditor reps negative → 1 | Negative | P1 |
-| TC_WLS_175 | Recent chips: 0 → hidden | Negative | P1 |
-| TC_WLS_176 | Recent chips: 1 | Positive | P2 |
-| TC_WLS_177 | Recent chips: 3 | Positive | P2 |
-| TC_WLS_178 | Recent chips: 5 | Positive | P2 |
+| TC_WLS_175 | Recent chips: 0 → hidden | Negative | P2 |
+| TC_WLS_176 | Recent chips: 1 | Edge | P3 |
+| TC_WLS_177 | Recent chips: 3 | Edge | P3 |
+| TC_WLS_178 | Recent chips: 5 | Edge | P3 |
 | TC_WLS_179 | Click chip → weight updates | Positive | P1 |
-| TC_WLS_180 | Click chip → highlighted | Positive | P2 |
+| TC_WLS_180 | Click chip → highlighted | Edge | P3 |
 | TC_WLS_181 | Save → onSave({weight,reps,rpe}) | Positive | P0 |
-| TC_WLS_182 | Cancel → onCancel | Positive | P1 |
-| TC_WLS_183 | Close X → onCancel | Positive | P2 |
+| TC_WLS_182 | Cancel → onCancel | Negative | P1 |
+| TC_WLS_183 | Close X → onCancel | Negative | P2 |
 | TC_WLS_184 | SetEditor isVisible=false → null | Negative | P1 |
-| TC_WLS_185 | SetEditor role="dialog" | Positive | P2 |
-| TC_WLS_186 | 1 exercise in session | Positive | P1 |
+| TC_WLS_185 | SetEditor role="dialog" | Edge | P3 |
+| TC_WLS_186 | 1 exercise in session | Positive | P0 |
 | TC_WLS_187 | 3 exercises in session | Positive | P1 |
 | TC_WLS_188 | 5 exercises in session | Positive | P2 |
-| TC_WLS_189 | 10 exercises in session | Boundary | P2 |
+| TC_WLS_189 | 10 exercises in session | Edge | P3 |
 | TC_WLS_190 | Add exercise via selector | Positive | P0 |
-| TC_WLS_191 | Exercise nameVi displayed | Positive | P2 |
-| TC_WLS_192 | Logged sets display | Positive | P1 |
-| TC_WLS_193 | Multiple sets: setNumber increments | Positive | P1 |
+| TC_WLS_191 | Exercise nameVi displayed | Negative | P1 |
+| TC_WLS_192 | Logged sets display | Boundary | P2 |
+| TC_WLS_193 | Multiple sets: setNumber increments | Boundary | P1 |
 | TC_WLS_194 | Finish → summary | Positive | P0 |
 | TC_WLS_195 | Summary duration MM:SS | Positive | P1 |
 | TC_WLS_196 | Summary volume | Positive | P1 |
-| TC_WLS_197 | Summary sets count | Positive | P1 |
+| TC_WLS_197 | Summary sets count | Boundary | P2 |
 | TC_WLS_198 | Save calls addWorkout+addWorkoutSet | Positive | P0 |
 | TC_WLS_199 | Save: onComplete with workout | Positive | P1 |
-| TC_WLS_200 | Empty exercises state | Positive | P1 |
-| TC_WLS_201 | Back button → onBack | Positive | P0 |
+| TC_WLS_200 | Empty exercises state | Negative | P2 |
+| TC_WLS_201 | Back button → onBack | Positive | P1 |
 | TC_WLS_202 | Timer: 0s → "00:00" | Boundary | P2 |
-| TC_WLS_203 | Timer: 65s → "01:05" | Positive | P2 |
-| TC_WLS_204 | Timer: 3661s → "61:01" | Edge | P3 |
-| TC_WLS_205 | Log set weight=0, reps=0 | Edge | P2 |
-| TC_WLS_206 | Dark mode: header emerald | Positive | P2 |
-| TC_WLS_207 | Dark mode: sections bg-slate-800 | Positive | P2 |
-| TC_WLS_208 | Dark mode: inputs contrast | Positive | P3 |
-| TC_WLS_209 | Dark mode: RPE buttons | Positive | P3 |
-| TC_WLS_210 | Workout 0 sets → save volume=0 | Edge | P2 |
+| TC_WLS_203 | Timer: 65s → "01:05" | Boundary | P2 |
+| TC_WLS_204 | Timer: 3661s → "61:01" | Edge | P2 |
+| TC_WLS_205 | Log set weight=0, reps=0 | Boundary | P2 |
+| TC_WLS_206 | Dark mode: header emerald | Edge | P3 |
+| TC_WLS_207 | Dark mode: sections bg-slate-800 | Edge | P3 |
+| TC_WLS_208 | Dark mode: inputs contrast | Negative | P3 |
+| TC_WLS_209 | Dark mode: RPE buttons | Negative | P3 |
+| TC_WLS_210 | Workout 0 sets → save volume=0 | Negative | P2 |
 
 ---
 
@@ -717,6 +717,8 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
+
+### ExerciseSelector - Tìm kiếm (TC_WLS_056 → TC_WLS_075)
 ##### TC_WLS_056: Search partial text "gáy" → tìm thấy exercises chứa "gáy"
 - **Pre-conditions**: ExerciseSelector đang mở
 - **Steps**:
@@ -747,7 +749,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Nhập "SQUAT"
 - **Expected Result**: Match tìm thấy dù input uppercase (query.toLowerCase())
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_060: Search with spaces " squat " → trimmed
@@ -755,7 +757,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Nhập " squat "
 - **Expected Result**: Spaces được trim, results match "squat"
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_061: Search empty string → tất cả exercises hiển thị
@@ -763,7 +765,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Clear search input
 - **Expected Result**: allExercises hiển thị đầy đủ
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_062: Search "xyznonexistent" → empty state
@@ -771,7 +773,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Nhập "xyznonexistent"
 - **Expected Result**: filteredExercises = [], exercise-empty-state visible
-- **Priority**: P1 | **Type**: Negative
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_063: Search + filter chest → chỉ chest exercises match "đẩy"
@@ -789,7 +791,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
   1. Chọn "Lưng"
   2. Nhập "kéo"
 - **Expected Result**: Chỉ back exercises AND nameVi chứa "kéo"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_065: Search + filter legs
@@ -798,7 +800,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
   1. Chọn "Chân"
   2. Nhập "gánh"
 - **Expected Result**: Chỉ legs exercises matching
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_066: Filter muscle group: Ngực (chest)
@@ -806,7 +808,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Ngực"
 - **Expected Result**: Chỉ exercises muscleGroup="chest" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_067: Filter muscle group: Lưng (back)
@@ -814,7 +816,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Lưng"
 - **Expected Result**: Chỉ exercises muscleGroup="back" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_068: Filter muscle group: Vai (shoulders)
@@ -822,7 +824,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Vai"
 - **Expected Result**: Chỉ exercises muscleGroup="shoulders" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_069: Filter muscle group: Chân (legs)
@@ -830,7 +832,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Chân"
 - **Expected Result**: Chỉ exercises muscleGroup="legs" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_070: Filter muscle group: Tay (arms)
@@ -838,7 +840,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Tay"
 - **Expected Result**: Chỉ exercises muscleGroup="arms" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_071: Filter muscle group: Bụng (core)
@@ -846,7 +848,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Bụng"
 - **Expected Result**: Chỉ exercises muscleGroup="core" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_072: Filter muscle group: Mông (glutes)
@@ -854,7 +856,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click chip "Mông"
 - **Expected Result**: Chỉ exercises muscleGroup="glutes" hiển thị
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_073: Clear search → full list restored
@@ -862,7 +864,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Clear input
 - **Expected Result**: Full list restored
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_074: Search: type rồi xóa từng ký tự
@@ -879,9 +881,11 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Nhập "%"
 - **Expected Result**: Không crash, 0 results
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
+
+### ExerciseSelector - Kết hợp Filter (TC_WLS_076 → TC_WLS_090)
 ##### TC_WLS_076: Filter "all" → shows everything
 - **Pre-conditions**: Filter = chest
 - **Steps**:
@@ -895,7 +899,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click "Tất cả"
 - **Expected Result**: List expand
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_078: Switch nhanh 7 muscle groups
@@ -911,7 +915,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Quan sát list
 - **Expected Result**: Chỉ barbell exercises
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_080: Equipment filter: bodyweight only
@@ -919,7 +923,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Quan sát
 - **Expected Result**: Chỉ bodyweight exercises
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_081: Equipment filter: multiple
@@ -927,7 +931,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Quan sát
 - **Expected Result**: barbell OR dumbbell exercises
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_082: Combined: search + muscleGroup + equipment
@@ -943,7 +947,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Apply filters
 - **Expected Result**: exercise-empty-state visible
-- **Priority**: P1 | **Type**: Negative
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_084: Select exercise → selector đóng
@@ -959,7 +963,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click exercise
 - **Expected Result**: handleSelect calls onSelect+onClose
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_086: Modal backdrop click → đóng
@@ -967,7 +971,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click backdrop
 - **Expected Result**: onClose triggered
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_087: Back gesture → đóng selector
@@ -975,7 +979,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Press Back
 - **Expected Result**: useModalBackHandler triggers onClose
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_088: Drag handle visible
@@ -983,7 +987,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect top
 - **Expected Result**: Handle div visible
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_089: Exercise item: nameVi, group, category, equipment
@@ -991,7 +995,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect 1 item
 - **Expected Result**: nameVi bold, group label, category, equipment list
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_090: ExerciseSelector isOpen=false → null
@@ -999,9 +1003,11 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect DOM
 - **Expected Result**: return null
-- **Priority**: P1 | **Type**: Negative
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
+
+### Set Logging - Weight (TC_WLS_091 → TC_WLS_110)
 ##### TC_WLS_091: Weight = 0 (min boundary)
 - **Pre-conditions**: Exercise visible
 - **Steps**:
@@ -1015,7 +1021,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click plus
 - **Expected Result**: weight=2.5
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_093: Weight = 100
@@ -1031,7 +1037,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input 200
 - **Expected Result**: weight=200
-- **Priority**: P2 | **Type**: Boundary
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_095: Weight = 500 (extreme)
@@ -1047,7 +1053,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click minus
 - **Expected Result**: Math.max(0,0-2.5)=0
-- **Priority**: P0 | **Type**: Boundary
+- **Priority**: P1 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_097: Weight=100, plus 10 lần → 125
@@ -1055,7 +1061,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click plus 10x
 - **Expected Result**: weight=125
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_098: Weight=5, minus 3 lần → 0
@@ -1071,7 +1077,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input "67.5"
 - **Expected Result**: weight=67.5
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_100: Direct input weight negative → 0
@@ -1079,7 +1085,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input "-10"
 - **Expected Result**: Clamped to 0
-- **Priority**: P1 | **Type**: Negative
+- **Priority**: P0 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_101: Direct input weight=0
@@ -1103,7 +1109,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input "999"
 - **Expected Result**: weight=999
-- **Priority**: P3 | **Type**: Boundary
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_104: Weight plus: +2.5 each
@@ -1111,7 +1117,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click plus 2x
 - **Expected Result**: weight=55
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P0 | **Type**: Positive
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_105: Weight minus: -2.5 each
@@ -1127,7 +1133,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect input
 - **Expected Result**: type="number"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_107: Weight display "Xkg × Y"
@@ -1135,7 +1141,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Quan sát display
 - **Expected Result**: "80kg × 10"
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_108: Multiple exercises: independent weight
@@ -1143,7 +1149,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Set different weights
 - **Expected Result**: Independent per exerciseId
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_109: Rapid weight increment 20x
@@ -1151,7 +1157,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click plus 20x
 - **Expected Result**: weight=50
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_110: Weight persist across sets
@@ -1159,15 +1165,17 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Log set, rest, check weight
 - **Expected Result**: weight stays 80
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
+
+### Set Logging - Reps (TC_WLS_111 → TC_WLS_125)
 ##### TC_WLS_111: Reps=0 (WorkoutLogger boundary)
 - **Pre-conditions**: Exercise visible
 - **Steps**:
   1. Set reps=0
 - **Expected Result**: reps=0 accepted
-- **Priority**: P1 | **Type**: Boundary
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_112: Reps=1 (SetEditor min)
@@ -1175,7 +1183,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Set reps=1
 - **Expected Result**: reps=1
-- **Priority**: P2 | **Type**: Boundary
+- **Priority**: P1 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_113: Reps=5
@@ -1199,7 +1207,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input 50
 - **Expected Result**: reps=50
-- **Priority**: P3 | **Type**: Boundary
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_116: Reps=100
@@ -1207,7 +1215,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input 100
 - **Expected Result**: reps=100
-- **Priority**: P3 | **Type**: Boundary
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_117: Reps negative → Math.max(0)
@@ -1223,7 +1231,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: type="number"
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_119: Reps display in logged set
@@ -1231,7 +1239,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Quan sát
 - **Expected Result**: "60kg × 8"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_120: Multiple exercises: independent reps
@@ -1239,7 +1247,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Different reps
 - **Expected Result**: Independent
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_121: Reps=0 → volume contribution = 0
@@ -1247,7 +1255,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check volume
 - **Expected Result**: 100×0=0
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_122: SetEditor: reps min 1, decrement at 1
@@ -1255,7 +1263,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click minus
 - **Expected Result**: Math.max(1,0)=1
-- **Priority**: P1 | **Type**: Boundary
+- **Priority**: P0 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_123: SetEditor: reps 1→2
@@ -1271,7 +1279,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input "0"
 - **Expected Result**: Math.max(1,0)=1
-- **Priority**: P1 | **Type**: Boundary
+- **Priority**: P1 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_125: Rapid reps increment 20x
@@ -1282,12 +1290,14 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
+
+### RPE Selection (TC_WLS_126 → TC_WLS_140)
 ##### TC_WLS_126: Select RPE 6
 - **Pre-conditions**: Exercise visible, no RPE
 - **Steps**:
   1. Click rpe-6
 - **Expected Result**: rpe=6, button active
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_127: Select RPE 7
@@ -1319,7 +1329,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click rpe-10
 - **Expected Result**: rpe=10, button active
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_131: RPE toggle: 8 → deselect
@@ -1327,7 +1337,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click rpe-8
 - **Expected Result**: rpe=undefined
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P1 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_132: RPE switch: 7→9
@@ -1335,7 +1345,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click rpe-9
 - **Expected Result**: rpe=9
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_133: No RPE → undefined in set
@@ -1343,7 +1353,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Log set
 - **Expected Result**: set.rpe=undefined
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_134: RPE display "RPE X"
@@ -1367,7 +1377,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect buttons
 - **Expected Result**: RPE 8: emerald, others: slate
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_137: SetEditor RPE aria-pressed
@@ -1375,7 +1385,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect rpe-button-9
 - **Expected Result**: aria-pressed="true"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_138: SetEditor RPE toggle
@@ -1383,7 +1393,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click rpe-7
 - **Expected Result**: rpe=undefined
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_139: Multiple exercises: independent RPE
@@ -1391,7 +1401,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Set different RPE
 - **Expected Result**: Independent per exerciseId
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_140: RPE options: 5 buttons render
@@ -1399,9 +1409,11 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Count buttons
 - **Expected Result**: 5 buttons: 6,7,8,9,10
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P1 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
+
+### Rest Timer (TC_WLS_141 → TC_WLS_165)
 ##### TC_WLS_141: RestTimer starts 90s
 - **Pre-conditions**: Just logged set
 - **Steps**:
@@ -1431,7 +1443,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check
 - **Expected Result**: formatTime(90)="1:30"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P1 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_145: Display "0:01" near end
@@ -1463,7 +1475,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click +30s
 - **Expected Result**: remaining=40
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_149: +30s twice → +60s
@@ -1471,7 +1483,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click +30s 2x
 - **Expected Result**: remaining=150
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_150: +30s updates progress ring
@@ -1479,7 +1491,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click +30s
 - **Expected Result**: totalDuration changes, ring recalculates
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_151: Skip → immediate close
@@ -1495,7 +1507,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click skip
 - **Expected Result**: Timer closes immediately
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_153: Skip at 1s
@@ -1503,7 +1515,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click skip
 - **Expected Result**: Closes
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_154: Progress ring 100% at start
@@ -1511,7 +1523,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: dashoffset=0 (full)
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_155: Progress ring 50%
@@ -1519,7 +1531,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: dashoffset=CIRCUMFERENCE*0.5
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_156: Progress ring 0%
@@ -1535,7 +1547,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect SVG
 - **Expected Result**: role, aria-valuenow, min, max
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_158: Timer isVisible=false → null
@@ -1551,7 +1563,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: fixed inset-0 z-50 bg-black/60
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_160: Timer dialog role="dialog"
@@ -1559,7 +1571,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: role="dialog" aria-modal="true"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_161: Timer aria-label
@@ -1567,7 +1579,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: aria-label=t("fitness.timer.rest")
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_162: +30s button text
@@ -1575,7 +1587,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check text
 - **Expected Result**: t("fitness.timer.addTime")
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_163: Skip button text
@@ -1583,7 +1595,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check text
 - **Expected Result**: t("fitness.timer.skip")
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_164: Timer icon present
@@ -1591,7 +1603,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect header
 - **Expected Result**: Timer icon visible
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_165: Multiple rest timers sequence
@@ -1599,9 +1611,11 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Log, rest, log, rest, log, rest
 - **Expected Result**: Each rest timer starts fresh at 90s
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
+
+### SetEditor Modal (TC_WLS_166 → TC_WLS_185)
 ##### TC_WLS_166: SetEditor opens with initials
 - **Pre-conditions**: initialWeight=80, reps=10, rpe=8
 - **Steps**:
@@ -1639,7 +1653,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Input "75"
 - **Expected Result**: weight=75
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_171: SetEditor reps dec: 5→4
@@ -1679,7 +1693,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: Section not rendered
-- **Priority**: P1 | **Type**: Negative
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_176: Recent chips: 1
@@ -1687,7 +1701,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: 1 chip visible
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_177: Recent chips: 3
@@ -1695,7 +1709,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: 3 chips
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_178: Recent chips: 5
@@ -1703,7 +1717,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: 5 chips
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_179: Click chip → weight updates
@@ -1719,7 +1733,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect chip 65
 - **Expected Result**: emerald bg
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_181: Save → onSave({weight,reps,rpe})
@@ -1735,7 +1749,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click cancel
 - **Expected Result**: onCancel triggered
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P1 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_183: Close X → onCancel
@@ -1743,7 +1757,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Click X
 - **Expected Result**: onCancel triggered
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_184: SetEditor isVisible=false → null
@@ -1759,15 +1773,17 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: role="dialog" aria-modal="true"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
+
+### Workout Session Flow (TC_WLS_186 → TC_WLS_200)
 ##### TC_WLS_186: 1 exercise in session
 - **Pre-conditions**: planDay 1 exercise
 - **Steps**:
   1. Load
 - **Expected Result**: 1 section renders
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P0 | **Type**: Positive
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_187: 3 exercises in session
@@ -1791,7 +1807,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Load
 - **Expected Result**: 10 sections, performance ok
-- **Priority**: P2 | **Type**: Boundary
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_190: Add exercise via selector
@@ -1807,7 +1823,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect heading
 - **Expected Result**: H3 shows exercise.nameVi
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P1 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_192: Logged sets display
@@ -1815,7 +1831,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: Set 1 and Set 2 visible
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_193: Multiple sets: setNumber increments
@@ -1823,7 +1839,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Verify numbers
 - **Expected Result**: 1, 2, 3
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P1 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_194: Finish → summary
@@ -1855,7 +1871,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check
 - **Expected Result**: "5"
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_198: Save calls addWorkout+addWorkoutSet
@@ -1879,15 +1895,17 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: empty-state visible
-- **Priority**: P1 | **Type**: Positive
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
+
+### Edge Cases & Dark Mode (TC_WLS_201 → TC_WLS_210)
 ##### TC_WLS_201: Back button → onBack
 - **Pre-conditions**: WorkoutLogger mở
 - **Steps**:
   1. Click back
 - **Expected Result**: onBack() triggered
-- **Priority**: P0 | **Type**: Positive
+- **Priority**: P1 | **Type**: Positive
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_202: Timer: 0s → "00:00"
@@ -1903,7 +1921,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check
 - **Expected Result**: "01:05"
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_204: Timer: 3661s → "61:01"
@@ -1911,7 +1929,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Check
 - **Expected Result**: "61:01", no cap
-- **Priority**: P3 | **Type**: Edge
+- **Priority**: P2 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_205: Log set weight=0, reps=0
@@ -1919,7 +1937,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Log set
 - **Expected Result**: Set created with 0 values
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P2 | **Type**: Boundary
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_206: Dark mode: header emerald
@@ -1927,7 +1945,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect header
 - **Expected Result**: bg-emerald-600, white text
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_207: Dark mode: sections bg-slate-800
@@ -1935,7 +1953,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect sections
 - **Expected Result**: dark:bg-slate-800
-- **Priority**: P2 | **Type**: Positive
+- **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_208: Dark mode: inputs contrast
@@ -1943,7 +1961,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect inputs
 - **Expected Result**: dark:bg-slate-700, readable
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_209: Dark mode: RPE buttons
@@ -1951,7 +1969,7 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Inspect
 - **Expected Result**: Selected emerald, others dark:bg-slate-700
-- **Priority**: P3 | **Type**: Positive
+- **Priority**: P3 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
 ##### TC_WLS_210: Workout 0 sets → save volume=0
@@ -1959,6 +1977,6 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Steps**:
   1. Finish, save
 - **Expected Result**: totalVolume=0, sets=0, save ok
-- **Priority**: P2 | **Type**: Edge
+- **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
