@@ -111,6 +111,20 @@ const mockSaveWorkoutAtomic = vi.fn().mockResolvedValue(undefined);
 const mockSetWorkoutDraft = vi.fn();
 const mockClearWorkoutDraft = vi.fn();
 const mockLoadWorkoutDraft = vi.fn().mockResolvedValue(undefined);
+const mockSuggestNextSet = vi.fn();
+
+vi.mock('../features/fitness/hooks/useProgressiveOverload', () => ({
+  useProgressiveOverload: () => ({
+    suggestNextSet: mockSuggestNextSet,
+    getLastSets: vi.fn().mockReturnValue([]),
+    checkPlateau: vi.fn().mockReturnValue({ isPlateaued: false, weeks: 0 }),
+    analyzeExercisePlateau: vi.fn(),
+    checkAcuteFatigue: vi.fn().mockReturnValue({ level: 'none', message: '' }),
+    checkChronicOvertraining: vi.fn().mockReturnValue({ level: 'none', message: '' }),
+    acuteFatigue: { level: 'none', message: '' },
+    chronicOvertraining: { level: 'none', message: '' },
+  }),
+}));
 
 afterEach(cleanup);
 
@@ -133,6 +147,7 @@ describe('WorkoutLogger', () => {
     mockSetWorkoutDraft.mockReset();
     mockClearWorkoutDraft.mockReset();
     mockLoadWorkoutDraft.mockReset().mockResolvedValue(undefined);
+    mockSuggestNextSet.mockReset().mockReturnValue({ weight: 0, reps: 8, source: 'manual' });
   });
 
   afterEach(() => {
@@ -737,5 +752,68 @@ describe('WorkoutLogger', () => {
   it('calls loadWorkoutDraft on mount', () => {
     render(<WorkoutLogger {...defaultProps} />);
     expect(mockLoadWorkoutDraft).toHaveBeenCalledTimes(1);
+  });
+
+  /* ---------- progressive overload chip ---------- */
+  it('shows progressive overload suggestion chip', () => {
+    mockSuggestNextSet.mockReturnValue({
+      weight: 62.5,
+      reps: 5,
+      source: 'progressive_overload',
+    });
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    expect(screen.getByTestId('overload-chip')).toHaveTextContent(
+      '62.5kg × 5',
+    );
+  });
+
+  it('applies suggestion to inputs on chip click', () => {
+    mockSuggestNextSet.mockReturnValue({
+      weight: 62.5,
+      reps: 5,
+      source: 'progressive_overload',
+    });
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    fireEvent.click(screen.getByTestId('overload-chip'));
+    expect(
+      (screen.getByTestId('weight-input-bench-press') as HTMLInputElement)
+        .value,
+    ).toBe('62.5');
+    expect(
+      (screen.getByTestId('reps-input-bench-press') as HTMLInputElement)
+        .value,
+    ).toBe('5');
+  });
+
+  it('shows plateau warning when plateaued', () => {
+    mockSuggestNextSet.mockReturnValue({
+      weight: 60,
+      reps: 5,
+      source: 'progressive_overload',
+      isPlateaued: true,
+      plateauWeeks: 3,
+    });
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    const chip = screen.getByTestId('overload-chip');
+    expect(chip).toHaveTextContent('60kg × 5');
+    expect(chip).toHaveTextContent('plateau 3w');
+  });
+
+  it('does not show overload chip when no suggestion data', () => {
+    mockSuggestNextSet.mockReturnValue({
+      weight: 0,
+      reps: 8,
+      source: 'manual',
+    });
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    expect(screen.queryByTestId('overload-chip')).not.toBeInTheDocument();
   });
 });

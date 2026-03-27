@@ -16,6 +16,8 @@ import type {
   EquipmentType,
 } from '../types';
 import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
+import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
+import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
 
 interface WorkoutLoggerProps {
   planDay?: {
@@ -64,6 +66,34 @@ function resolveExercises(exerciseIds?: string[]): Exercise[] {
     .map(seedToExercise);
 }
 
+function ProgressiveOverloadChip({
+  suggestion,
+  onApply,
+}: {
+  suggestion: OverloadSuggestion | null;
+  onApply: (s: OverloadSuggestion) => void;
+}): React.JSX.Element | null {
+  if (!suggestion) return null;
+  const isPlateaued = suggestion.isPlateaued ?? false;
+  return (
+    <button
+      type="button"
+      onClick={() => onApply(suggestion)}
+      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+        isPlateaued
+          ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
+          : 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+      }`}
+      data-testid="overload-chip"
+    >
+      {isPlateaued ? '⚠️' : '📈'} {suggestion.weight}kg × {suggestion.reps}
+      {isPlateaued &&
+        suggestion.plateauWeeks != null &&
+        ` (plateau ${suggestion.plateauWeeks}w)`}
+    </button>
+  );
+}
+
 export function WorkoutLogger({
   planDay,
   onComplete,
@@ -74,6 +104,8 @@ export function WorkoutLogger({
   const setWorkoutDraft = useFitnessStore((s) => s.setWorkoutDraft);
   const clearWorkoutDraft = useFitnessStore((s) => s.clearWorkoutDraft);
   const loadWorkoutDraft = useFitnessStore((s) => s.loadWorkoutDraft);
+
+  const { suggestNextSet: getOverloadSuggestion } = useProgressiveOverload();
 
   const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
@@ -138,6 +170,13 @@ export function WorkoutLogger({
       }));
     },
     [],
+  );
+
+  const handleApplySuggestion = useCallback(
+    (exerciseId: string, s: OverloadSuggestion) => {
+      updateInput(exerciseId, { weight: s.weight, reps: s.reps });
+    },
+    [updateInput],
   );
 
   const handleLogSet = useCallback(
@@ -327,6 +366,13 @@ export function WorkoutLogger({
               (s) => s.exerciseId === exercise.id,
             );
             const input = getInput(exercise.id);
+            const suggestion = getOverloadSuggestion(
+              exercise.id,
+              exercise.defaultRepsMin ?? 8,
+              exercise.defaultRepsMax ?? 12,
+            );
+            const overloadSuggestion =
+              suggestion.weight > 0 ? suggestion : null;
             return (
               <section
                 key={exercise.id}
@@ -356,6 +402,11 @@ export function WorkoutLogger({
                     )}
                   </div>
                 ))}
+
+                <ProgressiveOverloadChip
+                  suggestion={overloadSuggestion}
+                  onApply={(s) => handleApplySuggestion(exercise.id, s)}
+                />
 
                 <div
                   className="mt-3 space-y-3 border-t border-slate-100 pt-3 dark:border-slate-700"
