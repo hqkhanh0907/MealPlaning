@@ -26,6 +26,24 @@ function resetStore() {
   });
 }
 
+function clickNext() {
+  fireEvent.click(screen.getByTestId('next-button'));
+}
+
+function advanceSteps(count: number) {
+  for (let i = 0; i < count; i++) {
+    clickNext();
+  }
+}
+
+function navigateToLastStep() {
+  let nextBtn = screen.queryByTestId('next-button');
+  while (nextBtn) {
+    fireEvent.click(nextBtn);
+    nextBtn = screen.queryByTestId('next-button');
+  }
+}
+
 // Mock crypto.randomUUID for deterministic IDs
 const originalRandomUUID = crypto.randomUUID;
 beforeEach(() => {
@@ -36,12 +54,121 @@ afterEach(() => {
 });
 
 /* ------------------------------------------------------------------ */
+/*  Step indices (for reference)                                        */
+/*  Beginner:     core(0) sessionDuration(1) equipment(2) injuries(3)  */
+/*                cardio(4) known1rm(5)                                 */
+/*  Intermediate: core(0) sessionDuration(1) equipment(2) injuries(3)  */
+/*                cardio(4) periodization(5) cycleWeeks(6) priority(7)  */
+/*                known1rm(8)                                           */
+/*  Advanced:     core(0) sessionDuration(1) equipment(2) injuries(3)  */
+/*                cardio(4) periodization(5) cycleWeeks(6) priority(7)  */
+/*                known1rm(8) sleepHours(9)                             */
+/* ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ */
 /*  Tests                                                               */
 /* ------------------------------------------------------------------ */
 describe('FitnessOnboarding', () => {
   beforeEach(() => {
     resetStore();
   });
+
+  /* ---- Wizard navigation ---- */
+
+  it('hides back button on step 1', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    expect(screen.queryByTestId('onboarding-back')).not.toBeInTheDocument();
+  });
+
+  it('shows back button on step 2+', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    clickNext();
+    expect(screen.getByTestId('onboarding-back')).toBeInTheDocument();
+  });
+
+  it('shows step counter with correct format', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    // Beginner has 6 steps
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('1/6');
+
+    clickNext();
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('2/6');
+  });
+
+  it('step counter updates when experience changes total steps', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    // Default beginner: 6 steps
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('1/6');
+
+    // Switch to intermediate: 9 steps
+    fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('1/9');
+
+    // Switch to advanced: 10 steps
+    fireEvent.click(screen.getByRole('radio', { name: 'Nâng cao' }));
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('1/10');
+  });
+
+  it('back button navigates to previous step', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    clickNext(); // step 1: sessionDuration
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('2/6');
+
+    fireEvent.click(screen.getByTestId('onboarding-back'));
+    expect(screen.getByTestId('step-counter')).toHaveTextContent('1/6');
+    expect(screen.queryByTestId('onboarding-back')).not.toBeInTheDocument();
+  });
+
+  it('preserves entered data when going back', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    // Step 0: select strength goal and 5 days
+    fireEvent.click(screen.getByRole('radio', { name: 'Sức mạnh' }));
+    fireEvent.click(screen.getByRole('radio', { name: '5' }));
+
+    // Advance to step 1 (sessionDuration), select 90
+    clickNext();
+    fireEvent.click(screen.getByRole('radio', { name: '90' }));
+
+    // Go back to step 0
+    fireEvent.click(screen.getByTestId('onboarding-back'));
+
+    // Verify core data preserved
+    expect(screen.getByRole('radio', { name: 'Sức mạnh' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('radio', { name: '5' })).toHaveAttribute('aria-checked', 'true');
+
+    // Go forward again — session duration should still be 90
+    clickNext();
+    expect(screen.getByRole('radio', { name: '90' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('progress bar width increases as steps advance', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    const progressBar = screen.getByTestId('step-progress-bar');
+
+    // Step 0 of 6: width ~16.67%
+    const initialWidth = progressBar.style.width;
+    clickNext();
+
+    // Step 1 of 6: width ~33.33%
+    const secondWidth = progressBar.style.width;
+    expect(parseFloat(secondWidth)).toBeGreaterThan(parseFloat(initialWidth));
+  });
+
+  /* ---- Core step rendering ---- */
 
   it('renders 3 core fields (goal, experience, days)', () => {
     const onComplete = vitest.fn();
@@ -67,90 +194,130 @@ describe('FitnessOnboarding', () => {
     });
   });
 
-  it('customize section hidden by default', () => {
+  it('shows Next button on non-final steps', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
-    expect(screen.queryByTestId('customize-section')).not.toBeInTheDocument();
+    expect(screen.getByTestId('next-button')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Bắt đầu/ })).not.toBeInTheDocument();
   });
 
-  it('clicking "Tùy chỉnh thêm" shows extra fields', () => {
+  it('shows Submit button on final step', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
-    const toggleBtn = screen.getByText(/Tùy chỉnh thêm/);
-    fireEvent.click(toggleBtn);
+    navigateToLastStep();
 
-    expect(screen.getByTestId('customize-section')).toBeInTheDocument();
-    expect(screen.getByText('Thời lượng buổi tập (phút)')).toBeInTheDocument();
+    expect(screen.queryByTestId('next-button')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Bắt đầu/ })).toBeInTheDocument();
   });
 
-  it('beginner shows base fields plus 1RM toggle (no ORM inputs)', () => {
+  /* ---- Beginner step fields ---- */
+
+  it('beginner shows session duration on step 2', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Mới bắt đầu' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
-
+    advanceSteps(1); // → sessionDuration
     expect(screen.getByTestId('field-session-duration')).toBeInTheDocument();
+  });
+
+  it('beginner shows equipment on step 3', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    advanceSteps(2); // → equipment
     expect(screen.getByTestId('field-equipment')).toBeInTheDocument();
+  });
+
+  it('beginner shows injuries on step 4', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    advanceSteps(3); // → injuries
     expect(screen.getByTestId('field-injuries')).toBeInTheDocument();
+  });
+
+  it('beginner shows cardio on step 5', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    advanceSteps(4); // → cardioSessions
     expect(screen.getByTestId('field-cardio-sessions')).toBeInTheDocument();
+  });
+
+  it('beginner shows known 1RM on last step', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    advanceSteps(5); // → known1rm (last step for beginner)
     expect(screen.getByTestId('field-known-1rm')).toBeInTheDocument();
     expect(screen.getByTestId('orm-toggle')).toBeInTheDocument();
     expect(screen.queryByTestId('orm-inputs')).not.toBeInTheDocument();
-
-    expect(screen.queryByTestId('field-periodization')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('field-cycle-weeks')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('field-priority-muscles')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('field-avg-sleep')).not.toBeInTheDocument();
   });
 
-  it('intermediate shows intermediate fields plus 1RM toggle', () => {
+  it('beginner does not have periodization, cycle weeks, or priority muscles steps', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    // Navigate through all beginner steps and collect visible testids
+    const seenTestIds: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      if (screen.queryByTestId('field-periodization')) seenTestIds.push('periodization');
+      if (screen.queryByTestId('field-cycle-weeks')) seenTestIds.push('cycle-weeks');
+      if (screen.queryByTestId('field-priority-muscles')) seenTestIds.push('priority-muscles');
+      if (screen.queryByTestId('next-button')) clickNext();
+    }
+
+    expect(seenTestIds).toEqual([]);
+  });
+
+  /* ---- Intermediate step fields ---- */
+
+  it('intermediate shows periodization, cycle weeks, and priority muscles', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
 
-    expect(screen.getByTestId('field-session-duration')).toBeInTheDocument();
-    expect(screen.getByTestId('field-equipment')).toBeInTheDocument();
-    expect(screen.getByTestId('field-injuries')).toBeInTheDocument();
-    expect(screen.getByTestId('field-cardio-sessions')).toBeInTheDocument();
+    advanceSteps(5); // → periodization
     expect(screen.getByTestId('field-periodization')).toBeInTheDocument();
+
+    clickNext(); // → cycleWeeks
     expect(screen.getByTestId('field-cycle-weeks')).toBeInTheDocument();
+
+    clickNext(); // → priorityMuscles
     expect(screen.getByTestId('field-priority-muscles')).toBeInTheDocument();
+
+    clickNext(); // → known1rm (last for intermediate)
     expect(screen.getByTestId('field-known-1rm')).toBeInTheDocument();
     expect(screen.getByTestId('orm-toggle')).toBeInTheDocument();
     expect(screen.queryByTestId('orm-inputs')).not.toBeInTheDocument();
-
-    expect(screen.queryByTestId('field-avg-sleep')).not.toBeInTheDocument();
   });
 
-  it('advanced shows all fields with 1RM auto-enabled', () => {
+  /* ---- Advanced step fields ---- */
+
+  it('advanced shows all fields with 1RM auto-enabled and sleep hours', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Nâng cao' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
 
-    expect(screen.getByTestId('field-session-duration')).toBeInTheDocument();
-    expect(screen.getByTestId('field-equipment')).toBeInTheDocument();
-    expect(screen.getByTestId('field-injuries')).toBeInTheDocument();
-    expect(screen.getByTestId('field-cardio-sessions')).toBeInTheDocument();
-    expect(screen.getByTestId('field-periodization')).toBeInTheDocument();
-    expect(screen.getByTestId('field-cycle-weeks')).toBeInTheDocument();
-    expect(screen.getByTestId('field-priority-muscles')).toBeInTheDocument();
+    advanceSteps(8); // → known1rm
     expect(screen.getByTestId('field-known-1rm')).toBeInTheDocument();
     expect(screen.getByTestId('orm-inputs')).toBeInTheDocument();
+
+    clickNext(); // → sleepHours (last for advanced)
     expect(screen.getByTestId('field-avg-sleep')).toBeInTheDocument();
   });
+
+  /* ---- Multi-select and field interactions ---- */
 
   it('equipment multi-select toggles on/off', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+    advanceSteps(2); // → equipment
 
     const barbellBtn = screen.getByRole('checkbox', { name: /barbell/ });
     expect(barbellBtn).toHaveAttribute('aria-checked', 'false');
@@ -162,12 +329,28 @@ describe('FitnessOnboarding', () => {
     expect(barbellBtn).toHaveAttribute('aria-checked', 'false');
   });
 
+  it('injury multi-select toggles on/off', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    advanceSteps(3); // → injuries
+
+    const shouldersBtn = screen.getByRole('checkbox', { name: /shoulders/ });
+    expect(shouldersBtn).toHaveAttribute('aria-checked', 'false');
+
+    fireEvent.click(shouldersBtn);
+    expect(shouldersBtn).toHaveAttribute('aria-checked', 'true');
+
+    fireEvent.click(shouldersBtn);
+    expect(shouldersBtn).toHaveAttribute('aria-checked', 'false');
+  });
+
   it('priority muscles limited to 3', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+    advanceSteps(7); // → priorityMuscles
 
     const chestBtn = screen.getByRole('checkbox', { name: /^chest$/ });
     const backBtn = screen.getByRole('checkbox', { name: /^back$/ });
@@ -191,10 +374,45 @@ describe('FitnessOnboarding', () => {
     expect(armsBtn).toHaveAttribute('aria-checked', 'true');
   });
 
+  it('cardio, periodization, and cycle weeks pills are interactive', () => {
+    const onComplete = vitest.fn();
+    render(<FitnessOnboarding onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
+
+    advanceSteps(4); // → cardioSessions
+    const cardioSection = screen.getByTestId('field-cardio-sessions');
+    const cardio3 = within(cardioSection).getByRole('radio', { name: '3' });
+    fireEvent.click(cardio3);
+
+    clickNext(); // → periodization
+    const linearBtn = screen.getByRole('radio', { name: 'linear' });
+    fireEvent.click(linearBtn);
+    expect(linearBtn).toHaveAttribute('aria-checked', 'true');
+
+    clickNext(); // → cycleWeeks
+    const cycleSection = screen.getByTestId('field-cycle-weeks');
+    const cycle12 = within(cycleSection).getByRole('radio', { name: '12' });
+    fireEvent.click(cycle12);
+    expect(cycle12).toHaveAttribute('aria-checked', 'true');
+
+    // Navigate to last step and submit
+    navigateToLastStep();
+    fireEvent.click(screen.getByRole('button', { name: /Bắt đầu/ }));
+
+    const profile = useFitnessStore.getState().trainingProfile;
+    expect(profile?.cardioSessionsWeek).toBe(3);
+    expect(profile?.periodizationModel).toBe('linear');
+    expect(profile?.planCycleWeeks).toBe(12);
+  });
+
+  /* ---- Submit behavior ---- */
+
   it('clicking "Bắt đầu →" calls onComplete and store actions', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
+    navigateToLastStep();
     fireEvent.click(screen.getByRole('button', { name: /Bắt đầu/ }));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
@@ -212,18 +430,22 @@ describe('FitnessOnboarding', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
+    // Step 0: core
     fireEvent.click(screen.getByRole('radio', { name: 'Sức mạnh' }));
     fireEvent.click(screen.getByRole('radio', { name: 'Nâng cao' }));
     fireEvent.click(screen.getByRole('radio', { name: '5' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
 
+    clickNext(); // → sessionDuration
     fireEvent.click(screen.getByRole('radio', { name: '90' }));
 
-    const barbellBtn = screen.getByRole('checkbox', { name: /barbell/ });
-    fireEvent.click(barbellBtn);
+    clickNext(); // → equipment
+    fireEvent.click(screen.getByRole('checkbox', { name: /barbell/ }));
 
-    const kneeBtn = screen.getByRole('checkbox', { name: /knees/ });
-    fireEvent.click(kneeBtn);
+    clickNext(); // → injuries
+    fireEvent.click(screen.getByRole('checkbox', { name: /knees/ }));
+
+    advanceSteps(4); // → cardio → periodization → cycleWeeks → priorityMuscles
+    clickNext(); // → known1rm
 
     const squatInput = screen.getByLabelText('squat');
     fireEvent.change(squatInput, { target: { value: '140' } });
@@ -234,6 +456,7 @@ describe('FitnessOnboarding', () => {
     const deadliftInput = screen.getByLabelText('deadlift');
     fireEvent.change(deadliftInput, { target: { value: '0' } });
 
+    clickNext(); // → sleepHours
     const sleepInput = screen.getByLabelText('Giờ ngủ trung bình');
     fireEvent.change(sleepInput, { target: { value: '7.5' } });
 
@@ -250,77 +473,25 @@ describe('FitnessOnboarding', () => {
     expect(profile?.avgSleepHours).toBe(7.5);
   });
 
-  it('customize section can be toggled closed', () => {
-    const onComplete = vitest.fn();
-    render(<FitnessOnboarding onComplete={onComplete} />);
-
-    const toggleBtn = screen.getByText(/Tùy chỉnh thêm/);
-    fireEvent.click(toggleBtn);
-    expect(screen.getByTestId('customize-section')).toBeInTheDocument();
-
-    fireEvent.click(toggleBtn);
-    expect(screen.queryByTestId('customize-section')).not.toBeInTheDocument();
-  });
-
-  it('injury multi-select toggles on/off', () => {
-    const onComplete = vitest.fn();
-    render(<FitnessOnboarding onComplete={onComplete} />);
-
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
-
-    const shouldersBtn = screen.getByRole('checkbox', { name: /shoulders/ });
-    expect(shouldersBtn).toHaveAttribute('aria-checked', 'false');
-
-    fireEvent.click(shouldersBtn);
-    expect(shouldersBtn).toHaveAttribute('aria-checked', 'true');
-
-    fireEvent.click(shouldersBtn);
-    expect(shouldersBtn).toHaveAttribute('aria-checked', 'false');
-  });
-
-  it('cardio, periodization, and cycle weeks pills are interactive', () => {
-    const onComplete = vitest.fn();
-    render(<FitnessOnboarding onComplete={onComplete} />);
-
-    fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
-
-    const cardioSection = screen.getByTestId('field-cardio-sessions');
-    const cardio3 = within(cardioSection).getByRole('radio', { name: '3' });
-    fireEvent.click(cardio3);
-
-    const linearBtn = screen.getByRole('radio', { name: 'linear' });
-    fireEvent.click(linearBtn);
-    expect(linearBtn).toHaveAttribute('aria-checked', 'true');
-
-    const cycleSection = screen.getByTestId('field-cycle-weeks');
-    const cycle12 = within(cycleSection).getByRole('radio', { name: '12' });
-    fireEvent.click(cycle12);
-    expect(cycle12).toHaveAttribute('aria-checked', 'true');
-
-    fireEvent.click(screen.getByRole('button', { name: /Bắt đầu/ }));
-
-    const profile = useFitnessStore.getState().trainingProfile;
-    expect(profile?.cardioSessionsWeek).toBe(3);
-    expect(profile?.periodizationModel).toBe('linear');
-    expect(profile?.planCycleWeeks).toBe(12);
-  });
-
   it('submit with priority muscles override uses selected muscles', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+
+    advanceSteps(7); // → priorityMuscles
 
     fireEvent.click(screen.getByRole('checkbox', { name: /^chest$/ }));
     fireEvent.click(screen.getByRole('checkbox', { name: /^legs$/ }));
 
+    navigateToLastStep();
     fireEvent.click(screen.getByRole('button', { name: /Bắt đầu/ }));
 
     const profile = useFitnessStore.getState().trainingProfile;
     expect(profile?.priorityMuscles).toEqual(['chest', 'legs']);
   });
+
+  /* ---- 1RM tests ---- */
 
   it('ORM_LIFTS only contains valid exercise IDs', () => {
     const ORM_LIFT_EXERCISE_MAP: Record<string, string> = {
@@ -341,7 +512,7 @@ describe('FitnessOnboarding', () => {
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Nâng cao' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+    advanceSteps(8); // → known1rm
 
     const ormFieldset = screen.getByTestId('field-known-1rm');
     const ormInputs = within(ormFieldset).getAllByRole('spinbutton');
@@ -358,7 +529,7 @@ describe('FitnessOnboarding', () => {
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+    advanceSteps(8); // → known1rm
 
     expect(screen.getByTestId('orm-toggle')).toBeInTheDocument();
   });
@@ -367,7 +538,7 @@ describe('FitnessOnboarding', () => {
     const onComplete = vitest.fn();
     render(<FitnessOnboarding onComplete={onComplete} />);
 
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+    advanceSteps(5); // → known1rm (beginner: step 5)
 
     expect(screen.queryByTestId('orm-inputs')).not.toBeInTheDocument();
     expect(screen.queryByTestId('orm-squat')).not.toBeInTheDocument();
@@ -386,7 +557,7 @@ describe('FitnessOnboarding', () => {
     render(<FitnessOnboarding onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Nâng cao' }));
-    fireEvent.click(screen.getByText(/Tùy chỉnh thêm/));
+    advanceSteps(8); // → known1rm
 
     expect(screen.getByTestId('orm-toggle')).toBeChecked();
     expect(screen.getByTestId('orm-squat')).toBeInTheDocument();

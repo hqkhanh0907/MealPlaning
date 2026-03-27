@@ -46,7 +46,8 @@
     "select": "Chọn",
     "deselect": "Bỏ chọn",
     "clone": "Nhân bản",
-    "closeDialog": "Đóng hộp thoại"
+    "closeDialog": "Đóng hộp thoại",
+    "next": "Tiếp theo"
   },
   "meal": {
     "breakfast": "Sáng",
