@@ -90,11 +90,13 @@ const FitnessTabInner: React.FC = () => {
     setActiveSubTab(id as FitnessSubTab);
   }, []);
 
-  const handleSelectStrength = useCallback(() => {
+  const handleSelectStrength = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
     setWorkoutMode('strength');
   }, [setWorkoutMode]);
 
-  const handleSelectCardio = useCallback(() => {
+  const handleSelectCardio = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
     setWorkoutMode('cardio');
   }, [setWorkoutMode]);
 

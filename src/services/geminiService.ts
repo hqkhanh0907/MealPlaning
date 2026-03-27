@@ -101,17 +101,40 @@ const isMealPlanSuggestion = (v: unknown): v is MealPlanSuggestion =>
   'dinnerDishIds' in v && Array.isArray((v as MealPlanSuggestion).dinnerDishIds) &&
   'reasoning' in v && typeof (v as MealPlanSuggestion).reasoning === 'string';
 
+const isValidNutrition = (n: unknown): boolean => {
+  if (typeof n !== 'object' || n === null) return false;
+  const v = n as Record<string, unknown>;
+  return (
+    typeof v.calories === 'number' && !Number.isNaN(v.calories) &&
+    typeof v.protein === 'number' && !Number.isNaN(v.protein) &&
+    typeof v.carbs === 'number' && !Number.isNaN(v.carbs) &&
+    typeof v.fat === 'number' && !Number.isNaN(v.fat) &&
+    typeof v.fiber === 'number' && !Number.isNaN(v.fiber)
+  );
+};
+
 const isAnalyzedDishResult = (v: unknown): v is AnalyzedDishResult => {
   if (typeof v !== 'object' || v === null) return false;
   const r = v as Record<string, unknown>;
   if (typeof r.isFood !== 'boolean') return false;
-  // When isFood=false, other fields are optional
   if (!r.isFood) return true;
-  return (
-    typeof r.name === 'string' &&
-    typeof r.description === 'string' &&
-    Array.isArray(r.ingredients)
-  );
+  if (
+    typeof r.name !== 'string' ||
+    typeof r.description !== 'string' ||
+    !Array.isArray(r.ingredients)
+  ) {
+    return false;
+  }
+  return (r.ingredients as unknown[]).every((ing) => {
+    if (typeof ing !== 'object' || ing === null) return false;
+    const i = ing as Record<string, unknown>;
+    return (
+      typeof i.name === 'string' &&
+      typeof i.amount === 'number' &&
+      typeof i.unit === 'string' &&
+      isValidNutrition(i.nutritionPerStandardUnit)
+    );
+  });
 };
 
 const isIngredientSuggestion = (v: unknown): v is IngredientSuggestion => {

@@ -10,10 +10,15 @@ import {
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateExerciseVolume } from '../utils/trainingMetrics';
 import { parseDate, getMondayOfWeek } from '../utils/dateUtils';
+import { EXERCISES } from '../data/exerciseDatabase';
 import type { Workout, WorkoutSet } from '../types';
 import { DAY_LABELS_SUNDAY_FIRST } from '../constants';
 
 type FilterType = 'all' | 'strength' | 'cardio';
+
+const EXERCISE_NAME_MAP = new Map(
+  EXERCISES.map((e) => [e.id, e.nameVi]),
+);
 
 interface WeekGroup {
   weekKey: string;
@@ -299,7 +304,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                               >
                                 <div className="flex justify-between items-center mb-1">
                                   <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                                    {exerciseId}
+                                    {EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}
                                   </span>
                                   {exerciseVolume > 0 && (
                                     <span className="text-xs text-emerald-600 dark:text-emerald-400">

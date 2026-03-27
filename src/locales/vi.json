@@ -721,7 +721,9 @@
       "cardio": "Cardio",
       "volume": "Khối lượng",
       "minutes": "phút",
-      "completedAt": "Hoàn thành lúc"
+      "completedAt": "Hoàn thành lúc",
+      "weekOf": "Tuần từ {{date}}",
+      "exerciseCount": "{{count}} bài tập"
     },
     "progress": {
       "title": "Tiến trình",
@@ -734,7 +736,11 @@
       "estimated1rm": "1RM ước tính",
       "insights": "Phân tích",
       "dismiss": "Bỏ qua",
-      "weight": "Cân nặng"
+      "weight": "Cân nặng",
+      "missedSessions": "Bỏ lỡ {{count}} buổi tập tuần này",
+      "volumeUp": "Khối lượng tăng {{percent}}%",
+      "volumeDown": "Khối lượng giảm {{percent}}%",
+      "weightChange": "Cân nặng thay đổi {{delta}} kg"
     },
     "cardio": {
       "title": "Cardio",
@@ -834,7 +840,11 @@
       "recoveryTip1": "Ngủ đủ giấc và uống đủ nước",
       "recoveryTip2": "Ăn giàu protein để phục hồi cơ",
       "tomorrowRest": "Ngày mai nghỉ",
-      "prHighlight": "Kỷ lục cá nhân mới!"
+      "prHighlight": "Kỷ lục cá nhân mới!",
+      "exercisesCount": "{{count}} bài tập",
+      "duration": "{{minutes}} phút",
+      "setsCount": "{{count}} set",
+      "tomorrowPreview": "Ngày mai: {{name}} ({{count}} bài)"
     },
     "weightMini": {
       "noData": "Chưa có dữ liệu cân nặng",
@@ -844,12 +854,16 @@
       "stable": "Ổn định",
       "gainingFast": "Tăng nhanh",
       "needsAdjust": "Cần điều chỉnh",
-      "a11yEmpty": "Chưa ghi cân nặng"
+      "a11yEmpty": "Chưa ghi cân nặng",
+      "a11y": "Thay đổi hàng tuần {{weeklyChange}} kg, {{status}}"
     },
     "streakMini": {
       "noData": "Chưa có chuỗi tập",
       "startFirst": "Bắt đầu tập để tạo chuỗi",
-      "a11yEmpty": "Chưa có chuỗi tập luyện"
+      "a11yEmpty": "Chưa có chuỗi tập luyện",
+      "a11y": "Chuỗi tập {{days}} ngày, kỷ lục {{record}} ngày",
+      "days": "{{count}} ngày",
+      "record": "Kỷ lục: {{count}} ngày"
     }
   },
   "nutrition": {
