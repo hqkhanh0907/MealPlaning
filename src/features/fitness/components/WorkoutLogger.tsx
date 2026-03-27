@@ -7,6 +7,7 @@ import { WorkoutSummaryCard } from './WorkoutSummaryCard';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EXERCISES } from '../data/exerciseDatabase';
 import { formatElapsed } from '../utils/timeFormat';
+import { detectPRs } from '../utils/gamification';
 import type { ExerciseSeed } from '../data/exerciseDatabase';
 import type {
   Exercise,
@@ -301,7 +302,17 @@ export function WorkoutLogger({
     t,
   ]);
 
-  const detectedPRs: { exerciseName: string; weight: number }[] = [];
+  const detectedPRs = useMemo(() => {
+    if (!showSummary) return [];
+    const previousSets = useFitnessStore.getState().workoutSets ?? [];
+    const exerciseMap = new Map<string, string>(
+      currentExercises.map((ex) => [ex.id, ex.nameVi]),
+    );
+    return detectPRs(loggedSets, previousSets, exerciseMap).map((pr) => ({
+      exerciseName: pr.exerciseName,
+      weight: pr.newWeight,
+    }));
+  }, [showSummary, loggedSets, currentExercises]);
 
   if (showSummary) {
     return (

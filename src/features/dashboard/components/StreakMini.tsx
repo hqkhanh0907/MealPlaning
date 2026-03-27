@@ -58,7 +58,7 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
         aria-label={t('dashboard.streakMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+        className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
       >
         <Flame className="h-5 w-5 text-slate-400" aria-hidden={true} />
         <div>
@@ -84,7 +84,7 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
       })}
       onClick={handleTap}
       onKeyDown={handleKeyDown}
-      className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50 cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+      className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/50 cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5" data-testid="streak-count">

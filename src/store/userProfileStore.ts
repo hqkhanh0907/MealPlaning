@@ -5,10 +5,19 @@ const STORAGE_KEY = 'mp-user-profile';
 
 export const DEFAULT_USER_PROFILE: UserProfile = { weight: 83, proteinRatio: 2, targetCalories: 1500 };
 
+/** Coerce all numeric fields so string values from localStorage are safe. */
+function coerceNumericFields(raw: UserProfile): UserProfile {
+  return {
+    weight: Number(raw.weight),
+    proteinRatio: Number(raw.proteinRatio),
+    targetCalories: Number(raw.targetCalories),
+  };
+}
+
 const loadUserProfile = (): UserProfile => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) return JSON.parse(saved) as UserProfile;
+    if (saved !== null) return coerceNumericFields(JSON.parse(saved) as UserProfile);
   } catch { /* corrupted data — use default */ }
   return DEFAULT_USER_PROFILE;
 };

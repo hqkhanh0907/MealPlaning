@@ -5,6 +5,7 @@ import { SubTabBar } from '../../../components/shared/SubTabBar';
 import type { SubTab } from '../../../components/shared/SubTabBar';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useUserProfileStore } from '../../../store/userProfileStore';
+import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import type { SelectedExercise } from '../types';
 import { FitnessOnboarding } from './FitnessOnboarding';
 import { TrainingPlanView } from './TrainingPlanView';
@@ -37,6 +38,7 @@ const FitnessTabInner: React.FC = () => {
   const addTrainingPlan = useFitnessStore((s) => s.addTrainingPlan);
   const addPlanDays = useFitnessStore((s) => s.addPlanDays);
   const userProfile = useUserProfileStore((s) => s.userProfile);
+  const healthProfileAge = useHealthProfileStore((s) => s.profile.age);
   const { generatePlan, isGenerating } = useTrainingPlan();
   const { showNotification } = useNotification();
   const [confirmedExercises, setConfirmedExercises] = useState<Set<string>>(
@@ -102,14 +104,14 @@ const FitnessTabInner: React.FC = () => {
       hasGeneratedAfterOnboard.current = true;
       const result = generatePlan({
         trainingProfile,
-        healthProfile: { age: 30, weightKg: userProfile.weight },
+        healthProfile: { age: healthProfileAge ?? 30, weightKg: userProfile.weight },
       });
       if (result) {
         addTrainingPlan(result.plan);
         addPlanDays(result.days);
       }
     }
-  }, [isOnboarded, trainingProfile, trainingPlans.length, generatePlan, userProfile.weight, addTrainingPlan, addPlanDays]);
+  }, [isOnboarded, trainingProfile, trainingPlans.length, generatePlan, userProfile.weight, healthProfileAge, addTrainingPlan, addPlanDays]);
 
   const handleTabChange = useCallback((id: string) => {
     setActiveSubTab(id as FitnessSubTab);
@@ -129,7 +131,7 @@ const FitnessTabInner: React.FC = () => {
     if (!trainingProfile) return;
     const result = generatePlan({
       trainingProfile,
-      healthProfile: { age: 30, weightKg: userProfile.weight },
+      healthProfile: { age: healthProfileAge ?? 30, weightKg: userProfile.weight },
     });
     if (result) {
       addTrainingPlan(result.plan);
@@ -139,7 +141,7 @@ const FitnessTabInner: React.FC = () => {
       showNotification(t('fitness.plan.planError'), 'error');
     }
     setActiveSubTab('plan');
-  }, [trainingProfile, generatePlan, userProfile.weight, addTrainingPlan, addPlanDays, showNotification, t]);
+  }, [trainingProfile, generatePlan, userProfile.weight, healthProfileAge, addTrainingPlan, addPlanDays, showNotification, t]);
 
   const handleWorkoutComplete = useCallback(() => {
     setActiveSubTab('history');

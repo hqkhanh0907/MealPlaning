@@ -20,8 +20,7 @@ vi.mock('../features/fitness/utils/cardioEstimator', () => ({
   ),
 }));
 
-const mockAddWorkout = vi.fn();
-const mockAddWorkoutSet = vi.fn();
+const mockSaveWorkoutAtomic = vi.fn().mockResolvedValue(undefined);
 
 afterEach(cleanup);
 
@@ -31,16 +30,15 @@ describe('CardioLogger', () => {
     (useFitnessStore as unknown as Mock).mockImplementation(
       (selector: (s: Record<string, unknown>) => unknown) =>
         selector({
-          addWorkout: mockAddWorkout,
-          addWorkoutSet: mockAddWorkoutSet,
+          saveWorkoutAtomic: mockSaveWorkoutAtomic,
         }),
     );
     (useHealthProfileStore as unknown as Mock).mockImplementation(
       (selector: (s: { profile: { weightKg: number } }) => unknown) =>
         selector({ profile: { weightKg: 70 } }),
     );
-    mockAddWorkout.mockReset();
-    mockAddWorkoutSet.mockReset();
+    mockSaveWorkoutAtomic.mockReset();
+    mockSaveWorkoutAtomic.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -181,7 +179,7 @@ describe('CardioLogger', () => {
     expect(screen.getByTestId('calorie-value')).toHaveTextContent('280');
   });
 
-  it('save creates workout and calls onComplete', () => {
+  it('save creates workout and calls onComplete', async () => {
     const onComplete = vi.fn();
     render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
 
@@ -192,22 +190,31 @@ describe('CardioLogger', () => {
     });
 
     fireEvent.click(screen.getByTestId('save-button'));
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
 
-    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
-    expect(mockAddWorkoutSet).toHaveBeenCalledTimes(1);
-    expect(onComplete).toHaveBeenCalledTimes(1);
-    expect(onComplete).toHaveBeenCalledWith(
+    const [workout, sets] = mockSaveWorkoutAtomic.mock.calls[0];
+    expect(workout).toEqual(
       expect.objectContaining({
-        name: 'Ghi nhận Cardio',
+        name: 'Cardio',
         date: expect.any(String),
         durationMin: 20,
       }),
     );
-    expect(mockAddWorkoutSet).toHaveBeenCalledWith(
+    expect(sets).toHaveLength(1);
+    expect(sets[0]).toEqual(
       expect.objectContaining({
         exerciseId: 'running',
         durationMin: 20,
         intensity: 'moderate',
+      }),
+    );
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Cardio',
+        durationMin: 20,
       }),
     );
   });
@@ -238,11 +245,13 @@ describe('CardioLogger', () => {
     expect(hrInput).toHaveValue(null);
   });
 
-  it('save via finish button in header also works', () => {
+  it('save via finish button in header also works', async () => {
     const onComplete = vi.fn();
     render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
     fireEvent.click(screen.getByTestId('finish-button'));
-    expect(mockAddWorkout).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
@@ -268,7 +277,7 @@ describe('CardioLogger', () => {
     expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-emerald-500');
   });
 
-  it('saves with distance and heart rate when provided', () => {
+  it('saves with distance and heart rate when provided', async () => {
     render(<CardioLogger {...defaultProps} />);
 
     fireEvent.click(screen.getByTestId('manual-mode-button'));
@@ -284,8 +293,12 @@ describe('CardioLogger', () => {
     fireEvent.click(screen.getByTestId('intensity-high'));
 
     fireEvent.click(screen.getByTestId('save-button'));
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
 
-    expect(mockAddWorkoutSet).toHaveBeenCalledWith(
+    const [, sets] = mockSaveWorkoutAtomic.mock.calls[0];
+    expect(sets[0]).toEqual(
       expect.objectContaining({
         distanceKm: 5,
         avgHeartRate: 150,
@@ -319,17 +332,22 @@ describe('CardioLogger', () => {
     expect(screen.getByTestId('calorie-value')).toHaveTextContent('0');
   });
 
-  it('save with zero duration sends undefined durationMin', () => {
+  it('save with zero duration sends undefined durationMin', async () => {
     const onComplete = vi.fn();
     render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
     fireEvent.click(screen.getByTestId('save-button'));
 
-    expect(mockAddWorkout).toHaveBeenCalledWith(
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
+
+    const [workout, sets] = mockSaveWorkoutAtomic.mock.calls[0];
+    expect(workout).toEqual(
       expect.objectContaining({
         durationMin: undefined,
       }),
     );
-    expect(mockAddWorkoutSet).toHaveBeenCalledWith(
+    expect(sets[0]).toEqual(
       expect.objectContaining({
         durationMin: undefined,
         estimatedCalories: undefined,

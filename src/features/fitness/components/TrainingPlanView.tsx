@@ -25,11 +25,14 @@ function parseExercises(exercises?: string): SelectedExercise[] {
 
 function estimateDuration(exercises: SelectedExercise[]): number {
   if (exercises.length === 0) return 0;
+  const WARM_UP_MIN = 5;
+  const SET_DURATION_SEC = 40;
+  const SETUP_SEC = 30;
   const totalSeconds = exercises.reduce(
-    (sum, ex) => sum + ex.sets * (30 + ex.restSeconds),
+    (sum, ex) => sum + ex.sets * (SET_DURATION_SEC + ex.restSeconds) + SETUP_SEC,
     0,
   );
-  return Math.round(totalSeconds / 60) + 5;
+  return Math.round(totalSeconds / 60) + WARM_UP_MIN;
 }
 
 function getTodayDow(): number {

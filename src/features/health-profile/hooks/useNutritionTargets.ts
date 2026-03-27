@@ -53,11 +53,13 @@ export function useNutritionTargets(): NutritionTargets {
 
     if (!configured) {
       // Legacy fallback: derive protein from weight × ratio, keep old targetCalories
-      const fallbackProtein = Math.round(
-        userProfile.weight * userProfile.proteinRatio,
-      );
+      // Coerce to Number to guard against string values from localStorage
+      const weight = Number(userProfile.weight);
+      const proteinRatio = Number(userProfile.proteinRatio);
+      const targetCal = Number(userProfile.targetCalories);
+      const fallbackProtein = Math.round(weight * proteinRatio);
       return {
-        targetCalories: userProfile.targetCalories,
+        targetCalories: targetCal,
         targetProtein: fallbackProtein,
         targetFat: 0,
         targetCarbs: 0,

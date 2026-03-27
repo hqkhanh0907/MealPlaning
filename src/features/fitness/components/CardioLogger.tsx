@@ -19,8 +19,7 @@ interface CardioLoggerProps {
 
 export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.JSX.Element {
   const { t } = useTranslation();
-  const addWorkout = useFitnessStore((s) => s.addWorkout);
-  const addWorkoutSet = useFitnessStore((s) => s.addWorkoutSet);
+  const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
   const weightKg = useHealthProfileStore((s) => s.profile.weightKg);
 
   const [selectedType, setSelectedType] = useState<CardioType>('running');
@@ -53,7 +52,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
   const handlePauseStopwatch = stopwatch.stop;
   const handleStopStopwatch = stopwatch.reset;
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const now = new Date().toISOString();
     const workoutId = `workout-${Date.now()}`;
     const workout: Workout = {
@@ -64,26 +63,32 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
       createdAt: now,
       updatedAt: now,
     };
-    addWorkout(workout);
-    addWorkoutSet({
-      id: `set-${Date.now()}-cardio`,
-      workoutId,
-      exerciseId: selectedType,
-      setNumber: 1,
-      weightKg: 0,
-      durationMin: durationMin > 0 ? durationMin : undefined,
-      distanceKm,
-      avgHeartRate,
-      intensity,
-      estimatedCalories: estimatedCalories > 0 ? estimatedCalories : undefined,
-      updatedAt: now,
-    });
+    const sets = [
+      {
+        id: `set-${Date.now()}-cardio`,
+        workoutId,
+        exerciseId: selectedType,
+        setNumber: 1,
+        weightKg: 0,
+        durationMin: durationMin > 0 ? durationMin : undefined,
+        distanceKm,
+        avgHeartRate,
+        intensity,
+        estimatedCalories: estimatedCalories > 0 ? estimatedCalories : undefined,
+        updatedAt: now,
+      },
+    ];
+    try {
+      await saveWorkoutAtomic(workout, sets);
+    } catch (error) {
+      console.error('[CardioLogger] Save failed:', error);
+      return;
+    }
     onComplete(workout);
   }, [
     t,
     durationMin,
-    addWorkout,
-    addWorkoutSet,
+    saveWorkoutAtomic,
     selectedType,
     distanceKm,
     avgHeartRate,

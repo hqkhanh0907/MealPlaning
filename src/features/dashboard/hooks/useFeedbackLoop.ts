@@ -61,6 +61,9 @@ export function evaluateAndSuggestAdjustment(
   goalType: GoalType,
   tdee: number,
 ): Adjustment | null {
+  // Guard against string values leaking from localStorage / JSON deserialization
+  const target = Number(currentTarget);
+  const safeTdee = Number(tdee);
   if (goalType === 'maintain') return null;
 
   const recentEntries = getEntriesInWindow(
@@ -89,10 +92,10 @@ export function evaluateAndSuggestAdjustment(
   } = AUTO_ADJUST_CONFIG;
 
   if (goalType === 'cut' && weightChange >= -weightChangeThreshold) {
-    const floor = Math.max(minCalories, tdee - maxDeficit);
+    const floor = Math.max(minCalories, safeTdee - maxDeficit);
     const newTargetCal = Math.max(
       floor,
-      currentTarget - calorieAdjustment,
+      target - calorieAdjustment,
     );
     const reason =
       weightChange > 0
@@ -100,7 +103,7 @@ export function evaluateAndSuggestAdjustment(
         : 'Weight loss has stalled during cut phase';
     return {
       reason,
-      oldTargetCal: currentTarget,
+      oldTargetCal: target,
       newTargetCal,
       triggerType: 'auto',
       movingAvgWeight: currentAvg,
@@ -108,10 +111,10 @@ export function evaluateAndSuggestAdjustment(
   }
 
   if (goalType === 'bulk' && weightChange <= weightChangeThreshold) {
-    const cap = tdee + maxSurplus;
+    const cap = safeTdee + maxSurplus;
     const newTargetCal = Math.min(
       cap,
-      currentTarget + calorieAdjustment,
+      target + calorieAdjustment,
     );
     const reason =
       weightChange < 0
@@ -119,7 +122,7 @@ export function evaluateAndSuggestAdjustment(
         : 'Weight gain has stalled during bulk phase';
     return {
       reason,
-      oldTargetCal: currentTarget,
+      oldTargetCal: target,
       newTargetCal,
       triggerType: 'auto',
       movingAvgWeight: currentAvg,

@@ -6,6 +6,7 @@ import {
   detectAcuteFatigue,
   detectChronicOvertraining,
   isLowerBodyExercise,
+  isWeightSimilar,
   useProgressiveOverload,
 } from '../features/fitness/hooks/useProgressiveOverload';
 import type { WorkoutSet, TrainingProfile } from '../features/fitness/types';
@@ -167,6 +168,49 @@ describe('suggestNextSet', () => {
 });
 
 /* ------------------------------------------------------------------ */
+/*  isWeightSimilar                                                     */
+/* ------------------------------------------------------------------ */
+
+describe('isWeightSimilar', () => {
+  it('returns true for identical weights', () => {
+    expect(isWeightSimilar(80, 80)).toBe(true);
+  });
+
+  it('returns true when difference is within 2% tolerance', () => {
+    expect(isWeightSimilar(80, 81)).toBe(true);
+    expect(isWeightSimilar(80, 78.5)).toBe(true);
+    expect(isWeightSimilar(80, 81.6)).toBe(true);
+  });
+
+  it('returns false when difference exceeds 2% tolerance', () => {
+    expect(isWeightSimilar(80, 83)).toBe(false);
+    expect(isWeightSimilar(80, 77)).toBe(false);
+  });
+
+  it('returns true for both zero values', () => {
+    expect(isWeightSimilar(0, 0)).toBe(true);
+  });
+
+  it('returns true when one value is zero and other is zero', () => {
+    expect(isWeightSimilar(0, 0)).toBe(true);
+  });
+
+  it('returns false when one value is zero and other is nonzero', () => {
+    expect(isWeightSimilar(0, 5)).toBe(false);
+  });
+
+  it('supports custom tolerance', () => {
+    expect(isWeightSimilar(100, 105, 0.05)).toBe(true);
+    expect(isWeightSimilar(100, 106, 0.05)).toBe(false);
+  });
+
+  it('is symmetric (a,b same as b,a)', () => {
+    expect(isWeightSimilar(80, 81.5)).toBe(true);
+    expect(isWeightSimilar(81.5, 80)).toBe(true);
+  });
+});
+
+/* ------------------------------------------------------------------ */
 /*  detectPlateau                                                       */
 /* ------------------------------------------------------------------ */
 
@@ -241,6 +285,26 @@ describe('detectPlateau', () => {
     const result = detectPlateau(sessions);
     // Max weights: [60, 60, 60] → plateau
     expect(result).toEqual({ isPlateaued: true, weeks: 3 });
+  });
+
+  it('detects plateau with ±2% weight tolerance (e.g. 80 vs 80.5)', () => {
+    const sessions = [
+      [createSet({ weightKg: 80 })],
+      [createSet({ weightKg: 80.5 })],
+      [createSet({ weightKg: 79.5 })],
+    ];
+    const result = detectPlateau(sessions);
+    expect(result).toEqual({ isPlateaued: true, weeks: 3 });
+  });
+
+  it('does not detect plateau when weight difference exceeds 2%', () => {
+    const sessions = [
+      [createSet({ weightKg: 80 })],
+      [createSet({ weightKg: 80 })],
+      [createSet({ weightKg: 85 })],
+    ];
+    const result = detectPlateau(sessions);
+    expect(result).toEqual({ isPlateaued: false, weeks: 1 });
   });
 });
 

@@ -226,8 +226,8 @@ describe('TrainingPlanView', () => {
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     const stats = screen.getByTestId('workout-stats');
     expect(stats).toHaveTextContent('3 bài tập');
-    // 3*(30+90) + 3*(30+90) + 2*(30+60) = 900s = 15min + 5 warmup = 20
-    expect(stats).toHaveTextContent('~20 phút');
+    // 3*(40+90)+30 + 3*(40+90)+30 + 2*(40+60)+30 = 1070s ≈ 18min + 5 warmup = 23
+    expect(stats).toHaveTextContent('~23 phút');
   });
 
   it('workout card shows exercise names list', () => {

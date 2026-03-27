@@ -114,6 +114,11 @@ vi.mock('../store/userProfileStore', () => ({
     selector({ userProfile: { weight: 83 } }),
 }));
 
+vi.mock('../features/health-profile/store/healthProfileStore', () => ({
+  useHealthProfileStore: (selector: (state: { profile: { age: number } }) => unknown) =>
+    selector({ profile: { age: 25 } }),
+}));
+
 vi.mock('../contexts/NotificationContext', () => ({
   useNotification: () => ({
     showNotification: vi.fn(),

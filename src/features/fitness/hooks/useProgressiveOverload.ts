@@ -28,6 +28,17 @@ const EXERCISE_MAP = new Map(EXERCISES.map((e) => [e.id, e]));
 /*  Pure functions (exported for testing)                                */
 /* ------------------------------------------------------------------ */
 
+export function isWeightSimilar(
+  a: number,
+  b: number,
+  tolerance = 0.02,
+): boolean {
+  if (a === b) return true;
+  const reference = Math.max(Math.abs(a), Math.abs(b));
+  if (reference === 0) return true;
+  return Math.abs(a - b) / reference <= tolerance;
+}
+
 export function isLowerBodyExercise(exerciseId: string): boolean {
   const exercise = EXERCISE_MAP.get(exerciseId);
   if (!exercise) return false;
@@ -79,7 +90,7 @@ export function detectPlateau(
   const latestMax = maxWeights[maxWeights.length - 1];
 
   for (let i = maxWeights.length - 2; i >= 0; i--) {
-    if (maxWeights[i] === latestMax) {
+    if (isWeightSimilar(maxWeights[i], latestMax)) {
       streakCount++;
     } else {
       break;
