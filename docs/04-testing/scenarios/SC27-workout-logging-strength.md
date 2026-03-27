@@ -1980,3 +1980,218 @@ SetEditor là modal chỉnh sửa chi tiết với weight/reps controls (increme
 - **Priority**: P2 | **Type**: Negative
 - **Kết quả test thực tế**: | — |
 
+#### QuickConfirmCard
+
+##### TC_WLS_211: QuickConfirmCard renders khi có suggestions trên Plan tab
+- **Pre-conditions**: Đã hoàn thành onboarding, có active training plan với strength exercises
+- **Steps**:
+  1. Mở Tập luyện tab
+  2. Vào sub-tab Kế hoạch
+  3. Kiểm tra danh sách suggestions
+- **Expected Result**: QuickConfirmCard hiển thị với exercise name, weight, reps suggestion
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_212: QuickConfirmCard hiển thị exercise name từ suggestion
+- **Pre-conditions**: Có active plan với suggestion cho "Bench Press"
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Kiểm tra QuickConfirmCard content
+- **Expected Result**: Card hiển thị đúng tên bài tập "Bench Press" từ suggestion data
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_213: QuickConfirmCard hiển thị suggested weight (kg)
+- **Pre-conditions**: Suggestion có weight = 60kg
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Kiểm tra weight value trên QuickConfirmCard
+- **Expected Result**: Card hiển thị "60 kg" đúng giá trị weight từ suggestion
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_214: QuickConfirmCard hiển thị suggested reps
+- **Pre-conditions**: Suggestion có reps = 8
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Kiểm tra reps value trên QuickConfirmCard
+- **Expected Result**: Card hiển thị "8 reps" đúng giá trị reps từ suggestion
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_215: QuickConfirmCard hiển thị suggestion source (progressive_overload / rep_progression / manual)
+- **Pre-conditions**: Suggestion có source = "progressive_overload"
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Kiểm tra source label trên QuickConfirmCard
+- **Expected Result**: Card hiển thị badge/label "Progressive Overload" tương ứng source type
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_216: Click "Xác nhận" trên QuickConfirmCard logs set ngay lập tức
+- **Pre-conditions**: QuickConfirmCard hiển thị với suggestion weight=60kg, reps=8
+- **Steps**:
+  1. Click nút "Xác nhận" trên QuickConfirmCard
+  2. Kiểm tra workout log trong History
+- **Expected Result**: Set được log ngay với weight=60, reps=8; toast xác nhận hiển thị; card biến mất hoặc chuyển sang trạng thái completed
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_217: Click "Tùy chỉnh" mở full workout logger với pre-filled values
+- **Pre-conditions**: QuickConfirmCard hiển thị với suggestion weight=60kg, reps=8
+- **Steps**:
+  1. Click nút "Tùy chỉnh" trên QuickConfirmCard
+  2. Kiểm tra workout logger form
+- **Expected Result**: Full workout logger mở ra với weight=60, reps=8 đã điền sẵn; user có thể chỉnh sửa trước khi save
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_218: QuickConfirmCard không hiển thị khi không có suggestions
+- **Pre-conditions**: Không có active training plan hoặc plan không có strength suggestions
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Kiểm tra vùng hiển thị QuickConfirmCard
+- **Expected Result**: Không có QuickConfirmCard nào render; khu vực trống hoặc hiển thị CTA tạo plan
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_219: Multiple QuickConfirmCards hiển thị cho multi-exercise plans
+- **Pre-conditions**: Active plan có 3 exercises với suggestions (Bench Press, Squat, Deadlift)
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Scroll qua danh sách QuickConfirmCards
+- **Expected Result**: 3 QuickConfirmCards hiển thị, mỗi card tương ứng 1 exercise với đúng suggestion data
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_220: QuickConfirmCard accessibility - aria-label mô tả suggestion
+- **Pre-conditions**: QuickConfirmCard hiển thị với suggestion
+- **Steps**:
+  1. Inspect QuickConfirmCard bằng accessibility tree (DevTools)
+  2. Kiểm tra aria attributes
+- **Expected Result**: Card có aria-label mô tả đầy đủ suggestion (ví dụ: "Gợi ý: Bench Press 60kg x 8 reps"); buttons có accessible names
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+#### WorkoutSummaryCard
+
+##### TC_WLS_221: WorkoutSummaryCard hiển thị duration dạng MM:SS sau khi kết thúc workout
+- **Pre-conditions**: Đã hoàn thành workout session kéo dài 45 phút 30 giây
+- **Steps**:
+  1. Kết thúc workout session
+  2. Kiểm tra WorkoutSummaryCard
+- **Expected Result**: Duration hiển thị "45:30" đúng định dạng MM:SS
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_222: WorkoutSummaryCard hiển thị total volume (weight × reps sum)
+- **Pre-conditions**: Đã log 3 sets: 60kg×8, 60kg×8, 65kg×6 (tổng = 960+960+390 = 2310)
+- **Steps**:
+  1. Kết thúc workout session
+  2. Kiểm tra total volume trên WorkoutSummaryCard
+- **Expected Result**: Total volume hiển thị "2,310 kg" (tính đúng tổng weight × reps của tất cả sets)
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_223: WorkoutSummaryCard hiển thị sets completed count
+- **Pre-conditions**: Đã log 5 sets trong workout session
+- **Steps**:
+  1. Kết thúc workout session
+  2. Kiểm tra sets count trên WorkoutSummaryCard
+- **Expected Result**: Hiển thị "5 sets" đúng số sets đã hoàn thành
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_224: WorkoutSummaryCard hiển thị PR celebration khi phá kỷ lục cá nhân
+- **Pre-conditions**: Personal record Bench Press = 80kg; vừa log set 85kg
+- **Steps**:
+  1. Kết thúc workout session có PR mới
+  2. Kiểm tra WorkoutSummaryCard
+- **Expected Result**: PR celebration hiển thị (icon/animation/badge) với thông tin "Kỷ lục mới: Bench Press 85kg"
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_225: WorkoutSummaryCard "Lưu buổi tập" saves và navigates đến History
+- **Pre-conditions**: WorkoutSummaryCard hiển thị sau khi kết thúc workout
+- **Steps**:
+  1. Click nút "Lưu buổi tập" trên WorkoutSummaryCard
+  2. Kiểm tra navigation và data persistence
+- **Expected Result**: Workout được lưu vào database; app navigate đến History tab; workout mới xuất hiện đầu danh sách
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+#### CustomExerciseModal
+
+##### TC_WLS_226: CustomExerciseModal mở từ ExerciseSelector nút "Tạo bài tập"
+- **Pre-conditions**: Đang ở màn hình workout logger, ExerciseSelector hiển thị
+- **Steps**:
+  1. Mở ExerciseSelector
+  2. Click nút "Tạo bài tập" cuối danh sách
+- **Expected Result**: CustomExerciseModal mở ra dạng dialog/modal với form tạo bài tập mới
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_227: CustomExerciseModal form có đủ fields: name, muscle group, category, equipment
+- **Pre-conditions**: CustomExerciseModal đang mở
+- **Steps**:
+  1. Kiểm tra các form fields trong modal
+- **Expected Result**: Form chứa 4 fields: Tên bài tập (text input), Nhóm cơ (dropdown/select), Danh mục (dropdown/select), Thiết bị (dropdown/select)
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_228: CustomExerciseModal validates name is required
+- **Pre-conditions**: CustomExerciseModal đang mở
+- **Steps**:
+  1. Để trống field Tên bài tập
+  2. Điền các fields còn lại
+  3. Click Lưu
+- **Expected Result**: Validation error hiển thị "Tên bài tập là bắt buộc"; form không submit; focus chuyển về field name
+- **Priority**: P0 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_229: CustomExerciseModal save tạo exercise mới trong database
+- **Pre-conditions**: CustomExerciseModal đang mở
+- **Steps**:
+  1. Điền name = "Cable Fly", muscle group = "Ngực", category = "Isolation", equipment = "Cable"
+  2. Click Lưu
+- **Expected Result**: Exercise mới được lưu vào database; modal đóng; toast success hiển thị
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_230: Exercise mới tạo xuất hiện trong ExerciseSelector list
+- **Pre-conditions**: Đã tạo custom exercise "Cable Fly" qua CustomExerciseModal
+- **Steps**:
+  1. Mở ExerciseSelector
+  2. Tìm "Cable Fly" trong danh sách
+- **Expected Result**: "Cable Fly" xuất hiện trong danh sách exercises với đúng muscle group và category đã chọn
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_231: CustomExerciseModal dark mode styling
+- **Pre-conditions**: Dark mode enabled, CustomExerciseModal đang mở
+- **Steps**:
+  1. Inspect modal styling trong dark mode
+- **Expected Result**: Modal background dark:bg-slate-800, text readable, form inputs có contrast đủ (dark:bg-slate-700), buttons visible
+- **Priority**: P3 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_232: CustomExerciseModal keyboard navigation
+- **Pre-conditions**: CustomExerciseModal đang mở
+- **Steps**:
+  1. Tab qua tất cả form fields
+  2. Enter để submit form
+  3. Escape để đóng modal
+- **Expected Result**: Tab di chuyển focus theo thứ tự logic (name → muscle group → category → equipment → Lưu → Hủy); Enter submit; Escape đóng modal
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_WLS_233: CustomExerciseModal cancel/close không lưu data
+- **Pre-conditions**: CustomExerciseModal đang mở, đã điền một số fields
+- **Steps**:
+  1. Điền name = "Test Exercise"
+  2. Click nút Hủy hoặc icon close
+  3. Mở lại CustomExerciseModal
+- **Expected Result**: Modal đóng mà không lưu; mở lại modal thì form trống; "Test Exercise" không xuất hiện trong ExerciseSelector
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+

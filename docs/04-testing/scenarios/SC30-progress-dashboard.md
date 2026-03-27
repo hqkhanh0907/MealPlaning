@@ -1734,3 +1734,75 @@ Progress Dashboard là giao diện tổng quan theo dõi tiến trình tập luy
 - **Expected**: Focus di chuyển theo logical order
 - **Kết quả test thực tế**: | — |
 - **Type**: Positive | **Priority**: P2
+
+#### SmartInsightBanner
+
+##### TC_PRG_211: SmartInsightBanner renders phía trên fitness tabs khi có insight available
+- **Pre-conditions**: Nutrition-fitness bridge trả về insight data (ví dụ: protein intake thấp ảnh hưởng recovery)
+- **Steps**: 1. Mở Tiến trình tab 2. Kiểm tra khu vực phía trên fitness tabs
+- **Expected**: SmartInsightBanner hiển thị phía trên tabs với title và message từ bridge data
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P0
+
+##### TC_PRG_212: SmartInsightBanner hiển thị title và message từ nutrition-fitness bridge
+- **Pre-conditions**: Bridge insight có title = "Protein thấp", message = "Lượng protein hôm nay thấp hơn mục tiêu 30g, có thể ảnh hưởng phục hồi cơ"
+- **Steps**: 1. Mở Tiến trình tab 2. Đọc nội dung SmartInsightBanner
+- **Expected**: Banner hiển thị đúng title "Protein thấp" và message mô tả chi tiết từ bridge
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P0
+
+##### TC_PRG_213: SmartInsightBanner severity "info" hiển thị blue styling
+- **Pre-conditions**: Bridge insight có severity = "info"
+- **Steps**: 1. Mở Tiến trình tab 2. Inspect SmartInsightBanner styling
+- **Expected**: Banner có background blue (bg-blue-50 / dark:bg-blue-900/20), icon info màu blue, border-blue
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P1
+
+##### TC_PRG_214: SmartInsightBanner severity "warning" hiển thị yellow styling
+- **Pre-conditions**: Bridge insight có severity = "warning"
+- **Steps**: 1. Mở Tiến trình tab 2. Inspect SmartInsightBanner styling
+- **Expected**: Banner có background yellow (bg-yellow-50 / dark:bg-yellow-900/20), icon warning màu yellow, border-yellow
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P1
+
+##### TC_PRG_215: SmartInsightBanner severity "success" hiển thị green styling
+- **Pre-conditions**: Bridge insight có severity = "success"
+- **Steps**: 1. Mở Tiến trình tab 2. Inspect SmartInsightBanner styling
+- **Expected**: Banner có background green (bg-green-50 / dark:bg-green-900/20), icon success màu green, border-green
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P1
+
+##### TC_PRG_216: SmartInsightBanner dismiss button xóa banner
+- **Pre-conditions**: SmartInsightBanner đang hiển thị
+- **Steps**: 1. Click nút dismiss (X) trên SmartInsightBanner
+- **Expected**: Banner biến mất với animation; khu vực được giải phóng; insight ID được lưu vào dismissed list
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P0
+
+##### TC_PRG_217: SmartInsightBanner không hiển thị khi không có insights từ bridge
+- **Pre-conditions**: Nutrition-fitness bridge không trả về insight nào (empty array)
+- **Steps**: 1. Mở Tiến trình tab 2. Kiểm tra khu vực phía trên fitness tabs
+- **Expected**: Không có SmartInsightBanner render; fitness tabs hiển thị bình thường không có khoảng trống
+- **Kết quả test thực tế**: | — |
+- **Type**: Negative | **Priority**: P1
+
+##### TC_PRG_218: SmartInsightBanner accessible với role="alert" hoặc role="status"
+- **Pre-conditions**: SmartInsightBanner đang hiển thị
+- **Steps**: 1. Inspect SmartInsightBanner bằng accessibility tree (DevTools) 2. Kiểm tra ARIA attributes
+- **Expected**: Banner có role="alert" (cho warning) hoặc role="status" (cho info/success); dismiss button có aria-label="Đóng thông báo"
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P2
+
+##### TC_PRG_219: SmartInsightBanner dark mode contrast
+- **Pre-conditions**: Dark mode enabled, SmartInsightBanner đang hiển thị
+- **Steps**: 1. Inspect banner styling trong dark mode
+- **Expected**: Text contrast ratio ≥ 4.5:1; background colors chuyển sang dark variants; dismiss button visible
+- **Kết quả test thực tế**: | — |
+- **Type**: Edge | **Priority**: P3
+
+##### TC_PRG_220: SmartInsightBanner reappears với insight mới sau khi dismissed
+- **Pre-conditions**: Đã dismiss SmartInsightBanner trước đó; bridge trả về insight mới với ID khác
+- **Steps**: 1. Trigger insight mới từ bridge (ví dụ: thay đổi nutrition data) 2. Quay lại Tiến trình tab
+- **Expected**: SmartInsightBanner mới hiển thị với nội dung insight mới; insight cũ đã dismissed không reappear
+- **Kết quả test thực tế**: | — |
+- **Type**: Positive | **Priority**: P1

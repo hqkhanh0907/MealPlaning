@@ -2014,3 +2014,92 @@ Component tích hợp StreakCounter (đầu trang) và DailyWeightInput (cuối 
 - **Expected Result**: Heap memory không tăng đáng kể, không có detached DOM nodes tích lũy
 - **Priority**: P3 | **Type**: Edge
 - **Kết quả test thực tế**: | — |
+
+#### DeloadModal
+
+##### TC_TPV_211: DeloadModal xuất hiện sau 4 tuần liên tiếp high-intensity
+- **Pre-conditions**: Active plan đã hoàn thành 4 tuần liên tiếp với intensity ≥ 85% 1RM
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Chờ plan load xong
+- **Expected Result**: DeloadModal tự động hiển thị dạng dialog với nội dung gợi ý deload tuần tiếp theo
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_212: DeloadModal hiển thị explanation text về recovery
+- **Pre-conditions**: DeloadModal đang hiển thị
+- **Steps**:
+  1. Đọc nội dung text trong DeloadModal
+- **Expected Result**: Modal chứa explanation text giải thích lý do cần deload (ví dụ: "Bạn đã tập cường độ cao 4 tuần liên tiếp. Tuần deload giúp cơ thể phục hồi và tăng trưởng tốt hơn.")
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_213: DeloadModal nút "Chấp nhận" áp dụng deload vào plan
+- **Pre-conditions**: DeloadModal đang hiển thị
+- **Steps**:
+  1. Click nút "Chấp nhận" trên DeloadModal
+  2. Kiểm tra plan tuần tiếp theo
+- **Expected Result**: Modal đóng; plan tuần tiếp theo được cập nhật với volume giảm (~50-60% so với tuần trước); toast xác nhận hiển thị
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_214: DeloadModal nút "Bỏ qua" override deload suggestion
+- **Pre-conditions**: DeloadModal đang hiển thị
+- **Steps**:
+  1. Click nút "Bỏ qua" trên DeloadModal
+- **Expected Result**: Modal đóng; plan tiếp tục progression bình thường không giảm volume; deload suggestion bị dismiss
+- **Priority**: P0 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_215: DeloadModal không trigger khi < 4 tuần high-intensity
+- **Pre-conditions**: Active plan mới hoàn thành 3 tuần high-intensity
+- **Steps**:
+  1. Mở Tập luyện tab → sub-tab Kế hoạch
+  2. Chờ plan load xong
+- **Expected Result**: DeloadModal không xuất hiện; plan hiển thị bình thường
+- **Priority**: P1 | **Type**: Negative
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_216: DeloadModal accessibility - dialog role, focus trap
+- **Pre-conditions**: DeloadModal đang hiển thị
+- **Steps**:
+  1. Inspect DeloadModal bằng accessibility tree (DevTools)
+  2. Tab qua các elements trong modal
+  3. Tab tiếp để kiểm tra focus trap
+- **Expected Result**: Modal có role="dialog", aria-modal="true", aria-labelledby trỏ đến title; focus trapped trong modal; Tab cycle qua "Chấp nhận" → "Bỏ qua" → quay lại
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_217: Sau khi chấp nhận deload, plan hiển thị reduced volume cho tuần tiếp theo
+- **Pre-conditions**: Đã click "Chấp nhận" trên DeloadModal
+- **Steps**:
+  1. Navigate đến tuần tiếp theo trong plan view
+  2. Kiểm tra volume/weight của các exercises
+- **Expected Result**: Weight giảm ~50-60% so với tuần trước; sets giữ nguyên hoặc giảm; label "Deload Week" hiển thị trên plan header
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_218: Sau khi bỏ qua deload, plan tiếp tục normal progression
+- **Pre-conditions**: Đã click "Bỏ qua" trên DeloadModal
+- **Steps**:
+  1. Navigate đến tuần tiếp theo trong plan view
+  2. Kiểm tra volume/weight của các exercises
+- **Expected Result**: Weight tiếp tục tăng theo progression algorithm; không có label "Deload Week"; plan hoạt động bình thường
+- **Priority**: P1 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_219: DeloadModal dark mode contrast
+- **Pre-conditions**: Dark mode enabled, DeloadModal đang hiển thị
+- **Steps**:
+  1. Inspect DeloadModal styling trong dark mode
+- **Expected Result**: Modal background dark:bg-slate-800, text contrast ratio ≥ 4.5:1, buttons visible và có hover states rõ ràng
+- **Priority**: P3 | **Type**: Edge
+- **Kết quả test thực tế**: | — |
+
+##### TC_TPV_220: DeloadModal keyboard dismiss bằng phím Escape
+- **Pre-conditions**: DeloadModal đang hiển thị
+- **Steps**:
+  1. Nhấn phím Escape trên keyboard
+- **Expected Result**: Modal đóng; plan giữ nguyên trạng thái (không apply deload, tương đương "Bỏ qua"); focus trả về element trước khi modal mở
+- **Priority**: P2 | **Type**: Positive
+- **Kết quả test thực tế**: | — |
