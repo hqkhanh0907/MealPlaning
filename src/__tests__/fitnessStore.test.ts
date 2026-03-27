@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFitnessStore } from '../store/fitnessStore';
+import { createDatabaseService, type DatabaseService } from '../services/databaseService';
+import { createSchema } from '../services/schema';
 import type {
   TrainingProfile,
   TrainingPlan,
@@ -10,6 +12,15 @@ import type {
   WeightEntry,
   Exercise,
 } from '../features/fitness/types';
+
+vi.mock('@capacitor/core', () => ({
+  Capacitor: { isNativePlatform: vi.fn(() => false) },
+}));
+
+vi.mock('sql.js', async () => {
+  const real = await vi.importActual<typeof import('sql.js')>('sql.js');
+  return { default: () => real.default() };
+});
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
@@ -24,6 +35,7 @@ const INITIAL_STATE = {
   isOnboarded: false,
   workoutMode: 'strength' as const,
   workoutDraft: null,
+  sqliteReady: false,
 };
 
 function resetStore() {
@@ -133,6 +145,7 @@ describe('fitnessStore', () => {
     expect(state.isOnboarded).toBe(false);
     expect(state.workoutMode).toBe('strength');
     expect(state.workoutDraft).toBeNull();
+    expect(state.sqliteReady).toBe(false);
   });
 
   /* ---------- setTrainingProfile ---------- */
@@ -458,5 +471,210 @@ describe('fitnessStore', () => {
     });
     useFitnessStore.getState().setWorkoutDraft(null);
     expect(useFitnessStore.getState().workoutDraft).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Dual-layer SQLite tests                                             */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore dual-layer SQLite', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+  });
+
+  it('initializeFromSQLite loads workouts from SQLite', async () => {
+    await db.execute(
+      `INSERT INTO workouts (id, date, name, duration_min, notes, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ['w1', '2026-03-20', 'Push Day', 45, 'Great session', '2026-03-20T10:00:00Z', '2026-03-20T10:00:00Z'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    expect(result.current.workouts).toHaveLength(1);
+    expect(result.current.workouts[0]).toMatchObject({
+      id: 'w1',
+      date: '2026-03-20',
+      name: 'Push Day',
+      durationMin: 45,
+    });
+    expect(result.current.sqliteReady).toBe(true);
+  });
+
+  it('initializeFromSQLite loads workout sets from SQLite', async () => {
+    await db.execute('PRAGMA foreign_keys = OFF');
+    await db.execute(
+      `INSERT INTO workouts (id, date, name, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      ['w1', '2026-03-20', 'Push', '2026-03-20T10:00:00Z', '2026-03-20T10:00:00Z'],
+    );
+    await db.execute(
+      `INSERT INTO workout_sets (id, workout_id, exercise_id, set_number, reps, weight_kg, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ['s1', 'w1', 'bench', 1, 8, 80, '2026-03-20T10:00:00Z'],
+    );
+    await db.execute('PRAGMA foreign_keys = ON');
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    expect(result.current.workoutSets).toHaveLength(1);
+    expect(result.current.workoutSets[0]).toMatchObject({
+      id: 's1',
+      workoutId: 'w1',
+      exerciseId: 'bench',
+      setNumber: 1,
+      reps: 8,
+      weightKg: 80,
+    });
+  });
+
+  it('initializeFromSQLite loads weight entries from SQLite', async () => {
+    await db.execute(
+      `INSERT INTO weight_log (id, date, weight_kg, notes, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      ['wl1', '2026-03-20', 75.5, 'Morning weight', '2026-03-20T07:00:00Z', '2026-03-20T07:00:00Z'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    expect(result.current.weightEntries).toHaveLength(1);
+    expect(result.current.weightEntries[0]).toMatchObject({
+      id: 'wl1',
+      weightKg: 75.5,
+    });
+  });
+
+  it('initializeFromSQLite sets sqliteReady to true', async () => {
+    expect(useFitnessStore.getState().sqliteReady).toBe(false);
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    expect(result.current.sqliteReady).toBe(true);
+  });
+
+  it('initializeFromSQLite handles empty tables gracefully', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    expect(result.current.workouts).toEqual([]);
+    expect(result.current.workoutSets).toEqual([]);
+    expect(result.current.weightEntries).toEqual([]);
+    expect(result.current.sqliteReady).toBe(true);
+  });
+
+  it('write-through: addWorkout updates both Zustand and SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({ id: 'wt-1', name: 'Write-Through Test' });
+    act(() => {
+      result.current.addWorkout(workout);
+    });
+
+    expect(result.current.workouts).toContainEqual(workout);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM workouts WHERE id = ?',
+      ['wt-1'],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].name).toBe('Write-Through Test');
+  });
+
+  it('write-through: addWorkoutSet updates both Zustand and SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.execute('PRAGMA foreign_keys = OFF');
+    await db.execute(
+      `INSERT INTO workouts (id, date, name, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      ['wt-w1', '2026-03-20', 'Test', '2026-03-20T10:00:00Z', '2026-03-20T10:00:00Z'],
+    );
+
+    const workoutSet = sampleWorkoutSet({ id: 'wt-s1', workoutId: 'wt-w1' });
+    act(() => {
+      result.current.addWorkoutSet(workoutSet);
+    });
+
+    expect(result.current.workoutSets).toContainEqual(workoutSet);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM workout_sets WHERE id = ?',
+      ['wt-s1'],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].workoutId).toBe('wt-w1');
+    await db.execute('PRAGMA foreign_keys = ON');
+  });
+
+  it('read-after-write: data persists through SQLite round-trip', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({ id: 'raw-1', name: 'Round-Trip Test' });
+    act(() => {
+      result.current.addWorkout(workout);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    resetStore();
+
+    await act(async () => {
+      await useFitnessStore.getState().initializeFromSQLite(db);
+    });
+
+    const loaded = useFitnessStore.getState().workouts;
+    expect(loaded.find((w) => w.id === 'raw-1')).toBeDefined();
+    expect(loaded.find((w) => w.id === 'raw-1')?.name).toBe('Round-Trip Test');
+  });
+
+  it('initializeFromSQLite survives query failure gracefully', async () => {
+    const badDb: DatabaseService = {
+      ...db,
+      query: () => Promise.reject(new Error('DB error')),
+    };
+
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    expect(result.current.sqliteReady).toBe(false);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
   });
 });
