@@ -1,7 +1,7 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 7.0  
-**Date:** 2026-03-26  
+**Version:** 8.0  
+**Date:** 2026-03-27  
 **Author:** Dev Team
 
 ---
