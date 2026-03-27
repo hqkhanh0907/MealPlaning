@@ -68,11 +68,46 @@ vi.mock('../features/fitness/components/StreakCounter', () => ({
   ),
 }));
 
+vi.mock('../features/fitness/components/SmartInsightBanner', () => ({
+  SmartInsightBanner: () => (
+    <div data-testid="smart-insight-banner">SmartInsightBanner</div>
+  ),
+}));
+
+vi.mock('../features/fitness/components/QuickConfirmCard', () => ({
+  QuickConfirmCard: () => (
+    <div data-testid="quick-confirm-card">QuickConfirmCard</div>
+  ),
+}));
+
+vi.mock('../features/fitness/hooks/useFitnessNutritionBridge', () => ({
+  useFitnessNutritionBridge: () => ({ insight: null }),
+}));
+
+vi.mock('../features/fitness/hooks/useProgressiveOverload', () => ({
+  useProgressiveOverload: () => ({
+    suggestNextSet: () => ({ weight: 60, reps: 8, source: 'manual' }),
+    getLastSets: () => [],
+    checkPlateau: () => ({ isPlateaued: false, weeks: 0 }),
+    analyzeExercisePlateau: () => ({
+      isPlateaued: false,
+      plateauWeeks: 0,
+      suggestion: null,
+    }),
+    checkAcuteFatigue: () => ({ level: 'none', message: '' }),
+    checkChronicOvertraining: () => ({ level: 'none', message: '' }),
+    acuteFatigue: { level: 'none', message: '' },
+    chronicOvertraining: { level: 'none', message: '' },
+  }),
+}));
+
 interface MockFitnessState {
   isOnboarded: boolean;
   setOnboarded: Mock;
   workoutMode: 'strength' | 'cardio';
   setWorkoutMode: Mock;
+  trainingPlans: unknown[];
+  trainingPlanDays: unknown[];
 }
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
@@ -94,6 +129,8 @@ describe('FitnessTab', () => {
             setOnboarded: mockSetOnboarded,
             workoutMode: 'strength',
             setWorkoutMode: mockSetWorkoutMode,
+            trainingPlans: [],
+            trainingPlanDays: [],
           }),
       );
     });
@@ -136,6 +173,8 @@ describe('FitnessTab', () => {
             setOnboarded: mockSetOnboarded,
             workoutMode: 'strength',
             setWorkoutMode: mockSetWorkoutMode,
+            trainingPlans: [],
+            trainingPlanDays: [],
           }),
       );
     });
@@ -233,6 +272,8 @@ describe('FitnessTab', () => {
             setOnboarded: mockSetOnboarded,
             workoutMode: 'cardio',
             setWorkoutMode: mockSetWorkoutMode,
+            trainingPlans: [],
+            trainingPlanDays: [],
           }),
       );
       render(<FitnessTab />);
@@ -256,6 +297,8 @@ describe('FitnessTab', () => {
             setOnboarded: mockSetOnboarded,
             workoutMode: 'cardio',
             setWorkoutMode: mockSetWorkoutMode,
+            trainingPlans: [],
+            trainingPlanDays: [],
           }),
       );
       render(<FitnessTab />);
