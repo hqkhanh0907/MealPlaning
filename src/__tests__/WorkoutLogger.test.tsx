@@ -288,7 +288,7 @@ describe('WorkoutLogger', () => {
   it('shows summary on finish', () => {
     render(<WorkoutLogger {...defaultProps} />);
     fireEvent.click(screen.getByTestId('finish-button'));
-    expect(screen.getByTestId('workout-summary')).toBeInTheDocument();
+    expect(screen.getByTestId('workout-summary-card')).toBeInTheDocument();
     expect(screen.getByText('Tổng kết buổi tập')).toBeInTheDocument();
   });
 
@@ -322,11 +322,11 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('finish-button'));
 
-    expect(screen.getByTestId('summary-volume')).toHaveTextContent('1000');
-    expect(screen.getByTestId('summary-sets')).toHaveTextContent('2');
-    expect(screen.getByTestId('summary-duration')).toHaveTextContent(
-      '01:05',
-    );
+    const summary = screen.getByTestId('workout-summary-card');
+    expect(summary).toBeInTheDocument();
+    expect(summary).toHaveTextContent('1,000 kg');
+    expect(summary).toHaveTextContent('2');
+    expect(summary).toHaveTextContent('01:05');
   });
 
   it('calls onComplete and stores workout on save', async () => {

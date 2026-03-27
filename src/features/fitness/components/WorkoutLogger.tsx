@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { RestTimer } from './RestTimer';
 import { ExerciseSelector } from './ExerciseSelector';
+import { WorkoutSummaryCard } from './WorkoutSummaryCard';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EXERCISES } from '../data/exerciseDatabase';
 import { formatElapsed } from '../utils/timeFormat';
@@ -261,58 +262,17 @@ export function WorkoutLogger({
     t,
   ]);
 
+  const detectedPRs: { exerciseName: string; weight: number }[] = [];
+
   if (showSummary) {
     return (
-      <div
-        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900"
-        data-testid="workout-summary"
-      >
-        <div className="flex flex-1 flex-col items-center justify-center p-6">
-          <h2 className="mb-8 text-2xl font-bold text-slate-800 dark:text-slate-100">
-            {t('fitness.logger.summary')}
-          </h2>
-          <div className="w-full max-w-sm space-y-4">
-            <div
-              className="flex justify-between"
-              data-testid="summary-duration"
-            >
-              <span className="text-slate-500">
-                {t('fitness.logger.duration')}
-              </span>
-              <span className="font-semibold text-slate-800 dark:text-slate-100">
-                {formatElapsed(elapsedSeconds)}
-              </span>
-            </div>
-            <div
-              className="flex justify-between"
-              data-testid="summary-volume"
-            >
-              <span className="text-slate-500">
-                {t('fitness.logger.totalVolume')}
-              </span>
-              <span className="font-semibold text-slate-800 dark:text-slate-100">
-                {totalVolume} kg
-              </span>
-            </div>
-            <div className="flex justify-between" data-testid="summary-sets">
-              <span className="text-slate-500">
-                {t('fitness.logger.setsCompleted')}
-              </span>
-              <span className="font-semibold text-slate-800 dark:text-slate-100">
-                {loggedSets.length}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="mt-8 w-full max-w-sm rounded-xl bg-emerald-500 py-3 font-semibold text-white transition-colors hover:bg-emerald-600"
-            data-testid="save-workout-button"
-          >
-            {t('fitness.logger.save')}
-          </button>
-        </div>
-      </div>
+      <WorkoutSummaryCard
+        durationSeconds={elapsedSeconds}
+        totalVolume={totalVolume}
+        setsCompleted={loggedSets.length}
+        personalRecords={detectedPRs}
+        onSave={handleSave}
+      />
     );
   }
 
