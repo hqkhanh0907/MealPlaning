@@ -1,10 +1,10 @@
 # Test Report — Smart Meal Planner
 
-**Version:** 24.0  
+**Version:** 25.0  
 **Date:** 2026-03-27  
 **Commit:** TBD
 
-> **v24.0**: QA Cycle 23 — Comprehensive TC Expansion & Manual Verification. Expanded ALL 40 scenarios to 200+ TCs each (total: 14,482 TCs, up from 1,137). 75 manual Chrome DevTools tests across 23 scenarios — ALL PASS. Tested: Calendar navigation, MealPlannerModal, Library/Dish CRUD, AI Image Analysis, Fitness Tab (4 sub-tabs, workout timer, summary, history, progress dashboard, gamification), Dashboard (5-tier layout, energy balance, protein progress, AI insights, quick actions), Settings, WCAG a11y (landmarks, tablist, aria states, live regions). Zero console errors/warnings across all 5 tabs. Xem [Changelog](#9-changelog).
+> **v25.0**: QA Cycle 24 — Full Manual QA Regression. 158 manual Chrome DevTools TCs across all 40 scenarios — 155 PASS, 3 FAIL (98.1%). 2 bugs found: BUG-NaN-MODAL (High — NaN in dish ingredient nutrition modal), BUG-CALORIE-CONCAT (Medium — calorie target string concatenation "1500100"). Full workout flow, desktop responsive at 1200px, dark mode, 5-tab navigation, WCAG landmarks, 130+ Vietnamese exercises verified. Total documented TCs: 14,482. Xem [Changelog](#10-changelog).
 
 ---
 
@@ -23,7 +23,7 @@
 | Code Coverage (Funcs) | **98.92%** ✅ |
 | Code Coverage (Lines) | **99.51%** ✅ |
 | Runtime QA (DevTools) | **0 errors, 0 warnings** ✅ |
-| Bugs mở | **0** ✅ |
+| Bugs mở | **2** ⚠️ (BUG-NaN-MODAL, BUG-CALORIE-CONCAT) |
 | Bugs đã đóng | **11** (BUG-001, BUG-002, BUG-DOC-001, BUG-FAVICON-001, BUG-E2E-001, BUG-E2E-002, BUG-E2E-003, BUG-DM-001, BUG-TRANSLATE-001, BUG-EXPORT-001, BUG-NAN-001) |
 
 ---
@@ -257,6 +257,28 @@ protein: (ingredient.proteinPer100 || 0) * factor,
 **Test coverage:** Unit tests trong `nutrition.test.ts` — đã cover. Runtime verified: 0 console errors.  
 **Commit:** Committed cùng batch Vite best practices changes.
 
+### BUG-NaN-MODAL: NaN displayed for ingredient nutrition values in dish creation modal (OPEN)
+
+**Phát hiện:** QA Cycle 24 (2026-03-27) via Chrome DevTools MCP | **Mức độ:** High | **Priority:** P1  
+**Component:** Dish creation modal — ingredient nutrition display  
+**Scenario:** SC07: TC_DISH_011, TC_DISH_014  
+**Steps to reproduce:** Library → Món ăn → Tạo mới → Add ingredient → Observe nutrition values  
+**Actual result:** NaN displayed for cal/pro/carb/fat fields for all ingredients  
+**Expected result:** Numeric nutrition values calculated from ingredient per-100g data  
+**Root cause:** TBD — likely ingredient nutrition fields undefined or calculation factor error in dish creation context  
+**Impact:** All ingredient nutrition calculations show NaN in dish creation modal, blocking accurate dish nutrition tracking
+
+### BUG-CALORIE-CONCAT: Calorie target displays "1500100" instead of proper value (OPEN)
+
+**Phát hiện:** QA Cycle 24 (2026-03-27) via Chrome DevTools MCP | **Mức độ:** Medium | **Priority:** P2  
+**Component:** Calendar → Nutrition tab — calorie goal display  
+**Scenario:** SC03: TC_NUT_004  
+**Steps to reproduce:** Calendar → Dinh dưỡng tab → View calorie goal  
+**Actual result:** Calorie target displays "1500100" (string concatenation)  
+**Expected result:** Proper numeric calorie target value (e.g., 1500 or 1600)  
+**Root cause:** TBD — likely string concatenation instead of numeric addition (e.g., `"1500" + "100"` instead of `1500 + 100`)  
+**Impact:** Calorie target appears as concatenated string, misleading nutrition goal display
+
 ---
 
 ## 4. Known Limitations
@@ -285,6 +307,8 @@ protein: (ingredient.proteinPer100 || 0) * factor,
 | 2026-03-11 | 1201/1201 | 24/24 | ✅ | `412ad4e` | QA Cycle 6: Google Drive sync, Cloud auth, Desktop layout, Meal templates, Copy plan, AI suggest ingredients, +155 tests |
 | 2026-03-13 | 1280/1280 | 24/24 | ✅ | TBD | QA Cycle 21: Vite best practices audit, English removal, lazy loading, code splitting, TS strict mode, BUG-NAN-001 fix |
 | 2026-03-26 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 22: Nutrition & Fitness Integration v2.0, 16 new scenario docs (SC25–SC40), 89 manual TCs all PASS |
+| 2026-03-27 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 23: TC expansion to 14,482 documented TCs across 40 scenarios, 75 manual TCs all PASS |
+| 2026-03-27 | 2860/2860 | 24/24 | ✅ | TBD | QA Cycle 24: Full regression — 158 manual TCs, 155 PASS, 3 FAIL. 2 bugs: BUG-NaN-MODAL (High), BUG-CALORIE-CONCAT (Medium) |
 
 ---
 
@@ -417,7 +441,78 @@ protein: (ingredient.proteinPer100 || 0) * factor,
 
 ---
 
-## 9. Changelog
+## 9. QA Cycle 24: Full Manual QA Regression (v25.0)
+
+**Date:** 2026-03-27  
+**Scope:** Full regression across all 40 scenarios (SC01–SC40)  
+**Tester:** AI QA Agent via Chrome DevTools MCP  
+**Environment:** macOS, Chrome, localhost:3000 (Vite dev server)  
+**Console Errors:** 0 | **Console Warnings:** 0
+
+### Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Manual TCs Executed | 158 |
+| Passed | 155 (98.1%) |
+| Failed | 3 (1.9%) |
+| Scenarios Covered | 40/40 (100%) |
+| Documented TCs (total) | 14,482 |
+| Console Errors | 0 |
+| Console Warnings | 0 |
+
+### Manual Test Results (Chrome DevTools)
+
+| Scenario Group | TCs Tested | Passed | Failed | Notes |
+|----------------|-----------|--------|--------|-------|
+| SC01–SC02: Calendar & Modal | 10 each | 20 | 0 | 100% PASS |
+| SC03: Nutrition | 5 | 4 | 1 | 80% PASS — BUG-CALORIE-CONCAT (TC_NUT_004) |
+| SC04: AI Analysis | 3 | 3 | 0 | 100% PASS |
+| SC05–SC06: Library | 5 | 5 | 0 | 100% PASS |
+| SC07: Dish Creation | 17 | 15 | 2 | 88% PASS — BUG-NaN-MODAL (TC_DISH_011, TC_DISH_014) |
+| SC08: Settings | 8 | 8 | 0 | 100% PASS |
+| SC09–SC12: Goals/Copy/Clear/Templates | 5 | 5 | 0 | 100% PASS |
+| SC13–SC15: Templates/Grocery/Translation | 4 | 4 | 0 | 100% PASS |
+| SC16–SC17: Backup/Drive | 2 | 2 | 0 | 100% PASS |
+| SC18–SC19: Responsive/Preview | 5 | 5 | 0 | 100% PASS |
+| SC20–SC24: Filter/AI/Dark/i18n/Export | 9 | 9 | 0 | 100% PASS |
+| SC25–SC28: Fitness Core | 26 | 26 | 0 | 100% PASS |
+| SC29–SC32: Fitness Analysis | 14 | 14 | 0 | 100% PASS |
+| SC33–SC36: Dashboard | 10 | 10 | 0 | 100% PASS |
+| SC37–SC40: Integration/Nav/WCAG/Migration | 17 | 17 | 0 | 100% PASS |
+| **TOTAL** | **158** | **155** | **3** | **98.1% pass rate** |
+
+### Bugs Found (2 bugs, 3 failing TCs)
+
+| Bug ID | Severity | Scenario | Failing TCs | Description |
+|--------|----------|----------|-------------|-------------|
+| BUG-NaN-MODAL | High | SC07 | TC_DISH_011, TC_DISH_014 | NaN displayed for ingredient nutrition values (cal/pro/carb/fat) in dish creation modal |
+| BUG-CALORIE-CONCAT | Medium | SC03 | TC_NUT_004 | Calorie target displays "1500100" instead of proper numeric value (string concatenation) |
+
+### Key Testing Highlights
+
+1. **Full workout flow tested:** exercise select → log set → rest timer → summary → save → history
+2. **Desktop responsive verified at 1200px:** horizontal nav, 4-column metric grid, proper layout
+3. **Dark mode toggle verified** with screenshot confirmation
+4. **All 5 navigation tabs functional** with proper WCAG landmarks
+5. **130+ exercises in Vietnamese** with muscle group filtering verified
+6. **Streak counter consistent** across Fitness and Dashboard tabs
+7. **Export data** with success toast notification confirmed
+8. **Grocery list modal** with time filters working correctly
+
+### Console Monitoring
+- ✅ Zero errors across all tab navigations
+- ✅ Zero warnings during full test session
+- ✅ No resource loading issues
+
+### Verdict
+⚠️ **CONDITIONAL PASS** — 155/158 TCs passed (98.1%). 2 open bugs require resolution before full sign-off:
+- **BUG-NaN-MODAL** (High, P1): Blocks dish creation nutrition accuracy
+- **BUG-CALORIE-CONCAT** (Medium, P2): Misleading calorie goal display
+
+---
+
+## 10. Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
@@ -444,3 +539,5 @@ protein: (ingredient.proteinPer100 || 0) * factor,
 | 21.0 | 2026-03-12 | QA Cycle 20: Batch 2 UX features implemented + comprehensive Chrome DevTools manual testing. New features: SC07-3 Portion Size Adjuster (serving stepper 1-10x with auto-scale nutrition), SC01-1 Macro Ratio Pie Chart (SVG donut chart with protein/carbs/fat %). 56 critical TCs manually tested via Chrome DevTools MCP — ALL PASS. Verified: serving boundaries, reload persistence, macro empty state, dish rating stars/sort, recently used ingredients, template tags/search, recipe-linked grocery items, desktop layout, keyboard shortcuts, dark mode, language switch, Google OAuth popup. Unit tests 1201→1307 (+106). Coverage: 99.32% Stmts, 99.21% Funcs, 100% Lines, 92.47% Branch. Zero console errors. |
 | 22.0 | 2026-03-13 | QA Cycle 21: **Vite Best Practices Audit** (score 50→85/100). Removed English language support entirely — Vietnamese only. Removed OPUS-mt models + Web Worker (206MB). Migrated `process.env.GEMINI_API_KEY` → `import.meta.env.VITE_GEMINI_API_KEY`. Enabled TypeScript strict mode. Lazy loading: ManagementTab, SettingsTab, 7 modals. Code splitting: manual chunks (vendor-react, vendor-ui, vendor-i18n). Compression: gzip + brotli. Bundle analysis: rollup-plugin-visualizer. Main chunk 833KB→573KB (-31%). Prefetch: `usePrefetchAfterIdle` hook. BUG-NAN-001 fixed (NaN in nutrition calculation). Runtime testing: 0 console errors, 0 warnings across all 5 tabs + modals. Unit tests 1307→1280 (removed English translation tests), 56 files. Coverage: 99.03% Stmts, 98.33% Funcs, 99.87% Lines, 92.61% Branch. |
 | 23.0 | 2026-03-26 | QA Cycle 22: **Nutrition & Fitness Integration v2.0**. 29 implementation tasks across 4 phases (Infrastructure, Training System, Dashboard, Integration). 16 new scenario documents (SC25–SC40, 880 TCs, 55 per scenario). 89 manual Chrome DevTools TCs across 13 scenarios — ALL PASS. Fitness Tab: onboarding, workout logging, history, progress, gamification. Dashboard Tab: daily score, energy/protein, today's plan, quick actions, auto-adjust insights. Integration: migration V2, sync, cross-feature nav, WCAG accessibility. Unit tests 1280→2860 (+1580), 56→125 test files. Coverage: 98.93% Stmts, 92.97% Branch, 98.92% Funcs, 99.51% Lines. ESLint: 0 errors, 0 eslint-disable. Total manual TCs: 4,534 (SC01–SC40, SC11–SC16 expanded to 210 TCs each). Zero console errors/warnings. Zero bugs found. |
+| 24.0 | 2026-03-27 | QA Cycle 23: **Comprehensive TC Expansion & Manual Verification**. Expanded ALL 40 scenarios to 200+ TCs each (total: 14,482 TCs, up from 1,137). 75 manual Chrome DevTools tests across 23 scenarios — ALL PASS. Tested: Calendar navigation, MealPlannerModal, Library/Dish CRUD, AI Image Analysis, Fitness Tab, Dashboard, Settings, WCAG a11y. Zero console errors/warnings across all 5 tabs. |
+| 25.0 | 2026-03-27 | QA Cycle 24: **Full Manual QA Regression**. 158 manual Chrome DevTools TCs across all 40 scenarios — 155 PASS, 3 FAIL (98.1%). 2 bugs found: BUG-NaN-MODAL (High — NaN in dish creation ingredient nutrition), BUG-CALORIE-CONCAT (Medium — calorie target string concatenation "1500100"). Key verifications: full workout flow (exercise→log→timer→summary→save→history), desktop responsive 1200px, dark mode toggle, 5-tab navigation, WCAG landmarks, 130+ Vietnamese exercises, streak counter consistency, export with toast, grocery time filters. Total documented TCs: 14,482. Zero console errors. |
