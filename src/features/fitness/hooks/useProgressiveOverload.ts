@@ -90,28 +90,76 @@ export function detectPlateau(
   };
 }
 
-function hasRpe(s: WorkoutSet): s is WorkoutSet & { rpe: number } {
-  return s.rpe != null;
+export function detectAcuteFatigue(
+  recentSets: WorkoutSet[],
+): { level: 'none' | 'moderate' | 'high'; message: string } {
+  if (recentSets.length < 3) return { level: 'none', message: '' };
+  const last3Rpes = recentSets
+    .slice(-9)
+    .map((s) => s.rpe ?? 0)
+    .filter((r) => r > 0);
+  if (last3Rpes.length === 0) return { level: 'none', message: '' };
+  const avgRpe = last3Rpes.reduce((a, b) => a + b, 0) / last3Rpes.length;
+  const lastSessionVolume = recentSets
+    .slice(-3)
+    .reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0);
+  const avgSessionVolume =
+    recentSets
+      .slice(-9, -3)
+      .reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0) / 2;
+  const volumeSpikeRatio =
+    avgSessionVolume > 0 ? lastSessionVolume / avgSessionVolume : 1;
+  if (avgRpe >= 9.0 || volumeSpikeRatio > 1.3) {
+    return {
+      level: 'high',
+      message: `Acute fatigue: avg RPE ${avgRpe.toFixed(1)}, volume spike ${Math.round(volumeSpikeRatio * 100)}%`,
+    };
+  }
+  if (avgRpe >= 8.0) {
+    return {
+      level: 'moderate',
+      message: `Moderate fatigue: avg RPE ${avgRpe.toFixed(1)}`,
+    };
+  }
+  return { level: 'none', message: '' };
 }
 
-export function detectOvertraining(
-  sets: WorkoutSet[],
-  rpeThreshold = 9,
-): { isOvertraining: boolean; avgRpe: number } {
-  const setsWithRpe = sets.filter(hasRpe);
-
-  if (setsWithRpe.length === 0) {
-    return { isOvertraining: false, avgRpe: 0 };
+export function detectChronicOvertraining(
+  historySets: WorkoutSet[],
+): { level: 'none' | 'moderate' | 'high'; message: string } {
+  if (historySets.length < 12) return { level: 'none', message: '' };
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const weeklyVolumes: number[] = [];
+  for (let w = 0; w < 6; w++) {
+    const weekStart = now - (w + 1) * weekMs;
+    const weekEnd = now - w * weekMs;
+    const weekSets = historySets.filter((s) => {
+      const t = new Date(s.updatedAt).getTime();
+      return t >= weekStart && t < weekEnd;
+    });
+    weeklyVolumes.unshift(
+      weekSets.reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0),
+    );
   }
-
-  const totalRpe = setsWithRpe.reduce((sum, s) => sum + s.rpe, 0);
-  const avgRpe =
-    Math.round((totalRpe / setsWithRpe.length) * 100) / 100;
-
-  return {
-    isOvertraining: avgRpe > rpeThreshold,
-    avgRpe,
-  };
+  let decliningWeeks = 0;
+  for (let i = 1; i < weeklyVolumes.length; i++) {
+    if (weeklyVolumes[i] < weeklyVolumes[i - 1] * 0.95) decliningWeeks++;
+    else decliningWeeks = 0;
+  }
+  if (decliningWeeks >= 4) {
+    return {
+      level: 'high',
+      message: `Chronic overtraining: ${decliningWeeks} weeks declining`,
+    };
+  }
+  if (decliningWeeks >= 2) {
+    return {
+      level: 'moderate',
+      message: `Watch: ${decliningWeeks} weeks declining`,
+    };
+  }
+  return { level: 'none', message: '' };
 }
 
 /* ------------------------------------------------------------------ */
@@ -128,10 +176,15 @@ export function useProgressiveOverload(): {
   checkPlateau: (
     exerciseId: string,
   ) => { isPlateaued: boolean; weeks: number };
-  checkOvertraining: (
+  checkAcuteFatigue: (
     exerciseId: string,
     recentSets: WorkoutSet[],
-  ) => { isOvertraining: boolean; avgRpe: number };
+  ) => { level: 'none' | 'moderate' | 'high'; message: string };
+  checkChronicOvertraining: (
+    exerciseId: string,
+  ) => { level: 'none' | 'moderate' | 'high'; message: string };
+  acuteFatigue: { level: 'none' | 'moderate' | 'high'; message: string };
+  chronicOvertraining: { level: 'none' | 'moderate' | 'high'; message: string };
 } {
   const workoutSets = useFitnessStore((state) => state.workoutSets);
   const workouts = useFitnessStore((state) => state.workouts);
@@ -146,6 +199,16 @@ export function useProgressiveOverload(): {
     }
     return map;
   }, [workoutSets]);
+
+  const acuteFatigue = useMemo(
+    () => detectAcuteFatigue(workoutSets),
+    [workoutSets],
+  );
+
+  const chronicOvertraining = useMemo(
+    () => detectChronicOvertraining(workoutSets),
+    [workoutSets],
+  );
 
   const getLastSets = useCallback(
     (exerciseId: string): WorkoutSet[] => {
@@ -191,17 +254,29 @@ export function useProgressiveOverload(): {
     [workoutSets, workouts, workoutSetsByWorkoutId],
   );
 
-  const checkOvertrainingFn = useCallback(
+  const checkAcuteFatigueFn = useCallback(
     (
       exerciseId: string,
       recentSets: WorkoutSet[],
-    ): { isOvertraining: boolean; avgRpe: number } => {
+    ): { level: 'none' | 'moderate' | 'high'; message: string } => {
       const exerciseSets = recentSets.filter(
         (s) => s.exerciseId === exerciseId,
       );
-      return detectOvertraining(exerciseSets);
+      return detectAcuteFatigue(exerciseSets);
     },
     [],
+  );
+
+  const checkChronicOvertrainingFn = useCallback(
+    (
+      exerciseId: string,
+    ): { level: 'none' | 'moderate' | 'high'; message: string } => {
+      const exerciseSets = workoutSets.filter(
+        (s) => s.exerciseId === exerciseId,
+      );
+      return detectChronicOvertraining(exerciseSets);
+    },
+    [workoutSets],
   );
 
   const suggestNextSetFn = useCallback(
@@ -224,25 +299,42 @@ export function useProgressiveOverload(): {
       );
 
       const plateauResult = checkPlateauFn(exerciseId);
-      const overtrainingResult = detectOvertraining(lastSets);
+      const exerciseSets = workoutSets.filter(
+        (s) => s.exerciseId === exerciseId,
+      );
+      const fatigueResult = detectAcuteFatigue(exerciseSets);
+      const setsWithRpe = exerciseSets.filter(
+        (s) => s.rpe != null && s.rpe > 0,
+      );
+      const avgRpe =
+        setsWithRpe.length > 0
+          ? Math.round(
+              (setsWithRpe.reduce((sum, s) => sum + (s.rpe ?? 0), 0) /
+                setsWithRpe.length) *
+                100,
+            ) / 100
+          : 0;
 
       return {
         ...suggestion,
         ...(plateauResult.isPlateaued
           ? { isPlateaued: true, plateauWeeks: plateauResult.weeks }
           : {}),
-        ...(overtrainingResult.isOvertraining
-          ? { isOvertraining: true, avgRpe: overtrainingResult.avgRpe }
+        ...(fatigueResult.level !== 'none'
+          ? { isOvertraining: true, avgRpe }
           : {}),
       };
     },
-    [getLastSets, trainingProfile, checkPlateauFn],
+    [getLastSets, trainingProfile, checkPlateauFn, workoutSets],
   );
 
   return {
     suggestNextSet: suggestNextSetFn,
     getLastSets,
     checkPlateau: checkPlateauFn,
-    checkOvertraining: checkOvertrainingFn,
+    checkAcuteFatigue: checkAcuteFatigueFn,
+    checkChronicOvertraining: checkChronicOvertrainingFn,
+    acuteFatigue,
+    chronicOvertraining,
   };
 }

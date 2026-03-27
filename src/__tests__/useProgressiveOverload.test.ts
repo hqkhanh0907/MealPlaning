@@ -3,7 +3,8 @@ import { renderHook } from '@testing-library/react';
 import {
   suggestNextSet,
   detectPlateau,
-  detectOvertraining,
+  detectAcuteFatigue,
+  detectChronicOvertraining,
   isLowerBodyExercise,
   useProgressiveOverload,
 } from '../features/fitness/hooks/useProgressiveOverload';
@@ -244,63 +245,171 @@ describe('detectPlateau', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  detectOvertraining                                                  */
+/*  detectAcuteFatigue                                                   */
 /* ------------------------------------------------------------------ */
 
-describe('detectOvertraining', () => {
-  it('detects overtraining when avgRPE > 9', () => {
+describe('detectAcuteFatigue', () => {
+  it('returns none when fewer than 3 sets', () => {
+    const sets = [createSet({ rpe: 9.5 }), createSet({ rpe: 9.5 })];
+    expect(detectAcuteFatigue(sets)).toEqual({ level: 'none', message: '' });
+  });
+
+  it('detects high fatigue when avg RPE >= 9.0', () => {
     const sets = [
       createSet({ rpe: 9.5 }),
       createSet({ rpe: 9.5 }),
+      createSet({ rpe: 9.5 }),
     ];
-    const result = detectOvertraining(sets);
-    expect(result).toEqual({ isOvertraining: true, avgRpe: 9.5 });
+    const result = detectAcuteFatigue(sets);
+    expect(result.level).toBe('high');
+    expect(result.message).toContain('Acute fatigue');
+    expect(result.message).toContain('9.5');
   });
 
-  it('no overtraining when avgRPE < 9', () => {
+  it('detects moderate fatigue when avg RPE >= 8.0 and < 9.0', () => {
     const sets = [
-      createSet({ rpe: 7 }),
-      createSet({ rpe: 8 }),
+      createSet({ rpe: 8.0 }),
+      createSet({ rpe: 8.5 }),
+      createSet({ rpe: 8.0 }),
     ];
-    const result = detectOvertraining(sets);
-    expect(result).toEqual({ isOvertraining: false, avgRpe: 7.5 });
+    const result = detectAcuteFatigue(sets);
+    expect(result.level).toBe('moderate');
+    expect(result.message).toContain('Moderate fatigue');
   });
 
-  it('RPE exactly at threshold is not overtraining', () => {
-    const sets = [createSet({ rpe: 9 })];
-    const result = detectOvertraining(sets);
-    expect(result).toEqual({ isOvertraining: false, avgRpe: 9 });
+  it('returns none when avg RPE < 8.0', () => {
+    const sets = [
+      createSet({ rpe: 6.0 }),
+      createSet({ rpe: 7.0 }),
+      createSet({ rpe: 7.0 }),
+    ];
+    expect(detectAcuteFatigue(sets)).toEqual({ level: 'none', message: '' });
   });
 
-  it('handles empty sets array', () => {
-    const result = detectOvertraining([]);
-    expect(result).toEqual({ isOvertraining: false, avgRpe: 0 });
+  it('handles empty sets', () => {
+    expect(detectAcuteFatigue([])).toEqual({ level: 'none', message: '' });
   });
 
-  it('handles sets with no RPE values', () => {
+  it('handles sets without RPE values', () => {
     const sets = [
       createSet({ rpe: undefined }),
       createSet({ rpe: undefined }),
+      createSet({ rpe: undefined }),
     ];
-    const result = detectOvertraining(sets);
-    expect(result).toEqual({ isOvertraining: false, avgRpe: 0 });
+    expect(detectAcuteFatigue(sets)).toEqual({ level: 'none', message: '' });
   });
 
-  it('ignores sets without RPE when calculating average', () => {
+  it('detects high fatigue on volume spike > 1.3', () => {
+    const sets = [
+      createSet({ rpe: 7.0, reps: 5, weightKg: 50 }),
+      createSet({ rpe: 7.0, reps: 5, weightKg: 50 }),
+      createSet({ rpe: 7.0, reps: 5, weightKg: 50 }),
+      createSet({ rpe: 7.0, reps: 5, weightKg: 50 }),
+      createSet({ rpe: 7.0, reps: 5, weightKg: 50 }),
+      createSet({ rpe: 7.0, reps: 5, weightKg: 50 }),
+      createSet({ rpe: 7.0, reps: 12, weightKg: 100 }),
+      createSet({ rpe: 7.0, reps: 12, weightKg: 100 }),
+      createSet({ rpe: 7.0, reps: 12, weightKg: 100 }),
+    ];
+    const result = detectAcuteFatigue(sets);
+    expect(result.level).toBe('high');
+    expect(result.message).toContain('volume spike');
+  });
+
+  it('ignores sets with zero or undefined RPE in average', () => {
     const sets = [
       createSet({ rpe: 9.5 }),
       createSet({ rpe: undefined }),
       createSet({ rpe: 9.5 }),
+      createSet({ rpe: 0 }),
     ];
-    const result = detectOvertraining(sets);
-    // Only 2 sets with RPE → avg = (9.5 + 9.5) / 2 = 9.5
-    expect(result).toEqual({ isOvertraining: true, avgRpe: 9.5 });
+    const result = detectAcuteFatigue(sets);
+    expect(result.level).toBe('high');
+    expect(result.message).toContain('9.5');
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  detectChronicOvertraining                                            */
+/* ------------------------------------------------------------------ */
+
+describe('detectChronicOvertraining', () => {
+  it('returns none when fewer than 12 sets', () => {
+    const sets = Array.from({ length: 11 }, () => createSet({}));
+    expect(detectChronicOvertraining(sets)).toEqual({
+      level: 'none',
+      message: '',
+    });
   });
 
-  it('supports custom RPE threshold', () => {
-    const sets = [createSet({ rpe: 8.5 })];
-    expect(detectOvertraining(sets, 8).isOvertraining).toBe(true);
-    expect(detectOvertraining(sets, 9).isOvertraining).toBe(false);
+  it('returns none with empty array', () => {
+    expect(detectChronicOvertraining([])).toEqual({
+      level: 'none',
+      message: '',
+    });
+  });
+
+  it('returns none when no declining weeks', () => {
+    const now = Date.now();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const sets: WorkoutSet[] = [];
+    for (let w = 0; w < 6; w++) {
+      const midWeek = now - (6 - w - 0.5) * weekMs;
+      for (let i = 0; i < 2; i++) {
+        sets.push(
+          createSet({
+            updatedAt: new Date(midWeek + i * 1000).toISOString(),
+            reps: 10,
+            weightKg: 30,
+          }),
+        );
+      }
+    }
+    expect(detectChronicOvertraining(sets).level).toBe('none');
+  });
+
+  it('detects high chronic overtraining with 4+ declining weeks', () => {
+    const now = Date.now();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const sets: WorkoutSet[] = [];
+    const repsPerWeek = [10, 8, 6, 4, 3, 2];
+    for (let w = 0; w < 6; w++) {
+      const midWeek = now - (6 - w - 0.5) * weekMs;
+      for (let i = 0; i < 2; i++) {
+        sets.push(
+          createSet({
+            updatedAt: new Date(midWeek + i * 1000).toISOString(),
+            reps: repsPerWeek[w],
+            weightKg: 30,
+          }),
+        );
+      }
+    }
+    const result = detectChronicOvertraining(sets);
+    expect(result.level).toBe('high');
+    expect(result.message).toContain('weeks declining');
+  });
+
+  it('detects moderate chronic overtraining with 2-3 declining weeks', () => {
+    const now = Date.now();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const sets: WorkoutSet[] = [];
+    const repsPerWeek = [10, 10, 10, 10, 8, 6];
+    for (let w = 0; w < 6; w++) {
+      const midWeek = now - (6 - w - 0.5) * weekMs;
+      for (let i = 0; i < 2; i++) {
+        sets.push(
+          createSet({
+            updatedAt: new Date(midWeek + i * 1000).toISOString(),
+            reps: repsPerWeek[w],
+            weightKg: 30,
+          }),
+        );
+      }
+    }
+    const result = detectChronicOvertraining(sets);
+    expect(result.level).toBe('moderate');
+    expect(result.message).toContain('weeks declining');
   });
 });
 
@@ -451,24 +560,59 @@ describe('useProgressiveOverload hook', () => {
     });
   });
 
-  describe('checkOvertraining', () => {
-    it('filters sets by exerciseId and detects overtraining', () => {
+  describe('checkAcuteFatigue', () => {
+    it('filters sets by exerciseId and detects acute fatigue', () => {
       const sets = [
         createSet({ exerciseId: 'bench', rpe: 9.5 }),
         createSet({ exerciseId: 'squat', rpe: 5 }),
+        createSet({ exerciseId: 'bench', rpe: 9.5 }),
+        createSet({ exerciseId: 'bench', rpe: 9.5 }),
       ];
       const { result } = renderHook(() => useProgressiveOverload());
-      const res = result.current.checkOvertraining('bench', sets);
-      expect(res.isOvertraining).toBe(true);
-      expect(res.avgRpe).toBe(9.5);
+      const res = result.current.checkAcuteFatigue('bench', sets);
+      expect(res.level).toBe('high');
+      expect(res.message).toContain('Acute fatigue');
     });
 
-    it('returns safe default when no matching sets', () => {
+    it('returns none when no matching sets', () => {
       const sets = [createSet({ exerciseId: 'squat', rpe: 9.5 })];
       const { result } = renderHook(() => useProgressiveOverload());
-      const res = result.current.checkOvertraining('bench', sets);
-      expect(res.isOvertraining).toBe(false);
-      expect(res.avgRpe).toBe(0);
+      const res = result.current.checkAcuteFatigue('bench', sets);
+      expect(res.level).toBe('none');
+    });
+  });
+
+  describe('checkChronicOvertraining', () => {
+    it('returns none when insufficient data in store', () => {
+      const { result } = renderHook(() => useProgressiveOverload());
+      const res = result.current.checkChronicOvertraining('bench');
+      expect(res.level).toBe('none');
+    });
+
+    it('filters by exerciseId from store data', () => {
+      useFitnessStore.setState({
+        workoutSets: [
+          createSet({ exerciseId: 'bench' }),
+          createSet({ exerciseId: 'squat' }),
+        ],
+      });
+      const { result } = renderHook(() => useProgressiveOverload());
+      const res = result.current.checkChronicOvertraining('bench');
+      expect(res.level).toBe('none');
+    });
+  });
+
+  describe('cached fatigue values', () => {
+    it('exposes acuteFatigue and chronicOvertraining from store data', () => {
+      const { result } = renderHook(() => useProgressiveOverload());
+      expect(result.current.acuteFatigue).toEqual({
+        level: 'none',
+        message: '',
+      });
+      expect(result.current.chronicOvertraining).toEqual({
+        level: 'none',
+        message: '',
+      });
     });
   });
 
