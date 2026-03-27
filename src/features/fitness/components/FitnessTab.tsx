@@ -4,6 +4,7 @@ import { ClipboardList, Dumbbell, History, BarChart3 } from 'lucide-react';
 import { SubTabBar } from '../../../components/shared/SubTabBar';
 import type { SubTab } from '../../../components/shared/SubTabBar';
 import { useFitnessStore } from '../../../store/fitnessStore';
+import type { SelectedExercise } from '../types';
 import { FitnessOnboarding } from './FitnessOnboarding';
 import { TrainingPlanView } from './TrainingPlanView';
 import { WorkoutLogger } from './WorkoutLogger';
@@ -11,6 +12,10 @@ import { CardioLogger } from './CardioLogger';
 import { WorkoutHistory } from './WorkoutHistory';
 import { ProgressDashboard } from './ProgressDashboard';
 import { StreakCounter } from './StreakCounter';
+import { SmartInsightBanner } from './SmartInsightBanner';
+import { useFitnessNutritionBridge } from '../hooks/useFitnessNutritionBridge';
+import { QuickConfirmCard } from './QuickConfirmCard';
+import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
 
 type FitnessSubTab = 'plan' | 'workout' | 'history' | 'progress';
 
@@ -21,6 +26,51 @@ const FitnessTabInner: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<FitnessSubTab>('plan');
   const workoutMode = useFitnessStore((s) => s.workoutMode);
   const setWorkoutMode = useFitnessStore((s) => s.setWorkoutMode);
+  const { insight } = useFitnessNutritionBridge();
+  const { suggestNextSet } = useProgressiveOverload();
+  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
+  const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
+  const [confirmedExercises, setConfirmedExercises] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  const todayExercises: SelectedExercise[] = useMemo(() => {
+    const activePlan = trainingPlans.find((p) => p.status === 'active');
+    if (!activePlan) return [];
+    const jsDay = new Date().getDay();
+    const todayDow = jsDay === 0 ? 7 : jsDay;
+    const todayPlanDay = trainingPlanDays.find(
+      (d) => d.planId === activePlan.id && d.dayOfWeek === todayDow,
+    );
+    if (!todayPlanDay?.exercises) return [];
+    try {
+      const parsed: unknown = JSON.parse(todayPlanDay.exercises);
+      return Array.isArray(parsed) ? (parsed as SelectedExercise[]) : [];
+    } catch {
+      return [];
+    }
+  }, [trainingPlans, trainingPlanDays]);
+
+  const strengthExercises = useMemo(
+    () =>
+      todayExercises.filter(
+        (ex) =>
+          ex.exercise.exerciseType === 'strength' &&
+          !confirmedExercises.has(ex.exercise.id),
+      ),
+    [todayExercises, confirmedExercises],
+  );
+
+  const handleQuickConfirm = useCallback(
+    (exerciseId: string) => {
+      setConfirmedExercises((prev) => new Set(prev).add(exerciseId));
+    },
+    [],
+  );
+
+  const handleOpenCustomize = useCallback(() => {
+    setActiveSubTab('workout');
+  }, []);
 
   const subTabs: SubTab[] = useMemo(
     () => [
@@ -74,6 +124,8 @@ const FitnessTabInner: React.FC = () => {
         />
       </div>
 
+      {insight && <SmartInsightBanner insight={insight} />}
+
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         {activeSubTab === 'plan' && (
           <div
@@ -82,6 +134,23 @@ const FitnessTabInner: React.FC = () => {
             id="tabpanel-plan"
           >
             <TrainingPlanView onGeneratePlan={handleGeneratePlan} />
+            {strengthExercises.length > 0 && (
+              <div className="mt-4 space-y-3" data-testid="quick-confirm-list">
+                {strengthExercises.map((ex) => (
+                  <QuickConfirmCard
+                    key={ex.exercise.id}
+                    exerciseName={ex.exercise.nameVi}
+                    suggestion={suggestNextSet(
+                      ex.exercise.id,
+                      ex.repsMin,
+                      ex.repsMax,
+                    )}
+                    onConfirm={() => handleQuickConfirm(ex.exercise.id)}
+                    onCustomize={handleOpenCustomize}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
