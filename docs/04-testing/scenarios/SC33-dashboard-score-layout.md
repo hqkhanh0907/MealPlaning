@@ -2460,6 +2460,180 @@ DailyScoreHero hiển thị điểm tổng hợp 0-100 với 3 tier labels (≥8
 - **Kết quả test thực tế**: | — |
 - **Type**: Positive | **Priority**: P3
 
+#### 4.14. StreakMini Week Dots
+
+##### TC_DSL_300: StreakMini renders 7 week dots (T2-CN) trên Dashboard Tier 3
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Dashboard đã render, StreakMini component có dữ liệu tuần hiện tại
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống Tier 3
+  3. Kiểm tra StreakMini component
+- **Kết quả mong đợi**: Hiển thị đúng 7 dots đại diện cho 7 ngày trong tuần (Thứ 2 đến Chủ nhật)
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_301: StreakMini dot màu xanh lá cho ngày đã hoàn thành tập luyện
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Có ngày đã hoàn thành workout trong tuần hiện tại
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra màu dot của ngày đã hoàn thành
+- **Kết quả mong đợi**: Dot của ngày đã hoàn thành tập luyện có màu xanh lá (green/success)
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_302: StreakMini dot màu xám cho ngày nghỉ
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Có ngày nghỉ (rest day) trong lịch tập
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra màu dot của ngày nghỉ
+- **Kết quả mong đợi**: Dot của ngày nghỉ có màu xám (gray/neutral)
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_303: StreakMini dot màu đỏ cho ngày bỏ lỡ
+- **Loại**: Negative
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Có ngày đã qua mà user không tập luyện (missed day)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra màu dot của ngày bỏ lỡ
+- **Kết quả mong đợi**: Dot của ngày bỏ lỡ có màu đỏ (red/danger)
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_304: StreakMini dot màu xanh dương/highlighted cho ngày hôm nay
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Dashboard render vào ngày bất kỳ trong tuần
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra dot đại diện cho ngày hôm nay
+- **Kết quả mong đợi**: Dot ngày hôm nay có màu xanh dương/highlighted, nổi bật so với các dot khác
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_305: StreakMini dot màu mặc định cho ngày sắp tới
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Tuần hiện tại còn ngày chưa đến
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra dot của các ngày chưa đến
+- **Kết quả mong đợi**: Dot ngày sắp tới có màu mặc định (nhạt/outline), chưa có trạng thái
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_306: StreakMini hiển thị số ngày streak hiện tại
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: User có streak liên tiếp ≥ 1 ngày (ví dụ: 2 ngày)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra số streak hiển thị
+- **Kết quả mong đợi**: Hiển thị "2 ngày liên tiếp" (hoặc tương đương), phản ánh đúng số ngày streak hiện tại
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_307: StreakMini hiển thị kỷ lục streak dài nhất
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: User có kỷ lục streak = 5 ngày
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống StreakMini
+  3. Kiểm tra hiển thị kỷ lục
+- **Kết quả mong đợi**: Hiển thị "Kỷ lục: 5" (hoặc tương đương), phản ánh đúng kỷ lục dài nhất
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_308: StreakMini click chuyển đến Fitness Progress tab
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Dashboard đã render, StreakMini hiển thị
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Nhấn vào StreakMini component
+  3. Kiểm tra navigation
+- **Kết quả mong đợi**: App chuyển đến Fitness Progress tab để xem chi tiết streak
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_309: StreakMini accessible với role="button" và aria-label
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: StreakMini đã render
+- **Các bước**:
+  1. Inspect StreakMini element
+  2. Kiểm tra ARIA attributes
+- **Kết quả mong đợi**: StreakMini có role="button" và aria-label mô tả chức năng (ví dụ: "Xem chi tiết streak tập luyện")
+- **Kết quả test thực tế**: *(Chưa test)*
+
+#### 4.15. Dashboard ErrorBoundary Recovery
+
+##### TC_DSL_310: Dashboard ErrorBoundary bắt lỗi crash Tier 2 component
+- **Loại**: Negative
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Tier 2 component throw runtime error (simulated)
+- **Các bước**:
+  1. Mô phỏng lỗi runtime trong Tier 2 component (ví dụ: NutritionScore)
+  2. Quan sát Dashboard render
+- **Kết quả mong đợi**: ErrorBoundary bắt lỗi, Dashboard không crash toàn bộ, hiển thị fallback UI cho Tier 2
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_311: Dashboard ErrorBoundary bắt lỗi crash Tier 3 component
+- **Loại**: Negative
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Tier 3 component throw runtime error (simulated)
+- **Các bước**:
+  1. Mô phỏng lỗi runtime trong Tier 3 component (ví dụ: WeightMini hoặc StreakMini)
+  2. Quan sát Dashboard render
+- **Kết quả mong đợi**: ErrorBoundary bắt lỗi, Dashboard không crash toàn bộ, hiển thị fallback UI cho Tier 3
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_312: Dashboard ErrorBoundary bắt lỗi crash Tier 4 component
+- **Loại**: Negative
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Tier 4 component throw runtime error (simulated)
+- **Các bước**:
+  1. Mô phỏng lỗi runtime trong Tier 4 component (ví dụ: QuickActions)
+  2. Quan sát Dashboard render
+- **Kết quả mong đợi**: ErrorBoundary bắt lỗi, Dashboard không crash toàn bộ, hiển thị fallback UI cho Tier 4
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_313: Các tiers khác tiếp tục render khi một tier bị crash
+- **Loại**: Positive
+- **Độ ưu tiên**: P0
+- **Tiền điều kiện**: Tier 3 component bị crash (simulated)
+- **Các bước**:
+  1. Mô phỏng lỗi crash Tier 3
+  2. Kiểm tra Tier 1, Tier 2, Tier 4, Tier 5
+- **Kết quả mong đợi**: Tier 1, 2, 4, 5 vẫn render bình thường, chỉ Tier 3 hiển thị fallback UI
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_314: ErrorBoundary hiển thị thông báo lỗi thân thiện (không hiện stack trace)
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Một tier component bị crash
+- **Các bước**:
+  1. Mô phỏng lỗi crash bất kỳ tier nào
+  2. Kiểm tra nội dung fallback UI
+- **Kết quả mong đợi**: Hiển thị thông báo thân thiện (ví dụ: "Đã xảy ra lỗi, vui lòng thử lại") thay vì stack trace hoặc thông tin kỹ thuật
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_DSL_315: ErrorBoundary error state accessible với role="alert"
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Một tier component bị crash, fallback UI hiển thị
+- **Các bước**:
+  1. Mô phỏng lỗi crash
+  2. Inspect fallback UI element
+  3. Kiểm tra ARIA attributes
+- **Kết quả mong đợi**: Fallback UI có role="alert" để screen reader thông báo lỗi tự động cho user
+- **Kết quả test thực tế**: *(Chưa test)*
+
 ---
 
 ## Đề xuất Cải tiến

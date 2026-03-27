@@ -2281,3 +2281,137 @@ Scenario bao phủ toàn bộ luồng: từ hiển thị banner điều chỉnh,
 - **Expected**: P7 KHÔNG trigger: weightTrendCorrect=false dù weeks=3 >= 2
 - **Kết quả test thực tế**: —
 - **Type**: Negative | **Priority**: P1
+
+#### 4.13. AdjustmentHistory Component
+
+##### TC_AAI_211: AdjustmentHistory renders khi có adjustment history data
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Có ít nhất 1 adjustment trong history
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống phần Auto-Adjust
+  3. Kiểm tra hiển thị adjustment history
+- **Kết quả mong đợi**: AdjustmentHistory component hiển thị với toggle collapsed
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_212: AdjustmentHistory collapsible toggle - mặc định collapsed
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: AdjustmentHistory đã render với dữ liệu
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống phần Auto-Adjust
+  3. Quan sát trạng thái mặc định của AdjustmentHistory
+- **Kết quả mong đợi**: Toggle ở trạng thái collapsed, danh sách adjustment bị ẩn
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_213: AdjustmentHistory expanded hiển thị danh sách các adjustment đã qua
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: AdjustmentHistory đã render, có ≥ 2 adjustments trong history
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống phần Auto-Adjust
+  3. Nhấn toggle để expand AdjustmentHistory
+  4. Kiểm tra danh sách hiển thị
+- **Kết quả mong đợi**: Danh sách các adjustment hiển thị đầy đủ với thông tin ngày, loại, trạng thái
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_214: AdjustmentHistory định dạng ngày theo locale vi-VN
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory expanded, có adjustment với ngày 27/03/2026
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Expand AdjustmentHistory
+  3. Kiểm tra định dạng ngày của adjustment
+- **Kết quả mong đợi**: Ngày hiển thị theo locale vi-VN (ví dụ: "27 tháng 3, 2026"), không phải "Mar 27, 2026"
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_215: AdjustmentHistory status icon - Check circle cho "applied"
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory expanded, có adjustment với status = "applied"
+- **Các bước**:
+  1. Expand AdjustmentHistory
+  2. Tìm adjustment có trạng thái "applied"
+  3. Kiểm tra icon hiển thị
+- **Kết quả mong đợi**: Icon Check circle (✓) màu xanh lá hiển thị bên cạnh adjustment đã applied
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_216: AdjustmentHistory status icon - X circle cho "declined"
+- **Loại**: Negative
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory expanded, có adjustment với status = "declined"
+- **Các bước**:
+  1. Expand AdjustmentHistory
+  2. Tìm adjustment có trạng thái "declined"
+  3. Kiểm tra icon hiển thị
+- **Kết quả mong đợi**: Icon X circle (✗) màu đỏ hiển thị bên cạnh adjustment đã declined
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_217: AdjustmentHistory trigger type badge hiển thị "auto" vs "manual"
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory expanded, có cả adjustment auto và manual
+- **Các bước**:
+  1. Expand AdjustmentHistory
+  2. Kiểm tra badge trigger type của từng adjustment
+- **Kết quả mong đợi**: Badge "auto" (tự động) có màu khác biệt với badge "manual" (thủ công), dễ phân biệt
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_218: AdjustmentHistory trending icon với giá trị thay đổi calorie
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory expanded, adjustment có calorie change ≠ 0
+- **Các bước**:
+  1. Expand AdjustmentHistory
+  2. Kiểm tra trending icon và giá trị calorie change
+- **Kết quả mong đợi**: Trending icon (↑/↓) hiển thị kèm giá trị thay đổi calorie (ví dụ: "+150 kcal" hoặc "-100 kcal")
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_219: AdjustmentHistory applied/declined status label styling
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory expanded, có cả adjustment applied và declined
+- **Các bước**:
+  1. Expand AdjustmentHistory
+  2. So sánh styling của label "Đã áp dụng" và "Đã từ chối"
+- **Kết quả mong đợi**: Label "Đã áp dụng" có màu xanh lá/success, label "Đã từ chối" có màu đỏ/danger, đủ tương phản để phân biệt
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_220: AdjustmentHistory aria-expanded attribute trên toggle
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: AdjustmentHistory đã render
+- **Các bước**:
+  1. Inspect toggle button của AdjustmentHistory
+  2. Kiểm tra attribute aria-expanded khi collapsed
+  3. Nhấn toggle để expand
+  4. Kiểm tra attribute aria-expanded khi expanded
+- **Kết quả mong đợi**: aria-expanded="false" khi collapsed, aria-expanded="true" khi expanded
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_221: AdjustmentHistory dark mode contrast và readability
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Dark mode được bật, AdjustmentHistory có dữ liệu
+- **Các bước**:
+  1. Bật dark mode
+  2. Mở Dashboard tab (Tổng quan)
+  3. Expand AdjustmentHistory
+  4. Kiểm tra contrast và readability
+- **Kết quả mong đợi**: Text, icons, badges đều đọc được rõ ràng trên nền dark, contrast ratio ≥ 4.5:1 (WCAG AA)
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_AAI_222: AdjustmentHistory empty state khi không có adjustment history
+- **Loại**: Negative
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Không có adjustment nào trong history (user mới hoặc đã xóa)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống phần Auto-Adjust
+  3. Kiểm tra AdjustmentHistory khi không có dữ liệu
+- **Kết quả mong đợi**: Hiển thị empty state phù hợp (ví dụ: "Chưa có lịch sử điều chỉnh") thay vì component trống hoặc lỗi
+- **Kết quả test thực tế**: *(Chưa test)*

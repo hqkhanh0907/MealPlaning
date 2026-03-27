@@ -2150,6 +2150,97 @@ WeightQuickLog là bottom sheet cho phép ghi cân nặng nhanh: stepper ±0.1kg
 - **Kết quả test thực tế**: | — |
 - **Type**: Edge | **Priority**: P1
 
+#### 4.14. WeightMini Edge Cases
+
+##### TC_QAW_261: WeightMini sparkline với cân nặng giống nhau cả 7 ngày (đường phẳng)
+- **Loại**: Edge
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: 7 entries cân nặng đều là 70.0kg
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra sparkline chart
+- **Kết quả mong đợi**: Sparkline hiển thị đường phẳng (flat line) ở giữa chart, không bị lỗi render hoặc biến mất
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_262: WeightMini sparkline với đúng 1 entry (single point)
+- **Loại**: Edge
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Chỉ có 1 entry cân nặng trong 7 ngày gần nhất
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra sparkline chart
+- **Kết quả mong đợi**: Sparkline hiển thị single point (chấm đơn), không crash hoặc hiển thị đường nối sai
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_263: WeightMini sparkline với khoảng cân nặng rất lớn (40kg-120kg)
+- **Loại**: Edge
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Entries cân nặng dao động từ 40kg đến 120kg (range rất rộng)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra sparkline chart với range rộng
+- **Kết quả mong đợi**: Sparkline tự động scale Y-axis phù hợp, các điểm dữ liệu hiển thị đúng tỷ lệ, không bị tràn ra ngoài vùng chart
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_264: WeightMini sparkline không có entries hiển thị "—" placeholder
+- **Loại**: Negative
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Không có entry cân nặng nào (user mới hoặc đã xóa tất cả)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra hiển thị khi không có dữ liệu
+- **Kết quả mong đợi**: Hiển thị "—" placeholder thay vì sparkline trống hoặc lỗi
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_265: WeightMini trend calculation: cân nặng tăng hiển thị icon hướng lên
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Cân nặng gần nhất > cân nặng trước đó (ví dụ: 69.5 → 70.2kg)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra trend icon
+- **Kết quả mong đợi**: Icon trend hướng lên (↑) hiển thị, kèm giá trị thay đổi (ví dụ: "+0.7 kg")
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_266: WeightMini trend calculation: cân nặng giảm hiển thị icon hướng xuống
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: Cân nặng gần nhất < cân nặng trước đó (ví dụ: 70.2 → 69.5kg)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra trend icon
+- **Kết quả mong đợi**: Icon trend hướng xuống (↓) hiển thị, kèm giá trị thay đổi (ví dụ: "-0.7 kg")
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_267: WeightMini trend calculation: cân nặng ổn định hiển thị icon stable
+- **Loại**: Positive
+- **Độ ưu tiên**: P2
+- **Tiền điều kiện**: Cân nặng gần nhất ≈ cân nặng trước đó (chênh lệch ≤ threshold)
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Kiểm tra trend icon
+- **Kết quả mong đợi**: Icon trend ổn định (→ hoặc ≈) hiển thị, cho biết cân nặng không thay đổi đáng kể
+- **Kết quả test thực tế**: *(Chưa test)*
+
+##### TC_QAW_268: WeightMini click "Tap để ghi nhận" mở WeightQuickLog modal
+- **Loại**: Positive
+- **Độ ưu tiên**: P1
+- **Tiền điều kiện**: WeightMini hiển thị trên Dashboard
+- **Các bước**:
+  1. Mở Dashboard tab (Tổng quan)
+  2. Cuộn xuống WeightMini component
+  3. Nhấn vào text "Tap để ghi nhận" hoặc vùng WeightMini
+  4. Kiểm tra modal mở ra
+- **Kết quả mong đợi**: WeightQuickLog modal (bottom sheet) mở ra, sẵn sàng nhập cân nặng mới
+- **Kết quả test thực tế**: *(Chưa test)*
+
 ---
 
 ## Đề xuất Cải tiến
