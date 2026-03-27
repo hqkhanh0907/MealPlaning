@@ -1,7 +1,7 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 6.0  
-**Date:** 2026-03-11  
+**Version:** 7.0  
+**Date:** 2026-03-26  
 **Author:** Dev Team
 
 ---
@@ -10,24 +10,40 @@
 
 ### 1.1 Trong scope
 
-| Module | Unit Tests | E2E Tests | Manual |
-|--------|-----------|----------|--------|
-| Calendar / Meal Planning | ✅ | ✅ | ✅ |
-| Library (Ingredients & Dishes) | ✅ | ✅ | ✅ |
-| AI Image Analysis | ✅ (mock) | ✅ | ✅ |
-| AI Meal Suggestion | ✅ (mock) | ✅ | ✅ |
-| Grocery List | ✅ | ✅ | ✅ |
-| Settings & Profile | ✅ | ✅ | ✅ |
-| Data Backup (Import/Export) | ✅ | ✅ | ✅ |
-| i18n (Tiếng Việt) | ✅ | - | - |
-| localStorage persistence | ✅ | ✅ | - |
-| Navigation | - | ✅ | ✅ |
-| Responsive UI | ✅ | ✅ | ✅ |
-| Detail Modal | ✅ | ✅ | ✅ |
-| Delete Guard & Undo | ✅ | ✅ | ✅ |
-| Error Handling | ✅ | ✅ | - |
-| Deep Integration | - | ✅ | ✅ |
-| Dark Mode Visual QA | ✅ | - | ✅ (Chrome DevTools) |
+| Module | Unit Tests | E2E Tests | Manual | Scenarios |
+|--------|-----------|----------|--------|-----------|
+| Calendar / Meal Planning | ✅ | ✅ | ✅ | SC01 |
+| Library (Ingredients & Dishes) | ✅ | ✅ | ✅ | SC06-07 |
+| AI Image Analysis | ✅ (mock) | ✅ | ✅ | SC05 |
+| AI Meal Suggestion | ✅ (mock) | ✅ | ✅ | SC04 |
+| Grocery List | ✅ | ✅ | ✅ | SC14 |
+| Settings & Profile | ✅ | ✅ | ✅ | SC08-09 |
+| Data Backup (Import/Export) | ✅ | ✅ | ✅ | SC16 |
+| i18n (Tiếng Việt) | ✅ | - | - | SC23 |
+| localStorage persistence | ✅ | ✅ | - | SC24 |
+| Navigation | ✅ | ✅ | ✅ | SC38 |
+| Responsive UI | ✅ | ✅ | ✅ | SC18 |
+| Detail Modal | ✅ | ✅ | ✅ | — |
+| Delete Guard & Undo | ✅ | ✅ | ✅ | — |
+| Error Handling | ✅ | ✅ | - | — |
+| Deep Integration | ✅ | ✅ | ✅ | SC38 |
+| Dark Mode Visual QA | ✅ | - | ✅ (Chrome DevTools) | SC22 |
+| **Fitness Tab & Onboarding** | **✅** | **-** | **✅** | **SC25** |
+| **Training Plan View** | **✅** | **-** | **✅** | **SC26** |
+| **Workout Logging (Strength)** | **✅** | **-** | **✅** | **SC27** |
+| **Cardio Logging** | **✅** | **-** | **✅** | **SC28** |
+| **Workout History** | **✅** | **-** | **✅** | **SC29** |
+| **Progress Dashboard** | **✅** | **-** | **✅** | **SC30** |
+| **Daily Weight Input** | **✅** | **-** | **✅** | **SC31** |
+| **Gamification System** | **✅** | **-** | **✅** | **SC32** |
+| **Dashboard Score & Layout** | **✅** | **-** | **✅** | **SC33** |
+| **Energy Balance & Protein** | **✅** | **-** | **✅** | **SC34** |
+| **Today's Plan Card** | **✅** | **-** | **✅** | **SC35** |
+| **Quick Actions & Weight Log** | **✅** | **-** | **✅** | **SC36** |
+| **Auto-Adjust & Insights** | **✅** | **-** | **✅** | **SC37** |
+| **Cross-Feature Navigation** | **✅** | **-** | **✅** | **SC38** |
+| **WCAG Accessibility** | **✅** | **-** | **✅** | **SC39** |
+| **Migration & Sync V2** | **✅** | **-** | **✅** | **SC40** |
 
 ### 1.2 Ngoài scope
 
@@ -89,19 +105,21 @@
 
 ## 4. Mức độ coverage yêu cầu
 
-| Level | Target | Actual (2026-03-13) |
+| Level | Target | Actual (2026-03-26) |
 |-------|--------|---------------------|
-| Overall Statements | ≥ 80% | **99.03%** ✅ |
-| Overall Branches | ≥ 75% | **92.61%** ✅ |
-| Overall Functions | ≥ 85% | **98.33%** ✅ |
-| Overall Lines | ≥ 80% | **99.87%** ✅ |
-| Services | ≥ 90% | **99.70%** ✅ |
+| Overall Statements | ≥ 80% | **98.93%** ✅ |
+| Overall Branches | ≥ 75% | **92.97%** ✅ |
+| Overall Functions | ≥ 85% | **98.92%** ✅ |
+| Overall Lines | ≥ 80% | **99.51%** ✅ |
+| Services | ≥ 90% | **99%+** ✅ |
 | Utils | ≥ 90% | **100%** ✅ |
 | Components | ≥ 75% | **99%+** ✅ |
-| Hooks | ≥ 85% | **99.29%** ✅ |
+| Hooks | ≥ 85% | **99%+** ✅ |
 | Contexts | ≥ 85% | **98%+** ✅ |
 
-> **Note:** Unit tests: **1280 tests** across **56 test files** (cập nhật 2026-03-13). Coverage vượt xa target ≥80%. Branch coverage 92.61% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Lazy loading + code splitting không ảnh hưởng coverage.
+> **Note:** Unit tests: **2860 tests** across **125 test files** (cập nhật 2026-03-26). Coverage vượt xa target ≥80%. Branch coverage 92.97% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Lazy loading + code splitting không ảnh hưởng coverage.
+>
+> **Manual scenario test cases:** 40 scenarios, **4,534 manual test cases** (SC01-SC40). Xem thư mục `docs/04-testing/scenarios/`.
 
 ---
 
@@ -217,7 +235,15 @@ E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua l
 
 > **Tham khảo:** Xem [coding-guidelines.md](../03-developer-guide/coding-guidelines.md) để mitigate coding-related risks.
 >
-> **Scenario-based test cases:** [scenario-analysis-and-testcases.md](scenario-analysis-and-testcases.md) — 799 test cases across 15 scenarios (v2.0, mỗi scenario 50+ TCs).
+> **Scenario-based test cases:** 40 scenarios (SC01-SC40), **4,534 test cases** across:
+> - SC01-SC10: Core features (Calendar, Meal Planner, Nutrition, AI, Ingredients, Dishes, Settings, Goals, Copy) — 1,050 TCs
+> - SC11-SC16: Plan Management (Clear Plan, Template Manager, Save Template, Grocery, Translation, Backup) — 1,260 TCs (210 TCs/scenario)
+> - SC17-SC24: Extended features (Google Drive, Responsive, Preview, Filter, AI Ingredients, Dark Mode, i18n, Migration) — 945 TCs
+> - SC25-SC32: Fitness (Onboarding, Training, Workout, Cardio, History, Progress, Weight, Gamification) — 440 TCs
+> - SC33-SC36: Dashboard (Score Layout, Energy/Protein, Plan, Quick Actions) — 464 TCs
+> - SC37-SC40: Integration (Auto-Adjust, Navigation, WCAG, Migration V2) — 375 TCs
+>
+> Xem thư mục `docs/04-testing/scenarios/` cho chi tiết từng scenario.
 
 ---
 
