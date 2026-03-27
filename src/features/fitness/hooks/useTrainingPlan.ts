@@ -13,6 +13,7 @@ import type {
   CardioTypePref,
   CardioIntensity,
 } from '../types';
+import { isBodyRegion } from '../types';
 import {
   calculateWeeklyVolume,
   distributeVolume,
@@ -91,7 +92,7 @@ function seedToExercise(seed: ExerciseSeed): Exercise {
     muscleGroup: seed.muscleGroup as MuscleGroup,
     secondaryMuscles: seed.secondaryMuscles as MuscleGroup[],
     equipment: seed.equipment as EquipmentType[],
-    contraindicated: seed.contraindicated as BodyRegion[],
+    contraindicated: seed.contraindicated.filter(isBodyRegion),
     updatedAt: '',
   };
 }
@@ -250,7 +251,7 @@ function selectExercisesForMuscle(
       ex.equipment.some((eq) =>
         availableEquipment.includes(eq as EquipmentType),
       ) &&
-      !ex.contraindicated.some((ci) => injuries.includes(ci as BodyRegion)),
+      !ex.contraindicated.some((ci) => injuries.includes(ci)),
   );
 
   if (eligible.length === 0) return [];
@@ -503,16 +504,25 @@ export function generateTrainingPlan(
 /* ------------------------------------------------------------------ */
 
 export function useTrainingPlan(): {
-  generatePlan: (input: PlanGenerationInput) => GeneratedPlan;
+  generatePlan: (input: PlanGenerationInput) => GeneratedPlan | null;
   isGenerating: boolean;
+  generationError: string | null;
 } {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const generatePlan = useCallback(
-    (input: PlanGenerationInput): GeneratedPlan => {
+    (input: PlanGenerationInput): GeneratedPlan | null => {
+      setGenerationError(null);
       setIsGenerating(true);
       try {
         return generateTrainingPlan(input);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : String(err);
+        setGenerationError(message);
+        console.error('[useTrainingPlan] Generation failed:', err);
+        return null;
       } finally {
         setIsGenerating(false);
       }
@@ -520,5 +530,5 @@ export function useTrainingPlan(): {
     [],
   );
 
-  return { generatePlan, isGenerating };
+  return { generatePlan, isGenerating, generationError };
 }
