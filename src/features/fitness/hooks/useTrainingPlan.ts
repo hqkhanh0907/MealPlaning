@@ -15,7 +15,7 @@ import type {
 } from '../types';
 import { isBodyRegion } from '../types';
 import {
-  calculateWeeklyVolume,
+  calculateTargetWeeklySets,
   distributeVolume,
 } from '../utils/volumeCalculator';
 import type { GoalType } from '../utils/volumeCalculator';
@@ -196,7 +196,7 @@ function calculateVolume(
 
   const result = {} as Record<MuscleGroup, number>;
   for (const muscle of ALL_MUSCLES) {
-    result[muscle] = calculateWeeklyVolume(
+    result[muscle] = calculateTargetWeeklySets(
       muscle,
       profile.trainingExperience,
       goalType,

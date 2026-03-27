@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, X } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
+import { parseNumericInput } from '../utils/parseNumericInput';
 import { formatElapsed } from '../utils/timeFormat';
 import type { CardioType, CardioIntensity, Workout } from '../types';
 import { CARDIO_TYPES, DISTANCE_CARDIO_TYPES, INTENSITY_OPTIONS } from '../constants';
+import { useTimer } from '../hooks/useTimer';
 
 interface CardioLoggerProps {
   onComplete: (workout: Workout) => void;
@@ -23,37 +25,19 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
 
   const [selectedType, setSelectedType] = useState<CardioType>('running');
   const [isStopwatchMode, setIsStopwatchMode] = useState(true);
-  const [stopwatchRunning, setStopwatchRunning] = useState(false);
-  const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
   const [manualDuration, setManualDuration] = useState(0);
   const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
   const [avgHeartRate, setAvgHeartRate] = useState<number | undefined>(undefined);
   const [intensity, setIntensity] = useState<CardioIntensity>('moderate');
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  // Header elapsed timer
-  useEffect(() => {
-    const id = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  // Stopwatch timer
-  useEffect(() => {
-    if (!stopwatchRunning) return;
-    const id = setInterval(() => {
-      setStopwatchSeconds((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(id);
-  }, [stopwatchRunning]);
+  const headerTimer = useTimer(true);
+  const stopwatch = useTimer();
 
   const durationMin = useMemo(() => {
     if (isStopwatchMode) {
-      return Math.floor(stopwatchSeconds / 60);
+      return Math.floor(stopwatch.elapsed / 60);
     }
     return manualDuration;
-  }, [isStopwatchMode, stopwatchSeconds, manualDuration]);
+  }, [isStopwatchMode, stopwatch.elapsed, manualDuration]);
 
   const estimatedCalories = useMemo(() => {
     if (durationMin <= 0) return 0;
@@ -65,18 +49,9 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
     [selectedType],
   );
 
-  const handleStartStopwatch = useCallback(() => {
-    setStopwatchRunning(true);
-  }, []);
-
-  const handlePauseStopwatch = useCallback(() => {
-    setStopwatchRunning(false);
-  }, []);
-
-  const handleStopStopwatch = useCallback(() => {
-    setStopwatchRunning(false);
-    setStopwatchSeconds(0);
-  }, []);
+  const handleStartStopwatch = stopwatch.start;
+  const handlePauseStopwatch = stopwatch.stop;
+  const handleStopStopwatch = stopwatch.reset;
 
   const handleSave = useCallback(() => {
     const now = new Date().toISOString();
@@ -140,7 +115,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
           className="font-mono text-lg font-semibold tabular-nums"
           data-testid="elapsed-timer"
         >
-          {formatElapsed(elapsedSeconds)}
+          {formatElapsed(headerTimer.elapsed)}
         </span>
         <button
           type="button"
@@ -220,10 +195,10 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                 className="mb-3 text-center font-mono text-3xl font-bold text-slate-800 dark:text-slate-100"
                 data-testid="stopwatch-display"
               >
-                {formatElapsed(stopwatchSeconds)}
+                {formatElapsed(stopwatch.elapsed)}
               </p>
               <div className="flex gap-2">
-                {!stopwatchRunning ? (
+                {!stopwatch.isRunning ? (
                   <button
                     type="button"
                     onClick={handleStartStopwatch}
@@ -257,7 +232,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               <input
                 type="number"
                 value={manualDuration}
-                onChange={(e) => setManualDuration(Math.max(0, Number(e.target.value)))}
+                onChange={(e) => setManualDuration(parseNumericInput(e.target.value))}
                 className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                 data-testid="manual-duration-input"
                 min={0}
@@ -280,7 +255,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               value={distanceKm ?? ''}
               onChange={(e) => {
                 const val = e.target.value;
-                setDistanceKm(val === '' ? undefined : Math.max(0, Number(val)));
+                setDistanceKm(val === '' ? undefined : parseNumericInput(val));
               }}
               className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
               data-testid="distance-input"
@@ -300,7 +275,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             value={avgHeartRate ?? ''}
             onChange={(e) => {
               const val = e.target.value;
-              setAvgHeartRate(val === '' ? undefined : Math.max(0, Number(val)));
+              setAvgHeartRate(val === '' ? undefined : parseNumericInput(val));
             }}
             className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
             data-testid="heart-rate-input"
