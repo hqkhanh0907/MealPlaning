@@ -291,6 +291,18 @@ const dayPlans    = migrateDayPlans(rawDayPlans); // được xử lý inline
 
 Migration **idempotent** — an toàn khi chạy nhiều lần.
 
+### Store Rehydration Guards
+
+`userProfileStore.ts` includes a `coerceNumericFields()` rehydration guard that runs on every store init (hydration from localStorage). This prevents type corruption bugs (e.g., string concatenation `"1500" + 100 = "1500100"` instead of `1600`).
+
+| Field | Coercion | Range Clamping |
+|-------|----------|----------------|
+| `weight` | `Number()` | — |
+| `proteinRatio` | `Number()` | — |
+| `targetCalories` | `Number()` | 500–10000 |
+
+The guard is applied during Zustand `onRehydrateStorage` to ensure all numeric fields are valid `number` types before any business logic (e.g., `useFeedbackLoop`, `useNutritionTargets`) accesses them.
+
 ---
 
 ## Import/Export Validation

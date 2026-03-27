@@ -411,6 +411,7 @@ suggestNextSet(exerciseId, recentSets[]):
 │
 ├─ detectPlateau(exerciseSets):
 │  └─ 3 tuần liên tiếp max weight không tăng → PLATEAU
+│      (✅ Now uses `isWeightSimilar()` with ±2% tolerance instead of exact match)
 │
 └─ detectOvertraining(recentSets):
    └─ Performance declining (weight↓ hoặc reps↓) → WARNING
@@ -427,10 +428,11 @@ suggestNextSet(exerciseId, recentSets[]):
 
 **Issues phát hiện:**
 
-- **[OVERLOAD-01] 🔴 CRITICAL — Plateau detection conflict**
+- **[OVERLOAD-01] 🔴 CRITICAL — Plateau detection conflict** *(✅ Partially addressed: ±2% tolerance added)*
   - Location: `useProgressiveOverload.ts:63-90` vs `ProgressDashboard.tsx:268-286`
   - Mô tả: Hook kiểm tra "identical max weights in 3 weeks". Dashboard dùng "week-map approach for adherence". **Không thống nhất** "plateau" là gì.
   - Impact: User có thể thấy "no plateau" ở workout tab nhưng "stagnation detected" ở dashboard.
+  - Update: Hook now uses `isWeightSimilar()` with ±2% tolerance, reducing false negatives from minor weight variance.
 
 - **[OVERLOAD-02] 🟠 HIGH — detectOvertraining gọi 2 lần khác input**
   - Location: `useProgressiveOverload.ts:181-191` vs `line 214`

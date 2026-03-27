@@ -288,6 +288,8 @@ export function formatElapsed(totalSeconds: number): string {
 
 **Ảnh hưởng:** 🔴 Critical — Contradictory coaching. User mất niềm tin vào hệ thống.
 
+> **✅ Partial fix applied:** `useProgressiveOverload.ts` now uses `isWeightSimilar()` with ±2% tolerance for plateau detection (LOGIC-02 from enhance-design spec). The hook no longer requires exact weight match — weights within ±2% are considered equivalent for plateau analysis. Full `PlateauAnalysis` service (S1) still pending.
+
 **5 Giải pháp:**
 
 | # | Giải pháp | Ưu điểm | Nhược điểm | Complexity | Khuyến nghị |
@@ -620,6 +622,8 @@ src/features/fitness/
 | # | Giải pháp | Complexity | Khuyến nghị |
 |---|-----------|------------|-------------|
 | **S1** | **Fill 20-exercise gap + Add custom exercise modal** trong `ExerciseSelector` | Medium | ⭐ |
+
+> **✅ i18n update applied:** `ExerciseSelector.tsx` muscle group labels now use i18n keys (e.g., `t('fitness.muscleGroup.chest')`) instead of hardcoded Vietnamese strings. All UI labels are translation-ready.
 | **S2** | Import from external exercise API (ExerciseDB, wger) | Medium | ✅ Future |
 | **S3** | Community exercise sharing (sync custom exercises) | High | ⚠️ Phase 3 |
 | **S4** | AI-suggested exercise creation (describe movement → generate entry) | High | ⚠️ |
@@ -639,7 +643,7 @@ src/features/fitness/
 |----|-------|-------------|------------|
 | **PR1** | Wire `useProgressiveOverload` → `WorkoutLogger` (show suggestions inline) | None | Low |
 | **PR2** | `SmartInsightBanner` component — show overload tips + plateau warnings | PR1 | Medium |
-| **PR3** | Nutrition integration — `useFitnessNutritionBridge` hook | PR1, PR2, §4 Nutrition Engine | High |
+| **PR3** | Nutrition integration — `useFitnessNutritionBridge` hook | PR1, PR2, §4 Nutrition Engine | High | ✅ Bridge now uses real `useTodayNutrition()` data |
 
 ---
 

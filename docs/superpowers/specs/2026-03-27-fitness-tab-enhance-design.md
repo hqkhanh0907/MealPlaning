@@ -20,7 +20,7 @@ The most severe: `targetCalories` stored as `1500100` (string concatenation), pr
 
 ## Phase 1: Critical Bug Fixes
 
-### BUG-01: EnergyBalanceCard shows "1500100 kcal"
+### BUG-01: EnergyBalanceCard shows "1500100 kcal" — ✅ FIXED
 
 **Root Cause:** `targetCalories` in localStorage is corrupted to `1500100`. The `useFeedbackLoop.ts` auto-adjust logic does `currentTarget + calorieAdjustment` (line 114). If `currentTarget` arrives as a string (from JSON deserialization without type coercion), JavaScript concatenates instead of adding: `"1500" + 100 = "1500100"`.
 
@@ -28,6 +28,8 @@ The most severe: `targetCalories` stored as `1500100` (string concatenation), pr
 1. Add `Number()` coercion in `evaluateAndSuggestAdjustment()` for `currentTarget` parameter
 2. Add `Number()` coercion in `useNutritionTargets()` fallback path (line 60) for `userProfile.targetCalories`
 3. Add migration in `userProfileStore` to ensure `targetCalories` is always a number on load
+
+**Implementation:** `userProfileStore.ts` now includes `coerceNumericFields()` rehydration guard that runs on store init. It coerces `weight`, `proteinRatio`, and `targetCalories` to `Number()` and applies range clamping (500–10000 for calories).
 
 **Files:** `useFeedbackLoop.ts`, `useNutritionTargets.ts`, `userProfileStore.ts`
 
@@ -69,11 +71,13 @@ But `vi.json` line 732 defines: `"weekOf": "Tuần từ {{date}}"` — parameter
 
 **File:** `src/locales/vi.json`
 
-### BUG-05: CardioLogger non-atomic save
+### BUG-05: CardioLogger non-atomic save — ✅ FIXED
 
 **Root Cause:** `CardioLogger.tsx` uses separate `addWorkout()` + `addWorkoutSet()` calls. If crash occurs between them, orphaned workouts remain in DB.
 
 **Fix:** Use `saveWorkoutAtomic()` (already exists, used by WorkoutLogger) instead of two separate calls.
+
+**Implementation:** `CardioLogger.tsx` now calls `saveWorkoutAtomic()` for transactional save, eliminating the risk of orphaned workout records.
 
 **File:** `CardioLogger.tsx`
 
@@ -85,7 +89,7 @@ But `vi.json` line 732 defines: `"weekOf": "Tuần từ {{date}}"` — parameter
 
 **File:** `FitnessTab.tsx`
 
-### BUG-07: Nutrition bridge uses fake data
+### BUG-07: Nutrition bridge uses fake data — ✅ FIXED
 
 **Root Cause:** `useFitnessNutritionBridge.ts` line ~105-110:
 ```tsx
@@ -96,21 +100,25 @@ The bridge generates fake "50% of target" for calories and hardcoded 0 for prote
 
 **Fix:** Import `useTodayNutrition()` hook (already exists) to get actual consumed calories/protein from the meal plan.
 
+**Implementation:** `useFitnessNutritionBridge.ts` now imports and uses `useTodayNutrition()` to fetch real consumed calories and protein from the meal plan. Smart insights are now data-driven.
+
 **File:** `useFitnessNutritionBridge.ts`
 
 ---
 
 ## Phase 2: Logic Corrections
 
-### LOGIC-01: Periodization always uses Week 1 rep scheme
+### LOGIC-01: Periodization always uses Week 1 rep scheme — ✅ FIXED
 
 **Root Cause:** `useTrainingPlan.ts` plan generation uses a hardcoded week number approach. When auto-generating after onboarding, it always produces Week 1 rep scheme regardless of plan duration.
 
 **Fix:** Store `currentWeek` in the TrainingPlan object and increment weekly. The plan generation already supports week-based periodization — just needs to track which week the user is on.
 
+**Implementation:** `TrainingPlan` type now includes `currentWeek: number` field. `useTrainingPlan.ts` adds `computeCurrentWeek()` helper that derives the current week from `planStartDate`. The hook accepts a `planStartDate` input to compute the week offset.
+
 **Files:** `useTrainingPlan.ts`, `fitnessStore.ts` (add `currentWeek` field to TrainingPlan type)
 
-### LOGIC-02: Plateau detection too strict
+### LOGIC-02: Plateau detection too strict — ✅ FIXED
 
 **Root Cause:** `useProgressiveOverload.ts` requires exact same max weight for 3+ weeks. Real-world variance (e.g., 100kg → 99kg → 100kg) is missed.
 
@@ -118,6 +126,8 @@ The bridge generates fake "50% of target" for calories and hardcoded 0 for prote
 ```tsx
 const isWithinTolerance = Math.abs(weekMax - referenceMax) / referenceMax <= 0.02;
 ```
+
+**Implementation:** `useProgressiveOverload.ts` now includes `isWeightSimilar()` helper with ±2% tolerance for plateau detection, preventing false negatives from minor weight fluctuations.
 
 **File:** `useProgressiveOverload.ts`
 
