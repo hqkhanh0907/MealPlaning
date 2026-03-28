@@ -76,9 +76,10 @@ describe('SettingsTab', () => {
     setTheme: mockSetTheme,
   };
 
-  it('renders settings title', () => {
+  it('renders settings page without duplicate heading', () => {
     render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText('Cài đặt')).toBeInTheDocument();
+    expect(screen.getByTestId('settings-search')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Cài đặt' })).not.toBeInTheDocument();
   });
 
   it('renders navigable section cards', () => {

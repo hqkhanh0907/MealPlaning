@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Heart, Target, Dumbbell, Sun, Moon, Monitor, Clock,
-  Database, ChevronRight, Search, SlidersHorizontal,
+  Database, ChevronRight, Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -103,12 +103,6 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps)
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
-        <SlidersHorizontal className="w-6 h-6 text-emerald-500" />
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('settings.title')}</h2>
-      </div>
-
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
