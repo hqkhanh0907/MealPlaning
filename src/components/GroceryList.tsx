@@ -142,7 +142,7 @@ const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-2">
       {t('grocery.emptyDescription')}
     </p>
-    <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto mb-6">
+    <p className="text-xs text-slate-500 dark:text-slate-500 max-w-sm mx-auto mb-6">
       {t('grocery.emptyAutoHint')}
     </p>
     <button type="button" aria-label={t('grocery.emptyAction')} className="inline-flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-h-11">
@@ -283,7 +283,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
           </div>
           {isExpanded && hasDishes && (
             <div data-testid={`grocery-dishes-${item.id}`} className="px-12 pb-3 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('grocery.usedIn')}</span>
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">{t('grocery.usedIn')}</span>
               {item.usedInDishes.map(d => (
                 <div key={d.dishId} className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                   <span className="font-medium">{d.dishName}</span>
@@ -421,7 +421,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                     <div className="flex items-center gap-2 mb-2 px-2">
                       <span className="text-sm">{(() => { const Icon = AISLE_ICON[group.category]; return <Icon className="size-4" aria-hidden="true" />; })()}</span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t(AISLE_LABEL_KEYS[group.category])}</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500">({group.items.length})</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-500">({group.items.length})</span>
                     </div>
                     <ul className="space-y-1">
                       {group.items.map(item => renderGroceryItem(item))}

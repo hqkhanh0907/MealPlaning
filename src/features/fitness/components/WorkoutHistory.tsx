@@ -169,7 +169,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
         </p>
         <p
           data-testid="empty-subtitle"
-          className="text-sm text-slate-400 dark:text-slate-500 mb-6"
+          className="text-sm text-slate-500 dark:text-slate-500 mb-6"
         >
           {t('fitness.history.emptySubtitle')}
         </p>
@@ -217,7 +217,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
           <div key={weekKey} data-testid={`week-group-${weekKey}`}>
             <h3
               data-testid={`week-header-${weekKey}`}
-              className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2 px-1"
+              className="text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wide mb-2 px-1"
             >
               {t('fitness.history.weekOf', { date: weekLabel })}
             </h3>
@@ -259,7 +259,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         {exerciseCount > 0 && (
                           <span
                             data-testid={`workout-exercises-${workout.id}`}
-                            className="text-xs text-slate-400 dark:text-slate-500"
+                            className="text-xs text-slate-500 dark:text-slate-500"
                           >
                             {t('fitness.history.exerciseCount', {
                               count: exerciseCount,
@@ -343,7 +343,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
 
                         <div
                           data-testid={`workout-meta-${workout.id}`}
-                          className="flex items-center gap-4 pt-2 mt-2 border-t border-slate-50 dark:border-slate-700 text-xs text-slate-400 dark:text-slate-500"
+                          className="flex items-center gap-4 pt-2 mt-2 border-t border-slate-50 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-500"
                         >
                           <div className="flex items-center gap-1">
                             <Clock

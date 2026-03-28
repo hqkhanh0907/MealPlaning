@@ -266,7 +266,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         onChange={() => toggleIngredientSelection(idx)}
                         className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                       />
-                      <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{t('saveAnalyzed.ingredientNum', { num: idx + 1 })}</span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase">{t('saveAnalyzed.ingredientNum', { num: idx + 1 })}</span>
                     </label>
                     <button
                       onClick={() => handleResearchIngredient(idx)}
@@ -332,7 +332,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(watchedIngredients[idx]?.unit ?? 'g')}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       <div>
-                        <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">{t('common.calories')}</label>
+                        <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">{t('common.calories')}</label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.calories`}
                           control={control}
@@ -343,7 +343,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-pro-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Protein</label>
+                        <label htmlFor={`ai-ing-pro-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Protein</label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.protein`}
                           control={control}
@@ -354,7 +354,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-carbs-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Carbs</label>
+                        <label htmlFor={`ai-ing-carbs-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Carbs</label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.carbs`}
                           control={control}
@@ -365,7 +365,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-fat-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Fat</label>
+                        <label htmlFor={`ai-ing-fat-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Fat</label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.fat`}
                           control={control}
@@ -376,7 +376,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-fiber-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Fiber</label>
+                        <label htmlFor={`ai-ing-fiber-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Fiber</label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.fiber`}
                           control={control}

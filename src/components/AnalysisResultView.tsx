@@ -64,7 +64,7 @@ const EmptyState: React.FC = () => {
 
 const NutritionCard: React.FC<{ label: string; value: number; unit: string; color: string }> = ({ label, value, unit, color }) => (
   <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-600 shadow-sm">
-    <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">{label}</p>
+    <p className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase mb-1">{label}</p>
     <p className={`text-2xl font-bold ${color}`}>{value} <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">{unit}</span></p>
   </div>
 );
@@ -94,19 +94,19 @@ const IngredientCard: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
       </div>
       <div className="grid grid-cols-4 gap-2">
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.calories')}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase">{t('common.calories')}</p>
           <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.protein')}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase">{t('common.protein')}</p>
           <p className="text-sm font-bold text-blue-500">{Math.round(n.protein)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.carbs')}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase">{t('common.carbs')}</p>
           <p className="text-sm font-bold text-amber-500">{Math.round(n.carbs)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">{t('common.fat')}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase">{t('common.fat')}</p>
           <p className="text-sm font-bold text-rose-500">{Math.round(n.fat)}g</p>
         </div>
       </div>

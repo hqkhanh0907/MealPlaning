@@ -101,7 +101,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
             <div className="text-center py-8">
               <BookTemplate className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
               <p className="text-slate-500 dark:text-slate-400 font-medium">{t('template.empty')}</p>
-              <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">{t('template.emptyHint')}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">{t('template.emptyHint')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -146,7 +146,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
 
               {filteredTemplates.length === 0 ? (
                 <div className="text-center py-6">
-                  <p className="text-sm text-slate-400 dark:text-slate-500">{t('template.noResults')}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-500">{t('template.noResults')}</p>
                 </div>
               ) : (
               <div className="space-y-3">
@@ -187,7 +187,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                   ) : (
                     <div className="mb-3">
                       <h4 className="font-bold text-slate-800 dark:text-slate-100">{template.name}</h4>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
                         {t('template.dishes', { count: getDishCount(template) })} · {t('template.created')} {new Date(template.createdAt).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
                       </p>
                       {template.tags && template.tags.length > 0 && (

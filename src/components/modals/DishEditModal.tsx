@@ -359,7 +359,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                 {(() => {
                   const pickerSelectedIds = new Set(fields.map(f => f.ingredientId));
                   const available = allIngredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()));
-                  if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === allIngredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
+                  if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-500">{pickerSelectedIds.size === allIngredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
                   const recentlyUsed = available.filter(ing => ingredientFrequency.has(ing.id)).sort((a, b) => (ingredientFrequency.get(b.id) ?? 0) - (ingredientFrequency.get(a.id) ?? 0)).slice(0, 10);
                   const recentIds = new Set(recentlyUsed.map(ing => ing.id));
                   const rest = available.filter(ing => !recentIds.has(ing.id));
@@ -367,7 +367,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                     <button key={ing.id} data-testid={`btn-add-ing-${ing.id}`} type="button" onClick={() => handleAddIngredient(ing.id)} className="w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex items-center justify-between group transition-all">
                       <div className="flex-1 min-w-0">
                         <span className="text-slate-700 dark:text-slate-300 font-medium">{getLocalizedField(ing.name, lang)}</span>
-                        <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">{Math.round(ing.caloriesPer100)}cal · {Math.round(ing.proteinPer100)}g pro</span>
+                        <span className="ml-2 text-xs text-slate-500 dark:text-slate-500">{Math.round(ing.caloriesPer100)}cal · {Math.round(ing.proteinPer100)}g pro</span>
                       </div>
                       <Plus className="w-4 h-4 shrink-0 text-slate-300 dark:text-slate-600 group-hover:text-emerald-500" />
                     </button>
@@ -383,7 +383,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                           {recentlyUsed.map(renderIngButton)}
                           {rest.length > 0 && (
                             <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700/50">
-                              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('dish.allIngredients')}</span>
+                              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">{t('dish.allIngredients')}</span>
                             </div>
                           )}
                         </>
@@ -427,7 +427,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                           <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = safeAmount + step; setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 min-h-11 min-w-11 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * safeAmount / 100)}cal · {Math.round(ing.proteinPer100 * safeAmount / 100)}g pro · {Math.round(ing.carbsPer100 * safeAmount / 100)}g carb · {Math.round(ing.fatPer100 * safeAmount / 100)}g fat</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * safeAmount / 100)}cal · {Math.round(ing.proteinPer100 * safeAmount / 100)}g pro · {Math.round(ing.carbsPer100 * safeAmount / 100)}g carb · {Math.round(ing.fatPer100 * safeAmount / 100)}g fat</p>
                         {errors.ingredients?.[index]?.amount && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${field.ingredientId}`}>{errors.ingredients[index].amount.message}</p>}
                       </div>
                       <button type="button" onClick={() => handleRemoveIngredient(field.ingredientId)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all min-h-11 min-w-11 flex items-center justify-center"><Trash2 className="w-4 h-4" /></button>
@@ -436,7 +436,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                 })}
                 {fields.length === 0 && (
                   <div>
-                    <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl">{t('dish.noIngredientSelected')}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-500 text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl">{t('dish.noIngredientSelected')}</p>
                     {errors.ingredients?.message && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-ingredients">{errors.ingredients.message}</p>}
                   </div>
                 )}
@@ -460,10 +460,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           }, { cal: 0, prot: 0, carbs: 0, fat: 0 });
           return (
             <div className="px-6 py-3 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 flex items-center justify-around gap-3 text-center">
-              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Flame className="size-3.5" aria-hidden="true" /> KCal</p><p data-testid="dish-total-calories" className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.cal)}</p></div>
-              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Dumbbell className="size-3.5" aria-hidden="true" /> Protein</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p></div>
-              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Wheat className="size-3.5" aria-hidden="true" /> Carbs</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p></div>
-              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Droplets className="size-3.5" aria-hidden="true" /> Fat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p></div>
+              <div><p className="text-xs text-slate-500 dark:text-slate-500 inline-flex items-center gap-1"><Flame className="size-3.5" aria-hidden="true" /> KCal</p><p data-testid="dish-total-calories" className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.cal)}</p></div>
+              <div><p className="text-xs text-slate-500 dark:text-slate-500 inline-flex items-center gap-1"><Dumbbell className="size-3.5" aria-hidden="true" /> Protein</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p></div>
+              <div><p className="text-xs text-slate-500 dark:text-slate-500 inline-flex items-center gap-1"><Wheat className="size-3.5" aria-hidden="true" /> Carbs</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p></div>
+              <div><p className="text-xs text-slate-500 dark:text-slate-500 inline-flex items-center gap-1"><Droplets className="size-3.5" aria-hidden="true" /> Fat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p></div>
             </div>
           );
         })()}

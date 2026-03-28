@@ -252,7 +252,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
                             onChange={() => toggleMeal(type)}
                             className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                           />
-                          <span className={`text-sm font-bold uppercase tracking-wider ${isSelected ? colors.text : 'text-slate-400 dark:text-slate-500'}`}>
+                          <span className={`text-sm font-bold uppercase tracking-wider ${isSelected ? colors.text : 'text-slate-500 dark:text-slate-500'}`}>
                             {(() => { const Icon = MEAL_TYPE_ICONS[type]; return <Icon className="size-4 inline-block mr-1" aria-hidden="true" />; })()}{mealTypeLabels[type]}
                           </span>
                         </label>
@@ -275,7 +275,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
                         {names.map((name) => (
                           <div key={name} className="flex items-center gap-2">
                             <ChefHat className={`w-4 h-4 ${isSelected ? 'text-emerald-500' : 'text-slate-300'}`} />
-                            <span className={`font-medium ${isSelected ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <span className={`font-medium ${isSelected ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-500'}`}>
                               {name}
                             </span>
                           </div>
@@ -285,10 +285,10 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
                       {/* Nutrition summary */}
                       <div className={`pt-3 border-t ${isSelected ? 'border-slate-200/50 dark:border-slate-600/50' : 'border-slate-200 dark:border-slate-600'}`}>
                         <div className="flex gap-4 text-sm">
-                          <span className={`font-bold ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+                          <span className={`font-bold ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-slate-500 dark:text-slate-500'}`}>
                             {nutrition.calories} kcal
                           </span>
-                          <span className={`font-bold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                          <span className={`font-bold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-500'}`}>
                             {nutrition.protein}g protein
                           </span>
                         </div>

@@ -135,7 +135,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps)
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
                   {t(item.titleKey)}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
                   {item.summary}
                 </p>
               </div>

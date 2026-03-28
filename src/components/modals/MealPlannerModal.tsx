@@ -280,7 +280,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
               <p className="text-slate-500 dark:text-slate-400 font-medium">
                 {t('planning.noMatchTitle', { meal: activeTabLabel })}
               </p>
-              <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">
+              <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
                 {t('planning.noMatchHint', { meal: activeTabLabel })}
               </p>
             </div>
@@ -302,7 +302,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                     className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       isSelected
                         ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
+                        : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-500'
                     }`}
                   >
                     <ChefHat className="w-5 h-5" />
@@ -375,14 +375,14 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
             </div>
           )}
           <div className="flex items-center justify-between mb-3 text-xs">
-            <span className="text-slate-400 dark:text-slate-500">
+            <span className="text-slate-500 dark:text-slate-500">
               {activeTabLabel}:{' '}
               <span className="font-semibold text-slate-600 dark:text-slate-300">
                 {selections[activeTab].size} {t('common.item')}
               </span>
             </span>
             {selections[activeTab].size > 0 && (
-              <span className="text-slate-400 dark:text-slate-500">
+              <span className="text-slate-500 dark:text-slate-500">
                 {Math.round(activeTabNutrition.calories)} kcal · {Math.round(activeTabNutrition.protein)}g Pro
               </span>
             )}
