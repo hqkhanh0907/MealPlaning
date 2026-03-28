@@ -33,9 +33,11 @@ describe('AI Analysis Extended', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('AI analysis result (TC_AI_EXT_03-05)', () => {
     before(async () => {
-      // Inject a mock analysis result into the app state
+      // Inject a mock analysis result into the app state via custom event.
+      // Note: mp-last-analysis localStorage key is no longer used (removed
+      // during SQLite migration). The app now handles analysis results
+      // directly via event dispatch.
       await (browser as unknown as ExecutableBrowser).execute(() => {
-        // Store a mock analyzed result
         const mockResult = {
           name: { vi: 'Phở bò', en: 'Beef pho' },
           description: { vi: 'Phở bò truyền thống', en: 'Traditional beef pho' },
@@ -48,7 +50,6 @@ describe('AI Analysis Extended', () => {
             { name: { vi: 'Thịt bò', en: 'Beef' }, amount: 150, unit: { vi: 'g', en: 'g' }, caloriesPer100: 250, proteinPer100: 26, carbsPer100: 0, fatPer100: 15, fiberPer100: 0 },
           ],
         };
-        localStorage.setItem('mp-last-analysis', JSON.stringify(mockResult));
 
         // Dispatch custom event to notify React
         window.dispatchEvent(new CustomEvent('mp-analysis-complete', { detail: mockResult }));

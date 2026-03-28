@@ -3,11 +3,6 @@ import { SettingsPage } from '../pages/SettingsPage';
 import { CalendarPage } from '../pages/CalendarPage';
 import { localDateKey } from '../utils/dateKey';
 
-type ExecutableBrowser = typeof browser & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute: <T>(fn: () => T) => Promise<T>;
-};
-
 describe('Data Backup — export and import', () => {
   const page = new SettingsPage();
   const calPage = new CalendarPage();
@@ -58,13 +53,14 @@ describe('Data Backup — export and import', () => {
   // TC_BACKUP_04 — Verify data exists before export
   // ─────────────────────────────────────────────────────────────────
   describe('Data integrity check (TC_BACKUP_04)', () => {
-    it('TC_BACKUP_04 — should have data in localStorage for export', async () => {
-      const hasData = await (browser as unknown as ExecutableBrowser).execute(() => {
-        const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as unknown[];
-        const dishes = JSON.parse(localStorage.getItem('mp-dishes') || '[]') as unknown[];
-        return ings.length > 0 && dishes.length > 0;
-      });
-      assert.strictEqual(hasData, true, 'Expected ingredients and dishes in localStorage before export');
+    it('TC_BACKUP_04 — should have data available for export', async () => {
+      // Data is now in SQLite (not localStorage). Verify by navigating to
+      // management and checking that the seeded ingredient/dish are visible.
+      await page.navigateTo('management');
+      await browser.pause(500);
+      const hasDish = await page.isDisplayed('btn-edit-dish-e2e-backup-dish-1');
+      await page.navigateTo('settings');
+      assert.strictEqual(hasDish, true, 'Expected seeded dish to be visible in management before export');
     });
 
     it('TC_BACKUP_05 — should have data-backup section visible', async () => {

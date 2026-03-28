@@ -14,7 +14,7 @@ describe('Detail Modal Views', () => {
     await page.navigateTo('management');
     await browser.pause(500);
 
-    // Inject test ingredient and dish
+    // Seed test ingredient and dish via localStorage (migrated to SQLite on reload)
     await (browser as unknown as ExecutableBrowser).execute(() => {
       const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
       if (!ings.some((i) => i.id === 'e2e-detail-ing')) {
@@ -43,9 +43,8 @@ describe('Detail Modal Views', () => {
       }
     });
 
-    // Reload to pick up injected data
-    await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
-    await browser.pause(2000);
+    // Reload with migration flag cleared so data migrates to SQLite
+    await page.reloadApp();
     await page.navigateTo('management');
     await browser.pause(500);
   });

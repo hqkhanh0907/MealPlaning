@@ -53,13 +53,10 @@ describe('Grocery Extended', () => {
       }
       localStorage.setItem('mp-day-plans', JSON.stringify(plans));
 
-      // Clear grocery checked state
-      localStorage.removeItem('mp-grocery-checked');
+      // Grocery checked state is now in SQLite — no localStorage key to clear
     }, ING_ID, today);
 
-    await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
-    await browser.pause(2000);
-    await page.switchToWebview();
+    await page.reloadApp();
     await page.navigateTo('calendar');
     await browser.pause(300);
     await page.navigateTo('grocery');

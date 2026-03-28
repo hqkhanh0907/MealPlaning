@@ -111,9 +111,9 @@ export class CalendarPage extends BasePage {
     return text;
   }
 
-  /** Inject a day plan into localStorage for the given date key (YYYY-MM-DD).
-   *  Adds to (or replaces in) the mp-day-plans array.
-   *  Pass `ingredients` and `dishes` arrays to also seed the library.
+  /** Seed test data via localStorage for migration to SQLite on next reload.
+   *  Adds ingredient, dish, and day plan entries. Call reloadApp() afterwards
+   *  so the app migrates localStorage data to SQLite on startup.
    */
   async injectTestData(opts: {
     dateKey: string;
@@ -165,12 +165,5 @@ export class CalendarPage extends BasePage {
       ingredientPayload ? JSON.stringify(ingredientPayload) as unknown as string : null,
       dishPayload ? JSON.stringify(dishPayload) as unknown as string : null,
     );
-  }
-
-  /** Reload app page and switch back to webview context. */
-  async reloadApp() {
-    await (browser as unknown as ExecutableBrowser).execute(() => { location.reload(); });
-    await browser.pause(2_000);
-    await this.switchToWebview();
   }
 }

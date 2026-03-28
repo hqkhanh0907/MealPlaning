@@ -102,15 +102,16 @@ describe('Grocery Aggregation — verify item quantities match plan', () => {
   it('TC_GROC_AGG_04 — should mark item as checked and persist', async () => {
     await groceryPage.tapGroceryItem(ING_2_ID);
     await browser.pause(300);
-    const checkedIds = await (browser as unknown as ExecutableBrowser).execute(() => {
-      const snaps = JSON.parse(
-        localStorage.getItem('mp-grocery-checked') || '[]',
-      ) as Array<{ id: string }>;
-      return snaps.map(s => s.id);
-    });
+    // Grocery checked state is now stored in SQLite (not localStorage).
+    // Verify via UI: checked items get 'line-through' styling.
+    const isChecked = await (browser as unknown as ExecutableBrowser).execute((ingId: string) => {
+      const item = document.querySelector(`[data-testid="grocery-item-${ingId}"]`);
+      if (!item) return false;
+      return item.innerHTML.includes('line-through');
+    }, ING_2_ID);
     assert.ok(
-      checkedIds.includes(ING_2_ID),
-      `Expected ${ING_2_ID} to be in mp-grocery-checked`,
+      isChecked,
+      `Expected grocery item ${ING_2_ID} to show checked (line-through) state after tapping`,
     );
   });
 

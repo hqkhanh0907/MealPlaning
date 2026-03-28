@@ -37,9 +37,7 @@ describe('Sort, Filter & View Toggle — management toolbar features', () => {
       localStorage.setItem('mp-dishes', JSON.stringify(dishes));
     });
 
-    await (browser as unknown as ExecutableBrowser).execute(() => { location.reload(); });
-    await browser.pause(2_000);
-    await page.switchToWebview();
+    await page.reloadApp();
     await page.navigateTo('management');
   });
 

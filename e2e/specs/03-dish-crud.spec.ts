@@ -100,10 +100,8 @@ describe('Dish CRUD', () => {
           localStorage.setItem('mp-dishes', JSON.stringify(dishes));
         }
       });
-      // Reload so React picks up the injected data
-      await (browser as unknown as ExecutableBrowser).execute(() => { location.reload(); });
-      await browser.pause(2_000);
-      await page.switchToWebview();
+      // Reload so localStorage data migrates to SQLite
+      await page.reloadApp();
       await page.navigateTo('management');
       await page.openSubTab('dishes');
     });
@@ -155,10 +153,8 @@ describe('Dish CRUD', () => {
           localStorage.setItem('mp-ingredients', JSON.stringify(ings));
         }
       });
-      // Reload so React sees the latest ingredients
-      await (browser as unknown as ExecutableBrowser).execute(() => { location.reload(); });
-      await browser.pause(2_000);
-      await page.switchToWebview();
+      // Reload so localStorage data migrates to SQLite
+      await page.reloadApp();
       await page.navigateTo('management');
       await page.openSubTab('dishes');
       // Open a fresh new dish modal

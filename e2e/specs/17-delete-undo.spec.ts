@@ -18,6 +18,7 @@ describe('Delete Guard & Undo', () => {
     await browser.pause(500);
 
     // Inject test data: 1 unused dish, 1 used dish (in today's plan), 1 ingredient
+    // Data is seeded via localStorage and migrated to SQLite on reload
     await (browser as unknown as ExecutableBrowser).execute((ingId: string, dishId: string, usedDishId: string) => {
       const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
       if (!ings.some((i) => i.id === ingId)) {
@@ -68,10 +69,8 @@ describe('Delete Guard & Undo', () => {
       localStorage.setItem('mp-day-plans', JSON.stringify(plans));
     }, TEST_ING_ID, TEST_DISH_ID, USED_DISH_ID);
 
-    // Reload to pick up injected data
-    await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
-    await browser.pause(2000);
-    await page.switchToWebview();
+    // Reload with migration so seeded data moves from localStorage to SQLite
+    await page.reloadApp();
     await page.navigateTo('management');
     await browser.pause(500);
   });
@@ -179,9 +178,8 @@ describe('Delete Guard & Undo', () => {
         }
       }, STANDALONE_ING_ID);
 
-      await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
-      await browser.pause(2000);
-      await page.switchToWebview();
+      // Reload with migration so seeded data moves from localStorage to SQLite
+      await page.reloadApp();
       await page.navigateTo('management');
       await browser.pause(300);
       await page.openIngredientsSubTab();

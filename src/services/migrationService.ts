@@ -42,14 +42,25 @@ function readZustandState<T>(key: string, prop: string): T | null {
   const raw = localStorage.getItem(key);
   if (raw === null) return null;
 
-  const parsed: unknown = JSON.parse(raw);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
   if (typeof parsed !== 'object' || parsed === null) return null;
 
+  // Zustand persist format: { state: { [prop]: data } }
   const state = (parsed as Record<string, unknown>).state;
-  if (typeof state !== 'object' || state === null) return null;
+  if (typeof state === 'object' && state !== null) {
+    const value = (state as Record<string, unknown>)[prop];
+    if (value !== undefined) return value as T;
+  }
 
-  const value = (state as Record<string, unknown>)[prop];
-  return value === undefined ? null : (value as T);
+  // Fallback: raw array stored directly (legacy format or E2E test seeding)
+  if (Array.isArray(parsed)) return parsed as T;
+
+  return null;
 }
 
 /* ------------------------------------------------------------------ */

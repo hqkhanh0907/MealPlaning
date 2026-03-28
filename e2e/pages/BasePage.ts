@@ -137,4 +137,16 @@ export class BasePage {
   async navigateTo(tab: string) {
     await this.waitAndClick(`nav-${tab}`);
   }
+
+  /** Reload app page, clearing migration flags so seeded localStorage data
+   *  gets migrated to SQLite on next load. */
+  async reloadApp() {
+    await (browser as unknown as ContextCapableBrowser).execute(() => {
+      localStorage.removeItem('mp-migrated-to-sqlite');
+      localStorage.removeItem('fitness_migrated_to_sqlite');
+      location.reload();
+    });
+    await browser.pause(2_000);
+    await this.switchToWebview();
+  }
 }

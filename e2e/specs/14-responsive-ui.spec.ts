@@ -85,9 +85,7 @@ describe('Responsive UI', () => {
       await browser.pause(300);
 
       // Reload and check that the view is still list (via DOM presence of the active button)
-      await (browser as unknown as ExecutableBrowser).execute(() => location.reload());
-      await browser.pause(2000);
-      await mgmt.switchToWebview();
+      await mgmt.reloadApp();
       await mgmt.navigateTo('management');
       await browser.pause(500);
 
@@ -97,7 +95,7 @@ describe('Responsive UI', () => {
         // Check if list button has active/selected styling
         return listBtn?.className.includes('bg-') || listBtn?.getAttribute('aria-pressed') === 'true' || false;
       });
-      // Either localStorage persisted or the default view is grid — just verify toggle works
+      // View preference is in SQLite settings — verify toggle works
       assert.ok(typeof isListActive === 'boolean', 'View buttons should be functional');
 
       // Switch back to grid for subsequent tests

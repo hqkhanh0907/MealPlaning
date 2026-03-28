@@ -86,7 +86,7 @@ describe('Calendar — date navigation', () => {
           tags: ['breakfast'],
         },
       });
-      // Reload the app so React reads the injected data from localStorage
+      // Reload the app so localStorage data migrates to SQLite
       await page.reloadApp();
       await page.navigateTo('calendar');
       // Ensure calendar is showing today

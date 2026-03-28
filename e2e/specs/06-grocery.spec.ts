@@ -96,10 +96,8 @@ describe('Grocery List — scope switching and copy', () => {
           tags: ['breakfast'],
         },
       });
-      // Clear any previously checked state for a clean run
-      await (browser as unknown as ExecutableBrowser).execute(() => {
-        localStorage.removeItem('mp-grocery-checked');
-      });
+      // Grocery checked state is now in SQLite — no need to clear
+      // localStorage (fresh SQLite on reload has no checked items)
       // Reload so React sees the new data
       await calPage.reloadApp();
       await page.navigateTo('calendar');
@@ -112,16 +110,16 @@ describe('Grocery List — scope switching and copy', () => {
     it('TC_SHOP_02 — should mark a grocery item as checked', async () => {
       await page.tapGroceryItem(SHOP_ING_ID);
       await browser.pause(300);
-      // Verify the item ID appears in mp-grocery-checked after tapping
-      const checkedIds = await (browser as unknown as ExecutableBrowser).execute(() => {
-        const snaps = JSON.parse(
-          localStorage.getItem('mp-grocery-checked') || '[]',
-        ) as Array<{ id: string }>;
-        return snaps.map((s) => s.id);
-      });
+      // Grocery checked state is now stored in SQLite (not localStorage).
+      // Verify via UI: checked items get 'line-through' styling.
+      const isChecked = await (browser as unknown as ExecutableBrowser).execute((ingId: string) => {
+        const item = document.querySelector(`[data-testid="grocery-item-${ingId}"]`);
+        if (!item) return false;
+        return item.innerHTML.includes('line-through');
+      }, SHOP_ING_ID);
       assert.ok(
-        checkedIds.includes(SHOP_ING_ID),
-        `Expected ${SHOP_ING_ID} to be in mp-grocery-checked after tapping the item`,
+        isChecked,
+        `Expected grocery item ${SHOP_ING_ID} to show checked (line-through) state after tapping`,
       );
     });
   });

@@ -38,7 +38,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
     // Seed: 2 ingredients, 2 dishes, plans for today AND tomorrow
     await (browser as unknown as ExecutableBrowser).execute(
       (ingA: string, ingB: string, dishA: string, dishB: string, todayKey: string, tomorrowKey: string) => {
-        localStorage.removeItem('mp-grocery-checked');
+        // Grocery checked state is now in SQLite — no localStorage key to clear
 
         const ings = [
           { id: ingA, name: { vi: 'Gạo multi', en: 'Multi Rice' }, caloriesPer100: 130, proteinPer100: 3, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },

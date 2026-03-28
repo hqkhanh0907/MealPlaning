@@ -30,9 +30,7 @@ describe('Dish Ingredient Amount — edit amounts in dish modal', () => {
         localStorage.setItem('mp-ingredients', JSON.stringify(ings));
       }
     });
-    await (browser as unknown as ExecutableBrowser).execute(() => { location.reload(); });
-    await browser.pause(2_000);
-    await page.switchToWebview();
+    await page.reloadApp();
     await page.navigateTo('management');
     await page.openSubTab('dishes');
   });

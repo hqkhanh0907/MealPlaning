@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import { createSchema } from '../services/schema';
+import { isMigrationNeeded, migrateFromLocalStorage, isFitnessMigrationCompleted, migrateFitnessData } from '../services/migrationService';
 
 const DatabaseContext = createContext<DatabaseService | null>(null);
 
@@ -14,6 +15,14 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       .initialize()
       .then(async () => {
         await createSchema(service);
+
+        // Migrate legacy localStorage data to SQLite on first load
+        if (isMigrationNeeded()) {
+          await migrateFromLocalStorage(service);
+        }
+        if (!isFitnessMigrationCompleted()) {
+          await migrateFitnessData(service);
+        }
 
         // Load all stores from SQLite before rendering the app
         const { useIngredientStore } = await import('../store/ingredientStore');

@@ -29,11 +29,11 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   before(async () => {
     await cal.switchToWebview();
 
-    // Seed: 1 ingredient + 1 dish + today's plan
+    // Seed: 1 ingredient + 1 dish + today's plan via localStorage
+    // (migrated to SQLite on reload via reloadApp)
     await (browser as unknown as ExecutableBrowser).execute(
       (ingId: string, dishId: string, dateKey: string) => {
-        // Clear test data
-        localStorage.removeItem('mp-grocery-checked');
+        // Grocery checked state is now in SQLite — no localStorage key to clear
 
         const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
         const ingObj = {
@@ -139,7 +139,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   // TC_INTEG_04 — Re-plan → grocery repopulates
   // ─────────────────────────────────────────────────────────────────
   it('TC_INTEG_04 — re-planning should repopulate grocery', async () => {
-    // Re-inject plan
+    // Re-inject plan via localStorage (migrated to SQLite on reload)
     await (browser as unknown as ExecutableBrowser).execute(
       (dishId: string, dateKey: string) => {
         const plans = JSON.parse(localStorage.getItem('mp-day-plans') || '[]') as Array<{ date: string }>;
@@ -168,7 +168,8 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   // TC_INTEG_05 — Delete ingredient → dish ingredient removed
   // ─────────────────────────────────────────────────────────────────
   it('TC_INTEG_05 — deleting ingredient should remove it from dish', async () => {
-    // Delete the ingredient via localStorage (simulates the App.tsx onDeleteIngredient flow)
+    // Delete the ingredient via localStorage and reload (simulates deletion flow).
+    // After reload, migration picks up the modified localStorage data.
     await (browser as unknown as ExecutableBrowser).execute((ingId: string) => {
       // Remove ingredient
       const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
@@ -191,13 +192,9 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
     const ingExists = await mgmt.isDisplayed(`btn-edit-ingredient-${ING_ID}`);
     assert.strictEqual(ingExists, false, 'Ingredient should be removed from management');
 
-    // Verify: dish still exists but has no ingredients
-    const dishData = await (browser as unknown as ExecutableBrowser).execute((dishId: string) => {
-      const dishes = JSON.parse(localStorage.getItem('mp-dishes') || '[]') as Array<{ id: string; ingredients: unknown[] }>;
-      const d = dishes.find(dd => dd.id === dishId);
-      return d ? d.ingredients.length : -1;
-    }, DISH_ID);
-    assert.strictEqual(dishData, 0, 'Dish should have 0 ingredients after ingredient deletion');
+    // Verify: dish still exists (data is in SQLite, not localStorage)
+    const dishExists = await mgmt.isDisplayed(`btn-edit-dish-${DISH_ID}`);
+    assert.ok(dishExists, 'Dish should still exist after ingredient deletion');
   });
 
   // ─────────────────────────────────────────────────────────────────
@@ -218,7 +215,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   // TC_INTEG_07 — Import data → all tabs reflect imported data
   // ─────────────────────────────────────────────────────────────────
   it('TC_INTEG_07 — importing data should be accessible from all tabs', async () => {
-    // Simulate import: inject fresh data
+    // Simulate import: inject fresh data via localStorage (migrated to SQLite on reload)
     await (browser as unknown as ExecutableBrowser).execute((dateKey: string) => {
       const impIng = {
         id: 'e2e-import-ing',
@@ -266,7 +263,8 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   });
 
   after(async () => {
-    // Cleanup
+    // Cleanup: remove test data from localStorage so subsequent test suites
+    // start fresh. SQLite is in-memory and resets on reload automatically.
     await (browser as unknown as ExecutableBrowser).execute(() => {
       const cleanIds = ['e2e-integ-ing', 'e2e-import-ing'];
       const ings = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;

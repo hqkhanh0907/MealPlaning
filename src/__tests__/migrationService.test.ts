@@ -324,8 +324,9 @@ describe('migrationService', () => {
 
     const result = await migrateFromLocalStorage(db);
 
-    expect(result.success).toBe(false);
-    expect(result.error).toBeDefined();
+    // Malformed JSON is gracefully skipped (returns null from parseZustand)
+    expect(result.success).toBe(true);
+    expect(result.migratedCounts.ingredients).toBe(0);
   });
 
   /* --- Sets migration flag on success --- */
