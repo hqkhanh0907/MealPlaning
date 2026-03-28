@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SaveTemplateModal } from '../components/modals/SaveTemplateModal';
 import { DayPlan, Dish } from '../types';
 
@@ -65,33 +65,44 @@ describe('SaveTemplateModal', () => {
     expect(screen.getByText('copyPlan.noMeals')).toBeInTheDocument();
   });
 
-  it('calls onSave with trimmed name on submit', () => {
+  it('calls onSave with trimmed name on submit', async () => {
     render(<SaveTemplateModal {...defaultProps} />);
     fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: '  My Template  ' } });
     fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(defaultProps.onSave).toHaveBeenCalledWith('My Template', undefined);
+    await waitFor(() => {
+      expect(defaultProps.onSave).toHaveBeenCalledWith('My Template', undefined);
+    });
   });
 
-  it('shows validation error when submitting empty name', () => {
+  it('shows validation error when submitting empty name', async () => {
     render(<SaveTemplateModal {...defaultProps} />);
     fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(screen.getByText('template.nameRequired')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
     expect(defaultProps.onSave).not.toHaveBeenCalled();
   });
 
-  it('shows validation error on blur with empty input', () => {
+  it('shows validation error on blur with empty input', async () => {
     render(<SaveTemplateModal {...defaultProps} />);
     const input = screen.getByTestId('input-template-name');
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'a' } });
+    fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect(screen.getByText('template.nameRequired')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
   });
 
-  it('submits on Enter key', () => {
+  it('submits on Enter key', async () => {
     render(<SaveTemplateModal {...defaultProps} />);
     const input = screen.getByTestId('input-template-name');
     fireEvent.change(input, { target: { value: 'Enter Template' } });
     fireEvent.keyDown(input, { key: 'Enter' });
-    expect(defaultProps.onSave).toHaveBeenCalledWith('Enter Template', undefined);
+    await waitFor(() => {
+      expect(defaultProps.onSave).toHaveBeenCalledWith('Enter Template', undefined);
+    });
   });
 
   it('does not submit on other keys', () => {
@@ -155,14 +166,16 @@ describe('SaveTemplateModal', () => {
     expect(screen.queryByText('RemoveMe')).not.toBeInTheDocument();
   });
 
-  it('passes tags to onSave', () => {
+  it('passes tags to onSave', async () => {
     render(<SaveTemplateModal {...defaultProps} />);
     fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: 'Tagged Template' } });
     const tagInput = screen.getByTestId('input-template-tag');
     fireEvent.change(tagInput, { target: { value: 'TestTag' } });
     fireEvent.keyDown(tagInput, { key: 'Enter' });
     fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(defaultProps.onSave).toHaveBeenCalledWith('Tagged Template', ['TestTag']);
+    await waitFor(() => {
+      expect(defaultProps.onSave).toHaveBeenCalledWith('Tagged Template', ['TestTag']);
+    });
   });
 
   it('does not add duplicate tag', () => {

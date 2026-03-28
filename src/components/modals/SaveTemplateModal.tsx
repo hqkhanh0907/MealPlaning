@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { X, Save, ChefHat, Tag } from 'lucide-react';
 import { DayPlan, Dish, SupportedLang } from '../../types';
@@ -6,6 +8,12 @@ import { getLocalizedField } from '../../utils/localize';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { Input } from '@/components/ui/input';
+import {
+  saveTemplateSchema,
+  saveTemplateDefaults,
+  MAX_NAME_LENGTH,
+  type SaveTemplateFormData,
+} from '../../schemas/saveTemplateSchema';
 
 interface SaveTemplateModalProps {
   currentPlan: DayPlan;
@@ -14,20 +22,28 @@ interface SaveTemplateModalProps {
   onClose: () => void;
 }
 
-const MAX_NAME_LENGTH = 100;
-
 export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPlan, dishes, onSave, onClose }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   useModalBackHandler(true, onClose);
 
-  const [name, setName] = useState('');
-  const [touched, setTouched] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const {
+    register,
+    handleSubmit: rhfSubmit,
+    watch,
+    setValue,
+    formState: { errors, touchedFields, isSubmitted: formStateIsSubmitted },
+  } = useForm<SaveTemplateFormData>({
+    resolver: zodResolver(saveTemplateSchema),
+    mode: 'onBlur',
+    defaultValues: saveTemplateDefaults,
+  });
+
   const [tagInput, setTagInput] = useState('');
 
-  const trimmedName = name.trim();
-  const isValid = trimmedName.length > 0;
+  const showNameError = (touchedFields.name || formStateIsSubmitted) && errors.name;
+  const watchName = watch('name');
+  const watchTags = watch('tags');
 
   const getDishInfo = useCallback((ids: string[]): { id: string; name: string }[] =>
     ids.map(id => dishes.find(d => d.id === id)).filter(Boolean).map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
@@ -41,18 +57,16 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
 
   const totalDishes = preview.breakfast.length + preview.lunch.length + preview.dinner.length;
 
-  const handleSubmit = useCallback(() => {
-    setTouched(true);
-    if (isValid) {
-      onSave(trimmedName, selectedTags.length > 0 ? selectedTags : undefined);
-    }
-  }, [isValid, trimmedName, selectedTags, onSave]);
+  const onFormSubmit = useCallback((data: SaveTemplateFormData) => {
+    onSave(data.name, data.tags.length > 0 ? data.tags : undefined);
+  }, [onSave]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmit();
+      e.preventDefault();
+      rhfSubmit(onFormSubmit)();
     }
-  }, [handleSubmit]);
+  }, [rhfSubmit, onFormSubmit]);
 
   const PRESET_TAGS = useMemo(() => [
     t('template.tagHighProtein'), t('template.tagQuickMeals'), t('template.tagWeekend'),
@@ -61,15 +75,15 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
 
   const addTag = useCallback((tag: string) => {
     const trimmed = tag.trim();
-    if (trimmed && !selectedTags.includes(trimmed)) {
-      setSelectedTags(prev => [...prev, trimmed]);
+    if (trimmed && !watchTags.includes(trimmed)) {
+      setValue('tags', [...watchTags, trimmed], { shouldDirty: true });
     }
     setTagInput('');
-  }, [selectedTags]);
+  }, [watchTags, setValue]);
 
   const removeTag = useCallback((tag: string) => {
-    setSelectedTags(prev => prev.filter(t => t !== tag));
-  }, []);
+    setValue('tags', watchTags.filter(t => t !== tag), { shouldDirty: true });
+  }, [watchTags, setValue]);
 
   const handleTagKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -104,26 +118,24 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
               id="template-name"
               data-testid="input-template-name"
               type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
+              {...register('name')}
               onKeyDown={handleKeyDown}
-              onBlur={() => setTouched(true)}
               maxLength={MAX_NAME_LENGTH}
               placeholder={t('template.namePlaceholder')}
               autoFocus
               className={`w-full border-2 text-slate-800 min-h-12 ${
-                touched && !isValid
+                showNameError
                   ? 'border-rose-300'
                   : ''
               }`}
             />
             <div className="flex items-center justify-between mt-1.5">
-              {touched && !isValid ? (
-                <p className="text-xs text-rose-500 font-medium">{t('template.nameRequired')}</p>
+              {showNameError ? (
+                <p className="text-xs text-rose-500 font-medium" role="alert">{errors.name.message}</p>
               ) : (
                 <span />
               )}
-              <span className="text-xs text-slate-400 dark:text-slate-500">{name.length}/{MAX_NAME_LENGTH}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">{watchName.length}/{MAX_NAME_LENGTH}</span>
             </div>
           </div>
 
@@ -131,7 +143,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
           <div>
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('template.tags')}</label>
             <div className="flex flex-wrap gap-1.5 mb-2">
-              {selectedTags.map(tag => (
+              {watchTags.map(tag => (
                 <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
                   <Tag className="w-3 h-3" />
                   {tag}
@@ -152,7 +164,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
               className="w-full text-slate-800"
             />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {PRESET_TAGS.filter(pt => !selectedTags.includes(pt)).map(pt => (
+              {PRESET_TAGS.filter(pt => !watchTags.includes(pt)).map(pt => (
                 <button key={pt} type="button" data-testid={`preset-tag-${pt}`} onClick={() => addTag(pt)} className="text-[10px] font-medium px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 transition-all">
                   + {pt}
                 </button>
@@ -188,8 +200,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
         <div className="px-6 sm:px-8 py-4 border-t border-slate-100 dark:border-slate-700">
           <button
             data-testid="btn-save-template"
-            onClick={handleSubmit}
-            disabled={touched && !isValid}
+            onClick={rhfSubmit(onFormSubmit)}
             className="w-full flex items-center justify-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-12"
           >
             <Save className="w-4 h-4" />

@@ -1,15 +1,17 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { Input } from '@/components/ui/input';
-import type { MuscleGroup, ExerciseCategory } from '../types';
+import type { MuscleGroup } from '../types';
+import {
+  customExerciseSchema,
+  customExerciseDefaults,
+  type CustomExerciseFormData,
+} from '../../../schemas/customExerciseSchema';
 
-export interface CustomExerciseFormData {
-  name: string;
-  muscleGroup: string;
-  category: ExerciseCategory;
-  equipment: string;
-}
+export type { CustomExerciseFormData };
 
 interface CustomExerciseModalProps {
   isOpen: boolean;
@@ -27,58 +29,29 @@ const MUSCLE_GROUPS: MuscleGroup[] = [
   'glutes',
 ];
 
-const initialForm: CustomExerciseFormData = {
-  name: '',
-  muscleGroup: '',
-  category: 'compound',
-  equipment: '',
-};
-
 export function CustomExerciseModal({
   isOpen,
   onClose,
   onSave,
 }: CustomExerciseModalProps): React.JSX.Element | null {
   const { t } = useTranslation();
-  const [form, setForm] = useState<CustomExerciseFormData>(initialForm);
 
-  const handleNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setForm((f) => ({ ...f, name: e.target.value }));
-    },
-    [],
-  );
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CustomExerciseFormData>({
+    resolver: zodResolver(customExerciseSchema),
+    mode: 'onBlur',
+    defaultValues: customExerciseDefaults,
+  });
 
-  const handleMuscleGroupChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setForm((f) => ({ ...f, muscleGroup: e.target.value }));
-    },
-    [],
-  );
-
-  const handleCategoryChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setForm((f) => ({
-        ...f,
-        category: e.target.value as ExerciseCategory,
-      }));
-    },
-    [],
-  );
-
-  const handleEquipmentChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setForm((f) => ({ ...f, equipment: e.target.value }));
-    },
-    [],
-  );
-
-  const handleSubmit = useCallback(() => {
-    if (!form.name.trim()) return;
-    onSave({ ...form, name: form.name.trim() });
-    setForm(initialForm);
+  const onFormSubmit = useCallback((data: CustomExerciseFormData) => {
+    onSave(data);
+    reset(customExerciseDefaults);
     onClose();
-  }, [form, onSave, onClose]);
+  }, [onSave, reset, onClose]);
 
   if (!isOpen) return null;
 
@@ -91,17 +64,18 @@ export function CustomExerciseModal({
         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
           {t('fitness.exerciseSelector.addCustom')}
         </h3>
-        <div className="mt-4 space-y-3">
-          <Input
-            value={form.name}
-            onChange={handleNameChange}
-            placeholder={t('fitness.exerciseSelector.customName')}
-            data-testid="custom-exercise-name"
-            className="w-full"
-          />
+        <form onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-3">
+          <div>
+            <Input
+              {...register('name')}
+              placeholder={t('fitness.exerciseSelector.customName')}
+              data-testid="custom-exercise-name"
+              className={`w-full ${errors.name ? 'border-rose-500' : ''}`}
+            />
+            {errors.name && <p className="text-xs text-rose-500 mt-1" role="alert">{errors.name.message}</p>}
+          </div>
           <select
-            value={form.muscleGroup}
-            onChange={handleMuscleGroupChange}
+            {...register('muscleGroup')}
             data-testid="custom-exercise-muscle"
             className="w-full rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
           >
@@ -115,8 +89,7 @@ export function CustomExerciseModal({
             ))}
           </select>
           <select
-            value={form.category}
-            onChange={handleCategoryChange}
+            {...register('category')}
             data-testid="custom-exercise-category"
             className="w-full rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
           >
@@ -131,31 +104,28 @@ export function CustomExerciseModal({
             </option>
           </select>
           <Input
-            value={form.equipment}
-            onChange={handleEquipmentChange}
+            {...register('equipment')}
             placeholder={t('fitness.exerciseSelector.equipment')}
             data-testid="custom-exercise-equipment"
             className="w-full"
           />
-        </div>
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg border border-slate-300 py-2 text-sm text-slate-600 dark:border-slate-600 dark:text-slate-300"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!form.name.trim()}
-            className="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white disabled:opacity-50"
-            data-testid="save-custom-exercise"
-          >
-            {t('common.save')}
-          </button>
-        </div>
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-slate-300 py-2 text-sm text-slate-600 dark:border-slate-600 dark:text-slate-300"
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="submit"
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white disabled:opacity-50"
+              data-testid="save-custom-exercise"
+            >
+              {t('common.save')}
+            </button>
+          </div>
+        </form>
       </div>
     </ModalBackdrop>
   );
