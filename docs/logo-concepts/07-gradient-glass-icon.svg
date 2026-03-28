@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title7 desc7">
+  <title id="title7">Smart Meal Planner - Gradient Glassmorphism</title>
+  <desc id="desc7">An emerald droplet with glassmorphism effect and inner diamond shape</desc>
+  <defs>
+    <linearGradient id="glass-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064E3B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="glass-drop" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="40%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="glass-shine" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glass-blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15"/>
+    </filter>
+    <filter id="glass-shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#10B981" flood-opacity="0.3"/>
+    </filter>
+    <clipPath id="drop-clip">
+      <path d="M256,85 C256,85 370,220 370,310 C370,373 318,420 256,420 C194,420 142,373 142,310 C142,220 256,85 256,85Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="102" fill="url(#glass-bg)"/>
+
+  <!-- Ambient glow -->
+  <ellipse cx="256" cy="300" rx="180" ry="140" fill="#10B981" opacity="0.08" filter="url(#glass-blur)"/>
+
+  <!-- Main drop shape with shadow -->
+  <g filter="url(#glass-shadow)">
+    <path d="M256,85 C256,85 370,220 370,310 C370,373 318,420 256,420 C194,420 142,373 142,310 C142,220 256,85 256,85Z"
+          fill="url(#glass-drop)"/>
+  </g>
+
+  <!-- Glass reflection overlay -->
+  <path d="M256,85 C256,85 370,220 370,310 C370,373 318,420 256,420 C194,420 142,373 142,310 C142,220 256,85 256,85Z"
+        fill="url(#glass-shine)"/>
+
+  <!-- Frosted glass inner panel -->
+  <g clip-path="url(#drop-clip)">
+    <rect x="175" y="220" width="162" height="140" rx="20"
+          fill="#FFFFFF" opacity="0.12"/>
+    <rect x="175" y="220" width="162" height="140" rx="20"
+          fill="none" stroke="#FFFFFF" stroke-width="1" opacity="0.25"/>
+  </g>
+
+  <!-- Diamond gem in center -->
+  <g transform="translate(256, 300)">
+    <path d="M0,-35 L30,-8 L0,35 L-30,-8 Z" fill="#FFFFFF" opacity="0.2"/>
+    <path d="M0,-35 L30,-8 L0,0 Z" fill="#FFFFFF" opacity="0.15"/>
+    <path d="M0,-35 L-30,-8 L0,0 Z" fill="#FFFFFF" opacity="0.25"/>
+    <path d="M0,0 L30,-8 L0,35 Z" fill="#FFFFFF" opacity="0.08"/>
+    <path d="M0,0 L-30,-8 L0,35 Z" fill="#FFFFFF" opacity="0.12"/>
+    <!-- Diamond outline -->
+    <path d="M0,-35 L30,-8 L0,35 L-30,-8 Z" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5"/>
+    <line x1="-30" y1="-8" x2="30" y2="-8" stroke="#FFFFFF" stroke-width="1" opacity="0.3"/>
+    <line x1="0" y1="-35" x2="0" y2="0" stroke="#FFFFFF" stroke-width="0.8" opacity="0.2"/>
+  </g>
+
+  <!-- Highlight sparkle at top -->
+  <circle cx="220" cy="200" r="4" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="210" cy="215" r="2" fill="#FFFFFF" opacity="0.4"/>
+</svg>

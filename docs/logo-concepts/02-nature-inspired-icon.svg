@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title2 desc2">
+  <title id="title2">Smart Meal Planner - Nature Inspired</title>
+  <desc id="desc2">A fresh sprout growing from a circular plate, symbolizing healthy nutrition</desc>
+  <defs>
+    <linearGradient id="ni-leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="ni-stem" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="ni-plate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D1FAE5"/>
+      <stop offset="100%" stop-color="#A7F3D0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="102" fill="#FFFFFF"/>
+
+  <!-- Circular plate base -->
+  <ellipse cx="256" cy="340" rx="140" ry="35" fill="url(#ni-plate)" opacity="0.6"/>
+  <ellipse cx="256" cy="330" rx="130" ry="30" fill="none" stroke="#10B981" stroke-width="4" opacity="0.4"/>
+
+  <!-- Stem -->
+  <path d="M256 330 C256 280, 256 230, 256 180" stroke="url(#ni-stem)" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+  <!-- Left leaf -->
+  <path d="M256 220 C220 190, 170 180, 155 200 C140 220, 170 260, 220 250 C235 247, 248 235, 256 220Z"
+        fill="url(#ni-leaf)" opacity="0.9"/>
+  <!-- Left leaf vein -->
+  <path d="M250 222 C230 215, 195 210, 175 210" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- Right leaf -->
+  <path d="M256 180 C290 150, 340 140, 360 158 C380 176, 355 215, 300 210 C282 208, 266 196, 256 180Z"
+        fill="url(#ni-leaf)"/>
+  <!-- Right leaf vein -->
+  <path d="M264 183 C285 170, 318 162, 340 165" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- Small emerging leaf bud at top -->
+  <path d="M256 180 C248 160, 242 135, 250 120 C255 112, 262 115, 264 125 C268 140, 262 162, 256 180Z"
+        fill="#34D399"/>
+
+  <!-- Subtle dewdrop -->
+  <ellipse cx="210" cy="205" rx="5" ry="6" fill="#FFFFFF" opacity="0.7"/>
+</svg>

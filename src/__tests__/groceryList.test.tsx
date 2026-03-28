@@ -1,4 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useDatabase: () => ({
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    run: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockReturnValue(true),
+  }),
+}));
+
 import { GroceryList } from '../components/GroceryList';
 import type { Ingredient, Dish, DayPlan } from '../types';
 

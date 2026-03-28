@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DishManager } from '../components/DishManager';
 import { IngredientManager } from '../components/IngredientManager';
 import type { Dish, Ingredient } from '../types';
@@ -689,16 +689,18 @@ describe('IngredientManager', () => {
     expect(defaultProps.onDelete).toHaveBeenCalledWith('i2');
   });
 
-  it('validates form on submit', () => {
+  it('validates form on submit', async () => {
     render(<IngredientManager {...defaultProps} />);
     fireEvent.click(screen.getByText('Thêm nguyên liệu'));
     // Submit empty form
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
-    expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
+      expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    });
   });
 
-  it('saves new ingredient with valid data', () => {
+  it('saves new ingredient with valid data', async () => {
     render(<IngredientManager {...defaultProps} />);
     fireEvent.click(screen.getByText('Thêm nguyên liệu'));
 
@@ -707,7 +709,9 @@ describe('IngredientManager', () => {
     fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
 
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(defaultProps.onAdd).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(defaultProps.onAdd).toHaveBeenCalled();
+    });
   });
 
   it('shows "Dùng trong" for ingredients used in dishes', () => {
@@ -778,13 +782,15 @@ describe('IngredientManager', () => {
     expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
   });
 
-  it('calls onUpdate (not onAdd) when saving an edited ingredient', () => {
+  it('calls onUpdate (not onAdd) when saving an edited ingredient', async () => {
     render(<IngredientManager {...defaultProps} />);
     const editButtons = screen.getAllByText('Chỉnh sửa');
     fireEvent.click(editButtons[0]); // Opens edit for Cơm trắng (first sorted name-asc)
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(defaultProps.onUpdate).toHaveBeenCalled();
-    expect(defaultProps.onAdd).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(defaultProps.onUpdate).toHaveBeenCalled();
+      expect(defaultProps.onAdd).not.toHaveBeenCalled();
+    });
   });
 
   it('truncates "Used in" when ingredient appears in 3+ dishes', () => {

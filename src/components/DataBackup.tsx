@@ -131,6 +131,12 @@ export const DataBackup: React.FC = () => {
         return;
       }
 
+      const header = new TextDecoder().decode(data.slice(0, 16));
+      if (!header.startsWith('SQLite format 3\0')) {
+        notify.error(t('backup.invalidFile'), '');
+        return;
+      }
+
       setPendingImport({ data, fileName: file.name });
     } catch {
       notify.error(t('backup.importFailed'), '');

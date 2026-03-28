@@ -261,37 +261,37 @@ describe('NativeDatabaseService', () => {
     mockIsNativePlatform.mockReturnValue(false);
   });
 
-  it('initialize() throws not implemented', async () => {
-    await expect(nativeDb.initialize()).rejects.toThrow('Not implemented on native platform');
+  it('initialize() succeeds (uses WebDatabaseService universally)', async () => {
+    await expect(nativeDb.initialize()).resolves.toBeUndefined();
   });
 
-  it('execute() throws not implemented', async () => {
-    await expect(nativeDb.execute('SELECT 1')).rejects.toThrow('Not implemented on native platform');
+  it('execute() throws not initialized', async () => {
+    await expect(nativeDb.execute('SELECT 1')).rejects.toThrow('not initialized');
   });
 
-  it('query() throws not implemented', async () => {
-    await expect(nativeDb.query('SELECT 1')).rejects.toThrow('Not implemented on native platform');
+  it('query() throws not initialized', async () => {
+    await expect(nativeDb.query('SELECT 1')).rejects.toThrow('not initialized');
   });
 
-  it('queryOne() throws not implemented', async () => {
+  it('queryOne() throws not initialized', async () => {
     await expect(nativeDb.queryOne('SELECT 1')).rejects.toThrow(
-      'Not implemented on native platform',
+      'not initialized',
     );
   });
 
-  it('transaction() throws not implemented', async () => {
+  it('transaction() throws not initialized', async () => {
     await expect(nativeDb.transaction(async () => {})).rejects.toThrow(
-      'Not implemented on native platform',
+      'not initialized',
     );
   });
 
-  it('exportToJSON() throws not implemented', async () => {
-    await expect(nativeDb.exportToJSON()).rejects.toThrow('Not implemented on native platform');
+  it('exportToJSON() throws not initialized', async () => {
+    await expect(nativeDb.exportToJSON()).rejects.toThrow('not initialized');
   });
 
-  it('importFromJSON() throws not implemented', async () => {
+  it('importFromJSON() throws not initialized', async () => {
     await expect(nativeDb.importFromJSON('{}')).rejects.toThrow(
-      'Not implemented on native platform',
+      'not initialized',
     );
   });
 });

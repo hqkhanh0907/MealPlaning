@@ -2,30 +2,30 @@ import { z } from 'zod';
 
 export const ingredientEditSchema = z.object({
   name: z.object({
-    vi: z.string().trim().min(1, { message: 'Tên nguyên liệu không được bỏ trống' }),
+    vi: z.string().trim().min(1, { message: 'Vui lòng nhập tên nguyên liệu' }),
   }),
   unit: z.object({
-    vi: z.string().trim().min(1, { message: 'Đơn vị không được bỏ trống' }),
+    vi: z.string().trim().min(1, { message: 'Vui lòng nhập đơn vị tính' }),
   }),
   caloriesPer100: z.preprocess(
     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ message: 'Vui lòng nhập số hợp lệ' }).min(0, { message: 'Giá trị không được âm' }),
+    z.number({ message: 'Vui lòng nhập giá trị' }).min(0, { message: 'Giá trị không được âm' }),
   ),
   proteinPer100: z.preprocess(
     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ message: 'Vui lòng nhập số hợp lệ' }).min(0, { message: 'Giá trị không được âm' }),
+    z.number({ message: 'Vui lòng nhập giá trị' }).min(0, { message: 'Giá trị không được âm' }),
   ),
   carbsPer100: z.preprocess(
     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ message: 'Vui lòng nhập số hợp lệ' }).min(0, { message: 'Giá trị không được âm' }),
+    z.number({ message: 'Vui lòng nhập giá trị' }).min(0, { message: 'Giá trị không được âm' }),
   ),
   fatPer100: z.preprocess(
     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ message: 'Vui lòng nhập số hợp lệ' }).min(0, { message: 'Giá trị không được âm' }),
+    z.number({ message: 'Vui lòng nhập giá trị' }).min(0, { message: 'Giá trị không được âm' }),
   ),
   fiberPer100: z.preprocess(
     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ message: 'Vui lòng nhập số hợp lệ' }).min(0, { message: 'Giá trị không được âm' }),
+    z.number({ message: 'Vui lòng nhập giá trị' }).min(0, { message: 'Giá trị không được âm' }),
   ),
 });
 

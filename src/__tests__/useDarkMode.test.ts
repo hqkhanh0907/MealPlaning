@@ -1,11 +1,33 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: unknown }) => children,
+  useDatabase: () => ({
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    run: vi.fn().mockResolvedValue(undefined),
+    execute: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockReturnValue(true),
+  }),
+}));
+
+let mockGetSettingValue: string | null = null;
+const mockSetSetting = vi.fn().mockResolvedValue(undefined);
+vi.mock('../services/appSettings', () => ({
+  getSetting: vi.fn(() => Promise.resolve(mockGetSettingValue)),
+  setSetting: (...args: unknown[]) => mockSetSetting(...args),
+  deleteSetting: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { useDarkMode } from '../hooks/useDarkMode';
 
 describe('useDarkMode', () => {
   let matchMediaListeners: Record<string, (() => void)[]>;
 
   beforeEach(() => {
-    localStorage.clear();
+    mockGetSettingValue = null;
+    mockSetSetting.mockClear();
     document.documentElement.classList.remove('dark');
     matchMediaListeners = {};
 
@@ -30,25 +52,26 @@ describe('useDarkMode', () => {
     expect(result.current.theme).toBe('light');
   });
 
-  it('reads stored theme from localStorage', () => {
-    localStorage.setItem('mp-theme', 'dark');
+  it('reads stored theme from database settings', async () => {
+    mockGetSettingValue = 'dark';
     const { result } = renderHook(() => useDarkMode());
-    expect(result.current.theme).toBe('dark');
+    await waitFor(() => {
+      expect(result.current.theme).toBe('dark');
+    });
     expect(result.current.isDark).toBe(true);
   });
 
-  it('setTheme updates theme and persists to localStorage', () => {
+  it('setTheme updates theme and persists to database', () => {
     const { result } = renderHook(() => useDarkMode());
     act(() => {
       result.current.setTheme('dark');
     });
     expect(result.current.theme).toBe('dark');
-    expect(localStorage.getItem('mp-theme')).toBe('dark');
+    expect(mockSetSetting).toHaveBeenCalled();
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
   it('cycleTheme cycles through light → dark → system → schedule', () => {
-    localStorage.setItem('mp-theme', 'light');
     const { result } = renderHook(() => useDarkMode());
     expect(result.current.theme).toBe('light');
 
@@ -71,9 +94,11 @@ describe('useDarkMode', () => {
     expect(result.current.isDark).toBe(false);
   });
 
-  it('ignores invalid stored values and defaults to light', () => {
-    localStorage.setItem('mp-theme', 'invalid-value');
+  it('ignores invalid stored values and defaults to light', async () => {
+    mockGetSettingValue = 'invalid-value';
     const { result } = renderHook(() => useDarkMode());
+    // Wait for the async getSetting to resolve - invalid value should be ignored
+    await act(async () => { await Promise.resolve(); });
     expect(result.current.theme).toBe('light');
   });
 
@@ -89,8 +114,10 @@ describe('useDarkMode', () => {
         removeEventListener: vi.fn(),
       })),
     });
-    localStorage.setItem('mp-theme', 'system'); // explicitly use system mode
     const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('system');
+    });
     expect(result.current.theme).toBe('system');
     expect(result.current.isDark).toBe(true);
     expect(document.documentElement.classList.contains('dark')).toBe(true);
@@ -111,8 +138,10 @@ describe('useDarkMode', () => {
       })),
     });
 
-    localStorage.setItem('mp-theme', 'system');
-    renderHook(() => useDarkMode());
+    const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('system');
+    });
     expect(changeHandler).toBeDefined();
     act(() => { changeHandler?.(); });
   });
@@ -132,26 +161,24 @@ describe('useDarkMode', () => {
       })),
     });
 
-    localStorage.setItem('mp-theme', 'system');
     const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('system');
+    });
     expect(result.current.theme).toBe('system');
     expect(changeHandler).toBeDefined();
     act(() => { changeHandler?.(); });
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
-  it('defaults to light theme when localStorage.getItem throws', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
-      throw new DOMException('Blocked');
-    });
+  it('defaults to light theme when getSetting rejects', () => {
+    mockGetSettingValue = null;
     const { result } = renderHook(() => useDarkMode());
     expect(result.current.theme).toBe('light');
   });
 
-  it('still changes theme when localStorage.setItem throws', () => {
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
-      throw new DOMException('QuotaExceededError');
-    });
+  it('still changes theme when setSetting rejects', () => {
+    mockSetSetting.mockRejectedValueOnce(new Error('DB error'));
     const { result } = renderHook(() => useDarkMode());
     act(() => { result.current.cycleTheme(); });
     // Theme changed from 'light' to 'dark' despite storage error
@@ -167,17 +194,21 @@ describe('useDarkMode', () => {
     expect(() => renderHook(() => useDarkMode())).not.toThrow();
   });
 
-  it('reads stored schedule theme from localStorage', () => {
-    localStorage.setItem('mp-theme', 'schedule');
+  it('reads stored schedule theme from database settings', async () => {
+    mockGetSettingValue = 'schedule';
     const { result } = renderHook(() => useDarkMode());
-    expect(result.current.theme).toBe('schedule');
+    await waitFor(() => {
+      expect(result.current.theme).toBe('schedule');
+    });
   });
 
   it('schedule mode is dark during night hours', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2025, 0, 1, 21, 0, 0));
-    localStorage.setItem('mp-theme', 'schedule');
     const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('schedule');
+    });
     expect(result.current.isDark).toBe(true);
     vi.useRealTimers();
   });
@@ -185,8 +216,10 @@ describe('useDarkMode', () => {
   it('schedule mode is light during day hours', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2025, 0, 1, 12, 0, 0));
-    localStorage.setItem('mp-theme', 'schedule');
     const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('schedule');
+    });
     expect(result.current.isDark).toBe(false);
     vi.useRealTimers();
   });
@@ -194,10 +227,11 @@ describe('useDarkMode', () => {
   it('schedule mode sets up interval for periodic checks', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2025, 0, 1, 12, 0, 0));
-    localStorage.setItem('mp-theme', 'schedule');
-    const { unmount } = renderHook(() => useDarkMode());
+    const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('schedule');
+    });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    unmount();
     vi.useRealTimers();
   });
 });

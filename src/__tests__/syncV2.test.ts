@@ -66,9 +66,17 @@ function createMockDb(
     _stored,
     initialize: vi.fn(),
     execute: executeFn,
-    query: vi.fn(),
+    query: vi.fn(async (sql: string) => {
+      const match = sql.match(/SELECT\s+\*\s+FROM\s+"?(\w+)"?/i);
+      if (match && _stored[match[1]]) {
+        return _stored[match[1]];
+      }
+      return [];
+    }),
     queryOne: vi.fn(),
     transaction: transactionFn,
+    exportBinary: vi.fn(() => new Uint8Array()),
+    importBinary: vi.fn(),
     exportToJSON: vi.fn(async () => JSON.stringify(_stored)),
     importFromJSON: vi.fn(async (json: string) => {
       const parsed = JSON.parse(json) as Record<string, unknown[]>;

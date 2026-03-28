@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title3 desc3">
+  <title id="title3">Smart Meal Planner - Geometric MacroCircle</title>
+  <desc id="desc3">A circular donut chart divided into three macro segments: protein, carbs, fat</desc>
+  <defs>
+    <linearGradient id="geo-protein" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="geo-carbs" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="geo-fat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B45309"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="102" fill="#FFFFFF"/>
+
+  <!-- Outer ring segments (donut chart) -->
+  <g transform="translate(256, 256)">
+    <!-- Protein segment (top-right, ~45%) -->
+    <path d="M0,-155 A155,155 0 0,1 134.4,77.5 L89.6,51.7 A103,103 0 0,0 0,-103 Z"
+          fill="url(#geo-protein)"/>
+
+    <!-- Carbs segment (bottom, ~30%) -->
+    <path d="M134.4,77.5 A155,155 0 0,1 -134.4,77.5 L-89.6,51.7 A103,103 0 0,0 89.6,51.7 Z"
+          fill="url(#geo-carbs)"/>
+
+    <!-- Fat segment (top-left, ~25%) -->
+    <path d="M-134.4,77.5 A155,155 0 0,1 0,-155 L0,-103 A103,103 0 0,0 -89.6,51.7 Z"
+          fill="url(#geo-fat)"/>
+  </g>
+
+  <!-- Center circle (white) -->
+  <circle cx="256" cy="256" r="85" fill="#FFFFFF"/>
+
+  <!-- Inner icon: stylized fork+knife or leaf -->
+  <g transform="translate(256, 256)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Small leaf in center -->
+    <path d="M0,-30 C15,-20, 20,0, 15,15 C10,25, 0,30, 0,30 C0,30, -10,25, -15,15 C-20,0, -15,-20, 0,-30Z"
+          fill="#10B981" opacity="0.8"/>
+    <line x1="0" y1="-20" x2="0" y2="28" stroke="#FFFFFF" stroke-width="2"/>
+  </g>
+
+  <!-- Subtle gap lines between segments -->
+  <g transform="translate(256, 256)" stroke="#FFFFFF" stroke-width="4">
+    <line x1="0" y1="-103" x2="0" y2="-155"/>
+    <line x1="89.6" y1="51.7" x2="134.4" y2="77.5"/>
+    <line x1="-89.6" y1="51.7" x2="-134.4" y2="77.5"/>
+  </g>
+</svg>

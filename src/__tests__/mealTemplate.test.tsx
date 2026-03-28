@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, render, screen, fireEvent } from '@testing-library/react';
-import { useMealTemplate } from '../hooks/useMealTemplate';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TemplateManager } from '../components/modals/TemplateManager';
-import { DayPlan, MealTemplate, Dish } from '../types';
+import { MealTemplate, Dish } from '../types';
 
 // Mock i18n
 vi.mock('react-i18next', () => ({
@@ -25,23 +24,6 @@ vi.mock('../hooks/useModalBackHandler', () => ({
   useModalBackHandler: vi.fn(),
 }));
 
-// Mock usePersistedState
-let mockTemplates: MealTemplate[] = [];
-vi.mock('../hooks/usePersistedState', () => ({
-  usePersistedState: <T,>(_key: string, initial: T) => {
-    // Use mockTemplates for 'meal-templates' key
-    const value = (mockTemplates.length > 0 ? mockTemplates : initial) as T;
-    const setter = vi.fn((updater: unknown) => {
-      if (typeof updater === 'function') {
-        mockTemplates = (updater as (prev: MealTemplate[]) => MealTemplate[])(mockTemplates);
-      } else {
-        mockTemplates = updater as MealTemplate[];
-      }
-    });
-    return [value, setter, vi.fn()] as const;
-  },
-}));
-
 // Mock generateId
 vi.mock('../utils/helpers', () => ({
   generateId: (prefix: string) => `${prefix}-test-id`,
@@ -55,13 +37,6 @@ vi.mock('../utils/helpers', () => ({
 vi.mock('../utils/localize', () => ({
   getLocalizedField: (name: Record<string, string>, _lang: string) => name.vi || name.en || '',
 }));
-
-const makePlan = (date: string): DayPlan => ({
-  date,
-  breakfastDishIds: ['d1'],
-  lunchDishIds: ['d2'],
-  dinnerDishIds: ['d3'],
-});
 
 const makeTemplate = (id: string, name: string): MealTemplate => ({
   id,
@@ -77,62 +52,6 @@ const makeDish = (id: string, name: string): Dish => ({
   name: { vi: name, en: name },
   ingredients: [],
   tags: ['lunch'],
-});
-
-describe('useMealTemplate', () => {
-  beforeEach(() => {
-    mockTemplates = [];
-  });
-
-  it('starts with empty templates', () => {
-    const { result } = renderHook(() => useMealTemplate());
-    expect(result.current.templates).toEqual([]);
-  });
-
-  it('saves a template from plan', () => {
-    const { result } = renderHook(() => useMealTemplate());
-
-    act(() => result.current.saveTemplate('My Template', makePlan('2025-01-01')));
-
-    expect(mockTemplates).toHaveLength(1);
-    expect(mockTemplates[0].name).toBe('My Template');
-    expect(mockTemplates[0].breakfastDishIds).toEqual(['d1']);
-  });
-
-  it('deletes a template', () => {
-    mockTemplates = [makeTemplate('tpl-1', 'Test')];
-    const { result } = renderHook(() => useMealTemplate());
-
-    act(() => result.current.deleteTemplate('tpl-1'));
-
-    expect(mockTemplates).toHaveLength(0);
-  });
-
-  it('renames a template', () => {
-    mockTemplates = [makeTemplate('tpl-1', 'Old Name')];
-    const { result } = renderHook(() => useMealTemplate());
-
-    act(() => result.current.renameTemplate('tpl-1', 'New Name'));
-
-    expect(mockTemplates[0].name).toBe('New Name');
-  });
-
-  it('applies template returns DayPlan', () => {
-    const template = makeTemplate('tpl-1', 'Test');
-    const { result } = renderHook(() => useMealTemplate());
-
-    let plan: DayPlan | undefined;
-    act(() => {
-      plan = result.current.applyTemplate(template, '2025-02-01');
-    });
-
-    expect(plan).toBeDefined();
-    if (!plan) return;
-    expect(plan.date).toBe('2025-02-01');
-    expect(plan.breakfastDishIds).toEqual(['d1']);
-    expect(plan.lunchDishIds).toEqual(['d2']);
-    expect(plan.dinnerDishIds).toEqual(['d3']);
-  });
 });
 
 describe('TemplateManager', () => {

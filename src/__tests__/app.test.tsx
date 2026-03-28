@@ -2,6 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import App from '../App';
 import type { Dish, Ingredient } from '../types';
+import { useDayPlanStore } from '../store/dayPlanStore';
+import { useDishStore } from '../store/dishStore';
+import { useMealTemplateStore } from '../store/mealTemplateStore';
+import { initialDishes } from '../data/initialData';
 
 const getLocalToday = () => {
   const now = new Date();
@@ -79,6 +83,16 @@ vi.mock('../components/ManagementTab', () => ({
 
 // Mock hooks
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useDatabase: () => ({
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    run: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockReturnValue(true),
+  }),
+}));
 vi.mock('../store/appOnboardingStore', () => ({
   useAppOnboardingStore: (selector: (s: { isAppOnboarded: boolean }) => boolean) =>
     selector({ isAppOnboarded: true }),
@@ -131,16 +145,8 @@ vi.mock('../components/AIImageAnalyzer', () => ({
 
 // Mock SettingsTab to expose import callback
 vi.mock('../components/SettingsTab', () => ({
-  SettingsTab: ({ onImportData, theme, setTheme }: { onImportData: (d: Record<string, unknown>) => void; theme?: string; setTheme?: (t: string) => void }) => (
+  SettingsTab: ({ theme, setTheme }: { theme?: string; setTheme?: (t: string) => void }) => (
     <div data-testid="settings-tab">
-      <button data-testid="import-invalid" onClick={() => onImportData({ 'mp-ingredients': 'not-an-array' })}>Import Invalid</button>
-      <button data-testid="import-valid" onClick={() => onImportData({ 'mp-ingredients': [{ id: 'i1', name: 'Chicken', unit: 'g' }] })}>Import Valid</button>
-      <button data-testid="import-all" onClick={() => onImportData({
-        'mp-ingredients': [{ id: 'i1', name: 'Chicken', unit: 'g' }],
-        'mp-dishes': [{ id: 'd1', name: 'Dish', ingredients: [], tags: ['lunch'] }],
-        'mp-day-plans': [{ date: '2025-01-01', breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }],
-        'mp-user-profile': { weight: 75, targetCalories: 2000 },
-      })}>Import All</button>
       {theme && <span data-testid="current-theme">{theme}</span>}
       {setTheme && <button data-testid="btn-theme-light" onClick={() => setTheme('light')}>Light</button>}
     </div>
@@ -174,6 +180,9 @@ describe('App', () => {
     vi.clearAllMocks();
     localStorage.clear();
     mockThemeValue = 'light';
+    useDayPlanStore.setState({ dayPlans: [] });
+    useDishStore.setState({ dishes: initialDishes });
+    useMealTemplateStore.setState({ templates: [] });
   });
 
   it('renders header with app name', () => {
@@ -311,23 +320,7 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByTestId('dashboard-tab')).toBeInTheDocument());
   });
 
-  it('handleImportData with invalid key shows warning notification via settings overlay', async () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('btn-open-settings'));
-    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('import-invalid'));
-    expect(mockNotify.warning).toHaveBeenCalled();
-  });
-
-  it('handleImportData with valid data shows success notification via settings overlay', async () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('btn-open-settings'));
-    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('import-valid'));
-    expect(mockNotify.success).toHaveBeenCalled();
-  });
-
-  it('migrates dishes with empty tags from localStorage on mount', () => {
+  it('navigates to dashboard tab and renders content', async () => {
     localStorage.setItem('mp-dishes', JSON.stringify([
       { id: 'd99', name: 'Old Dish', ingredients: [], tags: [] },
     ]));
@@ -399,22 +392,14 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
-  it('handleImportData with all data keys imports everything via settings overlay', async () => {
-    render(<App />);
-    fireEvent.click(screen.getByTestId('btn-open-settings'));
-    await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('import-all'));
-    expect(mockNotify.success).toHaveBeenCalled();
-  });
-
   it('handleClearPlan clears plans via ClearPlanModal', async () => {
     // Seed a day plan so the clear button is visible
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDayPlanStore.setState({ dayPlans: [{
       date: getLocalToday(),
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     render(<App />);
     // Open more-actions menu first (buttons are in dropdown)
     await waitFor(() => {
@@ -432,12 +417,12 @@ describe('App', () => {
   });
 
   it('undo restores plans after clear', async () => {
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDayPlanStore.setState({ dayPlans: [{
       date: getLocalToday(),
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     render(<App />);
     await waitFor(() => {
       expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument();
@@ -465,13 +450,11 @@ describe('App', () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-    localStorage.setItem('mp-day-plans', JSON.stringify([
+    useDayPlanStore.setState({ dayPlans: [
       { date: yesterdayStr, breakfastDishIds: ['quick1'], lunchDishIds: [], dinnerDishIds: [] },
       { date: getLocalToday(), breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] },
-    ]));
-    localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'quick1', name: { vi: 'Quick Dish' }, ingredients: [], tags: [] },
-    ]));
+    ] });
+    useDishStore.getState().addDish({ id: 'quick1', name: { vi: 'Quick Dish' }, ingredients: [], tags: [] });
     render(<App />);
     // Wait for the recent dishes section
     await waitFor(() => {
@@ -562,12 +545,12 @@ describe('App', () => {
 
   it('opens copy plan modal and copies plan', async () => {
     const today = getLocalToday();
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDayPlanStore.setState({ dayPlans: [{
       date: today,
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -581,12 +564,12 @@ describe('App', () => {
 
   it('undo copy plan restores previous state', async () => {
     const today = getLocalToday();
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDayPlanStore.setState({ dayPlans: [{
       date: today,
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -613,12 +596,12 @@ describe('App', () => {
 
   it('saves current plan as template via save template modal', async () => {
     const today = getLocalToday();
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDayPlanStore.setState({ dayPlans: [{
       date: today,
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -627,7 +610,7 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByTestId('save-template-modal')).toBeInTheDocument());
     fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: 'My Template' } });
     fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(mockNotify.success).toHaveBeenCalled();
+    await waitFor(() => expect(mockNotify.success).toHaveBeenCalled());
   });
 
   it('meal planner single-tab confirm shows meal-specific notification', async () => {
@@ -643,14 +626,15 @@ describe('App', () => {
   });
 
   it('template apply adds new plan when no existing plan for date', async () => {
-    // No day plans seeded — applying template should create a new plan (line 449)
-    localStorage.setItem('meal-templates', JSON.stringify([{
+    // No day plans seeded — applying template should create a new plan
+    useMealTemplateStore.setState({ templates: [{
       id: 'tpl-test',
       name: 'Preset',
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+      createdAt: new Date().toISOString(),
+    }] });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -664,18 +648,19 @@ describe('App', () => {
 
   it('template manager applies, deletes and renames templates', async () => {
     const today = getLocalToday();
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDayPlanStore.setState({ dayPlans: [{
       date: today,
       breakfastDishIds: ['d1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     // Pre-seed templates so the manager has data
-    localStorage.setItem('meal-templates', JSON.stringify([
-      { id: 'tpl-1', name: 'Test Template', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
-      { id: 'tpl-2', name: 'Template Delete', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
-      { id: 'tpl-3', name: 'Template Rename', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
-    ]));
+    const now = new Date().toISOString();
+    useMealTemplateStore.setState({ templates: [
+      { id: 'tpl-1', name: 'Test Template', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [], createdAt: now },
+      { id: 'tpl-2', name: 'Template Delete', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [], createdAt: now },
+      { id: 'tpl-3', name: 'Template Rename', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [], createdAt: now },
+    ] });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
 
@@ -742,15 +727,13 @@ describe('App', () => {
   });
 
   it('handleUpdateServings updates serving count for a dish', async () => {
-    localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'srv1', name: { vi: 'Serving Dish' }, ingredients: [], tags: ['breakfast'] },
-    ]));
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDishStore.getState().addDish({ id: 'srv1', name: { vi: 'Serving Dish' }, ingredients: [], tags: ['breakfast'] });
+    useDayPlanStore.setState({ dayPlans: [{
       date: getLocalToday(),
       breakfastDishIds: ['srv1'],
       lunchDishIds: [],
       dinnerDishIds: [],
-    }]));
+    }] });
     render(<App />);
     await waitFor(() => {
       expect(screen.getByTestId('serving-count-srv1')).toBeInTheDocument();
@@ -765,16 +748,14 @@ describe('App', () => {
   });
 
   it('handleUpdateServings removes serving entry when reset to 1', async () => {
-    localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'srv2', name: { vi: 'Reset Dish' }, ingredients: [], tags: ['lunch'] },
-    ]));
-    localStorage.setItem('mp-day-plans', JSON.stringify([{
+    useDishStore.getState().addDish({ id: 'srv2', name: { vi: 'Reset Dish' }, ingredients: [], tags: ['lunch'] });
+    useDayPlanStore.setState({ dayPlans: [{
       date: getLocalToday(),
       breakfastDishIds: [],
       lunchDishIds: ['srv2'],
       dinnerDishIds: [],
       servings: { srv2: 2 },
-    }]));
+    }] });
     render(<App />);
     await waitFor(() => {
       expect(screen.getByTestId('serving-count-srv2')).toBeInTheDocument();

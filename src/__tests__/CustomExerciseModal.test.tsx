@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CustomExerciseModal } from '../features/fitness/components/CustomExerciseModal';
 
@@ -39,11 +39,14 @@ describe('CustomExerciseModal', () => {
     expect(screen.getByTestId('save-custom-exercise')).toBeInTheDocument();
   });
 
-  it('disables save button with empty name', () => {
+  it('disables save button with empty name', async () => {
     render(
       <CustomExerciseModal isOpen onClose={vi.fn()} onSave={vi.fn()} />,
     );
-    expect(screen.getByTestId('save-custom-exercise')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('save-custom-exercise'));
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
   });
 
   it('enables save button when name is provided', () => {
@@ -56,7 +59,7 @@ describe('CustomExerciseModal', () => {
     expect(screen.getByTestId('save-custom-exercise')).not.toBeDisabled();
   });
 
-  it('saves custom exercise with trimmed name', () => {
+  it('saves custom exercise with trimmed name', async () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
     render(
@@ -66,13 +69,15 @@ describe('CustomExerciseModal', () => {
       target: { value: '  Hip Thrust  ' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Hip Thrust' }),
-    );
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Hip Thrust' }),
+      );
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('does not save when name is only whitespace', () => {
+  it('does not save when name is only whitespace', async () => {
     const onSave = vi.fn();
     render(
       <CustomExerciseModal isOpen onClose={vi.fn()} onSave={onSave} />,
@@ -80,12 +85,13 @@ describe('CustomExerciseModal', () => {
     fireEvent.change(screen.getByTestId('custom-exercise-name'), {
       target: { value: '   ' },
     });
-    expect(screen.getByTestId('save-custom-exercise')).toBeDisabled();
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
-    expect(onSave).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSave).not.toHaveBeenCalled();
+    });
   });
 
-  it('resets form after successful save', () => {
+  it('resets form after successful save', async () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
     const { rerender } = render(
@@ -95,6 +101,10 @@ describe('CustomExerciseModal', () => {
       target: { value: 'My Exercise' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled();
+    });
 
     rerender(
       <CustomExerciseModal isOpen onClose={onClose} onSave={onSave} />,
@@ -112,7 +122,7 @@ describe('CustomExerciseModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('allows selecting muscle group', () => {
+  it('allows selecting muscle group', async () => {
     const onSave = vi.fn();
     render(
       <CustomExerciseModal isOpen onClose={vi.fn()} onSave={onSave} />,
@@ -124,12 +134,14 @@ describe('CustomExerciseModal', () => {
       target: { value: 'Pull-up' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ muscleGroup: 'back', name: 'Pull-up' }),
-    );
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ muscleGroup: 'back', name: 'Pull-up' }),
+      );
+    });
   });
 
-  it('allows selecting category', () => {
+  it('allows selecting category', async () => {
     const onSave = vi.fn();
     render(
       <CustomExerciseModal isOpen onClose={vi.fn()} onSave={onSave} />,
@@ -141,12 +153,14 @@ describe('CustomExerciseModal', () => {
       target: { value: 'Bicep Curl' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ category: 'isolation' }),
-    );
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ category: 'isolation' }),
+      );
+    });
   });
 
-  it('allows entering equipment', () => {
+  it('allows entering equipment', async () => {
     const onSave = vi.fn();
     render(
       <CustomExerciseModal isOpen onClose={vi.fn()} onSave={onSave} />,
@@ -158,12 +172,14 @@ describe('CustomExerciseModal', () => {
       target: { value: 'dumbbell' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ equipment: 'dumbbell' }),
-    );
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ equipment: 'dumbbell' }),
+      );
+    });
   });
 
-  it('saves with default category compound', () => {
+  it('saves with default category compound', async () => {
     const onSave = vi.fn();
     render(
       <CustomExerciseModal isOpen onClose={vi.fn()} onSave={onSave} />,
@@ -172,8 +188,10 @@ describe('CustomExerciseModal', () => {
       target: { value: 'Test' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ category: 'compound' }),
-    );
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ category: 'compound' }),
+      );
+    });
   });
 });

@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useDatabase: () => mockDb,
+}));
+
 import { useAutoSync } from '../hooks/useAutoSync';
 import * as driveService from '../services/googleDriveService';
 
@@ -31,6 +37,10 @@ vi.mock('../services/appSettings', () => ({
   getSetting: vi.fn().mockResolvedValue(null),
   setSetting: vi.fn().mockResolvedValue(undefined),
   deleteSetting: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../services/storeLoader', () => ({
+  reloadAllStores: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock stores used by useAutoSync for auto-sync change detection

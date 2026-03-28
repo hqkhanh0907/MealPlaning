@@ -61,51 +61,65 @@ describe('IngredientEditModal', () => {
 
   // --- Validation Tests ---
 
-  it('shows name validation error when submitting without name', () => {
+  it('shows name validation error when submitting without name', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Fill unit but no name
     fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
-    expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('shows unit validation error when submitting without unit', () => {
+  it('shows unit validation error when submitting without unit', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Fill name but no unit
     fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
-    expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('shows both validation errors when both name and unit are empty', () => {
+  it('shows both validation errors when both name and unit are empty', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
-    expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
-    expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
+      expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('clears name error when user types a name', () => {
+  it('clears name error when user types a name', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
+    });
 
     fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'X' } });
-    expect(screen.queryByText('Vui lòng nhập tên nguyên liệu')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Vui lòng nhập tên nguyên liệu')).not.toBeInTheDocument();
+    });
   });
 
-  it('clears unit error when user types a unit', () => {
+  it('clears unit error when user types a unit', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
+    });
 
     fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
-    expect(screen.queryByText('Vui lòng nhập đơn vị tính')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Vui lòng nhập đơn vị tính')).not.toBeInTheDocument();
+    });
   });
 
   // --- Nutrition Field Tests ---
@@ -117,21 +131,25 @@ describe('IngredientEditModal', () => {
     expect(calorieInput).toHaveValue(-10);
   });
 
-  it('shows per-field error when nutrition field is negative on submit', () => {
+  it('shows per-field error when nutrition field is negative on submit', async () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     const calorieInput = screen.getByDisplayValue('165');
     fireEvent.change(calorieInput, { target: { value: '-10' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(screen.getByText('Giá trị không được âm')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Giá trị không được âm')).toBeInTheDocument();
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('shows per-field error when nutrition field is empty on submit', () => {
+  it('shows per-field error when nutrition field is empty on submit', async () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     const calorieInput = screen.getByDisplayValue('165');
     fireEvent.change(calorieInput, { target: { value: '' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(screen.getByText('Vui lòng nhập giá trị')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập giá trị')).toBeInTheDocument();
+    });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -143,14 +161,18 @@ describe('IngredientEditModal', () => {
     expect(screen.queryByText('Giá trị không được âm')).not.toBeInTheDocument();
   });
 
-  it('clears nutrition error when user fixes the field', () => {
+  it('clears nutrition error when user fixes the field', async () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     const calorieInput = screen.getByDisplayValue('165');
     fireEvent.change(calorieInput, { target: { value: '-10' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(screen.getByText('Giá trị không được âm')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Giá trị không được âm')).toBeInTheDocument();
+    });
     fireEvent.change(calorieInput, { target: { value: '100' } });
-    expect(screen.queryByText('Giá trị không được âm')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Giá trị không được âm')).not.toBeInTheDocument();
+    });
   });
 
   it('updates nutrition field with valid number', () => {
@@ -265,13 +287,15 @@ describe('IngredientEditModal', () => {
 
   // --- Submit Tests ---
 
-  it('submits valid ingredient with correct data structure', () => {
+  it('submits valid ingredient with correct data structure', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
     fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
-    expect(onSubmit).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    });
     const saved = onSubmit.mock.calls[0][0];
     expect(saved.name).toEqual({ vi: 'Thịt bò' });
     expect(saved.unit).toEqual({ vi: 'g' });
@@ -279,10 +303,12 @@ describe('IngredientEditModal', () => {
     expect(saved.id).toMatch(/^ing-/);
   });
 
-  it('preserves existing ingredient ID when editing', () => {
+  it('preserves existing ingredient ID when editing', async () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
-    expect(onSubmit).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    });
     expect(onSubmit.mock.calls[0][0].id).toBe('ing-1');
   });
 
@@ -326,7 +352,7 @@ describe('IngredientEditModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('saves and closes via unsaved dialog when form is valid', () => {
+  it('saves and closes via unsaved dialog when form is valid', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Cà chua' } });
     fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
@@ -335,10 +361,12 @@ describe('IngredientEditModal', () => {
     if (xButton) fireEvent.click(xButton);
 
     fireEvent.click(screen.getByText('Lưu & quay lại'));
-    expect(onSubmit).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('stays in dialog when save fails validation from unsaved dialog', () => {
+  it('stays in dialog when save fails validation from unsaved dialog', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Only name filled, no unit
     fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Test' } });
@@ -348,8 +376,10 @@ describe('IngredientEditModal', () => {
 
     fireEvent.click(screen.getByText('Lưu & quay lại'));
     // Dialog should close but validation error should appear
-    expect(screen.queryByText(/Thay đổi chưa được lưu/)).not.toBeInTheDocument();
-    expect(onSubmit).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.queryByText(/Thay đổi chưa được lưu/)).not.toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
   });
 
   it('cancels unsaved dialog and returns to editing', () => {
@@ -375,11 +405,13 @@ describe('IngredientEditModal', () => {
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
   });
 
-  it('prevents double submission', () => {
+  it('prevents double submission', async () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     const saveBtn = screen.getByText('Lưu nguyên liệu');
     fireEvent.click(saveBtn);
-    expect(onSubmit).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    });
     // Click save again — should be blocked by hasSubmittedRef guard
     fireEvent.click(saveBtn);
     expect(onSubmit).toHaveBeenCalledTimes(1);

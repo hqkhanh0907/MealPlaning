@@ -21,6 +21,17 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('../../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  useDatabase: () => ({
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    run: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockReturnValue(true),
+  }),
+}));
+
 /* ================================================================== */
 /*  Store mocks — all empty/default by default, overridable per test   */
 /* ================================================================== */
@@ -398,7 +409,7 @@ describe('Edge Case 1: First-time user (day 0)', () => {
   it('DailyScoreHero uses slate gradient for first-time user', () => {
     render(React.createElement(DailyScoreHero));
     const hero = screen.getByTestId('daily-score-hero');
-    expect(hero.className).toContain('from-[#64748b]');
+    expect(hero.className).toContain('from-slate-500');
   });
 
   it('WeightMini shows empty state when no weight entries exist', () => {

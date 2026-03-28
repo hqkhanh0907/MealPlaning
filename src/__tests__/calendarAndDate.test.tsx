@@ -1,4 +1,29 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+
+let mockDateHintDismissed: string | null = null;
+const mockSetSetting = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useDatabase: () => ({
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    run: vi.fn().mockResolvedValue(undefined),
+    execute: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockReturnValue(true),
+  }),
+}));
+
+vi.mock('../services/appSettings', () => ({
+  getSetting: vi.fn((_db: unknown, key: string) => {
+    if (key === 'date_hint_dismissed') return Promise.resolve(mockDateHintDismissed);
+    return Promise.resolve(null);
+  }),
+  setSetting: (...args: unknown[]) => mockSetSetting(...args),
+  deleteSetting: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { DateSelector } from '../components/DateSelector';
 import { CalendarTab } from '../components/CalendarTab';
 import type { DayPlan, DayNutritionSummary } from '../types';
@@ -31,7 +56,8 @@ describe('DateSelector', () => {
   afterEach(() => {
     // Reset viewport to desktop after each test to avoid affecting subsequent tests
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
-    localStorage.removeItem('mp-date-hint-dismissed');
+    mockDateHintDismissed = null;
+    mockSetSetting.mockClear();
   });
 
   it('renders calendar icon and view mode toggle', () => {
@@ -247,22 +273,23 @@ describe('DateSelector', () => {
     expect(screen.getByText(/Vuốt ngang/)).toBeInTheDocument();
   });
 
-  it('hides swipe hint when localStorage flag is set', () => {
+  it('hides swipe hint when database flag is set', async () => {
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
-    localStorage.setItem('mp-date-hint-dismissed', '1');
+    mockDateHintDismissed = '1';
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
-    expect(screen.queryByText(/Vuốt ngang/)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText(/Vuốt ngang/)).not.toBeInTheDocument();
+    });
   });
 
-  it('dismisses hint after clicking a non-selected date in week view', () => {
+  it('dismisses hint after clicking a non-selected date in week view', async () => {
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
     const onSelectDate = vi.fn();
     render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
-    // Find a day button that is NOT selected (data-selected="false")
     const nonSelectedBtn = document.querySelector('[data-selected="false"]');
     if (nonSelectedBtn) {
       fireEvent.click(nonSelectedBtn);
-      expect(localStorage.getItem('mp-date-hint-dismissed')).toBe('1');
+      expect(mockSetSetting).toHaveBeenCalled();
     }
   });
 
@@ -270,17 +297,18 @@ describe('DateSelector', () => {
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
     const onSelectDate = vi.fn();
     render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
-    // Click day 15 (not selected unless today is the 15th)
     const day15 = screen.getByText('15');
     fireEvent.click(day15);
-    expect(localStorage.getItem('mp-date-hint-dismissed')).toBe('1');
+    expect(mockSetSetting).toHaveBeenCalled();
   });
 
-  it('hides calendar tip text when hint is dismissed', () => {
+  it('hides calendar tip text when hint is dismissed', async () => {
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 1024 });
-    localStorage.setItem('mp-date-hint-dismissed', '1');
+    mockDateHintDismissed = '1';
     render(<DateSelector selectedDate="2025-06-15" onSelectDate={vi.fn()} />);
-    expect(screen.queryByText(/Nhấn đúp/)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText(/Nhấn đúp/)).not.toBeInTheDocument();
+    });
     expect(screen.queryByText(/Nhấn chọn/)).not.toBeInTheDocument();
   });
 
@@ -297,12 +325,13 @@ describe('DateSelector', () => {
     expect(pulseEls.length).toBeGreaterThanOrEqual(0);
   });
 
-  it('reads hint dismissed state from localStorage on mount', () => {
-    localStorage.setItem('mp-date-hint-dismissed', '1');
+  it('reads hint dismissed state from database on mount', async () => {
+    mockDateHintDismissed = '1';
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
-    // swipe hint should not be shown
-    expect(screen.queryByText(/Vuốt ngang/)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText(/Vuốt ngang/)).not.toBeInTheDocument();
+    });
   });
 
   it('handles localStorage errors gracefully on read', () => {

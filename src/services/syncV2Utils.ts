@@ -1,4 +1,5 @@
 import type { DatabaseService } from './databaseService';
+import { typeToRow } from './databaseService';
 import { SCHEMA_TABLES } from './schema';
 
 /* ------------------------------------------------------------------ */
@@ -277,7 +278,8 @@ export async function createV2Export(
 ): Promise<V2ExportPayload> {
   const tables: Record<string, unknown[]> = {};
   for (const name of SCHEMA_TABLES) {
-    tables[name] = await db.query(`SELECT * FROM "${name}"`);
+    const rows = await db.query(`SELECT * FROM "${name}"`);
+    tables[name] = rows.map((row) => typeToRow(row as Record<string, unknown>));
   }
 
   const legacy =

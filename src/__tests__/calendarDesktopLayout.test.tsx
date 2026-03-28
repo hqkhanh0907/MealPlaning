@@ -1,4 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useDatabase: () => ({
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    run: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    isReady: vi.fn().mockReturnValue(true),
+  }),
+}));
+
 import { CalendarTab } from '../components/CalendarTab';
 import type { DayPlan, DayNutritionSummary } from '../types';
 import { useIsDesktop } from '../hooks/useIsDesktop';

@@ -38,18 +38,14 @@ vi.mock('../services/nutritionEngine', () => ({
 const mockSetTheme = vi.fn();
 
 vi.mock('../components/DataBackup', () => ({
-  DataBackup: ({ onImport }: { onImport: (d: Record<string, unknown>) => void }) => (
-    <div data-testid="data-backup">
-      <button onClick={() => onImport({ 'mp-dishes': [] })}>Import</button>
-    </div>
+  DataBackup: () => (
+    <div data-testid="data-backup">DataBackup</div>
   ),
 }));
 
 vi.mock('../components/GoogleDriveSync', () => ({
-  GoogleDriveSync: ({ onImportData }: { onImportData: (d: Record<string, unknown>) => void }) => (
-    <div data-testid="google-drive-sync">
-      <button onClick={() => onImportData({ 'mp-dishes': [] })}>SyncImport</button>
-    </div>
+  GoogleDriveSync: () => (
+    <div data-testid="google-drive-sync">GoogleDriveSync</div>
   ),
 }));
 
@@ -71,7 +67,6 @@ afterEach(cleanup);
 
 describe('SettingsTab', () => {
   const defaultProps = {
-    onImportData: vi.fn(),
     theme: 'system' as const,
     setTheme: mockSetTheme,
   };
@@ -120,12 +115,6 @@ describe('SettingsTab', () => {
     expect(screen.getByTestId('google-drive-sync')).toBeInTheDocument();
   });
 
-  it('passes onImportData to GoogleDriveSync', () => {
-    render(<SettingsTab {...defaultProps} />);
-    fireEvent.click(screen.getByText('SyncImport'));
-    expect(defaultProps.onImportData).toHaveBeenCalledWith({ 'mp-dishes': [] });
-  });
-
   it('calls setTheme when theme button is clicked', () => {
     render(<SettingsTab {...defaultProps} />);
     const lightBtn = screen.getByText('Sáng').closest('button');
@@ -148,13 +137,6 @@ describe('SettingsTab', () => {
     expect(sysBtn).toBeTruthy();
     if (sysBtn) fireEvent.click(sysBtn);
     expect(mockSetTheme).toHaveBeenCalledWith('system');
-  });
-
-  it('passes onImportData to DataBackup', () => {
-    render(<SettingsTab {...defaultProps} />);
-    const importBtn = screen.getByText('Import');
-    fireEvent.click(importBtn);
-    expect(defaultProps.onImportData).toHaveBeenCalledWith({ 'mp-dishes': [] });
   });
 
   it('highlights active system theme button', () => {

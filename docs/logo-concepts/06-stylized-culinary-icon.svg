@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title6 desc6">
+  <title id="title6">Smart Meal Planner - Stylized Culinary</title>
+  <desc id="desc6">A minimalist plate with fork and spoon, featuring a small sparkle for smart/AI</desc>
+  <defs>
+    <linearGradient id="cul-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="102" fill="#FFFFFF"/>
+
+  <!-- Outer plate ring -->
+  <circle cx="256" cy="260" r="155" fill="none" stroke="url(#cul-grad)" stroke-width="8"/>
+
+  <!-- Inner plate ring -->
+  <circle cx="256" cy="260" r="120" fill="none" stroke="#10B981" stroke-width="3" opacity="0.25"/>
+
+  <!-- Fork (left) -->
+  <g transform="translate(105, 155)" fill="none" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Handle -->
+    <line x1="25" y1="100" x2="25" y2="210"/>
+    <!-- Tines -->
+    <line x1="12" y1="70" x2="12" y2="105"/>
+    <line x1="25" y1="65" x2="25" y2="105"/>
+    <line x1="38" y1="70" x2="38" y2="105"/>
+    <!-- Bridge -->
+    <path d="M12,105 Q25,115 38,105" fill="none"/>
+  </g>
+
+  <!-- Knife (right) -->
+  <g transform="translate(370, 155)" fill="none" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Handle -->
+    <line x1="20" y1="105" x2="20" y2="210"/>
+    <!-- Blade -->
+    <path d="M20,65 C28,65 35,75 35,90 C35,100 28,105 20,105" fill="none"/>
+  </g>
+
+  <!-- Center sparkle / AI indicator -->
+  <g transform="translate(256, 260)">
+    <!-- Main star -->
+    <path d="M0,-22 L5,-5 L22,0 L5,5 L0,22 L-5,5 L-22,0 L-5,-5 Z"
+          fill="#10B981" opacity="0.7"/>
+    <!-- Small star -->
+    <path d="M18,-18 L20,-12 L26,-10 L20,-8 L18,-2 L16,-8 L10,-10 L16,-12 Z"
+          fill="#34D399" opacity="0.5"/>
+  </g>
+</svg>
