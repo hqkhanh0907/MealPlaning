@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { EQUIPMENT_DISPLAY } from '../constants';
 import {
   Info,
   Target,
@@ -75,7 +76,7 @@ export function TrainingProfileSection() {
       key: 'availableEquipment',
       label: t('fitness.onboarding.equipment'),
       value: trainingProfile.availableEquipment
-        .map((eq) => t(`fitness.onboarding.equip_${eq}`))
+        .map((eq) => EQUIPMENT_DISPLAY[eq] ?? eq)
         .join(', '),
     },
     ...(trainingProfile.injuryRestrictions.length > 0

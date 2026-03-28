@@ -14,6 +14,7 @@ import {
 import type { FitnessOnboardingFormData } from '../../../schemas/fitnessOnboardingSchema';
 import { RadioPills } from '../../../components/form/RadioPills';
 import { ChipSelect } from '../../../components/form/ChipSelect';
+import { EQUIPMENT_DISPLAY } from '../constants';
 import type {
   TrainingGoal,
   TrainingExperience,
@@ -177,8 +178,8 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
   );
 
   const equipmentOptions = useMemo(
-    () => EQUIPMENT_OPTIONS.map((eq) => ({ value: eq, label: t(`fitness.onboarding.equip_${eq}`) })),
-    [t],
+    () => EQUIPMENT_OPTIONS.map((eq) => ({ value: eq, label: EQUIPMENT_DISPLAY[eq] ?? eq })),
+    [],
   );
 
   const injuryOptions = useMemo(

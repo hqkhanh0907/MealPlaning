@@ -323,7 +323,7 @@ describe('FitnessOnboarding', () => {
 
     await advanceSteps(2); // → equipment
 
-    const barbellBtn = screen.getByRole('checkbox', { name: /Thanh tạ/ });
+    const barbellBtn = screen.getByRole('checkbox', { name: /Barbell/ });
     expect(barbellBtn).toHaveAttribute('aria-checked', 'false');
 
     fireEvent.click(barbellBtn);
@@ -447,7 +447,7 @@ describe('FitnessOnboarding', () => {
     fireEvent.click(screen.getByRole('radio', { name: '90' }));
 
     await clickNext(); // → equipment
-    fireEvent.click(screen.getByRole('checkbox', { name: /Thanh tạ/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Barbell/ }));
 
     await clickNext(); // → injuries
     fireEvent.click(screen.getByRole('checkbox', { name: /Đầu gối/ }));

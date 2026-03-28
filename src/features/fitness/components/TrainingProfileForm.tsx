@@ -11,6 +11,7 @@ import {
 import { RadioPills } from '../../../components/form/RadioPills';
 import { ChipSelect } from '../../../components/form/ChipSelect';
 import { FormField } from '../../../components/form/FormField';
+import { EQUIPMENT_DISPLAY } from '../constants';
 import type {
   TrainingGoal,
   TrainingExperience,
@@ -156,7 +157,7 @@ export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormPr
           control={control}
           options={EQUIPMENT_OPTIONS.map((eq) => ({
             value: eq,
-            label: t(`fitness.onboarding.equip_${eq}`),
+            label: EQUIPMENT_DISPLAY[eq] ?? eq,
           }))}
           testIdPrefix="equipment"
         />

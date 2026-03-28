@@ -101,3 +101,7 @@ INFO         | Destroyed VkInstance:0xb0a815000 for application:'' engine:''.
 INFO         | Warning: skipping QEventPoint(id=2 ts=0 pos=0,0 scn=959.526,426.932 gbl=959.526,426.932 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-959.526,-426.932 last=-959.526,-426.932 Δ 959.526,426.932) : no target window (:0, )
 INFO         | Created VkInstance:0xb0a816800 for application:'' engine:''.
 INFO         | Destroyed VkInstance:0xb0a816800 for application:'' engine:''.
+INFO         | Created VkInstance:0xb0a813800 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a813800 for application:'' engine:''.
+INFO         | Created VkInstance:0xb0a816800 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a816800 for application:'' engine:''.

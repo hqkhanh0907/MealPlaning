@@ -29,6 +29,18 @@ export const PUSH_MUSCLES: MuscleGroup[] = ['chest', 'shoulders'];
 export const PULL_MUSCLES: MuscleGroup[] = ['back', 'arms'];
 export const LEG_MUSCLES: MuscleGroup[] = ['legs', 'glutes', 'core'];
 
+// Equipment display names — kept in English as they are universally recognized fitness terms
+export const EQUIPMENT_DISPLAY: Record<string, string> = {
+  barbell: 'Barbell',
+  dumbbell: 'Dumbbell',
+  machine: 'Machine',
+  cable: 'Cable',
+  bodyweight: 'Bodyweight',
+  kettlebell: 'Kettlebell',
+  bands: 'Bands',
+  trx: 'TRX',
+};
+
 // Cardio types
 export const CARDIO_TYPES: { type: CardioType; icon: LucideIcon; i18nKey: string }[] = [
   { type: 'running', icon: PersonStanding, i18nKey: 'fitness.cardio.running' },
