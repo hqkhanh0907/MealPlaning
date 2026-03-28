@@ -1,5 +1,3 @@
-import { Capacitor } from '@capacitor/core';
-
 /* ------------------------------------------------------------------ */
 /*  Public interface                                                    */
 /* ------------------------------------------------------------------ */
@@ -130,38 +128,11 @@ class WebDatabaseService implements DatabaseService {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Native stub (Capacitor SQLite – future implementation)              */
-/* ------------------------------------------------------------------ */
-class NativeDatabaseService implements DatabaseService {
-  async initialize(): Promise<void> {
-    throw new Error('Not implemented on native platform');
-  }
-  async execute(): Promise<void> {
-    throw new Error('Not implemented on native platform');
-  }
-  async query<T>(): Promise<T[]> {
-    throw new Error('Not implemented on native platform');
-  }
-  async queryOne<T>(): Promise<T | null> {
-    throw new Error('Not implemented on native platform');
-  }
-  async transaction(): Promise<void> {
-    throw new Error('Not implemented on native platform');
-  }
-  exportBinary(): Uint8Array {
-    throw new Error('Not implemented on native platform');
-  }
-  async importBinary(): Promise<void> {
-    throw new Error('Not implemented on native platform');
-  }
-}
-
-/* ------------------------------------------------------------------ */
 /*  Factory                                                             */
 /* ------------------------------------------------------------------ */
 export function createDatabaseService(): DatabaseService {
-  if (Capacitor.isNativePlatform()) {
-    return new NativeDatabaseService();
-  }
+  // sql.js (WASM) works in both web browsers and Capacitor WebViews,
+  // so we use WebDatabaseService universally until a native SQLite
+  // plugin is integrated for better performance on mobile.
   return new WebDatabaseService();
 }
