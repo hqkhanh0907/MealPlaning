@@ -1,4 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useDatabase } from '../../../contexts/DatabaseContext';
+import { getSetting, setSetting } from '../../../services/appSettings';
+import type { DatabaseService } from '../../../services/databaseService';
 
 export type InsightType =
   | 'alert'
@@ -255,11 +258,9 @@ export function selectInsight(
   );
 }
 
-const DISMISSED_STORAGE_KEY = 'mp-insight-dismissed';
-
-function loadDismissedIds(): string[] {
+async function loadDismissedIds(db: DatabaseService): Promise<string[]> {
   try {
-    const stored = localStorage.getItem(DISMISSED_STORAGE_KEY);
+    const stored = await getSetting(db, 'insight_dismissed');
     if (!stored) return [];
     return JSON.parse(stored) as string[];
   } catch {
@@ -267,8 +268,8 @@ function loadDismissedIds(): string[] {
   }
 }
 
-function persistDismissedIds(ids: string[]): void {
-  localStorage.setItem(DISMISSED_STORAGE_KEY, JSON.stringify(ids));
+function persistDismissedIds(db: DatabaseService, ids: string[]): void {
+  setSetting(db, 'insight_dismissed', JSON.stringify(ids)).catch(() => { /* db write error */ });
 }
 
 export function useInsightEngine(): {
@@ -276,8 +277,12 @@ export function useInsightEngine(): {
   dismissInsight: (id: string) => void;
   handleAction: (insight: Insight) => void;
 } {
-  const [dismissedIds, setDismissedIds] =
-    useState<string[]>(loadDismissedIds);
+  const db = useDatabase();
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadDismissedIds(db).then(setDismissedIds).catch(() => { /* db read error */ });
+  }, [db]);
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const input: InsightInput = useMemo(() => ({}), []);
@@ -290,18 +295,18 @@ export function useInsightEngine(): {
   const dismissInsight = useCallback((id: string) => {
     setDismissedIds((prev) => {
       const next = [...prev, id];
-      persistDismissedIds(next);
+      persistDismissedIds(db, next);
       return next;
     });
-  }, []);
+  }, [db]);
 
   const handleAction = useCallback((insight: Insight) => {
     setDismissedIds((prev) => {
       const next = [...prev, insight.id];
-      persistDismissedIds(next);
+      persistDismissedIds(db, next);
       return next;
     });
-  }, []);
+  }, [db]);
 
   return { currentInsight, dismissInsight, handleAction };
 }

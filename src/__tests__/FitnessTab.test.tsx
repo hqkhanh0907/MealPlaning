@@ -109,14 +109,9 @@ vi.mock('../features/fitness/hooks/useTrainingPlan', () => ({
   }),
 }));
 
-vi.mock('../store/userProfileStore', () => ({
-  useUserProfileStore: (selector: (state: { userProfile: { weight: number } }) => unknown) =>
-    selector({ userProfile: { weight: 83 } }),
-}));
-
 vi.mock('../features/health-profile/store/healthProfileStore', () => ({
-  useHealthProfileStore: (selector: (state: { profile: { age: number } }) => unknown) =>
-    selector({ profile: { age: 25 } }),
+  useHealthProfileStore: (selector: (state: { profile: { age: number; weightKg: number } }) => unknown) =>
+    selector({ profile: { age: 25, weightKg: 83 } }),
 }));
 
 vi.mock('../contexts/NotificationContext', () => ({

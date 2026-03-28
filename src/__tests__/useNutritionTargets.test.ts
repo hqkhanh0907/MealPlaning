@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useNutritionTargets } from '../features/health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
-import { useUserProfileStore } from '../store/userProfileStore';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import type { HealthProfile, Goal } from '../features/health-profile/types';
 import {
@@ -19,16 +18,14 @@ describe('useNutritionTargets', () => {
       activeGoal: null,
       loading: false,
     });
-    useUserProfileStore.setState({
-      userProfile: { weight: 83, proteinRatio: 2, targetCalories: 1500 },
-    });
   });
 
-  it('falls back to old profile when no health profile is configured', () => {
+  it('falls back to default health profile values when no health profile is configured', () => {
     const { result } = renderHook(() => useNutritionTargets());
 
+    // DEFAULT_HEALTH_PROFILE: weightKg=70, proteinRatio=2.0, targetCalories=1500
     expect(result.current.targetCalories).toBe(1500);
-    expect(result.current.targetProtein).toBe(Math.round(83 * 2));
+    expect(result.current.targetProtein).toBe(Math.round(70 * 2));
     expect(result.current.bmr).toBe(0);
     expect(result.current.tdee).toBe(0);
     expect(result.current.targetFat).toBe(0);

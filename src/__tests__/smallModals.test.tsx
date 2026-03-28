@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClearPlanModal } from '../components/modals/ClearPlanModal';
 import { GoalSettingsModal } from '../components/modals/GoalSettingsModal';
-import type { DayPlan, UserProfile } from '../types';
+import type { DayPlan } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({
   useModalBackHandler: vi.fn(),
@@ -117,7 +117,7 @@ describe('ClearPlanModal', () => {
 
 // --- GoalSettingsModal ---
 describe('GoalSettingsModal', () => {
-  const defaultProfile: UserProfile = { weight: 70, proteinRatio: 2, targetCalories: 2000 };
+  const defaultProfile = { weight: 70, proteinRatio: 2, targetCalories: 2000 };
   const onUpdateProfile = vi.fn();
   const onClose = vi.fn();
 
@@ -309,7 +309,7 @@ describe('GoalSettingsModal', () => {
   });
 
   it('highlights active preset matching current profile', () => {
-    const balancedProfile: UserProfile = { weight: 70, proteinRatio: 1.6, targetCalories: 2000 };
+    const balancedProfile = { weight: 70, proteinRatio: 1.6, targetCalories: 2000 };
     render(<GoalSettingsModal userProfile={balancedProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     const btn = screen.getByTestId('btn-goal-preset-2000');
     expect(btn.className).toContain('border-emerald-500');

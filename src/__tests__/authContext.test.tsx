@@ -30,6 +30,20 @@ vi.mock('@capacitor/core', () => ({
   },
 }));
 
+const mockDb = {} as import('../services/databaseService').DatabaseService;
+vi.mock('../contexts/DatabaseContext', () => ({
+  useDatabase: () => mockDb,
+}));
+
+const mockGetSetting = vi.fn();
+const mockSetSetting = vi.fn();
+const mockDeleteSetting = vi.fn();
+vi.mock('../services/appSettings', () => ({
+  getSetting: (...args: unknown[]) => mockGetSetting(...args),
+  setSetting: (...args: unknown[]) => mockSetSetting(...args),
+  deleteSetting: (...args: unknown[]) => mockDeleteSetting(...args),
+}));
+
 interface ContextCaptureHandle {
   getCtx: () => AuthContextValue;
 }
@@ -70,8 +84,6 @@ const mockOnlineResponse = {
   },
 };
 
-const AUTH_STORAGE_KEY = 'mp-auth-state';
-
 const renderApp = () =>
   render(
     <AuthProvider>
@@ -87,11 +99,12 @@ describe('AuthProvider', () => {
     mockInitialize.mockResolvedValue(undefined);
     mockLogout.mockResolvedValue(undefined);
     mockIsLoggedIn.mockResolvedValue({ isLoggedIn: false });
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    mockGetSetting.mockResolvedValue(null);
+    mockSetSetting.mockResolvedValue(undefined);
+    mockDeleteSetting.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
     delete (window as unknown as Record<string, unknown>).google;
   });
 
@@ -189,7 +202,7 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('user').textContent).toBe('');
     });
 
-    it('should persist auth state to localStorage on native login', async () => {
+    it('should persist auth state to SQLite on native login', async () => {
       mockIsLoggedIn.mockResolvedValue({ isLoggedIn: true });
       mockLogin.mockResolvedValue(mockOnlineResponse);
 
@@ -199,9 +212,11 @@ describe('AuthProvider', () => {
         expect(screen.getByTestId('user').textContent).toBe('test@gmail.com');
       });
 
-      const stored = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)!);
-      expect(stored.user.email).toBe('test@gmail.com');
-      expect(stored.accessToken).toBe('test-access-token');
+      expect(mockSetSetting).toHaveBeenCalledWith(
+        mockDb,
+        'auth_state',
+        expect.stringContaining('test@gmail.com'),
+      );
     });
   });
 
@@ -216,21 +231,23 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('user').textContent).toBe('null');
     });
 
-    it('should restore persisted auth from localStorage on web', async () => {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+    it('should restore persisted auth from SQLite on web', async () => {
+      mockGetSetting.mockResolvedValue(JSON.stringify({
         user: { id: 'u1', email: 'saved@g.com', displayName: 'Saved', photoUrl: null },
         accessToken: 'saved-token',
       }));
 
       renderApp();
 
-      expect(screen.getByTestId('user').textContent).toBe('saved@g.com');
+      await waitFor(() => {
+        expect(screen.getByTestId('user').textContent).toBe('saved@g.com');
+      });
       expect(screen.getByTestId('token').textContent).toBe('saved-token');
       expect(screen.getByTestId('initialized').textContent).toBe('true');
     });
 
     it('should handle corrupt persisted auth gracefully', async () => {
-      localStorage.setItem(AUTH_STORAGE_KEY, 'not-json');
+      mockGetSetting.mockResolvedValue('not-json');
 
       renderApp();
 
@@ -242,7 +259,19 @@ describe('AuthProvider', () => {
     });
 
     it('should handle persisted auth with missing user fields', async () => {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: null, accessToken: null }));
+      mockGetSetting.mockResolvedValue(JSON.stringify({ user: null, accessToken: null }));
+
+      renderApp();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('initialized').textContent).toBe('true');
+      });
+
+      expect(screen.getByTestId('user').textContent).toBe('null');
+    });
+
+    it('should handle getSetting rejection gracefully', async () => {
+      mockGetSetting.mockRejectedValue(new Error('DB read failed'));
 
       renderApp();
 
@@ -567,7 +596,7 @@ describe('AuthProvider', () => {
       });
     });
 
-    it('should remove persisted auth from localStorage on sign-out', async () => {
+    it('should delete persisted auth from SQLite on sign-out', async () => {
       mockIsLoggedIn.mockResolvedValue({ isLoggedIn: true });
       mockLogin.mockResolvedValue(mockOnlineResponse);
 
@@ -576,7 +605,11 @@ describe('AuthProvider', () => {
         expect(screen.getByTestId('user').textContent).toBe('test@gmail.com');
       });
 
-      expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeTruthy();
+      expect(mockSetSetting).toHaveBeenCalledWith(
+        mockDb,
+        'auth_state',
+        expect.any(String),
+      );
 
       const user = userEvent.setup();
       await user.click(screen.getByText('sign-out'));
@@ -585,7 +618,7 @@ describe('AuthProvider', () => {
         expect(screen.getByTestId('user').textContent).toBe('null');
       });
 
-      expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
+      expect(mockDeleteSetting).toHaveBeenCalledWith(mockDb, 'auth_state');
     });
   });
 
@@ -601,13 +634,15 @@ describe('AuthProvider', () => {
         },
       };
 
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+      mockGetSetting.mockResolvedValue(JSON.stringify({
         user: { id: 'u1', email: 'web@g.com', displayName: 'Web', photoUrl: null },
         accessToken: 'web-token',
       }));
 
       renderApp();
-      expect(screen.getByTestId('user').textContent).toBe('web@g.com');
+      await waitFor(() => {
+        expect(screen.getByTestId('user').textContent).toBe('web@g.com');
+      });
 
       const user = userEvent.setup();
       await user.click(screen.getByText('sign-out'));
@@ -617,17 +652,19 @@ describe('AuthProvider', () => {
       });
 
       expect(mockRevoke).toHaveBeenCalledWith('web-token');
-      expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
+      expect(mockDeleteSetting).toHaveBeenCalledWith(mockDb, 'auth_state');
     });
 
     it('should handle sign-out when no google namespace on window', async () => {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+      mockGetSetting.mockResolvedValue(JSON.stringify({
         user: { id: 'u1', email: 'web@g.com', displayName: 'Web', photoUrl: null },
         accessToken: 'web-token',
       }));
 
       renderApp();
-      expect(screen.getByTestId('user').textContent).toBe('web@g.com');
+      await waitFor(() => {
+        expect(screen.getByTestId('user').textContent).toBe('web@g.com');
+      });
 
       const user = userEvent.setup();
       await user.click(screen.getByText('sign-out'));

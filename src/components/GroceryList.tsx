@@ -1,11 +1,12 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { Ingredient, Dish, DayPlan, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { useNotification } from '../contexts/NotificationContext';
 import { getWeekRange, isDateInRange } from '../utils/helpers';
-import { usePersistedState } from '../hooks/usePersistedState';
+import { useDatabase } from '../contexts/DatabaseContext';
+import { getSetting, setSetting } from '../services/appSettings';
 
 type GroceryScope = 'day' | 'week' | 'custom';
 
@@ -154,10 +155,27 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
+  const db = useDatabase();
   const [scope, setScope] = useState<GroceryScope>('day');
   const [groupByAisle, setGroupByAisle] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
-  const [persistedCheckedSnapshots, setPersistedCheckedSnapshots] = usePersistedState<CheckedSnapshot[]>('mp-grocery-checked', []);
+  const [persistedCheckedSnapshots, setPersistedCheckedSnapshots] = useState<CheckedSnapshot[]>([]);
+
+  // Load from SQLite on mount
+  useEffect(() => {
+    getSetting(db, 'grocery_checked').then((val) => {
+      if (val) {
+        try { setPersistedCheckedSnapshots(JSON.parse(val) as CheckedSnapshot[]); } catch { /* ignore corrupt */ }
+      }
+    }).catch(() => { /* db read error */ });
+  }, [db]);
+
+  // Save to SQLite when changed
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) { isInitialMount.current = false; return; }
+    setSetting(db, 'grocery_checked', JSON.stringify(persistedCheckedSnapshots)).catch(() => { /* db write error */ });
+  }, [db, persistedCheckedSnapshots]);
 
   const filteredPlans = useMemo(() => {
     if (scope === 'day') return [currentPlan];

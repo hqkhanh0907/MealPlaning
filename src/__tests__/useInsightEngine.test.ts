@@ -1,4 +1,5 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import type { DatabaseService } from '../services/databaseService';
 import {
   selectInsight,
   getTipOfTheDay,
@@ -6,6 +7,40 @@ import {
   TIPS_POOL,
   type InsightInput,
 } from '../features/dashboard/hooks/useInsightEngine';
+
+/* ------------------------------------------------------------------ */
+/*  Mock DatabaseContext for hook tests                                 */
+/* ------------------------------------------------------------------ */
+let mockSettingsStore: Record<string, string> = {};
+
+const mockDb: DatabaseService = {
+  initialize: vi.fn(),
+  execute: vi.fn(),
+  query: vi.fn().mockResolvedValue([]),
+  queryOne: vi.fn().mockImplementation((_sql: string, params: string[]) => {
+    const key = params[0];
+    const value = mockSettingsStore[key];
+    return Promise.resolve(value !== undefined ? { value } : null);
+  }),
+  transaction: vi.fn(),
+  exportToJSON: vi.fn(),
+  importFromJSON: vi.fn(),
+};
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  useDatabase: () => mockDb,
+}));
+
+vi.mock('../services/appSettings', () => ({
+  getSetting: (_db: DatabaseService, key: string) => {
+    const value = mockSettingsStore[key];
+    return Promise.resolve(value !== undefined ? value : null);
+  },
+  setSetting: (_db: DatabaseService, key: string, value: string) => {
+    mockSettingsStore[key] = value;
+    return Promise.resolve();
+  },
+}));
 
 describe('selectInsight', () => {
   describe('P1: Auto-adjust triggered', () => {
@@ -516,18 +551,23 @@ describe('TIPS_POOL', () => {
 
 describe('useInsightEngine', () => {
   beforeEach(() => {
-    localStorage.clear();
+    mockSettingsStore = {};
   });
 
-  it('returns currentInsight as a tip by default', () => {
+  it('returns currentInsight as a tip by default', async () => {
     const { result } = renderHook(() => useInsightEngine());
-    expect(result.current.currentInsight).not.toBeNull();
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
     expect(result.current.currentInsight?.priority).toBe(8);
     expect(result.current.currentInsight?.type).toBe('tip');
   });
 
-  it('dismissInsight changes the current insight', () => {
+  it('dismissInsight changes the current insight', async () => {
     const { result } = renderHook(() => useInsightEngine());
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
     const initialId = result.current.currentInsight!.id;
 
     act(() => {
@@ -537,8 +577,11 @@ describe('useInsightEngine', () => {
     expect(result.current.currentInsight?.id).not.toBe(initialId);
   });
 
-  it('handleAction dismisses the insight', () => {
+  it('handleAction dismisses the insight', async () => {
     const { result } = renderHook(() => useInsightEngine());
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
     const initialInsight = result.current.currentInsight!;
 
     act(() => {
@@ -548,46 +591,53 @@ describe('useInsightEngine', () => {
     expect(result.current.currentInsight?.id).not.toBe(initialInsight.id);
   });
 
-  it('persists dismissed IDs to localStorage', () => {
+  it('persists dismissed IDs to SQLite', async () => {
     const { result } = renderHook(() => useInsightEngine());
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
     const insight = result.current.currentInsight!;
 
     act(() => {
       result.current.dismissInsight(insight.id);
     });
 
-    const stored = JSON.parse(
-      localStorage.getItem('mp-insight-dismissed') ?? '[]',
-    );
+    const stored = JSON.parse(mockSettingsStore['insight_dismissed'] ?? '[]');
     expect(stored).toContain(insight.id);
   });
 
-  it('loads dismissed IDs from localStorage on mount', () => {
+  it('loads dismissed IDs from SQLite on mount', async () => {
     const firstTip = getTipOfTheDay();
-    localStorage.setItem(
-      'mp-insight-dismissed',
-      JSON.stringify([firstTip.id]),
-    );
+    mockSettingsStore['insight_dismissed'] = JSON.stringify([firstTip.id]);
 
     const { result } = renderHook(() => useInsightEngine());
-    expect(result.current.currentInsight?.id).not.toBe(firstTip.id);
+    await waitFor(() => {
+      expect(result.current.currentInsight?.id).not.toBe(firstTip.id);
+    });
   });
 
-  it('handles corrupted localStorage data gracefully', () => {
-    localStorage.setItem('mp-insight-dismissed', 'not-valid-json');
+  it('handles corrupted SQLite data gracefully', async () => {
+    mockSettingsStore['insight_dismissed'] = 'not-valid-json';
 
     const { result } = renderHook(() => useInsightEngine());
-    expect(result.current.currentInsight).not.toBeNull();
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
     expect(result.current.currentInsight?.priority).toBe(8);
   });
 
-  it('handles empty localStorage gracefully', () => {
+  it('handles empty SQLite store gracefully', async () => {
     const { result } = renderHook(() => useInsightEngine());
-    expect(result.current.currentInsight).not.toBeNull();
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
   });
 
-  it('multiple dismissals accumulate', () => {
+  it('multiple dismissals accumulate', async () => {
     const { result } = renderHook(() => useInsightEngine());
+    await waitFor(() => {
+      expect(result.current.currentInsight).not.toBeNull();
+    });
     const ids: string[] = [];
 
     for (let i = 0; i < 3; i++) {
@@ -599,9 +649,7 @@ describe('useInsightEngine', () => {
     }
 
     expect(new Set(ids).size).toBe(3);
-    const stored = JSON.parse(
-      localStorage.getItem('mp-insight-dismissed') ?? '[]',
-    );
+    const stored = JSON.parse(mockSettingsStore['insight_dismissed'] ?? '[]');
     expect(stored.length).toBe(3);
   });
 });

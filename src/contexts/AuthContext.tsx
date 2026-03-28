@@ -3,30 +3,33 @@ import { Capacitor } from '@capacitor/core';
 import type { AuthUser } from '../types';
 import { AuthContext } from './authContextDef';
 import type { AuthContextValue, AuthState } from './authContextDef';
+import { useDatabase } from './DatabaseContext';
+import { getSetting, setSetting, deleteSetting } from '../services/appSettings';
+import type { DatabaseService } from '../services/databaseService';
 
 export type { AuthContextValue, AuthState } from './authContextDef';
 
 const GOOGLE_WEB_CLIENT_ID = '871833618020-u4bum8ct6lo3a6pcjhhg62e8auiigs68.apps.googleusercontent.com';
 const DRIVE_APPDATA_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
 
-const AUTH_STORAGE_KEY = 'mp-auth-state';
+const AUTH_SETTING_KEY = 'auth_state';
 
 interface PersistedAuth {
   user: AuthUser;
   accessToken: string | null;
 }
 
-const persistAuth = (auth: PersistedAuth | null): void => {
+const persistAuth = (db: DatabaseService, auth: PersistedAuth | null): void => {
   if (auth) {
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    setSetting(db, AUTH_SETTING_KEY, JSON.stringify(auth)).catch(() => {});
   } else {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    deleteSetting(db, AUTH_SETTING_KEY).catch(() => {});
   }
 };
 
-const loadPersistedAuth = (): PersistedAuth | null => {
+const loadPersistedAuth = async (db: DatabaseService): Promise<PersistedAuth | null> => {
   try {
-    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+    const stored = await getSetting(db, AUTH_SETTING_KEY);
     if (!stored) return null;
     const parsed = JSON.parse(stored) as PersistedAuth;
     if (parsed.user && typeof parsed.user.email === 'string') return parsed;
@@ -135,14 +138,13 @@ const isNativePlatform = (): boolean => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AuthState>(() => {
-    const persisted = loadPersistedAuth();
-    return {
-      user: persisted?.user ?? null,
-      accessToken: persisted?.accessToken ?? null,
-      isLoading: false,
-      isInitialized: !!persisted,
-    };
+  const db = useDatabase();
+
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    accessToken: null,
+    isLoading: false,
+    isInitialized: false,
   });
 
   const gisTokenClientRef = useRef<GISTokenClient | null>(null);
@@ -153,6 +155,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const init = async () => {
+      const persisted = await loadPersistedAuth(db);
+      if (persisted) {
+        setState({
+          user: persisted.user,
+          accessToken: persisted.accessToken,
+          isLoading: false,
+          isInitialized: true,
+        });
+      }
+
       if (isNativePlatform()) {
         try {
           const { SocialLogin } = await import('@capgo/capacitor-social-login');
@@ -168,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const extracted = extractOnlineProfile(loginResult.result);
             if (extracted) {
               const authData = { user: extracted.user, accessToken: extracted.token };
-              persistAuth(authData);
+              persistAuth(db, authData);
               setState({ ...authData, isLoading: false, isInitialized: true });
               return;
             }
@@ -182,24 +194,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setState(prev => prev.isInitialized ? prev : { ...prev, isInitialized: true });
     };
     void init();
-  }, []);
+  }, [db]);
 
-  const processTokenResponse = async (tokenResponse: GISTokenResponse) => {
+  const processTokenResponse = useCallback(async (tokenResponse: GISTokenResponse) => {
     try {
       const user = await fetchGoogleUserInfo(tokenResponse.access_token);
       const authData = { user, accessToken: tokenResponse.access_token };
-      persistAuth(authData);
+      persistAuth(db, authData);
       setState({ ...authData, isLoading: false, isInitialized: true });
       signInResolverRef.current?.resolve();
     } catch (error_) {
       setState(prev => ({ ...prev, isLoading: false }));
-      persistAuth(null);
+      persistAuth(db, null);
       signInResolverRef.current?.reject(
         error_ instanceof Error ? error_ : new Error('Failed to fetch user info'),
       );
     }
     signInResolverRef.current = null;
-  };
+  }, [db]);
 
   const signIn = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true }));
@@ -214,7 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const extracted = extractOnlineProfile(loginResult.result);
         if (extracted) {
           const authData = { user: extracted.user, accessToken: extracted.token };
-          persistAuth(authData);
+          persistAuth(db, authData);
           setState({ ...authData, isLoading: false, isInitialized: true });
         } else {
           setState(prev => ({ ...prev, isLoading: false }));
@@ -247,7 +259,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleTokenSuccess = (tokenResponse: GISTokenResponse) => {
       if (tokenResponse.error) {
         setState(prev => ({ ...prev, isLoading: false }));
-        persistAuth(null);
+        persistAuth(db, null);
         const err = new Error(`Google sign-in failed: ${tokenResponse.error}`);
         signInResolverRef.current?.reject(err);
         signInResolverRef.current = null;
@@ -270,7 +282,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       gisTokenClientRef.current = tokenClient;
       tokenClient.requestAccessToken({ prompt: 'consent' });
     });
-  }, []);
+  }, [db, processTokenResponse]);
 
   const signOut = useCallback(async () => {
     if (isNativePlatform()) {
@@ -283,9 +295,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else if (state.accessToken && globalThis.google?.accounts?.oauth2) {
       globalThis.google.accounts.oauth2.revoke(state.accessToken);
     }
-    persistAuth(null);
+    persistAuth(db, null);
     setState({ user: null, accessToken: null, isLoading: false, isInitialized: true });
-  }, [state.accessToken]);
+  }, [state.accessToken, db]);
 
   const value = useMemo<AuthContextValue>(() => ({
     ...state,

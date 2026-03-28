@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Target, Zap } from 'lucide-react';
-import { UserProfile } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
+interface GoalProfile {
+  weight: number;
+  proteinRatio: number;
+  targetCalories: number;
+}
+
 interface GoalSettingsModalProps {
-  userProfile: UserProfile;
-  onUpdateProfile: (profile: UserProfile) => void;
+  userProfile: GoalProfile;
+  onUpdateProfile: (profile: GoalProfile) => void;
   onClose: () => void;
 }
 

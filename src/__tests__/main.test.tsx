@@ -22,6 +22,9 @@ vi.mock('../contexts/NotificationContext', () => ({
 vi.mock('../contexts/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 import React from 'react';
 

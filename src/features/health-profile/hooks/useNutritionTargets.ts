@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useHealthProfileStore } from '../store/healthProfileStore';
-import { useUserProfileStore } from '../../../store/userProfileStore';
 import { DEFAULT_HEALTH_PROFILE } from '../types';
 import {
   calculateBMR,
@@ -41,25 +40,19 @@ function isProfileConfigured(profile: typeof DEFAULT_HEALTH_PROFILE): boolean {
  *
  * Priority:
  *  1. If the user has customised their HealthProfile → full engine calculation
- *  2. Otherwise → fall back to the legacy `userProfileStore.targetCalories`
+ *  2. Otherwise → fall back to the default healthProfile values
  */
 export function useNutritionTargets(): NutritionTargets {
   const healthProfile = useHealthProfileStore((s) => s.profile);
   const activeGoal = useHealthProfileStore((s) => s.activeGoal);
-  const userProfile = useUserProfileStore((s) => s.userProfile);
 
   return useMemo(() => {
     const configured = isProfileConfigured(healthProfile);
 
     if (!configured) {
-      // Legacy fallback: derive protein from weight × ratio, keep old targetCalories
-      // Coerce to Number to guard against string values from localStorage
-      const weight = Number(userProfile.weight);
-      const proteinRatio = Number(userProfile.proteinRatio);
-      const targetCal = Number(userProfile.targetCalories);
-      const fallbackProtein = Math.round(weight * proteinRatio);
+      const fallbackProtein = Math.round(healthProfile.weightKg * healthProfile.proteinRatio);
       return {
-        targetCalories: targetCal,
+        targetCalories: healthProfile.targetCalories,
         targetProtein: fallbackProtein,
         targetFat: 0,
         targetCarbs: 0,
@@ -98,5 +91,5 @@ export function useNutritionTargets(): NutritionTargets {
       bmr,
       tdee,
     };
-  }, [healthProfile, activeGoal, userProfile]);
+  }, [healthProfile, activeGoal]);
 }

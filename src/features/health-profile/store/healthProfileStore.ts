@@ -17,6 +17,7 @@ interface ProfileRow {
   bmr_override: number | null;
   protein_ratio: number;
   fat_pct: number;
+  target_calories: number;
   updated_at: string;
 }
 
@@ -48,6 +49,7 @@ function rowToProfile(row: ProfileRow): HealthProfile {
     bmrOverride: row.bmr_override ?? undefined,
     proteinRatio: row.protein_ratio,
     fatPct: row.fat_pct,
+    targetCalories: row.target_calories,
     updatedAt: row.updated_at,
   };
 }
@@ -110,8 +112,9 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
     await db.execute(
       `INSERT OR REPLACE INTO user_profile
          (id, gender, age, height_cm, weight_kg, activity_level,
-          body_fat_pct, bmr_override, protein_ratio, fat_pct, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          body_fat_pct, bmr_override, protein_ratio, fat_pct,
+          target_calories, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         saved.id,
         saved.gender,
@@ -123,6 +126,7 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
         saved.bmrOverride ?? null,
         saved.proteinRatio,
         saved.fatPct,
+        saved.targetCalories,
         saved.updatedAt,
       ],
     );

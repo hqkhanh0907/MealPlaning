@@ -19,6 +19,7 @@ export interface HealthProfile {
   bmrOverride?: number;
   proteinRatio: number;
   fatPct: number;
+  targetCalories: number;
   updatedAt: string;
 }
 
@@ -44,5 +45,6 @@ export const DEFAULT_HEALTH_PROFILE: HealthProfile = {
   activityLevel: 'moderate',
   proteinRatio: 2.0,
   fatPct: 0.25,
+  targetCalories: 1500,
   updatedAt: new Date().toISOString(),
 };

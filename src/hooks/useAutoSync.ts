@@ -22,7 +22,6 @@ interface UseAutoSyncOptions {
   ingredients: unknown[];
   dishes: unknown[];
   dayPlans: unknown[];
-  userProfile: unknown;
   templates: unknown[];
   onImportData: (data: Record<string, unknown>) => void;
 }
@@ -128,7 +127,6 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     options.ingredients,
     options.dishes,
     options.dayPlans,
-    options.userProfile,
     options.templates,
     triggerUpload,
   ]);

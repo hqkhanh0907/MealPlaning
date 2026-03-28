@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
 import { DayPlan } from '../types';
 import { parseLocalDate } from '../utils/helpers';
+import { useDatabase } from '../contexts/DatabaseContext';
+import { getSetting, setSetting } from '../services/appSettings';
 
 /** Format a Date to local YYYY-MM-DD (avoids UTC shift from toISOString) */
 const formatLocalDate = (d: Date): string => {
@@ -84,10 +86,9 @@ const formatWeekLabel = (dates: Date[]): string => {
   return `${fmt(dates[0])} - ${fmt(dates[6])}`;
 };
 
-const HINT_DISMISSED_KEY = 'mp-date-hint-dismissed';
-
 export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }) => {
   const { t } = useTranslation();
+  const db = useDatabase();
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = parseLocalDate(selectedDate);
     return Number.isNaN(d.getTime()) ? new Date() : d;
@@ -96,12 +97,16 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
     typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640 ? 'week' : 'calendar'
   );
   const [weekOffset, setWeekOffset] = useState(0);
-  const [hintDismissed, setHintDismissed] = useState(() => {
-    try { return localStorage.getItem(HINT_DISMISSED_KEY) === '1'; } catch { return false; }
-  });
+  const [hintDismissed, setHintDismissed] = useState(false);
   const weekContainerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    getSetting(db, 'date_hint_dismissed').then((val) => {
+      if (val === '1') setHintDismissed(true);
+    }).catch(() => { /* db read error – keep default */ });
+  }, [db]);
 
   const todayStr = useMemo(() => formatLocalDate(new Date()), []);
 
@@ -142,8 +147,8 @@ export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSele
 
   const dismissHint = useCallback(() => {
     setHintDismissed(true);
-    try { localStorage.setItem(HINT_DISMISSED_KEY, '1'); } catch { /* quota exceeded */ }
-  }, []);
+    setSetting(db, 'date_hint_dismissed', '1').catch(() => { /* db write error */ });
+  }, [db]);
 
   const goToToday = () => {
     const today = new Date();

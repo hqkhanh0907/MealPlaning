@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Ingredient, Dish, DayPlan, MealType, UserProfile, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
+import type { Ingredient, Dish, DayPlan, MealType, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
 import { calculateDishesNutrition } from './utils/nutrition';
 import { CalendarTab } from './components/CalendarTab';
 
@@ -55,10 +55,10 @@ import { UNDO_TOAST_DURATION_MS } from './data/constants';
 import { useIngredientStore } from './store/ingredientStore';
 import { useDishStore } from './store/dishStore';
 import { useDayPlanStore } from './store/dayPlanStore';
-import { useUserProfileStore } from './store/userProfileStore';
 import { useMealTemplateStore } from './store/mealTemplateStore';
 import { useUIStore } from './store/uiStore';
 import { useNavigationStore } from './store/navigationStore';
+import { useHealthProfileStore } from './features/health-profile/store/healthProfileStore';
 
 
 // --- Main App component ---
@@ -76,7 +76,6 @@ export default function App() {
     useIngredientStore.getState().hydrate();
     useDishStore.getState().hydrate();
     useDayPlanStore.getState().hydrate();
-    useUserProfileStore.getState().hydrate();
     useMealTemplateStore.getState().hydrate();
     useUIStore.getState().hydrate();
     useNavigationStore.setState({ activeTab: 'calendar', pageStack: [], showBottomNav: true, tabScrollPositions: {} });
@@ -86,7 +85,7 @@ export default function App() {
   const { ingredients, setIngredients, addIngredient, updateIngredient } = useIngredientStore();
   const { dishes, setDishes, addDish, updateDish, deleteDish, isIngredientUsed } = useDishStore();
   const { dayPlans, setDayPlans, isDishUsed, restoreDayPlans } = useDayPlanStore();
-  const { userProfile, setUserProfile } = useUserProfileStore();
+  const healthProfile = useHealthProfileStore((s) => s.profile);
   const { templates, saveTemplate, deleteTemplate, renameTemplate, applyTemplate } = useMealTemplateStore();
   const { hasNewAIResult, setHasNewAIResult, activeManagementSubTab, setActiveManagementSubTab, selectedDate, setSelectedDate } = useUIStore();
   const activeMainTab = useNavigationStore(s => s.activeTab);
@@ -143,10 +142,10 @@ export default function App() {
     };
   }, [currentPlan, dishes, ingredients]);
 
-  const targetProtein = Math.round(userProfile.weight * userProfile.proteinRatio);
+  const targetProtein = Math.round(healthProfile.weightKg * healthProfile.proteinRatio);
 
   const aiSuggestion = useAISuggestion({
-    dishes, ingredients, targetCalories: userProfile.targetCalories,
+    dishes, ingredients, targetCalories: healthProfile.targetCalories,
     targetProtein, selectedDate, setDayPlans,
   });
 
@@ -271,20 +270,18 @@ export default function App() {
     if ('mp-ingredients' in validEntries) setIngredients(validEntries['mp-ingredients'] as Ingredient[]);
     if ('mp-dishes' in validEntries) setDishes(validEntries['mp-dishes'] as Dish[]);
     if ('mp-day-plans' in validEntries) setDayPlans(validEntries['mp-day-plans'] as DayPlan[]);
-    if ('mp-user-profile' in validEntries) setUserProfile(validEntries['mp-user-profile'] as UserProfile);
 
     const importedCount = Object.keys(validEntries).length;
     if (importedCount > 0) {
       notify.success(t('notification.importSuccess'), t('notification.importSuccessDesc', { count: importedCount }));
     }
-  }, [notify, setIngredients, setDishes, setDayPlans, setUserProfile, t]);
+  }, [notify, setIngredients, setDishes, setDayPlans, t]);
 
   // Auto-sync data to Google Drive when authenticated
   useAutoSync({
     ingredients,
     dishes,
     dayPlans,
-    userProfile,
     templates,
     onImportData: handleImportData,
   });
@@ -305,7 +302,7 @@ export default function App() {
               <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium sm:hidden">
                 {parseLocalDate(selectedDate).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">{t('header.subtitle', { weight: userProfile.weight })}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">{t('header.subtitle', { weight: healthProfile.weightKg })}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -330,7 +327,7 @@ export default function App() {
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
             dishes={dishes} ingredients={ingredients} currentPlan={currentPlan}
             dayNutrition={dayNutrition}
-            userWeight={userProfile.weight} targetCalories={userProfile.targetCalories} targetProtein={targetProtein}
+            userWeight={healthProfile.weightKg} targetCalories={healthProfile.targetCalories} targetProtein={targetProtein}
             isSuggesting={aiSuggestion.isLoading}
             servings={currentPlan.servings}
             onOpenTypeSelection={openTypeSelection} onOpenClearPlan={openClearPlan}
@@ -400,7 +397,7 @@ export default function App() {
           currentPlan={currentPlan}
           selectedDate={selectedDate}
           initialTab={modals.planningType}
-          targetCalories={userProfile.targetCalories}
+          targetCalories={healthProfile.targetCalories}
           targetProtein={targetProtein}
           onConfirm={(changes) => {
             for (const [type, dishIds] of Object.entries(changes)) {
@@ -421,7 +418,7 @@ export default function App() {
         />
       )}
       {modals.isClearPlanModalOpen && <ClearPlanModal dayPlans={dayPlans} selectedDate={selectedDate} onClear={handleClearPlan} onClose={modals.closeClearPlan} />}
-      {modals.isGoalModalOpen && <GoalSettingsModal userProfile={userProfile} onUpdateProfile={setUserProfile} onClose={modals.closeGoalModal} />}
+      {modals.isGoalModalOpen && <GoalSettingsModal userProfile={{ weight: healthProfile.weightKg, proteinRatio: healthProfile.proteinRatio, targetCalories: healthProfile.targetCalories }} onUpdateProfile={(p) => useHealthProfileStore.setState((s) => ({ profile: { ...s.profile, weightKg: p.weight, proteinRatio: p.proteinRatio, targetCalories: p.targetCalories } }))} onClose={modals.closeGoalModal} />}
 
       {modals.isCopyPlanOpen && (
         <CopyPlanModal
@@ -471,7 +468,7 @@ export default function App() {
         suggestion={aiSuggestion.suggestion}
         dishes={dishes}
         ingredients={ingredients}
-        targetCalories={userProfile.targetCalories}
+        targetCalories={healthProfile.targetCalories}
         targetProtein={targetProtein}
         isLoading={aiSuggestion.isLoading}
         error={aiSuggestion.error}
