@@ -2,9 +2,6 @@ import { create } from 'zustand';
 import type { Dish } from '../types';
 import type { DatabaseService } from '../services/databaseService';
 import { initialDishes } from '../data/initialData';
-import { migrateDishes } from '../services/dataService';
-
-const STORAGE_KEY = 'mp-dishes';
 
 interface DishRow {
   id: string;
@@ -20,14 +17,6 @@ interface DishIngredientRow {
   amount: number;
 }
 
-export const loadDishes = (): Dish[] => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) return migrateDishes(JSON.parse(saved));
-  } catch { /* corrupted data — use default */ }
-  return initialDishes;
-};
-
 interface DishState {
   dishes: Dish[];
   setDishes: (updater: Dish[] | ((prev: Dish[]) => Dish[])) => void;
@@ -35,7 +24,6 @@ interface DishState {
   updateDish: (dish: Dish) => void;
   deleteDish: (id: string) => void;
   isIngredientUsed: (ingId: string) => boolean;
-  hydrate: () => void;
   loadAll: (db: DatabaseService) => Promise<void>;
 }
 
@@ -55,13 +43,9 @@ export const useDishStore = create<DishState>((set, get) => ({
   })),
   isIngredientUsed: (ingId) =>
     get().dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)),
-  hydrate: () => set({ dishes: loadDishes() }),
   loadAll: async (db: DatabaseService) => {
     const dishRows = await db.query<DishRow>('SELECT * FROM dishes');
-    if (dishRows.length === 0) {
-      set({ dishes: loadDishes() });
-      return;
-    }
+    if (dishRows.length === 0) return;
     const dishes: Dish[] = await Promise.all(
       dishRows.map(async (r) => {
         const ings = await db.query<DishIngredientRow>(
@@ -81,10 +65,3 @@ export const useDishStore = create<DishState>((set, get) => ({
     set({ dishes });
   },
 }));
-
-useDishStore.subscribe((state, prev) => {
-  if (state.dishes !== prev.dishes) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.dishes)); }
-    catch { /* localStorage full */ }
-  }
-});

@@ -3,21 +3,11 @@ import type { DayPlan, MealTemplate } from '../types';
 import type { DatabaseService } from '../services/databaseService';
 import { generateId } from '../utils/helpers';
 
-const STORAGE_KEY = 'meal-templates';
-
 interface MealTemplateRow {
   id: string;
   name: string;
   data: string;
 }
-
-const loadTemplates = (): MealTemplate[] => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) return JSON.parse(saved) as MealTemplate[];
-  } catch { /* corrupted data — use default */ }
-  return [];
-};
 
 interface MealTemplateState {
   templates: MealTemplate[];
@@ -25,7 +15,6 @@ interface MealTemplateState {
   deleteTemplate: (id: string) => void;
   renameTemplate: (id: string, newName: string) => void;
   applyTemplate: (template: MealTemplate, targetDate: string) => DayPlan;
-  hydrate: () => void;
   loadAll: (db: DatabaseService) => Promise<void>;
 }
 
@@ -55,13 +44,9 @@ export const useMealTemplateStore = create<MealTemplateState>((set) => ({
     lunchDishIds: [...template.lunchDishIds],
     dinnerDishIds: [...template.dinnerDishIds],
   }),
-  hydrate: () => set({ templates: loadTemplates() }),
   loadAll: async (db: DatabaseService) => {
     const rows = await db.query<MealTemplateRow>('SELECT * FROM meal_templates');
-    if (rows.length === 0) {
-      set({ templates: loadTemplates() });
-      return;
-    }
+    if (rows.length === 0) return;
     const templates: MealTemplate[] = rows.map((r) => {
       const data = JSON.parse(r.data) as Omit<MealTemplate, 'id' | 'name'>;
       return { id: r.id, name: r.name, ...data };
@@ -69,10 +54,3 @@ export const useMealTemplateStore = create<MealTemplateState>((set) => ({
     set({ templates });
   },
 }));
-
-useMealTemplateStore.subscribe((state, prev) => {
-  if (state.templates !== prev.templates) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.templates)); }
-    catch { /* localStorage full */ }
-  }
-});

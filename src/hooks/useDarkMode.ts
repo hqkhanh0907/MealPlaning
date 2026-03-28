@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDatabase } from '../contexts/DatabaseContext';
+import { getSetting, setSetting } from '../services/appSettings';
 
 type Theme = 'light' | 'dark' | 'system' | 'schedule';
-
-const STORAGE_KEY = 'mp-theme';
 
 function getSystemPrefersDark(): boolean {
   return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
@@ -25,19 +25,23 @@ function applyTheme(theme: Theme) {
 }
 
 export function useDarkMode() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'light' || stored === 'dark' || stored === 'system' || stored === 'schedule') return stored;
-    } catch { /* ignore */ }
-    return 'light';
-  });
+  const db = useDatabase();
+  const [theme, setTheme] = useState<Theme>('light');
+
+  useEffect(() => {
+    getSetting(db, 'theme').then(v => {
+      if (v === 'light' || v === 'dark' || v === 'system' || v === 'schedule') {
+        setTheme(v);
+        applyTheme(v);
+      }
+    }).catch(() => {});
+  }, [db]);
 
   const persistTheme = useCallback((t: Theme) => {
     setTheme(t);
-    try { localStorage.setItem(STORAGE_KEY, t); } catch { /* ignore */ }
+    setSetting(db, 'theme', t).catch(() => {});
     applyTheme(t);
-  }, [setTheme]);
+  }, [db]);
 
   useEffect(() => {
     applyTheme(theme);

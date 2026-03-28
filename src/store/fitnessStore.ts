@@ -381,7 +381,7 @@ export const useFitnessStore = create<FitnessState>()(
           set({ sqliteReady: true });
         } catch (error) {
           console.warn(
-            '[fitnessStore] SQLite load failed, using localStorage fallback:',
+            '[fitnessStore] SQLite load failed:',
             error,
           );
         }

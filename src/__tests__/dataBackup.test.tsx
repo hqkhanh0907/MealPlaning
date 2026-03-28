@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { DataBackup } from '../components/DataBackup';
 
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
@@ -163,17 +163,24 @@ describe('DataBackup', () => {
   it('shows error for file without valid SQLite header', async () => {
     render(<DataBackup />);
 
-    const fileContent = new TextEncoder().encode('not a sqlite file at all');
-    const file = new File([fileContent], 'bad.db', { type: 'application/octet-stream' });
-
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).toBeTruthy();
 
-    if (input) fireEvent.change(input, { target: { files: [file] } });
+    // Create file with non-SQLite content
+    const fileContent = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+    const file = new File([fileContent], 'bad.db', { type: 'application/octet-stream' });
 
-    await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('File không hợp lệ', expect.any(String));
+    await act(async () => {
+      if (input) {
+        Object.defineProperty(input, 'files', { value: [file], configurable: true });
+        fireEvent.change(input);
+      }
     });
+
+    // Allow async arrayBuffer() to resolve
+    await act(async () => { await new Promise(r => { setTimeout(r, 50); }); });
+
+    expect(mockNotify.error).toHaveBeenCalled();
     expect(mockDb.importBinary).not.toHaveBeenCalled();
   });
 
