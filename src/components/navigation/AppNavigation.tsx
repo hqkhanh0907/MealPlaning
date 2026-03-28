@@ -18,11 +18,11 @@ interface NavItemConfig {
 }
 
 const NAV_CONFIG: NavItemConfig[] = [
-  { tab: 'calendar', mobileIcon: <Calendar className="w-6 h-6" />, desktopIcon: <Calendar className="w-4 h-4" />, labelKey: 'nav.calendar' },
-  { tab: 'library', mobileIcon: <ClipboardList className="w-6 h-6" />, desktopIcon: <ClipboardList className="w-4 h-4" />, labelKey: 'nav.library' },
-  { tab: 'ai-analysis', mobileIcon: <Bot className="w-6 h-6" />, desktopIcon: <Bot className="w-4 h-4" />, labelKey: 'nav.aiAnalysis' },
-  { tab: 'fitness', mobileIcon: <Dumbbell className="w-6 h-6" />, desktopIcon: <Dumbbell className="w-4 h-4" />, labelKey: 'nav.fitness' },
-  { tab: 'dashboard', mobileIcon: <LayoutDashboard className="w-6 h-6" />, desktopIcon: <LayoutDashboard className="w-4 h-4" />, labelKey: 'nav.dashboard' },
+  { tab: 'calendar', mobileIcon: <Calendar className="w-5 h-5" />, desktopIcon: <Calendar className="w-4 h-4" />, labelKey: 'nav.calendar' },
+  { tab: 'library', mobileIcon: <ClipboardList className="w-5 h-5" />, desktopIcon: <ClipboardList className="w-4 h-4" />, labelKey: 'nav.library' },
+  { tab: 'ai-analysis', mobileIcon: <Bot className="w-5 h-5" />, desktopIcon: <Bot className="w-4 h-4" />, labelKey: 'nav.aiAnalysis' },
+  { tab: 'fitness', mobileIcon: <Dumbbell className="w-5 h-5" />, desktopIcon: <Dumbbell className="w-4 h-4" />, labelKey: 'nav.fitness' },
+  { tab: 'dashboard', mobileIcon: <LayoutDashboard className="w-5 h-5" />, desktopIcon: <LayoutDashboard className="w-4 h-4" />, labelKey: 'nav.dashboard' },
 ];
 
 export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }> = ({ activeTab, onTabChange, showAIBadge }) => {
@@ -40,7 +40,7 @@ export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: Mai
               aria-label={label}
               data-testid={`nav-${tab}`}
               onClick={() => onTabChange(tab)}
-              className={`flex flex-col items-center justify-center py-2.5 px-4 min-h-12 rounded-xl transition-all relative ${activeTab === tab ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 active:text-slate-600'}`}
+              className={`flex flex-col items-center justify-center py-2.5 px-1 min-h-12 rounded-xl transition-all relative ${activeTab === tab ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 active:text-slate-600'}`}
             >
               <div className="relative">
                 {mobileIcon}
@@ -48,6 +48,7 @@ export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: Mai
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900" />
                 )}
               </div>
+              <span className="text-[10px] font-medium mt-0.5 leading-tight truncate max-w-[60px]">{label}</span>
               {activeTab === tab && <div className="absolute -bottom-0.5 w-5 h-0.5 bg-emerald-500 rounded-full" />}
             </button>
           );
