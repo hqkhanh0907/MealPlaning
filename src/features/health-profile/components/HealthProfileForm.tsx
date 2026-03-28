@@ -37,9 +37,10 @@ const ACTIVITY_LEVEL_I18N: Record<ActivityLevel, string> = {
 interface HealthProfileFormProps {
   embedded?: boolean;
   saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
+  blankDefaults?: boolean;
 }
 
-export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps = {}) {
+export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthProfileFormProps = {}) {
   const { t } = useTranslation();
   const db = useDatabase();
   const profile = useHealthProfileStore((s) => s.profile);
@@ -54,17 +55,29 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
   } = useForm<HealthProfileFormData>({
     resolver: zodResolver(healthProfileSchema),
     mode: 'onBlur',
-    defaultValues: {
-      gender: profile.gender,
-      age: profile.age,
-      heightCm: profile.heightCm,
-      weightKg: profile.weightKg,
-      activityLevel: profile.activityLevel,
-      bodyFatPct: profile.bodyFatPct,
-      bmrOverrideEnabled: profile.bmrOverride != null,
-      bmrOverride: profile.bmrOverride,
-      proteinRatio: profile.proteinRatio,
-    },
+    defaultValues: blankDefaults
+      ? {
+          gender: 'male' as const,
+          age: '' as unknown as number,
+          heightCm: '' as unknown as number,
+          weightKg: '' as unknown as number,
+          activityLevel: 'moderate' as const,
+          bodyFatPct: undefined,
+          bmrOverrideEnabled: false,
+          bmrOverride: undefined,
+          proteinRatio: '' as unknown as number,
+        }
+      : {
+          gender: profile.gender,
+          age: profile.age,
+          heightCm: profile.heightCm,
+          weightKg: profile.weightKg,
+          activityLevel: profile.activityLevel,
+          bodyFatPct: profile.bodyFatPct,
+          bmrOverrideEnabled: profile.bmrOverride != null,
+          bmrOverride: profile.bmrOverride,
+          proteinRatio: profile.proteinRatio,
+        },
   });
 
   const [saved, setSaved] = useState(false);

@@ -135,7 +135,7 @@ export function AppOnboarding() {
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 pb-32">
-            <HealthProfileForm embedded saveRef={saveRef} />
+            <HealthProfileForm embedded saveRef={saveRef} blankDefaults />
           </div>
 
           <div className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
