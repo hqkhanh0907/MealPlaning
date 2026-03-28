@@ -202,7 +202,7 @@ export function ExerciseSelector({
         </div>
 
         {/* Muscle group chips */}
-        <div className="px-4 pb-3 overflow-x-auto">
+        <div className="px-4 pb-3 overflow-x-auto shrink-0">
           <div className="flex gap-2 min-w-max" data-testid="muscle-group-chips">
             <button
               type="button"
