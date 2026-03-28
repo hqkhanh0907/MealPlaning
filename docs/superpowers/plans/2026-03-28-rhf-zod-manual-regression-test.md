@@ -314,7 +314,7 @@ Tap Fitness → Workout sub-tab → ensure Strength mode selected. Verify logger
 
 - [ ] **Step 5: Execute MOBILE tests (TC_WL_M01–M05)**
 
-- Weight snap-back, ±button touch, RPE scroll, timer smooth, haptic (conditional)
+- Weight snap-back, ±button touch, RPE scroll, timer smooth, haptic (conditional — non-blocking per spec)
 
 - [ ] **Step 6: Execute STATE tests (TC_WL_ST01–ST04)**
 
@@ -451,7 +451,8 @@ FROM bug_reports GROUP BY severity;
 - [ ] 0 Console errors on Android DevTools
 - [ ] 0 Network errors
 - [ ] 0 snap-back bugs (BUG-002 regression = 0)
-- [ ] 231/231 unit tests pass
+- [ ] Touch targets ≥44px on all interactive elements (MOBILE TCs)
+- [ ] All unit tests pass (query actual count, expect 231+)
 - [ ] ESLint clean (no eslint-disable)
 - [ ] Coverage not decreased
 
