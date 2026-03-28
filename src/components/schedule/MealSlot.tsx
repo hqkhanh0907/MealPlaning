@@ -62,7 +62,7 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
-            <span className="text-xs text-slate-400 dark:text-slate-500">{t('quickPreview.empty')}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{t('quickPreview.empty')}</span>
           </div>
         </div>
         <button
@@ -86,7 +86,7 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2">
           <MealIcon className="size-5 shrink-0" aria-hidden="true" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             {label}
           </span>
         </div>
@@ -111,12 +111,12 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
               </span>
               {onUpdateServings && (
                 <div className="flex items-center gap-1 shrink-0">
-                  <button type="button" data-testid={`btn-serving-minus-${d.id}`} onClick={() => handleServingChange(d.id, -1)} disabled={s <= 1} aria-label={`${t('common.decrease')} ${getLocalizedField(d.name, lang)}`} className="w-5 h-5 rounded flex items-center justify-center text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-all">
-                    <Minus className="w-3 h-3" />
+                  <button type="button" data-testid={`btn-serving-minus-${d.id}`} onClick={() => handleServingChange(d.id, -1)} disabled={s <= 1} aria-label={`${t('common.decrease')} ${getLocalizedField(d.name, lang)}`} className="min-h-11 min-w-11 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 disabled:opacity-30 transition-all active:scale-[0.98]">
+                    <Minus className="w-4 h-4" />
                   </button>
                   <span data-testid={`serving-count-${d.id}`} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 min-w-[18px] text-center">{s}x</span>
-                  <button type="button" data-testid={`btn-serving-plus-${d.id}`} onClick={() => handleServingChange(d.id, 1)} disabled={s >= 10} aria-label={`${t('common.increase')} ${getLocalizedField(d.name, lang)}`} className="w-5 h-5 rounded flex items-center justify-center text-slate-400 hover:text-emerald-500 disabled:opacity-30 transition-all">
-                    <Plus className="w-3 h-3" />
+                  <button type="button" data-testid={`btn-serving-plus-${d.id}`} onClick={() => handleServingChange(d.id, 1)} disabled={s >= 10} aria-label={`${t('common.increase')} ${getLocalizedField(d.name, lang)}`} className="min-h-11 min-w-11 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 disabled:opacity-30 transition-all active:scale-[0.98]">
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
               )}
@@ -124,14 +124,14 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
           );
         })}
         {extraCount > 0 && (
-          <span className="text-xs text-slate-400 dark:text-slate-500 ml-5.5">
+          <span className="text-xs text-slate-500 dark:text-slate-400 ml-5.5">
             {t('quickPreview.more', { count: extraCount })}
           </span>
         )}
       </div>
 
       <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-50 dark:border-slate-700">
-        <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded uppercase">
+        <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded uppercase">
           {Math.round(slot.calories)} kcal
         </span>
         <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded uppercase">

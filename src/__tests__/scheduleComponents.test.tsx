@@ -158,6 +158,21 @@ describe('MealSlot', () => {
     expect(screen.getByTestId('btn-serving-minus-d1')).toBeInTheDocument();
   });
 
+  it('serving buttons meet WCAG touch target minimum', () => {
+    render(
+      <MealSlot
+        type="breakfast" slot={makeSlot(['d1'], 400, 20)} dishes={dishes}
+        onEdit={vi.fn()} servings={{}} onUpdateServings={vi.fn()}
+      />,
+    );
+    const plusBtn = screen.getByTestId('btn-serving-plus-d1');
+    const minusBtn = screen.getByTestId('btn-serving-minus-d1');
+    expect(plusBtn.className).toContain('min-h-11');
+    expect(plusBtn.className).toContain('min-w-11');
+    expect(minusBtn.className).toContain('min-h-11');
+    expect(minusBtn.className).toContain('min-w-11');
+  });
+
   it('does not render serving stepper when onUpdateServings is absent', () => {
     render(
       <MealSlot
