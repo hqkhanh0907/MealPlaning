@@ -463,7 +463,10 @@ export function WorkoutLogger({
                       onChange={(e) => {
                         const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
                         const cur = getValues(key) ?? { ...setInputDefaults };
-                        setValue(key, { ...cur, weight: Number(e.target.value) });
+                        setValue(key, {
+                          ...cur,
+                          weight: Math.max(0, Number(e.target.value)),
+                        });
                       }}
                       className="w-20 text-center font-semibold text-slate-800"
                       data-testid={`weight-input-${exercise.id}`}

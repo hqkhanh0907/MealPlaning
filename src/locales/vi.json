@@ -771,6 +771,7 @@
       "emptySubtitle": "Bắt đầu tập để xem lịch sử tại đây",
       "today": "Hôm nay",
       "yesterday": "Hôm qua",
+      "daysAgo": "{{count}} ngày trước",
       "all": "Tất cả",
       "strength": "Sức mạnh",
       "cardio": "Cardio",
@@ -811,7 +812,17 @@
       "pause": "Tạm dừng",
       "save": "Lưu",
       "manual": "Nhập thủ công",
-      "stopwatch": "Đồng hồ bấm giờ"
+      "stopwatch": "Đồng hồ bấm giờ",
+      "running": "Chạy bộ",
+      "cycling": "Đạp xe",
+      "swimming": "Bơi lội",
+      "hiit": "HIIT",
+      "walking": "Đi bộ",
+      "elliptical": "Máy elip",
+      "rowing": "Chèo thuyền",
+      "low": "Thấp",
+      "moderate": "Trung bình",
+      "high": "Cao"
     },
     "editor": {
       "title": "Chỉnh sửa set",

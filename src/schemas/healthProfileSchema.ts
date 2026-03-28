@@ -13,26 +13,41 @@ const ACTIVITY_LEVEL_VALUES = [
 export const healthProfileSchema = z
   .object({
     gender: z.enum(GENDER_VALUES),
-    age: z.coerce.number().min(10).max(100),
-    heightCm: z.coerce.number().min(100).max(250),
-    weightKg: z.coerce.number().min(30).max(300),
+    age: z.coerce
+      .number()
+      .min(10, { message: 'Tuổi tối thiểu là 10' })
+      .max(100, { message: 'Tuổi tối đa là 100' }),
+    heightCm: z.coerce
+      .number()
+      .min(100, { message: 'Chiều cao tối thiểu là 100 cm' })
+      .max(250, { message: 'Chiều cao tối đa là 250 cm' }),
+    weightKg: z.coerce
+      .number()
+      .min(30, { message: 'Cân nặng tối thiểu là 30 kg' })
+      .max(300, { message: 'Cân nặng tối đa là 300 kg' }),
     bodyFatPct: z.coerce
       .number()
-      .min(3)
-      .max(60)
+      .min(3, { message: 'Tỉ lệ mỡ tối thiểu là 3%' })
+      .max(60, { message: 'Tỉ lệ mỡ tối đa là 60%' })
       .optional()
       .or(z.literal('')),
     activityLevel: z.enum(ACTIVITY_LEVEL_VALUES),
     bmrOverrideEnabled: z.boolean(),
-    bmrOverride: z.coerce.number().positive().optional(),
-    proteinRatio: z.coerce.number().min(0.8).max(4),
+    bmrOverride: z.coerce
+      .number()
+      .positive({ message: 'BMR phải là số dương' })
+      .optional(),
+    proteinRatio: z.coerce
+      .number()
+      .min(0.8, { message: 'Tỉ lệ protein tối thiểu là 0.8 g/kg' })
+      .max(4, { message: 'Tỉ lệ protein tối đa là 4 g/kg' }),
   })
   .refine(
     (data) =>
       !data.bmrOverrideEnabled ||
       (data.bmrOverride !== undefined && data.bmrOverride > 0),
     {
-      message: 'BMR override is required when enabled',
+      message: 'Vui lòng nhập giá trị BMR khi bật ghi đè',
       path: ['bmrOverride'],
     },
   );

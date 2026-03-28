@@ -256,16 +256,23 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               <Controller
                 name="manualDuration"
                 control={control}
-                render={({ field }) => (
-                  <Input
-                    type="number"
-                    value={field.value}
-                    onChange={(e) => field.onChange(parseNumericInput(e.target.value))}
-                    onBlur={field.onBlur}
-                    className="w-full text-center text-lg font-semibold text-slate-800"
-                    data-testid="manual-duration-input"
-                    min={0}
-                  />
+                render={({ field, fieldState }) => (
+                  <>
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(e) => field.onChange(parseNumericInput(e.target.value))}
+                      onBlur={field.onBlur}
+                      className="w-full text-center text-lg font-semibold text-slate-800"
+                      data-testid="manual-duration-input"
+                      min={0}
+                    />
+                    {fieldState.error?.message && (
+                      <p className="mt-1 text-xs text-rose-500" role="alert" aria-live="assertive">
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -284,20 +291,27 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             <Controller
               name="distanceKm"
               control={control}
-              render={({ field }) => (
-                <Input
-                  type="number"
-                  value={field.value ?? ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    field.onChange(val === '' ? undefined : parseNumericInput(val));
-                  }}
-                  onBlur={field.onBlur}
-                  className="w-full text-center text-lg font-semibold text-slate-800"
-                  data-testid="distance-input"
-                  min={0}
-                  step={0.1}
-                />
+              render={({ field, fieldState }) => (
+                <>
+                  <Input
+                    type="number"
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(val === '' ? undefined : parseNumericInput(val));
+                    }}
+                    onBlur={field.onBlur}
+                    className="w-full text-center text-lg font-semibold text-slate-800"
+                    data-testid="distance-input"
+                    min={0}
+                    step={0.1}
+                  />
+                  {fieldState.error?.message && (
+                    <p className="mt-1 text-xs text-rose-500" role="alert" aria-live="assertive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
               )}
             />
           </section>
@@ -311,19 +325,26 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
           <Controller
             name="avgHeartRate"
             control={control}
-            render={({ field }) => (
-              <Input
-                type="number"
-                value={field.value ?? ''}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  field.onChange(val === '' ? undefined : parseNumericInput(val));
-                }}
-                onBlur={field.onBlur}
-                className="w-full text-center text-lg font-semibold text-slate-800"
-                data-testid="heart-rate-input"
-                min={0}
-              />
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  type="number"
+                  value={field.value ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    field.onChange(val === '' ? undefined : parseNumericInput(val));
+                  }}
+                  onBlur={field.onBlur}
+                  className="w-full text-center text-lg font-semibold text-slate-800"
+                  data-testid="heart-rate-input"
+                  min={0}
+                />
+                {fieldState.error?.message && (
+                  <p className="mt-1 text-xs text-rose-500" role="alert" aria-live="assertive">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
             )}
           />
         </section>

@@ -82,11 +82,17 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
   const bmr = useMemo(() => {
     if (watchedBmrOverrideEnabled && watchedBmrOverride)
       return watchedBmrOverride;
-    return calculateBMR(
-      watchedWeightKg,
-      watchedHeightCm,
-      watchedAge,
-      watchedGender,
+    const isValid =
+      watchedWeightKg >= 30 &&
+      watchedWeightKg <= 300 &&
+      watchedHeightCm >= 100 &&
+      watchedHeightCm <= 250 &&
+      watchedAge >= 10 &&
+      watchedAge <= 100;
+    if (!isValid) return 0;
+    return Math.max(
+      0,
+      calculateBMR(watchedWeightKg, watchedHeightCm, watchedAge, watchedGender),
     );
   }, [
     watchedBmrOverrideEnabled,

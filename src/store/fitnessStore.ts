@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { DatabaseService } from '../services/databaseService';
+import { EXERCISES } from '../features/fitness/data/exerciseDatabase';
 import type {
   TrainingProfile,
   TrainingPlan,
@@ -183,6 +184,30 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             );
             for (const s of sets) {
+              const seed = EXERCISES.find((e) => e.id === s.exerciseId);
+              if (seed) {
+                await _db!.execute(
+                  `INSERT OR IGNORE INTO exercises
+                     (id, name_vi, name_en, muscle_group, secondary_muscles, category,
+                      equipment, contraindicated, exercise_type,
+                      default_reps_min, default_reps_max, is_custom, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
+                  [
+                    seed.id,
+                    seed.nameVi,
+                    seed.nameEn,
+                    seed.muscleGroup,
+                    JSON.stringify(seed.secondaryMuscles),
+                    seed.category,
+                    JSON.stringify(seed.equipment),
+                    JSON.stringify(seed.contraindicated),
+                    seed.exerciseType,
+                    seed.defaultRepsMin,
+                    seed.defaultRepsMax,
+                    new Date().toISOString(),
+                  ],
+                );
+              }
               await _db!.execute(
                 `INSERT INTO workout_sets
                    (id, workout_id, exercise_id, set_number, reps, weight_kg, rpe, rest_seconds,
