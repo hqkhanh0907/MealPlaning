@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
@@ -256,12 +257,12 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                 name="manualDuration"
                 control={control}
                 render={({ field }) => (
-                  <input
+                  <Input
                     type="number"
                     value={field.value}
                     onChange={(e) => field.onChange(parseNumericInput(e.target.value))}
                     onBlur={field.onBlur}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                    className="w-full text-center text-lg font-semibold text-slate-800"
                     data-testid="manual-duration-input"
                     min={0}
                   />
@@ -284,7 +285,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               name="distanceKm"
               control={control}
               render={({ field }) => (
-                <input
+                <Input
                   type="number"
                   value={field.value ?? ''}
                   onChange={(e) => {
@@ -292,7 +293,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                     field.onChange(val === '' ? undefined : parseNumericInput(val));
                   }}
                   onBlur={field.onBlur}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                  className="w-full text-center text-lg font-semibold text-slate-800"
                   data-testid="distance-input"
                   min={0}
                   step={0.1}
@@ -311,7 +312,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             name="avgHeartRate"
             control={control}
             render={({ field }) => (
-              <input
+              <Input
                 type="number"
                 value={field.value ?? ''}
                 onChange={(e) => {
@@ -319,7 +320,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                   field.onChange(val === '' ? undefined : parseNumericInput(val));
                 }}
                 onBlur={field.onBlur}
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                className="w-full text-center text-lg font-semibold text-slate-800"
                 data-testid="heart-rate-input"
                 min={0}
               />

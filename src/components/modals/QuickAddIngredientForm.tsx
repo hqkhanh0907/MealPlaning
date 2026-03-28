@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, X, Loader2, Sparkles } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ingredient, SupportedLang } from '../../types';
@@ -133,7 +134,7 @@ const QuickAddIngredientFormInner: React.FC<QuickAddIngredientFormProps> = ({ on
             name="qaName"
             control={control}
             render={({ field }) => (
-              <input
+              <Input
                 ref={field.ref}
                 id="qa-name"
                 name="qa-name"
@@ -142,7 +143,7 @@ const QuickAddIngredientFormInner: React.FC<QuickAddIngredientFormProps> = ({ on
                 onChange={e => { field.onChange(e.target.value); if (errors.qaName) clearErrors('qaName'); }}
                 onBlur={() => triggerAIFill(field.value, qaUnit.vi)}
                 placeholder={t('dish.quickAddNamePlaceholder')}
-                className={`w-full px-3 py-2 text-sm rounded-xl border ${errors.qaName ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all`}
+                className={`w-full ${errors.qaName ? 'border-rose-500' : ''}`}
               />
             )}
           />

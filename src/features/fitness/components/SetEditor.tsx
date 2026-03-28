@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Minus, Plus, X, Check } from 'lucide-react';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { RPE_OPTIONS, WEIGHT_INCREMENT, REPS_INCREMENT, MIN_WEIGHT_KG, MIN_REPS } from '../constants';
 
 interface SetEditorProps {
@@ -120,13 +121,13 @@ export const SetEditor = React.memo(function SetEditor({
             >
               <Minus className="h-5 w-5" aria-hidden="true" />
             </Button>
-            <input
+            <Input
               type="number"
               value={weight}
               onChange={handleWeightInput}
               min={MIN_WEIGHT_KG}
               step={WEIGHT_INCREMENT}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 text-center text-base font-semibold tabular-nums text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="w-full text-center font-semibold tabular-nums text-slate-800"
               data-testid="weight-input"
             />
             <Button
@@ -179,13 +180,13 @@ export const SetEditor = React.memo(function SetEditor({
             >
               <Minus className="h-5 w-5" aria-hidden="true" />
             </Button>
-            <input
+            <Input
               type="number"
               value={reps}
               onChange={handleRepsInput}
               min={MIN_REPS}
               step={REPS_INCREMENT}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 text-center text-base font-semibold tabular-nums text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="w-full text-center font-semibold tabular-nums text-slate-800"
               data-testid="reps-input"
             />
             <Button

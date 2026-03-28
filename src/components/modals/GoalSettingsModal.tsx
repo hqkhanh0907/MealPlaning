@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Target, Zap } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
@@ -95,14 +96,14 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
           <div>
             <label htmlFor="goal-weight" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('goalSettings.weight')}</label>
             <div className="relative">
-              <input
+              <Input
                 id="goal-weight"
                 type="number" min="1" max="500" step="1" inputMode="numeric"
                 value={weightStr}
                 onChange={(e) => { const v = e.target.value; setWeightStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 1) onUpdateProfile({ ...userProfile, weight: n }); }}
                 onBlur={() => { if (weightStr.trim() === '' || Number.isNaN(Number.parseFloat(weightStr))) setWeightStr(String(userProfile.weight)); }}
                 data-testid="input-goal-weight"
-                className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-base sm:text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
+                className="w-full pl-4 pr-12 font-bold text-lg text-slate-800"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-medium">kg</span>
             </div>
@@ -117,14 +118,14 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             </div>
             <div className="space-y-3">
               <div className="relative">
-                <input
+                <Input
                   id="goal-protein"
                   type="number" step="0.1" min="1" max="5" inputMode="decimal"
                   value={proteinStr}
                   onChange={(e) => { const v = e.target.value; setProteinStr(v); const raw = Number.parseFloat(v); if (!Number.isNaN(raw) && raw >= 0.1) { const rounded = Math.round(Math.max(1, raw) * 10) / 10; onUpdateProfile({ ...userProfile, proteinRatio: rounded }); } }}
                   onBlur={() => { if (proteinStr.trim() === '' || Number.isNaN(Number.parseFloat(proteinStr))) setProteinStr(String(userProfile.proteinRatio)); }}
                   data-testid="input-goal-protein"
-                  className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
+                  className="w-full pl-4 pr-16 font-bold text-lg text-slate-800"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-medium">{t('goalSettings.perKg')}</span>
               </div>
@@ -149,14 +150,14 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
           <div>
             <label htmlFor="goal-calories" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('goalSettings.caloriesGoal')}</label>
             <div className="relative">
-              <input
+              <Input
                 id="goal-calories"
                 type="number" min="100" max="10000" step="1" inputMode="numeric"
                 value={caloriesStr}
                 onChange={(e) => { const v = e.target.value; setCaloriesStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 100) onUpdateProfile({ ...userProfile, targetCalories: n }); }}
                 onBlur={() => { if (caloriesStr.trim() === '' || Number.isNaN(Number.parseFloat(caloriesStr))) setCaloriesStr(String(userProfile.targetCalories)); }}
                 data-testid="input-goal-calories"
-                className="w-full pl-4 pr-16 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-700"
+                className="w-full pl-4 pr-16 font-bold text-lg text-slate-800"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-medium">kcal</span>
             </div>

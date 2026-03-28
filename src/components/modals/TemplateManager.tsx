@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Pencil, Trash2, BookTemplate, Search, Tag } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { MealTemplate, Dish, SupportedLang } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -108,14 +109,14 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
               <div className="space-y-2">
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
+                  <Input
                     data-testid="input-template-search"
                     type="text"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder={t('template.searchPlaceholder')}
                     aria-label={t('template.searchPlaceholder')}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                    className="w-full pl-9 pr-4 text-slate-800"
                   />
                 </div>
                 {allTags.length > 0 && (
@@ -157,12 +158,12 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                 >
                   {renamingId === template.id ? (
                     <div className="flex items-center gap-2 mb-3">
-                      <input
+                      <Input
                         type="text"
                         value={renameValue}
                         onChange={e => setRenameValue(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { confirmRename(); } else if (e.key === 'Escape') { cancelRename(); } }}
-                        className="flex-1 px-3 py-2 rounded-lg border border-emerald-300 dark:border-emerald-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="flex-1 text-slate-800 border-emerald-300"
                         data-testid="template-rename-input"
                         aria-label={t('template.rename')}
                         autoFocus

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Plus, LayoutGrid, List } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Input } from '@/components/ui/input';
 
 export type ViewLayout = 'grid' | 'list';
 
@@ -40,7 +41,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
     <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
       <div className="relative w-full sm:w-80">
         <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input
+        <Input
           type="text"
           id={searchTestId || 'list-search'}
           name={searchTestId || 'list-search'}
@@ -48,7 +49,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
           placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-emerald-500 outline-none bg-white dark:bg-slate-800 dark:text-slate-100 shadow-sm text-base sm:text-sm"
+          className="w-full pl-10 pr-4 shadow-sm"
           {...(searchTestId ? { 'data-testid': searchTestId } : {})}
         />
       </div>

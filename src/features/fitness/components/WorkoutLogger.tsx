@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import { RestTimer } from './RestTimer';
 import { ExerciseSelector } from './ExerciseSelector';
 import { WorkoutSummaryCard } from './WorkoutSummaryCard';
@@ -454,7 +455,7 @@ export function WorkoutLogger({
                     >
                       −
                     </Button>
-                    <input
+                    <Input
                       type="number"
                       value={input.weight}
                       onChange={(e) => {
@@ -462,7 +463,7 @@ export function WorkoutLogger({
                         const cur = getValues(key) ?? { ...setInputDefaults };
                         setValue(key, { ...cur, weight: Number(e.target.value) });
                       }}
-                      className="w-20 rounded-lg border border-slate-200 bg-white py-2 text-center text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                      className="w-20 text-center font-semibold text-slate-800"
                       data-testid={`weight-input-${exercise.id}`}
                     />
                     <Button
@@ -482,7 +483,7 @@ export function WorkoutLogger({
                     <span className="w-16 text-xs text-slate-500">
                       {t('fitness.logger.reps')}
                     </span>
-                    <input
+                    <Input
                       type="number"
                       value={input.reps ?? 0}
                       onChange={(e) => {
@@ -490,7 +491,7 @@ export function WorkoutLogger({
                         const cur = getValues(key) ?? { ...setInputDefaults };
                         setValue(key, { ...cur, reps: Math.max(0, Number(e.target.value)) });
                       }}
-                      className="w-20 rounded-lg border border-slate-200 bg-white py-2 text-center text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                      className="w-20 text-center font-semibold text-slate-800"
                       data-testid={`reps-input-${exercise.id}`}
                     />
                   </div>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Ingredient, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 
@@ -122,7 +123,7 @@ export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewPr
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <input
+                  <Input
                     type="number"
                     inputMode="numeric"
                     min="0"
@@ -131,7 +132,7 @@ export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewPr
                     onChange={e => handleAmountChange(index, e.target.value)}
                     data-testid={`ai-suggest-amount-${index}`}
                     aria-label={`${t('ingredient.quantity')} ${item.suggestion.name}`}
-                    className="w-16 px-2 py-1 text-sm text-center rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all"
+                    className="w-16 text-center"
                   />
                   <span className="text-xs text-slate-400 dark:text-slate-500">{item.suggestion.unit}</span>
                 </div>

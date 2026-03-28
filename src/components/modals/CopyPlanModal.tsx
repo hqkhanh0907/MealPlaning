@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Copy, Plus, Trash2, ChefHat } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { DayPlan, Dish, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
@@ -184,12 +185,12 @@ export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, source
           {/* Custom date input */}
           {showCustomInput && (
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 type="date"
                 onChange={handleAddDate}
                 min={addDays(sourceDate, 1)}
                 aria-label={t('copyPlan.selectDate')}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 min-h-11"
+                className="flex-1 text-slate-800 min-h-11"
               />
               <Plus className="w-5 h-5 text-slate-400" />
             </div>

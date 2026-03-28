@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Scale, Check, Minus, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { calculateMovingAverage } from '../../dashboard/hooks/useFeedbackLoop';
@@ -260,7 +261,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             <Minus className="h-4 w-4" />
           </button>
 
-          <input
+          <Input
             type="number"
             data-testid="weight-input"
             aria-label={t('fitness.weight.todayWeight')}
@@ -270,7 +271,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             value={inputValue || ''}
             onChange={handleInputChange}
             style={{ fontVariantNumeric: 'tabular-nums' }}
-            className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-lg font-bold text-slate-800 outline-none transition-colors focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+            className="w-16 text-center text-lg font-bold text-slate-800"
           />
 
           <span className="text-xs text-slate-500 dark:text-slate-400">

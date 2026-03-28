@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useController, type Control, type FieldValues, type Path } from 'react-hook-form';
 import { parseNumericInput } from '../../features/fitness/utils/parseNumericInput';
+import { Input } from '@/components/ui/input';
 
 interface StringNumberControllerProps<T extends FieldValues> {
   name: Path<T>;
@@ -116,7 +117,7 @@ function StringNumberControllerInner<T extends FieldValues>(
           {label}
         </label>
       )}
-      <input
+      <Input
         ref={ref}
         id={testId ?? name}
         data-testid={testId}
@@ -131,7 +132,7 @@ function StringNumberControllerInner<T extends FieldValues>(
         aria-label={ariaLabel ?? label}
         className={
           className ??
-          'w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 min-h-[44px]'
+          'w-full text-slate-800 min-h-[44px]'
         }
       />
     </>

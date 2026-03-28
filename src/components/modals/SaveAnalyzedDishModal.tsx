@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Save, Loader2, Sparkles } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { AnalyzedDishResult, SaveAnalyzedDishPayload, MealType } from '../../types';
 import { suggestIngredientInfo } from '../../services/geminiService';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -171,12 +172,12 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                     name="name"
                     control={control}
                     render={({ field }) => (
-                      <input
+                      <Input
                         id="ai-dish-name"
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                        className="w-full"
                       />
                     )}
                   />
@@ -287,12 +288,12 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         name={`ingredients.${idx}.name`}
                         control={control}
                         render={({ field: nameField }) => (
-                          <input
+                          <Input
                             id={`ai-ing-name-${idx}`}
                             value={nameField.value}
                             onChange={nameField.onChange}
                             onBlur={nameField.onBlur}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                            className="w-full"
                           />
                         )}
                       />

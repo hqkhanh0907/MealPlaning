@@ -1,6 +1,7 @@
 import React from 'react';
 import { Loader2, Image as ImageIcon, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AnalyzedDishResult, AnalyzedIngredient } from '../types';
 import { toTempIngredient, calculateIngredientNutrition } from '../utils/nutrition';
 
@@ -13,27 +14,27 @@ interface AnalysisResultViewProps {
 const AnalysisSkeleton: React.FC = () => {
   const { t } = useTranslation();
   return (
-  <div className="space-y-6 animate-pulse">
+  <div className="space-y-6">
     <div>
-      <div className="h-7 bg-slate-200 dark:bg-slate-700 rounded-lg w-2/3 mb-3" />
-      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full mb-1.5" />
-      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-4/5" />
+      <Skeleton className="h-7 rounded-lg w-2/3 mb-3" />
+      <Skeleton className="h-4 w-full mb-1.5" />
+      <Skeleton className="h-4 w-4/5" />
     </div>
     <div className="grid grid-cols-2 gap-4">
       {['skeleton-cal', 'skeleton-pro', 'skeleton-carb', 'skeleton-fat'].map((id) => (
         <div key={id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-600 shadow-sm">
-          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-16 mb-2" />
-          <div className="h-7 bg-slate-200 dark:bg-slate-700 rounded w-20" />
+          <Skeleton className="h-3 w-16 mb-2" />
+          <Skeleton className="h-7 w-20" />
         </div>
       ))}
     </div>
     <div>
-      <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-48 mb-3" />
+      <Skeleton className="h-5 w-48 mb-3" />
       <div className="space-y-2">
         {['skeleton-ing-1', 'skeleton-ing-2', 'skeleton-ing-3'].map((id) => (
           <div key={id} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-600 flex justify-between">
-            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24" />
-            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
           </div>
         ))}
       </div>

@@ -5,6 +5,7 @@ import { DayPlan, Dish, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { Input } from '@/components/ui/input';
 
 interface SaveTemplateModalProps {
   currentPlan: DayPlan;
@@ -99,7 +100,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
         <div className="p-6 sm:p-8 space-y-5 overflow-y-auto">
           <div>
             <label htmlFor="template-name" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('template.saveName')}</label>
-            <input
+            <Input
               id="template-name"
               data-testid="input-template-name"
               type="text"
@@ -110,11 +111,11 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
               maxLength={MAX_NAME_LENGTH}
               placeholder={t('template.namePlaceholder')}
               autoFocus
-              className={`w-full px-4 py-3 rounded-xl border-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all min-h-12 ${
+              className={`w-full border-2 text-slate-800 min-h-12 ${
                 touched && !isValid
-                  ? 'border-rose-300 dark:border-rose-600 focus:border-rose-500'
-                  : 'border-slate-200 dark:border-slate-600 focus:border-emerald-500'
-              } focus:outline-none`}
+                  ? 'border-rose-300'
+                  : ''
+              }`}
             />
             <div className="flex items-center justify-between mt-1.5">
               {touched && !isValid ? (
@@ -140,7 +141,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
                 </span>
               ))}
             </div>
-            <input
+            <Input
               data-testid="input-template-tag"
               type="text"
               value={tagInput}
@@ -148,7 +149,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
               onKeyDown={handleTagKeyDown}
               placeholder={t('template.tagPlaceholder')}
               aria-label={t('template.tags')}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+              className="w-full text-slate-800"
             />
             <div className="flex flex-wrap gap-1.5 mt-2">
               {PRESET_TAGS.filter(pt => !selectedTags.includes(pt)).map(pt => (

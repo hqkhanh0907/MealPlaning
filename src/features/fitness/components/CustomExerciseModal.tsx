@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { Input } from '@/components/ui/input';
 import type { MuscleGroup, ExerciseCategory } from '../types';
 
 export interface CustomExerciseFormData {
@@ -91,12 +92,12 @@ export function CustomExerciseModal({
           {t('fitness.exerciseSelector.addCustom')}
         </h3>
         <div className="mt-4 space-y-3">
-          <input
+          <Input
             value={form.name}
             onChange={handleNameChange}
             placeholder={t('fitness.exerciseSelector.customName')}
             data-testid="custom-exercise-name"
-            className="w-full rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            className="w-full"
           />
           <select
             value={form.muscleGroup}
@@ -129,12 +130,12 @@ export function CustomExerciseModal({
               {t('fitness.exerciseSelector.cardioCategory')}
             </option>
           </select>
-          <input
+          <Input
             value={form.equipment}
             onChange={handleEquipmentChange}
             placeholder={t('fitness.exerciseSelector.equipment')}
             data-testid="custom-exercise-equipment"
-            className="w-full rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            className="w-full"
           />
         </div>
         <div className="mt-4 flex gap-3">

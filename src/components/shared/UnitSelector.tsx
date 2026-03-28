@@ -13,6 +13,7 @@
  */
 import React, { useState } from 'react';
 import { COMMON_UNITS } from '../../data/units';
+import { Input } from '@/components/ui/input';
 
 const CUSTOM_VALUE = '__custom__';
 
@@ -132,14 +133,14 @@ export const UnitSelector: React.FC<UnitSelectorProps> = (props) => {
 
       {/* Free-text input shown only when "Khác..." is selected */}
       {selectVal === CUSTOM_VALUE && (
-        <input
+        <Input
           type="text"
           value={customText}
           onChange={handleCustomChange}
           onBlur={onBlur}
           placeholder="Nhập đơn vị tuỳ chỉnh..."
           data-testid={testId ? `${testId}-custom` : undefined}
-          className={inputBase + borderClass}
+          className={error ? 'w-full border-rose-500' : 'w-full'}
           autoFocus
         />
       )}

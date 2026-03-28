@@ -9,6 +9,7 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { UnitSelector } from '../shared/UnitSelector';
 import { logger } from '../../utils/logger';
+import { Input } from '@/components/ui/input';
 
 interface IngredientEditModalProps {
   /** Ingredient being edited, or null for creating a new ingredient. */
@@ -170,7 +171,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
           <div>
             <label htmlFor="ing-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.ingredientName')}</label>
             <div className="flex gap-2">
-              <input id="ing-name" value={formData.name[lang]} onChange={e => { const val = e.target.value; setFormData(prev => ({ ...prev, name: { ...prev.name, [lang]: val } })); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
+              <Input id="ing-name" value={formData.name[lang]} onChange={e => { const val = e.target.value; setFormData(prev => ({ ...prev, name: { ...prev.name, [lang]: val } })); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined })); }} className={`flex-1 ${formErrors.name ? 'border-rose-500' : ''}`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
               <button type="button" onClick={handleAISearch} disabled={!getLocalizedField(formData.name, lang) || !getLocalizedField(formData.unit, lang) || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" aria-label={getLocalizedField(formData.unit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
                 {isSearchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
               </button>
@@ -196,7 +197,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
               return (
                 <div key={field}>
                   <label htmlFor={`ing-${field}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(formData.unit, lang)}</label>
-                  <input id={`ing-${field}`} name={`ing-${field}`} type="number" step="1" inputMode="numeric" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { setFormData(prev => ({ ...prev, [field]: n })); } if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: undefined })); }} data-testid={`input-ing-${field.replace('Per100', '')}`} className={`w-full px-4 py-2.5 rounded-xl border ${formErrors[field] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
+                  <Input id={`ing-${field}`} name={`ing-${field}`} type="number" step="1" inputMode="numeric" value={numericInputs[field]} onChange={e => { const v = e.target.value; setNumericInputs(prev => ({ ...prev, [field]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { setFormData(prev => ({ ...prev, [field]: n })); } if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: undefined })); }} data-testid={`input-ing-${field.replace('Per100', '')}`} className={`w-full ${formErrors[field] ? 'border-rose-500' : ''}`} />
                   {formErrors[field] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-ing-${field.replace('Per100', '')}`}>{formErrors[field]}</p>}
                 </div>
               );

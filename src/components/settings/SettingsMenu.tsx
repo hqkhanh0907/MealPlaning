@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { useFitnessStore } from '../../store/fitnessStore';
 import { calculateBMR, calculateTDEE } from '../../services/nutritionEngine';
@@ -111,14 +112,14 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps)
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
+        <Input
           type="text"
           data-testid="settings-search"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={t('settings.searchPlaceholder')}
           aria-label={t('settings.searchPlaceholder')}
-          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+          className="w-full pl-10 pr-4 text-slate-800"
         />
       </div>
 

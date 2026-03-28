@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingDown, TrendingUp, Equal, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../store/healthProfileStore';
 import { getCalorieOffset } from '../../../services/nutritionEngine';
@@ -240,7 +241,7 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
         >
           {t('goal.targetWeight')}
         </label>
-        <input
+        <Input
           id="target-weight"
           type="text"
           inputMode="decimal"
@@ -248,7 +249,7 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
           value={targetWeight}
           onChange={handleTargetWeightChange}
           placeholder={t('goal.targetWeightOptional')}
-          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+          className="w-full text-slate-800"
         />
       </div>
 
@@ -295,13 +296,13 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
 
         {/* Custom Offset Input */}
         {manualOverride && (
-          <input
+          <Input
             type="text"
             inputMode="numeric"
             data-testid="custom-offset-input"
             value={customOffset}
             onChange={handleCustomOffsetChange}
-            className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+            className="w-full text-slate-800"
           />
         )}
       </div>

@@ -7,6 +7,7 @@ import {
   Clock,
   StickyNote,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateExerciseVolume } from '../utils/trainingMetrics';
 import { parseDate, getMondayOfWeek } from '../utils/dateUtils';
@@ -178,10 +179,10 @@ function WorkoutHistoryInner(): React.JSX.Element {
           aria-hidden="true"
         >
           {[1, 2, 3].map((i) => (
-            <div
+            <Skeleton
               key={i}
               data-testid={`skeleton-card-${i}`}
-              className="bg-slate-100 dark:bg-slate-800 rounded-xl h-16 animate-pulse"
+              className="h-16 rounded-xl"
             />
           ))}
         </div>

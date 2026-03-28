@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Search, CheckCircle2, ChefHat, SlidersHorizontal } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Dish, Ingredient, MealType, DayPlan, NutritionInfo, SupportedLang, FilterConfig } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { calculateDishNutrition, calculateDishesNutrition } from '../../utils/nutrition';
@@ -243,7 +244,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
+              <Input
                 type="text"
                 id="meal-planner-search"
                 name="meal-planner-search"
@@ -252,7 +253,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 data-testid="input-search-plan"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 dark:text-slate-100 shadow-sm text-base"
+                className="w-full pl-10 pr-4 shadow-sm"
               />
             </div>
             <button
