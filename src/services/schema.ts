@@ -22,6 +22,8 @@ export const SCHEMA_TABLES = new Set([
   'fitness_profiles',
   'fitness_preferences',
   'workout_drafts',
+  'app_settings',
+  'grocery_checked',
 ]);
 
 export async function getSchemaVersion(db: DatabaseService): Promise<number> {
@@ -103,6 +105,7 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       bmr_override REAL,
       protein_ratio REAL NOT NULL DEFAULT 2.0,
       fat_pct REAL NOT NULL DEFAULT 0.25,
+      target_calories INTEGER DEFAULT 1500,
       updated_at TEXT NOT NULL
     )
   `);
@@ -305,6 +308,22 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       start_time TEXT NOT NULL,
       plan_day_id TEXT,
       updated_at TEXT NOT NULL
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS grocery_checked (
+      id TEXT PRIMARY KEY,
+      data TEXT NOT NULL,
+      updated_at TEXT DEFAULT (datetime('now'))
     )
   `);
 

@@ -275,12 +275,9 @@ export async function createV2Export(
   db: DatabaseService,
   legacyData?: Record<string, unknown>,
 ): Promise<V2ExportPayload> {
-  const raw = await db.exportToJSON();
-  const allTables: Record<string, unknown[]> = JSON.parse(raw) as Record<string, unknown[]>;
-
   const tables: Record<string, unknown[]> = {};
   for (const name of SCHEMA_TABLES) {
-    tables[name] = allTables[name] ?? [];
+    tables[name] = await db.query(`SELECT * FROM "${name}"`);
   }
 
   const legacy =

@@ -9,8 +9,8 @@ export interface DatabaseService {
   query<T>(sql: string, params?: unknown[]): Promise<T[]>;
   queryOne<T>(sql: string, params?: unknown[]): Promise<T | null>;
   transaction(fn: () => Promise<void>): Promise<void>;
-  exportToJSON(): Promise<string>;
-  importFromJSON(json: string): Promise<void>;
+  exportBinary(): Uint8Array;
+  importBinary(data: Uint8Array): Promise<void>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -51,12 +51,14 @@ import type initSqlJsType from 'sql.js';
 /* ------------------------------------------------------------------ */
 class WebDatabaseService implements DatabaseService {
   private db: SqlJsDatabase | null = null;
+  private SQL: Awaited<ReturnType<typeof initSqlJsType>> | null = null;
 
   async initialize(): Promise<void> {
     const initSqlJs: typeof initSqlJsType = (await import('sql.js')).default;
     const SQL = await initSqlJs({
       locateFile: (file: string) => `/wasm/${file}`,
     });
+    this.SQL = SQL;
     this.db = new SQL.Database();
   }
 
@@ -115,75 +117,14 @@ class WebDatabaseService implements DatabaseService {
     }
   }
 
-  async exportToJSON(): Promise<string> {
-    const db = this.getDb();
-    const tableResults = db.exec(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-    );
-    if (tableResults.length === 0) return JSON.stringify({});
-
-    const tables: Record<string, unknown[]> = {};
-    for (const row of tableResults[0].values) {
-      const tableName = row[0] as string;
-      const dataResults = db.exec(`SELECT * FROM "${tableName}"`);
-      if (dataResults.length === 0) {
-        tables[tableName] = [];
-        continue;
-      }
-      const { columns, values } = dataResults[0];
-      tables[tableName] = values.map((r) => {
-        const obj: Record<string, unknown> = {};
-        columns.forEach((col, i) => {
-          obj[col] = r[i];
-        });
-        return obj;
-      });
-    }
-    return JSON.stringify(tables);
+  exportBinary(): Uint8Array {
+    return this.getDb().export();
   }
 
-  async importFromJSON(json: string): Promise<void> {
-    const db = this.getDb();
-    let data: Record<string, Record<string, unknown>[]>;
-    try {
-      data = JSON.parse(json) as Record<string, Record<string, unknown>[]>;
-    } catch {
-      throw new Error('importFromJSON: invalid JSON string');
-    }
-
-    db.run('BEGIN TRANSACTION');
-    try {
-      const existingTables = db.exec(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-      );
-      if (existingTables.length > 0) {
-        for (const row of existingTables[0].values) {
-          db.run(`DROP TABLE IF EXISTS "${row[0] as string}"`);
-        }
-      }
-
-      for (const [tableName, rows] of Object.entries(data)) {
-        if (rows.length === 0) continue;
-        const columns = Object.keys(rows[0]);
-        const colDefs = columns.map((c) => `"${c}" TEXT`).join(', ');
-        db.run(`CREATE TABLE "${tableName}" (${colDefs})`);
-        const placeholders = columns.map(() => '?').join(', ');
-        const insertSql = `INSERT INTO "${tableName}" (${columns.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`;
-        for (const row of rows) {
-          db.run(
-            insertSql,
-            columns.map((c) => row[c] as unknown),
-          );
-        }
-      }
-      db.run('COMMIT');
-    } catch (error) {
-      db.run('ROLLBACK');
-      throw new Error(
-        `importFromJSON error: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error },
-      );
-    }
+  async importBinary(data: Uint8Array): Promise<void> {
+    if (!this.SQL) throw new Error('SQL.js not loaded');
+    this.db?.close();
+    this.db = new this.SQL.Database(data);
   }
 }
 
@@ -206,10 +147,10 @@ class NativeDatabaseService implements DatabaseService {
   async transaction(): Promise<void> {
     throw new Error('Not implemented on native platform');
   }
-  async exportToJSON(): Promise<string> {
+  exportBinary(): Uint8Array {
     throw new Error('Not implemented on native platform');
   }
-  async importFromJSON(): Promise<void> {
+  async importBinary(): Promise<void> {
     throw new Error('Not implemented on native platform');
   }
 }
