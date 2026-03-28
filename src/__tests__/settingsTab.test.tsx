@@ -27,6 +27,18 @@ vi.mock('../components/GoogleDriveSync', () => ({
   ),
 }));
 
+vi.mock('../features/health-profile/components/HealthProfileForm', () => ({
+  HealthProfileForm: () => <div data-testid="health-profile-form">HealthProfileForm</div>,
+}));
+
+vi.mock('../features/health-profile/components/GoalPhaseSelector', () => ({
+  GoalPhaseSelector: () => <div data-testid="goal-phase-selector">GoalPhaseSelector</div>,
+}));
+
+vi.mock('../features/fitness/components/TrainingProfileSection', () => ({
+  TrainingProfileSection: () => <div data-testid="training-profile-section">TrainingProfileSection</div>,
+}));
+
 
 
 afterEach(cleanup);

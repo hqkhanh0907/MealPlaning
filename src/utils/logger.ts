@@ -23,7 +23,7 @@ export const logger = {
   /** Verbose output — only emitted in development builds. */
   debug(ctx: LogContext, message: string): void {
     if (import.meta.env.DEV) {
-      console.debug(formatPrefix(ctx), message);
+      console.warn(formatPrefix(ctx), message);
     }
   },
 
@@ -36,7 +36,7 @@ export const logger = {
   },
 
   info(ctx: LogContext, message: string): void {
-    console.info(formatPrefix(ctx), message);
+    console.warn(formatPrefix(ctx), message);
   },
 };
 

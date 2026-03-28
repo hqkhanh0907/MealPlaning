@@ -17,11 +17,11 @@ export interface DatabaseService {
 /*  Key conversion helpers                                              */
 /* ------------------------------------------------------------------ */
 export function snakeToCamel(str: string): string {
-  return str.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+  return str.replaceAll(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
 export function camelToSnake(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  return str.replaceAll(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
 export function rowToType<T>(row: Record<string, unknown>): T {

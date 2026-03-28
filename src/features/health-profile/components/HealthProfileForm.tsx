@@ -61,7 +61,7 @@ export function HealthProfileForm() {
     if (
       !form.proteinRatio ||
       form.proteinRatio < 0.8 ||
-      form.proteinRatio > 4.0
+      form.proteinRatio > 4
     )
       e.proteinRatio = true;
     if (

@@ -89,7 +89,7 @@ export function calculateMacros(
 ): MacroSplit {
   // Priority 1: Protein (use LBM if bodyFatPct available)
   const effectiveWeight =
-    bodyFatPct != null ? weightKg * (1 - bodyFatPct) : weightKg;
+    bodyFatPct == null ? weightKg : weightKg * (1 - bodyFatPct);
   const proteinG = Math.round(effectiveWeight * proteinRatio);
   const proteinCal = proteinG * 4;
 

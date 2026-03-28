@@ -1,0 +1,93 @@
+{
+  "platform_architecture": {
+    "title": "Kiến trúc Thuật toán và Logic Nghiệp vụ Chuyên sâu cho Nền tảng Theo dõi Tập luyện và Sức khỏe Toàn diện",
+    "sections":
+          },
+          "movement_balance_engine": {
+            "patterns":,
+            "ideal_ratio": "1:1 giữa kéo và đẩy mặt phẳng ngang"
+          },
+          "nspi_north_star_progress_index": "Chỉ số tổng hợp đánh giá gia tăng sức mạnh ròng, khối lượng kích thích đạt chuẩn và sự ổn định cơ sinh học"
+        }
+      },
+      {
+        "section": "4. Cơ chế Phục hồi, Tái tạo Sinh lý và Trí tuệ Nhân tạo Phân bổ Tải",
+        "muscle_recovery": {
+          "base_time": "48 - 72 giờ",
+          "modifiers": {
+            "failure_training": "+24 giờ",
+            "large_muscle_group": "+12 giờ",
+            "small_muscle_group": "-12 giờ",
+            "eccentric_focus": "+12 giờ",
+            "poor_nutrition": "+12 đến +24 giờ",
+            "poor_sleep": "+24 giờ",
+            "age_over_40": "+12 giờ"
+          }
+        },
+        "plateau_detection_and_deload": {
+          "triggers":,
+          "actions": {
+            "proactive_deload": "Mỗi 4-6 tuần",
+            "reactive_deload": "Kích hoạt khi thuật toán phát hiện dấu hiệu suy giảm",
+            "deload_adjustments": "Cắt giảm 40-50% khối lượng (số hiệp/reps), giảm 10-20% mức tạ cơ sở"
+          }
+        }
+      },
+      {
+        "section": "5. Chuyển đổi Cơ sinh học, Cardio và Tuổi Thể chất Toàn diện",
+        "cardio_and_biomechanics": {
+          "miles_from_steps": "$$Miles = \\frac{\\text{Số Bước Chân} \\times \\text{Chiều Dài Sải Chân (inches)}}{63360}$$",
+          "calories_from_steps": "$$\\text{Calo Đốt Cháy} = \\text{Số Bước Chân} \\times \\frac{Weight_{lbs} \\times 0.57}{2000}$$",
+          "net_calories_active": "$$\\text{Net Calories} = (MET - 1) \\times Weight_{kg} \\times Duration_{hours}$$"
+        },
+        "fitness_age": {
+          "factors":
+        },
+        "sleep_quality_score": {
+          "duration": "7-9 tiếng (3 điểm), 5-6 tiếng (2 điểm), < 5 tiếng (1 điểm)",
+          "consistency": "Cố định (3 điểm), Lệch 1-2 tiếng (2 điểm), Dao động > 3 tiếng (1 điểm)",
+          "subjective_feeling": "Khỏe khoắn (3 điểm), Bình thường (2 điểm), Mệt mỏi (1 điểm)"
+        },
+        "stretching_time": {
+          "ideal_time_per_muscle": "60 giây",
+          "structure": "Chia nhỏ thành các khoảng giữ tĩnh từ 15-30 giây, lặp lại 2-4 lần"
+        }
+      },
+      {
+        "section": "6. Logic Quản lý Dữ liệu Tập luyện và Thiết kế Hành vi Tâm lý",
+        "workout_logging": {
+          "set_types":,
+          "features":
+        },
+        "gamification": {
+          "grace_period": "Mở rộng ranh giới ngày đến 2:00 hoặc 3:00 sáng",
+          "streak_freeze": "Cho phép bỏ lỡ 1 ngày tập luyện không bị mất chuỗi",
+          "timezone_logic": "Lấy dữ liệu Local Timezone của thiết bị làm chuẩn, không dùng UTC"
+        }
+      },
+      {
+        "section": "7. Kiến trúc Kỹ thuật Mạng, Tích hợp API và Rào cản Bảo mật Tuân thủ Pháp lý",
+        "technical_architecture": {
+          "offline_first": "Lưu trữ nội bộ (SQLite/Room Database), tự động đồng bộ đám mây khi có mạng",
+          "wearables_api": "Tích hợp Apple HealthKit, Google Fit, Garmin Connect, Oura Ring"
+        },
+        "legal_compliance": {
+          "gdpr_hipaa": [
+            "Mã hóa đầu cuối (End-to-End Encryption)",
+            "Giới hạn quyền truy cập",
+            "Quyền được lãng quên"
+          ],
+          "vietnam_pdpl_2026": {
+            "data_classification": "Dữ liệu cá nhân nhạy cảm",
+            "consent": "Tự nguyện, cụ thể, được thông báo đầy đủ, có checkbox tách biệt, có thể rút lại",
+            "penalties": "Phạt hành chính lên tới 5% tổng doanh thu hàng năm hoặc 3 tỷ VNĐ"
+          },
+          "vietnam_data_law_2024": {
+            "cross_border_transfer": "Báo cáo và lập hồ sơ Đánh giá Tác động Chuyển giao Dữ liệu Xuyên biên giới"
+          },
+          "data_handling": "Phân mảnh dữ liệu (data sharding) và ẩn danh hóa (pseudonymization)"
+        }
+      }
+    ]
+  }
+}
