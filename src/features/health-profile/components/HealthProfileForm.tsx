@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../store/healthProfileStore';
@@ -25,7 +25,12 @@ const ACTIVITY_LEVEL_I18N: Record<ActivityLevel, string> = {
   extra_active: 'healthProfile.extraActive',
 };
 
-export function HealthProfileForm() {
+interface HealthProfileFormProps {
+  embedded?: boolean;
+  saveRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+}
+
+export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps = {}) {
   const { t } = useTranslation();
   const db = useDatabase();
   const profile = useHealthProfileStore((s) => s.profile);
@@ -114,6 +119,12 @@ export function HealthProfileForm() {
     setSaved(true);
   }
 
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = handleSave;
+    }
+  });
+
   const inputBase =
     'w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all';
 
@@ -126,9 +137,11 @@ export function HealthProfileForm() {
 
   return (
     <div className="space-y-6" data-testid="health-profile-form">
-      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-        {t('healthProfile.title')}
-      </h3>
+      {!embedded && (
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+          {t('healthProfile.title')}
+        </h3>
+      )}
 
       {/* Gender Toggle */}
       <fieldset>
@@ -432,14 +445,15 @@ export function HealthProfileForm() {
         </div>
       </div>
 
-      {/* Save Button */}
-      <button
-        type="button"
-        onClick={() => void handleSave()}
-        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-all active:scale-[0.98] shadow-sm"
-      >
-        {saved ? t('healthProfile.saved') : t('healthProfile.save')}
-      </button>
+      {!embedded && (
+        <button
+          type="button"
+          onClick={() => void handleSave()}
+          className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-all active:scale-[0.98] shadow-sm"
+        >
+          {saved ? t('healthProfile.saved') : t('healthProfile.save')}
+        </button>
+      )}
     </div>
   );
 }

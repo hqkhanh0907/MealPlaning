@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingDown, TrendingUp, Equal, Check } from 'lucide-react';
 import { useDatabase } from '../../../contexts/DatabaseContext';
@@ -69,7 +69,12 @@ function generateId(): string {
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
-export const GoalPhaseSelector: React.FC = () => {
+interface GoalPhaseSelectorProps {
+  embedded?: boolean;
+  saveRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+}
+
+export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, saveRef } = {}) => {
   const { t } = useTranslation();
   const db = useDatabase();
   const saveGoal = useHealthProfileStore((s) => s.saveGoal);
@@ -149,14 +154,21 @@ export const GoalPhaseSelector: React.FC = () => {
     setSaved(true);
   }, [db, goalType, rateOfChange, targetWeight, effectiveOffset, saveGoal]);
 
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = handleSave;
+    }
+  });
+
   const showRateSelector = goalType !== 'maintain';
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
-      {/* Title */}
-      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-        {t('goal.title')}
-      </h3>
+      {!embedded && (
+        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          {t('goal.title')}
+        </h3>
+      )}
 
       {/* Phase Cards */}
       <div className="grid grid-cols-3 gap-3">
@@ -289,26 +301,27 @@ export const GoalPhaseSelector: React.FC = () => {
         )}
       </div>
 
-      {/* Save Button */}
-      <button
-        type="button"
-        data-testid="save-goal-button"
-        onClick={handleSave}
-        className={`w-full py-3 rounded-xl font-bold text-white transition-all ${
-          saved
-            ? 'bg-emerald-500'
-            : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
-        }`}
-      >
-        {saved ? (
-          <span className="flex items-center justify-center gap-2">
-            <Check className="w-5 h-5" />
-            {t('goal.saved')}
-          </span>
-        ) : (
-          t('goal.save')
-        )}
-      </button>
+      {!embedded && (
+        <button
+          type="button"
+          data-testid="save-goal-button"
+          onClick={handleSave}
+          className={`w-full py-3 rounded-xl font-bold text-white transition-all ${
+            saved
+              ? 'bg-emerald-500'
+              : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
+          }`}
+        >
+          {saved ? (
+            <span className="flex items-center justify-center gap-2">
+              <Check className="w-5 h-5" />
+              {t('goal.saved')}
+            </span>
+          ) : (
+            t('goal.save')
+          )}
+        </button>
+      )}
     </div>
   );
 };

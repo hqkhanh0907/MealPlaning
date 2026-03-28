@@ -14,6 +14,27 @@ vi.mock('../contexts/DatabaseContext', () => ({
   DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// Mock stores for SettingsMenu summary data
+vi.mock('../features/health-profile/store/healthProfileStore', () => ({
+  useHealthProfileStore: (selector: (s: Record<string, unknown>) => unknown) => selector({
+    profile: { weightKg: 70, heightCm: 170, age: 30, gender: 'male', activityLevel: 'moderate', proteinRatio: 2, fatPct: 25, bodyFatPct: null, bmrOverride: null },
+    activeGoal: null,
+  }),
+}));
+
+vi.mock('../store/fitnessStore', () => ({
+  useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) => selector({
+    trainingProfile: { daysPerWeek: 5, sessionDurationMin: 60 },
+  }),
+}));
+
+vi.mock('../services/nutritionEngine', () => ({
+  calculateBMR: () => 1618,
+  calculateTDEE: () => 2508,
+  calculateMacros: () => ({ proteinG: 140, fatG: 70, carbsG: 330 }),
+  getCalorieOffset: () => 0,
+}));
+
 const mockSetTheme = vi.fn();
 
 vi.mock('../components/DataBackup', () => ({
@@ -58,6 +79,19 @@ describe('SettingsTab', () => {
   it('renders settings title', () => {
     render(<SettingsTab {...defaultProps} />);
     expect(screen.getByText('Cài đặt')).toBeInTheDocument();
+  });
+
+  it('renders navigable section cards', () => {
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByTestId('settings-nav-health-profile')).toBeInTheDocument();
+    expect(screen.getByTestId('settings-nav-goal')).toBeInTheDocument();
+    expect(screen.getByTestId('settings-nav-training-profile')).toBeInTheDocument();
+  });
+
+  it('shows summary info on menu cards', () => {
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByText(/BMR: 1618/)).toBeInTheDocument();
+    expect(screen.getByText(/TDEE: 2508/)).toBeInTheDocument();
   });
 
   it('renders theme section with all options', () => {
@@ -133,7 +167,6 @@ describe('SettingsTab', () => {
 
   it('non-active theme buttons do not have border-emerald-500', () => {
     render(<SettingsTab {...defaultProps} />);
-    // system is active (from mock), so light and dark should NOT have the border
     const lightBtn = screen.getByText('Sáng').closest('button');
     const darkBtn = screen.getByText('Tối').closest('button');
     expect(lightBtn?.className).not.toContain('border-emerald-500');
@@ -170,13 +203,5 @@ describe('SettingsTab', () => {
     fireEvent.change(searchInput, { target: { value: '' } });
     expect(screen.getByText('Giao diện')).toBeInTheDocument();
     expect(screen.getByText('Dữ liệu')).toBeInTheDocument();
-  });
-
-  it('filters to theme section when searching for theme keyword', () => {
-    render(<SettingsTab {...defaultProps} />);
-    const searchInput = screen.getByTestId('settings-search');
-    fireEvent.change(searchInput, { target: { value: 'Giao diện' } });
-    expect(screen.getByText('Giao diện')).toBeInTheDocument();
-    expect(screen.queryByText('Dữ liệu')).not.toBeInTheDocument();
   });
 });

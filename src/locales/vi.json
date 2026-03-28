@@ -526,7 +526,12 @@
     "trainingProfileSection": "Hồ sơ tập luyện",
     "trainingProfileDesc": "Thông tin về chế độ tập luyện hiện tại",
     "notConfigured": "Chưa thiết lập",
-    "notConfiguredDesc": "Bạn cần hoàn thành thiết lập tập luyện trước"
+    "notConfiguredDesc": "Bạn cần hoàn thành thiết lập tập luyện trước",
+    "edit": "Chỉnh sửa",
+    "cancel": "Hủy",
+    "back": "Quay lại",
+    "goalNotSet": "Chưa thiết lập mục tiêu",
+    "trainingProfileEditHint": "Để thay đổi hồ sơ tập luyện, vui lòng quay lại tab Tập luyện và chạy lại thiết lập ban đầu."
   },
   "filter": {
     "button": "Lọc",
@@ -975,6 +980,9 @@
     "calorieOffset": "Chênh lệch calories",
     "calorieOffsetAuto": "Tự động",
     "calorieOffsetCustom": "Tùy chỉnh",
+    "conservative": "Chậm",
+    "moderate": "Vừa phải",
+    "aggressive": "Nhanh",
     "save": "Lưu",
     "saved": "Đã lưu"
   },
