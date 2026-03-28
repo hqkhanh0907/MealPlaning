@@ -659,6 +659,7 @@
       "known1rm": "1RM đã biết",
       "knowMyOrm": "Tôi biết 1RM của mình",
       "sleepHours": "Giờ ngủ trung bình",
+      "maxItems": "tối đa {{count}}",
       "start": "Bắt đầu →",
       "daysUnit": "ngày/tuần",
       "minutesUnit": "phút",

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dumbbell, Info } from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 import { TrainingProfileSection } from '../../features/fitness/components/TrainingProfileSection';
+import { TrainingProfileForm } from '../../features/fitness/components/TrainingProfileForm';
 import { useFitnessStore } from '../../store/fitnessStore';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
 
@@ -9,9 +10,15 @@ function TrainingProfileDetailPageInner({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const trainingProfile = useFitnessStore((s) => s.trainingProfile);
+  const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
-  const handleSave = () => {
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (saveRef.current) {
+      const success = await saveRef.current();
+      if (success) {
+        setIsEditing(false);
+      }
+    }
   };
 
   const handleCancel = () => {
@@ -26,19 +33,11 @@ function TrainingProfileDetailPageInner({ onBack }: { onBack: () => void }) {
       hasChanges={isEditing}
       onBack={onBack}
       onEdit={() => setIsEditing(true)}
-      onSave={handleSave}
+      onSave={() => void handleSave()}
       onCancel={handleCancel}
     >
       {isEditing ? (
-        <div className="space-y-4" data-testid="training-profile-edit">
-          <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-            <Info className="w-5 h-5 text-blue-500 shrink-0" />
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              {t('settings.trainingProfileEditHint')}
-            </p>
-          </div>
-          <TrainingProfileSection />
-        </div>
+        <TrainingProfileForm embedded saveRef={saveRef} />
       ) : (
         trainingProfile ? (
           <TrainingProfileSection />
