@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, Sun, Moon, Monitor, Database, Clock, Search, Heart, Target, Dumbbell } from 'lucide-react';
 import { DataBackup } from './DataBackup';
 import { GoogleDriveSync } from './GoogleDriveSync';
+import { DatabaseProvider } from '../contexts/DatabaseContext';
 import { HealthProfileForm } from '../features/health-profile/components/HealthProfileForm';
 import { GoalPhaseSelector } from '../features/health-profile/components/GoalPhaseSelector';
 import { TrainingProfileSection } from '../features/fitness/components/TrainingProfileSection';
@@ -67,36 +68,41 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, theme, s
         />
       </div>
 
-      {/* Health Profile Section */}
-      {visibleSections.has('health-profile') && (
-      <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 sm:p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/30 rounded-xl flex items-center justify-center">
-            <Heart className="w-5 h-5 text-rose-500 dark:text-rose-400" />
+      {/* Health Profile & Goal sections need DatabaseProvider */}
+      {(visibleSections.has('health-profile') || visibleSections.has('goal')) && (
+      <DatabaseProvider>
+        {/* Health Profile Section */}
+        {visibleSections.has('health-profile') && (
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/30 rounded-xl flex items-center justify-center">
+              <Heart className="w-5 h-5 text-rose-500 dark:text-rose-400" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.healthProfileSection')}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.healthProfileDesc')}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.healthProfileSection')}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.healthProfileDesc')}</p>
-          </div>
-        </div>
-        <HealthProfileForm />
-      </section>
-      )}
+          <HealthProfileForm />
+        </section>
+        )}
 
-      {/* Goal Phase Section */}
-      {visibleSections.has('goal') && (
-      <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 sm:p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-            <Target className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+        {/* Goal Phase Section */}
+        {visibleSections.has('goal') && (
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
+              <Target className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.goalSection')}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.goalDesc')}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.goalSection')}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.goalDesc')}</p>
-          </div>
-        </div>
-        <GoalPhaseSelector />
-      </section>
+          <GoalPhaseSelector />
+        </section>
+        )}
+      </DatabaseProvider>
       )}
 
       {/* Training Profile Section */}

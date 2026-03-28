@@ -966,6 +966,9 @@
   },
   "goal": {
     "title": "Mục tiêu",
+    "cut": "Giảm cân",
+    "maintain": "Duy trì",
+    "bulk": "Tăng cân",
     "targetWeight": "Cân nặng mục tiêu",
     "targetWeightOptional": "Cân nặng mục tiêu (tùy chọn)",
     "rateOfChange": "Tốc độ thay đổi",

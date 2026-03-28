@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { SettingsTab } from '../components/SettingsTab';
 
@@ -8,6 +9,10 @@ vi.mock('../contexts/NotificationContext', () => ({
 }));
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 const mockSetTheme = vi.fn();
 
