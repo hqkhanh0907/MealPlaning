@@ -305,7 +305,7 @@ export default function App() {
       </header>
 
       <main id="main-content" className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-8">
-        <div className={activeMainTab === 'calendar' ? 'block animate-fade-in' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} key={activeMainTab} inert={activeMainTab === 'calendar' ? undefined : true}>
+        <div className={activeMainTab === 'calendar' ? 'block animate-fade-in' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} key={`calendar-${activeMainTab}`} inert={activeMainTab === 'calendar' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.calendarTab')}>
           <CalendarTab
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
@@ -331,7 +331,7 @@ export default function App() {
           </ErrorBoundary>
         )}
 
-        <div className={activeMainTab === 'library' ? 'block animate-fade-in' : 'hidden'} role="tabpanel" aria-label={t('nav.library')} key={activeMainTab} inert={activeMainTab === 'library' ? undefined : true}>
+        <div className={activeMainTab === 'library' ? 'block animate-fade-in' : 'hidden'} role="tabpanel" aria-label={t('nav.library')} key={`library-${activeMainTab}`} inert={activeMainTab === 'library' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
           <Suspense fallback={<TabLoadingFallback />}>
           <ManagementTab
