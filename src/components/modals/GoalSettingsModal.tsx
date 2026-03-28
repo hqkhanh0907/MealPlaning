@@ -100,6 +100,7 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <Input
                 id="goal-weight"
                 type="number" min="1" max="500" step="1" inputMode="numeric"
+                autoComplete="off"
                 value={weightStr}
                 onChange={(e) => { const v = e.target.value; setWeightStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 1) onUpdateProfile({ ...userProfile, weight: n }); }}
                 onBlur={() => { if (weightStr.trim() === '' || Number.isNaN(Number.parseFloat(weightStr))) setWeightStr(String(userProfile.weight)); }}
@@ -122,6 +123,7 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
                 <Input
                   id="goal-protein"
                   type="number" step="0.1" min="1" max="5" inputMode="decimal"
+                  autoComplete="off"
                   value={proteinStr}
                   onChange={(e) => { const v = e.target.value; setProteinStr(v); const raw = Number.parseFloat(v); if (!Number.isNaN(raw) && raw >= 0.1) { const rounded = Math.round(Math.max(1, raw) * 10) / 10; onUpdateProfile({ ...userProfile, proteinRatio: rounded }); } }}
                   onBlur={() => { if (proteinStr.trim() === '' || Number.isNaN(Number.parseFloat(proteinStr))) setProteinStr(String(userProfile.proteinRatio)); }}
@@ -154,6 +156,7 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <Input
                 id="goal-calories"
                 type="number" min="100" max="10000" step="1" inputMode="numeric"
+                autoComplete="off"
                 value={caloriesStr}
                 onChange={(e) => { const v = e.target.value; setCaloriesStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 100) onUpdateProfile({ ...userProfile, targetCalories: n }); }}
                 onBlur={() => { if (caloriesStr.trim() === '' || Number.isNaN(Number.parseFloat(caloriesStr))) setCaloriesStr(String(userProfile.targetCalories)); }}

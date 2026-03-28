@@ -45,6 +45,7 @@ export const ListToolbar: React.FC<ListToolbarProps> = ({
           type="text"
           id={searchTestId || 'list-search'}
           name={searchTestId || 'list-search'}
+          autoComplete="off"
           aria-label={searchPlaceholder}
           placeholder={searchPlaceholder}
           value={searchQuery}

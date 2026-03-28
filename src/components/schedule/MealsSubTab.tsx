@@ -163,7 +163,7 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
       )}
       {!allEmpty && !isComplete && (
         <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 text-amber-700 dark:text-amber-300 text-sm">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+          <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
           <p className="font-medium">{t('recommendation.missing')} {missingSlots}</p>
         </div>
       )}

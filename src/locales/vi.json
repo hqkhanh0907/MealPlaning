@@ -709,7 +709,9 @@
       "rpe": "RPE",
       "logSet": "Ghi nhận set",
       "addExercise": "Thêm bài tập",
-      "nextUp": "Tiếp theo"
+      "nextUp": "Tiếp theo",
+      "decreaseWeight": "Giảm cân nặng",
+      "increaseWeight": "Tăng cân nặng"
     },
     "summary": {
       "title": "Tổng kết buổi tập",

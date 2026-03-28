@@ -452,11 +452,13 @@ export function WorkoutLogger({
                       }
                       className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
                       data-testid={`weight-minus-${exercise.id}`}
+                      aria-label={t('fitness.logger.decreaseWeight')}
                     >
                       −
                     </Button>
                     <Input
                       type="number"
+                      autoComplete="off"
                       value={input.weight}
                       onChange={(e) => {
                         const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
@@ -474,6 +476,7 @@ export function WorkoutLogger({
                       }
                       className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
                       data-testid={`weight-plus-${exercise.id}`}
+                      aria-label={t('fitness.logger.increaseWeight')}
                     >
                       +
                     </Button>
@@ -485,6 +488,7 @@ export function WorkoutLogger({
                     </span>
                     <Input
                       type="number"
+                      autoComplete="off"
                       value={input.reps ?? 0}
                       onChange={(e) => {
                         const key = `setInputs.${exercise.id}` as `setInputs.${string}`;

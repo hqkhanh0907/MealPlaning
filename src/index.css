@@ -215,8 +215,22 @@ input[type="number"] {
   }
   body {
     @apply bg-background text-foreground;
+    touch-action: manipulation;
   }
   html {
     @apply font-sans;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  /* Tabular figures for all number displays */
+  [data-numeric],
+  .tabular-nums,
+  td,
+  th,
+  [role="progressbar"],
+  time {
+    font-variant-numeric: tabular-nums;
   }
 }

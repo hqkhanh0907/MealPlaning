@@ -136,7 +136,7 @@ const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', '
 const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
   <div data-testid="grocery-empty-state" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
-      <ShoppingCart className="w-10 h-10 text-emerald-300" />
+      <ShoppingCart className="w-10 h-10 text-emerald-300" aria-hidden="true" />
     </div>
     <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">{t('grocery.emptyTitle')}</h3>
     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-2">
@@ -145,8 +145,8 @@ const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
     <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto mb-6">
       {t('grocery.emptyAutoHint')}
     </p>
-    <button type="button" className="inline-flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-h-11">
-      <CalendarDays className="w-4 h-4" />
+    <button type="button" aria-label={t('grocery.emptyAction')} className="inline-flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-h-11">
+      <CalendarDays className="w-4 h-4" aria-hidden="true" />
       {t('grocery.emptyAction')}
     </button>
   </div>

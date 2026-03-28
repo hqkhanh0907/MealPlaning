@@ -249,6 +249,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                 type="text"
                 id="meal-planner-search"
                 name="meal-planner-search"
+                autoComplete="off"
                 placeholder={t('planning.searchPlaceholder')}
                 aria-label={t('planning.searchPlaceholder')}
                 value={searchQuery}

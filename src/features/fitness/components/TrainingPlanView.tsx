@@ -12,6 +12,8 @@ import type { SelectedExercise, TrainingPlanDay } from '../types';
 import { DAY_LABELS } from '../constants';
 import { safeJsonParse } from '../utils/safeJsonParse';
 
+const DAY_FULL_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'] as const;
+
 interface TrainingPlanViewProps {
   onGeneratePlan: () => void;
   isGenerating?: boolean;
@@ -244,6 +246,7 @@ function TrainingPlanViewInner({
               onClick={() => handleDaySelect(dayNum)}
               className={`flex flex-1 flex-col items-center rounded-xl px-1 py-2 text-xs font-medium transition-colors ${colorClass} ${ringClass}`}
               aria-current={isToday ? 'date' : undefined}
+              aria-label={DAY_FULL_LABELS[i]}
             >
               <span>{DAY_LABELS[i]}</span>
             </button>

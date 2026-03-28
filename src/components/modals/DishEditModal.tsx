@@ -265,7 +265,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
             <div className="flex items-center gap-2">
-              <Input id="dish-name" value={watchedName} onChange={e => { setValue('name', e.target.value, { shouldDirty: true }); if (errors.name) clearErrors('name'); setAiSuggestError(''); }} className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+              <Input id="dish-name" autoComplete="off" value={watchedName} onChange={e => { setValue('name', e.target.value, { shouldDirty: true }); if (errors.name) clearErrors('name'); setAiSuggestError(''); }} className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
               {aiSuggestLoading ? (
                 <div className="shrink-0 w-10 h-10 min-h-11 min-w-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center" data-testid="ai-suggest-loading">
                   <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
@@ -342,7 +342,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <Input id="dish-ingredient-search" data-testid="input-dish-ingredient-search" name="dish-ingredient-search" aria-label={t('dish.searchIngredients')} value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4" placeholder={t('dish.searchIngredients')} />
+                  <Input id="dish-ingredient-search" autoComplete="off" data-testid="input-dish-ingredient-search" name="dish-ingredient-search" aria-label={t('dish.searchIngredients')} value={ingredientSearch} onChange={e => setIngredientSearch(e.target.value)} className="w-full pl-9 pr-4" placeholder={t('dish.searchIngredients')} />
                 </div>
                 <button
                   type="button"

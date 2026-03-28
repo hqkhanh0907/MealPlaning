@@ -21,7 +21,10 @@ function resolveIsDark(theme: Theme): boolean {
 }
 
 function applyTheme(theme: Theme) {
-  document.documentElement.classList.toggle('dark', resolveIsDark(theme));
+  const isDark = resolveIsDark(theme);
+  document.documentElement.classList.toggle('dark', isDark);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', isDark ? '#0f172a' : '#10b981');
 }
 
 export function useDarkMode() {

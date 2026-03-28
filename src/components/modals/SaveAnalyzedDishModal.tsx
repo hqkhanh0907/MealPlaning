@@ -174,6 +174,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                     render={({ field }) => (
                       <Input
                         id="ai-dish-name"
+                        autoComplete="off"
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -290,6 +291,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                         render={({ field: nameField }) => (
                           <Input
                             id={`ai-ing-name-${idx}`}
+                            autoComplete="off"
                             value={nameField.value}
                             onChange={nameField.onChange}
                             onBlur={nameField.onBlur}
