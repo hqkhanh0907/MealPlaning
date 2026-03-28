@@ -1,7 +1,7 @@
 # Release Process — Smart Meal Planner
 
-**Version:** 4.0  
-**Date:** 2026-03-11
+**Version:** 4.1  
+**Date:** 2026-03-28
 
 ---
 
@@ -48,9 +48,10 @@ Code changes
 Trước mỗi release, kiểm tra tất cả items:
 
 ```
-□ npm run test          → 1201/1201 pass
+□ npm run test          → 100% pass (0 failures allowed)
 □ npm run lint          → 0 errors, 0 warnings
-□ npm run test:coverage → 100% Stmts/Funcs/Lines, ≥93% Branch
+□ npm run test:coverage → 100% Stmts/Funcs/Lines, ≥97% Branch
+□ No eslint-disable     → grep -r "eslint-disable" src/ phải trả về 0 kết quả
 □ npm run build         → build thành công, không warnings
 □ npx cap sync android  → sync OK
 □ bash build-apk.sh     → APK tạo được (≈147MB)
@@ -64,9 +65,18 @@ Trước mỗi release, kiểm tra tất cả items:
   □ Thêm/sửa nguyên liệu OK
   □ Lên kế hoạch bữa ăn OK
   □ AI tab hiển thị OK
+  □ Fitness tab hiển thị OK
   □ Favicon hiển thị đúng
 □ git commit + push
 ```
+
+### ⛔ Chính sách No eslint-disable
+
+**Tuyệt đối không sử dụng** `eslint-disable`, `eslint-disable-next-line`, hoặc `eslint-disable-line` trong thư mục `src/`. Mọi lỗi lint phải được sửa triệt để tại nguồn thay vì bị suppress.
+
+- Nếu một rule gây false positive cho toàn bộ project → điều chỉnh rule trong `eslint.config.js` thông qua PR review
+- Không chấp nhận PR nào chứa eslint-disable trong `src/`
+- File test (`e2e/`) được phép sử dụng eslint-disable cho type casting khi cần thiết
 
 ---
 
@@ -232,11 +242,12 @@ Khi có bug nghiêm trọng sau release:
 3. Viết test case reproduce bug
 4. npm run test → pass
 5. npm run test:e2e (hoặc targeted spec)
-6. Bump PATCH version
-7. git commit "fix: description of fix"
-8. Merge vào main
-9. Tag: git tag v1.0.1
-10. Build APK và distribute
+6. npm run lint → 0 errors (no eslint-disable allowed)
+7. Bump PATCH version
+8. git commit "fix: description of fix"
+9. Merge vào main
+10. Tag: git tag v1.0.1
+11. Build APK và distribute
 ```
 
 ---

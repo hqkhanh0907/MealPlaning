@@ -1,7 +1,7 @@
 # Hướng Dẫn Triển Khai (Deployment Guide)
 
-**Version:** 2.0  
-**Date:** 2026-03-11
+**Version:** 2.1  
+**Date:** 2026-03-28
 
 ---
 

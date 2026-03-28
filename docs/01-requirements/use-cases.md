@@ -1,7 +1,7 @@
 # Use Cases — Smart Meal Planner
 
-**Version:** 1.1  
-**Date:** 2026-03-08
+**Version:** 1.2  
+**Date:** 2026-03-28
 
 ---
 
@@ -13,6 +13,7 @@
 | **Gemini AI** | Google Gemini API — xử lý ảnh & sinh gợi ý |
 | **LocalStorage** | Hệ thống lưu trữ cục bộ |
 | **OPUS Worker** | Web Worker dịch offline |
+| **SQLite** | Hệ thống lưu trữ chính (19 bảng, xem `src/services/schema.ts`) |
 
 ---
 
@@ -381,3 +382,55 @@ Nguyên liệu được gợi ý bởi AI đã được thêm vào form món ăn
 
 ### Cross-references
 - Test cases: TC_AIA_01–TC_AIA_55 trong [scenario-analysis-and-testcases.md](../04-testing/scenario-analysis-and-testcases.md)
+
+---
+
+## UC-17: Quản lý Fitness Profile
+
+**Actor:** User  
+**Trigger:** User mở tab Fitness hoặc truy cập Fitness Profile từ Settings
+
+### Main Flow
+1. User mở `FitnessTab` lần đầu
+2. System hiển thị `FitnessOnboarding` flow
+3. User điền: experience level, fitness goal, body stats (chiều cao, cân nặng, body fat %)
+4. System lưu vào bảng `fitness_profiles`
+5. User cấu hình preferences (hệ đơn vị kg/lbs, rest timer duration, thông báo)
+6. System lưu vào bảng `fitness_preferences`
+7. System hiển thị `ProgressDashboard` với streak, milestones
+
+### Alternative Flows
+- **A1: Chỉnh sửa profile** — User mở `TrainingProfileSection` → cập nhật training days, equipment, periodization
+- **A2: Xem training plan** — User mở `TrainingPlanView` → xem kế hoạch tập luyện theo tuần
+
+### Postcondition
+Fitness profile được lưu, training plan khả dụng, dashboard hiển thị dữ liệu cá nhân.
+
+---
+
+## UC-18: Workout Logging & Drafts
+
+**Actor:** User  
+**Trigger:** User nhấn "Bắt đầu tập" trên FitnessTab hoặc tiếp tục workout draft
+
+### Main Flow
+1. User chọn buổi tập từ training plan hoặc tạo workout mới
+2. System mở `WorkoutLogger` với danh sách exercises
+3. User ghi nhận từng set: reps, weight (qua `SetEditor`)
+4. System lưu draft liên tục vào bảng `workout_drafts` (auto-save)
+5. User hoàn thành buổi tập, nhấn "Kết thúc"
+6. System chuyển draft thành workout record (bảng `workouts` + `workout_sets`)
+7. System xoá draft, cập nhật streak, kiểm tra milestones/PR
+
+### Alternative Flows
+- **A1: Tạm dừng giữa chừng** — Draft được giữ trong `workout_drafts`, user quay lại tiếp tục sau
+- **A2: Cardio logging** — User mở `CardioLogger` → ghi nhận thời gian, loại cardio → ước tính calories đốt
+- **A3: Rest timer** — `RestTimer` tự động đếm ngược giữa các sets
+- **A4: Progressive overload** — `useProgressiveOverload` hook gợi ý tăng weight/reps dựa trên lịch sử
+
+### Postcondition
+Workout được ghi nhận đầy đủ. Draft đã xoá. Dashboard cập nhật streak, volume, PRs.
+
+### Cross-references
+- Store: `fitnessStore.ts` (Zustand)
+- Bridge: `useFitnessNutritionBridge` — đồng bộ calories đốt với mục tiêu dinh dưỡng
