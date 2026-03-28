@@ -8,11 +8,8 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'fitness.plan.tab': 'Kế hoạch',
-        'fitness.workout.tab': 'Tập luyện',
         'fitness.history.title': 'Lịch sử',
         'fitness.progress.title': 'Tiến trình',
-        'fitness.history.strength': 'Sức mạnh',
-        'fitness.history.cardio': 'Cardio',
       };
       return translations[key] ?? key;
     },
@@ -40,16 +37,6 @@ vi.mock('../features/fitness/components/TrainingPlanView', () => ({
   ),
 }));
 
-vi.mock('../features/fitness/components/WorkoutLogger', () => ({
-  WorkoutLogger: () => (
-    <div data-testid="workout-logger">WorkoutLogger</div>
-  ),
-}));
-
-vi.mock('../features/fitness/components/CardioLogger', () => ({
-  CardioLogger: () => <div data-testid="cardio-logger">CardioLogger</div>,
-}));
-
 vi.mock('../features/fitness/components/WorkoutHistory', () => ({
   WorkoutHistory: () => (
     <div data-testid="workout-history">WorkoutHistory</div>
@@ -74,31 +61,8 @@ vi.mock('../features/fitness/components/SmartInsightBanner', () => ({
   ),
 }));
 
-vi.mock('../features/fitness/components/QuickConfirmCard', () => ({
-  QuickConfirmCard: () => (
-    <div data-testid="quick-confirm-card">QuickConfirmCard</div>
-  ),
-}));
-
 vi.mock('../features/fitness/hooks/useFitnessNutritionBridge', () => ({
   useFitnessNutritionBridge: () => ({ insight: null }),
-}));
-
-vi.mock('../features/fitness/hooks/useProgressiveOverload', () => ({
-  useProgressiveOverload: () => ({
-    suggestNextSet: () => ({ weight: 60, reps: 8, source: 'manual' }),
-    getLastSets: () => [],
-    checkPlateau: () => ({ isPlateaued: false, weeks: 0 }),
-    analyzeExercisePlateau: () => ({
-      isPlateaued: false,
-      plateauWeeks: 0,
-      suggestion: null,
-    }),
-    checkAcuteFatigue: () => ({ level: 'none', message: '' }),
-    checkChronicOvertraining: () => ({ level: 'none', message: '' }),
-    acuteFatigue: { level: 'none', message: '' },
-    chronicOvertraining: { level: 'none', message: '' },
-  }),
 }));
 
 vi.mock('../features/fitness/hooks/useTrainingPlan', () => ({
@@ -123,10 +87,7 @@ vi.mock('../contexts/NotificationContext', () => ({
 interface MockFitnessState {
   isOnboarded: boolean;
   setOnboarded: Mock;
-  workoutMode: 'strength' | 'cardio';
-  setWorkoutMode: Mock;
   trainingPlans: unknown[];
-  trainingPlanDays: unknown[];
   trainingProfile: unknown;
   addTrainingPlan: Mock;
   addPlanDays: Mock;
@@ -139,13 +100,11 @@ afterEach(cleanup);
 describe('FitnessTab', () => {
   describe('when user is not onboarded', () => {
     const mockSetOnboarded = vi.fn();
-    const mockSetWorkoutMode = vi.fn();
     const mockAddTrainingPlan = vi.fn();
     const mockAddPlanDays = vi.fn();
 
     beforeEach(() => {
       mockSetOnboarded.mockClear();
-      mockSetWorkoutMode.mockClear();
       mockAddTrainingPlan.mockClear();
       mockAddPlanDays.mockClear();
       mockUseFitnessStore.mockImplementation(
@@ -153,10 +112,7 @@ describe('FitnessTab', () => {
           selector({
             isOnboarded: false,
             setOnboarded: mockSetOnboarded,
-            workoutMode: 'strength',
-            setWorkoutMode: mockSetWorkoutMode,
             trainingPlans: [],
-            trainingPlanDays: [],
             trainingProfile: null,
             addTrainingPlan: mockAddTrainingPlan,
             addPlanDays: mockAddPlanDays,
@@ -190,13 +146,11 @@ describe('FitnessTab', () => {
 
   describe('when user is onboarded', () => {
     const mockSetOnboarded = vi.fn();
-    const mockSetWorkoutMode = vi.fn();
     const mockAddTrainingPlan = vi.fn();
     const mockAddPlanDays = vi.fn();
 
     beforeEach(() => {
       mockSetOnboarded.mockClear();
-      mockSetWorkoutMode.mockClear();
       mockAddTrainingPlan.mockClear();
       mockAddPlanDays.mockClear();
       mockUseFitnessStore.mockImplementation(
@@ -204,10 +158,7 @@ describe('FitnessTab', () => {
           selector({
             isOnboarded: true,
             setOnboarded: mockSetOnboarded,
-            workoutMode: 'strength',
-            setWorkoutMode: mockSetWorkoutMode,
             trainingPlans: [],
-            trainingPlanDays: [],
             trainingProfile: null,
             addTrainingPlan: mockAddTrainingPlan,
             addPlanDays: mockAddPlanDays,
@@ -220,12 +171,12 @@ describe('FitnessTab', () => {
       expect(screen.getByTestId('subtab-bar')).toBeInTheDocument();
     });
 
-    it('renders all four sub-tab buttons', () => {
+    it('renders all three sub-tab buttons per spec §5.1', () => {
       render(<FitnessTab />);
       expect(screen.getByTestId('subtab-plan')).toBeInTheDocument();
-      expect(screen.getByTestId('subtab-workout')).toBeInTheDocument();
-      expect(screen.getByTestId('subtab-history')).toBeInTheDocument();
       expect(screen.getByTestId('subtab-progress')).toBeInTheDocument();
+      expect(screen.getByTestId('subtab-history')).toBeInTheDocument();
+      expect(screen.queryByTestId('subtab-workout')).not.toBeInTheDocument();
     });
 
     it('defaults to Kế hoạch tab with TrainingPlanView', () => {
@@ -238,19 +189,6 @@ describe('FitnessTab', () => {
       expect(
         screen.getByTestId('training-plan-view'),
       ).toBeInTheDocument();
-    });
-
-    it('clicking Tập luyện tab shows workout content with WorkoutLogger', () => {
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-
-      expect(
-        screen.getByTestId('workout-subtab-content'),
-      ).toBeInTheDocument();
-      expect(screen.getByTestId('workout-logger')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('plan-subtab-content'),
-      ).not.toBeInTheDocument();
     });
 
     it('clicking Lịch sử tab shows WorkoutHistory', () => {
@@ -266,7 +204,7 @@ describe('FitnessTab', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('clicking Tiến trình tab shows ProgressDashboard and StreakCounter', () => {
+    it('clicking Tiến trình tab shows ProgressDashboard', () => {
       render(<FitnessTab />);
       fireEvent.click(screen.getByTestId('subtab-progress'));
 
@@ -276,85 +214,14 @@ describe('FitnessTab', () => {
       expect(
         screen.getByTestId('progress-dashboard'),
       ).toBeInTheDocument();
-      expect(screen.getByTestId('streak-counter')).toBeInTheDocument();
     });
 
-    it('Tập luyện tab defaults to strength mode', () => {
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-
-      expect(
-        screen.getByTestId('workout-mode-strength'),
-      ).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('workout-mode-cardio')).toHaveAttribute(
-        'aria-checked',
-        'false',
-      );
-      expect(screen.getByTestId('workout-logger')).toBeInTheDocument();
-    });
-
-    it('toggling to cardio mode calls setWorkoutMode', () => {
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-      fireEvent.click(screen.getByTestId('workout-mode-cardio'));
-      expect(mockSetWorkoutMode).toHaveBeenCalledWith('cardio');
-    });
-
-    it('renders CardioLogger when workoutMode is cardio', () => {
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            isOnboarded: true,
-            setOnboarded: mockSetOnboarded,
-            workoutMode: 'cardio',
-            setWorkoutMode: mockSetWorkoutMode,
-            trainingPlans: [],
-            trainingPlanDays: [],
-            trainingProfile: null,
-            addTrainingPlan: mockAddTrainingPlan,
-            addPlanDays: mockAddPlanDays,
-          }),
-      );
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-
-      expect(screen.getByTestId('cardio-logger')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('workout-logger'),
-      ).not.toBeInTheDocument();
-      expect(screen.getByTestId('workout-mode-cardio')).toHaveAttribute(
-        'aria-checked',
-        'true',
-      );
-    });
-
-    it('toggling back to strength mode calls setWorkoutMode', () => {
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            isOnboarded: true,
-            setOnboarded: mockSetOnboarded,
-            workoutMode: 'cardio',
-            setWorkoutMode: mockSetWorkoutMode,
-            trainingPlans: [],
-            trainingPlanDays: [],
-            trainingProfile: null,
-            addTrainingPlan: mockAddTrainingPlan,
-            addPlanDays: mockAddPlanDays,
-          }),
-      );
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-      fireEvent.click(screen.getByTestId('workout-mode-strength'));
-      expect(mockSetWorkoutMode).toHaveBeenCalledWith('strength');
-    });
-
-    it('sub-tab labels are correct', () => {
+    it('sub-tab labels are correct per spec §5.1', () => {
       render(<FitnessTab />);
       expect(screen.getByText('Kế hoạch')).toBeInTheDocument();
-      expect(screen.getByText('Tập luyện')).toBeInTheDocument();
-      expect(screen.getByText('Lịch sử')).toBeInTheDocument();
       expect(screen.getByText('Tiến trình')).toBeInTheDocument();
+      expect(screen.getByText('Lịch sử')).toBeInTheDocument();
+      expect(screen.queryByText('Tập luyện')).not.toBeInTheDocument();
     });
 
     it('renders fitness-tab container', () => {
@@ -381,9 +248,6 @@ describe('FitnessTab', () => {
       render(<FitnessTab />);
       expect(screen.getByTestId('plan-subtab-content')).toBeInTheDocument();
       expect(
-        screen.queryByTestId('workout-subtab-content'),
-      ).not.toBeInTheDocument();
-      expect(
         screen.queryByTestId('history-subtab-content'),
       ).not.toBeInTheDocument();
       expect(
@@ -391,14 +255,14 @@ describe('FitnessTab', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('all four sub-tab buttons have correct aria-selected', () => {
+    it('all three sub-tab buttons have correct aria-selected', () => {
       render(<FitnessTab />);
 
       expect(screen.getByTestId('subtab-plan')).toHaveAttribute(
         'aria-selected',
         'true',
       );
-      expect(screen.getByTestId('subtab-workout')).toHaveAttribute(
+      expect(screen.getByTestId('subtab-progress')).toHaveAttribute(
         'aria-selected',
         'false',
       );
@@ -406,17 +270,13 @@ describe('FitnessTab', () => {
         'aria-selected',
         'false',
       );
-      expect(screen.getByTestId('subtab-progress')).toHaveAttribute(
-        'aria-selected',
-        'false',
-      );
 
-      fireEvent.click(screen.getByTestId('subtab-workout'));
+      fireEvent.click(screen.getByTestId('subtab-progress'));
       expect(screen.getByTestId('subtab-plan')).toHaveAttribute(
         'aria-selected',
         'false',
       );
-      expect(screen.getByTestId('subtab-workout')).toHaveAttribute(
+      expect(screen.getByTestId('subtab-progress')).toHaveAttribute(
         'aria-selected',
         'true',
       );
@@ -429,11 +289,6 @@ describe('FitnessTab', () => {
         'tabpanel',
       );
 
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-      expect(
-        screen.getByTestId('workout-subtab-content'),
-      ).toHaveAttribute('role', 'tabpanel');
-
       fireEvent.click(screen.getByTestId('subtab-history'));
       expect(
         screen.getByTestId('history-subtab-content'),
@@ -443,14 +298,6 @@ describe('FitnessTab', () => {
       expect(
         screen.getByTestId('progress-subtab-content'),
       ).toHaveAttribute('role', 'tabpanel');
-    });
-
-    it('workout mode toggle labels are correct', () => {
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('subtab-workout'));
-
-      expect(screen.getByText('Sức mạnh')).toBeInTheDocument();
-      expect(screen.getByText('Cardio')).toBeInTheDocument();
     });
   });
 

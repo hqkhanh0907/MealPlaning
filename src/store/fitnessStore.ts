@@ -30,6 +30,7 @@ export interface FitnessState {
     elapsedSeconds: number;
   } | null;
   sqliteReady: boolean;
+  showPlanCelebration: boolean;
 
   setTrainingProfile: (profile: TrainingProfile) => void;
   addTrainingPlan: (plan: TrainingPlan) => void;
@@ -56,6 +57,7 @@ export interface FitnessState {
   getLatestWeight: () => WeightEntry | undefined;
   getWorkoutsByDateRange: (startDate: string, endDate: string) => Workout[];
   initializeFromSQLite: (db: DatabaseService) => Promise<void>;
+  dismissPlanCelebration: () => void;
 }
 
 export const useFitnessStore = create<FitnessState>()(
@@ -71,6 +73,7 @@ export const useFitnessStore = create<FitnessState>()(
       workoutMode: 'strength',
       workoutDraft: null,
       sqliteReady: false,
+      showPlanCelebration: false,
 
       setTrainingProfile: (profile) => set({ trainingProfile: profile }),
 
@@ -272,6 +275,8 @@ export const useFitnessStore = create<FitnessState>()(
         })),
 
       setOnboarded: (value) => set({ isOnboarded: value }),
+
+      dismissPlanCelebration: () => set({ showPlanCelebration: false }),
 
       setWorkoutMode: (mode) => set({ workoutMode: mode }),
 

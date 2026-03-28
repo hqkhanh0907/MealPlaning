@@ -761,10 +761,24 @@
       "createNewCycle": "Tạo chu kỳ mới",
       "generating": "Đang tạo...",
       "planCreated": "Kế hoạch tập luyện đã được tạo thành công!",
-      "planError": "Không thể tạo kế hoạch. Vui lòng thử lại."
+      "planError": "Không thể tạo kế hoạch. Vui lòng thử lại.",
+      "setsLabel": "hiệp",
+      "repsLabel": "lần"
     },
     "workout": {
       "tab": "Buổi tập"
+    },
+    "celebration": {
+      "title": "Kế hoạch đã sẵn sàng! 🎉",
+      "subtitle": "Kế hoạch tập luyện cá nhân đã được tạo cho bạn",
+      "planSummary": "Phương pháp {{split}} trong {{weeks}} tuần"
+    },
+    "emptyState": {
+      "progressTitle": "Chưa có dữ liệu tiến trình",
+      "progressDescription": "Hoàn thành buổi tập đầu tiên để bắt đầu theo dõi tiến trình của bạn",
+      "historyTitle": "Chưa có lịch sử tập luyện",
+      "historyDescription": "Bắt đầu buổi tập đầu tiên để xem lịch sử tại đây",
+      "startWorkout": "Bắt đầu tập ngay"
     },
     "history": {
       "title": "Lịch sử",

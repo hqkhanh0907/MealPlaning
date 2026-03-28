@@ -17,7 +17,6 @@ const DAY_FULL_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 
 interface TrainingPlanViewProps {
   onGeneratePlan: () => void;
   isGenerating?: boolean;
-  onLogCardio?: () => void;
 }
 
 function parseExercises(exercises?: string): SelectedExercise[] {
@@ -58,7 +57,6 @@ function isPlanExpired(endDate?: string): boolean {
 function TrainingPlanViewInner({
   onGeneratePlan,
   isGenerating = false,
-  onLogCardio,
 }: TrainingPlanViewProps): React.JSX.Element {
   const { t } = useTranslation();
   const trainingPlans = useFitnessStore((s) => s.trainingPlans);
@@ -128,6 +126,14 @@ function TrainingPlanViewInner({
     },
     [pushPage],
   );
+
+  const handleLogCardio = useCallback(() => {
+    pushPage({
+      id: 'cardio-logger',
+      component: 'CardioLogger',
+      props: {},
+    });
+  }, [pushPage]);
 
   const handleDaySelect = useCallback((dayNum: number) => {
     setSelectedDay((prev) => (prev === dayNum ? null : dayNum));
@@ -293,13 +299,16 @@ function TrainingPlanViewInner({
           </div>
 
           {viewedExercises.length > 0 && (
-            <ul data-testid="exercise-list" className="mt-3 space-y-1">
+            <ul data-testid="exercise-list" className="mt-3 space-y-1.5">
               {viewedExercises.map((ex) => (
                 <li
                   key={ex.exercise.id}
-                  className="text-sm text-slate-600 dark:text-slate-300"
+                  className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300"
                 >
-                  {ex.exercise.nameVi}
+                  <span>{ex.exercise.nameVi}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">
+                    {ex.sets} {t('fitness.plan.setsLabel')} × {ex.repsMin}-{ex.repsMax} {t('fitness.plan.repsLabel')}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -358,7 +367,7 @@ function TrainingPlanViewInner({
               <button
                 data-testid="quick-log-cardio"
                 type="button"
-                onClick={onLogCardio}
+                onClick={handleLogCardio}
                 className="rounded-full bg-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/30"
               >
                 {t('fitness.plan.logLightCardio')}
