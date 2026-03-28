@@ -579,11 +579,11 @@ describe('DishEditModal', () => {
 
     await act(async () => { await vi.advanceTimersByTimeAsync(850); });
 
-    expect(screen.getByLabelText('Cal / 100g')).toHaveValue(200);
-    expect(screen.getByLabelText('Protein / 100g')).toHaveValue(25);
-    expect(screen.getByLabelText('Carbs / 100g')).toHaveValue(10);
-    expect(screen.getByLabelText('Fat / 100g')).toHaveValue(5);
-    expect(screen.getByLabelText('Fiber / 100g')).toHaveValue(3);
+    expect(screen.getByLabelText('Cal / 100g')).toHaveValue('200');
+    expect(screen.getByLabelText('Protein / 100g')).toHaveValue('25');
+    expect(screen.getByLabelText('Carbs / 100g')).toHaveValue('10');
+    expect(screen.getByLabelText('Fat / 100g')).toHaveValue('5');
+    expect(screen.getByLabelText('Fiber / 100g')).toHaveValue('3');
   });
 
   it('does not trigger AI fill when name is empty on blur', async () => {
@@ -613,7 +613,7 @@ describe('DishEditModal', () => {
 
     // Should still be able to fill manually and submit
     fireEvent.change(screen.getByLabelText('Cal / 100g'), { target: { value: '41' } });
-    expect(screen.getByLabelText('Cal / 100g')).toHaveValue(41);
+    expect(screen.getByLabelText('Cal / 100g')).toHaveValue('41');
   });
 
   it('toggles quick-add button off to close the overlay', () => {
@@ -651,7 +651,7 @@ describe('DishEditModal', () => {
     // Re-open quick-add — fields should be reset
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
     expect(screen.getByTestId('input-qa-name')).toHaveValue('');
-    expect(screen.getByLabelText('Cal / 100g')).toHaveValue(0);
+    expect(screen.getByLabelText('Cal / 100g')).toHaveValue('0');
   });
 
   it('calls onCreateIngredient for quick-added ingredients on dish save', () => {
@@ -758,11 +758,11 @@ describe('DishEditModal', () => {
     fireEvent.change(screen.getByLabelText('Fat / 100g'), { target: { value: '5' } });
     fireEvent.change(screen.getByLabelText('Fiber / 100g'), { target: { value: '3' } });
 
-    expect(screen.getByLabelText('Cal / 100g')).toHaveValue(100);
-    expect(screen.getByLabelText('Protein / 100g')).toHaveValue(20);
-    expect(screen.getByLabelText('Carbs / 100g')).toHaveValue(30);
-    expect(screen.getByLabelText('Fat / 100g')).toHaveValue(5);
-    expect(screen.getByLabelText('Fiber / 100g')).toHaveValue(3);
+    expect(screen.getByLabelText('Cal / 100g')).toHaveValue('100');
+    expect(screen.getByLabelText('Protein / 100g')).toHaveValue('20');
+    expect(screen.getByLabelText('Carbs / 100g')).toHaveValue('30');
+    expect(screen.getByLabelText('Fat / 100g')).toHaveValue('5');
+    expect(screen.getByLabelText('Fiber / 100g')).toHaveValue('3');
   });
 
   it('renders unit selector in quick-add form', () => {
