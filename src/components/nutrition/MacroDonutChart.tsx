@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { MACRO_COLORS } from '@/constant/colors';
 
 export interface MacroDonutChartProps {
   proteinG: number;
@@ -41,9 +42,9 @@ export const MacroDonutChart: React.FC<MacroDonutChartProps> = React.memo(
     const strokeWidth = 10;
 
     const segments: { cal: number; color: string; testId: string }[] = [
-      { cal: proteinCal, color: '#10b981', testId: 'arc-protein' },
-      { cal: fatCal, color: '#f59e0b', testId: 'arc-fat' },
-      { cal: carbsCal, color: '#3b82f6', testId: 'arc-carbs' },
+      { cal: proteinCal, color: MACRO_COLORS.protein.light, testId: 'arc-protein' },
+      { cal: fatCal, color: MACRO_COLORS.fat.light, testId: 'arc-fat' },
+      { cal: carbsCal, color: MACRO_COLORS.carbs.light, testId: 'arc-carbs' },
     ];
 
     let currentAngle = 0;

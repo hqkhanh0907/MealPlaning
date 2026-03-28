@@ -118,7 +118,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); toast.action?.onClick(); handleDismiss(); }}
-            className="mt-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 active:text-emerald-800 underline underline-offset-2 transition-colors min-h-8 flex items-center"
+            className="mt-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 active:text-emerald-800 underline underline-offset-2 transition-colors min-h-10 flex items-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
           >
             {toast.action.label}
           </button>
@@ -127,7 +127,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
-        className="relative z-10 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500 shrink-0"
+        className="relative z-10 p-2 min-h-10 min-w-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500 shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <X className="w-4 h-4" />
       </button>

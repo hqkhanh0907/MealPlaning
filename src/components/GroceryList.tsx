@@ -272,7 +272,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
               <button
                 data-testid={`grocery-expand-${item.id}`}
                 onClick={() => toggleExpand(item.id)}
-                className="p-2.5 mr-1 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                className="p-2.5 mr-1 min-h-11 min-w-11 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
                 title={t('grocery.usedIn')}
                 aria-label={`${t('grocery.usedIn')} ${item.name}`}
               >
@@ -393,7 +393,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
               type="button"
               onClick={() => setGroupByAisle(g => !g)}
               data-testid="btn-group-aisle"
-              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+              className={`text-xs font-bold px-3 py-1.5 min-h-11 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                 groupByAisle
                   ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'

@@ -11,9 +11,9 @@ import { useDailyScore } from '../hooks/useDailyScore';
 import type { ScoreColor } from '../types';
 
 const GRADIENT_MAP: Record<ScoreColor, string> = {
-  emerald: 'from-[#10b981] to-[#059669]',
-  amber: 'from-[#f59e0b] to-[#d97706]',
-  slate: 'from-[#64748b] to-[#475569]',
+  emerald: 'from-emerald-500 to-emerald-600',
+  amber: 'from-amber-500 to-amber-600',
+  slate: 'from-slate-500 to-slate-600',
 };
 
 const FACTOR_CONFIG = [

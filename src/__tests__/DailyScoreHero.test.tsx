@@ -61,8 +61,8 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByTestId('daily-score-hero');
-      expect(hero.className).toContain('from-[#10b981]');
-      expect(hero.className).toContain('to-[#059669]');
+      expect(hero.className).toContain('from-emerald-500');
+      expect(hero.className).toContain('to-emerald-600');
     });
 
     it('renders amber gradient for score 50-79', () => {
@@ -70,8 +70,8 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByTestId('daily-score-hero');
-      expect(hero.className).toContain('from-[#f59e0b]');
-      expect(hero.className).toContain('to-[#d97706]');
+      expect(hero.className).toContain('from-amber-500');
+      expect(hero.className).toContain('to-amber-600');
     });
 
     it('renders slate gradient for score < 50', () => {
@@ -79,8 +79,8 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByTestId('daily-score-hero');
-      expect(hero.className).toContain('from-[#64748b]');
-      expect(hero.className).toContain('to-[#475569]');
+      expect(hero.className).toContain('from-slate-500');
+      expect(hero.className).toContain('to-slate-600');
     });
   });
 
@@ -316,8 +316,8 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByTestId('daily-score-hero');
-      expect(hero.className).toContain('from-[#64748b]');
-      expect(hero.className).toContain('to-[#475569]');
+      expect(hero.className).toContain('from-slate-500');
+      expect(hero.className).toContain('to-slate-600');
     });
 
     it('renders 3-step checklist', () => {

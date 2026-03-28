@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trophy } from 'lucide-react';
+import { COLORS } from '@/constant/colors';
 import type { PRDetection } from '../utils/gamification';
 
 interface PRToastProps {
@@ -20,7 +21,7 @@ export const PRToast = React.memo(function PRToast({ pr, onDismiss }: PRToastPro
     <div
       data-testid="pr-toast"
       className="fixed inset-x-4 top-4 z-50 cursor-pointer rounded-xl p-4 shadow-lg"
-      style={{ background: 'linear-gradient(to right, #f59e0b, #d97706)' }}
+      style={{ background: `linear-gradient(to right, ${COLORS.amber500}, ${COLORS.amber600})` }}
       onClick={onDismiss}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {

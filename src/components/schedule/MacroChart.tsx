@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DayNutritionSummary } from '../../types';
+import { MACRO_COLORS } from '@/constant/colors';
 
 export interface MacroChartProps {
   dayNutrition: DayNutritionSummary;
@@ -45,24 +46,24 @@ export const MacroChart: React.FC<MacroChartProps> = React.memo(({ dayNutrition 
         grams: totalProtein,
         calories: proteinCal,
         percent: Math.round((proteinCal / totalCal) * 100),
-        color: '#10b981',
-        darkColor: '#34d399',
+        color: MACRO_COLORS.protein.light,
+        darkColor: MACRO_COLORS.protein.dark,
       },
       {
         label: t('macro.carbs'),
         grams: totalCarbs,
         calories: carbsCal,
         percent: Math.round((carbsCal / totalCal) * 100),
-        color: '#3b82f6',
-        darkColor: '#60a5fa',
+        color: MACRO_COLORS.carbs.light,
+        darkColor: MACRO_COLORS.carbs.dark,
       },
       {
         label: t('macro.fat'),
         grams: totalFat,
         calories: fatCal,
         percent: Math.round((fatCal / totalCal) * 100),
-        color: '#f59e0b',
-        darkColor: '#fbbf24',
+        color: MACRO_COLORS.fat.light,
+        darkColor: MACRO_COLORS.fat.dark,
       },
     ];
   }, [dayNutrition, t]);

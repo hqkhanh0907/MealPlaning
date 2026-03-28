@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, Minus, Scale } from 'lucide-react';
+import { COLORS } from '@/constant/colors';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import type { WeightEntry } from '../../fitness/types';
@@ -192,13 +193,13 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
           bg: 'bg-emerald-50 dark:bg-emerald-900/15',
           icon: 'text-emerald-600 dark:text-emerald-400',
           text: 'text-emerald-700 dark:text-emerald-400',
-          spark: '#10b981',
+          spark: COLORS.emerald500,
         }
       : {
           bg: 'bg-amber-50 dark:bg-amber-900/15',
           icon: 'text-amber-600 dark:text-amber-400',
           text: 'text-amber-700 dark:text-amber-400',
-          spark: '#f59e0b',
+          spark: COLORS.amber500,
         };
 
   return (

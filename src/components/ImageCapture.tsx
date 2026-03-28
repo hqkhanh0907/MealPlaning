@@ -166,21 +166,21 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
                 <button 
                   onClick={stopCamera}
                   aria-label={t('imageCapture.closeCamera')}
-                  className="bg-white/20 backdrop-blur text-white p-3 rounded-full hover:bg-white/30 transition-all"
+                  className="bg-white/20 backdrop-blur text-white p-3 min-h-12 min-w-12 flex items-center justify-center rounded-full hover:bg-white/30 transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <X className="w-6 h-6" />
                 </button>
                 <button 
                   onClick={capturePhoto}
                   aria-label={t('imageCapture.takePhoto')}
-                  className="bg-white text-emerald-600 p-5 rounded-full hover:bg-emerald-50 transition-all shadow-2xl"
+                  className="bg-white text-emerald-600 p-5 min-h-12 min-w-12 flex items-center justify-center rounded-full hover:bg-emerald-50 transition-all shadow-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <Camera className="w-9 h-9" />
                 </button>
                 <button 
                   onClick={switchCamera}
                   aria-label={t('imageCapture.switchCamera')}
-                  className="bg-white/20 backdrop-blur text-white p-3 rounded-full hover:bg-white/30 transition-all"
+                  className="bg-white/20 backdrop-blur text-white p-3 min-h-12 min-w-12 flex items-center justify-center rounded-full hover:bg-white/30 transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <RotateCcw className="w-6 h-6" />
                 </button>

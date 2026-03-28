@@ -207,7 +207,7 @@ export function ExerciseSelector({
             <button
               type="button"
               onClick={() => handleChipClick('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 min-h-11 rounded-full text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                 selectedMuscleGroup === 'all'
                   ? 'bg-emerald-500 text-white'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -220,7 +220,7 @@ export function ExerciseSelector({
                 key={group}
                 type="button"
                 onClick={() => handleChipClick(group)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1.5 min-h-11 rounded-full text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   selectedMuscleGroup === group
                     ? 'bg-emerald-500 text-white'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -251,7 +251,7 @@ export function ExerciseSelector({
                     type="button"
                     data-testid={`exercise-item-${exercise.id}`}
                     onClick={() => handleSelect(exercise)}
-                    className="w-full text-left px-2 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+                    className="w-full text-left px-2 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                       {exercise.nameVi}
@@ -283,7 +283,7 @@ export function ExerciseSelector({
           <button
             type="button"
             onClick={openCustomModal}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 dark:border-slate-600 dark:text-slate-500"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 dark:border-slate-600 dark:text-slate-500 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             data-testid="add-custom-exercise"
           >
             <Plus className="h-4 w-4" />

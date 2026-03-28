@@ -200,7 +200,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
             onClick={() => setFilter(key)}
             aria-pressed={filter === key}
             aria-label={label}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 min-h-11 rounded-full text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
               filter === key
                 ? 'bg-emerald-500 text-white'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
@@ -238,7 +238,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                       onClick={() => handleToggle(workout.id)}
                       aria-expanded={isExpanded}
                       aria-label={`${workout.name} - ${getRelativeDate(workout.date, t)}`}
-                      className="w-full px-4 py-3 flex items-center justify-between text-left"
+                      className="w-full px-4 py-3 flex items-center justify-between text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
                     >
                       <div className="flex flex-col gap-1">
                         <span
