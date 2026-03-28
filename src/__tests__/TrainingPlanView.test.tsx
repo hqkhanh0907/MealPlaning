@@ -6,7 +6,7 @@ import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, fallback?: string) => {
       const translations: Record<string, string> = {
         'fitness.plan.todayWorkout': 'Buổi tập hôm nay',
         'fitness.plan.startWorkout': 'Bắt đầu',
@@ -21,8 +21,15 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.tomorrow': 'Ngày mai',
         'fitness.plan.logWeight': '📝 Log cân nặng',
         'fitness.plan.logLightCardio': '🏃 Log cardio nhẹ',
+        'fitness.onboarding.muscle_chest': 'Ngực',
+        'fitness.onboarding.muscle_back': 'Lưng',
+        'fitness.onboarding.muscle_shoulders': 'Vai',
+        'fitness.onboarding.muscle_legs': 'Chân',
+        'fitness.onboarding.muscle_arms': 'Tay',
+        'fitness.onboarding.muscle_core': 'Cơ trung tâm',
+        'fitness.onboarding.muscle_glutes': 'Mông',
       };
-      return translations[key] ?? key;
+      return translations[key] ?? fallback ?? key;
     },
     i18n: { language: 'vi' },
   }),
@@ -218,7 +225,7 @@ describe('TrainingPlanView', () => {
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
     expect(screen.getByText('Push')).toBeInTheDocument();
-    expect(screen.getByText('chest,shoulders')).toBeInTheDocument();
+    expect(screen.getByText('Ngực, Vai')).toBeInTheDocument();
   });
 
   it('workout card shows exercise count and estimated duration', () => {

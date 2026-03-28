@@ -323,7 +323,7 @@ describe('FitnessOnboarding', () => {
 
     await advanceSteps(2); // → equipment
 
-    const barbellBtn = screen.getByRole('checkbox', { name: /barbell/ });
+    const barbellBtn = screen.getByRole('checkbox', { name: /Thanh tạ/ });
     expect(barbellBtn).toHaveAttribute('aria-checked', 'false');
 
     fireEvent.click(barbellBtn);
@@ -339,7 +339,7 @@ describe('FitnessOnboarding', () => {
 
     await advanceSteps(3); // → injuries
 
-    const shouldersBtn = screen.getByRole('checkbox', { name: /shoulders/ });
+    const shouldersBtn = screen.getByRole('checkbox', { name: /Vai/ });
     expect(shouldersBtn).toHaveAttribute('aria-checked', 'false');
 
     fireEvent.click(shouldersBtn);
@@ -356,10 +356,10 @@ describe('FitnessOnboarding', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Trung cấp' }));
     await advanceSteps(7); // → priorityMuscles
 
-    const chestBtn = screen.getByRole('checkbox', { name: /^chest$/ });
-    const backBtn = screen.getByRole('checkbox', { name: /^back$/ });
-    const legsBtn = screen.getByRole('checkbox', { name: /^legs$/ });
-    const armsBtn = screen.getByRole('checkbox', { name: /^arms$/ });
+    const chestBtn = screen.getByRole('checkbox', { name: /^Ngực$/ });
+    const backBtn = screen.getByRole('checkbox', { name: /^Lưng$/ });
+    const legsBtn = screen.getByRole('checkbox', { name: /^Chân$/ });
+    const armsBtn = screen.getByRole('checkbox', { name: /^Tay$/ });
 
     fireEvent.click(chestBtn);
     fireEvent.click(backBtn);
@@ -390,7 +390,7 @@ describe('FitnessOnboarding', () => {
     fireEvent.click(cardio3);
 
     await clickNext(); // → periodization
-    const linearBtn = screen.getByRole('radio', { name: 'linear' });
+    const linearBtn = screen.getByRole('radio', { name: 'Tuyến tính' });
     fireEvent.click(linearBtn);
     expect(linearBtn).toHaveAttribute('aria-checked', 'true');
 
@@ -447,10 +447,10 @@ describe('FitnessOnboarding', () => {
     fireEvent.click(screen.getByRole('radio', { name: '90' }));
 
     await clickNext(); // → equipment
-    fireEvent.click(screen.getByRole('checkbox', { name: /barbell/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Thanh tạ/ }));
 
     await clickNext(); // → injuries
-    fireEvent.click(screen.getByRole('checkbox', { name: /knees/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Đầu gối/ }));
 
     await advanceSteps(4); // → cardio → periodization → cycleWeeks → priorityMuscles
     await clickNext(); // → known1rm
@@ -491,8 +491,8 @@ describe('FitnessOnboarding', () => {
 
     await advanceSteps(7); // → priorityMuscles
 
-    fireEvent.click(screen.getByRole('checkbox', { name: /^chest$/ }));
-    fireEvent.click(screen.getByRole('checkbox', { name: /^legs$/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /^Ngực$/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /^Chân$/ }));
 
     await navigateToLastStep();
     await act(async () => {

@@ -273,7 +273,11 @@ function TrainingPlanViewInner({
           </h3>
           {viewedPlanDay.muscleGroups && (
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {viewedPlanDay.muscleGroups}
+              {viewedPlanDay.muscleGroups
+                .split(',')
+                .map((g) => g.trim())
+                .map((g) => t(`fitness.onboarding.muscle_${g}`, g))
+                .join(', ')}
             </p>
           )}
           <div

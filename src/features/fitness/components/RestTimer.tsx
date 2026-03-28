@@ -151,16 +151,20 @@ export const RestTimer = React.memo(function RestTimer({
         <div className="flex gap-3">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
+            className="min-h-11"
             onClick={handleAddTime}
+            aria-label={t('fitness.timer.addTime')}
             data-testid="add-time-button"
           >
             {t('fitness.timer.addTime')}
           </Button>
           <Button
             variant="default"
-            size="sm"
+            size="default"
+            className="min-h-11"
             onClick={handleSkip}
+            aria-label={t('fitness.timer.skip')}
             data-testid="skip-button"
           >
             {t('fitness.timer.skip')}

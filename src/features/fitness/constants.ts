@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+import { PersonStanding, Bike, Waves, Zap, Footprints, Dumbbell, Ship } from 'lucide-react';
 import type { MuscleGroup, CardioType, CardioIntensity } from './types';
 
 // Day labels (Monday-first, Vietnamese)
@@ -28,14 +30,14 @@ export const PULL_MUSCLES: MuscleGroup[] = ['back', 'arms'];
 export const LEG_MUSCLES: MuscleGroup[] = ['legs', 'glutes', 'core'];
 
 // Cardio types
-export const CARDIO_TYPES: { type: CardioType; emoji: string; i18nKey: string }[] = [
-  { type: 'running', emoji: '🏃', i18nKey: 'fitness.cardio.running' },
-  { type: 'cycling', emoji: '🚴', i18nKey: 'fitness.cardio.cycling' },
-  { type: 'swimming', emoji: '🏊', i18nKey: 'fitness.cardio.swimming' },
-  { type: 'hiit', emoji: '⚡', i18nKey: 'fitness.cardio.hiit' },
-  { type: 'walking', emoji: '🚶', i18nKey: 'fitness.cardio.walking' },
-  { type: 'elliptical', emoji: '🏋️', i18nKey: 'fitness.cardio.elliptical' },
-  { type: 'rowing', emoji: '🚣', i18nKey: 'fitness.cardio.rowing' },
+export const CARDIO_TYPES: { type: CardioType; icon: LucideIcon; i18nKey: string }[] = [
+  { type: 'running', icon: PersonStanding, i18nKey: 'fitness.cardio.running' },
+  { type: 'cycling', icon: Bike, i18nKey: 'fitness.cardio.cycling' },
+  { type: 'swimming', icon: Waves, i18nKey: 'fitness.cardio.swimming' },
+  { type: 'hiit', icon: Zap, i18nKey: 'fitness.cardio.hiit' },
+  { type: 'walking', icon: Footprints, i18nKey: 'fitness.cardio.walking' },
+  { type: 'elliptical', icon: Dumbbell, i18nKey: 'fitness.cardio.elliptical' },
+  { type: 'rowing', icon: Ship, i18nKey: 'fitness.cardio.rowing' },
 ];
 export const DISTANCE_CARDIO_TYPES: CardioType[] = ['running', 'cycling', 'swimming'];
 

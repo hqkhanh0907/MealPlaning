@@ -158,21 +158,21 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             className="flex gap-2 overflow-x-auto pb-2"
             data-testid="cardio-type-selector"
           >
-            {CARDIO_TYPES.map(({ type, emoji, i18nKey }) => (
+            {CARDIO_TYPES.map(({ type, icon: Icon, i18nKey }) => (
               <Button
                 key={type}
                 variant={selectedType === type ? 'default' : 'outline'}
-                size="sm"
+                size="default"
                 onClick={() => setValue('selectedType', type)}
                 className={cn(
-                  'shrink-0 rounded-full px-4 py-2',
+                  'shrink-0 rounded-full px-4 min-h-11',
                   selectedType === type
                     ? 'bg-emerald-500 text-white hover:bg-emerald-600'
                     : 'bg-white text-slate-600 border-transparent dark:bg-slate-800 dark:text-slate-300'
                 )}
                 data-testid={`cardio-type-${type}`}
               >
-                <span>{emoji}</span>
+                <Icon className="h-4 w-4" aria-hidden="true" />
                 <span>{t(i18nKey)}</span>
               </Button>
             ))}
@@ -361,7 +361,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                 variant={intensity === value ? 'default' : 'outline'}
                 onClick={() => setValue('intensity', value)}
                 className={cn(
-                  'flex-1 rounded-lg py-2.5',
+                  'flex-1 rounded-lg min-h-11',
                   intensity === value
                     ? 'bg-emerald-500 text-white hover:bg-emerald-600'
                     : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'

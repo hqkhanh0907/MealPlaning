@@ -177,23 +177,23 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
   );
 
   const equipmentOptions = useMemo(
-    () => EQUIPMENT_OPTIONS.map((eq) => ({ value: eq, label: eq })),
-    [],
+    () => EQUIPMENT_OPTIONS.map((eq) => ({ value: eq, label: t(`fitness.onboarding.equip_${eq}`) })),
+    [t],
   );
 
   const injuryOptions = useMemo(
-    () => INJURY_OPTIONS.map((inj) => ({ value: inj, label: inj })),
-    [],
+    () => INJURY_OPTIONS.map((inj) => ({ value: inj, label: t(`fitness.onboarding.injury_${inj}`) })),
+    [t],
   );
 
   const periodizationOptions = useMemo(
-    () => PERIODIZATION_OPTIONS.map((p) => ({ value: p, label: p })),
-    [],
+    () => PERIODIZATION_OPTIONS.map((p) => ({ value: p, label: t(`fitness.onboarding.period_${p}`) })),
+    [t],
   );
 
   const muscleOptions = useMemo(
-    () => MUSCLE_OPTIONS.map((m) => ({ value: m, label: m })),
-    [],
+    () => MUSCLE_OPTIONS.map((m) => ({ value: m, label: t(`fitness.onboarding.muscle_${m}`) })),
+    [t],
   );
 
   const onFormSubmit = useCallback(
