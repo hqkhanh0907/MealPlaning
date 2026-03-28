@@ -1037,5 +1037,20 @@
   },
   "insightCard": {
     "dismiss": "Bỏ qua"
+  },
+  "welcome": {
+    "slide1Title": "Chào mừng đến với Smart Meal Planner",
+    "slide1Desc": "Lên kế hoạch bữa ăn thông minh, theo dõi dinh dưỡng và tập luyện — tất cả trong một ứng dụng.",
+    "slide2Title": "Dinh dưỡng chính xác",
+    "slide2Desc": "Theo dõi calo, protein, carbs và chất béo hàng ngày. Phân tích món ăn bằng AI chỉ với một bức ảnh.",
+    "slide3Title": "Tập luyện & Sức khỏe",
+    "slide3Desc": "Kế hoạch tập luyện cá nhân hóa, theo dõi tiến trình và cân bằng năng lượng thông minh.",
+    "setupTitle": "Thiết lập hồ sơ của bạn",
+    "setupDesc": "Nhập thông tin cơ bản để chúng tôi tính toán nhu cầu dinh dưỡng phù hợp với bạn.",
+    "next": "Tiếp tục",
+    "skip": "Bỏ qua",
+    "getStarted": "Bắt đầu",
+    "letsGo": "Vào ứng dụng →",
+    "step": "Bước {{current}}/{{total}}"
   }
 }
