@@ -71,7 +71,7 @@ function generateId(): string {
 /* ------------------------------------------------------------------ */
 interface GoalPhaseSelectorProps {
   embedded?: boolean;
-  saveRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
 export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, saveRef } = {}) => {
@@ -137,21 +137,26 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
     setSaved(false);
   }, [autoOffset]);
 
-  const handleSave = useCallback(async () => {
-    const now = new Date().toISOString();
-    const goal: Goal = {
-      id: generateId(),
-      type: goalType,
-      rateOfChange,
-      targetWeightKg: targetWeight ? Number(targetWeight) : undefined,
-      calorieOffset: effectiveOffset,
-      startDate: now,
-      isActive: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await saveGoal(db, goal);
-    setSaved(true);
+  const handleSave = useCallback(async (): Promise<boolean> => {
+    try {
+      const now = new Date().toISOString();
+      const goal: Goal = {
+        id: generateId(),
+        type: goalType,
+        rateOfChange,
+        targetWeightKg: targetWeight ? Number(targetWeight) : undefined,
+        calorieOffset: effectiveOffset,
+        startDate: now,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await saveGoal(db, goal);
+      setSaved(true);
+      return true;
+    } catch {
+      return false;
+    }
   }, [db, goalType, rateOfChange, targetWeight, effectiveOffset, saveGoal]);
 
   useEffect(() => {

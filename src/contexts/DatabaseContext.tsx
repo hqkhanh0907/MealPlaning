@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
+import { createSchema } from '../services/schema';
 
 const DatabaseContext = createContext<DatabaseService | null>(null);
 
@@ -11,7 +12,8 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
     const service = createDatabaseService();
     service
       .initialize()
-      .then(() => {
+      .then(async () => {
+        await createSchema(service);
         setDb(service);
       })
       .catch((err: unknown) => {

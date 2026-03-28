@@ -27,6 +27,9 @@ const EXPECTED_TABLES = [
   'weight_log',
   'daily_log',
   'adjustments',
+  'fitness_profiles',
+  'fitness_preferences',
+  'workout_drafts',
 ];
 
 const EXPECTED_INDEXES = [
@@ -49,11 +52,11 @@ describe('createSchema', () => {
     await db.initialize();
   });
 
-  it('creates all 16 tables', async () => {
+  it('creates all 19 tables', async () => {
     const tables = await db.query<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
     );
-    expect(tables).toHaveLength(16);
+    expect(tables).toHaveLength(19);
   });
 
   it.each(EXPECTED_TABLES)('table "%s" exists in sqlite_master', async (tableName) => {
@@ -114,7 +117,7 @@ describe('createSchema', () => {
     const tables = await db.query<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
     );
-    expect(tables).toHaveLength(16);
+    expect(tables).toHaveLength(19);
   });
 
   it('enforces UNIQUE constraint — duplicate date in weight_log is rejected', async () => {

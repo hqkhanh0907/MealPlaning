@@ -94,13 +94,15 @@ function HealthProfileViewMode() {
 function HealthProfileDetailPageInner({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
-  const saveRef = useRef<(() => Promise<void>) | null>(null);
+  const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
   const handleSave = async () => {
     if (saveRef.current) {
-      await saveRef.current();
+      const success = await saveRef.current();
+      if (success) {
+        setIsEditing(false);
+      }
     }
-    setIsEditing(false);
   };
 
   const handleCancel = () => {

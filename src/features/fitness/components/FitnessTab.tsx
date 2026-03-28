@@ -40,7 +40,7 @@ const FitnessTabInner: React.FC = () => {
   const userProfile = useUserProfileStore((s) => s.userProfile);
   const healthProfileAge = useHealthProfileStore((s) => s.profile.age);
   const { generatePlan, isGenerating } = useTrainingPlan();
-  const { showNotification } = useNotification();
+  const notify = useNotification();
   const [confirmedExercises, setConfirmedExercises] = useState<Set<string>>(
     () => new Set(),
   );
@@ -136,12 +136,12 @@ const FitnessTabInner: React.FC = () => {
     if (result) {
       addTrainingPlan(result.plan);
       addPlanDays(result.days);
-      showNotification(t('fitness.plan.planCreated'), 'success');
+      notify.success(t('fitness.plan.planCreated'));
     } else {
-      showNotification(t('fitness.plan.planError'), 'error');
+      notify.error(t('fitness.plan.planError'));
     }
     setActiveSubTab('plan');
-  }, [trainingProfile, generatePlan, userProfile.weight, healthProfileAge, addTrainingPlan, addPlanDays, showNotification, t]);
+  }, [trainingProfile, generatePlan, userProfile.weight, healthProfileAge, addTrainingPlan, addPlanDays, notify, t]);
 
   const handleWorkoutComplete = useCallback(() => {
     setActiveSubTab('history');

@@ -27,7 +27,7 @@ const ACTIVITY_LEVEL_I18N: Record<ActivityLevel, string> = {
 
 interface HealthProfileFormProps {
   embedded?: boolean;
-  saveRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
 }
 
 export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps = {}) {
@@ -109,14 +109,19 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
     );
   }, [tdee, form.weightKg, form.proteinRatio, form.fatPct, form.bodyFatPct]);
 
-  async function handleSave() {
-    if (!validate()) return;
-    const profileToSave: HealthProfile = {
-      ...form,
-      bmrOverride: bmrOverrideEnabled ? form.bmrOverride : undefined,
-    };
-    await saveProfileAction(db, profileToSave);
-    setSaved(true);
+  async function handleSave(): Promise<boolean> {
+    if (!validate()) return false;
+    try {
+      const profileToSave: HealthProfile = {
+        ...form,
+        bmrOverride: bmrOverrideEnabled ? form.bmrOverride : undefined,
+      };
+      await saveProfileAction(db, profileToSave);
+      setSaved(true);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   useEffect(() => {
@@ -185,9 +190,14 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
           type="number"
           min={10}
           max={100}
-          value={form.age}
+          value={form.age || ''}
           onChange={(e) => {
-            const v = parseInt(e.target.value, 10);
+            const raw = e.target.value;
+            if (raw === '') {
+              updateField('age', 0);
+              return;
+            }
+            const v = parseInt(raw, 10);
             if (!isNaN(v)) updateField('age', v);
           }}
           className={inputClass('age')}
@@ -207,9 +217,15 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
           type="number"
           min={100}
           max={250}
-          value={form.heightCm}
+          step={0.5}
+          value={form.heightCm || ''}
           onChange={(e) => {
-            const v = parseInt(e.target.value, 10);
+            const raw = e.target.value;
+            if (raw === '') {
+              updateField('heightCm', 0);
+              return;
+            }
+            const v = parseFloat(raw);
             if (!isNaN(v)) updateField('heightCm', v);
           }}
           className={inputClass('heightCm')}
@@ -229,9 +245,15 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
           type="number"
           min={30}
           max={300}
-          value={form.weightKg}
+          step={0.1}
+          value={form.weightKg || ''}
           onChange={(e) => {
-            const v = parseInt(e.target.value, 10);
+            const raw = e.target.value;
+            if (raw === '') {
+              updateField('weightKg', 0);
+              return;
+            }
+            const v = parseFloat(raw);
             if (!isNaN(v)) updateField('weightKg', v);
           }}
           className={inputClass('weightKg')}
@@ -370,9 +392,14 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
           min={0.8}
           max={4.0}
           step={0.1}
-          value={form.proteinRatio}
+          value={form.proteinRatio || ''}
           onChange={(e) => {
-            const v = parseFloat(e.target.value);
+            const raw = e.target.value;
+            if (raw === '') {
+              updateField('proteinRatio', 0);
+              return;
+            }
+            const v = parseFloat(raw);
             if (!isNaN(v)) updateField('proteinRatio', v);
           }}
           className={inputClass('proteinRatio')}
