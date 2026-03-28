@@ -12,7 +12,7 @@ import { EmptyState } from './shared/EmptyState';
 import { DetailModal } from './shared/DetailModal';
 import { useItemModalFlow } from '../hooks/useItemModalFlow';
 import { useListManager } from '../hooks/useListManager';
-import { getMealTagOptions, getTagShortLabels, getBaseSortOptions, UNDO_TOAST_DURATION_MS } from '../data/constants';
+import { getMealTagOptions, getTagShortLabels, getBaseSortOptions, UNDO_TOAST_DURATION_MS, MEAL_TYPE_ICONS } from '../data/constants';
 import { generateId } from '../utils/helpers';
 import type { BaseSortOption } from '../data/constants';
 
@@ -195,7 +195,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{dish.ingredients.length} {t('dish.ingredients')}</p>
                       {dish.tags && dish.tags.length > 0 && (
                         <div className="flex gap-1 mt-1 flex-wrap">
-                          {dish.tags.map(tag => <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">{tagLabels[tag]}</span>)}
+                          {dish.tags.map(tag => { const TagIcon = MEAL_TYPE_ICONS[tag]; return <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">{TagIcon && <TagIcon className="size-3" aria-hidden="true" />}{tagLabels[tag]}</span>; })}
                         </div>
                       )}
                     </div>
@@ -244,7 +244,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                   return (
                     <tr key={dish.id} className={`transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
                       <td className="px-4 py-3"><div className="flex items-center gap-3"><button data-testid={`btn-compare-${dish.id}`} onClick={() => toggleCompare(dish.id)} className={`w-6 h-6 min-h-11 min-w-11 rounded flex items-center justify-center border-2 shrink-0 transition-all ${compareIds.has(dish.id) ? 'bg-blue-500 border-blue-500 text-white' : 'border-slate-200 dark:border-slate-600 text-transparent hover:border-blue-400'}`} aria-label={t('dish.compare')}><GitCompareArrows className="w-3 h-3" /></button><div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-500 shrink-0"><ChefHat className="w-4 h-4" /></div><div><button type="button" onClick={() => modal.openView(dish)} className="font-bold text-slate-800 dark:text-slate-100 text-left cursor-pointer hover:text-emerald-600 transition-colors">{getLocalizedField(dish.name, lang)}</button><p className="text-xs text-slate-500 dark:text-slate-400">{dish.ingredients.length} {t('dish.ingredients')}</p></div></div></td>
-                      <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{dish.tags?.map(tag => <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-600 px-1.5 py-0.5 rounded">{tagLabels[tag]}</span>)}</div></td>
+                      <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{dish.tags?.map(tag => { const TagIcon = MEAL_TYPE_ICONS[tag]; return <span key={tag} className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-600 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">{TagIcon && <TagIcon className="size-3" aria-hidden="true" />}{tagLabels[tag]}</span>; })}</div></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-slate-700 dark:text-slate-300">{Math.round(nutrition.calories)}</span></td>
                       <td className="px-4 py-3 text-right"><span className="font-bold text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g</span></td>
                       <td className="px-4 py-3"><div className="flex items-center justify-end gap-3">
@@ -294,7 +294,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(dish.name, lang)}</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{dish.ingredients.length} {t('dish.ingredients')}</p>
                 {dish.tags && dish.tags.length > 0 && (
-                  <div className="flex gap-1.5 mt-1.5 flex-wrap">{dish.tags.map(tag => <span key={tag} className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-lg">{tagLabels[tag]}</span>)}</div>
+                  <div className="flex gap-1.5 mt-1.5 flex-wrap">{dish.tags.map(tag => { const TagIcon = MEAL_TYPE_ICONS[tag]; return <span key={tag} className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-lg inline-flex items-center gap-1">{TagIcon && <TagIcon className="size-3.5" aria-hidden="true" />}{tagLabels[tag]}</span>; })}</div>
                 )}
               </div>
             </div>

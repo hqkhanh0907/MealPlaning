@@ -157,7 +157,7 @@ export const AiInsightCard: React.FC = React.memo(function AiInsightCard() {
             size="sm"
             data-testid="insight-action-btn"
             onClick={onAction}
-            className={`mt-1.5 gap-1 px-2 py-1 ${colors.action}`}
+            className={`mt-1.5 gap-1 px-2 py-1 min-h-11 ${colors.action}`}
           >
             {currentInsight.actionLabel}
             <ChevronRight className="w-3 h-3" />
@@ -172,7 +172,7 @@ export const AiInsightCard: React.FC = React.memo(function AiInsightCard() {
           data-testid="insight-dismiss-btn"
           onClick={onDismiss}
           aria-label={t('insightCard.dismiss')}
-          className={`shrink-0 ${colors.dismiss}`}
+          className={`shrink-0 min-h-11 min-w-11 ${colors.dismiss}`}
         >
           <X className="w-4 h-4" />
         </Button>

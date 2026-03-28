@@ -56,9 +56,9 @@
     "breakfastFull": "Bữa Sáng",
     "lunchFull": "Bữa Trưa",
     "dinnerFull": "Bữa Tối",
-    "breakfastShort": "🌅 Sáng",
-    "lunchShort": "🌤️ Trưa",
-    "dinnerShort": "🌙 Tối"
+    "breakfastShort": "Sáng",
+    "lunchShort": "Trưa",
+    "dinnerShort": "Tối"
   },
   "sort": {
     "nameAsc": "Tên (A-Z)",
