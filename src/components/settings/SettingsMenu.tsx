@@ -4,6 +4,8 @@ import {
   Heart, Target, Dumbbell, Sun, Moon, Monitor, Clock,
   Database, ChevronRight, Search, SlidersHorizontal,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { useFitnessStore } from '../../store/fitnessStore';
 import { calculateBMR, calculateTDEE } from '../../services/nutritionEngine';
@@ -124,12 +126,12 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps)
       {visibleMenuItems.length > 0 && (
         <div className="space-y-3">
           {visibleMenuItems.map(item => (
-            <button
+            <Button
               key={item.id}
-              type="button"
+              variant="ghost"
               data-testid={`settings-nav-${item.id}`}
               onClick={() => onNavigate(item.id)}
-              className="w-full flex items-center gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-md transition-all active:scale-[0.99]"
+              className="w-full h-auto flex items-center gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-md transition-all active:scale-[0.99]"
             >
               <div className="w-10 h-10 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-center shrink-0">
                 {item.icon}
@@ -143,7 +145,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps)
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -162,19 +164,21 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps)
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {THEME_OPTIONS.map(({ value, labelKey, icon: Icon }) => (
-              <button
+              <Button
                 key={value}
+                variant="ghost"
                 onClick={() => setTheme(value)}
                 data-testid={`btn-theme-${value}`}
-                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all min-h-12 ${
+                className={cn(
+                  'flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all min-h-12 h-auto',
                   theme === value
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300'
-                }`}
+                )}
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-bold text-sm">{t(labelKey)}</span>
-              </button>
+              </Button>
             ))}
           </div>
         </section>

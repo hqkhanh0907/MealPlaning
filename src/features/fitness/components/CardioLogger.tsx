@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
@@ -117,30 +119,32 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
         className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
         data-testid="cardio-header"
       >
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onBack}
-          className="flex items-center gap-1 text-sm font-medium"
+          className="gap-1 text-white hover:bg-white/20 hover:text-white"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" />
           <span>{t('common.back')}</span>
-        </button>
+        </Button>
         <span
           className="font-mono text-lg font-semibold tabular-nums"
           data-testid="elapsed-timer"
         >
           {formatElapsed(headerTimer.elapsed)}
         </span>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleSave}
-          className="flex items-center gap-1 text-sm font-medium"
+          className="gap-1 text-white hover:bg-white/20 hover:text-white"
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>
           <X className="h-5 w-5" />
-        </button>
+        </Button>
       </header>
 
       <div className="flex-1 space-y-6 overflow-y-auto p-4">
@@ -154,20 +158,22 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             data-testid="cardio-type-selector"
           >
             {CARDIO_TYPES.map(({ type, emoji, i18nKey }) => (
-              <button
+              <Button
                 key={type}
-                type="button"
+                variant={selectedType === type ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setValue('selectedType', type)}
-                className={`flex shrink-0 items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                className={cn(
+                  'shrink-0 rounded-full px-4 py-2',
                   selectedType === type
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                }`}
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    : 'bg-white text-slate-600 border-transparent dark:bg-slate-800 dark:text-slate-300'
+                )}
                 data-testid={`cardio-type-${type}`}
               >
                 <span>{emoji}</span>
                 <span>{t(i18nKey)}</span>
-              </button>
+              </Button>
             ))}
           </div>
         </section>
@@ -178,30 +184,32 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             {t('fitness.cardio.duration')}
           </h3>
           <div className="mb-3 flex gap-2">
-            <button
-              type="button"
+            <Button
+              variant={isStopwatchMode ? 'default' : 'outline'}
               onClick={() => setValue('isStopwatchMode', true)}
-              className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+              className={cn(
+                'flex-1 rounded-lg py-2',
                 isStopwatchMode
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-              }`}
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                  : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+              )}
               data-testid="stopwatch-mode-button"
             >
               {t('fitness.cardio.stopwatch')}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant={!isStopwatchMode ? 'default' : 'outline'}
               onClick={() => setValue('isStopwatchMode', false)}
-              className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+              className={cn(
+                'flex-1 rounded-lg py-2',
                 !isStopwatchMode
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-              }`}
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                  : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+              )}
               data-testid="manual-mode-button"
             >
               {t('fitness.cardio.manual')}
-            </button>
+            </Button>
           </div>
 
           {isStopwatchMode ? (
@@ -214,32 +222,32 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               </p>
               <div className="flex gap-2">
                 {!stopwatch.isRunning ? (
-                  <button
-                    type="button"
+                  <Button
+                    variant="default"
                     onClick={handleStartStopwatch}
-                    className="flex-1 rounded-lg bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+                    className="flex-1 bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
                     data-testid="start-button"
                   >
                     {t('fitness.cardio.start')}
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    type="button"
+                  <Button
+                    variant="default"
                     onClick={handlePauseStopwatch}
-                    className="flex-1 rounded-lg bg-amber-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
+                    className="flex-1 bg-amber-500 py-2.5 text-white hover:bg-amber-600"
                     data-testid="pause-button"
                   >
                     {t('fitness.cardio.pause')}
-                  </button>
+                  </Button>
                 )}
-                <button
-                  type="button"
+                <Button
+                  variant="destructive"
                   onClick={handleStopStopwatch}
-                  className="flex-1 rounded-lg bg-red-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600"
+                  className="flex-1 bg-red-500 py-2.5 text-white hover:bg-red-600"
                   data-testid="stop-button"
                 >
                   {t('fitness.cardio.stop')}
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -326,19 +334,20 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
           </h3>
           <div className="flex gap-2" data-testid="intensity-selector">
             {INTENSITY_OPTIONS.map(({ value, i18nKey }) => (
-              <button
+              <Button
                 key={value}
-                type="button"
+                variant={intensity === value ? 'default' : 'outline'}
                 onClick={() => setValue('intensity', value)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+                className={cn(
+                  'flex-1 rounded-lg py-2.5',
                   intensity === value
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                }`}
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+                )}
                 data-testid={`intensity-${value}`}
               >
                 {t(i18nKey)}
-              </button>
+              </Button>
             ))}
           </div>
         </section>
@@ -364,14 +373,14 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
 
       {/* Save Button */}
       <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
-        <button
-          type="button"
+        <Button
+          variant="default"
           onClick={handleSave}
-          className="w-full rounded-xl bg-emerald-500 py-3 font-semibold text-white transition-colors hover:bg-emerald-600"
+          className="w-full rounded-xl bg-emerald-500 py-3 text-white hover:bg-emerald-600"
           data-testid="save-button"
         >
           {t('fitness.cardio.save')}
-        </button>
+        </Button>
       </div>
     </div>
   );

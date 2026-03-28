@@ -8,6 +8,7 @@ import {
   TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useQuickActions, type QuickAction, type ActionType } from '../hooks/useQuickActions';
 
 const ACTION_ICON_MAP: Record<ActionType, LucideIcon> = {
@@ -40,12 +41,11 @@ const ActionButton = React.memo(function ActionButton({
 
   if (action.isPrimary) {
     return (
-      <button
-        type="button"
+      <Button
+        variant="default"
         onClick={handleClick}
-        className="flex min-w-[100px] flex-col items-center justify-center gap-1 rounded-full bg-emerald-500 px-4 text-white"
+        className="flex min-w-[100px] flex-col items-center justify-center gap-1 rounded-full bg-emerald-500 px-4 text-white hover:bg-emerald-600 h-14"
         style={{
-          height: 56,
           boxShadow: 'var(--shadow-glow)',
         }}
         aria-label={t(action.label)}
@@ -55,16 +55,15 @@ const ActionButton = React.memo(function ActionButton({
         <span className="text-[10px] font-medium leading-tight">
           {t(action.label)}
         </span>
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
       onClick={handleClick}
-      className="flex min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border border-gray-200 bg-white px-4 text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-emerald-400"
-      style={{ height: 48 }}
+      className="flex min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border-gray-200 bg-white px-4 text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-emerald-400 h-12"
       aria-label={t(action.label)}
       data-testid={`quick-action-${action.id}`}
     >
@@ -72,7 +71,7 @@ const ActionButton = React.memo(function ActionButton({
       <span className="text-[10px] font-medium leading-tight">
         {t(action.label)}
       </span>
-    </button>
+    </Button>
   );
 });
 

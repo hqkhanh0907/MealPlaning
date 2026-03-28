@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { RestTimer } from './RestTimer';
 import { ExerciseSelector } from './ExerciseSelector';
 import { WorkoutSummaryCard } from './WorkoutSummaryCard';
@@ -109,21 +111,23 @@ function ProgressiveOverloadChip({
   if (!suggestion) return null;
   const isPlateaued = suggestion.isPlateaued ?? false;
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={() => onApply(suggestion)}
-      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+      className={cn(
+        'rounded-full px-3 py-1.5 text-xs',
         isPlateaued
-          ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
-          : 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
-      }`}
+          ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300'
+          : 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300'
+      )}
       data-testid="overload-chip"
     >
       {isPlateaued ? '⚠️' : '📈'} {suggestion.weight}kg × {suggestion.reps}
       {isPlateaued &&
         suggestion.plateauWeeks != null &&
         ` (plateau ${suggestion.plateauWeeks}w)`}
-    </button>
+    </Button>
   );
 }
 
@@ -347,25 +351,27 @@ export function WorkoutLogger({
         className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
         data-testid="workout-header"
       >
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleBack}
-          className="flex items-center gap-1 text-sm font-medium"
+          className="gap-1 text-white hover:bg-white/20 hover:text-white"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" />
           <span>{t('fitness.logger.back')}</span>
-        </button>
+        </Button>
         <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} />
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleFinish}
-          className="flex items-center gap-1 text-sm font-medium"
+          className="gap-1 text-white hover:bg-white/20 hover:text-white"
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>
           <X className="h-5 w-5" />
-        </button>
+        </Button>
       </header>
 
       <div className="flex-1 space-y-6 overflow-y-auto p-4">
@@ -437,16 +443,17 @@ export function WorkoutLogger({
                     <span className="w-16 text-xs text-slate-500">
                       {t('fitness.logger.weight')}
                     </span>
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary"
+                      size="icon"
                       onClick={() =>
                         handleWeightChange(exercise.id, -WEIGHT_INCREMENT)
                       }
-                      className="h-10 w-10 rounded-lg bg-slate-100 font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
                       data-testid={`weight-minus-${exercise.id}`}
                     >
                       −
-                    </button>
+                    </Button>
                     <input
                       type="number"
                       value={input.weight}
@@ -458,16 +465,17 @@ export function WorkoutLogger({
                       className="w-20 rounded-lg border border-slate-200 bg-white py-2 text-center text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                       data-testid={`weight-input-${exercise.id}`}
                     />
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary"
+                      size="icon"
                       onClick={() =>
                         handleWeightChange(exercise.id, WEIGHT_INCREMENT)
                       }
-                      className="h-10 w-10 rounded-lg bg-slate-100 font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
                       data-testid={`weight-plus-${exercise.id}`}
                     >
                       +
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -496,31 +504,33 @@ export function WorkoutLogger({
                       data-testid={`rpe-selector-${exercise.id}`}
                     >
                       {RPE_OPTIONS.map((rpe) => (
-                        <button
+                        <Button
                           key={rpe}
-                          type="button"
+                          variant={input.rpe === rpe ? 'default' : 'outline'}
+                          size="icon"
                           onClick={() => handleRpeSelect(exercise.id, rpe)}
-                          className={`h-9 w-9 rounded-full text-xs font-semibold transition-colors ${
+                          className={cn(
+                            'h-9 w-9 rounded-full text-xs',
                             input.rpe === rpe
-                              ? 'bg-emerald-500 text-white'
-                              : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                          }`}
+                              ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                              : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+                          )}
                           data-testid={`rpe-${rpe}-${exercise.id}`}
                         >
                           {rpe}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
 
-                  <button
-                    type="button"
+                  <Button
+                    variant="default"
                     onClick={() => handleLogSet(exercise.id)}
-                    className="w-full rounded-lg bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+                    className="w-full bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
                     data-testid={`log-set-${exercise.id}`}
                   >
                     {t('fitness.logger.logSet')}
-                  </button>
+                  </Button>
                 </div>
               </section>
 
@@ -544,15 +554,15 @@ export function WorkoutLogger({
       </div>
 
       <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
-        <button
-          type="button"
+        <Button
+          variant="outline"
           onClick={() => setShowExerciseSelector(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 py-3 text-sm font-medium text-slate-500 transition-colors hover:border-emerald-500 hover:text-emerald-500 dark:border-slate-600 dark:text-slate-400"
+          className="w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 py-3 text-slate-500 hover:border-emerald-500 hover:text-emerald-500 dark:border-slate-600 dark:text-slate-400"
           data-testid="add-exercise-button"
         >
           <Plus className="h-5 w-5" />
           {t('fitness.logger.addExercise')}
-        </button>
+        </Button>
       </div>
 
       {showRestTimer && (

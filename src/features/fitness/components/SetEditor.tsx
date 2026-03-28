@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Minus, Plus, X, Check } from 'lucide-react';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { Button } from '@/components/ui/button';
 import { RPE_OPTIONS, WEIGHT_INCREMENT, REPS_INCREMENT, MIN_WEIGHT_KG, MIN_REPS } from '../constants';
 
 interface SetEditorProps {
@@ -93,14 +94,15 @@ export const SetEditor = React.memo(function SetEditor({
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
             {t('fitness.editor.title')}
           </h3>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onCancel}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700"
+            className="h-8 w-8 rounded-full"
             data-testid="editor-close-button"
           >
             <X className="h-5 w-5" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
 
         {/* Weight section */}
@@ -109,14 +111,15 @@ export const SetEditor = React.memo(function SetEditor({
             {t('fitness.editor.weight')} ({t('fitness.editor.kg')})
           </label>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={handleWeightDecrement}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              className="h-11 w-11 shrink-0"
               data-testid="weight-minus-button"
             >
               <Minus className="h-5 w-5" aria-hidden="true" />
-            </button>
+            </Button>
             <input
               type="number"
               value={weight}
@@ -126,14 +129,15 @@ export const SetEditor = React.memo(function SetEditor({
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 text-center text-base font-semibold tabular-nums text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
               data-testid="weight-input"
             />
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={handleWeightIncrement}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              className="h-11 w-11 shrink-0"
               data-testid="weight-plus-button"
             >
               <Plus className="h-5 w-5" aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -145,19 +149,16 @@ export const SetEditor = React.memo(function SetEditor({
             </span>
             <div className="flex flex-wrap gap-2">
               {recentWeights.map((w) => (
-                <button
+                <Button
                   key={w}
-                  type="button"
+                  variant={weight === w ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => handleWeightChip(w)}
-                  className={`rounded-full px-3 py-1.5 text-sm font-medium tabular-nums transition-colors ${
-                    weight === w
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                  }`}
+                  className="rounded-full tabular-nums"
                   data-testid={`weight-chip-${w}`}
                 >
                   {w}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -169,14 +170,15 @@ export const SetEditor = React.memo(function SetEditor({
             {t('fitness.editor.reps')}
           </label>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={handleRepsDecrement}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              className="h-11 w-11 shrink-0"
               data-testid="reps-minus-button"
             >
               <Minus className="h-5 w-5" aria-hidden="true" />
-            </button>
+            </Button>
             <input
               type="number"
               value={reps}
@@ -186,14 +188,15 @@ export const SetEditor = React.memo(function SetEditor({
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 text-center text-base font-semibold tabular-nums text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
               data-testid="reps-input"
             />
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={handleRepsIncrement}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              className="h-11 w-11 shrink-0"
               data-testid="reps-plus-button"
             >
               <Plus className="h-5 w-5" aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -209,44 +212,43 @@ export const SetEditor = React.memo(function SetEditor({
             data-testid="rpe-selector"
           >
             {RPE_OPTIONS.map((value) => (
-              <button
+              <Button
                 key={value}
-                type="button"
+                variant={rpe === value ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => handleRpeSelect(value)}
-                className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold tabular-nums transition-colors ${
-                  rpe === value
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                }`}
+                className="h-11 w-11 rounded-full tabular-nums"
                 aria-pressed={rpe === value}
                 data-testid={`rpe-button-${value}`}
               >
                 {value}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="lg"
             onClick={onCancel}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="flex-1"
             data-testid="cancel-button"
           >
             <X className="h-4 w-4" aria-hidden="true" />
             {t('fitness.editor.cancel')}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="default"
+            size="lg"
             onClick={handleSave}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+            className="flex-1"
             data-testid="save-button"
           >
             <Check className="h-4 w-4" aria-hidden="true" />
             {t('fitness.editor.save')}
-          </button>
+          </Button>
         </div>
       </div>
     </ModalBackdrop>

@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { InsightType, InsightColor } from '../hooks/useInsightEngine';
+import { Button } from '@/components/ui/button';
 import { useInsightEngine } from '../hooks/useInsightEngine';
 
 const ICON_MAP: Record<InsightType, React.FC<{ className?: string }>> = {
@@ -151,28 +152,30 @@ export const AiInsightCard: React.FC = React.memo(function AiInsightCard() {
         </p>
 
         {currentInsight.actionLabel && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             data-testid="insight-action-btn"
-            type="button"
             onClick={onAction}
-            className={`mt-1.5 inline-flex items-center gap-1 text-xs font-semibold rounded px-2 py-1 transition-colors ${colors.action}`}
+            className={`mt-1.5 gap-1 px-2 py-1 ${colors.action}`}
           >
             {currentInsight.actionLabel}
             <ChevronRight className="w-3 h-3" />
-          </button>
+          </Button>
         )}
       </div>
 
       {currentInsight.dismissable && (
-        <button
+        <Button
+          variant="ghost"
+          size="icon-xs"
           data-testid="insight-dismiss-btn"
-          type="button"
           onClick={onDismiss}
           aria-label={t('insightCard.dismiss')}
-          className={`flex-shrink-0 p-1 rounded transition-colors ${colors.dismiss}`}
+          className={`shrink-0 ${colors.dismiss}`}
         >
           <X className="w-4 h-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

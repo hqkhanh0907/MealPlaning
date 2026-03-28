@@ -262,7 +262,7 @@ describe('QuickActionsBar', () => {
     it('center button height is 56px', () => {
       render(<QuickActionsBar />);
       const centerButton = screen.getByTestId('quick-action-log-breakfast');
-      expect(centerButton.style.height).toBe('56px');
+      expect(centerButton.className).toContain('h-14');
     });
 
     it('left button has secondary styling with border', () => {
@@ -277,7 +277,7 @@ describe('QuickActionsBar', () => {
     it('secondary button height is 48px', () => {
       render(<QuickActionsBar />);
       const leftButton = screen.getByTestId('quick-action-log-weight');
-      expect(leftButton.style.height).toBe('48px');
+      expect(leftButton.className).toContain('h-12');
     });
 
     it('all buttons have rounded-full and min-width', () => {
@@ -295,7 +295,7 @@ describe('QuickActionsBar', () => {
       const { unmount } = render(<QuickActionsBar />);
       const center1 = screen.getByTestId('quick-action-log-meal');
       expect(center1.className).toContain('bg-emerald-500');
-      expect(center1.style.height).toBe('56px');
+      expect(center1.className).toContain('h-14');
       unmount();
 
       // Context: all meals + workout
@@ -303,7 +303,7 @@ describe('QuickActionsBar', () => {
       render(<QuickActionsBar />);
       const center2 = screen.getByTestId('quick-action-view-results');
       expect(center2.className).toContain('bg-emerald-500');
-      expect(center2.style.height).toBe('56px');
+      expect(center2.className).toContain('h-14');
     });
   });
 

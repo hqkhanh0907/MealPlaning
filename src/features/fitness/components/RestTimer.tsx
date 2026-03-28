@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Timer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RestTimerProps {
   durationSeconds: number;
@@ -148,22 +149,22 @@ export const RestTimer = React.memo(function RestTimer({
         </div>
 
         <div className="flex gap-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleAddTime}
-            className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
             data-testid="add-time-button"
           >
             {t('fitness.timer.addTime')}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
             onClick={handleSkip}
-            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
             data-testid="skip-button"
           >
             {t('fitness.timer.skip')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

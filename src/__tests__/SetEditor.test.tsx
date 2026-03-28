@@ -146,25 +146,25 @@ describe('SetEditor', () => {
     renderEditor();
     const rpeButton = screen.getByTestId('rpe-button-8');
     fireEvent.click(rpeButton);
-    expect(rpeButton.className).toContain('bg-emerald-500');
+    expect(rpeButton.className).toContain('bg-primary');
   });
 
   it('toggling same RPE value deselects it', () => {
     renderEditor({ initialRpe: 8 });
     const rpeButton = screen.getByTestId('rpe-button-8');
-    expect(rpeButton.className).toContain('bg-emerald-500');
+    expect(rpeButton.className).toContain('bg-primary');
     fireEvent.click(rpeButton);
-    expect(rpeButton.className).not.toContain('bg-emerald-500');
+    expect(rpeButton.className).not.toContain('bg-primary');
   });
 
   it('selecting a different RPE value switches selection', () => {
     renderEditor({ initialRpe: 7 });
     const rpe7 = screen.getByTestId('rpe-button-7');
     const rpe9 = screen.getByTestId('rpe-button-9');
-    expect(rpe7.className).toContain('bg-emerald-500');
+    expect(rpe7.className).toContain('bg-primary');
     fireEvent.click(rpe9);
-    expect(rpe9.className).toContain('bg-emerald-500');
-    expect(rpe7.className).not.toContain('bg-emerald-500');
+    expect(rpe9.className).toContain('bg-primary');
+    expect(rpe7.className).not.toContain('bg-primary');
   });
 
   it('RPE buttons have aria-pressed attribute', () => {

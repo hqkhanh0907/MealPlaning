@@ -7,6 +7,7 @@ import {
   UtensilsCrossed,
   ChevronRight,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTodaysPlan } from '../hooks/useTodaysPlan';
 import { useNavigationStore } from '../../../store/navigationStore';
 
@@ -61,14 +62,15 @@ function MealsSection({
         )}
       </div>
       {nextMealKey && !hasReachedTarget && (
-        <button
-          type="button"
+        <Button
+          variant="link"
+          size="sm"
           onClick={onLogMeal}
           data-testid="log-meal-cta"
-          className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          className="mt-2 h-auto p-0 text-xs text-blue-600 dark:text-blue-400"
         >
           {t(nextMealKey)}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -140,15 +142,15 @@ const TodaysPlanCard: React.FC = React.memo(() => {
                 })}
               </p>
             )}
-            <button
-              type="button"
+            <Button
+              size="sm"
               onClick={handleStartWorkout}
               data-testid="start-workout-cta"
-              className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="mt-2 gap-1 bg-blue-600 text-white hover:bg-blue-700"
             >
               <Play className="w-3.5 h-3.5" aria-hidden="true" />
               {t('dashboard.todaysPlan.startCta')}
-            </button>
+            </Button>
           </div>
           <MealsSection {...mealsProps} />
         </div>
@@ -238,22 +240,24 @@ const TodaysPlanCard: React.FC = React.memo(() => {
           </div>
         </div>
         <div className="flex gap-2 mt-3" data-testid="quick-actions">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleLogWeight}
             data-testid="log-weight-chip"
-            className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
           >
             {t('dashboard.todaysPlan.logWeight')}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleLogCardio}
             data-testid="log-cardio-chip"
-            className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
           >
             {t('dashboard.todaysPlan.logCardio')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -272,15 +276,15 @@ const TodaysPlanCard: React.FC = React.memo(() => {
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
           {t('dashboard.todaysPlan.noPlan')}
         </p>
-        <button
-          type="button"
+        <Button
+          size="sm"
           onClick={handleCreatePlan}
           data-testid="create-plan-cta"
-          className="inline-flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          className="gap-1 bg-blue-600 text-white hover:bg-blue-700"
         >
           {t('dashboard.todaysPlan.createPlan')}
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
-        </button>
+        </Button>
       </div>
       <div className="border-t border-slate-100 dark:border-slate-700 pt-3 mt-1">
         <MealsSection {...mealsProps} />
