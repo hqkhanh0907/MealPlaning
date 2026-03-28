@@ -1,9 +1,18 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronLeft } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ChevronLeft } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { getSmartDefaults } from '../utils/getSmartDefaults';
 import { EXERCISES } from '../data/exerciseDatabase';
+import {
+  fitnessOnboardingSchema,
+  fitnessOnboardingDefaults,
+} from '../../../schemas/fitnessOnboardingSchema';
+import type { FitnessOnboardingFormData } from '../../../schemas/fitnessOnboardingSchema';
+import { RadioPills } from '../../../components/form/RadioPills';
+import { ChipSelect } from '../../../components/form/ChipSelect';
 import type {
   TrainingGoal,
   TrainingExperience,
@@ -77,6 +86,19 @@ const ALL_STEPS: StepDef[] = [
   { id: 'sleepHours', minExperience: 'advanced' },
 ];
 
+const STEP_FIELDS: Record<StepId, (keyof FitnessOnboardingFormData)[]> = {
+  core: ['trainingGoal', 'experience', 'daysPerWeek'],
+  sessionDuration: ['sessionDuration'],
+  equipment: ['equipment'],
+  injuries: ['injuries'],
+  cardioSessions: ['cardioSessions'],
+  periodization: ['periodization'],
+  cycleWeeks: ['cycleWeeks'],
+  priorityMuscles: ['priorityMuscles'],
+  known1rm: ['known1rm'],
+  sleepHours: ['avgSleepHours'],
+};
+
 function getActiveSteps(experience: TrainingExperience): StepDef[] {
   const rank = EXPERIENCE_RANK[experience];
   return ALL_STEPS.filter((step) => {
@@ -94,21 +116,34 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
   const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);
   const setOnboarded = useFitnessStore((s) => s.setOnboarded);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [goal, setGoal] = useState<TrainingGoal>('hypertrophy');
-  const [experience, setExperience] = useState<TrainingExperience>('beginner');
-  const [daysPerWeek, setDaysPerWeek] = useState(3);
+  const { control, handleSubmit, watch, trigger, setValue } = useForm<FitnessOnboardingFormData>({
+    resolver: zodResolver(fitnessOnboardingSchema),
+    mode: 'onBlur',
+    defaultValues: fitnessOnboardingDefaults,
+  });
 
-  const [sessionDuration, setSessionDuration] = useState<number | null>(null);
-  const [equipment, setEquipment] = useState<EquipmentType[]>([]);
-  const [injuries, setInjuries] = useState<BodyRegion[]>([]);
-  const [cardioSessions, setCardioSessions] = useState<number | null>(null);
-  const [periodization, setPeriodization] = useState<PeriodizationModel | null>(null);
-  const [cycleWeeks, setCycleWeeks] = useState<number | null>(null);
-  const [priorityMuscles, setPriorityMuscles] = useState<MuscleGroup[]>([]);
-  const [known1rm, setKnown1rm] = useState<Record<string, string>>({});
-  const [avgSleepHours, setAvgSleepHours] = useState('');
+  const [currentStep, setCurrentStep] = useState(0);
   const [showOrm, setShowOrm] = useState(false);
+  const [ormStrings, setOrmStrings] = useState<Record<string, string>>({});
+
+  const experience = watch('experience');
+  const daysPerWeek = watch('daysPerWeek');
+  const sessionDuration = watch('sessionDuration');
+  const cardioSessions = watch('cardioSessions');
+  const cycleWeeks = watch('cycleWeeks');
+
+  useEffect(() => {
+    if (experience === 'advanced') setShowOrm(true);
+  }, [experience]);
+
+  useEffect(() => {
+    const parsed: Record<string, number> = {};
+    for (const [lift, val] of Object.entries(ormStrings)) {
+      const num = parseFloat(val);
+      if (!isNaN(num) && num >= 0) parsed[lift] = num;
+    }
+    setValue('known1rm', parsed, { shouldValidate: false });
+  }, [ormStrings, setValue]);
 
   const activeSteps = useMemo(() => getActiveSteps(experience), [experience]);
   const totalSteps = activeSteps.length;
@@ -121,78 +156,82 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   }, []);
 
-  const handleNext = useCallback(() => {
-    setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
-  }, [totalSteps]);
-
-  const handleExperienceChange = useCallback((exp: TrainingExperience) => {
-    setExperience(exp);
-    if (exp === 'advanced') setShowOrm(true);
-  }, []);
-
-  const toggleEquipment = useCallback((item: EquipmentType) => {
-    setEquipment((prev) =>
-      prev.includes(item) ? prev.filter((e) => e !== item) : [...prev, item],
-    );
-  }, []);
-
-  const toggleInjury = useCallback((item: BodyRegion) => {
-    setInjuries((prev) =>
-      prev.includes(item) ? prev.filter((e) => e !== item) : [...prev, item],
-    );
-  }, []);
-
-  const toggleMuscle = useCallback((item: MuscleGroup) => {
-    setPriorityMuscles((prev) => {
-      if (prev.includes(item)) return prev.filter((m) => m !== item);
-      if (prev.length >= MAX_PRIORITY_MUSCLES) return prev;
-      return [...prev, item];
-    });
-  }, []);
-
-  const handleSubmit = useCallback(() => {
-    const defaults = getSmartDefaults(goal, experience, daysPerWeek);
-
-    const parsed1rm: Record<string, number> = {};
-    for (const [lift, val] of Object.entries(known1rm)) {
-      const num = parseFloat(val);
-      if (!isNaN(num) && num > 0) parsed1rm[lift] = num;
+  const handleNext = useCallback(async () => {
+    if (!currentStepId) return;
+    const fields = STEP_FIELDS[currentStepId];
+    const isValid = await trigger(fields);
+    if (isValid) {
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
     }
+  }, [currentStepId, trigger, totalSteps]);
 
-    const profile: TrainingProfile = {
-      id: crypto.randomUUID(),
-      ...defaults,
-      ...(sessionDuration != null ? { sessionDurationMin: sessionDuration } : {}),
-      ...(equipment.length > 0 ? { availableEquipment: equipment } : {}),
-      injuryRestrictions: injuries,
-      ...(cardioSessions != null ? { cardioSessionsWeek: cardioSessions } : {}),
-      ...(periodization != null ? { periodizationModel: periodization } : {}),
-      ...(cycleWeeks != null ? { planCycleWeeks: cycleWeeks } : {}),
-      ...(priorityMuscles.length > 0 ? { priorityMuscles } : {}),
-      ...(Object.keys(parsed1rm).length > 0 ? { known1rm: parsed1rm } : {}),
-      ...(avgSleepHours !== '' ? { avgSleepHours: parseFloat(avgSleepHours) } : {}),
-      updatedAt: new Date().toISOString(),
-    };
+  const goalOptions = useMemo(
+    () => GOALS.map((g) => ({ value: g, label: t(`fitness.onboarding.${g}`) })),
+    [t],
+  );
 
-    setTrainingProfile(profile);
-    setOnboarded(true);
-    onComplete();
-  }, [
-    goal, experience, daysPerWeek, sessionDuration, equipment,
-    injuries, cardioSessions, periodization, cycleWeeks,
-    priorityMuscles, known1rm, avgSleepHours,
-    setTrainingProfile, setOnboarded, onComplete,
-  ]);
+  const experienceOptions = useMemo(
+    () => EXPERIENCES.map((e) => ({ value: e, label: t(`fitness.onboarding.${e}`) })),
+    [t],
+  );
+
+  const equipmentOptions = useMemo(
+    () => EQUIPMENT_OPTIONS.map((eq) => ({ value: eq, label: eq })),
+    [],
+  );
+
+  const injuryOptions = useMemo(
+    () => INJURY_OPTIONS.map((inj) => ({ value: inj, label: inj })),
+    [],
+  );
+
+  const periodizationOptions = useMemo(
+    () => PERIODIZATION_OPTIONS.map((p) => ({ value: p, label: p })),
+    [],
+  );
+
+  const muscleOptions = useMemo(
+    () => MUSCLE_OPTIONS.map((m) => ({ value: m, label: m })),
+    [],
+  );
+
+  const onFormSubmit = useCallback(
+    (data: FitnessOnboardingFormData) => {
+      const defaults = getSmartDefaults(data.trainingGoal, data.experience, data.daysPerWeek);
+
+      const parsed1rm: Record<string, number> = {};
+      for (const [lift, val] of Object.entries(data.known1rm)) {
+        if (val > 0) parsed1rm[lift] = val;
+      }
+
+      const profile: TrainingProfile = {
+        id: crypto.randomUUID(),
+        ...defaults,
+        ...(data.sessionDuration != null ? { sessionDurationMin: data.sessionDuration } : {}),
+        ...(data.equipment.length > 0 ? { availableEquipment: data.equipment } : {}),
+        injuryRestrictions: data.injuries,
+        ...(data.cardioSessions != null ? { cardioSessionsWeek: data.cardioSessions } : {}),
+        ...(data.periodization != null ? { periodizationModel: data.periodization } : {}),
+        ...(data.cycleWeeks != null ? { planCycleWeeks: data.cycleWeeks } : {}),
+        ...(data.priorityMuscles.length > 0 ? { priorityMuscles: data.priorityMuscles } : {}),
+        ...(Object.keys(parsed1rm).length > 0 ? { known1rm: parsed1rm } : {}),
+        ...(data.avgSleepHours !== undefined ? { avgSleepHours: data.avgSleepHours } : {}),
+        updatedAt: new Date().toISOString(),
+      };
+
+      setTrainingProfile(profile);
+      setOnboarded(true);
+      onComplete();
+    },
+    [setTrainingProfile, setOnboarded, onComplete],
+  );
+
+  const submitForm = useCallback(() => {
+    void handleSubmit(onFormSubmit)();
+  }, [handleSubmit, onFormSubmit]);
 
   const pillClass = (active: boolean) =>
     `px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-      active
-        ? 'bg-emerald-500 text-white shadow-sm'
-        : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-    }`;
-
-  const chipClass = (active: boolean) =>
-    `px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
       active
         ? 'bg-emerald-500 text-white shadow-sm'
         : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -244,40 +283,22 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
             <legend className={labelClass}>
               {t('fitness.onboarding.goal')}
             </legend>
-            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('fitness.onboarding.goal')}>
-              {GOALS.map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  role="radio"
-                  aria-checked={goal === g}
-                  onClick={() => setGoal(g)}
-                  className={pillClass(goal === g)}
-                >
-                  {t(`fitness.onboarding.${g}`)}
-                </button>
-              ))}
-            </div>
+            <RadioPills<FitnessOnboardingFormData>
+              name="trainingGoal"
+              control={control}
+              options={goalOptions}
+            />
           </fieldset>
 
           <fieldset>
             <legend className={labelClass}>
               {t('fitness.onboarding.experience')}
             </legend>
-            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('fitness.onboarding.experience')}>
-              {EXPERIENCES.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  role="radio"
-                  aria-checked={experience === e}
-                  onClick={() => handleExperienceChange(e)}
-                  className={pillClass(experience === e)}
-                >
-                  {t(`fitness.onboarding.${e}`)}
-                </button>
-              ))}
-            </div>
+            <RadioPills<FitnessOnboardingFormData>
+              name="experience"
+              control={control}
+              options={experienceOptions}
+            />
           </fieldset>
 
           <fieldset>
@@ -291,7 +312,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
                   type="button"
                   role="radio"
                   aria-checked={daysPerWeek === d}
-                  onClick={() => setDaysPerWeek(d)}
+                  onClick={() => setValue('daysPerWeek', d)}
                   className={pillClass(daysPerWeek === d)}
                 >
                   {d}
@@ -315,7 +336,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
                 type="button"
                 role="radio"
                 aria-checked={sessionDuration === d}
-                onClick={() => setSessionDuration(d)}
+                onClick={() => setValue('sessionDuration', d)}
                 className={pillClass(sessionDuration === d)}
               >
                 {d}
@@ -331,21 +352,11 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
           <legend className={labelClass}>
             {t('fitness.onboarding.equipment')}
           </legend>
-          <div className="flex flex-wrap gap-2">
-            {EQUIPMENT_OPTIONS.map((eq) => (
-              <button
-                key={eq}
-                type="button"
-                role="checkbox"
-                aria-checked={equipment.includes(eq)}
-                onClick={() => toggleEquipment(eq)}
-                className={chipClass(equipment.includes(eq))}
-              >
-                {equipment.includes(eq) && <Check className="w-3 h-3" aria-hidden="true" />}
-                {eq}
-              </button>
-            ))}
-          </div>
+          <ChipSelect<FitnessOnboardingFormData>
+            name="equipment"
+            control={control}
+            options={equipmentOptions}
+          />
         </fieldset>
       )}
 
@@ -355,21 +366,11 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
           <legend className={labelClass}>
             {t('fitness.onboarding.injuries')}
           </legend>
-          <div className="flex flex-wrap gap-2">
-            {INJURY_OPTIONS.map((inj) => (
-              <button
-                key={inj}
-                type="button"
-                role="checkbox"
-                aria-checked={injuries.includes(inj)}
-                onClick={() => toggleInjury(inj)}
-                className={chipClass(injuries.includes(inj))}
-              >
-                {injuries.includes(inj) && <Check className="w-3 h-3" aria-hidden="true" />}
-                {inj}
-              </button>
-            ))}
-          </div>
+          <ChipSelect<FitnessOnboardingFormData>
+            name="injuries"
+            control={control}
+            options={injuryOptions}
+          />
         </fieldset>
       )}
 
@@ -386,7 +387,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
                 type="button"
                 role="radio"
                 aria-checked={cardioSessions === c}
-                onClick={() => setCardioSessions(c)}
+                onClick={() => setValue('cardioSessions', c)}
                 className={pillClass(cardioSessions === c)}
               >
                 {c}
@@ -402,20 +403,11 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
           <legend className={labelClass}>
             {t('fitness.onboarding.periodization')}
           </legend>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('fitness.onboarding.periodization')}>
-            {PERIODIZATION_OPTIONS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="radio"
-                aria-checked={periodization === p}
-                onClick={() => setPeriodization(p)}
-                className={pillClass(periodization === p)}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          <RadioPills<FitnessOnboardingFormData>
+            name="periodization"
+            control={control}
+            options={periodizationOptions}
+          />
         </fieldset>
       )}
 
@@ -432,7 +424,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
                 type="button"
                 role="radio"
                 aria-checked={cycleWeeks === w}
-                onClick={() => setCycleWeeks(w)}
+                onClick={() => setValue('cycleWeeks', w)}
                 className={pillClass(cycleWeeks === w)}
               >
                 {w}
@@ -448,21 +440,12 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
           <legend className={labelClass}>
             {t('fitness.onboarding.priorityMuscles')}
           </legend>
-          <div className="flex flex-wrap gap-2">
-            {MUSCLE_OPTIONS.map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="checkbox"
-                aria-checked={priorityMuscles.includes(m)}
-                onClick={() => toggleMuscle(m)}
-                className={chipClass(priorityMuscles.includes(m))}
-              >
-                {priorityMuscles.includes(m) && <Check className="w-3 h-3" aria-hidden="true" />}
-                {m}
-              </button>
-            ))}
-          </div>
+          <ChipSelect<FitnessOnboardingFormData>
+            name="priorityMuscles"
+            control={control}
+            options={muscleOptions}
+            maxItems={MAX_PRIORITY_MUSCLES}
+          />
         </fieldset>
       )}
 
@@ -502,9 +485,9 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
                     min={0}
                     step={2.5}
                     placeholder="kg"
-                    value={known1rm[lift] ?? ''}
+                    value={ormStrings[lift] ?? ''}
                     onChange={(e) =>
-                      setKnown1rm((prev) => ({ ...prev, [lift]: e.target.value }))
+                      setOrmStrings((prev) => ({ ...prev, [lift]: e.target.value }))
                     }
                     className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
                     data-testid={`orm-${lift}`}
@@ -519,22 +502,34 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
       {/* Step: Sleep hours (advanced) */}
       {currentStepId === 'sleepHours' && (
         <div data-testid="field-avg-sleep">
-          <label
-            htmlFor="avg-sleep"
-            className={labelClass}
-          >
-            {t('fitness.onboarding.sleepHours')}
-          </label>
-          <input
-            id="avg-sleep"
-            type="number"
-            min={3}
-            max={12}
-            step={0.5}
-            placeholder="7.5"
-            value={avgSleepHours}
-            onChange={(e) => setAvgSleepHours(e.target.value)}
-            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+          <Controller
+            name="avgSleepHours"
+            control={control}
+            render={({ field }) => (
+              <>
+                <label
+                  htmlFor="avg-sleep"
+                  className={labelClass}
+                >
+                  {t('fitness.onboarding.sleepHours')}
+                </label>
+                <input
+                  id="avg-sleep"
+                  type="number"
+                  min={3}
+                  max={12}
+                  step={0.5}
+                  placeholder="7.5"
+                  value={field.value ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    field.onChange(val === '' ? undefined : parseFloat(val));
+                  }}
+                  onBlur={field.onBlur}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+                />
+              </>
+            )}
           />
         </div>
       )}
@@ -543,7 +538,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
       {isLastStep ? (
         <button
           type="button"
-          onClick={handleSubmit}
+          onClick={submitForm}
           className="w-full py-3 rounded-xl bg-emerald-500 text-white font-semibold text-base shadow-md hover:bg-emerald-600 transition-all active:scale-[0.98]"
         >
           {t('fitness.onboarding.start')}
@@ -551,7 +546,7 @@ function FitnessOnboardingComponent({ onComplete }: FitnessOnboardingProps) {
       ) : (
         <button
           type="button"
-          onClick={handleNext}
+          onClick={() => { void handleNext(); }}
           data-testid="next-button"
           className="w-full py-3 rounded-xl bg-emerald-500 text-white font-semibold text-base shadow-md hover:bg-emerald-600 transition-all active:scale-[0.98]"
         >

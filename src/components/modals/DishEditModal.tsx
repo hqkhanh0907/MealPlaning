@@ -1,15 +1,19 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, Clock } from 'lucide-react';
-import { Dish, Ingredient, DishIngredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
+import { Dish, Ingredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { getMealTagOptions } from '../../data/constants';
-import { suggestIngredientInfo, suggestDishIngredients } from '../../services/geminiService';
-import { UnitSelector } from '../shared/UnitSelector';
+import { suggestDishIngredients } from '../../services/geminiService';
 import { AISuggestIngredientsPreview, ConfirmedSuggestion } from './AISuggestIngredientsPreview';
+import { QuickAddIngredientForm } from './QuickAddIngredientForm';
+import { StringNumberController } from '../form/StringNumberController';
+import { dishEditSchema, type DishEditFormData } from '../../schemas/dishEditSchema';
 
 interface DishEditModalProps {
   /** Dish being edited, or null for creating a new dish. */
@@ -32,49 +36,40 @@ const getAmountStep = (amount: number): number => {
   return 10;
 };
 
-/** Display unit for nutrition labels: "100g" for g/kg, "100ml" for ml/l, "1 {unit}" for others. */
-const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
-  const u = getLocalizedField(unit, lang).toLowerCase().trim();
-  if (u === 'kg' || u === 'g') return '100g';
-  if (u === 'l' || u === 'ml') return '100ml';
-  return `1 ${getLocalizedField(unit, lang)}`;
-};
-
 export const DishEditModal: React.FC<DishEditModalProps> = ({
   editingItem, ingredients, allDishes = [], onSubmit, onClose, onCreateIngredient,
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
-  const [namePrimary, setNamePrimary] = useState(() => editingItem ? getLocalizedField(editingItem.name, lang) : '');
-  const [selectedIngredients, setSelectedIngredients] = useState<DishIngredient[]>(
-    () => editingItem ? [...editingItem.ingredients] : [],
-  );
-  const [tags, setTags] = useState<MealType[]>(() => editingItem ? [...(editingItem.tags || [])] : []);
-  const [rating, setRating] = useState<number>(() => editingItem?.rating ?? 0);
-  const [notes, setNotes] = useState<string>(() => editingItem?.notes ?? '');
+
+  const { control, getValues, setValue, setError, clearErrors, watch, formState: { errors, isDirty } } = useForm<DishEditFormData>({
+    resolver: zodResolver(dishEditSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      name: editingItem ? getLocalizedField(editingItem.name, lang) : '',
+      tags: editingItem ? [...(editingItem.tags || [])] as DishEditFormData['tags'] : [],
+      rating: editingItem?.rating ?? 0,
+      notes: editingItem?.notes ?? '',
+      ingredients: editingItem
+        ? editingItem.ingredients.map(i => ({ ingredientId: i.ingredientId, amount: Math.round(i.amount) }))
+        : [],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({ control, name: 'ingredients' });
+
   const [ingredientSearch, setIngredientSearch] = useState('');
-  const [formErrors, setFormErrors] = useState<{ name?: string; tags?: string; ingredients?: string; amounts?: Partial<Record<string, string>> }>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-  // String state per ingredient amount to allow clearing/retyping without snap-back on mobile
-  const [amountStrings, setAmountStrings] = useState<Record<string, string>>(
-    () => Object.fromEntries((editingItem?.ingredients ?? []).map(si => [si.ingredientId, String(Math.round(si.amount))])),
-  );
+  const watchedName = watch('name');
+  const watchedTags = watch('tags');
+  const watchedRating = watch('rating');
+  const watchedNotes = watch('notes');
+  const watchedIngredients = watch('ingredients');
 
   // Quick-add ingredient inline form state
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [qaName, setQaName] = useState('');
-  const [qaUnit, setQaUnit] = useState<{ vi: string; en?: string }>({ vi: 'g' });
-  const [qaCal, setQaCal] = useState('');
-  const [qaProtein, setQaProtein] = useState('');
-  const [qaCarbs, setQaCarbs] = useState('');
-  const [qaFat, setQaFat] = useState('');
-  const [qaFiber, setQaFiber] = useState('');
-  const [qaAiLoading, setQaAiLoading] = useState(false);
-  const [qaError, setQaError] = useState('');
   const [extraIngredients, setExtraIngredients] = useState<Ingredient[]>([]);
-  const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const aiAbortRef = useRef<AbortController | null>(null);
 
   // AI Suggest Ingredients state
   const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
@@ -95,80 +90,97 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     return freq;
   }, [allDishes]);
 
-  const hasChanges = useCallback((): boolean => {
-    if (!editingItem) return namePrimary !== '' || selectedIngredients.length > 0 || tags.length > 0 || rating > 0 || notes !== '';
-    if (namePrimary !== getLocalizedField(editingItem.name, lang)) return true;
-    if (JSON.stringify(tags) !== JSON.stringify(editingItem.tags || [])) return true;
-    if (rating !== (editingItem.rating ?? 0)) return true;
-    if (notes !== (editingItem.notes ?? '')) return true;
-    if (selectedIngredients.length !== editingItem.ingredients.length) return true;
-    return selectedIngredients.some((si, i) => {
-      const orig = editingItem.ingredients[i];
-      if (si.ingredientId !== orig.ingredientId) return true;
-      const amtStr = amountStrings[si.ingredientId] ?? String(si.amount);
-      return amtStr.trim() === '' || Number.isNaN(Number.parseFloat(amtStr)) || Math.round(Number.parseFloat(amtStr)) !== Math.round(orig.amount);
-    });
-  }, [editingItem, namePrimary, lang, selectedIngredients, tags, amountStrings, rating, notes]);
-
-  const buildDish = (): Dish => ({
-    id: editingItem ? editingItem.id : generateId('dish'),
-    name: {
-      vi: namePrimary.trim(),
-    },
-    ingredients: selectedIngredients.map(si => ({
-      ...si,
-      amount: Math.round(Number.parseFloat(amountStrings[si.ingredientId] ?? String(si.amount))),
-    })),
-    tags,
-    ...(rating > 0 ? { rating } : {}),
-    ...(notes.trim() ? { notes: notes.trim() } : {}),
-  });
-
-  const validate = (): boolean => {
-    const errors: { name?: string; tags?: string; ingredients?: string; amounts?: Partial<Record<string, string>> } = {};
-    if (!namePrimary.trim()) errors.name = t('dish.validationName');
-    if (tags.length === 0) errors.tags = t('dish.validationSelectMeal');
-    if (selectedIngredients.length === 0) errors.ingredients = t('dish.validationIngredients');
-    const amtErrors: Partial<Record<string, string>> = {};
-    for (const si of selectedIngredients) {
-      const v = (amountStrings[si.ingredientId] ?? '').trim();
-      if (v === '' || Number.isNaN(Number.parseFloat(v))) {
-        amtErrors[si.ingredientId] = t('dish.validationAmountRequired');
-      } else if (Number.parseFloat(v) < 0) {
-        amtErrors[si.ingredientId] = t('dish.validationAmountNegative');
+  // Clear ingredient amount errors reactively when display value becomes valid
+  useEffect(() => {
+    const ingErrors = errors.ingredients;
+    if (!ingErrors) return;
+    for (let i = 0; i < watchedIngredients.length; i++) {
+      const indexed = ingErrors as unknown as Record<number, { amount?: { message?: string } }>;
+      const entry = indexed?.[i];
+      if (entry?.amount) {
+        const ingId = watchedIngredients[i]?.ingredientId;
+        const inputEl = ingId ? document.querySelector(`[data-testid="input-dish-amount-${ingId}"]`) as HTMLInputElement | null : null;
+        const displayValue = inputEl?.value ?? '';
+        const parsedDisplay = Number.parseFloat(displayValue);
+        if (displayValue !== '' && !Number.isNaN(parsedDisplay) && parsedDisplay >= 0) {
+          clearErrors(`ingredients.${i}.amount`);
+        }
       }
     }
-    if (Object.keys(amtErrors).length > 0) errors.amounts = amtErrors;
-    if (Object.keys(errors).length > 0) { setFormErrors(errors); return false; }
-    return true;
+  });
+
+  const buildDish = (values: DishEditFormData): Dish => ({
+    id: editingItem ? editingItem.id : generateId('dish'),
+    name: {
+      vi: values.name.trim(),
+    },
+    ingredients: values.ingredients.map(si => ({
+      ...si,
+      amount: Math.round(Number.isNaN(si.amount) ? 0 : si.amount),
+    })),
+    tags: values.tags as MealType[],
+    ...(values.rating > 0 ? { rating: values.rating } : {}),
+    ...((values.notes ?? '').trim() ? { notes: (values.notes ?? '').trim() } : {}),
+  });
+
+  const validateForm = (): boolean => {
+    const values = getValues();
+    let hasError = false;
+
+    if (!values.name.trim()) {
+      setError('name', { message: t('dish.validationName') });
+      hasError = true;
+    }
+    if (values.tags.length === 0) {
+      setError('tags', { message: t('dish.validationSelectMeal') });
+      hasError = true;
+    }
+    if (values.ingredients.length === 0) {
+      setError('ingredients', { message: t('dish.validationIngredients') });
+      hasError = true;
+    }
+
+    for (let i = 0; i < values.ingredients.length; i++) {
+      const inputEl = document.querySelector(`[data-testid="input-dish-amount-${values.ingredients[i].ingredientId}"]`) as HTMLInputElement | null;
+      const displayValue = inputEl ? inputEl.value : String(values.ingredients[i].amount);
+      if (displayValue === '' || Number.isNaN(Number.parseFloat(displayValue))) {
+        setError(`ingredients.${i}.amount`, { message: t('dish.validationAmountRequired') });
+        hasError = true;
+      } else if (Number.parseFloat(displayValue) < 0) {
+        setError(`ingredients.${i}.amount`, { message: t('dish.validationAmountNegative') });
+        hasError = true;
+      }
+    }
+
+    return !hasError;
   };
 
   const hasSubmittedRef = useRef(false);
 
-  const handleSubmit = () => {
+  const handleFormSubmit = () => {
     if (hasSubmittedRef.current) return;
-    if (!validate()) return;
+    if (!validateForm()) return;
     hasSubmittedRef.current = true;
-    // Flush newly-created extra ingredients to parent ONLY on successful save
     extraIngredients.forEach(ing => onCreateIngredient?.(ing));
-    onSubmit(buildDish());
+    onSubmit(buildDish(getValues()));
   };
 
   const handleClose = () => {
     aiSuggestAbortRef.current?.abort();
-    if (hasChanges()) { setShowUnsavedDialog(true); return; }
+    if (isDirty) { setShowUnsavedDialog(true); return; }
     onClose();
   };
 
   const handleAiSuggest = useCallback(async () => {
-    if (!namePrimary.trim()) return;
+    const currentName = getValues('name');
+    if (!currentName.trim()) return;
     aiSuggestAbortRef.current?.abort();
     const ctrl = new AbortController();
     aiSuggestAbortRef.current = ctrl;
     setAiSuggestLoading(true);
     setAiSuggestError('');
     try {
-      const results = await suggestDishIngredients(namePrimary.trim(), ctrl.signal);
+      const results = await suggestDishIngredients(currentName.trim(), ctrl.signal);
       if (!ctrl.signal.aborted) {
         setAiSuggestions(results);
       }
@@ -179,16 +191,16 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     } finally {
       if (!ctrl.signal.aborted) setAiSuggestLoading(false);
     }
-  }, [namePrimary, t]);
+  }, [getValues, t]);
 
   const handleAiSuggestConfirm = useCallback((selected: ConfirmedSuggestion[]) => {
+    const currentIngredients = getValues('ingredients');
     for (const item of selected) {
       if (item.matchedIngredient) {
         const matchedId = item.matchedIngredient.id;
-        const alreadyAdded = selectedIngredients.some(si => si.ingredientId === matchedId);
+        const alreadyAdded = currentIngredients.some(si => si.ingredientId === matchedId);
         if (!alreadyAdded) {
-          setSelectedIngredients(prev => [...prev, { ingredientId: matchedId, amount: item.amount }]);
-          setAmountStrings(prev => ({ ...prev, [matchedId]: String(item.amount) }));
+          append({ ingredientId: matchedId, amount: item.amount });
         }
       } else {
         const newIng: Ingredient = {
@@ -202,97 +214,43 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           fiberPer100: item.suggestion.fiber,
         };
         setExtraIngredients(prev => [...prev, newIng]);
-        setSelectedIngredients(prev => [...prev, { ingredientId: newIng.id, amount: item.amount }]);
-        setAmountStrings(prev => ({ ...prev, [newIng.id]: String(item.amount) }));
+        append({ ingredientId: newIng.id, amount: item.amount });
       }
     }
     setAiSuggestions(null);
-    if (formErrors.ingredients) setFormErrors(prev => ({ ...prev, ingredients: undefined }));
-  }, [selectedIngredients, formErrors.ingredients]);
+    if (errors.ingredients?.message) clearErrors('ingredients');
+  }, [getValues, append, errors.ingredients, clearErrors]);
 
   const handleSaveAndBack = () => {
-    if (!validate()) { setShowUnsavedDialog(false); return; }
+    if (!validateForm()) { setShowUnsavedDialog(false); return; }
     extraIngredients.forEach(ing => onCreateIngredient?.(ing));
-    onSubmit(buildDish());
+    onSubmit(buildDish(getValues()));
   };
 
   const handleAddIngredient = useCallback((ingId: string) => {
-    setSelectedIngredients(prev => [...prev, { ingredientId: ingId, amount: 100 }]);
-    setAmountStrings(prev => ({ ...prev, [ingId]: '100' }));
-    if (formErrors.ingredients) setFormErrors(prev => ({ ...prev, ingredients: undefined }));
-  }, [formErrors.ingredients]);
+    append({ ingredientId: ingId, amount: 100 });
+    if (errors.ingredients?.message) clearErrors('ingredients');
+  }, [append, errors.ingredients, clearErrors]);
 
   const handleRemoveIngredient = (ingId: string) => {
-    setSelectedIngredients(prev => prev.filter(si => si.ingredientId !== ingId));
-    setAmountStrings(prev => { const r = { ...prev }; delete r[ingId]; return r; });
+    const idx = fields.findIndex(f => f.ingredientId === ingId);
+    if (idx !== -1) remove(idx);
   };
 
-  const handleUpdateAmount = (ingId: string, amount: number) => {
-    setSelectedIngredients(prev => prev.map(si => si.ingredientId === ingId ? { ...si, amount } : si));
+  const handleTagToggle = (type: MealType, isActive: boolean) => {
+    const currentTags = getValues('tags');
+    if (isActive) {
+      setValue('tags', currentTags.filter(t2 => t2 !== type) as DishEditFormData['tags'], { shouldDirty: true });
+    } else {
+      setValue('tags', [...currentTags, type] as DishEditFormData['tags'], { shouldDirty: true });
+      if (errors.tags) clearErrors('tags');
+    }
   };
 
-  const handleTagToggle = (type: MealType, isActive: boolean) => {    setTags(prev => isActive ? prev.filter(t => t !== type) : [...prev, type]);
-    if (!isActive && formErrors.tags) setFormErrors(prev => ({ ...prev, tags: undefined }));
-  };
-
-  const resetQuickAdd = useCallback(() => {
-    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
-    aiAbortRef.current?.abort();
-    setShowQuickAdd(false);
-    setQaName('');
-    setQaUnit({ vi: 'g', en: 'g' });
-    setQaCal('');
-    setQaProtein('');
-    setQaCarbs('');
-    setQaFat('');
-    setQaFiber('');
-    setQaAiLoading(false);
-    setQaError('');
-  }, []);
-
-  const triggerAIFill = useCallback((name: string, unit: string) => {
-    if (!name.trim() || !unit.trim()) return;
-    // unit here is the vi/display value
-    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
-    aiAbortRef.current?.abort();
-    aiTimerRef.current = setTimeout(async () => {
-      const ctrl = new AbortController();
-      aiAbortRef.current = ctrl;
-      setQaAiLoading(true);
-      try {
-        const info = await suggestIngredientInfo(name.trim(), unit.trim(), ctrl.signal);
-        if (!ctrl.signal.aborted) {
-          setQaCal(String(Math.round(info.calories)));
-          setQaProtein(String(Math.round(info.protein)));
-          setQaCarbs(String(Math.round(info.carbs)));
-          setQaFat(String(Math.round(info.fat)));
-          setQaFiber(String(Math.round(info.fiber)));
-        }
-      } catch {
-        // silent — user fills manually
-      } finally {
-        setQaAiLoading(false);
-      }
-    }, 800);
-  }, []);
-
-  const handleQuickCreate = useCallback(() => {
-    if (!qaName.trim()) { setQaError(t('dish.quickAddValidationName')); return; }
-    const primaryName = qaName.trim();
-    const newIng: Ingredient = {
-      id: generateId('ing'),
-      name: { vi: primaryName, en: primaryName },
-      unit: { vi: qaUnit.vi.trim() || 'g' },
-      caloriesPer100: Number(qaCal) || 0,
-      proteinPer100: Number(qaProtein) || 0,
-      carbsPer100: Number(qaCarbs) || 0,
-      fatPer100: Number(qaFat) || 0,
-      fiberPer100: Number(qaFiber) || 0,
-    };
+  const handleQuickAddIngredient = useCallback((newIng: Ingredient) => {
     setExtraIngredients(prev => [...prev, newIng]);
     handleAddIngredient(newIng.id);
-    resetQuickAdd();
-  }, [qaName, qaUnit, qaCal, qaProtein, qaCarbs, qaFat, qaFiber, t, handleAddIngredient, resetQuickAdd]);
+  }, [handleAddIngredient]);
 
   return (
     <>
@@ -306,7 +264,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
             <div className="flex items-center gap-2">
-              <input id="dish-name" value={namePrimary} onChange={e => { setNamePrimary(e.target.value); if (formErrors.name) { setFormErrors(prev => ({ ...prev, name: undefined })); } setAiSuggestError(''); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${formErrors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+              <input id="dish-name" value={watchedName} onChange={e => { setValue('name', e.target.value, { shouldDirty: true }); if (errors.name) clearErrors('name'); setAiSuggestError(''); }} className={`flex-1 px-4 py-2.5 rounded-xl border ${errors.name ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
               {aiSuggestLoading ? (
                 <div className="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center" data-testid="ai-suggest-loading">
                   <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
@@ -315,7 +273,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAiSuggest}
-                  disabled={!namePrimary.trim()}
+                  disabled={!watchedName.trim()}
                   title={t('dish.aiSuggestButton')}
                   aria-label={t('dish.aiSuggestButton')}
                   data-testid="btn-ai-suggest"
@@ -325,15 +283,15 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                 </button>
               )}
             </div>
-            {formErrors.name && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-name">{formErrors.name}</p>}
+            {errors.name && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-name">{errors.name.message}</p>}
             {aiSuggestError && <p className="text-xs text-rose-500 mt-1" data-testid="ai-suggest-error">{aiSuggestError}</p>}
             {aiSuggestLoading && <p className="text-xs text-indigo-500 mt-1">{t('dish.aiSuggestLoading')}</p>}
           </div>
           <div>
-            <p className={`block text-xs font-bold uppercase mb-1.5 ${formErrors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>
+            <p className={`block text-xs font-bold uppercase mb-1.5 ${errors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>
             <div className="flex gap-2 flex-wrap">
               {getMealTagOptions(t).map(({ type, label, icon }) => {
-                const isActive = tags.includes(type);
+                const isActive = watchedTags.includes(type);
                 return (
                   <button key={type} type="button" onClick={() => handleTagToggle(type, isActive)} data-testid={`tag-${type}`} className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${isActive ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'}`}>
                     {icon} {label}
@@ -341,7 +299,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                 );
               })}
             </div>
-            {formErrors.tags && <p className="text-xs text-rose-500 mt-1.5 font-medium">{formErrors.tags}</p>}
+            {errors.tags && <p className="text-xs text-rose-500 mt-1.5 font-medium">{errors.tags.message}</p>}
           </div>
 
           {/* Rating & Notes */}
@@ -350,25 +308,25 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.rating')}</p>
               <div className="flex gap-1" data-testid="dish-rating">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star}
-                    type="button"
-                    data-testid={`star-${star}`}
-                    onClick={() => setRating(prev => prev === star ? 0 : star)}
-                    className={`p-1 text-2xl transition-all min-h-11 min-w-11 flex items-center justify-center rounded-lg ${star <= rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-300'}`}
-                    aria-label={`${star} ${t('dish.stars')}`}
-                  >
-                    ★
-                  </button>
-                ))}
+                    <button
+                      key={star}
+                      type="button"
+                      data-testid={`star-${star}`}
+                      onClick={() => setValue('rating', watchedRating === star ? 0 : star, { shouldDirty: true })}
+                      className={`p-1 text-2xl transition-all min-h-11 min-w-11 flex items-center justify-center rounded-lg ${star <= watchedRating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-300'}`}
+                      aria-label={`${star} ${t('dish.stars')}`}
+                    >
+                      ★
+                    </button>
+                  ))}
               </div>
             </div>
             <div>
               <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.notes')}</p>
               <textarea
                 data-testid="dish-notes"
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
+                value={watchedNotes ?? ''}
+                onChange={e => setValue('notes', e.target.value, { shouldDirty: true })}
                 placeholder={t('dish.notesPlaceholder')}
                 rows={2}
                 className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-slate-100 resize-none"
@@ -398,7 +356,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               </div>
               <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-xl divide-y divide-slate-100 dark:divide-slate-700">
                 {(() => {
-                  const pickerSelectedIds = new Set(selectedIngredients.map(si => si.ingredientId));
+                  const pickerSelectedIds = new Set(fields.map(f => f.ingredientId));
                   const available = allIngredients.filter(ing => !pickerSelectedIds.has(ing.id)).filter(ing => getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()));
                   if (available.length === 0) return <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">{pickerSelectedIds.size === allIngredients.length ? t('dish.allIngredientsSelected') : t('dish.noIngredientFound')}</div>;
                   const recentlyUsed = available.filter(ing => ingredientFrequency.has(ing.id)).sort((a, b) => (ingredientFrequency.get(b.id) ?? 0) - (ingredientFrequency.get(a.id) ?? 0)).slice(0, 10);
@@ -436,130 +394,49 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
               </div>
               {/* Quick-add bottom sheet overlay */}
               {showQuickAdd && (
-                <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center">
-                  {/* backdrop — keyboard-accessible via aria-hidden, close via Escape is handled by ModalBackdrop */}
-                  <button type="button" aria-label="close quick-add" className="absolute inset-0 bg-black/30 cursor-default" onClick={resetQuickAdd} />
-                  <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md p-6 space-y-4 max-h-[80dvh] overflow-y-auto overscroll-contain">
-                    <div className="flex items-center justify-between">
-                      <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{t('dish.quickAddTitle')}</p>
-                      <button type="button" onClick={resetQuickAdd} aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
-                    </div>
-                    <div>
-                      <label htmlFor="qa-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.quickAddName')} <span className="text-rose-500">*</span></label>
-                      <input
-                        id="qa-name"
-                        name="qa-name"
-                        data-testid="input-qa-name"
-                        value={qaName}
-                        onChange={e => { setQaName(e.target.value); setQaError(''); }}
-                        onBlur={() => triggerAIFill(qaName, qaUnit.vi)}
-                        placeholder={t('dish.quickAddNamePlaceholder')}
-                        className={`w-full px-3 py-2 text-sm rounded-xl border ${qaError ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all`}
-                      />
-                      {qaError && <p className="text-xs text-rose-500 mt-0.5">{qaError}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor="qa-unit" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.quickAddUnit')}</label>
-                      <UnitSelector
-                        mode="bilingual"
-                        id="qa-unit"
-                        value={qaUnit}
-                        onChange={v => { setQaUnit(v); triggerAIFill(qaName, v.vi); }}
-                        data-testid="qa-unit"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('dish.quickAddNutrition')}</label>
-                        <div className="flex items-center gap-2">
-                          {qaAiLoading && (
-                            <span className="text-xs text-emerald-500 flex items-center gap-1">
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                              {t('dish.quickAddAiFilling')}
-                            </span>
-                          )}
-                          {!qaAiLoading && (
-                            <button
-                              type="button"
-                              onClick={() => triggerAIFill(qaName, qaUnit.vi)}
-                              disabled={!qaName.trim()}
-                              data-testid="btn-qa-ai-fill"
-                              title={t('dish.quickAddAiFillButton')}
-                              aria-label={t('dish.quickAddAiFillButton')}
-                              className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
-                        {[
-                          { label: 'Cal', value: qaCal, setter: setQaCal },
-                          { label: 'Protein', value: qaProtein, setter: setQaProtein },
-                          { label: 'Carbs', value: qaCarbs, setter: setQaCarbs },
-                          { label: 'Fat', value: qaFat, setter: setQaFat },
-                          { label: 'Fiber', value: qaFiber, setter: setQaFiber },
-                        ].map(({ label, value, setter }) => (
-                          <div key={label}>
-                            <label htmlFor={`qa-${label.toLowerCase()}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-0.5">{label} / {getDisplayUnit(qaUnit, lang)}</label>
-                            <input
-                              id={`qa-${label.toLowerCase()}`}
-                              name={`qa-${label.toLowerCase()}`}
-                              type="number"
-                              min="0"
-                              step="1"
-                              inputMode="numeric"
-                              value={value}
-                              onChange={e => setter(e.target.value)}
-                              disabled={qaAiLoading}
-                              placeholder="0"
-                              className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-slate-100 outline-none focus:border-emerald-500 transition-all disabled:opacity-50"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex gap-2 pt-1">
-                      <button type="button" onClick={resetQuickAdd} data-testid="btn-qa-cancel" className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">
-                        {t('dish.quickAddCancel')}
-                      </button>
-                      <button type="button" onClick={handleQuickCreate} data-testid="btn-qa-submit" className="flex-[2] py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-all flex items-center justify-center gap-1.5">
-                        <Plus className="w-4 h-4" /> {t('dish.quickAddSubmit')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <QuickAddIngredientForm
+                  onAdd={handleQuickAddIngredient}
+                  onCancel={() => setShowQuickAdd(false)}
+                />
               )}
             </div>
             {/* Selected Ingredients */}
             <div className="space-y-3">
               <p className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('dish.selectedIngredients')}</p>
               <div className="space-y-2">
-                {selectedIngredients.map(si => {
-                  const ing = allIngredients.find(i => i.id === si.ingredientId);
+                {fields.map((field, index) => {
+                  const ing = allIngredients.find(i => i.id === field.ingredientId);
                   if (!ing) return null;
+                  const currentAmount = watchedIngredients[index]?.amount;
+                  const safeAmount = (typeof currentAmount === 'number' && !Number.isNaN(currentAmount)) ? currentAmount : 0;
                   return (
-                    <div key={si.ingredientId} className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600 flex items-center justify-between">
+                    <div key={field.id} className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600 flex items-center justify-between">
                       <div className="flex-1">
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = Math.max(0, si.amount - step); handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-4 h-4" /></button>
-                          <input type="number" step="1" inputMode="numeric" value={amountStrings[si.ingredientId] ?? String(si.amount)} onChange={e => { const v = e.target.value; setAmountStrings(prev => ({ ...prev, [si.ingredientId]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) { handleUpdateAmount(si.ingredientId, n); } if (formErrors.amounts?.[si.ingredientId]) { setFormErrors(prev => ({ ...prev, amounts: { ...prev.amounts, [si.ingredientId]: undefined } })); } }} data-testid={`input-dish-amount-${si.ingredientId}`} id={`dish-amount-${si.ingredientId}`} name={`dish-amount-${si.ingredientId}`} aria-label={getLocalizedField(ing.name, lang)} className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${formErrors.amounts?.[si.ingredientId] ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`} />
-                          <button type="button" onClick={() => { const step = getAmountStep(si.amount); const a = si.amount + step; handleUpdateAmount(si.ingredientId, a); setAmountStrings(prev => ({ ...prev, [si.ingredientId]: String(a) })); }} aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
+                          <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = Math.max(0, safeAmount - step); setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-4 h-4" /></button>
+                          <StringNumberController<DishEditFormData>
+                            name={`ingredients.${index}.amount`}
+                            control={control}
+                            inputMode="numeric"
+                            testId={`input-dish-amount-${field.ingredientId}`}
+                            ariaLabel={getLocalizedField(ing.name, lang)}
+                            className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`}
+                          />
+                          <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = safeAmount + step; setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * si.amount / 100)}cal · {Math.round(ing.proteinPer100 * si.amount / 100)}g pro · {Math.round(ing.carbsPer100 * si.amount / 100)}g carb · {Math.round(ing.fatPer100 * si.amount / 100)}g fat</p>
-                        {formErrors.amounts?.[si.ingredientId] && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${si.ingredientId}`}>{formErrors.amounts[si.ingredientId]}</p>}
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * safeAmount / 100)}cal · {Math.round(ing.proteinPer100 * safeAmount / 100)}g pro · {Math.round(ing.carbsPer100 * safeAmount / 100)}g carb · {Math.round(ing.fatPer100 * safeAmount / 100)}g fat</p>
+                        {errors.ingredients?.[index]?.amount && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${field.ingredientId}`}>{errors.ingredients[index].amount.message}</p>}
                       </div>
-                      <button type="button" onClick={() => handleRemoveIngredient(si.ingredientId)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                      <button type="button" onClick={() => handleRemoveIngredient(field.ingredientId)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   );
                 })}
-                {selectedIngredients.length === 0 && (
+                {fields.length === 0 && (
                   <div>
                     <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl">{t('dish.noIngredientSelected')}</p>
-                    {formErrors.ingredients && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-ingredients">{formErrors.ingredients}</p>}
+                    {errors.ingredients?.message && <p className="text-xs text-rose-500 mt-1" data-testid="error-dish-ingredients">{errors.ingredients.message}</p>}
                   </div>
                 )}
               </div>
@@ -567,11 +444,12 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           </div>
         </div>
         {/* Live nutrition preview */}
-        {selectedIngredients.length > 0 && (() => {
-          const totals = selectedIngredients.reduce((acc, si) => {
+        {fields.length > 0 && (() => {
+          const totals = watchedIngredients.reduce((acc, si) => {
             const ing = allIngredients.find(i => i.id === si.ingredientId);
             if (!ing) return acc;
-            const factor = si.amount / 100;
+            const safeAmt = (typeof si.amount === 'number' && !Number.isNaN(si.amount)) ? si.amount : 0;
+            const factor = safeAmt / 100;
             return {
               cal: acc.cal + ing.caloriesPer100 * factor,
               prot: acc.prot + ing.proteinPer100 * factor,
@@ -589,14 +467,14 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           );
         })()}
         <div className="p-6 border-t border-slate-100 dark:border-slate-700">
-          <button type="button" onClick={handleSubmit} data-testid="btn-save-dish" className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 dark:shadow-emerald-900 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 text-lg"><Save className="w-5 h-5" /> {t('dish.saveDish')}</button>
+          <button type="button" onClick={handleFormSubmit} data-testid="btn-save-dish" className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 dark:shadow-emerald-900 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 text-lg"><Save className="w-5 h-5" /> {t('dish.saveDish')}</button>
         </div>
       </div>
     </ModalBackdrop>
 
     {aiSuggestions !== null && (
       <AISuggestIngredientsPreview
-        dishName={namePrimary}
+        dishName={watchedName}
         suggestions={aiSuggestions}
         existingIngredients={allIngredients}
         onConfirm={handleAiSuggestConfirm}

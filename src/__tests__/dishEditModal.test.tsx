@@ -651,7 +651,7 @@ describe('DishEditModal', () => {
     // Re-open quick-add — fields should be reset
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
     expect(screen.getByTestId('input-qa-name')).toHaveValue('');
-    expect(screen.getByLabelText('Cal / 100g')).toHaveValue(null);
+    expect(screen.getByLabelText('Cal / 100g')).toHaveValue(0);
   });
 
   it('calls onCreateIngredient for quick-added ingredients on dish save', () => {

@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { RestTimer } from './RestTimer';
 import { ExerciseSelector } from './ExerciseSelector';
@@ -19,6 +21,12 @@ import type {
 import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
 import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
+import {
+  workoutLoggerSchema,
+  setInputDefaults,
+  type WorkoutLoggerFormData,
+  type SetInputData,
+} from '../../../schemas/workoutLoggerSchema';
 
 interface WorkoutLoggerProps {
   planDay?: {
@@ -31,13 +39,37 @@ interface WorkoutLoggerProps {
   onBack: () => void;
 }
 
-interface SetInput {
-  weight: number;
-  reps?: number;
-  rpe?: number;
+interface TimerDisplayProps {
+  startSeconds: number;
+  elapsedRef: MutableRefObject<number>;
 }
 
-const EMPTY_INPUT: SetInput = { weight: 0 };
+const TimerDisplay = React.memo(function TimerDisplay({
+  startSeconds,
+  elapsedRef,
+}: TimerDisplayProps): React.JSX.Element {
+  const [seconds, setSeconds] = useState(startSeconds);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSeconds((prev) => {
+        const next = prev + 1;
+        elapsedRef.current = next;
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [elapsedRef]);
+
+  return (
+    <span
+      className="font-mono text-lg font-semibold tabular-nums"
+      data-testid="elapsed-timer"
+    >
+      {formatElapsed(seconds)}
+    </span>
+  );
+});
 
 
 
@@ -108,6 +140,12 @@ export function WorkoutLogger({
 
   const { suggestNextSet: getOverloadSuggestion } = useProgressiveOverload();
 
+  const { getValues, setValue, watch } = useForm<WorkoutLoggerFormData>({
+    resolver: zodResolver(workoutLoggerSchema),
+    mode: 'onBlur',
+    defaultValues: { setInputs: {} },
+  });
+
   const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
     return draft ? draft.exercises : resolveExercises(planDay?.exercises);
@@ -119,23 +157,11 @@ export function WorkoutLogger({
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState<number>(() => {
+  const initialElapsed = useMemo(() => {
     const draft = useFitnessStore.getState().workoutDraft;
     return draft ? draft.elapsedSeconds : 0;
-  });
-  const [setInputs, setSetInputs] = useState<Record<string, SetInput>>({});
-  const elapsedRef = useRef(0);
-
-  useEffect(() => {
-    elapsedRef.current = elapsedSeconds;
-  }, [elapsedSeconds]);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(id);
   }, []);
+  const elapsedRef = useRef(initialElapsed);
 
   useEffect(() => {
     loadWorkoutDraft();
@@ -155,34 +181,35 @@ export function WorkoutLogger({
   }, [currentExercises, loggedSets, setWorkoutDraft]);
 
   const getInput = useCallback(
-    (exerciseId: string): SetInput =>
-      setInputs[exerciseId] ?? EMPTY_INPUT,
-    [setInputs],
+    (exerciseId: string): SetInputData => {
+      const inputs = getValues('setInputs');
+      return inputs[exerciseId] ?? setInputDefaults;
+    },
+    [getValues],
   );
 
-  const updateInput = useCallback(
-    (exerciseId: string, updates: Partial<SetInput>) => {
-      setSetInputs((prev) => ({
-        ...prev,
-        [exerciseId]: {
-          ...(prev[exerciseId] ?? EMPTY_INPUT),
-          ...updates,
-        },
-      }));
+  const ensureInput = useCallback(
+    (exerciseId: string): void => {
+      const current = getValues(`setInputs.${exerciseId}` as `setInputs.${string}`);
+      if (!current) {
+        setValue(`setInputs.${exerciseId}` as `setInputs.${string}`, { ...setInputDefaults });
+      }
     },
-    [],
+    [getValues, setValue],
   );
 
   const handleApplySuggestion = useCallback(
     (exerciseId: string, s: OverloadSuggestion) => {
-      updateInput(exerciseId, { weight: s.weight, reps: s.reps });
+      const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
+      const current = getValues(key) ?? { ...setInputDefaults };
+      setValue(key, { ...current, weight: s.weight, reps: s.reps });
     },
-    [updateInput],
+    [getValues, setValue],
   );
 
   const handleLogSet = useCallback(
     (exerciseId: string) => {
-      const input = setInputs[exerciseId] ?? EMPTY_INPUT;
+      const input = getInput(exerciseId);
       setLoggedSets((prev) => {
         const existingCount = prev.filter(
           (s) => s.exerciseId === exerciseId,
@@ -201,39 +228,25 @@ export function WorkoutLogger({
       });
       setShowRestTimer(true);
     },
-    [setInputs],
+    [getInput],
   );
 
   const handleWeightChange = useCallback(
     (exerciseId: string, delta: number) => {
-      setSetInputs((prev) => {
-        const current = prev[exerciseId] ?? EMPTY_INPUT;
-        return {
-          ...prev,
-          [exerciseId]: {
-            ...current,
-            weight: Math.max(0, current.weight + delta),
-          },
-        };
-      });
+      const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
+      const current = getValues(key) ?? { ...setInputDefaults };
+      setValue(key, { ...current, weight: Math.max(0, current.weight + delta) });
     },
-    [],
+    [getValues, setValue],
   );
 
   const handleRpeSelect = useCallback(
     (exerciseId: string, rpe: number) => {
-      setSetInputs((prev) => {
-        const current = prev[exerciseId] ?? EMPTY_INPUT;
-        return {
-          ...prev,
-          [exerciseId]: {
-            ...current,
-            rpe: current.rpe === rpe ? undefined : rpe,
-          },
-        };
-      });
+      const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
+      const current = getValues(key) ?? { ...setInputDefaults };
+      setValue(key, { ...current, rpe: current.rpe === rpe ? undefined : rpe });
     },
-    [],
+    [getValues, setValue],
   );
 
   const handleRestComplete = useCallback(() => {
@@ -272,7 +285,7 @@ export function WorkoutLogger({
   );
 
   const handleSave = useCallback(async () => {
-    const durationMin = Math.floor(elapsedSeconds / 60);
+    const durationMin = Math.floor(elapsedRef.current / 60);
     const now = new Date().toISOString();
     const workoutId = `workout-${Date.now()}`;
     const workout: Workout = {
@@ -293,7 +306,6 @@ export function WorkoutLogger({
     clearWorkoutDraft();
     onComplete(workout);
   }, [
-    elapsedSeconds,
     planDay,
     loggedSets,
     saveWorkoutAtomic,
@@ -317,7 +329,7 @@ export function WorkoutLogger({
   if (showSummary) {
     return (
       <WorkoutSummaryCard
-        durationSeconds={elapsedSeconds}
+        durationSeconds={elapsedRef.current}
         totalVolume={totalVolume}
         setsCompleted={loggedSets.length}
         personalRecords={detectedPRs}
@@ -344,12 +356,7 @@ export function WorkoutLogger({
           <ArrowLeft className="h-5 w-5" />
           <span>{t('fitness.logger.back')}</span>
         </button>
-        <span
-          className="font-mono text-lg font-semibold tabular-nums"
-          data-testid="elapsed-timer"
-        >
-          {formatElapsed(elapsedSeconds)}
-        </span>
+        <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} />
         <button
           type="button"
           onClick={handleFinish}
@@ -376,7 +383,9 @@ export function WorkoutLogger({
             const exerciseSets = loggedSets.filter(
               (s) => s.exerciseId === exercise.id,
             );
-            const input = getInput(exercise.id);
+            ensureInput(exercise.id);
+            const formInput = watch(`setInputs.${exercise.id}` as `setInputs.${string}`);
+            const input: SetInputData = formInput ?? setInputDefaults;
             const suggestion = getOverloadSuggestion(
               exercise.id,
               exercise.defaultRepsMin ?? 8,
@@ -441,11 +450,11 @@ export function WorkoutLogger({
                     <input
                       type="number"
                       value={input.weight}
-                      onChange={(e) =>
-                        updateInput(exercise.id, {
-                          weight: Number(e.target.value),
-                        })
-                      }
+                      onChange={(e) => {
+                        const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
+                        const cur = getValues(key) ?? { ...setInputDefaults };
+                        setValue(key, { ...cur, weight: Number(e.target.value) });
+                      }}
                       className="w-20 rounded-lg border border-slate-200 bg-white py-2 text-center text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                       data-testid={`weight-input-${exercise.id}`}
                     />
@@ -468,11 +477,11 @@ export function WorkoutLogger({
                     <input
                       type="number"
                       value={input.reps ?? 0}
-                      onChange={(e) =>
-                        updateInput(exercise.id, {
-                          reps: Math.max(0, Number(e.target.value)),
-                        })
-                      }
+                      onChange={(e) => {
+                        const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
+                        const cur = getValues(key) ?? { ...setInputDefaults };
+                        setValue(key, { ...cur, reps: Math.max(0, Number(e.target.value)) });
+                      }}
                       className="w-20 rounded-lg border border-slate-200 bg-white py-2 text-center text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                       data-testid={`reps-input-${exercise.id}`}
                     />

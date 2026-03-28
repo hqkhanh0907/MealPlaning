@@ -1,33 +1,43 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
 import { parseNumericInput } from '../utils/parseNumericInput';
 import { formatElapsed } from '../utils/timeFormat';
-import type { CardioType, CardioIntensity, Workout } from '../types';
+import type { Workout } from '../types';
 import { CARDIO_TYPES, DISTANCE_CARDIO_TYPES, INTENSITY_OPTIONS } from '../constants';
 import { useTimer } from '../hooks/useTimer';
+import {
+  cardioLoggerSchema,
+  cardioLoggerDefaults,
+  type CardioLoggerFormData,
+} from '../../../schemas/cardioLoggerSchema';
 
 interface CardioLoggerProps {
   onComplete: (workout: Workout) => void;
   onBack: () => void;
 }
 
-
-
 export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.JSX.Element {
   const { t } = useTranslation();
   const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
   const weightKg = useHealthProfileStore((s) => s.profile.weightKg);
 
-  const [selectedType, setSelectedType] = useState<CardioType>('running');
-  const [isStopwatchMode, setIsStopwatchMode] = useState(true);
-  const [manualDuration, setManualDuration] = useState(0);
-  const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
-  const [avgHeartRate, setAvgHeartRate] = useState<number | undefined>(undefined);
-  const [intensity, setIntensity] = useState<CardioIntensity>('moderate');
+  const { control, handleSubmit, watch, setValue } = useForm<CardioLoggerFormData>({
+    resolver: zodResolver(cardioLoggerSchema),
+    mode: 'onBlur',
+    defaultValues: cardioLoggerDefaults,
+  });
+
+  const selectedType = watch('selectedType');
+  const isStopwatchMode = watch('isStopwatchMode');
+  const manualDuration = watch('manualDuration');
+  const intensity = watch('intensity');
+
   const headerTimer = useTimer(true);
   const stopwatch = useTimer();
 
@@ -52,50 +62,50 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
   const handlePauseStopwatch = stopwatch.stop;
   const handleStopStopwatch = stopwatch.reset;
 
-  const handleSave = useCallback(async () => {
-    const now = new Date().toISOString();
-    const workoutId = `workout-${Date.now()}`;
-    const workout: Workout = {
-      id: workoutId,
-      date: now.split('T')[0],
-      name: t('fitness.cardio.title'),
-      durationMin: durationMin > 0 ? durationMin : undefined,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const sets = [
-      {
-        id: `set-${Date.now()}-cardio`,
-        workoutId,
-        exerciseId: selectedType,
-        setNumber: 1,
-        weightKg: 0,
-        durationMin: durationMin > 0 ? durationMin : undefined,
-        distanceKm,
-        avgHeartRate,
-        intensity,
-        estimatedCalories: estimatedCalories > 0 ? estimatedCalories : undefined,
+  const onFormSubmit = useCallback(
+    async (data: CardioLoggerFormData) => {
+      const effectiveDuration = data.isStopwatchMode
+        ? Math.floor(stopwatch.elapsed / 60)
+        : data.manualDuration;
+      const now = new Date().toISOString();
+      const workoutId = `workout-${Date.now()}`;
+      const workout: Workout = {
+        id: workoutId,
+        date: now.split('T')[0],
+        name: t('fitness.cardio.title'),
+        durationMin: effectiveDuration > 0 ? effectiveDuration : undefined,
+        createdAt: now,
         updatedAt: now,
-      },
-    ];
-    try {
-      await saveWorkoutAtomic(workout, sets);
-    } catch (error) {
-      console.error('[CardioLogger] Save failed:', error);
-      return;
-    }
-    onComplete(workout);
-  }, [
-    t,
-    durationMin,
-    saveWorkoutAtomic,
-    selectedType,
-    distanceKm,
-    avgHeartRate,
-    intensity,
-    estimatedCalories,
-    onComplete,
-  ]);
+      };
+      const sets = [
+        {
+          id: `set-${Date.now()}-cardio`,
+          workoutId,
+          exerciseId: data.selectedType,
+          setNumber: 1,
+          weightKg: 0,
+          durationMin: effectiveDuration > 0 ? effectiveDuration : undefined,
+          distanceKm: data.distanceKm,
+          avgHeartRate: data.avgHeartRate,
+          intensity: data.intensity,
+          estimatedCalories: estimatedCalories > 0 ? estimatedCalories : undefined,
+          updatedAt: now,
+        },
+      ];
+      try {
+        await saveWorkoutAtomic(workout, sets);
+      } catch (error) {
+        console.error('[CardioLogger] Save failed:', error);
+        return;
+      }
+      onComplete(workout);
+    },
+    [t, stopwatch.elapsed, saveWorkoutAtomic, estimatedCalories, onComplete],
+  );
+
+  const handleSave = useCallback(() => {
+    void handleSubmit(onFormSubmit)();
+  }, [handleSubmit, onFormSubmit]);
 
   return (
     <div
@@ -147,7 +157,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               <button
                 key={type}
                 type="button"
-                onClick={() => setSelectedType(type)}
+                onClick={() => setValue('selectedType', type)}
                 className={`flex shrink-0 items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   selectedType === type
                     ? 'bg-emerald-500 text-white'
@@ -170,7 +180,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
           <div className="mb-3 flex gap-2">
             <button
               type="button"
-              onClick={() => setIsStopwatchMode(true)}
+              onClick={() => setValue('isStopwatchMode', true)}
               className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
                 isStopwatchMode
                   ? 'bg-emerald-500 text-white'
@@ -182,7 +192,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             </button>
             <button
               type="button"
-              onClick={() => setIsStopwatchMode(false)}
+              onClick={() => setValue('isStopwatchMode', false)}
               className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
                 !isStopwatchMode
                   ? 'bg-emerald-500 text-white'
@@ -234,13 +244,20 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             </div>
           ) : (
             <div data-testid="manual-panel">
-              <input
-                type="number"
-                value={manualDuration}
-                onChange={(e) => setManualDuration(parseNumericInput(e.target.value))}
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
-                data-testid="manual-duration-input"
-                min={0}
+              <Controller
+                name="manualDuration"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    type="number"
+                    value={field.value}
+                    onChange={(e) => field.onChange(parseNumericInput(e.target.value))}
+                    onBlur={field.onBlur}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                    data-testid="manual-duration-input"
+                    min={0}
+                  />
+                )}
               />
             </div>
           )}
@@ -255,17 +272,24 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
             <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
               {t('fitness.cardio.distance')}
             </h3>
-            <input
-              type="number"
-              value={distanceKm ?? ''}
-              onChange={(e) => {
-                const val = e.target.value;
-                setDistanceKm(val === '' ? undefined : parseNumericInput(val));
-              }}
-              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
-              data-testid="distance-input"
-              min={0}
-              step={0.1}
+            <Controller
+              name="distanceKm"
+              control={control}
+              render={({ field }) => (
+                <input
+                  type="number"
+                  value={field.value ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    field.onChange(val === '' ? undefined : parseNumericInput(val));
+                  }}
+                  onBlur={field.onBlur}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                  data-testid="distance-input"
+                  min={0}
+                  step={0.1}
+                />
+              )}
             />
           </section>
         )}
@@ -275,16 +299,23 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
           <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
             {t('fitness.cardio.heartRate')}
           </h3>
-          <input
-            type="number"
-            value={avgHeartRate ?? ''}
-            onChange={(e) => {
-              const val = e.target.value;
-              setAvgHeartRate(val === '' ? undefined : parseNumericInput(val));
-            }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
-            data-testid="heart-rate-input"
-            min={0}
+          <Controller
+            name="avgHeartRate"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="number"
+                value={field.value ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  field.onChange(val === '' ? undefined : parseNumericInput(val));
+                }}
+                onBlur={field.onBlur}
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-center text-lg font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                data-testid="heart-rate-input"
+                min={0}
+              />
+            )}
           />
         </section>
 
@@ -298,7 +329,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               <button
                 key={value}
                 type="button"
-                onClick={() => setIntensity(value)}
+                onClick={() => setValue('intensity', value)}
                 className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
                   intensity === value
                     ? 'bg-emerald-500 text-white'

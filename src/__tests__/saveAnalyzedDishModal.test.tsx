@@ -251,16 +251,15 @@ describe('SaveAnalyzedDishModal', () => {
 
   it('edits nutrition fiber field for ingredient', () => {
     render(<SaveAnalyzedDishModal {...defaultProps} />);
-    // Fiber for Bánh phở is 0.5, rounded to 1
-    // Fiber for Thịt bò is 0
+    // Fiber for Bánh phở is 0.5
     // Use the labeled inputs to find the exact fiber field
-    const fiberInputs = screen.getAllByRole('spinbutton').filter(el => {
-      const label = el.closest('div')?.querySelector('label');
-      return label?.textContent === 'Fiber';
-    });
-    if (fiberInputs.length > 0) {
-      fireEvent.change(fiberInputs[0], { target: { value: '3' } });
-      expect((fiberInputs[0] as HTMLInputElement).value).toBe('3');
+    const fiberLabels = screen.getAllByText('Fiber');
+    const fiberContainer = fiberLabels[0].closest('div');
+    const fiberInput = fiberContainer?.querySelector('input');
+    expect(fiberInput).toBeTruthy();
+    if (fiberInput) {
+      fireEvent.change(fiberInput, { target: { value: '3' } });
+      expect(fiberInput.value).toBe('3');
     }
   });
 

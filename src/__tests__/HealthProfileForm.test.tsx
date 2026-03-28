@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { HealthProfileForm } from '../features/health-profile/components/HealthProfileForm';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
@@ -70,10 +70,11 @@ describe('HealthProfileForm', () => {
   it('populates with current profile data', () => {
     render(<HealthProfileForm />);
 
-    expect(screen.getByLabelText('Tuổi')).toHaveValue(30);
-    expect(screen.getByLabelText('Chiều cao (cm)')).toHaveValue(170);
-    expect(screen.getByLabelText('Cân nặng (kg)')).toHaveValue(70);
-    expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toHaveValue(2);
+    // StringNumberController uses type="text" so values are strings
+    expect(screen.getByLabelText('Tuổi')).toHaveValue('30');
+    expect(screen.getByLabelText('Chiều cao (cm)')).toHaveValue('170');
+    expect(screen.getByLabelText('Cân nặng (kg)')).toHaveValue('70');
+    expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toHaveValue('2');
 
     const maleBtn = screen.getByRole('radio', { name: 'Nam' });
     expect(maleBtn).toHaveAttribute('aria-checked', 'true');
@@ -123,7 +124,9 @@ describe('HealthProfileForm', () => {
   it('save button calls saveProfile', async () => {
     render(<HealthProfileForm />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    });
 
     await waitFor(() => {
       expect(mockSaveProfile).toHaveBeenCalledTimes(1);
@@ -149,24 +152,29 @@ describe('HealthProfileForm', () => {
     fireEvent.change(screen.getByLabelText('Tuổi'), {
       target: { value: '5' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
 
-    await waitFor(() => {
-      expect(mockSaveProfile).not.toHaveBeenCalled();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
     });
 
-    expect(screen.getByLabelText('Tuổi').className).toContain('border-red');
+    await waitFor(() => {
+      expect(screen.getByLabelText('Tuổi').className).toContain('border-red');
+    });
+
+    expect(mockSaveProfile).not.toHaveBeenCalled();
   });
 
   it('body fat field is optional', async () => {
     render(<HealthProfileForm />);
 
-    // Body fat is empty by default
+    // Body fat is empty by default — StringNumberController uses type="text"
     const bodyFatInput = screen.getByLabelText(/Tỉ lệ mỡ cơ thể/);
-    expect(bodyFatInput).toHaveValue(null);
+    expect(bodyFatInput).toHaveValue('');
 
     // Save should succeed without body fat
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    });
 
     await waitFor(() => {
       expect(mockSaveProfile).toHaveBeenCalledTimes(1);

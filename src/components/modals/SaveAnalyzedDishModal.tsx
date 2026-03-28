@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Save, Loader2, Sparkles } from 'lucide-react';
-import { AnalyzedDishResult, AnalyzedIngredient, SaveAnalyzedDishPayload, MealType } from '../../types';
+import { AnalyzedDishResult, SaveAnalyzedDishPayload, MealType } from '../../types';
 import { suggestIngredientInfo } from '../../services/geminiService';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
@@ -9,6 +11,8 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { getMealTagOptions } from '../../data/constants';
 import { UnitSelector } from '../shared/UnitSelector';
 import { logger } from '../../utils/logger';
+import { saveAnalyzedDishSchema, type SaveAnalyzedDishFormData } from '../../schemas/saveAnalyzedDishSchema';
+import { StringNumberController } from '../form/StringNumberController';
 
 /** Display unit for nutrition labels: "100g" for g/kg, "100ml" for ml/l, "1 {unit}" for others. */
 const getDisplayUnit = (unit: string) => {
@@ -27,68 +31,67 @@ interface SaveAnalyzedDishModalProps {
 export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ onClose, result, onSave }) => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const [editedResult, setEditedResult] = useState<AnalyzedDishResult>(() => structuredClone(result));
-  const [saveDish, setSaveDish] = useState(true);
-  const [dishTags, setDishTags] = useState<MealType[]>([]);
-  const [tagError, setTagError] = useState<string | null>(null);
-  const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>(() => new Array(result.ingredients.length).fill(true));
-  const [researchingIngredientIndex, setResearchingIngredientIndex] = useState<number | null>(null);
 
-  // String state for numeric inputs to allow clearing without snap-back on mobile
-  const [numericStrings, setNumericStrings] = useState<Record<string, string>>(() => {
-    const entries: Record<string, string> = {};
-    result.ingredients.forEach((ing, idx) => {
-      entries[`${idx}-amount`] = String(ing.amount);
-      entries[`${idx}-calories`] = String(ing.nutritionPerStandardUnit.calories);
-      entries[`${idx}-protein`] = String(ing.nutritionPerStandardUnit.protein);
-      entries[`${idx}-carbs`] = String(ing.nutritionPerStandardUnit.carbs);
-      entries[`${idx}-fat`] = String(ing.nutritionPerStandardUnit.fat);
-      entries[`${idx}-fiber`] = String(ing.nutritionPerStandardUnit.fiber);
-    });
-    return entries;
+  const { control, watch, getValues, setValue } = useForm<SaveAnalyzedDishFormData>({
+    resolver: zodResolver(saveAnalyzedDishSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      name: result.name,
+      description: result.description,
+      saveDish: true,
+      dishTags: [],
+      ingredients: result.ingredients.map(ing => ({
+        name: ing.name,
+        amount: ing.amount,
+        unit: ing.unit,
+        nutritionPerStandardUnit: {
+          calories: ing.nutritionPerStandardUnit.calories,
+          protein: ing.nutritionPerStandardUnit.protein,
+          carbs: ing.nutritionPerStandardUnit.carbs,
+          fat: ing.nutritionPerStandardUnit.fat,
+          fiber: ing.nutritionPerStandardUnit.fiber,
+        },
+      })),
+    },
   });
 
+  const { fields } = useFieldArray({ control, name: 'ingredients' });
+  const saveDish = watch('saveDish');
+  const watchedIngredients = watch('ingredients');
+
+  const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>(() => new Array(result.ingredients.length).fill(true));
+  const [researchingIngredientIndex, setResearchingIngredientIndex] = useState<number | null>(null);
+  const [tagError, setTagError] = useState<string | null>(null);
+
   useModalBackHandler(true, onClose);
-
-  const toggleDishTag = (type: MealType) => {
-    setDishTags(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
-    setTagError(null);
-  };
-
-  const handleUpdateIngredient = (index: number, field: string, value: string | number) => {
-    const newIngredients: AnalyzedIngredient[] = [...editedResult.ingredients];
-    const current = newIngredients[index];
-
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      if (parent === 'nutritionPerStandardUnit') {
-        newIngredients[index] = {
-          ...current,
-          nutritionPerStandardUnit: { ...current.nutritionPerStandardUnit, [child]: value },
-        };
-      }
-    } else {
-      newIngredients[index] = { ...current, [field]: value } as AnalyzedIngredient;
-    }
-    setEditedResult({ ...editedResult, ingredients: newIngredients });
-  };
 
   const hasSubmittedRef = useRef(false);
 
   const handleConfirmSave = () => {
     if (hasSubmittedRef.current) return;
-    if (saveDish && dishTags.length === 0) {
-      setTagError(t('saveAnalyzed.validationSelectMeal'));
+
+    const formData = getValues();
+    const parsed = saveAnalyzedDishSchema.safeParse(formData);
+
+    if (!parsed.success) {
+      const hasDishTagsError = parsed.error.issues.some(
+        issue => issue.path.includes('dishTags'),
+      );
+      if (hasDishTagsError) {
+        setTagError(t('saveAnalyzed.validationSelectMeal'));
+      }
       return;
     }
 
     hasSubmittedRef.current = true;
-    const finalIngredients = editedResult.ingredients.filter((_, idx) => selectedIngredients[idx]);
-    const payload: SaveAnalyzedDishPayload = {
-      ...editedResult,
+    const finalIngredients = parsed.data.ingredients.filter((_, idx) => selectedIngredients[idx]);
+    const payload = {
+      ...result,
+      name: parsed.data.name,
+      description: parsed.data.description,
       ingredients: finalIngredients,
-      shouldCreateDish: saveDish,
-      tags: saveDish ? dishTags : undefined,
+      shouldCreateDish: parsed.data.saveDish,
+      tags: parsed.data.saveDish ? (parsed.data.dishTags as MealType[]) : undefined,
     };
     onSave(payload);
     onClose();
@@ -106,32 +109,20 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
   };
 
   const handleResearchIngredient = async (index: number) => {
-    const ingredient = editedResult.ingredients[index];
+    const ingredients = getValues('ingredients');
+    const ingredient = ingredients[index];
     if (!ingredient.name) return;
 
     try {
       setResearchingIngredientIndex(index);
       const info = await suggestIngredientInfo(ingredient.name, ingredient.unit);
-      const newIngredients = [...editedResult.ingredients];
-      newIngredients[index] = {
-        ...newIngredients[index],
-        nutritionPerStandardUnit: {
-          calories: info.calories,
-          protein: info.protein,
-          carbs: info.carbs,
-          fat: info.fat,
-          fiber: info.fiber,
-        },
-      };
-      setEditedResult({ ...editedResult, ingredients: newIngredients });
-      setNumericStrings(prev => ({
-        ...prev,
-        [`${index}-calories`]: String(info.calories),
-        [`${index}-protein`]: String(info.protein),
-        [`${index}-carbs`]: String(info.carbs),
-        [`${index}-fat`]: String(info.fat),
-        [`${index}-fiber`]: String(info.fiber),
-      }));
+      setValue(`ingredients.${index}.nutritionPerStandardUnit`, {
+        calories: info.calories,
+        protein: info.protein,
+        carbs: info.carbs,
+        fat: info.fat,
+        fiber: info.fiber,
+      });
     } catch (error) {
       logger.error({ component: 'SaveAnalyzedDishModal', action: 'researchIngredient' }, error);
       notify.error(t('saveAnalyzed.lookupFailed'), t('saveAnalyzed.lookupFailedDesc'));
@@ -156,11 +147,17 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
               <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.dishInfo')}</h5>
               <label className="flex items-center gap-2 cursor-pointer min-h-11 px-2 -mr-2 rounded-lg active:bg-slate-100 dark:active:bg-slate-700 transition-colors">
-                <input 
-                  type="checkbox" 
-                  checked={saveDish}
-                  onChange={(e) => setSaveDish(e.target.checked)}
-                  className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                <Controller
+                  name="saveDish"
+                  control={control}
+                  render={({ field }) => (
+                    <input 
+                      type="checkbox" 
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                  )}
                 />
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('saveAnalyzed.saveDish')}</span>
               </label>
@@ -170,46 +167,72 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
               <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div>
                   <label htmlFor="ai-dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('saveAnalyzed.dishName')}</label>
-                  <input
-                    id="ai-dish-name"
-                    value={editedResult.name}
-                    onChange={e => setEditedResult({ ...editedResult, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                  <Controller
+                    name="name"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        id="ai-dish-name"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                      />
+                    )}
                   />
                 </div>
                 <div>
                   <label htmlFor="ai-dish-desc" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('saveAnalyzed.description')}</label>
-                  <textarea
-                    id="ai-dish-desc"
-                    value={editedResult.description}
-                    onChange={e => setEditedResult({ ...editedResult, description: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
-                    rows={2}
+                  <Controller
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        id="ai-dish-desc"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                        rows={2}
+                      />
+                    )}
                   />
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">
                     {t('saveAnalyzed.suitableFor')} <span className="text-rose-500">*</span>
                   </span>
-                  <div className="flex gap-2">
-                    {getMealTagOptions(t).map(opt => {
-                      const isActive = dishTags.includes(opt.type);
-                      return (
-                        <button
-                          key={opt.type}
-                          type="button"
-                          onClick={() => toggleDishTag(opt.type)}
-                          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${
-                            isActive
-                              ? 'bg-emerald-500 text-white shadow-sm'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'
-                          }`}
-                        >
-                          {opt.icon} {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <Controller
+                    name="dishTags"
+                    control={control}
+                    render={({ field: tagsField }) => (
+                      <div className="flex gap-2">
+                        {getMealTagOptions(t).map(opt => {
+                          const isActive = tagsField.value.includes(opt.type);
+                          return (
+                            <button
+                              key={opt.type}
+                              type="button"
+                              onClick={() => {
+                                const next = isActive
+                                  ? tagsField.value.filter((v) => v !== opt.type)
+                                  : [...tagsField.value, opt.type];
+                                tagsField.onChange(next);
+                                setTagError(null);
+                              }}
+                              className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${
+                                isActive
+                                  ? 'bg-emerald-500 text-white shadow-sm'
+                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'
+                              }`}
+                            >
+                              {opt.icon} {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  />
                   {tagError && (
                     <p className="text-xs text-rose-500 mt-1.5 font-medium">{tagError}</p>
                   )}
@@ -231,8 +254,8 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
             </div>
             
             <div className="space-y-4">
-              {editedResult.ingredients.map((ing, idx) => (
-                <div key={`edit-${ing.name}-${idx}`} className={`p-4 rounded-xl border transition-all ${selectedIngredients[idx] ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 opacity-60'}`}>
+              {fields.map((field, idx) => (
+                <div key={field.id} className={`p-4 rounded-xl border transition-all ${selectedIngredients[idx] ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 opacity-60'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <label className="flex items-center gap-3 cursor-pointer min-h-11 px-1 rounded-lg active:bg-slate-100 dark:active:bg-slate-700 transition-colors">
                       <input 
@@ -260,87 +283,103 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                   <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
                     <div className="md:col-span-1">
                       <label htmlFor={`ai-ing-name-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('common.name')}</label>
-                      <input
-                        id={`ai-ing-name-${idx}`}
-                        value={ing.name}
-                        onChange={e => handleUpdateIngredient(idx, 'name', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                      <Controller
+                        name={`ingredients.${idx}.name`}
+                        control={control}
+                        render={({ field: nameField }) => (
+                          <input
+                            id={`ai-ing-name-${idx}`}
+                            value={nameField.value}
+                            onChange={nameField.onChange}
+                            onBlur={nameField.onBlur}
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                          />
+                        )}
                       />
                     </div>
                     <div className="md:col-span-1">
                       <label htmlFor={`ai-ing-amount-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('ingredient.quantity')}</label>
-                      <input
-                        id={`ai-ing-amount-${idx}`}
-                        type="number"
-                        min="0"
-                        step="1"
+                      <StringNumberController
+                        name={`ingredients.${idx}.amount`}
+                        control={control}
                         inputMode="numeric"
-                        value={numericStrings[`${idx}-amount`] ?? String(ing.amount)}
-                        onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-amount`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'amount', n); }}
+                        min={0}
+                        testId={`ai-ing-amount-${idx}`}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                       />
                     </div>
                     <div className="md:col-span-1">
                       <label htmlFor={`ai-ing-unit-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('common.unit')}</label>
-                      <UnitSelector
-                        mode="single"
-                        value={ing.unit}
-                        onChange={v => handleUpdateIngredient(idx, 'unit', v)}
-                        data-testid={`ai-ing-unit-${idx}`}
+                      <Controller
+                        name={`ingredients.${idx}.unit`}
+                        control={control}
+                        render={({ field: unitField }) => (
+                          <UnitSelector
+                            mode="single"
+                            value={unitField.value}
+                            onChange={unitField.onChange}
+                            data-testid={`ai-ing-unit-${idx}`}
+                          />
+                        )}
                       />
                     </div>
                   </div>
                   
                   <div className={`mt-3 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-600 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(ing.unit)}</p>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(watchedIngredients[idx]?.unit ?? 'g')}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       <div>
                         <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">{t('common.calories')}</label>
-                        <input
-                          id={`ai-ing-cal-${idx}`}
-                          type="number" min="0" step="1" inputMode="numeric"
-                          value={numericStrings[`${idx}-calories`] ?? String(ing.nutritionPerStandardUnit.calories)}
-                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-calories`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.calories', n); }}
+                        <StringNumberController
+                          name={`ingredients.${idx}.nutritionPerStandardUnit.calories`}
+                          control={control}
+                          inputMode="numeric"
+                          min={0}
+                          testId={`ai-ing-cal-${idx}`}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
                         <label htmlFor={`ai-ing-pro-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Protein</label>
-                        <input
-                          id={`ai-ing-pro-${idx}`}
-                          type="number" min="0" step="1" inputMode="numeric"
-                          value={numericStrings[`${idx}-protein`] ?? String(ing.nutritionPerStandardUnit.protein)}
-                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-protein`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.protein', n); }}
+                        <StringNumberController
+                          name={`ingredients.${idx}.nutritionPerStandardUnit.protein`}
+                          control={control}
+                          inputMode="numeric"
+                          min={0}
+                          testId={`ai-ing-pro-${idx}`}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
                         <label htmlFor={`ai-ing-carbs-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Carbs</label>
-                        <input
-                          id={`ai-ing-carbs-${idx}`}
-                          type="number" min="0" step="1" inputMode="numeric"
-                          value={numericStrings[`${idx}-carbs`] ?? String(ing.nutritionPerStandardUnit.carbs)}
-                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-carbs`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.carbs', n); }}
+                        <StringNumberController
+                          name={`ingredients.${idx}.nutritionPerStandardUnit.carbs`}
+                          control={control}
+                          inputMode="numeric"
+                          min={0}
+                          testId={`ai-ing-carbs-${idx}`}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
                         <label htmlFor={`ai-ing-fat-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Fat</label>
-                        <input
-                          id={`ai-ing-fat-${idx}`}
-                          type="number" min="0" step="1" inputMode="numeric"
-                          value={numericStrings[`${idx}-fat`] ?? String(ing.nutritionPerStandardUnit.fat)}
-                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-fat`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fat', n); }}
+                        <StringNumberController
+                          name={`ingredients.${idx}.nutritionPerStandardUnit.fat`}
+                          control={control}
+                          inputMode="numeric"
+                          min={0}
+                          testId={`ai-ing-fat-${idx}`}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
                         <label htmlFor={`ai-ing-fiber-${idx}`} className="text-[10px] text-slate-400 dark:text-slate-500 block mb-0.5">Fiber</label>
-                        <input
-                          id={`ai-ing-fiber-${idx}`}
-                          type="number" min="0" step="1" inputMode="numeric"
-                          value={numericStrings[`${idx}-fiber`] ?? String(ing.nutritionPerStandardUnit.fiber)}
-                          onChange={e => { const v = e.target.value; setNumericStrings(prev => ({ ...prev, [`${idx}-fiber`]: v })); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 0) handleUpdateIngredient(idx, 'nutritionPerStandardUnit.fiber', n); }}
+                        <StringNumberController
+                          name={`ingredients.${idx}.nutritionPerStandardUnit.fiber`}
+                          control={control}
+                          inputMode="numeric"
+                          min={0}
+                          testId={`ai-ing-fiber-${idx}`}
                           className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>

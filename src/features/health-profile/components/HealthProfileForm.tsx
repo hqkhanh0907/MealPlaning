@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../store/healthProfileStore';
@@ -7,7 +9,14 @@ import {
   calculateTDEE,
   calculateMacros,
 } from '../../../services/nutritionEngine';
-import type { HealthProfile, Gender, ActivityLevel } from '../types';
+import type { HealthProfile, ActivityLevel } from '../types';
+import {
+  healthProfileSchema,
+  type HealthProfileFormData,
+} from '../../../schemas/healthProfileSchema';
+import { StringNumberController } from '../../../components/form/StringNumberController';
+import { FormField } from '../../../components/form/FormField';
+import { RadioPills } from '../../../components/form/RadioPills';
 
 const ACTIVITY_LEVELS: ActivityLevel[] = [
   'sedentary',
@@ -36,92 +45,106 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
   const profile = useHealthProfileStore((s) => s.profile);
   const saveProfileAction = useHealthProfileStore((s) => s.saveProfile);
 
-  const [form, setForm] = useState<HealthProfile>(() => ({ ...profile }));
-  const [bmrOverrideEnabled, setBmrOverrideEnabled] = useState(
-    () => profile.bmrOverride != null,
-  );
+  const {
+    control,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<HealthProfileFormData>({
+    resolver: zodResolver(healthProfileSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      gender: profile.gender,
+      age: profile.age,
+      heightCm: profile.heightCm,
+      weightKg: profile.weightKg,
+      activityLevel: profile.activityLevel,
+      bodyFatPct: profile.bodyFatPct,
+      bmrOverrideEnabled: profile.bmrOverride != null,
+      bmrOverride: profile.bmrOverride,
+      proteinRatio: profile.proteinRatio,
+    },
+  });
+
   const [saved, setSaved] = useState(false);
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
 
-  function updateField<K extends keyof HealthProfile>(
-    key: K,
-    value: HealthProfile[K],
-  ) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    setSaved(false);
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-  }
-
-  function validate(): boolean {
-    const e: Record<string, boolean> = {};
-    if (!form.age || form.age < 10 || form.age > 100) e.age = true;
-    if (!form.heightCm || form.heightCm < 100 || form.heightCm > 250)
-      e.heightCm = true;
-    if (!form.weightKg || form.weightKg < 30 || form.weightKg > 300)
-      e.weightKg = true;
-    if (
-      !form.proteinRatio ||
-      form.proteinRatio < 0.8 ||
-      form.proteinRatio > 4
-    )
-      e.proteinRatio = true;
-    if (
-      form.bodyFatPct != null &&
-      (form.bodyFatPct < 3 || form.bodyFatPct > 60)
-    )
-      e.bodyFatPct = true;
-    if (bmrOverrideEnabled && (!form.bmrOverride || form.bmrOverride <= 0))
-      e.bmrOverride = true;
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  }
+  const watchedGender = watch('gender');
+  const watchedAge = watch('age');
+  const watchedHeightCm = watch('heightCm');
+  const watchedWeightKg = watch('weightKg');
+  const watchedActivityLevel = watch('activityLevel');
+  const watchedBmrOverrideEnabled = watch('bmrOverrideEnabled');
+  const watchedBmrOverride = watch('bmrOverride');
+  const watchedBodyFatPct = watch('bodyFatPct');
+  const watchedProteinRatio = watch('proteinRatio');
 
   const bmr = useMemo(() => {
-    if (bmrOverrideEnabled && form.bmrOverride) return form.bmrOverride;
-    return calculateBMR(form.weightKg, form.heightCm, form.age, form.gender);
+    if (watchedBmrOverrideEnabled && watchedBmrOverride)
+      return watchedBmrOverride;
+    return calculateBMR(
+      watchedWeightKg,
+      watchedHeightCm,
+      watchedAge,
+      watchedGender,
+    );
   }, [
-    bmrOverrideEnabled,
-    form.bmrOverride,
-    form.weightKg,
-    form.heightCm,
-    form.age,
-    form.gender,
+    watchedBmrOverrideEnabled,
+    watchedBmrOverride,
+    watchedWeightKg,
+    watchedHeightCm,
+    watchedAge,
+    watchedGender,
   ]);
 
   const tdee = useMemo(
-    () => calculateTDEE(bmr, form.activityLevel),
-    [bmr, form.activityLevel],
+    () => calculateTDEE(bmr, watchedActivityLevel),
+    [bmr, watchedActivityLevel],
   );
 
   const macros = useMemo(() => {
     const bodyFatFraction =
-      form.bodyFatPct != null ? form.bodyFatPct / 100 : undefined;
+      typeof watchedBodyFatPct === 'number'
+        ? watchedBodyFatPct / 100
+        : undefined;
     return calculateMacros(
       tdee,
-      form.weightKg,
-      form.proteinRatio,
-      form.fatPct,
+      watchedWeightKg,
+      watchedProteinRatio,
+      profile.fatPct,
       bodyFatFraction,
     );
-  }, [tdee, form.weightKg, form.proteinRatio, form.fatPct, form.bodyFatPct]);
+  }, [tdee, watchedWeightKg, watchedProteinRatio, profile.fatPct, watchedBodyFatPct]);
 
-  async function handleSave(): Promise<boolean> {
-    if (!validate()) return false;
+  async function onSubmit(data: HealthProfileFormData): Promise<boolean> {
     try {
       const profileToSave: HealthProfile = {
-        ...form,
-        bmrOverride: bmrOverrideEnabled ? form.bmrOverride : undefined,
+        ...profile,
+        gender: data.gender,
+        age: data.age,
+        heightCm: data.heightCm,
+        weightKg: data.weightKg,
+        activityLevel: data.activityLevel,
+        bodyFatPct:
+          typeof data.bodyFatPct === 'number' ? data.bodyFatPct : undefined,
+        bmrOverride: data.bmrOverrideEnabled ? data.bmrOverride : undefined,
+        proteinRatio: data.proteinRatio,
       };
       await saveProfileAction(db, profileToSave);
       setSaved(true);
+      reset(data);
       return true;
     } catch {
       return false;
     }
+  }
+
+  async function handleSave(): Promise<boolean> {
+    let result = false;
+    await handleSubmit(async (data) => {
+      result = await onSubmit(data);
+    })();
+    return result;
   }
 
   useEffect(() => {
@@ -133,7 +156,7 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
   const inputBase =
     'w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all';
 
-  function inputClass(field: string): string {
+  function inputClass(field: keyof HealthProfileFormData): string {
     const borderColor = errors[field]
       ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
       : 'border-slate-300 dark:border-slate-600 focus:ring-emerald-500/50 focus:border-emerald-500';
@@ -153,112 +176,52 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
         <legend className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           {t('healthProfile.gender')}
         </legend>
-        <div
+        <RadioPills<HealthProfileFormData>
+          name="gender"
+          control={control}
+          options={[
+            { value: 'male', label: t('healthProfile.male') },
+            { value: 'female', label: t('healthProfile.female') },
+          ]}
           className="flex gap-2"
-          role="radiogroup"
-          aria-label={t('healthProfile.gender')}
-        >
-          {(['male', 'female'] as Gender[]).map((g) => (
-            <button
-              key={g}
-              type="button"
-              role="radio"
-              aria-checked={form.gender === g}
-              onClick={() => updateField('gender', g)}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                form.gender === g
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-              }`}
-            >
-              {t(`healthProfile.${g}`)}
-            </button>
-          ))}
-        </div>
+        />
       </fieldset>
 
       {/* Age */}
-      <div>
-        <label
-          htmlFor="hp-age"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
-          {t('healthProfile.age')}
-        </label>
-        <input
-          id="hp-age"
-          type="number"
-          min={10}
-          max={100}
-          value={form.age || ''}
-          onChange={(e) => {
-            const raw = e.target.value;
-            if (raw === '') {
-              updateField('age', 0);
-              return;
-            }
-            const v = parseInt(raw, 10);
-            if (!isNaN(v)) updateField('age', v);
-          }}
+      <FormField label={t('healthProfile.age')} error={errors.age} className="">
+        <StringNumberController<HealthProfileFormData>
+          name="age"
+          control={control}
+          testId="hp-age"
+          ariaLabel={t('healthProfile.age')}
+          inputMode="numeric"
           className={inputClass('age')}
         />
-      </div>
+      </FormField>
 
       {/* Height */}
-      <div>
-        <label
-          htmlFor="hp-height"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
-          {t('healthProfile.height')}
-        </label>
-        <input
-          id="hp-height"
-          type="number"
-          min={100}
-          max={250}
+      <FormField label={t('healthProfile.height')} error={errors.heightCm} className="">
+        <StringNumberController<HealthProfileFormData>
+          name="heightCm"
+          control={control}
+          testId="hp-height"
+          ariaLabel={t('healthProfile.height')}
           step={0.5}
-          value={form.heightCm || ''}
-          onChange={(e) => {
-            const raw = e.target.value;
-            if (raw === '') {
-              updateField('heightCm', 0);
-              return;
-            }
-            const v = parseFloat(raw);
-            if (!isNaN(v)) updateField('heightCm', v);
-          }}
           className={inputClass('heightCm')}
         />
-      </div>
+      </FormField>
 
       {/* Weight */}
-      <div>
-        <label
-          htmlFor="hp-weight"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
-          {t('healthProfile.weight')}
-        </label>
-        <input
-          id="hp-weight"
-          type="number"
-          min={30}
-          max={300}
+      <FormField label={t('healthProfile.weight')} error={errors.weightKg} className="">
+        <StringNumberController<HealthProfileFormData>
+          name="weightKg"
+          control={control}
+          testId="hp-weight"
+          ariaLabel={t('healthProfile.weight')}
           step={0.1}
-          value={form.weightKg || ''}
-          onChange={(e) => {
-            const raw = e.target.value;
-            if (raw === '') {
-              updateField('weightKg', 0);
-              return;
-            }
-            const v = parseFloat(raw);
-            if (!isNaN(v)) updateField('weightKg', v);
-          }}
           className={inputClass('weightKg')}
         />
-      </div>
+      </FormField>
 
       {/* Activity Level */}
       <div>
@@ -268,20 +231,25 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
         >
           {t('healthProfile.activityLevel')}
         </label>
-        <select
-          id="hp-activity"
-          value={form.activityLevel}
-          onChange={(e) =>
-            updateField('activityLevel', e.target.value as ActivityLevel)
-          }
-          className={`${inputBase} border border-slate-300 dark:border-slate-600 focus:ring-emerald-500/50 focus:border-emerald-500`}
-        >
-          {ACTIVITY_LEVELS.map((level) => (
-            <option key={level} value={level}>
-              {t(ACTIVITY_LEVEL_I18N[level])}
-            </option>
-          ))}
-        </select>
+        <Controller
+          name="activityLevel"
+          control={control}
+          render={({ field }) => (
+            <select
+              id="hp-activity"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              className={`${inputBase} border border-slate-300 dark:border-slate-600 focus:ring-emerald-500/50 focus:border-emerald-500`}
+            >
+              {ACTIVITY_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {t(ACTIVITY_LEVEL_I18N[level])}
+                </option>
+              ))}
+            </select>
+          )}
+        />
       </div>
 
       {/* Body Fat % */}
@@ -295,21 +263,12 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
             ({t('healthProfile.bodyFatOptional')})
           </span>
         </label>
-        <input
-          id="hp-bodyfat"
-          type="number"
-          min={3}
-          max={60}
+        <StringNumberController<HealthProfileFormData>
+          name="bodyFatPct"
+          control={control}
+          testId="hp-bodyfat"
+          ariaLabel={t('healthProfile.bodyFat')}
           step={0.1}
-          value={form.bodyFatPct ?? ''}
-          onChange={(e) => {
-            if (e.target.value === '') {
-              updateField('bodyFatPct', undefined);
-            } else {
-              const v = parseFloat(e.target.value);
-              if (!isNaN(v)) updateField('bodyFatPct', v);
-            }
-          }}
           placeholder={t('healthProfile.bodyFatOptional')}
           className={inputClass('bodyFatPct')}
         />
@@ -320,91 +279,71 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
         <legend className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           {t('healthProfile.bmr')}
         </legend>
-        <div
-          className="flex gap-2 mb-2"
-          role="radiogroup"
-          aria-label={t('healthProfile.bmr')}
-        >
-          <button
-            type="button"
-            role="radio"
-            aria-checked={!bmrOverrideEnabled}
-            onClick={() => {
-              setBmrOverrideEnabled(false);
-              setSaved(false);
-            }}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              !bmrOverrideEnabled
-                ? 'bg-emerald-500 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            {t('healthProfile.bmrAuto')}
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={bmrOverrideEnabled}
-            onClick={() => {
-              setBmrOverrideEnabled(true);
-              setSaved(false);
-            }}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              bmrOverrideEnabled
-                ? 'bg-emerald-500 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-            }`}
-          >
-            {t('healthProfile.bmrCustom')}
-          </button>
-        </div>
-        {bmrOverrideEnabled && (
-          <input
-            data-testid="bmr-override-input"
-            type="number"
-            aria-label={`${t('healthProfile.bmr')} ${t('healthProfile.bmrCustom')}`}
-            min={1}
-            value={form.bmrOverride ?? ''}
-            onChange={(e) => {
-              if (e.target.value === '') {
-                updateField('bmrOverride', undefined);
-              } else {
-                const v = parseInt(e.target.value, 10);
-                if (!isNaN(v)) updateField('bmrOverride', v);
-              }
-            }}
+        <Controller
+          name="bmrOverrideEnabled"
+          control={control}
+          render={({ field }) => (
+            <div
+              className="flex gap-2 mb-2"
+              role="radiogroup"
+              aria-label={t('healthProfile.bmr')}
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!field.value}
+                onClick={() => field.onChange(false)}
+                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  !field.value
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+              >
+                {t('healthProfile.bmrAuto')}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={field.value === true}
+                onClick={() => field.onChange(true)}
+                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  field.value
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+              >
+                {t('healthProfile.bmrCustom')}
+              </button>
+            </div>
+          )}
+        />
+        {watchedBmrOverrideEnabled && (
+          <StringNumberController<HealthProfileFormData>
+            name="bmrOverride"
+            control={control}
+            testId="bmr-override-input"
+            ariaLabel={`${t('healthProfile.bmr')} ${t('healthProfile.bmrCustom')}`}
+            inputMode="numeric"
             className={inputClass('bmrOverride')}
           />
         )}
       </fieldset>
 
       {/* Protein Ratio */}
-      <div>
-        <label
-          htmlFor="hp-protein"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
-          {t('healthProfile.proteinRatio')}
-        </label>
-        <input
-          id="hp-protein"
-          type="number"
-          min={0.8}
-          max={4.0}
+      <FormField
+        label={t('healthProfile.proteinRatio')}
+        error={errors.proteinRatio}
+        className=""
+      >
+        <StringNumberController<HealthProfileFormData>
+          name="proteinRatio"
+          control={control}
+          testId="hp-protein"
+          ariaLabel={t('healthProfile.proteinRatio')}
           step={0.1}
-          value={form.proteinRatio || ''}
-          onChange={(e) => {
-            const raw = e.target.value;
-            if (raw === '') {
-              updateField('proteinRatio', 0);
-              return;
-            }
-            const v = parseFloat(raw);
-            if (!isNaN(v)) updateField('proteinRatio', v);
-          }}
           className={inputClass('proteinRatio')}
         />
-      </div>
+      </FormField>
 
       {/* Computed Values */}
       <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl space-y-3">
@@ -478,7 +417,9 @@ export function HealthProfileForm({ embedded, saveRef }: HealthProfileFormProps 
           onClick={() => void handleSave()}
           className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-all active:scale-[0.98] shadow-sm"
         >
-          {saved ? t('healthProfile.saved') : t('healthProfile.save')}
+          {saved && !isDirty
+            ? t('healthProfile.saved')
+            : t('healthProfile.save')}
         </button>
       )}
     </div>
