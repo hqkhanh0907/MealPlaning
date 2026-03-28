@@ -1,9 +1,15 @@
 /// <reference types="vitest" />
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@/': `${path.resolve(__dirname, './src')}/`,
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
@@ -26,6 +32,8 @@ export default defineConfig({
         'src/index.css',
         'src/locales/**',
         'src/components/navigation/index.ts',
+        'src/components/ui/**',
+        'src/lib/utils.ts',
       ],
     },
   },
