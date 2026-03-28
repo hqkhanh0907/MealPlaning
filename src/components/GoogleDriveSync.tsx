@@ -1,44 +1,31 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Cloud, Upload, Download, LogOut, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../contexts/NotificationContext';
+import { useDatabase } from '../contexts/DatabaseContext';
 import { SyncConflictModal } from './modals/SyncConflictModal';
 import * as driveService from '../services/googleDriveService';
+import { getSetting, setSetting, deleteSetting } from '../services/appSettings';
+import { reloadAllStores } from '../services/storeLoader';
 import type { SyncStatus } from '../types';
 
-const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
-const LAST_SYNC_KEY = 'mp-last-sync-at';
-
-const buildExportData = (): Record<string, unknown> => {
-  const data: Record<string, unknown> = {};
-  for (const key of EXPORT_KEYS) {
-    const value = localStorage.getItem(key);
-    if (value) data[key] = JSON.parse(value);
-  }
-  data._syncedAt = new Date().toISOString();
-  data._version = '1.0';
-  return data;
-};
-
-interface GoogleDriveSyncProps {
-  onImportData: (data: Record<string, unknown>) => void;
-}
-
-export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }) => {
+export const GoogleDriveSync: React.FC = () => {
   const { t } = useTranslation();
   const { user, accessToken, isLoading: authLoading, signIn, signOut } = useAuth();
   const notify = useNotification();
+  const db = useDatabase();
 
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
-  const [lastSyncAt, setLastSyncAt] = useState<string | null>(() =>
-    localStorage.getItem(LAST_SYNC_KEY),
-  );
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
   const [conflictData, setConflictData] = useState<{
-    local: Record<string, unknown>;
-    remote: Record<string, unknown>;
+    remoteData: Uint8Array;
     remoteModifiedTime: string;
   } | null>(null);
+
+  useEffect(() => {
+    getSetting(db, 'last_sync_at').then(v => { setLastSyncAt(v); }).catch(() => {});
+  }, [db]);
 
   const isSyncing = syncStatus === 'uploading' || syncStatus === 'downloading';
 
@@ -54,20 +41,20 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
   const handleSignOut = useCallback(async () => {
     await signOut();
     setLastSyncAt(null);
-    localStorage.removeItem(LAST_SYNC_KEY);
+    deleteSetting(db, 'last_sync_at').catch(() => {});
     notify.success(t('cloudSync.signOutSuccess'));
-  }, [signOut, notify, t]);
+  }, [signOut, notify, t, db]);
 
   const updateLastSync = useCallback((timestamp: string) => {
     setLastSyncAt(timestamp);
-    localStorage.setItem(LAST_SYNC_KEY, timestamp);
-  }, []);
+    setSetting(db, 'last_sync_at', timestamp).catch(() => {});
+  }, [db]);
 
   const handleUpload = useCallback(async () => {
     if (!accessToken) return;
     setSyncStatus('uploading');
     try {
-      const data = buildExportData();
+      const data = db.exportBinary();
       const result = await driveService.uploadBackup(accessToken, data);
       updateLastSync(result.modifiedTime);
       setSyncStatus('idle');
@@ -76,7 +63,7 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
       setSyncStatus('error');
       notify.error(t('cloudSync.uploadError'));
     }
-  }, [accessToken, notify, t, updateLastSync]);
+  }, [accessToken, db, notify, t, updateLastSync]);
 
   const handleDownload = useCallback(async () => {
     if (!accessToken) return;
@@ -88,21 +75,20 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
         notify.warning(t('cloudSync.noBackupFound'));
         return;
       }
-      const storedSyncTime = localStorage.getItem(LAST_SYNC_KEY);
+      const storedSyncTime = await getSetting(db, 'last_sync_at');
       const remoteSyncTime = result.file.modifiedTime;
 
       if (storedSyncTime && remoteSyncTime < storedSyncTime) {
-        const localData = buildExportData();
         setConflictData({
-          local: localData,
-          remote: result.data,
+          remoteData: result.data,
           remoteModifiedTime: remoteSyncTime,
         });
         setSyncStatus('idle');
         return;
       }
 
-      onImportData(result.data);
+      await db.importBinary(result.data);
+      await reloadAllStores(db);
       updateLastSync(remoteSyncTime);
       setSyncStatus('idle');
       notify.success(t('cloudSync.downloadSuccess'));
@@ -110,16 +96,21 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
       setSyncStatus('error');
       notify.error(t('cloudSync.downloadError'));
     }
-  }, [accessToken, onImportData, notify, t, updateLastSync]);
+  }, [accessToken, db, notify, t, updateLastSync]);
 
-  const handleConflictResolve = useCallback((choice: 'local' | 'cloud') => {
+  const handleConflictResolve = useCallback(async (choice: 'local' | 'cloud') => {
     if (choice === 'cloud' && conflictData) {
-      onImportData(conflictData.remote);
-      updateLastSync(conflictData.remoteModifiedTime);
-      notify.success(t('cloudSync.downloadSuccess'));
+      try {
+        await db.importBinary(conflictData.remoteData);
+        await reloadAllStores(db);
+        updateLastSync(conflictData.remoteModifiedTime);
+        notify.success(t('cloudSync.downloadSuccess'));
+      } catch {
+        notify.error(t('cloudSync.downloadError'));
+      }
     }
     setConflictData(null);
-  }, [conflictData, onImportData, notify, t, updateLastSync]);
+  }, [conflictData, db, notify, t, updateLastSync]);
 
   const statusIcon = useMemo(() => {
     if (syncStatus === 'uploading' || syncStatus === 'downloading') {
@@ -229,7 +220,7 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ onImportData }
 
       {conflictData && (
         <SyncConflictModal
-          localTime={(conflictData.local._syncedAt as string) ?? new Date().toISOString()}
+          localTime={lastSyncAt ?? new Date().toISOString()}
           remoteTime={conflictData.remoteModifiedTime}
           onResolve={handleConflictResolve}
           onClose={() => setConflictData(null)}

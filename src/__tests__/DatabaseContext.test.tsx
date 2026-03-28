@@ -6,10 +6,10 @@ import { DatabaseProvider, useDatabase } from '../contexts/DatabaseContext';
 const mockInitialize = vi.fn();
 const mockService = {
   initialize: mockInitialize,
-  execute: vi.fn(),
-  query: vi.fn(),
-  queryOne: vi.fn(),
-  transaction: vi.fn(),
+  execute: vi.fn().mockResolvedValue(undefined),
+  query: vi.fn().mockResolvedValue([]),
+  queryOne: vi.fn().mockResolvedValue(null),
+  transaction: vi.fn().mockResolvedValue(undefined),
   exportToJSON: vi.fn(),
   importFromJSON: vi.fn(),
 };

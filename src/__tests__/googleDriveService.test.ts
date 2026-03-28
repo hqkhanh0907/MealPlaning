@@ -12,7 +12,7 @@ const TOKEN = 'test-access-token';
 
 const mockFile = {
   id: 'file-1',
-  name: 'meal-planner-backup.json',
+  name: 'meal-planner-backup.sqlite',
   modifiedTime: '2024-01-15T10:00:00Z',
 };
 
@@ -21,7 +21,8 @@ const mockResponse = (body: unknown, ok = true, status = 200): Response =>
     ok,
     status,
     json: () => Promise.resolve(body),
-  }) as Response;
+    arrayBuffer: () => Promise.resolve(body instanceof Uint8Array ? body.buffer : new ArrayBuffer(0)),
+  }) as unknown as Response;
 
 describe('googleDriveService', () => {
   let fetchSpy: ReturnType<typeof vi.spyOn>;
@@ -44,7 +45,7 @@ describe('googleDriveService', () => {
       expect(urlStr).toContain('spaces=appDataFolder');
       expect(urlStr).toContain('fields=files');
       expect(urlStr).toContain('orderBy=modifiedTime+desc');
-      expect(urlStr).toContain("q=name+%3D+%27meal-planner-backup.json%27");
+      expect(urlStr).toContain("q=name+%3D+%27meal-planner-backup.sqlite%27");
       expect(options).toEqual({
         headers: { Authorization: `Bearer ${TOKEN}` },
       });
@@ -83,7 +84,8 @@ describe('googleDriveService', () => {
 
   describe('downloadBackup', () => {
     it('sends correct URL with alt=media and auth header', async () => {
-      fetchSpy.mockResolvedValueOnce(mockResponse({ meals: [] }));
+      const binaryData = new Uint8Array([1, 2, 3]);
+      fetchSpy.mockResolvedValueOnce(mockResponse(binaryData));
 
       await downloadBackup(TOKEN, 'file-1');
 
@@ -92,13 +94,13 @@ describe('googleDriveService', () => {
       });
     });
 
-    it('returns parsed JSON data', async () => {
-      const backupData = { meals: [{ name: 'Lunch' }] };
-      fetchSpy.mockResolvedValueOnce(mockResponse(backupData));
+    it('returns Uint8Array data', async () => {
+      const binaryData = new Uint8Array([10, 20, 30]);
+      fetchSpy.mockResolvedValueOnce(mockResponse(binaryData));
 
       const result = await downloadBackup(TOKEN, 'file-1');
 
-      expect(result).toEqual(backupData);
+      expect(result).toBeInstanceOf(Uint8Array);
     });
 
     it('throws on non-ok response', async () => {
@@ -120,19 +122,22 @@ describe('googleDriveService', () => {
     });
 
     it('returns latest backup data and file info', async () => {
-      const backupData = { meals: ['a'] };
+      const binaryData = new Uint8Array([1, 2, 3]);
       fetchSpy.mockResolvedValueOnce(mockResponse({ files: [mockFile] }));
-      fetchSpy.mockResolvedValueOnce(mockResponse(backupData));
+      fetchSpy.mockResolvedValueOnce(mockResponse(binaryData));
 
       const result = await downloadLatestBackup(TOKEN);
 
-      expect(result).toEqual({ data: backupData, file: mockFile });
+      expect(result).not.toBeNull();
+      expect(result!.file).toEqual(mockFile);
+      expect(result!.data).toBeInstanceOf(Uint8Array);
     });
 
     it('uses the first file from the list (most recent)', async () => {
-      const olderFile = { id: 'file-2', name: 'meal-planner-backup.json', modifiedTime: '2024-01-10T10:00:00Z' };
+      const olderFile = { id: 'file-2', name: 'meal-planner-backup.sqlite', modifiedTime: '2024-01-10T10:00:00Z' };
+      const binaryData = new Uint8Array([1, 2]);
       fetchSpy.mockResolvedValueOnce(mockResponse({ files: [mockFile, olderFile] }));
-      fetchSpy.mockResolvedValueOnce(mockResponse({ data: 'latest' }));
+      fetchSpy.mockResolvedValueOnce(mockResponse(binaryData));
 
       await downloadLatestBackup(TOKEN);
 
@@ -142,7 +147,7 @@ describe('googleDriveService', () => {
   });
 
   describe('uploadBackup', () => {
-    const uploadData = { meals: [{ id: 1 }] };
+    const uploadData = new Uint8Array([1, 2, 3, 4]);
 
     describe('when existing backup exists (PATCH path)', () => {
       it('updates existing file with PATCH', async () => {
@@ -164,14 +169,14 @@ describe('googleDriveService', () => {
 
         const [url, options] = fetchSpy.mock.calls[1];
         expect(url).toBe(`${DRIVE_UPLOAD_API}/${mockFile.id}?uploadType=media`);
-        expect(options).toEqual({
-          method: 'PATCH',
-          headers: {
+        expect((options as RequestInit).method).toBe('PATCH');
+        expect((options as RequestInit).headers).toEqual(
+          expect.objectContaining({
             Authorization: `Bearer ${TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(uploadData),
-        });
+            'Content-Type': 'application/octet-stream',
+          }),
+        );
+        expect((options as RequestInit).body).toEqual(uploadData);
       });
 
       it('throws on PATCH failure', async () => {
@@ -186,7 +191,7 @@ describe('googleDriveService', () => {
 
     describe('when no existing backup (POST multipart path)', () => {
       it('creates new file with POST multipart', async () => {
-        const newFile = { id: 'new-1', name: 'meal-planner-backup.json', modifiedTime: '2024-01-16T12:00:00Z' };
+        const newFile = { id: 'new-1', name: 'meal-planner-backup.sqlite', modifiedTime: '2024-01-16T12:00:00Z' };
         fetchSpy.mockResolvedValueOnce(mockResponse({ files: [] }));
         fetchSpy.mockResolvedValueOnce(mockResponse(newFile));
 
@@ -219,27 +224,29 @@ describe('googleDriveService', () => {
         );
       });
 
-      it('constructs multipart body with boundary, metadata and content', async () => {
+      it('constructs multipart body as Blob with boundary and metadata', async () => {
         fetchSpy.mockResolvedValueOnce(mockResponse({ files: [] }));
         fetchSpy.mockResolvedValueOnce(mockResponse(mockFile));
 
         await uploadBackup(TOKEN, uploadData);
 
-        const body = (fetchSpy.mock.calls[1][1] as RequestInit).body as string;
+        const body = (fetchSpy.mock.calls[1][1] as RequestInit).body;
+        expect(body).toBeInstanceOf(Blob);
+
+        const text = await (body as Blob).text();
         const boundary = '___meal_planner_boundary___';
 
-        expect(body).toContain(`--${boundary}`);
-        expect(body).toContain(`--${boundary}--`);
-        expect(body).toContain('Content-Type: application/json; charset=UTF-8');
-        expect(body).toContain('Content-Type: application/json');
+        expect(text).toContain(`--${boundary}`);
+        expect(text).toContain(`--${boundary}--`);
+        expect(text).toContain('Content-Type: application/json; charset=UTF-8');
+        expect(text).toContain('Content-Type: application/octet-stream');
 
         const metadata = {
-          name: 'meal-planner-backup.json',
-          mimeType: 'application/json',
+          name: 'meal-planner-backup.sqlite',
+          mimeType: 'application/octet-stream',
           parents: ['appDataFolder'],
         };
-        expect(body).toContain(JSON.stringify(metadata));
-        expect(body).toContain(JSON.stringify(uploadData));
+        expect(text).toContain(JSON.stringify(metadata));
       });
 
       it('throws on POST failure', async () => {

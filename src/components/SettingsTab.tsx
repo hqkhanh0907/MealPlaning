@@ -5,7 +5,6 @@ type Theme = 'light' | 'dark' | 'system' | 'schedule';
 type SettingsView = 'menu' | 'health-profile' | 'goal' | 'training-profile';
 
 interface SettingsTabProps {
-  onImportData: (data: Record<string, unknown>) => void;
   theme: Theme;
   setTheme: (t: Theme) => void;
 }
@@ -22,7 +21,7 @@ function DetailLoadingFallback() {
   );
 }
 
-export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, theme, setTheme }) => {
+export const SettingsTab: React.FC<SettingsTabProps> = ({ theme, setTheme }) => {
   const [currentView, setCurrentView] = useState<SettingsView>('menu');
 
   const handleNavigate = useCallback((section: 'health-profile' | 'goal' | 'training-profile') => {
@@ -60,7 +59,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ onImportData, theme, s
   return (
     <SettingsMenu
       onNavigate={handleNavigate}
-      onImportData={onImportData}
       theme={theme}
       setTheme={setTheme}
     />

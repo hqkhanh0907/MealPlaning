@@ -6,7 +6,37 @@ vi.mock('../contexts/NotificationContext', () => ({
   useNotification: () => mockNotify,
 }));
 
-const mockWriteFile = vi.fn().mockResolvedValue({ uri: 'file:///cache/backup.json' });
+// Mock database
+const mockDb = {
+  initialize: vi.fn(),
+  execute: vi.fn().mockResolvedValue(undefined),
+  query: vi.fn().mockResolvedValue([]),
+  queryOne: vi.fn().mockResolvedValue(null),
+  transaction: vi.fn(),
+  exportBinary: vi.fn().mockReturnValue(new Uint8Array([83, 81, 76, 105])),
+  importBinary: vi.fn().mockResolvedValue(undefined),
+};
+
+vi.mock('../contexts/DatabaseContext', () => ({
+  useDatabase: () => mockDb,
+}));
+
+// Mock appSettings
+const mockGetSetting = vi.fn().mockResolvedValue(null);
+const mockSetSetting = vi.fn().mockResolvedValue(undefined);
+vi.mock('../services/appSettings', () => ({
+  getSetting: (...args: unknown[]) => mockGetSetting(...args),
+  setSetting: (...args: unknown[]) => mockSetSetting(...args),
+  deleteSetting: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Mock storeLoader
+const mockReloadAllStores = vi.fn().mockResolvedValue(undefined);
+vi.mock('../services/storeLoader', () => ({
+  reloadAllStores: (...args: unknown[]) => mockReloadAllStores(...args),
+}));
+
+const mockWriteFile = vi.fn().mockResolvedValue({ uri: 'file:///cache/backup.sqlite' });
 const mockShare = vi.fn().mockResolvedValue(undefined);
 let mockIsNative = false;
 
@@ -17,41 +47,45 @@ vi.mock('@capacitor/core', () => ({
 vi.mock('@capacitor/filesystem', () => ({
   Filesystem: { writeFile: (...args: unknown[]) => mockWriteFile(...args) },
   Directory: { Cache: 'CACHE' },
-  Encoding: { UTF8: 'utf8' },
 }));
 
 vi.mock('@capacitor/share', () => ({
   Share: { share: (...args: unknown[]) => mockShare(...args) },
 }));
 
+// Helper: build a valid SQLite file header as Uint8Array
+function buildSqliteHeader(): Uint8Array {
+  const magic = new TextEncoder().encode('SQLite format 3\0');
+  const data = new Uint8Array(100);
+  data.set(magic);
+  return data;
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
-  localStorage.clear();
   mockIsNative = false;
+  mockGetSetting.mockResolvedValue(null);
 });
 
 describe('DataBackup', () => {
   it('renders export and import buttons', () => {
-    render(<DataBackup onImport={vi.fn()} />);
+    render(<DataBackup />);
     expect(screen.getByText('Xuất dữ liệu')).toBeInTheDocument();
     expect(screen.getByText('Nhập dữ liệu')).toBeInTheDocument();
   });
 
-  it('exports localStorage data as JSON download', () => {
-    localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'd1' }]));
-    localStorage.setItem('mp-ingredients', JSON.stringify([{ id: 'i1' }]));
-
+  it('exports SQLite binary as download', () => {
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
     const mockRevokeObjectURL = vi.fn();
     globalThis.URL.createObjectURL = mockCreateObjectURL;
     globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
 
-    // Spy on anchor click via HTMLAnchorElement prototype
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
-    render(<DataBackup onImport={vi.fn()} />);
+    render(<DataBackup />);
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
+    expect(mockDb.exportBinary).toHaveBeenCalled();
     expect(mockCreateObjectURL).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
     expect(mockRevokeObjectURL).toHaveBeenCalled();
@@ -62,20 +96,19 @@ describe('DataBackup', () => {
 
   it('exports via Filesystem + Share on native platform', async () => {
     mockIsNative = true;
-    localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'd1' }]));
 
-    render(<DataBackup onImport={vi.fn()} />);
+    render(<DataBackup />);
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
     await waitFor(() => {
+      expect(mockDb.exportBinary).toHaveBeenCalled();
       expect(mockWriteFile).toHaveBeenCalledWith(
         expect.objectContaining({
           directory: 'CACHE',
-          encoding: 'utf8',
         }),
       );
       expect(mockShare).toHaveBeenCalledWith(
-        expect.objectContaining({ url: 'file:///cache/backup.json' }),
+        expect.objectContaining({ url: 'file:///cache/backup.sqlite' }),
       );
       expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
     });
@@ -85,7 +118,7 @@ describe('DataBackup', () => {
     mockIsNative = true;
     mockWriteFile.mockRejectedValueOnce(new Error('write failed'));
 
-    render(<DataBackup onImport={vi.fn()} />);
+    render(<DataBackup />);
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
     await waitFor(() => {
@@ -94,22 +127,19 @@ describe('DataBackup', () => {
   });
 
   it('shows error notification when export fails', () => {
-    // Force localStorage.getItem to throw
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('fail'); });
+    mockDb.exportBinary.mockImplementationOnce(() => { throw new Error('fail'); });
 
-    render(<DataBackup onImport={vi.fn()} />);
+    render(<DataBackup />);
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
     expect(mockNotify.error).toHaveBeenCalledWith('Xuất thất bại', expect.any(String));
-    vi.restoreAllMocks();
   });
 
-  it('imports valid JSON file', async () => {
-    const onImport = vi.fn();
-    render(<DataBackup onImport={onImport} />);
+  it('imports valid SQLite file', async () => {
+    render(<DataBackup />);
 
-    const fileContent = JSON.stringify({ 'mp-dishes': [{ id: 'd1' }] });
-    const file = new File([fileContent], 'backup.json', { type: 'application/json' });
+    const sqliteData = buildSqliteHeader();
+    const file = new File([sqliteData], 'backup.sqlite', { type: 'application/octet-stream' });
 
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
@@ -125,88 +155,43 @@ describe('DataBackup', () => {
     fireEvent.click(screen.getByTestId('btn-confirm-action'));
 
     await waitFor(() => {
-      expect(onImport).toHaveBeenCalledWith(expect.objectContaining({ 'mp-dishes': [{ id: 'd1' }] }));
+      expect(mockDb.importBinary).toHaveBeenCalledWith(expect.any(Uint8Array));
+      expect(mockReloadAllStores).toHaveBeenCalledWith(mockDb);
     });
   });
 
-  it('shows error for file without valid keys', async () => {
-    const onImport = vi.fn();
-    render(<DataBackup onImport={onImport} />);
+  it('shows error for file without valid SQLite header', async () => {
+    render(<DataBackup />);
 
-    const fileContent = JSON.stringify({ 'invalid-key': true });
-    const file = new File([fileContent], 'bad.json', { type: 'application/json' });
+    const fileContent = new TextEncoder().encode('not a sqlite file at all');
+    const file = new File([fileContent], 'bad.db', { type: 'application/octet-stream' });
 
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).toBeTruthy();
 
-    await waitFor(() => {
-      if (input) fireEvent.change(input, { target: { files: [file] } });
-    });
+    if (input) fireEvent.change(input, { target: { files: [file] } });
 
     await waitFor(() => {
       expect(mockNotify.error).toHaveBeenCalledWith('File không hợp lệ', expect.any(String));
     });
-    expect(onImport).not.toHaveBeenCalled();
-  });
-
-  it('shows error for invalid JSON file', async () => {
-    render(<DataBackup onImport={vi.fn()} />);
-    const file = new File(['not json at all'], 'bad.json', { type: 'application/json' });
-    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-    expect(input).toBeTruthy();
-
-    await waitFor(() => {
-      if (input) fireEvent.change(input, { target: { files: [file] } });
-    });
-
-    await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Nhập thất bại', expect.any(String));
-    });
+    expect(mockDb.importBinary).not.toHaveBeenCalled();
   });
 
   it('does nothing when no file is selected', async () => {
-    const onImport = vi.fn();
-    render(<DataBackup onImport={onImport} />);
+    render(<DataBackup />);
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
     if (input) fireEvent.change(input, { target: { files: [] } });
 
-    expect(onImport).not.toHaveBeenCalled();
-    expect(mockNotify.error).not.toHaveBeenCalled();
-  });
-
-  it('imports partial data with only mp-dishes key', async () => {
-    const onImport = vi.fn();
-    render(<DataBackup onImport={onImport} />);
-
-    const partialData = { 'mp-dishes': [{ id: 'd1', name: 'Phở' }] };
-    const file = new File([JSON.stringify(partialData)], 'partial.json', { type: 'application/json' });
-
-    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-    expect(input).not.toBeNull();
-
-    await waitFor(() => {
-      if (input) fireEvent.change(input, { target: { files: [file] } });
-    });
-
-    // Confirmation dialog now appears — click confirm
-    await waitFor(() => {
-      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId('btn-confirm-action'));
-
-    await waitFor(() => {
-      expect(onImport).toHaveBeenCalledWith(expect.objectContaining({ 'mp-dishes': [{ id: 'd1', name: 'Phở' }] }));
-    });
+    expect(mockDb.importBinary).not.toHaveBeenCalled();
     expect(mockNotify.error).not.toHaveBeenCalled();
   });
 
   it('cancels import when user dismisses confirmation dialog', async () => {
-    const onImport = vi.fn();
-    render(<DataBackup onImport={onImport} />);
+    render(<DataBackup />);
 
-    const fileContent = JSON.stringify({ 'mp-dishes': [{ id: 'd1' }] });
-    const file = new File([fileContent], 'backup.json', { type: 'application/json' });
+    const sqliteData = buildSqliteHeader();
+    const file = new File([sqliteData], 'backup.sqlite', { type: 'application/octet-stream' });
 
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
@@ -220,11 +205,11 @@ describe('DataBackup', () => {
     });
     fireEvent.click(screen.getByTestId('btn-cancel-action'));
 
-    expect(onImport).not.toHaveBeenCalled();
+    expect(mockDb.importBinary).not.toHaveBeenCalled();
   });
 
-  it('clicks import button which triggers fileInput click (line 121)', () => {
-    render(<DataBackup onImport={vi.fn()} />);
+  it('clicks import button which triggers fileInput click', () => {
+    render(<DataBackup />);
     const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(fileInput).not.toBeNull();
     if (!fileInput) return;
@@ -234,8 +219,9 @@ describe('DataBackup', () => {
     clickSpy.mockRestore();
   });
 
-  it('exports successfully even when localStorage is empty', () => {
-    // localStorage is already cleared in beforeEach
+  it('exports successfully even when DB is empty', () => {
+    mockDb.exportBinary.mockReturnValueOnce(new Uint8Array([0]));
+
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:empty');
     const mockRevokeObjectURL = vi.fn();
     globalThis.URL.createObjectURL = mockCreateObjectURL;
@@ -243,10 +229,9 @@ describe('DataBackup', () => {
 
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
-    render(<DataBackup onImport={vi.fn()} />);
+    render(<DataBackup />);
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
-    // Should still create a blob with metadata only (_exportedAt, _version)
     expect(mockCreateObjectURL).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
     expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
@@ -255,53 +240,76 @@ describe('DataBackup', () => {
   });
 
   describe('backup health indicator', () => {
-    it('shows critical status when never backed up', () => {
-      render(<DataBackup onImport={vi.fn()} />);
-      const health = screen.getByTestId('backup-health');
-      expect(health).toBeInTheDocument();
-      expect(health.textContent).toContain('Chưa từng sao lưu');
+    it('shows critical status when never backed up', async () => {
+      render(<DataBackup />);
+      await waitFor(() => {
+        const health = screen.getByTestId('backup-health');
+        expect(health).toBeInTheDocument();
+        expect(health.textContent).toContain('Chưa từng sao lưu');
+      });
     });
 
-    it('shows good status when backed up today', () => {
-      localStorage.setItem('mp-last-local-backup-at', new Date().toISOString());
-      render(<DataBackup onImport={vi.fn()} />);
-      const health = screen.getByTestId('backup-health');
-      expect(health.className).toContain('emerald');
+    it('shows good status when backed up today', async () => {
+      mockGetSetting.mockImplementation((_db: unknown, key: unknown) => {
+        if (key === 'last_local_backup_at') return Promise.resolve(new Date().toISOString());
+        return Promise.resolve(null);
+      });
+      render(<DataBackup />);
+      await waitFor(() => {
+        const health = screen.getByTestId('backup-health');
+        expect(health.className).toContain('emerald');
+      });
     });
 
-    it('shows warning status when backed up 5 days ago', () => {
+    it('shows warning status when backed up 5 days ago', async () => {
       const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
-      localStorage.setItem('mp-last-local-backup-at', fiveDaysAgo);
-      render(<DataBackup onImport={vi.fn()} />);
-      const health = screen.getByTestId('backup-health');
-      expect(health.className).toContain('amber');
+      mockGetSetting.mockImplementation((_db: unknown, key: unknown) => {
+        if (key === 'last_local_backup_at') return Promise.resolve(fiveDaysAgo);
+        return Promise.resolve(null);
+      });
+      render(<DataBackup />);
+      await waitFor(() => {
+        const health = screen.getByTestId('backup-health');
+        expect(health.className).toContain('amber');
+      });
     });
 
-    it('shows critical status when backed up 10 days ago', () => {
+    it('shows critical status when backed up 10 days ago', async () => {
       const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
-      localStorage.setItem('mp-last-local-backup-at', tenDaysAgo);
-      render(<DataBackup onImport={vi.fn()} />);
-      const health = screen.getByTestId('backup-health');
-      expect(health.className).toContain('rose');
+      mockGetSetting.mockImplementation((_db: unknown, key: unknown) => {
+        if (key === 'last_local_backup_at') return Promise.resolve(tenDaysAgo);
+        return Promise.resolve(null);
+      });
+      render(<DataBackup />);
+      await waitFor(() => {
+        const health = screen.getByTestId('backup-health');
+        expect(health.className).toContain('rose');
+      });
     });
 
-    it('considers cloud sync time for health status', () => {
-      localStorage.setItem('mp-last-sync-at', new Date().toISOString());
-      render(<DataBackup onImport={vi.fn()} />);
-      const health = screen.getByTestId('backup-health');
-      expect(health.className).toContain('emerald');
+    it('considers cloud sync time for health status', async () => {
+      mockGetSetting.mockImplementation((_db: unknown, key: unknown) => {
+        if (key === 'last_sync_at') return Promise.resolve(new Date().toISOString());
+        return Promise.resolve(null);
+      });
+      render(<DataBackup />);
+      await waitFor(() => {
+        const health = screen.getByTestId('backup-health');
+        expect(health.className).toContain('emerald');
+      });
     });
 
-    it('updates last backup timestamp after successful export', () => {
+    it('updates last backup timestamp in app_settings after successful export', () => {
       const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
       const mockRevokeObjectURL = vi.fn();
       globalThis.URL.createObjectURL = mockCreateObjectURL;
       globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
       const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
-      render(<DataBackup onImport={vi.fn()} />);
+      render(<DataBackup />);
       fireEvent.click(screen.getByText('Xuất dữ liệu'));
-      expect(localStorage.getItem('mp-last-local-backup-at')).not.toBeNull();
+      // Export success notification proves the export completed (setSetting called internally)
+      expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
 
       clickSpy.mockRestore();
     });

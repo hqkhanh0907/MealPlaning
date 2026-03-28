@@ -14,6 +14,24 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
       .initialize()
       .then(async () => {
         await createSchema(service);
+
+        // Load all stores from SQLite before rendering the app
+        const { useIngredientStore } = await import('../store/ingredientStore');
+        const { useDishStore } = await import('../store/dishStore');
+        const { useDayPlanStore } = await import('../store/dayPlanStore');
+        const { useMealTemplateStore } = await import('../store/mealTemplateStore');
+        const { useHealthProfileStore } = await import('../features/health-profile/store/healthProfileStore');
+        const { useFitnessStore } = await import('../store/fitnessStore');
+
+        await Promise.all([
+          useIngredientStore.getState().loadAll(service),
+          useDishStore.getState().loadAll(service),
+          useDayPlanStore.getState().loadAll(service),
+          useMealTemplateStore.getState().loadAll(service),
+          useHealthProfileStore.getState().loadProfile(service),
+          useFitnessStore.getState().initializeFromSQLite(service),
+        ]);
+
         setDb(service);
       })
       .catch((err: unknown) => {

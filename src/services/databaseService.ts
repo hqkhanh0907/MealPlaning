@@ -118,13 +118,14 @@ class WebDatabaseService implements DatabaseService {
   }
 
   exportBinary(): Uint8Array {
-    return this.getDb().export();
+    return (this.getDb() as unknown as { export(): Uint8Array }).export();
   }
 
   async importBinary(data: Uint8Array): Promise<void> {
     if (!this.SQL) throw new Error('SQL.js not loaded');
     this.db?.close();
-    this.db = new this.SQL.Database(data);
+    const SQL = this.SQL;
+    this.db = new (SQL.Database as unknown as new (data: Uint8Array) => InstanceType<typeof SQL.Database>)(data);
   }
 }
 

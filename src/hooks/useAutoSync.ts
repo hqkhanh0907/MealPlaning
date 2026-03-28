@@ -1,30 +1,16 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAuth } from './useAuth';
+import { useDatabase } from '../contexts/DatabaseContext';
 import * as driveService from '../services/googleDriveService';
+import { getSetting, setSetting } from '../services/appSettings';
+import { reloadAllStores } from '../services/storeLoader';
+import { useIngredientStore } from '../store/ingredientStore';
+import { useDishStore } from '../store/dishStore';
+import { useDayPlanStore } from '../store/dayPlanStore';
+import { useMealTemplateStore } from '../store/mealTemplateStore';
 import type { SyncStatus } from '../types';
 
-const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
 const DEBOUNCE_DELAY_MS = 3000;
-const LAST_SYNC_KEY = 'mp-last-sync-at';
-
-const buildExportData = (): Record<string, unknown> => {
-  const data: Record<string, unknown> = {};
-  for (const key of EXPORT_KEYS) {
-    const value = localStorage.getItem(key);
-    if (value) data[key] = JSON.parse(value);
-  }
-  data._syncedAt = new Date().toISOString();
-  data._version = '1.0';
-  return data;
-};
-
-interface UseAutoSyncOptions {
-  ingredients: unknown[];
-  dishes: unknown[];
-  dayPlans: unknown[];
-  templates: unknown[];
-  onImportData: (data: Record<string, unknown>) => void;
-}
 
 interface UseAutoSyncReturn {
   syncStatus: SyncStatus;
@@ -33,22 +19,30 @@ interface UseAutoSyncReturn {
   triggerDownload: () => Promise<void>;
 }
 
-export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
+export const useAutoSync = (): UseAutoSyncReturn => {
   const { accessToken, user } = useAuth();
+  const db = useDatabase();
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
-  const [lastSyncAt, setLastSyncAt] = useState<string | null>(() =>
-    localStorage.getItem(LAST_SYNC_KEY),
-  );
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isUploadingRef = useRef(false);
   const initializedRef = useRef(false);
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
+  const dbRef = useRef(db);
+  dbRef.current = db;
 
-  const updateLastSync = useCallback((timestamp: string) => {
+  const ingredients = useIngredientStore(s => s.ingredients);
+  const dishes = useDishStore(s => s.dishes);
+  const dayPlans = useDayPlanStore(s => s.dayPlans);
+  const templates = useMealTemplateStore(s => s.templates);
+
+  useEffect(() => {
+    getSetting(db, 'last_sync_at').then(v => { setLastSyncAt(v); }).catch(() => {});
+  }, [db]);
+
+  const updateLastSync = useCallback(async (timestamp: string) => {
     setLastSyncAt(timestamp);
-    localStorage.setItem(LAST_SYNC_KEY, timestamp);
+    await setSetting(dbRef.current, 'last_sync_at', timestamp).catch(() => {});
   }, []);
 
   const triggerUpload = useCallback(async () => {
@@ -56,9 +50,9 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     isUploadingRef.current = true;
     setSyncStatus('uploading');
     try {
-      const data = buildExportData();
+      const data = dbRef.current.exportBinary();
       const result = await driveService.uploadBackup(accessToken, data);
-      updateLastSync(result.modifiedTime);
+      await updateLastSync(result.modifiedTime);
       setSyncStatus('idle');
     } catch {
       setSyncStatus('error');
@@ -73,8 +67,9 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     try {
       const result = await driveService.downloadLatestBackup(accessToken);
       if (result) {
-        optionsRef.current.onImportData(result.data);
-        updateLastSync(result.file.modifiedTime);
+        await dbRef.current.importBinary(result.data);
+        await reloadAllStores(dbRef.current);
+        await updateLastSync(result.file.modifiedTime);
       }
       setSyncStatus('idle');
     } catch {
@@ -82,7 +77,6 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     }
   }, [accessToken, updateLastSync]);
 
-  // Sync on launch when authenticated
   useEffect(() => {
     if (!user || !accessToken || initializedRef.current) return;
     initializedRef.current = true;
@@ -92,10 +86,11 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
         const result = await driveService.downloadLatestBackup(accessToken);
         if (result) {
           const remoteSyncTime = result.file.modifiedTime;
-          const localSyncTime = localStorage.getItem(LAST_SYNC_KEY);
+          const localSyncTime = await getSetting(dbRef.current, 'last_sync_at');
           if (!localSyncTime || remoteSyncTime > localSyncTime) {
-            optionsRef.current.onImportData(result.data);
-            updateLastSync(remoteSyncTime);
+            await dbRef.current.importBinary(result.data);
+            await reloadAllStores(dbRef.current);
+            await updateLastSync(remoteSyncTime);
           }
         }
       } catch {
@@ -105,7 +100,6 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
     syncOnLaunch();
   }, [user, accessToken, updateLastSync]);
 
-  // Auto-sync when data changes (debounced)
   useEffect(() => {
     if (!user || !accessToken || !initializedRef.current) return;
 
@@ -124,14 +118,13 @@ export const useAutoSync = (options: UseAutoSyncOptions): UseAutoSyncReturn => {
   }, [
     user,
     accessToken,
-    options.ingredients,
-    options.dishes,
-    options.dayPlans,
-    options.templates,
+    ingredients,
+    dishes,
+    dayPlans,
+    templates,
     triggerUpload,
   ]);
 
-  // Reset when user signs out
   useEffect(() => {
     if (!user) {
       initializedRef.current = false;

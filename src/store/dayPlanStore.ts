@@ -1,9 +1,18 @@
 import { create } from 'zustand';
 import type { DayPlan, MealType } from '../types';
+import type { DatabaseService } from '../services/databaseService';
 import { migrateDayPlans } from '../services/dataService';
 import { updateDayPlanSlot } from '../services/planService';
 
 const STORAGE_KEY = 'mp-day-plans';
+
+interface DayPlanRow {
+  date: string;
+  breakfast_dish_ids: string;
+  lunch_dish_ids: string;
+  dinner_dish_ids: string;
+  servings: string | null;
+}
 
 export const loadDayPlans = (): DayPlan[] => {
   try {
@@ -21,6 +30,7 @@ interface DayPlanState {
   isDishUsed: (dishId: string) => boolean;
   restoreDayPlans: (snapshot: DayPlan[]) => void;
   hydrate: () => void;
+  loadAll: (db: DatabaseService) => Promise<void>;
 }
 
 export const useDayPlanStore = create<DayPlanState>((set, get) => ({
@@ -53,6 +63,21 @@ export const useDayPlanStore = create<DayPlanState>((set, get) => ({
     }));
   },
   hydrate: () => set({ dayPlans: loadDayPlans() }),
+  loadAll: async (db: DatabaseService) => {
+    const rows = await db.query<DayPlanRow>('SELECT * FROM day_plans');
+    if (rows.length === 0) {
+      set({ dayPlans: loadDayPlans() });
+      return;
+    }
+    const dayPlans: DayPlan[] = rows.map((r) => ({
+      date: r.date,
+      breakfastDishIds: JSON.parse(r.breakfast_dish_ids) as string[],
+      lunchDishIds: JSON.parse(r.lunch_dish_ids) as string[],
+      dinnerDishIds: JSON.parse(r.dinner_dish_ids) as string[],
+      ...(r.servings ? { servings: JSON.parse(r.servings) as Record<string, number> } : {}),
+    }));
+    set({ dayPlans });
+  },
 }));
 
 useDayPlanStore.subscribe((state, prev) => {

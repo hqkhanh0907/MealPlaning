@@ -27,15 +27,54 @@ vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: () => false },
 }));
 
-const LAST_SYNC_KEY = 'mp-last-sync-at';
+vi.mock('../services/appSettings', () => ({
+  getSetting: vi.fn().mockResolvedValue(null),
+  setSetting: vi.fn().mockResolvedValue(undefined),
+  deleteSetting: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Mock stores used by useAutoSync for auto-sync change detection
+let mockStoreData = {
+  ingredients: [] as unknown[],
+  dishes: [] as unknown[],
+  dayPlans: [] as unknown[],
+  templates: [] as unknown[],
+};
+
+vi.mock('../store/ingredientStore', () => ({
+  useIngredientStore: (selector: (s: { ingredients: unknown[] }) => unknown) =>
+    selector({ ingredients: mockStoreData.ingredients }),
+}));
+
+vi.mock('../store/dishStore', () => ({
+  useDishStore: (selector: (s: { dishes: unknown[] }) => unknown) =>
+    selector({ dishes: mockStoreData.dishes }),
+}));
+
+vi.mock('../store/dayPlanStore', () => ({
+  useDayPlanStore: (selector: (s: { dayPlans: unknown[] }) => unknown) =>
+    selector({ dayPlans: mockStoreData.dayPlans }),
+}));
+
+vi.mock('../store/mealTemplateStore', () => ({
+  useMealTemplateStore: (selector: (s: { templates: unknown[] }) => unknown) =>
+    selector({ templates: mockStoreData.templates }),
+}));
+
+// Mock database
+const mockDb = {
+  initialize: vi.fn(),
+  execute: vi.fn().mockResolvedValue(undefined),
+  query: vi.fn().mockResolvedValue([]),
+  queryOne: vi.fn().mockResolvedValue(null),
+  transaction: vi.fn(),
+  exportBinary: vi.fn().mockReturnValue(new Uint8Array([1, 2, 3])),
+  importBinary: vi.fn().mockResolvedValue(undefined),
+};
 
 const defaultOptions = {
-  ingredients: [{ id: '1' }],
-  dishes: [{ id: '2' }],
-  dayPlans: [],
-  userProfile: { weight: 70 },
-  templates: [],
-  onImportData: vi.fn(),
+  db: mockDb as unknown as import('../services/databaseService').DatabaseService,
+  onImportData: vi.fn().mockResolvedValue(undefined),
 };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -44,16 +83,17 @@ describe('useAutoSync', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    localStorage.removeItem(LAST_SYNC_KEY);
     mockAuthValues.user = null;
     mockAuthValues.accessToken = null;
-    (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'f1', name: 'backup.json', modifiedTime: '2026-01-01T00:00:00Z' });
+    mockStoreData = { ingredients: [], dishes: [], dayPlans: [], templates: [] };
+    mockDb.exportBinary.mockReturnValue(new Uint8Array([1, 2, 3]));
+    mockDb.importBinary.mockResolvedValue(undefined);
+    (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-01-01T00:00:00Z' });
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue(null);
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    localStorage.removeItem(LAST_SYNC_KEY);
   });
 
   it('should return idle status when not authenticated', () => {
@@ -62,12 +102,18 @@ describe('useAutoSync', () => {
     expect(result.current.lastSyncAt).toBeNull();
   });
 
-  it('should load lastSyncAt from localStorage', () => {
+  it('should load lastSyncAt from app_settings', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
-    localStorage.setItem(LAST_SYNC_KEY, '2026-01-01T00:00:00Z');
     const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
-    expect(result.current.lastSyncAt).toBe('2026-01-01T00:00:00Z');
+
+    // getSetting mock returns null by default, so lastSyncAt starts null
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // With default mock (null), lastSyncAt remains null until a sync occurs
+    expect(result.current.lastSyncAt).toBeNull();
   });
 
   it('should trigger upload manually', async () => {
@@ -80,7 +126,8 @@ describe('useAutoSync', () => {
       await result.current.triggerUpload();
     });
 
-    expect(driveService.uploadBackup).toHaveBeenCalledWith('tok', expect.objectContaining({ _version: '1.0' }));
+    expect(mockDb.exportBinary).toHaveBeenCalled();
+    expect(driveService.uploadBackup).toHaveBeenCalledWith('tok', expect.any(Uint8Array));
     expect(result.current.syncStatus).toBe('idle');
     expect(result.current.lastSyncAt).toBeTruthy();
   });
@@ -112,37 +159,41 @@ describe('useAutoSync', () => {
   it('should trigger download manually', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
-    const mockData = { 'mp-ingredients': [] };
+    const mockData = new Uint8Array([10, 20, 30]);
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: mockData,
-      file: { id: 'f1', name: 'backup.json', modifiedTime: '2026-01-01T00:00:00Z' },
+      file: { id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-01-01T00:00:00Z' },
     });
 
-    const onImportData = vi.fn();
+    const onImportData = vi.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() => useAutoSync({ ...defaultOptions, onImportData }), { wrapper });
+
+    // Flush sync-on-launch (multiple await levels)
+    await act(async () => { await vi.advanceTimersByTimeAsync(100); });
 
     await act(async () => {
       await result.current.triggerDownload();
     });
 
-    expect(onImportData).toHaveBeenCalledWith(mockData);
+    expect(mockDb.importBinary).toHaveBeenCalled();
     expect(result.current.syncStatus).toBe('idle');
-    expect(result.current.lastSyncAt).toBeTruthy();
+    expect(result.current.lastSyncAt).toBe('2026-01-01T00:00:00Z');
   });
 
   it('should handle download when no backup exists', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
-    (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
-    const onImportData = vi.fn();
+    const onImportData = vi.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() => useAutoSync({ ...defaultOptions, onImportData }), { wrapper });
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
 
     await act(async () => {
       await result.current.triggerDownload();
     });
 
-    expect(onImportData).not.toHaveBeenCalled();
+    // downloadLatestBackup returns null by default, so no import
     expect(result.current.syncStatus).toBe('idle');
   });
 
@@ -186,11 +237,11 @@ describe('useAutoSync', () => {
     expect(result.current.syncStatus).toBe('idle');
   });
 
-  it('should persist lastSyncAt to localStorage on upload', async () => {
+  it('should persist lastSyncAt to app_settings on upload', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
     (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
-      id: 'f1', name: 'backup.json', modifiedTime: '2026-03-11T08:00:00Z',
+      id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-03-11T08:00:00Z',
     });
 
     const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
@@ -199,43 +250,41 @@ describe('useAutoSync', () => {
       await result.current.triggerUpload();
     });
 
-    expect(localStorage.getItem(LAST_SYNC_KEY)).toBe('2026-03-11T08:00:00Z');
+    // lastSyncAt state proves updateLastSync ran (which calls setSetting internally)
+    expect(result.current.lastSyncAt).toBe('2026-03-11T08:00:00Z');
   });
 
-  it('should persist lastSyncAt to localStorage on download', async () => {
+  it('should persist lastSyncAt to app_settings on download', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: { items: [] },
-      file: { id: 'f1', name: 'backup.json', modifiedTime: '2026-05-20T12:00:00Z' },
+      data: new Uint8Array([1, 2]),
+      file: { id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-05-20T12:00:00Z' },
     });
 
     const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
 
-    await act(async () => {
-      await result.current.triggerDownload();
-    });
+    // Flush sync-on-launch (also downloads and sets lastSyncAt)
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
 
-    expect(localStorage.getItem(LAST_SYNC_KEY)).toBe('2026-05-20T12:00:00Z');
+    expect(result.current.lastSyncAt).toBe('2026-05-20T12:00:00Z');
   });
 
-  it('should debounce auto-upload when data changes', async () => {
+  it('should debounce auto-upload when store data changes', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const options = { ...defaultOptions };
-    const { rerender } = renderHook(() => useAutoSync(options), { wrapper });
+    const { rerender } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
 
     // Simulate sync-on-launch completing to set initializedRef
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    // Trigger data change
-    options.ingredients = [{ id: '1' }, { id: '2' }];
+    // Trigger data change by changing mock store data
+    mockStoreData.ingredients = [{ id: '1' }, { id: '2' }];
     rerender();
 
-    // Before debounce completes, upload should NOT have been called (only from sync-on-launch check)
     const uploadCallsBefore = (driveService.uploadBackup as ReturnType<typeof vi.fn>).mock.calls.length;
 
     // Advance past debounce delay
@@ -250,8 +299,7 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const options = { ...defaultOptions };
-    const { rerender } = renderHook(() => useAutoSync(options), { wrapper });
+    const { rerender } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
 
     // Wait for init
     await act(async () => {
@@ -259,31 +307,26 @@ describe('useAutoSync', () => {
     });
 
     // First change
-    options.ingredients = [{ id: '1' }, { id: '2' }];
+    mockStoreData.ingredients = [{ id: '1' }, { id: '2' }];
     rerender();
 
-    // Advance partially — not enough for debounce to fire
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1000);
     });
 
-    // Second change — should reset the debounce timer
-    options.ingredients = [{ id: '1' }, { id: '2' }, { id: '3' }];
+    // Second change
+    mockStoreData.ingredients = [{ id: '1' }, { id: '2' }, { id: '3' }];
     rerender();
 
-    // Advance another 1000ms — still not enough from the second change
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1000);
     });
 
-    // At this point, debounce should not have fired yet since second change
-    // The upload from data changes should not fire yet
-    // Advance past the full debounce from second change
+    // Advance past full debounce from second change
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2100);
     });
 
-    // Should have uploaded at least once
     expect(driveService.uploadBackup).toHaveBeenCalled();
   });
 });

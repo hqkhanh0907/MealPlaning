@@ -1,50 +1,43 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Upload, Loader2, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { useNotification } from '../contexts/NotificationContext';
+import { useDatabase } from '../contexts/DatabaseContext';
+import { getSetting, setSetting } from '../services/appSettings';
+import { reloadAllStores } from '../services/storeLoader';
 import { ConfirmationModal } from './modals/ConfirmationModal';
 
-interface DataBackupProps {
-  onImport: (data: Record<string, unknown>) => void;
+function useBackupHealthStatus(): { level: 'good' | 'warning' | 'critical'; daysSince: number | null } {
+  const db = useDatabase();
+  const [status, setStatus] = useState<{ level: 'good' | 'warning' | 'critical'; daysSince: number | null }>({ level: 'critical', daysSince: null });
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const cloudTime = await getSetting(db, 'last_sync_at');
+        const localTime = await getSetting(db, 'last_local_backup_at');
+        const timestamps = [cloudTime, localTime].filter(Boolean).map(t => new Date(t!).getTime());
+        if (timestamps.length === 0) { setStatus({ level: 'critical', daysSince: null }); return; }
+        const latest = Math.max(...timestamps);
+        const daysSince = Math.floor((Date.now() - latest) / (1000 * 60 * 60 * 24));
+        if (daysSince <= 3) { setStatus({ level: 'good', daysSince }); return; }
+        if (daysSince <= 7) { setStatus({ level: 'warning', daysSince }); return; }
+        setStatus({ level: 'critical', daysSince });
+      } catch {
+        setStatus({ level: 'critical', daysSince: null });
+      }
+    };
+    load();
+  }, [db]);
+
+  return status;
 }
-
-const EXPORT_KEYS = ['mp-ingredients', 'mp-dishes', 'mp-day-plans', 'mp-user-profile', 'meal-templates'];
-const LAST_LOCAL_BACKUP_KEY = 'mp-last-local-backup-at';
-
-function getBackupHealthStatus(): { level: 'good' | 'warning' | 'critical'; daysSince: number | null } {
-  try {
-    const cloudTime = localStorage.getItem('mp-last-sync-at');
-    const localTime = localStorage.getItem(LAST_LOCAL_BACKUP_KEY);
-    const timestamps = [cloudTime, localTime].filter(Boolean).map(t => new Date(t!).getTime());
-    if (timestamps.length === 0) return { level: 'critical', daysSince: null };
-    const latest = Math.max(...timestamps);
-    const daysSince = Math.floor((Date.now() - latest) / (1000 * 60 * 60 * 24));
-    if (daysSince <= 3) return { level: 'good', daysSince };
-    if (daysSince <= 7) return { level: 'warning', daysSince };
-    return { level: 'critical', daysSince };
-  } catch {
-    return { level: 'critical', daysSince: null };
-  }
-}
-
-const buildExportData = (): Record<string, unknown> => {
-  const data: Record<string, unknown> = {};
-  for (const key of EXPORT_KEYS) {
-    const value = localStorage.getItem(key);
-    if (value) {
-      data[key] = JSON.parse(value);
-    }
-  }
-  data._exportedAt = new Date().toISOString();
-  data._version = '1.0';
-  return data;
-};
 
 const exportFileName = () =>
-  `meal-planner-backup-${new Date().toISOString().split('T')[0]}.json`;
+  `meal-planner-backup-${new Date().toISOString().split('T')[0]}.sqlite`;
 
 const HEALTH_STYLES = {
   good: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-400', Icon: ShieldCheck },
@@ -54,7 +47,7 @@ const HEALTH_STYLES = {
 
 const BackupHealthIndicator: React.FC = () => {
   const { t } = useTranslation();
-  const { level, daysSince } = getBackupHealthStatus();
+  const { level, daysSince } = useBackupHealthStatus();
   const style = HEALTH_STYLES[level];
   const message = daysSince === null
     ? t('backup.neverBackedUp')
@@ -68,16 +61,17 @@ const BackupHealthIndicator: React.FC = () => {
   );
 };
 
-export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
+export const DataBackup: React.FC = () => {
   const { t } = useTranslation();
   const notify = useNotification();
+  const db = useDatabase();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [pendingImport, setPendingImport] = useState<{ data: Record<string, unknown>; summary: string } | null>(null);
+  const [pendingImport, setPendingImport] = useState<{ data: Uint8Array; fileName: string } | null>(null);
 
-  const exportWeb = (data: Record<string, unknown>, fileName: string) => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const exportWeb = (data: Uint8Array, fileName: string) => {
+    const blob = new Blob([data], { type: 'application/x-sqlite3' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -88,12 +82,12 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
     URL.revokeObjectURL(url);
   };
 
-  const exportNative = async (data: Record<string, unknown>, fileName: string) => {
+  const exportNative = async (data: Uint8Array, fileName: string) => {
+    const base64 = btoa(String.fromCharCode(...data));
     const result = await Filesystem.writeFile({
       path: fileName,
-      data: JSON.stringify(data, null, 2),
+      data: base64,
       directory: Directory.Cache,
-      encoding: Encoding.UTF8,
     });
 
     await Share.share({
@@ -105,7 +99,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      const data = buildExportData();
+      const data = db.exportBinary();
       const fileName = exportFileName();
 
       if (Capacitor.isNativePlatform()) {
@@ -115,7 +109,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
       }
 
       notify.success(t('backup.exportSuccess'), '');
-      try { localStorage.setItem(LAST_LOCAL_BACKUP_KEY, new Date().toISOString()); } catch { /* ignore */ }
+      setSetting(db, 'last_local_backup_at', new Date().toISOString()).catch(() => {});
     } catch {
       notify.error(t('backup.exportFailed'), '');
     } finally {
@@ -129,21 +123,15 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
 
     try {
       setIsImporting(true);
-      const text = await file.text();
-      const data = JSON.parse(text) as Record<string, unknown>;
+      const buffer = await file.arrayBuffer();
+      const data = new Uint8Array(buffer);
 
-      const hasValidKeys = EXPORT_KEYS.some(key => key in data);
-      if (!hasValidKeys) {
+      if (data.length < 16) {
         notify.error(t('backup.invalidFile'), '');
         return;
       }
 
-      const counts: string[] = [];
-      if (Array.isArray(data['mp-ingredients'])) counts.push(`${(data['mp-ingredients'] as unknown[]).length} ${t('ingredient.ingredients').toLowerCase()}`);
-      if (Array.isArray(data['mp-dishes'])) counts.push(`${(data['mp-dishes'] as unknown[]).length} ${t('dish.dishes').toLowerCase()}`);
-      if (Array.isArray(data['mp-day-plans'])) counts.push(`${(data['mp-day-plans'] as unknown[]).length} ${t('calendar.mealPlan').toLowerCase()}`);
-      const summary = counts.join(', ');
-      setPendingImport({ data, summary });
+      setPendingImport({ data, fileName: file.name });
     } catch {
       notify.error(t('backup.importFailed'), '');
     } finally {
@@ -152,9 +140,15 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
     }
   };
 
-  const confirmImport = () => {
+  const confirmImport = async () => {
     if (pendingImport) {
-      onImport(pendingImport.data);
+      try {
+        await db.importBinary(pendingImport.data);
+        await reloadAllStores(db);
+        notify.success(t('backup.importSuccess'), '');
+      } catch {
+        notify.error(t('backup.importFailed'), '');
+      }
       setPendingImport(null);
     }
   };
@@ -185,7 +179,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
           type="file"
           ref={fileInputRef}
           onChange={handleImport}
-          accept=".json"
+          accept=".sqlite,.db"
           aria-label={t('backup.import')}
           className="hidden"
         />
@@ -194,7 +188,7 @@ export const DataBackup: React.FC<DataBackupProps> = ({ onImport }) => {
         isOpen={!!pendingImport}
         variant="warning"
         title={t('backup.import')}
-        message={<p>{t('backup.importConfirmMsg', { summary: pendingImport?.summary ?? '' })}</p>}
+        message={<p>{t('backup.importConfirmMsg', { summary: pendingImport?.fileName ?? '' })}</p>}
         confirmLabel={t('common.confirm')}
         onConfirm={confirmImport}
         onCancel={() => setPendingImport(null)}

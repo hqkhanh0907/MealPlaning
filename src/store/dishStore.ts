@@ -1,9 +1,24 @@
 import { create } from 'zustand';
 import type { Dish } from '../types';
+import type { DatabaseService } from '../services/databaseService';
 import { initialDishes } from '../data/initialData';
 import { migrateDishes } from '../services/dataService';
 
 const STORAGE_KEY = 'mp-dishes';
+
+interface DishRow {
+  id: string;
+  name_vi: string;
+  name_en: string | null;
+  tags: string;
+  rating: number | null;
+  notes: string | null;
+}
+
+interface DishIngredientRow {
+  ingredient_id: string;
+  amount: number;
+}
 
 export const loadDishes = (): Dish[] => {
   try {
@@ -21,6 +36,7 @@ interface DishState {
   deleteDish: (id: string) => void;
   isIngredientUsed: (ingId: string) => boolean;
   hydrate: () => void;
+  loadAll: (db: DatabaseService) => Promise<void>;
 }
 
 export const useDishStore = create<DishState>((set, get) => ({
@@ -40,6 +56,30 @@ export const useDishStore = create<DishState>((set, get) => ({
   isIngredientUsed: (ingId) =>
     get().dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)),
   hydrate: () => set({ dishes: loadDishes() }),
+  loadAll: async (db: DatabaseService) => {
+    const dishRows = await db.query<DishRow>('SELECT * FROM dishes');
+    if (dishRows.length === 0) {
+      set({ dishes: loadDishes() });
+      return;
+    }
+    const dishes: Dish[] = await Promise.all(
+      dishRows.map(async (r) => {
+        const ings = await db.query<DishIngredientRow>(
+          'SELECT ingredient_id, amount FROM dish_ingredients WHERE dish_id = ?',
+          [r.id],
+        );
+        return {
+          id: r.id,
+          name: { vi: r.name_vi, ...(r.name_en ? { en: r.name_en } : {}) },
+          ingredients: ings.map((i) => ({ ingredientId: i.ingredient_id, amount: i.amount })),
+          tags: JSON.parse(r.tags),
+          ...(r.rating != null ? { rating: r.rating } : {}),
+          ...(r.notes != null ? { notes: r.notes } : {}),
+        };
+      }),
+    );
+    set({ dishes });
+  },
 }));
 
 useDishStore.subscribe((state, prev) => {

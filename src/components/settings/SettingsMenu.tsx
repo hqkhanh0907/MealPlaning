@@ -15,7 +15,6 @@ type SettingsSection = 'health-profile' | 'goal' | 'training-profile';
 
 interface SettingsMenuProps {
   onNavigate: (section: SettingsSection) => void;
-  onImportData: (data: Record<string, unknown>) => void;
   theme: Theme;
   setTheme: (t: Theme) => void;
 }
@@ -27,7 +26,7 @@ const THEME_OPTIONS = [
   { value: 'schedule', labelKey: 'settings.themeSchedule', icon: Clock },
 ] as const;
 
-export function SettingsMenu({ onNavigate, onImportData, theme, setTheme }: SettingsMenuProps) {
+export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -184,7 +183,7 @@ export function SettingsMenu({ onNavigate, onImportData, theme, setTheme }: Sett
       {/* Cloud Sync Section (inline) */}
       {visibleInlineSections.has('cloud') && (
         <section>
-          <GoogleDriveSync onImportData={onImportData} />
+          <GoogleDriveSync />
         </section>
       )}
 
@@ -200,7 +199,7 @@ export function SettingsMenu({ onNavigate, onImportData, theme, setTheme }: Sett
               <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.dataDesc')}</p>
             </div>
           </div>
-          <DataBackup onImport={onImportData} />
+          <DataBackup />
         </section>
       )}
     </div>

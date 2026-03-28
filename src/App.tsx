@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Ingredient, Dish, DayPlan, MealType, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
+import type { MealType, SaveAnalyzedDishPayload, DayNutritionSummary } from './types';
 import { calculateDishesNutrition } from './utils/nutrition';
 import { CalendarTab } from './components/CalendarTab';
 
@@ -44,7 +44,6 @@ import {
 import {
   removeIngredientFromDishes,
   processAnalyzedDish,
-  validateImportData,
 } from './services/dataService';
 import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navigation';
 import { getTabLabels } from './components/navigation/types';
@@ -70,13 +69,9 @@ export default function App() {
   const prefetchFns = useMemo(() => [importManagementTab], []);
   usePrefetchAfterIdle(prefetchFns);
 
-  // Hydrate all stores from localStorage on mount (ensures test isolation
-  // because Zustand stores are module-level singletons while tests clear localStorage between runs)
+  // Reset runtime-only stores on mount (no persistent data — safe to keep)
+  // Data stores (ingredients, dishes, dayPlans, templates) are now loaded from SQLite by DatabaseContext
   useState(() => {
-    useIngredientStore.getState().hydrate();
-    useDishStore.getState().hydrate();
-    useDayPlanStore.getState().hydrate();
-    useMealTemplateStore.getState().hydrate();
     useUIStore.getState().hydrate();
     useNavigationStore.setState({ activeTab: 'calendar', pageStack: [], showBottomNav: true, tabScrollPositions: {} });
   });
@@ -260,31 +255,10 @@ export default function App() {
     }
   }, [setHasNewAIResult, notify, navigateTab, t]);
 
-  const handleImportData = useCallback((data: Record<string, unknown>) => {
-    const { validEntries, invalidKeys } = validateImportData(data);
 
-    for (const key of invalidKeys) {
-      notify.warning(t('notification.invalidData'), t('notification.invalidDataDesc', { key }));
-    }
-
-    if ('mp-ingredients' in validEntries) setIngredients(validEntries['mp-ingredients'] as Ingredient[]);
-    if ('mp-dishes' in validEntries) setDishes(validEntries['mp-dishes'] as Dish[]);
-    if ('mp-day-plans' in validEntries) setDayPlans(validEntries['mp-day-plans'] as DayPlan[]);
-
-    const importedCount = Object.keys(validEntries).length;
-    if (importedCount > 0) {
-      notify.success(t('notification.importSuccess'), t('notification.importSuccessDesc', { count: importedCount }));
-    }
-  }, [notify, setIngredients, setDishes, setDayPlans, t]);
 
   // Auto-sync data to Google Drive when authenticated
-  useAutoSync({
-    ingredients,
-    dishes,
-    dayPlans,
-    templates,
-    onImportData: handleImportData,
-  });
+  useAutoSync();
 
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
@@ -499,7 +473,7 @@ export default function App() {
           </div>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <Suspense fallback={<TabLoadingFallback />}>
-              <SettingsTab onImportData={handleImportData} theme={theme} setTheme={setTheme} />
+              <SettingsTab theme={theme} setTheme={setTheme} />
             </Suspense>
           </div>
         </div>

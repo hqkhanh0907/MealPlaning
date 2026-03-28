@@ -1,6 +1,6 @@
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3/files';
-const BACKUP_FILE_NAME = 'meal-planner-backup.json';
+const BACKUP_FILE_NAME = 'meal-planner-backup.sqlite';
 
 export interface DriveFileInfo {
   id: string;
@@ -27,15 +27,16 @@ export const listBackups = async (accessToken: string): Promise<DriveFileInfo[]>
   return data.files ?? [];
 };
 
-export const downloadBackup = async (accessToken: string, fileId: string): Promise<Record<string, unknown>> => {
+export const downloadBackup = async (accessToken: string, fileId: string): Promise<Uint8Array> => {
   const res = await fetch(`${DRIVE_API}/${fileId}?alt=media`, {
     headers: authHeaders(accessToken),
   });
   if (!res.ok) throw new Error(`Drive download failed: ${res.status}`);
-  return res.json();
+  const buffer = await res.arrayBuffer();
+  return new Uint8Array(buffer);
 };
 
-export const downloadLatestBackup = async (accessToken: string): Promise<{ data: Record<string, unknown>; file: DriveFileInfo } | null> => {
+export const downloadLatestBackup = async (accessToken: string): Promise<{ data: Uint8Array; file: DriveFileInfo } | null> => {
   const files = await listBackups(accessToken);
   if (files.length === 0) return null;
   const latest = files[0];
@@ -43,9 +44,8 @@ export const downloadLatestBackup = async (accessToken: string): Promise<{ data:
   return { data, file: latest };
 };
 
-export const uploadBackup = async (accessToken: string, data: Record<string, unknown>): Promise<DriveFileInfo> => {
+export const uploadBackup = async (accessToken: string, data: Uint8Array): Promise<DriveFileInfo> => {
   const existing = await listBackups(accessToken);
-  const content = JSON.stringify(data);
 
   if (existing.length > 0) {
     const fileId = existing[0].id;
@@ -53,9 +53,9 @@ export const uploadBackup = async (accessToken: string, data: Record<string, unk
       method: 'PATCH',
       headers: {
         ...authHeaders(accessToken),
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/octet-stream',
       },
-      body: content,
+      body: data,
     });
     if (!res.ok) throw new Error(`Drive update failed: ${res.status}`);
     return res.json();
@@ -64,18 +64,17 @@ export const uploadBackup = async (accessToken: string, data: Record<string, unk
   const boundary = '___meal_planner_boundary___';
   const metadata = {
     name: BACKUP_FILE_NAME,
-    mimeType: 'application/json',
+    mimeType: 'application/octet-stream',
     parents: ['appDataFolder'],
   };
-  const body = [
-    `--${boundary}\r\n`,
-    'Content-Type: application/json; charset=UTF-8\r\n\r\n',
-    JSON.stringify(metadata),
-    `\r\n--${boundary}\r\n`,
-    'Content-Type: application/json\r\n\r\n',
-    content,
-    `\r\n--${boundary}--`,
-  ].join('');
+  const encoder = new TextEncoder();
+  const body = new Blob([
+    encoder.encode(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`),
+    encoder.encode(JSON.stringify(metadata)),
+    encoder.encode(`\r\n--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`),
+    data,
+    encoder.encode(`\r\n--${boundary}--`),
+  ]);
 
   const res = await fetch(`${DRIVE_UPLOAD_API}?uploadType=multipart`, {
     method: 'POST',
