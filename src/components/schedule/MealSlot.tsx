@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Edit3, Plus, ChefHat, Minus } from 'lucide-react';
+import { Edit3, Plus, ChefHat, Minus, Sunrise, Sun, Moon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Dish, MealType, SlotInfo, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 
@@ -13,10 +14,10 @@ export interface MealSlotProps {
   onUpdateServings?: (dishId: string, servings: number) => void;
 }
 
-const MEAL_ICONS: Record<MealType, string> = {
-  breakfast: '☀️',
-  lunch: '🌤️',
-  dinner: '🌙',
+const MEAL_ICONS: Record<MealType, LucideIcon> = {
+  breakfast: Sunrise,
+  lunch: Sun,
+  dinner: Moon,
 };
 
 const MAX_VISIBLE_DISHES = 2;
@@ -33,7 +34,7 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const hasDishes = slot.dishIds.length > 0;
-  const icon = MEAL_ICONS[type];
+  const MealIcon = MEAL_ICONS[type];
   const label = t(`meal.${type}`);
 
   const resolvedDishes = useMemo(() => {
@@ -57,7 +58,7 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
         data-testid={TEST_ID_MAP[type]}
         className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
       >
-        <span className="text-lg shrink-0" aria-hidden="true">{icon}</span>
+        <MealIcon className="size-5 shrink-0" aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
@@ -84,7 +85,7 @@ export const MealSlot: React.FC<MealSlotProps> = React.memo(({
     >
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-lg shrink-0" aria-hidden="true">{icon}</span>
+          <MealIcon className="size-5 shrink-0" aria-hidden="true" />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             {label}
           </span>

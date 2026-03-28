@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Search, CheckCircle2, ChefHat, SlidersHorizontal } from 'lucide-react';
+import { X, Search, CheckCircle2, ChefHat, SlidersHorizontal, Sunrise, Sun, Moon, Flame, Dumbbell } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Dish, Ingredient, MealType, DayPlan, NutritionInfo, SupportedLang, FilterConfig } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
@@ -34,10 +35,10 @@ const getDishIdsForMeal = (plan: DayPlan, type: MealType): string[] => {
   }
 };
 
-const MEAL_TABS: { type: MealType; emoji: string; labelKey: string }[] = [
-  { type: 'breakfast', emoji: '☀️', labelKey: 'meal.breakfastFull' },
-  { type: 'lunch', emoji: '🌤️', labelKey: 'meal.lunchFull' },
-  { type: 'dinner', emoji: '🌙', labelKey: 'meal.dinnerFull' },
+const MEAL_TABS: { type: MealType; icon: LucideIcon; labelKey: string }[] = [
+  { type: 'breakfast', icon: Sunrise, labelKey: 'meal.breakfastFull' },
+  { type: 'lunch', icon: Sun, labelKey: 'meal.lunchFull' },
+  { type: 'dinner', icon: Moon, labelKey: 'meal.dinnerFull' },
 ];
 
 interface MealPlannerModalProps {
@@ -213,7 +214,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                       : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 font-medium'
                   }`}
                 >
-                  <span>{tab.emoji}</span>
+                  <span><tab.icon className="size-4 inline-block" aria-hidden="true" /></span>
                   <span>{t(tab.labelKey)}</span>
                   {count > 0 && (
                     <span
@@ -317,10 +318,10 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
                     </h4>
                     <div className="flex gap-2 mt-1">
                       <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
-                        🔥 {Math.round(nutrition.calories)} kcal
+                        <Flame className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(nutrition.calories)} kcal
                       </span>
                       <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                        💪 {Math.round(nutrition.protein)}g
+                        <Dumbbell className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(nutrition.protein)}g
                       </span>
                     </div>
                   </div>
@@ -350,7 +351,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
             </span>
             {totalDayDishCount > 0 && (
               <span className="text-slate-500 dark:text-slate-400">
-                🔥 {Math.round(totalDayNutrition.calories)} kcal · 💪 {Math.round(totalDayNutrition.protein)}g Pro
+                <Flame className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(totalDayNutrition.calories)} kcal · <Dumbbell className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(totalDayNutrition.protein)}g Pro
               </span>
             )}
           </div>

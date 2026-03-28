@@ -273,13 +273,11 @@ describe('TodaysPlanCard', () => {
       });
     });
 
-    it('renders recovery tips with emojis', () => {
+    it('renders recovery tips with icons', () => {
       render(<TodaysPlanCard />);
 
       const tips = screen.getByTestId('recovery-tips');
-      expect(tips).toHaveTextContent('🚶');
       expect(tips).toHaveTextContent('Ngủ đủ giấc và uống đủ nước');
-      expect(tips).toHaveTextContent('💧');
       expect(tips).toHaveTextContent('Ăn giàu protein để phục hồi cơ');
     });
 

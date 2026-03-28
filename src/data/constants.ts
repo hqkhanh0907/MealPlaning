@@ -1,11 +1,13 @@
 import { TFunction } from 'i18next';
+import type { LucideIcon } from 'lucide-react';
+import { Sunrise, Sun, Moon } from 'lucide-react';
 import { MealType } from '../types';
 
 /** i18n-aware meal tag options factory — single source of truth. */
-export const getMealTagOptions = (t: TFunction): { type: MealType; label: string; icon: string }[] => [
-  { type: 'breakfast', label: t('meal.breakfast'), icon: '🌅' },
-  { type: 'lunch', label: t('meal.lunch'), icon: '🌤️' },
-  { type: 'dinner', label: t('meal.dinner'), icon: '🌙' },
+export const getMealTagOptions = (t: TFunction): { type: MealType; label: string; icon: LucideIcon }[] => [
+  { type: 'breakfast', label: t('meal.breakfast'), icon: Sunrise },
+  { type: 'lunch', label: t('meal.lunch'), icon: Sun },
+  { type: 'dinner', label: t('meal.dinner'), icon: Moon },
 ];
 
 /** i18n-aware meal type labels factory — single source of truth. */
@@ -22,11 +24,11 @@ export const getTagShortLabels = (t: TFunction): Record<MealType, string> => ({
   dinner: t('meal.dinnerShort'),
 });
 
-/** Meal type icons — emoji values don't need i18n. */
-export const MEAL_TYPE_ICONS: Record<MealType, string> = {
-  breakfast: '🌅',
-  lunch: '🌤️',
-  dinner: '🌙',
+/** Meal type icons — Lucide component references, no i18n needed. */
+export const MEAL_TYPE_ICONS: Record<MealType, LucideIcon> = {
+  breakfast: Sunrise,
+  lunch: Sun,
+  dinner: Moon,
 };
 
 // --- Sort options shared by DishManager & IngredientManager ---

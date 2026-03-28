@@ -6,6 +6,8 @@ import {
   Dumbbell,
   UtensilsCrossed,
   ChevronRight,
+  Footprints,
+  Droplets,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTodaysPlan } from '../hooks/useTodaysPlan';
@@ -216,11 +218,11 @@ const TodaysPlanCard: React.FC = React.memo(() => {
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="recovery-tips">
             <p className="text-sm text-slate-700 dark:text-slate-200">
-              <span aria-hidden="true">{'🚶 '}</span>
+              <span aria-hidden="true"><Footprints className="size-4 inline-block mr-1" /></span>
               {t('dashboard.todaysPlan.recoveryTip1')}
             </p>
             <p className="text-sm text-slate-700 dark:text-slate-200 mt-1">
-              <span aria-hidden="true">{'💧 '}</span>
+              <span aria-hidden="true"><Droplets className="size-4 inline-block mr-1" /></span>
               {t('dashboard.todaysPlan.recoveryTip2')}
             </p>
           </div>

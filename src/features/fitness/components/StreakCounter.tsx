@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, Moon, Circle, MapPin } from 'lucide-react';
+import { CheckCircle, Moon, Circle, MapPin, Flame } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateStreak } from '../utils/gamification';
 import { DAY_LABELS } from '../constants';
@@ -45,7 +45,7 @@ export const StreakCounter = React.memo(function StreakCounter() {
       className="rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-800"
     >
       <div className="flex items-center gap-2">
-        <span className="text-2xl">🔥</span>
+        <Flame className="size-6 text-orange-500" aria-hidden="true" />
         <span
           data-testid="streak-count"
           className="text-xl font-bold text-zinc-900 dark:text-zinc-100"

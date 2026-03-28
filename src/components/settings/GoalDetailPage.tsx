@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, TrendingDown, Equal, TrendingUp } from 'lucide-react';
+import { Target, TrendingDown, Equal, TrendingUp, Zap, Scale, Flame } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { DatabaseProvider } from '../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { GoalPhaseSelector } from '../../features/health-profile/components/GoalPhaseSelector';
@@ -22,16 +23,16 @@ function GoalViewMode() {
   const { t } = useTranslation();
   const activeGoal = useHealthProfileStore((s) => s.activeGoal);
 
-  const fields = useMemo(() => {
+  const fields: { label: string; value: string; icon: LucideIcon }[] = useMemo(() => {
     if (!activeGoal) return [];
-    const result = [
-      { label: t('goal.title'), value: t(`goal.${activeGoal.type}`), icon: '🎯' },
+    const result: { label: string; value: string; icon: LucideIcon }[] = [
+      { label: t('goal.title'), value: t(`goal.${activeGoal.type}`), icon: Target },
     ];
     if (activeGoal.type !== 'maintain' && activeGoal.rateOfChange) {
-      result.push({ label: t('goal.rateOfChange'), value: t(`goal.${activeGoal.rateOfChange}`), icon: '⚡' });
+      result.push({ label: t('goal.rateOfChange'), value: t(`goal.${activeGoal.rateOfChange}`), icon: Zap });
     }
     if (activeGoal.targetWeightKg) {
-      result.push({ label: t('goal.targetWeight'), value: `${activeGoal.targetWeightKg} kg`, icon: '⚖️' });
+      result.push({ label: t('goal.targetWeight'), value: `${activeGoal.targetWeightKg} kg`, icon: Scale });
     }
     result.push({
       label: t('goal.calorieOffset'),
@@ -40,7 +41,7 @@ function GoalViewMode() {
         : activeGoal.calorieOffset < 0
           ? `${activeGoal.calorieOffset} kcal`
           : '±0 kcal',
-      icon: '🔥',
+      icon: Flame,
     });
     return result;
   }, [activeGoal, t]);
@@ -84,7 +85,7 @@ function GoalViewMode() {
             key={field.label}
             className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
           >
-            <span className="text-base leading-none mt-0.5">{field.icon}</span>
+            <span className="text-base leading-none mt-0.5">{(() => { const Icon = field.icon; return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />; })()}</span>
             <div className="min-w-0">
               <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>

@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Heart } from 'lucide-react';
+import { Heart, User, Calendar, Ruler, Scale, Activity, Beef, BarChart3 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { DatabaseProvider } from '../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { HealthProfileForm } from '../../features/health-profile/components/HealthProfileForm';
@@ -29,14 +30,14 @@ function HealthProfileViewMode() {
     return calculateMacros(tdee, profile.weightKg, profile.proteinRatio, profile.fatPct, bodyFatFraction);
   }, [tdee, profile.weightKg, profile.proteinRatio, profile.fatPct, profile.bodyFatPct]);
 
-  const fields = [
-    { label: t('healthProfile.gender'), value: t(`healthProfile.${profile.gender}`), icon: '👤' },
-    { label: t('healthProfile.age'), value: `${profile.age}`, icon: '🎂' },
-    { label: t('healthProfile.height'), value: `${profile.heightCm} cm`, icon: '📏' },
-    { label: t('healthProfile.weight'), value: `${profile.weightKg} kg`, icon: '⚖️' },
-    { label: t('healthProfile.activityLevel'), value: t(ACTIVITY_LEVEL_I18N[profile.activityLevel] ?? ''), icon: '🏃' },
-    { label: t('healthProfile.proteinRatio'), value: `${profile.proteinRatio} g/kg`, icon: '🥩' },
-    ...(profile.bodyFatPct != null ? [{ label: t('healthProfile.bodyFat'), value: `${profile.bodyFatPct}%`, icon: '📊' }] : []),
+  const fields: { label: string; value: string; icon: LucideIcon }[] = [
+    { label: t('healthProfile.gender'), value: t(`healthProfile.${profile.gender}`), icon: User },
+    { label: t('healthProfile.age'), value: `${profile.age}`, icon: Calendar },
+    { label: t('healthProfile.height'), value: `${profile.heightCm} cm`, icon: Ruler },
+    { label: t('healthProfile.weight'), value: `${profile.weightKg} kg`, icon: Scale },
+    { label: t('healthProfile.activityLevel'), value: t(ACTIVITY_LEVEL_I18N[profile.activityLevel] ?? ''), icon: Activity },
+    { label: t('healthProfile.proteinRatio'), value: `${profile.proteinRatio} g/kg`, icon: Beef },
+    ...(profile.bodyFatPct != null ? [{ label: t('healthProfile.bodyFat'), value: `${profile.bodyFatPct}%`, icon: BarChart3 }] : []),
   ];
 
   return (
@@ -48,7 +49,7 @@ function HealthProfileViewMode() {
             key={field.label}
             className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
           >
-            <span className="text-base leading-none mt-0.5">{field.icon}</span>
+            <span className="text-base leading-none mt-0.5">{(() => { const Icon = field.icon; return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />; })()}</span>
             <div className="min-w-0">
               <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>

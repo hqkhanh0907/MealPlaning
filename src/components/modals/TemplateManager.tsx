@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Pencil, Trash2, BookTemplate, Search, Tag } from 'lucide-react';
+import { X, Check, Pencil, Trash2, BookTemplate, Search, Tag, Sunrise, Sun, Moon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { MealTemplate, Dish, SupportedLang } from '../../types';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
@@ -206,13 +206,13 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                   {renamingId !== template.id && (
                     <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 space-y-0.5">
                       {template.breakfastDishIds.length > 0 && (
-                        <p>🌅 {getDishNames(template.breakfastDishIds)}</p>
+                        <p className="flex items-center gap-1"><Sunrise className="size-3.5 inline-block shrink-0" aria-hidden="true" /> {getDishNames(template.breakfastDishIds)}</p>
                       )}
                       {template.lunchDishIds.length > 0 && (
-                        <p>🌤️ {getDishNames(template.lunchDishIds)}</p>
+                        <p className="flex items-center gap-1"><Sun className="size-3.5 inline-block shrink-0" aria-hidden="true" /> {getDishNames(template.lunchDishIds)}</p>
                       )}
                       {template.dinnerDishIds.length > 0 && (
-                        <p>🌙 {getDishNames(template.dinnerDishIds)}</p>
+                        <p className="flex items-center gap-1"><Moon className="size-3.5 inline-block shrink-0" aria-hidden="true" /> {getDishNames(template.dinnerDishIds)}</p>
                       )}
                     </div>
                   )}

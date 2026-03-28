@@ -1,19 +1,33 @@
 import { useTranslation } from 'react-i18next';
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { Info } from 'lucide-react';
+import {
+  Info,
+  Target,
+  BarChart3,
+  Calendar,
+  Timer,
+  Dumbbell,
+  ShieldAlert,
+  TrendingUp,
+  RefreshCw,
+  HeartPulse,
+  Moon,
+  ClipboardList,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const FIELD_ICON: Record<string, string> = {
-  trainingGoal: '🎯',
-  trainingExperience: '📊',
-  daysPerWeek: '📅',
-  sessionDurationMin: '⏱️',
-  availableEquipment: '🏋️',
-  injuryRestrictions: '🩹',
-  periodizationModel: '📈',
-  planCycleWeeks: '🔄',
-  priorityMuscles: '💪',
-  cardioSessionsWeek: '🫀',
-  avgSleepHours: '😴',
+const FIELD_ICON: Record<string, LucideIcon> = {
+  trainingGoal: Target,
+  trainingExperience: BarChart3,
+  daysPerWeek: Calendar,
+  sessionDurationMin: Timer,
+  availableEquipment: Dumbbell,
+  injuryRestrictions: ShieldAlert,
+  periodizationModel: TrendingUp,
+  planCycleWeeks: RefreshCw,
+  priorityMuscles: Dumbbell,
+  cardioSessionsWeek: HeartPulse,
+  avgSleepHours: Moon,
 };
 
 export function TrainingProfileSection() {
@@ -114,7 +128,7 @@ export function TrainingProfileSection() {
           className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
         >
           <span className="text-base leading-none mt-0.5">
-            {FIELD_ICON[field.key] ?? '📋'}
+            {(() => { const Icon = FIELD_ICON[field.key] ?? ClipboardList; return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />; })()}
           </span>
           <div className="min-w-0">
             <p className="text-xs text-slate-500 dark:text-slate-400">

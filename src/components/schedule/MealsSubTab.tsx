@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, CheckCircle2, Plus, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Plus, Clock, ClipboardList } from 'lucide-react';
 import { DayNutritionSummary, Dish, MealType, SupportedLang } from '../../types';
 import { MealSlot } from './MealSlot';
 import { MealActionBar } from './MealActionBar';
@@ -114,7 +114,7 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
                       setQuickAddDishId(prev => prev === dish.id ? null : dish.id);
                     }
                   }}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 transition-all"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 transition-all min-h-11"
                 >
                   <Plus className="w-3 h-3 text-emerald-500" />
                   {getLocalizedField(dish.name, lang)}
@@ -126,7 +126,7 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
                         key={type}
                         data-testid={`btn-quick-add-${type}-${dish.id}`}
                         onClick={() => handleQuickAdd(type, dish.id)}
-                        className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                        className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors min-h-11 flex items-center"
                       >
                         {mealTypeLabels[type]}
                       </button>
@@ -157,7 +157,7 @@ export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
       {/* Inline tip */}
       {allEmpty && (
         <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 text-blue-700 dark:text-blue-300 text-sm">
-          <span className="shrink-0">📋</span>
+          <ClipboardList className="size-4 shrink-0" aria-hidden="true" />
           <p className="font-medium">{t('tips.noPlan')}</p>
         </div>
       )}

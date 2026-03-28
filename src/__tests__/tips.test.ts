@@ -1,6 +1,17 @@
 import { getDynamicTips } from '../utils/tips';
 import { DayNutritionSummary, SlotInfo } from '../types';
 import i18n from '../i18n';
+import {
+  ClipboardList,
+  AlertTriangle,
+  TrendingDown,
+  Dumbbell,
+  Beef,
+  Leaf,
+  Droplets,
+  FileText,
+  CheckCircle2,
+} from 'lucide-react';
 
 const t = i18n.t.bind(i18n);
 
@@ -34,7 +45,7 @@ describe('getDynamicTips', () => {
     const tips = getDynamicTips(makeDay(), TARGET_CAL, TARGET_PROT, t);
     expect(tips).toHaveLength(1);
     expect(tips[0].type).toBe('info');
-    expect(tips[0].emoji).toBe('📋');
+    expect(tips[0].icon).toBe(ClipboardList);
     expect(tips[0].text).toContain('Bắt đầu lên kế hoạch');
   });
 
@@ -50,7 +61,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const warn = tips.find(t => t.emoji === '⚠️');
+    const warn = tips.find(t => t.icon === AlertTriangle);
     expect(warn).toBeDefined();
     expect(warn?.type).toBe('warning');
     expect(warn?.text).toContain('vượt');
@@ -68,7 +79,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const warn = tips.find(t => t.emoji === '📉');
+    const warn = tips.find(t => t.icon === TrendingDown);
     expect(warn).toBeDefined();
     expect(warn?.type).toBe('warning');
     expect(warn?.text).toContain('calo hôm nay thấp');
@@ -85,7 +96,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const success = tips.find(t => t.emoji === '💪');
+    const success = tips.find(t => t.icon === Dumbbell);
     expect(success).toBeDefined();
     expect(success?.type).toBe('success');
     expect(success?.text).toContain('protein');
@@ -103,7 +114,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const warn = tips.find(t => t.emoji === '🥩');
+    const warn = tips.find(t => t.icon === Beef);
     expect(warn).toBeDefined();
     expect(warn?.type).toBe('warning');
   });
@@ -119,7 +130,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const fiberTip = tips.find(t => t.emoji === '🥬');
+    const fiberTip = tips.find(t => t.icon === Leaf);
     expect(fiberTip).toBeDefined();
     expect(fiberTip?.type).toBe('info');
   });
@@ -136,7 +147,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const fatTip = tips.find(t => t.emoji === '🫒');
+    const fatTip = tips.find(t => t.icon === Droplets);
     expect(fatTip).toBeDefined();
     expect(fatTip?.type).toBe('info');
     expect(fatTip?.text).toContain('chất béo cao');
@@ -155,7 +166,7 @@ describe('getDynamicTips', () => {
       t,
     );
     expect(tips).toHaveLength(1);
-    expect(tips[0].emoji).toBe('✅');
+    expect(tips[0].icon).toBe(CheckCircle2);
     expect(tips[0].type).toBe('success');
     expect(tips[0].text).toContain('cân đối');
   });
@@ -172,7 +183,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const missingTip = tips.find(t => t.emoji === '📝');
+    const missingTip = tips.find(t => t.icon === FileText);
     expect(missingTip).toBeDefined();
     expect(missingTip?.type).toBe('info');
     expect(missingTip?.text).toContain('bữa trưa');
@@ -191,7 +202,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const missingTip = tips.find(t => t.emoji === '📝');
+    const missingTip = tips.find(t => t.icon === FileText);
     expect(missingTip).toBeDefined();
     expect(missingTip?.text).toContain('bữa sáng');
     expect(missingTip?.text).not.toContain('bữa trưa');
@@ -224,7 +235,7 @@ describe('getDynamicTips', () => {
       t,
     );
     // Should not crash, should have missing meals tip
-    const calorieTip = tips.find(t => t.emoji === '⚠️' || t.emoji === '📉');
+    const calorieTip = tips.find(t => t.icon === AlertTriangle || t.icon === TrendingDown);
     expect(calorieTip).toBeUndefined();
   });
 });

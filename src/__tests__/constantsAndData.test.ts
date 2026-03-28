@@ -13,7 +13,8 @@ describe('constants', () => {
       expect(opt).toHaveProperty('label');
       expect(opt).toHaveProperty('icon');
       expect(typeof opt.label).toBe('string');
-      expect(typeof opt.icon).toBe('string');
+      expect(opt.icon).toBeDefined();
+      expect(opt.icon).toHaveProperty('$$typeof');
     });
     expect(options.map(o => o.type)).toEqual(['breakfast', 'lunch', 'dinner']);
   });

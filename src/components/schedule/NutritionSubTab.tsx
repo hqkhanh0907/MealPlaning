@@ -56,8 +56,8 @@ const RecommendationPanel: React.FC<RecommendationPanelProps> = ({
 
         {tips.map((tip) => (
           <div key={tip.text} className={`p-3 rounded-xl border ${TIP_STYLES[tip.type]}`}>
-            <p className="font-medium">
-              <span className="mr-1.5">{tip.emoji}</span>
+            <p className="font-medium inline-flex items-center gap-1.5">
+              <tip.icon className="size-4 shrink-0" aria-hidden="true" />
               {tip.text}
             </p>
           </div>

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Edit3, Plus } from 'lucide-react';
+import { Edit3, Plus, Sunrise, Sun, Moon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { DayPlan, Dish, Ingredient, MealType, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { calculateDishesNutrition } from '../utils/nutrition';
@@ -13,10 +14,10 @@ export interface QuickPreviewPanelProps {
   onPlanAll: () => void;
 }
 
-const MEAL_SLOTS: { type: MealType; icon: string; key: string }[] = [
-  { type: 'breakfast', icon: '☀️', key: 'meal.breakfast' },
-  { type: 'lunch', icon: '🌤️', key: 'meal.lunch' },
-  { type: 'dinner', icon: '🌙', key: 'meal.dinner' },
+const MEAL_SLOTS: { type: MealType; icon: LucideIcon; key: string }[] = [
+  { type: 'breakfast', icon: Sunrise, key: 'meal.breakfast' },
+  { type: 'lunch', icon: Sun, key: 'meal.lunch' },
+  { type: 'dinner', icon: Moon, key: 'meal.dinner' },
 ];
 
 const DAILY_CALORIES = 2000;
@@ -92,7 +93,7 @@ QuickPreviewPanel.displayName = 'QuickPreviewPanel';
 
 interface MealRowProps {
   type: MealType;
-  icon: string;
+  icon: LucideIcon;
   label: string;
   dishIds: string[];
   dishes: Dish[];
@@ -103,7 +104,7 @@ interface MealRowProps {
 }
 
 const MealRow: React.FC<MealRowProps> = React.memo(({
-  type, icon, label, dishIds, dishes, ingredients, lang, t, onPlanMeal,
+  type, icon: MealIcon, label, dishIds, dishes, ingredients, lang, t, onPlanMeal,
 }) => {
   const hasDishes = dishIds.length > 0;
 
@@ -134,7 +135,7 @@ const MealRow: React.FC<MealRowProps> = React.memo(({
       data-testid={TEST_ID_MAP[type]}
       className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
     >
-      <span className="text-lg shrink-0" aria-hidden="true">{icon}</span>
+      <MealIcon className="size-5 shrink-0" aria-hidden="true" />
 
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-baseline gap-2">

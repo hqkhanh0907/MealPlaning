@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
+import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays, ChevronDown, ChevronUp, Beef, GlassWater, Wheat, Leaf, Package } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Ingredient, Dish, DayPlan, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { useNotification } from '../contexts/NotificationContext';
@@ -24,12 +25,12 @@ type CheckedSnapshot = { id: string; amount: number };
 
 type AisleCategory = 'protein' | 'dairy' | 'grains' | 'produce' | 'other';
 
-const AISLE_EMOJI: Record<AisleCategory, string> = {
-  protein: '🥩',
-  dairy: '🥛',
-  grains: '🌾',
-  produce: '🥬',
-  other: '📦',
+const AISLE_ICON: Record<AisleCategory, LucideIcon> = {
+  protein: Beef,
+  dairy: GlassWater,
+  grains: Wheat,
+  produce: Leaf,
+  other: Package,
 };
 
 const PROTEIN_KEYWORDS_VI = ['gà', 'bò', 'heo', 'lợn', 'cá', 'tôm', 'thịt', 'trứng'];
@@ -418,7 +419,7 @@ export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan
                 {groupedItems.map(group => (
                   <div key={group.category}>
                     <div className="flex items-center gap-2 mb-2 px-2">
-                      <span className="text-sm">{AISLE_EMOJI[group.category]}</span>
+                      <span className="text-sm">{(() => { const Icon = AISLE_ICON[group.category]; return <Icon className="size-4" aria-hidden="true" />; })()}</span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t(AISLE_LABEL_KEYS[group.category])}</span>
                       <span className="text-[10px] text-slate-400 dark:text-slate-500">({group.items.length})</span>
                     </div>

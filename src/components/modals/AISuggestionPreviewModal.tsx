@@ -253,7 +253,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
                             className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                           />
                           <span className={`text-sm font-bold uppercase tracking-wider ${isSelected ? colors.text : 'text-slate-400 dark:text-slate-500'}`}>
-                            {MEAL_TYPE_ICONS[type]} {mealTypeLabels[type]}
+                            {(() => { const Icon = MEAL_TYPE_ICONS[type]; return <Icon className="size-4 inline-block mr-1" aria-hidden="true" />; })()}{mealTypeLabels[type]}
                           </span>
                         </label>
                         <button

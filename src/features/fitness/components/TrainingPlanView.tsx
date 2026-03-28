@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Dumbbell, Moon, ChevronRight, Calendar, RefreshCw } from 'lucide-react';
+import { Play, Dumbbell, Moon, ChevronRight, Calendar, RefreshCw, ClipboardList } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
 import { DailyWeightInput } from './DailyWeightInput';
@@ -330,7 +330,7 @@ function TrainingPlanViewInner({
               data-testid="tomorrow-preview"
               className="mt-3 text-sm text-white/80"
             >
-              📋 {t('fitness.plan.tomorrow')}: {tomorrowPlanDay.workoutType} —{' '}
+              <ClipboardList className="size-4 inline-block" aria-hidden="true" /> {t('fitness.plan.tomorrow')}: {tomorrowPlanDay.workoutType} —{' '}
               {tomorrowExercises.length} {t('fitness.plan.exercises')}
             </p>
           )}

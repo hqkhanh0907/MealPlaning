@@ -1,8 +1,20 @@
 import { TFunction } from 'i18next';
+import type { LucideIcon } from 'lucide-react';
+import {
+  AlertTriangle,
+  TrendingDown,
+  Dumbbell,
+  Beef,
+  Leaf,
+  Droplets,
+  FileText,
+  CheckCircle2,
+  ClipboardList,
+} from 'lucide-react';
 import { DayNutritionSummary } from '../types';
 
 export interface NutritionTip {
-  emoji: string;
+  icon: LucideIcon;
   text: string;
   type: 'success' | 'warning' | 'info';
 }
@@ -55,10 +67,10 @@ function computeMealStatus(dayNutrition: DayNutritionSummary): MealStatus {
 function getCalorieTip(totals: NutritionTotals, targetCalories: number, isComplete: boolean, t: TFunction): NutritionTip | null {
   if (totals.calories <= 0) return null;
   if (totals.calories > targetCalories * CALORIE_OVER_THRESHOLD) {
-    return { emoji: '⚠️', text: t('tips.caloriesOver', { amount: Math.round(totals.calories - targetCalories) }), type: 'warning' };
+    return { icon: AlertTriangle, text: t('tips.caloriesOver', { amount: Math.round(totals.calories - targetCalories) }), type: 'warning' };
   }
   if (isComplete && totals.calories < targetCalories * CALORIE_UNDER_THRESHOLD) {
-    return { emoji: '📉', text: t('tips.caloriesLow', { amount: Math.round(totals.calories) }), type: 'warning' };
+    return { icon: TrendingDown, text: t('tips.caloriesLow', { amount: Math.round(totals.calories) }), type: 'warning' };
   }
   return null;
 }
@@ -66,17 +78,17 @@ function getCalorieTip(totals: NutritionTotals, targetCalories: number, isComple
 function getProteinTip(totals: NutritionTotals, targetProtein: number, isComplete: boolean, t: TFunction): NutritionTip | null {
   if (totals.protein <= 0) return null;
   if (totals.protein >= targetProtein) {
-    return { emoji: '💪', text: t('tips.proteinMet', { current: Math.round(totals.protein), target: targetProtein }), type: 'success' };
+    return { icon: Dumbbell, text: t('tips.proteinMet', { current: Math.round(totals.protein), target: targetProtein }), type: 'success' };
   }
   if (isComplete && totals.protein < targetProtein * PROTEIN_LOW_THRESHOLD) {
-    return { emoji: '🥩', text: t('tips.proteinLow', { current: Math.round(totals.protein), target: targetProtein }), type: 'warning' };
+    return { icon: Beef, text: t('tips.proteinLow', { current: Math.round(totals.protein), target: targetProtein }), type: 'warning' };
   }
   return null;
 }
 
 function getFiberTip(totals: NutritionTotals, isComplete: boolean, t: TFunction): NutritionTip | null {
   if (totals.fiber > 0 && totals.fiber < MIN_FIBER_GRAMS && isComplete) {
-    return { emoji: '🥬', text: t('tips.fiberLow'), type: 'info' };
+    return { icon: Leaf, text: t('tips.fiberLow'), type: 'info' };
   }
   return null;
 }
@@ -85,7 +97,7 @@ function getFatTip(totals: NutritionTotals, t: TFunction): NutritionTip | null {
   if (totals.fat <= 0 || totals.calories <= 0) return null;
   const fatCalPercent = (totals.fat * 9 / totals.calories) * 100;
   if (fatCalPercent > FAT_CALORIE_PERCENT_LIMIT) {
-    return { emoji: '🫒', text: t('tips.fatHigh', { percent: Math.round(fatCalPercent) }), type: 'info' };
+    return { icon: Droplets, text: t('tips.fatHigh', { percent: Math.round(fatCalPercent) }), type: 'info' };
   }
   return null;
 }
@@ -96,7 +108,7 @@ function getMissingMealsTip(status: MealStatus, t: TFunction): NutritionTip | nu
   if (!status.hasBreakfast) missing.push(t('tips.mealBreakfast'));
   if (!status.hasLunch) missing.push(t('tips.mealLunch'));
   if (!status.hasDinner) missing.push(t('tips.mealDinner'));
-  return { emoji: '📝', text: t('tips.missingMeals', { meals: missing.join(', ') }), type: 'info' };
+  return { icon: FileText, text: t('tips.missingMeals', { meals: missing.join(', ') }), type: 'info' };
 }
 
 /**
@@ -114,7 +126,7 @@ export const getDynamicTips = (
 
   // No plan yet
   if (!status.hasAnyPlan) {
-    return [{ emoji: '📋', text: t('tips.noPlan'), type: 'info' }];
+    return [{ icon: ClipboardList, text: t('tips.noPlan'), type: 'info' }];
   }
 
   const tipGenerators = [
@@ -128,7 +140,7 @@ export const getDynamicTips = (
 
   // All good
   if (status.isComplete && tips.length === 0) {
-    tips.push({ emoji: '✅', text: t('tips.balanced'), type: 'success' });
+    tips.push({ icon: CheckCircle2, text: t('tips.balanced'), type: 'success' });
   }
 
   // Missing meals

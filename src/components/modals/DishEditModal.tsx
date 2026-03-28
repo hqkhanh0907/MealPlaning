@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, Clock } from 'lucide-react';
+import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, Clock, Flame, Dumbbell, Wheat, Droplets } from 'lucide-react';
 import { Dish, Ingredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { generateId } from '../../utils/helpers';
@@ -259,7 +259,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[90dvh] sm:h-auto sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{editingItem ? t('dish.editExisting') : t('dish.createNew')}</h4>
-          <button onClick={handleClose} data-testid="btn-close-dish" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
+          <button onClick={handleClose} data-testid="btn-close-dish" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 min-h-11 min-w-11 flex items-center justify-center"><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           <div>
@@ -267,7 +267,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
             <div className="flex items-center gap-2">
               <Input id="dish-name" value={watchedName} onChange={e => { setValue('name', e.target.value, { shouldDirty: true }); if (errors.name) clearErrors('name'); setAiSuggestError(''); }} className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
               {aiSuggestLoading ? (
-                <div className="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center" data-testid="ai-suggest-loading">
+                <div className="shrink-0 w-10 h-10 min-h-11 min-w-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center" data-testid="ai-suggest-loading">
                   <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
                 </div>
               ) : (
@@ -278,7 +278,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   title={t('dish.aiSuggestButton')}
                   aria-label={t('dish.aiSuggestButton')}
                   data-testid="btn-ai-suggest"
-                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="shrink-0 w-10 h-10 min-h-11 min-w-11 rounded-xl flex items-center justify-center transition-all bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="w-5 h-5" />
                 </button>
@@ -291,11 +291,11 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           <div>
             <p className={`block text-xs font-bold uppercase mb-1.5 ${errors.tags ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>{t('dish.suitableFor')} <span className="text-rose-500">*</span></p>
             <div className="flex gap-2 flex-wrap">
-              {getMealTagOptions(t).map(({ type, label, icon }) => {
+              {getMealTagOptions(t).map(({ type, label, icon: TagIcon }) => {
                 const isActive = watchedTags.includes(type);
                 return (
-                  <button key={type} type="button" onClick={() => handleTagToggle(type, isActive)} data-testid={`tag-${type}`} className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${isActive ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'}`}>
-                    {icon} {label}
+                  <button key={type} type="button" onClick={() => handleTagToggle(type, isActive)} data-testid={`tag-${type}`} className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 inline-flex items-center gap-1.5 ${isActive ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'}`}>
+                    <TagIcon className="size-4" aria-hidden="true" /> {label}
                   </button>
                 );
               })}
@@ -350,7 +350,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                   title={t('dish.quickAddTitle')}
                   aria-label={t('dish.quickAddTitle')}
                   data-testid="btn-quick-add-ingredient"
-                  className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showQuickAdd ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
+                  className={`shrink-0 w-10 h-10 min-h-11 min-w-11 rounded-xl flex items-center justify-center transition-all ${showQuickAdd ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -415,7 +415,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                       <div className="flex-1">
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</p>
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = Math.max(0, safeAmount - step); setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-4 h-4" /></button>
+                          <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = Math.max(0, safeAmount - step); setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 min-h-11 min-w-11 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Minus className="w-4 h-4" /></button>
                           <StringNumberController<DishEditFormData>
                             name={`ingredients.${index}.amount`}
                             control={control}
@@ -424,13 +424,13 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
                             ariaLabel={getLocalizedField(ing.name, lang)}
                             className={`w-16 px-2 py-1 text-sm text-center rounded-lg border ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} outline-none focus:border-emerald-500 transition-all bg-white dark:bg-slate-700 dark:text-slate-100`}
                           />
-                          <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = safeAmount + step; setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
+                          <button type="button" onClick={() => { const step = getAmountStep(safeAmount); const a = safeAmount + step; setValue(`ingredients.${index}.amount`, a, { shouldDirty: true }); }} aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`} className="w-10 h-10 min-h-11 min-w-11 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 active:bg-slate-300 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all"><Plus className="w-4 h-4" /></button>
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{getLocalizedField(ing.unit, lang)}</span>
                         </div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{Math.round(ing.caloriesPer100 * safeAmount / 100)}cal · {Math.round(ing.proteinPer100 * safeAmount / 100)}g pro · {Math.round(ing.carbsPer100 * safeAmount / 100)}g carb · {Math.round(ing.fatPer100 * safeAmount / 100)}g fat</p>
                         {errors.ingredients?.[index]?.amount && <p className="text-xs text-rose-500 mt-1" data-testid={`error-dish-amount-${field.ingredientId}`}>{errors.ingredients[index].amount.message}</p>}
                       </div>
-                      <button type="button" onClick={() => handleRemoveIngredient(field.ingredientId)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                      <button type="button" onClick={() => handleRemoveIngredient(field.ingredientId)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 rounded-lg transition-all min-h-11 min-w-11 flex items-center justify-center"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   );
                 })}
@@ -460,10 +460,10 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           }, { cal: 0, prot: 0, carbs: 0, fat: 0 });
           return (
             <div className="px-6 py-3 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 flex items-center justify-around gap-3 text-center">
-              <div><p className="text-xs text-slate-400 dark:text-slate-500">🔥 KCal</p><p data-testid="dish-total-calories" className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.cal)}</p></div>
-              <div><p className="text-xs text-slate-400 dark:text-slate-500">💪 Protein</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p></div>
-              <div><p className="text-xs text-slate-400 dark:text-slate-500">🌾 Carbs</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p></div>
-              <div><p className="text-xs text-slate-400 dark:text-slate-500">💧 Fat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p></div>
+              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Flame className="size-3.5" aria-hidden="true" /> KCal</p><p data-testid="dish-total-calories" className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.cal)}</p></div>
+              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Dumbbell className="size-3.5" aria-hidden="true" /> Protein</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p></div>
+              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Wheat className="size-3.5" aria-hidden="true" /> Carbs</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p></div>
+              <div><p className="text-xs text-slate-400 dark:text-slate-500 inline-flex items-center gap-1"><Droplets className="size-3.5" aria-hidden="true" /> Fat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p></div>
             </div>
           );
         })()}
