@@ -79,7 +79,7 @@ npm run dev
 ```bash
 npm run build          # Build production bundle
 npm run lint           # TypeScript check + ESLint
-npm run test           # Unit tests (1280 tests)
+npm run test           # Unit tests (3135 tests)
 npm run test:coverage  # Unit tests + coverage report
 npm run e2e            # E2E tests (Appium, cần emulator Android)
 npm run analyze        # Bundle analysis (visualizer)
@@ -117,10 +117,11 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 npm run e2e
 ```
 
-**Kết quả hiện tại:**
-- Unit: **1280/1280** tests passing (56 test files)
+**Kết quả hiện tại (2026-03-28):**
+- Unit: **3135/3135** tests passing (139 test files)
 - E2E: **183/183** tests passing (24 specs, Appium + WebdriverIO, Android)
-- Coverage: **99.03%** statements, **100%** lines
+- Coverage: **97.24%** statements
+- Lint: **0** errors, **0** warnings
 
 ---
 

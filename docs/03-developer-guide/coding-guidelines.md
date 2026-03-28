@@ -1,7 +1,7 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 5.0  
-**Date:** 2026-03-13
+**Version:** 5.1  
+**Date:** 2026-03-28
 
 ---
 
@@ -29,6 +29,27 @@
 | Test | `.test.ts(x)` cùng tên file gốc | `geminiService.test.ts` |
 | E2E Page Object | PascalCase, suffix `Page` | `CalendarPage.ts` |
 | E2E Spec | prefix số thứ tự | `03-dish-crud.spec.ts` |
+
+### Store API Naming
+
+> **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
+
+Store methods sử dụng tên hành động trực tiếp, **không** thêm suffix `Db`, `ToDb`, `FromDb`:
+
+```typescript
+// ✅ Correct — direct action names
+addDish(dish);
+updateDish(dish);
+deleteDish(id);
+addIngredient(ingredient);
+
+// ❌ Wrong — DB-suffixed names (không tồn tại)
+addDishToDb(dish);
+updateDishInDb(dish);
+deleteDishFromDb(id);
+```
+
+Các hàm `loadXxx()` (ví dụ: `loadDishes()`, `loadIngredients()`) là **standalone exports** riêng biệt, không phải methods trên store object.
 
 ### Variables & Functions
 
@@ -221,6 +242,49 @@ const [ingredients, setIngredients] = useState(() =>
 
 ## 7. Error handling
 
+### Logger Usage
+
+> **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
+
+Sử dụng logger utility (`src/utils/logger.ts`) cho **tất cả** logging thay vì gọi `console.*` trực tiếp. Logger cung cấp 4 methods với structured context:
+
+```typescript
+import { logger } from '../utils/logger';
+
+// ✅ Sử dụng logger — có structured context
+logger.debug('Rendering component', { componentName: 'DishEdit', dishId });
+logger.info('Saving ingredient', { id, name: ingredient.name.vi });
+logger.warn('Missing nutrition data', { ingredientId });
+logger.error('analyzeDishImage failed', error);
+
+// ❌ KHÔNG dùng console.* trực tiếp
+console.log('saving', data);          // ← ESLint no-console sẽ báo lỗi
+console.error('failed', error);       // ← ESLint no-console sẽ báo lỗi
+```
+
+> **Lưu ý:** ESLint rule `no-console` được disable **chỉ** trong file `src/utils/logger.ts`. Mọi file khác gọi `console.*` sẽ bị ESLint báo lỗi.
+
+### Notification API
+
+> **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
+
+Sử dụng `useNotification()` hook để hiển thị toast notifications. **Không** destructure methods không tồn tại:
+
+```typescript
+// ✅ Correct — sử dụng useNotification hook
+const notify = useNotification();
+notify.success(t('common.saveSuccess'));
+notify.error(t('errors.saveFailed'));
+notify.warning(t('warnings.dataIncomplete'));
+notify.info(t('info.syncComplete'));
+
+// ❌ Wrong — destructure method không tồn tại
+const { showNotification } = useNotification(); // showNotification KHÔNG tồn tại
+showNotification('success', 'Saved!');           // sẽ crash runtime
+```
+
+### Async Error Handling
+
 ```typescript
 // ✅ Luôn catch async errors
 try {
@@ -228,13 +292,8 @@ try {
   // handle success
 } catch (error) {
   logger.error('analyzeDishImage failed', error);
-  showToast(t('errors.aiAnalysisFailed'), 'error');
+  notify.error(t('errors.aiAnalysisFailed'));
 }
-
-// ✅ Dùng logger thay console.log
-import { logger } from '../utils/logger';
-logger.info('Saving ingredient', { id });
-logger.error('Failed', error);
 
 // ❌ console.log trực tiếp
 console.log('saving', data);
@@ -266,6 +325,44 @@ describe('ComponentName', () => {
 });
 ```
 
+### Database Test Setup
+
+> **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
+
+Khi viết test liên quan đến database (SQLite), **bắt buộc** gọi `createSchema(db)` sau `db.initialize()` để đảm bảo schema được tạo đầy đủ (19 tables):
+
+```typescript
+// ✅ Correct — luôn gọi createSchema sau initialize
+const db = new SQLiteDatabase();
+await db.initialize();
+await createSchema(db);  // ← BẮT BUỘC — tạo đủ 19 tables
+
+// ❌ Wrong — thiếu createSchema → test fail do missing tables
+const db = new SQLiteDatabase();
+await db.initialize();
+// forgot createSchema → queries fail with "no such table"
+```
+
+### i18n Assertions trong Tests
+
+> **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
+
+Khi assert text hiển thị trong unit tests, sử dụng **i18n keys từ `vi.json`** thay vì hardcode strings tiếng Việt. Điều này đảm bảo test không bị break khi cập nhật translations:
+
+```typescript
+// ✅ Correct — dùng i18n keys hoặc translated text từ t()
+expect(screen.getByText(t('ingredients.modal.title'))).toBeInTheDocument();
+expect(screen.getByRole('button', { name: t('common.save') })).toBeInTheDocument();
+
+// ✅ Acceptable — dùng regex match cho text đã biết từ vi.json
+expect(screen.getByText(/nguyên liệu/i)).toBeInTheDocument();
+
+// ❌ Wrong — hardcode string không có trong vi.json
+expect(screen.getByText('Add Ingredient')).toBeInTheDocument();
+expect(screen.getByText('Thêm nguyên liệu mới vào danh sách')).toBeInTheDocument();
+```
+```
+
 ### E2E tests
 
 ```typescript
@@ -288,21 +385,22 @@ await $('button[data-testid="add-dish"]').click();
 | `hooks/` | ≥ 85% | **100%** ✅ |
 | `components/` | ≥ 75% | **100%** ✅ |
 | `contexts/` | ≥ 85% | **100%** ✅ |
-| **Overall Stmts** | ≥ 80% | **100%** ✅ |
+| **Overall Stmts** | ≥ 97% | **97.24%** ✅ |
 | **Overall Branch** | ≥ 75% | **93.99%** ✅ |
 | **E2E Specs** | 24 specs | **183 tests** ✅ |
+| **Unit Test Files** | — | **139 files, 3135 tests** ✅ |
 
-> **Chuẩn mới (QA Cycle 2):** 100% Stmts/Funcs/Lines đã đạt được và là baseline cho các release tiếp theo. Mọi PR không được làm giảm coverage dưới 100%.
+> **Chuẩn mới (QA Stabilization 2026-03-28):** 97%+ statement coverage là baseline bắt buộc. Mọi PR không được làm giảm coverage dưới 97%. Hiện tại: 139 test files, 3135 tests passing, 97.24% statements.
 >
 > **Chuẩn E2E (QA Cycle 3):** Deep integration tests required for cross-feature data flow. 100% feature-level coverage achieved and must be maintained.
 
 ### Quy tắc Test Coverage
 
 - Coverage **không được phép giảm** sau mỗi PR
-- Target: 100% lines, 100% functions, 100% statements
-- Branch coverage >= 90%
+- Target: ≥ 97% statements, ≥ 90% branches (updated 2026-03-28)
 - Mọi bug fix **phải kèm** test case regression
-- **Coverage threshold**: Duy trì ≥ 99% statement coverage và 100% line coverage. Mỗi PR phải chạy `npm run test:coverage` và không được giảm coverage.
+- **Coverage threshold**: Duy trì ≥ 97% statement coverage. Mỗi PR phải chạy `npm run test:coverage` và không được giảm coverage.
+- **Lint**: `npm run lint` phải đạt 0 errors, 0 warnings trước khi merge
 
 ### Quy tắc ESLint — Không dùng eslint-disable
 

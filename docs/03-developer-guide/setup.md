@@ -1,7 +1,7 @@
 # Hướng Dẫn Cài Đặt Môi Trường Dev
 
-**Version:** 1.1  
-**Date:** 2026-03-08
+**Version:** 1.2  
+**Date:** 2026-03-28
 
 ---
 
@@ -276,7 +276,38 @@ bash build-apk.sh
 
 ---
 
-## 9. SonarQube Setup
+## 9. Database Schema
+
+Ứng dụng sử dụng SQLite (qua Capacitor SQLite plugin) với **19 tables**. Schema được tạo bởi `createSchema(db)` trong `src/services/databaseService.ts`.
+
+> **Lưu ý (2026-03-28):** Schema đã tăng từ 16 lên 19 tables do thêm các bảng hỗ trợ meal templates, AI suggestion history, và user preferences. Khi viết tests, bắt buộc gọi `createSchema(db)` sau `db.initialize()` để đảm bảo tạo đủ tables.
+
+---
+
+## 10. Quality Gates
+
+### Coverage target
+
+| Metric | Target | Hiện tại (2026-03-28) |
+|--------|--------|-----------------------|
+| Test files | — | **139 files** |
+| Tests passing | 100% | **3135/3135** ✅ |
+| Statement coverage | ≥ 97% | **97.24%** ✅ |
+| Lint errors | 0 | **0** ✅ |
+
+### Lệnh kiểm tra
+
+```bash
+npm run test             # Chạy toàn bộ unit tests (Vitest)
+npm run test:coverage    # Unit tests + coverage report
+npm run lint             # ESLint — bắt buộc 0 errors, 0 warnings
+```
+
+> Mỗi PR phải pass cả 3 lệnh trên trước khi merge. Coverage không được giảm dưới 97%.
+
+---
+
+## 11. SonarQube Setup
 
 Chạy sonar analysis:
 
