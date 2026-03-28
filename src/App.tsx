@@ -58,12 +58,15 @@ import { useMealTemplateStore } from './store/mealTemplateStore';
 import { useUIStore } from './store/uiStore';
 import { useNavigationStore } from './store/navigationStore';
 import { useHealthProfileStore } from './features/health-profile/store/healthProfileStore';
+import { useAppOnboardingStore } from './store/appOnboardingStore';
+import { AppOnboarding } from './components/AppOnboarding';
 
 
 // --- Main App component ---
 
 export default function App() {
   const { t } = useTranslation();
+  const isAppOnboarded = useAppOnboardingStore((s) => s.isAppOnboarded);
   const { theme, setTheme } = useDarkMode();
 
   const prefetchFns = useMemo(() => [importManagementTab], []);
@@ -260,6 +263,10 @@ export default function App() {
   // Auto-sync data to Google Drive when authenticated
   useAutoSync();
 
+  if (!isAppOnboarded) {
+    return <AppOnboarding />;
+  }
+
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
@@ -298,7 +305,7 @@ export default function App() {
       </header>
 
       <main id="main-content" className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-8">
-        <div className={activeMainTab === 'calendar' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} inert={activeMainTab === 'calendar' ? undefined : true}>
+        <div className={activeMainTab === 'calendar' ? 'block animate-fade-in' : 'hidden'} role="tabpanel" aria-label={t('nav.calendar')} key={activeMainTab} inert={activeMainTab === 'calendar' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.calendarTab')}>
           <CalendarTab
             selectedDate={selectedDate} onSelectDate={setSelectedDate} dayPlans={dayPlans}
@@ -324,7 +331,7 @@ export default function App() {
           </ErrorBoundary>
         )}
 
-        <div className={activeMainTab === 'library' ? 'block' : 'hidden'} role="tabpanel" aria-label={t('nav.library')} inert={activeMainTab === 'library' ? undefined : true}>
+        <div className={activeMainTab === 'library' ? 'block animate-fade-in' : 'hidden'} role="tabpanel" aria-label={t('nav.library')} key={activeMainTab} inert={activeMainTab === 'library' ? undefined : true}>
           <ErrorBoundary fallbackTitle={t('errorBoundary.managementTab')}>
           <Suspense fallback={<TabLoadingFallback />}>
           <ManagementTab
