@@ -4,7 +4,8 @@
 >
 > Dựa trên phân tích mã nguồn dự án Smart Meal Planner + nghiên cứu tiêu chuẩn ngành.
 >
-> **Cập nhật 2026-03-28**: Đã audit toàn bộ codebase — đánh dấu rõ ✅ Đã implement / ❌ Chưa implement (đề xuất từ Internet).
+> **Cập nhật 2026-03-28**: Đã audit toàn bộ codebase — đánh dấu rõ ✅ Đã implement / ⚠️ Một phần.
+> Đã loại bỏ 7 công thức không phù hợp scope (BMI, FFMI, Navy Body Fat, Wilks, Max HR, HR Zones, Recovery Time) — xem lý do tại Phần E.
 
 ---
 
@@ -18,8 +19,7 @@
 | 1.2 | TDEE | ✅ Đã implement | `nutritionEngine.ts:46-52` |
 | 1.3 | Caloric Target | ✅ Đã implement | `nutritionEngine.ts:74-80` |
 | 1.4 | Macro Split (P→F→C) | ✅ Đã implement | `nutritionEngine.ts:82-114` |
-| 2.1a | 1RM Brzycki | ✅ Đã implement | `trainingMetrics.ts:31-36` |
-| 2.1b | 1RM Epley | ❌ Chưa implement | Internet — công thức phổ biến thay thế |
+| 2.1 | 1RM Brzycki | ✅ Đã implement | `trainingMetrics.ts:31-36` |
 | 2.2 | RPE/RIR | ⚠️ Một phần | Có lưu RPE, chưa có công thức RIR↔RPE |
 | 2.3 | Volume Load | ✅ Đã implement | `trainingMetrics.ts:5-19` |
 | 2.4 | Progressive Overload | ✅ Đã implement | `useProgressiveOverload.ts:47-75` |
@@ -27,21 +27,14 @@
 | 2.6 | Deload Protocol | ✅ Đã implement | `periodization.ts:64-109` |
 | 2.7 | Duration Estimate | ✅ Đã implement | `TrainingPlanView.tsx` |
 | 2.8 | Volume Distribution | ✅ Đã implement | `volumeCalculator.ts` |
-| 3.1 | BMI | ❌ Chưa implement | Internet — công thức chuẩn WHO |
 | 3.2 | LBM | ✅ Đã implement | `nutritionEngine.ts:90-92` |
-| 3.3 | FFMI | ❌ Chưa implement | Internet — chỉ số đánh giá thể hình |
-| 3.4 | Navy Body Fat | ❌ Chưa implement | Internet — US Military formula |
-| 3.5 | Wilks Score | ❌ Chưa implement | Internet — chuẩn IPF Powerlifting |
-| 4.1 | Max HR (220−Age) | ❌ Chưa implement | Internet — công thức cổ điển + Tanaka |
-| 4.2 | HR Zones (Karvonen) | ❌ Chưa implement | Internet — 5 vùng nhịp tim |
 | 4.3 | Cardio Calories (MET) | ✅ Đã implement | `cardioEstimator.ts` |
-| 4.4 | Recovery Time | ❌ Chưa implement | Internet — ước tính thời gian hồi phục |
 | 5.1 | Daily Score | ✅ Đã implement | `scoreCalculator.ts:83-164` |
 | 5.2 | Streak | ✅ Đã implement | `gamification.ts:58-176` |
 | 5.3 | PR Detection | ✅ Đã implement | `gamification.ts:192-225` |
 | 5.4 | Milestones | ✅ Đã implement | `gamification.ts` |
 
-**Tóm tắt**: ✅ 19 đã implement | ⚠️ 1 một phần | ❌ 8 chưa implement (từ Internet)
+**Tóm tắt**: ✅ 19 đã implement | ⚠️ 1 một phần (RPE/RIR)
 
 ### Business Logic (Luồng Nghiệp vụ)
 
@@ -85,6 +78,7 @@
    - [14. Quản lý Trạng thái & Lưu trữ](#14-quản-lý-trạng-thái--lưu-trữ-dữ-liệu)
 3. [Phần C: Bảng Tổng hợp](#phần-c-bảng-tổng-hợp-tất-cả-công-thức)
 4. [Phần D: Nguồn tham khảo](#phần-d-nguồn-tham-khảo)
+5. [Phần E: Công thức đã loại bỏ (và lý do)](#phần-e-công-thức-đã-loại-bỏ-khỏi-scope)
 
 ---
 
@@ -221,28 +215,19 @@ Carbs (g) = Calories Carbs ÷ 4 kcal/g
 
 ## 2. Sức mạnh & Tập luyện
 
-### 2.1 Ước tính 1RM (One-Rep Max)
-
-**Công thức Brzycki** ✅ (chính xác ±5% cho reps < 10)[^6]:
+### 2.1 Ước tính 1RM (One-Rep Max) — Brzycki ✅
 
 > **Trạng thái**: ✅ Đã implement — `src/features/fitness/utils/trainingMetrics.ts:31-36`
+> Accuracy ±5% cho reps < 10. Brzycki là công thức duy nhất cần thiết — Epley cho kết quả tương đương, không thêm giá trị.
 
 ```
 1RM = Trọng lượng ÷ (1.0278 − 0.0278 × Số lần lặp)
 ```
 
-**Công thức Epley** ❌ (phổ biến)[^7]:
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet. Chỉ dùng Brzycki trong project.
-
-```
-1RM = Trọng lượng × (1 + 0.0333 × Số lần lặp)
-```
-
-| Ví dụ | Brzycki | Epley |
-|-------|---------|-------|
-| 100kg × 5 reps | ~112.5 kg | ~116.7 kg |
-| 80kg × 10 reps | ~106.7 kg | ~106.6 kg |
+| Ví dụ | Kết quả |
+|-------|---------|
+| 100kg × 5 reps | ~112.5 kg |
+| 80kg × 10 reps | ~106.7 kg |
 
 **Ứng dụng**: Xác định cường độ tập (% 1RM), theo dõi tiến trình sức mạnh.
 
@@ -419,23 +404,7 @@ Ví dụ: 14 sets cho 3 bài tập → [5, 5, 4]
 
 ## 3. Thể hình & Cơ thể
 
-### 3.1 BMI — Chỉ số Khối Cơ thể ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet (WHO standard).
-> Dữ liệu weight/height có sẵn trong healthProfileStore nhưng chưa tính BMI.
-
-```
-BMI = Cân nặng(kg) ÷ Chiều cao(m)²
-```
-
-| BMI | Phân loại |
-|-----|-----------|
-| < 18.5 | Thiếu cân |
-| 18.5–24.9 | Bình thường |
-| 25–29.9 | Thừa cân |
-| ≥ 30 | Béo phì |
-
-### 3.2 LBM — Khối lượng Nạc ✅
+### 3.1 LBM — Khối lượng Nạc ✅
 
 > **Trạng thái**: ✅ Đã implement — `src/services/nutritionEngine.ts:90-92` (trong `calculateMacros`)
 
@@ -443,86 +412,11 @@ BMI = Cân nặng(kg) ÷ Chiều cao(m)²
 LBM = Cân nặng × (1 − % Mỡ cơ thể)
 ```
 
-### 3.3 FFMI — Chỉ số Khối Không Mỡ ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet. Hữu ích để đánh giá thể hình tự nhiên vs enhanced.
-
-```
-FFMI = LBM(kg) ÷ Chiều cao(m)²
-FFMI điều chỉnh = FFMI + 6.1 × (1.8 − Chiều cao(m))
-```
-
-| FFMI | Đánh giá (Nam) |
-|------|---------------|
-| < 18 | Dưới trung bình |
-| 18–20 | Trung bình |
-| 20–22 | Trên trung bình |
-| 22–25 | Xuất sắc |
-| > 25 | Nghi ngờ dùng chất |
-
-### 3.4 Navy Body Fat (US Military) ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet. Cần thêm input đo vòng eo/cổ/hông.
-
-```
-Nam: % Mỡ = 86.010 × log10(Eo − Cổ) − 70.041 × log10(Cao) + 36.76
-Nữ: % Mỡ = 163.205 × log10(Eo + Hông − Cổ) − 97.684 × log10(Cao) − 78.387
-
-(Đơn vị: cm)
-```
-
-### 3.5 Wilks Score (Powerlifting) ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet (IPF standard). Dùng cho powerlifting scoring.
-
-```
-Wilks = Tổng tạ nâng × 500 ÷ (a + bW + cW² + dW³ + eW⁴ + fW⁵)
-
-W = Cân nặng (kg)
-Hệ số cho Nam:
-  a = −216.0475144
-  b = 16.2606339
-  c = −0.002388645
-  d = −0.00113732
-  e = 7.01863E-06
-  f = −1.291E-08
-```
-
 ---
 
 ## 4. Tim mạch & Cardio
 
-### 4.1 Nhịp Tim Tối đa (Max HR) ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet. Cần để tính HR Zones.
-
-**Công thức cổ điển**:
-```
-Max HR = 220 − Tuổi
-```
-
-**Công thức Tanaka** (chính xác hơn cho người > 40)[^13]:
-```
-Max HR = 208 − (0.7 × Tuổi)
-```
-
-### 4.2 Vùng Nhịp Tim Tập luyện (Karvonen) ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet. Hữu ích cho cardio training zones.
-
-```
-Nhịp Tim Mục tiêu = Nhịp nghỉ + (% Cường độ × (Max HR − Nhịp nghỉ))
-```
-
-| Vùng | % Max HR | Mục tiêu |
-|------|---------|----------|
-| Zone 1 | 50–60% | Hồi phục, khởi động |
-| Zone 2 | 60–70% | Nền tảng aerobic, đốt mỡ |
-| Zone 3 | 70–80% | Sức bền aerobic |
-| Zone 4 | 80–90% | Ngưỡng anaerobic |
-| Zone 5 | 90–100% | Nỗ lực tối đa, sprint |
-
-### 4.3 Ước tính Calories Đốt (Cardio) ✅
+### 4.1 Ước tính Calories Đốt (Cardio) ✅
 
 > **Trạng thái**: ✅ Đã implement — `src/features/fitness/utils/cardioEstimator.ts`
 > MET table đầy đủ cho 7 loại cardio × 3 mức cường độ.
@@ -546,16 +440,6 @@ Calories = (Phút × MET × Cân nặng(kg)) ÷ 60
 ```
 Calories/phút = (5.0 × Cân nặng(kg) × Thời gian(phút)) ÷ 60
 ```
-
-### 4.4 Thời gian Hồi phục ❌
-
-> **Trạng thái**: ❌ Chưa implement — Nguồn: Internet. Ước tính thời gian recovery giữa các buổi tập.
-
-```
-WRT (giờ) = (Nhịp tim trung bình × Thời gian tập (phút)) ÷ 200
-```
-
-Ví dụ: HR trung bình 150 bpm × 40 phút = 30 giờ hồi phục.
 
 ---
 
@@ -1121,36 +1005,31 @@ WeightEntry
 | 5 | LBM | Weight × (1 − BF%) | ✅ Đã implement | nutritionEngine.ts:90-92 |
 | 6 | Activity Blend | 0.7×Auto + 0.3×User | ✅ Đã implement | nutritionEngine.ts:63-72 |
 | 7 | 1RM Brzycki | W÷(1.0278−0.0278R) | ✅ Đã implement | trainingMetrics.ts:31-36 |
-| 8 | 1RM Epley | W×(1+0.0333R) | ❌ Chưa implement | Internet — thay thế cho Brzycki |
-| 9 | Volume | Σ(Reps×Weight) | ✅ Đã implement | trainingMetrics.ts:5-8 |
-| 10 | Weekly Sets | Base×Adjustments, clamped | ✅ Đã implement | volumeCalculator.ts:54-73 |
-| 11 | Volume Distribution | Floor(total/n) + remainder | ✅ Đã implement | volumeCalculator.ts:75-83 |
-| 12 | Progressive Overload | Rep max → +Weight, else +Rep | ✅ Đã implement | useProgressiveOverload.ts:48-75 |
-| 13 | Plateau Detection | ≥3 weeks same weight (±2%) | ✅ Đã implement | useProgressiveOverload.ts:77-104 |
-| 14 | Acute Fatigue | RPE ≥ 9.0 OR spike > 1.3x | ✅ Đã implement | useProgressiveOverload.ts:106-138 |
-| 15 | Chronic Overtraining | ≥4 weeks declining volume | ✅ Đã implement | useProgressiveOverload.ts:140-176 |
-| 16 | Deload | Sets × 0.6, Intensity × 0.9 | ✅ Đã implement | periodization.ts:72-79 |
-| 17 | Current Week | Floor(elapsed / 7days) + 1 | ✅ Đã implement | useTrainingPlan.ts:98-102 |
-| 18 | Cardio Burn (MET) | (Min×MET×Kg)÷60 | ✅ Đã implement | cardioEstimator.ts:14-23 |
-| 19 | Strength Burn | (5.0×Kg×Min)÷60 | ✅ Đã implement | activityMultiplier.ts:150-151 |
-| 20 | Duration Estimate | Warmup + Σ(sets×(40s+rest)+30s)/60 | ✅ Đã implement | TrainingPlanView.tsx:26-33 |
-| 21 | Daily Score | Weighted average (5 factors) | ✅ Đã implement | scoreCalculator.ts:83-164 |
-| 22 | Streak | Consecutive days + grace period | ✅ Đã implement | gamification.ts:58-176 |
-| 23 | PR Detection | Current 1RM > historical best | ✅ Đã implement | gamification.ts:192-225 |
-| 24 | Streak Bonus | Min(days × 5, 100) | ✅ Đã implement | scoreCalculator.ts:65-70 |
-| 25 | Moving Average | Σ(weights)/n (min 3 entries) | ✅ Đã implement | useFeedbackLoop.ts:33-38 |
-| 26 | Auto-Adjust | ±150 kcal per evaluation | ✅ Đã implement | useFeedbackLoop.ts:58-133 |
-| 27 | Adherence | Hit%: actual in ±10% target | ✅ Đã implement | useFeedbackLoop.ts:135-179 |
-| 28 | BMI | Weight ÷ Height² | ❌ Chưa implement | Internet — WHO standard |
-| 29 | FFMI | LBM ÷ Height² | ❌ Chưa implement | Internet — chỉ số thể hình |
-| 30 | Max HR | 220 − Age (hoặc Tanaka) | ❌ Chưa implement | Internet — cần cho HR Zones |
-| 31 | HR Zones | Karvonen: Rest + %×(Max−Rest) | ❌ Chưa implement | Internet — 5 vùng nhịp tim |
-| 32 | Recovery Time | (AvgHR × Minutes) ÷ 200 | ❌ Chưa implement | Internet — ước tính hồi phục |
-| 33 | Navy Body Fat | Circumference-based % | ❌ Chưa implement | Internet — US Military |
-| 34 | Wilks Score | Total × 500 ÷ polynomial(BW) | ❌ Chưa implement | Internet — chuẩn IPF |
-| 35 | RPE→RIR | RIR = 10 − RPE | ⚠️ Một phần | Có RPE, chưa có RIR mapping |
+| 8 | Volume | Σ(Reps×Weight) | ✅ Đã implement | trainingMetrics.ts:5-8 |
+| 9 | Weekly Sets | Base×Adjustments, clamped | ✅ Đã implement | volumeCalculator.ts:54-73 |
+| 10 | Volume Distribution | Floor(total/n) + remainder | ✅ Đã implement | volumeCalculator.ts:75-83 |
+| 11 | Progressive Overload | Rep max → +Weight, else +Rep | ✅ Đã implement | useProgressiveOverload.ts:48-75 |
+| 12 | Plateau Detection | ≥3 weeks same weight (±2%) | ✅ Đã implement | useProgressiveOverload.ts:77-104 |
+| 13 | Acute Fatigue | RPE ≥ 9.0 OR spike > 1.3x | ✅ Đã implement | useProgressiveOverload.ts:106-138 |
+| 14 | Chronic Overtraining | ≥4 weeks declining volume | ✅ Đã implement | useProgressiveOverload.ts:140-176 |
+| 15 | Deload | Sets × 0.6, Intensity × 0.9 | ✅ Đã implement | periodization.ts:72-79 |
+| 16 | Current Week | Floor(elapsed / 7days) + 1 | ✅ Đã implement | useTrainingPlan.ts:98-102 |
+| 17 | Cardio Burn (MET) | (Min×MET×Kg)÷60 | ✅ Đã implement | cardioEstimator.ts:14-23 |
+| 18 | Strength Burn | (5.0×Kg×Min)÷60 | ✅ Đã implement | activityMultiplier.ts:150-151 |
+| 19 | Duration Estimate | Warmup + Σ(sets×(40s+rest)+30s)/60 | ✅ Đã implement | TrainingPlanView.tsx:26-33 |
+| 20 | Daily Score | Weighted average (5 factors) | ✅ Đã implement | scoreCalculator.ts:83-164 |
+| 21 | Streak | Consecutive days + grace period | ✅ Đã implement | gamification.ts:58-176 |
+| 22 | PR Detection | Current 1RM > historical best | ✅ Đã implement | gamification.ts:192-225 |
+| 23 | Streak Bonus | Min(days × 5, 100) | ✅ Đã implement | scoreCalculator.ts:65-70 |
+| 24 | Moving Average | Σ(weights)/n (min 3 entries) | ✅ Đã implement | useFeedbackLoop.ts:33-38 |
+| 25 | Auto-Adjust | ±150 kcal per evaluation | ✅ Đã implement | useFeedbackLoop.ts:58-133 |
+| 26 | Adherence | Hit%: actual in ±10% target | ✅ Đã implement | useFeedbackLoop.ts:135-179 |
+| 27 | RPE→RIR | RIR = 10 − RPE | ⚠️ Một phần | Có RPE, chưa có RIR mapping |
 
-**Tổng: ✅ 27 đã implement | ⚠️ 1 một phần | ❌ 7 chưa implement**
+**Tổng: ✅ 26 đã implement | ⚠️ 1 một phần**
+
+> **Ghi chú**: 8 công thức từ Internet (BMI, FFMI, 1RM Epley, Max HR, HR Zones, Recovery Time, Navy Body Fat, Wilks Score)
+> đã được đánh giá và **loại bỏ khỏi scope** — xem lý do chi tiết tại [Phần E](#phần-e-công-thức-đã-loại-bỏ-khỏi-scope).
 
 ---
 
@@ -1162,12 +1041,27 @@ WeightEntry
 [^4]: `src/features/fitness/utils/activityMultiplier.ts:37-58` — Activity level detection from training data
 [^5]: `src/features/dashboard/hooks/useFeedbackLoop.ts:21-29` — Auto-adjust configuration & safety limits
 [^6]: `src/features/fitness/utils/trainingMetrics.ts:31-36` — Brzycki 1RM formula implementation
-[^7]: LiftStrong Calculators — https://www.liftstrong.com/calculators (Epley formula reference)
 [^8]: BodySpec RPE Guide — https://www.bodyspec.com/blog/post/rate_of_perceived_exertion_practical_guide_and_calculator
 [^9]: `src/features/fitness/utils/volumeCalculator.ts:14-53` — Schoenfeld 2017 volume landmarks
 [^10]: `src/features/fitness/hooks/useProgressiveOverload.ts:48-75` — Progressive overload algorithm
 [^11]: `src/features/fitness/hooks/useTrainingPlan.ts:98-102` — Current week computation
 [^12]: `src/features/fitness/utils/periodization.ts:72-79` — Deload reduction formula
-[^13]: Heart Rate Zone Calculator (Karvonen) — https://fitnesscalcs.com/heart-rate-zone-calculator/
-[^14]: Workout Recovery Calculator — https://calculator.academy/recovery-time-calculator/
 [^15]: `src/features/dashboard/utils/scoreCalculator.ts:83-164` — Daily score aggregation
+
+---
+
+# Phần E: Công thức Đã Loại bỏ Khỏi Scope
+
+> Các công thức sau đã được đánh giá ngày 2026-03-28 và **loại bỏ** vì không phù hợp scope app
+> (Smart Meal Planner = meal planning + macro tracking + training logging).
+
+| Công thức | Lý do loại bỏ |
+|-----------|---------------|
+| **BMI** (Weight ÷ Height²) | App focus là macro tracking + training, không phải health screening. BMI không ảnh hưởng tới bất kỳ logic nào (TDEE dùng Mifflin-St Jeor, macro dùng weight_kg trực tiếp). Vanity metric, không actionable. |
+| **FFMI** (LBM ÷ Height²) | Fitness onboarding không thu thập `heightCm` (chỉ nutrition profile có). FFMI dùng cho bodybuilding competitive — vượt scope app meal planner. |
+| **1RM Epley** (W × (1+0.0333R)) | Brzycki đã implement với accuracy ±5%. Epley cho kết quả tương đương (~0.1% khác biệt ở 10 reps). Thêm Epley chỉ tạo confusion, không thêm giá trị. |
+| **Max HR** (220 − Age / Tanaka) | App không kết nối wearable (Apple Watch/Fitbit). CardioLogger chỉ ghi HR thủ công. Max HR chỉ hữu ích khi có HR Zones — defer tới khi thêm wearable integration. |
+| **HR Zones** (Karvonen) | Cần `Resting HR` (chưa thu thập) + `Max HR` (chưa tính). Không có UI hiển thị zones. Toàn bộ cardio tracking dùng MET-based calories — hoạt động tốt. |
+| **Recovery Time** ((AvgHR × Min) ÷ 200) | Hệ thống hiện tại đã có: rest timers (90-180s), sleep tracking, auto-deload detection (RPE ≥ 8 × 4 tuần), acute/chronic fatigue detection. Công thức HR-based kém chính xác hơn. |
+| **Navy Body Fat** (Circumference-based %) | Cần đo circumference (cổ, eo, hông) — app không có UI nhập, không có data model. `bodyFatPct` hiện nhập trực tiếp trong HealthProfile — đơn giản hơn và đủ dùng. |
+| **Wilks Score** (Total × 500 ÷ polynomial) | Chỉ hữu ích cho nhánh `trainingGoal: 'strength'` (~20% users). Dùng cho powerlifting competitive ranking — vượt scope app meal planner. Có thể xem xét lại nếu thêm tính năng powerlifting. |
