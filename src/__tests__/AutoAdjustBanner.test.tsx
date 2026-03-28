@@ -32,7 +32,7 @@ describe('AutoAdjustBanner', () => {
       />,
     );
     expect(screen.getByTestId('banner-title')).toHaveTextContent(
-      'Điều chỉnh mục tiêu',
+      'Đề xuất điều chỉnh',
     );
   });
 
@@ -48,7 +48,7 @@ describe('AutoAdjustBanner', () => {
     );
     const body = screen.getByTestId('banner-body');
     expect(body.textContent).toContain('150');
-    expect(body.textContent).toContain('giảm');
+    expect(body.textContent).toContain('Giảm');
   });
 
   it('renders banner body with gaining message for cut', () => {
@@ -62,7 +62,7 @@ describe('AutoAdjustBanner', () => {
       />,
     );
     const body = screen.getByTestId('banner-body');
-    expect(body.textContent).toContain('giảm');
+    expect(body.textContent).toContain('Giảm');
     expect(body.textContent).toContain('150');
   });
 
@@ -79,7 +79,7 @@ describe('AutoAdjustBanner', () => {
       />,
     );
     const body = screen.getByTestId('banner-body');
-    expect(body.textContent).toContain('tăng');
+    expect(body.textContent).toContain('Tăng');
   });
 
   it('renders AlertTriangle icon', () => {

@@ -88,7 +88,7 @@ describe('ProteinProgress', () => {
     render(<ProteinProgress current={170} target={166} />);
 
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Đạt mục tiêu protein! ✅',
+      'Đã đạt mục tiêu protein!',
     );
   });
 
@@ -96,7 +96,7 @@ describe('ProteinProgress', () => {
     render(<ProteinProgress current={166} target={166} />);
 
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Đạt mục tiêu protein! ✅',
+      'Đã đạt mục tiêu protein!',
     );
   });
 
@@ -104,7 +104,7 @@ describe('ProteinProgress', () => {
     render(<ProteinProgress current={150} target={166} />);
 
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Gần đạt! 💪',
+      'Gần đạt mục tiêu protein',
     );
   });
 
@@ -112,7 +112,7 @@ describe('ProteinProgress', () => {
     render(<ProteinProgress current={146} target={166} />);
 
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Gần đạt! 💪',
+      'Gần đạt mục tiêu protein',
     );
   });
 
@@ -120,21 +120,21 @@ describe('ProteinProgress', () => {
     render(<ProteinProgress current={130} target={166} />);
 
     const suggestion = screen.getByTestId('protein-suggestion');
-    expect(suggestion.textContent).toMatch(/≈.*protein/);
+    expect(suggestion.textContent).toMatch(/Gợi ý/);
   });
 
   it('shows food suggestion at deficit exactly 50g', () => {
     render(<ProteinProgress current={116} target={166} />);
 
     const suggestion = screen.getByTestId('protein-suggestion');
-    expect(suggestion.textContent).toMatch(/≈.*protein/);
+    expect(suggestion.textContent).toMatch(/Gợi ý/);
   });
 
   it('shows significant deficit message when deficit >50g', () => {
     render(<ProteinProgress current={50} target={166} />);
 
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Cần bổ sung đáng kể',
+      'Cần bổ sung thêm protein',
     );
   });
 
@@ -148,7 +148,7 @@ describe('ProteinProgress', () => {
     );
     expect(screen.getByTestId('protein-bar')).toHaveStyle({ width: '0%' });
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Cần bổ sung đáng kể',
+      'Cần bổ sung thêm protein',
     );
   });
 
@@ -169,7 +169,7 @@ describe('ProteinProgress', () => {
       '0g / 0g',
     );
     expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Đạt mục tiêu protein! ✅',
+      'Đã đạt mục tiêu protein!',
     );
   });
 
@@ -200,7 +200,7 @@ describe('ProteinProgress', () => {
 
     const container = screen.getByTestId('protein-progress');
     const label = container.getAttribute('aria-label');
-    expect(label).toContain('Đạt mục tiêu protein');
+    expect(label).toContain('Đã đạt mục tiêu protein');
   });
 
   // --- tabular-nums ---

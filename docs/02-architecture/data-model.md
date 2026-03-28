@@ -1,8 +1,8 @@
 # Data Model — Smart Meal Planner
 
-**Version:** 1.1  
-**Date:** 2026-03-08  
-**Source of truth:** `src/types.ts`
+**Version:** 1.2  
+**Date:** 2026-03-28  
+**Source of truth:** `src/types.ts` (domain types), `src/services/schema.ts` (SQLite schema)
 
 ---
 
@@ -361,3 +361,341 @@ File `src/data/initialData.ts` cung cấp bộ dữ liệu mẫu mặc định:
 - Khoảng 10-15 món ăn mẫu (cơm, phở, bún, trứng, rau...)
 
 Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiên).
+
+---
+
+## 8. SQLite Database Schema (19 Tables)
+
+> **Source of truth:** `src/services/schema.ts` — `SCHEMA_VERSION = 1`
+>
+> Ứng dụng đã chuyển từ localStorage sang SQLite (via Capacitor SQLite plugin). Schema gồm **19 bảng** chia thành 5 nhóm chức năng.
+
+### 8.1 Meal Planning Tables (migrated from localStorage)
+
+#### `ingredients`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `name_vi` | TEXT | NOT NULL |
+| `name_en` | TEXT | |
+| `calories_per_100` | REAL | NOT NULL |
+| `protein_per_100` | REAL | NOT NULL |
+| `carbs_per_100` | REAL | NOT NULL |
+| `fat_per_100` | REAL | NOT NULL |
+| `fiber_per_100` | REAL | NOT NULL |
+| `unit_vi` | TEXT | NOT NULL |
+| `unit_en` | TEXT | |
+
+#### `dishes`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `name_vi` | TEXT | NOT NULL |
+| `name_en` | TEXT | |
+| `tags` | TEXT | NOT NULL (JSON array of MealType) |
+| `rating` | INTEGER | |
+| `notes` | TEXT | |
+
+#### `dish_ingredients`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `dish_id` | TEXT | NOT NULL, FK → `dishes(id)` ON DELETE CASCADE |
+| `ingredient_id` | TEXT | NOT NULL, FK → `ingredients(id)` |
+| `amount` | REAL | NOT NULL |
+
+**Primary Key:** `(dish_id, ingredient_id)`
+
+#### `day_plans`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `date` | TEXT | PRIMARY KEY |
+| `breakfast_dish_ids` | TEXT | NOT NULL (JSON array) |
+| `lunch_dish_ids` | TEXT | NOT NULL (JSON array) |
+| `dinner_dish_ids` | TEXT | NOT NULL (JSON array) |
+| `servings` | TEXT | (JSON) |
+
+#### `meal_templates`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `name` | TEXT | NOT NULL |
+| `data` | TEXT | NOT NULL (JSON blob) |
+
+### 8.2 User & Goal Tables
+
+#### `user_profile`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `'default'` |
+| `gender` | TEXT | NOT NULL, CHECK `IN ('male', 'female')` |
+| `age` | INTEGER | NOT NULL |
+| `height_cm` | REAL | NOT NULL |
+| `weight_kg` | REAL | NOT NULL |
+| `activity_level` | TEXT | NOT NULL, DEFAULT `'moderate'`, CHECK `IN ('sedentary', 'light', 'moderate', 'active', 'extra_active')` |
+| `body_fat_pct` | REAL | |
+| `bmr_override` | REAL | |
+| `protein_ratio` | REAL | NOT NULL, DEFAULT `2.0` |
+| `fat_pct` | REAL | NOT NULL, DEFAULT `0.25` |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `goals`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `type` | TEXT | NOT NULL, CHECK `IN ('cut', 'bulk', 'maintain')` |
+| `rate_of_change` | TEXT | NOT NULL, DEFAULT `'moderate'`, CHECK `IN ('conservative', 'moderate', 'aggressive')` |
+| `target_weight_kg` | REAL | |
+| `calorie_offset` | INTEGER | NOT NULL |
+| `start_date` | TEXT | NOT NULL |
+| `end_date` | TEXT | |
+| `is_active` | INTEGER | NOT NULL, DEFAULT `1` |
+| `created_at` | TEXT | NOT NULL |
+| `updated_at` | TEXT | NOT NULL |
+
+### 8.3 Training System Tables
+
+#### `training_profile`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `'default'` |
+| `training_experience` | TEXT | NOT NULL, CHECK `IN ('beginner', 'intermediate', 'advanced')` |
+| `days_per_week` | INTEGER | NOT NULL, CHECK `BETWEEN 2 AND 6` |
+| `session_duration_min` | INTEGER | NOT NULL, CHECK `IN (30, 45, 60, 90)` |
+| `training_goal` | TEXT | NOT NULL, CHECK `IN ('strength', 'hypertrophy', 'endurance', 'general')` |
+| `available_equipment` | TEXT | NOT NULL, DEFAULT `'[]'` |
+| `injury_restrictions` | TEXT | DEFAULT `'[]'` |
+| `periodization_model` | TEXT | NOT NULL, DEFAULT `'linear'`, CHECK `IN ('linear', 'undulating', 'block')` |
+| `plan_cycle_weeks` | INTEGER | NOT NULL, DEFAULT `4`, CHECK `IN (4, 6, 8, 12)` |
+| `priority_muscles` | TEXT | DEFAULT `'[]'` |
+| `cardio_sessions_week` | INTEGER | NOT NULL, DEFAULT `0`, CHECK `BETWEEN 0 AND 5` |
+| `cardio_type_pref` | TEXT | DEFAULT `'mixed'`, CHECK `IN ('liss', 'hiit', 'mixed')` |
+| `cardio_duration_min` | INTEGER | DEFAULT `30`, CHECK `IN (15, 20, 30, 45, 60)` |
+| `known_1rm` | TEXT | (JSON) |
+| `avg_sleep_hours` | REAL | |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `training_plans`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `lower(hex(randomblob(16)))` |
+| `name` | TEXT | NOT NULL |
+| `status` | TEXT | DEFAULT `'active'`, CHECK `IN ('active', 'completed', 'paused')` |
+| `split_type` | TEXT | NOT NULL |
+| `duration_weeks` | INTEGER | NOT NULL |
+| `start_date` | TEXT | NOT NULL |
+| `end_date` | TEXT | |
+| `created_at` | TEXT | DEFAULT `datetime('now')` |
+| `updated_at` | TEXT | DEFAULT `datetime('now')` |
+
+#### `training_plan_days`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `lower(hex(randomblob(16)))` |
+| `plan_id` | TEXT | NOT NULL, FK → `training_plans(id)` ON DELETE CASCADE |
+| `day_of_week` | INTEGER | NOT NULL, CHECK `BETWEEN 0 AND 6` |
+| `workout_type` | TEXT | NOT NULL |
+| `muscle_groups` | TEXT | |
+| `exercises` | TEXT | (JSON) |
+| `notes` | TEXT | |
+
+#### `exercises`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `name_vi` | TEXT | NOT NULL |
+| `name_en` | TEXT | |
+| `muscle_group` | TEXT | NOT NULL |
+| `secondary_muscles` | TEXT | DEFAULT `'[]'` |
+| `category` | TEXT | NOT NULL, CHECK `IN ('compound', 'secondary', 'isolation')` |
+| `equipment` | TEXT | NOT NULL, DEFAULT `'[]'` |
+| `contraindicated` | TEXT | DEFAULT `'[]'` |
+| `exercise_type` | TEXT | NOT NULL, CHECK `IN ('strength', 'cardio')` |
+| `default_reps_min` | INTEGER | NOT NULL, DEFAULT `8` |
+| `default_reps_max` | INTEGER | NOT NULL, DEFAULT `12` |
+| `is_custom` | INTEGER | NOT NULL, DEFAULT `0` |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `workouts`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `date` | TEXT | NOT NULL |
+| `name` | TEXT | NOT NULL |
+| `duration_min` | INTEGER | |
+| `notes` | TEXT | |
+| `created_at` | TEXT | NOT NULL |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `workout_sets`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `workout_id` | TEXT | NOT NULL, FK → `workouts(id)` ON DELETE CASCADE |
+| `exercise_id` | TEXT | NOT NULL, FK → `exercises(id)` |
+| `set_number` | INTEGER | NOT NULL |
+| `reps` | INTEGER | |
+| `weight_kg` | REAL | DEFAULT `0` |
+| `rpe` | REAL | |
+| `rest_seconds` | INTEGER | |
+| `duration_min` | REAL | |
+| `distance_km` | REAL | |
+| `avg_heart_rate` | INTEGER | |
+| `intensity` | TEXT | CHECK `IN ('low', 'moderate', 'high')` |
+| `estimated_calories` | REAL | |
+| `updated_at` | TEXT | NOT NULL |
+
+**Unique constraint:** `(workout_id, exercise_id, set_number)`
+
+### 8.4 Tracking & Logging Tables
+
+#### `weight_log`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `date` | TEXT | NOT NULL, UNIQUE |
+| `weight_kg` | REAL | NOT NULL |
+| `notes` | TEXT | |
+| `created_at` | TEXT | NOT NULL |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `daily_log`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `date` | TEXT | NOT NULL, UNIQUE |
+| `target_calories` | REAL | NOT NULL |
+| `actual_calories` | REAL | NOT NULL |
+| `target_protein` | REAL | NOT NULL |
+| `actual_protein` | REAL | NOT NULL |
+| `target_fat` | REAL | |
+| `actual_fat` | REAL | DEFAULT `0` |
+| `target_carbs` | REAL | |
+| `actual_carbs` | REAL | DEFAULT `0` |
+| `adherence_cal` | INTEGER | NOT NULL, DEFAULT `0` |
+| `adherence_protein` | INTEGER | NOT NULL, DEFAULT `0` |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `adjustments`
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY |
+| `date` | TEXT | NOT NULL |
+| `reason` | TEXT | NOT NULL |
+| `old_target_cal` | REAL | NOT NULL |
+| `new_target_cal` | REAL | NOT NULL |
+| `trigger_type` | TEXT | NOT NULL, CHECK `IN ('auto', 'manual')` |
+| `moving_avg_weight` | REAL | |
+| `applied` | INTEGER | NOT NULL, DEFAULT `0` |
+| `created_at` | TEXT | NOT NULL |
+
+### 8.5 Fitness Module Tables *(NEW — v1.2)*
+
+> Ba bảng mới phục vụ module Fitness, quản lý hồ sơ thể lực, tùy chọn tập luyện và bản nháp workout đang thực hiện.
+
+#### `fitness_profiles`
+
+Lưu hồ sơ thể lực của người dùng (kinh nghiệm, mục tiêu, thông số cơ thể).
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `'default'` |
+| `experience` | TEXT | NOT NULL, DEFAULT `'beginner'` |
+| `goal` | TEXT | NOT NULL, DEFAULT `'general'` |
+| `days_per_week` | INTEGER | NOT NULL, DEFAULT `3` |
+| `body_weight_kg` | REAL | |
+| `height_cm` | REAL | |
+| `gender` | TEXT | |
+| `birthdate` | TEXT | |
+| `created_at` | TEXT | NOT NULL |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `fitness_preferences`
+
+Lưu tùy chọn cá nhân cho module Fitness (đơn vị đo, timer, RPE, thông báo).
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `'default'` |
+| `unit_system` | TEXT | NOT NULL, DEFAULT `'metric'` |
+| `rest_timer_enabled` | INTEGER | NOT NULL, DEFAULT `1` |
+| `default_rest_seconds` | INTEGER | NOT NULL, DEFAULT `90` |
+| `show_rpe` | INTEGER | NOT NULL, DEFAULT `1` |
+| `enable_notifications` | INTEGER | NOT NULL, DEFAULT `1` |
+| `updated_at` | TEXT | NOT NULL |
+
+#### `workout_drafts`
+
+Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app crash hoặc navigate away).
+
+| Column | Type | Constraints |
+|--------|------|------------|
+| `id` | TEXT | PRIMARY KEY, DEFAULT `'current'` |
+| `exercises_json` | TEXT | NOT NULL, DEFAULT `'[]'` |
+| `sets_json` | TEXT | NOT NULL, DEFAULT `'[]'` |
+| `start_time` | TEXT | NOT NULL |
+| `plan_day_id` | TEXT | |
+| `updated_at` | TEXT | NOT NULL |
+
+### 8.6 Performance Indexes
+
+| Index | Table | Column(s) |
+|-------|-------|-----------|
+| `idx_workout_sets_workout` | `workout_sets` | `workout_id` |
+| `idx_workout_sets_exercise` | `workout_sets` | `exercise_id` |
+| `idx_weight_log_date` | `weight_log` | `date` |
+| `idx_daily_log_date` | `daily_log` | `date` |
+| `idx_workouts_date` | `workouts` | `date` |
+| `idx_goals_active` | `goals` | `is_active` |
+| `idx_adjustments_date` | `adjustments` | `date` |
+| `idx_dish_ingredients_dish` | `dish_ingredients` | `dish_id` |
+| `idx_dish_ingredients_ingredient` | `dish_ingredients` | `ingredient_id` |
+
+### 8.7 Table Summary
+
+| # | Table | Group | Description |
+|---|-------|-------|-------------|
+| 1 | `ingredients` | Meal Planning | Thư viện nguyên liệu |
+| 2 | `dishes` | Meal Planning | Thư viện món ăn |
+| 3 | `dish_ingredients` | Meal Planning | Liên kết món ăn ↔ nguyên liệu |
+| 4 | `day_plans` | Meal Planning | Kế hoạch bữa ăn theo ngày |
+| 5 | `meal_templates` | Meal Planning | Mẫu kế hoạch bữa ăn |
+| 6 | `user_profile` | User & Goal | Hồ sơ dinh dưỡng cá nhân |
+| 7 | `goals` | User & Goal | Mục tiêu cut/bulk/maintain |
+| 8 | `training_profile` | Training | Hồ sơ tập luyện chi tiết |
+| 9 | `training_plans` | Training | Kế hoạch tập luyện |
+| 10 | `training_plan_days` | Training | Ngày tập trong kế hoạch |
+| 11 | `exercises` | Training | Thư viện bài tập |
+| 12 | `workouts` | Training | Phiên tập đã ghi nhận |
+| 13 | `workout_sets` | Training | Các set trong phiên tập |
+| 14 | `weight_log` | Tracking | Nhật ký cân nặng |
+| 15 | `daily_log` | Tracking | Nhật ký dinh dưỡng hàng ngày |
+| 16 | `adjustments` | Tracking | Điều chỉnh mục tiêu calories |
+| 17 | `fitness_profiles` | **Fitness (NEW)** | Hồ sơ thể lực người dùng |
+| 18 | `fitness_preferences` | **Fitness (NEW)** | Tùy chọn module Fitness |
+| 19 | `workout_drafts` | **Fitness (NEW)** | Bản nháp workout đang thực hiện |
+
+---
+
+## 9. Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-02-20 | Initial data model — localStorage types |
+| 1.1 | 2026-03-08 | Added MealTemplate, FilterConfig, AI Response Types |
+| 1.2 | 2026-03-28 | Added SQLite database schema (19 tables). 3 new fitness module tables: `fitness_profiles`, `fitness_preferences`, `workout_drafts`. Documented all table columns, constraints, indexes, and FK relationships from `src/services/schema.ts` |

@@ -1,21 +1,6 @@
-import {
-  createDatabaseService,
-  type DatabaseService,
-} from '../services/databaseService';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import type { DayPlan } from '../types';
-
-/* ------------------------------------------------------------------ */
-/*  Mocks                                                               */
-/* ------------------------------------------------------------------ */
-vi.mock('@capacitor/core', () => ({
-  Capacitor: { isNativePlatform: () => false },
-}));
-
-vi.mock('sql.js', async () => {
-  const real = await vi.importActual<typeof import('sql.js')>('sql.js');
-  return { default: () => real.default() };
-});
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
@@ -36,27 +21,19 @@ function resetStore(): void {
 /* ================================================================== */
 /*  Tests                                                               */
 /* ================================================================== */
-describe('dayPlanStore SQLite methods', () => {
-  let db: DatabaseService;
-
-  beforeEach(async () => {
+describe('dayPlanStore', () => {
+  beforeEach(() => {
     resetStore();
-    db = createDatabaseService();
-    await db.initialize();
   });
 
   /* ---------------------------------------------------------------- */
-  /*  loadDayPlansFromDb                                                */
+  /*  setDayPlans                                                       */
   /* ---------------------------------------------------------------- */
-  describe('loadDayPlansFromDb', () => {
-    it('loads and parses JSON columns from SQLite', async () => {
-      await db.execute(
-        `INSERT INTO day_plans (date, breakfast_dish_ids, lunch_dish_ids, dinner_dish_ids, servings)
-         VALUES (?, ?, ?, ?, ?)`,
-        ['2025-01-15', '["d1","d2"]', '["d3"]', '[]', '{"d1":2}'],
-      );
+  describe('setDayPlans', () => {
+    it('sets day plans from an array', () => {
+      const plan = makePlan();
 
-      await useDayPlanStore.getState().loadDayPlansFromDb(db);
+      useDayPlanStore.getState().setDayPlans([plan]);
 
       const plans = useDayPlanStore.getState().dayPlans;
       expect(plans).toHaveLength(1);
@@ -65,155 +42,145 @@ describe('dayPlanStore SQLite methods', () => {
         breakfastDishIds: ['d1', 'd2'],
         lunchDishIds: ['d3'],
         dinnerDishIds: [],
-        servings: { d1: 2 },
+        servings: { d1: 2, d3: 3 },
       });
     });
 
-    it('loads multiple day plans', async () => {
-      await db.execute(
-        `INSERT INTO day_plans VALUES (?, ?, ?, ?, ?)`,
-        ['2025-01-15', '["d1"]', '[]', '[]', null],
-      );
-      await db.execute(
-        `INSERT INTO day_plans VALUES (?, ?, ?, ?, ?)`,
-        ['2025-01-16', '[]', '["d2"]', '["d3"]', '{"d2":4}'],
-      );
+    it('sets multiple day plans', () => {
+      const plan1 = makePlan({ date: '2025-01-15' });
+      const plan2 = makePlan({ date: '2025-01-16', breakfastDishIds: [] });
 
-      await useDayPlanStore.getState().loadDayPlansFromDb(db);
+      useDayPlanStore.getState().setDayPlans([plan1, plan2]);
 
       const plans = useDayPlanStore.getState().dayPlans;
       expect(plans).toHaveLength(2);
     });
 
-    it('sets empty dayPlans when table is empty', async () => {
+    it('replaces existing dayPlans with empty array', () => {
       useDayPlanStore.setState({ dayPlans: [makePlan()] });
 
-      await useDayPlanStore.getState().loadDayPlansFromDb(db);
+      useDayPlanStore.getState().setDayPlans([]);
 
       expect(useDayPlanStore.getState().dayPlans).toEqual([]);
     });
 
-    it('handles null servings as undefined', async () => {
-      await db.execute(
-        `INSERT INTO day_plans VALUES (?, ?, ?, ?, ?)`,
-        ['2025-01-15', '[]', '[]', '[]', null],
-      );
+    it('accepts an updater function', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
 
-      await useDayPlanStore.getState().loadDayPlansFromDb(db);
+      useDayPlanStore.getState().setDayPlans((prev) => [
+        ...prev,
+        makePlan({ date: '2025-01-16' }),
+      ]);
+
+      expect(useDayPlanStore.getState().dayPlans).toHaveLength(2);
+    });
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  updatePlan                                                        */
+  /* ---------------------------------------------------------------- */
+  describe('updatePlan', () => {
+    it('updates breakfast dish ids for a given date', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
+
+      useDayPlanStore.getState().updatePlan('2025-01-15', 'breakfast', ['d9']);
+
+      const plan = useDayPlanStore.getState().dayPlans.find(p => p.date === '2025-01-15');
+      expect(plan?.breakfastDishIds).toEqual(['d9']);
+    });
+
+    it('creates a new plan entry when date does not exist', () => {
+      useDayPlanStore.getState().updatePlan('2025-01-20', 'lunch', ['d5']);
+
+      const plans = useDayPlanStore.getState().dayPlans;
+      expect(plans).toHaveLength(1);
+      expect(plans[0].date).toBe('2025-01-20');
+      expect(plans[0].lunchDishIds).toEqual(['d5']);
+    });
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  updateServings                                                    */
+  /* ---------------------------------------------------------------- */
+  describe('updateServings', () => {
+    it('sets serving count for a dish', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
+
+      useDayPlanStore.getState().updateServings('2025-01-15', 'd1', 5);
 
       const plan = useDayPlanStore.getState().dayPlans[0];
-      expect(plan.servings).toBeUndefined();
+      expect(plan.servings?.d1).toBe(5);
+    });
+
+    it('removes serving entry when count is 1 or less', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
+
+      useDayPlanStore.getState().updateServings('2025-01-15', 'd1', 1);
+
+      const plan = useDayPlanStore.getState().dayPlans[0];
+      expect(plan.servings?.d1).toBeUndefined();
     });
   });
 
   /* ---------------------------------------------------------------- */
-  /*  saveDayPlan                                                       */
+  /*  isDishUsed                                                        */
   /* ---------------------------------------------------------------- */
-  describe('saveDayPlan', () => {
-    it('inserts a new day plan into SQLite', async () => {
-      const plan = makePlan();
+  describe('isDishUsed', () => {
+    it('returns true when dish is in breakfast', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
 
-      await useDayPlanStore.getState().saveDayPlan(db, plan);
-
-      const rows = await db.query<Record<string, unknown>>('SELECT * FROM day_plans');
-      expect(rows).toHaveLength(1);
-
-      const storeState = useDayPlanStore.getState().dayPlans;
-      expect(storeState).toHaveLength(1);
-      expect(storeState[0]).toEqual(plan);
+      expect(useDayPlanStore.getState().isDishUsed('d1')).toBe(true);
     });
 
-    it('replaces existing day plan on same date', async () => {
-      const original = makePlan();
-      await useDayPlanStore.getState().saveDayPlan(db, original);
+    it('returns true when dish is in lunch', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
 
-      const updated = makePlan({ breakfastDishIds: ['d9'] });
-      await useDayPlanStore.getState().saveDayPlan(db, updated);
-
-      const rows = await db.query<Record<string, unknown>>('SELECT * FROM day_plans');
-      expect(rows).toHaveLength(1);
-
-      const storeState = useDayPlanStore.getState().dayPlans;
-      expect(storeState).toHaveLength(1);
-      expect(storeState[0].breakfastDishIds).toEqual(['d9']);
+      expect(useDayPlanStore.getState().isDishUsed('d3')).toBe(true);
     });
 
-    it('saves plan with undefined servings as null in SQLite', async () => {
-      const plan = makePlan({ servings: undefined });
+    it('returns false when dish is not used anywhere', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
 
-      await useDayPlanStore.getState().saveDayPlan(db, plan);
-
-      const row = await db.queryOne<{ servings: string | null }>(
-        'SELECT servings FROM day_plans WHERE date = ?',
-        ['2025-01-15'],
-      );
-      expect(row?.servings).toBeNull();
+      expect(useDayPlanStore.getState().isDishUsed('not-used')).toBe(false);
     });
   });
 
   /* ---------------------------------------------------------------- */
-  /*  deleteDayPlan                                                     */
+  /*  restoreDayPlans                                                   */
   /* ---------------------------------------------------------------- */
-  describe('deleteDayPlan', () => {
-    it('removes a day plan by date', async () => {
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-15' }));
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-16' }));
+  describe('restoreDayPlans', () => {
+    it('restores snapshot and merges with existing plans', () => {
+      useDayPlanStore.setState({
+        dayPlans: [
+          makePlan({ date: '2025-01-15' }),
+          makePlan({ date: '2025-01-16' }),
+          makePlan({ date: '2025-01-17' }),
+        ],
+      });
 
-      await useDayPlanStore.getState().deleteDayPlan(db, '2025-01-15');
+      const snapshot = [
+        makePlan({ date: '2025-01-15', breakfastDishIds: ['restored'] }),
+        makePlan({ date: '2025-01-17', breakfastDishIds: ['restored'] }),
+      ];
 
-      const rows = await db.query<Record<string, unknown>>('SELECT * FROM day_plans');
-      expect(rows).toHaveLength(1);
+      useDayPlanStore.getState().restoreDayPlans(snapshot);
 
-      const storeState = useDayPlanStore.getState().dayPlans;
-      expect(storeState).toHaveLength(1);
-      expect(storeState[0].date).toBe('2025-01-16');
-    });
+      const plans = useDayPlanStore.getState().dayPlans;
+      expect(plans).toHaveLength(3);
 
-    it('is a no-op when date does not exist', async () => {
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan());
+      const plan15 = plans.find(p => p.date === '2025-01-15');
+      expect(plan15?.breakfastDishIds).toEqual(['restored']);
 
-      await useDayPlanStore.getState().deleteDayPlan(db, '9999-12-31');
-
-      expect(useDayPlanStore.getState().dayPlans).toHaveLength(1);
-    });
-  });
-
-  /* ---------------------------------------------------------------- */
-  /*  clearDayPlans                                                     */
-  /* ---------------------------------------------------------------- */
-  describe('clearDayPlans', () => {
-    it('deletes all day plans when no dates provided', async () => {
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-15' }));
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-16' }));
-
-      await useDayPlanStore.getState().clearDayPlans(db);
-
-      const rows = await db.query<Record<string, unknown>>('SELECT * FROM day_plans');
-      expect(rows).toHaveLength(0);
-      expect(useDayPlanStore.getState().dayPlans).toEqual([]);
-    });
-
-    it('deletes only specified dates', async () => {
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-15' }));
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-16' }));
-      await useDayPlanStore.getState().saveDayPlan(db, makePlan({ date: '2025-01-17' }));
-
-      await useDayPlanStore.getState().clearDayPlans(db, ['2025-01-15', '2025-01-17']);
-
-      const rows = await db.query<Record<string, unknown>>('SELECT * FROM day_plans');
-      expect(rows).toHaveLength(1);
-
-      const storeState = useDayPlanStore.getState().dayPlans;
-      expect(storeState).toHaveLength(1);
-      expect(storeState[0].date).toBe('2025-01-16');
+      const plan16 = plans.find(p => p.date === '2025-01-16');
+      expect(plan16?.breakfastDishIds).toEqual(['d1', 'd2']);
     });
   });
 
   /* ---------------------------------------------------------------- */
-  /*  JSON roundtrip                                                    */
+  /*  Data integrity                                                    */
   /* ---------------------------------------------------------------- */
-  describe('JSON roundtrip', () => {
-    it('preserves arrays and servings object through save/load', async () => {
+  describe('data integrity', () => {
+    it('preserves arrays and servings object through set/get', () => {
       const plan: DayPlan = {
         date: '2025-06-01',
         breakfastDishIds: ['a', 'b', 'c'],
@@ -222,15 +189,12 @@ describe('dayPlanStore SQLite methods', () => {
         servings: { a: 2, d: 5, e: 1 },
       };
 
-      await useDayPlanStore.getState().saveDayPlan(db, plan);
-
-      resetStore();
-      await useDayPlanStore.getState().loadDayPlansFromDb(db);
+      useDayPlanStore.getState().setDayPlans([plan]);
 
       expect(useDayPlanStore.getState().dayPlans[0]).toEqual(plan);
     });
 
-    it('handles empty arrays correctly through roundtrip', async () => {
+    it('handles plans with empty arrays correctly', () => {
       const plan: DayPlan = {
         date: '2025-06-02',
         breakfastDishIds: [],
@@ -238,10 +202,7 @@ describe('dayPlanStore SQLite methods', () => {
         dinnerDishIds: [],
       };
 
-      await useDayPlanStore.getState().saveDayPlan(db, plan);
-
-      resetStore();
-      await useDayPlanStore.getState().loadDayPlansFromDb(db);
+      useDayPlanStore.getState().setDayPlans([plan]);
 
       const loaded = useDayPlanStore.getState().dayPlans[0];
       expect(loaded.breakfastDishIds).toEqual([]);

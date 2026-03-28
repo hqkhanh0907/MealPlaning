@@ -58,12 +58,12 @@ describe('HealthProfileForm', () => {
     expect(screen.getByLabelText('Tuổi')).toBeInTheDocument();
     expect(screen.getByLabelText('Chiều cao (cm)')).toBeInTheDocument();
     expect(screen.getByLabelText('Cân nặng (kg)')).toBeInTheDocument();
-    expect(screen.getByLabelText('Mức hoạt động')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Tỷ lệ mỡ cơ thể/)).toBeInTheDocument();
-    expect(screen.getAllByText('BMR (kcal/ngày)').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByLabelText('Tỷ lệ protein (g/kg)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Mức độ vận động')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Tỉ lệ mỡ cơ thể/)).toBeInTheDocument();
+    expect(screen.getAllByText('BMR').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Lưu hồ sơ' }),
+      screen.getByRole('button', { name: 'Lưu' }),
     ).toBeInTheDocument();
   });
 
@@ -73,12 +73,12 @@ describe('HealthProfileForm', () => {
     expect(screen.getByLabelText('Tuổi')).toHaveValue(30);
     expect(screen.getByLabelText('Chiều cao (cm)')).toHaveValue(170);
     expect(screen.getByLabelText('Cân nặng (kg)')).toHaveValue(70);
-    expect(screen.getByLabelText('Tỷ lệ protein (g/kg)')).toHaveValue(2);
+    expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toHaveValue(2);
 
     const maleBtn = screen.getByRole('radio', { name: 'Nam' });
     expect(maleBtn).toHaveAttribute('aria-checked', 'true');
 
-    const activitySelect = screen.getByLabelText('Mức hoạt động');
+    const activitySelect = screen.getByLabelText('Mức độ vận động');
     expect(activitySelect).toHaveValue('moderate');
   });
 
@@ -100,7 +100,7 @@ describe('HealthProfileForm', () => {
   it('activity level select works', () => {
     render(<HealthProfileForm />);
 
-    const select = screen.getByLabelText('Mức hoạt động');
+    const select = screen.getByLabelText('Mức độ vận động');
     expect(select).toHaveValue('moderate');
 
     fireEvent.change(select, { target: { value: 'active' } });
@@ -123,7 +123,7 @@ describe('HealthProfileForm', () => {
   it('save button calls saveProfile', async () => {
     render(<HealthProfileForm />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
 
     await waitFor(() => {
       expect(mockSaveProfile).toHaveBeenCalledTimes(1);
@@ -149,7 +149,7 @@ describe('HealthProfileForm', () => {
     fireEvent.change(screen.getByLabelText('Tuổi'), {
       target: { value: '5' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
 
     await waitFor(() => {
       expect(mockSaveProfile).not.toHaveBeenCalled();
@@ -162,11 +162,11 @@ describe('HealthProfileForm', () => {
     render(<HealthProfileForm />);
 
     // Body fat is empty by default
-    const bodyFatInput = screen.getByLabelText(/Tỷ lệ mỡ cơ thể/);
+    const bodyFatInput = screen.getByLabelText(/Tỉ lệ mỡ cơ thể/);
     expect(bodyFatInput).toHaveValue(null);
 
     // Save should succeed without body fat
-    fireEvent.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
 
     await waitFor(() => {
       expect(mockSaveProfile).toHaveBeenCalledTimes(1);
@@ -176,8 +176,8 @@ describe('HealthProfileForm', () => {
   it('BMR override toggle works', () => {
     render(<HealthProfileForm />);
 
-    const autoBtn = screen.getByRole('radio', { name: 'Tự động' });
-    const customBtn = screen.getByRole('radio', { name: 'Tùy chỉnh' });
+    const autoBtn = screen.getByRole('radio', { name: 'Tự động tính' });
+    const customBtn = screen.getByRole('radio', { name: 'Nhập thủ công' });
 
     expect(autoBtn).toHaveAttribute('aria-checked', 'true');
     expect(customBtn).toHaveAttribute('aria-checked', 'false');

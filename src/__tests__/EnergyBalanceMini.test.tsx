@@ -108,7 +108,7 @@ describe('EnergyBalanceMini', () => {
     const container = screen.getByTestId('energy-balance-mini');
     expect(container).toHaveTextContent('Nạp vào');
     expect(container).toHaveTextContent('Tiêu hao');
-    expect(container).toHaveTextContent('Ròng');
+    expect(container).toHaveTextContent('Cân bằng');
   });
 
   it('uses tabular-nums for number displays', () => {

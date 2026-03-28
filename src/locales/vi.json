@@ -887,9 +887,11 @@
       "meals": "Bữa ăn",
       "mealsReachedTarget": "Đã đạt mục tiêu bữa ăn",
       "logBreakfast": "Ghi bữa sáng",
+      "logLunch": "Ghi bữa trưa",
+      "logDinner": "Ghi bữa tối",
       "logWeight": "Ghi cân nặng",
       "logCardio": "Ghi cardio",
-      "mealsProgress": "Tiến trình bữa ăn",
+      "mealsProgress": "{{logged}}/{{total}} bữa",
       "restDayTitle": "Ngày nghỉ phục hồi",
       "recoveryTip1": "Ngủ đủ giấc và uống đủ nước",
       "recoveryTip2": "Ăn giàu protein để phục hồi cơ",
@@ -935,7 +937,12 @@
     "proteinGoalMet": "Đã đạt mục tiêu protein!",
     "proteinNearGoal": "Gần đạt mục tiêu protein",
     "proteinNeedSignificant": "Cần bổ sung thêm protein",
-    "proteinSuggestion": "Gợi ý: thêm thịt, trứng, đậu"
+    "proteinSuggestion": "Gợi ý: thêm thịt, trứng, đậu",
+    "proteinSuggestion0": "Gợi ý: thêm thịt gà, trứng, đậu",
+    "proteinSuggestion1": "Gợi ý: thêm cá, tôm, đậu phụ",
+    "proteinSuggestion2": "Gợi ý: thêm sữa, phô mai, hạt",
+    "proteinSuggestion3": "Gợi ý: thêm thịt bò, trứng, đậu nành",
+    "proteinSuggestion4": "Gợi ý: thêm cá hồi, ức gà, đậu xanh"
   },
   "quickActions": {
     "ariaLabel": "Thao tác nhanh",
@@ -958,7 +965,10 @@
     "dismiss": "Bỏ qua",
     "ariaLabel": "Banner đề xuất điều chỉnh",
     "directionIncrease": "Tăng",
-    "directionDecrease": "Giảm"
+    "directionDecrease": "Giảm",
+    "bodyStalled": "TB 7 ngày: {{prevAvg}} → {{currAvg}} kg. Đề xuất {{direction}} {{amount}} kcal.",
+    "bodyGaining": "Cân nặng tăng ({{prevAvg}} → {{currAvg}} kg). Đề xuất {{direction}} {{amount}} kcal.",
+    "bodyLosing": "Cân nặng giảm ({{prevAvg}} → {{currAvg}} kg). Đề xuất {{direction}} {{amount}} kcal."
   },
   "adjustmentHistory": {
     "title": "Lịch sử điều chỉnh",

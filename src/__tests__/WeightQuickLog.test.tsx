@@ -74,7 +74,7 @@ describe('WeightQuickLog', () => {
     renderSheet();
 
     expect(screen.getByTestId('weight-quick-log')).toBeInTheDocument();
-    expect(screen.getByText('Ghi nhận cân nặng')).toBeInTheDocument();
+    expect(screen.getByText('Ghi nhanh cân nặng')).toBeInTheDocument();
     expect(screen.getByTestId('close-btn')).toBeInTheDocument();
   });
 

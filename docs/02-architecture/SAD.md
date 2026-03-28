@@ -1,8 +1,8 @@
 # SAD — System Architecture Document
 
 **Project:** Smart Meal Planner  
-**Version:** 2.0  
-**Date:** 2026-03-11
+**Version:** 2.1  
+**Date:** 2026-03-28
 
 ---
 
@@ -178,7 +178,7 @@ Chứa business logic thuần túy (pure functions), không có side effects.
 | `helpers.ts` | Ngày tháng, ID generation, week range, date parsing |
 | `nutrition.ts` | Tính toán dinh dưỡng từ DishIngredient[] |
 | `localize.ts` | Lấy giá trị LocalizedString theo language, toLocalized() |
-| `logger.ts` | Structured logging (chỉ output trong dev mode) |
+| `logger.ts` | Structured logging: `debug` (dev-only), `info`, `warn`, `error` (always). Accepts `LogContext` with `component`, `action`, optional `traceId` |
 | `imageCompression.ts` | Compress ảnh trước khi gửi AI |
 | `tips.ts` | Random health tips |
 
@@ -189,7 +189,7 @@ Chứa business logic thuần túy (pure functions), không có side effects.
 | Context | Mô tả |
 |---------|-------|
 | `AuthContext` | Google OAuth2 state management (user, accessToken, loading). Wraps `App` component |
-| `NotificationContext` | Global toast notification system |
+| `NotificationContext` | Global toast notification system. API: `notify.success()`, `notify.error()`, `notify.warning()`, `notify.info()`, `notify.dismiss()`, `notify.dismissAll()` via `useNotification()` hook |
 
 ---
 
@@ -407,3 +407,12 @@ Architecture validated through **183 E2E tests** and **1201 unit tests**. The fo
 | UX Improvement Research | [ux-improvement-research.md](../ux-improvement-research.md) |
 | Data Model | [data-model.md](data-model.md) |
 | Sequence Diagrams | [sequence-diagrams.md](sequence-diagrams.md) |
+
+---
+
+## 11. Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.0 | 2026-03-11 | QA-driven architecture validation, Capacitor mobile, Google Drive sync |
+| 2.1 | 2026-03-28 | Updated `NotificationContext` API docs (`notify.success()/error()/warning()/info()` via `useNotification()` hook). Corrected `logger.ts` description: only `debug` is dev-only; `info`, `warn`, `error` always output. SQLite database schema now has 19 tables (3 new fitness module tables — see [data-model.md §8](data-model.md#8-sqlite-database-schema-19-tables)) |

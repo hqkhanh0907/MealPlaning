@@ -92,6 +92,7 @@ describe('migrationService', () => {
     localStorage.clear();
     db = createDatabaseService();
     await db.initialize();
+    await createSchema(db);
   });
 
   /* --- Ingredient migration --- */

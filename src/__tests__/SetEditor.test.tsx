@@ -227,7 +227,7 @@ describe('SetEditor', () => {
 
   it('renders recent weights label', () => {
     renderEditor({ recentWeights: [50] });
-    expect(screen.getByText('Gần đây')).toBeInTheDocument();
+    expect(screen.getByText('Cân nặng gần đây')).toBeInTheDocument();
   });
 
   // Accessibility

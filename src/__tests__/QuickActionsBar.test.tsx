@@ -390,15 +390,15 @@ describe('QuickActionsBar', () => {
   describe('Labels', () => {
     it('buttons show translated text for morning context', () => {
       render(<QuickActionsBar />);
-      expect(screen.getByText('Log cân')).toBeInTheDocument();
-      expect(screen.getByText('Log bữa sáng')).toBeInTheDocument();
+      expect(screen.getByText('Ghi cân nặng')).toBeInTheDocument();
+      expect(screen.getByText('Ghi bữa sáng')).toBeInTheDocument();
     });
 
     it('buttons show translated text for all-logged context', () => {
       setMeals({ breakfast: true, lunch: true, dinner: true });
       setWorkoutCompleted();
       render(<QuickActionsBar />);
-      expect(screen.getByText('Log cân')).toBeInTheDocument();
+      expect(screen.getByText('Ghi cân nặng')).toBeInTheDocument();
       expect(screen.getByText('Xem kết quả')).toBeInTheDocument();
       expect(screen.getByText('Thêm snack')).toBeInTheDocument();
     });

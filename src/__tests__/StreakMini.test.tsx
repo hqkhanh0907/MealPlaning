@@ -82,8 +82,8 @@ describe('StreakMini', () => {
 
     expect(screen.getByTestId('streak-mini-empty')).toBeInTheDocument();
     expect(screen.queryByTestId('streak-mini')).not.toBeInTheDocument();
-    expect(screen.getByText('Chưa có buổi tập nào')).toBeInTheDocument();
-    expect(screen.getByText('Bắt đầu tập luyện')).toBeInTheDocument();
+    expect(screen.getByText('Chưa có chuỗi tập')).toBeInTheDocument();
+    expect(screen.getByText('Bắt đầu tập để tạo chuỗi')).toBeInTheDocument();
   });
 
   it('empty state has proper aria-label', () => {
@@ -92,7 +92,7 @@ describe('StreakMini', () => {
 
     expect(screen.getByTestId('streak-mini-empty')).toHaveAttribute(
       'aria-label',
-      'Chưa có streak. Tap để bắt đầu tập luyện',
+      'Chưa có chuỗi tập luyện',
     );
   });
 

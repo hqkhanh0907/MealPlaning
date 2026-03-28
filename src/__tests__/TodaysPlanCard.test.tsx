@@ -195,7 +195,7 @@ describe('TodaysPlanCard', () => {
       expect(screen.getByTestId('meals-progress')).toHaveTextContent(
         '2/3 bữa',
       );
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Log tối');
+      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa tối');
     });
   });
 
@@ -252,7 +252,7 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '3/3 bữaĐạt target',
+        '3/3 bữaĐã đạt mục tiêu bữa ăn',
       );
     });
   });
@@ -278,9 +278,9 @@ describe('TodaysPlanCard', () => {
 
       const tips = screen.getByTestId('recovery-tips');
       expect(tips).toHaveTextContent('🚶');
-      expect(tips).toHaveTextContent('Đi bộ 20 phút');
+      expect(tips).toHaveTextContent('Ngủ đủ giấc và uống đủ nước');
       expect(tips).toHaveTextContent('💧');
-      expect(tips).toHaveTextContent('Uống đủ 2L nước');
+      expect(tips).toHaveTextContent('Ăn giàu protein để phục hồi cơ');
     });
 
     it('renders tomorrow preview', () => {
@@ -288,7 +288,7 @@ describe('TodaysPlanCard', () => {
 
       const preview = screen.getByTestId('tomorrow-preview');
       expect(preview).toHaveTextContent('Ngày mai: Lower Body A');
-      expect(preview).toHaveTextContent('2 bài tập');
+      expect(preview).toHaveTextContent('2 bài');
     });
 
     it('renders tomorrow rest message when no tomorrow plan day', () => {
@@ -300,7 +300,7 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       const preview = screen.getByTestId('tomorrow-preview');
-      expect(preview).toHaveTextContent('Ngày mai: Nghỉ ngơi');
+      expect(preview).toHaveTextContent('Ngày mai nghỉ');
     });
 
     it('renders quick action chips', () => {
@@ -308,10 +308,10 @@ describe('TodaysPlanCard', () => {
 
       expect(screen.getByTestId('quick-actions')).toBeInTheDocument();
       expect(screen.getByTestId('log-weight-chip')).toHaveTextContent(
-        'Log cân nặng',
+        'Ghi cân nặng',
       );
       expect(screen.getByTestId('log-cardio-chip')).toHaveTextContent(
-        'Log cardio nhẹ',
+        'Ghi cardio',
       );
     });
 
@@ -342,7 +342,7 @@ describe('TodaysPlanCard', () => {
     it('shows rest day title', () => {
       render(<TodaysPlanCard />);
 
-      expect(screen.getByText('Ngày nghỉ')).toBeInTheDocument();
+      expect(screen.getByText('Ngày nghỉ phục hồi')).toBeInTheDocument();
     });
   });
 
@@ -361,7 +361,7 @@ describe('TodaysPlanCard', () => {
 
       const cta = screen.getByTestId('create-plan-cta');
       expect(cta).toBeInTheDocument();
-      expect(cta).toHaveTextContent('Tạo plan');
+      expect(cta).toHaveTextContent('Tạo kế hoạch');
     });
 
     it('create plan CTA navigates to FitnessOnboarding', () => {
@@ -454,7 +454,7 @@ describe('TodaysPlanCard', () => {
         '3/3 bữa',
       );
       expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        'Đạt target',
+        'Đã đạt mục tiêu bữa ăn',
       );
     });
 
@@ -466,7 +466,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Log sáng');
+      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa sáng');
     });
 
     it('shows log lunch CTA when breakfast logged', () => {
@@ -486,7 +486,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Log trưa');
+      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa trưa');
     });
 
     it('shows log dinner CTA when breakfast and lunch logged', () => {
@@ -506,7 +506,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Log tối');
+      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa tối');
     });
 
     it('hides log meal CTA when all meals logged', () => {

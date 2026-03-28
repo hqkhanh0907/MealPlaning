@@ -93,7 +93,7 @@ describe('AdjustmentHistory', () => {
       />,
     );
     expect(screen.getByTestId('status-label-adj-b')).toHaveTextContent(
-      'Đã bỏ qua',
+      'Đã từ chối',
     );
   });
 
@@ -183,7 +183,7 @@ describe('AdjustmentHistory', () => {
       'Đã áp dụng',
     );
     expect(screen.getByTestId('status-label-adj-2')).toHaveTextContent(
-      'Đã bỏ qua',
+      'Đã từ chối',
     );
   });
 });

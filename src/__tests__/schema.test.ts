@@ -50,6 +50,7 @@ describe('createSchema', () => {
   beforeEach(async () => {
     db = createDatabaseService();
     await db.initialize();
+    await createSchema(db);
   });
 
   it('creates all 19 tables', async () => {

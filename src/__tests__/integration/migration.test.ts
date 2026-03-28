@@ -11,7 +11,7 @@ import {
   buildLegacyFormat,
 } from '../../services/syncV2Utils';
 import type { V2ExportPayload } from '../../services/syncV2Utils';
-import { SCHEMA_TABLES } from '../../services/schema';
+import { createSchema, SCHEMA_TABLES } from '../../services/schema';
 
 /* ------------------------------------------------------------------ */
 /*  Mocks                                                               */
@@ -183,6 +183,7 @@ describe('Migration Integration — Full Pipeline', () => {
     localStorage.clear();
     db = createDatabaseService();
     await db.initialize();
+    await createSchema(db);
   });
 
   /* ================================================================ */
@@ -790,6 +791,7 @@ describe('Migration Integration — Full Pipeline', () => {
 
       const db2 = createDatabaseService();
       await db2.initialize();
+      await createSchema(db2);
 
       const importResult = await importV2Data(
         db2,
@@ -844,6 +846,7 @@ describe('Migration Integration — Full Pipeline', () => {
 
       const db3 = createDatabaseService();
       await db3.initialize();
+      await createSchema(db3);
 
       const result = await importV2Data(db3, legacy);
       expect(result.success).toBe(true);
@@ -861,7 +864,7 @@ describe('Migration Integration — Full Pipeline', () => {
   /*  Scenario: Schema completeness                                     */
   /* ================================================================ */
   describe('Schema completeness', () => {
-    it('all 16 SCHEMA_TABLES exist after initialization', async () => {
+    it('all 19 SCHEMA_TABLES exist after initialization', async () => {
       const tables = await db.query<Record<string, unknown>>(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
       );
@@ -872,7 +875,7 @@ describe('Migration Integration — Full Pipeline', () => {
       }
     });
 
-    it('V2 export includes all 16 table keys', async () => {
+    it('V2 export includes all 19 table keys', async () => {
       const exported = await createV2Export(db);
 
       for (const tableName of SCHEMA_TABLES) {

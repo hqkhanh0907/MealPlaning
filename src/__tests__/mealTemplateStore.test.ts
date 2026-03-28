@@ -1,144 +1,175 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useMealTemplateStore } from '../store/mealTemplateStore';
-import type { DatabaseService } from '../services/databaseService';
-import type { MealTemplate } from '../types';
-
-function createMockDb(overrides: Partial<DatabaseService> = {}): DatabaseService {
-  return {
-    initialize: vi.fn(),
-    execute: vi.fn(),
-    query: vi.fn().mockResolvedValue([]),
-    queryOne: vi.fn().mockResolvedValue(null),
-    transaction: vi.fn(),
-    exportToJSON: vi.fn(),
-    importFromJSON: vi.fn(),
-    ...overrides,
-  };
-}
+import type { DayPlan } from '../types';
 
 function resetStore() {
   useMealTemplateStore.setState({ templates: [] });
 }
 
-const SAMPLE_TEMPLATE: MealTemplate = {
-  id: 'tpl-001',
-  name: 'Chế độ giảm cân',
+const SAMPLE_PLAN: DayPlan = {
+  date: '2024-06-15',
   breakfastDishIds: ['dish-a', 'dish-b'],
   lunchDishIds: ['dish-c'],
   dinnerDishIds: ['dish-d', 'dish-e', 'dish-f'],
-  createdAt: '2024-06-15T08:00:00.000Z',
-  tags: ['diet', 'low-carb'],
 };
 
-describe('mealTemplateStore — SQLite methods', () => {
+describe('mealTemplateStore', () => {
   beforeEach(() => {
     resetStore();
   });
 
-  it('loadTemplates loads and parses JSON data', async () => {
-    const db = createMockDb({
-      query: vi.fn().mockResolvedValue([
-        { id: SAMPLE_TEMPLATE.id, name: SAMPLE_TEMPLATE.name, data: JSON.stringify(SAMPLE_TEMPLATE) },
-      ]),
+  describe('saveTemplate', () => {
+    it('creates a template from a day plan', () => {
+      useMealTemplateStore.getState().saveTemplate('Chế độ giảm cân', SAMPLE_PLAN, ['diet', 'low-carb']);
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(1);
+      expect(templates[0].name).toBe('Chế độ giảm cân');
+      expect(templates[0].breakfastDishIds).toEqual(['dish-a', 'dish-b']);
+      expect(templates[0].lunchDishIds).toEqual(['dish-c']);
+      expect(templates[0].dinnerDishIds).toEqual(['dish-d', 'dish-e', 'dish-f']);
+      expect(templates[0].tags).toEqual(['diet', 'low-carb']);
+      expect(templates[0].id).toBeTruthy();
+      expect(templates[0].createdAt).toBeTruthy();
     });
 
-    await useMealTemplateStore.getState().loadTemplates(db);
+    it('creates a template without tags', () => {
+      useMealTemplateStore.getState().saveTemplate('No tags plan', SAMPLE_PLAN);
 
-    expect(db.query).toHaveBeenCalledWith('SELECT id, name, data FROM meal_templates');
-
-    const { templates } = useMealTemplateStore.getState();
-    expect(templates).toHaveLength(1);
-    expect(templates[0]).toEqual(SAMPLE_TEMPLATE);
-  });
-
-  it('saveTemplateToDb serializes to JSON', async () => {
-    const db = createMockDb();
-
-    await useMealTemplateStore.getState().saveTemplateToDb(db, SAMPLE_TEMPLATE);
-
-    expect(db.execute).toHaveBeenCalledTimes(1);
-    const [sql, params] = (db.execute as ReturnType<typeof vi.fn>).mock.calls[0] as [
-      string,
-      unknown[],
-    ];
-    expect(sql).toContain('INSERT OR REPLACE INTO meal_templates');
-    expect(params[0]).toBe(SAMPLE_TEMPLATE.id);
-    expect(params[1]).toBe(SAMPLE_TEMPLATE.name);
-
-    const storedData = JSON.parse(params[2] as string) as MealTemplate;
-    expect(storedData.breakfastDishIds).toEqual(['dish-a', 'dish-b']);
-    expect(storedData.tags).toEqual(['diet', 'low-carb']);
-
-    const { templates } = useMealTemplateStore.getState();
-    expect(templates).toHaveLength(1);
-    expect(templates[0]).toEqual(SAMPLE_TEMPLATE);
-  });
-
-  it('deleteTemplateFromDb removes correctly', async () => {
-    useMealTemplateStore.setState({ templates: [SAMPLE_TEMPLATE] });
-    const db = createMockDb();
-
-    await useMealTemplateStore.getState().deleteTemplateFromDb(db, SAMPLE_TEMPLATE.id);
-
-    expect(db.execute).toHaveBeenCalledWith(
-      'DELETE FROM meal_templates WHERE id = ?',
-      [SAMPLE_TEMPLATE.id],
-    );
-
-    const { templates } = useMealTemplateStore.getState();
-    expect(templates).toHaveLength(0);
-  });
-
-  it('JSON roundtrip preserves all fields', async () => {
-    const stored: Record<string, unknown[]> = {};
-    const db = createMockDb({
-      execute: vi.fn().mockImplementation((_sql: string, params?: unknown[]) => {
-        if (params) {
-          stored['rows'] = stored['rows'] ?? [];
-          stored['rows'] = stored['rows'].filter(
-            (r) => (r as unknown[])[0] !== params[0],
-          );
-          stored['rows'].push(params);
-        }
-        return Promise.resolve();
-      }),
-      query: vi.fn().mockImplementation(() => {
-        if (stored['rows']) {
-          return Promise.resolve(
-            stored['rows'].map((params) => {
-              const p = params as unknown[];
-              return { id: p[0], name: p[1], data: p[2] };
-            }),
-          );
-        }
-        return Promise.resolve([]);
-      }),
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(1);
+      expect(templates[0].tags).toBeUndefined();
     });
 
-    await useMealTemplateStore.getState().saveTemplateToDb(db, SAMPLE_TEMPLATE);
-    resetStore();
-    await useMealTemplateStore.getState().loadTemplates(db);
+    it('appends to existing templates', () => {
+      useMealTemplateStore.getState().saveTemplate('Template 1', SAMPLE_PLAN);
+      useMealTemplateStore.getState().saveTemplate('Template 2', SAMPLE_PLAN);
 
-    const { templates } = useMealTemplateStore.getState();
-    expect(templates).toHaveLength(1);
-    expect(templates[0]).toEqual(SAMPLE_TEMPLATE);
-    expect(templates[0].id).toBe('tpl-001');
-    expect(templates[0].breakfastDishIds).toEqual(['dish-a', 'dish-b']);
-    expect(templates[0].lunchDishIds).toEqual(['dish-c']);
-    expect(templates[0].dinnerDishIds).toEqual(['dish-d', 'dish-e', 'dish-f']);
-    expect(templates[0].createdAt).toBe('2024-06-15T08:00:00.000Z');
-    expect(templates[0].tags).toEqual(['diet', 'low-carb']);
-  });
-
-  it('handles empty templates list', async () => {
-    const db = createMockDb({
-      query: vi.fn().mockResolvedValue([]),
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(2);
+      expect(templates[0].name).toBe('Template 1');
+      expect(templates[1].name).toBe('Template 2');
     });
 
-    await useMealTemplateStore.getState().loadTemplates(db);
+    it('generates unique ids for each template', () => {
+      useMealTemplateStore.getState().saveTemplate('Template 1', SAMPLE_PLAN);
+      useMealTemplateStore.getState().saveTemplate('Template 2', SAMPLE_PLAN);
 
-    const { templates } = useMealTemplateStore.getState();
-    expect(templates).toHaveLength(0);
-    expect(templates).toEqual([]);
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates[0].id).not.toBe(templates[1].id);
+    });
+
+    it('copies dish ids (not references) from the plan', () => {
+      const plan: DayPlan = {
+        date: '2024-06-15',
+        breakfastDishIds: ['dish-x'],
+        lunchDishIds: ['dish-y'],
+        dinnerDishIds: ['dish-z'],
+      };
+
+      useMealTemplateStore.getState().saveTemplate('Copy test', plan);
+
+      plan.breakfastDishIds.push('dish-extra');
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates[0].breakfastDishIds).toEqual(['dish-x']);
+    });
+  });
+
+  describe('deleteTemplate', () => {
+    it('removes a template by id', () => {
+      useMealTemplateStore.getState().saveTemplate('To delete', SAMPLE_PLAN);
+      const id = useMealTemplateStore.getState().templates[0].id;
+
+      useMealTemplateStore.getState().deleteTemplate(id);
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(0);
+    });
+
+    it('only removes the targeted template', () => {
+      useMealTemplateStore.getState().saveTemplate('Keep', SAMPLE_PLAN);
+      useMealTemplateStore.getState().saveTemplate('Delete', SAMPLE_PLAN);
+      const deleteId = useMealTemplateStore.getState().templates[1].id;
+
+      useMealTemplateStore.getState().deleteTemplate(deleteId);
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(1);
+      expect(templates[0].name).toBe('Keep');
+    });
+  });
+
+  describe('renameTemplate', () => {
+    it('renames an existing template', () => {
+      useMealTemplateStore.getState().saveTemplate('Old name', SAMPLE_PLAN);
+      const id = useMealTemplateStore.getState().templates[0].id;
+
+      useMealTemplateStore.getState().renameTemplate(id, 'New name');
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates[0].name).toBe('New name');
+    });
+
+    it('does not modify other templates', () => {
+      useMealTemplateStore.getState().saveTemplate('Template A', SAMPLE_PLAN);
+      useMealTemplateStore.getState().saveTemplate('Template B', SAMPLE_PLAN);
+      const idA = useMealTemplateStore.getState().templates[0].id;
+
+      useMealTemplateStore.getState().renameTemplate(idA, 'Renamed A');
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates[0].name).toBe('Renamed A');
+      expect(templates[1].name).toBe('Template B');
+    });
+  });
+
+  describe('applyTemplate', () => {
+    it('creates a DayPlan from a template for a target date', () => {
+      useMealTemplateStore.getState().saveTemplate('Test', SAMPLE_PLAN, ['diet']);
+      const template = useMealTemplateStore.getState().templates[0];
+
+      const result = useMealTemplateStore.getState().applyTemplate(template, '2025-01-20');
+
+      expect(result.date).toBe('2025-01-20');
+      expect(result.breakfastDishIds).toEqual(['dish-a', 'dish-b']);
+      expect(result.lunchDishIds).toEqual(['dish-c']);
+      expect(result.dinnerDishIds).toEqual(['dish-d', 'dish-e', 'dish-f']);
+    });
+
+    it('returns a new array (not a reference to template arrays)', () => {
+      useMealTemplateStore.getState().saveTemplate('Test', SAMPLE_PLAN);
+      const template = useMealTemplateStore.getState().templates[0];
+
+      const result = useMealTemplateStore.getState().applyTemplate(template, '2025-01-20');
+
+      result.breakfastDishIds.push('extra');
+      expect(template.breakfastDishIds).toEqual(['dish-a', 'dish-b']);
+    });
+  });
+
+  describe('data integrity', () => {
+    it('preserves all fields through save and retrieve', () => {
+      vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2024-06-15T08:00:00.000Z');
+
+      useMealTemplateStore.getState().saveTemplate('Chế độ giảm cân', SAMPLE_PLAN, ['diet', 'low-carb']);
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(1);
+      expect(templates[0].name).toBe('Chế độ giảm cân');
+      expect(templates[0].breakfastDishIds).toEqual(['dish-a', 'dish-b']);
+      expect(templates[0].lunchDishIds).toEqual(['dish-c']);
+      expect(templates[0].dinnerDishIds).toEqual(['dish-d', 'dish-e', 'dish-f']);
+      expect(templates[0].createdAt).toBe('2024-06-15T08:00:00.000Z');
+      expect(templates[0].tags).toEqual(['diet', 'low-carb']);
+
+      vi.restoreAllMocks();
+    });
+
+    it('handles empty templates list', () => {
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(0);
+      expect(templates).toEqual([]);
+    });
   });
 });

@@ -132,7 +132,7 @@ describe('RestTimer', () => {
 
   it('renders rest label', () => {
     renderTimer();
-    expect(screen.getByText('Nghỉ')).toBeInTheDocument();
+    expect(screen.getByText('Nghỉ giữa set')).toBeInTheDocument();
   });
 
   it('renders skip button with correct label', () => {
@@ -142,7 +142,7 @@ describe('RestTimer', () => {
 
   it('renders add time button with correct label', () => {
     renderTimer();
-    expect(screen.getByText('+30s')).toBeInTheDocument();
+    expect(screen.getByText('Thêm thời gian')).toBeInTheDocument();
   });
 
   it('renders nothing when isVisible is false', () => {
@@ -153,7 +153,7 @@ describe('RestTimer', () => {
   it('has aria-label for accessibility', () => {
     renderTimer();
     const overlay = screen.getByTestId('rest-timer-overlay');
-    expect(overlay).toHaveAttribute('aria-label', 'Nghỉ');
+    expect(overlay).toHaveAttribute('aria-label', 'Nghỉ giữa set');
     expect(overlay).toHaveAttribute('role', 'dialog');
     expect(overlay).toHaveAttribute('aria-modal', 'true');
   });
