@@ -67,7 +67,7 @@ import { useUIStore } from './store/uiStore';
 import { useNavigationStore } from './store/navigationStore';
 import { useHealthProfileStore } from './features/health-profile/store/healthProfileStore';
 import { useAppOnboardingStore } from './store/appOnboardingStore';
-import { AppOnboarding } from './components/AppOnboarding';
+const UnifiedOnboarding = React.lazy(() => import('./components/UnifiedOnboarding').then((m) => ({ default: m.UnifiedOnboarding })));
 import { useFitnessStore } from './store/fitnessStore';
 import type { Workout } from './features/fitness/types';
 import type { PageEntry } from './store/navigationStore';
@@ -318,7 +318,11 @@ export default function App() {
   useAutoSync();
 
   if (!isAppOnboarded) {
-    return <AppOnboarding />;
+    return (
+      <Suspense fallback={<div className="flex h-dvh items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" /></div>}>
+        <UnifiedOnboarding />
+      </Suspense>
+    );
   }
 
   return (

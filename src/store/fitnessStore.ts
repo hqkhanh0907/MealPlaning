@@ -30,9 +30,12 @@ export interface FitnessState {
     sets: WorkoutSet[];
     elapsedSeconds: number;
   } | null;
+  planStrategy: 'auto' | 'manual' | null;
   sqliteReady: boolean;
   showPlanCelebration: boolean;
 
+  setPlanStrategy: (strategy: 'auto' | 'manual' | null) => void;
+  clearTrainingPlans: () => void;
   setTrainingProfile: (profile: TrainingProfile) => void;
   addTrainingPlan: (plan: TrainingPlan) => void;
   updateTrainingPlan: (id: string, updates: Partial<TrainingPlan>) => void;
@@ -78,8 +81,13 @@ export const useFitnessStore = create<FitnessState>()(
       isOnboarded: false,
       workoutMode: 'strength',
       workoutDraft: null,
+      planStrategy: null,
       sqliteReady: false,
       showPlanCelebration: false,
+
+      setPlanStrategy: (strategy) => set({ planStrategy: strategy }),
+
+      clearTrainingPlans: () => set({ trainingPlans: [], trainingPlanDays: [] }),
 
       setTrainingProfile: (profile) => set({ trainingProfile: profile }),
 
@@ -544,7 +552,14 @@ export const useFitnessStore = create<FitnessState>()(
     }),
     {
       name: 'fitness-storage',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown, version: number) => {
+        const state = persisted as Record<string, unknown>;
+        if (version < 2) {
+          return { ...state, planStrategy: null };
+        }
+        return state;
+      },
     },
   ),
 );

@@ -8,8 +8,10 @@ import { DEFAULT_HEALTH_PROFILE } from '../types';
 /* ------------------------------------------------------------------ */
 interface ProfileRow {
   id: string;
+  name: string;
   gender: string;
   age: number;
+  date_of_birth: string | null;
   height_cm: number;
   weight_kg: number;
   activity_level: string;
@@ -40,8 +42,10 @@ interface GoalRow {
 function rowToProfile(row: ProfileRow): HealthProfile {
   return {
     id: row.id,
+    name: (row.name as string) ?? '',
     gender: row.gender as HealthProfile['gender'],
     age: row.age,
+    dateOfBirth: (row.date_of_birth as string) ?? null,
     heightCm: row.height_cm,
     weightKg: row.weight_kg,
     activityLevel: row.activity_level as HealthProfile['activityLevel'],
@@ -111,14 +115,16 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
 
     await db.execute(
       `INSERT OR REPLACE INTO user_profile
-         (id, gender, age, height_cm, weight_kg, activity_level,
-          body_fat_pct, bmr_override, protein_ratio, fat_pct,
-          target_calories, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id, name, gender, age, date_of_birth, height_cm, weight_kg,
+          activity_level, body_fat_pct, bmr_override, protein_ratio,
+          fat_pct, target_calories, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         saved.id,
+        saved.name,
         saved.gender,
         saved.age,
+        saved.dateOfBirth ?? null,
         saved.heightCm,
         saved.weightKg,
         saved.activityLevel,

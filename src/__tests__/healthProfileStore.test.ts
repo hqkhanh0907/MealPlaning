@@ -134,9 +134,10 @@ describe('healthProfileStore', () => {
     ];
     expect(sql).toContain('INSERT OR REPLACE INTO user_profile');
     expect(params[0]).toBe('default');
-    expect(params[1]).toBe('female');
-    expect(params[4]).toBe(58);
-    expect(params[5]).toBe('active');
+    expect(params[1]).toBe(''); // name
+    expect(params[2]).toBe('female'); // gender
+    expect(params[6]).toBe(58); // weight_kg
+    expect(params[7]).toBe('active'); // activity_level
 
     const { profile: stored } = useHealthProfileStore.getState();
     expect(stored.gender).toBe('female');

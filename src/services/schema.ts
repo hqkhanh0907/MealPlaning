@@ -1,6 +1,6 @@
 import type { DatabaseService } from './databaseService';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const SCHEMA_TABLES = new Set([
   'ingredients',
@@ -101,6 +101,8 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       weight_kg REAL NOT NULL,
       activity_level TEXT NOT NULL DEFAULT 'moderate'
         CHECK (activity_level IN ('sedentary', 'light', 'moderate', 'active', 'extra_active')),
+      name TEXT DEFAULT '',
+      date_of_birth TEXT,
       body_fat_pct REAL,
       bmr_override REAL,
       protein_ratio REAL NOT NULL DEFAULT 2.0,
@@ -406,5 +408,12 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
     );
 
     await db.execute('PRAGMA user_version = 2');
+  }
+
+  // Migration v2 → v3: Add name and date_of_birth to user_profile
+  if (currentVersion < 3) {
+    await db.execute("ALTER TABLE user_profile ADD COLUMN name TEXT DEFAULT ''");
+    await db.execute('ALTER TABLE user_profile ADD COLUMN date_of_birth TEXT');
+    await db.execute('PRAGMA user_version = 3');
   }
 }

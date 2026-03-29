@@ -35,10 +35,23 @@ export default defineConfig(({mode}) => {
       sourcemap: isProduction ? false : true,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-ui': ['lucide-react', 'motion'],
-            'vendor-i18n': ['i18next', 'react-i18next'],
+          manualChunks(id) {
+            if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+              return 'vendor-react';
+            }
+            if (id.includes('node_modules/lucide-react') || id.includes('node_modules/motion')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next')) {
+              return 'vendor-i18n';
+            }
+            if (
+              id.includes('onboarding/TrainingDetailSteps') ||
+              id.includes('onboarding/PlanComputingScreen') ||
+              id.includes('onboarding/PlanPreviewScreen')
+            ) {
+              return 'onboarding-advanced';
+            }
           },
         },
       },

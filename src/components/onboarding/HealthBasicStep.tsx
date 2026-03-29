@@ -1,0 +1,169 @@
+import { useTranslation } from 'react-i18next';
+import { useController, type UseFormReturn } from 'react-hook-form';
+import { ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { OnboardingFormData } from './onboardingSchema';
+import { STEP_FIELDS } from './onboardingSchema';
+
+interface HealthBasicStepProps {
+  form: UseFormReturn<OnboardingFormData>;
+  goNext: () => void;
+  goBack: () => void;
+}
+
+export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) {
+  const { t } = useTranslation();
+  const { control, trigger } = form;
+
+  const nameField = useController({ control, name: 'name' });
+  const genderField = useController({ control, name: 'gender' });
+  const dobField = useController({ control, name: 'dateOfBirth' });
+  const heightField = useController({ control, name: 'heightCm' });
+  const weightField = useController({ control, name: 'weightKg' });
+
+  const handleNext = async () => {
+    const valid = await trigger([...STEP_FIELDS['2a']]);
+    if (valid) goNext();
+  };
+
+  return (
+    <div className="flex flex-1 flex-col" data-testid="health-basic-step">
+      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
+          {t('onboarding.health.title')}
+        </h2>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
+          {t('onboarding.health.subtitle')}
+        </p>
+
+        <div className="space-y-4">
+          {/* Name */}
+          <div>
+            <label htmlFor="ob-name" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('onboarding.health.name')}
+            </label>
+            <input
+              id="ob-name"
+              type="text"
+              autoComplete="name"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              value={nameField.field.value}
+              onChange={nameField.field.onChange}
+              onBlur={nameField.field.onBlur}
+            />
+            {nameField.fieldState.error && (
+              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
+            )}
+          </div>
+
+          {/* Gender */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('onboarding.health.gender')}
+            </label>
+            <div className="flex gap-3">
+              {(['male', 'female'] as const).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => genderField.field.onChange(g)}
+                  className={`min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
+                    genderField.field.value === g
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400'
+                  }`}
+                >
+                  {t(`onboarding.health.gender_${g}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date of Birth */}
+          <div>
+            <label htmlFor="ob-dob" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('onboarding.health.dateOfBirth')}
+            </label>
+            <input
+              id="ob-dob"
+              type="date"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              value={dobField.field.value}
+              onChange={dobField.field.onChange}
+              onBlur={dobField.field.onBlur}
+            />
+            {dobField.fieldState.error && (
+              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
+            )}
+          </div>
+
+          {/* Height */}
+          <div>
+            <label htmlFor="ob-height" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('onboarding.health.height')}
+            </label>
+            <div className="relative">
+              <input
+                id="ob-height"
+                type="number"
+                inputMode="decimal"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                value={heightField.field.value}
+                onChange={(e) => heightField.field.onChange(Number(e.target.value))}
+                onBlur={heightField.field.onBlur}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">cm</span>
+            </div>
+            {heightField.field.value < 3 && heightField.field.value > 0 && (
+              <p className="mt-1 text-xs text-amber-500">{t('onboarding.validation.heightHint')}</p>
+            )}
+            {heightField.fieldState.error && (
+              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.heightRange')}</p>
+            )}
+          </div>
+
+          {/* Weight */}
+          <div>
+            <label htmlFor="ob-weight" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('onboarding.health.weight')}
+            </label>
+            <div className="relative">
+              <input
+                id="ob-weight"
+                type="number"
+                inputMode="decimal"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                value={weightField.field.value}
+                onChange={(e) => weightField.field.onChange(Number(e.target.value))}
+                onBlur={weightField.field.onBlur}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">kg</span>
+            </div>
+            {weightField.fieldState.error && (
+              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.weightRange')}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Nav */}
+      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+        <button
+          type="button"
+          onClick={goBack}
+          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+        >
+          {t('onboarding.nav.back')}
+        </button>
+        <Button
+          onClick={handleNext}
+          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          data-testid="health-basic-next"
+        >
+          {t('onboarding.nav.next')}
+          <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
+    </div>
+  );
+}
