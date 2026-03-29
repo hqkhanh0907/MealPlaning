@@ -49,6 +49,8 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 - 💾 **Backup/Restore** — Export/Import JSON, share qua hệ thống chia sẻ Android
 - 🌙 **Dark Mode** — Hỗ trợ light/dark/system theme
 - 🌐 **Ngôn ngữ** — Giao diện hoàn toàn bằng Tiếng Việt
+- 💪 **Fitness Tab** — Quản lý kế hoạch tập luyện, nhiều buổi tập/ngày (multi-session), chỉnh sửa bài tập (Plan Day Editor), tập tự do (freestyle workout)
+- 🏃 **Workout Logging** — Ghi log bài tập strength và cardio, theo dõi tiến trình qua lịch sử tập luyện
 
 ---
 

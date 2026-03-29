@@ -360,6 +360,20 @@ App.tsx
   └── SettingsTab
         ├── DataBackup
         └── GoalSettingsModal
+
+  PageStackOverlay (lazy — renders full-screen fitness pages)
+    ├── PlanDayEditor (lazy)    # Edit exercises in daily training plan
+    │     └── UnsavedChangesDialog
+    ├── WorkoutLogger (lazy)    # Strength workout logging (plan + freestyle modes)
+    ├── CardioLogger (lazy)     # Cardio workout logging
+
+  FitnessTab
+    ├── Plan sub-tab
+    │     ├── SessionTabs        # Session selector with "+" button for adding sessions
+    │     ├── AddSessionModal    # Modal to add Strength/Cardio/Freestyle session
+    │     └── TodaysPlanCard     # Today's workout overview
+    ├── Progress sub-tab
+    └── History sub-tab
 ```
 
 ---
@@ -377,6 +391,7 @@ App.tsx
 | Reference-counted scroll lock | Fix BUG-001: nested modal unmount race condition | [BUG-001](../bug-reports/BUG-001-scroll-lock-nested-modal.md) |
 | Google Drive sync (appDataFolder) | Cloud backup without exposing user files, auto-sync with conflict resolution |
 | AuthContext for OAuth2 | Separates auth concerns from App.tsx, provides useAuth() hook |
+| **PageStackOverlay pattern** | **Full-screen fitness pages (WorkoutLogger, CardioLogger, PlanDayEditor) rendered as lazy-loaded overlays via `pushPage()`/`popPage()` through `useNavigationStore`. Fixes rendering gap where App.tsx only handled Settings overlay.** |
 
 ---
 
@@ -399,7 +414,22 @@ Architecture validated through **183 E2E tests** and **1201 unit tests**. The fo
 
 ---
 
-## 10. Cross-References
+## 10. QA-Driven Changes (Cycle 4 — Fitness Flexibility)
+
+Architecture extended through manual testing of fitness features (SC41-SC43). Two bugs were found and fixed:
+
+| Pattern | Validation |
+|---------|-----------|
+| **PageStackOverlay** | New component: reads `pageStack` from `useNavigationStore` and lazy-loads the top page as a full-screen overlay. Supports WorkoutLogger, CardioLogger, PlanDayEditor. Fixed BUG-FLEX-001 where `pushPage()` entries were stored but never rendered. |
+| **SessionTabs visibility** | Condition changed from `sessions.length > 1` to `>= 1`. Fixed BUG-FLEX-002 chicken-and-egg problem where single-session users couldn't access the "+" button to add more sessions. |
+| **Freestyle workout (planDayId=null)** | WorkoutLogger supports freestyle mode — workouts saved with `planDayId=null`, not attached to any training plan session. |
+| **pushPage/popPage navigation** | Full-screen pages (PlanDayEditor, WorkoutLogger, CardioLogger) use `pushPage()`/`popPage()` pattern via `useNavigationStore` Zustand store, rendered by `PageStackOverlay`. |
+
+> **Test Report:** [test-report-fitness-flexibility.md](../04-testing/reports/test-report-fitness-flexibility.md)
+
+---
+
+## 11. Cross-References
 
 | Tài liệu | Đường dẫn |
 |-----------|-----------|
@@ -407,12 +437,14 @@ Architecture validated through **183 E2E tests** and **1201 unit tests**. The fo
 | UX Improvement Research | [ux-improvement-research.md](../ux-improvement-research.md) |
 | Data Model | [data-model.md](data-model.md) |
 | Sequence Diagrams | [sequence-diagrams.md](sequence-diagrams.md) |
+| Fitness Flexibility Test Report | [test-report-fitness-flexibility.md](../04-testing/reports/test-report-fitness-flexibility.md) |
 
 ---
 
-## 11. Revision History
+## 12. Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 2.0 | 2026-03-11 | QA-driven architecture validation, Capacitor mobile, Google Drive sync |
 | 2.1 | 2026-03-28 | Updated `NotificationContext` API docs (`notify.success()/error()/warning()/info()` via `useNotification()` hook). Corrected `logger.ts` description: only `debug` is dev-only; `info`, `warn`, `error` always output. SQLite database schema now has 19 tables (3 new fitness module tables — see [data-model.md §8](data-model.md#8-sqlite-database-schema-19-tables)) |
+| 2.2 | 2026-03-29 | Added PageStackOverlay pattern for full-screen fitness pages (pushPage/popPage). New components: SessionTabs, AddSessionModal, PlanDayEditor. Documented BUG-FLEX-001 and BUG-FLEX-002 fixes. |

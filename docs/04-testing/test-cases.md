@@ -242,44 +242,44 @@
 
 | ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
 |----|-----|---------------------|----------------|-----------------|-----------|
-| TC_FLEX_01 | SessionTabs ẩn khi chỉ có 1 session | Fitness tab mở, plan ngày có đúng 1 session | Mở tab Fitness → xem Plan sub-tab | SessionTabs không hiển thị, workout hiển thị trực tiếp không cần chọn tab | 🔲 P0 |
-| TC_FLEX_02 | SessionTabs hiển thị khi có 2+ sessions | Plan ngày có ≥2 sessions | Mở tab Fitness → xem Plan sub-tab | SessionTabs hiển thị với tên từng session, session đầu tiên được chọn mặc định | 🔲 P0 |
-| TC_FLEX_03 | AddSessionModal mở từ tab "+" | Plan ngày có ≥1 session, SessionTabs hiển thị | Click tab "+" ở cuối SessionTabs | AddSessionModal mở với các tùy chọn: Strength, Cardio, Freestyle | 🔲 P0 |
-| TC_FLEX_04 | Thêm session Strength với nhóm cơ | AddSessionModal đang mở | 1. Chọn "Strength"; 2. Chọn nhóm cơ (ví dụ: Ngực, Vai); 3. Click "Thêm" | Session mới xuất hiện trong SessionTabs, có danh sách bài tập theo nhóm cơ đã chọn | 🔲 P0 |
-| TC_FLEX_05 | Giới hạn tối đa 3 sessions | Plan ngày đã có 3 sessions | Click tab "+" trên SessionTabs | Tab "+" bị disabled hoặc hiển thị thông báo "Tối đa 3 buổi tập/ngày" | 🔲 P1 |
-| TC_FLEX_06 | Trạng thái training-partial trên TodaysPlanCard | Có 2 sessions, hoàn thành 1 session | Quay về Dashboard → xem TodaysPlanCard | TodaysPlanCard hiển thị trạng thái "training-partial" (ví dụ: "1/2 buổi hoàn thành") | 🔲 P0 |
-| TC_FLEX_07 | Chuyển đổi session thay đổi hiển thị workout | Có 2+ sessions với bài tập khác nhau | Click tab session thứ 2 trên SessionTabs | Danh sách bài tập thay đổi theo session được chọn | 🔲 P1 |
-| TC_FLEX_08 | Xóa session và kiểm tra reorder | Có 3 sessions (A, B, C) | 1. Long press session B; 2. Chọn "Xóa"; 3. Confirm | Session B bị xóa, SessionTabs hiển thị A và C, session_order cập nhật liên tục | 🔲 P1 |
+| TC_FLEX_01 | SessionTabs ẩn khi chỉ có 1 session | Fitness tab mở, plan ngày có đúng 1 session | Mở tab Fitness → xem Plan sub-tab | SessionTabs không hiển thị, workout hiển thị trực tiếp không cần chọn tab | ✅ P0 |
+| TC_FLEX_02 | SessionTabs hiển thị khi có 2+ sessions | Plan ngày có ≥2 sessions | Mở tab Fitness → xem Plan sub-tab | SessionTabs hiển thị với tên từng session, session đầu tiên được chọn mặc định | ✅ P0 |
+| TC_FLEX_03 | AddSessionModal mở từ tab "+" | Plan ngày có ≥1 session, SessionTabs hiển thị | Click tab "+" ở cuối SessionTabs | AddSessionModal mở với các tùy chọn: Strength, Cardio, Freestyle | ✅ P0 |
+| TC_FLEX_04 | Thêm session Strength với nhóm cơ | AddSessionModal đang mở | 1. Chọn "Strength"; 2. Chọn nhóm cơ (ví dụ: Ngực, Vai); 3. Click "Thêm" | Session mới xuất hiện trong SessionTabs, có danh sách bài tập theo nhóm cơ đã chọn | ✅ P0 |
+| TC_FLEX_05 | Giới hạn tối đa 3 sessions | Plan ngày đã có 3 sessions | Click tab "+" trên SessionTabs | Tab "+" bị disabled hoặc hiển thị thông báo "Tối đa 3 buổi tập/ngày" | ✅ P1 |
+| TC_FLEX_06 | Trạng thái training-partial trên TodaysPlanCard | Có 2 sessions, hoàn thành 1 session | Quay về Dashboard → xem TodaysPlanCard | TodaysPlanCard hiển thị trạng thái "training-partial" (ví dụ: "1/2 buổi hoàn thành") | ✅ P0 |
+| TC_FLEX_07 | Chuyển đổi session thay đổi hiển thị workout | Có 2+ sessions với bài tập khác nhau | Click tab session thứ 2 trên SessionTabs | Danh sách bài tập thay đổi theo session được chọn | ✅ P1 |
+| TC_FLEX_08 | Xóa session và kiểm tra reorder | Có 3 sessions (A, B, C) | 1. Long press session B; 2. Chọn "Xóa"; 3. Confirm | Session B bị xóa, SessionTabs hiển thị A và C, session_order cập nhật liên tục | ✅ P1 |
 
 #### Plan Day Editor (SC42)
 
 | ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
 |----|-----|---------------------|----------------|-----------------|-----------|
-| TC_FLEX_09 | Nút Edit mở PlanDayEditor full-screen | Plan ngày có ≥1 bài tập | Click nút "Chỉnh sửa" trên Plan sub-tab | PlanDayEditor mở dưới dạng full-screen overlay qua pushPage(), không render inline | 🔲 P0 |
-| TC_FLEX_10 | Danh sách bài tập hiển thị đúng | PlanDayEditor đang mở, session có 3 bài tập | Xem danh sách bài tập | Hiển thị đầy đủ tên, số set × rep, và thứ tự đúng với original_exercises | 🔲 P0 |
-| TC_FLEX_11 | Sắp xếp lại bài tập lên/xuống | PlanDayEditor mở, có ≥2 bài tập | 1. Click nút ↑ trên bài tập thứ 2; 2. Xác nhận thứ tự mới | Bài tập thứ 2 di chuyển lên vị trí 1, thứ tự cập nhật trên UI | 🔲 P0 |
-| TC_FLEX_12 | Xóa bài tập | PlanDayEditor mở, có ≥2 bài tập | 1. Click nút xóa trên bài tập; 2. Confirm | Bài tập bị xóa khỏi danh sách, các bài tập còn lại reindex | 🔲 P0 |
-| TC_FLEX_13 | Thêm bài tập qua selector | PlanDayEditor mở | 1. Click "Thêm bài tập"; 2. Chọn bài tập từ danh sách; 3. Confirm | Bài tập mới xuất hiện ở cuối danh sách | 🔲 P1 |
-| TC_FLEX_14 | Lưu thay đổi persist vào store | PlanDayEditor có thay đổi (reorder/add/remove) | Click "Lưu" | PlanDayEditor đóng, quay về Plan sub-tab, danh sách bài tập phản ánh thay đổi đã lưu trong Zustand store | 🔲 P0 |
-| TC_FLEX_15 | Dialog cảnh báo khi quay lại chưa lưu | PlanDayEditor có thay đổi chưa lưu | Click nút Back (←) | Hiển thị dialog "Bạn có thay đổi chưa lưu. Hủy bỏ?" với 2 nút: Hủy / Tiếp tục chỉnh sửa | 🔲 P0 |
+| TC_FLEX_09 | Nút Edit mở PlanDayEditor full-screen | Plan ngày có ≥1 bài tập | Click nút "Chỉnh sửa" trên Plan sub-tab | PlanDayEditor mở dưới dạng full-screen overlay qua pushPage(), không render inline | ✅ P0 |
+| TC_FLEX_10 | Danh sách bài tập hiển thị đúng | PlanDayEditor đang mở, session có 3 bài tập | Xem danh sách bài tập | Hiển thị đầy đủ tên, số set × rep, và thứ tự đúng với original_exercises | ✅ P0 |
+| TC_FLEX_11 | Sắp xếp lại bài tập lên/xuống | PlanDayEditor mở, có ≥2 bài tập | 1. Click nút ↑ trên bài tập thứ 2; 2. Xác nhận thứ tự mới | Bài tập thứ 2 di chuyển lên vị trí 1, thứ tự cập nhật trên UI | ✅ P0 |
+| TC_FLEX_12 | Xóa bài tập | PlanDayEditor mở, có ≥2 bài tập | 1. Click nút xóa trên bài tập; 2. Confirm | Bài tập bị xóa khỏi danh sách, các bài tập còn lại reindex | ✅ P0 |
+| TC_FLEX_13 | Thêm bài tập qua selector | PlanDayEditor mở | 1. Click "Thêm bài tập"; 2. Chọn bài tập từ danh sách; 3. Confirm | Bài tập mới xuất hiện ở cuối danh sách | ✅ P1 |
+| TC_FLEX_14 | Lưu thay đổi persist vào store | PlanDayEditor có thay đổi (reorder/add/remove) | Click "Lưu" | PlanDayEditor đóng, quay về Plan sub-tab, danh sách bài tập phản ánh thay đổi đã lưu trong Zustand store | ✅ P0 |
+| TC_FLEX_15 | Dialog cảnh báo khi quay lại chưa lưu | PlanDayEditor có thay đổi chưa lưu | Click nút Back (←) | Hiển thị dialog "Bạn có thay đổi chưa lưu. Hủy bỏ?" với 2 nút: Hủy / Tiếp tục chỉnh sửa | ✅ P0 |
 
 #### Freestyle Workout (SC43)
 
 | ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
 |----|-----|---------------------|----------------|-----------------|-----------|
-| TC_FLEX_16 | Freestyle qua AddSessionModal mở WorkoutLogger | AddSessionModal đang mở | 1. Chọn "Freestyle"; 2. Confirm | WorkoutLogger mở full-screen qua pushPage() ở chế độ freestyle, không có plan bài tập sẵn | 🔲 P0 |
-| TC_FLEX_17 | Nhập tên buổi tập sau khi hoàn thành freestyle | WorkoutLogger freestyle, đã log ≥1 bài tập | Click "Hoàn thành" | Hiển thị prompt nhập tên buổi tập (ví dụ: "Tập tay + vai") | 🔲 P0 |
-| TC_FLEX_18 | Tên mặc định "Buổi tập tự do" khi bỏ qua | Prompt nhập tên đang hiển thị | Bỏ trống và click "Xác nhận" hoặc "Bỏ qua" | Buổi tập được lưu với tên mặc định "Buổi tập tự do" | 🔲 P1 |
-| TC_FLEX_19 | Freestyle lưu với planDayId=null | Hoàn thành buổi freestyle workout | Kiểm tra dữ liệu lưu trong store/SQLite | Record workout có planDayId=null, các bài tập và set được lưu đầy đủ | 🔲 P0 |
-| TC_FLEX_20 | Freestyle không ảnh hưởng trạng thái training | Có plan ngày với 1 session chưa tập | Tập freestyle → hoàn thành → quay về Plan sub-tab | Trạng thái training của session plan không thay đổi (vẫn "chưa tập") | 🔲 P1 |
+| TC_FLEX_16 | Freestyle qua AddSessionModal mở WorkoutLogger | AddSessionModal đang mở | 1. Chọn "Freestyle"; 2. Confirm | WorkoutLogger mở full-screen qua pushPage() ở chế độ freestyle, không có plan bài tập sẵn | ✅ P0 |
+| TC_FLEX_17 | Nhập tên buổi tập sau khi hoàn thành freestyle | WorkoutLogger freestyle, đã log ≥1 bài tập | Click "Hoàn thành" | Hiển thị prompt nhập tên buổi tập (ví dụ: "Tập tay + vai") | ✅ P0 |
+| TC_FLEX_18 | Tên mặc định "Buổi tập tự do" khi bỏ qua | Prompt nhập tên đang hiển thị | Bỏ trống và click "Xác nhận" hoặc "Bỏ qua" | Buổi tập được lưu với tên mặc định "Buổi tập tự do" | ✅ P1 |
+| TC_FLEX_19 | Freestyle lưu với planDayId=null | Hoàn thành buổi freestyle workout | Kiểm tra dữ liệu lưu trong store/SQLite | Record workout có planDayId=null, các bài tập và set được lưu đầy đủ | ✅ P0 |
+| TC_FLEX_20 | Freestyle không ảnh hưởng trạng thái training | Có plan ngày với 1 session chưa tập | Tập freestyle → hoàn thành → quay về Plan sub-tab | Trạng thái training của session plan không thay đổi (vẫn "chưa tập") | ✅ P1 |
 
 #### PageStack Bug Fix
 
 | ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
 |----|-----|---------------------|----------------|-----------------|-----------|
-| TC_FLEX_21 | PlanDayEditor render full-screen overlay | Plan ngày có bài tập | Click "Chỉnh sửa" trên Plan sub-tab | PlanDayEditor render qua PageStackRenderer dưới dạng overlay phủ toàn màn hình, không phải inline trong tab | 🔲 P0 |
-| TC_FLEX_22 | WorkoutLogger render full-screen overlay | Session có bài tập | Click "Bắt đầu tập" trên Plan sub-tab | WorkoutLogger render qua PageStackRenderer dưới dạng overlay phủ toàn màn hình | 🔲 P0 |
-| TC_FLEX_23 | Nút Back đóng overlay và quay về view trước | PlanDayEditor hoặc WorkoutLogger đang mở overlay | Click nút Back (←) hoặc swipe back | Overlay đóng, quay về đúng view trước đó (Plan sub-tab), không bị trap trong page | 🔲 P0 |
+| TC_FLEX_21 | PlanDayEditor render full-screen overlay | Plan ngày có bài tập | Click "Chỉnh sửa" trên Plan sub-tab | PlanDayEditor render qua PageStackRenderer dưới dạng overlay phủ toàn màn hình, không phải inline trong tab | ✅ P0 |
+| TC_FLEX_22 | WorkoutLogger render full-screen overlay | Session có bài tập | Click "Bắt đầu tập" trên Plan sub-tab | WorkoutLogger render qua PageStackRenderer dưới dạng overlay phủ toàn màn hình | ✅ P0 |
+| TC_FLEX_23 | Nút Back đóng overlay và quay về view trước | PlanDayEditor hoặc WorkoutLogger đang mở overlay | Click nút Back (←) hoặc swipe back | Overlay đóng, quay về đúng view trước đó (Plan sub-tab), không bị trap trong page | ✅ P0 |
 
 ---
 

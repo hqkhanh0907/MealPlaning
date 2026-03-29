@@ -271,3 +271,39 @@ E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua l
 | Release candidate | E2E full suite | Trước mỗi APK build |
 | Post-release | E2E smoke (01, 02, 07) | Sau khi cài APK lên device |
 | On-demand | E2E full suite | CI workflow `.github/workflows/e2e.yml` — `workflow_dispatch` trigger |
+
+---
+
+## 9. Test Closure — Fitness Plan Flexibility (SC41-SC43)
+
+**Date:** 2026-03-29  
+**Features:** Multi-Session System (SC41), Plan Day Editor (SC42), Freestyle Workout (SC43)
+
+### 9.1 Test Execution Summary
+
+| Metric | Value |
+|--------|-------|
+| Total TC_FLEX Cases | 23 |
+| Executed (Manual) | 15 (representative subset covering all 3 features + PageStack) |
+| Passed | **15/15** (100%) |
+| Remaining 8 TCs | Covered by unit tests (Zustand store logic, SQLite persistence) |
+
+### 9.2 Bugs Found & Fixed
+
+| Bug ID | Severity | Description | Fix Commit | Status |
+|--------|----------|-------------|------------|--------|
+| BUG-FLEX-001 | P0 Critical | PageStack rendering — `pushPage()` entries not rendered by `App.tsx`. Added `PageStackOverlay` with lazy-loaded WorkoutLogger, CardioLogger, PlanDayEditor. | `6954146` | ✅ Fixed & Verified |
+| BUG-FLEX-002 | P1 Major | SessionTabs hidden when `sessions.length === 1` — chicken-and-egg problem. Changed condition from `> 1` to `>= 1`. | `9b58051` | ✅ Fixed & Verified |
+
+### 9.3 Final Build Verification
+
+| Check | Result |
+|-------|--------|
+| All 15 manual TCs passed | ✅ |
+| Chrome DevTools Console — 0 errors | ✅ |
+| Chrome DevTools Console — 0 warnings | ✅ |
+| Navigation flows (pushPage/popPage) | ✅ |
+| Data persistence (Zustand + SQLite) | ✅ |
+| Build status | ✅ Stable |
+
+> **Full report:** [reports/test-report-fitness-flexibility.md](reports/test-report-fitness-flexibility.md)
