@@ -159,7 +159,22 @@ export class BasePage {
       localStorage.removeItem('fitness_migrated_to_sqlite');
       location.reload();
     });
-    await browser.pause(2_000);
+    await browser.pause(3_000);
     await this.switchToWebview();
+    const ciTimeout = process.env.CI ? 60_000 : 30_000;
+    await browser.waitUntil(
+      async () => {
+        try {
+          const ready = await (browser as unknown as ContextCapableBrowser).execute(
+            () => document.readyState === 'complete'
+              && (document.getElementById('root')?.children.length ?? 0) > 0
+              && !!document.querySelector('[data-testid="nav-calendar"]'),
+          );
+          return !!ready;
+        } catch { return false; }
+      },
+      { timeout: ciTimeout, interval: 2_000, timeoutMsg: 'App did not fully render after reload' },
+    );
+    await browser.pause(1_000);
   }
 }

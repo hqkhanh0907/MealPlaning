@@ -165,6 +165,13 @@ export class ManagementPage extends BasePage {
   /** Return the ID of the most recently created ingredient from localStorage. */
   async getLastIngredientId(): Promise<string | null> {
     return (browser as unknown as ExecutableBrowser).execute(() => {
+      // Try DOM first (UI-created items have edit buttons with testid containing the ID)
+      const editBtns = document.querySelectorAll('[data-testid^="btn-edit-ingredient-"]');
+      if (editBtns.length > 0) {
+        const lastBtn = editBtns[editBtns.length - 1];
+        return lastBtn.getAttribute('data-testid')?.replace('btn-edit-ingredient-', '') ?? null;
+      }
+      // Fallback to localStorage (seeded data)
       const items = JSON.parse(localStorage.getItem('mp-ingredients') || '[]') as Array<{ id: string }>;
       return items.length > 0 ? items[items.length - 1].id : null;
     });
@@ -173,6 +180,13 @@ export class ManagementPage extends BasePage {
   /** Return the ID of the most recently created dish from localStorage. */
   async getLastDishId(): Promise<string | null> {
     return (browser as unknown as ExecutableBrowser).execute(() => {
+      // Try DOM first (UI-created items have edit buttons with testid containing the ID)
+      const editBtns = document.querySelectorAll('[data-testid^="btn-edit-dish-"]');
+      if (editBtns.length > 0) {
+        const lastBtn = editBtns[editBtns.length - 1];
+        return lastBtn.getAttribute('data-testid')?.replace('btn-edit-dish-', '') ?? null;
+      }
+      // Fallback to localStorage (seeded data)
       const items = JSON.parse(localStorage.getItem('mp-dishes') || '[]') as Array<{ id: string }>;
       return items.length > 0 ? items[items.length - 1].id : null;
     });
