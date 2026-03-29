@@ -474,13 +474,16 @@ export function generateTrainingPlan(
       resolvedWeek,
     );
 
+    const exercisesJson = JSON.stringify(finalExercises);
     return {
       id: `${planId}_day_${index + 1}`,
       planId,
       dayOfWeek: dayOfWeekAssignment[index],
+      sessionOrder: 1,
       workoutType: session.name,
       muscleGroups: session.muscleGroups.join(','),
-      exercises: JSON.stringify(finalExercises),
+      exercises: exercisesJson,
+      originalExercises: exercisesJson,
       notes: deloadNote,
     };
   });
@@ -493,22 +496,154 @@ export function generateTrainingPlan(
     weightKg,
   );
 
-  for (const cardio of cardioSchedule) {
-    const cardioNote = `Cardio: ${cardio.type} ${cardio.durationMin}min (~${cardio.estimatedCalories}kcal)`;
-    const existingDay = days.find((d) => d.dayOfWeek === cardio.dayOfWeek);
+  const useMultiSession =
+    trainingProfile.daysPerWeek >= 5 &&
+    trainingProfile.cardioSessionsWeek > 0;
 
-    if (existingDay) {
-      existingDay.notes = existingDay.notes
-        ? `${existingDay.notes}; ${cardioNote}`
-        : cardioNote;
-    } else {
-      days.push({
-        id: `${planId}_cardio_${cardio.dayOfWeek}`,
-        planId,
-        dayOfWeek: cardio.dayOfWeek,
-        workoutType: 'Cardio',
-        notes: cardioNote,
-      });
+  if (useMultiSession) {
+    const overflowItems: CardioScheduleItem[] = [];
+
+    for (const cardio of cardioSchedule) {
+      const cardioNote = `Cardio: ${cardio.type} ${cardio.durationMin}min (~${cardio.estimatedCalories}kcal)`;
+      const isOnTrainingDay = days.some(
+        (d) => d.dayOfWeek === cardio.dayOfWeek && d.sessionOrder === 1,
+      );
+
+      if (isOnTrainingDay) {
+        overflowItems.push(cardio);
+      } else {
+        days.push({
+          id: `${planId}_cardio_${cardio.dayOfWeek}`,
+          planId,
+          dayOfWeek: cardio.dayOfWeek,
+          sessionOrder: 1,
+          workoutType: 'Cardio',
+          notes: cardioNote,
+        });
+      }
+    }
+
+    // Place overflow cardio as session 2 on lightest strength days
+    if (overflowItems.length > 0) {
+      const strengthDays = days
+        .filter((d) => d.sessionOrder === 1 && d.exercises)
+        .map((d) => {
+          const exCount = (
+            JSON.parse(d.exercises!) as SelectedExercise[]
+          ).length;
+          return { day: d, exerciseCount: exCount };
+        })
+        .sort((a, b) => a.exerciseCount - b.exerciseCount);
+
+      const MAX_DOUBLE_SESSIONS = 2;
+      let doubleSessionCount = 0;
+
+      for (const cardio of overflowItems) {
+        if (doubleSessionCount >= MAX_DOUBLE_SESSIONS) break;
+
+        const isHIIT = cardio.type === 'hiit';
+        const target = strengthDays.find((sd) => {
+          const hasSession2 = days.some(
+            (d) =>
+              d.dayOfWeek === sd.day.dayOfWeek && d.sessionOrder === 2,
+          );
+          if (hasSession2) return false;
+          if (isHIIT && sd.day.muscleGroups?.includes('legs'))
+            return false;
+          return true;
+        });
+
+        if (!target) continue;
+
+        const cardioNote = `Cardio: ${cardio.type} ${cardio.durationMin}min (~${cardio.estimatedCalories}kcal)`;
+
+        days.push({
+          id: `${planId}_cardio_s2_${target.day.dayOfWeek}`,
+          planId,
+          dayOfWeek: target.day.dayOfWeek,
+          sessionOrder: 2,
+          workoutType: 'Cardio',
+          notes: cardioNote,
+        });
+        doubleSessionCount++;
+      }
+    }
+  } else {
+    for (const cardio of cardioSchedule) {
+      const cardioNote = `Cardio: ${cardio.type} ${cardio.durationMin}min (~${cardio.estimatedCalories}kcal)`;
+      const existingDay = days.find(
+        (d) => d.dayOfWeek === cardio.dayOfWeek,
+      );
+
+      if (existingDay) {
+        existingDay.notes = existingDay.notes
+          ? `${existingDay.notes}; ${cardioNote}`
+          : cardioNote;
+      } else {
+        days.push({
+          id: `${planId}_cardio_${cardio.dayOfWeek}`,
+          planId,
+          dayOfWeek: cardio.dayOfWeek,
+          sessionOrder: 1,
+          workoutType: 'Cardio',
+          notes: cardioNote,
+        });
+      }
+    }
+  }
+
+  // Step 5b: Session duration splitting
+  // When session is short (<=45min) and training frequently (>=5 days),
+  // split the heaviest strength day into compounds (session 1) and isolation (session 2)
+  if (
+    trainingProfile.sessionDurationMin <= 45 &&
+    trainingProfile.daysPerWeek >= 5
+  ) {
+    const splittable = days
+      .filter((d) => d.sessionOrder === 1 && d.exercises)
+      .map((d) => {
+        const exs = JSON.parse(d.exercises!) as SelectedExercise[];
+        const compounds = exs.filter(
+          (e) => e.exercise.category === 'compound',
+        );
+        const nonCompounds = exs.filter(
+          (e) =>
+            e.exercise.category === 'isolation' ||
+            e.exercise.category === 'secondary',
+        );
+        return { day: d, exercises: exs, compounds, nonCompounds };
+      })
+      .filter(
+        (s) =>
+          s.exercises.length >= 4 &&
+          s.compounds.length > 0 &&
+          s.nonCompounds.length > 0,
+      )
+      .sort((a, b) => b.exercises.length - a.exercises.length);
+
+    if (splittable.length > 0) {
+      const heaviest = splittable[0];
+      const hasSession2 = days.some(
+        (d) =>
+          d.dayOfWeek === heaviest.day.dayOfWeek && d.sessionOrder === 2,
+      );
+
+      if (!hasSession2) {
+        heaviest.day.exercises = JSON.stringify(heaviest.compounds);
+        heaviest.day.originalExercises = heaviest.day.exercises;
+
+        const isoJson = JSON.stringify(heaviest.nonCompounds);
+        days.push({
+          id: `${heaviest.day.id}_s2`,
+          planId,
+          dayOfWeek: heaviest.day.dayOfWeek,
+          sessionOrder: 2,
+          workoutType: `${heaviest.day.workoutType} (Accessory)`,
+          muscleGroups: heaviest.day.muscleGroups,
+          exercises: isoJson,
+          originalExercises: isoJson,
+        });
+      }
     }
   }
 

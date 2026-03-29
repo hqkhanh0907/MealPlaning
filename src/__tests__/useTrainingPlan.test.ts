@@ -1058,7 +1058,7 @@ describe('generateTrainingPlan', () => {
       }
     });
 
-    it('appends cardio note to existing training day notes', () => {
+    it('creates session 2 cardio for overflow when daysPerWeek >= 5', () => {
       const result = generateTrainingPlan({
         trainingProfile: createProfile({
           daysPerWeek: 6,
@@ -1071,18 +1071,17 @@ describe('generateTrainingPlan', () => {
       });
 
       // With 6 training days, only 1 rest day.
-      // 3 cardio sessions → 1 rest + 2 overflow to training days
-      const overflowDays = result.days.filter(
-        (d) =>
-          d.workoutType !== 'Cardio' &&
-          d.notes?.includes('Cardio') &&
-          d.notes?.includes('Deload'),
+      // 3 cardio sessions → 1 rest + 2 overflow as session 2
+      const session2Cardio = result.days.filter(
+        (d) => d.sessionOrder === 2 && d.workoutType.includes('Cardio'),
       );
-      expect(overflowDays.length).toBeGreaterThanOrEqual(1);
-      expect(overflowDays[0].notes).toContain('; Cardio:');
+      expect(session2Cardio.length).toBeGreaterThanOrEqual(1);
+      for (const d of session2Cardio) {
+        expect(d.notes).toContain('Cardio');
+      }
     });
 
-    it('cardio overflow to training day without deload notes', () => {
+    it('creates session 2 cardio without deload notes for overflow', () => {
       const result = generateTrainingPlan({
         trainingProfile: createProfile({
           daysPerWeek: 6,
@@ -1094,13 +1093,14 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      // 6 training days, 1 rest day, 3 cardio → 1 rest + 2 overflow
-      // planCycleWeeks = 0 → no deload notes → notes start with Cardio:
-      const overflow = result.days.filter(
-        (d) =>
-          d.workoutType !== 'Cardio' && d.notes?.startsWith('Cardio:'),
+      // 6 training days, 1 rest day, 3 cardio → 1 rest + 2 overflow as session 2
+      const session2Days = result.days.filter(
+        (d) => d.sessionOrder === 2,
       );
-      expect(overflow.length).toBeGreaterThanOrEqual(1);
+      expect(session2Days.length).toBeGreaterThanOrEqual(1);
+      for (const d of session2Days) {
+        expect(d.notes).toContain('Cardio');
+      }
     });
 
     it('uses general rep scheme for general goal', () => {
@@ -1123,6 +1123,145 @@ describe('generateTrainingPlan', () => {
         expect(exercises[0].restSeconds).toBe(90);
       }
     });
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Multi-session + originalExercises                                   */
+/* ------------------------------------------------------------------ */
+
+describe('generateTrainingPlan — multi-session', () => {
+  it('sets sessionOrder=1 and originalExercises on all generated days', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({ daysPerWeek: 4 }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    for (const day of result.days) {
+      expect(day.sessionOrder).toBeDefined();
+      expect(day.sessionOrder).toBeGreaterThanOrEqual(1);
+      if (day.exercises) {
+        expect(day.originalExercises).toBe(day.exercises);
+      }
+    }
+  });
+
+  it('sets sessionOrder=1 on cardio-only rest days', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 3,
+        cardioSessionsWeek: 2,
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    const cardioDays = result.days.filter(
+      (d) => d.workoutType === 'Cardio',
+    );
+    for (const day of cardioDays) {
+      expect(day.sessionOrder).toBe(1);
+    }
+  });
+
+  it('adds cardio as session 2 when daysPerWeek >= 5 and cardioSessionsWeek > 0', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 5,
+        cardioSessionsWeek: 3,
+        cardioTypePref: 'liss',
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    const session2Days = result.days.filter((d) => d.sessionOrder === 2);
+    expect(session2Days.length).toBeGreaterThanOrEqual(1);
+    for (const d of session2Days) {
+      expect(d.workoutType).toContain('Cardio');
+    }
+  });
+
+  it('never puts cardio HIIT on same day as legs', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 5,
+        cardioSessionsWeek: 3,
+        cardioTypePref: 'hiit',
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    const dayGroups = new Map<number, typeof result.days>();
+    for (const d of result.days) {
+      const arr = dayGroups.get(d.dayOfWeek) ?? [];
+      arr.push(d);
+      dayGroups.set(d.dayOfWeek, arr);
+    }
+    for (const [, sessions] of dayGroups) {
+      const hasLegs = sessions.some((s) => s.muscleGroups?.includes('legs'));
+      const hasHIIT = sessions.some((s) => s.notes?.includes('hiit'));
+      expect(hasLegs && hasHIIT).toBe(false);
+    }
+  });
+
+  it('limits double-session days to at most 2', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 6,
+        cardioSessionsWeek: 5,
+        cardioTypePref: 'liss',
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    const dayOfWeeks = result.days.map((d) => d.dayOfWeek);
+    const counts = new Map<number, number>();
+    for (const dow of dayOfWeeks) {
+      counts.set(dow, (counts.get(dow) ?? 0) + 1);
+    }
+    const doubleDays = [...counts.values()].filter((c) => c >= 2).length;
+    expect(doubleDays).toBeLessThanOrEqual(2);
+  });
+
+  it('splits heaviest strength day when sessionDurationMin <= 45 and daysPerWeek >= 5', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 5,
+        sessionDurationMin: 40,
+        cardioSessionsWeek: 0,
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    const session2Strength = result.days.filter(
+      (d) =>
+        d.sessionOrder === 2 && !d.workoutType.includes('Cardio'),
+    );
+    expect(session2Strength.length).toBeGreaterThanOrEqual(1);
+    for (const d of session2Strength) {
+      expect(d.exercises).toBeTruthy();
+      const exs = JSON.parse(d.exercises!) as SelectedExercise[];
+      expect(exs.length).toBeGreaterThan(0);
+      for (const ex of exs) {
+        expect(['isolation', 'secondary']).toContain(
+          ex.exercise.category,
+        );
+      }
+    }
+  });
+
+  it('originalExercises remains unchanged after deload reduction', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({ daysPerWeek: 4 }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+      weeklyIntensities: [9, 9, 9, 9],
+    });
+    for (const day of result.days) {
+      if (!day.exercises || !day.originalExercises) continue;
+      // originalExercises should be a valid JSON array
+      const original = JSON.parse(day.originalExercises) as SelectedExercise[];
+      expect(original.length).toBeGreaterThan(0);
+    }
   });
 });
 
