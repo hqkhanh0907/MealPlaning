@@ -211,4 +211,79 @@ describe('dayPlanStore', () => {
       expect(loaded.servings).toBeUndefined();
     });
   });
+
+  /* ---------------------------------------------------------------- */
+  /*  updateServings – date mismatch                                    */
+  /* ---------------------------------------------------------------- */
+  describe('updateServings – edge cases', () => {
+    it('does not modify plans when date does not match', () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan({ date: '2025-01-15' })] });
+
+      useDayPlanStore.getState().updateServings('2025-01-99', 'd1', 5);
+
+      const plan = useDayPlanStore.getState().dayPlans[0];
+      expect(plan.servings?.d1).toBe(2);
+    });
+  });
+
+  /* ---------------------------------------------------------------- */
+  /*  loadAll                                                           */
+  /* ---------------------------------------------------------------- */
+  describe('loadAll', () => {
+    it('loads day plans from database with servings', async () => {
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([
+          {
+            date: '2025-07-01',
+            breakfast_dish_ids: '["d1","d2"]',
+            lunch_dish_ids: '["d3"]',
+            dinner_dish_ids: '[]',
+            servings: '{"d1":2}',
+          },
+        ]),
+      };
+
+      await useDayPlanStore.getState().loadAll(mockDb as never);
+
+      const plans = useDayPlanStore.getState().dayPlans;
+      expect(plans).toHaveLength(1);
+      expect(plans[0].date).toBe('2025-07-01');
+      expect(plans[0].breakfastDishIds).toEqual(['d1', 'd2']);
+      expect(plans[0].lunchDishIds).toEqual(['d3']);
+      expect(plans[0].dinnerDishIds).toEqual([]);
+      expect(plans[0].servings).toEqual({ d1: 2 });
+    });
+
+    it('loads day plans without servings field', async () => {
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([
+          {
+            date: '2025-07-02',
+            breakfast_dish_ids: '[]',
+            lunch_dish_ids: '["d5"]',
+            dinner_dish_ids: '["d6"]',
+            servings: null,
+          },
+        ]),
+      };
+
+      await useDayPlanStore.getState().loadAll(mockDb as never);
+
+      const plans = useDayPlanStore.getState().dayPlans;
+      expect(plans).toHaveLength(1);
+      expect(plans[0].servings).toBeUndefined();
+    });
+
+    it('does nothing when database returns empty rows', async () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
+
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([]),
+      };
+
+      await useDayPlanStore.getState().loadAll(mockDb as never);
+
+      expect(useDayPlanStore.getState().dayPlans).toHaveLength(1);
+    });
+  });
 });

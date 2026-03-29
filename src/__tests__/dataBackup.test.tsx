@@ -321,4 +321,63 @@ describe('DataBackup', () => {
       clickSpy.mockRestore();
     });
   });
+
+  it('shows error when imported file is too small (< 16 bytes)', async () => {
+    render(<DataBackup />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+
+    const tinyFile = new File([new Uint8Array(8)], 'tiny.db', { type: 'application/octet-stream' });
+
+    await act(async () => {
+      if (input) {
+        Object.defineProperty(input, 'files', { value: [tinyFile], configurable: true });
+        fireEvent.change(input);
+      }
+    });
+    await act(async () => { await new Promise(r => { setTimeout(r, 50); }); });
+
+    expect(mockNotify.error).toHaveBeenCalled();
+    expect(mockDb.importBinary).not.toHaveBeenCalled();
+  });
+
+  it('shows error when file reading fails (arrayBuffer rejects)', async () => {
+    render(<DataBackup />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+
+    const badFile = new File([new Uint8Array(100)], 'bad.db');
+    vi.spyOn(badFile, 'arrayBuffer').mockRejectedValueOnce(new Error('Read failed'));
+
+    await act(async () => {
+      if (input) {
+        Object.defineProperty(input, 'files', { value: [badFile], configurable: true });
+        fireEvent.change(input);
+      }
+    });
+    await act(async () => { await new Promise(r => { setTimeout(r, 50); }); });
+
+    expect(mockNotify.error).toHaveBeenCalled();
+  });
+
+  it('shows error when database import fails during confirm', async () => {
+    mockDb.importBinary.mockRejectedValueOnce(new Error('DB import failed'));
+
+    render(<DataBackup />);
+    const sqliteData = buildSqliteHeader();
+    const file = new File([sqliteData], 'backup.sqlite', { type: 'application/octet-stream' });
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+
+    await waitFor(() => {
+      if (input) fireEvent.change(input, { target: { files: [file] } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('btn-confirm-action'));
+    await waitFor(() => {
+      expect(mockNotify.error).toHaveBeenCalled();
+    });
+  });
 });

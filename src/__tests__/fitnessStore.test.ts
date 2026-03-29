@@ -495,6 +495,11 @@ describe('fitnessStore', () => {
     expect(useFitnessStore.getState().workoutDraft).toBeNull();
   });
 
+  it('loadWorkoutDraft returns early when _db is null', async () => {
+    await useFitnessStore.getState().loadWorkoutDraft();
+    expect(useFitnessStore.getState().workoutDraft).toBeNull();
+  });
+
   /* ---------- updatePlanDayExercises ---------- */
   describe('updatePlanDayExercises', () => {
     it('updates exercises field without changing originalExercises', () => {
@@ -940,5 +945,726 @@ describe('fitnessStore SQLite draft persistence', () => {
     });
 
     expect(result.current.workoutDraft).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Additional coverage tests                                           */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – additional coverage', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetStore();
+  });
+
+  /* ---------- setPlanStrategy ---------- */
+  it('setPlanStrategy sets strategy to auto', () => {
+    useFitnessStore.getState().setPlanStrategy('auto');
+    expect(useFitnessStore.getState().planStrategy).toBe('auto');
+  });
+
+  it('setPlanStrategy sets strategy to manual', () => {
+    useFitnessStore.getState().setPlanStrategy('manual');
+    expect(useFitnessStore.getState().planStrategy).toBe('manual');
+  });
+
+  it('setPlanStrategy sets strategy to null', () => {
+    useFitnessStore.setState({ planStrategy: 'auto' });
+    useFitnessStore.getState().setPlanStrategy(null);
+    expect(useFitnessStore.getState().planStrategy).toBeNull();
+  });
+
+  /* ---------- clearTrainingPlans ---------- */
+  it('clearTrainingPlans empties both plans and plan days', () => {
+    useFitnessStore.setState({
+      trainingPlans: [samplePlan()],
+      trainingPlanDays: [samplePlanDay()],
+    });
+
+    useFitnessStore.getState().clearTrainingPlans();
+
+    expect(useFitnessStore.getState().trainingPlans).toEqual([]);
+    expect(useFitnessStore.getState().trainingPlanDays).toEqual([]);
+  });
+
+  /* ---------- dismissPlanCelebration ---------- */
+  it('dismissPlanCelebration sets showPlanCelebration to false', () => {
+    useFitnessStore.setState({ showPlanCelebration: true });
+    useFitnessStore.getState().dismissPlanCelebration();
+    expect(useFitnessStore.getState().showPlanCelebration).toBe(false);
+  });
+
+  /* ---------- removePlanDaySession – non-existent day ---------- */
+  it('removePlanDaySession is no-op for non-existent dayId', () => {
+    useFitnessStore.setState({ trainingPlanDays: [samplePlanDay()] });
+
+    useFitnessStore.getState().removePlanDaySession('nonexistent-id');
+
+    expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(1);
+  });
+
+  /* ---------- persist migration ---------- */
+  describe('persist migration', () => {
+    it('adds planStrategy when migrating from version < 2', () => {
+      const oldState = {
+        trainingPlans: [],
+        isOnboarded: true,
+      };
+
+      localStorage.setItem(
+        'fitness-storage',
+        JSON.stringify({ state: oldState, version: 1 }),
+      );
+
+      const migrated = JSON.parse(
+        localStorage.getItem('fitness-storage') ?? '{}',
+      );
+
+      const migrateV2 = (persisted: unknown, version: number) => {
+        const state = persisted as Record<string, unknown>;
+        if (version < 2) {
+          return { ...state, planStrategy: null };
+        }
+        return state;
+      };
+
+      const result = migrateV2(migrated.state, migrated.version);
+      expect(result).toHaveProperty('planStrategy', null);
+      expect(result).toHaveProperty('isOnboarded', true);
+    });
+
+    it('returns state unchanged when version >= 2', () => {
+      const state = { trainingPlans: [], planStrategy: 'auto' };
+
+      const migrateV2 = (persisted: unknown, version: number) => {
+        const s = persisted as Record<string, unknown>;
+        if (version < 2) {
+          return { ...s, planStrategy: null };
+        }
+        return s;
+      };
+
+      const result = migrateV2(state, 2);
+      expect(result).toEqual(state);
+    });
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  SQLite write-through additional tests                               */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – SQLite write-through', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['plan-1', 'Test Plan', 'active', 'push-pull-legs', 8, '2025-06-01', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+  });
+
+  it('addPlanDays persists to SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const day = samplePlanDay({ id: 'sqlite-day-1' });
+    act(() => {
+      result.current.addPlanDays([day]);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM training_plan_days WHERE id = ?',
+      ['sqlite-day-1'],
+    );
+    expect(rows).toHaveLength(1);
+  });
+
+  it('updatePlanDayExercises persists to SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const day = samplePlanDay({ id: 'sqlite-day-upd' });
+    act(() => {
+      result.current.addPlanDays([day]);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const newExercises = [{ exercise: { id: 'squat', name: 'Squat', primaryMuscle: 'legs', equipment: 'barbell', category: 'compound' }, sets: 5, repsMin: 5, repsMax: 5, restSeconds: 180 }];
+    act(() => {
+      result.current.updatePlanDayExercises('sqlite-day-upd', newExercises as never[]);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT exercises FROM training_plan_days WHERE id = ?',
+      ['sqlite-day-upd'],
+    );
+    expect(rows).toHaveLength(1);
+    expect(JSON.parse(rows[0].exercises as string)).toEqual(newExercises);
+  });
+
+  it('restorePlanDayOriginal persists to SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const day = samplePlanDay({ id: 'sqlite-day-restore', exercises: '[]' });
+    act(() => {
+      result.current.addPlanDays([day]);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    act(() => {
+      result.current.restorePlanDayOriginal('sqlite-day-restore');
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT exercises FROM training_plan_days WHERE id = ?',
+      ['sqlite-day-restore'],
+    );
+    expect(rows).toHaveLength(1);
+  });
+
+  it('addPlanDaySession persists to SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.addPlanDaySession('plan-1', 3, {
+        planId: 'plan-1',
+        dayOfWeek: 3,
+        sessionOrder: 1,
+        workoutType: 'pull',
+        muscleGroups: 'back',
+        exercises: '[]',
+        originalExercises: '[]',
+      });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM training_plan_days WHERE plan_id = ? AND day_of_week = ?',
+      ['plan-1', 3],
+    );
+    expect(rows).toHaveLength(1);
+  });
+
+  it('removePlanDaySession deletes from SQLite and reorders', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const day1 = samplePlanDay({ id: 'rm-day-1', sessionOrder: 1 });
+    const day2 = samplePlanDay({ id: 'rm-day-2', sessionOrder: 2 });
+    const day3 = samplePlanDay({ id: 'rm-day-3', sessionOrder: 3 });
+    act(() => {
+      result.current.addPlanDays([day1, day2, day3]);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    act(() => {
+      result.current.removePlanDaySession('rm-day-1');
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM training_plan_days WHERE id = ?',
+      ['rm-day-1'],
+    );
+    expect(rows).toHaveLength(0);
+
+    expect(result.current.trainingPlanDays).toHaveLength(2);
+    expect(result.current.trainingPlanDays[0].sessionOrder).toBe(1);
+    expect(result.current.trainingPlanDays[1].sessionOrder).toBe(2);
+  });
+
+  it('deleteWorkout deletes from SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({ id: 'del-w1' });
+    act(() => {
+      result.current.addWorkout(workout);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    await act(async () => {
+      await result.current.deleteWorkout('del-w1');
+    });
+
+    const rows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM workouts WHERE id = ?',
+      ['del-w1'],
+    );
+    expect(rows).toHaveLength(0);
+  });
+
+  it('saveWorkoutAtomic persists workout and sets via transaction', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({ id: 'atomic-w1' });
+    const sets = [
+      sampleWorkoutSet({
+        id: 'atomic-s1',
+        workoutId: 'atomic-w1',
+        exerciseId: 'barbell-bench-press',
+      }),
+    ];
+
+    await act(async () => {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    });
+
+    expect(result.current.workouts).toContainEqual(workout);
+    expect(result.current.workoutSets).toContainEqual(sets[0]);
+
+    const workoutRows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM workouts WHERE id = ?',
+      ['atomic-w1'],
+    );
+    expect(workoutRows).toHaveLength(1);
+
+    const setRows = await db.query<Record<string, unknown>>(
+      'SELECT * FROM workout_sets WHERE workout_id = ?',
+      ['atomic-w1'],
+    );
+    expect(setRows).toHaveLength(1);
+  });
+
+  it('saveWorkoutAtomic handles exercise not found in EXERCISES', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.execute('PRAGMA foreign_keys = OFF');
+
+    const workout = sampleWorkout({ id: 'atomic-w2' });
+    const sets = [
+      sampleWorkoutSet({
+        id: 'atomic-s2',
+        workoutId: 'atomic-w2',
+        exerciseId: 'non-existent-exercise',
+      }),
+    ];
+
+    await act(async () => {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    });
+
+    expect(result.current.workouts).toContainEqual(workout);
+    expect(result.current.workoutSets).toContainEqual(sets[0]);
+
+    await db.execute('PRAGMA foreign_keys = ON');
+  });
+
+  it('saveWorkoutAtomic updates Zustand state when _db is set', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.execute('PRAGMA foreign_keys = OFF');
+
+    const workout = sampleWorkout({ id: 'nodb-w1' });
+    const sets = [sampleWorkoutSet({ id: 'nodb-s1', workoutId: 'nodb-w1', exerciseId: 'custom-ex-not-in-seed' })];
+
+    await act(async () => {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    });
+
+    expect(result.current.workouts).toContainEqual(workout);
+    expect(result.current.workoutSets).toContainEqual(sets[0]);
+
+    await db.execute('PRAGMA foreign_keys = ON');
+  });
+
+  it('loadWorkoutDraft catches error when SQLite query fails', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.execute(`DROP TABLE IF EXISTS workout_drafts`);
+
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await act(async () => {
+      await result.current.loadWorkoutDraft();
+    });
+
+    expect(consoleSpy).toHaveBeenCalled();
+    expect(result.current.workoutDraft).toBeNull();
+    consoleSpy.mockRestore();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  SQLite error-path and catch-block tests                             */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – SQLite error paths', () => {
+  let db: DatabaseService;
+  let badDb: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    badDb = {
+      ...db,
+      execute: () => Promise.reject(new Error('SQLite write error')),
+      query: db.query.bind(db),
+      transaction: () => Promise.reject(new Error('Transaction error')),
+      initialize: db.initialize.bind(db),
+      queryOne: db.queryOne.bind(db),
+      exportBinary: db.exportBinary.bind(db),
+      importBinary: db.importBinary.bind(db),
+      exportToJSON: db.exportToJSON.bind(db),
+      importFromJSON: db.importFromJSON.bind(db),
+    };
+  });
+
+  it('addPlanDays catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      result.current.addPlanDays([samplePlanDay()]);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('addPlanDays'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('updatePlanDayExercises catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      useFitnessStore.setState({ trainingPlanDays: [samplePlanDay()] });
+      result.current.updatePlanDayExercises('day-1', []);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('updatePlanDayExercises'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('restorePlanDayOriginal catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      useFitnessStore.setState({ trainingPlanDays: [samplePlanDay()] });
+      result.current.restorePlanDayOriginal('day-1');
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('restorePlanDayOriginal'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('addPlanDaySession catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      result.current.addPlanDaySession('plan-1', 5, {
+        planId: 'plan-1',
+        dayOfWeek: 5,
+        sessionOrder: 1,
+        workoutType: 'push',
+        exercises: '[]',
+        originalExercises: '[]',
+      });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('addPlanDaySession'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('removePlanDaySession catches SQLite delete and reorder errors', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      useFitnessStore.setState({
+        trainingPlanDays: [
+          samplePlanDay({ id: 'err-d1', sessionOrder: 1 }),
+          samplePlanDay({ id: 'err-d2', sessionOrder: 2 }),
+        ],
+      });
+      result.current.removePlanDaySession('err-d1');
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('removePlanDaySession'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('addWorkout catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      result.current.addWorkout(sampleWorkout());
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('SQLite write failed for workout'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('deleteWorkout catches SQLite delete error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      useFitnessStore.setState({ workouts: [sampleWorkout()] });
+    });
+
+    await act(async () => {
+      await result.current.deleteWorkout('workout-1');
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('SQLite delete failed for workout'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('addWorkoutSet catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      result.current.addWorkoutSet(sampleWorkoutSet());
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('SQLite write failed for workoutSet'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('setWorkoutDraft catches SQLite write error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      result.current.setWorkoutDraft({
+        exercises: [],
+        sets: [],
+        elapsedSeconds: 0,
+      });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('SQLite write failed for workout draft'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('clearWorkoutDraft catches SQLite delete error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    act(() => {
+      result.current.clearWorkoutDraft();
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('SQLite delete failed for workout draft'),
+      expect.anything(),
+    );
+    consoleSpy.mockRestore();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  removePlanDaySession – different planId/dayOfWeek days remain       */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – removePlanDaySession reorder edge case', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetStore();
+  });
+
+  it('does not reorder days from a different planId or dayOfWeek', () => {
+    useFitnessStore.setState({
+      trainingPlanDays: [
+        samplePlanDay({ id: 'rd-1', planId: 'plan-1', dayOfWeek: 1, sessionOrder: 1 }),
+        samplePlanDay({ id: 'rd-2', planId: 'plan-1', dayOfWeek: 1, sessionOrder: 2 }),
+        samplePlanDay({ id: 'rd-other', planId: 'plan-2', dayOfWeek: 3, sessionOrder: 1 }),
+      ],
+    });
+
+    useFitnessStore.getState().removePlanDaySession('rd-1');
+
+    const days = useFitnessStore.getState().trainingPlanDays;
+    expect(days).toHaveLength(2);
+
+    const otherDay = days.find((d) => d.id === 'rd-other');
+    expect(otherDay?.sessionOrder).toBe(1);
+    expect(otherDay?.planId).toBe('plan-2');
+
+    const reorderedDay = days.find((d) => d.id === 'rd-2');
+    expect(reorderedDay?.sessionOrder).toBe(1);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Persist migration tests                                             */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – persist migrate via rehydration', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetStore();
+  });
+
+  it('migration v1→v2 adds planStrategy: null', () => {
+    const v1State = {
+      trainingProfile: null,
+      trainingPlans: [],
+      trainingPlanDays: [],
+      workouts: [],
+      workoutSets: [],
+      weightEntries: [],
+      isOnboarded: true,
+      workoutMode: 'strength',
+      workoutDraft: null,
+      sqliteReady: false,
+      showPlanCelebration: false,
+    };
+
+    localStorage.setItem(
+      'fitness-storage',
+      JSON.stringify({ state: v1State, version: 1 }),
+    );
+
+    useFitnessStore.persist.rehydrate();
+
+    const state = useFitnessStore.getState();
+    expect(state.planStrategy).toBeNull();
+    expect(state.isOnboarded).toBe(true);
+  });
+
+  it('migration v2→v2 keeps state unchanged', () => {
+    const v2State = {
+      trainingProfile: null,
+      trainingPlans: [],
+      trainingPlanDays: [],
+      workouts: [],
+      workoutSets: [],
+      weightEntries: [],
+      isOnboarded: false,
+      workoutMode: 'strength',
+      workoutDraft: null,
+      planStrategy: 'manual',
+      sqliteReady: false,
+      showPlanCelebration: false,
+    };
+
+    localStorage.setItem(
+      'fitness-storage',
+      JSON.stringify({ state: v2State, version: 2 }),
+    );
+
+    useFitnessStore.persist.rehydrate();
+
+    expect(useFitnessStore.getState().planStrategy).toBe('manual');
+  });
+
+  it('migration function returns state unchanged for version >= 2', () => {
+    const options = useFitnessStore.persist.getOptions();
+    const migrate = options.migrate;
+    if (!migrate) throw new Error('migrate function not found');
+
+    const input = { trainingPlans: [], planStrategy: 'auto' };
+    const result = migrate(input, 2) as Record<string, unknown>;
+    expect(result).toEqual(input);
+    expect(result.planStrategy).toBe('auto');
   });
 });

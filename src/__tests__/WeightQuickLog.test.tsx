@@ -529,4 +529,29 @@ describe('WeightQuickLog', () => {
     const infoRow = screen.getByTestId('info-row');
     expect(infoRow.style.fontVariantNumeric).toBe('tabular-nums');
   });
+
+  /* ---- Long press acceleration ---- */
+
+  it('accelerates to fast interval after sustained long press past threshold', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 70.0 })]);
+    renderSheet();
+
+    const incBtn = screen.getByTestId('increment-btn');
+
+    fireEvent.pointerDown(incBtn);
+
+    // LONG_PRESS_DELAY = 500ms, then 8 ticks × 150ms = 1200ms → acceleration at tick 9
+    // Advance 1800ms total to ensure acceleration branch is hit
+    act(() => { vi.advanceTimersByTime(1800); });
+
+    fireEvent.pointerUp(incBtn);
+
+    const displayText = screen.getByTestId('weight-display').textContent;
+    const weight = parseFloat(displayText ?? '0');
+    // After 500ms delay + many ticks (9 slow + fast ticks), weight increases significantly
+    expect(weight).toBeGreaterThan(70.5);
+
+    vi.useRealTimers();
+  });
 });

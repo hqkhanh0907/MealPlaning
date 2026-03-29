@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
 import { PlanDayEditor } from '../features/fitness/components/PlanDayEditor';
@@ -501,5 +500,42 @@ describe('PlanDayEditor', () => {
     expect(screen.queryByTestId('exercise-selector')).not.toBeInTheDocument();
     expect(screen.getByText('Bench Press')).toBeInTheDocument();
     expect(screen.getByText('OHP')).toBeInTheDocument();
+  });
+
+  it('exercise names use line-clamp-2 and have title tooltip', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const names = screen.getAllByTestId('exercise-name');
+    names.forEach(name => {
+      expect(name.className).toContain('line-clamp-2');
+      expect(name).toHaveAttribute('title');
+    });
+  });
+
+  it('undo toast has aria-live polite attribute', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButtons = screen.getAllByLabelText(/remove/i);
+    fireEvent.click(removeButtons[0]);
+    const toast = screen.getByRole('status');
+    expect(toast).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('expand button has aria-controls linking to params panel', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const exerciseNames = screen.getAllByTestId('exercise-name');
+    fireEvent.click(exerciseNames[0]);
+    const expandBtn = exerciseNames[0].closest('button');
+    expect(expandBtn).not.toBeNull();
+    expect(expandBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(expandBtn).toHaveAttribute('aria-controls', 'exercise-params-0');
+  });
+
+  it('unsaved changes dialog dismisses with Escape', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    fireEvent.click(screen.getByLabelText('Quay lại'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

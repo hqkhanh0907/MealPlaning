@@ -20,10 +20,6 @@ export function useModalBackHandler(isOpen: boolean, onClose: () => void) {
 
   useEffect(() => {
     if (!isOpen) {
-      if (isPushedRef.current) {
-        isPushedRef.current = false;
-        removeTopBackEntry();
-      }
       return;
     }
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClearPlanModal } from '../components/modals/ClearPlanModal';
-import type { DayPlan } from '../types';
+import type { DayPlan, MealType } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({
   useModalBackHandler: vi.fn(),
@@ -42,12 +42,12 @@ describe('ClearPlanModal', () => {
     makePlan('2024-01-17', [], ['d6'], []),
   ];
 
-  let onClear: ReturnType<typeof vi.fn>;
-  let onClose: ReturnType<typeof vi.fn>;
+  let onClear = vi.fn<(scope: 'month' | 'week' | 'day', meals?: MealType[]) => void>();
+  let onClose = vi.fn<() => void>();
 
   beforeEach(() => {
-    onClear = vi.fn();
-    onClose = vi.fn();
+    onClear = vi.fn<(scope: 'month' | 'week' | 'day', meals?: MealType[]) => void>();
+    onClose = vi.fn<() => void>();
   });
 
   const renderModal = (

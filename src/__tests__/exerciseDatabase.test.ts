@@ -16,6 +16,8 @@ function createMockDb(): DatabaseService & { rows: Record<string, unknown>[] } {
     query: vi.fn(async () => [{ count: rows.length }]) as DatabaseService['query'],
     queryOne: vi.fn(async () => null),
     transaction: vi.fn(async (fn: () => Promise<void>) => fn()),
+    exportBinary: vi.fn().mockReturnValue(new Uint8Array()),
+    importBinary: vi.fn(),
     exportToJSON: vi.fn(async () => '{}'),
     importFromJSON: vi.fn(),
   };

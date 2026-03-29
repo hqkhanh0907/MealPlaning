@@ -43,12 +43,12 @@ describe('CopyPlanModal', () => {
     makeDish('d3', 'Bún chả'),
   ];
 
-  let onCopy: ReturnType<typeof vi.fn>;
-  let onClose: ReturnType<typeof vi.fn>;
+  let onCopy = vi.fn<(targetDates: string[], mergeMode: boolean) => void>();
+  let onClose = vi.fn<() => void>();
 
   beforeEach(() => {
-    onCopy = vi.fn();
-    onClose = vi.fn();
+    onCopy = vi.fn<(targetDates: string[], mergeMode: boolean) => void>();
+    onClose = vi.fn<() => void>();
   });
 
   const renderModal = (

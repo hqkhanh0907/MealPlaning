@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Dumbbell, Moon, ChevronRight, Calendar, CalendarPlus, RefreshCw, ClipboardList, Pencil, RotateCcw, Plus, Trash2 } from 'lucide-react';
+import { Play, Dumbbell, Moon, ChevronRight, Calendar, CalendarPlus, RefreshCw, ClipboardList, Pencil, RotateCcw, Plus, Trash2, X } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
 import { ConfirmationModal } from '../../../components/modals/ConfirmationModal';
@@ -66,10 +67,14 @@ function TrainingPlanViewInner({
   isGenerating = false,
 }: TrainingPlanViewProps): React.JSX.Element {
   const { t } = useTranslation();
-  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
-  const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
-  const workouts = useFitnessStore((s) => s.workouts);
-  const workoutSets = useFitnessStore((s) => s.workoutSets);
+  const { trainingPlans, trainingPlanDays, workouts, workoutSets } = useFitnessStore(
+    useShallow((s) => ({
+      trainingPlans: s.trainingPlans,
+      trainingPlanDays: s.trainingPlanDays,
+      workouts: s.workouts,
+      workoutSets: s.workoutSets,
+    })),
+  );
   const pushPage = useNavigationStore((s) => s.pushPage);
   const { targetCalories, targetProtein } = useNutritionTargets();
   const { eaten, protein } = useTodayNutrition();
@@ -81,6 +86,13 @@ function TrainingPlanViewInner({
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [dayContextMenu, setDayContextMenu] = useState<{ dayNum: number; x: number; y: number } | null>(null);
   const [showConvertToRestConfirm, setShowConvertToRestConfirm] = useState<number | null>(null);
+  const [coachingDismissed, setCoachingDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('planCoachingDismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const todayCaloriesOut = useMemo(() => {
@@ -219,6 +231,22 @@ function TrainingPlanViewInner({
     onGeneratePlan();
   }, [onGeneratePlan]);
 
+  const handleDismissCoaching = useCallback(() => {
+    setCoachingDismissed(true);
+    try {
+      localStorage.setItem('planCoachingDismissed', 'true');
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleSelectSession = useCallback((id: string) => {
+    setActiveSessionIds((prev) => ({ ...prev, [viewedDay]: id }));
+  }, [viewedDay]);
+
+  const handleOpenAddSession = useCallback(() => {
+    setAddSessionDow(viewedDay);
+    setShowAddSessionModal(true);
+  }, [viewedDay]);
+
   useEffect(() => {
     if (!dayContextMenu) return;
     function handleClickOutside(e: MouseEvent) {
@@ -228,6 +256,23 @@ function TrainingPlanViewInner({
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dayContextMenu]);
+
+  useEffect(() => {
+    if (!dayContextMenu) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setDayContextMenu(null);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [dayContextMenu]);
+
+  useEffect(() => {
+    if (dayContextMenu && contextMenuRef.current) {
+      contextMenuRef.current.focus();
+    }
   }, [dayContextMenu]);
 
   if (activePlan && planExpired) {
@@ -251,7 +296,7 @@ function TrainingPlanViewInner({
             data-testid="create-new-cycle-btn"
             type="button"
             onClick={onGeneratePlan}
-            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-95"
+            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-95 motion-reduce:transform-none"
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             {t('fitness.plan.createNewCycle')}
@@ -283,7 +328,7 @@ function TrainingPlanViewInner({
               data-testid="create-manual-plan-btn"
               type="button"
               onClick={onCreateManualPlan}
-              className="flex min-h-[44px] items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-95"
+              className="flex min-h-[44px] items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-95 motion-reduce:transform-none"
             >
               <CalendarPlus className="h-4 w-4" aria-hidden="true" />
               {t('fitness.plan.createFirstWorkout')}
@@ -311,7 +356,7 @@ function TrainingPlanViewInner({
             type="button"
             onClick={onGeneratePlan}
             disabled={isGenerating}
-            className="flex min-h-[44px] items-center gap-1 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-95 disabled:opacity-60"
+            className="flex min-h-[44px] items-center gap-1 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-95 motion-reduce:transform-none disabled:opacity-60"
           >
             {isGenerating ? (
               <>
@@ -389,9 +434,16 @@ function TrainingPlanViewInner({
           ref={contextMenuRef}
           data-testid="day-context-menu"
           role="menu"
+          tabIndex={-1}
           aria-label={t('fitness.plan.dayContextMenu')}
           className="fixed z-50 min-w-[180px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
-          style={{ left: dayContextMenu.x, top: dayContextMenu.y }}
+          style={{
+            left: Math.min(dayContextMenu.x, window.innerWidth - 200),
+            top: Math.min(dayContextMenu.y, window.innerHeight - 100),
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setDayContextMenu(null);
+          }}
         >
           {(daySessionsMap.get(dayContextMenu.dayNum) ?? []).length > 0 ? (
             <button
@@ -419,6 +471,26 @@ function TrainingPlanViewInner({
         </div>
       )}
 
+      {!coachingDismissed && (
+        <div
+          data-testid="plan-coaching-hint"
+          role="status"
+          className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20"
+        >
+          <span className="flex-1 text-sm text-emerald-700 dark:text-emerald-300">
+            {t('fitness.plan.coachingHint')}
+          </span>
+          <button
+            type="button"
+            onClick={handleDismissCoaching}
+            aria-label={t('common.dismiss')}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-emerald-500 hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-emerald-400 dark:hover:bg-emerald-800"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <button
         data-testid="regenerate-plan-btn"
         type="button"
@@ -440,8 +512,8 @@ function TrainingPlanViewInner({
               sessions={viewedDaySessions}
               activeSessionId={activeSessionIds[viewedDay] ?? viewedDaySessions[0].id}
               completedSessionIds={[]}
-              onSelectSession={(id) => setActiveSessionIds((prev) => ({ ...prev, [viewedDay]: id }))}
-              onAddSession={() => { setAddSessionDow(viewedDay); setShowAddSessionModal(true); }}
+              onSelectSession={handleSelectSession}
+              onAddSession={handleOpenAddSession}
               onDeleteSession={(dayId) => useFitnessStore.getState().removePlanDaySession(dayId)}
             />
           )}
@@ -540,12 +612,25 @@ function TrainingPlanViewInner({
               data-testid="start-workout-btn"
               type="button"
               onClick={() => handleStartWorkout(viewedPlanDay)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-lg font-bold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.98]"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-lg font-bold text-white transition-[colors,transform] hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             >
               <Play className="h-5 w-5" aria-hidden="true" />
               {t('fitness.plan.startWorkout')}
             </button>
           )}
+
+          {/* Day actions - visible alternative to context menu */}
+          <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
+            <button
+              data-testid="day-convert-rest-btn"
+              type="button"
+              onClick={() => handleConvertToRest(viewedDay)}
+              className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-400 dark:hover:bg-rose-900/40"
+            >
+              <Moon className="h-4 w-4" aria-hidden="true" />
+              {t('fitness.plan.convertToRest')}
+            </button>
+          </div>
         </div>
       ) : (
         <div
@@ -561,6 +646,17 @@ function TrainingPlanViewInner({
             <li>{t('fitness.plan.restDayTip2')}</li>
             <li>{t('fitness.plan.restDayTip3')}</li>
           </ul>
+
+          {/* Rest day action - visible alternative to context menu */}
+          <button
+            data-testid="rest-add-workout-btn"
+            type="button"
+            onClick={() => handleAddWorkoutToDay(viewedDay)}
+            className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-white/20 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            {t('fitness.plan.convertToWorkout')}
+          </button>
 
           {isViewingToday && tomorrowPlanDay && (
             <p

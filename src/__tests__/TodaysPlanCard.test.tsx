@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useDayPlanStore } from '../store/dayPlanStore';
@@ -681,6 +681,93 @@ describe('TodaysPlanCard', () => {
       expect(screen.getByTestId('workout-name')).toHaveTextContent('Upper Body A');
       expect(screen.getByTestId('start-workout-cta')).toBeInTheDocument();
       expect(screen.queryByTestId('session-info')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('handleLogMeal navigation', () => {
+    it('log meal CTA navigates to calendar tab', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      fireEvent.click(screen.getByTestId('log-meal-cta'));
+
+      const { activeTab } = useNavigationStore.getState();
+      expect(activeTab).toBe('calendar');
+    });
+  });
+
+  describe('WeightQuickLog integration', () => {
+    it('rest-day: closing WeightQuickLog removes it from DOM', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-mon', dayOfWeek: 1 }),
+          makePlanDay({
+            id: 'day-thu',
+            dayOfWeek: 4,
+            workoutType: 'Lower Body A',
+            muscleGroups: 'quads, hamstrings',
+          }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      fireEvent.click(screen.getByTestId('log-weight-chip'));
+      expect(screen.getByTestId('weight-quick-log')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Close'));
+      expect(screen.queryByTestId('weight-quick-log')).not.toBeInTheDocument();
+    });
+
+    it('training-pending: WeightQuickLog renders when showWeightLog is true', async () => {
+      // Start in rest-day to access log-weight-chip
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-mon', dayOfWeek: 1 }),
+          makePlanDay({
+            id: 'day-thu',
+            dayOfWeek: 4,
+            workoutType: 'Lower Body A',
+            muscleGroups: 'quads, hamstrings',
+          }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      // Click log weight in rest-day state to set showWeightLog=true
+      fireEvent.click(screen.getByTestId('log-weight-chip'));
+      expect(screen.getByTestId('weight-quick-log')).toBeInTheDocument();
+
+      // Transition to training-pending by adding a plan day for Wednesday (dayOfWeek=3)
+      await act(async () => {
+        useFitnessStore.setState({
+          trainingPlanDays: [
+            makePlanDay({ id: 'day-mon', dayOfWeek: 1 }),
+            makePlanDay({ id: 'day-wed', dayOfWeek: 3 }),
+            makePlanDay({
+              id: 'day-thu',
+              dayOfWeek: 4,
+              workoutType: 'Lower Body A',
+              muscleGroups: 'quads, hamstrings',
+            }),
+          ],
+        });
+      });
+
+      // Now in training-pending with showWeightLog still true (covers line 199)
+      expect(screen.getByTestId('start-workout-cta')).toBeInTheDocument();
+      expect(screen.getByTestId('weight-quick-log')).toBeInTheDocument();
+
+      // Close WeightQuickLog to exercise onClose callback from line 199
+      fireEvent.click(screen.getByText('Close'));
+      expect(screen.queryByTestId('weight-quick-log')).not.toBeInTheDocument();
     });
   });
 });

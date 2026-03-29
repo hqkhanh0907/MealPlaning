@@ -1,5 +1,28 @@
 import { deriveInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
 import type { FitnessNutritionInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
+import { useFitnessNutritionBridge } from '../features/fitness/hooks/useFitnessNutritionBridge';
+import { renderHook } from '@testing-library/react';
+import type { Mock } from 'vitest';
+import { useFitnessStore } from '../store/fitnessStore';
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import * as todayNutrition from '../hooks/useTodayNutrition';
+
+vi.mock('../store/fitnessStore', () => ({
+  useFitnessStore: vi.fn(),
+}));
+
+vi.mock('../features/health-profile/store/healthProfileStore', () => ({
+  useHealthProfileStore: vi.fn(),
+}));
+
+vi.mock('../hooks/useTodayNutrition', () => ({
+  useTodayNutrition: vi.fn(() => ({ eaten: 0, protein: 0 })),
+}));
+
+vi.mock('../services/nutritionEngine', () => ({
+  calculateBMR: vi.fn(() => 1800),
+  calculateTDEE: vi.fn(() => 2500),
+}));
 
 describe('deriveInsight', () => {
   it('returns deficit-on-training when calories < 75% budget on training day', () => {
@@ -132,5 +155,122 @@ describe('deriveInsight', () => {
       112,
     );
     expect(result).toBeNull();
+  });
+});
+
+/* ================================================================== */
+/*  useFitnessNutritionBridge hook tests                                */
+/* ================================================================== */
+
+function formatDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+const DEFAULT_PROFILE = {
+  id: 'default',
+  name: 'Test',
+  gender: 'male' as const,
+  age: 30,
+  dateOfBirth: null,
+  heightCm: 175,
+  weightKg: 70,
+  activityLevel: 'moderate' as const,
+  proteinRatio: 2,
+  fatPct: 0.25,
+  targetCalories: 2000,
+  updatedAt: '2024-01-01',
+};
+
+describe('useFitnessNutritionBridge hook', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: unknown[] }) => unknown) =>
+        selector({ workouts: [] }),
+    );
+    (useHealthProfileStore as unknown as Mock).mockImplementation(
+      (selector: (s: { profile: typeof DEFAULT_PROFILE }) => unknown) =>
+        selector({ profile: DEFAULT_PROFILE }),
+    );
+    vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
+      eaten: 2000,
+      protein: 120,
+    });
+  });
+
+  it('returns result with no workouts (rest day)', () => {
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+
+    expect(result.current.isTrainingDay).toBe(false);
+    expect(result.current.weeklyTrainingLoad).toBe(0);
+    expect(result.current.todayCalorieBudget).toBe(2500);
+  });
+
+  it('identifies training day when workout matches today', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+        selector({
+          workouts: [{ date: today }],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.isTrainingDay).toBe(true);
+    expect(result.current.weeklyTrainingLoad).toBeGreaterThanOrEqual(1);
+  });
+
+  it('calculates weekly training load for current week', () => {
+    const today = new Date();
+    const d1 = formatDate(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const d2 = formatDate(yesterday);
+
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+        selector({
+          workouts: [{ date: d1 }, { date: d2 }],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.weeklyTrainingLoad).toBe(2);
+  });
+
+  it('excludes workouts from previous weeks', () => {
+    const lastMonth = new Date();
+    lastMonth.setDate(lastMonth.getDate() - 30);
+    const oldDate = formatDate(lastMonth);
+
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+        selector({
+          workouts: [{ date: oldDate }],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.weeklyTrainingLoad).toBe(0);
+    expect(result.current.isTrainingDay).toBe(false);
+  });
+
+  it('returns insight object from deriveInsight integration', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+        selector({ workouts: [{ date: today }] }),
+    );
+    vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
+      eaten: 500,
+      protein: 10,
+    });
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.insight).not.toBeNull();
+    expect(result.current.insight?.type).toBe('deficit-on-training');
   });
 });

@@ -197,4 +197,97 @@ describe('dishStore', () => {
       expect(useDishStore.getState().dishes[0].tags).toEqual([]);
     });
   });
+
+  describe('loadAll', () => {
+    it('loads dishes with ingredients from database', async () => {
+      const mockDb = {
+        query: vi.fn()
+          .mockResolvedValueOnce([
+            {
+              id: 'db-dish-1',
+              name_vi: 'Phở',
+              name_en: 'Pho',
+              tags: '["soup"]',
+              rating: 5,
+              notes: 'Delicious',
+            },
+          ])
+          .mockResolvedValueOnce([
+            { ingredient_id: 'ing-1', amount: 200 },
+            { ingredient_id: 'ing-2', amount: 100 },
+          ]),
+      };
+
+      await useDishStore.getState().loadAll(mockDb as never);
+
+      const { dishes } = useDishStore.getState();
+      expect(dishes).toHaveLength(1);
+      expect(dishes[0].id).toBe('db-dish-1');
+      expect(dishes[0].name).toEqual({ vi: 'Phở', en: 'Pho' });
+      expect(dishes[0].tags).toEqual(['soup']);
+      expect(dishes[0].rating).toBe(5);
+      expect(dishes[0].notes).toBe('Delicious');
+      expect(dishes[0].ingredients).toEqual([
+        { ingredientId: 'ing-1', amount: 200 },
+        { ingredientId: 'ing-2', amount: 100 },
+      ]);
+    });
+
+    it('loads dish without optional fields (name_en, rating, notes)', async () => {
+      const mockDb = {
+        query: vi.fn()
+          .mockResolvedValueOnce([
+            {
+              id: 'db-dish-2',
+              name_vi: 'Bún bò',
+              name_en: null,
+              tags: '["noodle"]',
+              rating: null,
+              notes: null,
+            },
+          ])
+          .mockResolvedValueOnce([]),
+      };
+
+      await useDishStore.getState().loadAll(mockDb as never);
+
+      const { dishes } = useDishStore.getState();
+      expect(dishes).toHaveLength(1);
+      expect(dishes[0].name).toEqual({ vi: 'Bún bò' });
+      expect(dishes[0].rating).toBeUndefined();
+      expect(dishes[0].notes).toBeUndefined();
+      expect(dishes[0].ingredients).toEqual([]);
+    });
+
+    it('does nothing when database returns empty rows', async () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([]),
+      };
+
+      await useDishStore.getState().loadAll(mockDb as never);
+
+      expect(useDishStore.getState().dishes).toHaveLength(1);
+    });
+
+    it('loads multiple dishes from database', async () => {
+      const mockDb = {
+        query: vi.fn()
+          .mockResolvedValueOnce([
+            { id: 'd1', name_vi: 'A', name_en: null, tags: '[]', rating: null, notes: null },
+            { id: 'd2', name_vi: 'B', name_en: 'B-en', tags: '["tag"]', rating: 3, notes: 'note' },
+          ])
+          .mockResolvedValueOnce([{ ingredient_id: 'i1', amount: 50 }])
+          .mockResolvedValueOnce([]),
+      };
+
+      await useDishStore.getState().loadAll(mockDb as never);
+
+      const { dishes } = useDishStore.getState();
+      expect(dishes).toHaveLength(2);
+      expect(dishes[0].ingredients).toEqual([{ ingredientId: 'i1', amount: 50 }]);
+      expect(dishes[1].ingredients).toEqual([]);
+    });
+  });
 });

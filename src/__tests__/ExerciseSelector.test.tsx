@@ -316,4 +316,50 @@ describe('ExerciseSelector', () => {
     await user.click(screen.getByTestId('add-custom-exercise'));
     expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();
   });
+
+  it('saves custom exercise via form submission', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
+    render(
+      <ExerciseSelector
+        isOpen
+        onClose={onClose}
+        onSelect={onSelect}
+        equipmentFilter={[]}
+      />,
+    );
+
+    await user.click(screen.getByTestId('add-custom-exercise'));
+    expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();
+
+    const nameInput = screen.getByTestId('custom-exercise-name');
+    await user.type(nameInput, 'My Custom Exercise');
+
+    const submitBtn = screen.getByTestId('save-custom-exercise');
+    await user.click(submitBtn);
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nameVi: 'My Custom Exercise',
+        nameEn: 'My Custom Exercise',
+        isCustom: true,
+        exerciseType: 'strength',
+      }),
+    );
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('closes custom exercise modal via backdrop close', async () => {
+    const user = userEvent.setup();
+    render(<ExerciseSelector {...defaultProps} />);
+
+    await user.click(screen.getByTestId('add-custom-exercise'));
+    expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();
+
+    const overlays = screen.getAllByTestId('backdrop-overlay');
+    await user.click(overlays[overlays.length - 1]);
+
+    expect(screen.queryByTestId('custom-exercise-modal')).not.toBeInTheDocument();
+  });
 });

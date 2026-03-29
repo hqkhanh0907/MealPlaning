@@ -496,4 +496,31 @@ describe('ProgressDashboard', () => {
       '1RM ước tính',
     );
   });
+
+  it('shows plateau insight when exercise shows no strength improvement', () => {
+    // analyzePlateau requires 6+ sets for an exercise with no max-weight increase
+    // across the most recent 9 sets (sorted by updatedAt desc):
+    //   maxRecent = max(topWeights[0:3]), maxPrevious = max(topWeights[3:9])
+    //   strengthPlateau = maxRecent <= maxPrevious
+    const plateauSets = Array.from({ length: 9 }, (_, i) => ({
+      id: `ps${i}`,
+      workoutId: 'w1',
+      exerciseId: 'e2',
+      setNumber: i + 1,
+      reps: 10,
+      weightKg: 80,
+      updatedAt: `2024-01-${String(10 - i).padStart(2, '0')}T10:00:00Z`,
+    }));
+
+    setupStore({
+      ...fullState(),
+      workoutSets: [thisWeekSet, lastWeekSet, ...plateauSets],
+    });
+    render(<ProgressDashboard />);
+
+    expect(screen.getByTestId('insight-plateau-e2')).toBeInTheDocument();
+    expect(screen.getByTestId('insight-plateau-e2').textContent).toContain(
+      'Strength stagnation',
+    );
+  });
 });

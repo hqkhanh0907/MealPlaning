@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Save, Loader2, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
   const notify = useNotification();
 
   const { control, watch, getValues, setValue } = useForm<SaveAnalyzedDishFormData>({
-    resolver: zodResolver(saveAnalyzedDishSchema),
+    resolver: zodResolver(saveAnalyzedDishSchema) as unknown as Resolver<SaveAnalyzedDishFormData>,
     mode: 'onBlur',
     defaultValues: {
       name: result.name,

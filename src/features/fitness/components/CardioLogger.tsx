@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,16 +31,16 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
   const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
   const weightKg = useHealthProfileStore((s) => s.profile.weightKg);
 
-  const { control, handleSubmit, watch, setValue } = useForm<CardioLoggerFormData>({
-    resolver: zodResolver(cardioLoggerSchema),
+  const { control, handleSubmit, setValue } = useForm<CardioLoggerFormData>({
+    resolver: zodResolver(cardioLoggerSchema) as unknown as Resolver<CardioLoggerFormData>,
     mode: 'onBlur',
     defaultValues: cardioLoggerDefaults,
   });
 
-  const selectedType = watch('selectedType');
-  const isStopwatchMode = watch('isStopwatchMode');
-  const manualDuration = watch('manualDuration');
-  const intensity = watch('intensity');
+  const [selectedType, isStopwatchMode, manualDuration, intensity] = useWatch({
+    control,
+    name: ['selectedType', 'isStopwatchMode', 'manualDuration', 'intensity'],
+  });
 
   const headerTimer = useTimer(true);
   const stopwatch = useTimer();

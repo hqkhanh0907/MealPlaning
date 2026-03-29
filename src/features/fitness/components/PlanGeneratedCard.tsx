@@ -42,7 +42,7 @@ export const PlanGeneratedCard: React.FC = () => {
         <p className="mt-3 text-sm text-white/80">
           {t('fitness.celebration.planSummary', {
             split: activePlan.splitType,
-            weeks: activePlan.cycleWeeks,
+            weeks: activePlan.durationWeeks,
           })}
         </p>
       )}

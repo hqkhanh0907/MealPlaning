@@ -35,13 +35,16 @@ describe('useNutritionTargets', () => {
   it('returns computed targets when health profile is configured', () => {
     const customProfile: HealthProfile = {
       id: 'default',
+      name: '',
       gender: 'male',
       age: 25,
+      dateOfBirth: null,
       heightCm: 180,
       weightKg: 80,
       activityLevel: 'active',
       proteinRatio: 2.2,
       fatPct: 0.25,
+      targetCalories: 0,
       updatedAt: new Date().toISOString(),
     };
     useHealthProfileStore.setState({ profile: customProfile });
@@ -64,13 +67,16 @@ describe('useNutritionTargets', () => {
   it('recalculates when profile changes', () => {
     const profileA: HealthProfile = {
       id: 'default',
+      name: '',
       gender: 'female',
       age: 28,
+      dateOfBirth: null,
       heightCm: 165,
       weightKg: 60,
       activityLevel: 'light',
       proteinRatio: 1.8,
       fatPct: 0.3,
+      targetCalories: 0,
       updatedAt: new Date().toISOString(),
     };
     useHealthProfileStore.setState({ profile: profileA });
@@ -98,13 +104,16 @@ describe('useNutritionTargets', () => {
   it('includes active goal offset in target', () => {
     const customProfile: HealthProfile = {
       id: 'default',
+      name: '',
       gender: 'male',
       age: 30,
+      dateOfBirth: null,
       heightCm: 175,
       weightKg: 85,
       activityLevel: 'moderate',
       proteinRatio: 2.0,
       fatPct: 0.25,
+      targetCalories: 0,
       updatedAt: new Date().toISOString(),
     };
 
@@ -137,14 +146,17 @@ describe('useNutritionTargets', () => {
   it('returns correct macro split', () => {
     const customProfile: HealthProfile = {
       id: 'default',
+      name: '',
       gender: 'male',
       age: 25,
+      dateOfBirth: null,
       heightCm: 180,
       weightKg: 80,
       activityLevel: 'active',
       proteinRatio: 2.0,
       fatPct: 0.25,
       bodyFatPct: 0.15,
+      targetCalories: 0,
       updatedAt: new Date().toISOString(),
     };
     useHealthProfileStore.setState({ profile: customProfile });

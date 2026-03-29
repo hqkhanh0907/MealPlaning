@@ -16,12 +16,12 @@ vi.mock('../components/shared/ModalBackdrop', () => ({
 }));
 
 describe('ConfirmationModal', () => {
-  let onConfirm: ReturnType<typeof vi.fn>;
-  let onCancel: ReturnType<typeof vi.fn>;
+  let onConfirm = vi.fn<() => void>();
+  let onCancel = vi.fn<() => void>();
 
   beforeEach(() => {
-    onConfirm = vi.fn();
-    onCancel = vi.fn();
+    onConfirm = vi.fn<() => void>();
+    onCancel = vi.fn<() => void>();
   });
 
   const renderModal = (overrides: Record<string, unknown> = {}) =>

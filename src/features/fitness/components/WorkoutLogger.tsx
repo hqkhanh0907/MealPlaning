@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -152,7 +153,7 @@ export function WorkoutLogger({
   const { suggestNextSet: getOverloadSuggestion } = useProgressiveOverload();
 
   const { getValues, setValue, watch } = useForm<WorkoutLoggerFormData>({
-    resolver: zodResolver(workoutLoggerSchema),
+    resolver: zodResolver(workoutLoggerSchema) as unknown as Resolver<WorkoutLoggerFormData>,
     mode: 'onBlur',
     defaultValues: { setInputs: {} },
   });

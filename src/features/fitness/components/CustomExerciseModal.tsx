@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
@@ -42,7 +43,7 @@ export function CustomExerciseModal({
     reset,
     formState: { errors },
   } = useForm<CustomExerciseFormData>({
-    resolver: zodResolver(customExerciseSchema),
+    resolver: zodResolver(customExerciseSchema) as unknown as Resolver<CustomExerciseFormData>,
     mode: 'onBlur',
     defaultValues: customExerciseDefaults,
   });

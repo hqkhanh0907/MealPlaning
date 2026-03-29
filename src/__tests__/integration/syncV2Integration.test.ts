@@ -394,7 +394,7 @@ function createMockDb(
         return _stored[match[1]];
       }
       return [];
-    }),
+    }) as DatabaseService['query'],
     queryOne: vi.fn(),
     transaction: transactionFn,
     exportBinary: vi.fn(() => new Uint8Array()),

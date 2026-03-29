@@ -27,13 +27,13 @@ const defaultProfile = {
 
 function renderModal(overrides: Partial<{
   userProfile: { weight: number; proteinRatio: number; targetCalories: number };
-  onUpdateProfile: ReturnType<typeof vi.fn>;
-  onClose: ReturnType<typeof vi.fn>;
+  onUpdateProfile: (profile: { weight: number; proteinRatio: number; targetCalories: number }) => void;
+  onClose: () => void;
 }> = {}) {
   const props = {
     userProfile: overrides.userProfile ?? { ...defaultProfile },
-    onUpdateProfile: overrides.onUpdateProfile ?? vi.fn(),
-    onClose: overrides.onClose ?? vi.fn(),
+    onUpdateProfile: overrides.onUpdateProfile ?? vi.fn<(profile: { weight: number; proteinRatio: number; targetCalories: number }) => void>(),
+    onClose: overrides.onClose ?? vi.fn<() => void>(),
   };
   const result = render(<GoalSettingsModal {...props} />);
   return { ...result, props };

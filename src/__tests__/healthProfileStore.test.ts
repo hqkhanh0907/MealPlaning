@@ -17,6 +17,8 @@ function createMockDb(overrides: Partial<DatabaseService> = {}): DatabaseService
     query: vi.fn().mockResolvedValue([]),
     queryOne: vi.fn().mockResolvedValue(null),
     transaction: vi.fn(),
+    exportBinary: vi.fn().mockReturnValue(new Uint8Array()),
+    importBinary: vi.fn(),
     exportToJSON: vi.fn(),
     importFromJSON: vi.fn(),
     ...overrides,

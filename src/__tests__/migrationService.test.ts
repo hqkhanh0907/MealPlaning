@@ -326,7 +326,7 @@ describe('migrationService', () => {
 
     // Malformed JSON is gracefully skipped (returns null from parseZustand)
     expect(result.success).toBe(true);
-    expect(result.migratedCounts.ingredients).toBe(0);
+    expect(result.migratedCounts?.ingredients).toBe(0);
   });
 
   /* --- Sets migration flag on success --- */
@@ -423,6 +423,35 @@ describe('migrationService', () => {
       'mp-ingredients',
       JSON.stringify({ state: { somethingElse: [] }, version: 0 }),
     );
+
+    const result = await migrateFromLocalStorage(db);
+
+    expect(result.success).toBe(true);
+    expect(result.migratedCounts?.ingredients).toBe(0);
+  });
+
+  /* --- readZustandState legacy array format (lines 60-61) --- */
+
+  it('handles legacy format — raw array stored without Zustand wrapper', async () => {
+    localStorage.setItem('mp-ingredients', JSON.stringify([SAMPLE_INGREDIENT]));
+
+    const result = await migrateFromLocalStorage(db);
+
+    expect(result.success).toBe(true);
+    expect(result.migratedCounts?.ingredients).toBe(1);
+  });
+
+  it('handles legacy format — raw array for day plans', async () => {
+    localStorage.setItem('mp-day-plans', JSON.stringify([SAMPLE_DAY_PLAN]));
+
+    const result = await migrateFromLocalStorage(db);
+
+    expect(result.success).toBe(true);
+    expect(result.migratedCounts?.dayPlans).toBe(1);
+  });
+
+  it('returns null for object with no state and not an array', async () => {
+    localStorage.setItem('mp-ingredients', JSON.stringify({ noState: true }));
 
     const result = await migrateFromLocalStorage(db);
 

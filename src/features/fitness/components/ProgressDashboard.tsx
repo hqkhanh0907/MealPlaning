@@ -301,6 +301,7 @@ function ProgressDashboardInner() {
           .sort()
           .map((key) => weekMap.get(key) ?? 0);
       }
+      /* v8 ignore next 3 -- TypeScript exhaustiveness check: all MetricCardType values handled above */
       default: {
         const _exhaustive: never = selectedCard;
         return _exhaustive;

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SessionTabs } from '../features/fitness/components/SessionTabs';
 import type { TrainingPlanDay } from '../features/fitness/types';
 
@@ -262,6 +263,71 @@ describe('SessionTabs', () => {
       fireEvent.contextMenu(screen.getAllByRole('tab')[0]);
       const dialog = screen.getByRole('alertdialog');
       expect(dialog).toHaveAttribute('aria-label', 'Xóa buổi tập này?');
+    });
+
+    it('shows visible delete button on active tab when 2+ sessions', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      const deleteBtn = screen.getByTestId('delete-session-pd-1');
+      expect(deleteBtn).toBeInTheDocument();
+    });
+
+    it('does not show delete button when only 1 session', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      expect(screen.queryByTestId('delete-session-pd-1')).not.toBeInTheDocument();
+    });
+
+    it('clicking visible delete button shows confirmation', async () => {
+      const user = userEvent.setup();
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      const deleteBtn = screen.getByTestId('delete-session-pd-1');
+      await user.click(deleteBtn);
+      expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
+    });
+
+    it('dismisses delete confirmation with Escape key', async () => {
+      const user = userEvent.setup();
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      const deleteBtn = screen.getByTestId('delete-session-pd-1');
+      await user.click(deleteBtn);
+      expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
+      await user.keyboard('{Escape}');
+      expect(screen.queryByTestId('delete-session-confirm')).not.toBeInTheDocument();
     });
   });
 });

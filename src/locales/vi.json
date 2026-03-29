@@ -28,6 +28,7 @@
     "selectAll": "Chọn tất cả",
     "deselectAll": "Bỏ chọn tất cả",
     "done": "Hoàn tất",
+    "dismiss": "Bỏ qua",
     "apply": "Áp dụng",
     "reloadPage": "Tải lại trang",
     "errorOccurred": "Đã xảy ra lỗi",
@@ -845,7 +846,10 @@
       "confirmRegenerate": "Tạo lại",
       "cancelRegenerate": "Hủy",
       "convertToRest": "Chuyển thành ngày nghỉ",
-      "convertToWorkout": "Thêm buổi tập"
+      "convertToRestConfirm": "Xóa tất cả buổi tập ngày này và chuyển thành ngày nghỉ?",
+      "convertToWorkout": "Thêm buổi tập",
+      "coachingHint": "Chạm ✏ để chỉnh bài tập \u2022 Chạm ngày để xem buổi tập",
+      "dayContextMenu": "Tùy chọn ngày tập"
     },
     "workout": {
       "tab": "Buổi tập"

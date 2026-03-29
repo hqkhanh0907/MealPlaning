@@ -182,6 +182,7 @@ export function UnifiedOnboarding() {
           case 1: return <ActivityLevelStep {...stepProps} />;
           case 2: return <NutritionGoalStep {...stepProps} />;
           case 3: return <HealthConfirmStep {...stepProps} />;
+          /* v8 ignore next -- defensive: step is always 0-3, managed by internal useState */
           default: return null;
         }
       case 3: return <TrainingCoreStep {...stepProps} />;

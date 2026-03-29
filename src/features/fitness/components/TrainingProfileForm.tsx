@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import type { Resolver, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useFitnessStore } from '../../../store/fitnessStore';
@@ -51,7 +52,7 @@ export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormPr
     reset,
     formState: { errors },
   } = useForm<TrainingProfileFormData>({
-    resolver: zodResolver(trainingProfileSchema),
+    resolver: zodResolver(trainingProfileSchema) as unknown as Resolver<TrainingProfileFormData>,
     mode: 'onBlur',
     defaultValues: trainingProfile
       ? {
@@ -151,7 +152,7 @@ export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormPr
         />
       </FormField>
 
-      <FormField label={t('fitness.onboarding.equipment')} error={errors.availableEquipment}>
+      <FormField label={t('fitness.onboarding.equipment')} error={errors.availableEquipment as FieldError | undefined}>
         <ChipSelect<TrainingProfileFormData>
           name="availableEquipment"
           control={control}
@@ -163,7 +164,7 @@ export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormPr
         />
       </FormField>
 
-      <FormField label={t('fitness.onboarding.injuries')} error={errors.injuryRestrictions}>
+      <FormField label={t('fitness.onboarding.injuries')} error={errors.injuryRestrictions as FieldError | undefined}>
         <ChipSelect<TrainingProfileFormData>
           name="injuryRestrictions"
           control={control}
@@ -210,7 +211,7 @@ export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormPr
 
       <FormField
         label={`${t('fitness.onboarding.priorityMuscles')} (${t('fitness.onboarding.maxItems', { count: MAX_PRIORITY_MUSCLES })})`}
-        error={errors.priorityMuscles}
+        error={errors.priorityMuscles as FieldError | undefined}
       >
         <ChipSelect<TrainingProfileFormData>
           name="priorityMuscles"

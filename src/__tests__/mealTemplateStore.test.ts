@@ -172,4 +172,56 @@ describe('mealTemplateStore', () => {
       expect(templates).toEqual([]);
     });
   });
+
+  describe('loadAll', () => {
+    it('loads templates from database', async () => {
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([
+          {
+            id: 'tpl-1',
+            name: 'Low Carb',
+            data: JSON.stringify({
+              breakfastDishIds: ['d1'],
+              lunchDishIds: ['d2', 'd3'],
+              dinnerDishIds: [],
+              createdAt: '2025-01-01T00:00:00.000Z',
+              tags: ['diet'],
+            }),
+          },
+        ]),
+      };
+
+      await useMealTemplateStore.getState().loadAll(mockDb as never);
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).toBe('tpl-1');
+      expect(templates[0].name).toBe('Low Carb');
+      expect(templates[0].breakfastDishIds).toEqual(['d1']);
+      expect(templates[0].lunchDishIds).toEqual(['d2', 'd3']);
+      expect(templates[0].dinnerDishIds).toEqual([]);
+      expect(templates[0].tags).toEqual(['diet']);
+    });
+
+    it('does nothing when database returns empty rows', async () => {
+      useMealTemplateStore.getState().saveTemplate('Keep', SAMPLE_PLAN);
+
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([]),
+      };
+
+      await useMealTemplateStore.getState().loadAll(mockDb as never);
+
+      expect(useMealTemplateStore.getState().templates).toHaveLength(1);
+    });
+  });
+
+  describe('saveTemplate – edge cases', () => {
+    it('omits tags when empty array is passed', () => {
+      useMealTemplateStore.getState().saveTemplate('No tags', SAMPLE_PLAN, []);
+
+      const { templates } = useMealTemplateStore.getState();
+      expect(templates[0].tags).toBeUndefined();
+    });
+  });
 });

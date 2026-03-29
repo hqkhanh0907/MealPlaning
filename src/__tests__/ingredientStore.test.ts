@@ -182,4 +182,76 @@ describe('ingredientStore', () => {
       expect(ing.fatPer100).toBe(4);
     });
   });
+
+  describe('loadAll', () => {
+    it('loads ingredients from database with en fields', async () => {
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([
+          {
+            id: 'db-ing-1',
+            name_vi: 'Cá hồi',
+            name_en: 'Salmon',
+            calories_per_100: 208,
+            protein_per_100: 20,
+            carbs_per_100: 0,
+            fat_per_100: 13,
+            fiber_per_100: 0,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
+        ]),
+      };
+
+      await useIngredientStore.getState().loadAll(mockDb as never);
+
+      const { ingredients } = useIngredientStore.getState();
+      expect(ingredients).toHaveLength(1);
+      expect(ingredients[0].id).toBe('db-ing-1');
+      expect(ingredients[0].name).toEqual({ vi: 'Cá hồi', en: 'Salmon' });
+      expect(ingredients[0].caloriesPer100).toBe(208);
+      expect(ingredients[0].proteinPer100).toBe(20);
+      expect(ingredients[0].carbsPer100).toBe(0);
+      expect(ingredients[0].fatPer100).toBe(13);
+      expect(ingredients[0].fiberPer100).toBe(0);
+      expect(ingredients[0].unit).toEqual({ vi: 'g', en: 'g' });
+    });
+
+    it('loads ingredients without en fields', async () => {
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([
+          {
+            id: 'db-ing-2',
+            name_vi: 'Đậu phụ',
+            name_en: null,
+            calories_per_100: 76,
+            protein_per_100: 8,
+            carbs_per_100: 2,
+            fat_per_100: 5,
+            fiber_per_100: 1,
+            unit_vi: 'miếng',
+            unit_en: null,
+          },
+        ]),
+      };
+
+      await useIngredientStore.getState().loadAll(mockDb as never);
+
+      const { ingredients } = useIngredientStore.getState();
+      expect(ingredients).toHaveLength(1);
+      expect(ingredients[0].name).toEqual({ vi: 'Đậu phụ' });
+      expect(ingredients[0].unit).toEqual({ vi: 'miếng' });
+    });
+
+    it('does nothing when database returns empty rows', async () => {
+      useIngredientStore.setState({ ingredients: [SAMPLE_INGREDIENT] });
+
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([]),
+      };
+
+      await useIngredientStore.getState().loadAll(mockDb as never);
+
+      expect(useIngredientStore.getState().ingredients).toHaveLength(1);
+    });
+  });
 });

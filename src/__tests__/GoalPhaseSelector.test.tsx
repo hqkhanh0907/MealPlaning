@@ -13,6 +13,8 @@ const mockDb: DatabaseService = {
   query: vi.fn().mockResolvedValue([]),
   queryOne: vi.fn().mockResolvedValue(null),
   transaction: vi.fn(),
+  exportBinary: vi.fn().mockReturnValue(new Uint8Array()),
+  importBinary: vi.fn(),
   exportToJSON: vi.fn(),
   importFromJSON: vi.fn(),
 };
@@ -193,5 +195,45 @@ describe('GoalPhaseSelector', () => {
     expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
       '±0 kcal',
     );
+  });
+
+  it('handleSave returns false when saveGoal throws', async () => {
+    const user = userEvent.setup();
+
+    const originalSaveGoal = useHealthProfileStore.getState().saveGoal;
+    useHealthProfileStore.setState({
+      saveGoal: vi.fn().mockRejectedValue(new Error('DB error')) as never,
+    });
+
+    render(<GoalPhaseSelector />);
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).toBeNull();
+
+    useHealthProfileStore.setState({ saveGoal: originalSaveGoal });
+  });
+
+  it('assigns handleSave to saveRef when provided', () => {
+    const saveRef = { current: null as (() => Promise<boolean>) | null };
+    render(<GoalPhaseSelector saveRef={saveRef} />);
+    expect(saveRef.current).not.toBeNull();
+    expect(typeof saveRef.current).toBe('function');
+  });
+
+  it('saveRef.current calls handleSave and returns true on success', async () => {
+    const user = userEvent.setup();
+    const saveRef = { current: null as (() => Promise<boolean>) | null };
+    render(<GoalPhaseSelector saveRef={saveRef} />);
+
+    await user.click(screen.getByTestId('goal-type-bulk'));
+
+    const result = await saveRef.current!();
+    expect(result).toBe(true);
+
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).not.toBeNull();
+    expect(activeGoal!.type).toBe('bulk');
   });
 });

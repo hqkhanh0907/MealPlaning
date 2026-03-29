@@ -14,6 +14,8 @@ const mockDb: DatabaseService = {
   query: vi.fn().mockResolvedValue([]),
   queryOne: vi.fn().mockResolvedValue(null),
   transaction: vi.fn(),
+  exportBinary: vi.fn().mockReturnValue(new Uint8Array()),
+  importBinary: vi.fn(),
   exportToJSON: vi.fn(),
   importFromJSON: vi.fn(),
 };
@@ -205,5 +207,48 @@ describe('HealthProfileForm', () => {
     // Enter custom BMR
     fireEvent.change(overrideInput, { target: { value: '1800' } });
     expect(screen.getByTestId('bmr-value')).toHaveTextContent('1800');
+  });
+
+  it('saveRef is assigned when provided', () => {
+    const saveRef = { current: null as (() => Promise<boolean>) | null };
+    render(<HealthProfileForm saveRef={saveRef} />);
+    expect(saveRef.current).not.toBeNull();
+    expect(typeof saveRef.current).toBe('function');
+  });
+
+  it('saveRef.current returns true on successful save', async () => {
+    const saveRef = { current: null as (() => Promise<boolean>) | null };
+    render(<HealthProfileForm saveRef={saveRef} />);
+
+    const result = await saveRef.current!();
+    expect(result).toBe(true);
+    expect(mockSaveProfile).toHaveBeenCalledTimes(1);
+  });
+
+  it('save returns false when saveProfile throws', async () => {
+    const failingSave = vi.fn().mockRejectedValue(new Error('DB error'));
+    resetStore();
+    useHealthProfileStore.setState({ saveProfile: failingSave as never });
+
+    const saveRef = { current: null as (() => Promise<boolean>) | null };
+    render(<HealthProfileForm saveRef={saveRef} />);
+
+    const result = await saveRef.current!();
+    expect(result).toBe(false);
+  });
+
+  it('switching from custom BMR back to auto disables override', () => {
+    render(<HealthProfileForm />);
+
+    const customBtn = screen.getByRole('radio', { name: 'Nhập thủ công' });
+    const autoBtn = screen.getByRole('radio', { name: 'Tự động tính' });
+
+    fireEvent.click(customBtn);
+    expect(customBtn).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('bmr-override-input')).toBeInTheDocument();
+
+    fireEvent.click(autoBtn);
+    expect(autoBtn).toHaveAttribute('aria-checked', 'true');
+    expect(screen.queryByTestId('bmr-override-input')).not.toBeInTheDocument();
   });
 });

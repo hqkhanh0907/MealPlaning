@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, X, Loader2, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useForm, Controller } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ingredient, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
@@ -49,7 +50,7 @@ const QuickAddIngredientFormInner: React.FC<QuickAddIngredientFormProps> = ({ on
     watch,
     formState: { errors },
   } = useForm<QuickAddIngredientData>({
-    resolver: zodResolver(quickAddIngredientSchema),
+    resolver: zodResolver(quickAddIngredientSchema) as unknown as Resolver<QuickAddIngredientData>,
     mode: 'onBlur',
     defaultValues: quickAddIngredientDefaults,
   });

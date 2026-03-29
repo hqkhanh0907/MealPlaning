@@ -35,7 +35,7 @@ export const quickAddIngredientDefaults: QuickAddIngredientData = {
 
 const dishIngredientSchema = z.object({
   ingredientId: z.string().min(1),
-  amount: z.coerce.number({ invalid_type_error: 'dish.validationAmountRequired' }).min(1, 'dish.validationAmountNegative'),
+  amount: z.coerce.number({ message: 'dish.validationAmountRequired' }).min(1, 'dish.validationAmountNegative'),
 });
 
 /* ── Main Dish Edit Schema ── */

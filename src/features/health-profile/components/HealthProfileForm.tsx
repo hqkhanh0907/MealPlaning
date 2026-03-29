@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useDatabase } from '../../../contexts/DatabaseContext';
@@ -49,11 +50,10 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   const {
     control,
     handleSubmit,
-    watch,
     reset,
     formState: { errors, isDirty },
   } = useForm<HealthProfileFormData>({
-    resolver: zodResolver(healthProfileSchema),
+    resolver: zodResolver(healthProfileSchema) as unknown as Resolver<HealthProfileFormData>,
     mode: 'onBlur',
     defaultValues: blankDefaults
       ? {
@@ -82,15 +82,30 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
   const [saved, setSaved] = useState(false);
 
-  const watchedGender = watch('gender');
-  const watchedAge = watch('age');
-  const watchedHeightCm = watch('heightCm');
-  const watchedWeightKg = watch('weightKg');
-  const watchedActivityLevel = watch('activityLevel');
-  const watchedBmrOverrideEnabled = watch('bmrOverrideEnabled');
-  const watchedBmrOverride = watch('bmrOverride');
-  const watchedBodyFatPct = watch('bodyFatPct');
-  const watchedProteinRatio = watch('proteinRatio');
+  const [
+    watchedGender,
+    watchedAge,
+    watchedHeightCm,
+    watchedWeightKg,
+    watchedActivityLevel,
+    watchedBmrOverrideEnabled,
+    watchedBmrOverride,
+    watchedBodyFatPct,
+    watchedProteinRatio,
+  ] = useWatch({
+    control,
+    name: [
+      'gender',
+      'age',
+      'heightCm',
+      'weightKg',
+      'activityLevel',
+      'bmrOverrideEnabled',
+      'bmrOverride',
+      'bodyFatPct',
+      'proteinRatio',
+    ],
+  });
 
   const bmr = useMemo(() => {
     if (watchedBmrOverrideEnabled && watchedBmrOverride)

@@ -487,6 +487,32 @@ describe('GoogleDriveSync', () => {
       // Verify via displayed sync time (state update proves setSetting was called)
       expect(screen.getByText(/Đồng bộ lần cuối/)).toBeInTheDocument();
     });
+
+    it('shows error when importing cloud data fails during conflict resolution', async () => {
+      mockGetSetting.mockResolvedValue('2025-01-01T00:00:00Z');
+      const remoteData = new Uint8Array([1, 2]);
+      mockDownloadLatestBackup.mockResolvedValueOnce({
+        data: remoteData,
+        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2020-01-01T00:00:00Z' },
+      });
+      mockDb.importBinary.mockRejectedValueOnce(new Error('import failed'));
+
+      render(<GoogleDriveSync />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-download-drive'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('sync-conflict-modal')).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-use-cloud'));
+      });
+
+      expect(mockNotify.error).toHaveBeenCalledWith('Tải xuống thất bại. Vui lòng thử lại.');
+      expect(screen.queryByTestId('sync-conflict-modal')).not.toBeInTheDocument();
+    });
   });
 
   describe('Status display', () => {

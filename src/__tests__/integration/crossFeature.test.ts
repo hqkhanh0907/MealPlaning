@@ -150,6 +150,7 @@ function mkPlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay {
     id: 'pd-1',
     planId: 'plan-1',
     dayOfWeek: new Date().getDay(),
+    sessionOrder: 1,
     workoutType: 'Push A',
     muscleGroups: 'chest,shoulders,triceps',
     ...overrides,
@@ -169,13 +170,16 @@ function mkDayPlan(overrides: Partial<DayPlan> = {}): DayPlan {
 function mkHealthProfile(overrides: Partial<HealthProfile> = {}): HealthProfile {
   return {
     id: 'user-1',
+    name: '',
     gender: 'male',
     age: 28,
+    dateOfBirth: null,
     heightCm: 175,
     weightKg: 80,
     activityLevel: 'moderate',
     proteinRatio: 2.0,
     fatPct: 0.25,
+    targetCalories: 0,
     updatedAt: now,
     ...overrides,
   };

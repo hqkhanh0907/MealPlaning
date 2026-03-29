@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Sunset, Plus, Check, Trash2 } from 'lucide-react';
+import { Sun, Moon, Sunset, Plus, Check, Trash2, X } from 'lucide-react';
 import type { TrainingPlanDay } from '../types';
 
 interface SessionTabsProps {
@@ -30,7 +30,10 @@ function SessionTabsInner({
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSelect = useCallback(
-    (id: string) => () => onSelectSession(id),
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const id = e.currentTarget.dataset.sessionId;
+      if (id) onSelectSession(id);
+    },
     [onSelectSession],
   );
 
@@ -44,8 +47,10 @@ function SessionTabsInner({
   }, []);
 
   const handlePointerDown = useCallback(
-    (id: string) => () => {
+    (e: React.PointerEvent<HTMLButtonElement>) => {
       if (!canDelete) return;
+      const id = e.currentTarget.dataset.sessionId;
+      if (!id) return;
       clearLongPress();
       longPressTimerRef.current = setTimeout(() => {
         setConfirmDeleteId(id);
@@ -59,10 +64,11 @@ function SessionTabsInner({
   }, [clearLongPress]);
 
   const handleContextMenu = useCallback(
-    (id: string) => (e: React.MouseEvent) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!canDelete) return;
       e.preventDefault();
-      setConfirmDeleteId(id);
+      const id = e.currentTarget.dataset.sessionId;
+      if (id) setConfirmDeleteId(id);
     },
     [canDelete],
   );
@@ -102,12 +108,13 @@ function SessionTabsInner({
                 type="button"
                 aria-selected={isActive}
                 data-completed={isCompleted ? 'true' : undefined}
-                onClick={handleSelect(session.id)}
-                onPointerDown={handlePointerDown(session.id)}
+                data-session-id={session.id}
+                onClick={handleSelect}
+                onPointerDown={handlePointerDown}
                 onPointerUp={handlePointerUpOrLeave}
                 onPointerLeave={handlePointerUpOrLeave}
-                onContextMenu={handleContextMenu(session.id)}
-                className={`flex items-center gap-1.5 rounded-full py-3 px-4 text-sm font-medium transition-colors min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] ${
+                onContextMenu={handleContextMenu}
+                className={`flex items-center gap-1.5 rounded-full py-3 px-4 text-sm font-medium transition-colors min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
                   isActive
                     ? 'bg-emerald-500 text-white dark:bg-emerald-600'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
@@ -119,6 +126,20 @@ function SessionTabsInner({
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 )}
                 {t('fitness.plan.sessionTab', { order: session.sessionOrder })}
+                {isActive && canDelete && (
+                  <button
+                    type="button"
+                    data-testid={`delete-session-${session.id}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmDeleteId(session.id);
+                    }}
+                    aria-label={t('fitness.plan.deleteSession')}
+                    className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/30 text-current transition-colors hover:bg-white/50 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </button>
             );
           })}
@@ -141,6 +162,9 @@ function SessionTabsInner({
           data-testid="delete-session-confirm"
           role="alertdialog"
           aria-label={t('fitness.plan.deleteSessionConfirm')}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') handleCancelDelete();
+          }}
           className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20"
         >
           <Trash2 className="h-4 w-4 shrink-0 text-red-500" aria-hidden="true" />
@@ -151,14 +175,18 @@ function SessionTabsInner({
             data-testid="confirm-delete-session"
             type="button"
             onClick={handleConfirmDelete}
+            aria-label={t('fitness.plan.deleteSession')}
             className="ml-auto rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
           >
+            <Trash2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
             {t('fitness.plan.delete')}
           </button>
           <button
             data-testid="cancel-delete-session"
             type="button"
             onClick={handleCancelDelete}
+            autoFocus
+            aria-label={t('fitness.plan.cancelDelete')}
             className="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-300 min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500"
           >
             {t('fitness.plan.cancelDelete')}

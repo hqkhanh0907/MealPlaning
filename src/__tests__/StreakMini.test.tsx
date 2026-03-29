@@ -69,6 +69,7 @@ function makePlanDays(daysOfWeek: number[]): TrainingPlanDay[] {
     id: `pd-${d}`,
     planId: 'plan1',
     dayOfWeek: d,
+    sessionOrder: 1,
     workoutType: 'strength',
   }));
 }

@@ -46,6 +46,8 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.restore': 'Khôi phục',
         'fitness.plan.setsLabel': 'hiệp',
         'fitness.plan.repsLabel': 'lần',
+        'fitness.plan.coachingHint': 'Nhấn giữ hoặc nhấp chuột phải vào ngày để xem tùy chọn',
+        'common.dismiss': 'Bỏ qua',
       };
       return translations[key] ?? fallback ?? key;
     },
@@ -1331,6 +1333,103 @@ describe('TrainingPlanView', () => {
       const closedConfirmBtn = screen.getByTestId(`closed-confirm-${slug}`);
       fireEvent.click(closedConfirmBtn);
       expect(mockRemovePlanDaySession).not.toHaveBeenCalled();
+    });
+  });
+
+  // --- Visible convert-to-rest button ---
+  describe('visible convert-to-rest button', () => {
+    it('shows visible "convert to rest" button on workout day', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('day-convert-rest-btn')).toBeInTheDocument();
+    });
+  });
+
+  // --- Coaching Hint ---
+  describe('coaching hint', () => {
+    it('shows coaching hint on first render and dismisses it', () => {
+      localStorage.removeItem('planCoachingDismissed');
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const hint = screen.getByTestId('plan-coaching-hint');
+      expect(hint).toBeInTheDocument();
+      const dismissBtn = hint.querySelector('button');
+      expect(dismissBtn).not.toBeNull();
+      fireEvent.click(dismissBtn!);
+      expect(screen.queryByTestId('plan-coaching-hint')).not.toBeInTheDocument();
+    });
+
+    it('does not show coaching hint when already dismissed', () => {
+      localStorage.setItem('planCoachingDismissed', 'true');
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('plan-coaching-hint')).not.toBeInTheDocument();
+    });
+  });
+
+  // --- Context Menu Escape ---
+  describe('context menu keyboard', () => {
+    it('context menu stays within viewport bounds', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      const ctxMenu = screen.getByTestId('day-context-menu');
+      expect(ctxMenu).toBeInTheDocument();
+      const style = ctxMenu.style;
+      const left = parseFloat(style.left);
+      const top = parseFloat(style.top);
+      expect(left).toBeGreaterThanOrEqual(0);
+      expect(top).toBeGreaterThanOrEqual(0);
+    });
+
+    it('dismisses context menu with Escape key', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      expect(screen.getByTestId('day-context-menu')).toBeInTheDocument();
+      fireEvent.keyDown(screen.getByTestId('day-context-menu'), { key: 'Escape' });
+      expect(screen.queryByTestId('day-context-menu')).not.toBeInTheDocument();
+    });
+  });
+
+  // --- localStorage error handling ---
+  describe('localStorage error handling', () => {
+    it('defaults coachingDismissed to false when localStorage.getItem throws', () => {
+      const originalGetItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = () => { throw new Error('blocked'); };
+
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+
+      expect(screen.getByTestId('plan-coaching-hint')).toBeInTheDocument();
+
+      Storage.prototype.getItem = originalGetItem;
+    });
+  });
+
+  // --- Inline day action buttons ---
+  describe('inline day action buttons', () => {
+    it('clicking day-convert-rest-btn opens convert-to-rest confirmation', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+
+      fireEvent.click(screen.getByTestId('day-convert-rest-btn'));
+
+      expect(screen.getByTestId('confirmation-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('confirmation-title')).toHaveTextContent('Chuyển thành ngày nghỉ');
+    });
+
+    it('clicking rest-add-workout-btn on rest day opens add session modal', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+
+      // Navigate to Tuesday (day 2) which is a rest day
+      fireEvent.click(screen.getByTestId('day-pill-2'));
+      expect(screen.getByTestId('rest-day-card')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('rest-add-workout-btn'));
+
+      expect(screen.getByTestId('add-session-modal')).toBeInTheDocument();
     });
   });
 });

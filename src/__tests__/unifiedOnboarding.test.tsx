@@ -2019,3 +2019,37 @@ describe('PlanComputingScreen – trainingProfile null', () => {
     defaultFitnessState.trainingProfile = savedProfile;
   });
 });
+
+/* ================================================================== */
+/*  21. UnifiedOnboarding – renderStep defensive defaults               */
+/* ================================================================== */
+
+describe('UnifiedOnboarding – renderStep outer default', () => {
+  it('renders no step content when section is out of valid range', async () => {
+    // Temporarily override the appOnboardingStore mock to return an invalid section (99)
+    // so the outer switch default branch (line 192) is covered.
+    const mod = await import('../store/appOnboardingStore') as Record<string, unknown>;
+    const original = mod.useAppOnboardingStore;
+
+    mod.useAppOnboardingStore = (selector: (s: Record<string, unknown>) => unknown) =>
+      selector({
+        isAppOnboarded: false,
+        onboardingSection: 99,
+        setAppOnboarded: vi.fn(),
+        setOnboardingSection: vi.fn(),
+      });
+
+    try {
+      render(
+        <React.Suspense fallback={<div>Loading</div>}>
+          <UnifiedOnboarding />
+        </React.Suspense>,
+      );
+
+      // With an invalid section (99), renderStep returns null — no step content rendered
+      expect(screen.queryByTestId('welcome-slides')).not.toBeInTheDocument();
+    } finally {
+      mod.useAppOnboardingStore = original;
+    }
+  });
+});

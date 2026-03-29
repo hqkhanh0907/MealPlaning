@@ -79,4 +79,46 @@ describe('useModalBackHandler', () => {
     expect(onClose2).toHaveBeenCalledTimes(1);
     expect(onClose1).not.toHaveBeenCalled();
   });
+
+  it('does not double-remove when handler was invoked before close', () => {
+    let capturedHandler: (() => void) | null = null;
+    vi.mocked(backService.pushBackEntry).mockImplementation((handler) => {
+      capturedHandler = handler;
+    });
+
+    const { rerender } = renderHook(
+      ({ isOpen }) => useModalBackHandler(isOpen, vi.fn()),
+      { initialProps: { isOpen: true } },
+    );
+
+    capturedHandler!();
+    vi.clearAllMocks();
+
+    rerender({ isOpen: false });
+    expect(backService.removeTopBackEntry).not.toHaveBeenCalled();
+  });
+
+  it('removes entry when closed without handler invocation', () => {
+    const { rerender } = renderHook(
+      ({ isOpen }) => useModalBackHandler(isOpen, vi.fn()),
+      { initialProps: { isOpen: true } },
+    );
+
+    rerender({ isOpen: false });
+    expect(backService.removeTopBackEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-pushes back entry when reopened after close', () => {
+    const { rerender } = renderHook(
+      ({ isOpen }) => useModalBackHandler(isOpen, vi.fn()),
+      { initialProps: { isOpen: true } },
+    );
+    expect(backService.pushBackEntry).toHaveBeenCalledTimes(1);
+
+    rerender({ isOpen: false });
+    vi.clearAllMocks();
+
+    rerender({ isOpen: true });
+    expect(backService.pushBackEntry).toHaveBeenCalledTimes(1);
+  });
 });

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Save, Sparkles, Loader2, X } from 'lucide-react';
@@ -47,7 +48,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
     watch,
     formState: { errors, isDirty },
   } = useForm<IngredientEditFormData>({
-    resolver: zodResolver(ingredientEditSchema),
+    resolver: zodResolver(ingredientEditSchema) as unknown as Resolver<IngredientEditFormData>,
     mode: 'onBlur',
     defaultValues: editingItem
       ? {

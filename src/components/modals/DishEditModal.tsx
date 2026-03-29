@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, Clock, Flame, Dumbbell, Wheat, Droplets } from 'lucide-react';
 import { Dish, Ingredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
@@ -44,7 +45,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const lang = i18n.language as SupportedLang;
 
   const { control, getValues, setValue, setError, clearErrors, watch, formState: { errors, isDirty } } = useForm<DishEditFormData>({
-    resolver: zodResolver(dishEditSchema),
+    resolver: zodResolver(dishEditSchema) as unknown as Resolver<DishEditFormData>,
     mode: 'onBlur',
     defaultValues: {
       name: editingItem ? getLocalizedField(editingItem.name, lang) : '',

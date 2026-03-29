@@ -82,11 +82,6 @@ const mockDb = {
   importBinary: vi.fn().mockResolvedValue(undefined),
 };
 
-const defaultOptions = {
-  db: mockDb as unknown as import('../services/databaseService').DatabaseService,
-  onImportData: vi.fn().mockResolvedValue(undefined),
-};
-
 const wrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 describe('useAutoSync', () => {
@@ -107,7 +102,7 @@ describe('useAutoSync', () => {
   });
 
   it('should return idle status when not authenticated', () => {
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
     expect(result.current.syncStatus).toBe('idle');
     expect(result.current.lastSyncAt).toBeNull();
   });
@@ -115,7 +110,7 @@ describe('useAutoSync', () => {
   it('should load lastSyncAt from app_settings', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     // getSetting mock returns null by default, so lastSyncAt starts null
     await act(async () => {
@@ -130,7 +125,7 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => {
       await result.current.triggerUpload();
@@ -147,7 +142,7 @@ describe('useAutoSync', () => {
     mockAuthValues.accessToken = 'tok';
     (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network'));
 
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => {
       await result.current.triggerUpload();
@@ -157,7 +152,7 @@ describe('useAutoSync', () => {
   });
 
   it('should not upload when no access token', async () => {
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => {
       await result.current.triggerUpload();
@@ -175,8 +170,7 @@ describe('useAutoSync', () => {
       file: { id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-01-01T00:00:00Z' },
     });
 
-    const onImportData = vi.fn().mockResolvedValue(undefined);
-    const { result } = renderHook(() => useAutoSync({ ...defaultOptions, onImportData }), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     // Flush sync-on-launch (multiple await levels)
     await act(async () => { await vi.advanceTimersByTimeAsync(100); });
@@ -194,8 +188,7 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const onImportData = vi.fn().mockResolvedValue(undefined);
-    const { result } = renderHook(() => useAutoSync({ ...defaultOptions, onImportData }), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => { await vi.advanceTimersByTimeAsync(0); });
 
@@ -212,7 +205,7 @@ describe('useAutoSync', () => {
     mockAuthValues.accessToken = 'tok';
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('403'));
 
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => {
       await result.current.triggerDownload();
@@ -222,7 +215,7 @@ describe('useAutoSync', () => {
   });
 
   it('should not download when no access token', async () => {
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => {
       await result.current.triggerDownload();
@@ -235,7 +228,7 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const { result, rerender } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result, rerender } = renderHook(() => useAutoSync(), { wrapper });
 
     expect(result.current.syncStatus).toBe('idle');
 
@@ -254,7 +247,7 @@ describe('useAutoSync', () => {
       id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-03-11T08:00:00Z',
     });
 
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     await act(async () => {
       await result.current.triggerUpload();
@@ -272,7 +265,7 @@ describe('useAutoSync', () => {
       file: { id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-05-20T12:00:00Z' },
     });
 
-    const { result } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     // Flush sync-on-launch (also downloads and sets lastSyncAt)
     await act(async () => { await vi.advanceTimersByTimeAsync(0); });
@@ -284,7 +277,7 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const { rerender } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { rerender } = renderHook(() => useAutoSync(), { wrapper });
 
     // Simulate sync-on-launch completing to set initializedRef
     await act(async () => {
@@ -309,7 +302,7 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
 
-    const { rerender } = renderHook(() => useAutoSync(defaultOptions), { wrapper });
+    const { rerender } = renderHook(() => useAutoSync(), { wrapper });
 
     // Wait for init
     await act(async () => {

@@ -233,7 +233,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
         </button>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="truncate text-lg font-semibold text-white">
+          <h1 className="truncate text-lg font-semibold text-white" title={t('fitness.plan.editExercises')}>
             {t('fitness.plan.editExercises')}
           </h1>
           {(isModified || hasChanges) && (
@@ -246,6 +246,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
         <button
           type="button"
           onClick={handleRestore}
+          aria-label={t('fitness.plan.restore')}
           className="flex h-11 items-center gap-1 rounded-lg px-3 text-sm text-white active:bg-emerald-700"
         >
           <RotateCcw className="h-4 w-4" />
@@ -287,12 +288,14 @@ export const PlanDayEditor = memo(function PlanDayEditor({
                     type="button"
                     onClick={() => handleToggleExpand(index)}
                     aria-expanded={isExpanded}
+                    aria-controls={isExpanded ? `exercise-params-${index}` : undefined}
                     aria-label={`${t('fitness.plan.editParams')} ${item.exercise.nameVi}`}
                     className="min-w-0 flex-1 text-left focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none rounded-lg"
                   >
                     <p
                       data-testid="exercise-name"
-                      className="truncate font-medium text-slate-900 dark:text-slate-100"
+                      className="line-clamp-2 font-medium text-slate-900 dark:text-slate-100"
+                      title={item.exercise.nameVi}
                     >
                       {item.exercise.nameVi}
                     </p>
@@ -413,6 +416,9 @@ export const PlanDayEditor = memo(function PlanDayEditor({
           role="dialog"
           aria-modal="true"
           aria-labelledby={confirmDialogTitleId}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') handleCancelDiscard();
+          }}
         >
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
             <p id={confirmDialogTitleId} className="mb-6 text-sm text-slate-700 dark:text-slate-300">
@@ -422,6 +428,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
               <button
                 type="button"
                 onClick={handleCancelDiscard}
+                autoFocus
                 className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-200 text-sm font-medium text-slate-700 active:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:active:bg-slate-700"
               >
                 {t('common.cancel')}
@@ -440,7 +447,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
 
       {/* Undo removal toast */}
       {pendingRemoval && (
-        <div className="fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg bg-slate-800 px-4 py-3 text-white shadow-lg">
+        <div role="status" aria-live="polite" className="fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg bg-slate-800 px-4 py-3 text-white shadow-lg">
           <span className="text-sm">
             {pendingRemoval.exercise.exercise.nameVi} {t('fitness.plan.exerciseRemoved')}
           </span>
@@ -474,6 +481,8 @@ export const PlanDayEditor = memo(function PlanDayEditor({
   );
 });
 
+PlanDayEditor.displayName = 'PlanDayEditor';
+
 interface StepperFieldProps {
   label: string;
   value: number;
@@ -485,9 +494,9 @@ interface StepperFieldProps {
   testId: string;
 }
 
-function StepperField({ label, value, suffix, onDecrement, onIncrement, min, max, testId }: StepperFieldProps) {
+const StepperField = memo(function StepperField({ label, value, suffix, onDecrement, onIncrement, min, max, testId }: StepperFieldProps) {
   return (
-    <div className="flex flex-col items-center gap-1" data-testid={testId}>
+    <div role="group" aria-label={label} className="flex flex-col items-center gap-1" data-testid={testId}>
       <span className="text-xs text-slate-500 dark:text-slate-400">{label}</span>
       <div className="flex items-center gap-2">
         <button
@@ -514,4 +523,4 @@ function StepperField({ label, value, suffix, onDecrement, onIncrement, min, max
       </div>
     </div>
   );
-}
+});

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { X, Save, ChefHat, Tag } from 'lucide-react';
@@ -30,11 +31,11 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
   const {
     register,
     handleSubmit: rhfSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors, touchedFields, isSubmitted: formStateIsSubmitted },
   } = useForm<SaveTemplateFormData>({
-    resolver: zodResolver(saveTemplateSchema),
+    resolver: zodResolver(saveTemplateSchema) as unknown as Resolver<SaveTemplateFormData>,
     mode: 'onBlur',
     defaultValues: saveTemplateDefaults,
   });
@@ -42,8 +43,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
   const [tagInput, setTagInput] = useState('');
 
   const showNameError = (touchedFields.name || formStateIsSubmitted) && errors.name;
-  const watchName = watch('name');
-  const watchTags = watch('tags');
+  const [watchName, watchTags] = useWatch({ control, name: ['name', 'tags'] });
 
   const getDishInfo = useCallback((ids: string[]): { id: string; name: string }[] =>
     ids.map(id => dishes.find(d => d.id === id)).filter(Boolean).map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
@@ -131,7 +131,7 @@ export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPla
             />
             <div className="flex items-center justify-between mt-1.5">
               {showNameError ? (
-                <p className="text-xs text-rose-500 font-medium" role="alert">{errors.name.message}</p>
+                <p className="text-xs text-rose-500 font-medium" role="alert">{errors.name?.message}</p>
               ) : (
                 <span />
               )}
