@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useState, useCallback } from 'react';
 import { SettingsMenu } from './settings/SettingsMenu';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 type Theme = 'light' | 'dark' | 'system' | 'schedule';
 type SettingsView = 'menu' | 'health-profile' | 'goal' | 'training-profile';
@@ -31,6 +32,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ theme, setTheme }) => 
   const handleBack = useCallback(() => {
     setCurrentView('menu');
   }, []);
+
+  useModalBackHandler(currentView !== 'menu', handleBack);
 
   if (currentView === 'health-profile') {
     return (
