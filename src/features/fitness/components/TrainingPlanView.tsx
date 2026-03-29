@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Dumbbell, Moon, ChevronRight, Calendar, RefreshCw, ClipboardList } from 'lucide-react';
+import { Play, Dumbbell, Moon, ChevronRight, Calendar, RefreshCw, ClipboardList, Pencil, RotateCcw } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
 import { DailyWeightInput } from './DailyWeightInput';
 import { StreakCounter } from './StreakCounter';
+import { SessionTabs } from './SessionTabs';
+import { AddSessionModal } from './AddSessionModal';
 import { EnergyBalanceCard } from '../../../components/nutrition/EnergyBalanceCard';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
@@ -66,6 +68,9 @@ function TrainingPlanViewInner({
   const { eaten, protein } = useTodayNutrition();
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [activeSessionIds, setActiveSessionIds] = useState<Record<number, string>>({});
+  const [showAddSessionModal, setShowAddSessionModal] = useState(false);
+  const [addSessionDow, setAddSessionDow] = useState<number>(0);
 
   const activePlan = useMemo(
     () => trainingPlans.find((p) => p.status === 'active'),
@@ -85,14 +90,33 @@ function TrainingPlanViewInner({
     [activePlan, trainingPlanDays],
   );
 
+  const daySessionsMap = useMemo(() => {
+    const map = new Map<number, TrainingPlanDay[]>();
+    for (const day of planDays) {
+      const existing = map.get(day.dayOfWeek) ?? [];
+      existing.push(day);
+      map.set(day.dayOfWeek, existing.sort((a, b) => (a.sessionOrder ?? 1) - (b.sessionOrder ?? 1)));
+    }
+    return map;
+  }, [planDays]);
+
   const todayDow = getTodayDow();
   const viewedDay = selectedDay ?? todayDow;
   const isViewingToday = viewedDay === todayDow;
 
-  const viewedPlanDay = useMemo(
-    () => planDays.find((d) => d.dayOfWeek === viewedDay),
-    [planDays, viewedDay],
+  const viewedDaySessions = useMemo(
+    () => daySessionsMap.get(viewedDay) ?? [],
+    [daySessionsMap, viewedDay],
   );
+
+  const viewedPlanDay = useMemo(() => {
+    if (viewedDaySessions.length === 0) return undefined;
+    const activeId = activeSessionIds[viewedDay];
+    if (activeId) {
+      return viewedDaySessions.find((s) => s.id === activeId) ?? viewedDaySessions[0];
+    }
+    return viewedDaySessions[0];
+  }, [viewedDaySessions, activeSessionIds, viewedDay]);
 
   const viewedExercises = useMemo(
     () => parseExercises(viewedPlanDay?.exercises),
@@ -224,7 +248,8 @@ function TrainingPlanViewInner({
       <div data-testid="calendar-strip" className="flex gap-1.5">
         {Array.from({ length: 7 }, (_, i) => {
           const dayNum = i + 1;
-          const planDay = planDays.find((d) => d.dayOfWeek === dayNum);
+          const daySessions = daySessionsMap.get(dayNum) ?? [];
+          const planDay = daySessions[0];
           const isToday = dayNum === todayDow;
           const isSelected = dayNum === viewedDay && !isToday;
           const isCardio =
@@ -265,6 +290,16 @@ function TrainingPlanViewInner({
           data-testid="today-workout-card"
           className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800"
         >
+          {viewedDaySessions.length > 1 && (
+            <SessionTabs
+              sessions={viewedDaySessions}
+              activeSessionId={activeSessionIds[viewedDay] ?? viewedDaySessions[0].id}
+              completedSessionIds={[]}
+              onSelectSession={(id) => setActiveSessionIds((prev) => ({ ...prev, [viewedDay]: id }))}
+              onAddSession={() => { setAddSessionDow(viewedDay); setShowAddSessionModal(true); }}
+            />
+          )}
+
           <div
             data-testid="workout-card-header"
             className="mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500"
@@ -274,9 +309,49 @@ function TrainingPlanViewInner({
               ? t('fitness.plan.todayWorkout')
               : DAY_LABELS[viewedDay - 1]}
           </div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-            {viewedPlanDay.workoutType}
-          </h3>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                {viewedPlanDay.workoutType}
+              </h3>
+              {viewedPlanDay.originalExercises != null && viewedPlanDay.exercises !== viewedPlanDay.originalExercises && (
+                <span
+                  data-testid="modified-badge"
+                  className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                >
+                  {t('fitness.plan.modified')}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {viewedPlanDay.originalExercises != null && viewedPlanDay.exercises !== viewedPlanDay.originalExercises && (
+                <button
+                  data-testid="restore-original-btn"
+                  type="button"
+                  onClick={() => useFitnessStore.getState().restorePlanDayOriginal(viewedPlanDay.id)}
+                  className="flex items-center gap-1 rounded-full p-2 text-xs text-emerald-600 transition-colors hover:bg-slate-100 dark:text-emerald-400 dark:hover:bg-slate-700"
+                  aria-label={t('fitness.plan.restore')}
+                >
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                </button>
+              )}
+              <button
+                data-testid="edit-exercises-btn"
+                type="button"
+                aria-label={t('fitness.plan.editExercises')}
+                onClick={() => pushPage({
+                  id: 'plan-day-editor',
+                  component: 'PlanDayEditor',
+                  props: { planDay: viewedPlanDay },
+                })}
+                className="rounded-full p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
+              >
+                <Pencil className="h-4 w-4 text-slate-500" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
           {viewedPlanDay.muscleGroups && (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {viewedPlanDay.muscleGroups
@@ -378,6 +453,52 @@ function TrainingPlanViewInner({
       )}
 
       <DailyWeightInput />
+
+      <AddSessionModal
+        isOpen={showAddSessionModal}
+        onClose={() => setShowAddSessionModal(false)}
+        onSelectStrength={(groups) => {
+          const plan = useFitnessStore.getState().getActivePlan();
+          if (plan) {
+            const existingSessions = daySessionsMap.get(addSessionDow) ?? [];
+            useFitnessStore.getState().addPlanDaySession(plan.id, addSessionDow, {
+              planId: plan.id,
+              dayOfWeek: addSessionDow,
+              sessionOrder: existingSessions.length + 1,
+              workoutType: 'Strength',
+              muscleGroups: groups.join(','),
+              exercises: '[]',
+              originalExercises: '[]',
+            });
+          }
+          setShowAddSessionModal(false);
+        }}
+        onSelectCardio={() => {
+          const plan = useFitnessStore.getState().getActivePlan();
+          if (plan) {
+            const existingSessions = daySessionsMap.get(addSessionDow) ?? [];
+            useFitnessStore.getState().addPlanDaySession(plan.id, addSessionDow, {
+              planId: plan.id,
+              dayOfWeek: addSessionDow,
+              sessionOrder: existingSessions.length + 1,
+              workoutType: 'Cardio',
+              muscleGroups: '',
+              exercises: '[]',
+              originalExercises: '[]',
+            });
+          }
+          setShowAddSessionModal(false);
+        }}
+        onSelectFreestyle={() => {
+          pushPage({
+            id: 'workout-logger',
+            component: 'WorkoutLogger',
+            props: {},
+          });
+          setShowAddSessionModal(false);
+        }}
+        currentSessionCount={(daySessionsMap.get(addSessionDow) ?? []).length}
+      />
     </div>
   );
 }

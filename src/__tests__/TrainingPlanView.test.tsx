@@ -51,15 +51,54 @@ vi.mock('../features/fitness/components/StreakCounter', () => ({
   StreakCounter: () => <div data-testid="streak-counter" />,
 }));
 
-const mockUseFitnessStore = useFitnessStore as unknown as Mock;
+vi.mock('../features/fitness/components/SessionTabs', () => ({
+  SessionTabs: (props: { sessions: unknown[]; activeSessionId: string; onSelectSession: (id: string) => void; onAddSession: () => void }) => (
+    <div data-testid="session-tabs" role="tablist">
+      {props.sessions.map((_s: unknown, i: number) => (
+        <button key={i} role="tab" type="button" onClick={() => props.onSelectSession(String(i))} />
+      ))}
+      <button data-testid="add-session-tab" type="button" onClick={props.onAddSession}>+</button>
+    </div>
+  ),
+}));
+
+vi.mock('../features/fitness/components/AddSessionModal', () => ({
+  AddSessionModal: (props: { isOpen: boolean; onClose: () => void; onSelectCardio: () => void; onSelectFreestyle: () => void; onSelectStrength: (g: string[]) => void }) => {
+    if (!props.isOpen) return null;
+    return (
+      <div data-testid="add-session-modal">
+        <button data-testid="modal-close-btn" type="button" onClick={props.onClose}>Close</button>
+        <button data-testid="modal-cardio-btn" type="button" onClick={props.onSelectCardio}>Cardio</button>
+        <button data-testid="modal-freestyle-btn" type="button" onClick={props.onSelectFreestyle}>Freestyle</button>
+        <button data-testid="modal-strength-btn" type="button" onClick={() => props.onSelectStrength(['chest', 'back'])}>Strength</button>
+      </div>
+    );
+  },
+}));
+
+vi.mock('../components/shared/ModalBackdrop', () => ({
+  ModalBackdrop: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+const mockUseFitnessStore = useFitnessStore as unknown as Mock & { getState: () => Record<string, unknown> };
 const mockUseNavigationStore = useNavigationStore as unknown as Mock;
 
 let mockPushPage: Mock;
+let mockRestorePlanDayOriginal: Mock;
+let mockAddPlanDaySession: Mock;
+let mockGetActivePlan: Mock;
 
 function mockStore(state: Record<string, unknown>) {
   mockUseFitnessStore.mockImplementation(
     (selector: (s: Record<string, unknown>) => unknown) => selector(state),
   );
+  const storeState = {
+    ...state,
+    restorePlanDayOriginal: mockRestorePlanDayOriginal,
+    addPlanDaySession: mockAddPlanDaySession,
+    getActivePlan: mockGetActivePlan,
+  };
+  mockUseFitnessStore.getState = () => storeState;
 }
 
 const mockExercisesData = [
@@ -104,6 +143,7 @@ const planDays = [
     id: 'd1',
     planId: 'plan1',
     dayOfWeek: 1,
+    sessionOrder: 1,
     workoutType: 'Push',
     muscleGroups: 'chest,shoulders',
     exercises: mockExercises,
@@ -112,6 +152,7 @@ const planDays = [
     id: 'd2',
     planId: 'plan1',
     dayOfWeek: 3,
+    sessionOrder: 1,
     workoutType: 'Pull',
     muscleGroups: 'back,arms',
     exercises: mockExercises,
@@ -120,6 +161,7 @@ const planDays = [
     id: 'd3',
     planId: 'plan1',
     dayOfWeek: 5,
+    sessionOrder: 1,
     workoutType: 'Legs',
     muscleGroups: 'legs,glutes,core',
     exercises: mockExercises,
@@ -128,6 +170,7 @@ const planDays = [
     id: 'd4',
     planId: 'plan1',
     dayOfWeek: 6,
+    sessionOrder: 1,
     workoutType: 'Cardio',
   },
 ];
@@ -139,6 +182,9 @@ beforeEach(() => {
   // Monday Jan 6, 2025 — dayOfWeek = 1
   vi.setSystemTime(new Date('2025-01-06T12:00:00'));
   mockPushPage = vi.fn();
+  mockRestorePlanDayOriginal = vi.fn();
+  mockAddPlanDaySession = vi.fn();
+  mockGetActivePlan = vi.fn();
   defaultOnGeneratePlan.mockReset();
   mockUseNavigationStore.mockImplementation(
     (selector: (s: Record<string, unknown>) => unknown) =>
@@ -455,5 +501,156 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.getByTestId('daily-weight-input')).toBeInTheDocument();
+  });
+
+  // --- Multi-session & Edit ---
+  describe('multi-session', () => {
+    const multiSessionDays = [
+      {
+        id: 'ms1',
+        planId: 'plan1',
+        dayOfWeek: 1,
+        sessionOrder: 1,
+        workoutType: 'Push',
+        muscleGroups: 'chest,shoulders',
+        exercises: mockExercises,
+        originalExercises: mockExercises,
+      },
+      {
+        id: 'ms2',
+        planId: 'plan1',
+        dayOfWeek: 1,
+        sessionOrder: 2,
+        workoutType: 'Cardio',
+        muscleGroups: '',
+        exercises: '[]',
+        originalExercises: '[]',
+      },
+      {
+        id: 'ms3',
+        planId: 'plan1',
+        dayOfWeek: 3,
+        sessionOrder: 1,
+        workoutType: 'Pull',
+        muscleGroups: 'back,arms',
+        exercises: mockExercises,
+        originalExercises: mockExercises,
+      },
+    ];
+
+    it('renders SessionTabs when a day has 2+ sessions', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('session-tabs')).toBeInTheDocument();
+      expect(screen.getByRole('tablist')).toBeInTheDocument();
+    });
+
+    it('does not render SessionTabs when day has only 1 session', () => {
+      // Wednesday has only 1 session
+      vi.setSystemTime(new Date('2025-01-08T12:00:00'));
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('session-tabs')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('edit button', () => {
+    it('click edit button calls pushPage with PlanDayEditor', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('edit-exercises-btn'));
+      expect(mockPushPage).toHaveBeenCalledWith({
+        id: 'plan-day-editor',
+        component: 'PlanDayEditor',
+        props: { planDay: planDays[0] },
+      });
+    });
+  });
+
+  describe('modified badge & restore', () => {
+    const modifiedExercises = JSON.stringify([
+      {
+        exercise: { id: 'e1', nameVi: 'Bench Press' },
+        sets: 4,
+        repsMin: 6,
+        repsMax: 8,
+        restSeconds: 120,
+      },
+    ]);
+
+    it('shows "Đã chỉnh sửa" badge when exercises differ from originalExercises', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Push',
+            muscleGroups: 'chest',
+            exercises: modifiedExercises,
+            originalExercises: mockExercises,
+          },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('modified-badge')).toBeInTheDocument();
+    });
+
+    it('does not show modified badge when exercises equal originalExercises', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Push',
+            muscleGroups: 'chest',
+            exercises: mockExercises,
+            originalExercises: mockExercises,
+          },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('modified-badge')).not.toBeInTheDocument();
+    });
+
+    it('does not show modified badge when originalExercises is undefined', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('modified-badge')).not.toBeInTheDocument();
+    });
+
+    it('clicking restore button calls restorePlanDayOriginal', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Push',
+            muscleGroups: 'chest',
+            exercises: modifiedExercises,
+            originalExercises: mockExercises,
+          },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('restore-original-btn'));
+      expect(mockRestorePlanDayOriginal).toHaveBeenCalledWith('d1');
+    });
+  });
+
+  describe('AddSessionModal integration', () => {
+    it('does not render modal by default', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
+    });
   });
 });
