@@ -1,0 +1,168 @@
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { AlertTriangle, Check } from 'lucide-react';
+import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
+
+export interface DayAssignmentSheetProps {
+  open: boolean;
+  onClose: () => void;
+  trainingDays: number[];
+  currentDay: number;
+  onSelectDay: (day: number) => void;
+  existingDayCounts?: Record<number, number>;
+}
+
+const MAX_SESSIONS_PER_DAY = 3;
+
+const DAY_LABEL_KEYS = [
+  'fitness.scheduleEditor.monday',
+  'fitness.scheduleEditor.tuesday',
+  'fitness.scheduleEditor.wednesday',
+  'fitness.scheduleEditor.thursday',
+  'fitness.scheduleEditor.friday',
+  'fitness.scheduleEditor.saturday',
+  'fitness.scheduleEditor.sunday',
+] as const;
+
+const DAY_FULL_KEYS = [
+  'fitness.scheduleEditor.mondayFull',
+  'fitness.scheduleEditor.tuesdayFull',
+  'fitness.scheduleEditor.wednesdayFull',
+  'fitness.scheduleEditor.thursdayFull',
+  'fitness.scheduleEditor.fridayFull',
+  'fitness.scheduleEditor.saturdayFull',
+  'fitness.scheduleEditor.sundayFull',
+] as const;
+
+const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
+  open,
+  onClose,
+  trainingDays,
+  currentDay,
+  onSelectDay,
+  existingDayCounts = {},
+}: DayAssignmentSheetProps): React.JSX.Element | null {
+  const { t } = useTranslation();
+
+  useModalBackHandler(open, onClose);
+
+  const sortedDays = useMemo(
+    () => [...trainingDays].sort((a, b) => a - b),
+    [trainingDays],
+  );
+
+  const handleSelect = useCallback(
+    (day: number) => {
+      const count = existingDayCounts[day] ?? 0;
+      if (count >= MAX_SESSIONS_PER_DAY) return;
+      onSelectDay(day);
+      onClose();
+    },
+    [existingDayCounts, onSelectDay, onClose],
+  );
+
+  if (!open) return null;
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div
+        data-testid="day-assignment-sheet"
+        className="relative w-full rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        style={{ overscrollBehavior: 'contain' }}
+      >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
+        </div>
+
+        {/* Header */}
+        <div className="px-4 pb-3 text-center">
+          <h2
+            data-testid="day-assignment-title"
+            className="text-lg font-bold text-slate-800 dark:text-slate-200"
+          >
+            {t('fitness.scheduleEditor.selectDay')}
+          </h2>
+        </div>
+
+        {/* Day list */}
+        <div className="px-4 pb-safe">
+          <ul role="radiogroup" aria-label={t('fitness.scheduleEditor.selectDay')} className="space-y-2 pb-4">
+            {sortedDays.map((day) => {
+              const count = existingDayCounts[day] ?? 0;
+              const isFull = count >= MAX_SESSIONS_PER_DAY;
+              const isCurrent = day === currentDay;
+              const shortLabel = t(DAY_LABEL_KEYS[day - 1]);
+              const fullLabel = t(DAY_FULL_KEYS[day - 1]);
+
+              return (
+                <li key={day}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={isCurrent}
+                    aria-disabled={isFull}
+                    data-testid={`day-option-${day}`}
+                    disabled={isFull}
+                    onClick={() => handleSelect(day)}
+                    className={[
+                      'flex w-full items-center gap-3 rounded-xl px-4 py-3',
+                      'text-left text-sm touch-manipulation',
+                      'transition-colors motion-reduce:transition-none',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+                      isCurrent
+                        ? 'border-2 border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30'
+                        : 'border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/50',
+                      isFull ? 'cursor-not-allowed opacity-50' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {/* Radio indicator */}
+                    <span
+                      className={[
+                        'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2',
+                        isCurrent
+                          ? 'border-emerald-500 bg-emerald-500 dark:border-emerald-400 dark:bg-emerald-400'
+                          : 'border-slate-300 dark:border-slate-600',
+                      ].join(' ')}
+                    >
+                      {isCurrent && <Check className="h-3 w-3 text-white" />}
+                    </span>
+
+                    {/* Day info */}
+                    <span className="flex-1">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                        {shortLabel}
+                      </span>
+                      <span className="ml-1 text-slate-500 dark:text-slate-400">
+                        ({fullLabel})
+                      </span>
+                      <span className="ml-2 text-slate-400 dark:text-slate-500">
+                        — {t('fitness.scheduleEditor.sessionsCount', { count })}
+                      </span>
+                    </span>
+
+                    {/* Warning for full days */}
+                    {isFull && (
+                      <span
+                        data-testid={`day-full-warning-${day}`}
+                        className="flex flex-shrink-0 items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+                        aria-label={t('fitness.scheduleEditor.maxSessions')}
+                      >
+                        <AlertTriangle className="h-4 w-4" />
+                      </span>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </ModalBackdrop>
+  );
+});
+
+export const DayAssignmentSheet = DayAssignmentSheetInner;

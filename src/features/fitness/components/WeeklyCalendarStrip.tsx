@@ -1,0 +1,103 @@
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+export interface WeeklyCalendarStripProps {
+  trainingDays: number[];
+  selectedDay?: number;
+  onDayToggle?: (day: number) => void;
+  onDaySelect?: (day: number) => void;
+  interactive?: boolean;
+  todayDow?: number;
+}
+
+const DAY_LABEL_KEYS = [
+  'fitness.scheduleEditor.monday',
+  'fitness.scheduleEditor.tuesday',
+  'fitness.scheduleEditor.wednesday',
+  'fitness.scheduleEditor.thursday',
+  'fitness.scheduleEditor.friday',
+  'fitness.scheduleEditor.saturday',
+  'fitness.scheduleEditor.sunday',
+] as const;
+
+const DAY_FULL_KEYS = [
+  'fitness.scheduleEditor.mondayFull',
+  'fitness.scheduleEditor.tuesdayFull',
+  'fitness.scheduleEditor.wednesdayFull',
+  'fitness.scheduleEditor.thursdayFull',
+  'fitness.scheduleEditor.fridayFull',
+  'fitness.scheduleEditor.saturdayFull',
+  'fitness.scheduleEditor.sundayFull',
+] as const;
+
+export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
+  trainingDays,
+  selectedDay,
+  onDayToggle,
+  onDaySelect,
+  interactive = false,
+  todayDow,
+}: WeeklyCalendarStripProps): React.JSX.Element {
+  const { t } = useTranslation();
+
+  const trainingDaySet = useMemo(() => new Set(trainingDays), [trainingDays]);
+
+  const handleDayClick = useCallback(
+    (day: number) => {
+      if (interactive && onDayToggle) {
+        onDayToggle(day);
+      } else if (!interactive && onDaySelect) {
+        onDaySelect(day);
+      }
+    },
+    [interactive, onDayToggle, onDaySelect],
+  );
+
+  return (
+    <div
+      role="group"
+      aria-label={t('fitness.scheduleEditor.weeklyCalendar')}
+      data-testid="weekly-calendar-strip"
+      className="flex items-center justify-center gap-2"
+    >
+      {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+        const isTraining = trainingDaySet.has(day);
+        const isSelected = selectedDay === day;
+        const isToday = todayDow === day;
+        const label = t(DAY_LABEL_KEYS[day - 1]);
+        const fullLabel = t(DAY_FULL_KEYS[day - 1]);
+        const statusLabel = isTraining
+          ? t('fitness.scheduleEditor.trainingDay')
+          : t('fitness.scheduleEditor.restDay');
+
+        return (
+          <button
+            key={day}
+            type="button"
+            data-testid={`calendar-day-${day}`}
+            aria-label={`${fullLabel} — ${statusLabel}`}
+            aria-pressed={interactive ? isTraining : undefined}
+            onClick={() => handleDayClick(day)}
+            className={[
+              'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full',
+              'text-sm font-semibold',
+              'touch-manipulation',
+              'motion-reduce:transition-none',
+              'transition-colors duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+              isTraining
+                ? 'bg-emerald-500 text-white dark:bg-emerald-600'
+                : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+              isToday ? 'ring-2 ring-blue-500 ring-offset-1' : '',
+              isSelected ? 'border-2 border-slate-900 dark:border-white' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+});
