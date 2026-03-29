@@ -965,7 +965,7 @@
     "equipment": {
       "barbell": "Tạ đòn",
       "bench": "Ghế tập",
-      "bodyweight": "Tự trọng",
+      "bodyweight": "Không tạ",
       "box": "Hộp nhảy",
       "cable": "Cáp",
       "dumbbell": "Tạ tay",
@@ -1189,6 +1189,7 @@
       "start": "Bắt đầu"
     },
     "progress": {
+      "section0": "Bắt đầu",
       "section1": "Chào mừng",
       "section2": "Hồ sơ sức khỏe",
       "section3": "Mục tiêu tập",
