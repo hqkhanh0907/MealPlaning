@@ -75,6 +75,7 @@ const makePlanDay = (
   id: 'day-wed',
   planId: 'plan-1',
   dayOfWeek: 3,
+  sessionOrder: 1,
   workoutType: 'Upper Body A',
   muscleGroups: 'chest, shoulders, triceps',
   exercises: makeExercisesJson(),
@@ -204,7 +205,7 @@ describe('TodaysPlanCard', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
-        workouts: [makeWorkout()],
+        workouts: [makeWorkout({ planDayId: 'day-wed' })],
         workoutSets: [
           makeWorkoutSet({ id: 'set-1' }),
           makeWorkoutSet({ id: 'set-2', setNumber: 2 }),
@@ -234,7 +235,7 @@ describe('TodaysPlanCard', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
-        workouts: [makeWorkout()],
+        workouts: [makeWorkout({ planDayId: 'day-wed' })],
         workoutSets: [makeWorkoutSet()],
       });
 
@@ -536,6 +537,144 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByText('Kế hoạch hôm nay')).toBeInTheDocument();
+    });
+  });
+
+  describe('State 5: training-partial (multi-session)', () => {
+    beforeEach(() => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1, workoutType: 'Strength' }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
+        ],
+        workouts: [
+          makeWorkout({ id: 'w-1', planDayId: 'day-s1' }),
+        ],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-partial-1', workoutId: 'w-1' }),
+        ],
+      });
+    });
+
+    it('renders session progress text', () => {
+      render(<TodaysPlanCard />);
+
+      const section = screen.getByTestId('partial-progress-section');
+      expect(section).toHaveTextContent('Đã tập 1/2 buổi');
+    });
+
+    it('shows next uncompleted session name', () => {
+      render(<TodaysPlanCard />);
+
+      expect(screen.getByTestId('next-session-name')).toHaveTextContent(
+        'Tiếp theo: Cardio',
+      );
+    });
+
+    it('renders continue session CTA', () => {
+      render(<TodaysPlanCard />);
+
+      const cta = screen.getByTestId('continue-session-cta');
+      expect(cta).toHaveTextContent('Tiếp tục buổi tập');
+    });
+
+    it('continue CTA navigates to WorkoutLogger via pushPage', () => {
+      render(<TodaysPlanCard />);
+
+      fireEvent.click(screen.getByTestId('continue-session-cta'));
+
+      const { pageStack } = useNavigationStore.getState();
+      expect(pageStack).toHaveLength(1);
+      expect(pageStack[0]).toEqual(
+        expect.objectContaining({ component: 'WorkoutLogger' }),
+      );
+    });
+
+    it('still shows meals section', () => {
+      render(<TodaysPlanCard />);
+
+      expect(screen.getByTestId('meals-section')).toBeInTheDocument();
+    });
+  });
+
+  describe('Multi-session info display', () => {
+    it('shows session count in training-pending when totalSessions > 1', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1 }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      expect(screen.getByTestId('session-info')).toHaveTextContent(
+        '2 buổi tập hôm nay',
+      );
+    });
+
+    it('does not show session info for single session in training-pending', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      expect(screen.queryByTestId('session-info')).not.toBeInTheDocument();
+    });
+
+    it('shows completed session count in training-completed when totalSessions > 1', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1 }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
+        ],
+        workouts: [
+          makeWorkout({ id: 'w-1', planDayId: 'day-s1' }),
+          makeWorkout({ id: 'w-2', planDayId: 'day-s2' }),
+        ],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-c1', workoutId: 'w-1' }),
+          makeWorkoutSet({ id: 'set-c2', workoutId: 'w-2' }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      expect(screen.getByTestId('session-info')).toHaveTextContent(
+        'Hoàn thành 2/2 buổi',
+      );
+    });
+
+    it('does not show session info for single session in training-completed', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+        workouts: [makeWorkout()],
+        workoutSets: [makeWorkoutSet()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      expect(screen.queryByTestId('session-info')).not.toBeInTheDocument();
+    });
+
+    it('single session training-pending still works (backward compat)', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      expect(screen.getByTestId('workout-section')).toBeInTheDocument();
+      expect(screen.getByTestId('workout-name')).toHaveTextContent('Upper Body A');
+      expect(screen.getByTestId('start-workout-cta')).toBeInTheDocument();
+      expect(screen.queryByTestId('session-info')).not.toBeInTheDocument();
     });
   });
 });

@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Footprints,
   Droplets,
+  RotateCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTodaysPlan } from '../hooks/useTodaysPlan';
@@ -21,6 +22,36 @@ const MEAL_LOG_KEYS: Record<string, string> = {
 
 const CARD_CLASS =
   'bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4';
+
+function SessionInfo({
+  totalSessions,
+  completedSessions,
+  variant,
+}: {
+  totalSessions: number;
+  completedSessions: number;
+  variant: 'pending' | 'completed';
+}) {
+  const { t } = useTranslation();
+  if (totalSessions <= 1) return null;
+
+  const text =
+    variant === 'completed'
+      ? t('dashboard.todaysPlan.completedAllSessions', {
+          completed: completedSessions,
+          total: totalSessions,
+        })
+      : t('dashboard.todaysPlan.sessionsToday', { count: totalSessions });
+
+  return (
+    <p
+      data-testid="session-info"
+      className="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+    >
+      {text}
+    </p>
+  );
+}
 
 function MealsSection({
   mealsLogged,
@@ -144,6 +175,11 @@ const TodaysPlanCard: React.FC = React.memo(() => {
                 })}
               </p>
             )}
+            <SessionInfo
+              totalSessions={data.totalSessions}
+              completedSessions={data.completedSessions}
+              variant="pending"
+            />
             <Button
               size="sm"
               onClick={handleStartWorkout}
@@ -152,6 +188,49 @@ const TodaysPlanCard: React.FC = React.memo(() => {
             >
               <Play className="w-3.5 h-3.5" aria-hidden="true" />
               {t('dashboard.todaysPlan.startCta')}
+            </Button>
+          </div>
+          <MealsSection {...mealsProps} />
+        </div>
+      </div>
+    );
+  }
+
+  if (data.state === 'training-partial') {
+    return (
+      <div data-testid="todays-plan-card" className={CARD_CLASS}>
+        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+          {t('dashboard.todaysPlan.title')}
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div data-testid="partial-progress-section">
+            <div className="flex items-center gap-1.5 mb-2">
+              <RotateCw className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                {t('dashboard.todaysPlan.sessionProgress', {
+                  completed: data.completedSessions,
+                  total: data.totalSessions,
+                })}
+              </span>
+            </div>
+            {data.nextUncompletedSession && (
+              <p
+                data-testid="next-session-name"
+                className="text-sm font-semibold text-slate-800 dark:text-slate-100"
+              >
+                {t('dashboard.todaysPlan.nextSession', {
+                  name: data.nextUncompletedSession.workoutType,
+                })}
+              </p>
+            )}
+            <Button
+              size="sm"
+              onClick={handleStartWorkout}
+              data-testid="continue-session-cta"
+              className="mt-2 gap-1 bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <Play className="w-3.5 h-3.5" aria-hidden="true" />
+              {t('dashboard.todaysPlan.continueSession')}
             </Button>
           </div>
           <MealsSection {...mealsProps} />
@@ -202,6 +281,11 @@ const TodaysPlanCard: React.FC = React.memo(() => {
                 )}
               </>
             )}
+            <SessionInfo
+              totalSessions={data.totalSessions}
+              completedSessions={data.completedSessions}
+              variant="completed"
+            />
           </div>
           <MealsSection {...mealsProps} />
         </div>

@@ -763,7 +763,38 @@
       "planCreated": "Kế hoạch tập luyện đã được tạo thành công!",
       "planError": "Không thể tạo kế hoạch. Vui lòng thử lại.",
       "setsLabel": "hiệp",
-      "repsLabel": "lần"
+      "repsLabel": "lần",
+      "editExercises": "Chỉnh sửa bài tập",
+      "addExercise": "Thêm bài tập",
+      "save": "Lưu",
+      "restore": "Khôi phục gốc",
+      "modified": "Đã chỉnh sửa",
+      "noExercises": "Chưa có bài tập nào",
+      "unsavedChanges": "Bạn có thay đổi chưa lưu. Bỏ thay đổi?",
+      "sessionTab": "Buổi {{order}}",
+      "addSession": "Thêm buổi tập",
+      "strengthOption": "Sức mạnh (Strength)",
+      "strengthDesc": "Chọn nhóm cơ → auto-gợi ý bài tập",
+      "cardioOption": "Cardio",
+      "cardioDesc": "HIIT, chạy bộ, đạp xe, bơi...",
+      "freestyleOption": "Tập tự do (Freestyle)",
+      "freestyleDesc": "Tự chọn bài tập, không theo template",
+      "maxSessions": "Tối đa 3 buổi/ngày",
+      "selectMuscleGroups": "Chọn nhóm cơ",
+      "createSession": "Tạo buổi tập",
+      "muscleGroup": {
+        "chest": "Ngực",
+        "back": "Lưng",
+        "shoulders": "Vai",
+        "legs": "Chân",
+        "arms": "Tay",
+        "core": "Bụng",
+        "glutes": "Mông"
+      },
+      "sessionProgress": "Đã tập {{completed}}/{{total}} buổi",
+      "continueSession": "Tiếp tục buổi tập",
+      "freestyleName": "Đặt tên buổi tập",
+      "freestyleDefault": "Buổi tập tự do"
     },
     "workout": {
       "tab": "Buổi tập"
@@ -928,7 +959,12 @@
       "exercisesCount": "{{count}} bài tập",
       "duration": "{{minutes}} phút",
       "setsCount": "{{count}} set",
-      "tomorrowPreview": "Ngày mai: {{name}} ({{count}} bài)"
+      "tomorrowPreview": "Ngày mai: {{name}} ({{count}} bài)",
+      "sessionProgress": "Đã tập {{completed}}/{{total}} buổi",
+      "continueSession": "Tiếp tục buổi tập",
+      "sessionsToday": "{{count}} buổi tập hôm nay",
+      "completedAllSessions": "Hoàn thành {{completed}}/{{total}} buổi",
+      "nextSession": "Tiếp theo: {{name}}"
     },
     "weightMini": {
       "noData": "Chưa có dữ liệu cân nặng",
