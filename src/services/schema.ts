@@ -1,6 +1,6 @@
 import type { DatabaseService } from './databaseService';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const SCHEMA_TABLES = new Set([
   'ingredients',
@@ -170,10 +170,12 @@ export async function createSchema(db: DatabaseService): Promise<void> {
     CREATE TABLE IF NOT EXISTS training_plan_days (
       id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
       plan_id TEXT NOT NULL REFERENCES training_plans(id) ON DELETE CASCADE,
-      day_of_week INTEGER NOT NULL CHECK(day_of_week BETWEEN 0 AND 6),
+      day_of_week INTEGER NOT NULL CHECK(day_of_week BETWEEN 1 AND 7),
+      session_order INTEGER NOT NULL DEFAULT 1,
       workout_type TEXT NOT NULL,
       muscle_groups TEXT,
       exercises TEXT,
+      original_exercises TEXT,
       notes TEXT
     )
   `);
@@ -201,6 +203,7 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       id TEXT PRIMARY KEY,
       date TEXT NOT NULL,
       name TEXT NOT NULL,
+      plan_day_id TEXT REFERENCES training_plan_days(id),
       duration_min INTEGER,
       notes TEXT,
       created_at TEXT NOT NULL,
@@ -346,8 +349,62 @@ export async function createSchema(db: DatabaseService): Promise<void> {
   await db.execute(
     'CREATE INDEX IF NOT EXISTS idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id)',
   );
+  await db.execute(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_plan_day_session ON training_plan_days(plan_id, day_of_week, session_order)',
+  );
 
   // --- Schema version ---
 
   await db.execute(`PRAGMA user_version = ${String(SCHEMA_VERSION)}`);
+}
+
+export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
+  const currentVersion = await getSchemaVersion(db);
+  if (currentVersion >= SCHEMA_VERSION) return;
+
+  // Migration v1 → v2: Fitness plan flexibility (multi-session, plan editing)
+  if (currentVersion < 2) {
+    // 1. Add session_order and original_exercises to training_plan_days
+    await db.execute(
+      'ALTER TABLE training_plan_days ADD COLUMN session_order INTEGER NOT NULL DEFAULT 1',
+    );
+    await db.execute(
+      'ALTER TABLE training_plan_days ADD COLUMN original_exercises TEXT',
+    );
+
+    // 2. Backfill original_exercises from exercises for existing data
+    await db.execute(
+      'UPDATE training_plan_days SET original_exercises = exercises WHERE original_exercises IS NULL',
+    );
+
+    // 3. Recreate table with fixed CHECK constraint (0-6 → 1-7)
+    await db.execute(`CREATE TABLE training_plan_days_v2 (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      plan_id TEXT NOT NULL REFERENCES training_plans(id) ON DELETE CASCADE,
+      day_of_week INTEGER NOT NULL CHECK(day_of_week BETWEEN 1 AND 7),
+      session_order INTEGER NOT NULL DEFAULT 1,
+      workout_type TEXT NOT NULL,
+      muscle_groups TEXT,
+      exercises TEXT,
+      original_exercises TEXT,
+      notes TEXT
+    )`);
+    await db.execute(
+      'INSERT INTO training_plan_days_v2 SELECT id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes FROM training_plan_days',
+    );
+    await db.execute('DROP TABLE training_plan_days');
+    await db.execute('ALTER TABLE training_plan_days_v2 RENAME TO training_plan_days');
+
+    // 4. UNIQUE index for max 3 sessions/day
+    await db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_plan_day_session ON training_plan_days(plan_id, day_of_week, session_order)',
+    );
+
+    // 5. Add plan_day_id to workouts
+    await db.execute(
+      'ALTER TABLE workouts ADD COLUMN plan_day_id TEXT REFERENCES training_plan_days(id)',
+    );
+
+    await db.execute('PRAGMA user_version = 2');
+  }
 }

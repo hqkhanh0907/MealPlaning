@@ -44,6 +44,7 @@ const EXPECTED_INDEXES = [
   'idx_adjustments_date',
   'idx_dish_ingredients_dish',
   'idx_dish_ingredients_ingredient',
+  'idx_plan_day_session',
 ];
 
 describe('createSchema', () => {
@@ -108,10 +109,10 @@ describe('createSchema', () => {
     expect(indexes).toHaveLength(EXPECTED_INDEXES.length);
   });
 
-  it('sets schema version to 1', async () => {
+  it('sets schema version to current SCHEMA_VERSION', async () => {
     const version = await getSchemaVersion(db);
     expect(version).toBe(SCHEMA_VERSION);
-    expect(version).toBe(1);
+    expect(version).toBe(2);
   });
 
   it('is idempotent — running createSchema twice does not error', async () => {

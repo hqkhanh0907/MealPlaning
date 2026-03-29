@@ -74,9 +74,11 @@ export interface TrainingPlanDay {
   id: string;
   planId: string;
   dayOfWeek: number;
+  sessionOrder: number;
   workoutType: string;
   muscleGroups?: string;
   exercises?: string;
+  originalExercises?: string;
   notes?: string;
 }
 
@@ -85,6 +87,7 @@ export interface Workout {
   id: string;
   date: string;
   name: string;
+  planDayId?: string;
   durationMin?: number;
   notes?: string;
   createdAt: string;
@@ -150,3 +153,11 @@ export interface SelectedExercise {
   repsMax: number;
   restSeconds: number;
 }
+
+// Today's plan state for multi-session support
+export type TodayPlanState =
+  | 'training-pending'
+  | 'training-partial'
+  | 'training-completed'
+  | 'rest-day'
+  | 'no-plan';
