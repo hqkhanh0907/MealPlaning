@@ -95,7 +95,7 @@ function PageStackOverlay({ page, onBack }: { page: PageEntry; onBack: () => voi
   if (!content) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 overflow-y-auto" data-testid={`page-overlay-${page.id}`}>
+    <div className="fixed inset-0 z-50 bg-slate-50 pt-safe dark:bg-slate-950 overflow-y-auto" data-testid={`page-overlay-${page.id}`}>
       <Suspense fallback={<TabLoadingFallback />}>
         {content}
       </Suspense>

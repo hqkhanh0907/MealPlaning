@@ -45,6 +45,7 @@ export interface FitnessState {
   removePlanDaySession: (dayId: string) => void;
   addWorkout: (workout: Workout) => void;
   updateWorkout: (id: string, updates: Partial<Workout>) => void;
+  deleteWorkout: (id: string) => Promise<void>;
   addWorkoutSet: (workoutSet: WorkoutSet) => void;
   saveWorkoutAtomic: (workout: Workout, sets: WorkoutSet[]) => Promise<void>;
   updateWorkoutSet: (id: string, updates: Partial<WorkoutSet>) => void;
@@ -242,6 +243,21 @@ export const useFitnessStore = create<FitnessState>()(
             w.id === id ? { ...w, ...updates } : w,
           ),
         })),
+
+      deleteWorkout: async (id) => {
+        set((state) => ({
+          workouts: state.workouts.filter((w) => w.id !== id),
+          workoutSets: state.workoutSets.filter((s) => s.workoutId !== id),
+        }));
+        if (_db) {
+          try {
+            await _db.execute('DELETE FROM workout_sets WHERE workout_id = ?', [id]);
+            await _db.execute('DELETE FROM workouts WHERE id = ?', [id]);
+          } catch (error: unknown) {
+            console.error('[fitnessStore] SQLite delete failed for workout:', error);
+          }
+        }
+      },
 
       addWorkoutSet: (workoutSet) => {
         set((state) => ({

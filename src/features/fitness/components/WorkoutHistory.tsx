@@ -6,8 +6,10 @@ import {
   ChevronUp,
   Clock,
   StickyNote,
+  Trash2,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateExerciseVolume } from '../utils/trainingMetrics';
 import { parseDate, getMondayOfWeek } from '../utils/dateUtils';
@@ -67,9 +69,11 @@ function WorkoutHistoryInner(): React.JSX.Element {
   const { t } = useTranslation();
   const workouts = useFitnessStore((s) => s.workouts);
   const workoutSets = useFitnessStore((s) => s.workoutSets);
+  const deleteWorkout = useFitnessStore((s) => s.deleteWorkout);
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const getSetsForWorkout = useCallback(
     (workoutId: string): WorkoutSet[] =>
@@ -119,6 +123,14 @@ function WorkoutHistoryInner(): React.JSX.Element {
   const handleToggle = useCallback((workoutId: string) => {
     setExpandedId((prev) => (prev === workoutId ? null : workoutId));
   }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (deleteTargetId) {
+      await deleteWorkout(deleteTargetId);
+      setDeleteTargetId(null);
+      setExpandedId(null);
+    }
+  }, [deleteTargetId, deleteWorkout]);
 
   const groupSetsByExercise = useCallback(
     (workoutId: string): Record<string, WorkoutSet[]> => {
@@ -381,6 +393,19 @@ function WorkoutHistoryInner(): React.JSX.Element {
                             </p>
                           </div>
                         )}
+
+                        <div className="flex justify-end pt-2 mt-2 border-t border-slate-50 dark:border-slate-700">
+                          <button
+                            type="button"
+                            data-testid={`delete-workout-${workout.id}`}
+                            onClick={() => setDeleteTargetId(workout.id)}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            aria-label={t('fitness.deleteWorkout.title')}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                            {t('fitness.deleteWorkout.delete')}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -390,6 +415,17 @@ function WorkoutHistoryInner(): React.JSX.Element {
           </div>
         ))}
       </div>
+
+      <ConfirmationModal
+        isOpen={deleteTargetId !== null}
+        variant="danger"
+        title={t('fitness.deleteWorkout.title')}
+        message={t('fitness.deleteWorkout.confirm')}
+        confirmLabel={t('fitness.deleteWorkout.delete')}
+        cancelLabel={t('fitness.deleteWorkout.cancel')}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

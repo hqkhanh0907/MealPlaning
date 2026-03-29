@@ -116,7 +116,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
+      <div className="flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 pt-safe dark:border-slate-700">
         <button
           type="button"
           onClick={handleBack}
@@ -221,7 +221,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
       </div>
 
       {/* Sticky add button */}
-      <div className="sticky bottom-0 border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <div className="sticky bottom-0 border-t border-slate-200 bg-white p-4 pb-safe dark:border-slate-700 dark:bg-slate-900">
         <button
           type="button"
           onClick={handleOpenSelector}

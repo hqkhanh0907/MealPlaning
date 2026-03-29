@@ -117,7 +117,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
     >
       {/* Header */}
       <header
-        className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
+        className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 pt-safe text-white"
         data-testid="cardio-header"
       >
         <Button
@@ -394,7 +394,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
       </div>
 
       {/* Save Button */}
-      <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+      <div className="border-t border-slate-200 bg-white p-4 pb-safe dark:border-slate-700 dark:bg-slate-800">
         <Button
           variant="default"
           onClick={handleSave}

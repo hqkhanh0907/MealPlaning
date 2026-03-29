@@ -1,4 +1,4 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
 import { WorkoutHistory } from '../features/fitness/components/WorkoutHistory';
 import { useFitnessStore } from '../store/fitnessStore';
 import type { Mock } from 'vitest';
@@ -201,12 +201,16 @@ describe('WorkoutHistory', () => {
   });
 
   describe('with workouts', () => {
+    const mockDeleteWorkout = vi.fn().mockResolvedValue(undefined);
+
     beforeEach(() => {
+      mockDeleteWorkout.mockClear();
       mockUseFitnessStore.mockImplementation(
         (selector: (state: Record<string, unknown>) => unknown) =>
           selector({
             workouts: mockWorkouts,
             workoutSets: mockWorkoutSets,
+            deleteWorkout: mockDeleteWorkout,
           }),
       );
     });
@@ -496,6 +500,46 @@ describe('WorkoutHistory', () => {
       expect(
         screen.queryByTestId('workout-notes-w3'),
       ).not.toBeInTheDocument();
+    });
+
+    it('shows delete button when workout is expanded', () => {
+      render(<WorkoutHistory />);
+      fireEvent.click(screen.getByTestId('workout-toggle-w3'));
+
+      expect(screen.getByTestId('delete-workout-w3')).toBeInTheDocument();
+    });
+
+    it('delete button opens confirmation dialog', () => {
+      render(<WorkoutHistory />);
+      fireEvent.click(screen.getByTestId('workout-toggle-w3'));
+      fireEvent.click(screen.getByTestId('delete-workout-w3'));
+
+      // ConfirmationModal renders — btn-confirm-action and btn-cancel-action should be present
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+      expect(screen.getByTestId('btn-cancel-action')).toBeInTheDocument();
+    });
+
+    it('cancel delete closes dialog without removing workout', () => {
+      render(<WorkoutHistory />);
+      fireEvent.click(screen.getByTestId('workout-toggle-w3'));
+      fireEvent.click(screen.getByTestId('delete-workout-w3'));
+      fireEvent.click(screen.getByTestId('btn-cancel-action'));
+
+      expect(screen.getByTestId('workout-card-w3')).toBeInTheDocument();
+      expect(screen.queryByTestId('btn-confirm-action')).not.toBeInTheDocument();
+    });
+
+    it('confirm delete calls deleteWorkout with correct id', async () => {
+      render(<WorkoutHistory />);
+      fireEvent.click(screen.getByTestId('workout-toggle-w3'));
+      fireEvent.click(screen.getByTestId('delete-workout-w3'));
+
+      // Must wrap in act since the handler is async
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-confirm-action'));
+      });
+
+      expect(mockDeleteWorkout).toHaveBeenCalledWith('w3');
     });
   });
 });

@@ -294,6 +294,23 @@ describe('fitnessStore', () => {
     expect(sets[0].id).toBe('set-2');
   });
 
+  it('deleteWorkout removes workout and all its sets', async () => {
+    const workout1 = sampleWorkout({ id: 'w-1' });
+    const workout2 = sampleWorkout({ id: 'w-2' });
+    const set1 = sampleWorkoutSet({ id: 's-1', workoutId: 'w-1' });
+    const set2 = sampleWorkoutSet({ id: 's-2', workoutId: 'w-1', setNumber: 2 });
+    const set3 = sampleWorkoutSet({ id: 's-3', workoutId: 'w-2' });
+    useFitnessStore.setState({ workouts: [workout1, workout2], workoutSets: [set1, set2, set3] });
+
+    await useFitnessStore.getState().deleteWorkout('w-1');
+
+    const state = useFitnessStore.getState();
+    expect(state.workouts).toHaveLength(1);
+    expect(state.workouts[0].id).toBe('w-2');
+    expect(state.workoutSets).toHaveLength(1);
+    expect(state.workoutSets[0].id).toBe('s-3');
+  });
+
   it('getWorkoutSets filters by workoutId', () => {
     const set1 = sampleWorkoutSet({ id: 'set-1', workoutId: 'workout-1' });
     const set2 = sampleWorkoutSet({ id: 'set-2', workoutId: 'workout-2' });

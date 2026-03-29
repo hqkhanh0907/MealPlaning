@@ -374,7 +374,7 @@ export function WorkoutLogger({
       data-testid="workout-logger"
     >
       <header
-        className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
+        className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 pt-safe text-white"
         data-testid="workout-header"
       >
         <Button
@@ -586,7 +586,7 @@ export function WorkoutLogger({
         )}
       </div>
 
-      <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95" data-testid="add-exercise-container">
+      <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 pb-safe backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95" data-testid="add-exercise-container">
         <Button
           variant="outline"
           onClick={() => setShowExerciseSelector(true)}

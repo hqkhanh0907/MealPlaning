@@ -233,7 +233,7 @@ export function ExerciseSelector({
         </div>
 
         {/* Exercise list */}
-        <div className="flex-1 overflow-y-auto px-4 pb-safe">
+        <div className="flex-1 overflow-y-auto px-4 pb-3">
           {filteredExercises.length === 0 ? (
             <div
               data-testid="exercise-empty-state"
@@ -278,12 +278,14 @@ export function ExerciseSelector({
               ))}
             </ul>
           )}
+        </div>
 
-          {/* Custom Exercise button */}
+        {/* Custom Exercise button — sticky footer outside scroll */}
+        <div className="border-t border-slate-200 px-4 py-3 pb-safe dark:border-slate-700">
           <button
             type="button"
             onClick={openCustomModal}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 dark:border-slate-600 dark:text-slate-500 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 dark:border-slate-600 dark:text-slate-500 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             data-testid="add-custom-exercise"
           >
             <Plus className="h-4 w-4" />
