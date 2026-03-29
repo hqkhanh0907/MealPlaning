@@ -41,6 +41,9 @@ import { useModalManager } from './hooks/useModalManager';
 import { useCopyPlan } from './hooks/useCopyPlan';
 import { useAutoSync } from './hooks/useAutoSync';
 import { usePrefetchAfterIdle } from './hooks/usePrefetchAfterIdle';
+import { useAppBackHandler } from './hooks/useAppBackHandler';
+import { usePageStackBackHandler } from './hooks/usePageStackBackHandler';
+import { useTabHistoryBackHandler } from './hooks/useTabHistoryBackHandler';
 import {
   createEmptyDayPlan,
   clearPlansByScope,
@@ -115,6 +118,11 @@ export default function App() {
 
   const prefetchFns = useMemo(() => [importManagementTab], []);
   usePrefetchAfterIdle(prefetchFns);
+
+  // Centralized back navigation — must be before other hooks
+  useAppBackHandler();
+  usePageStackBackHandler();
+  useTabHistoryBackHandler();
 
   // Reset runtime-only stores on mount (no persistent data — safe to keep)
   // Data stores (ingredients, dishes, dayPlans, templates) are now loaded from SQLite by DatabaseContext
