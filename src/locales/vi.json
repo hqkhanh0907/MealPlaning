@@ -718,6 +718,13 @@
       "title": "Tổng kết buổi tập",
       "newPR": "{{count}} kỷ lục cá nhân mới!"
     },
+    "deleteWorkout": {
+      "title": "Xóa buổi tập",
+      "confirm": "Bạn có chắc muốn xóa buổi tập này? Tất cả dữ liệu sẽ bị mất.",
+      "success": "Đã xóa buổi tập",
+      "cancel": "Hủy",
+      "delete": "Xóa"
+    },
     "exerciseSelector": {
       "title": "Chọn bài tập",
       "search": "Tìm bài tập...",
@@ -927,7 +934,13 @@
         "step3": "Ghi nhận buổi tập luyện",
         "a11y": "Hướng dẫn bắt đầu"
       },
-      "partialData": "Một số dữ liệu chưa đầy đủ"
+      "partialData": "Một số dữ liệu chưa đầy đủ",
+      "scoreLabel": {
+        "excellent": "Xuất sắc",
+        "good": "Tốt",
+        "needsWork": "Cần cải thiện"
+      },
+      "a11yLabel": "Điểm số hôm nay: {{score}} - {{label}}"
     },
     "error": {
       "hero": "Không thể tải tổng quan",
