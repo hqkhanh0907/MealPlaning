@@ -21,7 +21,7 @@ export const config = {
 
   logLevel: 'info',
   bail: 0,
-  waitforTimeout: 30000,
+  waitforTimeout: process.env.CI ? 45000 : 30000,
   connectionRetryTimeout: 120000,
   connectionRetryCount: 3,
 
@@ -30,7 +30,7 @@ export const config = {
 
   mochaOpts: {
     ui: 'bdd',
-    timeout: 60000,
+    timeout: process.env.CI ? 120000 : 60000,
   },
 
   services: [

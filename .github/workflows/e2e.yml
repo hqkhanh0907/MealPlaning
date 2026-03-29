@@ -101,9 +101,9 @@ jobs:
       - name: Run E2E tests on Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 31
+          api-level: 34
           arch: x86_64
-          target: default
+          target: google_apis
           emulator-options: -no-snapshot -no-audio -no-window -no-boot-anim -gpu swiftshader_indirect -memory 2048
           emulator-boot-timeout: 900
           force-avd-creation: false
