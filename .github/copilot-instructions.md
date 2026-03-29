@@ -99,3 +99,52 @@ src/
 - Test file location: `src/__tests__/` hoặc cùng thư mục với component
 - Mock pattern: Mock stores và services, test behavior
 - KHÔNG dùng `eslint-disable` trong test files
+
+---
+
+## 🌐 i18n — QUY TẮC BẮT BUỘC (Bài học từ lỗi thực tế 2026-03-29)
+
+### Bài học:
+AI đã tạo component sử dụng `t('dashboard.hero.scoreLabel.excellent')`, `t('health.activityLevel.sedentary')`, `t('common.sodium')` v.v. nhưng **KHÔNG thêm key tương ứng vào `src/locales/vi.json`**, khiến UI hiển thị raw key thay vì text tiếng Việt — bug nghiêm trọng.
+
+### Quy tắc KHÔNG ĐƯỢC vi phạm:
+
+1. **MỌI lần dùng `t('key')` trong code, BẮT BUỘC phải đồng thời thêm key vào `src/locales/vi.json`.**
+   - Không bao giờ commit code có `t('some.key')` mà key đó chưa tồn tại trong vi.json.
+
+2. **Kiểm tra CẢ dynamic keys** — các pattern `t(\`namespace.${variable}\`)`:
+   - Liệt kê TẤT CẢ giá trị có thể có của `variable` (từ enum, const array, type union).
+   - Đảm bảo MỖI giá trị đều có key tương ứng trong vi.json.
+   - Ví dụ: `t(\`fitness.onboarding.${goal}\`)` với `goal: 'strength' | 'hypertrophy' | 'endurance' | 'general'` → cần 4 keys.
+
+3. **Kiểm tra pluralization**: i18next dùng `_zero`, `_one`, `_other` suffix.
+   - `t('key', { count: N })` cần `key_zero`, `key_one`, `key_other` (KHÔNG cần `key` gốc).
+
+4. **Pre-commit checklist i18n:**
+   ```
+   □ Mọi t('key') mới đều có trong vi.json
+   □ Mọi t(`dynamic.${var}`) đã cover hết enum values
+   □ JSON hợp lệ (chạy: python3 -c "import json; json.load(open('src/locales/vi.json'))")
+   □ Không có raw i18n key hiển thị trên UI
+   ```
+
+5. **Script kiểm tra nhanh** (chạy trước mỗi commit có thay đổi i18n):
+   ```bash
+   python3 -c "
+   import json,re,glob
+   vi=json.load(open('src/locales/vi.json'))
+   def kx(d,p):
+     for k in p.split('.'):
+       if isinstance(d,dict) and k in d: d=d[k]
+       else: return False
+     return True
+   missing=0
+   for f in glob.glob('src/**/*.tsx',recursive=True)+glob.glob('src/**/*.ts',recursive=True):
+     if '__tests__' in f or '.test.' in f: continue
+     c=open(f).read()
+     for m in re.findall(r\"t\(['\"]([^'\"]+)['\"]\",c):
+       if not kx(vi,m) and not kx(vi,m+'_one') and not kx(vi,m+'_other'):
+         print(f'❌ {f}: {m}'); missing+=1
+   print(f'Missing: {missing}')
+   "
+   ```
