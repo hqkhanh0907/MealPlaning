@@ -64,7 +64,16 @@ export const config = {
       return;
     }
     const exec = browser as unknown as { execute: (fn: () => unknown) => Promise<unknown> };
+    // Ensure onboarding is marked complete so the app shows main UI
+    await exec.execute(() => {
+      const key = 'app-onboarding-storage';
+      if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, JSON.stringify({ state: { isAppOnboarded: true }, version: 0 }));
+        location.reload();
+      }
+    });
     // Wait for Capacitor React app to finish loading inside the WebView
+    const ciTimeout = process.env.CI ? 60000 : 30000;
     await browser.waitUntil(
       async () => {
         try {
@@ -76,30 +85,7 @@ export const config = {
       },
       { timeout: 30000, interval: 1000, timeoutMsg: 'document.readyState never reached "complete"' }
     );
-    // Clear localStorage to isolate test state between spec files, then reload.
-    // Preserve onboarding flag so the app boots into the main UI (not onboarding wizard).
-    await exec.execute(() => {
-      localStorage.clear();
-      localStorage.setItem(
-        'app-onboarding-storage',
-        JSON.stringify({ state: { isAppOnboarded: true }, version: 0 }),
-      );
-    });
-    await exec.execute(() => { location.reload(); });
-    // Wait for page to be ready again after reload
-    await browser.waitUntil(
-      async () => {
-        try {
-          const state = await exec.execute(() => document.readyState);
-          return state === 'complete';
-        } catch {
-          return false;
-        }
-      },
-      { timeout: 30000, interval: 1000, timeoutMsg: 'App did not reload in 30s' }
-    );
     // Wait for React root to have children (app actually rendered)
-    const ciTimeout = process.env.CI ? 60000 : 30000;
     await browser.waitUntil(
       async () => {
         try {
