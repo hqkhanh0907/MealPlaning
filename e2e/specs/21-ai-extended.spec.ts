@@ -80,7 +80,7 @@ describe('AI Analysis Extended', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('AI ingredient search (TC_AI_EXT_05)', () => {
     before(async () => {
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(300);
       await mgmt.openIngredientsSubTab();
       await browser.pause(300);

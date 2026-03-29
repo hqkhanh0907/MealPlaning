@@ -59,7 +59,7 @@ describe('Grocery Extended', () => {
     await page.reloadApp();
     await page.navigateTo('calendar');
     await browser.pause(300);
-    await page.navigateTo('grocery');
+    await page.openGrocery();
     await browser.waitUntil(
       async () => (await page.isDisplayed('grocery-empty-state')) || (await page.isDisplayed('tab-grocery-day')),
       { timeout: 10_000, interval: 500 }

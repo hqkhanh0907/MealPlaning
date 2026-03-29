@@ -5,7 +5,7 @@ describe('Settings — theme switching', () => {
 
   before(async () => {
     await page.switchToWebview();
-    await page.navigateTo('settings');
+    await page.openSettings();
   });
 
   it('should display settings page with search field', async () => {

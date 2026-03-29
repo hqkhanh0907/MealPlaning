@@ -140,6 +140,17 @@ export class BasePage {
     await this.waitAndClick(`nav-${tab}`);
   }
 
+  /** Open settings overlay via header button. */
+  async openSettings() {
+    await this.waitAndClick('btn-open-settings');
+  }
+
+  /** Open grocery modal from calendar page. */
+  async openGrocery() {
+    await this.navigateTo('calendar');
+    await this.waitAndClick('btn-open-grocery');
+  }
+
   /** Reload app page, clearing migration flags so seeded localStorage data
    *  gets migrated to SQLite on next load. */
   async reloadApp() {

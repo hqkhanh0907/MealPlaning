@@ -161,7 +161,7 @@ export class FitnessPage extends BasePage {
 
   // ── Training Profile (Settings) ─────────────────────────────
   async navigateToTrainingProfileSettings() {
-    await this.navigateTo('settings');
+    await this.openSettings();
     await browser.pause(300);
     await this.waitAndClick('settings-nav-training-profile');
     await browser.pause(500);

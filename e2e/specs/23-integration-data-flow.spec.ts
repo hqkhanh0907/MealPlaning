@@ -97,7 +97,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   // ─────────────────────────────────────────────────────────────────
   it('TC_INTEG_02 — grocery should list the planned ingredient', async () => {
     await grocery.navigateTo('calendar');
-    await grocery.navigateTo('grocery');
+    await grocery.openGrocery();
     await browser.pause(500);
 
     await grocery.selectScope('day');
@@ -126,7 +126,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
 
     // Navigate to grocery and verify empty
     await grocery.navigateTo('calendar');
-    await grocery.navigateTo('grocery');
+    await grocery.openGrocery();
     await browser.pause(500);
 
     // After clearing plan, grocery may show empty state (no scope tabs visible)
@@ -155,7 +155,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
 
     await cal.reloadApp();
     await grocery.navigateTo('calendar');
-    await grocery.navigateTo('grocery');
+    await grocery.openGrocery();
     await browser.pause(500);
     await grocery.selectScope('day');
     await browser.pause(500);
@@ -186,7 +186,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
     await cal.reloadApp();
 
     // Verify in management: ingredient no longer listed
-    await mgmt.navigateTo('management');
+    await mgmt.navigateTo('library');
     await mgmt.openIngredientsSubTab();
     await browser.pause(300);
     const ingExists = await mgmt.isDisplayed(`btn-edit-ingredient-${ING_ID}`);
@@ -202,7 +202,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
   // ─────────────────────────────────────────────────────────────────
   it('TC_INTEG_06 — grocery should not show deleted ingredient', async () => {
     await grocery.navigateTo('calendar');
-    await grocery.navigateTo('grocery');
+    await grocery.openGrocery();
     await browser.pause(500);
     await grocery.selectScope('day');
     await browser.pause(500);
@@ -246,7 +246,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
     assert.ok(Number.parseInt(calText, 10) > 0, `Calendar should show imported dish calories, got: ${calText}`);
 
     // Check Management: imported ingredient exists
-    await mgmt.navigateTo('management');
+    await mgmt.navigateTo('library');
     await mgmt.openIngredientsSubTab();
     await browser.pause(300);
     const ingExists = await mgmt.isDisplayed('btn-edit-ingredient-e2e-import-ing');
@@ -254,7 +254,7 @@ describe('Integration — Ingredient → Dish → Calendar → Grocery data flow
 
     // Check Grocery: imported plan generates items
     await grocery.navigateTo('calendar');
-    await grocery.navigateTo('grocery');
+    await grocery.openGrocery();
     await browser.pause(500);
     await grocery.selectScope('day');
     await browser.pause(500);

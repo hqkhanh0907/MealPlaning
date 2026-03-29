@@ -11,7 +11,7 @@ describe('Dish CRUD', () => {
 
   before(async () => {
     await page.switchToWebview();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
   });
 
   it('should open add dish modal', async () => {
@@ -102,7 +102,7 @@ describe('Dish CRUD', () => {
       });
       // Reload so localStorage data migrates to SQLite
       await page.reloadApp();
-      await page.navigateTo('management');
+      await page.navigateTo('library');
       await page.openSubTab('dishes');
     });
 
@@ -155,7 +155,7 @@ describe('Dish CRUD', () => {
       });
       // Reload so localStorage data migrates to SQLite
       await page.reloadApp();
-      await page.navigateTo('management');
+      await page.navigateTo('library');
       await page.openSubTab('dishes');
       // Open a fresh new dish modal
       await page.tapAddDish();

@@ -10,7 +10,7 @@ describe('Ingredient CRUD', () => {
 
   before(async () => {
     await page.switchToWebview();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await page.openIngredientsSubTab();
   });
 

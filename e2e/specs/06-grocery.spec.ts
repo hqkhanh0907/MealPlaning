@@ -17,7 +17,7 @@ describe('Grocery List — scope switching and copy', () => {
     await page.switchToWebview();
     // navigate deterministically to avoid landing on a stale tab state
     await page.navigateTo('calendar');
-    await page.navigateTo('grocery');
+    await page.openGrocery();
 
     await browser.waitUntil(
       async () => (await page.isDisplayed('grocery-empty-state')) || (await page.isDisplayed('tab-grocery-day')),
@@ -101,7 +101,7 @@ describe('Grocery List — scope switching and copy', () => {
       // Reload so React sees the new data
       await calPage.reloadApp();
       await page.navigateTo('calendar');
-      await page.navigateTo('grocery');
+      await page.openGrocery();
       await page.selectScope('day');
       // Wait for the injected item to render
       await page.el(`grocery-item-${SHOP_ING_ID}`).waitForDisplayed({ timeout: 10_000 });

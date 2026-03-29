@@ -38,7 +38,7 @@ describe('Data Backup Extended', () => {
       },
     });
     await calPage.reloadApp();
-    await page.navigateTo('settings');
+    await page.openSettings();
     await browser.pause(500);
   });
 
@@ -62,10 +62,10 @@ describe('Data Backup Extended', () => {
   it('TC_BAK_EXT_03 — seeded data should be available for export', async () => {
     // Data is now in SQLite (not localStorage). Verify by checking
     // the management tab shows the seeded ingredient.
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await browser.pause(500);
     const hasDish = await page.isDisplayed('btn-edit-dish-e2e-bak-ext-dish');
-    await page.navigateTo('settings');
+    await page.openSettings();
     assert.ok(hasDish, 'Seeded dish should be visible in management (SQLite has data for export)');
   });
 
@@ -95,10 +95,10 @@ describe('Data Backup Extended', () => {
     await browser.pause(500);
 
     // Verify imported data is visible in management
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await browser.pause(500);
     const found = await page.isDisplayed('btn-edit-ingredient-e2e-import-ing');
-    await page.navigateTo('settings');
+    await page.openSettings();
     assert.ok(found, 'Imported ingredient should be visible in management after migration');
   });
 
@@ -118,7 +118,7 @@ describe('Data Backup Extended', () => {
     await browser.pause(500);
 
     // App should still render (navigation visible)
-    const navVisible = await page.isDisplayed('nav-settings');
+    const navVisible = await page.isDisplayed('btn-open-settings');
     assert.ok(navVisible, 'App should still be functional with empty database');
   });
 });

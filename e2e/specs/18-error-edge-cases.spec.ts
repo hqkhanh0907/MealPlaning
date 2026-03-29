@@ -23,7 +23,7 @@ describe('Error Handling & Edge Cases', () => {
         localStorage.setItem('mp-day-plans', '[]');
       });
       await settings.reloadApp();
-      await settings.navigateTo('grocery');
+      await settings.openGrocery();
       await browser.pause(500);
     });
 
@@ -37,7 +37,7 @@ describe('Error Handling & Edge Cases', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Theme CSS (TC_EDGE_02)', () => {
     before(async () => {
-      await settings.navigateTo('settings');
+      await settings.openSettings();
       await browser.pause(500);
     });
 

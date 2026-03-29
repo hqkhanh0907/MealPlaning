@@ -31,7 +31,7 @@ describe('Dish Ingredient Amount — edit amounts in dish modal', () => {
       }
     });
     await page.reloadApp();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await page.openSubTab('dishes');
   });
 

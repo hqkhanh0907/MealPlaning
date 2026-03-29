@@ -33,7 +33,7 @@ describe('Data Backup — export and import', () => {
       },
     });
     await calPage.reloadApp();
-    await page.navigateTo('settings');
+    await page.openSettings();
   });
 
   it('TC_BACKUP_01 — should display export button', async () => {
@@ -56,10 +56,10 @@ describe('Data Backup — export and import', () => {
     it('TC_BACKUP_04 — should have data available for export', async () => {
       // Data is now in SQLite (not localStorage). Verify by navigating to
       // management and checking that the seeded ingredient/dish are visible.
-      await page.navigateTo('management');
+      await page.navigateTo('library');
       await browser.pause(500);
       const hasDish = await page.isDisplayed('btn-edit-dish-e2e-backup-dish-1');
-      await page.navigateTo('settings');
+      await page.openSettings();
       assert.strictEqual(hasDish, true, 'Expected seeded dish to be visible in management before export');
     });
 

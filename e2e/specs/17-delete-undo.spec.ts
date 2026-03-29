@@ -14,7 +14,7 @@ describe('Delete Guard & Undo', () => {
 
   before(async () => {
     await page.switchToWebview();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await browser.pause(500);
 
     // Inject test data: 1 unused dish, 1 used dish (in today's plan), 1 ingredient
@@ -71,7 +71,7 @@ describe('Delete Guard & Undo', () => {
 
     // Reload with migration so seeded data moves from localStorage to SQLite
     await page.reloadApp();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await browser.pause(500);
   });
 
@@ -180,7 +180,7 @@ describe('Delete Guard & Undo', () => {
 
       // Reload with migration so seeded data moves from localStorage to SQLite
       await page.reloadApp();
-      await page.navigateTo('management');
+      await page.navigateTo('library');
       await browser.pause(300);
       await page.openIngredientsSubTab();
       await browser.pause(500);

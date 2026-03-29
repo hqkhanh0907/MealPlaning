@@ -11,7 +11,7 @@ describe('Detail Modal Views', () => {
 
   before(async () => {
     await page.switchToWebview();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await browser.pause(500);
 
     // Seed test ingredient and dish via localStorage (migrated to SQLite on reload)
@@ -45,7 +45,7 @@ describe('Detail Modal Views', () => {
 
     // Reload with migration flag cleared so data migrates to SQLite
     await page.reloadApp();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
     await browser.pause(500);
   });
 

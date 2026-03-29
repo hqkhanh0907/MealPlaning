@@ -60,7 +60,7 @@ describe('Grocery Aggregation — verify item quantities match plan', () => {
 
     await calPage.reloadApp();
     await groceryPage.navigateTo('calendar');
-    await groceryPage.navigateTo('grocery');
+    await groceryPage.openGrocery();
     await browser.waitUntil(
       async () => (await groceryPage.isDisplayed('grocery-empty-state')) || (await groceryPage.isDisplayed('tab-grocery-day')),
       { timeout: 10_000, interval: 500 }

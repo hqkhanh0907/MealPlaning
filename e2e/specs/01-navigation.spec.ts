@@ -7,7 +7,7 @@ describe('Navigation — switch between tabs', () => {
     await page.switchToWebview();
   });
 
-  const tabs = ['calendar', 'management', 'ai-analysis', 'grocery', 'settings'];
+  const tabs = ['calendar', 'library', 'ai-analysis', 'fitness', 'dashboard'];
 
   for (const tab of tabs) {
     it(`should navigate to ${tab} tab`, async () => {

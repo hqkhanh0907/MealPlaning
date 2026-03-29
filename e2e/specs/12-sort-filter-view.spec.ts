@@ -38,7 +38,7 @@ describe('Sort, Filter & View Toggle — management toolbar features', () => {
     });
 
     await page.reloadApp();
-    await page.navigateTo('management');
+    await page.navigateTo('library');
   });
 
   // ─────────────────────────────────────────────────────────────────

@@ -73,7 +73,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
   describe('Multi-day grocery aggregation', () => {
     it('TC_MULTI_01 — day scope shows only today\'s ingredients', async () => {
       await grocery.navigateTo('calendar');
-      await grocery.navigateTo('grocery');
+      await grocery.openGrocery();
       await browser.pause(500);
       await grocery.selectScope('day');
       await browser.pause(500);
@@ -109,7 +109,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
 
       // Day scope should now be empty (today cleared)
       await grocery.navigateTo('calendar');
-      await grocery.navigateTo('grocery');
+      await grocery.openGrocery();
       await browser.pause(500);
       await grocery.selectScope('day');
       await browser.pause(500);
@@ -161,7 +161,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
     });
 
     it('TC_LANG_INTEG_02 — management tab reflects Vietnamese language', async () => {
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(500);
 
       // Check that UI text is in Vietnamese (e.g., add button or tab label)
@@ -182,7 +182,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Cross-tab theme consistency', () => {
     it('TC_THEME_INTEG_01 — dark theme applies to all tabs', async () => {
-      await settings.navigateTo('settings');
+      await settings.openSettings();
       await browser.pause(300);
       await settings.switchTheme('dark');
       await browser.pause(300);
@@ -202,7 +202,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
       assert.ok(stillDark, 'Dark class should persist on calendar tab');
 
       // Navigate to management — dark class should persist
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(300);
       const mgmtDark = await (browser as unknown as ExecutableBrowser).execute(() => {
         return document.documentElement.classList.contains('dark');
@@ -221,7 +221,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
     });
 
     it('TC_THEME_INTEG_03 — switching to light removes dark class everywhere', async () => {
-      await settings.navigateTo('settings');
+      await settings.openSettings();
       await browser.pause(300);
       await settings.switchTheme('light');
       await browser.pause(300);
@@ -233,7 +233,7 @@ describe('Integration — Multi-day & Cross-tab consistency', () => {
 
       // Verify across tabs
       await grocery.navigateTo('calendar');
-      await grocery.navigateTo('grocery');
+      await grocery.openGrocery();
       await browser.pause(300);
       const groceryDark = await (browser as unknown as ExecutableBrowser).execute(() => {
         return document.documentElement.classList.contains('dark');

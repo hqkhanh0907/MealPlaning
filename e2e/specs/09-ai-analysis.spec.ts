@@ -29,7 +29,7 @@ describe('AI Analysis — navigation and states', () => {
     const mgmtPage = new ManagementPage();
 
     before(async () => {
-      await mgmtPage.navigateTo('management');
+      await mgmtPage.navigateTo('library');
       await mgmtPage.openIngredientsSubTab();
       await mgmtPage.tapAddIngredient();
       await expect(mgmtPage.el('input-ing-name')).toBeDisplayed();

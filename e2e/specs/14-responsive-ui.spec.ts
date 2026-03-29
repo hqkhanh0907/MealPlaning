@@ -19,14 +19,14 @@ describe('Responsive UI', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Bottom navigation (TC_RESP_01)', () => {
     it('TC_RESP_01 — all 5 nav tabs should be visible and clickable', async () => {
-      const tabs = ['calendar', 'management', 'ai-analysis', 'grocery', 'settings'];
+      const tabs = ['calendar', 'library', 'ai-analysis', 'fitness', 'dashboard'];
       for (const tab of tabs) {
         await expect(settings.el(`nav-${tab}`)).toBeDisplayed();
       }
     });
 
     it('TC_RESP_02 — clicking nav tab should switch active tab', async () => {
-      await settings.navigateTo('management');
+      await settings.navigateTo('library');
       await browser.pause(500);
       // Verify management tab content is displayed
       await expect(mgmt.el('tab-management-dishes')).toBeDisplayed();
@@ -42,7 +42,7 @@ describe('Responsive UI', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Layout switcher (TC_RESP_03-04)', () => {
     before(async () => {
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(500);
     });
 
@@ -75,7 +75,7 @@ describe('Responsive UI', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('View persistence (TC_RESP_05)', () => {
     before(async () => {
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(500);
     });
 
@@ -86,7 +86,7 @@ describe('Responsive UI', () => {
 
       // Reload and check that the view is still list (via DOM presence of the active button)
       await mgmt.reloadApp();
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(500);
 
       // Verify list view button is active or list items are displayed
@@ -122,7 +122,7 @@ describe('Responsive UI', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Add button responsive (TC_RESP_07)', () => {
     before(async () => {
-      await mgmt.navigateTo('management');
+      await mgmt.navigateTo('library');
       await browser.pause(500);
     });
 
