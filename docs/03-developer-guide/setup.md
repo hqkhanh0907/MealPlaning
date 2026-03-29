@@ -1,7 +1,7 @@
 # Hướng Dẫn Cài Đặt Môi Trường Dev
 
-**Version:** 1.2  
-**Date:** 2026-03-28
+**Version:** 1.3  
+**Date:** 2026-06-28
 
 ---
 
@@ -9,11 +9,11 @@
 
 | Công cụ | Phiên bản tối thiểu | Ghi chú |
 |---------|---------------------|---------|
-| Node.js | 20 LTS | Dùng `nvm` để quản lý version |
-| npm | 10+ | Đi kèm với Node 20 |
+| Node.js | 18+ | Dùng `nvm` để quản lý version (khuyến nghị 20 LTS) |
+| npm | 9+ | Đi kèm với Node 18+ |
 | Android Studio | Iguana 2023.2+ | Build Android APK |
 | JDK | 17 | Được bundle trong Android Studio |
-| Android SDK | API 36 | Cài qua Android Studio SDK Manager |
+| Android SDK | API 34+ | Cài qua Android Studio SDK Manager (Capacitor target) |
 | Git | 2.40+ | |
 | macOS / Linux | - | Windows cần thêm file `.bat` |
 
@@ -61,7 +61,7 @@ Sau khi cài đặt, verify API key hoạt động bằng cách:
 npm run dev
 ```
 
-Ứng dụng chạy tại: http://localhost:5173
+Ứng dụng chạy tại: http://localhost:3000 (cấu hình trong `vite.config.ts`)
 
 ---
 
@@ -95,11 +95,17 @@ Tải lại: `source ~/.zshrc`
 echo "sdk.dir=$HOME/Library/Android/sdk" > android/local.properties
 ```
 
-### 3.4 Sync Capacitor
+### 3.4 Sync Capacitor & Build APK
 
 ```bash
 npm run build
 npx cap sync android
+
+# Mở Android Studio để build/debug
+npx cap open android
+
+# Hoặc build APK trực tiếp qua script
+bash build-apk.sh
 ```
 
 ### 3.5 Tạo AVD (Android Virtual Device)
@@ -176,13 +182,15 @@ npm run test:e2e
 
 | Lệnh | Mô tả |
 |------|-------|
-| `npm run dev` | Dev server tại localhost:5173 |
-| `npm run build` | Build production bundle |
-| `npm run test` | Unit tests (Vitest, không watch) |
+| `npm run dev` | Dev server tại localhost:3000 |
+| `npm run build` | Build production bundle → `dist/` |
+| `npm test` | Unit tests (Vitest, không watch) |
 | `npm run test:watch` | Unit tests watch mode |
 | `npm run test:coverage` | Unit tests + coverage report |
 | `npm run test:e2e` | E2E tests (cần Appium + emulator) |
 | `npm run lint` | ESLint check |
+| `npx eslint src/` | ESLint check (trực tiếp) |
+| `npx tsc --noEmit` | TypeScript type-check (không emit) |
 | `npx cap sync android` | Sync web assets vào Android project |
 | `npx cap open android` | Mở Android Studio |
 | `bash build-apk.sh` | Build APK đầy đủ |
@@ -288,22 +296,24 @@ bash build-apk.sh
 
 ### Coverage target
 
-| Metric | Target | Hiện tại (2026-03-28) |
+| Metric | Target | Hiện tại (2026-06-28) |
 |--------|--------|-----------------------|
-| Test files | — | **139 files** |
-| Tests passing | 100% | **3135/3135** ✅ |
-| Statement coverage | ≥ 97% | **97.24%** ✅ |
+| Test files | — | **165 files** |
+| Tests passing | 100% | **3954/3954** ✅ |
+| Statement coverage | ≥ 98% | **≥98%** ✅ |
 | Lint errors | 0 | **0** ✅ |
+| TypeScript errors | 0 | **0** ✅ |
 
 ### Lệnh kiểm tra
 
 ```bash
-npm run test             # Chạy toàn bộ unit tests (Vitest)
-npm run test:coverage    # Unit tests + coverage report
-npm run lint             # ESLint — bắt buộc 0 errors, 0 warnings
+npx tsc --noEmit         # TypeScript type-check — bắt buộc 0 errors
+npx eslint src/          # ESLint — bắt buộc 0 errors
+npm test                 # Chạy toàn bộ unit tests (Vitest)
+npm run test:coverage    # Unit tests + coverage report (≥98% statements)
 ```
 
-> Mỗi PR phải pass cả 3 lệnh trên trước khi merge. Coverage không được giảm dưới 97%.
+> Mỗi PR phải pass cả 4 lệnh trên trước khi merge. Coverage không được giảm dưới 98%.
 
 ---
 

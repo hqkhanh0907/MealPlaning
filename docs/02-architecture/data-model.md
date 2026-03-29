@@ -1,8 +1,8 @@
 # Data Model — Smart Meal Planner
 
-**Version:** 1.2  
-**Date:** 2026-03-28  
-**Source of truth:** `src/types.ts` (domain types), `src/services/schema.ts` (SQLite schema)
+**Version:** 2.0  
+**Date:** 2026-07-16  
+**Source of truth:** `src/types.ts` (domain types), `src/features/fitness/types.ts` (fitness types), `src/features/health-profile/types.ts` (health types), `src/services/schema.ts` (SQLite schema)
 
 ---
 
@@ -261,7 +261,221 @@ type SuggestedDishIngredient = {
 
 ---
 
-## 4. Entity Relationship Diagram
+## 4. Fitness Domain Types (`src/features/fitness/types.ts`)
+
+### 4.1 TrainingPlan
+
+Kế hoạch tập luyện tổng thể, chứa danh sách các ngày tập.
+
+```typescript
+interface TrainingPlan {
+  id: string;
+  name: string;
+  status: 'active' | 'completed' | 'paused';
+  splitType: string;
+  strategy: 'auto' | 'manual';
+  durationWeeks: number;
+  currentWeek: number;
+  daysPerWeek: number;
+  startDate: string;
+  endDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  days: TrainingDay[];
+}
+```
+
+### 4.2 TrainingDay
+
+Một ngày trong kế hoạch tập luyện, có thể là ngày nghỉ hoặc chứa các sessions.
+
+```typescript
+interface TrainingDay {
+  id: string;
+  planId: string;
+  dayOfWeek: number;        // 0 (Sunday) – 6 (Saturday)
+  isRestDay: boolean;
+  sessionOrder: number;
+  workoutType: string;      // e.g. 'chest_triceps', 'back_biceps', 'rest'
+  muscleGroups?: string;
+  sessions: TrainingSession[];
+}
+```
+
+### 4.3 TrainingSession
+
+Một phiên tập trong ngày, chứa danh sách bài tập đã lên kế hoạch.
+
+```typescript
+interface TrainingSession {
+  id: string;
+  name: string;
+  sessionOrder: number;
+  exercises: PlannedExercise[];
+}
+```
+
+### 4.4 PlannedExercise
+
+Bài tập đã lên kế hoạch trong session, bao gồm thông số sets/reps mục tiêu.
+
+```typescript
+interface PlannedExercise {
+  exerciseId: string;
+  name: string;
+  muscleGroups: string[];
+  sets: number;
+  repsMin: number;
+  repsMax: number;
+  weight?: number;
+  order: number;
+}
+```
+
+### 4.5 WorkoutLog
+
+Nhật ký phiên tập đã thực hiện.
+
+```typescript
+interface WorkoutLog {
+  id: string;
+  date: string;
+  sessionId?: string;       // Linked to TrainingSession, null = freestyle
+  planDayId?: string;       // Linked to TrainingDay, null = freestyle
+  name: string;
+  exercises: ExerciseLog[];
+  duration?: number;        // minutes
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+### 4.6 ExerciseLog
+
+Log chi tiết cho một bài tập trong phiên tập.
+
+```typescript
+interface ExerciseLog {
+  exerciseId: string;
+  sets: SetLog[];
+}
+```
+
+### 4.7 SetLog
+
+Log chi tiết cho một set trong bài tập.
+
+```typescript
+interface SetLog {
+  setNumber: number;
+  reps: number;
+  weight: number;           // kg
+  completed: boolean;
+  rpe?: number;             // Rate of Perceived Exertion (1-10)
+  restSeconds?: number;
+}
+```
+
+**Ví dụ WorkoutLog:**
+```json
+{
+  "id": "wk_20260716_001",
+  "date": "2026-07-16",
+  "sessionId": "sess_001",
+  "planDayId": "day_mon_001",
+  "name": "Chest & Triceps",
+  "exercises": [
+    {
+      "exerciseId": "ex_bench_press",
+      "sets": [
+        { "setNumber": 1, "reps": 10, "weight": 60, "completed": true },
+        { "setNumber": 2, "reps": 8, "weight": 65, "completed": true },
+        { "setNumber": 3, "reps": 6, "weight": 70, "completed": false }
+      ]
+    }
+  ],
+  "duration": 55,
+  "notes": "Good session, increase weight next time"
+}
+```
+
+---
+
+## 5. Health Profile Types (`src/features/health-profile/types.ts`)
+
+### 5.1 HealthProfile
+
+Hồ sơ sức khỏe cá nhân, bao gồm thông tin cơ thể và mục tiêu dinh dưỡng.
+
+```typescript
+interface HealthProfile {
+  id: string;
+  name: string;
+  gender: 'male' | 'female';
+  dateOfBirth: string | null;
+  age: number;
+  heightCm: number;
+  weightKg: number;
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'extra_active';
+  fitnessGoal?: string;
+  experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
+  equipment?: string[];
+  bodyFatPct?: number;
+  bmrOverride?: number;
+  proteinRatio: number;     // g/kg — thường 1.6–2.2
+  fatPct: number;
+  targetCalories: number;
+  updatedAt: string;
+}
+```
+
+**Ví dụ:**
+```json
+{
+  "id": "default",
+  "name": "Nguyễn Văn A",
+  "gender": "male",
+  "dateOfBirth": "1995-06-15",
+  "age": 31,
+  "heightCm": 175,
+  "weightKg": 78,
+  "activityLevel": "active",
+  "fitnessGoal": "hypertrophy",
+  "experienceLevel": "intermediate",
+  "equipment": ["barbell", "dumbbell", "cable_machine"],
+  "proteinRatio": 2.0,
+  "fatPct": 0.25,
+  "targetCalories": 2500,
+  "updatedAt": "2026-07-16T10:00:00Z"
+}
+```
+
+### 5.2 OnboardingState
+
+Trạng thái onboarding của ứng dụng, được persist qua Zustand middleware.
+
+```typescript
+interface OnboardingState {
+  isAppOnboarded: boolean;
+  onboardingSection: number | null;
+  completed: boolean;
+  currentStep: number;
+  planStrategy: 'auto' | 'manual';
+}
+```
+
+| Field | Mô tả |
+|-------|-------|
+| `isAppOnboarded` | `true` khi user đã hoàn thành onboarding wizard |
+| `onboardingSection` | Section hiện tại trong wizard (null = chưa bắt đầu) |
+| `completed` | Alias cho `isAppOnboarded` — backward compatibility |
+| `currentStep` | Step index hiện tại (0-based) |
+| `planStrategy` | Chiến lược tạo plan: `auto` (app tạo) hoặc `manual` (user tự xây) |
+
+---
+
+## 6. Entity Relationship Diagram
 
 ```
 ┌───────────────────┐        ┌──────────────────────┐
@@ -296,13 +510,68 @@ type SuggestedDishIngredient = {
 LSt = LocalizedString { vi: string, en: string }
 ```
 
+### 6.2 Fitness Entity Relationships
+
+```
+┌───────────────────┐         ┌──────────────────────┐
+│   TrainingPlan    │         │    TrainingDay        │
+│───────────────────│  1   N  │──────────────────────│
+│ + id (PK)         │────────►│ + id (PK)            │
+│ + strategy        │         │ + planId (FK)        │
+│ + durationWeeks   │         │ + dayOfWeek          │
+│ + daysPerWeek     │         │ + isRestDay          │
+│ + days[]          │         │ + sessions[]         │
+└───────────────────┘         └──────────┬───────────┘
+                                         │ 1
+                                         │
+                                         │ N
+                              ┌──────────▼───────────┐
+                              │   TrainingSession    │
+                              │──────────────────────│
+                              │ + id (PK)            │
+                              │ + name               │
+                              │ + exercises[]        │
+                              └──────────┬───────────┘
+                                         │ 1
+                                         │
+                                         │ N
+                              ┌──────────▼───────────┐
+                              │  PlannedExercise     │
+                              │──────────────────────│
+                              │ + exerciseId (FK)    │
+                              │ + sets, repsMin/Max  │
+                              │ + weight, order      │
+                              └──────────────────────┘
+
+┌───────────────────┐         ┌──────────────────────┐
+│    WorkoutLog     │         │    ExerciseLog       │
+│───────────────────│  1   N  │──────────────────────│
+│ + id (PK)         │────────►│ + exerciseId (FK)    │
+│ + date            │         │ + sets[]             │
+│ + sessionId (FK)  │         └──────────┬───────────┘
+│ + duration        │                    │ 1
+│ + notes           │                    │
+└───────────────────┘                    │ N
+                              ┌──────────▼───────────┐
+                              │      SetLog          │
+HealthProfile ◄──────────────►│──────────────────────│
+  + name                      │ + reps               │
+  + gender                    │ + weight             │
+  + dateOfBirth               │ + completed          │
+  + heightCm                  └──────────────────────┘
+  + weightKg
+  + activityLevel
+  + fitnessGoal
+  + experienceLevel
+```
+
 ---
 
-## 5. Data Migration (Schema Evolution)
+## 7. Data Migration (Schema Evolution)
 
 `dataService.ts` xử lý các migration khi đọc dữ liệu cũ từ localStorage.
 
-### 5.1 Ingredient Migration
+### 7.1 Ingredient Migration
 
 | Version | Thay đổi |
 |---------|---------|
@@ -311,7 +580,7 @@ LSt = LocalizedString { vi: string, en: string }
 | v1 | `unit: string` (plain) |
 | v2 | `unit: LocalizedString` → Migration: `{ vi: oldUnit, en: oldUnit }` |
 
-### 5.2 Dish Migration
+### 7.2 Dish Migration
 
 | Version | Thay đổi |
 |---------|---------|
@@ -320,14 +589,14 @@ LSt = LocalizedString { vi: string, en: string }
 | v1 | `tags` field không có → default `['lunch']` |
 | v2 | `tags: MealType[]` |
 
-### 5.3 DayPlan Migration
+### 7.3 DayPlan Migration
 
 | Version | Thay đổi |
 |---------|---------|
 | v1 | `breakfastId: string` (singular) |
 | v2 | `breakfastDishIds: string[]` (array) |
 
-### 5.4 Migration Functions (`dataService.ts`)
+### 7.4 Migration Functions (`dataService.ts`)
 
 Ba hàm migration chạy tự động khi đọc dữ liệu từ localStorage:
 
@@ -339,7 +608,7 @@ Ba hàm migration chạy tự động khi đọc dữ liệu từ localStorage:
 
 ---
 
-## 6. localStorage Keys
+## 8. localStorage Keys (Legacy)
 
 | Key | Type | Mô tả |
 |-----|------|-------|
@@ -354,7 +623,7 @@ Ba hàm migration chạy tự động khi đọc dữ liệu từ localStorage:
 
 ---
 
-## 7. Initial Data
+## 9. Initial Data
 
 File `src/data/initialData.ts` cung cấp bộ dữ liệu mẫu mặc định:
 - Khoảng 20-30 nguyên liệu phổ biến trong ẩm thực Việt Nam
@@ -364,13 +633,13 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 
 ---
 
-## 8. SQLite Database Schema (19 Tables)
+## 10. SQLite Database Schema (27 Tables)
 
-> **Source of truth:** `src/services/schema.ts` — `SCHEMA_VERSION = 1`
+> **Source of truth:** `src/services/schema.ts` — `SCHEMA_VERSION = 3`
 >
-> Ứng dụng đã chuyển từ localStorage sang SQLite (via Capacitor SQLite plugin). Schema gồm **19 bảng** chia thành 5 nhóm chức năng.
+> Ứng dụng đã chuyển từ localStorage sang SQLite (via sql.js WASM). Schema gồm **27 bảng** chia thành 5 nhóm chức năng.
 
-### 8.1 Meal Planning Tables (migrated from localStorage)
+### 10.1 Meal Planning Tables (migrated from localStorage)
 
 #### `ingredients`
 
@@ -426,7 +695,7 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 | `name` | TEXT | NOT NULL |
 | `data` | TEXT | NOT NULL (JSON blob) |
 
-### 8.2 User & Goal Tables
+### 10.2 User & Goal Tables
 
 #### `user_profile`
 
@@ -459,7 +728,7 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 | `created_at` | TEXT | NOT NULL |
 | `updated_at` | TEXT | NOT NULL |
 
-### 8.3 Training System Tables
+### 10.3 Training System Tables
 
 #### `training_profile`
 
@@ -559,7 +828,7 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 
 **Unique constraint:** `(workout_id, exercise_id, set_number)`
 
-### 8.4 Tracking & Logging Tables
+### 10.4 Tracking & Logging Tables
 
 #### `weight_log`
 
@@ -604,7 +873,7 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 | `applied` | INTEGER | NOT NULL, DEFAULT `0` |
 | `created_at` | TEXT | NOT NULL |
 
-### 8.5 Fitness Module Tables *(NEW — v1.2)*
+### 10.5 Fitness Module Tables
 
 > Ba bảng mới phục vụ module Fitness, quản lý hồ sơ thể lực, tùy chọn tập luyện và bản nháp workout đang thực hiện.
 
@@ -652,7 +921,7 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 | `plan_day_id` | TEXT | |
 | `updated_at` | TEXT | NOT NULL |
 
-### 8.6 Performance Indexes
+### 10.6 Performance Indexes
 
 | Index | Table | Column(s) |
 |-------|-------|-----------|
@@ -666,7 +935,7 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 | `idx_dish_ingredients_dish` | `dish_ingredients` | `dish_id` |
 | `idx_dish_ingredients_ingredient` | `dish_ingredients` | `ingredient_id` |
 
-### 8.7 Table Summary
+### 10.7 Table Summary
 
 | # | Table | Group | Description |
 |---|-------|-------|-------------|
@@ -686,16 +955,21 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 | 14 | `weight_log` | Tracking | Nhật ký cân nặng |
 | 15 | `daily_log` | Tracking | Nhật ký dinh dưỡng hàng ngày |
 | 16 | `adjustments` | Tracking | Điều chỉnh mục tiêu calories |
-| 17 | `fitness_profiles` | **Fitness (NEW)** | Hồ sơ thể lực người dùng |
-| 18 | `fitness_preferences` | **Fitness (NEW)** | Tùy chọn module Fitness |
-| 19 | `workout_drafts` | **Fitness (NEW)** | Bản nháp workout đang thực hiện |
+| 17 | `fitness_profiles` | Fitness | Hồ sơ thể lực người dùng |
+| 18 | `fitness_preferences` | Fitness | Tùy chọn module Fitness |
+| 19 | `workout_drafts` | Fitness | Bản nháp workout đang thực hiện |
+| 20 | `app_settings` | Settings | Key-value application settings |
+| 21 | `grocery_checked` | Meal Planning | Trạng thái đã mua của grocery items |
+
+> **Lưu ý:** Bảng 20-21+ và các bảng bổ sung khác có thể được thêm trong các migration tiếp theo. Tham khảo `schema.ts` cho danh sách đầy đủ (SCHEMA_VERSION = 3, 27 bảng).
 
 ---
 
-## 9. Revision History
+## 11. Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-02-20 | Initial data model — localStorage types |
 | 1.1 | 2026-03-08 | Added MealTemplate, FilterConfig, AI Response Types |
 | 1.2 | 2026-03-28 | Added SQLite database schema (19 tables). 3 new fitness module tables: `fitness_profiles`, `fitness_preferences`, `workout_drafts`. Documented all table columns, constraints, indexes, and FK relationships from `src/services/schema.ts` |
+| 2.0 | 2026-07-16 | **Major update**: Added Fitness Domain Types (§4): TrainingPlan, TrainingDay, TrainingSession, PlannedExercise, WorkoutLog, ExerciseLog, SetLog. Added Health Profile Types (§5): HealthProfile, OnboardingState. Added Fitness ER diagram (§6.2). Updated SQLite schema to version 3 (27 tables). Re-numbered sections. |

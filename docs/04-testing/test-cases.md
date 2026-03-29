@@ -1,9 +1,11 @@
 # Test Cases — Smart Meal Planner
 
-**Version:** 8.0  
+**Version:** 9.0  
 **Date:** 2026-07-05  
 
-> **v8.0**: Fitness Plan Flexibility — Thêm TC_FLEX (23 test cases) cho Multi-Session System, Plan Day Editor, Freestyle Workout, PageStack overlay. Scenarios SC41-SC43. Xem [Changelog](#changelog).
+> **v9.0**: Comprehensive QA Cycle — Thêm TC_ONBOARD (15), TC_PLAN (20), TC_EDIT (15), TC_WORK (15), TC_DASH (10), TC_A11Y (10), TC_PERF (5). Total 90 new manual TCs. Coverage target 100%. Chrome DevTools manual testing protocol.
+>
+> **v8.0**: Fitness Plan Flexibility — Thêm TC_FLEX (23 test cases) cho Multi-Session System, Plan Day Editor, Freestyle Workout, PageStack overlay. Scenarios SC41-SC43.
 >
 > **v6.0**: QA Cycle 5 — Comprehensive scenario expansion. Unit tests 995→1046 (49 files). Coverage 99.53% Stmts, 92.30% Branch.
 >
@@ -390,3 +392,143 @@
 | 5.0 | 2026-03-07 | QA Cycle 4: Dark mode visual audit. Added TC_DM (11 test cases). Unit tests 866→995, test files 40→47. BUG-DM-001 fixed (4 components). Chrome DevTools MCP used for visual QA |
 | 7.0 | 2026-03-13 | Removed English language support: deleted TC_SET_02/03 (EN switch), replaced TC_I18N_01-07 with Vietnamese-only TCs, removed TC_LANG_INTEG_02/03. Added BUG-NAN-001 fix documentation. Updated for Vite best practices audit changes (lazy loading, code splitting, strict mode). |
 | 8.0 | 2026-07-05 | Fitness Plan Flexibility: Added TC_FLEX section (23 test cases — TC_FLEX_01 to TC_FLEX_23). Covers Multi-Session System (SC41), Plan Day Editor (SC42), Freestyle Workout (SC43), PageStack overlay rendering. Schema v2 migration (session_order, original_exercises, plan_day_id). |
+| 9.0 | 2026-07-05 | Comprehensive QA Cycle: Added TC_ONBOARD (15), TC_PLAN (20), TC_EDIT (15), TC_WORK (15), TC_DASH (10), TC_A11Y (10), TC_PERF (5). Total: 90 new manual TCs. Coverage target raised to 100%. Quality gates added. |
+
+---
+
+## TC_ONBOARD — Unified Onboarding Wizard
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_ONBOARD_01 | Welcome slides hiển thị | Fresh app (localStorage cleared) | Mở app | 3 welcome slides xuất hiện với nút "Tiếp tục" | 🔲 |
+| TC_ONBOARD_02 | Health basic step | Hoàn thành welcome | Nhập tên, giới tính, tuổi, chiều cao, cân nặng | Form validate thành công, BMI hiển thị | 🔲 |
+| TC_ONBOARD_03 | Activity level selection | Hoàn thành health basic | Chọn 1 trong 5 mức hoạt động | Card được highlight, nút tiếp tục active | 🔲 |
+| TC_ONBOARD_04 | Nutrition goal step | Hoàn thành activity level | Chọn mục tiêu (giảm/tăng/duy trì), nhập target | Conditional fields hiển thị đúng theo goal | 🔲 |
+| TC_ONBOARD_05 | Health confirm summary | Hoàn thành nutrition goal | Xem tổng quan thông tin sức khỏe | Hero calorie hiển thị, expandable detail hoạt động | 🔲 |
+| TC_ONBOARD_06 | Training core step | Hoàn thành health | Chọn goal, experience, ngày/tuần | RadioPills hoạt động, validation đúng | 🔲 |
+| TC_ONBOARD_07 | Training detail steps | Hoàn thành training core | Điền thông tin chi tiết (thời gian, thiết bị, giấc ngủ) | Sub-steps chuyển đúng, ChipSelect hoạt động | 🔲 |
+| TC_ONBOARD_08 | Plan strategy choice — Auto | Hoàn thành training | Chọn "Để ứng dụng tự động lên kế hoạch" | Chuyển đến PlanComputingScreen | 🔲 |
+| TC_ONBOARD_09 | Plan computing animation | Chọn Auto strategy | Đợi animation hoàn thành | Hiệu ứng tính toán 10s, sau đó chuyển preview | 🔲 |
+| TC_ONBOARD_10 | Plan preview screen | Computing xong | Xem kế hoạch được tạo | Calendar strip + stats + day cards hiển thị | 🔲 |
+| TC_ONBOARD_11 | Plan strategy choice — Manual | Hoàn thành training | Chọn "Tự lên kế hoạch" | Chuyển thẳng vào tab Tập luyện (empty state) | 🔲 |
+| TC_ONBOARD_12 | Progress bar 7 segments | Đang trong onboarding | Quan sát progress bar | 7 đoạn emerald, animate khi chuyển step | 🔲 |
+| TC_ONBOARD_13 | Back navigation | Đang ở step 3+ | Nhấn nút Back | Quay lại step trước, giữ nguyên dữ liệu đã nhập | 🔲 |
+| TC_ONBOARD_14 | Safe area — không bị che | Đang ở bất kỳ step | Kiểm tra trên mobile emulation | Không có content bị che bởi notch/status bar | 🔲 |
+| TC_ONBOARD_15 | Error boundary recovery | Đang trong onboarding | Force error (nếu có) | ErrorBoundary hiển thị, có nút retry | 🔲 |
+
+---
+
+## TC_PLAN — Training Plan View & Day Actions
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_PLAN_01 | Day pills hiển thị | Có kế hoạch tập luyện | Vào tab Tập luyện | 7 day pills (T2-CN) hiển thị với màu phân biệt | 🔲 |
+| TC_PLAN_02 | Chọn ngày tập | Day pills hiển thị | Tap ngày có buổi tập (vd: T2) | Workout card hiển thị với thông tin buổi tập | 🔲 |
+| TC_PLAN_03 | Chọn ngày nghỉ | Day pills hiển thị | Tap ngày nghỉ (vd: CN) | Rest day card hiển thị với nút "Thêm buổi tập" | 🔲 |
+| TC_PLAN_04 | Nút "Chuyển ngày nghỉ" visible | Chọn ngày tập | Quan sát dưới workout card | Nút rose/pink "Chuyển thành ngày nghỉ" hiển thị rõ ràng | 🔲 |
+| TC_PLAN_05 | Chuyển ngày tập → nghỉ | TC_PLAN_04 | Tap nút "Chuyển thành ngày nghỉ" | Confirmation dialog → xác nhận → ngày chuyển thành nghỉ | 🔲 |
+| TC_PLAN_06 | Nút "Thêm buổi tập" trên ngày nghỉ | Chọn ngày nghỉ | Quan sát rest day card | Nút emerald "Thêm buổi tập" hiển thị rõ ràng | 🔲 |
+| TC_PLAN_07 | Thêm buổi tập từ ngày nghỉ | TC_PLAN_06 | Tap "Thêm buổi tập" | Session mới được tạo, ngày chuyển thành ngày tập | 🔲 |
+| TC_PLAN_08 | Session tabs — 1 session | Ngày có 1 buổi tập | Quan sát session tabs | Tab "Buổi 1" hiển thị + nút "+" thêm buổi | 🔲 |
+| TC_PLAN_09 | Session tabs — thêm buổi | TC_PLAN_08 | Tap nút "+" | AddSessionModal mở, chọn loại (Strength/Cardio/Freestyle) | 🔲 |
+| TC_PLAN_10 | Session tabs — nút xóa visible | Có ≥2 buổi tập | Quan sát active tab | Nút × hiển thị trên tab đang active | 🔲 |
+| TC_PLAN_11 | Xóa session | TC_PLAN_10 | Tap × → confirm | Session bị xóa, tab còn lại tự chọn | 🔲 |
+| TC_PLAN_12 | Xóa session — Escape dismiss | TC_PLAN_10 | Tap × → nhấn Escape | Dialog đóng, không xóa | 🔲 |
+| TC_PLAN_13 | Coaching hint hiển thị lần đầu | Lần đầu vào plan view | Quan sát UI | Hint card "Chạm ✏ để chỉnh..." hiển thị | 🔲 |
+| TC_PLAN_14 | Coaching hint dismiss | TC_PLAN_13 | Tap × trên hint | Hint biến mất, không hiện lại sau refresh | 🔲 |
+| TC_PLAN_15 | Context menu on day pill | Day pills hiển thị | Long-press ngày bất kỳ | Context menu hiển thị trong viewport (không bị tràn) | 🔲 |
+| TC_PLAN_16 | Streak card hiển thị | Có workout history | Quan sát tab Tập luyện | Streak counter + energy balance hiển thị | 🔲 |
+| TC_PLAN_17 | Exercise list hiển thị | Chọn ngày có bài tập | Quan sát workout card | Danh sách bài tập với tên, sets × reps hiển thị | 🔲 |
+| TC_PLAN_18 | Tap ✏ mở editor | TC_PLAN_17 | Tap nút ✏ pencil | PlanDayEditor full-screen mở ra | 🔲 |
+| TC_PLAN_19 | Regenerate plan | Có kế hoạch cũ | Tap nút tạo lại kế hoạch | Confirmation → kế hoạch mới được generate | 🔲 |
+| TC_PLAN_20 | Plan view responsive | Mở trên mobile | Kiểm tra layout trên 393×851 | Tất cả elements hiển thị đúng, không bị overflow | 🔲 |
+
+---
+
+## TC_EDIT — Plan Day Editor
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_EDIT_01 | Editor mở với exercises | Mở PlanDayEditor từ ngày có bài tập | Quan sát | Danh sách bài tập đầy đủ, tên không bị cắt (line-clamp-2) | 🔲 |
+| TC_EDIT_02 | Thêm bài tập | Editor đang mở | Tap "Thêm bài tập" → chọn từ ExerciseSelector | Bài tập mới xuất hiện cuối danh sách | 🔲 |
+| TC_EDIT_03 | Xóa bài tập + undo toast | Editor có ≥2 bài tập | Tap nút xóa trên bài tập | Bài tập biến mất, undo toast hiển thị 5s (aria-live) | 🔲 |
+| TC_EDIT_04 | Undo xóa bài tập | TC_EDIT_03 | Tap "Hoàn tác" trên toast | Bài tập khôi phục lại vị trí cũ | 🔲 |
+| TC_EDIT_05 | Reorder bài tập (drag) | Editor có ≥2 bài tập | Kéo bài tập từ vị trí 1 xuống vị trí 2 | Thứ tự thay đổi, animation mượt | 🔲 |
+| TC_EDIT_06 | Chỉnh sets/reps (StepperField) | Expand bài tập | Tap +/- trên sets hoặc reps | Giá trị tăng/giảm 1, min=1, max hợp lý | 🔲 |
+| TC_EDIT_07 | Chỉnh weight (StepperField) | Expand bài tập | Tap +/- trên weight | Giá trị thay đổi, min=0 | 🔲 |
+| TC_EDIT_08 | Swap exercise | Expand bài tập | Tap "Đổi bài tập" → chọn bài mới | Bài tập cũ được thay bằng bài mới, giữ sets/reps | 🔲 |
+| TC_EDIT_09 | Unsaved changes dialog | Có thay đổi chưa lưu | Tap Back | Dialog cảnh báo "Bạn có thay đổi chưa lưu" hiển thị | 🔲 |
+| TC_EDIT_10 | Unsaved changes — Escape | TC_EDIT_09 | Nhấn Escape | Dialog đóng, tiếp tục chỉnh sửa | 🔲 |
+| TC_EDIT_11 | Lưu thay đổi | Có thay đổi | Tap "Lưu" | Quay lại TrainingPlanView, data cập nhật | 🔲 |
+| TC_EDIT_12 | Exercise name tooltip | Tên bài tập dài | Hover/tap vào tên | Tooltip hiển thị tên đầy đủ | 🔲 |
+| TC_EDIT_13 | Exercise selector search | Tap "Thêm bài tập" | Tìm kiếm "kéo xô" | Kết quả filter đúng, highlight match | 🔲 |
+| TC_EDIT_14 | Custom exercise | Tap "Thêm bài tập" | Tap "Tạo bài tập tùy chỉnh" → điền form | Custom exercise được tạo và thêm vào danh sách | 🔲 |
+| TC_EDIT_15 | Editor safe area | Editor mở trên mobile | Kiểm tra phần đầu trang | Không bị notch/status bar che | 🔲 |
+
+---
+
+## TC_WORK — Workout Logging
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_WORK_01 | Mở WorkoutLogger | Có buổi tập Strength | Tap "Bắt đầu tập" | WorkoutLogger full-screen mở | 🔲 |
+| TC_WORK_02 | Log set (weight + reps) | WorkoutLogger mở | Nhập weight=60, reps=10 → tap ✓ | Set recorded, hiển thị trong danh sách | 🔲 |
+| TC_WORK_03 | Rest timer | Hoàn thành 1 set | Quan sát timer | Timer tự động đếm ngược, có nút skip | 🔲 |
+| TC_WORK_04 | PR toast | Log set vượt record cũ | Log weight > previous max | 🎉 PR toast hiển thị với animation | 🔲 |
+| TC_WORK_05 | Complete workout | Log tất cả sets | Tap "Hoàn thành buổi tập" | Summary card hiển thị, workout saved | 🔲 |
+| TC_WORK_06 | Mở CardioLogger | Có buổi Cardio | Tap "Bắt đầu tập" | CardioLogger full-screen mở | 🔲 |
+| TC_WORK_07 | Cardio stopwatch mode | CardioLogger mở | Chọn Stopwatch mode → Start | Timer đếm lên, nút Pause/Stop hiển thị | 🔲 |
+| TC_WORK_08 | Cardio manual mode | CardioLogger mở | Chọn Manual → nhập duration/distance | Form validate, calories tự tính | 🔲 |
+| TC_WORK_09 | Freestyle workout | Tap "Tập tự do" | Chọn exercises → log sets | Workout saved với planDayId=null | 🔲 |
+| TC_WORK_10 | Workout history | Có workout history | Vào tab Lịch sử | Danh sách workouts hiển thị theo ngày | 🔲 |
+| TC_WORK_11 | Edit previous set | Trong WorkoutLogger | Tap set đã log → chỉnh weight | Giá trị cập nhật | 🔲 |
+| TC_WORK_12 | Delete set | Trong WorkoutLogger | Swipe/tap delete trên set | Set bị xóa, danh sách cập nhật | 🔲 |
+| TC_WORK_13 | RPE input | Expand set options | Nhập RPE (1-10) | RPE saved, hiển thị trong summary | 🔲 |
+| TC_WORK_14 | Workout back navigation | Đang log workout | Tap Back | Confirmation dialog nếu có unsaved data | 🔲 |
+| TC_WORK_15 | Workout safe area | WorkoutLogger mở mobile | Kiểm tra header | Không bị notch che | 🔲 |
+
+---
+
+## TC_DASH — Dashboard Integration
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_DASH_01 | Daily score hiển thị | Có nutrition + workout data | Mở tab Dashboard | DailyScoreHero hiển thị điểm 0-100 | 🔲 |
+| TC_DASH_02 | AI insight card | Có lịch sử ≥3 ngày | Quan sát Dashboard | AI insight card hiển thị gợi ý | 🔲 |
+| TC_DASH_03 | Today's plan card | Có meal plan hôm nay | Quan sát Dashboard | Today's plan summary hiển thị | 🔲 |
+| TC_DASH_04 | Quick actions bar | Dashboard mở | Tap quick action buttons | Mỗi action navigate đúng đích | 🔲 |
+| TC_DASH_05 | Protein progress | Có nutrition data | Quan sát Protein progress | Progress bar phản ánh đúng intake/target | 🔲 |
+| TC_DASH_06 | Streak mini widget | Có workout streak | Quan sát Dashboard | Streak counter hiển thị số ngày liên tiếp | 🔲 |
+| TC_DASH_07 | Weight mini widget | Có weight data | Quan sát Dashboard | Weight trend hiển thị đúng | 🔲 |
+| TC_DASH_08 | Weight quick log | Dashboard mở | Tap weight widget → nhập cân nặng | Weight saved, chart cập nhật | 🔲 |
+| TC_DASH_09 | Auto-adjust banner | Đủ điều kiện auto-adjust | Quan sát Dashboard | Banner suggest macro adjustment | 🔲 |
+| TC_DASH_10 | Dashboard responsive | Mobile emulation | Kiểm tra layout 393×851 | Tất cả widgets hiển thị đúng, no overflow | 🔲 |
+
+---
+
+## TC_A11Y — WCAG Accessibility
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_A11Y_01 | Touch targets ≥44px | App mở | Kiểm tra tất cả buttons | Tất cả interactive elements ≥ 44×44px | 🔲 |
+| TC_A11Y_02 | Color contrast | App mở | Kiểm tra text/background | Contrast ratio ≥ 4.5:1 (AA) | 🔲 |
+| TC_A11Y_03 | Focus visible | Keyboard navigation | Tab qua các elements | Focus ring visible trên mọi focusable element | 🔲 |
+| TC_A11Y_04 | Aria labels | App mở | Kiểm tra buttons/inputs | Tất cả interactive elements có aria-label | 🔲 |
+| TC_A11Y_05 | Escape key dismisses | Mở bất kỳ dialog | Nhấn Escape | Dialog đóng, focus trở về trigger element | 🔲 |
+| TC_A11Y_06 | Screen reader text | App mở | Kiểm tra role/aria attributes | role="dialog", aria-modal, aria-live đúng | 🔲 |
+| TC_A11Y_07 | Reduced motion | Enable prefers-reduced-motion | Navigate qua app | Animations disabled/simplified | 🔲 |
+| TC_A11Y_08 | Form error messages | Onboarding form | Submit form trống | Error messages accessible (aria-describedby) | 🔲 |
+| TC_A11Y_09 | Heading hierarchy | Mỗi page | Inspect headings | H1 → H2 → H3 đúng thứ tự | 🔲 |
+| TC_A11Y_10 | Image alt text | Có images | Inspect img elements | Tất cả images có alt text | 🔲 |
+
+---
+
+## TC_PERF — Performance
+
+| ID | Tên | Điều kiện tiên quyết | Bước thực hiện | Kết quả mong đợi | Trạng thái |
+|----|-----|---------------------|----------------|-----------------|-----------|
+| TC_PERF_01 | Bundle size | Build production | `npm run build` | Main bundle < 500KB gzipped | 🔲 |
+| TC_PERF_02 | First load time | Fresh page load | DevTools Network → reload | First contentful paint < 2s | 🔲 |
+| TC_PERF_03 | Tab switch latency | App running | Switch tabs | Tab content renders < 100ms | 🔲 |
+| TC_PERF_04 | No memory leaks | Extended usage | DevTools Memory → heap snapshot | No growing memory over 10 tab switches | 🔲 |
+| TC_PERF_05 | Lazy loading | Page load | DevTools Network | Chunks load on-demand, not upfront | 🔲 |

@@ -1,13 +1,15 @@
 # Hướng Dẫn Triển Khai (Deployment Guide)
 
-**Version:** 2.1  
-**Date:** 2026-03-28
+**Version:** 2.2  
+**Date:** 2026-06-28
 
 ---
 
 ## 1. Tổng quan
 
-App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor + React). Không có backend server — dữ liệu lưu trong localStorage của WebView. Từ v2.0, hỗ trợ đồng bộ lên Google Drive (appDataFolder) qua Google OAuth2.
+App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor 8 + React). Không có backend server — ứng dụng hoạt động hoàn toàn **offline-first** với SQLite (qua Capacitor SQLite plugin) và IndexedDB/localStorage cho WebView storage. Từ v2.0, hỗ trợ đồng bộ lên Google Drive (appDataFolder) qua Google OAuth2.
+
+> **Lưu ý:** Không cần backend server để chạy ứng dụng. Tất cả dữ liệu được lưu trữ local trên thiết bị. Chỉ cần kết nối internet cho AI features (Gemini API) và Cloud Sync (Google Drive).
 
 | Môi trường | Mô tả |
 |-----------|-------|
@@ -16,7 +18,15 @@ App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor + React). 
 
 ---
 
-## 2. Build APK Debug
+## 2. Build Pipeline
+
+### 2.1 Quy trình build đầy đủ
+
+```
+npm run build → dist/ → npx cap sync android → Android Studio build (hoặc ./build-apk.sh)
+```
+
+### 2.2 Build APK Debug
 
 ```bash
 # Full pipeline
@@ -83,6 +93,19 @@ adb logcat --pid=$(adb shell pidof com.mealplaner.app)
 3. Chuyển APK sang điện thoại (USB / Google Drive / Email)
 4. Mở file explorer → tap file `.apk` → Install
 
+### 4.1 Upload APK lên Google Drive (tự động)
+
+```bash
+bash upload-apk-drive.sh
+```
+
+Script tự động upload APK từ `android/app/build/outputs/apk/debug/app-debug.apk` lên Google Drive folder đã cấu hình. File config: `metadata.json`.
+
+#### Setup Google Drive upload
+1. Tạo service account trong Google Cloud Console
+2. Share folder Drive với email service account
+3. Đặt credentials file path trong script
+
 ---
 
 ## 5. Yêu cầu thiết bị
@@ -100,19 +123,28 @@ adb logcat --pid=$(adb shell pidof com.mealplaner.app)
 
 File: `capacitor.config.ts`
 
+> **Capacitor 8** — config dùng TypeScript format.
+
 ```typescript
 const config: CapacitorConfig = {
   appId: 'com.mealplaner.app',
   appName: 'Smart Meal Planner',
-  webDir: 'dist',
+  webDir: 'dist',                    // Output của npm run build
   android: {
     buildOptions: {
       keystorePath: undefined,        // Debug keystore
       keystoreAlias: undefined,
     }
   }
+  // server.url: KHÔNG set trong production — app load từ local assets
+  // Chỉ enable server.url cho dev mode khi cần hot-reload
 };
 ```
+
+**Lưu ý production:**
+- `webDir: 'dist'` — Capacitor copy nội dung `dist/` vào Android assets khi `cap sync`
+- Server localhost bị disable trong production — app load trực tiếp từ bundled assets
+- Không cần chạy dev server khi dùng APK
 
 ---
 
@@ -299,3 +331,44 @@ adb shell pm clear com.mealplaner.app
 - [Release Process](../05-process/release-process.md) — Quy trình release và versioning
 - [Coding Guidelines](../03-developer-guide/coding-guidelines.md) — Quy tắc code, testing và ESLint
 - [Setup Guide](../03-developer-guide/setup.md) — Hướng dẫn cài đặt môi trường phát triển
+
+---
+
+## CI/CD — GitHub Actions
+
+### Workflow tổng quan
+
+GitHub Actions workflow tự động chạy build + test + lint cho mỗi push/PR:
+
+```yaml
+# .github/workflows/ci.yml (cấu trúc tham khảo)
+jobs:
+  build-and-test:
+    steps:
+      - npm install
+      - npx tsc --noEmit          # TypeScript check
+      - npx eslint src/           # Lint check
+      - npm test                  # Unit tests (3954 tests)
+      - npm run test:coverage     # Coverage check (≥98%)
+      - npm run build             # Production build
+```
+
+### Quality Gates trong CI
+
+| Step | Lệnh | Pass criteria |
+|------|-------|---------------|
+| TypeScript | `npx tsc --noEmit` | 0 errors |
+| ESLint | `npx eslint src/` | 0 errors |
+| Unit Tests | `npm test` | All 3954 tests pass |
+| Coverage | `npm run test:coverage` | ≥98% statements |
+| Build | `npm run build` | Exit code 0 |
+
+### SonarQube trong CI
+
+SonarQube analysis có thể được tích hợp vào CI pipeline:
+
+```bash
+bash sonar-setup.sh
+```
+
+Config: `sonar-project.properties` tại root project. Chạy sau mỗi sprint hoặc khi cần audit code quality.

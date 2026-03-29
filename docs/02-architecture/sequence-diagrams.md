@@ -1,7 +1,7 @@
 # Sequence Diagrams — Smart Meal Planner
 
-**Version:** 2.0  
-**Date:** 2026-03-11
+**Version:** 3.0  
+**Date:** 2026-07-16
 
 ---
 
@@ -430,3 +430,261 @@ User          CalendarTab   SaveTemplateModal   useMealTemplate   TemplateManage
  │               │               │                  │                  │  persist to localStorage
  │◄──calendar updated──────────────────────────────────────────────────────────────────│
 ```
+
+---
+
+## SD-14: Onboarding Flow (Wizard → Profile Save → Plan Generation)
+
+> **v3.0 (2026-07-16):** Unified Onboarding wizard — multi-step form collecting health profile and training configuration, then generating a training plan.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UnifiedOnboarding
+    participant WelcomeSlides
+    participant HealthSteps
+    participant TrainingSteps
+    participant PlanStrategy
+    participant PlanComputing
+    participant PlanPreview
+    participant HealthProfileStore
+    participant FitnessStore
+    participant AppOnboardingStore
+    participant DB as SQLite (databaseService)
+
+    User->>UnifiedOnboarding: Open app (first time)
+    UnifiedOnboarding->>AppOnboardingStore: check isAppOnboarded
+    AppOnboardingStore-->>UnifiedOnboarding: false
+
+    UnifiedOnboarding->>WelcomeSlides: render step 0
+    User->>WelcomeSlides: swipe/tap "Bắt đầu"
+    WelcomeSlides-->>UnifiedOnboarding: onNext()
+
+    UnifiedOnboarding->>HealthSteps: render HealthBasicStep
+    User->>HealthSteps: fill name, gender, DOB, height, weight
+    HealthSteps-->>UnifiedOnboarding: onNext(healthData)
+
+    UnifiedOnboarding->>HealthSteps: render ActivityLevelStep
+    User->>HealthSteps: select activity level
+    HealthSteps-->>UnifiedOnboarding: onNext()
+
+    UnifiedOnboarding->>HealthSteps: render NutritionGoalStep
+    User->>HealthSteps: select goal (cut/bulk/maintain)
+    HealthSteps-->>UnifiedOnboarding: onNext()
+
+    UnifiedOnboarding->>HealthSteps: render HealthConfirmStep
+    User->>HealthSteps: confirm health info
+    HealthSteps-->>UnifiedOnboarding: onNext()
+
+    UnifiedOnboarding->>HealthProfileStore: saveProfile(healthData)
+    HealthProfileStore->>DB: INSERT INTO user_profile
+
+    UnifiedOnboarding->>TrainingSteps: render TrainingCoreStep
+    User->>TrainingSteps: fill goal, experience, days/week
+    TrainingSteps-->>UnifiedOnboarding: onNext()
+
+    UnifiedOnboarding->>TrainingSteps: render TrainingDetailSteps
+    User->>TrainingSteps: fill equipment, injuries, cardio
+    TrainingSteps-->>UnifiedOnboarding: onNext()
+
+    UnifiedOnboarding->>PlanStrategy: render PlanStrategyChoice
+    User->>PlanStrategy: choose "auto" or "manual"
+
+    alt Auto Strategy
+        PlanStrategy-->>UnifiedOnboarding: onNext(strategy='auto')
+        UnifiedOnboarding->>PlanComputing: render computing screen
+        PlanComputing->>FitnessStore: generatePlan(profile, trainingConfig)
+        FitnessStore->>DB: INSERT INTO training_plans, training_plan_days
+        FitnessStore-->>PlanComputing: plan generated
+        PlanComputing->>PlanPreview: render plan preview
+        User->>PlanPreview: confirm plan
+    else Manual Strategy
+        PlanStrategy-->>UnifiedOnboarding: onNext(strategy='manual')
+        Note over UnifiedOnboarding: Skip plan generation, user builds own plan later
+    end
+
+    UnifiedOnboarding->>AppOnboardingStore: setAppOnboarded(true)
+    AppOnboardingStore->>DB: persist onboarding state
+    UnifiedOnboarding-->>User: navigate to Dashboard tab
+```
+
+---
+
+## SD-15: Training Plan View (Load Plan → Render Calendar → Select Day)
+
+> **v3.0 (2026-07-16):** How the training plan view loads and displays exercises.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant FitnessTab
+    participant TrainingPlanView
+    participant SessionTabs
+    participant FitnessStore
+    participant DB as SQLite (databaseService)
+
+    User->>FitnessTab: tap "Tập luyện" tab
+    FitnessTab->>FitnessStore: check activePlan
+
+    alt No active plan
+        FitnessStore-->>FitnessTab: activePlan = null
+        FitnessTab-->>User: show "Chưa có kế hoạch" empty state
+    else Has active plan
+        FitnessStore-->>FitnessTab: activePlan exists
+        FitnessTab->>TrainingPlanView: render with plan data
+    end
+
+    TrainingPlanView->>FitnessStore: useShallow(s => ({ plans, activePlan }))
+    FitnessStore->>DB: SELECT * FROM training_plans WHERE status='active'
+    DB-->>FitnessStore: TrainingPlan[]
+    FitnessStore->>DB: SELECT * FROM training_plan_days WHERE plan_id=?
+    DB-->>FitnessStore: TrainingPlanDay[]
+    FitnessStore-->>TrainingPlanView: plan + days data
+
+    TrainingPlanView-->>User: render week calendar view
+    Note over TrainingPlanView: Days colored by workout type<br/>Rest days grayed out
+
+    User->>TrainingPlanView: tap on a day (e.g. Monday)
+    TrainingPlanView->>TrainingPlanView: setSelectedDay(monday)
+    TrainingPlanView->>SessionTabs: render sessions for selected day
+
+    SessionTabs-->>User: show exercise list with sets/reps
+    Note over SessionTabs: Each exercise shows:<br/>name, muscle groups, sets × reps range, weight
+
+    User->>SessionTabs: tap "+" button
+    SessionTabs-->>User: open AddSessionModal
+```
+
+---
+
+## SD-16: Plan Day Editor (Open → Modify Exercises → Save)
+
+> **v3.0 (2026-07-16):** Full-screen page for editing exercises in a training plan day.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant TrainingPlanView
+    participant NavigationStore
+    participant PageStackOverlay
+    participant PlanDayEditor
+    participant FitnessStore
+    participant DB as SQLite (databaseService)
+
+    User->>TrainingPlanView: tap "Chỉnh sửa" on a plan day
+    TrainingPlanView->>NavigationStore: pushPage({ type: 'PlanDayEditor', planDayId })
+    NavigationStore-->>PageStackOverlay: pageStack updated
+
+    PageStackOverlay->>PlanDayEditor: lazy load + render (full-screen overlay)
+    PlanDayEditor->>FitnessStore: loadPlanDay(planDayId)
+    FitnessStore->>DB: SELECT * FROM training_plan_days WHERE id=?
+    DB-->>FitnessStore: TrainingPlanDay with exercises JSON
+    FitnessStore-->>PlanDayEditor: planDay data
+
+    PlanDayEditor-->>User: show exercise list (editable)
+    Note over PlanDayEditor: Each exercise:<br/>name, sets, reps range, weight<br/>Drag to reorder, swipe to delete
+
+    User->>PlanDayEditor: modify exercise (change sets/reps/weight)
+    PlanDayEditor->>PlanDayEditor: updateLocalState(exerciseChanges)
+
+    User->>PlanDayEditor: add new exercise
+    PlanDayEditor-->>User: show exercise picker modal
+    User->>PlanDayEditor: select exercise from library
+    PlanDayEditor->>PlanDayEditor: addExerciseToList(selectedExercise)
+
+    User->>PlanDayEditor: tap "Lưu"
+    PlanDayEditor->>PlanDayEditor: validate (hasChanges?)
+
+    alt Has unsaved changes
+        PlanDayEditor->>FitnessStore: updatePlanDay(planDayId, exercises)
+        FitnessStore->>DB: UPDATE training_plan_days SET exercises=? WHERE id=?
+        DB-->>FitnessStore: success
+        FitnessStore-->>PlanDayEditor: updated
+        PlanDayEditor->>NavigationStore: popPage()
+        NavigationStore-->>PageStackOverlay: pageStack updated
+        PageStackOverlay-->>User: return to TrainingPlanView (re-rendered)
+    end
+
+    alt User taps back without saving
+        PlanDayEditor-->>User: show UnsavedChangesDialog
+        User->>PlanDayEditor: "Discard" or "Keep editing"
+    end
+```
+
+---
+
+## SD-17: Workout Logging (Start → Log Sets → Complete → Update Progress)
+
+> **v3.0 (2026-07-16):** Strength workout logging flow with plan-based and freestyle modes.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant FitnessTab
+    participant NavigationStore
+    participant PageStackOverlay
+    participant WorkoutLogger
+    participant FitnessStore
+    participant DB as SQLite (databaseService)
+
+    User->>FitnessTab: tap "Bắt đầu tập" on today's plan
+    FitnessTab->>NavigationStore: pushPage({ type: 'WorkoutLogger', planDayId })
+    NavigationStore-->>PageStackOverlay: pageStack updated
+    PageStackOverlay->>WorkoutLogger: lazy load + render (full-screen)
+
+    alt Plan-based workout (planDayId exists)
+        WorkoutLogger->>FitnessStore: loadPlanDay(planDayId)
+        FitnessStore->>DB: SELECT exercises FROM training_plan_days WHERE id=?
+        DB-->>FitnessStore: planned exercises
+        FitnessStore-->>WorkoutLogger: prefill exercise list
+    else Freestyle workout (planDayId = null)
+        WorkoutLogger-->>User: empty exercise list, user adds manually
+    end
+
+    WorkoutLogger->>FitnessStore: saveDraft(exercises, startTime)
+    FitnessStore->>DB: INSERT INTO workout_drafts
+    Note over WorkoutLogger: Draft saved periodically<br/>to prevent data loss on crash
+
+    loop For each exercise
+        User->>WorkoutLogger: select exercise
+        WorkoutLogger-->>User: show set inputs (reps, weight)
+
+        loop For each set
+            User->>WorkoutLogger: enter reps + weight
+            User->>WorkoutLogger: tap "✓" to complete set
+            WorkoutLogger->>WorkoutLogger: markSetComplete(exerciseId, setNumber)
+            WorkoutLogger-->>User: set highlighted as completed
+        end
+    end
+
+    User->>WorkoutLogger: tap "Hoàn thành"
+    WorkoutLogger->>WorkoutLogger: calculate duration (now - startTime)
+
+    WorkoutLogger->>FitnessStore: saveWorkout(workoutData)
+    FitnessStore->>DB: BEGIN TRANSACTION
+    FitnessStore->>DB: INSERT INTO workouts (id, date, name, plan_day_id, duration_min)
+    FitnessStore->>DB: INSERT INTO workout_sets (workout_id, exercise_id, set_number, reps, weight_kg) × N
+    FitnessStore->>DB: DELETE FROM workout_drafts WHERE id='current'
+    FitnessStore->>DB: COMMIT
+    DB-->>FitnessStore: success
+
+    FitnessStore-->>WorkoutLogger: workout saved
+    WorkoutLogger->>NavigationStore: popPage()
+    NavigationStore-->>PageStackOverlay: pageStack updated
+    PageStackOverlay-->>User: return to FitnessTab
+
+    FitnessTab->>FitnessStore: refreshProgress()
+    FitnessStore-->>FitnessTab: updated workout history
+    FitnessTab-->>User: show updated progress + history
+```
+
+---
+
+## Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-02-20 | Initial sequence diagrams (SD-01 to SD-06) |
+| 1.1 | 2026-03-07 | Updated SD-07 (MealPlanner direct modal), SD-08 (inline clear button) |
+| 2.0 | 2026-03-11 | Added SD-09 (translation), SD-10 (Google Drive sync), SD-11 (conflict resolution), SD-12 (copy plan), SD-13 (meal templates) |
+| 3.0 | 2026-07-16 | Added 4 Mermaid sequence diagrams: SD-14 (Onboarding Flow), SD-15 (Training Plan View), SD-16 (Plan Day Editor), SD-17 (Workout Logging) |

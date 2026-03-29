@@ -1,8 +1,9 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 8.0  
-**Date:** 2026-03-27  
-**Author:** Dev Team
+**Version:** 9.0  
+**Date:** 2026-07-05  
+**Author:** Dev Team  
+**Changelog v9.0:** Thêm Unified Onboarding, Plan Editing UX, Multi-Session System, coverage 100% target, Chrome DevTools manual testing protocol, SonarQube quality gates
 
 ---
 
@@ -47,6 +48,11 @@
 | **Fitness Plan Flexibility — Multi-Session** | **✅** | **-** | **✅** | **SC41** |
 | **Fitness Plan Flexibility — Plan Day Editor** | **✅** | **-** | **✅** | **SC42** |
 | **Fitness Plan Flexibility — Freestyle Workout** | **✅** | **-** | **✅** | **SC43** |
+| **Unified Onboarding Wizard** | **✅** | **-** | **✅** | **—** |
+| **Plan Editing UX (Visible Actions)** | **✅** | **-** | **✅** | **—** |
+| **Plan Strategy Choice (Auto/Manual)** | **✅** | **-** | **✅** | **—** |
+| **Plan Computing Screen** | **✅** | **-** | **✅** | **—** |
+| **Plan Preview Screen** | **✅** | **-** | **✅** | **—** |
 
 ### 1.3 Fitness Plan Flexibility — Chi tiết phạm vi
 
@@ -119,21 +125,36 @@
 
 ## 4. Mức độ coverage yêu cầu
 
-| Level | Target | Actual (2026-03-26) |
+| Level | Target | Actual (2026-07-05) |
 |-------|--------|---------------------|
-| Overall Statements | ≥ 80% | **98.93%** ✅ |
-| Overall Branches | ≥ 75% | **92.97%** ✅ |
-| Overall Functions | ≥ 85% | **98.92%** ✅ |
-| Overall Lines | ≥ 80% | **99.51%** ✅ |
-| Services | ≥ 90% | **99%+** ✅ |
-| Utils | ≥ 90% | **100%** ✅ |
-| Components | ≥ 75% | **99%+** ✅ |
-| Hooks | ≥ 85% | **99%+** ✅ |
-| Contexts | ≥ 85% | **98%+** ✅ |
+| Overall Statements | **100%** | **97.23%** ⬆ |
+| Overall Branches | ≥ 95% | **90.04%** ⬆ |
+| Overall Functions | **100%** | **95.93%** ⬆ |
+| Overall Lines | **100%** | **97.23%** ⬆ |
+| Services | **100%** | **95%** ⬆ |
+| Utils | **100%** | **100%** ✅ |
+| Components | **100%** | **98.51%** ⬆ |
+| Hooks | **100%** | **96.82%** ⬆ |
+| Stores | **100%** | **73.97%** ⬆ |
+| Contexts | **100%** | **99.53%** ⬆ |
 
-> **Note:** Unit tests: **2860 tests** across **125 test files** (cập nhật 2026-03-26). Coverage vượt xa target ≥80%. Branch coverage 92.97% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Lazy loading + code splitting không ảnh hưởng coverage.
+> **Note:** v9.0 — Unit tests: **3826 tests** across **157 test files** (2026-07-05). Coverage target raised to **100%** for all categories. TypeScript strict mode: 0 errors. ESLint: 0 errors. SonarQube quality gate enforced.
 >
-> **Manual scenario test cases:** 43 scenarios, **4,603 manual test cases** (SC01-SC43). Xem thư mục `docs/04-testing/scenarios/`.
+> **Manual scenario test cases:** 43 scenarios, **~10,000 manual test cases** (SC01-SC43). Xem thư mục `docs/04-testing/scenarios/`.
+
+### 4.1 Quality Gates (v9.0 — NEW)
+
+| Gate | Threshold | Tool |
+|------|-----------|------|
+| TypeScript Strict | 0 errors | `tsc --noEmit` |
+| ESLint | 0 errors, 0 warnings | `eslint src/` |
+| Unit Tests | 100% pass | `vitest run` |
+| Statement Coverage | 100% | `vitest --coverage` |
+| Branch Coverage | ≥ 95% | `vitest --coverage` |
+| SonarQube | Pass all rules | `sonar-scanner` |
+| No eslint-disable | 0 occurrences | grep check |
+| Chrome DevTools Console | 0 errors/warnings | Manual check |
+| Chrome DevTools Network | All 2xx responses | Manual check |
 
 ---
 
@@ -203,6 +224,58 @@ Specs 23–24 kiểm tra luồng dữ liệu xuyên suốt toàn bộ ứng dụ
 
 - **`23-integration-data-flow`**: Cascade test — tạo Ingredient → gắn vào Dish → lên Calendar → kiểm tra Grocery list tự động cập nhật. Xác nhận tính nhất quán dữ liệu end-to-end.
 - **`24-integration-multiday-crosstab`**: Multi-day grocery aggregation (cùng ingredient trên nhiều ngày phải cộng dồn), cross-tab consistency (đổi theme ở Settings tab → phản ánh tức thì trên Calendar/Library), và nutrition cascade (thay đổi calo ingredient → Dish/Calendar tự cập nhật).
+
+### 5.4 Manual Testing Protocol — Chrome DevTools (v9.0 — NEW)
+
+**Mục đích:** Kiểm thử thủ công trên Chrome DevTools với mobile emulation để phát hiện lỗi UI/UX, console errors, network issues mà unit tests không thể bắt được.
+
+#### 5.4.1 Thiết lập môi trường
+
+| | Chi tiết |
+|--|---------|
+| URL | `localhost:3000` |
+| Browser | Chrome (latest) |
+| DevTools | Console + Network + Application tabs |
+| Mobile Emulation | 393×851 viewport (iPhone 14 Pro) |
+| Android Emulator | emulator-5556 (1080×2400, density 420) |
+| Emulator Host | `10.0.2.2:3000` |
+
+#### 5.4.2 Quy trình kiểm thử
+
+1. **Khởi chạy:** `npm run dev` → mở Chrome DevTools → bật mobile emulation
+2. **Console monitoring:** Liên tục giám sát tab Console — bất kỳ error/warning nào đều phải được ghi nhận
+3. **Network monitoring:** Kiểm tra tất cả requests — status codes, latency, payload sizes
+4. **Application monitoring:** Kiểm tra localStorage, SQLite/IndexedDB state sau mỗi thao tác
+5. **Screenshot evidence:** Chụp ảnh màn hình cho mỗi test case khi verify
+
+#### 5.4.3 Bug Report Template
+
+```markdown
+**Bug ID:** BUG-XXX-NNN
+**Severity:** P0 Critical | P1 Major | P2 Minor | P3 Trivial
+**Module:** [Module name]
+**Environment:** Chrome [version], Mobile emulation 393×851
+**Steps to reproduce:**
+1. ...
+2. ...
+**Expected Result:** ...
+**Actual Result:** ...
+**Evidence:** [Console log / Screenshot / Network trace]
+**Root Cause:** [Frontend UI / State management / Business logic]
+```
+
+#### 5.4.4 Nhóm Test Cases Manual (v9.0)
+
+| Nhóm | Mã TC | Mô tả | Số TCs |
+|------|-------|--------|--------|
+| Onboarding | TC_ONBOARD_01–15 | Unified onboarding wizard (auto + manual paths) | 15 |
+| Training Plan | TC_PLAN_01–20 | Training plan view, day actions, session management | 20 |
+| Plan Editor | TC_EDIT_01–15 | Plan day editor, exercise CRUD, undo/redo | 15 |
+| Workout | TC_WORK_01–15 | Workout logging (strength + cardio) | 15 |
+| Dashboard | TC_DASH_01–10 | Dashboard integration, daily score, insights | 10 |
+| Accessibility | TC_A11Y_01–10 | WCAG 2.1 AA compliance | 10 |
+| Performance | TC_PERF_01–05 | Bundle size, render time, memory | 5 |
+| **Total** | | | **90** |
 
 ---
 

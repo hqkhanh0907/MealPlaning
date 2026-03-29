@@ -1,7 +1,7 @@
 # Release Process — Smart Meal Planner
 
-**Version:** 4.1  
-**Date:** 2026-03-28
+**Version:** 4.2  
+**Date:** 2026-06-28
 
 ---
 
@@ -11,34 +11,43 @@
 Code changes
      │
      ▼
-[1] Run unit tests (npm run test)
-     │ ✅ 1201/1201
+[1] TypeScript check (npx tsc --noEmit)
+     │ ✅ 0 errors
      ▼
-[2] Run linter (npm run lint)
-     │ ✅ no errors, no warnings
+[2] Run linter (npx eslint src/)
+     │ ✅ 0 errors (react-refresh warnings acceptable)
      ▼
-[3] Run coverage check (npm run test:coverage)
-     │ ✅ 100% Stmts/Funcs/Lines
+[3] Run unit tests (npm test)
+     │ ✅ 3954/3954 (165 files)
      ▼
-[4] Build web assets (npm run build)
+[4] Run coverage check (npm run test:coverage)
+     │ ✅ ≥98% Stmts
+     ▼
+[5] Build web assets (npm run build)
      │ ✅ dist/ generated
      ▼
-[5] Sync to Android (npx cap sync android)
+[6] Sync to Android (npx cap sync android)
      │ ✅ web assets in android/
      ▼
-[6] Build APK (bash build-apk.sh)
+[7] Build APK (bash build-apk.sh)
      │ ✅ app-debug.apk generated
      ▼
-[7] Run E2E tests (CI workflow_dispatch)
+[8] Chrome DevTools console check
+     │ ✅ 0 errors, 0 warnings
+     ▼
+[9] Manual testing on mobile viewport (393×851)
+     │ ✅ Critical flows verified
+     ▼
+[10] Run E2E tests (CI workflow_dispatch)
      │ ✅ 24/24 specs (183 test cases)
      ▼
-[8] Run E2E deep integration (specs 23-24)
+[11] Run E2E deep integration (specs 23-24)
      │ ✅ Cross-feature cascade + cross-tab consistency
      ▼
-[9] Git commit + tag
+[12] Git commit + tag
      │
      ▼
-[10] Upload APK to Google Drive (optional)
+[13] Upload APK to Google Drive (optional)
 ```
 
 ---
@@ -48,9 +57,10 @@ Code changes
 Trước mỗi release, kiểm tra tất cả items:
 
 ```
-□ npm run test          → 100% pass (0 failures allowed)
-□ npm run lint          → 0 errors, 0 warnings
-□ npm run test:coverage → 100% Stmts/Funcs/Lines, ≥97% Branch
+□ npx tsc --noEmit      → 0 errors (TypeScript type-check)
+□ npx eslint src/       → 0 errors (warnings from react-refresh are pre-existing and acceptable)
+□ npm test              → 100% pass, 0 failures (currently 3954 tests, 165 files)
+□ npm run test:coverage → statement coverage ≥98%
 □ No eslint-disable     → grep -r "eslint-disable" src/ phải trả về 0 kết quả
 □ npm run build         → build thành công, không warnings
 □ npx cap sync android  → sync OK
@@ -58,8 +68,8 @@ Trước mỗi release, kiểm tra tất cả items:
 □ npm run test:e2e      → 24/24 specs pass (183 test cases)
 □ E2E deep integration → specs 23-24 pass (cascade + cross-tab)
 □ adb install APK       → cài thành công trên emulator
-□ DevTools Console      → 0 errors, 0 warnings
-□ Smoke test manual:
+□ Chrome DevTools Console → 0 errors, 0 warnings
+□ Manual testing on mobile viewport (393×851) for critical flows:
   □ App mở được
   □ Tab navigation OK
   □ Thêm/sửa nguyên liệu OK
@@ -67,8 +77,22 @@ Trước mỗi release, kiểm tra tất cả items:
   □ AI tab hiển thị OK
   □ Fitness tab hiển thị OK
   □ Favicon hiển thị đúng
+  □ Safe areas hiển thị đúng (notch, home indicator)
 □ git commit + push
 ```
+
+### ⛔ Quality Gates (Mandatory — Bắt buộc trước mọi release)
+
+Các quality gates sau **bắt buộc** pass trước khi merge hoặc release:
+
+| # | Gate | Lệnh | Tiêu chí |
+|---|------|-------|----------|
+| 1 | TypeScript | `npx tsc --noEmit` | 0 errors |
+| 2 | ESLint | `npx eslint src/` | 0 errors (react-refresh warnings acceptable) |
+| 3 | Unit Tests | `npm test` | All 3954 tests pass (165 files) |
+| 4 | Coverage | `npm run test:coverage` | Statement coverage ≥98% |
+| 5 | DevTools | Chrome DevTools Console | 0 errors, 0 warnings |
+| 6 | Mobile | Manual test 393×851 viewport | Critical flows pass |
 
 ### ⛔ Chính sách No eslint-disable
 
@@ -77,6 +101,16 @@ Trước mỗi release, kiểm tra tất cả items:
 - Nếu một rule gây false positive cho toàn bộ project → điều chỉnh rule trong `eslint.config.js` thông qua PR review
 - Không chấp nhận PR nào chứa eslint-disable trong `src/`
 - File test (`e2e/`) được phép sử dụng eslint-disable cho type casting khi cần thiết
+
+### 🔍 SonarQube Integration
+
+SonarQube analysis được chạy sau mỗi sprint để đảm bảo code quality:
+
+- Config: `sonar-project.properties` tại root project
+- Script: `bash sonar-setup.sh`
+- Chạy analysis: sau mỗi sprint hoặc trước release
+- Quality Profile: Default + custom rules cho TypeScript/React
+- Gate: Phải pass SonarQube quality gate trước khi release
 
 ---
 
@@ -242,7 +276,8 @@ Khi có bug nghiêm trọng sau release:
 3. Viết test case reproduce bug
 4. npm run test → pass
 5. npm run test:e2e (hoặc targeted spec)
-6. npm run lint → 0 errors (no eslint-disable allowed)
+6. npx eslint src/ → 0 errors (no eslint-disable allowed)
+7. npx tsc --noEmit → 0 errors
 7. Bump PATCH version
 8. git commit "fix: description of fix"
 9. Merge vào main

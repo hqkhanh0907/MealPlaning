@@ -1,17 +1,19 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 5.1  
-**Date:** 2026-03-28
+**Version:** 5.2  
+**Date:** 2026-06-28
 
 ---
 
 ## 1. Ngôn ngữ và Framework
 
 - **TypeScript strict mode** — tất cả file `.ts`/`.tsx`, không dùng `any` trừ khi cực kỳ cần thiết
+- **`@typescript-eslint/no-explicit-any` rule set to error** — tuyệt đối không dùng `as any`. Sử dụng proper typing, generics, hoặc `unknown` + type guard.
 - **React 19 functional components** — không dùng class components
 - **Tailwind CSS v4** — không viết CSS inline, không dùng `style={}` trừ giá trị động
 - **Dark mode bắt buộc:** Khi thêm bất kỳ class `bg-*`, `text-*`, `border-*`, hoặc `active:bg-*` phải luôn kèm variant `dark:` tương ứng. Ví dụ: `bg-amber-50 dark:bg-amber-900/20`. Xem [BUG-DM-001](../bug-reports/BUG-DM-001-dark-mode-missing-variants.md) cho pattern chi tiết.
 - Mọi text hiển thị với user phải qua `t()` của i18next — **không hardcode string**
+- **No `eslint-disable`**: Tuyệt đối không sử dụng `eslint-disable`, `eslint-disable-next-line`, hoặc `eslint-disable-line` trong bất kỳ file nào.
 
 ---
 
@@ -225,6 +227,30 @@ const newIng: Ingredient = { id: Date.now().toString(), ... };
 - **Context Providers**: Dùng React Context cho cross-cutting concerns (AuthContext cho OAuth, NotificationContext cho toast). Không dùng Context cho domain data — dùng `usePersistedState` hoặc Zustand.
 - **Custom hooks naming**: Hooks trả về boolean dùng prefix `useIs` (ví dụ: `useIsDesktop`). Hooks cho CRUD dùng prefix `use` + noun (ví dụ: `useMealTemplate`, `useCopyPlan`).
 
+### Zustand Pattern — `useShallow` bắt buộc
+
+> **Quy tắc bắt buộc** — tránh unnecessary re-renders khi select multiple properties từ Zustand store.
+
+Khi select nhiều properties từ Zustand store, **bắt buộc** dùng `useShallow` để tránh re-render không cần thiết:
+
+```typescript
+import { useShallow } from 'zustand/react/shallow';
+
+// ✅ Correct — useShallow khi select multiple properties
+const { dishes, ingredients, addDish } = useMealStore(
+  useShallow((s) => ({ dishes: s.dishes, ingredients: s.ingredients, addDish: s.addDish }))
+);
+
+// ✅ Correct — single property không cần useShallow
+const dishes = useMealStore((s) => s.dishes);
+
+// ❌ Wrong — select multiple properties WITHOUT useShallow → unnecessary re-renders
+const { dishes, ingredients } = useMealStore((s) => ({
+  dishes: s.dishes,
+  ingredients: s.ingredients,
+}));
+```
+
 ```typescript
 // ✅ Dùng usePersistedState
 const [ingredients, setIngredients] = usePersistedState<Ingredient[]>(
@@ -325,6 +351,66 @@ describe('ComponentName', () => {
 });
 ```
 
+### Form Pattern — Zod v4 + React Hook Form
+
+> **Quy tắc bắt buộc** — giải quyết incompatibility giữa Zod v4 và React Hook Form resolver types.
+
+Khi dùng `zodResolver` với Zod v4, sử dụng double assertion thay vì `as any`:
+
+```typescript
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { Resolver } from 'react-hook-form';
+
+// ✅ Correct — double assertion (unknown → Resolver)
+const form = useForm<FormData>({
+  resolver: zodResolver(schema) as unknown as Resolver<FormData>,
+});
+
+// ❌ Wrong — as any
+const form = useForm<FormData>({
+  resolver: zodResolver(schema) as any,
+});
+```
+
+### useWatch over watch
+
+> **Quy tắc bắt buộc** — tránh `react-hooks/incompatible-library` warnings.
+
+Sử dụng `useWatch` hook thay vì `form.watch()` method để theo dõi field values:
+
+```typescript
+import { useWatch } from 'react-hook-form';
+
+// ✅ Correct — useWatch hook
+const fieldValue = useWatch({ control: form.control, name: 'fieldName' });
+
+// ❌ Wrong — form.watch triggers react-hooks warnings
+const fieldValue = form.watch('fieldName');
+```
+
+### Safe Area Rule — Mobile Components
+
+> **Quy tắc bắt buộc** — sau nhiều bug lặp lại trên mobile viewport.
+
+Tất cả component mới **bắt buộc** phải account cho mobile safe areas. Sử dụng Tailwind safe area utilities:
+
+```typescript
+// ✅ Correct — safe area padding
+<div className="pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+  {/* content */}
+</div>
+
+// ✅ Alternative — fixed header/footer with safe area
+<header className="fixed top-0 pt-[env(safe-area-inset-top)] w-full">
+  {/* navigation */}
+</header>
+
+// ❌ Wrong — no safe area consideration → content hidden behind notch/home indicator
+<div className="pt-0">
+  {/* content bị ẩn dưới notch */}
+</div>
+```
+
 ### Database Test Setup
 
 > **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
@@ -385,22 +471,23 @@ await $('button[data-testid="add-dish"]').click();
 | `hooks/` | ≥ 85% | **100%** ✅ |
 | `components/` | ≥ 75% | **100%** ✅ |
 | `contexts/` | ≥ 85% | **100%** ✅ |
-| **Overall Stmts** | ≥ 97% | **97.24%** ✅ |
+| **Overall Stmts** | ≥ 98% | **≥98%** ✅ |
 | **Overall Branch** | ≥ 75% | **93.99%** ✅ |
 | **E2E Specs** | 24 specs | **183 tests** ✅ |
-| **Unit Test Files** | — | **139 files, 3135 tests** ✅ |
+| **Unit Test Files** | — | **165 files, 3954 tests** ✅ |
 
-> **Chuẩn mới (QA Stabilization 2026-03-28):** 97%+ statement coverage là baseline bắt buộc. Mọi PR không được làm giảm coverage dưới 97%. Hiện tại: 139 test files, 3135 tests passing, 97.24% statements.
+> **Chuẩn mới (2026-06-28):** 98%+ statement coverage là baseline bắt buộc. Mọi PR không được làm giảm coverage dưới 98%. Hiện tại: 165 test files, 3954 tests passing.
 >
 > **Chuẩn E2E (QA Cycle 3):** Deep integration tests required for cross-feature data flow. 100% feature-level coverage achieved and must be maintained.
 
 ### Quy tắc Test Coverage
 
 - Coverage **không được phép giảm** sau mỗi PR
-- Target: ≥ 97% statements, ≥ 90% branches (updated 2026-03-28)
+- Target: ≥ 98% statements, ≥ 90% branches (updated 2026-06-28)
 - Mọi bug fix **phải kèm** test case regression
-- **Coverage threshold**: Duy trì ≥ 97% statement coverage. Mỗi PR phải chạy `npm run test:coverage` và không được giảm coverage.
-- **Lint**: `npm run lint` phải đạt 0 errors, 0 warnings trước khi merge
+- **Coverage threshold**: Duy trì ≥ 98% statement coverage. Mỗi PR phải chạy `npm run test:coverage` và không được giảm coverage.
+- **Lint**: `npx eslint src/` phải đạt 0 errors trước khi merge. Warnings từ `react-refresh` plugin là pre-existing và acceptable.
+- **TypeScript**: `npx tsc --noEmit` phải đạt 0 errors.
 
 ### Quy tắc ESLint — Không dùng eslint-disable
 
@@ -477,6 +564,15 @@ Object.defineProperty(navigator, 'mediaDevices', {
   value: { getUserMedia: vi.fn() },
 });
 ```
+
+### Quy tắc i18n trong code
+
+> **Quy tắc bắt buộc** — Tất cả user-facing strings phải dùng `t()` từ i18next.
+
+- Ngôn ngữ chính: **Tiếng Việt** (vi)
+- File translations: `src/locales/vi.json`
+- Không hardcode bất kỳ string tiếng Việt nào trong components — luôn dùng translation key
+- Khi thêm string mới: thêm key vào `vi.json` trước, rồi dùng `t('key.path')` trong component
 
 ---
 
