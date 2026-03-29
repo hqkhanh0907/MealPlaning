@@ -11,6 +11,7 @@ import type {
   WeightEntry,
   Exercise,
   CardioIntensity,
+  SelectedExercise,
 } from '../features/fitness/types';
 
 let _db: DatabaseService | null = null;
@@ -38,6 +39,10 @@ export interface FitnessState {
   setActivePlan: (planId: string) => void;
   addPlanDays: (days: TrainingPlanDay[]) => void;
   getPlanDays: (planId: string) => TrainingPlanDay[];
+  updatePlanDayExercises: (dayId: string, exercises: SelectedExercise[]) => void;
+  restorePlanDayOriginal: (dayId: string) => void;
+  addPlanDaySession: (planId: string, dayOfWeek: number, session: Omit<TrainingPlanDay, 'id'>) => void;
+  removePlanDaySession: (dayId: string) => void;
   addWorkout: (workout: Workout) => void;
   updateWorkout: (id: string, updates: Partial<Workout>) => void;
   addWorkoutSet: (workoutSet: WorkoutSet) => void;
@@ -98,25 +103,127 @@ export const useFitnessStore = create<FitnessState>()(
           ),
         })),
 
-      addPlanDays: (days) =>
+      addPlanDays: (days) => {
         set((state) => ({
           trainingPlanDays: [...state.trainingPlanDays, ...days],
-        })),
+        }));
+        if (_db) {
+          for (const day of days) {
+            _db.execute(
+              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [day.id, day.planId, day.dayOfWeek, day.sessionOrder ?? 1, day.workoutType,
+               day.muscleGroups ?? null, day.exercises ?? null, day.originalExercises ?? null, day.notes ?? null],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite addPlanDays write failed:', error);
+            });
+          }
+        }
+      },
 
       getPlanDays: (planId) =>
         get().trainingPlanDays.filter((d) => d.planId === planId),
+
+      updatePlanDayExercises: (dayId, exercises) => {
+        set((state) => ({
+          trainingPlanDays: state.trainingPlanDays.map((d) =>
+            d.id === dayId ? { ...d, exercises: JSON.stringify(exercises) } : d,
+          ),
+        }));
+        if (_db) {
+          _db.execute('UPDATE training_plan_days SET exercises = ? WHERE id = ?', [
+            JSON.stringify(exercises),
+            dayId,
+          ]).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite updatePlanDayExercises failed:', error);
+          });
+        }
+      },
+
+      restorePlanDayOriginal: (dayId) => {
+        set((state) => ({
+          trainingPlanDays: state.trainingPlanDays.map((d) =>
+            d.id === dayId ? { ...d, exercises: d.originalExercises ?? d.exercises } : d,
+          ),
+        }));
+        if (_db) {
+          _db.execute(
+            'UPDATE training_plan_days SET exercises = original_exercises WHERE id = ?',
+            [dayId],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite restorePlanDayOriginal failed:', error);
+          });
+        }
+      },
+
+      addPlanDaySession: (planId, dayOfWeek, session) => {
+        const existing = get().trainingPlanDays.filter(
+          (d) => d.planId === planId && d.dayOfWeek === dayOfWeek,
+        );
+        if (existing.length >= 3) return;
+
+        const newDay: TrainingPlanDay = {
+          ...session,
+          id: `${planId}_day_${String(dayOfWeek)}_s${String(existing.length + 1)}_${String(Date.now())}`,
+        };
+        set((state) => ({
+          trainingPlanDays: [...state.trainingPlanDays, newDay],
+        }));
+        if (_db) {
+          _db.execute(
+            `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [newDay.id, newDay.planId, newDay.dayOfWeek, newDay.sessionOrder, newDay.workoutType,
+             newDay.muscleGroups ?? null, newDay.exercises ?? null, newDay.originalExercises ?? null, newDay.notes ?? null],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite addPlanDaySession failed:', error);
+          });
+        }
+      },
+
+      removePlanDaySession: (dayId) => {
+        const dayToRemove = get().trainingPlanDays.find((d) => d.id === dayId);
+        if (!dayToRemove) return;
+
+        set((state) => {
+          const remaining = state.trainingPlanDays.filter((d) => d.id !== dayId);
+          let order = 1;
+          const reordered = remaining.map((d) => {
+            if (d.planId === dayToRemove.planId && d.dayOfWeek === dayToRemove.dayOfWeek) {
+              return { ...d, sessionOrder: order++ };
+            }
+            return d;
+          });
+          return { trainingPlanDays: reordered };
+        });
+
+        if (_db) {
+          _db.execute('DELETE FROM training_plan_days WHERE id = ?', [dayId]).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite removePlanDaySession delete failed:', error);
+          });
+          const remaining = get().trainingPlanDays
+            .filter((d) => d.planId === dayToRemove.planId && d.dayOfWeek === dayToRemove.dayOfWeek)
+            .sort((a, b) => a.sessionOrder - b.sessionOrder);
+          for (const d of remaining) {
+            _db.execute('UPDATE training_plan_days SET session_order = ? WHERE id = ?', [d.sessionOrder, d.id]).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite removePlanDaySession reorder failed:', error);
+            });
+          }
+        }
+      },
 
       addWorkout: (workout) => {
         set((state) => ({ workouts: [...state.workouts, workout] }));
         if (_db) {
           _db
             .execute(
-              `INSERT INTO workouts (id, date, name, duration_min, notes, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO workouts (id, date, name, plan_day_id, duration_min, notes, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 workout.id,
                 workout.date,
                 workout.name,
+                workout.planDayId ?? null,
                 workout.durationMin ?? null,
                 workout.notes ?? null,
                 workout.createdAt,
@@ -174,12 +281,13 @@ export const useFitnessStore = create<FitnessState>()(
         if (_db) {
           await _db.transaction(async () => {
             await _db!.execute(
-              `INSERT INTO workouts (id, date, name, duration_min, notes, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO workouts (id, date, name, plan_day_id, duration_min, notes, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 workout.id,
                 workout.date,
                 workout.name,
+                workout.planDayId ?? null,
                 workout.durationMin ?? null,
                 workout.notes ?? null,
                 workout.createdAt,
@@ -360,6 +468,7 @@ export const useFitnessStore = create<FitnessState>()(
                 id: w.id as string,
                 date: w.date as string,
                 name: w.name as string,
+                planDayId: w.planDayId as string | undefined,
                 durationMin: w.durationMin as number | undefined,
                 notes: w.notes as string | undefined,
                 createdAt: w.createdAt as string,

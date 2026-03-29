@@ -82,7 +82,11 @@ function samplePlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDa
     id: 'day-1',
     planId: 'plan-1',
     dayOfWeek: 1,
+    sessionOrder: 1,
     workoutType: 'push',
+    muscleGroups: 'chest,shoulders',
+    exercises: JSON.stringify([{ exercise: { id: 'bench', name: 'Bench Press', primaryMuscle: 'chest', equipment: 'barbell', category: 'compound' }, sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120 }]),
+    originalExercises: JSON.stringify([{ exercise: { id: 'bench', name: 'Bench Press', primaryMuscle: 'chest', equipment: 'barbell', category: 'compound' }, sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120 }]),
     ...overrides,
   };
 }
@@ -472,6 +476,99 @@ describe('fitnessStore', () => {
     });
     useFitnessStore.getState().setWorkoutDraft(null);
     expect(useFitnessStore.getState().workoutDraft).toBeNull();
+  });
+
+  /* ---------- updatePlanDayExercises ---------- */
+  describe('updatePlanDayExercises', () => {
+    it('updates exercises field without changing originalExercises', () => {
+      const day = samplePlanDay();
+      useFitnessStore.setState({ trainingPlanDays: [day] });
+
+      const newExercises = [{ exercise: { id: 'ohp', name: 'OHP', primaryMuscle: 'shoulders', equipment: 'barbell', category: 'compound' }, sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90 }];
+      useFitnessStore.getState().updatePlanDayExercises('day-1', newExercises as never[]);
+
+      const updated = useFitnessStore.getState().trainingPlanDays[0];
+      expect(JSON.parse(updated.exercises!)).toEqual(newExercises);
+      expect(updated.originalExercises).toBe(day.originalExercises);
+    });
+
+    it('no-ops for non-existent dayId', () => {
+      useFitnessStore.setState({ trainingPlanDays: [samplePlanDay()] });
+      useFitnessStore.getState().updatePlanDayExercises('nonexistent', []);
+      expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(1);
+    });
+  });
+
+  /* ---------- restorePlanDayOriginal ---------- */
+  describe('restorePlanDayOriginal', () => {
+    it('copies originalExercises back to exercises', () => {
+      const day = samplePlanDay({ exercises: '[]' });
+      useFitnessStore.setState({ trainingPlanDays: [day] });
+
+      useFitnessStore.getState().restorePlanDayOriginal('day-1');
+
+      const updated = useFitnessStore.getState().trainingPlanDays[0];
+      expect(updated.exercises).toBe(day.originalExercises);
+    });
+  });
+
+  /* ---------- addPlanDaySession ---------- */
+  describe('addPlanDaySession', () => {
+    it('adds a new session with next sessionOrder', () => {
+      const day1 = samplePlanDay({ sessionOrder: 1 });
+      useFitnessStore.setState({ trainingPlanDays: [day1] });
+
+      useFitnessStore.getState().addPlanDaySession('plan-1', 1, {
+        planId: 'plan-1',
+        dayOfWeek: 1,
+        sessionOrder: 2,
+        workoutType: 'Cardio',
+        muscleGroups: '',
+        exercises: '[]',
+        originalExercises: '[]',
+      });
+
+      const days = useFitnessStore.getState().trainingPlanDays;
+      expect(days).toHaveLength(2);
+      expect(days[1].sessionOrder).toBe(2);
+    });
+
+    it('rejects when 3 sessions already exist', () => {
+      useFitnessStore.setState({
+        trainingPlanDays: [
+          samplePlanDay({ id: 'pd-1', sessionOrder: 1 }),
+          samplePlanDay({ id: 'pd-2', sessionOrder: 2 }),
+          samplePlanDay({ id: 'pd-3', sessionOrder: 3 }),
+        ],
+      });
+
+      useFitnessStore.getState().addPlanDaySession('plan-1', 1, {
+        planId: 'plan-1', dayOfWeek: 1, sessionOrder: 4,
+        workoutType: 'Extra', exercises: '[]', originalExercises: '[]',
+      });
+
+      expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(3);
+    });
+  });
+
+  /* ---------- removePlanDaySession ---------- */
+  describe('removePlanDaySession', () => {
+    it('removes session and reorders remaining', () => {
+      useFitnessStore.setState({
+        trainingPlanDays: [
+          samplePlanDay({ id: 'pd-1', sessionOrder: 1 }),
+          samplePlanDay({ id: 'pd-2', sessionOrder: 2 }),
+          samplePlanDay({ id: 'pd-3', sessionOrder: 3 }),
+        ],
+      });
+
+      useFitnessStore.getState().removePlanDaySession('pd-2');
+
+      const days = useFitnessStore.getState().trainingPlanDays;
+      expect(days).toHaveLength(2);
+      expect(days[0].sessionOrder).toBe(1);
+      expect(days[1].sessionOrder).toBe(2);
+    });
   });
 });
 
