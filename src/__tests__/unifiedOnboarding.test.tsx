@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
@@ -19,6 +19,7 @@ import { TrainingDetailSteps } from '../components/onboarding/TrainingDetailStep
 import { PlanStrategyChoice } from '../components/onboarding/PlanStrategyChoice';
 import { PlanComputingScreen } from '../components/onboarding/PlanComputingScreen';
 import { PlanPreviewScreen } from '../components/onboarding/PlanPreviewScreen';
+import { UnifiedOnboarding } from '../components/UnifiedOnboarding';
 
 /* ------------------------------------------------------------------ */
 /*  Mocks                                                              */
@@ -58,6 +59,53 @@ vi.mock('../features/health-profile/store/healthProfileStore', () => ({
     }),
 }));
 
+const mockAddTrainingPlan = vi.fn();
+const mockAddPlanDays = vi.fn();
+
+const mockSetOnboarded = vi.fn();
+const mockSetPlanStrategy = vi.fn();
+
+const defaultFitnessState = {
+  trainingProfile: {
+    id: 'test-profile',
+    trainingGoal: 'hypertrophy',
+    experience: 'beginner',
+    daysPerWeek: 4,
+    equipment: ['barbell', 'dumbbell'],
+    injuredAreas: [],
+  } as Record<string, unknown> | null,
+  addTrainingPlan: mockAddTrainingPlan,
+  addPlanDays: mockAddPlanDays,
+  trainingPlans: [],
+  trainingPlanDays: [],
+  planStrategy: 'auto',
+  setOnboarded: mockSetOnboarded,
+  setPlanStrategy: mockSetPlanStrategy,
+};
+
+const mockFitnessSelector = vi.fn(
+  (selector: (s: Record<string, unknown>) => unknown) =>
+    selector(defaultFitnessState as unknown as Record<string, unknown>),
+);
+
+vi.mock('../store/fitnessStore', () => ({
+  useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) =>
+    mockFitnessSelector(selector),
+}));
+
+const mockGeneratePlan = vi.fn().mockReturnValue({
+  plan: { id: 'test-plan', name: 'Test Plan', weekCount: 8 },
+  days: [{ id: 'day-1', planId: 'test-plan', dayOfWeek: 1 }],
+});
+
+vi.mock('../features/fitness/hooks/useTrainingPlan', () => ({
+  useTrainingPlan: () => ({
+    generatePlan: mockGeneratePlan,
+    isGenerating: false,
+    generationError: null,
+  }),
+}));
+
 const mockSetOnboardingSection = vi.fn();
 
 vi.mock('../store/appOnboardingStore', () => ({
@@ -92,9 +140,16 @@ vi.mock('motion/react', () => ({
               whileHover: _whileHover,
               whileTap: _whileTap,
               exit: _exit,
-              variants: _variants,
+              variants,
+              custom,
               ...rest
             } = props;
+            if (variants && typeof variants === 'object') {
+              const v = variants as Record<string, unknown>;
+              const d = typeof custom === 'number' ? custom : 1;
+              if (typeof v.enter === 'function') { v.enter(d); v.enter(-d); }
+              if (typeof v.exit === 'function') { v.exit(d); v.exit(-d); }
+            }
             return React.createElement(prop, { ...rest, ref });
           },
         );
@@ -1213,6 +1268,26 @@ describe('PlanStrategyChoice', () => {
 describe('PlanComputingScreen', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    mockAddTrainingPlan.mockClear();
+    mockAddPlanDays.mockClear();
+    mockGeneratePlan.mockClear();
+    mockGeneratePlan.mockReturnValue({
+      plan: { id: 'test-plan', name: 'Test Plan', weekCount: 8 },
+      days: [{ id: 'day-1', planId: 'test-plan', dayOfWeek: 1 }],
+    });
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
   });
 
   afterEach(() => {
@@ -1234,29 +1309,137 @@ describe('PlanComputingScreen', () => {
     expect(screen.getByText('onboarding.computing.step_finalizing')).toBeInTheDocument();
   });
 
-  it('auto-advances through steps and calls goNext', () => {
+  it('auto-advances through steps and calls goNext', async () => {
     const { goNext } = renderWithForm(PlanComputingScreen);
 
-    // step 0 → 1
-    vi.advanceTimersByTime(2500);
-    // step 1 → 2
-    vi.advanceTimersByTime(2500);
-    // step 2 → 3
-    vi.advanceTimersByTime(2500);
-    // step 3 → end
-    vi.advanceTimersByTime(2500);
-    // final delay
-    vi.advanceTimersByTime(1500);
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(1500); });
 
     expect(goNext).toHaveBeenCalledTimes(1);
   });
 
-  it('cleans up timer on unmount', () => {
+  it('cleans up timer on unmount', async () => {
     const { unmount } = renderWithForm(PlanComputingScreen);
     unmount();
-    // Advance timers after unmount — goNext should not fire
-    vi.advanceTimersByTime(20000);
-    // No error means cleanup worked correctly
+    await act(async () => { vi.advanceTimersByTime(20000); });
+  });
+
+  it('calls generatePlan at step 2 and stores result', async () => {
+    renderWithForm(PlanComputingScreen);
+
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
+
+    expect(mockGeneratePlan).toHaveBeenCalledTimes(1);
+    expect(mockAddTrainingPlan).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'test-plan' }),
+    );
+    expect(mockAddPlanDays).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: 'day-1' })]),
+    );
+  });
+
+  it('shows error card when generatePlan returns null', () => {
+    mockGeneratePlan.mockReturnValue(null);
+    renderWithForm(PlanComputingScreen);
+
+    // advance to step 2
+    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => { vi.advanceTimersByTime(2500); });
+
+    expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.computing.retry')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.computing.skipToManual')).toBeInTheDocument();
+  });
+
+  it('retry button resets error and restarts animation', () => {
+    mockGeneratePlan.mockReturnValueOnce(null);
+    renderWithForm(PlanComputingScreen);
+
+    // advance to step 2 - error
+    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => { vi.advanceTimersByTime(2500); });
+    expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
+
+    // fix the mock for retry
+    mockGeneratePlan.mockReturnValue({
+      plan: { id: 'retry-plan', name: 'Retry Plan', weekCount: 8 },
+      days: [{ id: 'day-r1', planId: 'retry-plan', dayOfWeek: 1 }],
+    });
+
+    fireEvent.click(screen.getByText('onboarding.computing.retry'));
+
+    // error card should be gone, animation restarted
+    expect(screen.getByText('onboarding.computing.step_analyzing')).toBeInTheDocument();
+    expect(screen.queryByText('onboarding.computing.error')).not.toBeInTheDocument();
+  });
+
+  it('skipToManual button calls goNext on error', () => {
+    mockGeneratePlan.mockReturnValue(null);
+    const { goNext } = renderWithForm(PlanComputingScreen);
+
+    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => { vi.advanceTimersByTime(2500); });
+
+    fireEvent.click(screen.getByText('onboarding.computing.skipToManual'));
+    expect(goNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('skip button calls goNext immediately', () => {
+    const { goNext } = renderWithForm(PlanComputingScreen);
+    fireEvent.click(screen.getByText('onboarding.computing.skip'));
+    expect(goNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('back button calls goBack', () => {
+    const { goBack } = renderWithForm(PlanComputingScreen);
+    fireEvent.click(screen.getByText('onboarding.nav.back'));
+    expect(goBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('has aria-live region for accessibility', () => {
+    renderWithForm(PlanComputingScreen);
+    const region = screen.getByRole('status');
+    expect(region).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('skip button attempts generation if not already generated', async () => {
+    mockGeneratePlan.mockClear();
+    const { goNext } = renderWithForm(PlanComputingScreen);
+    fireEvent.click(screen.getByText('onboarding.computing.skip'));
+    expect(mockGeneratePlan).toHaveBeenCalledTimes(1);
+    expect(goNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('skip button does not re-generate if already generated', async () => {
+    const { goNext } = renderWithForm(PlanComputingScreen);
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    mockGeneratePlan.mockClear();
+    fireEvent.click(screen.getByText('onboarding.computing.skip'));
+    expect(mockGeneratePlan).not.toHaveBeenCalled();
+    expect(goNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('respects reduced motion preference', () => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: query === '(prefers-reduced-motion: reduce)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+    renderWithForm(PlanComputingScreen);
+    expect(screen.getByTestId('plan-computing')).toBeInTheDocument();
   });
 });
 
@@ -1638,5 +1821,199 @@ describe('HealthConfirmStep – edge cases', () => {
     );
     // Age row: "0 onboarding.confirm.years"
     expect(screen.getByText('0 onboarding.confirm.years')).toBeInTheDocument();
+  });
+});
+
+/* ================================================================== */
+/*  19. UnifiedOnboarding integration                                  */
+/* ================================================================== */
+
+describe('UnifiedOnboarding – integration', () => {
+  it('renders welcome slides at initial state', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('navigates forward through welcome slides', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('onboarding-next-btn'));
+    await waitFor(() => {
+      expect(screen.getByText('welcome.slide2Title')).toBeInTheDocument();
+    });
+  });
+
+  it('skip from welcome goes to section 2 (health basic)', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('onboarding-skip-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('health-basic-step')).toBeInTheDocument();
+    });
+  });
+
+  it('goBack from section 2 returns to section 1 last step', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('onboarding-skip-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('health-basic-step')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('onboarding.nav.back'));
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates through section 2 steps with valid form data', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('onboarding-skip-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('health-basic-step')).toBeInTheDocument();
+    });
+    const nameInput = screen.getByLabelText('onboarding.health.name');
+    fireEvent.change(nameInput, { target: { value: 'Test User' } });
+    const dobInput = screen.getByLabelText('onboarding.health.dateOfBirth');
+    fireEvent.change(dobInput, { target: { value: '1990-01-01' } });
+    fireEvent.click(screen.getByTestId('health-basic-next'));
+    await waitFor(() => {
+      expect(screen.getByTestId('activity-level-step')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('onboarding.nav.next'));
+    await waitFor(() => {
+      expect(screen.getByTestId('nutrition-goal-step')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('onboarding.nav.next'));
+    await waitFor(() => {
+      expect(screen.getByTestId('health-confirm-step')).toBeInTheDocument();
+    });
+  });
+
+  it('goBack within section 2 decrements step', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId('onboarding-skip-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('health-basic-step')).toBeInTheDocument();
+    });
+    const nameInput = screen.getByLabelText('onboarding.health.name');
+    fireEvent.change(nameInput, { target: { value: 'Test User' } });
+    const dobInput = screen.getByLabelText('onboarding.health.dateOfBirth');
+    fireEvent.change(dobInput, { target: { value: '1990-01-01' } });
+    fireEvent.click(screen.getByTestId('health-basic-next'));
+    await waitFor(() => {
+      expect(screen.getByTestId('activity-level-step')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('onboarding.nav.back'));
+    await waitFor(() => {
+      expect(screen.getByTestId('health-basic-step')).toBeInTheDocument();
+    });
+  });
+
+  it('error boundary catches errors and provides reset', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    function CrashChild(): React.ReactElement {
+      throw new Error('crash');
+    }
+    const onReset = vi.fn();
+    render(
+      <OnboardingErrorBoundary onReset={onReset}>
+        <CrashChild />
+      </OnboardingErrorBoundary>,
+    );
+    expect(screen.getByText('onboarding.error.title')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('onboarding.error.restart'));
+    expect(onReset).toHaveBeenCalledTimes(1);
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('progress bar renders for non-computing sections', async () => {
+    render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <UnifiedOnboarding />
+      </React.Suspense>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+});
+
+/* ================================================================== */
+/*  20. PlanComputingScreen – no trainingProfile error branch           */
+/* ================================================================== */
+
+describe('PlanComputingScreen – trainingProfile null', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('shows error when trainingProfile is null', async () => {
+    const savedProfile = defaultFitnessState.trainingProfile;
+    defaultFitnessState.trainingProfile = null;
+
+    renderWithForm(PlanComputingScreen);
+    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => { vi.advanceTimersByTime(2500); });
+
+    expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
+
+    defaultFitnessState.trainingProfile = savedProfile;
   });
 });

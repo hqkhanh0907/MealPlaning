@@ -16,6 +16,9 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.restDayTip3': '🥩 Đạt đủ protein',
         'fitness.plan.noPlan': 'Chưa có kế hoạch tập luyện',
         'fitness.plan.createPlan': 'Tạo kế hoạch',
+        'fitness.plan.manualEmpty': 'Bạn đã chọn tự lên kế hoạch',
+        'fitness.plan.manualEmptyDesc': 'Hãy bắt đầu bằng cách tạo buổi tập đầu tiên cho tuần này.',
+        'fitness.plan.createFirstWorkout': 'Tạo buổi tập đầu tiên',
         'fitness.plan.exercises': 'bài tập',
         'fitness.plan.minutes': 'phút',
         'fitness.plan.tomorrow': 'Ngày mai',
@@ -28,6 +31,21 @@ vi.mock('react-i18next', () => ({
         'fitness.onboarding.muscle_arms': 'Tay',
         'fitness.onboarding.muscle_core': 'Cơ trung tâm',
         'fitness.onboarding.muscle_glutes': 'Mông',
+        'fitness.plan.regenerateConfirm': 'Bạn có chắc muốn tạo lại kế hoạch? Kế hoạch hiện tại sẽ bị thay thế.',
+        'fitness.plan.regenerate': 'Tạo lại kế hoạch',
+        'fitness.plan.addWorkout': 'Thêm buổi tập',
+        'fitness.plan.convertToRest': 'Chuyển thành ngày nghỉ',
+        'fitness.plan.convertToRestConfirm': 'Xóa tất cả buổi tập trong ngày này?',
+        'fitness.plan.dayContextMenu': 'Tùy chọn ngày',
+        'fitness.plan.planExpired': 'Kế hoạch đã hết hạn',
+        'fitness.plan.planExpiredMessage': 'Kế hoạch tập luyện của bạn đã hết hạn.',
+        'fitness.plan.createNewCycle': 'Tạo chu kỳ mới',
+        'fitness.plan.generating': 'Đang tạo...',
+        'fitness.plan.modified': 'Đã chỉnh sửa',
+        'fitness.plan.editExercises': 'Chỉnh sửa bài tập',
+        'fitness.plan.restore': 'Khôi phục',
+        'fitness.plan.setsLabel': 'hiệp',
+        'fitness.plan.repsLabel': 'lần',
       };
       return translations[key] ?? fallback ?? key;
     },
@@ -52,12 +70,16 @@ vi.mock('../features/fitness/components/StreakCounter', () => ({
 }));
 
 vi.mock('../features/fitness/components/SessionTabs', () => ({
-  SessionTabs: (props: { sessions: unknown[]; activeSessionId: string; onSelectSession: (id: string) => void; onAddSession: () => void }) => (
+  SessionTabs: (props: { sessions: Array<{ id: string }>; activeSessionId: string; onSelectSession: (id: string) => void; onAddSession: () => void; onDeleteSession?: (dayId: string) => void }) => (
     <div data-testid="session-tabs" role="tablist">
-      {props.sessions.map((_s: unknown, i: number) => (
-        <button key={i} role="tab" type="button" onClick={() => props.onSelectSession(String(i))} />
+      {props.sessions.map((s: { id: string }, i: number) => (
+        <button key={i} role="tab" data-testid={`session-tab-${i}`} type="button" onClick={() => props.onSelectSession(s.id)} />
       ))}
       <button data-testid="add-session-tab" type="button" onClick={props.onAddSession}>+</button>
+      {props.onDeleteSession && props.sessions.length > 0 && (
+        <button data-testid="delete-session-btn" type="button" onClick={() => props.onDeleteSession!(props.sessions[0].id)}>Delete</button>
+      )}
+      <button data-testid="select-stale-session" type="button" onClick={() => props.onSelectSession('stale-nonexistent-id')}>Stale</button>
     </div>
   ),
 }));
@@ -80,6 +102,31 @@ vi.mock('../components/shared/ModalBackdrop', () => ({
   ModalBackdrop: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+vi.mock('../components/modals/ConfirmationModal', () => ({
+  ConfirmationModal: (props: { isOpen: boolean; title: string; message: string; confirmLabel?: string; onConfirm: () => void; onCancel: () => void; variant?: string }) => {
+    const slug = props.title.replace(/\s+/g, '-').toLowerCase();
+    if (!props.isOpen) {
+      return (
+        <div data-testid={`closed-modal-${slug}`} style={{ display: 'none' }}>
+          <button data-testid={`closed-confirm-${slug}`} type="button" onClick={props.onConfirm}>
+            {props.confirmLabel ?? 'Confirm'}
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div data-testid="confirmation-modal">
+        <span data-testid="confirmation-title">{props.title}</span>
+        <span data-testid="confirmation-message">{props.message}</span>
+        <button data-testid="confirmation-confirm-btn" type="button" onClick={props.onConfirm}>
+          {props.confirmLabel ?? 'Confirm'}
+        </button>
+        <button data-testid="confirmation-cancel-btn" type="button" onClick={props.onCancel}>Cancel</button>
+      </div>
+    );
+  },
+}));
+
 const mockUseFitnessStore = useFitnessStore as unknown as Mock & { getState: () => Record<string, unknown> };
 const mockUseNavigationStore = useNavigationStore as unknown as Mock;
 
@@ -87,6 +134,7 @@ let mockPushPage: Mock;
 let mockRestorePlanDayOriginal: Mock;
 let mockAddPlanDaySession: Mock;
 let mockGetActivePlan: Mock;
+let mockRemovePlanDaySession: Mock;
 
 function mockStore(state: Record<string, unknown>) {
   const stateWithDefaults = {
@@ -102,6 +150,7 @@ function mockStore(state: Record<string, unknown>) {
     restorePlanDayOriginal: mockRestorePlanDayOriginal,
     addPlanDaySession: mockAddPlanDaySession,
     getActivePlan: mockGetActivePlan,
+    removePlanDaySession: mockRemovePlanDaySession,
   };
   mockUseFitnessStore.getState = () => storeState;
 }
@@ -190,6 +239,7 @@ beforeEach(() => {
   mockRestorePlanDayOriginal = vi.fn();
   mockAddPlanDaySession = vi.fn();
   mockGetActivePlan = vi.fn();
+  mockRemovePlanDaySession = vi.fn();
   defaultOnGeneratePlan.mockReset();
   mockUseNavigationStore.mockImplementation(
     (selector: (s: Record<string, unknown>) => unknown) =>
@@ -225,6 +275,77 @@ describe('TrainingPlanView', () => {
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.queryByTestId('streak-counter')).not.toBeInTheDocument();
     expect(screen.queryByTestId('calendar-strip')).not.toBeInTheDocument();
+  });
+
+  // --- Manual Plan Empty State ---
+  it('renders manual plan CTA when planStrategy is manual and no active plan', () => {
+    mockStore({ trainingPlans: [], trainingPlanDays: [] });
+    const mockCreateManual = vi.fn();
+    render(
+      <TrainingPlanView
+        onGeneratePlan={defaultOnGeneratePlan}
+        onCreateManualPlan={mockCreateManual}
+        planStrategy="manual"
+      />,
+    );
+    expect(screen.getByTestId('manual-plan-cta')).toBeInTheDocument();
+    expect(screen.getByText('Bạn đã chọn tự lên kế hoạch')).toBeInTheDocument();
+    expect(screen.getByText('Hãy bắt đầu bằng cách tạo buổi tập đầu tiên cho tuần này.')).toBeInTheDocument();
+    expect(screen.getByTestId('create-manual-plan-btn')).toBeInTheDocument();
+    expect(screen.queryByTestId('no-plan-cta')).not.toBeInTheDocument();
+  });
+
+  it('"Tạo buổi tập đầu tiên" button calls onCreateManualPlan', () => {
+    mockStore({ trainingPlans: [], trainingPlanDays: [] });
+    const mockCreateManual = vi.fn();
+    render(
+      <TrainingPlanView
+        onGeneratePlan={defaultOnGeneratePlan}
+        onCreateManualPlan={mockCreateManual}
+        planStrategy="manual"
+      />,
+    );
+    fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+    expect(mockCreateManual).toHaveBeenCalledOnce();
+  });
+
+  it('renders auto plan CTA when planStrategy is auto and no active plan', () => {
+    mockStore({ trainingPlans: [], trainingPlanDays: [] });
+    render(
+      <TrainingPlanView
+        onGeneratePlan={defaultOnGeneratePlan}
+        planStrategy="auto"
+      />,
+    );
+    expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
+    expect(screen.queryByTestId('manual-plan-cta')).not.toBeInTheDocument();
+  });
+
+  it('renders auto plan CTA when planStrategy is null', () => {
+    mockStore({ trainingPlans: [], trainingPlanDays: [] });
+    render(
+      <TrainingPlanView
+        onGeneratePlan={defaultOnGeneratePlan}
+        planStrategy={null}
+      />,
+    );
+    expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
+    expect(screen.queryByTestId('manual-plan-cta')).not.toBeInTheDocument();
+  });
+
+  it('manual plan CTA button has min-h-[44px] and focus-visible ring', () => {
+    mockStore({ trainingPlans: [], trainingPlanDays: [] });
+    render(
+      <TrainingPlanView
+        onGeneratePlan={defaultOnGeneratePlan}
+        onCreateManualPlan={vi.fn()}
+        planStrategy="manual"
+      />,
+    );
+    const btn = screen.getByTestId('create-manual-plan-btn');
+    expect(btn.className).toContain('min-h-[44px]');
+    expect(btn.className).toContain('focus-visible:ring-2');
+    expect(btn.className).toContain('focus-visible:ring-emerald-400');
   });
 
   // --- Calendar Strip ---
@@ -657,6 +778,559 @@ describe('TrainingPlanView', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  // --- Regenerate Plan Button ---
+  describe('regenerate plan', () => {
+    it('shows regenerate button when plan is active', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('regenerate-plan-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('regenerate-plan-btn')).toHaveTextContent('Tạo lại kế hoạch');
+    });
+
+    it('clicking regenerate shows confirmation modal', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('confirmation-modal')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+      expect(screen.getByTestId('confirmation-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('confirmation-message')).toHaveTextContent(
+        'Bạn có chắc muốn tạo lại kế hoạch?',
+      );
+    });
+
+    it('confirming regenerate calls onGeneratePlan', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+      fireEvent.click(screen.getByTestId('confirmation-confirm-btn'));
+      expect(defaultOnGeneratePlan).toHaveBeenCalledOnce();
+      expect(screen.queryByTestId('confirmation-modal')).not.toBeInTheDocument();
+    });
+
+    it('cancelling regenerate does not call onGeneratePlan', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+      fireEvent.click(screen.getByTestId('confirmation-cancel-btn'));
+      expect(defaultOnGeneratePlan).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('confirmation-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  // --- Day Context Menu ---
+  describe('day context menu', () => {
+    it('right-click on workout day shows "convert to rest" option', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      expect(screen.getByTestId('day-context-menu')).toBeInTheDocument();
+      expect(screen.getByTestId('ctx-convert-rest')).toBeInTheDocument();
+    });
+
+    it('right-click on rest day shows "add workout" option', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      // Day 2 is a rest day (no plan day)
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      expect(screen.getByTestId('day-context-menu')).toBeInTheDocument();
+      expect(screen.getByTestId('ctx-add-workout')).toBeInTheDocument();
+    });
+
+    it('clicking "add workout" on rest day opens AddSessionModal', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      expect(screen.queryByTestId('day-context-menu')).not.toBeInTheDocument();
+      expect(screen.getByTestId('add-session-modal')).toBeInTheDocument();
+    });
+
+    it('clicking "convert to rest" shows confirmation then removes sessions', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      fireEvent.click(screen.getByTestId('ctx-convert-rest'));
+      // Context menu closes, confirmation modal opens
+      expect(screen.queryByTestId('day-context-menu')).not.toBeInTheDocument();
+      expect(screen.getByTestId('confirmation-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('confirmation-title')).toHaveTextContent('Chuyển thành ngày nghỉ');
+      // Confirm removal
+      fireEvent.click(screen.getByTestId('confirmation-confirm-btn'));
+      expect(mockRemovePlanDaySession).toHaveBeenCalledWith('d1');
+    });
+
+    it('cancelling "convert to rest" does not remove sessions', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      fireEvent.click(screen.getByTestId('ctx-convert-rest'));
+      fireEvent.click(screen.getByTestId('confirmation-cancel-btn'));
+      expect(mockRemovePlanDaySession).not.toHaveBeenCalled();
+    });
+  });
+
+  // --- Touch Target Compliance ---
+  describe('touch targets', () => {
+    it('day pill buttons have min-h-[44px] class', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const pill = screen.getByTestId('day-pill-1');
+      expect(pill.className).toContain('min-h-[44px]');
+    });
+
+    it('edit button has min-h-[44px] and min-w-[44px]', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const btn = screen.getByTestId('edit-exercises-btn');
+      expect(btn.className).toContain('min-h-[44px]');
+      expect(btn.className).toContain('min-w-[44px]');
+    });
+
+    it('quick action buttons have min-h-[44px]', () => {
+      vi.setSystemTime(new Date('2025-01-07T12:00:00'));
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('quick-log-weight').className).toContain('min-h-[44px]');
+      expect(screen.getByTestId('quick-log-cardio').className).toContain('min-h-[44px]');
+    });
+
+    it('regenerate button has min-h-[44px]', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('regenerate-plan-btn').className).toContain('min-h-[44px]');
+    });
+
+    it('context menu convert-to-rest button has min-h-[44px]', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      expect(screen.getByTestId('ctx-convert-rest').className).toContain('min-h-[44px]');
+    });
+
+    it('context menu add-workout button has min-h-[44px]', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      expect(screen.getByTestId('ctx-add-workout').className).toContain('min-h-[44px]');
+    });
+
+    it('restore button has min-h-[44px] and min-w-[44px]', () => {
+      const modifiedExercises = JSON.stringify([
+        { exercise: { id: 'e1', nameVi: 'Bench Press' }, sets: 4, repsMin: 6, repsMax: 8, restSeconds: 120 },
+      ]);
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [{
+          id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1,
+          workoutType: 'Push', muscleGroups: 'chest',
+          exercises: modifiedExercises, originalExercises: mockExercises,
+        }],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const btn = screen.getByTestId('restore-original-btn');
+      expect(btn.className).toContain('min-h-[44px]');
+      expect(btn.className).toContain('min-w-[44px]');
+    });
+  });
+
+  // --- Plan Expired State ---
+  describe('plan expired state', () => {
+    const expiredPlan = {
+      ...activePlan,
+      endDate: '2025-01-05T00:00:00.000Z',
+    };
+
+    it('renders expired CTA when plan endDate is in the past', () => {
+      mockStore({ trainingPlans: [expiredPlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('plan-expired-cta')).toBeInTheDocument();
+      expect(screen.getByTestId('create-new-cycle-btn')).toBeInTheDocument();
+      expect(screen.queryByTestId('today-workout-card')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('calendar-strip')).not.toBeInTheDocument();
+    });
+
+    it('create-new-cycle button calls onGeneratePlan', () => {
+      mockStore({ trainingPlans: [expiredPlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('create-new-cycle-btn'));
+      expect(defaultOnGeneratePlan).toHaveBeenCalledOnce();
+    });
+
+    it('does not show expired CTA when endDate is in the future', () => {
+      const futurePlan = { ...activePlan, endDate: '2025-12-31T00:00:00.000Z' };
+      mockStore({ trainingPlans: [futurePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.queryByTestId('plan-expired-cta')).not.toBeInTheDocument();
+      expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+    });
+  });
+
+  // --- isGenerating State ---
+  describe('isGenerating state', () => {
+    it('no plan + isGenerating shows spinner and disables button', () => {
+      mockStore({ trainingPlans: [], trainingPlanDays: [] });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} isGenerating />);
+      const btn = screen.getByTestId('create-plan-btn');
+      expect(btn).toBeDisabled();
+      expect(btn).toHaveTextContent('Đang tạo...');
+    });
+
+    it('active plan + isGenerating disables regenerate button', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} isGenerating />);
+      const btn = screen.getByTestId('regenerate-plan-btn');
+      expect(btn).toBeDisabled();
+    });
+  });
+
+  // --- Today Calories Out ---
+  describe('today calories out', () => {
+    it('calculates cardio and strength calories from today workouts', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: planDays,
+        workouts: [{ id: 'w1', date: '2025-01-06' }],
+        workoutSets: [
+          { workoutId: 'w1', estimatedCalories: 200, weightKg: 0 },
+          { workoutId: 'w1', estimatedCalories: undefined, weightKg: 50 },
+          { workoutId: 'w1', estimatedCalories: undefined, weightKg: 60 },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
+    });
+
+    it('ignores workouts from other dates', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: planDays,
+        workouts: [{ id: 'w1', date: '2025-01-05' }],
+        workoutSets: [
+          { workoutId: 'w1', estimatedCalories: 500, weightKg: 0 },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
+    });
+
+    it('handles workout sets with zero weightKg (excluded from strength)', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: planDays,
+        workouts: [{ id: 'w1', date: '2025-01-06' }],
+        workoutSets: [
+          { workoutId: 'w1', estimatedCalories: undefined, weightKg: 0 },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
+    });
+  });
+
+  // --- Quick Action Buttons ---
+  describe('quick action buttons behavior', () => {
+    it('quick-log-cardio calls pushPage with CardioLogger', () => {
+      vi.setSystemTime(new Date('2025-01-07T12:00:00'));
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('quick-log-cardio'));
+      expect(mockPushPage).toHaveBeenCalledWith({
+        id: 'cardio-logger',
+        component: 'CardioLogger',
+        props: {},
+      });
+    });
+
+    it('quick-log-weight scrolls to weight input', () => {
+      vi.setSystemTime(new Date('2025-01-07T12:00:00'));
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const weightInput = screen.getByTestId('daily-weight-input');
+      weightInput.scrollIntoView = vi.fn();
+      fireEvent.click(screen.getByTestId('quick-log-weight'));
+      expect(weightInput.scrollIntoView).toHaveBeenCalledWith({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    });
+
+    it('quick-log-weight handles missing weight input element', () => {
+      vi.setSystemTime(new Date('2025-01-07T12:00:00'));
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const originalQS = document.querySelector.bind(document);
+      const spy = vi.spyOn(document, 'querySelector').mockImplementation((sel: string) => {
+        if (sel === '[data-testid="daily-weight-input"]') return null;
+        return originalQS(sel);
+      });
+      fireEvent.click(screen.getByTestId('quick-log-weight'));
+      spy.mockRestore();
+    });
+  });
+
+  // --- Click Outside Context Menu ---
+  describe('click outside context menu', () => {
+    it('clicking outside closes context menu', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      expect(screen.getByTestId('day-context-menu')).toBeInTheDocument();
+      fireEvent.mouseDown(document.body);
+      expect(screen.queryByTestId('day-context-menu')).not.toBeInTheDocument();
+    });
+
+    it('clicking inside context menu does not close it', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      const menu = screen.getByTestId('day-context-menu');
+      fireEvent.mouseDown(menu);
+      expect(screen.getByTestId('day-context-menu')).toBeInTheDocument();
+    });
+  });
+
+  // --- SessionTabs Callbacks ---
+  describe('SessionTabs callbacks', () => {
+    const multiSessionDays = [
+      {
+        id: 'ms1',
+        planId: 'plan1',
+        dayOfWeek: 1,
+        sessionOrder: 1,
+        workoutType: 'Push',
+        muscleGroups: 'chest',
+        exercises: mockExercises,
+      },
+      {
+        id: 'ms2',
+        planId: 'plan1',
+        dayOfWeek: 1,
+        sessionOrder: 2,
+        workoutType: 'Cardio',
+        muscleGroups: '',
+        exercises: '[]',
+      },
+    ];
+
+    it('onSelectSession switches displayed workout type', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByText('Push')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('session-tab-1'));
+      expect(screen.getByText('Cardio')).toBeInTheDocument();
+    });
+
+    it('onAddSession opens AddSessionModal', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('add-session-tab'));
+      expect(screen.getByTestId('add-session-modal')).toBeInTheDocument();
+    });
+
+    it('onDeleteSession calls removePlanDaySession', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('delete-session-btn'));
+      expect(mockRemovePlanDaySession).toHaveBeenCalledWith('ms1');
+    });
+
+    it('selecting stale session id falls back to first session', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('select-stale-session'));
+      expect(screen.getByText('Push')).toBeInTheDocument();
+    });
+  });
+
+  // --- AddSessionModal Callbacks ---
+  describe('AddSessionModal callbacks', () => {
+    it('onSelectStrength calls addPlanDaySession for rest day', () => {
+      mockGetActivePlan.mockReturnValue(activePlan);
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      fireEvent.click(screen.getByTestId('modal-strength-btn'));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 2, expect.objectContaining({
+        planId: 'plan1',
+        dayOfWeek: 2,
+        sessionOrder: 1,
+        workoutType: 'Strength',
+        muscleGroups: 'chest,back',
+        exercises: '[]',
+        originalExercises: '[]',
+      }));
+      expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
+    });
+
+    it('onSelectStrength with existing sessions uses correct sessionOrder', () => {
+      mockGetActivePlan.mockReturnValue(activePlan);
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('add-session-tab'));
+      fireEvent.click(screen.getByTestId('modal-strength-btn'));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 1, expect.objectContaining({
+        sessionOrder: 2,
+      }));
+    });
+
+    it('onSelectCardio calls addPlanDaySession for rest day', () => {
+      mockGetActivePlan.mockReturnValue(activePlan);
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      fireEvent.click(screen.getByTestId('modal-cardio-btn'));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 2, expect.objectContaining({
+        planId: 'plan1',
+        dayOfWeek: 2,
+        sessionOrder: 1,
+        workoutType: 'Cardio',
+        muscleGroups: '',
+        exercises: '[]',
+        originalExercises: '[]',
+      }));
+      expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
+    });
+
+    it('onSelectCardio with existing sessions uses correct sessionOrder', () => {
+      mockGetActivePlan.mockReturnValue(activePlan);
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.click(screen.getByTestId('add-session-tab'));
+      fireEvent.click(screen.getByTestId('modal-cardio-btn'));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 1, expect.objectContaining({
+        sessionOrder: 2,
+      }));
+    });
+
+    it('onSelectFreestyle calls pushPage with WorkoutLogger', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      fireEvent.click(screen.getByTestId('modal-freestyle-btn'));
+      expect(mockPushPage).toHaveBeenCalledWith({
+        id: 'workout-logger',
+        component: 'WorkoutLogger',
+        props: {},
+      });
+      expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
+    });
+
+    it('onSelectStrength does not call addPlanDaySession when no active plan', () => {
+      mockGetActivePlan.mockReturnValue(null);
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      fireEvent.click(screen.getByTestId('modal-strength-btn'));
+      expect(mockAddPlanDaySession).not.toHaveBeenCalled();
+    });
+
+    it('onSelectCardio does not call addPlanDaySession when no active plan', () => {
+      mockGetActivePlan.mockReturnValue(null);
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      fireEvent.click(screen.getByTestId('modal-cardio-btn'));
+      expect(mockAddPlanDaySession).not.toHaveBeenCalled();
+    });
+
+    it('onClose closes the modal', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
+      fireEvent.click(screen.getByTestId('ctx-add-workout'));
+      expect(screen.getByTestId('add-session-modal')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('modal-close-btn'));
+      expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  // --- Convert to Rest with Multiple Sessions ---
+  describe('convert to rest with multiple sessions', () => {
+    it('removes all sessions for a multi-session day', () => {
+      const multiSessionDays = [
+        { id: 'ms1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Push', exercises: mockExercises },
+        { id: 'ms2', planId: 'plan1', dayOfWeek: 1, sessionOrder: 2, workoutType: 'Cardio', exercises: '[]' },
+      ];
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      fireEvent.click(screen.getByTestId('ctx-convert-rest'));
+      fireEvent.click(screen.getByTestId('confirmation-confirm-btn'));
+      expect(mockRemovePlanDaySession).toHaveBeenCalledTimes(2);
+      expect(mockRemovePlanDaySession).toHaveBeenCalledWith('ms1');
+      expect(mockRemovePlanDaySession).toHaveBeenCalledWith('ms2');
+    });
+  });
+
+  // --- Sessions Without sessionOrder (sort fallback) ---
+  describe('sessions without sessionOrder', () => {
+    it('handles sessions with undefined sessionOrder using fallback', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          { id: 'no-order-1', planId: 'plan1', dayOfWeek: 1, workoutType: 'Push', exercises: mockExercises },
+          { id: 'no-order-2', planId: 'plan1', dayOfWeek: 1, workoutType: 'Pull', exercises: '[]' },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+      expect(screen.getByText('Push')).toBeInTheDocument();
+    });
+  });
+
+  // --- Edge-case branch coverage ---
+  describe('edge-case branch coverage', () => {
+    it('estimatedCalories nullish coalesce fallback in reduce (branch 94)', () => {
+      let accessCount = 0;
+      const trickSet = {
+        workoutId: 'w1',
+        weightKg: 0,
+        get estimatedCalories() {
+          accessCount++;
+          return accessCount <= 1 ? 100 : null;
+        },
+      };
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: planDays,
+        workouts: [{ id: 'w1', date: '2025-01-06' }],
+        workoutSets: [trickSet],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
+    });
+
+    it('confirmConvertToRest handles empty daySessionsMap after rerender (branch 210)', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      const { rerender } = render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      fireEvent.contextMenu(screen.getByTestId('day-pill-1'));
+      fireEvent.click(screen.getByTestId('ctx-convert-rest'));
+      expect(screen.getByTestId('confirmation-modal')).toBeInTheDocument();
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: planDays.filter((d) => d.dayOfWeek !== 1),
+      });
+      const newOnGenerate = vi.fn();
+      rerender(<TrainingPlanView onGeneratePlan={newOnGenerate} />);
+      fireEvent.click(screen.getByTestId('confirmation-confirm-btn'));
+      expect(mockRemovePlanDaySession).not.toHaveBeenCalled();
+    });
+
+    it('onConfirm guard when showConvertToRestConfirm is null (branch 667)', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const slug = 'chuyển-thành-ngày-nghỉ';
+      const closedConfirmBtn = screen.getByTestId(`closed-confirm-${slug}`);
+      fireEvent.click(closedConfirmBtn);
+      expect(mockRemovePlanDaySession).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import React from 'react';
 
 /* ------------------------------------------------------------------ */
@@ -88,9 +88,16 @@ vi.mock('motion/react', () => ({
               whileHover: _whileHover,
               whileTap: _whileTap,
               exit: _exit,
-              variants: _variants,
+              variants,
+              custom,
               ...rest
             } = props;
+            if (variants && typeof variants === 'object') {
+              const v = variants as Record<string, unknown>;
+              const d = typeof custom === 'number' ? custom : 1;
+              if (typeof v.enter === 'function') { v.enter(d); v.enter(-d); }
+              if (typeof v.exit === 'function') { v.exit(d); v.exit(-d); }
+            }
             return React.createElement(prop, { ...rest, ref });
           },
         );
@@ -114,6 +121,27 @@ vi.mock('../components/onboarding/PlanComputingScreen', () => ({
       return () => clearTimeout(id);
     }, [props.goNext]);
     return React.createElement('div', { 'data-testid': 'plan-computing' }, 'Computing…');
+  },
+}));
+
+const welcomeThrowFlag = vi.fn().mockReturnValue(false);
+
+vi.mock('../components/onboarding/WelcomeSlides', () => ({
+  WelcomeSlides: function MockWelcome(props: {
+    step: number;
+    goNext: () => void;
+    goBack: () => void;
+    goToSection: (s: number) => void;
+  }) {
+    if (welcomeThrowFlag()) throw new Error('Simulated crash');
+    return React.createElement(
+      'div',
+      { 'data-testid': 'welcome-slides' },
+      React.createElement('span', null, props.step === 0 ? 'welcome.slide1Title' : props.step === 1 ? 'welcome.slide2Title' : 'welcome.slide3Title'),
+      React.createElement('button', { 'data-testid': 'onboarding-next-btn', onClick: props.goNext }, props.step === 2 ? 'onboarding.nav.start' : 'welcome.next'),
+      React.createElement('button', { 'data-testid': 'onboarding-skip-btn', onClick: () => props.goToSection(2) }, 'welcome.skip'),
+      React.createElement('button', { onClick: props.goBack }, 'onboarding.nav.back'),
+    );
   },
 }));
 
@@ -351,6 +379,30 @@ describe('UnifiedOnboarding Integration', () => {
       fireEvent.click(screen.getByTestId('onboarding-skip-btn'));
 
       expect(await screen.findByTestId('health-basic-step')).toBeInTheDocument();
+    });
+  });
+
+  describe('Error boundary recovery (handleReset)', () => {
+    it('handles crash in child and resets via error boundary', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      render(<UnifiedOnboarding />);
+      await screen.findByTestId('welcome-slides');
+
+      welcomeThrowFlag.mockReturnValue(true);
+      fireEvent.click(screen.getByTestId('onboarding-next-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByText('onboarding.error.title')).toBeInTheDocument();
+      });
+
+      welcomeThrowFlag.mockReturnValue(false);
+      fireEvent.click(screen.getByText('onboarding.error.restart'));
+
+      expect(mockSetOnboardingSection).toHaveBeenCalledWith(null);
+      await waitFor(() => {
+        expect(screen.getByTestId('welcome-slides')).toBeInTheDocument();
+      });
+      consoleErrorSpy.mockRestore();
     });
   });
 });

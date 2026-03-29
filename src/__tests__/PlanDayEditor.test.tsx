@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
 import { PlanDayEditor } from '../features/fitness/components/PlanDayEditor';
 import { useFitnessStore } from '../store/fitnessStore';
 import type { TrainingPlanDay, SelectedExercise } from '../features/fitness/types';
@@ -15,6 +15,8 @@ vi.mock('react-i18next', () => ({
       'fitness.plan.modified': 'Đã chỉnh sửa',
       'fitness.plan.noExercises': 'Chưa có bài tập nào',
       'fitness.plan.unsavedChanges': 'Bạn có thay đổi chưa lưu. Bỏ thay đổi?',
+      'fitness.plan.exerciseRemoved': 'đã xóa',
+      'fitness.plan.undo': 'Hoàn tác',
       'fitness.plan.setsLabel': 'hiệp',
       'fitness.plan.repsLabel': 'lần',
       'fitness.plan.repsMinLabel': 'Lần tối thiểu',
@@ -38,13 +40,14 @@ vi.mock('../store/navigationStore', () => ({
 
 // Mock ExerciseSelector
 vi.mock('../features/fitness/components/ExerciseSelector', () => ({
-  ExerciseSelector: ({ isOpen, onSelect }: { isOpen: boolean; onSelect: (ex: unknown) => void }) => {
+  ExerciseSelector: ({ isOpen, onSelect, onClose }: { isOpen: boolean; onSelect: (ex: unknown) => void; onClose: () => void }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="exercise-selector">
         <button onClick={() => onSelect({ id: 'new-ex', nameVi: 'Squat', muscleGroup: 'legs', category: 'compound', equipment: ['barbell'], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12 })}>
           Add Squat
         </button>
+        <button data-testid="close-selector" onClick={onClose}>Close Selector</button>
       </div>
     );
   },
@@ -103,22 +106,50 @@ describe('PlanDayEditor', () => {
     expect(screen.getByText('Chưa có bài tập nào')).toBeInTheDocument();
   });
 
-  it('click remove button removes exercise from list', () => {
+  it('click remove button hides exercise and shows undo toast', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     const removeButtons = screen.getAllByLabelText(/remove/i);
     fireEvent.click(removeButtons[0]);
-    expect(screen.queryByText('Bench Press')).not.toBeInTheDocument();
-    expect(screen.getByText('OHP')).toBeInTheDocument();
+    const benchEl = screen.getByText('Bench Press');
+    expect(benchEl.closest('li')?.className).toContain('opacity-0');
+    expect(screen.getByText('Hoàn tác')).toBeInTheDocument();
   });
 
-  it('click save calls updatePlanDayExercises and popPage', () => {
+  it('undo restores exercise after remove', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    // Remove an exercise to create a change
     const removeButtons = screen.getAllByLabelText(/remove/i);
     fireEvent.click(removeButtons[0]);
+    fireEvent.click(screen.getByText('Hoàn tác'));
+    const benchEl = screen.getByText('Bench Press');
+    expect(benchEl.closest('li')?.className).not.toContain('opacity-0');
+    expect(screen.queryByText('Hoàn tác')).not.toBeInTheDocument();
+  });
+
+  it('exercise is permanently removed after timeout', async () => {
+    vi.useFakeTimers();
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButtons = screen.getAllByLabelText(/remove/i);
+    fireEvent.click(removeButtons[0]);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.queryByText('Bench Press')).not.toBeInTheDocument();
+    expect(screen.getByText('OHP')).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('click save calls updatePlanDayExercises and popPage', async () => {
+    vi.useFakeTimers();
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButtons = screen.getAllByLabelText(/remove/i);
+    fireEvent.click(removeButtons[0]);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
     fireEvent.click(screen.getByText('Lưu'));
     expect(useFitnessStore.getState().updatePlanDayExercises).toBeDefined();
     expect(mockPopPage).toHaveBeenCalled();
+    vi.useRealTimers();
   });
 
   it('click restore calls restorePlanDayOriginal', () => {
@@ -224,5 +255,251 @@ describe('PlanDayEditor', () => {
 
     expect(screen.queryByTestId('swap-exercise-sheet')).not.toBeInTheDocument();
     expect(screen.getByText('Bench Press')).toBeInTheDocument();
+  });
+
+  it('move down reorders exercises correctly', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const moveDownButtons = screen.getAllByLabelText(/move down/i);
+    fireEvent.click(moveDownButtons[0]);
+    const names = screen.getAllByTestId('exercise-name');
+    expect(names[0].textContent).toContain('OHP');
+    expect(names[1].textContent).toContain('Bench Press');
+  });
+
+  it('move down on last exercise is a no-op', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const moveDownButtons = screen.getAllByLabelText(/move down/i);
+    fireEvent.click(moveDownButtons[moveDownButtons.length - 1]);
+    const names = screen.getAllByTestId('exercise-name');
+    expect(names[names.length - 1].textContent).toContain('OHP');
+  });
+
+  it('move up on first exercise is a no-op', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const moveUpButtons = screen.getAllByLabelText(/move up/i);
+    fireEvent.click(moveUpButtons[0]);
+    const names = screen.getAllByTestId('exercise-name');
+    expect(names[0].textContent).toContain('Bench Press');
+  });
+
+  it('decrement sets stepper decreases value', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const btn = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Decrease hiệp"]');
+    expect(btn).not.toBeNull();
+    fireEvent.click(btn!);
+    const info = screen.getAllByTestId('exercise-name')[0].parentElement;
+    expect(info?.textContent).toContain('3');
+  });
+
+  it('increment and decrement repsMin stepper', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const inc = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Increase Lần tối thiểu"]');
+    const dec = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Decrease Lần tối thiểu"]');
+    expect(inc).not.toBeNull();
+    expect(dec).not.toBeNull();
+    fireEvent.click(inc!);
+    fireEvent.click(dec!);
+  });
+
+  it('increment and decrement repsMax stepper', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const inc = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Increase Lần tối đa"]');
+    const dec = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Decrease Lần tối đa"]');
+    expect(inc).not.toBeNull();
+    expect(dec).not.toBeNull();
+    fireEvent.click(inc!);
+    fireEvent.click(dec!);
+  });
+
+  it('increment and decrement rest stepper', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const inc = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Increase Nghỉ"]');
+    const dec = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Decrease Nghỉ"]');
+    expect(inc).not.toBeNull();
+    expect(dec).not.toBeNull();
+    fireEvent.click(inc!);
+    fireEvent.click(dec!);
+  });
+
+  it('sets stepper respects min boundary', () => {
+    const minExercise: SelectedExercise = {
+      ...sampleExercise,
+      sets: 1,
+    };
+    render(<PlanDayEditor planDay={makePlanDay([minExercise])} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const dec = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Decrease hiệp"]');
+    expect(dec).toBeDisabled();
+  });
+
+  it('sets stepper respects max boundary', () => {
+    const maxExercise: SelectedExercise = {
+      ...sampleExercise,
+      sets: 10,
+    };
+    render(<PlanDayEditor planDay={makePlanDay([maxExercise])} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const inc = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Increase hiệp"]');
+    expect(inc).toBeDisabled();
+  });
+
+  it('repsMin stepper cannot exceed repsMax', () => {
+    const exercise: SelectedExercise = {
+      ...sampleExercise,
+      repsMin: 10,
+      repsMax: 10,
+    };
+    render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const inc = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Increase Lần tối thiểu"]');
+    expect(inc).toBeDisabled();
+  });
+
+  it('repsMax stepper cannot go below repsMin', () => {
+    const exercise: SelectedExercise = {
+      ...sampleExercise,
+      repsMin: 10,
+      repsMax: 10,
+    };
+    render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const dec = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Decrease Lần tối đa"]');
+    expect(dec).toBeDisabled();
+  });
+
+  it('rest stepper respects min=30 boundary', () => {
+    const exercise: SelectedExercise = {
+      ...sampleExercise,
+      restSeconds: 30,
+    };
+    render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const dec = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Decrease Nghỉ"]');
+    expect(dec).toBeDisabled();
+  });
+
+  it('rest stepper respects max=300 boundary', () => {
+    const exercise: SelectedExercise = {
+      ...sampleExercise,
+      restSeconds: 300,
+    };
+    render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const inc = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Increase Nghỉ"]');
+    expect(inc).toBeDisabled();
+  });
+
+  it('back with unsaved changes shows confirm dialog with a11y attrs', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    fireEvent.click(screen.getByLabelText('Quay lại'));
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog).toHaveAttribute('aria-labelledby', 'confirm-dialog-title');
+    expect(screen.getByText('Bạn có thay đổi chưa lưu. Bỏ thay đổi?')).toBeInTheDocument();
+  });
+
+  it('cancel discard closes dialog without navigating', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    fireEvent.click(screen.getByLabelText('Quay lại'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Hủy'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mockPopPage).not.toHaveBeenCalled();
+  });
+
+  it('confirm discard navigates away', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    fireEvent.click(screen.getByLabelText('Quay lại'));
+    fireEvent.click(screen.getByText('Xác nhận'));
+    expect(mockPopPage).toHaveBeenCalled();
+  });
+
+  it('GripVertical icons have aria-hidden true', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const svgs = document.querySelectorAll('[aria-hidden="true"]');
+    expect(svgs.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('second removal commits first pending removal', async () => {
+    vi.useFakeTimers();
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButtons = screen.getAllByLabelText(/remove/i);
+    fireEvent.click(removeButtons[0]);
+    expect(screen.getByText('Hoàn tác')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByLabelText(/remove/i)[1]);
+    await act(async () => { vi.advanceTimersByTime(5000); });
+    expect(screen.queryByText('Bench Press')).not.toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('shows modified badge when originalExercises differs from exercises', () => {
+    const day = makePlanDay();
+    day.originalExercises = JSON.stringify([sampleExercise]);
+    render(<PlanDayEditor planDay={day} />);
+    expect(screen.getByText('Đã chỉnh sửa')).toBeInTheDocument();
+  });
+
+  it('save while undo toast is showing still navigates', () => {
+    vi.useFakeTimers();
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButtons = screen.getAllByLabelText(/remove/i);
+    fireEvent.click(removeButtons[0]);
+    expect(screen.getByText('Hoàn tác')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Lưu'));
+    expect(mockPopPage).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('cleanup effect clears timeout on unmount', () => {
+    vi.useFakeTimers();
+    const { unmount } = render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButtons = screen.getAllByLabelText(/remove/i);
+    fireEvent.click(removeButtons[0]);
+    unmount();
+    vi.advanceTimersByTime(5000);
+    vi.useRealTimers();
+  });
+
+  it('adding exercise via selector closes sheet and updates list', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    expect(screen.queryByTestId('exercise-selector')).not.toBeInTheDocument();
+    expect(screen.getByText('Squat')).toBeInTheDocument();
+  });
+
+  it('shows hasChanges badge after modifying exercises', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    expect(screen.queryByText('Đã chỉnh sửa')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    expect(screen.getByText('Đã chỉnh sửa')).toBeInTheDocument();
+  });
+
+  it('renders suffix in stepper field (rest seconds shows "s")', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
+    const restStepper = screen.getByTestId('stepper-rest-0');
+    expect(restStepper.textContent).toContain('120s');
+  });
+
+  it('closing exercise selector without selecting preserves list', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    expect(screen.getByTestId('exercise-selector')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('close-selector'));
+    expect(screen.queryByTestId('exercise-selector')).not.toBeInTheDocument();
+    expect(screen.getByText('Bench Press')).toBeInTheDocument();
+    expect(screen.getByText('OHP')).toBeInTheDocument();
   });
 });

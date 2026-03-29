@@ -5,6 +5,7 @@ import { SubTabBar } from '../../../components/shared/SubTabBar';
 import type { SubTab } from '../../../components/shared/SubTabBar';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
+import { useNavigationStore } from '../../../store/navigationStore';
 import { TrainingPlanView } from './TrainingPlanView';
 import { WorkoutHistory } from './WorkoutHistory';
 import { ProgressDashboard } from './ProgressDashboard';
@@ -21,8 +22,10 @@ const FitnessTabInner: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<FitnessSubTab>('plan');
   const { insight } = useFitnessNutritionBridge();
   const trainingProfile = useFitnessStore((s) => s.trainingProfile);
+  const planStrategy = useFitnessStore((s) => s.planStrategy);
   const addTrainingPlan = useFitnessStore((s) => s.addTrainingPlan);
   const addPlanDays = useFitnessStore((s) => s.addPlanDays);
+  const pushPage = useNavigationStore((s) => s.pushPage);
   const healthProfileWeight = useHealthProfileStore((s) => s.profile.weightKg);
   const healthProfileAge = useHealthProfileStore((s) => s.profile.age);
   const { generatePlan, isGenerating } = useTrainingPlan();
@@ -57,6 +60,51 @@ const FitnessTabInner: React.FC = () => {
     setActiveSubTab('plan');
   }, [trainingProfile, generatePlan, healthProfileWeight, healthProfileAge, addTrainingPlan, addPlanDays, notify, t]);
 
+  const handleCreateManualPlan = useCallback(() => {
+    const now = new Date();
+    const planId = `manual-${now.getTime()}`;
+    const startDate = now.toISOString();
+    const endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const plan = {
+      id: planId,
+      name: 'Manual Plan',
+      status: 'active' as const,
+      splitType: 'Custom',
+      durationWeeks: 1,
+      currentWeek: 1,
+      startDate,
+      endDate,
+      createdAt: startDate,
+      updatedAt: startDate,
+    };
+    addTrainingPlan(plan);
+
+    const days = Array.from({ length: 7 }, (_, i) => ({
+      id: `${planId}-d${i + 1}`,
+      planId,
+      dayOfWeek: i + 1,
+      sessionOrder: 1,
+      workoutType: 'Rest',
+      exercises: '[]',
+      originalExercises: '[]',
+    }));
+    addPlanDays(days);
+
+    const todayDow = now.getDay() === 0 ? 7 : now.getDay();
+    const todayDay = days.find((d) => d.dayOfWeek === todayDow);
+    if (todayDay) {
+      pushPage({
+        id: 'plan-day-editor',
+        component: 'PlanDayEditor',
+        props: { planDay: todayDay },
+      });
+    }
+
+    notify.success(t('fitness.plan.planCreated'));
+    setActiveSubTab('plan');
+  }, [addTrainingPlan, addPlanDays, pushPage, notify, t]);
+
   return (
     <div className="flex flex-col h-full" data-testid="fitness-tab">
       <div className="px-4 pt-3 pb-2">
@@ -79,6 +127,8 @@ const FitnessTabInner: React.FC = () => {
             <PlanGeneratedCard />
             <TrainingPlanView
               onGeneratePlan={handleGeneratePlan}
+              onCreateManualPlan={handleCreateManualPlan}
+              planStrategy={planStrategy}
               isGenerating={isGenerating}
             />
           </div>

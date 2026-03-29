@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { GoalSettingsModal } from '../components/modals/GoalSettingsModal';
 
 vi.mock('react-i18next', () => ({
@@ -325,7 +325,7 @@ describe('GoalSettingsModal', () => {
     });
 
     it('highlights active preset when profile matches', () => {
-      const { container } = render(
+      render(
         <GoalSettingsModal
           userProfile={{ weight: 70, proteinRatio: 1.6, targetCalories: 2000 }}
           onUpdateProfile={vi.fn()}

@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
 import { SessionTabs } from '../features/fitness/components/SessionTabs';
 import type { TrainingPlanDay } from '../features/fitness/types';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => {
     if (key === 'fitness.plan.sessionTab') return `Buổi ${String(opts?.order ?? '')}`;
+    if (key === 'fitness.plan.sessionTabs') return 'Buổi tập';
     if (key === 'fitness.plan.addSession') return 'Thêm buổi tập';
+    if (key === 'fitness.plan.deleteSessionConfirm') return 'Xóa buổi tập này?';
+    if (key === 'fitness.plan.delete') return 'Xóa';
+    if (key === 'fitness.plan.cancelDelete') return 'Hủy';
     return key;
   } }),
 }));
@@ -58,7 +62,7 @@ describe('SessionTabs', () => {
       />,
     );
     expect(screen.getByRole('tablist')).toBeInTheDocument();
-    expect(screen.getAllByRole('tab')).toHaveLength(3); // 2 sessions + 1 add button
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
 
   it('fires onSelectSession when tab clicked', () => {
@@ -72,7 +76,7 @@ describe('SessionTabs', () => {
         onAddSession={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getAllByRole('tab')[1]); // click session 2
+    fireEvent.click(screen.getAllByRole('tab')[1]);
     expect(onSelect).toHaveBeenCalledWith('pd-2');
   });
 
@@ -122,5 +126,142 @@ describe('SessionTabs', () => {
     );
     fireEvent.click(screen.getByTestId('add-session-tab'));
     expect(onAdd).toHaveBeenCalled();
+  });
+
+  describe('delete session', () => {
+    it('shows confirmation on context menu (right-click) with 2+ sessions', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      fireEvent.contextMenu(screen.getAllByRole('tab')[1]);
+      expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
+      expect(screen.getByText('Xóa buổi tập này?')).toBeInTheDocument();
+    });
+
+    it('does not show confirmation on context menu when only 1 session', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      fireEvent.contextMenu(screen.getByRole('tab'));
+      expect(screen.queryByTestId('delete-session-confirm')).toBeNull();
+    });
+
+    it('calls onDeleteSession when confirm button clicked', () => {
+      const onDelete = vi.fn();
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={onDelete}
+        />,
+      );
+      fireEvent.contextMenu(screen.getAllByRole('tab')[1]);
+      fireEvent.click(screen.getByTestId('confirm-delete-session'));
+      expect(onDelete).toHaveBeenCalledWith('pd-2');
+    });
+
+    it('hides confirmation when cancel button clicked', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      fireEvent.contextMenu(screen.getAllByRole('tab')[0]);
+      expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('cancel-delete-session'));
+      expect(screen.queryByTestId('delete-session-confirm')).toBeNull();
+    });
+
+    it('does not show confirmation when onDeleteSession is not provided', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+        />,
+      );
+      fireEvent.contextMenu(screen.getAllByRole('tab')[0]);
+      expect(screen.queryByTestId('delete-session-confirm')).toBeNull();
+    });
+
+    it('shows confirmation on long press via pointerDown timer', () => {
+      vi.useFakeTimers();
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      const tab = screen.getAllByRole('tab')[1];
+      fireEvent.pointerDown(tab);
+      act(() => { vi.advanceTimersByTime(500); });
+      expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
+      vi.useRealTimers();
+    });
+
+    it('does not show confirmation if pointer released before 500ms', () => {
+      vi.useFakeTimers();
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      const tab = screen.getAllByRole('tab')[1];
+      fireEvent.pointerDown(tab);
+      act(() => { vi.advanceTimersByTime(300); });
+      fireEvent.pointerUp(tab);
+      act(() => { vi.advanceTimersByTime(300); });
+      expect(screen.queryByTestId('delete-session-confirm')).toBeNull();
+      vi.useRealTimers();
+    });
+
+    it('confirmation has alertdialog role with proper aria-label', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      fireEvent.contextMenu(screen.getAllByRole('tab')[0]);
+      const dialog = screen.getByRole('alertdialog');
+      expect(dialog).toHaveAttribute('aria-label', 'Xóa buổi tập này?');
+    });
   });
 });

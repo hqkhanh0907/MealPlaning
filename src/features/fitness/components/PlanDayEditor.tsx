@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
@@ -36,6 +36,12 @@ export const PlanDayEditor = memo(function PlanDayEditor({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [swapIndex, setSwapIndex] = useState<number | null>(null);
+  const [pendingRemoval, setPendingRemoval] = useState<{
+    index: number;
+    exercise: SelectedExercise;
+  } | null>(null);
+  const pendingRemovalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confirmDialogTitleId = 'confirm-dialog-title';
 
   const initialSnapshot = useMemo(() => planDay.exercises, [planDay.exercises]);
   const hasChanges = JSON.stringify(localExercises) !== initialSnapshot;
@@ -76,8 +82,52 @@ export const PlanDayEditor = memo(function PlanDayEditor({
     setShowConfirmDialog(false);
   }, []);
 
-  const handleRemove = useCallback((index: number) => {
-    setLocalExercises((prev) => prev.filter((_, i) => i !== index));
+  const pendingRemovalRef = useRef<{
+    index: number;
+    exercise: SelectedExercise;
+  } | null>(null);
+
+  const commitRemoval = useCallback(() => {
+    const current = pendingRemovalRef.current;
+    if (current) {
+      setLocalExercises((prev) => prev.filter((_, i) => i !== current.index));
+    }
+    pendingRemovalRef.current = null;
+    setPendingRemoval(null);
+    pendingRemovalTimeoutRef.current = null;
+  }, []);
+
+  const handleRemove = useCallback(
+    (index: number) => {
+      if (pendingRemovalTimeoutRef.current) {
+        clearTimeout(pendingRemovalTimeoutRef.current);
+        commitRemoval();
+      }
+      const removed = localExercises[index];
+      if (!removed) return;
+      const removal = { index, exercise: removed };
+      pendingRemovalRef.current = removal;
+      setPendingRemoval(removal);
+      pendingRemovalTimeoutRef.current = setTimeout(commitRemoval, 5000);
+    },
+    [localExercises, commitRemoval],
+  );
+
+  const handleUndo = useCallback(() => {
+    if (pendingRemovalTimeoutRef.current) {
+      clearTimeout(pendingRemovalTimeoutRef.current);
+      pendingRemovalTimeoutRef.current = null;
+    }
+    pendingRemovalRef.current = null;
+    setPendingRemoval(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pendingRemovalTimeoutRef.current) {
+        clearTimeout(pendingRemovalTimeoutRef.current);
+      }
+    };
   }, []);
 
   const handleMoveUp = useCallback((index: number) => {
@@ -224,20 +274,21 @@ export const PlanDayEditor = memo(function PlanDayEditor({
           <ul className="space-y-2">
             {localExercises.map((item, index) => {
               const isExpanded = expandedIndex === index;
+              const isPendingRemoval = pendingRemoval?.index === index;
               return (
               <li
                 key={`${item.exercise.id}-${index}`}
-                className="rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
+                className={`rounded-xl border border-slate-200 bg-slate-50 transition-opacity dark:border-slate-700 dark:bg-slate-800${isPendingRemoval ? ' pointer-events-none opacity-0' : ''}`}
               >
                 <div className="flex items-center gap-2 p-3">
-                  <GripVertical className="h-5 w-5 shrink-0 text-slate-300 dark:text-slate-600" />
+                  <GripVertical className="h-5 w-5 shrink-0 text-slate-300 dark:text-slate-600" aria-hidden="true" />
 
                   <button
                     type="button"
                     onClick={() => handleToggleExpand(index)}
                     aria-expanded={isExpanded}
                     aria-label={`${t('fitness.plan.editParams')} ${item.exercise.nameVi}`}
-                    className="min-w-0 flex-1 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+                    className="min-w-0 flex-1 text-left focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none rounded-lg"
                   >
                     <p
                       data-testid="exercise-name"
@@ -256,7 +307,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
                       type="button"
                       onClick={() => handleOpenSwap(index)}
                       aria-label={`${t('fitness.swap.title')} ${item.exercise.nameVi}`}
-                      className="flex h-11 w-9 items-center justify-center rounded text-emerald-500 active:bg-emerald-50 dark:text-emerald-400 dark:active:bg-emerald-900/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-emerald-500 active:bg-emerald-50 dark:text-emerald-400 dark:active:bg-emerald-900/20 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                       data-testid={`swap-exercise-${index}`}
                     >
                       <ArrowLeftRight className="h-4 w-4" />
@@ -266,7 +317,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
                       onClick={() => handleMoveUp(index)}
                       aria-label={`Move up ${item.exercise.nameVi}`}
                       disabled={index === 0}
-                      className="flex h-11 w-9 items-center justify-center rounded text-slate-400 enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                     >
                       <ChevronUp className="h-4 w-4" />
                     </button>
@@ -275,7 +326,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
                       onClick={() => handleMoveDown(index)}
                       aria-label={`Move down ${item.exercise.nameVi}`}
                       disabled={index === localExercises.length - 1}
-                      className="flex h-11 w-9 items-center justify-center rounded text-slate-400 enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                     >
                       <ChevronDown className="h-4 w-4" />
                     </button>
@@ -283,7 +334,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
                       type="button"
                       onClick={() => handleRemove(index)}
                       aria-label={`Remove ${item.exercise.nameVi}`}
-                      className="flex h-11 w-9 items-center justify-center rounded text-red-400 active:bg-red-50 dark:text-red-500 dark:active:bg-red-900/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-red-400 active:bg-red-50 dark:text-red-500 dark:active:bg-red-900/20 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -357,9 +408,14 @@ export const PlanDayEditor = memo(function PlanDayEditor({
 
       {/* Unsaved changes confirm dialog */}
       {showConfirmDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={confirmDialogTitleId}
+        >
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
-            <p className="mb-6 text-sm text-slate-700 dark:text-slate-300">
+            <p id={confirmDialogTitleId} className="mb-6 text-sm text-slate-700 dark:text-slate-300">
               {t('fitness.plan.unsavedChanges')}
             </p>
             <div className="flex gap-3">
@@ -379,6 +435,22 @@ export const PlanDayEditor = memo(function PlanDayEditor({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Undo removal toast */}
+      {pendingRemoval && (
+        <div className="fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg bg-slate-800 px-4 py-3 text-white shadow-lg">
+          <span className="text-sm">
+            {pendingRemoval.exercise.exercise.nameVi} {t('fitness.plan.exerciseRemoved')}
+          </span>
+          <button
+            type="button"
+            onClick={handleUndo}
+            className="min-h-[44px] min-w-[44px] text-sm font-medium text-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+          >
+            {t('fitness.plan.undo')}
+          </button>
         </div>
       )}
 
@@ -423,7 +495,7 @@ function StepperField({ label, value, suffix, onDecrement, onIncrement, min, max
           onClick={onDecrement}
           disabled={value <= min}
           aria-label={`Decrease ${label}`}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
         >
           <Minus className="h-3.5 w-3.5" />
         </button>
@@ -435,7 +507,7 @@ function StepperField({ label, value, suffix, onDecrement, onIncrement, min, max
           onClick={onIncrement}
           disabled={value >= max}
           aria-label={`Increase ${label}`}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
         >
           <Plus className="h-3.5 w-3.5" />
         </button>

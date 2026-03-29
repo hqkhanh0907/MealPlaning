@@ -1,7 +1,24 @@
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { FitnessTab } from '../features/fitness/components/FitnessTab';
 import { useFitnessStore } from '../store/fitnessStore';
+import { useNavigationStore } from '../store/navigationStore';
 import type { Mock } from 'vitest';
+
+const {
+  mockGeneratePlan,
+  mockNotifySuccess,
+  mockNotifyError,
+  mockPushPage,
+  mockInsightRef,
+  mockHealthProfileRef,
+} = vi.hoisted(() => ({
+  mockGeneratePlan: vi.fn(),
+  mockNotifySuccess: vi.fn(),
+  mockNotifyError: vi.fn(),
+  mockPushPage: vi.fn(),
+  mockInsightRef: { current: null as string | null },
+  mockHealthProfileRef: { current: { age: 25 as number | null, weightKg: 83 } },
+}));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -21,9 +38,32 @@ vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
 }));
 
+vi.mock('../store/navigationStore', () => ({
+  useNavigationStore: vi.fn(),
+}));
+
 vi.mock('../features/fitness/components/TrainingPlanView', () => ({
-  TrainingPlanView: () => (
-    <div data-testid="training-plan-view">TrainingPlanView</div>
+  TrainingPlanView: ({
+    onGeneratePlan,
+    onCreateManualPlan,
+    planStrategy,
+    isGenerating,
+  }: {
+    onGeneratePlan: () => void;
+    onCreateManualPlan: () => void;
+    planStrategy: string | null;
+    isGenerating: boolean;
+  }) => (
+    <div data-testid="training-plan-view">
+      <span data-testid="plan-strategy">{planStrategy ?? 'null'}</span>
+      <span data-testid="is-generating">{String(isGenerating)}</span>
+      <button data-testid="generate-plan-btn" onClick={onGeneratePlan}>
+        Generate
+      </button>
+      <button data-testid="create-manual-plan-btn" onClick={onCreateManualPlan}>
+        Manual
+      </button>
+    </div>
   ),
 }));
 
@@ -46,41 +86,51 @@ vi.mock('../features/fitness/components/StreakCounter', () => ({
 }));
 
 vi.mock('../features/fitness/components/SmartInsightBanner', () => ({
-  SmartInsightBanner: () => (
-    <div data-testid="smart-insight-banner">SmartInsightBanner</div>
+  SmartInsightBanner: ({ insight }: { insight: string }) => (
+    <div data-testid="smart-insight-banner">{insight}</div>
+  ),
+}));
+
+vi.mock('../features/fitness/components/PlanGeneratedCard', () => ({
+  PlanGeneratedCard: () => (
+    <div data-testid="plan-generated-card">PlanGeneratedCard</div>
   ),
 }));
 
 vi.mock('../features/fitness/hooks/useFitnessNutritionBridge', () => ({
-  useFitnessNutritionBridge: () => ({ insight: null }),
+  useFitnessNutritionBridge: () => ({ insight: mockInsightRef.current }),
 }));
 
 vi.mock('../features/fitness/hooks/useTrainingPlan', () => ({
   useTrainingPlan: () => ({
-    generatePlan: vi.fn(() => null),
+    generatePlan: mockGeneratePlan,
     isGenerating: false,
     generationError: null,
   }),
 }));
 
 vi.mock('../features/health-profile/store/healthProfileStore', () => ({
-  useHealthProfileStore: (selector: (state: { profile: { age: number; weightKg: number } }) => unknown) =>
-    selector({ profile: { age: 25, weightKg: 83 } }),
+  useHealthProfileStore: (selector: (state: { profile: { age: number | null; weightKg: number } }) => unknown) =>
+    selector({ profile: mockHealthProfileRef.current }),
 }));
 
 vi.mock('../contexts/NotificationContext', () => ({
   useNotification: () => ({
     showNotification: vi.fn(),
+    success: mockNotifySuccess,
+    error: mockNotifyError,
   }),
 }));
 
 interface MockFitnessState {
   trainingProfile: unknown;
+  planStrategy: 'auto' | 'manual' | null;
   addTrainingPlan: Mock;
   addPlanDays: Mock;
 }
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
+const mockUseNavigationStore = useNavigationStore as unknown as Mock;
 
 afterEach(cleanup);
 
@@ -92,10 +142,21 @@ describe('FitnessTab', () => {
     beforeEach(() => {
       mockAddTrainingPlan.mockClear();
       mockAddPlanDays.mockClear();
+      mockGeneratePlan.mockClear();
+      mockNotifySuccess.mockClear();
+      mockNotifyError.mockClear();
+      mockPushPage.mockClear();
+      mockInsightRef.current = null;
+      mockHealthProfileRef.current = { age: 25, weightKg: 83 };
+      mockUseNavigationStore.mockImplementation(
+        (selector: (s: { pushPage: Mock }) => unknown) =>
+          selector({ pushPage: mockPushPage }),
+      );
       mockUseFitnessStore.mockImplementation(
         (selector: (state: MockFitnessState) => unknown) =>
           selector({
             trainingProfile: null,
+            planStrategy: null,
             addTrainingPlan: mockAddTrainingPlan,
             addPlanDays: mockAddPlanDays,
           }),
@@ -234,6 +295,258 @@ describe('FitnessTab', () => {
       expect(
         screen.getByTestId('progress-subtab-content'),
       ).toHaveAttribute('role', 'tabpanel');
+    });
+  });
+
+  describe('handleGeneratePlan', () => {
+    const localAddTrainingPlan = vi.fn();
+    const localAddPlanDays = vi.fn();
+
+    function setupStore(overrides: Partial<MockFitnessState> = {}) {
+      mockUseFitnessStore.mockImplementation(
+        (selector: (state: MockFitnessState) => unknown) =>
+          selector({
+            trainingProfile: null,
+            planStrategy: 'auto',
+            addTrainingPlan: localAddTrainingPlan,
+            addPlanDays: localAddPlanDays,
+            ...overrides,
+          }),
+      );
+      mockUseNavigationStore.mockImplementation(
+        (selector: (s: { pushPage: Mock }) => unknown) =>
+          selector({ pushPage: mockPushPage }),
+      );
+    }
+
+    beforeEach(() => {
+      localAddTrainingPlan.mockClear();
+      localAddPlanDays.mockClear();
+      mockGeneratePlan.mockReset();
+      mockNotifySuccess.mockClear();
+      mockNotifyError.mockClear();
+      mockPushPage.mockClear();
+      mockInsightRef.current = null;
+      mockHealthProfileRef.current = { age: 25, weightKg: 83 };
+    });
+
+    it('does nothing when trainingProfile is null', () => {
+      setupStore({ trainingProfile: null });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+      expect(mockGeneratePlan).not.toHaveBeenCalled();
+      expect(localAddTrainingPlan).not.toHaveBeenCalled();
+    });
+
+    it('adds plan and days then shows success notification', () => {
+      const mockPlan = { id: 'plan-1', name: 'Test Plan' };
+      const mockDays = [{ id: 'day-1', planId: 'plan-1' }];
+      mockGeneratePlan.mockReturnValue({ plan: mockPlan, days: mockDays });
+      setupStore({ trainingProfile: { level: 'beginner', goal: 'strength' } });
+
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+
+      expect(mockGeneratePlan).toHaveBeenCalledWith({
+        trainingProfile: { level: 'beginner', goal: 'strength' },
+        healthProfile: { age: 25, weightKg: 83 },
+      });
+      expect(localAddTrainingPlan).toHaveBeenCalledWith(mockPlan);
+      expect(localAddPlanDays).toHaveBeenCalledWith(mockDays);
+      expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
+    });
+
+    it('shows error notification when generatePlan returns null', () => {
+      mockGeneratePlan.mockReturnValue(null);
+      setupStore({ trainingProfile: { level: 'beginner', goal: 'strength' } });
+
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+
+      expect(mockGeneratePlan).toHaveBeenCalled();
+      expect(localAddTrainingPlan).not.toHaveBeenCalled();
+      expect(localAddPlanDays).not.toHaveBeenCalled();
+      expect(mockNotifyError).toHaveBeenCalledWith('fitness.plan.planError');
+    });
+
+    it('uses fallback age 30 when healthProfileAge is null', () => {
+      const mockPlan = { id: 'p2', name: 'Plan' };
+      const mockDays = [{ id: 'd1', planId: 'p2' }];
+      mockGeneratePlan.mockReturnValue({ plan: mockPlan, days: mockDays });
+      mockHealthProfileRef.current = { age: null, weightKg: 70 };
+      setupStore({ trainingProfile: { level: 'advanced', goal: 'hypertrophy' } });
+
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+
+      expect(mockGeneratePlan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          healthProfile: { age: 30, weightKg: 70 },
+        }),
+      );
+    });
+  });
+
+  describe('handleCreateManualPlan', () => {
+    const localAddTrainingPlan = vi.fn();
+    const localAddPlanDays = vi.fn();
+
+    function setupStore(overrides: Partial<MockFitnessState> = {}) {
+      mockUseFitnessStore.mockImplementation(
+        (selector: (state: MockFitnessState) => unknown) =>
+          selector({
+            trainingProfile: null,
+            planStrategy: 'manual',
+            addTrainingPlan: localAddTrainingPlan,
+            addPlanDays: localAddPlanDays,
+            ...overrides,
+          }),
+      );
+      mockUseNavigationStore.mockImplementation(
+        (selector: (s: { pushPage: Mock }) => unknown) =>
+          selector({ pushPage: mockPushPage }),
+      );
+    }
+
+    beforeEach(() => {
+      localAddTrainingPlan.mockClear();
+      localAddPlanDays.mockClear();
+      mockGeneratePlan.mockClear();
+      mockNotifySuccess.mockClear();
+      mockNotifyError.mockClear();
+      mockPushPage.mockClear();
+      mockInsightRef.current = null;
+      mockHealthProfileRef.current = { age: 25, weightKg: 83 };
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('creates a 7-day blank plan and opens PlanDayEditor on a weekday', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 8, 12, 0, 0)); // Wednesday
+      const now = new Date();
+      const expectedTimestamp = now.getTime();
+      const expectedPlanId = `manual-${expectedTimestamp}`;
+      const expectedIso = now.toISOString();
+      const expectedEndIso = new Date(expectedTimestamp + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expectedDow = now.getDay(); // 3 for Wednesday
+
+      setupStore();
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+
+      expect(localAddTrainingPlan).toHaveBeenCalledWith({
+        id: expectedPlanId,
+        name: 'Manual Plan',
+        status: 'active',
+        splitType: 'Custom',
+        durationWeeks: 1,
+        currentWeek: 1,
+        startDate: expectedIso,
+        endDate: expectedEndIso,
+        createdAt: expectedIso,
+        updatedAt: expectedIso,
+      });
+
+      const addedDays = localAddPlanDays.mock.calls[0][0] as Array<{
+        id: string;
+        planId: string;
+        dayOfWeek: number;
+        sessionOrder: number;
+        workoutType: string;
+        exercises: string;
+        originalExercises: string;
+      }>;
+      expect(addedDays).toHaveLength(7);
+      expect(addedDays[0].dayOfWeek).toBe(1);
+      expect(addedDays[6].dayOfWeek).toBe(7);
+      addedDays.forEach((day) => {
+        expect(day.planId).toBe(expectedPlanId);
+        expect(day.workoutType).toBe('Rest');
+        expect(day.exercises).toBe('[]');
+        expect(day.originalExercises).toBe('[]');
+      });
+
+      expect(mockPushPage).toHaveBeenCalledWith({
+        id: 'plan-day-editor',
+        component: 'PlanDayEditor',
+        props: { planDay: addedDays[expectedDow - 1] },
+      });
+      expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
+    });
+
+    it('maps Sunday (getDay()=0) to dayOfWeek 7', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 5, 12, 0, 0)); // Sunday
+
+      setupStore();
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+
+      expect(mockPushPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            planDay: expect.objectContaining({
+              dayOfWeek: 7,
+            }),
+          }),
+        }),
+      );
+      expect(localAddPlanDays.mock.calls[0][0] as Array<{ dayOfWeek: number }>).toHaveLength(7);
+    });
+
+    it('skips pushPage when todayDay is not found', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 8, 12, 0, 0));
+      const spy = vi.spyOn(Date.prototype, 'getDay').mockReturnValue(8);
+
+      setupStore();
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+
+      expect(localAddTrainingPlan).toHaveBeenCalled();
+      expect(localAddPlanDays).toHaveBeenCalled();
+      expect(mockPushPage).not.toHaveBeenCalled();
+      expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('SmartInsightBanner visibility', () => {
+    beforeEach(() => {
+      mockGeneratePlan.mockClear();
+      mockNotifySuccess.mockClear();
+      mockNotifyError.mockClear();
+      mockPushPage.mockClear();
+      mockHealthProfileRef.current = { age: 25, weightKg: 83 };
+      mockUseNavigationStore.mockImplementation(
+        (selector: (s: { pushPage: Mock }) => unknown) =>
+          selector({ pushPage: mockPushPage }),
+      );
+      mockUseFitnessStore.mockImplementation(
+        (selector: (state: MockFitnessState) => unknown) =>
+          selector({
+            trainingProfile: null,
+            planStrategy: null,
+            addTrainingPlan: vi.fn(),
+            addPlanDays: vi.fn(),
+          }),
+      );
+    });
+
+    it('renders SmartInsightBanner when insight is present', () => {
+      mockInsightRef.current = 'You need more protein';
+      render(<FitnessTab />);
+      expect(screen.getByTestId('smart-insight-banner')).toBeInTheDocument();
+    });
+
+    it('does not render SmartInsightBanner when insight is null', () => {
+      mockInsightRef.current = null;
+      render(<FitnessTab />);
+      expect(screen.queryByTestId('smart-insight-banner')).not.toBeInTheDocument();
     });
   });
 

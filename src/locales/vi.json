@@ -793,6 +793,9 @@
       "generating": "Đang tạo...",
       "planCreated": "Kế hoạch tập luyện đã được tạo thành công!",
       "planError": "Không thể tạo kế hoạch. Vui lòng thử lại.",
+      "manualEmpty": "Bạn đã chọn tự lên kế hoạch",
+      "manualEmptyDesc": "Hãy bắt đầu bằng cách tạo buổi tập đầu tiên cho tuần này.",
+      "createFirstWorkout": "Tạo buổi tập đầu tiên",
       "setsLabel": "hiệp",
       "repsLabel": "lần",
       "repsMinLabel": "Lần tối thiểu",
@@ -806,6 +809,8 @@
       "modified": "Đã chỉnh sửa",
       "noExercises": "Chưa có bài tập nào",
       "unsavedChanges": "Bạn có thay đổi chưa lưu. Bỏ thay đổi?",
+      "exerciseRemoved": "đã xóa",
+      "undo": "Hoàn tác",
       "sessionTab": "Buổi {{order}}",
       "addSession": "Thêm buổi tập",
       "strengthOption": "Sức mạnh (Strength)",
@@ -830,7 +835,11 @@
       "continueSession": "Tiếp tục buổi tập",
       "freestyleName": "Đặt tên buổi tập",
       "freestyleDefault": "Buổi tập tự do",
-      "customizeHint": "Chạm vào ✎ để chỉnh sửa bài tập"
+      "customizeHint": "Chạm vào ✎ để chỉnh sửa bài tập",
+      "deleteSession": "Xóa buổi tập",
+      "deleteSessionConfirm": "Xóa buổi tập này?",
+      "delete": "Xóa",
+      "cancelDelete": "Hủy"
     },
     "workout": {
       "tab": "Buổi tập"
