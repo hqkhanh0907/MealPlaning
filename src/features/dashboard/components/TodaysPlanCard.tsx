@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Play,
@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useTodaysPlan } from '../hooks/useTodaysPlan';
 import { useNavigationStore } from '../../../store/navigationStore';
+import { WeightQuickLog } from './WeightQuickLog';
 
 const MEAL_LOG_KEYS: Record<string, string> = {
   breakfast: 'dashboard.todaysPlan.logBreakfast',
@@ -114,6 +115,7 @@ const TodaysPlanCard: React.FC = React.memo(() => {
   const data = useTodaysPlan();
   const pushPage = useNavigationStore((s) => s.pushPage);
   const navigateTab = useNavigationStore((s) => s.navigateTab);
+  const [showWeightLog, setShowWeightLog] = useState(false);
 
   const handleStartWorkout = useCallback(() => {
     pushPage({ id: 'workout-logger', component: 'WorkoutLogger' });
@@ -124,8 +126,8 @@ const TodaysPlanCard: React.FC = React.memo(() => {
   }, [navigateTab]);
 
   const handleLogWeight = useCallback(() => {
-    pushPage({ id: 'weight-logger', component: 'WeightLogger' });
-  }, [pushPage]);
+    setShowWeightLog(true);
+  }, []);
 
   const handleLogCardio = useCallback(() => {
     pushPage({ id: 'cardio-logger', component: 'CardioLogger' });
@@ -145,54 +147,57 @@ const TodaysPlanCard: React.FC = React.memo(() => {
 
   if (data.state === 'training-pending') {
     return (
-      <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
-          {t('dashboard.todaysPlan.title')}
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div data-testid="workout-section">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Dumbbell className="w-4 h-4 text-blue-500" aria-hidden="true" />
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                {t('dashboard.todaysPlan.workout')}
-              </span>
+      <>
+        <div data-testid="todays-plan-card" className={CARD_CLASS}>
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+            {t('dashboard.todaysPlan.title')}
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div data-testid="workout-section">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Dumbbell className="w-4 h-4 text-blue-500" aria-hidden="true" />
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                  {t('dashboard.todaysPlan.workout')}
+                </span>
+              </div>
+              {data.workoutType && (
+                <p
+                  data-testid="workout-name"
+                  className="text-sm font-semibold text-slate-800 dark:text-slate-100"
+                >
+                  {data.workoutType}
+                </p>
+              )}
+              {data.exerciseCount != null && (
+                <p
+                  data-testid="exercise-count"
+                  className="text-xs text-slate-500 dark:text-slate-400"
+                >
+                  {t('dashboard.todaysPlan.exercisesCount', {
+                    count: data.exerciseCount,
+                  })}
+                </p>
+              )}
+              <SessionInfo
+                totalSessions={data.totalSessions}
+                completedSessions={data.completedSessions}
+                variant="pending"
+              />
+              <Button
+                size="sm"
+                onClick={handleStartWorkout}
+                data-testid="start-workout-cta"
+                className="mt-2 gap-1 bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <Play className="w-3.5 h-3.5" aria-hidden="true" />
+                {t('dashboard.todaysPlan.startCta')}
+              </Button>
             </div>
-            {data.workoutType && (
-              <p
-                data-testid="workout-name"
-                className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
-                {data.workoutType}
-              </p>
-            )}
-            {data.exerciseCount != null && (
-              <p
-                data-testid="exercise-count"
-                className="text-xs text-slate-500 dark:text-slate-400"
-              >
-                {t('dashboard.todaysPlan.exercisesCount', {
-                  count: data.exerciseCount,
-                })}
-              </p>
-            )}
-            <SessionInfo
-              totalSessions={data.totalSessions}
-              completedSessions={data.completedSessions}
-              variant="pending"
-            />
-            <Button
-              size="sm"
-              onClick={handleStartWorkout}
-              data-testid="start-workout-cta"
-              className="mt-2 gap-1 bg-blue-600 text-white hover:bg-blue-700"
-            >
-              <Play className="w-3.5 h-3.5" aria-hidden="true" />
-              {t('dashboard.todaysPlan.startCta')}
-            </Button>
+            <MealsSection {...mealsProps} />
           </div>
-          <MealsSection {...mealsProps} />
         </div>
-      </div>
+        {showWeightLog && <WeightQuickLog onClose={() => setShowWeightLog(false)} />}
+      </>
     );
   }
 
@@ -295,57 +300,60 @@ const TodaysPlanCard: React.FC = React.memo(() => {
 
   if (data.state === 'rest-day') {
     return (
-      <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
-          {t('dashboard.todaysPlan.restDayTitle')}
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div data-testid="recovery-tips">
-            <p className="text-sm text-slate-700 dark:text-slate-200">
-              <span aria-hidden="true"><Footprints className="size-4 inline-block mr-1" /></span>
-              {t('dashboard.todaysPlan.recoveryTip1')}
-            </p>
-            <p className="text-sm text-slate-700 dark:text-slate-200 mt-1">
-              <span aria-hidden="true"><Droplets className="size-4 inline-block mr-1" /></span>
-              {t('dashboard.todaysPlan.recoveryTip2')}
-            </p>
-          </div>
-          <div data-testid="tomorrow-preview">
-            {data.tomorrowWorkoutType ? (
+      <>
+        <div data-testid="todays-plan-card" className={CARD_CLASS}>
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+            {t('dashboard.todaysPlan.restDayTitle')}
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div data-testid="recovery-tips">
               <p className="text-sm text-slate-700 dark:text-slate-200">
-                {t('dashboard.todaysPlan.tomorrowPreview', {
-                  name: data.tomorrowWorkoutType,
-                  count: data.tomorrowExerciseCount ?? 0,
-                })}
+                <span aria-hidden="true"><Footprints className="size-4 inline-block mr-1" /></span>
+                {t('dashboard.todaysPlan.recoveryTip1')}
               </p>
-            ) : (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {t('dashboard.todaysPlan.tomorrowRest')}
+              <p className="text-sm text-slate-700 dark:text-slate-200 mt-1">
+                <span aria-hidden="true"><Droplets className="size-4 inline-block mr-1" /></span>
+                {t('dashboard.todaysPlan.recoveryTip2')}
               </p>
-            )}
+            </div>
+            <div data-testid="tomorrow-preview">
+              {data.tomorrowWorkoutType ? (
+                <p className="text-sm text-slate-700 dark:text-slate-200">
+                  {t('dashboard.todaysPlan.tomorrowPreview', {
+                    name: data.tomorrowWorkoutType,
+                    count: data.tomorrowExerciseCount ?? 0,
+                  })}
+                </p>
+              ) : (
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {t('dashboard.todaysPlan.tomorrowRest')}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3" data-testid="quick-actions">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogWeight}
+              data-testid="log-weight-chip"
+              className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+            >
+              {t('dashboard.todaysPlan.logWeight')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogCardio}
+              data-testid="log-cardio-chip"
+              className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+            >
+              {t('dashboard.todaysPlan.logCardio')}
+            </Button>
           </div>
         </div>
-        <div className="flex gap-2 mt-3" data-testid="quick-actions">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogWeight}
-            data-testid="log-weight-chip"
-            className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-          >
-            {t('dashboard.todaysPlan.logWeight')}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogCardio}
-            data-testid="log-cardio-chip"
-            className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-          >
-            {t('dashboard.todaysPlan.logCardio')}
-          </Button>
-        </div>
-      </div>
+        {showWeightLog && <WeightQuickLog onClose={() => setShowWeightLog(false)} />}
+      </>
     );
   }
 

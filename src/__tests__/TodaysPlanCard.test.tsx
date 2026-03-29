@@ -12,6 +12,14 @@ import type {
 } from '../features/fitness/types';
 import type { DayPlan } from '../types';
 
+vi.mock('../features/dashboard/components/WeightQuickLog', () => ({
+  WeightQuickLog: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="weight-quick-log">
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+}));
+
 const makeExercisesJson = (): string =>
   JSON.stringify([
     {
@@ -314,16 +322,14 @@ describe('TodaysPlanCard', () => {
       );
     });
 
-    it('log weight chip triggers navigation', () => {
+    it('log weight chip opens WeightQuickLog modal', () => {
       render(<TodaysPlanCard />);
 
       fireEvent.click(screen.getByTestId('log-weight-chip'));
 
       const { pageStack } = useNavigationStore.getState();
-      expect(pageStack).toHaveLength(1);
-      expect(pageStack[0]).toEqual(
-        expect.objectContaining({ component: 'WeightLogger' }),
-      );
+      expect(pageStack).toHaveLength(0);
+      expect(screen.getByTestId('weight-quick-log')).toBeInTheDocument();
     });
 
     it('log cardio chip triggers navigation', () => {
