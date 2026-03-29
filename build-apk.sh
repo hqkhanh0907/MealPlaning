@@ -20,8 +20,8 @@ GOOGLE_DRIVE_FOLDER_ID="17BHCjT_pHNLJN-r6yxvqa-GUI6ASA21G"
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ANDROID_DIR="$PROJECT_DIR/android"
-APK_SOURCE="$ANDROID_DIR/app/build/outputs/apk/debug/app-debug.apk"
-APK_SOURCE_ALT="$ANDROID_DIR/app/build/outputs/app-debug.apk"
+APK_SOURCE="$ANDROID_DIR/app/build/outputs/apk/release/app-release.apk"
+APK_SOURCE_ALT="$ANDROID_DIR/app/build/outputs/apk/release/app-release-unsigned.apk"
 
 CURRENT_DATE=$(date +"%d-%m-%Y_%H-%M-%S")
 APK_NAME="MealPlaning_${CURRENT_DATE}.apk"
@@ -44,6 +44,9 @@ echo -e "${YELLOW}[1/4] Building web app...${NC}"
 cd "$PROJECT_DIR"
 npm run build
 echo -e "${GREEN}Web build hoan tat!${NC}"
+
+echo -e "  Removing unused sql-wasm.wasm..."
+rm -f dist/wasm/sql-wasm.wasm
 echo ""
 
 echo -e "${YELLOW}[2/4] Syncing Capacitor...${NC}"
@@ -51,10 +54,11 @@ npx cap sync android
 echo -e "${GREEN}Capacitor sync hoan tat!${NC}"
 echo ""
 
-echo -e "${YELLOW}[3/4] Building APK...${NC}"
+echo -e "${YELLOW}[3/4] Building APK (release)...${NC}"
 cd "$ANDROID_DIR"
 chmod +x gradlew
-./gradlew assembleDebug
+./gradlew clean
+./gradlew assembleRelease
 echo -e "${GREEN}APK build hoan tat!${NC}"
 echo ""
 
