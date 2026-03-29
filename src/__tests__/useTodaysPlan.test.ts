@@ -77,6 +77,7 @@ const makePlanDay = (
   id: 'day-wed',
   planId: 'plan-1',
   dayOfWeek: 3,
+  sessionOrder: 1,
   workoutType: 'Upper Body A',
   muscleGroups: 'chest, shoulders, triceps',
   exercises: makeExercisesJson(),
@@ -127,27 +128,68 @@ function resetStores(): void {
 
 describe('determineTodayPlanState', () => {
   it('returns no-plan when no active plan', () => {
-    expect(determineTodayPlanState(undefined, undefined, undefined)).toBe(
-      'no-plan',
-    );
+    expect(determineTodayPlanState(undefined, [], [])).toBe('no-plan');
   });
 
   it('returns training-pending when plan day exists but no workout logged', () => {
     expect(
-      determineTodayPlanState(makePlan(), makePlanDay(), undefined),
+      determineTodayPlanState(makePlan(), [makePlanDay()], []),
     ).toBe('training-pending');
   });
 
   it('returns training-completed when workout logged today', () => {
     expect(
-      determineTodayPlanState(makePlan(), makePlanDay(), makeWorkout()),
+      determineTodayPlanState(
+        makePlan(),
+        [makePlanDay()],
+        [makeWorkout({ planDayId: 'day-wed' })],
+      ),
     ).toBe('training-completed');
   });
 
   it('returns rest-day when active plan but no plan day for today', () => {
-    expect(determineTodayPlanState(makePlan(), undefined, undefined)).toBe(
-      'rest-day',
+    expect(determineTodayPlanState(makePlan(), [], [])).toBe('rest-day');
+  });
+});
+
+describe('determineTodayPlanState — multi-session', () => {
+  it('returns training-partial when 1 of 2 sessions completed', () => {
+    const result = determineTodayPlanState(
+      makePlan(),
+      [
+        makePlanDay({ id: 'pd-1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Upper' }),
+        makePlanDay({ id: 'pd-2', dayOfWeek: 1, sessionOrder: 2, workoutType: 'Cardio' }),
+      ],
+      [makeWorkout({ id: 'w-1', date: '2026-03-29', name: 'Upper', planDayId: 'pd-1' })],
     );
+    expect(result).toBe('training-partial');
+  });
+
+  it('returns training-completed when all sessions have matching workouts', () => {
+    const result = determineTodayPlanState(
+      makePlan(),
+      [
+        makePlanDay({ id: 'pd-1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Upper' }),
+        makePlanDay({ id: 'pd-2', dayOfWeek: 1, sessionOrder: 2, workoutType: 'Cardio' }),
+      ],
+      [
+        makeWorkout({ id: 'w-1', date: '2026-03-29', name: 'Upper', planDayId: 'pd-1' }),
+        makeWorkout({ id: 'w-2', date: '2026-03-29', name: 'Cardio', planDayId: 'pd-2' }),
+      ],
+    );
+    expect(result).toBe('training-completed');
+  });
+
+  it('returns training-pending when no sessions completed', () => {
+    const result = determineTodayPlanState(
+      makePlan(),
+      [
+        makePlanDay({ id: 'pd-1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Upper' }),
+        makePlanDay({ id: 'pd-2', dayOfWeek: 1, sessionOrder: 2, workoutType: 'Cardio' }),
+      ],
+      [],
+    );
+    expect(result).toBe('training-pending');
   });
 });
 
@@ -193,7 +235,7 @@ describe('useTodaysPlan', () => {
     useFitnessStore.setState({
       trainingPlans: [makePlan()],
       trainingPlanDays: [makePlanDay()],
-      workouts: [makeWorkout()],
+      workouts: [makeWorkout({ planDayId: 'day-wed' })],
       workoutSets: [
         makeWorkoutSet({ id: 'set-1' }),
         makeWorkoutSet({ id: 'set-2', setNumber: 2 }),
@@ -258,7 +300,7 @@ describe('useTodaysPlan', () => {
   });
 
   it('Sunday wraps to Monday for tomorrow', () => {
-    // 2025-01-19 is Sunday → getDay() === 0
+    // 2025-01-19 is Sunday → getDay() === 0 → todayDow = 7
     vi.setSystemTime(new Date('2025-01-19T10:00:00'));
 
     const mondayDay = makePlanDay({
@@ -278,6 +320,29 @@ describe('useTodaysPlan', () => {
     expect(result.current.tomorrowWorkoutType).toBe('Push Day');
     expect(result.current.tomorrowMuscleGroups).toBe('chest, shoulders');
     expect(result.current.state).toBe('rest-day');
+  });
+
+  it('Sunday matches plan day with dayOfWeek 7', () => {
+    // 2025-01-19 is Sunday → getDay() === 0 → todayDow = 7
+    vi.setSystemTime(new Date('2025-01-19T10:00:00'));
+
+    const sundayDay = makePlanDay({
+      id: 'day-sun',
+      dayOfWeek: 7,
+      workoutType: 'Active Recovery',
+      muscleGroups: 'full body',
+    });
+
+    useFitnessStore.setState({
+      trainingPlans: [makePlan()],
+      trainingPlanDays: [sundayDay],
+    });
+
+    const { result } = renderHook(() => useTodaysPlan());
+
+    expect(result.current.state).toBe('training-pending');
+    expect(result.current.workoutType).toBe('Active Recovery');
+    expect(result.current.totalSessions).toBe(1);
   });
 
   it('returns no-plan state when no active training plan', () => {
@@ -332,7 +397,7 @@ describe('useTodaysPlan', () => {
     useFitnessStore.setState({
       trainingPlans: [makePlan()],
       trainingPlanDays: [makePlanDay()],
-      workouts: [makeWorkout({ durationMin: undefined })],
+      workouts: [makeWorkout({ durationMin: undefined, planDayId: 'day-wed' })],
       workoutSets: [makeWorkoutSet()],
     });
 
@@ -368,5 +433,46 @@ describe('useTodaysPlan', () => {
 
     expect(result.current.mealsLogged).toBe(0);
     expect(result.current.hasReachedTarget).toBe(false);
+  });
+
+  it('returns multi-session info for two sessions on the same day', () => {
+    vi.setSystemTime(new Date('2025-01-15T10:00:00'));
+
+    useFitnessStore.setState({
+      trainingPlans: [makePlan()],
+      trainingPlanDays: [
+        makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
+        makePlanDay({ id: 'pd-pm', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio', muscleGroups: undefined, exercises: undefined }),
+      ],
+      workouts: [makeWorkout({ planDayId: 'pd-am' })],
+    });
+
+    const { result } = renderHook(() => useTodaysPlan());
+
+    expect(result.current.state).toBe('training-partial');
+    expect(result.current.totalSessions).toBe(2);
+    expect(result.current.completedSessions).toBe(1);
+    expect(result.current.todayPlanDays).toHaveLength(2);
+    expect(result.current.nextUncompletedSession?.id).toBe('pd-pm');
+    expect(result.current.workoutType).toBe('Upper');
+  });
+
+  it('returns nextUncompletedSession as undefined when all done', () => {
+    vi.setSystemTime(new Date('2025-01-15T10:00:00'));
+
+    useFitnessStore.setState({
+      trainingPlans: [makePlan()],
+      trainingPlanDays: [
+        makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
+      ],
+      workouts: [makeWorkout({ planDayId: 'pd-am' })],
+    });
+
+    const { result } = renderHook(() => useTodaysPlan());
+
+    expect(result.current.state).toBe('training-completed');
+    expect(result.current.totalSessions).toBe(1);
+    expect(result.current.completedSessions).toBe(1);
+    expect(result.current.nextUncompletedSession).toBeUndefined();
   });
 });

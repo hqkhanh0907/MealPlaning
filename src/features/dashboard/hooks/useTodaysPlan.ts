@@ -5,13 +5,10 @@ import type {
   TrainingPlanDay,
   Workout,
   SelectedExercise,
+  TodayPlanState,
 } from '../../fitness/types';
 
-export type TodayPlanState =
-  | 'training-pending'
-  | 'training-completed'
-  | 'rest-day'
-  | 'no-plan';
+export type { TodayPlanState };
 
 export interface TodaysPlanData {
   state: TodayPlanState;
@@ -31,17 +28,30 @@ export interface TodaysPlanData {
   mealsLogged: number;
   totalMealsPlanned: number;
   hasReachedTarget: boolean;
+  totalSessions: number;
+  completedSessions: number;
+  todayPlanDays: TrainingPlanDay[];
+  nextUncompletedSession?: TrainingPlanDay;
 }
 
 export function determineTodayPlanState(
   activePlan: TrainingPlan | undefined,
-  todayPlanDay: TrainingPlanDay | undefined,
-  todayWorkout: Workout | undefined,
+  todayPlanDays: TrainingPlanDay[],
+  todayWorkouts: Workout[],
 ): TodayPlanState {
   if (!activePlan) return 'no-plan';
-  if (!todayPlanDay) return 'rest-day';
-  if (todayWorkout) return 'training-completed';
-  return 'training-pending';
+  if (todayPlanDays.length === 0) return 'rest-day';
+
+  const completedSessionIds = new Set(
+    todayWorkouts.filter((w) => w.planDayId).map((w) => w.planDayId),
+  );
+  const completedCount = todayPlanDays.filter((d) =>
+    completedSessionIds.has(d.id),
+  ).length;
+
+  if (completedCount === 0) return 'training-pending';
+  if (completedCount < todayPlanDays.length) return 'training-partial';
+  return 'training-completed';
 }
 
 function parseExercises(exercises?: string): SelectedExercise[] {
@@ -74,8 +84,8 @@ const TOTAL_MEALS_PLANNED = 3;
 export function useTodaysPlan(): TodaysPlanData {
   const today = new Date();
   const todayStr = formatDateToISO(today);
-  const todayDayOfWeek = today.getDay();
-  const tomorrowDayOfWeek = (todayDayOfWeek + 1) % 7;
+  const todayDow = today.getDay() === 0 ? 7 : today.getDay();
+  const tomorrowDow = todayDow === 7 ? 1 : todayDow + 1;
 
   const trainingPlans = useFitnessStore((s) => s.trainingPlans);
   const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
@@ -89,31 +99,37 @@ export function useTodaysPlan(): TodaysPlanData {
     ? trainingPlanDays.filter((d) => d.planId === activePlan.id)
     : [];
 
-  const todayPlanDay = planDays.find((d) => d.dayOfWeek === todayDayOfWeek);
-  const todayWorkout = workouts.find((w) => w.date === todayStr);
+  const todayPlanDays = planDays
+    .filter((d) => d.dayOfWeek === todayDow)
+    .sort((a, b) => a.sessionOrder - b.sessionOrder);
+  const todayWorkouts = workouts.filter((w) => w.date === todayStr);
 
-  const state = determineTodayPlanState(activePlan, todayPlanDay, todayWorkout);
+  const state = determineTodayPlanState(activePlan, todayPlanDays, todayWorkouts);
 
-  const exercises = todayPlanDay
-    ? parseExercises(todayPlanDay.exercises)
+  const primaryPlanDay = todayPlanDays[0];
+  const exercises = primaryPlanDay
+    ? parseExercises(primaryPlanDay.exercises)
     : [];
 
   const estimatedDuration =
     exercises.length > 0 ? estimateDurationMinutes(exercises) : undefined;
 
   const tomorrowPlanDay = planDays.find(
-    (d) => d.dayOfWeek === tomorrowDayOfWeek,
+    (d) => d.dayOfWeek === tomorrowDow,
   );
 
   const tomorrowExercises = tomorrowPlanDay
     ? parseExercises(tomorrowPlanDay.exercises)
     : [];
 
+  const firstTodayWorkout = todayWorkouts[0];
   let completedWorkout: TodaysPlanData['completedWorkout'];
-  if (todayWorkout) {
-    const sets = workoutSets.filter((s) => s.workoutId === todayWorkout.id);
+  if (firstTodayWorkout) {
+    const sets = workoutSets.filter(
+      (s) => s.workoutId === firstTodayWorkout.id,
+    );
     completedWorkout = {
-      durationMin: todayWorkout.durationMin ?? 0,
+      durationMin: firstTodayWorkout.durationMin ?? 0,
       totalSets: sets.length,
       hasPR: false,
     };
@@ -136,10 +152,14 @@ export function useTodaysPlan(): TodaysPlanData {
     nextMealToLog = 'breakfast';
   }
 
+  const completedSessionCount = todayPlanDays.filter((d) =>
+    todayWorkouts.some((w) => w.planDayId === d.id),
+  ).length;
+
   return {
     state,
-    workoutType: todayPlanDay?.workoutType,
-    muscleGroups: todayPlanDay?.muscleGroups,
+    workoutType: primaryPlanDay?.workoutType,
+    muscleGroups: primaryPlanDay?.muscleGroups,
     exerciseCount: exercises.length > 0 ? exercises.length : undefined,
     estimatedDuration,
     completedWorkout,
@@ -151,5 +171,11 @@ export function useTodaysPlan(): TodaysPlanData {
     mealsLogged,
     totalMealsPlanned: TOTAL_MEALS_PLANNED,
     hasReachedTarget: mealsLogged >= TOTAL_MEALS_PLANNED,
+    totalSessions: todayPlanDays.length,
+    completedSessions: completedSessionCount,
+    todayPlanDays,
+    nextUncompletedSession: todayPlanDays.find(
+      (d) => !todayWorkouts.some((w) => w.planDayId === d.id),
+    ),
   };
 }
