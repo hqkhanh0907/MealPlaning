@@ -76,8 +76,15 @@ export const config = {
       },
       { timeout: 30000, interval: 1000, timeoutMsg: 'document.readyState never reached "complete"' }
     );
-    // Clear localStorage to isolate test state between spec files, then reload
-    await exec.execute(() => { localStorage.clear(); });
+    // Clear localStorage to isolate test state between spec files, then reload.
+    // Preserve onboarding flag so the app boots into the main UI (not onboarding wizard).
+    await exec.execute(() => {
+      localStorage.clear();
+      localStorage.setItem(
+        'app-onboarding-storage',
+        JSON.stringify({ state: { isAppOnboarded: true }, version: 0 }),
+      );
+    });
     await exec.execute(() => { location.reload(); });
     // Wait for page to be ready again after reload
     await browser.waitUntil(
