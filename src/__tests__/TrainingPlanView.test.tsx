@@ -545,12 +545,13 @@ describe('TrainingPlanView', () => {
       expect(screen.getByRole('tablist')).toBeInTheDocument();
     });
 
-    it('does not render SessionTabs when day has only 1 session', () => {
-      // Wednesday has only 1 session
+    it('renders SessionTabs with add button even for single-session day', () => {
+      // Wednesday has only 1 session - should still show SessionTabs with "+" button
       vi.setSystemTime(new Date('2025-01-08T12:00:00'));
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: multiSessionDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.queryByTestId('session-tabs')).not.toBeInTheDocument();
+      expect(screen.getByTestId('session-tabs')).toBeInTheDocument();
+      expect(screen.getByTestId('add-session-tab')).toBeInTheDocument();
     });
   });
 

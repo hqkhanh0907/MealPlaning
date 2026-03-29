@@ -109,3 +109,14 @@ ERROR        | adb protocol fault (couldn't read status length)
 ERROR        | adb protocol fault (couldn't read status length)
 ERROR        | adb protocol fault (couldn't read status length)
 ERROR        | adb protocol fault (couldn't read status length)
+INFO         | Created VkInstance:0xb0a819800 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a819800 for application:'' engine:''.
+INFO         | Created VkInstance:0xb0a815000 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a815000 for application:'' engine:''.
+INFO         | Created VkInstance:0xb0a816800 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a816800 for application:'' engine:''.
+INFO         | Created VkInstance:0xb0a815000 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a815000 for application:'' engine:''.
+ERROR        | adb protocol fault (couldn't read status length)
+INFO         | Created VkInstance:0xb0a816800 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb0a816800 for application:'' engine:''.

@@ -290,7 +290,7 @@ function TrainingPlanViewInner({
           data-testid="today-workout-card"
           className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800"
         >
-          {viewedDaySessions.length > 1 && (
+          {viewedDaySessions.length >= 1 && (
             <SessionTabs
               sessions={viewedDaySessions}
               activeSessionId={activeSessionIds[viewedDay] ?? viewedDaySessions[0].id}

@@ -20,11 +20,25 @@ const makePlanDay = (overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay 
 });
 
 describe('SessionTabs', () => {
-  it('does not render when only 1 session and showAlways=false', () => {
-    const { container } = render(
+  it('renders with add button when only 1 session', () => {
+    render(
       <SessionTabs
         sessions={[makePlanDay()]}
         activeSessionId="pd-1"
+        completedSessionIds={[]}
+        onSelectSession={vi.fn()}
+        onAddSession={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getByTestId('add-session-tab')).toBeInTheDocument();
+  });
+
+  it('does not render when sessions list is empty', () => {
+    const { container } = render(
+      <SessionTabs
+        sessions={[]}
+        activeSessionId=""
         completedSessionIds={[]}
         onSelectSession={vi.fn()}
         onAddSession={vi.fn()}

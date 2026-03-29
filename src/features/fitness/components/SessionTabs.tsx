@@ -29,7 +29,7 @@ function SessionTabsInner({
     [onSelectSession],
   );
 
-  if (sessions.length <= 1) return null;
+  if (sessions.length === 0) return null;
 
   const isMaxReached = sessions.length >= maxSessions;
 
