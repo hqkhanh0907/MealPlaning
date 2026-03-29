@@ -12,6 +12,11 @@ const FitnessTab = React.lazy(() => import('./features/fitness/components/Fitnes
 const DashboardTab = React.lazy(() => import('./features/dashboard/components/DashboardTab').then(m => ({ default: m.DashboardTab })));
 const SettingsTab = React.lazy(() => import('./components/SettingsTab').then(m => ({ default: m.SettingsTab })));
 
+// Lazy-loaded full-screen pages — only loaded when pushed to pageStack
+const WorkoutLogger = React.lazy(() => import('./features/fitness/components/WorkoutLogger').then(m => ({ default: m.WorkoutLogger })));
+const CardioLogger = React.lazy(() => import('./features/fitness/components/CardioLogger').then(m => ({ default: m.CardioLogger })));
+const PlanDayEditor = React.lazy(() => import('./features/fitness/components/PlanDayEditor').then(m => ({ default: m.PlanDayEditor })));
+
 // Lazy-loaded modals — only loaded when opened
 const MealPlannerModal = React.lazy(() => import('./components/modals/MealPlannerModal').then(m => ({ default: m.MealPlannerModal })));
 const ClearPlanModal = React.lazy(() => import('./components/modals/ClearPlanModal').then(m => ({ default: m.ClearPlanModal })));
@@ -60,7 +65,46 @@ import { useNavigationStore } from './store/navigationStore';
 import { useHealthProfileStore } from './features/health-profile/store/healthProfileStore';
 import { useAppOnboardingStore } from './store/appOnboardingStore';
 import { AppOnboarding } from './components/AppOnboarding';
+import { useFitnessStore } from './store/fitnessStore';
+import type { Workout } from './features/fitness/types';
+import type { PageEntry } from './store/navigationStore';
 
+// Generic page stack renderer for full-screen pages
+function PageStackOverlay({ page, onBack }: { page: PageEntry; onBack: () => void }): React.JSX.Element | null {
+  const addWorkout = useFitnessStore((s) => s.addWorkout);
+  const handleWorkoutComplete = useCallback((workout: Workout) => {
+    addWorkout(workout);
+    onBack();
+  }, [addWorkout, onBack]);
+
+  const renderPage = (): React.ReactNode => {
+    const props = page.props ?? {};
+    switch (page.component) {
+      case 'WorkoutLogger':
+        return <WorkoutLogger planDay={props.planDay as WorkoutLoggerPlanDay} onComplete={handleWorkoutComplete} onBack={onBack} />;
+      case 'CardioLogger':
+        return <CardioLogger onComplete={handleWorkoutComplete} onBack={onBack} />;
+      case 'PlanDayEditor':
+        return <PlanDayEditor planDay={props.planDay as PlanDayEditorPlanDay} />;
+      default:
+        return null;
+    }
+  };
+
+  const content = renderPage();
+  if (!content) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 overflow-y-auto" data-testid={`page-overlay-${page.id}`}>
+      <Suspense fallback={<TabLoadingFallback />}>
+        {content}
+      </Suspense>
+    </div>
+  );
+}
+
+type WorkoutLoggerPlanDay = React.ComponentProps<typeof WorkoutLogger>['planDay'];
+type PlanDayEditorPlanDay = React.ComponentProps<typeof PlanDayEditor>['planDay'];
 
 // --- Main App component ---
 
@@ -97,6 +141,8 @@ export default function App() {
   }, [pushPage]);
 
   const isSettingsOpen = pageStack.length > 0 && pageStack[pageStack.length - 1].id === 'settings';
+  const topPage = pageStack.length > 0 ? pageStack[pageStack.length - 1] : null;
+  const isFitnessPageOpen = topPage !== null && topPage.id !== 'settings';
 
   const handleTabChange = useCallback((tab: MainTab) => {
     navigateTab(tab);
@@ -487,6 +533,10 @@ export default function App() {
             </Suspense>
           </div>
         </div>
+      )}
+
+      {isFitnessPageOpen && topPage && (
+        <PageStackOverlay page={topPage} onBack={popPage} />
       )}
     </div>
   );
