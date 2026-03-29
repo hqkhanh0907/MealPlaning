@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Dumbbell, Moon, ChevronRight, Calendar, CalendarPlus, RefreshCw, ClipboardList, Pencil, RotateCcw, Plus, Trash2, X } from 'lucide-react';
+import { Play, Dumbbell, Moon, ChevronRight, Calendar, CalendarPlus, RefreshCw, ClipboardList, Pencil, RotateCcw, Plus, Trash2, X, CalendarCog, ArrowRightLeft, BookOpen } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
@@ -427,6 +427,55 @@ function TrainingPlanViewInner({
             </button>
           );
         })}
+      </div>
+
+      {/* Plan action buttons */}
+      <div data-testid="plan-action-bar" className="flex gap-2">
+        <button
+          data-testid="action-edit-schedule"
+          type="button"
+          onClick={() => pushPage({
+            id: 'plan-schedule-editor',
+            component: 'PlanScheduleEditor',
+            props: { planId: activePlan.id },
+          })}
+          aria-label={t('fitness.planActions.editSchedule')}
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+          style={{ touchAction: 'manipulation' }}
+        >
+          <CalendarCog className="h-4 w-4" aria-hidden="true" />
+          {t('fitness.planActions.editSchedule')}
+        </button>
+        <button
+          data-testid="action-change-split"
+          type="button"
+          onClick={() => pushPage({
+            id: 'split-changer',
+            component: 'SplitChanger',
+            props: { planId: activePlan.id, currentSplit: activePlan.splitType },
+          })}
+          aria-label={t('fitness.planActions.changeSplit')}
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+          style={{ touchAction: 'manipulation' }}
+        >
+          <ArrowRightLeft className="h-4 w-4" aria-hidden="true" />
+          {t('fitness.planActions.changeSplit')}
+        </button>
+        <button
+          data-testid="action-templates"
+          type="button"
+          onClick={() => pushPage({
+            id: 'plan-template-gallery',
+            component: 'PlanTemplateGallery',
+            props: { planId: activePlan.id },
+          })}
+          aria-label={t('fitness.planActions.templates')}
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+          style={{ touchAction: 'manipulation' }}
+        >
+          <BookOpen className="h-4 w-4" aria-hidden="true" />
+          {t('fitness.planActions.templates')}
+        </button>
       </div>
 
       {dayContextMenu && (

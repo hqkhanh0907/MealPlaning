@@ -1015,7 +1015,21 @@
       "moveDown": "Di chuyển xuống",
       "dragHandle": "Kéo để sắp xếp",
       "workoutLabel": "Buổi tập",
-      "reassignDay": "Đổi ngày"
+      "reassignDay": "Đổi ngày",
+      "title": "Chỉnh sửa lịch tập",
+      "autoAssign": "Tự động sắp xếp",
+      "restoreOriginal": "Khôi phục gốc",
+      "save": "Lưu thay đổi",
+      "saved": "Đã lưu lịch tập",
+      "unsavedWarning": "Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?",
+      "minDaysError": "Cần ít nhất 2 ngày tập",
+      "maxDaysError": "Tối đa 6 ngày tập",
+      "allAssigned": "Tất cả bài tập đã được phân công",
+      "unassignedWarning": "Còn bài tập chưa được phân công",
+      "emptyPlan": "Chưa có kế hoạch tập",
+      "emptyPlanCta": "Tạo kế hoạch tập mới",
+      "stepDays": "Chọn ngày tập",
+      "stepAssignment": "Phân công bài tập"
     },
     "splitChanger": {
       "title": "Đổi kiểu chia nhóm cơ",
@@ -1044,6 +1058,28 @@
       "preview": "Xem trước",
       "previewError": "Không thể xem trước. Vui lòng thử lại.",
       "applyError": "Lỗi áp dụng thay đổi. Vui lòng thử lại."
+    },
+    "templateGallery": {
+      "title": "Thư viện mẫu kế hoạch",
+      "recommended": "Đề xuất cho bạn",
+      "allTemplates": "Tất cả mẫu",
+      "matchScore": "Phù hợp {{score}}%",
+      "daysPerWeek": "{{count}} ngày/tuần",
+      "apply": "Áp dụng mẫu",
+      "applyConfirm": "Plan hiện tại sẽ bị thay thế. Bạn có chắc không?",
+      "applySuccess": "Đã áp dụng mẫu thành công",
+      "saveCurrent": "Lưu plan hiện tại làm mẫu",
+      "saveNamePrompt": "Tên mẫu kế hoạch",
+      "saveSuccess": "Đã lưu mẫu thành công",
+      "empty": "Không tải được mẫu",
+      "retry": "Thử lại",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    },
+    "planActions": {
+      "editSchedule": "Chỉnh lịch",
+      "changeSplit": "Đổi Split",
+      "templates": "Mẫu Plan"
     }
   },
   "dashboard": {
@@ -1236,7 +1272,8 @@
     "skip": "Bỏ qua",
     "getStarted": "Bắt đầu",
     "letsGo": "Vào ứng dụng →",
-    "step": "Bước {{current}}/{{total}}"
+    "step": "Bước {{current}}/{{total}}",
+    "slideIndicator": "Chỉ báo trang trình chiếu"
   },
   "onboarding": {
     "welcome": {

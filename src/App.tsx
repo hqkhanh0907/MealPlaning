@@ -16,6 +16,9 @@ const SettingsTab = React.lazy(() => import('./components/SettingsTab').then(m =
 const WorkoutLogger = React.lazy(() => import('./features/fitness/components/WorkoutLogger').then(m => ({ default: m.WorkoutLogger })));
 const CardioLogger = React.lazy(() => import('./features/fitness/components/CardioLogger').then(m => ({ default: m.CardioLogger })));
 const PlanDayEditor = React.lazy(() => import('./features/fitness/components/PlanDayEditor').then(m => ({ default: m.PlanDayEditor })));
+const PlanScheduleEditor = React.lazy(() => import('./features/fitness/components/PlanScheduleEditor'));
+const SplitChanger = React.lazy(() => import('./features/fitness/components/SplitChanger').then(m => ({ default: m.SplitChanger })));
+const PlanTemplateGallery = React.lazy(() => import('./features/fitness/components/PlanTemplateGallery'));
 
 // Lazy-loaded modals — only loaded when opened
 const MealPlannerModal = React.lazy(() => import('./components/modals/MealPlannerModal').then(m => ({ default: m.MealPlannerModal })));
@@ -89,6 +92,12 @@ function PageStackOverlay({ page, onBack }: { page: PageEntry; onBack: () => voi
         return <CardioLogger onComplete={handleWorkoutComplete} onBack={onBack} />;
       case 'PlanDayEditor':
         return <PlanDayEditor planDay={props.planDay as PlanDayEditorPlanDay} />;
+      case 'PlanScheduleEditor':
+        return <PlanScheduleEditor planId={props.planId as string} />;
+      case 'SplitChanger':
+        return <SplitChanger planId={props.planId as string} currentSplit={props.currentSplit as SplitChangerSplitType} onComplete={onBack} />;
+      case 'PlanTemplateGallery':
+        return <PlanTemplateGallery planId={props.planId as string} />;
       default:
         return null;
     }
@@ -108,6 +117,7 @@ function PageStackOverlay({ page, onBack }: { page: PageEntry; onBack: () => voi
 
 type WorkoutLoggerPlanDay = React.ComponentProps<typeof WorkoutLogger>['planDay'];
 type PlanDayEditorPlanDay = React.ComponentProps<typeof PlanDayEditor>['planDay'];
+type SplitChangerSplitType = React.ComponentProps<typeof SplitChanger>['currentSplit'];
 
 // --- Main App component ---
 
