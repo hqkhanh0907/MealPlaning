@@ -44,6 +44,20 @@
 | **Cross-Feature Navigation** | **✅** | **-** | **✅** | **SC38** |
 | **WCAG Accessibility** | **✅** | **-** | **✅** | **SC39** |
 | **Migration & Sync V2** | **✅** | **-** | **✅** | **SC40** |
+| **Fitness Plan Flexibility — Multi-Session** | **✅** | **-** | **✅** | **SC41** |
+| **Fitness Plan Flexibility — Plan Day Editor** | **✅** | **-** | **✅** | **SC42** |
+| **Fitness Plan Flexibility — Freestyle Workout** | **✅** | **-** | **✅** | **SC43** |
+
+### 1.3 Fitness Plan Flexibility — Chi tiết phạm vi
+
+| Component | Mô tả | Unit | Manual | Scenarios |
+|-----------|--------|------|--------|-----------|
+| SessionTabs | Hiển thị / ẩn tabs khi có 1 hoặc nhiều session | ✅ | ✅ | SC41 |
+| AddSessionModal | Modal thêm session mới (Strength / Cardio / Freestyle) | ✅ | ✅ | SC41 |
+| PlanDayEditor | Full-screen page chỉnh sửa bài tập trong ngày (reorder, add, remove) | ✅ | ✅ | SC42 |
+| WorkoutLogger (freestyle mode) | Chế độ tập tự do không theo plan, lưu với planDayId=null | ✅ | ✅ | SC43 |
+| PageStackRenderer | Overlay rendering cho fitness full-screen pages (PlanDayEditor, WorkoutLogger) | ✅ | ✅ | SC41-43 |
+| Schema v2 migration | Migration thêm session_order, original_exercises, plan_day_id | ✅ | ✅ | SC41 |
 
 ### 1.2 Ngoài scope
 
@@ -119,7 +133,7 @@
 
 > **Note:** Unit tests: **2860 tests** across **125 test files** (cập nhật 2026-03-26). Coverage vượt xa target ≥80%. Branch coverage 92.97% — chấp nhận được do một số defensive code paths không thể trigger trong test environment. Lazy loading + code splitting không ảnh hưởng coverage.
 >
-> **Manual scenario test cases:** 40 scenarios, **4,534 manual test cases** (SC01-SC40). Xem thư mục `docs/04-testing/scenarios/`.
+> **Manual scenario test cases:** 43 scenarios, **4,603 manual test cases** (SC01-SC43). Xem thư mục `docs/04-testing/scenarios/`.
 
 ---
 
@@ -235,13 +249,14 @@ E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua l
 
 > **Tham khảo:** Xem [coding-guidelines.md](../03-developer-guide/coding-guidelines.md) để mitigate coding-related risks.
 >
-> **Scenario-based test cases:** 40 scenarios (SC01-SC40), **4,534 test cases** across:
+> **Scenario-based test cases:** 43 scenarios (SC01-SC43), **4,603 test cases** across:
 > - SC01-SC10: Core features (Calendar, Meal Planner, Nutrition, AI, Ingredients, Dishes, Settings, Goals, Copy) — 1,050 TCs
 > - SC11-SC16: Plan Management (Clear Plan, Template Manager, Save Template, Grocery, Translation, Backup) — 1,260 TCs (210 TCs/scenario)
 > - SC17-SC24: Extended features (Google Drive, Responsive, Preview, Filter, AI Ingredients, Dark Mode, i18n, Migration) — 945 TCs
 > - SC25-SC32: Fitness (Onboarding, Training, Workout, Cardio, History, Progress, Weight, Gamification) — 440 TCs
 > - SC33-SC36: Dashboard (Score Layout, Energy/Protein, Plan, Quick Actions) — 464 TCs
 > - SC37-SC40: Integration (Auto-Adjust, Navigation, WCAG, Migration V2) — 375 TCs
+> - SC41-SC43: Fitness Flexibility (Multi-Session, Plan Day Editor, Freestyle Workout) — 69 TCs
 >
 > Xem thư mục `docs/04-testing/scenarios/` cho chi tiết từng scenario.
 
