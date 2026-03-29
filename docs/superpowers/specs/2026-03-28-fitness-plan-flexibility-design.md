@@ -39,7 +39,7 @@ Mỗi ngày trong plan là 1 danh sách Sessions (tối đa 3). Plan auto-genera
 export interface TrainingPlanDay {
   id: string;
   planId: string;
-  dayOfWeek: number;            // 0-6 (0 = Chủ nhật)
+  dayOfWeek: number;            // 1-7 (1 = Thứ 2, 7 = Chủ nhật) — theo convention codebase hiện tại
   sessionOrder: number;          // NEW: 1, 2, 3 — thứ tự buổi tập trong ngày
   workoutType: string;
   muscleGroups?: string;
@@ -49,19 +49,50 @@ export interface TrainingPlanDay {
 }
 ```
 
+**`Workout` — Thêm `planDayId` để liên kết session:**
+
+```typescript
+export interface Workout {
+  id: string;
+  date: string;
+  name: string;
+  planDayId?: string;            // NEW: FK → training_plan_days.id (null cho freestyle)
+  durationMin?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
 **DB Migration:**
 
 ```sql
 ALTER TABLE training_plan_days ADD COLUMN session_order INTEGER NOT NULL DEFAULT 1;
 ALTER TABLE training_plan_days ADD COLUMN original_exercises TEXT;
 UPDATE training_plan_days SET original_exercises = exercises WHERE original_exercises IS NULL;
+
+-- Fix pre-existing bug: CHECK constraint says 0-6 but codebase uses 1-7.
+-- SQLite cannot ALTER CHECK constraints, so we recreate via temp table.
+-- Migration service handles this as a versioned migration step.
+-- Note: actual implementation should use CREATE TABLE new → INSERT SELECT → DROP old → RENAME
+
+-- Enforce max 3 sessions per day per plan
+CREATE UNIQUE INDEX IF NOT EXISTS idx_plan_day_session
+  ON training_plan_days(plan_id, day_of_week, session_order);
+
+-- Link workout → plan day for multi-session matching
+ALTER TABLE workouts ADD COLUMN plan_day_id TEXT REFERENCES training_plan_days(id);
 ```
+
+**Pre-existing bug fix:** `training_plan_days.day_of_week` has `CHECK(day_of_week BETWEEN 0 AND 6)` but codebase convention is 1-7 (Mon=1, Sun=7). Migration must recreate table with `CHECK(day_of_week BETWEEN 1 AND 7)`. This prevents Sunday (7) insertion failures.
 
 **Quy tắc data:**
 - Plan generation luôn ghi `exercises` VÀ `originalExercises` giống nhau
 - User edit → chỉ cập nhật `exercises`, `originalExercises` giữ nguyên
 - "Khôi phục plan gốc" = copy `originalExercises` → `exercises`
-- Constraint: `session_order` IN (1, 2, 3) — tối đa 3 sessions/day
+- Constraint: `session_order` IN (1, 2, 3) — tối đa 3 sessions/day, enforced bởi UNIQUE index `(plan_id, day_of_week, session_order)`
+- `dayOfWeek` dùng convention **1-7** (1=Thứ 2, 7=CN) — khớp với `useTrainingPlan.ts` và `TrainingPlanView.tsx`
+- `Workout.planDayId` liên kết trực tiếp với `TrainingPlanDay.id` — giải quyết matching multi-session. `null` cho freestyle workouts.
 
 ### 2.2 Store Actions
 
@@ -98,9 +129,10 @@ removePlanDaySession: (dayId: string) => void
 const todayPlanDay = planDays.find(d => d.dayOfWeek === todayDayOfWeek);
 const todayWorkout = workouts.find(w => w.date === todayStr);
 
-// AFTER (plural)
+// AFTER (plural, dayOfWeek convention 1-7)
+const todayDow = today.getDay() === 0 ? 7 : today.getDay(); // Fix: JS getDay() 0=Sun → convert to 7
 const todayPlanDays = planDays
-  .filter(d => d.dayOfWeek === todayDayOfWeek)
+  .filter(d => d.dayOfWeek === todayDow)
   .sort((a, b) => a.sessionOrder - b.sessionOrder);
 const todayWorkouts = workouts.filter(w => w.date === todayStr);
 ```
@@ -115,7 +147,38 @@ const todayWorkouts = workouts.filter(w => w.date === todayStr);
 | `training-partial` | **NEW:** Đã tập 1+ buổi nhưng chưa xong hết |
 | `training-completed` | Tất cả sessions đã có workout tương ứng |
 
-**Matching logic:** Mỗi session matched với workout bằng `workoutType` + `date`. Freestyle workouts (không có planDay) không cần match.
+**Updated function signature:**
+
+```typescript
+export type TodayPlanState =
+  | 'training-pending'
+  | 'training-partial'     // NEW
+  | 'training-completed'
+  | 'rest-day'
+  | 'no-plan';
+
+export function determineTodayPlanState(
+  activePlan: TrainingPlan | undefined,
+  todayPlanDays: TrainingPlanDay[],      // CHANGED: array thay vì singular
+  todayWorkouts: Workout[],               // CHANGED: array thay vì singular
+): TodayPlanState {
+  if (!activePlan) return 'no-plan';
+  if (todayPlanDays.length === 0) return 'rest-day';
+  
+  // Match workouts → plan days via planDayId
+  const completedSessionIds = new Set(
+    todayWorkouts.filter(w => w.planDayId).map(w => w.planDayId)
+  );
+  const totalSessions = todayPlanDays.length;
+  const completedSessions = todayPlanDays.filter(d => completedSessionIds.has(d.id)).length;
+  
+  if (completedSessions === 0) return 'training-pending';
+  if (completedSessions < totalSessions) return 'training-partial';
+  return 'training-completed';
+}
+```
+
+**Note:** `useTodaysPlan.ts` hiện có bug: dùng `today.getDay()` (0=CN) nhưng plan dùng convention 1-7 (7=CN). Fix bằng conversion `getDay() === 0 ? 7 : getDay()` — đồng bộ với `TrainingPlanView.tsx:getTodayDow()`.
 
 ---
 
@@ -379,14 +442,14 @@ Thêm vào `src/locales/vi.json`:
 | **CREATE** | `src/features/fitness/components/PlanDayEditor.tsx` | Full-screen editor cho exercises |
 | **CREATE** | `src/features/fitness/components/AddSessionModal.tsx` | Bottom sheet chọn loại session |
 | **CREATE** | `src/features/fitness/components/SessionTabs.tsx` | Session tab pills component |
-| **MODIFY** | `src/features/fitness/types.ts` | Thêm `sessionOrder`, `originalExercises` |
-| **MODIFY** | `src/services/schema.ts` | Migration: `session_order`, `original_exercises` columns |
+| **MODIFY** | `src/features/fitness/types.ts` | Thêm `sessionOrder`, `originalExercises` vào TrainingPlanDay; thêm `planDayId` vào Workout |
+| **MODIFY** | `src/services/schema.ts` | Migration: `session_order`, `original_exercises`, `plan_day_id` columns + UNIQUE index |
 | **MODIFY** | `src/store/fitnessStore.ts` | 4 actions mới + SQLite persist |
 | **MODIFY** | `src/features/fitness/components/TrainingPlanView.tsx` | Session tabs + edit button |
-| **MODIFY** | `src/features/fitness/components/WorkoutLogger.tsx` | Sticky "Thêm bài tập" button + freestyle name input |
+| **MODIFY** | `src/features/fitness/components/WorkoutLogger.tsx` | Sticky "Thêm bài tập" button + freestyle name input + set `planDayId` on save |
 | **MODIFY** | `src/features/fitness/hooks/useTrainingPlan.ts` | Multi-session plan generation |
-| **MODIFY** | `src/features/dashboard/hooks/useTodaysPlan.ts` | Multi-session + partial state |
-| **MODIFY** | `src/features/dashboard/components/TodaysPlanCard.tsx` | Multi-session display |
+| **MODIFY** | `src/features/dashboard/hooks/useTodaysPlan.ts` | Multi-session + partial state + fix dayOfWeek bug (0→7 for Sunday) |
+| **MODIFY** | `src/features/dashboard/components/TodaysPlanCard.tsx` | Multi-session display + `training-partial` state |
 | **MODIFY** | `src/locales/vi.json` | New i18n keys |
 | **CREATE** | `src/__tests__/PlanDayEditor.test.tsx` | Tests |
 | **CREATE** | `src/__tests__/AddSessionModal.test.tsx` | Tests |
