@@ -64,16 +64,32 @@ export const config = {
       return;
     }
     const exec = browser as unknown as { execute: (fn: () => unknown) => Promise<unknown> };
-    // Ensure onboarding is marked complete so the app shows main UI
-    await exec.execute(() => {
+    const ciTimeout = process.env.CI ? 60000 : 30000;
+
+    // Check if we need to set onboarding flag (first boot of fresh APK)
+    const needsReload = await exec.execute(() => {
       const key = 'app-onboarding-storage';
       if (!localStorage.getItem(key)) {
         localStorage.setItem(key, JSON.stringify({ state: { isAppOnboarded: true }, version: 0 }));
-        location.reload();
+        return true;
       }
+      return false;
     });
-    // Wait for Capacitor React app to finish loading inside the WebView
-    const ciTimeout = process.env.CI ? 60000 : 30000;
+
+    if (needsReload) {
+      // Reload and wait for the page to actually start reloading
+      await exec.execute(() => { location.reload(); });
+      await browser.pause(3000);
+      // Re-switch to webview context (reload may reset context)
+      try {
+        const b = browser as unknown as { getContexts: () => Promise<string[]>; switchContext: (c: string) => Promise<void> };
+        const ctxs = await b.getContexts();
+        const wv = ctxs.find((c: string) => c.startsWith('WEBVIEW'));
+        if (wv) await b.switchContext(wv);
+      } catch { /* already in webview */ }
+    }
+
+    // Wait for document to be fully loaded
     await browser.waitUntil(
       async () => {
         try {
@@ -100,7 +116,7 @@ export const config = {
       },
       { timeout: ciTimeout, interval: 2000, timeoutMsg: 'React app did not render in #root' }
     );
-    // Wait for bottom nav to be present (app fully loaded)
+    // Wait for bottom nav to be present (app fully loaded, not stuck on onboarding/error)
     await browser.waitUntil(
       async () => {
         try {
