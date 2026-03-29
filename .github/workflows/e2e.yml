@@ -65,8 +65,10 @@ jobs:
       - name: Build web app
         run: npm run build
 
-      - name: Add Android platform
-        run: npx cap add android 2>/dev/null || echo "Android platform already exists, skipping add"
+      - name: Prepare Android platform
+        run: |
+          rm -rf android
+          npx cap add android
 
       - name: Restore custom build config
         run: |
@@ -81,6 +83,7 @@ jobs:
       - name: Build release APK
         working-directory: android
         run: |
+          chmod +x gradlew
           ./gradlew clean
           ./gradlew assembleRelease
 
