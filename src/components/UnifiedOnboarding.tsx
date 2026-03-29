@@ -76,7 +76,7 @@ export function UnifiedOnboarding() {
   const saveProfile = useHealthProfileStore((s) => s.saveProfile);
   const saveGoal = useHealthProfileStore((s) => s.saveGoal);
 
-  const initialSection = (resumeSection ?? 1) as Section;
+  const initialSection = (resumeSection || 1) as Section;
   const [location, setLocation] = useState<StepLocation>({
     section: initialSection,
     step: 0,

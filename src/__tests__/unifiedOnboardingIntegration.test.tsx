@@ -55,6 +55,7 @@ vi.mock('../store/appOnboardingStore', () => ({
 
 const mockSetOnboarded = vi.fn();
 const mockSetPlanStrategy = vi.fn();
+const mockSetTrainingProfile = vi.fn();
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) =>
@@ -63,6 +64,7 @@ vi.mock('../store/fitnessStore', () => ({
       planStrategy: null,
       setOnboarded: mockSetOnboarded,
       setPlanStrategy: mockSetPlanStrategy,
+      setTrainingProfile: mockSetTrainingProfile,
     }),
 }));
 

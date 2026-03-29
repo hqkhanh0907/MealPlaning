@@ -3,6 +3,8 @@ import { useController, type UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useFitnessStore } from '@/store/fitnessStore';
+import type { EquipmentType, PeriodizationModel, TrainingExperience, TrainingGoal } from '@/features/fitness/types';
 import type { OnboardingFormData } from './onboardingSchema';
 
 interface TrainingDetailStepsProps {
@@ -22,8 +24,26 @@ const EQUIPMENT_OPTIONS = [
 
 export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingSection }: TrainingDetailStepsProps) {
   const experience = form.watch('experience');
+  const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);
 
   const handleConfirmTraining = () => {
+    const values = form.getValues();
+    setTrainingProfile({
+      id: crypto.randomUUID(),
+      trainingGoal: values.trainingGoal as TrainingGoal,
+      trainingExperience: values.experience as TrainingExperience,
+      daysPerWeek: values.daysPerWeek,
+      sessionDurationMin: values.sessionDuration ?? 60,
+      availableEquipment: (values.equipment ?? []) as EquipmentType[],
+      cardioSessionsWeek: values.cardioSessions ?? 0,
+      periodizationModel: (values.periodization ?? 'linear') as PeriodizationModel,
+      planCycleWeeks: 4,
+      injuryRestrictions: [],
+      priorityMuscles: [],
+      cardioTypePref: 'mixed',
+      cardioDurationMin: 30,
+      updatedAt: new Date().toISOString(),
+    });
     setOnboardingSection(5);
     goNext();
   };

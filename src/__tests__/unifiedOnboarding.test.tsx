@@ -64,6 +64,7 @@ const mockAddPlanDays = vi.fn();
 
 const mockSetOnboarded = vi.fn();
 const mockSetPlanStrategy = vi.fn();
+const mockSetTrainingProfile = vi.fn();
 
 const defaultFitnessState = {
   trainingProfile: {
@@ -81,6 +82,7 @@ const defaultFitnessState = {
   planStrategy: 'auto',
   setOnboarded: mockSetOnboarded,
   setPlanStrategy: mockSetPlanStrategy,
+  setTrainingProfile: mockSetTrainingProfile,
 };
 
 const mockFitnessSelector = vi.fn(

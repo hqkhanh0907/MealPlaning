@@ -839,7 +839,13 @@
       "deleteSession": "Xóa buổi tập",
       "deleteSessionConfirm": "Xóa buổi tập này?",
       "delete": "Xóa",
-      "cancelDelete": "Hủy"
+      "cancelDelete": "Hủy",
+      "regenerate": "Tạo lại kế hoạch",
+      "regenerateConfirm": "Tạo lại kế hoạch tập luyện? Kế hoạch hiện tại sẽ bị thay thế.",
+      "confirmRegenerate": "Tạo lại",
+      "cancelRegenerate": "Hủy",
+      "convertToRest": "Chuyển thành ngày nghỉ",
+      "convertToWorkout": "Thêm buổi tập"
     },
     "workout": {
       "tab": "Buổi tập"
@@ -1324,6 +1330,8 @@
       "error": "Có lỗi xảy ra khi tạo kế hoạch",
       "retry": "Thử lại",
       "switchManual": "Tự lên kế hoạch",
+      "skipToManual": "Tự lên kế hoạch",
+      "skip": "Bỏ qua",
       "subtitle": "Dựa trên hồ sơ và mục tiêu của bạn",
       "step_analyzing": "Phân tích mục tiêu tập luyện",
       "step_optimizing": "Lựa chọn bài tập phù hợp",
