@@ -17,7 +17,7 @@ const STEPS = [
   { key: 'finalizing', delay: 7.5 },
 ] as const;
 
-export function PlanComputingScreen({ goNext }: PlanComputingScreenProps) {
+export function PlanComputingScreen({ form, goNext }: PlanComputingScreenProps) {
   const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,7 +50,7 @@ export function PlanComputingScreen({ goNext }: PlanComputingScreenProps) {
       </motion.div>
 
       <h2 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
-        {t('onboarding.computing.title')}
+        {t('onboarding.computing.title', { name: form.getValues().name })}
       </h2>
       <p className="mb-8 text-center text-sm text-slate-500 dark:text-slate-400">
         {t('onboarding.computing.subtitle')}

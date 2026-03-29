@@ -54,7 +54,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
                     : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
                 )}
               >
-                {t(`fitness.onboarding.goal_${goal}`)}
+                {t(`fitness.onboarding.${goal}`)}
               </button>
             ))}
           </div>
@@ -78,7 +78,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
                     : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
                 )}
               >
-                {t(`fitness.onboarding.experience_${level}`)}
+                {t(`fitness.onboarding.${level}`)}
               </button>
             ))}
           </div>

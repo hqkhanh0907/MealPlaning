@@ -24,7 +24,7 @@ export function PlanPreviewScreen({ form, goBack, completeOnboarding }: PlanPrev
     <div className="flex flex-1 flex-col" data-testid="plan-preview">
       <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.preview.title')}
+          {t('onboarding.preview.title', { name: values.name })}
         </h2>
         <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
           {t('onboarding.preview.subtitle')}
@@ -56,11 +56,11 @@ export function PlanPreviewScreen({ form, goBack, completeOnboarding }: PlanPrev
         <div className="mb-6 grid grid-cols-3 gap-3">
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{daysPerWeek}</p>
-            <p className="text-[10px] text-slate-500">{t('onboarding.preview.workoutDays')}</p>
+            <p className="text-[10px] text-slate-500">{t('onboarding.preview.workoutDays', { count: daysPerWeek })}</p>
           </div>
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{restDays.length}</p>
-            <p className="text-[10px] text-slate-500">{t('onboarding.preview.restDays')}</p>
+            <p className="text-[10px] text-slate-500">{t('onboarding.preview.restDays', { count: restDays.length })}</p>
           </div>
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{values.sessionDuration ?? 60}</p>

@@ -12,8 +12,9 @@ interface PlanStrategyChoiceProps {
   goToSection: (section: 1 | 2 | 3 | 4 | 5 | 6 | 7) => void;
 }
 
-export function PlanStrategyChoice({ goNext, goBack, setPlanStrategy, goToSection }: PlanStrategyChoiceProps) {
+export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goToSection }: PlanStrategyChoiceProps) {
   const { t } = useTranslation();
+  const values = form.getValues();
 
   const handleAuto = () => {
     setPlanStrategy('auto');
@@ -29,7 +30,7 @@ export function PlanStrategyChoice({ goNext, goBack, setPlanStrategy, goToSectio
     <div className="flex flex-1 flex-col" data-testid="plan-strategy-choice">
       <div className="flex flex-1 flex-col items-center justify-center px-6">
         <h2 className="mb-2 text-center text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.strategy.title')}
+          {t('onboarding.strategy.title', { name: values.name })}
         </h2>
         <p className="mb-8 text-center text-sm text-slate-500 dark:text-slate-400">
           {t('onboarding.strategy.subtitle')}

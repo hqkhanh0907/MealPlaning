@@ -892,17 +892,17 @@ describe('TrainingCoreStep', () => {
   it('renders training goal options', () => {
     renderWithForm(TrainingCoreStep);
     expect(screen.getByTestId('training-core-step')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.goal_strength')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.goal_hypertrophy')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.goal_endurance')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.goal_general')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.strength')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.hypertrophy')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.endurance')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.general')).toBeInTheDocument();
   });
 
   it('renders experience level options', () => {
     renderWithForm(TrainingCoreStep);
-    expect(screen.getByText('fitness.onboarding.experience_beginner')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.experience_intermediate')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.experience_advanced')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.beginner')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.intermediate')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.advanced')).toBeInTheDocument();
   });
 
   it('renders days per week options (2-6)', () => {
@@ -934,9 +934,9 @@ describe('TrainingCoreStep', () => {
 
   it('allows selecting a training goal', () => {
     renderWithForm(TrainingCoreStep);
-    const strengthBtn = screen.getByText('fitness.onboarding.goal_strength').closest('button');
+    const strengthBtn = screen.getByText('fitness.onboarding.strength').closest('button');
     if (strengthBtn) fireEvent.click(strengthBtn);
-    expect(screen.getByText('fitness.onboarding.goal_strength')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.strength')).toBeInTheDocument();
   });
 });
 
@@ -974,8 +974,8 @@ describe('TrainingDetailSteps', () => {
       { step: 1, setOnboardingSection },
     );
     expect(screen.getByText('fitness.onboarding.equipment')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.equipment_barbell')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.equipment_dumbbell')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.equip_barbell')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.equip_dumbbell')).toBeInTheDocument();
   });
 
   it('allows toggling equipment selection', () => {
@@ -987,12 +987,12 @@ describe('TrainingDetailSteps', () => {
       }>,
       { step: 1, setOnboardingSection },
     );
-    const barbellBtn = screen.getByText('fitness.onboarding.equipment_barbell').closest('button');
+    const barbellBtn = screen.getByText('fitness.onboarding.equip_barbell').closest('button');
     if (barbellBtn) {
       fireEvent.click(barbellBtn);
       fireEvent.click(barbellBtn);
     }
-    expect(screen.getByText('fitness.onboarding.equipment_barbell')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.equip_barbell')).toBeInTheDocument();
   });
 
   it('renders CardioStep at step 2', () => {
@@ -1035,9 +1035,9 @@ describe('TrainingDetailSteps', () => {
       { experience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.periodization')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.periodization_linear')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.periodization_undulating')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.periodization_block')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_linear')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_undulating')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_block')).toBeInTheDocument();
   });
 
   it('renders TrainingConfirmStep at step 4 (default)', () => {
@@ -1063,8 +1063,8 @@ describe('TrainingDetailSteps', () => {
       { step: 3, setOnboardingSection },
       { experience: 'beginner', daysPerWeek: 4, trainingGoal: 'hypertrophy' },
     );
-    expect(screen.getByText('fitness.onboarding.goal_hypertrophy')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.experience_beginner')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.hypertrophy')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.beginner')).toBeInTheDocument();
     expect(screen.getByText('4')).toBeInTheDocument();
   });
 
@@ -1516,11 +1516,11 @@ describe('NutritionGoalStep – field interactions', () => {
 describe('TrainingCoreStep – field interactions', () => {
   it('allows clicking each experience level button', () => {
     const { getByText } = renderWithForm(TrainingCoreStep);
-    const intermediateBtn = getByText('fitness.onboarding.experience_intermediate');
+    const intermediateBtn = getByText('fitness.onboarding.intermediate');
     fireEvent.click(intermediateBtn);
     expect(intermediateBtn.className).toContain('border-emerald-500');
 
-    const advancedBtn = getByText('fitness.onboarding.experience_advanced');
+    const advancedBtn = getByText('fitness.onboarding.advanced');
     fireEvent.click(advancedBtn);
     expect(advancedBtn.className).toContain('border-emerald-500');
   });
@@ -1590,11 +1590,11 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
       { step: 3, setOnboardingSection },
       { experience: 'intermediate' },
     );
-    const linearBtn = getByText('fitness.onboarding.periodization_linear');
+    const linearBtn = getByText('fitness.onboarding.period_linear');
     fireEvent.click(linearBtn);
     expect(linearBtn.closest('button')?.className).toContain('border-emerald-500');
 
-    const blockBtn = getByText('fitness.onboarding.periodization_block');
+    const blockBtn = getByText('fitness.onboarding.period_block');
     fireEvent.click(blockBtn);
     expect(blockBtn.closest('button')?.className).toContain('border-emerald-500');
   });
@@ -1608,7 +1608,7 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
       }>,
       { step: 1, setOnboardingSection },
     );
-    const barbellBtn = getByText('fitness.onboarding.equipment_barbell');
+    const barbellBtn = getByText('fitness.onboarding.equip_barbell');
     fireEvent.click(barbellBtn);
     expect(barbellBtn.className).toContain('border-emerald-500');
     // Toggle off

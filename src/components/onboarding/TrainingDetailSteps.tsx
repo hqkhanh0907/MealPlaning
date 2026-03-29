@@ -111,7 +111,7 @@ function EquipmentStep({ form, goNext, goBack }: { form: UseFormReturn<Onboardin
                 : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
             )}
           >
-            {t(`fitness.onboarding.equipment_${eq}`)}
+            {t(`fitness.onboarding.equip_${eq}`)}
           </button>
         ))}
       </div>
@@ -182,7 +182,7 @@ function PeriodizationStep({ form, goNext, goBack }: { form: UseFormReturn<Onboa
                 ? 'text-emerald-700 dark:text-emerald-300'
                 : 'text-slate-700 dark:text-slate-300',
             )}>
-              {t(`fitness.onboarding.periodization_${opt}`)}
+              {t(`fitness.onboarding.period_${opt}`)}
             </span>
           </button>
         ))}
@@ -202,8 +202,8 @@ function TrainingConfirmStep({ form, goNext, goBack }: { form: UseFormReturn<Onb
           {t('onboarding.confirm.trainingTitle')}
         </h2>
         <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
-          <SummaryRow label={t('fitness.onboarding.goal')} value={t(`fitness.onboarding.goal_${values.trainingGoal}`)} />
-          <SummaryRow label={t('fitness.onboarding.experience')} value={t(`fitness.onboarding.experience_${values.experience}`)} />
+          <SummaryRow label={t('fitness.onboarding.goal')} value={t(`fitness.onboarding.${values.trainingGoal}`)} />
+          <SummaryRow label={t('fitness.onboarding.experience')} value={t(`fitness.onboarding.${values.experience}`)} />
           <SummaryRow label={t('fitness.onboarding.daysPerWeek')} value={`${values.daysPerWeek}`} />
           {values.sessionDuration && <SummaryRow label={t('fitness.onboarding.sessionDuration')} value={`${values.sessionDuration} ${t('fitness.onboarding.minutes')}`} />}
           {values.cardioSessions != null && <SummaryRow label={t('fitness.onboarding.cardioSessions')} value={`${values.cardioSessions}`} />}

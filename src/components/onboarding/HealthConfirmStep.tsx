@@ -88,7 +88,7 @@ export function HealthConfirmStep({
     <div className="flex flex-1 flex-col" data-testid="health-confirm-step">
       <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.confirm.title')}
+          {t('onboarding.confirm.title', { name: values.name })}
         </h2>
         <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
           {t('onboarding.confirm.subtitle')}
