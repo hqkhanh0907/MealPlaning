@@ -5,7 +5,6 @@ import { SubTabBar } from '../../../components/shared/SubTabBar';
 import type { SubTab } from '../../../components/shared/SubTabBar';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
-import { FitnessOnboarding } from './FitnessOnboarding';
 import { TrainingPlanView } from './TrainingPlanView';
 import { WorkoutHistory } from './WorkoutHistory';
 import { ProgressDashboard } from './ProgressDashboard';
@@ -19,11 +18,8 @@ type FitnessSubTab = 'plan' | 'history' | 'progress';
 
 const FitnessTabInner: React.FC = () => {
   const { t } = useTranslation();
-  const isOnboarded = useFitnessStore((s) => s.isOnboarded);
-  const setOnboarded = useFitnessStore((s) => s.setOnboarded);
   const [activeSubTab, setActiveSubTab] = useState<FitnessSubTab>('plan');
   const { insight } = useFitnessNutritionBridge();
-  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
   const trainingProfile = useFitnessStore((s) => s.trainingProfile);
   const addTrainingPlan = useFitnessStore((s) => s.addTrainingPlan);
   const addPlanDays = useFitnessStore((s) => s.addPlanDays);
@@ -40,27 +36,6 @@ const FitnessTabInner: React.FC = () => {
     ],
     [t],
   );
-
-  const handleOnboardingComplete = useCallback(() => {
-    setOnboarded(true);
-  }, [setOnboarded]);
-
-  const hasGeneratedAfterOnboard = React.useRef(false);
-
-  React.useEffect(() => {
-    if (isOnboarded && trainingProfile && !hasGeneratedAfterOnboard.current && trainingPlans.length === 0) {
-      hasGeneratedAfterOnboard.current = true;
-      const result = generatePlan({
-        trainingProfile,
-        healthProfile: { age: healthProfileAge ?? 30, weightKg: healthProfileWeight },
-      });
-      if (result) {
-        addTrainingPlan(result.plan);
-        addPlanDays(result.days);
-        useFitnessStore.setState({ showPlanCelebration: true });
-      }
-    }
-  }, [isOnboarded, trainingProfile, trainingPlans.length, generatePlan, healthProfileWeight, healthProfileAge, addTrainingPlan, addPlanDays]);
 
   const handleTabChange = useCallback((id: string) => {
     setActiveSubTab(id as FitnessSubTab);
@@ -81,10 +56,6 @@ const FitnessTabInner: React.FC = () => {
     }
     setActiveSubTab('plan');
   }, [trainingProfile, generatePlan, healthProfileWeight, healthProfileAge, addTrainingPlan, addPlanDays, notify, t]);
-
-  if (!isOnboarded) {
-    return <FitnessOnboarding onComplete={handleOnboardingComplete} />;
-  }
 
   return (
     <div className="flex flex-col h-full" data-testid="fitness-tab">

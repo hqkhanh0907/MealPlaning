@@ -21,16 +21,6 @@ vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
 }));
 
-vi.mock('../features/fitness/components/FitnessOnboarding', () => ({
-  FitnessOnboarding: ({ onComplete }: { onComplete: () => void }) => (
-    <div data-testid="fitness-onboarding">
-      <button data-testid="complete-onboarding" onClick={onComplete}>
-        Complete
-      </button>
-    </div>
-  ),
-}));
-
 vi.mock('../features/fitness/components/TrainingPlanView', () => ({
   TrainingPlanView: () => (
     <div data-testid="training-plan-view">TrainingPlanView</div>
@@ -85,9 +75,6 @@ vi.mock('../contexts/NotificationContext', () => ({
 }));
 
 interface MockFitnessState {
-  isOnboarded: boolean;
-  setOnboarded: Mock;
-  trainingPlans: unknown[];
   trainingProfile: unknown;
   addTrainingPlan: Mock;
   addPlanDays: Mock;
@@ -98,67 +85,16 @@ const mockUseFitnessStore = useFitnessStore as unknown as Mock;
 afterEach(cleanup);
 
 describe('FitnessTab', () => {
-  describe('when user is not onboarded', () => {
-    const mockSetOnboarded = vi.fn();
-    const mockAddTrainingPlan = vi.fn();
-    const mockAddPlanDays = vi.fn();
-
-    beforeEach(() => {
-      mockSetOnboarded.mockClear();
-      mockAddTrainingPlan.mockClear();
-      mockAddPlanDays.mockClear();
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            isOnboarded: false,
-            setOnboarded: mockSetOnboarded,
-            trainingPlans: [],
-            trainingProfile: null,
-            addTrainingPlan: mockAddTrainingPlan,
-            addPlanDays: mockAddPlanDays,
-          }),
-      );
-    });
-
-    it('renders FitnessOnboarding when isOnboarded is false', () => {
-      render(<FitnessTab />);
-      expect(
-        screen.getByTestId('fitness-onboarding'),
-      ).toBeInTheDocument();
-    });
-
-    it('does not render sub-tab bar', () => {
-      render(<FitnessTab />);
-      expect(screen.queryByTestId('subtab-bar')).not.toBeInTheDocument();
-    });
-
-    it('does not render fitness-tab container', () => {
-      render(<FitnessTab />);
-      expect(screen.queryByTestId('fitness-tab')).not.toBeInTheDocument();
-    });
-
-    it('calls setOnboarded(true) when onboarding completes', () => {
-      render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('complete-onboarding'));
-      expect(mockSetOnboarded).toHaveBeenCalledWith(true);
-    });
-  });
-
   describe('when user is onboarded', () => {
-    const mockSetOnboarded = vi.fn();
     const mockAddTrainingPlan = vi.fn();
     const mockAddPlanDays = vi.fn();
 
     beforeEach(() => {
-      mockSetOnboarded.mockClear();
       mockAddTrainingPlan.mockClear();
       mockAddPlanDays.mockClear();
       mockUseFitnessStore.mockImplementation(
         (selector: (state: MockFitnessState) => unknown) =>
           selector({
-            isOnboarded: true,
-            setOnboarded: mockSetOnboarded,
-            trainingPlans: [],
             trainingProfile: null,
             addTrainingPlan: mockAddTrainingPlan,
             addPlanDays: mockAddPlanDays,
