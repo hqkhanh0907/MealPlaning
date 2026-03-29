@@ -47,7 +47,9 @@
     "deselect": "Bỏ chọn",
     "clone": "Nhân bản",
     "closeDialog": "Đóng hộp thoại",
-    "next": "Tiếp theo"
+    "next": "Tiếp theo",
+    "sugar": "Đường",
+    "sodium": "Natri"
   },
   "meal": {
     "breakfast": "Sáng",
@@ -58,7 +60,9 @@
     "dinnerFull": "Bữa Tối",
     "breakfastShort": "Sáng",
     "lunchShort": "Trưa",
-    "dinnerShort": "Tối"
+    "dinnerShort": "Tối",
+    "snack": "Phụ",
+    "snackFull": "Bữa Phụ"
   },
   "sort": {
     "nameAsc": "Tên (A-Z)",
@@ -358,6 +362,7 @@
     "exportSuccess": "Xuất dữ liệu thành công!",
     "exportFailed": "Xuất thất bại",
     "invalidFile": "File không hợp lệ",
+    "importSuccess": "Nhập dữ liệu thành công!",
     "importFailed": "Nhập thất bại",
     "importConfirmMsg": "Dữ liệu nhập sẽ ghi đè dữ liệu hiện tại ({{summary}}). Bạn có muốn tiếp tục?",
     "neverBackedUp": "Chưa từng sao lưu — hãy sao lưu dữ liệu ngay!",
@@ -1137,7 +1142,8 @@
     "proteinRatio": "Tỉ lệ protein (g/kg)",
     "macroPreview": "Xem trước macros",
     "save": "Lưu",
-    "saved": "Đã lưu"
+    "saved": "Đã lưu",
+    "other": "Khác"
   },
   "insightCard": {
     "dismiss": "Bỏ qua"
@@ -1216,7 +1222,8 @@
       "activity_light_desc": "Đi bộ, việc nhà cơ bản",
       "activity_moderate_desc": "Đi lại nhiều, công việc chân tay",
       "activity_active_desc": "Lao động chân tay, thể thao",
-      "activity_extra_active_desc": "VĐV / lao động nặng liên tục"
+      "activity_extra_active_desc": "VĐV / lao động nặng liên tục",
+      "gender_other": "Khác"
     },
     "goal": {
       "title": "Mục tiêu của bạn?",
@@ -1344,6 +1351,15 @@
     "error": {
       "title": "Đã xảy ra lỗi",
       "restart": "Bắt đầu lại"
+    }
+  },
+  "health": {
+    "activityLevel": {
+      "sedentary": "Ít vận động",
+      "light": "Hoạt động nhẹ",
+      "moderate": "Hoạt động vừa phải",
+      "active": "Hoạt động tích cực",
+      "extra_active": "Hoạt động rất cao"
     }
   }
 }
