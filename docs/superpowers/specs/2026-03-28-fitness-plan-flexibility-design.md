@@ -196,7 +196,7 @@ Cập nhật `TrainingPlanView.tsx`:
 ┌───────────────────────────────────────────────┐
 │ [T2] [T3] [T4] [T5] [T6] [T7] [CN]          │  ← Calendar strip (giữ nguyên)
 ├───────────────────────────────────────────────┤
-│ [☀️ Buổi 1] [🌙 Buổi 2] [➕]                 │  ← Session tabs (NEW)
+│ [Sun Buổi 1] [Moon Buổi 2] [+]               │  ← Session tabs (Lucide icons: Sun/Moon, NO emoji)
 ├───────────────────────────────────────────────┤
 │ Upper Push                              ✏️    │
 │ chest, shoulders, triceps                     │
@@ -237,17 +237,17 @@ Tạo mới: `src/features/fitness/components/PlanDayEditor.tsx`
 ├───────────────────────────────────────────────┤
 │                                               │
 │ ┌─────────────────────────────────────────┐   │
-│ │ ☰  1. Bench Press                  4 sets│  │  ← Drag handle + exercise info
+│ │ ≡  1. Bench Press                  4 sets│  │  ← GripVertical icon (Lucide) + exercise info
 │ │     Ngực • Barbell        6-10 reps • 120s│ │     Nút ✕ xóa
 │ └─────────────────────────────────────────┘   │
 │                                               │
 │ ┌─────────────────────────────────────────┐   │
-│ │ ☰  2. Incline DB Press            3 sets│  │
+│ │ ≡  2. Incline DB Press            3 sets│  │
 │ │     Ngực (trên) • DB     8-12 reps • 90s│  │
 │ └─────────────────────────────────────────┘   │
 │                                               │
 │ ┌─────────────────────────────────────────┐   │
-│ │ ☰  3. OHP                         3 sets│  │
+│ │ ≡  3. OHP                         3 sets│  │
 │ │     Vai • Barbell        8-12 reps • 90s│  │
 │ └─────────────────────────────────────────┘   │
 │                                               │
@@ -260,7 +260,7 @@ Tạo mới: `src/features/fitness/components/PlanDayEditor.tsx`
 
 **Interactions:**
 - **Nhấn exercise card:** Mở inline edit cho sets, repsMin, repsMax, restSeconds (stepper buttons ±1)
-- **☰ Drag handle:** Kéo thả để reorder exercises
+- **`<GripVertical>` Drag handle:** Kéo thả để reorder exercises. **Phải có alternative:** nút `<ChevronUp>`/`<ChevronDown>` (Lucide) hiển thị bên phải mỗi exercise card để move up/down (accessibility: không rely on gesture-only — guideline `gesture-alternative`)
 - **✕ Xóa:** Xóa exercise khỏi danh sách (cần ít nhất 1 exercise)
 - **➕ Thêm bài tập:** Mở ExerciseSelector (component có sẵn) dạng bottom sheet
 - **💾 Lưu:** Gọi `updatePlanDayExercises()` → popPage()
@@ -273,15 +273,17 @@ Tạo mới: `src/features/fitness/components/PlanDayEditor.tsx`
 
 Tạo mới: `src/features/fitness/components/AddSessionModal.tsx`
 
+**⚠️ PHẢI dùng `ModalBackdrop` component** (pattern hiện tại trong codebase) + `useModalBackHandler` hook cho back button handling. Dùng `rounded-t-3xl` trên mobile (nhất quán với SetEditor, ExerciseSelector).
+
 **Mở khi:** User nhấn tab "+" trên Session Tabs.
 
 **3 options:**
 
 | Option | Icon | Label | Flow khi chọn |
 |--------|------|-------|---------------|
-| Strength | 🏋️ | Sức mạnh (Strength) | → Chọn nhóm cơ → auto-suggest bài tập → Tạo session → Mở PlanDayEditor |
-| Cardio | 🏃 | Cardio | → Chọn loại cardio → Tạo session cardio → Mở CardioLogger |
-| Freestyle | ⚡ | Tập tự do (Freestyle) | → Mở WorkoutLogger trống (không planDay) → Hỏi tên sau khi xong |
+| Strength | `<Dumbbell>` (Lucide) | Sức mạnh (Strength) | → Chọn nhóm cơ → auto-suggest bài tập → Tạo session → Mở PlanDayEditor |
+| Cardio | `<Heart>` (Lucide) | Cardio | → Chọn loại cardio → Tạo session cardio → Mở CardioLogger |
+| Freestyle | `<Zap>` (Lucide) | Tập tự do (Freestyle) | → Mở WorkoutLogger trống (không planDay) → Hỏi tên sau khi xong |
 
 **Validation:** Nếu đã có 3 sessions → hiển thị "Tối đa 3 buổi/ngày", nút disabled.
 
@@ -475,3 +477,68 @@ Thêm vào `src/locales/vi.json`:
 - `original_exercises` backfill từ `exercises`: Nút "Khôi phục gốc" hoạt động cho plan cũ
 - `useTodaysPlan` return type mở rộng (thêm fields), không break existing consumers
 - `determineTodayPlanState` thêm state `training-partial` — TodaysPlanCard cần handle
+
+---
+
+## 11. UI Implementation Standards (từ UI/UX Review)
+
+Các quy tắc bắt buộc khi implement UI cho spec này:
+
+### 11.1 Icons — KHÔNG dùng emoji
+
+- **LUÔN** dùng Lucide React icons (`lucide-react`) — nhất quán với toàn bộ codebase
+- **KHÔNG BAO GIỜ** dùng emoji (☀️ 🌙 🏋️ 🏃 ⚡) làm structural icon
+- Icon mapping:
+  - Session Sáng → `<Sun>`, Session Chiều → `<Moon>` hoặc `<Sunset>`
+  - Strength → `<Dumbbell>`, Cardio → `<Heart>`, Freestyle → `<Zap>`
+  - Drag handle → `<GripVertical>`, Move up/down → `<ChevronUp>`/`<ChevronDown>`
+  - Edit → `<Pencil>`, Save → `<Save>`, Restore → `<RotateCcw>`
+  - Check/Complete → `<Check>` (NOT ✅ emoji)
+
+### 11.2 Touch Targets
+
+- Tất cả interactive elements: **min height 44px** (Apple HIG)
+- Session tabs: `py-3 px-4` (tương đương ~44px height)
+- Gap giữa tabs: **min 8px** (`gap-2`)
+- Exercise cards trong PlanDayEditor: `py-3 px-4` min
+- Drag handle hit area: Expand bằng `hitSlop` hoặc `p-3` padding
+
+### 11.3 Dark Mode
+
+- Tất cả component MỚI phải support dark mode:
+  - Background: `bg-white dark:bg-slate-800`
+  - Text: `text-slate-900 dark:text-slate-100`
+  - Secondary text: `text-slate-600 dark:text-slate-400`
+  - Borders: `border-slate-200 dark:border-slate-700`
+  - Active tab: `bg-emerald-500 dark:bg-emerald-600`
+- Test cả 2 mode trước khi commit
+
+### 11.4 Color Palette — Chỉ dùng palette hiện tại
+
+- **Primary (CTA):** emerald-500/600 (Bắt đầu, Lưu)
+- **Info/Secondary:** blue-100/700 (badges, tags)
+- **Warning/Accent:** amber-500/600 (Freestyle option, Đã chỉnh sửa badge)
+- **Danger:** red-500/600 (Xóa, xác nhận hủy)
+- **KHÔNG** dùng purple/violet — chưa có trong design system hiện tại
+
+### 11.5 Modal Pattern
+
+- Tất cả modals/bottom sheets: Wrap trong `ModalBackdrop` component
+- Bắt buộc dùng `useModalBackHandler` hook cho hardware back button
+- Bottom sheet trên mobile: `rounded-t-3xl`
+- Dialog trên desktop: `rounded-2xl`
+
+### 11.6 Accessibility
+
+- Drag-to-reorder PHẢI có alternative controls (move up/down buttons)
+- Tất cả icon-only buttons: `aria-label` bắt buộc
+- Session tabs: `role="tablist"` + `role="tab"` + `aria-selected`
+- Focus order: Visual order = Tab order
+- Screen reader: Đọc tên exercise + số sets + muscle group
+
+### 11.7 Interaction Feedback
+
+- Press feedback: `active:scale-[0.97]` trên buttons và tabs
+- Loading states: Skeleton shimmer cho data loading > 300ms
+- Session tab badge khi complete: Lucide `<Check>` icon nhỏ (h-3 w-3)
+- Haptic feedback (nếu Capacitor hỗ trợ) cho: Start workout, Save changes, Delete exercise
