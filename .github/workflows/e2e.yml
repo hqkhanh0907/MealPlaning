@@ -68,12 +68,21 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Restore custom build config
+        run: |
+          git checkout -- android/app/build.gradle android/app/proguard-rules.pro
+
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build debug APK
+      - name: Remove unused WASM
+        run: rm -f dist/wasm/sql-wasm.wasm
+
+      - name: Build release APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: |
+          ./gradlew clean
+          ./gradlew assembleRelease
 
       - name: Enable KVM
         run: |
@@ -100,5 +109,5 @@ jobs:
           name: e2e-logs
           path: |
             e2e/logs/
-            android/app/build/outputs/apk/debug/
+            android/app/build/outputs/apk/release/
           retention-days: 7

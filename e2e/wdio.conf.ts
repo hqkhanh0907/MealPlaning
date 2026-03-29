@@ -9,7 +9,7 @@ export const config = {
     {
       platformName: 'Android',
       'appium:automationName': 'UiAutomator2',
-      'appium:app': './android/app/build/outputs/apk/debug/app-debug.apk',
+      'appium:app': './android/app/build/outputs/apk/release/app-release.apk',
       'appium:chromedriverAutodownload': true,
       'appium:noReset': true,
       // Only return WEBVIEW contexts that have an actual loaded page
