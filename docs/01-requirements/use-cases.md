@@ -1,7 +1,7 @@
 # Use Cases — Smart Meal Planner
 
-**Version:** 1.2  
-**Date:** 2026-03-28
+**Version:** 2.0  
+**Date:** 2026-07-20
 
 ---
 
@@ -11,9 +11,9 @@
 |-------|-------|
 | **User** | Người dùng cuối — sử dụng app trực tiếp |
 | **Gemini AI** | Google Gemini API — xử lý ảnh & sinh gợi ý |
-| **LocalStorage** | Hệ thống lưu trữ cục bộ |
+| **SQLite** | Hệ thống lưu trữ chính (27 bảng, sql.js WebAssembly, xem `src/services/schema.ts`) |
+| **IndexedDB** | Binary persistence layer cho SQLite database |
 | **OPUS Worker** | Web Worker dịch offline |
-| **SQLite** | Hệ thống lưu trữ chính (19 bảng, xem `src/services/schema.ts`) |
 
 ---
 
@@ -434,3 +434,279 @@ Workout được ghi nhận đầy đủ. Draft đã xoá. Dashboard cập nhậ
 ### Cross-references
 - Store: `fitnessStore.ts` (Zustand)
 - Bridge: `useFitnessNutritionBridge` — đồng bộ calories đốt với mục tiêu dinh dưỡng
+
+---
+
+## UC_ONBOARD: User Onboarding with Plan Strategy Choice
+
+**Actor:** User  
+**Precondition:** Lần đầu mở app hoặc chưa hoàn thành onboarding  
+**Trigger:** User mở app lần đầu
+
+### Main Flow
+1. System hiển thị `UnifiedOnboarding` với 7 sections
+2. **Section 1 — Welcome:** 3 slides giới thiệu app, user swipe hoặc nhấn "Tiếp"
+3. **Section 2 — Health Basic:** User điền 4 steps:
+   - Giới tính (male/female)
+   - Ngày sinh → system tính tuổi
+   - Chiều cao (cm), Cân nặng (kg)
+   - Mức độ hoạt động (sedentary/light/moderate/active/extra_active)
+4. **Section 3 — Training Core:** User chọn mục tiêu tập luyện (strength/hypertrophy/endurance/general)
+5. **Section 4 — Training Detail:** User điền 4–9 steps adaptive:
+   - Experience level (beginner/intermediate/advanced)
+   - Số ngày tập/tuần (2–6)
+   - Thời lượng session (30/45/60/90 phút)
+   - Equipment available, chấn thương (injuries), cardio sessions/tuần
+6. **Section 5 — Strategy Choice:** User chọn 1 trong 2 paths:
+   - **"Để app lên kế hoạch"** (auto) → tiếp tục Section 6
+   - **"Tự lên kế hoạch"** (manual) → nhảy sang Section 7
+7. **Section 6 — Plan Computing** (chỉ auto path): Animation computing, system tạo plan tự động dựa trên profile
+8. **Section 7 — Plan Preview:** Hiển thị kế hoạch tuần, user xem trước và xác nhận
+
+### Alternative Flows
+- **A1: Quay lại bước trước** — User nhấn "Quay lại" → system hiển thị bước trước
+- **A2: Skip onboarding** — Nếu đã có profile → system bỏ qua onboarding, vào Dashboard
+- **A3: Manual path adjust** — User chọn manual → tự chọn exercises, workout/rest cho từng ngày
+
+### Postcondition
+Profile lưu vào bảng `user_profile`, `training_profile`, `health_profile`. Training plan được tạo trong `training_plans` + `training_plan_days`. User vào Dashboard.
+
+---
+
+## UC_PLAN_VIEW: View Weekly Training Plan
+
+**Actor:** User  
+**Precondition:** Đã hoàn thành onboarding, có training plan  
+**Trigger:** User mở tab "Tập luyện" → xem Training Plan
+
+### Main Flow
+1. System hiển thị `TrainingPlanView` với weekly calendar
+2. 7 day pills hiển thị: `T2, T3, T4, T5, T6, T7, CN` (Thứ 2 – Chủ Nhật)
+3. Mỗi day pill hiển thị label: loại workout (ví dụ: "Push", "Pull", "Legs", "Upper", "Lower") hoặc "Nghỉ"
+4. User nhấn vào day pill
+5. System hiển thị chi tiết ngày:
+   - Danh sách exercises với: tên bài tập, nhóm cơ, sets × reps, weight gợi ý
+   - Thời gian ước tính cho buổi tập
+   - Session tabs nếu có nhiều buổi
+
+### Alternative Flows
+- **A1: Ngày nghỉ** — Day pill hiển thị "Nghỉ", nhấn vào có thể toggle sang workout
+- **A2: Chỉnh sửa ngày** — User nhấn "Chỉnh sửa" → mở `PlanDayEditor` (xem UC_PLAN_EDIT)
+
+### Postcondition
+User xem được kế hoạch tập luyện tuần đầy đủ.
+
+---
+
+## UC_PLAN_EDIT: Edit Exercises on a Training Day
+
+**Actor:** User  
+**Precondition:** Đã có training plan, ngày đang chọn là workout day  
+**Trigger:** User nhấn "Chỉnh sửa" trên chi tiết ngày
+
+### Main Flow
+1. System mở `PlanDayEditor` với danh sách exercises hiện tại
+2. User thực hiện các thao tác chỉnh sửa:
+   - **Add:** Nhấn "Thêm bài tập" → chọn từ exercise database → default 3 sets, default reps, 90s rest
+   - **Remove:** Nhấn icon xoá → exercise chuyển sang pending removal (undo 5 giây)
+   - **Move up/down:** Nhấn arrows → đổi vị trí exercise trong danh sách
+   - **Swap:** Nhấn icon swap → chọn exercise thay thế → giữ nguyên sets/reps/rest
+   - **Edit parameters:** Expand exercise → chỉnh sets (1–10), reps min/max (1–30), rest (30–300s)
+3. User nhấn "Lưu"
+4. System persist thay đổi qua `updatePlanDayExercises()`
+
+### Alternative Flows
+- **A1: Undo removal** — Trong 5 giây sau khi xoá, user nhấn "Hoàn tác" → exercise khôi phục
+- **A2: Restore original** — User nhấn "Khôi phục" → toàn bộ exercises trở về trạng thái ban đầu
+- **A3: Thoát khi có unsaved changes** — System hiển thị warning dialog, user chọn Lưu/Bỏ/Huỷ
+
+### Postcondition
+Danh sách exercises được cập nhật trong `training_plan_days`. Plan view refresh hiển thị thay đổi.
+
+---
+
+## UC_SESSION: Add/Manage Multiple Workout Sessions
+
+**Actor:** User  
+**Precondition:** Đã có training plan, đang xem workout day  
+**Trigger:** User nhấn "Thêm buổi tập" hoặc chuyển session tabs
+
+### Main Flow — Thêm Session
+1. User nhấn nút "Thêm buổi tập" (nếu < 3 sessions)
+2. System mở `AddSessionModal`
+3. User chọn loại session:
+   - **Strength** → chọn nhóm cơ (chest/back/shoulders/legs/arms/core/glutes)
+   - **Cardio** → session cardio mặc định
+   - **Freestyle** → workout tuỳ chỉnh
+4. System tạo session mới, gắn vào ngày hiện tại
+5. System hiển thị session tab mới: "Buổi 2" hoặc "Buổi 3"
+
+### Main Flow — Switch Session
+1. `SessionTabs` hiển thị pills: "Buổi 1", "Buổi 2", ... với icons (Sun/Moon/Sunset)
+2. User nhấn pill → system switch hiển thị exercises của session đó
+
+### Alternative Flows
+- **A1: Xoá session** — Long-press/right-click trên session tab → confirm → system xoá session
+- **A2: Đánh dấu hoàn thành** — User toggle completed state trên session
+- **A3: Tối đa 3 sessions** — Nếu đã có 3 sessions, nút "Thêm buổi tập" bị disable
+
+### Postcondition
+Ngày có nhiều sessions, mỗi session có danh sách exercises riêng.
+
+---
+
+## UC_DAY_TOGGLE: Toggle Day Between Workout/Rest
+
+**Actor:** User  
+**Precondition:** Đã có training plan  
+**Trigger:** User nhấn toggle trên day detail hoặc long-press day pill
+
+### Main Flow
+1. User mở chi tiết ngày (hoặc long-press day pill)
+2. User nhấn toggle "Workout ↔ Nghỉ"
+3. **Nếu chuyển từ Workout → Rest:**
+   - System ẩn danh sách exercises
+   - Day pill hiển thị "Nghỉ"
+4. **Nếu chuyển từ Rest → Workout:**
+   - System hiển thị danh sách exercises (nếu đã có) hoặc form thêm exercises
+   - Day pill hiển thị loại workout
+
+### Postcondition
+Ngày được toggle giữa workout/rest. Training plan cập nhật trong database.
+
+---
+
+## UC_WORKOUT_LOG: Log a Workout with Weight/Reps
+
+**Actor:** User  
+**Precondition:** Đã có training plan hoặc tạo workout mới  
+**Trigger:** User nhấn "Bắt đầu tập" hoặc tiếp tục workout draft
+
+### Main Flow
+1. User chọn buổi tập từ training plan hoặc tạo workout mới
+2. System mở `WorkoutLogger` với danh sách exercises
+3. Cho từng exercise, user ghi nhận từng set qua `SetEditor`:
+   - Reps completed
+   - Weight (kg/lbs tuỳ theo preference)
+   - RPE (Rate of Perceived Exertion) — optional
+4. System lưu draft liên tục vào bảng `workout_drafts` (auto-save)
+5. `RestTimer` tự động đếm ngược giữa các sets (tuỳ chỉnh trong preferences)
+6. `useProgressiveOverload` hook gợi ý tăng weight/reps dựa trên lịch sử
+7. User hoàn thành tất cả exercises, nhấn "Kết thúc"
+8. System chuyển draft thành workout record (bảng `workouts` + `workout_sets`)
+9. System xoá draft, cập nhật streak, kiểm tra milestones/PR
+
+### Alternative Flows
+- **A1: Tạm dừng** — Draft giữ trong `workout_drafts`, user quay lại tiếp tục sau
+- **A2: Skip set** — User bỏ qua set → ghi nhận 0 reps
+- **A3: Cancel workout** — User huỷ → system xoá draft
+
+### Postcondition
+Workout record được lưu đầy đủ. Dashboard cập nhật streak, volume, PRs.
+
+---
+
+## UC_CARDIO_LOG: Log Cardio Session
+
+**Actor:** User  
+**Precondition:** Có session cardio hoặc tạo mới  
+**Trigger:** User chọn cardio session hoặc nhấn "Log Cardio"
+
+### Main Flow
+1. User mở `CardioLogger`
+2. User chọn loại cardio (chạy bộ, đạp xe, bơi, ...)
+3. User nhập: thời gian (phút), khoảng cách (km) — optional
+4. System ước tính calories đốt dựa trên loại cardio + thời gian + cân nặng user
+5. User xác nhận, nhấn "Lưu"
+6. System lưu vào bảng `workouts` với type = 'cardio'
+
+### Alternative Flows
+- **A1: Chỉ nhập thời gian** — System ước tính calories dựa trên thời gian + MET value
+- **A2: Chỉnh sửa calories** — User override calories ước tính trước khi lưu
+
+### Postcondition
+Cardio session được ghi nhận. Dashboard cập nhật calories đốt, streak.
+
+---
+
+## UC_WEIGHT_LOG: Log Daily Body Weight
+
+**Actor:** User  
+**Precondition:** Đã có user profile  
+**Trigger:** User nhấn "Log cân nặng" từ Dashboard QuickActionsBar hoặc WeightMini
+
+### Main Flow
+1. System mở `WeightQuickLog` bottom sheet modal
+2. User nhập cân nặng (kg hoặc lbs tuỳ preference)
+3. User nhấn "Lưu"
+4. System lưu vào bảng `weight_log` (1 entry/ngày, overwrite nếu đã có)
+5. System cập nhật `WeightMini` trên Dashboard
+6. System đóng modal, hiển thị toast success
+
+### Alternative Flows
+- **A1: Đã log hôm nay** — System hiện giá trị cũ, user có thể overwrite
+- **A2: Biến động lớn** — Nếu chênh > 2kg so với entry trước → hiển thị cảnh báo xác nhận
+
+### Postcondition
+Weight log entry được lưu. Dashboard WeightMini cập nhật. Biểu đồ weight trend cập nhật.
+
+---
+
+## UC_DASHBOARD: View Daily Dashboard Summary
+
+**Actor:** User  
+**Trigger:** User mở tab "Tổng quan" (tab thứ 5)
+
+### Main Flow
+1. System load `DashboardTab` với 5 tier progressive loading
+2. **Tier 1 (0ms):** `DailyScoreHero` hiển thị điểm hiệu suất ngày (dựa trên bữa ăn + workout + weight log)
+3. **Tier 2 (30ms):** `EnergyBalanceMini` hiển thị calorie intake vs target; `ProteinProgress` hiển thị protein progress bar
+4. **Tier 3 (60ms):** `TodaysPlanCard` hiển thị preview bữa ăn & workout hôm nay; `WeightMini` hiển thị cân nặng (tap để log nhanh); `StreakMini` hiển thị workout streak
+5. **Tier 4 (lazy):** `AutoAdjustBanner` gợi ý điều chỉnh calo nếu cần; `AiInsightCard` hiển thị AI health tips
+6. **Tier 5 (lazy):** `QuickActionsBar` hiển thị quick actions
+7. User tương tác: nhấn quick action → navigate đến flow tương ứng (log weight, log meal, start workout)
+
+### Alternative Flows
+- **A1: Chưa có data** — Hiển thị empty states với hướng dẫn getting started
+- **A2: Error trong 1 tier** — Error boundary bắt lỗi, tier bị lỗi hiển thị fallback, các tiers khác vẫn hoạt động
+- **A3: Reduced motion** — Tắt stagger animation, hiển thị tất cả cùng lúc
+
+### Postcondition
+User xem được tổng quan đầy đủ: dinh dưỡng, tập luyện, cân nặng, quick actions.
+
+---
+
+## UC_AI_ANALYZE: Use AI to Analyze Food Image
+
+**Actor:** User, Gemini AI  
+**Precondition:** Đã có `GEMINI_API_KEY`, tab "AI Phân tích" đang mở  
+**Trigger:** User chuyển sang tab "AI Phân tích" (tab thứ 3)
+
+### Main Flow
+1. System hiển thị `AIImageAnalyzer` với 3-step progress indicator
+2. **Step 1 — Chụp ảnh:**
+   - User chụp từ camera hoặc chọn ảnh từ thư viện qua `ImageCapture`
+   - System compress ảnh tối đa 1MB
+   - Hiển thị preview ảnh, nút "Xoá" để chọn lại
+3. **Step 2 — AI phân tích:**
+   - User nhấn "Phân tích"
+   - System gửi base64 image lên `geminiService.analyzeDishImage()`
+   - Loading spinner hiển thị "Đang phân tích..."
+   - Gemini trả về: tên món, mô tả, danh sách nguyên liệu kèm dinh dưỡng
+4. **Step 3 — Lưu món:**
+   - `AnalysisResultView` hiển thị kết quả: calories, protein, carbs, fat
+   - Danh sách nguyên liệu với khối lượng chi tiết
+   - User có thể chỉnh sửa tên món, bỏ chọn nguyên liệu
+   - User nhấn "Lưu" → `SaveAnalyzedDishModal` mở
+   - User chọn: chỉ lưu nguyên liệu / lưu cả món ăn + tags
+   - System tạo `Ingredient` mới (nếu chưa tồn tại) + optional `Dish`
+   - System persist vào SQLite database
+
+### Alternative Flows
+- **A1: Ảnh không phải thức ăn** — Gemini trả về `isFood: false` → hiển thị cảnh báo, không crash
+- **A2: Timeout >30s** — Toast error "Phân tích thất bại", user retry
+- **A3: Network error** — Retry 2 lần exponential backoff, hiển thị error nếu hết retry
+- **A4: User chỉnh sửa trước lưu** — Sửa tên, thêm/bớt nguyên liệu, thay đổi khối lượng
+
+### Postcondition
+Nguyên liệu + món ăn mới được lưu vào database. Có thể sử dụng ngay trong meal planning.
