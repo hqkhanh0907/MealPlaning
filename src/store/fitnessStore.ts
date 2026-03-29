@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { DatabaseService } from '../services/databaseService';
 import { EXERCISES } from '../features/fitness/data/exerciseDatabase';
+import { BUILTIN_TEMPLATES } from '../features/fitness/data/builtinTemplates';
+import { computeMatchScore } from '../features/fitness/utils/templateMatcher';
+import { remapExercisesToNewSplit } from '../features/fitness/utils/splitRemapper';
 import type {
   TrainingProfile,
   TrainingPlan,
@@ -12,7 +15,12 @@ import type {
   Exercise,
   CardioIntensity,
   SelectedExercise,
+  PlanTemplate,
+  SplitType,
+  SplitChangePreview,
+  MuscleGroup,
 } from '../features/fitness/types';
+import { safeParseJsonArray } from '../features/fitness/types';
 
 let _db: DatabaseService | null = null;
 
@@ -65,8 +73,18 @@ export interface FitnessState {
   getActivePlan: () => TrainingPlan | undefined;
   getLatestWeight: () => WeightEntry | undefined;
   getWorkoutsByDateRange: (startDate: string, endDate: string) => Workout[];
+  updateTrainingDays: (planId: string, trainingDays: number[]) => void;
+  reassignWorkoutToDay: (dayId: string, newDayOfWeek: number) => void;
+  autoAssignWorkouts: (planId: string) => void;
+  restoreOriginalSchedule: (planId: string) => void;
   initializeFromSQLite: (db: DatabaseService) => Promise<void>;
   dismissPlanCelebration: () => void;
+  changeSplitType: (planId: string, newSplit: SplitType, mode: 'regenerate' | 'remap') => void;
+  previewSplitChange: (planId: string, newSplit: SplitType) => SplitChangePreview;
+  getTemplates: () => PlanTemplate[];
+  getRecommendedTemplates: (profile: TrainingProfile) => PlanTemplate[];
+  applyTemplate: (planId: string, templateId: string) => void;
+  saveCurrentAsTemplate: (planId: string, name: string) => void;
 }
 
 export const useFitnessStore = create<FitnessState>()(
@@ -480,6 +498,243 @@ export const useFitnessStore = create<FitnessState>()(
           (w) => w.date >= startDate && w.date <= endDate,
         ),
 
+      updateTrainingDays: (planId, trainingDays) => {
+        if (trainingDays.length < 2 || trainingDays.length > 6) {
+          console.error('[fitnessStore] updateTrainingDays: training days must be between 2 and 6');
+          return;
+        }
+
+        const allDays = [1, 2, 3, 4, 5, 6, 7];
+        const restDays = allDays.filter((d) => !trainingDays.includes(d));
+
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) {
+          console.error('[fitnessStore] updateTrainingDays: plan not found');
+          return;
+        }
+
+        const removedDays = plan.trainingDays.filter((d) => !trainingDays.includes(d));
+        const planDays = get().trainingPlanDays.filter((d) => d.planId === planId);
+        const orphanedSessions = planDays.filter((d) => removedDays.includes(d.dayOfWeek));
+
+        const reassignedSessions = orphanedSessions.map((session) => {
+          const sorted = [...trainingDays].sort(
+            (a, b) => Math.abs(a - session.dayOfWeek) - Math.abs(b - session.dayOfWeek),
+          );
+          return { ...session, dayOfWeek: sorted[0], isUserAssigned: false };
+        });
+
+        set((state) => ({
+          trainingPlans: state.trainingPlans.map((p) =>
+            p.id === planId
+              ? { ...p, trainingDays: [...trainingDays], restDays: [...restDays], updatedAt: new Date().toISOString() }
+              : p,
+          ),
+          trainingPlanDays: state.trainingPlanDays.map((d) => {
+            if (d.planId !== planId) return d;
+            const reassigned = reassignedSessions.find((r) => r.id === d.id);
+            if (reassigned) return reassigned;
+            return d;
+          }),
+        }));
+
+        if (_db) {
+          _db.execute(
+            'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+            [JSON.stringify(trainingDays), JSON.stringify(restDays), new Date().toISOString(), planId],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite updateTrainingDays plan update failed:', error);
+          });
+          for (const session of reassignedSessions) {
+            _db.execute(
+              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
+              [session.dayOfWeek, session.id],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite updateTrainingDays reassign failed:', error);
+            });
+          }
+        }
+      },
+
+      reassignWorkoutToDay: (dayId, newDayOfWeek) => {
+        const day = get().trainingPlanDays.find((d) => d.id === dayId);
+        if (!day) {
+          console.error('[fitnessStore] reassignWorkoutToDay: day not found');
+          return;
+        }
+
+        const plan = get().trainingPlans.find((p) => p.id === day.planId);
+        if (!plan) {
+          console.error('[fitnessStore] reassignWorkoutToDay: plan not found');
+          return;
+        }
+
+        if (!plan.trainingDays.includes(newDayOfWeek)) {
+          console.error('[fitnessStore] reassignWorkoutToDay: target day is not a training day');
+          return;
+        }
+
+        const sessionsOnTarget = get().trainingPlanDays.filter(
+          (d) => d.planId === day.planId && d.dayOfWeek === newDayOfWeek,
+        );
+        if (sessionsOnTarget.length >= 3) {
+          console.error('[fitnessStore] reassignWorkoutToDay: target day already has 3 sessions');
+          return;
+        }
+
+        set((state) => ({
+          trainingPlanDays: state.trainingPlanDays.map((d) =>
+            d.id === dayId ? { ...d, dayOfWeek: newDayOfWeek, isUserAssigned: true } : d,
+          ),
+        }));
+
+        if (_db) {
+          _db.execute(
+            'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 1 WHERE id = ?',
+            [newDayOfWeek, dayId],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite reassignWorkoutToDay failed:', error);
+          });
+        }
+      },
+
+      autoAssignWorkouts: (planId) => {
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) {
+          console.error('[fitnessStore] autoAssignWorkouts: plan not found');
+          return;
+        }
+
+        const planDays = get().trainingPlanDays.filter((d) => d.planId === planId);
+        if (planDays.length === 0) return;
+
+        const sortedTrainingDays = [...plan.trainingDays].sort((a, b) => a - b);
+        if (sortedTrainingDays.length === 0) return;
+
+        const sortedPlanDays = [...planDays].sort((a, b) => {
+          const primaryA = (a.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+          const primaryB = (b.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+          if (primaryA < primaryB) return -1;
+          if (primaryA > primaryB) return 1;
+          return 0;
+        });
+
+        const assigned: Array<{ id: string; dayOfWeek: number }> = [];
+        const daySlots = new Map<number, string[]>();
+        for (const td of sortedTrainingDays) {
+          daySlots.set(td, []);
+        }
+
+        for (const pd of sortedPlanDays) {
+          const primaryMuscle = (pd.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+
+          let bestDay = sortedTrainingDays[0];
+          let bestScore = -Infinity;
+
+          for (const td of sortedTrainingDays) {
+            const slotsUsed = daySlots.get(td)?.length ?? 0;
+            let score = -slotsUsed * 100;
+
+            const assignedToAdjacentDays = assigned.filter((a) => {
+              const diff = Math.abs(a.dayOfWeek - td);
+              return diff === 1 || diff === 6;
+            });
+
+            const hasSameMuscleAdjacent = assignedToAdjacentDays.some((a) => {
+              const existingDay = sortedPlanDays.find((d) => d.id === a.id);
+              const existingMuscle = (existingDay?.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+              return existingMuscle === primaryMuscle && primaryMuscle !== '';
+            });
+
+            if (hasSameMuscleAdjacent) {
+              score -= 20;
+            }
+
+            if (score > bestScore) {
+              bestScore = score;
+              bestDay = td;
+            }
+          }
+
+          assigned.push({ id: pd.id, dayOfWeek: bestDay });
+          daySlots.get(bestDay)?.push(pd.id);
+        }
+
+        const assignmentMap = new Map(assigned.map((a) => [a.id, a.dayOfWeek]));
+
+        set((state) => ({
+          trainingPlanDays: state.trainingPlanDays.map((d) => {
+            if (d.planId !== planId) return d;
+            const newDay = assignmentMap.get(d.id);
+            if (newDay === undefined) return d;
+            return { ...d, dayOfWeek: newDay, isUserAssigned: false };
+          }),
+        }));
+
+        if (_db) {
+          for (const a of assigned) {
+            _db.execute(
+              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
+              [a.dayOfWeek, a.id],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite autoAssignWorkouts failed:', error);
+            });
+          }
+        }
+      },
+
+      restoreOriginalSchedule: (planId) => {
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) {
+          console.error('[fitnessStore] restoreOriginalSchedule: plan not found');
+          return;
+        }
+
+        const planDays = get().trainingPlanDays.filter((d) => d.planId === planId);
+        if (planDays.length === 0) return;
+
+        const restoredDays = planDays.map((d) => ({
+          ...d,
+          dayOfWeek: d.originalDayOfWeek,
+          isUserAssigned: false,
+        }));
+
+        const allDays = [1, 2, 3, 4, 5, 6, 7];
+        const usedDays = [...new Set(restoredDays.map((d) => d.dayOfWeek))];
+        const newTrainingDays = allDays.filter((d) => usedDays.includes(d));
+        const newRestDays = allDays.filter((d) => !usedDays.includes(d));
+
+        set((state) => ({
+          trainingPlans: state.trainingPlans.map((p) =>
+            p.id === planId
+              ? { ...p, trainingDays: newTrainingDays, restDays: newRestDays, updatedAt: new Date().toISOString() }
+              : p,
+          ),
+          trainingPlanDays: state.trainingPlanDays.map((d) => {
+            if (d.planId !== planId) return d;
+            const restored = restoredDays.find((r) => r.id === d.id);
+            return restored ?? d;
+          }),
+        }));
+
+        if (_db) {
+          _db.execute(
+            'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+            [JSON.stringify(newTrainingDays), JSON.stringify(newRestDays), new Date().toISOString(), planId],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite restoreOriginalSchedule plan update failed:', error);
+          });
+          for (const d of restoredDays) {
+            _db.execute(
+              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
+              [d.dayOfWeek, d.id],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite restoreOriginalSchedule day update failed:', error);
+            });
+          }
+        }
+      },
+
       initializeFromSQLite: async (db) => {
         _db = db;
         try {
@@ -548,6 +803,298 @@ export const useFitnessStore = create<FitnessState>()(
             error,
           );
         }
+      },
+
+      changeSplitType: (planId, newSplit, mode) => {
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) return;
+
+        const currentDays = get().trainingPlanDays.filter((d) => d.planId === planId);
+        const now = new Date().toISOString();
+
+        if (mode === 'regenerate') {
+          const daysPerWeek = plan.trainingDays.length;
+          const preview = remapExercisesToNewSplit([], newSplit, daysPerWeek);
+          const newDays: TrainingPlanDay[] = preview.suggested.map((s, i) => ({
+            id: `${planId}_split_${String(i)}_${String(Date.now())}`,
+            planId,
+            dayOfWeek: plan.trainingDays[i] ?? i,
+            sessionOrder: 1,
+            workoutType: s.muscleGroups.length > 4 ? 'full_body' : s.muscleGroups.join('_'),
+            muscleGroups: JSON.stringify(s.muscleGroups),
+            exercises: '[]',
+            originalExercises: '[]',
+            isUserAssigned: false,
+            originalDayOfWeek: plan.trainingDays[i] ?? i,
+            notes: s.day,
+          }));
+
+          set((state) => ({
+            trainingPlans: state.trainingPlans.map((p) =>
+              p.id === planId ? { ...p, splitType: newSplit, updatedAt: now } : p,
+            ),
+            trainingPlanDays: [
+              ...state.trainingPlanDays.filter((d) => d.planId !== planId),
+              ...newDays,
+            ],
+          }));
+
+          if (_db) {
+            _db.execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?',
+              [newSplit, now, planId],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite changeSplitType plan update failed:', error);
+            });
+            _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite changeSplitType delete old days failed:', error);
+            });
+            for (const day of newDays) {
+              _db.execute(
+                `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [day.id, day.planId, day.dayOfWeek, day.sessionOrder, day.workoutType,
+                 day.muscleGroups ?? null, day.exercises ?? null, day.originalExercises ?? null, day.notes ?? null],
+              ).catch((error: unknown) => {
+                console.error('[fitnessStore] SQLite changeSplitType insert day failed:', error);
+              });
+            }
+          }
+        } else {
+          const preview = remapExercisesToNewSplit(currentDays, newSplit, plan.trainingDays.length);
+
+          const updatedDays: TrainingPlanDay[] = preview.mapped.map((m) => ({
+            ...m.from,
+            workoutType: m.toMuscleGroups.length > 4 ? 'full_body' : m.toMuscleGroups.join('_'),
+            muscleGroups: JSON.stringify(m.toMuscleGroups),
+            notes: m.toDay,
+          }));
+
+          const newSuggestedDays: TrainingPlanDay[] = preview.suggested.map((s, i) => ({
+            id: `${planId}_remap_${String(i)}_${String(Date.now())}`,
+            planId,
+            dayOfWeek: plan.trainingDays[updatedDays.length + i] ?? (updatedDays.length + i),
+            sessionOrder: 1,
+            workoutType: s.muscleGroups.length > 4 ? 'full_body' : s.muscleGroups.join('_'),
+            muscleGroups: JSON.stringify(s.muscleGroups),
+            exercises: '[]',
+            originalExercises: '[]',
+            isUserAssigned: false,
+            originalDayOfWeek: plan.trainingDays[updatedDays.length + i] ?? (updatedDays.length + i),
+            notes: s.day,
+          }));
+
+          const allNewDays = [...updatedDays, ...newSuggestedDays];
+
+          set((state) => ({
+            trainingPlans: state.trainingPlans.map((p) =>
+              p.id === planId ? { ...p, splitType: newSplit, updatedAt: now } : p,
+            ),
+            trainingPlanDays: [
+              ...state.trainingPlanDays.filter((d) => d.planId !== planId),
+              ...allNewDays,
+            ],
+          }));
+
+          if (_db) {
+            _db.execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?',
+              [newSplit, now, planId],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite changeSplitType remap plan update failed:', error);
+            });
+            _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite changeSplitType remap delete old days failed:', error);
+            });
+            for (const day of allNewDays) {
+              _db.execute(
+                `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [day.id, day.planId, day.dayOfWeek, day.sessionOrder, day.workoutType,
+                 day.muscleGroups ?? null, day.exercises ?? null, day.originalExercises ?? null, day.notes ?? null],
+              ).catch((error: unknown) => {
+                console.error('[fitnessStore] SQLite changeSplitType remap insert day failed:', error);
+              });
+            }
+          }
+        }
+      },
+
+      previewSplitChange: (planId, newSplit) => {
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) return { mapped: [], suggested: [], unmapped: [] };
+
+        const currentDays = get().trainingPlanDays.filter((d) => d.planId === planId);
+        return remapExercisesToNewSplit(currentDays, newSplit, plan.trainingDays.length);
+      },
+
+      getTemplates: () => {
+        const builtins = [...BUILTIN_TEMPLATES];
+        if (!_db) return builtins;
+
+        try {
+          const rows: Record<string, unknown>[] = [];
+          _db.query<Record<string, unknown>>(
+            'SELECT * FROM plan_templates WHERE is_builtin = 0',
+          ).then((result) => {
+            rows.push(...result);
+          }).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite getTemplates query failed:', error);
+          });
+
+          const userTemplates: PlanTemplate[] = rows.map((row) => ({
+            id: row.id as string,
+            name: row.name as string,
+            splitType: row.splitType as SplitType,
+            daysPerWeek: row.daysPerWeek as number,
+            experienceLevel: (row.experienceLevel as PlanTemplate['experienceLevel']) ?? 'all',
+            trainingGoal: (row.trainingGoal as PlanTemplate['trainingGoal']) ?? 'general',
+            equipmentRequired: safeParseJsonArray<PlanTemplate['equipmentRequired'][number]>(
+              row.equipmentRequired as string,
+            ),
+            description: (row.description as string) ?? '',
+            dayConfigs: safeParseJsonArray<PlanTemplate['dayConfigs'][number]>(
+              row.dayConfigs as string,
+            ),
+            popularityScore: (row.popularityScore as number) ?? 0,
+            isBuiltin: false,
+            createdAt: row.createdAt as string | undefined,
+            updatedAt: row.updatedAt as string | undefined,
+          }));
+
+          return [...builtins, ...userTemplates];
+        } catch (error: unknown) {
+          console.error('[fitnessStore] getTemplates failed:', error);
+          return builtins;
+        }
+      },
+
+      getRecommendedTemplates: (profile) => {
+        const templates = get().getTemplates();
+        const scored = templates.map((t) => ({
+          template: t,
+          score: computeMatchScore(t, profile),
+        }));
+        scored.sort((a, b) => b.score - a.score);
+        return scored.slice(0, 3).map((s) => s.template);
+      },
+
+      applyTemplate: (planId, templateId) => {
+        const allTemplates = get().getTemplates();
+        const template = allTemplates.find((t) => t.id === templateId);
+        if (!template) return;
+
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) return;
+
+        const now = new Date().toISOString();
+        const trainingDays = plan.trainingDays.length >= template.daysPerWeek
+          ? plan.trainingDays.slice(0, template.daysPerWeek)
+          : Array.from({ length: template.daysPerWeek }, (_, i) => plan.trainingDays[i] ?? i);
+
+        const newDays: TrainingPlanDay[] = template.dayConfigs.map((config, i) => ({
+          id: `${planId}_tpl_${String(i)}_${String(Date.now())}`,
+          planId,
+          dayOfWeek: trainingDays[i] ?? i,
+          sessionOrder: 1,
+          workoutType: config.workoutType,
+          muscleGroups: JSON.stringify(config.muscleGroups),
+          exercises: JSON.stringify(config.exercises),
+          originalExercises: JSON.stringify(config.exercises),
+          isUserAssigned: false,
+          originalDayOfWeek: trainingDays[i] ?? i,
+          notes: config.dayLabel,
+        }));
+
+        set((state) => ({
+          trainingPlans: state.trainingPlans.map((p) =>
+            p.id === planId
+              ? {
+                  ...p,
+                  splitType: template.splitType,
+                  templateId: template.id,
+                  trainingDays,
+                  updatedAt: now,
+                }
+              : p,
+          ),
+          trainingPlanDays: [
+            ...state.trainingPlanDays.filter((d) => d.planId !== planId),
+            ...newDays,
+          ],
+        }));
+
+        if (_db) {
+          _db.execute(
+            'UPDATE training_plans SET split_type = ?, template_id = ?, training_days = ?, updated_at = ? WHERE id = ?',
+            [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite applyTemplate plan update failed:', error);
+          });
+          _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite applyTemplate delete old days failed:', error);
+          });
+          for (const day of newDays) {
+            _db.execute(
+              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [day.id, day.planId, day.dayOfWeek, day.sessionOrder, day.workoutType,
+               day.muscleGroups ?? null, day.exercises ?? null, day.originalExercises ?? null, day.notes ?? null],
+            ).catch((error: unknown) => {
+              console.error('[fitnessStore] SQLite applyTemplate insert day failed:', error);
+            });
+          }
+        }
+      },
+
+      saveCurrentAsTemplate: (planId, name) => {
+        const plan = get().trainingPlans.find((p) => p.id === planId);
+        if (!plan) return;
+
+        const currentDays = get().trainingPlanDays.filter((d) => d.planId === planId);
+        const now = new Date().toISOString();
+        const templateId = `user_tpl_${String(Date.now())}`;
+
+        const dayConfigs = currentDays.map((day) => ({
+          dayLabel: day.notes ?? `Day ${String(day.dayOfWeek)}`,
+          workoutType: day.workoutType,
+          muscleGroups: safeParseJsonArray<MuscleGroup>(day.muscleGroups),
+          exercises: safeParseJsonArray<PlanTemplate['dayConfigs'][number]['exercises'][number]>(day.exercises),
+        }));
+
+        const profile = get().trainingProfile;
+
+        const template: PlanTemplate = {
+          id: templateId,
+          name,
+          splitType: plan.splitType,
+          daysPerWeek: currentDays.length,
+          experienceLevel: profile?.trainingExperience ?? 'all',
+          trainingGoal: profile?.trainingGoal ?? 'general',
+          equipmentRequired: profile?.availableEquipment ?? [],
+          description: `Custom template from plan "${plan.name}"`,
+          dayConfigs,
+          popularityScore: 0,
+          isBuiltin: false,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        if (_db) {
+          _db.execute(
+            `INSERT INTO plan_templates (id, name, split_type, days_per_week, experience_level, training_goal, equipment_required, description, day_configs, popularity_score, is_builtin, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+            [
+              template.id, template.name, template.splitType, template.daysPerWeek,
+              template.experienceLevel, template.trainingGoal,
+              JSON.stringify(template.equipmentRequired), template.description,
+              JSON.stringify(template.dayConfigs), template.popularityScore,
+              now, now,
+            ],
+          ).catch((error: unknown) => {
+            console.error('[fitnessStore] SQLite saveCurrentAsTemplate failed:', error);
+          });
+        }
+
+        return template;
       },
     }),
     {
