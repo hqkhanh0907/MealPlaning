@@ -221,7 +221,7 @@ export class FitnessPage extends BasePage {
   /** Inject a training profile into localStorage so the Fitness tab skips onboarding. */
   async injectTrainingProfile() {
     await (browser as unknown as ExecutableBrowser).execute(() => {
-      const store = JSON.parse(localStorage.getItem('fitness-store') || '{}');
+      const store = JSON.parse(localStorage.getItem('fitness-storage') || '{}');
       store.state = store.state || {};
       store.state.isOnboarded = true;
       store.state.trainingProfile = {
@@ -241,14 +241,14 @@ export class FitnessPage extends BasePage {
         cardioDurationMin: 20,
         updatedAt: new Date().toISOString(),
       };
-      localStorage.setItem('fitness-store', JSON.stringify(store));
+      localStorage.setItem('fitness-storage', JSON.stringify(store));
     });
   }
 
   /** Inject a training plan so the Plan sub-tab shows calendar strip. */
   async injectTrainingPlan() {
     await (browser as unknown as ExecutableBrowser).execute(() => {
-      const store = JSON.parse(localStorage.getItem('fitness-store') || '{}');
+      const store = JSON.parse(localStorage.getItem('fitness-storage') || '{}');
       store.state = store.state || {};
       const now = new Date();
       const planId = 'plan-test-1';
@@ -292,14 +292,14 @@ export class FitnessPage extends BasePage {
           updatedAt: now.toISOString(),
         },
       ];
-      localStorage.setItem('fitness-store', JSON.stringify(store));
+      localStorage.setItem('fitness-storage', JSON.stringify(store));
     });
   }
 
   /** Inject a workout into history for testing the history view. */
   async injectWorkoutHistory() {
     await (browser as unknown as ExecutableBrowser).execute(() => {
-      const store = JSON.parse(localStorage.getItem('fitness-store') || '{}');
+      const store = JSON.parse(localStorage.getItem('fitness-storage') || '{}');
       store.state = store.state || {};
       const today = new Date().toISOString().split('T')[0];
       const workoutId = 'workout-test-1';
@@ -320,7 +320,7 @@ export class FitnessPage extends BasePage {
         weightKg: 60,
         updatedAt: new Date().toISOString(),
       }];
-      localStorage.setItem('fitness-store', JSON.stringify(store));
+      localStorage.setItem('fitness-storage', JSON.stringify(store));
     });
   }
 
