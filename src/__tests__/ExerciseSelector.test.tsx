@@ -290,8 +290,8 @@ describe('ExerciseSelector', () => {
     const compoundBadges = screen.getAllByText('Đa khớp');
     expect(compoundBadges.length).toBeGreaterThan(0);
 
-    // Equipment text
-    expect(screen.getAllByText('barbell').length).toBeGreaterThan(0);
+    // Equipment text (translated)
+    expect(screen.getAllByText('Tạ đòn').length).toBeGreaterThan(0);
 
     // Muscle group label
     expect(screen.getAllByText('Ngực').length).toBeGreaterThan(0);

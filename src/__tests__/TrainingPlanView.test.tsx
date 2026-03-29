@@ -89,8 +89,13 @@ let mockAddPlanDaySession: Mock;
 let mockGetActivePlan: Mock;
 
 function mockStore(state: Record<string, unknown>) {
+  const stateWithDefaults = {
+    workouts: [],
+    workoutSets: [],
+    ...state,
+  };
   mockUseFitnessStore.mockImplementation(
-    (selector: (s: Record<string, unknown>) => unknown) => selector(state),
+    (selector: (s: Record<string, unknown>) => unknown) => selector(stateWithDefaults),
   );
   const storeState = {
     ...state,

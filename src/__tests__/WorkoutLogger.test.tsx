@@ -126,6 +126,11 @@ vi.mock('../features/fitness/hooks/useProgressiveOverload', () => ({
   }),
 }));
 
+const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismiss: vi.fn(), dismissAll: vi.fn() };
+vi.mock('../contexts/NotificationContext', () => ({
+  useNotification: () => mockNotify,
+}));
+
 afterEach(cleanup);
 
 describe('WorkoutLogger', () => {
@@ -181,7 +186,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('increments elapsed timer each second', () => {
-    render(<WorkoutLogger {...defaultProps} />);
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('00:00');
 
     act(() => {

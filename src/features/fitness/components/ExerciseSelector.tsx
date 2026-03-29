@@ -270,7 +270,9 @@ export function ExerciseSelector({
                         •
                       </span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {exercise.equipment.join(', ')}
+                        {exercise.equipment
+                          .map((eq) => t(`fitness.equipment.${eq}`))
+                          .join(', ')}
                       </span>
                     </div>
                   </button>

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { RestTimer } from './RestTimer';
 import { ExerciseSelector } from './ExerciseSelector';
 import { WorkoutSummaryCard } from './WorkoutSummaryCard';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EXERCISES } from '../data/exerciseDatabase';
 import { formatElapsed } from '../utils/timeFormat';
@@ -46,15 +47,18 @@ interface WorkoutLoggerProps {
 interface TimerDisplayProps {
   startSeconds: number;
   elapsedRef: MutableRefObject<number>;
+  isRunning: boolean;
 }
 
 const TimerDisplay = React.memo(function TimerDisplay({
   startSeconds,
   elapsedRef,
+  isRunning,
 }: TimerDisplayProps): React.JSX.Element {
   const [seconds, setSeconds] = useState(startSeconds);
 
   useEffect(() => {
+    if (!isRunning) return;
     const id = setInterval(() => {
       setSeconds((prev) => {
         const next = prev + 1;
@@ -63,7 +67,7 @@ const TimerDisplay = React.memo(function TimerDisplay({
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [elapsedRef]);
+  }, [elapsedRef, isRunning]);
 
   return (
     <span
@@ -139,6 +143,7 @@ export function WorkoutLogger({
   onBack,
 }: WorkoutLoggerProps): React.JSX.Element {
   const { t } = useTranslation();
+  const notify = useNotification();
   const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
   const setWorkoutDraft = useFitnessStore((s) => s.setWorkoutDraft);
   const clearWorkoutDraft = useFitnessStore((s) => s.clearWorkoutDraft);
@@ -170,6 +175,13 @@ export function WorkoutLogger({
     return draft ? draft.elapsedSeconds : 0;
   }, []);
   const elapsedRef = useRef(initialElapsed);
+  const [timerRunning, setTimerRunning] = useState(() => {
+    const draft = useFitnessStore.getState().workoutDraft;
+    const hasExercises = draft
+      ? draft.exercises.length > 0
+      : (planDay?.exercises ?? []).length > 0;
+    return hasExercises || initialElapsed > 0;
+  });
 
   useEffect(() => {
     loadWorkoutDraft();
@@ -268,7 +280,8 @@ export function WorkoutLogger({
   const handleSelectExercise = useCallback((exercise: Exercise) => {
     setCurrentExercises((prev) => [...prev, exercise]);
     setShowExerciseSelector(false);
-  }, []);
+    if (!timerRunning) setTimerRunning(true);
+  }, [timerRunning]);
 
   const handleCloseSelector = useCallback(() => {
     setShowExerciseSelector(false);
@@ -316,6 +329,7 @@ export function WorkoutLogger({
       return;
     }
     clearWorkoutDraft();
+    notify.success(t('fitness.logger.saveSuccess'));
     onComplete(workout);
   }, [
     planDay,
@@ -323,6 +337,7 @@ export function WorkoutLogger({
     saveWorkoutAtomic,
     clearWorkoutDraft,
     onComplete,
+    notify,
     t,
     freestyleName,
   ]);
@@ -387,7 +402,7 @@ export function WorkoutLogger({
           <ArrowLeft className="h-5 w-5" />
           <span>{t('fitness.logger.back')}</span>
         </Button>
-        <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} />
+        <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} isRunning={timerRunning} />
         <Button
           variant="ghost"
           size="sm"

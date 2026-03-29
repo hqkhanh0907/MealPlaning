@@ -706,13 +706,14 @@
       "noExercises": "Chưa có bài tập. Thêm bài tập để bắt đầu.",
       "set": "Set",
       "weight": "Cân nặng",
-      "reps": "Reps",
+      "reps": "Lần",
       "rpe": "RPE",
       "logSet": "Ghi nhận set",
       "addExercise": "Thêm bài tập",
       "nextUp": "Tiếp theo",
       "decreaseWeight": "Giảm cân nặng",
-      "increaseWeight": "Tăng cân nặng"
+      "increaseWeight": "Tăng cân nặng",
+      "saveSuccess": "Đã lưu buổi tập thành công!"
     },
     "summary": {
       "title": "Tổng kết buổi tập",
@@ -755,14 +756,6 @@
       "muscleArms": "Tay",
       "muscleCore": "Bụng",
       "muscleGlutes": "Mông"
-    },
-    "swap": {
-      "title": "Đổi bài tập",
-      "current": "Bài tập hiện tại",
-      "alternatives": "Bài tập thay thế",
-      "search": "Tìm bài tập...",
-      "noAlternatives": "Không có bài tập thay thế",
-      "sameGroup": "Cùng nhóm cơ"
     },
     "plan": {
       "tab": "Kế hoạch",
@@ -943,6 +936,23 @@
       "proteinMessage": "Đã nạp {{consumed}}g / mục tiêu {{target}}g. Ưu tiên thực phẩm giàu protein.",
       "recoveryTitle": "Ngày nghỉ phục hồi",
       "recoveryMessage": "{{count}} buổi tập tuần này — hãy nghỉ ngơi và ăn đủ dinh dưỡng."
+    },
+    "equipment": {
+      "barbell": "Tạ đòn",
+      "bench": "Ghế tập",
+      "bodyweight": "Tự trọng",
+      "box": "Hộp nhảy",
+      "cable": "Cáp",
+      "dumbbell": "Tạ tay",
+      "elliptical": "Máy elip",
+      "kettlebell": "Tạ ấm",
+      "landmine": "Thanh landmine",
+      "machine": "Máy tập",
+      "plate": "Đĩa tạ",
+      "pool": "Hồ bơi",
+      "rack": "Khung squat",
+      "treadmill": "Máy chạy bộ",
+      "bands": "Dây kháng lực"
     }
   },
   "dashboard": {

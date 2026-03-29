@@ -63,6 +63,8 @@ function TrainingPlanViewInner({
   const { t } = useTranslation();
   const trainingPlans = useFitnessStore((s) => s.trainingPlans);
   const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
+  const workouts = useFitnessStore((s) => s.workouts);
+  const workoutSets = useFitnessStore((s) => s.workoutSets);
   const pushPage = useNavigationStore((s) => s.pushPage);
   const { targetCalories, targetProtein } = useNutritionTargets();
   const { eaten, protein } = useTodayNutrition();
@@ -71,6 +73,22 @@ function TrainingPlanViewInner({
   const [activeSessionIds, setActiveSessionIds] = useState<Record<number, string>>({});
   const [showAddSessionModal, setShowAddSessionModal] = useState(false);
   const [addSessionDow, setAddSessionDow] = useState<number>(0);
+
+  const todayCaloriesOut = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayWorkoutIds = new Set(
+      workouts.filter((w) => w.date === todayStr).map((w) => w.id),
+    );
+    if (todayWorkoutIds.size === 0) return 0;
+    const cardioCalories = workoutSets
+      .filter((s) => todayWorkoutIds.has(s.workoutId) && s.estimatedCalories)
+      .reduce((sum, s) => sum + (s.estimatedCalories ?? 0), 0);
+    const strengthSets = workoutSets.filter(
+      (s) => todayWorkoutIds.has(s.workoutId) && !s.estimatedCalories && s.weightKg > 0,
+    );
+    const strengthCalories = strengthSets.length * 8;
+    return Math.round(cardioCalories + strengthCalories);
+  }, [workouts, workoutSets]);
 
   const activePlan = useMemo(
     () => trainingPlans.find((p) => p.status === 'active'),
@@ -238,7 +256,7 @@ function TrainingPlanViewInner({
 
       <EnergyBalanceCard
         caloriesIn={eaten}
-        caloriesOut={0}
+        caloriesOut={todayCaloriesOut}
         targetCalories={targetCalories}
         proteinCurrent={protein}
         proteinTarget={targetProtein}
