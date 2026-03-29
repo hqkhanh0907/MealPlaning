@@ -91,7 +91,56 @@ export const config = {
       },
       { timeout: 30000, interval: 1000, timeoutMsg: 'App did not reload in 30s' }
     );
-    // Extra buffer for React to finish mounting after document ready
+    // Wait for React root to have children (app actually rendered)
+    const ciTimeout = process.env.CI ? 60000 : 30000;
+    await browser.waitUntil(
+      async () => {
+        try {
+          const hasContent = await exec.execute(() => {
+            const root = document.getElementById('root');
+            return root ? root.children.length > 0 : false;
+          });
+          return !!hasContent;
+        } catch {
+          return false;
+        }
+      },
+      { timeout: ciTimeout, interval: 2000, timeoutMsg: 'React app did not render in #root' }
+    );
+    // Wait for bottom nav to be present (app fully loaded)
+    await browser.waitUntil(
+      async () => {
+        try {
+          const hasNav = await exec.execute(() => !!document.querySelector('[data-testid="nav-calendar"]'));
+          return !!hasNav;
+        } catch {
+          return false;
+        }
+      },
+      { timeout: ciTimeout, interval: 2000, timeoutMsg: 'Bottom nav did not appear' }
+    );
+    // Extra buffer for React to settle after initial render
     await browser.pause(2000);
+  },
+
+  async afterTest(_test: unknown, _context: unknown, result: { passed: boolean }) {
+    if (!result.passed) {
+      try {
+        const exec = browser as unknown as { execute: <T>(fn: () => T) => Promise<T> };
+        const diag = await exec.execute(() => {
+          const root = document.getElementById('root');
+          return {
+            url: location.href,
+            title: document.title,
+            rootChildren: root ? root.children.length : -1,
+            rootHTML: root ? root.innerHTML.substring(0, 500) : 'NO ROOT',
+            bodyHTML: document.body.innerHTML.substring(0, 300),
+          };
+        });
+        console.log('[E2E DIAG] Page state on failure:', JSON.stringify(diag, null, 2));
+      } catch (e) {
+        console.log('[E2E DIAG] Could not capture page state:', e);
+      }
+    }
   },
 };

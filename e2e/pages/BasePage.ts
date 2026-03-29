@@ -16,22 +16,24 @@ export class BasePage {
   }
 
   /** Wait for element to be displayed AND stable (handles modal open animations). */
-  async waitForClickable(testid: string, timeout = 15_000) {
+  async waitForClickable(testid: string, timeout?: number) {
+    const t = timeout ?? (process.env.CI ? 45_000 : 15_000);
     const elem = this.el(testid);
-    await elem.waitForDisplayed({ timeout });
+    await elem.waitForDisplayed({ timeout: t });
     await browser.waitUntil(async () => elem.isEnabled(), {
-      timeout,
+      timeout: t,
       interval: 200,
-      timeoutMsg: `Element [data-testid="${testid}"] not interactable after ${timeout}ms`,
+      timeoutMsg: `Element [data-testid="${testid}"] not interactable after ${t}ms`,
     });
   }
 
   /** Wait for element and click. */
   async waitAndClick(testid: string) {
+    const timeout = process.env.CI ? 45_000 : 15_000;
     const elem = this.el(testid);
-    await elem.waitForDisplayed({ timeout: 15_000 });
+    await elem.waitForDisplayed({ timeout });
     await browser.waitUntil(async () => elem.isEnabled(), {
-      timeout: 15_000,
+      timeout,
       interval: 200,
     });
     // Use document.querySelector inside execute() to avoid WebElement
