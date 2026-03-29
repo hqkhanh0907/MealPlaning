@@ -28,3 +28,4 @@ client_secret*.json
 # Bundle analysis
 stats.html
 .superpowers/
+.superpowers/
