@@ -142,7 +142,7 @@ export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady,
   return (
     <div data-testid="image-capture">
       {isCameraOpen ? (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center" data-testid="camera-overlay">
+        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center pt-safe pb-safe" data-testid="camera-overlay">
           {cameraError ? (
             <div className="text-center p-6 max-w-xs">
               <div className="w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">

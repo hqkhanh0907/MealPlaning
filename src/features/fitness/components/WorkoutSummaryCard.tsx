@@ -22,7 +22,7 @@ export function WorkoutSummaryCard({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900"
+      className="fixed inset-0 z-50 flex flex-col bg-white pt-safe pb-safe dark:bg-slate-900"
       data-testid="workout-summary-card"
     >
       <div className="flex flex-1 flex-col items-center justify-center p-6">

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'motion/react';
 import { useDatabase } from '@/contexts/DatabaseContext';
@@ -105,13 +105,14 @@ export function UnifiedOnboarding() {
   const isAutoPath = useFitnessStore((s) => s.planStrategy === 'auto');
   const totalSections = isAutoPath ? 7 : 5;
 
+  const watchedExperience = useWatch({ control: form.control, name: 'experience' });
+
   const sectionSteps = useMemo(() => {
-    const experience = form.watch('experience');
     return {
       ...SECTION_STEPS,
-      4: experience === 'advanced' ? 9 : experience === 'intermediate' ? 8 : 4,
+      4: watchedExperience === 'advanced' ? 9 : watchedExperience === 'intermediate' ? 8 : 4,
     };
-  }, [form]);
+  }, [watchedExperience]);
 
   const goNext = useCallback(() => {
     setDirection(1);
@@ -198,7 +199,7 @@ export function UnifiedOnboarding() {
     <OnboardingErrorBoundary onReset={handleReset}>
       <div className="flex h-dvh flex-col bg-white dark:bg-slate-950">
         {location.section !== 6 && (
-          <div className="shrink-0 px-4 pt-safe-top">
+          <div className="shrink-0 px-4 pt-safe">
             <div className="pt-2">
               <OnboardingProgress
                 currentSection={location.section}
