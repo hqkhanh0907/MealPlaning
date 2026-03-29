@@ -445,7 +445,7 @@ describe('WorkoutLogger', () => {
     expect(screen.getByText('RPE 9')).toBeInTheDocument();
   });
 
-  it('uses fallback workout name when no planDay', async () => {
+  it('uses fallback workout name when no planDay (freestyle default)', async () => {
     const onComplete = vi.fn();
     render(<WorkoutLogger {...defaultProps} onComplete={onComplete} />);
 
@@ -456,7 +456,7 @@ describe('WorkoutLogger', () => {
 
     expect(onComplete).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Ghi nhận buổi tập',
+        name: 'Buổi tập tự do',
       }),
     );
   });
@@ -819,5 +819,96 @@ describe('WorkoutLogger', () => {
       <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
     );
     expect(screen.queryByTestId('overload-chip')).not.toBeInTheDocument();
+  });
+
+  /* ---------- planDayId and freestyle ---------- */
+  it('includes planDayId in saved workout when planDay has id', async () => {
+    const onComplete = vi.fn();
+    const planDayWithId = {
+      id: 'pd-1',
+      dayOfWeek: 1,
+      workoutType: 'Push Day',
+      exercises: ['bench-press'],
+    };
+    render(
+      <WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithId} />,
+    );
+
+    fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
+      target: { value: '80' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input-bench-press'), {
+      target: { value: '5' },
+    });
+    fireEvent.click(screen.getByTestId('log-set-bench-press'));
+    fireEvent.click(screen.getByText('Skip'));
+    fireEvent.click(screen.getByTestId('finish-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
+
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Push Day',
+        planDayId: 'pd-1',
+      }),
+      expect.any(Array),
+    );
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ planDayId: 'pd-1' }),
+    );
+  });
+
+  it('saves workout with undefined planDayId when no planDay (freestyle)', async () => {
+    const onComplete = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByTestId('finish-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
+
+    const savedWorkout = mockSaveWorkoutAtomic.mock.calls[0][0] as Record<string, unknown>;
+    expect(savedWorkout.planDayId).toBeUndefined();
+  });
+
+  it('shows freestyle name input after finishing a freestyle workout', () => {
+    render(<WorkoutLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    expect(screen.getByTestId('freestyle-name-input')).toBeInTheDocument();
+    expect(screen.getByText('Đặt tên buổi tập')).toBeInTheDocument();
+  });
+
+  it('does not show freestyle name input when planDay is provided', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    expect(screen.queryByTestId('freestyle-name-input')).not.toBeInTheDocument();
+  });
+
+  it('uses custom freestyle name when provided', async () => {
+    const onComplete = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByTestId('finish-button'));
+    fireEvent.change(screen.getByTestId('freestyle-name-input'), {
+      target: { value: 'Leg Day Custom' },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
+
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Leg Day Custom' }),
+    );
+  });
+
+  it('add exercise button has sticky positioning', () => {
+    render(<WorkoutLogger {...defaultProps} />);
+    const container = screen.getByTestId('add-exercise-container');
+    expect(container).toHaveClass('sticky');
+    expect(container).toHaveClass('bottom-0');
+    expect(container).toHaveClass('backdrop-blur-sm');
   });
 });

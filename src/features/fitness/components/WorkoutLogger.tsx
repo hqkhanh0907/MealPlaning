@@ -33,6 +33,7 @@ import {
 
 interface WorkoutLoggerProps {
   planDay?: {
+    id?: string;
     dayOfWeek: number;
     workoutType: string;
     exercises?: string[];
@@ -162,6 +163,8 @@ export function WorkoutLogger({
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [freestyleName, setFreestyleName] = useState('');
+  const isFreestyle = !planDay;
   const initialElapsed = useMemo(() => {
     const draft = useFitnessStore.getState().workoutDraft;
     return draft ? draft.elapsedSeconds : 0;
@@ -293,10 +296,14 @@ export function WorkoutLogger({
     const durationMin = Math.floor(elapsedRef.current / 60);
     const now = new Date().toISOString();
     const workoutId = `workout-${Date.now()}`;
+    const workoutName = planDay
+      ? (planDay.workoutType || t('fitness.logger.title'))
+      : (freestyleName.trim() || t('fitness.plan.freestyleDefault'));
     const workout: Workout = {
       id: workoutId,
       date: now.split('T')[0],
-      name: planDay?.workoutType ?? t('fitness.logger.title'),
+      name: workoutName,
+      planDayId: planDay?.id,
       durationMin,
       createdAt: now,
       updatedAt: now,
@@ -317,6 +324,7 @@ export function WorkoutLogger({
     clearWorkoutDraft,
     onComplete,
     t,
+    freestyleName,
   ]);
 
   const detectedPRs = useMemo(() => {
@@ -333,13 +341,30 @@ export function WorkoutLogger({
 
   if (showSummary) {
     return (
-      <WorkoutSummaryCard
-        durationSeconds={elapsedRef.current}
-        totalVolume={totalVolume}
-        setsCompleted={loggedSets.length}
-        personalRecords={detectedPRs}
-        onSave={handleSave}
-      />
+      <>
+        {isFreestyle && (
+          <div className="px-4 py-3" data-testid="freestyle-name-section">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              {t('fitness.plan.freestyleName')}
+            </label>
+            <input
+              type="text"
+              value={freestyleName}
+              onChange={(e) => setFreestyleName(e.target.value)}
+              placeholder={t('fitness.plan.freestyleDefault')}
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              data-testid="freestyle-name-input"
+            />
+          </div>
+        )}
+        <WorkoutSummaryCard
+          durationSeconds={elapsedRef.current}
+          totalVolume={totalVolume}
+          setsCompleted={loggedSets.length}
+          personalRecords={detectedPRs}
+          onSave={handleSave}
+        />
+      </>
     );
   }
 
@@ -561,7 +586,7 @@ export function WorkoutLogger({
         )}
       </div>
 
-      <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+      <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95" data-testid="add-exercise-container">
         <Button
           variant="outline"
           onClick={() => setShowExerciseSelector(true)}
