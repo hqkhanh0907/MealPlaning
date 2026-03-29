@@ -55,12 +55,14 @@ function makePlan(): TrainingPlan {
     id: 'plan1',
     name: 'Test Plan',
     status: 'active',
-    splitType: 'push_pull',
+    splitType: 'ppl',
     durationWeeks: 8,
     currentWeek: 1,
     startDate: '2024-01-01',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    trainingDays: [1, 3, 5],
+    restDays: [2, 4, 6, 7],
   };
 }
 
@@ -71,6 +73,8 @@ function makePlanDays(daysOfWeek: number[]): TrainingPlanDay[] {
     dayOfWeek: d,
     sessionOrder: 1,
     workoutType: 'strength',
+    isUserAssigned: false,
+    originalDayOfWeek: d,
   }));
 }
 

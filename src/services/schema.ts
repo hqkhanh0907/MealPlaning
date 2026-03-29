@@ -1,6 +1,6 @@
 import type { DatabaseService } from './databaseService';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const SCHEMA_TABLES = new Set([
   'ingredients',
@@ -24,6 +24,7 @@ export const SCHEMA_TABLES = new Set([
   'workout_drafts',
   'app_settings',
   'grocery_checked',
+  'plan_templates',
 ]);
 
 export async function getSchemaVersion(db: DatabaseService): Promise<number> {
@@ -163,6 +164,9 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       duration_weeks INTEGER NOT NULL,
       start_date TEXT NOT NULL,
       end_date TEXT,
+      template_id TEXT,
+      training_days TEXT,
+      rest_days TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     )
@@ -178,6 +182,8 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       muscle_groups TEXT,
       exercises TEXT,
       original_exercises TEXT,
+      is_user_assigned INTEGER DEFAULT 0,
+      original_day_of_week INTEGER,
       notes TEXT
     )
   `);
@@ -355,6 +361,25 @@ export async function createSchema(db: DatabaseService): Promise<void> {
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_plan_day_session ON training_plan_days(plan_id, day_of_week, session_order)',
   );
 
+  // --- Plan templates table ---
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS plan_templates (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      split_type TEXT NOT NULL,
+      days_per_week INTEGER NOT NULL,
+      experience_level TEXT,
+      training_goal TEXT,
+      equipment_required TEXT,
+      description TEXT,
+      day_configs TEXT NOT NULL,
+      popularity_score INTEGER DEFAULT 0,
+      is_builtin INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
   // --- Schema version ---
 
   await db.execute(`PRAGMA user_version = ${String(SCHEMA_VERSION)}`);
@@ -415,5 +440,79 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
     await db.execute("ALTER TABLE user_profile ADD COLUMN name TEXT DEFAULT ''");
     await db.execute('ALTER TABLE user_profile ADD COLUMN date_of_birth TEXT');
     await db.execute('PRAGMA user_version = 3');
+  }
+
+  // Migration v3 → v4: Full Plan Editor (schedule editor, split changer, templates)
+  if (currentVersion < 4) {
+    // 1. Add new columns to training_plan_days
+    await db.execute(
+      'ALTER TABLE training_plan_days ADD COLUMN is_user_assigned INTEGER DEFAULT 0',
+    );
+    await db.execute(
+      'ALTER TABLE training_plan_days ADD COLUMN original_day_of_week INTEGER',
+    );
+
+    // 2. Add new columns to training_plans
+    await db.execute('ALTER TABLE training_plans ADD COLUMN template_id TEXT');
+    await db.execute('ALTER TABLE training_plans ADD COLUMN training_days TEXT');
+    await db.execute('ALTER TABLE training_plans ADD COLUMN rest_days TEXT');
+
+    // 3. Backfill original_day_of_week from current day_of_week
+    await db.execute(
+      'UPDATE training_plan_days SET original_day_of_week = day_of_week WHERE original_day_of_week IS NULL',
+    );
+
+    // 4. Normalize existing split_type values
+    await db.execute(
+      "UPDATE training_plans SET split_type = 'full_body' WHERE LOWER(REPLACE(REPLACE(split_type, ' ', '_'), '/', '_')) LIKE '%full%body%'",
+    );
+    await db.execute(
+      "UPDATE training_plans SET split_type = 'upper_lower' WHERE LOWER(REPLACE(REPLACE(split_type, ' ', '_'), '/', '_')) LIKE '%upper%lower%'",
+    );
+    await db.execute(
+      "UPDATE training_plans SET split_type = 'ppl' WHERE LOWER(REPLACE(REPLACE(split_type, ' ', '_'), '/', '_')) LIKE '%push%' OR LOWER(split_type) = 'ppl'",
+    );
+    await db.execute(
+      "UPDATE training_plans SET split_type = 'bro_split' WHERE LOWER(REPLACE(REPLACE(split_type, ' ', '_'), '/', '_')) LIKE '%bro%'",
+    );
+    await db.execute(
+      "UPDATE training_plans SET split_type = 'custom' WHERE split_type NOT IN ('full_body', 'upper_lower', 'ppl', 'bro_split', 'custom')",
+    );
+
+    // 5. Backfill training_days and rest_days from existing plan days
+    const plans = await db.query<{ id: string }>('SELECT id FROM training_plans WHERE training_days IS NULL');
+    for (const plan of plans) {
+      const days = await db.query<{ day_of_week: number }>(
+        'SELECT DISTINCT day_of_week FROM training_plan_days WHERE plan_id = ?',
+        [plan.id],
+      );
+      const trainingDays = days.map((d) => d.day_of_week).sort((a, b) => a - b);
+      const restDays = [1, 2, 3, 4, 5, 6, 7].filter((d) => !trainingDays.includes(d));
+      await db.execute(
+        'UPDATE training_plans SET training_days = ?, rest_days = ? WHERE id = ?',
+        [JSON.stringify(trainingDays), JSON.stringify(restDays), plan.id],
+      );
+    }
+
+    // 6. Create plan_templates table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS plan_templates (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        split_type TEXT NOT NULL,
+        days_per_week INTEGER NOT NULL,
+        experience_level TEXT,
+        training_goal TEXT,
+        equipment_required TEXT,
+        description TEXT,
+        day_configs TEXT NOT NULL,
+        popularity_score INTEGER DEFAULT 0,
+        is_builtin INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+
+    await db.execute('PRAGMA user_version = 4');
   }
 }

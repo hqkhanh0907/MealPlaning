@@ -441,13 +441,15 @@ describe('FitnessTab', () => {
         id: expectedPlanId,
         name: 'Manual Plan',
         status: 'active',
-        splitType: 'Custom',
+        splitType: 'custom',
         durationWeeks: 1,
         currentWeek: 1,
         startDate: expectedIso,
         endDate: expectedEndIso,
         createdAt: expectedIso,
         updatedAt: expectedIso,
+        trainingDays: [],
+        restDays: [1, 2, 3, 4, 5, 6, 7],
       });
 
       const addedDays = localAddPlanDays.mock.calls[0][0] as Array<{

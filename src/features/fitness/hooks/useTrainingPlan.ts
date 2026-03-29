@@ -13,7 +13,7 @@ import type {
   CardioTypePref,
   CardioIntensity,
 } from '../types';
-import { isBodyRegion } from '../types';
+import { isBodyRegion, normalizeSplitType } from '../types';
 import {
   calculateTargetWeeklySets,
   distributeVolume,
@@ -475,16 +475,19 @@ export function generateTrainingPlan(
     );
 
     const exercisesJson = JSON.stringify(finalExercises);
+    const dayOfWeek = dayOfWeekAssignment[index];
     return {
       id: `${planId}_day_${index + 1}`,
       planId,
-      dayOfWeek: dayOfWeekAssignment[index],
+      dayOfWeek,
       sessionOrder: 1,
       workoutType: session.name,
       muscleGroups: session.muscleGroups.join(','),
       exercises: exercisesJson,
       originalExercises: exercisesJson,
       notes: deloadNote,
+      isUserAssigned: false,
+      originalDayOfWeek: dayOfWeek,
     };
   });
 
@@ -519,6 +522,8 @@ export function generateTrainingPlan(
           sessionOrder: 1,
           workoutType: 'Cardio',
           notes: cardioNote,
+          isUserAssigned: false,
+          originalDayOfWeek: cardio.dayOfWeek,
         });
       }
     }
@@ -564,6 +569,8 @@ export function generateTrainingPlan(
           sessionOrder: 2,
           workoutType: 'Cardio',
           notes: cardioNote,
+          isUserAssigned: false,
+          originalDayOfWeek: target.day.dayOfWeek,
         });
         doubleSessionCount++;
       }
@@ -587,6 +594,8 @@ export function generateTrainingPlan(
           sessionOrder: 1,
           workoutType: 'Cardio',
           notes: cardioNote,
+          isUserAssigned: false,
+          originalDayOfWeek: cardio.dayOfWeek,
         });
       }
     }
@@ -642,6 +651,8 @@ export function generateTrainingPlan(
           muscleGroups: heaviest.day.muscleGroups,
           exercises: isoJson,
           originalExercises: isoJson,
+          isUserAssigned: false,
+          originalDayOfWeek: heaviest.day.dayOfWeek,
         });
       }
     }
@@ -667,16 +678,21 @@ export function generateTrainingPlan(
     }
   }
 
+  const trainingDays = [...new Set(days.filter((d) => d.sessionOrder === 1).map((d) => d.dayOfWeek))].sort();
+  const restDays = [1, 2, 3, 4, 5, 6, 7].filter((d) => !trainingDays.includes(d));
+
   const plan: TrainingPlan = {
     id: planId,
     name: `${splitType} - ${trainingProfile.trainingGoal}`,
     status: 'active',
-    splitType,
+    splitType: normalizeSplitType(splitType),
     durationWeeks: trainingProfile.planCycleWeeks,
     currentWeek: resolvedWeek,
     startDate: now,
     createdAt: now,
     updatedAt: now,
+    trainingDays,
+    restDays,
   };
 
   return { plan, days, deloadSuggestion };

@@ -21,6 +21,7 @@ afterEach(cleanup);
 const makePlanDay = (overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay => ({
   id: 'pd-1', planId: 'plan-1', dayOfWeek: 1, sessionOrder: 1,
   workoutType: 'Upper Push', exercises: '[]', originalExercises: '[]',
+  isUserAssigned: false, originalDayOfWeek: 1,
   ...overrides,
 });
 

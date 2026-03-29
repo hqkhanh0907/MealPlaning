@@ -711,6 +711,8 @@ function TrainingPlanViewInner({
               muscleGroups: groups.join(','),
               exercises: '[]',
               originalExercises: '[]',
+              isUserAssigned: true,
+              originalDayOfWeek: addSessionDow,
             });
           }
           setShowAddSessionModal(false);
@@ -727,6 +729,8 @@ function TrainingPlanViewInner({
               muscleGroups: '',
               exercises: '[]',
               originalExercises: '[]',
+              isUserAssigned: true,
+              originalDayOfWeek: addSessionDow,
             });
           }
           setShowAddSessionModal(false);

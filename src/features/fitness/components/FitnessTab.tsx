@@ -70,13 +70,15 @@ const FitnessTabInner: React.FC = () => {
       id: planId,
       name: 'Manual Plan',
       status: 'active' as const,
-      splitType: 'Custom',
+      splitType: 'custom' as const,
       durationWeeks: 1,
       currentWeek: 1,
       startDate,
       endDate,
       createdAt: startDate,
       updatedAt: startDate,
+      trainingDays: [] as number[],
+      restDays: [1, 2, 3, 4, 5, 6, 7],
     };
     addTrainingPlan(plan);
 
@@ -88,6 +90,8 @@ const FitnessTabInner: React.FC = () => {
       workoutType: 'Rest',
       exercises: '[]',
       originalExercises: '[]',
+      isUserAssigned: false,
+      originalDayOfWeek: i + 1,
     }));
     addPlanDays(days);
 

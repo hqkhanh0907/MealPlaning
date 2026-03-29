@@ -135,10 +135,12 @@ function mkActivePlan(overrides: Partial<TrainingPlan> = {}): TrainingPlan {
     id: 'plan-1',
     name: 'PPL 6-day',
     status: 'active',
-    splitType: 'Push/Pull/Legs',
+    splitType: 'ppl',
     durationWeeks: 8,
     currentWeek: 1,
     startDate: '2025-01-01',
+    trainingDays: [1, 3, 5],
+    restDays: [2, 4, 6, 7],
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -153,6 +155,8 @@ function mkPlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay {
     sessionOrder: 1,
     workoutType: 'Push A',
     muscleGroups: 'chest,shoulders,triceps',
+    isUserAssigned: false,
+    originalDayOfWeek: new Date().getDay(),
     ...overrides,
   };
 }

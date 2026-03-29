@@ -91,6 +91,8 @@ const makePlanDay = (exercises: SelectedExercise[] = [sampleExercise, sampleExer
   workoutType: 'Upper Push',
   exercises: JSON.stringify(exercises),
   originalExercises: JSON.stringify(exercises),
+  isUserAssigned: false,
+  originalDayOfWeek: 1,
 });
 
 describe('PlanDayEditor', () => {

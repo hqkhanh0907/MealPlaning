@@ -67,10 +67,12 @@ function samplePlan(overrides: Partial<TrainingPlan> = {}): TrainingPlan {
     id: 'plan-1',
     name: 'PPL 8-Week',
     status: 'active',
-    splitType: 'push-pull-legs',
+    splitType: 'ppl',
     durationWeeks: 8,
     currentWeek: 1,
     startDate: '2025-06-01',
+    trainingDays: [1, 3, 5],
+    restDays: [2, 4, 6, 7],
     createdAt: '2025-06-01T00:00:00.000Z',
     updatedAt: '2025-06-01T00:00:00.000Z',
     ...overrides,
@@ -87,6 +89,8 @@ function samplePlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDa
     muscleGroups: 'chest,shoulders',
     exercises: JSON.stringify([{ exercise: { id: 'bench', name: 'Bench Press', primaryMuscle: 'chest', equipment: 'barbell', category: 'compound' }, sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120 }]),
     originalExercises: JSON.stringify([{ exercise: { id: 'bench', name: 'Bench Press', primaryMuscle: 'chest', equipment: 'barbell', category: 'compound' }, sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120 }]),
+    isUserAssigned: false,
+    originalDayOfWeek: 1,
     ...overrides,
   };
 }
@@ -197,7 +201,7 @@ describe('fitnessStore', () => {
     const updated = useFitnessStore.getState().trainingPlans[0];
     expect(updated.name).toBe('Updated PPL');
     expect(updated.endDate).toBe('2025-07-27');
-    expect(updated.splitType).toBe('push-pull-legs');
+    expect(updated.splitType).toBe('ppl');
   });
 
   it('updateTrainingPlan does not modify non-matching plans', () => {
@@ -548,6 +552,8 @@ describe('fitnessStore', () => {
         muscleGroups: '',
         exercises: '[]',
         originalExercises: '[]',
+        isUserAssigned: false,
+        originalDayOfWeek: 1,
       });
 
       const days = useFitnessStore.getState().trainingPlanDays;
@@ -567,6 +573,7 @@ describe('fitnessStore', () => {
       useFitnessStore.getState().addPlanDaySession('plan-1', 1, {
         planId: 'plan-1', dayOfWeek: 1, sessionOrder: 4,
         workoutType: 'Extra', exercises: '[]', originalExercises: '[]',
+        isUserAssigned: false, originalDayOfWeek: 1,
       });
 
       expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(3);
@@ -1155,6 +1162,8 @@ describe('fitnessStore – SQLite write-through', () => {
         muscleGroups: 'back',
         exercises: '[]',
         originalExercises: '[]',
+        isUserAssigned: false,
+        originalDayOfWeek: 3,
       });
     });
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -1424,6 +1433,8 @@ describe('fitnessStore – SQLite error paths', () => {
         workoutType: 'push',
         exercises: '[]',
         originalExercises: '[]',
+        isUserAssigned: false,
+        originalDayOfWeek: 5,
       });
     });
 

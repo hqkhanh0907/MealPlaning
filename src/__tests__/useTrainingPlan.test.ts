@@ -214,7 +214,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 1 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Full Body');
+      expect(result.plan.splitType).toBe('full_body');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -227,7 +227,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 2 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Full Body');
+      expect(result.plan.splitType).toBe('full_body');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -241,7 +241,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 3 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Full Body');
+      expect(result.plan.splitType).toBe('full_body');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -258,7 +258,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 4 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Upper/Lower');
+      expect(result.plan.splitType).toBe('upper_lower');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -286,7 +286,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 5 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Push/Pull/Legs');
+      expect(result.plan.splitType).toBe('ppl');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -304,7 +304,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 6 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Push/Pull/Legs');
+      expect(result.plan.splitType).toBe('ppl');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -323,7 +323,7 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 7 }),
         exerciseDB: mockDB,
       });
-      expect(result.plan.splitType).toBe('Push/Pull/Legs');
+      expect(result.plan.splitType).toBe('ppl');
       const training = result.days.filter(
         (d) => d.workoutType !== 'Cardio',
       );
@@ -1040,7 +1040,7 @@ describe('generateTrainingPlan', () => {
       expect(result.plan.name).toContain('Upper/Lower');
       expect(result.plan.name).toContain('strength');
       expect(result.plan.status).toBe('active');
-      expect(result.plan.splitType).toBe('Upper/Lower');
+      expect(result.plan.splitType).toBe('upper_lower');
       expect(result.plan.id).toMatch(/^plan_/);
       expect(result.plan.startDate).toBeTruthy();
       expect(result.plan.createdAt).toBeTruthy();
@@ -1288,7 +1288,7 @@ describe('useTrainingPlan', () => {
     });
 
     expect(plan).toBeDefined();
-    expect(plan?.plan.splitType).toBe('Full Body');
+    expect(plan?.plan.splitType).toBe('full_body');
     expect(plan?.days.length).toBeGreaterThan(0);
     expect(result.current.isGenerating).toBe(false);
   });

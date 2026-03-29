@@ -32,6 +32,7 @@ const EXPECTED_TABLES = [
   'workout_drafts',
   'app_settings',
   'grocery_checked',
+  'plan_templates',
 ];
 
 const EXPECTED_INDEXES = [
@@ -56,11 +57,11 @@ describe('createSchema', () => {
     await createSchema(db);
   });
 
-  it('creates all 21 tables', async () => {
+  it('creates all 22 tables', async () => {
     const tables = await db.query<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
     );
-    expect(tables).toHaveLength(21);
+    expect(tables).toHaveLength(22);
   });
 
   it.each(EXPECTED_TABLES)('table "%s" exists in sqlite_master', async (tableName) => {
@@ -112,7 +113,7 @@ describe('createSchema', () => {
   it('sets schema version to current SCHEMA_VERSION', async () => {
     const version = await getSchemaVersion(db);
     expect(version).toBe(SCHEMA_VERSION);
-    expect(version).toBe(3);
+    expect(version).toBe(4);
   });
 
   it('is idempotent — running createSchema twice does not error', async () => {
@@ -121,7 +122,7 @@ describe('createSchema', () => {
     const tables = await db.query<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
     );
-    expect(tables).toHaveLength(21);
+    expect(tables).toHaveLength(22);
   });
 
   it('enforces UNIQUE constraint — duplicate date in weight_log is rejected', async () => {
@@ -215,6 +216,31 @@ async function createV2Schema(db: DatabaseService): Promise<void> {
     fat_pct REAL NOT NULL DEFAULT 0.25,
     target_calories INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+
+  await db.execute(`CREATE TABLE IF NOT EXISTS training_plans (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active',
+    split_type TEXT NOT NULL DEFAULT '',
+    duration_weeks INTEGER NOT NULL DEFAULT 4,
+    current_week INTEGER NOT NULL DEFAULT 1,
+    start_date TEXT NOT NULL DEFAULT '',
+    end_date TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+
+  await db.execute(`CREATE TABLE IF NOT EXISTS training_plan_days (
+    id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+    plan_id TEXT NOT NULL REFERENCES training_plans(id) ON DELETE CASCADE,
+    day_of_week INTEGER NOT NULL CHECK(day_of_week BETWEEN 1 AND 7),
+    session_order INTEGER NOT NULL DEFAULT 1,
+    workout_type TEXT NOT NULL,
+    muscle_groups TEXT,
+    exercises TEXT,
+    original_exercises TEXT,
+    notes TEXT
   )`);
 
   await db.execute('PRAGMA user_version = 2');

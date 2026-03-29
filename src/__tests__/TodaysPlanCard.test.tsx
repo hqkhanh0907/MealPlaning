@@ -68,12 +68,14 @@ const makePlan = (overrides: Partial<TrainingPlan> = {}): TrainingPlan => ({
   id: 'plan-1',
   name: 'Test Plan',
   status: 'active',
-  splitType: 'push-pull-legs',
+  splitType: 'ppl',
   durationWeeks: 8,
   currentWeek: 1,
   startDate: '2025-01-01',
   createdAt: '2025-01-01T00:00:00',
   updatedAt: '2025-01-01T00:00:00',
+  trainingDays: [3],
+  restDays: [1, 2, 4, 5, 6, 7],
   ...overrides,
 });
 
@@ -87,6 +89,8 @@ const makePlanDay = (
   workoutType: 'Upper Body A',
   muscleGroups: 'chest, shoulders, triceps',
   exercises: makeExercisesJson(),
+  isUserAssigned: false,
+  originalDayOfWeek: 3,
   ...overrides,
 });
 

@@ -56,16 +56,47 @@ export interface TrainingProfile {
   updatedAt: string;
 }
 
+// Split type — normalized enum for plan structure
+export type SplitType = 'full_body' | 'upper_lower' | 'ppl' | 'bro_split' | 'custom';
+
+const SPLIT_TYPES: readonly SplitType[] = ['full_body', 'upper_lower', 'ppl', 'bro_split', 'custom'];
+
+export function isSplitType(value: string): value is SplitType {
+  return (SPLIT_TYPES as readonly string[]).includes(value);
+}
+
+export function normalizeSplitType(raw: string): SplitType {
+  const lower = raw.toLowerCase().replace(/[\s/-]/g, '_');
+  if (lower.includes('full') && lower.includes('body')) return 'full_body';
+  if (lower.includes('upper') && lower.includes('lower')) return 'upper_lower';
+  if (lower.includes('push') || lower === 'ppl') return 'ppl';
+  if (lower.includes('bro')) return 'bro_split';
+  return 'custom';
+}
+
+export function safeParseJsonArray<T>(json: string | null | undefined, fallback: T[] = []): T[] {
+  if (!json) return fallback;
+  try {
+    const parsed: unknown = JSON.parse(json);
+    return Array.isArray(parsed) ? (parsed as T[]) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 // Training Plan
 export interface TrainingPlan {
   id: string;
   name: string;
   status: PlanStatus;
-  splitType: string;
+  splitType: SplitType;
   durationWeeks: number;
   currentWeek: number;
   startDate: string;
   endDate?: string;
+  templateId?: string | null;
+  trainingDays: number[];
+  restDays: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -79,7 +110,40 @@ export interface TrainingPlanDay {
   muscleGroups?: string;
   exercises?: string;
   originalExercises?: string;
+  isUserAssigned: boolean;
+  originalDayOfWeek: number;
   notes?: string;
+}
+
+// Plan template for quick-start gallery
+export interface PlanTemplate {
+  id: string;
+  name: string;
+  splitType: SplitType;
+  daysPerWeek: number;
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced' | 'all';
+  trainingGoal: TrainingGoal | 'general';
+  equipmentRequired: EquipmentType[];
+  description: string;
+  dayConfigs: TemplateDayConfig[];
+  popularityScore: number;
+  isBuiltin: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TemplateDayConfig {
+  dayLabel: string;
+  workoutType: string;
+  muscleGroups: MuscleGroup[];
+  exercises: SelectedExercise[];
+}
+
+// Preview for split change confirmation
+export interface SplitChangePreview {
+  mapped: Array<{ from: TrainingPlanDay; toDay: string; toMuscleGroups: MuscleGroup[] }>;
+  suggested: Array<{ day: string; muscleGroups: MuscleGroup[]; reason: string }>;
+  unmapped: TrainingPlanDay[];
 }
 
 // Workout Logging
