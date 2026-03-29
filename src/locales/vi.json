@@ -725,6 +725,14 @@
       "cancel": "Hủy",
       "delete": "Xóa"
     },
+    "swap": {
+      "title": "Đổi bài tập",
+      "current": "Bài tập hiện tại",
+      "alternatives": "Bài tập thay thế",
+      "search": "Tìm bài tập...",
+      "noAlternatives": "Không có bài tập thay thế",
+      "sameGroup": "Cùng nhóm cơ"
+    },
     "exerciseSelector": {
       "title": "Chọn bài tập",
       "search": "Tìm bài tập...",
@@ -747,6 +755,14 @@
       "muscleArms": "Tay",
       "muscleCore": "Bụng",
       "muscleGlutes": "Mông"
+    },
+    "swap": {
+      "title": "Đổi bài tập",
+      "current": "Bài tập hiện tại",
+      "alternatives": "Bài tập thay thế",
+      "search": "Tìm bài tập...",
+      "noAlternatives": "Không có bài tập thay thế",
+      "sameGroup": "Cùng nhóm cơ"
     },
     "plan": {
       "tab": "Kế hoạch",
@@ -771,6 +787,10 @@
       "planError": "Không thể tạo kế hoạch. Vui lòng thử lại.",
       "setsLabel": "hiệp",
       "repsLabel": "lần",
+      "repsMinLabel": "Lần tối thiểu",
+      "repsMaxLabel": "Lần tối đa",
+      "restLabel": "Nghỉ",
+      "editParams": "Chỉnh thông số",
       "editExercises": "Chỉnh sửa bài tập",
       "addExercise": "Thêm bài tập",
       "save": "Lưu",

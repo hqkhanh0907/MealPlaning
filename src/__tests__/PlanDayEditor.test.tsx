@@ -15,9 +15,17 @@ vi.mock('react-i18next', () => ({
       'fitness.plan.modified': 'Đã chỉnh sửa',
       'fitness.plan.noExercises': 'Chưa có bài tập nào',
       'fitness.plan.unsavedChanges': 'Bạn có thay đổi chưa lưu. Bỏ thay đổi?',
+      'fitness.plan.setsLabel': 'hiệp',
+      'fitness.plan.repsLabel': 'lần',
+      'fitness.plan.repsMinLabel': 'Lần tối thiểu',
+      'fitness.plan.repsMaxLabel': 'Lần tối đa',
+      'fitness.plan.restLabel': 'Nghỉ',
+      'fitness.plan.editParams': 'Chỉnh thông số',
+      'fitness.swap.title': 'Đổi bài tập',
       'common.back': 'Quay lại',
       'common.confirm': 'Xác nhận',
       'common.cancel': 'Hủy',
+      'common.close': 'Đóng',
     };
     return map[key] ?? key;
   } }),
@@ -37,6 +45,22 @@ vi.mock('../features/fitness/components/ExerciseSelector', () => ({
         <button onClick={() => onSelect({ id: 'new-ex', nameVi: 'Squat', muscleGroup: 'legs', category: 'compound', equipment: ['barbell'], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12 })}>
           Add Squat
         </button>
+      </div>
+    );
+  },
+}));
+
+// Mock SwapExerciseSheet
+vi.mock('../features/fitness/components/SwapExerciseSheet', () => ({
+  SwapExerciseSheet: ({ isOpen, currentExercise, onSelect, onClose }: { isOpen: boolean; currentExercise: { nameVi: string }; onSelect: (ex: unknown) => void; onClose: () => void }) => {
+    if (!isOpen) return null;
+    return (
+      <div data-testid="swap-exercise-sheet">
+        <span data-testid="swap-current">{currentExercise.nameVi}</span>
+        <button data-testid="swap-select" onClick={() => onSelect({ id: 'fly', nameVi: 'Chest Fly', nameEn: 'Chest Fly', muscleGroup: 'chest', secondaryMuscles: [], category: 'isolation', equipment: ['dumbbell'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 10, defaultRepsMax: 15, isCustom: false, updatedAt: '' })}>
+          Select Fly
+        </button>
+        <button data-testid="swap-close" onClick={onClose}>Close</button>
       </div>
     );
   },
@@ -132,5 +156,73 @@ describe('PlanDayEditor', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     fireEvent.click(screen.getByLabelText('Quay lại'));
     expect(mockPopPage).toHaveBeenCalled();
+  });
+
+  it('tap exercise card expands to show inline steppers', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    // Click the first exercise name to expand it
+    const exerciseNames = screen.getAllByTestId('exercise-name');
+    fireEvent.click(exerciseNames[0]);
+
+    expect(screen.getByTestId('exercise-params-0')).toBeInTheDocument();
+    expect(screen.getByTestId('stepper-sets-0')).toBeInTheDocument();
+    expect(screen.getByTestId('stepper-rest-0')).toBeInTheDocument();
+    expect(screen.getByTestId('stepper-repsMin-0')).toBeInTheDocument();
+    expect(screen.getByTestId('stepper-repsMax-0')).toBeInTheDocument();
+  });
+
+  it('tap expanded exercise collapses it', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const exerciseNames = screen.getAllByTestId('exercise-name');
+    fireEvent.click(exerciseNames[0]);
+    expect(screen.getByTestId('exercise-params-0')).toBeInTheDocument();
+
+    fireEvent.click(exerciseNames[0]);
+    expect(screen.queryByTestId('exercise-params-0')).not.toBeInTheDocument();
+  });
+
+  it('increment sets stepper updates exercise params', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const exerciseNames = screen.getAllByTestId('exercise-name');
+    fireEvent.click(exerciseNames[0]);
+
+    // sampleExercise has sets=4, click increment
+    const incrementBtn = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Increase hiệp"]');
+    expect(incrementBtn).not.toBeNull();
+    fireEvent.click(incrementBtn!);
+
+    // Sets text should now show 5
+    const exerciseInfo = screen.getAllByTestId('exercise-name')[0].parentElement;
+    expect(exerciseInfo?.textContent).toContain('5');
+  });
+
+  it('swap button opens SwapExerciseSheet with current exercise', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const swapBtn = screen.getByTestId('swap-exercise-0');
+    fireEvent.click(swapBtn);
+
+    expect(screen.getByTestId('swap-exercise-sheet')).toBeInTheDocument();
+    expect(screen.getByTestId('swap-current')).toHaveTextContent('Bench Press');
+  });
+
+  it('selecting swap replacement updates exercise in list', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByTestId('swap-exercise-0'));
+    fireEvent.click(screen.getByTestId('swap-select'));
+
+    // Bench Press should be replaced with Chest Fly
+    expect(screen.queryByText('Bench Press')).not.toBeInTheDocument();
+    expect(screen.getByText('Chest Fly')).toBeInTheDocument();
+    // OHP should still be there
+    expect(screen.getByText('OHP')).toBeInTheDocument();
+  });
+
+  it('closing swap sheet without selecting preserves original exercise', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByTestId('swap-exercise-0'));
+    fireEvent.click(screen.getByTestId('swap-close'));
+
+    expect(screen.queryByTestId('swap-exercise-sheet')).not.toBeInTheDocument();
+    expect(screen.getByText('Bench Press')).toBeInTheDocument();
   });
 });
