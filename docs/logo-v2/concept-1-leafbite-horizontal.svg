@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" width="640" height="200" role="img">
+  <title>SmartMeal — LeafBite Horizontal</title>
+  <defs>
+    <linearGradient id="lb-h-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon (scaled down) -->
+  <g transform="translate(16, 16) scale(0.328)">
+    <rect width="512" height="512" rx="112" fill="#ECFDF5"/>
+    <path d="M256 56 C380 56, 456 160, 456 280 C456 380, 380 456, 256 456 C180 456, 120 420, 96 340 C72 260, 132 56, 256 56Z" fill="url(#lb-h-grad)"/>
+    <circle cx="200" cy="340" r="80" fill="#ECFDF5"/>
+    <g transform="translate(200, 340)" stroke="#10B981" stroke-width="6" stroke-linecap="round" fill="none">
+      <line x1="-16" y1="-30" x2="-16" y2="30"/>
+      <line x1="0" y1="-30" x2="0" y2="30"/>
+      <line x1="16" y1="-30" x2="16" y2="30"/>
+      <path d="M-16,-30 C-16,-42 16,-42 16,-30"/>
+      <line x1="0" y1="30" x2="0" y2="44"/>
+    </g>
+    <g transform="translate(370, 140)">
+      <circle cx="0" cy="0" r="24" fill="#FFFFFF"/>
+      <g stroke="#10B981" stroke-width="5" stroke-linecap="round">
+        <line x1="0" y1="-16" x2="0" y2="16"/>
+        <line x1="-16" y1="0" x2="16" y2="0"/>
+      </g>
+      <g stroke="#10B981" stroke-width="3.5" stroke-linecap="round">
+        <line x1="-10" y1="-10" x2="10" y2="10"/>
+        <line x1="10" y1="-10" x2="-10" y2="10"/>
+      </g>
+    </g>
+    <g transform="translate(360, 370) rotate(-30)">
+      <rect x="-36" y="-5" width="72" height="10" rx="5" fill="#FFFFFF"/>
+      <rect x="-44" y="-12" width="14" height="24" rx="5" fill="#FFFFFF"/>
+      <rect x="30" y="-12" width="14" height="24" rx="5" fill="#FFFFFF"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(210, 80)">
+    <text font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+          font-size="52" font-weight="800" fill="#064E3B" letter-spacing="-1">
+      SmartMeal
+    </text>
+    <text y="44"
+          font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+          font-size="22" font-weight="600" fill="#10B981" letter-spacing="8">
+      PLANNER
+    </text>
+  </g>
+</svg>

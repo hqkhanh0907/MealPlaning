@@ -611,7 +611,7 @@ describe('Edge Case 3: Fitness-only user', () => {
         {
           id: 'pd1',
           planId: 'plan1',
-          dayOfWeek: new Date().getDay(),
+          dayOfWeek: new Date().getDay() === 0 ? 7 : new Date().getDay(),
           workoutType: 'Push',
           muscleGroups: 'Chest,Shoulders',
           exercises: JSON.stringify([
@@ -630,6 +630,7 @@ describe('Edge Case 3: Fitness-only user', () => {
           id: 'w1',
           date: today,
           planId: 'plan1',
+          planDayId: 'pd1',
           startedAt: '2024-01-01T08:00:00Z',
           durationMin: 60,
         },

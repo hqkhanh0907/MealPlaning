@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160" role="img" aria-labelledby="title8h">
+  <title id="title8h">Smart Meal Planner - Vietnamese Localization Horizontal</title>
+  <defs>
+    <linearGradient id="vn-h-bowl" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="vn-h-steam" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.5"/><stop offset="100%" stop-color="#34D399" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(72, 45)">
+    <g fill="none" stroke-linecap="round" stroke-width="2">
+      <path d="M-12,0 C-12,-8 -6,-14 -6,-22" stroke="url(#vn-h-steam)"/>
+      <path d="M0,-3 C0,-11 6,-17 6,-25" stroke="url(#vn-h-steam)"/>
+      <path d="M12,0 C12,-8 18,-14 18,-22" stroke="url(#vn-h-steam)"/>
+    </g>
+    <path d="M-45,10 C-45,10 -40,70 0,70 C40,70 45,10 45,10 Z" fill="url(#vn-h-bowl)"/>
+    <rect x="-48" y="5" width="96" height="8" rx="4" fill="#10B981"/>
+    <line x1="-20" y1="-12" x2="22" y2="8" stroke="#D97706" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="-20" y1="-12" x2="22" y2="8" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+    <line x1="20" y1="-12" x2="-15" y2="8" stroke="#D97706" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="20" y1="-12" x2="-15" y2="8" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="0" cy="73" rx="18" ry="4" fill="#059669"/>
+  </g>
+  <text x="160" y="72" font-family="'SF Pro Display','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="36" font-weight="700" fill="#10B981" letter-spacing="-0.5">Smart</text>
+  <text x="160" y="72" font-family="'SF Pro Display','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="36" font-weight="700" fill="#1E293B" letter-spacing="-0.5" dx="105">Meal</text>
+  <text x="160" y="110" font-family="'SF Pro Display','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="400" fill="#64748B" letter-spacing="3">PLANNER</text>
+</svg>

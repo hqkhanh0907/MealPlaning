@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img">
+  <title>SmartMeal — GreenDrop</title>
+  <desc>A vibrant emerald gradient with a clean white drop/leaf shape containing a subtle sparkle</desc>
+  <defs>
+    <linearGradient id="gd-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="50%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rich gradient background -->
+  <rect width="512" height="512" rx="112" fill="url(#gd-bg)"/>
+
+  <!-- Single white drop/leaf — ONE shape, nothing else -->
+  <!-- Drop shape: circle bottom + pointed top = teardrop inverted -->
+  <circle cx="256" cy="284" r="96" fill="#FFFFFF"/>
+  <polygon points="256,112 196,232 316,232" fill="#FFFFFF"/>
+  <!-- Smooth the join -->
+  <rect x="196" y="216" width="120" height="32" fill="#FFFFFF"/>
+
+  <!-- Inside: subtle 4-point star = AI/Smart -->
+  <polygon points="256,176 262,204 290,210 262,216 256,244 250,216 222,210 250,204"
+           fill="#059669" opacity="0.6"/>
+
+  <!-- Tiny circular accent = completeness -->
+  <circle cx="256" cy="310" r="8" fill="#059669" opacity="0.25"/>
+</svg>

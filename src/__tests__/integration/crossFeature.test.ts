@@ -317,9 +317,9 @@ describe('Cross-Feature: Fitness → Dashboard', () => {
   it('workout logged today → TodaysPlanCard shows training-completed', () => {
     const activePlan = mkActivePlan();
     const todayPlanDay = mkPlanDay();
-    const todayWorkout = mkWorkout();
+    const todayWorkout = mkWorkout({ planDayId: todayPlanDay.id });
 
-    const state = determineTodayPlanState(activePlan, todayPlanDay, todayWorkout);
+    const state = determineTodayPlanState(activePlan, [todayPlanDay], [todayWorkout]);
     expect(state).toBe('training-completed');
   });
 
@@ -327,19 +327,19 @@ describe('Cross-Feature: Fitness → Dashboard', () => {
     const activePlan = mkActivePlan();
     const todayPlanDay = mkPlanDay();
 
-    const state = determineTodayPlanState(activePlan, todayPlanDay, undefined);
+    const state = determineTodayPlanState(activePlan, [todayPlanDay], []);
     expect(state).toBe('training-pending');
   });
 
   it('no plan day scheduled → shows rest-day', () => {
     const activePlan = mkActivePlan();
 
-    const state = determineTodayPlanState(activePlan, undefined, undefined);
+    const state = determineTodayPlanState(activePlan, [], []);
     expect(state).toBe('rest-day');
   });
 
   it('no active training plan → shows no-plan', () => {
-    const state = determineTodayPlanState(undefined, undefined, undefined);
+    const state = determineTodayPlanState(undefined, [], []);
     expect(state).toBe('no-plan');
   });
 

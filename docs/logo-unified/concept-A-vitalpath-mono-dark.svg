@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img">
+  <title>VitalPath — Monochrome Dark</title>
+  <rect width="512" height="512" rx="102" fill="#FFFFFF"/>
+  <path d="M256 72 C348 132, 400 212, 388 308 C380 368, 340 412, 296 432 C276 440, 266 442, 256 443 C246 442, 236 440, 216 432 C172 412, 132 368, 124 308 C112 212, 164 132, 256 72Z" fill="#1E293B"/>
+  <path d="M200 390 C195 355, 195 325, 200 295 C208 258, 218 235, 222 210 C226 190, 235 168, 245 145 L256 118" fill="none" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" opacity="0.7"/>
+  <path d="M190 395 C192 378, 194 368, 196 358" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+  <path d="M210 395 C208 378, 205 365, 204 352" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+  <path d="M256 405 L256 340 L256 280 L248 245 L264 210 L250 175 L256 118" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+  <path d="M312 390 C317 355, 317 325, 312 295 C304 258, 294 235, 290 210 C286 190, 277 168, 267 145 L256 118" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+  <circle cx="315" cy="320" r="4" fill="#FFF" opacity="0.35"/>
+  <circle cx="305" cy="265" r="3.5" fill="#FFF" opacity="0.4"/>
+  <circle cx="256" cy="110" r="10" fill="#FFFFFF"/>
+  <g stroke="#FFF" stroke-width="2.5" stroke-linecap="round" opacity="0.7">
+    <line x1="256" y1="92" x2="256" y2="82"/><line x1="256" y1="128" x2="256" y2="138"/>
+    <line x1="238" y1="110" x2="228" y2="110"/><line x1="274" y1="110" x2="284" y2="110"/>
+  </g>
+</svg>

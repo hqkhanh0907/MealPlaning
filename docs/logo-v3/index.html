@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Meal Planner — Logo Final Review</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0A0A; color: #E5E5E5; font-family: -apple-system, 'Inter', 'Segoe UI', sans-serif; }
+
+  .header { text-align: center; padding: 48px 20px 32px; }
+  .header h1 { font-size: 28px; font-weight: 800; color: #FFF; margin-bottom: 8px; }
+  .header p { font-size: 14px; color: #888; }
+
+  .section-title {
+    text-align: center; padding: 32px 20px 16px;
+    font-size: 11px; font-weight: 700; color: #10B981;
+    text-transform: uppercase; letter-spacing: 4px;
+  }
+
+  /* Top 4 ranking */
+  .ranking {
+    max-width: 1000px; margin: 0 auto; padding: 0 20px 40px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .rank-card {
+    background: #141414; border: 1px solid #222; border-radius: 16px;
+    padding: 24px; text-align: center; position: relative;
+  }
+  .rank-card.best { border-color: #10B981; }
+  .rank-badge {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: #10B981; color: #000; font-size: 11px; font-weight: 700;
+    padding: 3px 14px; border-radius: 12px; white-space: nowrap;
+  }
+  .rank-card img { border-radius: 22%; margin: 12px auto; display: block; }
+  .rank-card h3 { font-size: 16px; font-weight: 700; margin: 8px 0 4px; }
+  .rank-card .score { font-size: 28px; font-weight: 800; color: #10B981; }
+  .rank-card .desc { font-size: 12px; color: #888; line-height: 1.5; }
+
+  /* All 8 concepts grid */
+  .all-grid {
+    max-width: 1100px; margin: 0 auto; padding: 0 20px 40px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .mini-card {
+    background: #141414; border: 1px solid #1a1a1a; border-radius: 12px;
+    padding: 16px; text-align: center;
+  }
+  .mini-card img { border-radius: 22%; margin-bottom: 8px; }
+  .mini-card h4 { font-size: 13px; font-weight: 600; }
+  .mini-card .mini-score { font-size: 11px; color: #666; }
+  .mini-card.rejected { opacity: 0.45; }
+
+  /* Size test */
+  .size-test {
+    max-width: 800px; margin: 0 auto; padding: 20px;
+    display: flex; justify-content: center; align-items: end; gap: 40px; flex-wrap: wrap;
+  }
+  .size-item { text-align: center; }
+  .size-item img { border-radius: 22%; display: block; margin-bottom: 6px; }
+  .size-item span { font-size: 11px; color: #666; }
+
+  /* Honest notes */
+  .notes {
+    max-width: 700px; margin: 40px auto; padding: 28px;
+    background: #141414; border: 1px solid #222; border-radius: 16px;
+  }
+  .notes h3 { color: #10B981; margin-bottom: 12px; font-size: 15px; }
+  .notes p { font-size: 13px; color: #AAA; line-height: 1.8; }
+  .notes ul { margin-top: 10px; padding-left: 20px; }
+  .notes li { font-size: 13px; color: #AAA; line-height: 2; }
+
+  .footer { text-align: center; padding: 40px; font-size: 12px; color: #444; }
+
+  @media (max-width: 768px) {
+    .ranking { grid-template-columns: repeat(2, 1fr); }
+    .all-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎨 Smart Meal Planner — Logo Review</h1>
+  <p>8 concepts đã tạo → qua 3 vòng iteration có kiểm tra visual → Top 4 bên dưới</p>
+</div>
+
+<!-- TOP 4 -->
+<div class="section-title">🏆 Top 4 — Đánh giá sau khi nhìn thực tế</div>
+<div class="ranking">
+
+  <div class="rank-card best">
+    <div class="rank-badge">🥇 ĐỀ XUẤT #1</div>
+    <img src="concept-4-smartleaf-icon.svg.png" width="160" height="160" alt="SmartLeaf">
+    <h3>SmartLeaf</h3>
+    <div class="score">8.5</div>
+    <p class="desc">Chữ S trắng bold trên lá emerald.<br>Nền tối sang trọng. Sparkle AI tinh tế.</p>
+  </div>
+
+  <div class="rank-card">
+    <img src="concept-8-bloom-icon.svg.png" width="160" height="160" alt="Bloom">
+    <h3>Bloom</h3>
+    <div class="score">7.5</div>
+    <p class="desc">3 vòng tròn chồng nhau = 3 pillars.<br>Venn diagram. Tâm trắng hội tụ.</p>
+  </div>
+
+  <div class="rank-card">
+    <img src="concept-7-spark-icon.svg.png" width="160" height="160" alt="Spark">
+    <h3>Spark</h3>
+    <div class="score">7.5</div>
+    <p class="desc">Ngôi sao 4 cánh + vòng tròn giữa.<br>Ultra clean. Nhưng không gợi "food".</p>
+  </div>
+
+  <div class="rank-card">
+    <img src="concept-2-tridot-icon.svg.png" width="160" height="160" alt="TriDot">
+    <h3>TriDot</h3>
+    <div class="score">7.0</div>
+    <p class="desc">3 vòng tròn tam giác, mỗi vòng<br>chứa icon: fork, dumbbell, star.</p>
+  </div>
+
+</div>
+
+<!-- SIZE TEST for #1 -->
+<div class="section-title">📐 SmartLeaf — Test các kích thước</div>
+<div class="size-test">
+  <div class="size-item">
+    <img src="concept-4-smartleaf-icon.svg" width="180" height="180" alt="180px">
+    <span>180px (App Store)</span>
+  </div>
+  <div class="size-item">
+    <img src="concept-4-smartleaf-icon.svg" width="96" height="96" alt="96px">
+    <span>96px (Launcher)</span>
+  </div>
+  <div class="size-item">
+    <img src="concept-4-smartleaf-icon.svg" width="64" height="64" alt="64px">
+    <span>64px (Home)</span>
+  </div>
+  <div class="size-item">
+    <img src="concept-4-smartleaf-icon.svg" width="48" height="48" alt="48px">
+    <span>48px (Tab bar)</span>
+  </div>
+  <div class="size-item">
+    <img src="concept-4-smartleaf-icon.svg" width="32" height="32" alt="32px">
+    <span>32px (Favicon)</span>
+  </div>
+  <div class="size-item">
+    <img src="concept-4-smartleaf-icon.svg" width="20" height="20" alt="20px">
+    <span>20px (Notification)</span>
+  </div>
+</div>
+
+<!-- ALL 8 overview -->
+<div class="section-title">📋 Tất cả 8 concepts — Quick overview</div>
+<div class="all-grid">
+  <div class="mini-card rejected">
+    <img src="concept-1-leafbite-icon.svg.png" width="100" height="100" alt="#1">
+    <h4>1. LeafBite</h4>
+    <div class="mini-score">❌ 4/10 — Blob, rời rạc</div>
+  </div>
+  <div class="mini-card">
+    <img src="concept-2-tridot-icon.svg.png" width="100" height="100" alt="#2">
+    <h4>2. TriDot</h4>
+    <div class="mini-score">✅ 7/10 — 3 circles clean</div>
+  </div>
+  <div class="mini-card rejected">
+    <img src="concept-3-platebell-icon.svg.png" width="100" height="100" alt="#3">
+    <h4>3. PlateBell</h4>
+    <div class="mini-score">❌ 4/10 — Nặng nề, rối</div>
+  </div>
+  <div class="mini-card">
+    <img src="concept-4-smartleaf-icon.svg.png" width="100" height="100" alt="#4">
+    <h4>4. SmartLeaf ⭐</h4>
+    <div class="mini-score">✅ 8.5/10 — Best overall</div>
+  </div>
+  <div class="mini-card rejected">
+    <img src="concept-5-greendrop-icon.svg.png" width="100" height="100" alt="#5">
+    <h4>5. GreenDrop</h4>
+    <div class="mini-score">❌ 4/10 — Seam lộ, trống</div>
+  </div>
+  <div class="mini-card rejected">
+    <img src="concept-6-nutrifit-icon.svg.png" width="100" height="100" alt="#6">
+    <h4>6. NutriFit</h4>
+    <div class="mini-score">❌ 5/10 — Fusion icon kỳ</div>
+  </div>
+  <div class="mini-card">
+    <img src="concept-7-spark-icon.svg.png" width="100" height="100" alt="#7">
+    <h4>7. Spark</h4>
+    <div class="mini-score">✅ 7.5/10 — Clean, generic</div>
+  </div>
+  <div class="mini-card">
+    <img src="concept-8-bloom-icon.svg.png" width="100" height="100" alt="#8">
+    <h4>8. Bloom</h4>
+    <div class="mini-score">✅ 7.5/10 — 3 pillars rõ</div>
+  </div>
+</div>
+
+<!-- Honest assessment -->
+<div class="notes">
+  <h3>💡 Đánh giá thành thật</h3>
+  <p>Tôi đã xem thực tế từng logo qua PNG preview trước khi đánh giá. Kết quả:</p>
+  <ul>
+    <li><strong>SmartLeaf (#4)</strong> là kết quả tốt nhất — chữ S trên lá emerald, nền tối, nhìn chuyên nghiệp nhất trong tất cả</li>
+    <li><strong>Bloom (#8)</strong> và <strong>Spark (#7)</strong> đều sạch, nhưng một cái thiếu ý nghĩa food, cái kia cần icon tinh chỉnh</li>
+    <li><strong>4/8 concept bị loại</strong> vì xấu khi nhìn thực tế (blob, seam lộ, fusion kỳ cục)</li>
+    <li>Đây là giới hạn của hand-coded SVG. Để đạt chất lượng Duolingo/Headspace cần Figma hoặc AI image generation</li>
+  </ul>
+  <p style="margin-top:16px;"><strong>Bước tiếp theo gợi ý:</strong> Nếu thích hướng SmartLeaf, dùng nó làm concept direction → tạo final version bằng Figma/Midjourney/DALL-E.</p>
+</div>
+
+<div class="footer">
+  Smart Meal Planner — Logo Review v3 • 8 concepts • 3 iterations • Emerald #059669→#10B981→#34D399
+</div>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img">
+  <title>SmartMeal — TriDot</title>
+  <desc>Three bold circles in triangle formation connected by clean lines, representing meal, fitness, and AI</desc>
+  <defs>
+    <linearGradient id="td-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#022C22"/>
+      <stop offset="100%" stop-color="#064E3B"/>
+    </linearGradient>
+    <linearGradient id="td-circle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="512" height="512" rx="112" fill="url(#td-bg)"/>
+
+  <!-- Connecting lines (behind circles) — thinner, more elegant -->
+  <g stroke="#34D399" stroke-width="3.5" stroke-linecap="round" opacity="0.35">
+    <line x1="256" y1="155" x2="152" y2="335"/>
+    <line x1="256" y1="155" x2="360" y2="335"/>
+    <line x1="152" y1="335" x2="360" y2="335"/>
+  </g>
+
+  <!-- Center dot — smaller, subtler -->
+  <circle cx="256" cy="275" r="10" fill="#34D399" opacity="0.3"/>
+
+  <!-- Top circle: MEAL — simple bowl/plate (half circle) -->
+  <circle cx="256" cy="155" r="62" fill="url(#td-circle)"/>
+  <g transform="translate(256, 155)">
+    <!-- Simple fork + knife — clean, bold -->
+    <g stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" fill="none">
+      <!-- Fork (3 tines + handle) -->
+      <line x1="-14" y1="-22" x2="-14" y2="24"/>
+      <line x1="-22" y1="-22" x2="-22" y2="-6"/>
+      <line x1="-6" y1="-22" x2="-6" y2="-6"/>
+    </g>
+    <!-- Knife — solid blade -->
+    <rect x="8" y="-22" width="12" height="20" rx="6" fill="#FFFFFF"/>
+    <rect x="11" y="-2" width="6" height="26" rx="3" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Bottom-left circle: FITNESS (dumbbell) — cleaner proportions -->
+  <circle cx="152" cy="335" r="62" fill="url(#td-circle)"/>
+  <g transform="translate(152, 335)">
+    <rect x="-24" y="-4.5" width="48" height="9" rx="4.5" fill="#FFFFFF"/>
+    <rect x="-32" y="-13" width="12" height="26" rx="4" fill="#FFFFFF"/>
+    <rect x="20" y="-13" width="12" height="26" rx="4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Bottom-right circle: AI (4-point star — cleaner) -->
+  <circle cx="360" cy="335" r="62" fill="url(#td-circle)"/>
+  <g transform="translate(360, 335)">
+    <!-- Clean 4-point star -->
+    <polygon points="0,-26 6,-6 26,0 6,6 0,26 -6,6 -26,0 -6,-6" fill="#FFFFFF"/>
+  </g>
+</svg>

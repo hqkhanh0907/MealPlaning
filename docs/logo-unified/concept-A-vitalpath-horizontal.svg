@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" width="640" height="180" role="img" aria-labelledby="vpH-title">
+  <title id="vpH-title">Smart Meal Planner — VitalPath Horizontal</title>
+  <defs>
+    <linearGradient id="vpH-body" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/><stop offset="45%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="vpH-p1" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity="0.3"/><stop offset="100%" stop-color="#FFF" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="vpH-p2" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity="0.25"/><stop offset="100%" stop-color="#FFF" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="vpH-p3" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity="0.2"/><stop offset="100%" stop-color="#FFF" stop-opacity="0.8"/>
+    </linearGradient>
+    <radialGradient id="vpH-glow" cx="50%" cy="18%" r="25%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity="0.95"/><stop offset="60%" stop-color="#A7F3D0" stop-opacity="0.3"/><stop offset="100%" stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(80, 90) scale(0.3)">
+    <path d="M0,-280 C148,-200, 228,-100, 212,50 C200,148, 135,216, 64,248 C22,262, 0,264, 0,264 C0,264, -22,262, -64,248 C-135,216, -200,148, -212,50 C-228,-100, -148,-200, 0,-280Z" fill="url(#vpH-body)"/>
+    <!-- Left meal path -->
+    <path d="M-90,230 C-98,170, -98,120, -90,60 C-78,0, -60,-45, -52,-85 L0,-210" fill="none" stroke="url(#vpH-p1)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M-105,235 C-103,210, -100,195, -98,180" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+    <path d="M-75,235 C-77,210, -80,195, -82,180" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+    <!-- Center fitness path -->
+    <path d="M0,250 L0,140 L0,40 L-12,-20 L12,-65 L-8,-120 L0,-210" fill="none" stroke="url(#vpH-p2)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Right AI path -->
+    <path d="M90,230 C98,170, 98,120, 90,60 C78,0, 60,-45, 52,-85 L0,-210" fill="none" stroke="url(#vpH-p3)" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="96" cy="90" r="6" fill="#FFF" opacity="0.4"/>
+    <circle cx="80" cy="15" r="5" fill="#FFF" opacity="0.45"/>
+    <!-- Sparkle top -->
+    <circle cx="0" cy="-225" r="42" fill="url(#vpH-glow)"/>
+    <circle cx="0" cy="-225" r="15" fill="#FFF"/>
+    <g stroke="#FFF" stroke-width="3.5" stroke-linecap="round" opacity="0.85">
+      <line x1="0" y1="-250" x2="0" y2="-265"/><line x1="0" y1="-200" x2="0" y2="-185"/>
+      <line x1="-25" y1="-225" x2="-40" y2="-225"/><line x1="25" y1="-225" x2="40" y2="-225"/>
+    </g>
+    <g stroke="#FFF" stroke-width="2.5" stroke-linecap="round" opacity="0.45">
+      <line x1="-18" y1="-243" x2="-26" y2="-251"/><line x1="18" y1="-243" x2="26" y2="-251"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(175, 0)">
+    <text x="0" y="78" font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="44" font-weight="800" letter-spacing="-1">
+      <tspan fill="#10B981">Smart</tspan><tspan fill="#1E293B" dx="4">Meal</tspan>
+    </text>
+    <text x="0" y="118" font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="17" font-weight="500" fill="#64748B" letter-spacing="4.5">PLANNER</text>
+    <!-- Three tiny pillar indicators -->
+    <g transform="translate(142, 106)">
+      <circle cx="0" cy="0" r="3" fill="#10B981" opacity="0.5"/>
+      <circle cx="14" cy="0" r="3" fill="#10B981" opacity="0.35"/>
+      <circle cx="28" cy="0" r="3" fill="#10B981" opacity="0.2"/>
+    </g>
+  </g>
+</svg>

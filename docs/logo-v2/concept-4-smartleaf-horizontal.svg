@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" width="640" height="200" role="img">
+  <title>SmartMeal — SmartLeaf Horizontal</title>
+  <defs>
+    <linearGradient id="sl-h-grad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="sl-h-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064E3B"/>
+      <stop offset="100%" stop-color="#065F46"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon (scaled down) -->
+  <g transform="translate(16, 16) scale(0.328)">
+    <rect width="512" height="512" rx="112" fill="url(#sl-h-bg)"/>
+    <path d="M256 60 C380 60, 440 180, 440 280 C440 400, 360 452, 256 452 C152 452, 72 400, 72 280 C72 180, 132 60, 256 60Z" fill="url(#sl-h-grad)"/>
+    <path d="M256 120 L256 400" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.3"/>
+    <g transform="translate(256, 256)">
+      <path d="M48,-60 L-8,-60 C-44,-60 -60,-44 -60,-20 C-60,4 -40,16 -8,16 L8,16 C40,16 60,28 60,56 C60,80 44,96 8,96 L-48,96" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(368, 148)">
+      <g stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.7">
+        <line x1="0" y1="-14" x2="0" y2="14"/>
+        <line x1="-14" y1="0" x2="14" y2="0"/>
+        <line x1="-9" y1="-9" x2="9" y2="9"/>
+        <line x1="9" y1="-9" x2="-9" y2="9"/>
+      </g>
+    </g>
+    <g transform="translate(136, 364)">
+      <g stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.45">
+        <line x1="0" y1="-10" x2="0" y2="10"/>
+        <line x1="-10" y1="0" x2="10" y2="0"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(210, 80)">
+    <text font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+          font-size="52" font-weight="800" fill="#064E3B" letter-spacing="-1">
+      SmartMeal
+    </text>
+    <text y="44"
+          font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+          font-size="22" font-weight="600" fill="#10B981" letter-spacing="8">
+      PLANNER
+    </text>
+  </g>
+</svg>

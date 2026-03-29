@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" width="640" height="180" role="img" aria-labelledby="nlH-title">
+  <title id="nlH-title">Smart Meal Planner — NexusLeaf Horizontal</title>
+  <defs>
+    <linearGradient id="nlH-body" x1="25%" y1="0%" x2="75%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/><stop offset="35%" stop-color="#059669"/><stop offset="65%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <radialGradient id="nlH-crown" cx="50%" cy="0%" r="40%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity="1"/><stop offset="50%" stop-color="#A7F3D0" stop-opacity="0.4"/><stop offset="100%" stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- NexusLeaf icon -->
+  <g transform="translate(75, 90) scale(0.185)">
+    <!-- Leaf -->
+    <path d="M0,-380 C160,-270, 245,-130, 220,60 C204,155, 144,260, 70,295 C38,310, 0,318, 0,318 C0,318, -38,310, -70,295 C-144,260, -204,155, -220,60 C-245,-130, -160,-270, 0,-380Z" fill="url(#nlH-body)"/>
+    <!-- Person stem -->
+    <g fill="#FFF" opacity="0.5">
+      <circle cx="0" cy="55" r="18"/>
+      <rect x="-7" y="75" width="14" height="60" rx="7"/>
+      <path d="M-7,82 L-38,52 L-30,46" stroke="#FFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M7,82 L38,52 L30,46" stroke="#FFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M-4,135 L-22,180" stroke="#FFF" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <path d="M4,135 L22,180" stroke="#FFF" stroke-width="10" stroke-linecap="round" fill="none"/>
+    </g>
+    <!-- Left vein meal -->
+    <path d="M0,-180 C-42,-130, -90,-50, -115,30 C-128,65, -138,95, -148,130" fill="none" stroke="#FFF" stroke-width="4" opacity="0.4" stroke-linecap="round"/>
+    <g transform="translate(-148, 135) rotate(20)">
+      <line x1="-7" y1="0" x2="-7" y2="16" stroke="#FFF" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+      <line x1="0" y1="0" x2="0" y2="18" stroke="#FFF" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+      <line x1="7" y1="0" x2="7" y2="16" stroke="#FFF" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    </g>
+    <!-- Center vein fitness -->
+    <line x1="0" y1="-180" x2="0" y2="280" stroke="#FFF" stroke-width="5" opacity="0.45" stroke-linecap="round"/>
+    <!-- Right vein AI -->
+    <path d="M0,-180 C42,-130, 90,-50, 115,30 C128,65, 138,95, 148,130" fill="none" stroke="#FFF" stroke-width="4" opacity="0.4" stroke-linecap="round"/>
+    <circle cx="85" cy="-55" r="5.5" fill="#FFF" opacity="0.4"/>
+    <circle cx="125" cy="55" r="5.5" fill="#FFF" opacity="0.35"/>
+    <line x1="85" y1="-55" x2="102" y2="-66" stroke="#FFF" stroke-width="2" opacity="0.25" stroke-linecap="round"/>
+    <line x1="125" y1="55" x2="145" y2="45" stroke="#FFF" stroke-width="2" opacity="0.25" stroke-linecap="round"/>
+    <!-- Crown -->
+    <circle cx="0" cy="-340" r="50" fill="url(#nlH-crown)"/>
+    <circle cx="0" cy="-340" r="18" fill="#FFF"/>
+    <g stroke="#FFF" stroke-width="4.5" stroke-linecap="round">
+      <line x1="0" y1="-368" x2="0" y2="-385"/><line x1="0" y1="-312" x2="0" y2="-295"/>
+      <line x1="-28" y1="-340" x2="-45" y2="-340"/><line x1="28" y1="-340" x2="45" y2="-340"/>
+    </g>
+    <g stroke="#FFF" stroke-width="3" stroke-linecap="round" opacity="0.5">
+      <line x1="-20" y1="-360" x2="-30" y2="-370"/><line x1="20" y1="-360" x2="30" y2="-370"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(175, 0)">
+    <text x="0" y="78" font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="44" font-weight="800" letter-spacing="-1">
+      <tspan fill="#10B981">Smart</tspan><tspan fill="#1E293B" dx="4">Meal</tspan>
+    </text>
+    <text x="0" y="118" font-family="'SF Pro Display','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="17" font-weight="500" fill="#64748B" letter-spacing="4.5">PLANNER</text>
+  </g>
+</svg>
