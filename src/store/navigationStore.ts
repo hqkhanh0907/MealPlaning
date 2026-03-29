@@ -14,8 +14,10 @@ interface NavigationState {
   pageStack: PageEntry[];
   showBottomNav: boolean;
   tabScrollPositions: Record<string, number>;
+  tabHistory: MainTab[];
 
   navigateTab: (tab: MainTab) => void;
+  navigateTabBack: (tab: MainTab) => void;
   pushPage: (page: PageEntry) => void;
   popPage: () => void;
   canGoBack: () => boolean;
@@ -28,8 +30,18 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   pageStack: [],
   showBottomNav: true,
   tabScrollPositions: {},
+  tabHistory: [],
 
   navigateTab: (tab: MainTab) => {
+    set((state) => ({
+      activeTab: tab,
+      tabHistory: [...state.tabHistory, state.activeTab],
+      pageStack: [],
+      showBottomNav: true,
+    }));
+  },
+
+  navigateTabBack: (tab: MainTab) => {
     set({
       activeTab: tab,
       pageStack: [],
