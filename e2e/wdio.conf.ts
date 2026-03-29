@@ -66,28 +66,26 @@ export const config = {
     const exec = browser as unknown as { execute: (fn: () => unknown) => Promise<unknown> };
     const ciTimeout = process.env.CI ? 60000 : 30000;
 
-    // Check if we need to set onboarding flag (first boot of fresh APK)
-    const needsReload = await exec.execute(() => {
-      const key = 'app-onboarding-storage';
-      if (!localStorage.getItem(key)) {
-        localStorage.setItem(key, JSON.stringify({ state: { isAppOnboarded: true }, version: 0 }));
-        return true;
-      }
-      return false;
+    // Clear localStorage for test isolation, but preserve Zustand persist stores
+    // with valid empty state to avoid "undefined is not valid JSON" errors.
+    await exec.execute(() => {
+      localStorage.clear();
+      // Restore Zustand persist stores with valid empty state
+      localStorage.setItem('app-onboarding-storage',
+        JSON.stringify({ state: { isAppOnboarded: true }, version: 0 }));
+      localStorage.setItem('fitness-storage',
+        JSON.stringify({ state: {}, version: 0 }));
     });
-
-    if (needsReload) {
-      // Reload and wait for the page to actually start reloading
-      await exec.execute(() => { location.reload(); });
-      await browser.pause(3000);
-      // Re-switch to webview context (reload may reset context)
-      try {
-        const b = browser as unknown as { getContexts: () => Promise<string[]>; switchContext: (c: string) => Promise<void> };
-        const ctxs = await b.getContexts();
-        const wv = ctxs.find((c: string) => c.startsWith('WEBVIEW'));
-        if (wv) await b.switchContext(wv);
-      } catch { /* already in webview */ }
-    }
+    // Reload to apply clean state
+    await exec.execute(() => { location.reload(); });
+    await browser.pause(3000);
+    // Re-switch to webview context (reload may reset context)
+    try {
+      const b = browser as unknown as { getContexts: () => Promise<string[]>; switchContext: (c: string) => Promise<void> };
+      const ctxs = await b.getContexts();
+      const wv = ctxs.find((c: string) => c.startsWith('WEBVIEW'));
+      if (wv) await b.switchContext(wv);
+    } catch { /* already in webview */ }
 
     // Wait for document to be fully loaded
     await browser.waitUntil(
