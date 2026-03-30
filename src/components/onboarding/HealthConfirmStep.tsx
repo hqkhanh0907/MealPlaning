@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { getCalorieOffset } from '@/services/nutritionEngine';
 import type { OnboardingFormData } from './onboardingSchema';
+import { STEP_FIELDS } from './onboardingSchema';
 import { getAge, type HealthProfile } from '@/features/health-profile/types';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { useHealthProfileStore } from '@/features/health-profile/store/healthProfileStore';
@@ -53,8 +54,23 @@ export function HealthConfirmStep({
   }, [values, age]);
 
   const handleConfirm = async () => {
-    const isValid = await form.trigger();
+    const healthFields = [
+      ...STEP_FIELDS['2a'],
+      ...STEP_FIELDS['2b'],
+      ...STEP_FIELDS['2c'],
+    ] as const;
+    const isValid = await form.trigger([...healthFields]);
     if (!isValid) return;
+
+    const v = form.getValues();
+    if (v.goalType === 'cut' && v.targetWeightKg != null && v.targetWeightKg >= v.weightKg) {
+      form.setError('targetWeightKg', { message: t('onboarding.validation.cutTargetTooHigh') });
+      return;
+    }
+    if (v.goalType === 'bulk' && v.targetWeightKg != null && v.targetWeightKg <= v.weightKg) {
+      form.setError('targetWeightKg', { message: t('onboarding.validation.bulkTargetTooLow') });
+      return;
+    }
 
     setSaving(true);
     try {
@@ -79,12 +95,18 @@ export function HealthConfirmStep({
       const calorieOffset = currentValues.goalType === 'maintain'
         ? 0
         : getCalorieOffset(currentValues.goalType, currentValues.rateOfChange ?? 'moderate');
+      const now = new Date().toISOString();
       await saveGoal(db, {
+        id: 'default',
         type: currentValues.goalType,
         rateOfChange: currentValues.rateOfChange ?? 'moderate',
         targetWeightKg: currentValues.targetWeightKg ?? currentValues.weightKg,
         calorieOffset,
-      } as Parameters<typeof saveGoal>[1]);
+        startDate: now,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+      });
 
       setOnboardingSection(3);
       goNext();

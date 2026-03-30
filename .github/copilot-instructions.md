@@ -102,6 +102,40 @@ src/
 
 ---
 
+## 📋 Multi-Step Form (RHF + Zod) — QUY TẮC BẮT BUỘC (Bài học từ lỗi thực tế 2026-03-30)
+
+### Bài học:
+AI fix bug C-004 "Cross-field validation không chạy" bằng cách thêm `form.trigger()` (không args) vào `handleConfirm` của HealthConfirmStep. Nhưng `form.trigger()` không args validate **TOÀN BỘ schema** (cả Section 3+4 chưa được điền) → `isValid = false` → nút "Xác nhận" im lặng không phản hồi — regression nghiêm trọng.
+
+### Quy tắc KHÔNG ĐƯỢC vi phạm:
+
+1. **KHÔNG BAO GIỜ dùng `form.trigger()` không args tại bước trung gian của multi-step form.**
+   - `form.trigger()` validate toàn bộ schema, bao gồm fields của các bước CHƯA ĐƯỢC ĐIỀN.
+   - Luôn dùng `form.trigger([...STEP_FIELDS['currentStep']])` để chỉ validate fields của step hiện tại.
+
+2. **Cross-field validation (superRefine) KHÔNG chạy với field-level trigger.**
+   - `form.trigger(['field1', 'field2'])` chỉ validate từng field riêng lẻ, KHÔNG chạy `superRefine`.
+   - Nếu cần cross-field checks, implement thủ công bằng `form.setError()` sau khi field-level pass.
+
+3. **Validation failure PHẢI có feedback cho user.**
+   - KHÔNG BAO GIỜ viết `if (!isValid) return;` mà không có feedback.
+   - Tối thiểu: scroll đến field lỗi đầu tiên hoặc hiển thị toast/error message.
+   - Lý tưởng: hiển thị inline error trên mỗi field lỗi.
+
+4. **Sử dụng `STEP_FIELDS` constant để quản lý field groups.**
+   - Mỗi step phải có field group tương ứng trong `STEP_FIELDS` (xem `onboardingSchema.ts`).
+   - Khi validate, luôn reference `STEP_FIELDS` thay vì hardcode field names.
+
+### Checklist trước mỗi commit liên quan multi-step form:
+```
+□ form.trigger() có truyền field list (KHÔNG dùng trigger() không args)
+□ Cross-field validation được implement thủ công nếu cần
+□ Validation failure có feedback cho user (không silent return)
+□ Đã test trên emulator: button hoạt động ở MỌI step
+```
+
+---
+
 ## 🌐 i18n — QUY TẮC BẮT BUỘC (Bài học từ lỗi thực tế 2026-03-29)
 
 ### Bài học:
