@@ -45,6 +45,12 @@ vi.mock('@capacitor/app', () => ({
   },
 }));
 
+vi.mock('../services/backNavigationService', () => ({
+  pushBackEntry: vi.fn(),
+  removeBackEntries: vi.fn(),
+  initBackNavigation: vi.fn(() => vi.fn()),
+}));
+
 const mockSaveProfile = vi.fn().mockResolvedValue(undefined);
 const mockSaveGoal = vi.fn().mockResolvedValue(undefined);
 

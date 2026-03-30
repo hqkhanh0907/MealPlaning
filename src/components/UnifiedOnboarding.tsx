@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { App as CapApp } from '@capacitor/app';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { pushBackEntry, removeBackEntries } from '../services/backNavigationService';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'motion/react';
@@ -58,6 +58,14 @@ const SECTION_STEPS: Record<Section, number> = {
   6: 1, // computing
   7: 1, // preview
 };
+
+function computeDepth(loc: StepLocation): number {
+  let depth = loc.step;
+  for (let s = 1; s < loc.section; s++) {
+    depth += SECTION_STEPS[s as Section];
+  }
+  return depth;
+}
 
 const slideVariants = {
   enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%', opacity: 0 }),
@@ -160,14 +168,45 @@ export function UnifiedOnboarding() {
     setDirection(1);
   }, [setOnboardingSection]);
 
+  const prevDepthRef = useRef(computeDepth({ section: initialSection, step: 0 }));
+  const pushedCountRef = useRef(0);
+  const goBackRef = useRef(goBack);
+
   useEffect(() => {
-    const listener = CapApp.addListener('backButton', () => {
-      if (location.section > 1 || location.step > 0) {
-        goBack();
+    goBackRef.current = goBack;
+  }, [goBack]);
+
+  useEffect(() => {
+    const currDepth = computeDepth(location);
+    const prevDepth = prevDepthRef.current;
+    prevDepthRef.current = currDepth;
+
+    if (currDepth > prevDepth) {
+      const delta = currDepth - prevDepth;
+      for (let i = 0; i < delta; i++) {
+        pushBackEntry(() => {
+          pushedCountRef.current--;
+          goBackRef.current();
+        });
+        pushedCountRef.current++;
       }
-    });
-    return () => { listener.then(h => h.remove()); };
-  }, [location, goBack]);
+    } else if (currDepth < prevDepth && pushedCountRef.current > 0) {
+      const delta = Math.min(prevDepth - currDepth, pushedCountRef.current);
+      if (delta > 0) {
+        pushedCountRef.current -= delta;
+        removeBackEntries(delta);
+      }
+    }
+  }, [location]);
+
+  useEffect(() => {
+    return () => {
+      if (pushedCountRef.current > 0) {
+        removeBackEntries(pushedCountRef.current);
+        pushedCountRef.current = 0;
+      }
+    };
+  }, []);
 
   const stepProps = useMemo(() => ({
     form,
