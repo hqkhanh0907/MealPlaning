@@ -44,15 +44,18 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
             </label>
             <input
               id="ob-name"
+              name="name"
               type="text"
               autoComplete="name"
+              aria-invalid={!!nameField.fieldState.error}
+              aria-describedby={nameField.fieldState.error ? 'ob-name-error' : undefined}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               value={nameField.field.value}
               onChange={nameField.field.onChange}
               onBlur={nameField.field.onBlur}
             />
             {nameField.fieldState.error && (
-              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
+              <p id="ob-name-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
             )}
           </div>
 
@@ -61,11 +64,13 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
             <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               {t('onboarding.health.gender')}
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-3" role="radiogroup" aria-label={t('onboarding.health.gender')}>
               {(['male', 'female'] as const).map((g) => (
                 <button
                   key={g}
                   type="button"
+                  role="radio"
+                  aria-checked={genderField.field.value === g}
                   onClick={() => genderField.field.onChange(g)}
                   className={`min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
                     genderField.field.value === g
@@ -86,14 +91,17 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
             </label>
             <input
               id="ob-dob"
+              name="dateOfBirth"
               type="date"
+              aria-invalid={!!dobField.fieldState.error}
+              aria-describedby={dobField.fieldState.error ? 'ob-dob-error' : undefined}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               value={dobField.field.value}
               onChange={dobField.field.onChange}
               onBlur={dobField.field.onBlur}
             />
             {dobField.fieldState.error && (
-              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
+              <p id="ob-dob-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
             )}
           </div>
 
@@ -105,20 +113,24 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
             <div className="relative">
               <input
                 id="ob-height"
+                name="heightCm"
                 type="number"
                 inputMode="decimal"
+                placeholder="170"
+                aria-invalid={!!heightField.fieldState.error}
+                aria-describedby={heightField.fieldState.error ? 'ob-height-error' : undefined}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                value={heightField.field.value}
-                onChange={(e) => heightField.field.onChange(Number(e.target.value))}
+                value={heightField.field.value ?? ''}
+                onChange={(e) => heightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={heightField.field.onBlur}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">cm</span>
             </div>
-            {heightField.field.value < 3 && heightField.field.value > 0 && (
+            {heightField.field.value != null && heightField.field.value < 3 && heightField.field.value > 0 && (
               <p className="mt-1 text-xs text-amber-500">{t('onboarding.validation.heightHint')}</p>
             )}
             {heightField.fieldState.error && (
-              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.heightRange')}</p>
+              <p id="ob-height-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.heightRange')}</p>
             )}
           </div>
 
@@ -130,17 +142,21 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
             <div className="relative">
               <input
                 id="ob-weight"
+                name="weightKg"
                 type="number"
                 inputMode="decimal"
+                placeholder="70"
+                aria-invalid={!!weightField.fieldState.error}
+                aria-describedby={weightField.fieldState.error ? 'ob-weight-error' : undefined}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                value={weightField.field.value}
-                onChange={(e) => weightField.field.onChange(Number(e.target.value))}
+                value={weightField.field.value ?? ''}
+                onChange={(e) => weightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={weightField.field.onBlur}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">kg</span>
             </div>
             {weightField.fieldState.error && (
-              <p className="mt-1 text-xs text-red-500">{t('onboarding.validation.weightRange')}</p>
+              <p id="ob-weight-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.weightRange')}</p>
             )}
           </div>
         </div>

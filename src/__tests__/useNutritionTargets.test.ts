@@ -155,7 +155,7 @@ describe('useNutritionTargets', () => {
       activityLevel: 'active',
       proteinRatio: 2.0,
       fatPct: 0.25,
-      bodyFatPct: 0.15,
+      bodyFatPct: 15,
       targetCalories: 0,
       updatedAt: new Date().toISOString(),
     };

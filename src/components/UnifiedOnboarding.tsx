@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { App as CapApp } from '@capacitor/app';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'motion/react';
@@ -58,6 +59,12 @@ const SECTION_STEPS: Record<Section, number> = {
   7: 1, // preview
 };
 
+const slideVariants = {
+  enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%', opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%', opacity: 0 }),
+};
+
 function StepFallback() {
   return (
     <div className="flex h-full items-center justify-center">
@@ -90,12 +97,12 @@ export function UnifiedOnboarding() {
       name: '',
       gender: 'male',
       dateOfBirth: '',
-      heightCm: 170,
-      weightKg: 70,
+      heightCm: undefined,
+      weightKg: undefined,
       activityLevel: 'moderate',
       goalType: 'maintain',
       rateOfChange: 'moderate',
-      targetWeightKg: 70,
+      targetWeightKg: undefined,
       trainingGoal: 'hypertrophy',
       experience: 'beginner',
       daysPerWeek: 4,
@@ -153,7 +160,16 @@ export function UnifiedOnboarding() {
     setDirection(1);
   }, [setOnboardingSection]);
 
-  const stepProps = {
+  useEffect(() => {
+    const listener = CapApp.addListener('backButton', () => {
+      if (location.section > 1 || location.step > 0) {
+        goBack();
+      }
+    });
+    return () => { listener.then(h => h.remove()); };
+  }, [location, goBack]);
+
+  const stepProps = useMemo(() => ({
     form,
     db,
     goNext,
@@ -165,13 +181,7 @@ export function UnifiedOnboarding() {
     setPlanStrategy,
     completeOnboarding,
     location,
-  };
-
-  const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%', opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%', opacity: 0 }),
-  };
+  }), [form, db, goNext, goBack, goToSection, saveProfile, saveGoal, setOnboardingSection, setPlanStrategy, completeOnboarding, location]);
 
   const renderStep = () => {
     switch (location.section) {

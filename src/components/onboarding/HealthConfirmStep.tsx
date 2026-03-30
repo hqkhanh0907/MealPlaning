@@ -3,6 +3,7 @@ import { type UseFormReturn } from 'react-hook-form';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { getCalorieOffset } from '@/services/nutritionEngine';
 import type { OnboardingFormData } from './onboardingSchema';
 import { getAge, type HealthProfile } from '@/features/health-profile/types';
 import { useDatabase } from '@/contexts/DatabaseContext';
@@ -41,7 +42,7 @@ export function HealthConfirmStep({
     return (values.weightKg / (h * h)).toFixed(1);
   }, [values.heightCm, values.weightKg]);
 
-  const bmr = useMemo(() => {
+  const estimatedTdee = useMemo(() => {
     const base = values.gender === 'male'
       ? 10 * values.weightKg + 6.25 * values.heightCm - 5 * age + 5
       : 10 * values.weightKg + 6.25 * values.heightCm - 5 * age - 161;
@@ -52,27 +53,46 @@ export function HealthConfirmStep({
   }, [values, age]);
 
   const handleConfirm = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) return;
+
     setSaving(true);
-    const profileData = {
-      name: values.name,
-      gender: values.gender,
-      dateOfBirth: values.dateOfBirth,
-      age,
-      heightCm: values.heightCm,
-      weightKg: values.weightKg,
-      activityLevel: values.activityLevel,
-      bodyFatPct: values.bodyFatPct,
-      bmrOverride: values.bmrOverride,
-    } as HealthProfile;
-    saveProfile(db, profileData).catch(console.error);
-    saveGoal(db, {
-      type: values.goalType,
-      rateOfChange: values.rateOfChange ?? 'moderate',
-      targetWeightKg: values.targetWeightKg ?? values.weightKg,
-    } as Parameters<typeof saveGoal>[1]).catch(console.error);
-    setOnboardingSection(3);
-    setSaving(false);
-    goNext();
+    try {
+      const currentValues = form.getValues();
+      const profileData = {
+        id: 'default',
+        name: currentValues.name,
+        gender: currentValues.gender,
+        dateOfBirth: currentValues.dateOfBirth,
+        age,
+        heightCm: currentValues.heightCm,
+        weightKg: currentValues.weightKg,
+        activityLevel: currentValues.activityLevel,
+        bodyFatPct: currentValues.bodyFatPct,
+        bmrOverride: currentValues.bmrOverride,
+        proteinRatio: currentValues.proteinRatio ?? 2.0,
+        fatPct: 0.25,
+        targetCalories: estimatedTdee,
+      } as HealthProfile;
+      await saveProfile(db, profileData);
+
+      const calorieOffset = currentValues.goalType === 'maintain'
+        ? 0
+        : getCalorieOffset(currentValues.goalType, currentValues.rateOfChange ?? 'moderate');
+      await saveGoal(db, {
+        type: currentValues.goalType,
+        rateOfChange: currentValues.rateOfChange ?? 'moderate',
+        targetWeightKg: currentValues.targetWeightKg ?? currentValues.weightKg,
+        calorieOffset,
+      } as Parameters<typeof saveGoal>[1]);
+
+      setOnboardingSection(3);
+      goNext();
+    } catch (error) {
+      console.error('Failed to save onboarding data:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const summaryItems = [
@@ -100,7 +120,7 @@ export function HealthConfirmStep({
             {t('onboarding.confirm.dailyCalories')}
           </p>
           <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-300">
-            {bmr}
+            {estimatedTdee}
           </p>
           <p className="mt-1 text-xs text-emerald-500/70">kcal / {t('onboarding.confirm.day')}</p>
         </div>

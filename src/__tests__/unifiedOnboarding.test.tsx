@@ -32,14 +32,15 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-const mockBackButtonRemove = vi.fn();
-const mockAddListener = vi.fn((_event: string, _handler: () => void) => {
-  return Promise.resolve({ remove: mockBackButtonRemove });
-});
+const { mockCapAddListener } = vi.hoisted(() => ({
+  mockCapAddListener: vi.fn((_event: string, _handler: () => void) =>
+    Promise.resolve({ remove: vi.fn() }),
+  ),
+}));
 
 vi.mock('@capacitor/app', () => ({
   App: {
-    addListener: mockAddListener,
+    addListener: mockCapAddListener,
     exitApp: vi.fn(),
   },
 }));
@@ -1921,6 +1922,10 @@ describe('UnifiedOnboarding – integration', () => {
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     const dobInput = screen.getByLabelText('onboarding.health.dateOfBirth');
     fireEvent.change(dobInput, { target: { value: '1990-01-01' } });
+    const heightInput = screen.getByLabelText('onboarding.health.height');
+    fireEvent.change(heightInput, { target: { value: '170' } });
+    const weightInput = screen.getByLabelText('onboarding.health.weight');
+    fireEvent.change(weightInput, { target: { value: '70' } });
     fireEvent.click(screen.getByTestId('health-basic-next'));
     await waitFor(() => {
       expect(screen.getByTestId('activity-level-step')).toBeInTheDocument();
@@ -1952,6 +1957,10 @@ describe('UnifiedOnboarding – integration', () => {
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     const dobInput = screen.getByLabelText('onboarding.health.dateOfBirth');
     fireEvent.change(dobInput, { target: { value: '1990-01-01' } });
+    const heightInput = screen.getByLabelText('onboarding.health.height');
+    fireEvent.change(heightInput, { target: { value: '170' } });
+    const weightInput = screen.getByLabelText('onboarding.health.weight');
+    fireEvent.change(weightInput, { target: { value: '70' } });
     fireEvent.click(screen.getByTestId('health-basic-next'));
     await waitFor(() => {
       expect(screen.getByTestId('activity-level-step')).toBeInTheDocument();

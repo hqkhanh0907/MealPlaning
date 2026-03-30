@@ -12,9 +12,16 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+const { mockCapAddListener } = vi.hoisted(() => ({
+  mockCapAddListener: vi.fn((_event: string, _handler: () => void) => {
+    
+    return Promise.resolve({ remove: vi.fn() });
+  }),
+}));
+
 vi.mock('@capacitor/app', () => ({
   App: {
-    addListener: vi.fn(() => Promise.resolve({ remove: vi.fn() })),
+    addListener: mockCapAddListener,
     exitApp: vi.fn(),
   },
 }));
@@ -182,6 +189,14 @@ async function fillHealthBasicFields() {
   const dobInput = screen.getByLabelText('onboarding.health.dateOfBirth');
   fireEvent.change(dobInput, { target: { value: '1990-06-15' } });
   fireEvent.blur(dobInput);
+
+  const heightInput = screen.getByLabelText('onboarding.health.height');
+  fireEvent.change(heightInput, { target: { value: '170' } });
+  fireEvent.blur(heightInput);
+
+  const weightInput = screen.getByLabelText('onboarding.health.weight');
+  fireEvent.change(weightInput, { target: { value: '70' } });
+  fireEvent.blur(weightInput);
 }
 
 /**
@@ -354,8 +369,10 @@ describe('UnifiedOnboarding Integration', () => {
       await navigateWelcomeSlides();
       await navigateHealthSection();
 
-      // HealthConfirmStep calls setOnboardingSection(3)
-      expect(mockSetOnboardingSection).toHaveBeenCalledWith(3);
+      // HealthConfirmStep calls setOnboardingSection(3) after async save
+      await waitFor(() => {
+        expect(mockSetOnboardingSection).toHaveBeenCalledWith(3);
+      });
     });
 
     it('persists section via setOnboardingSection during training confirm', async () => {
@@ -375,7 +392,9 @@ describe('UnifiedOnboarding Integration', () => {
       await navigateWelcomeSlides();
       await navigateHealthSection();
 
-      expect(mockSaveProfile).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockSaveProfile).toHaveBeenCalledTimes(1);
+      });
       expect(mockSaveGoal).toHaveBeenCalledTimes(1);
     });
   });
@@ -416,23 +435,12 @@ describe('UnifiedOnboarding Integration', () => {
   });
 
   describe('Android back button (C-001)', () => {
-    let backButtonHandler: (() => void) | null = null;
-
-    // We need a custom mock that captures the handler
-    // Since vi.mock hoisting makes it hard to share mock references,
-    // we tap into the component's behavior directly
-    beforeEach(async () => {
-      // The @capacitor/app mock is set up to capture handlers
-      const { App } = await vi.importMock<typeof import('@capacitor/app')>('@capacitor/app');
-      vi.mocked(App.addListener).mockImplementation((_event: string, handler: () => void) => {
-        backButtonHandler = handler;
-        return Promise.resolve({ remove: vi.fn() });
-      });
-    });
-
-    afterEach(() => {
-      backButtonHandler = null;
-    });
+    function getLatestBackButtonHandler(): () => void {
+      const backCalls = mockCapAddListener.mock.calls.filter(
+        (c: [string, () => void]) => c[0] === 'backButton',
+      );
+      return backCalls[backCalls.length - 1][1];
+    }
 
     it('should call goBack on Android back button when not on first step', async () => {
       render(<UnifiedOnboarding />);
@@ -445,8 +453,8 @@ describe('UnifiedOnboarding Integration', () => {
       });
 
       // Simulate Android back button
-      expect(backButtonHandler).not.toBeNull();
-      act(() => { backButtonHandler!(); });
+      const handler = getLatestBackButtonHandler();
+      act(() => { handler(); });
 
       // Should go back to slide 1
       await waitFor(() => {
@@ -460,8 +468,8 @@ describe('UnifiedOnboarding Integration', () => {
       expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
 
       // Simulate Android back button on very first step — should do nothing
-      expect(backButtonHandler).not.toBeNull();
-      act(() => { backButtonHandler!(); });
+      const handler = getLatestBackButtonHandler();
+      act(() => { handler(); });
 
       // Still on slide 1
       expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
@@ -478,8 +486,8 @@ describe('UnifiedOnboarding Integration', () => {
       await screen.findByTestId('health-basic-step');
 
       // Simulate Android back button
-      expect(backButtonHandler).not.toBeNull();
-      act(() => { backButtonHandler!(); });
+      const handler = getLatestBackButtonHandler();
+      act(() => { handler(); });
 
       // Should go back to section 1, last step (slide 3)
       expect(await screen.findByText('welcome.slide3Title')).toBeInTheDocument();

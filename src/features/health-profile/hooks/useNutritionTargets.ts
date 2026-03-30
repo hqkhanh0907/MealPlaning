@@ -80,7 +80,7 @@ export function useNutritionTargets(): NutritionTargets {
       healthProfile.weightKg,
       healthProfile.proteinRatio,
       healthProfile.fatPct,
-      healthProfile.bodyFatPct,
+      healthProfile.bodyFatPct != null ? healthProfile.bodyFatPct / 100 : undefined,
     );
 
     return {

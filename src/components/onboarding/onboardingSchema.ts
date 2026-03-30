@@ -4,7 +4,13 @@ export const onboardingSchema = z.object({
   // Section 2a: Basic Info
   name: z.string().min(1).max(50),
   gender: z.enum(['male', 'female']),
-  dateOfBirth: z.string().min(1),
+  dateOfBirth: z.string().min(1).refine(
+    (v) => {
+      const d = new Date(v);
+      return !isNaN(d.getTime()) && d < new Date();
+    },
+    { message: 'onboarding.validation.dobInvalid' }
+  ),
   heightCm: z.number().min(100).max(250),
   weightKg: z.number().min(30).max(300),
 
