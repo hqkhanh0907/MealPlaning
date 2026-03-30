@@ -75,6 +75,7 @@ describe('SetEditor', () => {
     renderEditor({ initialWeight: 60 });
     const input = screen.getByTestId('weight-input');
     fireEvent.change(input, { target: { value: '-5' } });
+    fireEvent.blur(input);
     expect((input as HTMLInputElement).value).toBe('0');
   });
 
@@ -131,6 +132,7 @@ describe('SetEditor', () => {
     renderEditor({ initialReps: 10 });
     const input = screen.getByTestId('reps-input');
     fireEvent.change(input, { target: { value: '0' } });
+    fireEvent.blur(input);
     expect((input as HTMLInputElement).value).toBe('1');
   });
 
@@ -258,5 +260,46 @@ describe('SetEditor', () => {
     renderEditor();
     const input = screen.getByTestId('reps-input');
     expect(input.className).toContain('tabular-nums');
+  });
+
+  // Clear input bug-fix tests
+  it('clearing weight input shows empty, not zero', () => {
+    renderEditor({ initialWeight: 60 });
+    const input = screen.getByTestId('weight-input');
+    fireEvent.change(input, { target: { value: '' } });
+    expect((input as HTMLInputElement).value).toBe('');
+  });
+
+  it('clearing reps input shows empty, not one', () => {
+    renderEditor({ initialReps: 10 });
+    const input = screen.getByTestId('reps-input');
+    fireEvent.change(input, { target: { value: '' } });
+    expect((input as HTMLInputElement).value).toBe('');
+  });
+
+  it('blur after clearing weight restores previous value', () => {
+    renderEditor({ initialWeight: 60 });
+    const input = screen.getByTestId('weight-input');
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+    expect((input as HTMLInputElement).value).toBe('60');
+  });
+
+  it('blur after clearing reps restores previous value', () => {
+    renderEditor({ initialReps: 10 });
+    const input = screen.getByTestId('reps-input');
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+    expect((input as HTMLInputElement).value).toBe('10');
+  });
+
+  it('save after clear and blur uses last valid weight', () => {
+    const onSave = vi.fn();
+    renderEditor({ initialWeight: 75, initialReps: 8, onSave });
+    const input = screen.getByTestId('weight-input');
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+    fireEvent.click(screen.getByTestId('save-button'));
+    expect(onSave).toHaveBeenCalledWith({ weight: 75, reps: 8, rpe: undefined });
   });
 });

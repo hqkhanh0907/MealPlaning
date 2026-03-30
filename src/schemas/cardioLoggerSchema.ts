@@ -22,7 +22,7 @@ export const cardioLoggerSchema = z
   .object({
     selectedType: z.enum(CARDIO_TYPE_VALUES),
     isStopwatchMode: z.boolean(),
-    manualDuration: z.coerce.number().min(0).default(0),
+    manualDuration: z.coerce.number().min(0).optional(),
     distanceKm: z.coerce.number().min(0).optional(),
     avgHeartRate: z.coerce.number().int().min(30).max(250).optional(),
     intensity: z.enum(INTENSITY_VALUES),
@@ -45,7 +45,7 @@ export type CardioLoggerFormData = z.infer<typeof cardioLoggerSchema>;
 export const cardioLoggerDefaults: CardioLoggerFormData = {
   selectedType: 'running',
   isStopwatchMode: true,
-  manualDuration: 0,
+  manualDuration: undefined,
   distanceKm: undefined,
   avgHeartRate: undefined,
   intensity: 'moderate',

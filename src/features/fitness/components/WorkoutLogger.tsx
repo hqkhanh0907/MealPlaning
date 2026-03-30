@@ -240,8 +240,8 @@ export function WorkoutLogger({
           workoutId: '',
           exerciseId,
           setNumber: existingCount + 1,
-          reps: input.reps,
-          weightKg: input.weight,
+          reps: Number.isNaN(input.reps) ? 1 : Math.max(1, input.reps),
+          weightKg: Number.isNaN(input.weight) ? 0 : input.weight,
           rpe: input.rpe,
           updatedAt: new Date().toISOString(),
         };
@@ -256,7 +256,7 @@ export function WorkoutLogger({
     (exerciseId: string, delta: number) => {
       const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
       const current = getValues(key) ?? { ...setInputDefaults };
-      setValue(key, { ...current, weight: Math.max(0, current.weight + delta) });
+      setValue(key, { ...current, weight: Math.max(0, (Number.isNaN(current.weight) ? 0 : current.weight) + delta) });
     },
     [getValues, setValue],
   );
@@ -500,13 +500,14 @@ export function WorkoutLogger({
                     <Input
                       type="number"
                       autoComplete="off"
-                      value={input.weight}
+                      value={Number.isNaN(input.weight) ? '' : input.weight}
                       onChange={(e) => {
+                        const raw = e.target.value;
                         const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
                         const cur = getValues(key) ?? { ...setInputDefaults };
                         setValue(key, {
                           ...cur,
-                          weight: Math.max(0, Number(e.target.value)),
+                          weight: raw === '' ? NaN : Math.max(0, Number(raw)),
                         });
                       }}
                       className="w-20 text-center font-semibold text-slate-800"
@@ -533,11 +534,12 @@ export function WorkoutLogger({
                     <Input
                       type="number"
                       autoComplete="off"
-                      value={input.reps ?? 0}
+                      value={Number.isNaN(input.reps) ? '' : (input.reps ?? '')}
                       onChange={(e) => {
+                        const raw = e.target.value;
                         const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
                         const cur = getValues(key) ?? { ...setInputDefaults };
-                        setValue(key, { ...cur, reps: Math.max(0, Number(e.target.value)) });
+                        setValue(key, { ...cur, reps: raw === '' ? NaN : Math.max(0, Number(raw)) });
                       }}
                       className="w-20 text-center font-semibold text-slate-800"
                       data-testid={`reps-input-${exercise.id}`}

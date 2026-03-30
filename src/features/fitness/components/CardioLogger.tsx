@@ -49,7 +49,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
     if (isStopwatchMode) {
       return Math.floor(stopwatch.elapsed / 60);
     }
-    return manualDuration;
+    return manualDuration ?? 0;
   }, [isStopwatchMode, stopwatch.elapsed, manualDuration]);
 
   const estimatedCalories = useMemo(() => {
@@ -70,7 +70,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
     async (data: CardioLoggerFormData) => {
       const effectiveDuration = data.isStopwatchMode
         ? Math.floor(stopwatch.elapsed / 60)
-        : data.manualDuration;
+        : (data.manualDuration ?? 0);
       const now = new Date().toISOString();
       const workoutId = `workout-${Date.now()}`;
       const workout: Workout = {
@@ -261,8 +261,11 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                   <>
                     <Input
                       type="number"
-                      value={field.value}
-                      onChange={(e) => field.onChange(parseNumericInput(e.target.value))}
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === '' ? undefined : parseNumericInput(val));
+                      }}
                       onBlur={field.onBlur}
                       className="w-full text-center text-lg font-semibold text-slate-800"
                       data-testid="manual-duration-input"

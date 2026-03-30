@@ -127,29 +127,43 @@ function DailyWeightInputInner(): React.JSX.Element {
 
   const initialWeight =
     todayEntry?.weightKg ?? latestEntry?.weightKg ?? 0;
-  const [inputValue, setInputValue] = useState<number>(initialWeight);
+  const [displayValue, setDisplayValue] = useState<string>(
+    initialWeight > 0 ? String(initialWeight) : '',
+  );
+  const [numericValue, setNumericValue] = useState<number>(initialWeight);
   const [isSaved, setIsSaved] = useState<boolean>(!!todayEntry);
 
   const isValid =
-    inputValue >= MIN_WEIGHT && inputValue <= MAX_WEIGHT;
+    displayValue !== '' &&
+    !Number.isNaN(parseFloat(displayValue)) &&
+    numericValue >= MIN_WEIGHT &&
+    numericValue <= MAX_WEIGHT;
 
   const delta = useMemo(() => {
-    if (!yesterdayEntry || inputValue <= 0) return null;
-    return round1(inputValue - yesterdayEntry.weightKg);
-  }, [yesterdayEntry, inputValue]);
+    if (!yesterdayEntry || numericValue <= 0) return null;
+    return round1(numericValue - yesterdayEntry.weightKg);
+  }, [yesterdayEntry, numericValue]);
 
   const handleIncrement = useCallback(() => {
-    setInputValue((prev) => {
+    setNumericValue((prev) => {
       const next = round1(prev + STEP);
-      return next <= MAX_WEIGHT ? next : prev;
+      if (next <= MAX_WEIGHT) {
+        setDisplayValue(String(next));
+        return next;
+      }
+      return prev;
     });
     setIsSaved(false);
   }, []);
 
   const handleDecrement = useCallback(() => {
-    setInputValue((prev) => {
+    setNumericValue((prev) => {
       const next = round1(prev - STEP);
-      return next >= MIN_WEIGHT ? next : prev;
+      if (next >= MIN_WEIGHT) {
+        setDisplayValue(String(next));
+        return next;
+      }
+      return prev;
     });
     setIsSaved(false);
   }, []);
@@ -157,18 +171,29 @@ function DailyWeightInputInner(): React.JSX.Element {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      if (raw === '') {
-        setInputValue(0);
-      } else {
-        setInputValue(parseFloat(raw));
+      setDisplayValue(raw);
+      if (raw !== '') {
+        const num = parseFloat(raw);
+        if (!Number.isNaN(num)) {
+          setNumericValue(num);
+        }
       }
       setIsSaved(false);
     },
     [],
   );
 
+  const handleInputBlur = useCallback(() => {
+    if (displayValue === '' || Number.isNaN(parseFloat(displayValue))) {
+      const restoreVal = numericValue > 0 ? numericValue : initialWeight;
+      setDisplayValue(restoreVal > 0 ? String(restoreVal) : '');
+      setNumericValue(restoreVal);
+    }
+  }, [displayValue, numericValue, initialWeight]);
+
   const handleChipSelect = useCallback((weight: number) => {
-    setInputValue(weight);
+    setNumericValue(weight);
+    setDisplayValue(String(weight));
     setIsSaved(false);
   }, []);
 
@@ -179,14 +204,14 @@ function DailyWeightInputInner(): React.JSX.Element {
 
     if (todayEntry) {
       updateWeightEntry(todayEntry.id, {
-        weightKg: inputValue,
+        weightKg: numericValue,
         updatedAt: now,
       });
     } else {
       const entry: WeightEntry = {
         id: generateId(),
         date: today,
-        weightKg: inputValue,
+        weightKg: numericValue,
         createdAt: now,
         updatedAt: now,
       };
@@ -194,7 +219,7 @@ function DailyWeightInputInner(): React.JSX.Element {
     }
     setIsSaved(true);
 
-    const savedWeight = inputValue;
+    const savedWeight = numericValue;
     notify.success(
       t('fitness.weight.saved'),
       `${savedWeight} ${t('fitness.weight.kg')}`,
@@ -208,14 +233,16 @@ function DailyWeightInputInner(): React.JSX.Element {
                 weightKg: previousWeight,
                 updatedAt: new Date().toISOString(),
               });
-              setInputValue(previousWeight);
+              setNumericValue(previousWeight);
+              setDisplayValue(String(previousWeight));
             } else {
               const entries = useFitnessStore.getState().weightEntries;
               const created = entries.find((e) => e.date === today);
               if (created) {
                 removeWeightEntry(created.id);
               }
-              setInputValue(savedWeight);
+              setNumericValue(savedWeight);
+              setDisplayValue(String(savedWeight));
             }
             setIsSaved(false);
           },
@@ -224,7 +251,7 @@ function DailyWeightInputInner(): React.JSX.Element {
     );
   }, [
     todayEntry,
-    inputValue,
+    numericValue,
     today,
     updateWeightEntry,
     addWeightEntry,
@@ -268,8 +295,9 @@ function DailyWeightInputInner(): React.JSX.Element {
             min={MIN_WEIGHT}
             max={MAX_WEIGHT}
             step={STEP}
-            value={inputValue || ''}
+            value={displayValue}
             onChange={handleInputChange}
+            onBlur={handleInputBlur}
             style={{ fontVariantNumeric: 'tabular-nums' }}
             className="w-16 text-center text-lg font-bold text-slate-800"
           />
@@ -318,7 +346,7 @@ function DailyWeightInputInner(): React.JSX.Element {
               aria-label={`${t('fitness.weight.selectWeight')} ${w} ${t('fitness.weight.kg')}`}
               onClick={() => handleChipSelect(w)}
               className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
-                inputValue === w
+                numericValue === w
                   ? 'border-emerald-400 bg-emerald-100 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300'
                   : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
               }`}

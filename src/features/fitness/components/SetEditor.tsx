@@ -31,42 +31,81 @@ export const SetEditor = React.memo(function SetEditor({
   const [weight, setWeight] = useState(initialWeight);
   const [reps, setReps] = useState(initialReps);
   const [rpe, setRpe] = useState<number | undefined>(initialRpe);
+  const [weightStr, setWeightStr] = useState(String(initialWeight));
+  const [repsStr, setRepsStr] = useState(String(initialReps));
 
   const handleWeightDecrement = useCallback(() => {
-    setWeight((prev) => Math.max(MIN_WEIGHT_KG, prev - WEIGHT_INCREMENT));
+    setWeight((prev) => {
+      const next = Math.max(MIN_WEIGHT_KG, prev - WEIGHT_INCREMENT);
+      setWeightStr(String(next));
+      return next;
+    });
   }, []);
 
   const handleWeightIncrement = useCallback(() => {
-    setWeight((prev) => prev + WEIGHT_INCREMENT);
+    setWeight((prev) => {
+      const next = prev + WEIGHT_INCREMENT;
+      setWeightStr(String(next));
+      return next;
+    });
   }, []);
 
   const handleWeightInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = Number(e.target.value);
-      setWeight(Math.max(MIN_WEIGHT_KG, value));
+      const raw = e.target.value;
+      setWeightStr(raw);
+      if (raw !== '') {
+        const value = Number(raw);
+        if (!Number.isNaN(value)) {
+          setWeight(Math.max(MIN_WEIGHT_KG, value));
+        }
+      }
     },
     [],
   );
 
+  const handleWeightBlur = useCallback(() => {
+    setWeightStr(String(weight));
+  }, [weight]);
+
   const handleWeightChip = useCallback((value: number) => {
     setWeight(value);
+    setWeightStr(String(value));
   }, []);
 
   const handleRepsDecrement = useCallback(() => {
-    setReps((prev) => Math.max(MIN_REPS, prev - REPS_INCREMENT));
+    setReps((prev) => {
+      const next = Math.max(MIN_REPS, prev - REPS_INCREMENT);
+      setRepsStr(String(next));
+      return next;
+    });
   }, []);
 
   const handleRepsIncrement = useCallback(() => {
-    setReps((prev) => prev + REPS_INCREMENT);
+    setReps((prev) => {
+      const next = prev + REPS_INCREMENT;
+      setRepsStr(String(next));
+      return next;
+    });
   }, []);
 
   const handleRepsInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = Number(e.target.value);
-      setReps(Math.max(MIN_REPS, value));
+      const raw = e.target.value;
+      setRepsStr(raw);
+      if (raw !== '') {
+        const value = Number(raw);
+        if (!Number.isNaN(value)) {
+          setReps(Math.max(MIN_REPS, value));
+        }
+      }
     },
     [],
   );
+
+  const handleRepsBlur = useCallback(() => {
+    setRepsStr(String(reps));
+  }, [reps]);
 
   const handleRpeSelect = useCallback((value: number) => {
     setRpe((prev) => (prev === value ? undefined : value));
@@ -123,8 +162,9 @@ export const SetEditor = React.memo(function SetEditor({
             </Button>
             <Input
               type="number"
-              value={weight}
+              value={weightStr}
               onChange={handleWeightInput}
+              onBlur={handleWeightBlur}
               min={MIN_WEIGHT_KG}
               step={WEIGHT_INCREMENT}
               className="w-full text-center font-semibold tabular-nums text-slate-800"
@@ -182,8 +222,9 @@ export const SetEditor = React.memo(function SetEditor({
             </Button>
             <Input
               type="number"
-              value={reps}
+              value={repsStr}
               onChange={handleRepsInput}
+              onBlur={handleRepsBlur}
               min={MIN_REPS}
               step={REPS_INCREMENT}
               className="w-full text-center font-semibold tabular-nums text-slate-800"

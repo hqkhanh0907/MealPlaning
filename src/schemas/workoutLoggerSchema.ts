@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 /** Schema for individual set input (what user fills per set) */
 export const setInputSchema = z.object({
-  weight: z.coerce.number().min(0),
-  reps: z.coerce.number().int().min(0),
+  weight: z.union([z.number().min(0), z.nan()]),
+  reps: z.union([z.number().int().min(0), z.nan()]),
   rpe: z.coerce.number().min(1).max(10).optional(),
 });
 

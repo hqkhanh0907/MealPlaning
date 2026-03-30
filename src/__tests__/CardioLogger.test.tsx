@@ -317,6 +317,21 @@ describe('CardioLogger', () => {
     expect(screen.getByTestId('manual-duration-input')).toHaveValue(0);
   });
 
+  it('clearing manual duration shows empty not zero', () => {
+    render(<CardioLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '30' },
+    });
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue(30);
+
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '' },
+    });
+    expect(screen.getByTestId('manual-duration-input')).not.toHaveValue(0);
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue(null);
+  });
+
   it('distance hidden for elliptical and rowing', () => {
     render(<CardioLogger {...defaultProps} />);
 

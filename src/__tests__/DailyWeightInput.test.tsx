@@ -198,6 +198,42 @@ describe('DailyWeightInput', () => {
     expect(screen.getByTestId('save-weight-btn')).toBeDisabled();
   });
 
+  it('blur restores previous value when input is cleared', () => {
+    resetStore([makeEntry({ date: '2025-01-01', weightKg: 70.0 })]);
+    renderWithNotification();
+
+    const input = screen.getByTestId('weight-input') as HTMLInputElement;
+    expect(input.value).toBe('70');
+
+    fireEvent.change(input, { target: { value: '' } });
+    expect(input.value).toBe('');
+
+    fireEvent.blur(input);
+    expect(input.value).toBe('70');
+  });
+
+  it('blur restores previous value after non-numeric input', () => {
+    resetStore([makeEntry({ date: '2025-01-01', weightKg: 70.0 })]);
+    renderWithNotification();
+
+    const input = screen.getByTestId('weight-input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'abc' } });
+
+    fireEvent.blur(input);
+    expect(input.value).toBe('70');
+  });
+
+  it('does not force zero when user clears input', () => {
+    resetStore([makeEntry({ date: '2025-01-01', weightKg: 70.0 })]);
+    renderWithNotification();
+
+    const input = screen.getByTestId('weight-input') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '' } });
+
+    expect(input.value).toBe('');
+    expect(input.value).not.toBe('0');
+  });
+
   it('ignores non-numeric input and keeps state valid', () => {
     resetStore([makeEntry({ date: '2025-01-01', weightKg: 70.0 })]);
     renderWithNotification();

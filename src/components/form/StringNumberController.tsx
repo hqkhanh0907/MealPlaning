@@ -59,8 +59,8 @@ function StringNumberControllerInner<T extends FieldValues>(
   const fieldNum = field.value as number;
   const bothNaN = Number.isNaN(fieldNum) && Number.isNaN(prevFieldValue);
   if (fieldNum !== prevFieldValue && !bothNaN) {
-    setPrevFieldValue(fieldNum);
     if (!Number.isNaN(fieldNum)) {
+      setPrevFieldValue(fieldNum);
       const parsed = parseNumericInput(localValue, NaN);
       if (Number.isNaN(parsed) || parsed !== fieldNum) {
         setLocalValue(fieldNum === 0 ? '0' : String(fieldNum ?? ''));
@@ -76,7 +76,6 @@ function StringNumberControllerInner<T extends FieldValues>(
 
     if (raw === '') {
       const nanVal = NaN as unknown as typeof field.value;
-      setPrevFieldValue(nanVal as number);
       field.onChange(nanVal);
       return;
     }
@@ -91,13 +90,10 @@ function StringNumberControllerInner<T extends FieldValues>(
 
   const handleBlur = () => {
     if (localValue === '' || Number.isNaN(parseNumericInput(localValue, NaN))) {
-      const fieldVal = field.value as number;
-      const fallback = (fieldVal !== null && fieldVal !== undefined && !Number.isNaN(fieldVal)) ? fieldVal : 0;
-      setLocalValue(String(fallback));
-      if (Number.isNaN(fieldVal)) {
-        setPrevFieldValue(0);
-        field.onChange(0 as unknown as typeof field.value);
-      }
+      const lastValid = !Number.isNaN(prevFieldValue) ? prevFieldValue : (min ?? 0);
+      setLocalValue(String(lastValid));
+      setPrevFieldValue(lastValid);
+      field.onChange(lastValid as unknown as typeof field.value);
     } else {
       const clamped = clampValue(parseNumericInput(localValue));
       setPrevFieldValue(clamped);

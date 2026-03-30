@@ -916,4 +916,65 @@ describe('WorkoutLogger', () => {
     expect(container).toHaveClass('bottom-0');
     expect(container).toHaveClass('backdrop-blur-sm');
   });
+
+  it('clearing weight input shows empty string, not zero', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    const weightInput = screen.getByTestId(
+      'weight-input-bench-press',
+    ) as HTMLInputElement;
+
+    fireEvent.change(weightInput, { target: { value: '60' } });
+    expect(weightInput.value).toBe('60');
+
+    fireEvent.change(weightInput, { target: { value: '' } });
+    expect(weightInput.value).toBe('');
+  });
+
+  it('clearing reps input shows empty string, not zero', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    const repsInput = screen.getByTestId(
+      'reps-input-bench-press',
+    ) as HTMLInputElement;
+
+    fireEvent.change(repsInput, { target: { value: '10' } });
+    expect(repsInput.value).toBe('10');
+
+    fireEvent.change(repsInput, { target: { value: '' } });
+    expect(repsInput.value).toBe('');
+  });
+
+  it('saving with cleared weight uses 0 fallback and reps uses 1 fallback', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
+      target: { value: '' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input-bench-press'), {
+      target: { value: '' },
+    });
+    fireEvent.click(screen.getByTestId('log-set-bench-press'));
+
+    expect(screen.getByText(/0kg × 1/)).toBeInTheDocument();
+  });
+
+  it('weight +/- buttons work after clearing the input', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    const weightInput = screen.getByTestId(
+      'weight-input-bench-press',
+    ) as HTMLInputElement;
+
+    fireEvent.change(weightInput, { target: { value: '' } });
+    expect(weightInput.value).toBe('');
+
+    fireEvent.click(screen.getByTestId('weight-plus-bench-press'));
+    expect(weightInput.value).toBe('2.5');
+  });
 });
