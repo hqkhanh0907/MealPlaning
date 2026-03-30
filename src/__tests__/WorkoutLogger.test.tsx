@@ -387,12 +387,7 @@ describe('WorkoutLogger', () => {
       ]),
     );
     expect(onComplete).toHaveBeenCalledTimes(1);
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Push Day',
-        date: expect.any(String),
-      }),
-    );
+    expect(onComplete).toHaveBeenCalledWith();
   });
 
   it('allows RPE selection and toggle', () => {
@@ -459,11 +454,7 @@ describe('WorkoutLogger', () => {
       fireEvent.click(screen.getByTestId('save-workout-button'));
     });
 
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Buổi tập tự do',
-      }),
-    );
+    expect(onComplete).toHaveBeenCalledWith();
   });
 
   it('resolves multiple planned exercises', () => {
@@ -859,9 +850,7 @@ describe('WorkoutLogger', () => {
       }),
       expect.any(Array),
     );
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({ planDayId: 'pd-1' }),
-    );
+    expect(onComplete).toHaveBeenCalledWith();
   });
 
   it('saves workout with undefined planDayId when no planDay (freestyle)', async () => {
@@ -904,9 +893,7 @@ describe('WorkoutLogger', () => {
       fireEvent.click(screen.getByTestId('save-workout-button'));
     });
 
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Leg Day Custom' }),
-    );
+    expect(onComplete).toHaveBeenCalledWith();
   });
 
   it('add exercise button has sticky positioning', () => {

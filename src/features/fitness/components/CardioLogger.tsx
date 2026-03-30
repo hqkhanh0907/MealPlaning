@@ -22,7 +22,7 @@ import {
 } from '../../../schemas/cardioLoggerSchema';
 
 interface CardioLoggerProps {
-  onComplete: (workout: Workout) => void;
+  onComplete: () => void;
   onBack: () => void;
 }
 
@@ -102,7 +102,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
         console.error('[CardioLogger] Save failed:', error);
         return;
       }
-      onComplete(workout);
+      onComplete();
     },
     [t, stopwatch.elapsed, saveWorkoutAtomic, estimatedCalories, onComplete],
   );

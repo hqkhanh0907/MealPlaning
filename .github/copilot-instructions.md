@@ -1,184 +1,137 @@
 # GitHub Copilot Instructions — MealPlaning Project
 
-## 🚨 QUY TẮC BẮT BUỘC #1: TUÂN THỦ SPEC 100% (Spec Compliance)
+## Commands
 
-### Bài học từ lỗi thực tế (2026-06-28):
+```bash
+npm run dev              # Dev server at localhost:3000
+npm run build            # Production build (Vite)
+npm run lint             # TypeScript type-check + ESLint
+npm run lint:fix         # Auto-fix ESLint issues
+npm run format           # Prettier format src/
+npm run test             # Run all tests (Vitest)
+npm run test:watch       # Watch mode
+npm run test:coverage    # Coverage report (target: 100%)
 
-AI đã vi phạm spec khi implement Fitness Tab:
-- Spec ghi 3 sub-tabs (Plan/Progress/History) → AI tự ý thêm tab thứ 4 ("Buổi tập")
-- Spec ghi WorkoutLogger mở qua pushPage() (full-screen) → AI render inline trong sub-tab
-- Spec ghi QuickConfirmCard thuộc về bên trong WorkoutLogger → AI đặt trên Plan sub-tab
-- Kết quả: User bị trap trong WorkoutLogger, không navigate được, UX hỏng hoàn toàn
+# Run a single test file
+npx vitest run src/__tests__/dishStore.test.ts
+# Run tests matching a pattern
+npx vitest run -t "should update meal type"
 
-### Quy tắc KHÔNG ĐƯỢC vi phạm:
+# Android (Capacitor)
+npm run android:sync     # Build + sync to Android project
+npm run android:run      # Build + sync + run on device/emulator
 
-1. **KHÔNG tự ý thêm tính năng ngoài spec.** Nếu spec không mô tả → KHÔNG implement. Nếu nghĩ cần thêm → HỎI user trước.
+# SonarQube (requires Docker)
+docker compose up -d     # Start SonarQube at localhost:9000
+npm run sonar            # Run analysis
 
-2. **KHÔNG thay đổi kiến trúc navigation so với spec.** Spec định nghĩa bao nhiêu tabs, sub-tabs, full-screen pages → implement ĐÚNG số lượng và cấu trúc đó. Không được thêm/bớt/đổi chỗ.
-
-3. **KHÔNG di chuyển component sang vị trí khác so với spec.** Nếu spec nói component X thuộc về page Y → đặt ở page Y, KHÔNG đặt ở page Z dù cảm thấy "tiện hơn".
-
-4. **LUÔN cross-check với spec trước khi commit.** Trước khi hoàn thành 1 task, đọc lại phần spec tương ứng và so sánh:
-   - Số lượng tabs/sub-tabs có đúng không?
-   - Navigation flow có đúng không? (pushPage vs inline render)
-   - Vị trí đặt component có đúng không?
-   - Empty states có đúng spec §5.5.1 không?
-
-5. **Nếu spec mâu thuẫn hoặc thiếu → HỎI USER.** Không tự ý đoán hoặc "sáng tạo" giải pháp.
-
-### Checklist trước mỗi commit (Spec Compliance):
-
-```
-□ Đã đọc lại phần spec liên quan
-□ Số lượng tabs/sub-tabs/pages khớp với spec
-□ Navigation flow (pushPage vs inline) khớp với spec
-□ Vị trí component khớp với spec
-□ Empty states khớp với spec §5.5.1
-□ Không thêm tính năng nào ngoài spec
-□ Nếu có thay đổi so với spec → đã hỏi và được user chấp thuận
+# Bundle analysis
+npm run analyze          # Generates stats.html treemap
 ```
 
----
+## Architecture
 
-## 📁 Specs Location
+**Offline-first mobile meal planning app** — React 19 + Vite 6, deployed to Android via Capacitor 8. Vietnamese-language UI, backed by in-browser SQLite (sql.js WASM).
 
-Tất cả spec files nằm tại: `docs/superpowers/specs/`
+### Navigation Model
 
-Khi implement bất kỳ feature nào, BẮT BUỘC phải:
-1. Tìm và đọc spec tương ứng trong `docs/superpowers/specs/`
-2. Xác định đúng section liên quan (ví dụ: §5.1 Navigation Architecture)
-3. Implement đúng 100% theo mô tả trong spec
-4. Cross-check lại trước khi commit
+The app uses a **stack-based navigation** managed by `useNavigationStore` (Zustand):
 
----
+- **5 main tabs**: `calendar`, `library`, `ai-analysis`, `fitness`, `dashboard`
+- **Full-screen pages**: Opened via `pushPage()` onto a `pageStack` (max depth 2). Rendered by `PageStackOverlay` in `App.tsx`. Hides bottom nav when active.
+- **Sub-tabs**: Rendered inline within tab panels (NOT via pushPage).
+- **Bottom sheets**: Mounted as components, never replace a page.
 
-## 🔧 Quality Gates
+**Rule**: Never render a full-screen page inline or add/remove tabs beyond what the spec defines.
 
-Mỗi lần thay đổi code PHẢI qua đủ các bước:
-
-1. **ESLint** — 0 errors, KHÔNG dùng eslint-disable
-2. **Unit Tests** — 0 new failures, coverage không giảm
-3. **Build** — `npm run build` pass
-4. **Manual Test** — Verify trên emulator/browser
-5. **Spec Check** — Cross-check với spec document
-
----
-
-## 📐 Architecture Rules
-
-- Tab navigation: `useNavigationStore` (Zustand)
-- Full-screen pages: Mở qua `pushPage()`, KHÔNG render inline
-- Bottom sheets: Mở qua component mounting, KHÔNG thay thế page
-- Sub-tabs: Render content inline trong tab panel
-- State: Zustand stores + SQLite persistence
-- i18n: Vietnamese translations trong `src/locales/vi.json`
-- Styling: Tailwind CSS v4 + shadcn/ui components
-
----
-
-## 🏗️ Project Structure
+### Data Layer
 
 ```
-src/
-├── components/     # Reusable UI components
-├── features/       # Feature-based modules (fitness, health-profile, etc.)
-├── hooks/          # Custom React hooks
-├── store/          # Zustand global stores
-├── locales/        # i18n translation files
-├── services/       # Database and API services
-├── __tests__/      # Test files
-└── App.tsx         # Root component with tab navigation
+Zustand stores (in-memory) ←→ SQLite (sql.js WASM, persistence)
 ```
 
----
+- Each store has a `loadAll(db: DatabaseService)` method to hydrate from SQLite on startup.
+- State updates are **optimistic** — update the store immediately, persist to DB separately via `useAutoSync` hook.
+- `DatabaseService` interface: `execute()`, `query<T>()`, `queryOne<T>()`, `transaction()`, `exportBinary()`, `importBinary()`.
+- Schema version 4 with migrations in `src/services/schema.ts`.
+- DB column names are `snake_case`; TypeScript properties are `camelCase`. Conversion helpers: `snakeToCamel()`, `camelToSnake()`, `rowToType<T>()`, `typeToRow<T>()`.
 
-## 🧪 Testing Standards
+### Localized Data Pattern
 
-- Framework: Vitest + React Testing Library
-- Coverage target: 100% cho code mới
-- Test file location: `src/__tests__/` hoặc cùng thư mục với component
-- Mock pattern: Mock stores và services, test behavior
-- KHÔNG dùng `eslint-disable` trong test files
-
----
-
-## 📋 Multi-Step Form (RHF + Zod) — QUY TẮC BẮT BUỘC (Bài học từ lỗi thực tế 2026-03-30)
-
-### Bài học:
-AI fix bug C-004 "Cross-field validation không chạy" bằng cách thêm `form.trigger()` (không args) vào `handleConfirm` của HealthConfirmStep. Nhưng `form.trigger()` không args validate **TOÀN BỘ schema** (cả Section 3+4 chưa được điền) → `isValid = false` → nút "Xác nhận" im lặng không phản hồi — regression nghiêm trọng.
-
-### Quy tắc KHÔNG ĐƯỢC vi phạm:
-
-1. **KHÔNG BAO GIỜ dùng `form.trigger()` không args tại bước trung gian của multi-step form.**
-   - `form.trigger()` validate toàn bộ schema, bao gồm fields của các bước CHƯA ĐƯỢC ĐIỀN.
-   - Luôn dùng `form.trigger([...STEP_FIELDS['currentStep']])` để chỉ validate fields của step hiện tại.
-
-2. **Cross-field validation (superRefine) KHÔNG chạy với field-level trigger.**
-   - `form.trigger(['field1', 'field2'])` chỉ validate từng field riêng lẻ, KHÔNG chạy `superRefine`.
-   - Nếu cần cross-field checks, implement thủ công bằng `form.setError()` sau khi field-level pass.
-
-3. **Validation failure PHẢI có feedback cho user.**
-   - KHÔNG BAO GIỜ viết `if (!isValid) return;` mà không có feedback.
-   - Tối thiểu: scroll đến field lỗi đầu tiên hoặc hiển thị toast/error message.
-   - Lý tưởng: hiển thị inline error trên mỗi field lỗi.
-
-4. **Sử dụng `STEP_FIELDS` constant để quản lý field groups.**
-   - Mỗi step phải có field group tương ứng trong `STEP_FIELDS` (xem `onboardingSchema.ts`).
-   - Khi validate, luôn reference `STEP_FIELDS` thay vì hardcode field names.
-
-### Checklist trước mỗi commit liên quan multi-step form:
+Text fields in the database use `_vi`/`_en` suffixes:
+```sql
+name_vi TEXT NOT NULL, name_en TEXT
 ```
-□ form.trigger() có truyền field list (KHÔNG dùng trigger() không args)
-□ Cross-field validation được implement thủ công nếu cần
-□ Validation failure có feedback cho user (không silent return)
-□ Đã test trên emulator: button hoạt động ở MỌI step
+In TypeScript, these become `{ vi: string, en?: string }` objects. Always include `name.vi` as required.
+
+### Key Stores
+
+| Store | Persistence | Purpose |
+|-------|------------|---------|
+| `navigationStore` | Memory only | Tab/page stack, scroll positions |
+| `dishStore` | SQLite | Recipes with ingredient lists |
+| `ingredientStore` | SQLite | Food items + nutrition per 100g |
+| `dayPlanStore` | SQLite | Daily meal plans (breakfast/lunch/dinner) |
+| `fitnessStore` | Zustand `persist` | Workouts, training plans, weight logs |
+| `appOnboardingStore` | Zustand `persist` | First-run state |
+| `uiStore` | Memory only | Modal visibility, selected date, sub-tab state |
+
+### Form Validation
+
+Forms use **React Hook Form + Zod** (`@hookform/resolvers`). Schemas live in `src/schemas/`.
+
+Numeric fields use `z.preprocess()` to coerce empty strings to `undefined` before validation:
+```typescript
+z.preprocess(
+  val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+  z.number().min(0)
+)
 ```
 
----
+### Feature Specs
 
-## 🌐 i18n — QUY TẮC BẮT BUỘC (Bài học từ lỗi thực tế 2026-03-29)
+Design specs live in `docs/superpowers/specs/`. When implementing any feature, **read the corresponding spec first** and implement exactly what it describes. Do not add tabs, sub-tabs, or navigation flows beyond what the spec defines. If the spec is ambiguous or missing, ask the user.
 
-### Bài học:
-AI đã tạo component sử dụng `t('dashboard.hero.scoreLabel.excellent')`, `t('health.activityLevel.sedentary')`, `t('common.sodium')` v.v. nhưng **KHÔNG thêm key tương ứng vào `src/locales/vi.json`**, khiến UI hiển thị raw key thay vì text tiếng Việt — bug nghiêm trọng.
+## Conventions
 
-### Quy tắc KHÔNG ĐƯỢC vi phạm:
+### Styling
+- **Tailwind CSS v4** + **shadcn/ui** (style: `base-nova`, icons: `lucide-react`)
+- shadcn/ui components in `src/components/ui/` — add new ones via `npx shadcn@latest add <component>`
+- Path alias: `@/` → `src/`
 
-1. **MỌI lần dùng `t('key')` trong code, BẮT BUỘC phải đồng thời thêm key vào `src/locales/vi.json`.**
-   - Không bao giờ commit code có `t('some.key')` mà key đó chưa tồn tại trong vi.json.
+### Formatting
+- Prettier: single quotes, semicolons, trailing commas, 120 char width, `arrowParens: "avoid"`
+- ESLint: `no-explicit-any` is an error. `no-console` is a warning (except in `src/utils/logger.ts`). Unused vars prefixed with `_` are allowed.
+- **Never use `eslint-disable`** — fix the underlying issue instead.
 
-2. **Kiểm tra CẢ dynamic keys** — các pattern `t(\`namespace.${variable}\`)`:
-   - Liệt kê TẤT CẢ giá trị có thể có của `variable` (từ enum, const array, type union).
-   - Đảm bảo MỖI giá trị đều có key tương ứng trong vi.json.
-   - Ví dụ: `t(\`fitness.onboarding.${goal}\`)` với `goal: 'strength' | 'hypertrophy' | 'endurance' | 'general'` → cần 4 keys.
+### i18n
 
-3. **Kiểm tra pluralization**: i18next dùng `_zero`, `_one`, `_other` suffix.
-   - `t('key', { count: N })` cần `key_zero`, `key_one`, `key_other` (KHÔNG cần `key` gốc).
+The app uses i18next with Vietnamese as the only UI language (`src/locales/vi.json`).
 
-4. **Pre-commit checklist i18n:**
-   ```
-   □ Mọi t('key') mới đều có trong vi.json
-   □ Mọi t(`dynamic.${var}`) đã cover hết enum values
-   □ JSON hợp lệ (chạy: python3 -c "import json; json.load(open('src/locales/vi.json'))")
-   □ Không có raw i18n key hiển thị trên UI
-   ```
+**Every `t('key')` call must have a corresponding entry in `vi.json`.** This includes:
+- Dynamic keys like `` t(`namespace.${variable}`) `` — all possible values of `variable` must have entries.
+- Pluralized keys using `_zero`, `_one`, `_other` suffixes for `t('key', { count })`.
 
-5. **Script kiểm tra nhanh** (chạy trước mỗi commit có thay đổi i18n):
-   ```bash
-   python3 -c "
-   import json,re,glob
-   vi=json.load(open('src/locales/vi.json'))
-   def kx(d,p):
-     for k in p.split('.'):
-       if isinstance(d,dict) and k in d: d=d[k]
-       else: return False
-     return True
-   missing=0
-   for f in glob.glob('src/**/*.tsx',recursive=True)+glob.glob('src/**/*.ts',recursive=True):
-     if '__tests__' in f or '.test.' in f: continue
-     c=open(f).read()
-     for m in re.findall(r\"t\(['\"]([^'\"]+)['\"]\",c):
-       if not kx(vi,m) and not kx(vi,m+'_one') and not kx(vi,m+'_other'):
-         print(f'❌ {f}: {m}'); missing+=1
-   print(f'Missing: {missing}')
-   "
-   ```
+### Testing
+
+- **Framework**: Vitest + React Testing Library + `@testing-library/jest-dom`
+- **Setup**: `src/__tests__/setup.ts` initializes i18n with Vietnamese translations
+- **Coverage target**: 100% for new code. Coverage config excludes `components/ui/`, `locales/`, `lib/utils.ts`, and test files.
+- **Store tests**: Reset state in `beforeEach` via `useXxxStore.setState(...)`.
+- **Component tests**: Mock Zustand stores and database services, test user-facing behavior.
+- **E2E**: WebdriverIO + Appium for Android device testing (`npm run e2e`).
+
+### Multi-Step Forms (React Hook Form + Zod)
+
+- **Never call `form.trigger()` without arguments** in a multi-step form — it validates the entire schema including unfilled future steps.
+- Always use `form.trigger([...STEP_FIELDS['currentStep']])` to validate only the current step's fields.
+- `superRefine` cross-field validators don't run with field-level triggers — implement cross-field checks manually via `form.setError()`.
+- Validation failures must always show feedback (inline errors or scroll to first error). Never silently `return`.
+
+### Quality Gates
+
+Every code change must pass:
+1. `npm run lint` — 0 errors, no `eslint-disable`
+2. `npm run test` — 0 new failures, coverage ≥ 100% for new code
+3. `npm run build` — clean production build
+4. Spec cross-check — verify against `docs/superpowers/specs/`

@@ -211,12 +211,7 @@ describe('CardioLogger', () => {
       }),
     );
     expect(onComplete).toHaveBeenCalledTimes(1);
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Cardio',
-        durationMin: 20,
-      }),
-    );
+    expect(onComplete).toHaveBeenCalledWith();
   });
 
   it('elapsed timer increments in stopwatch mode', () => {

@@ -71,17 +71,13 @@ import { useNavigationStore } from './store/navigationStore';
 import { useHealthProfileStore } from './features/health-profile/store/healthProfileStore';
 import { useAppOnboardingStore } from './store/appOnboardingStore';
 const UnifiedOnboarding = React.lazy(() => import('./components/UnifiedOnboarding').then((m) => ({ default: m.UnifiedOnboarding })));
-import { useFitnessStore } from './store/fitnessStore';
-import type { Workout } from './features/fitness/types';
 import type { PageEntry } from './store/navigationStore';
 
 // Generic page stack renderer for full-screen pages
 function PageStackOverlay({ page, onBack }: { page: PageEntry; onBack: () => void }): React.JSX.Element | null {
-  const addWorkout = useFitnessStore((s) => s.addWorkout);
-  const handleWorkoutComplete = useCallback((workout: Workout) => {
-    addWorkout(workout);
+  const handleWorkoutComplete = useCallback(() => {
     onBack();
-  }, [addWorkout, onBack]);
+  }, [onBack]);
 
   const renderPage = (): React.ReactNode => {
     const props = page.props ?? {};

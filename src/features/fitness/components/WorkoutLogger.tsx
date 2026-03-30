@@ -41,7 +41,7 @@ interface WorkoutLoggerProps {
     exercises?: string[];
     muscleGroups?: string;
   };
-  onComplete: (workout: Workout) => void;
+  onComplete: () => void;
   onBack: () => void;
 }
 
@@ -331,7 +331,7 @@ export function WorkoutLogger({
     }
     clearWorkoutDraft();
     notify.success(t('fitness.logger.saveSuccess'));
-    onComplete(workout);
+    onComplete();
   }, [
     planDay,
     loggedSets,
