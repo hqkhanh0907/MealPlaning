@@ -12,6 +12,13 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@capacitor/app', () => ({
+  App: {
+    addListener: vi.fn(() => Promise.resolve({ remove: vi.fn() })),
+    exitApp: vi.fn(),
+  },
+}));
+
 const mockSaveProfile = vi.fn().mockResolvedValue(undefined);
 const mockSaveGoal = vi.fn().mockResolvedValue(undefined);
 
@@ -409,12 +416,23 @@ describe('UnifiedOnboarding Integration', () => {
   });
 
   describe('Android back button (C-001)', () => {
-    function getLatestBackButtonHandler(): () => void {
-      const calls = mockAddListener.mock.calls.filter(
-        (c: [string, () => void]) => c[0] === 'backButton',
-      );
-      return calls[calls.length - 1][1];
-    }
+    let backButtonHandler: (() => void) | null = null;
+
+    // We need a custom mock that captures the handler
+    // Since vi.mock hoisting makes it hard to share mock references,
+    // we tap into the component's behavior directly
+    beforeEach(async () => {
+      // The @capacitor/app mock is set up to capture handlers
+      const { App } = await vi.importMock<typeof import('@capacitor/app')>('@capacitor/app');
+      vi.mocked(App.addListener).mockImplementation((_event: string, handler: () => void) => {
+        backButtonHandler = handler;
+        return Promise.resolve({ remove: vi.fn() });
+      });
+    });
+
+    afterEach(() => {
+      backButtonHandler = null;
+    });
 
     it('should call goBack on Android back button when not on first step', async () => {
       render(<UnifiedOnboarding />);
@@ -427,8 +445,8 @@ describe('UnifiedOnboarding Integration', () => {
       });
 
       // Simulate Android back button
-      const handler = getLatestBackButtonHandler();
-      act(() => { handler(); });
+      expect(backButtonHandler).not.toBeNull();
+      act(() => { backButtonHandler!(); });
 
       // Should go back to slide 1
       await waitFor(() => {
@@ -442,8 +460,8 @@ describe('UnifiedOnboarding Integration', () => {
       expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
 
       // Simulate Android back button on very first step — should do nothing
-      const handler = getLatestBackButtonHandler();
-      act(() => { handler(); });
+      expect(backButtonHandler).not.toBeNull();
+      act(() => { backButtonHandler!(); });
 
       // Still on slide 1
       expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
@@ -460,8 +478,8 @@ describe('UnifiedOnboarding Integration', () => {
       await screen.findByTestId('health-basic-step');
 
       // Simulate Android back button
-      const handler = getLatestBackButtonHandler();
-      act(() => { handler(); });
+      expect(backButtonHandler).not.toBeNull();
+      act(() => { backButtonHandler!(); });
 
       // Should go back to section 1, last step (slide 3)
       expect(await screen.findByText('welcome.slide3Title')).toBeInTheDocument();
