@@ -42,9 +42,9 @@ const SLIDES: SlideContent[] = [
   },
 ];
 
-function DotIndicator({ total, current }: { total: number; current: number }) {
+function DotIndicator({ total, current, ariaLabel }: { total: number; current: number; ariaLabel: string }) {
   return (
-    <div className="flex items-center gap-2" role="group" aria-label="Slide indicator">
+    <div className="flex items-center gap-2" role="group" aria-label={ariaLabel}>
       {Array.from({ length: total }, (_, i) => (
         <div
           key={i}
@@ -95,7 +95,7 @@ export function WelcomeSlides({ step, goNext, goToSection }: WelcomeSlidesProps)
       </div>
 
       <div className="flex items-center justify-between px-8 pb-12">
-        <DotIndicator total={SLIDES.length} current={step} />
+        <DotIndicator total={SLIDES.length} current={step} ariaLabel={t('welcome.slideIndicator')} />
 
         <Button
           onClick={goNext}

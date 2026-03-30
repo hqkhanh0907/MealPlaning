@@ -849,7 +849,9 @@
       "convertToRestConfirm": "Xóa tất cả buổi tập ngày này và chuyển thành ngày nghỉ?",
       "convertToWorkout": "Thêm buổi tập",
       "coachingHint": "Chạm ✏ để chỉnh bài tập • Chạm ngày để xem buổi tập",
-      "dayContextMenu": "Tùy chọn ngày tập"
+      "dayContextMenu": "Tùy chọn ngày tập",
+      "addWorkout": "Thêm buổi tập",
+      "sessionTabs": "Danh sách buổi tập"
     },
     "workout": {
       "tab": "Buổi tập"

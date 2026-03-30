@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useController, type UseFormReturn } from 'react-hook-form';
+import { useController, useWatch, type UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ const EQUIPMENT_OPTIONS = [
 ] as const;
 
 export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingSection }: TrainingDetailStepsProps) {
-  const experience = form.watch('experience');
+  const experience = useWatch({ control: form.control, name: 'experience' });
   const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);
 
   const handleConfirmTraining = () => {
@@ -76,11 +76,13 @@ function DurationStep({ form, goNext, goBack }: { form: UseFormReturn<Onboarding
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('fitness.onboarding.sessionDuration')}>
         {DURATIONS.map((d) => (
           <button
             key={d}
             type="button"
+            role="radio"
+            aria-checked={field.field.value === d}
             onClick={() => field.field.onChange(d)}
             className={cn(
               'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -118,11 +120,13 @@ function EquipmentStep({ form, goNext, goBack }: { form: UseFormReturn<Onboardin
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label={t('fitness.onboarding.equipment')}>
         {EQUIPMENT_OPTIONS.map((eq) => (
           <button
             key={eq}
             type="button"
+            role="checkbox"
+            aria-checked={(selected as string[]).includes(eq)}
             onClick={() => toggle(eq)}
             className={cn(
               'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -150,11 +154,13 @@ function CardioStep({ form, goNext, goBack }: { form: UseFormReturn<OnboardingFo
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex gap-2">
+      <div className="flex gap-2" role="radiogroup" aria-label={t('fitness.onboarding.cardioSessions')}>
         {[0, 1, 2, 3].map((n) => (
           <button
             key={n}
             type="button"
+            role="radio"
+            aria-checked={field.field.value === n}
             onClick={() => field.field.onChange(n)}
             className={cn(
               'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -183,11 +189,13 @@ function PeriodizationStep({ form, goNext, goBack }: { form: UseFormReturn<Onboa
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="space-y-3">
+      <div className="space-y-3" role="radiogroup" aria-label={t('fitness.onboarding.periodization')}>
         {options.map((opt) => (
           <button
             key={opt}
             type="button"
+            role="radio"
+            aria-checked={field.field.value === opt}
             onClick={() => field.field.onChange(opt)}
             className={cn(
               'flex w-full min-h-[56px] items-center rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',

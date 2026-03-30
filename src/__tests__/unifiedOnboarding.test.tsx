@@ -32,6 +32,18 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+const mockBackButtonRemove = vi.fn();
+const mockAddListener = vi.fn((_event: string, _handler: () => void) => {
+  return Promise.resolve({ remove: mockBackButtonRemove });
+});
+
+vi.mock('@capacitor/app', () => ({
+  App: {
+    addListener: mockAddListener,
+    exitApp: vi.fn(),
+  },
+}));
+
 const mockSaveProfile = vi.fn().mockResolvedValue(undefined);
 const mockSaveGoal = vi.fn().mockResolvedValue(undefined);
 
@@ -683,7 +695,7 @@ describe('WelcomeSlides', () => {
       }>,
       { step: 0, goToSection: vi.fn() },
     );
-    const dotGroup = screen.getByRole('group', { name: 'Slide indicator' });
+    const dotGroup = screen.getByRole('group', { name: 'welcome.slideIndicator' });
     expect(dotGroup).toBeInTheDocument();
     expect(dotGroup.children.length).toBe(3);
   });
@@ -697,7 +709,7 @@ describe('WelcomeSlides', () => {
       }>,
       { step: 1, goToSection: vi.fn() },
     );
-    const dotGroup = screen.getByRole('group', { name: 'Slide indicator' });
+    const dotGroup = screen.getByRole('group', { name: 'welcome.slideIndicator' });
     const dots = Array.from(dotGroup.children);
     expect(dots[1]).toHaveAttribute('aria-current', 'step');
     expect(dots[0]).not.toHaveAttribute('aria-current');
