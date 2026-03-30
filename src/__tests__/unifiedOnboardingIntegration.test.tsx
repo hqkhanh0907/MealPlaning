@@ -407,4 +407,64 @@ describe('UnifiedOnboarding Integration', () => {
       consoleErrorSpy.mockRestore();
     });
   });
+
+  describe('Android back button (C-001)', () => {
+    function getLatestBackButtonHandler(): () => void {
+      const calls = mockAddListener.mock.calls.filter(
+        (c: [string, () => void]) => c[0] === 'backButton',
+      );
+      return calls[calls.length - 1][1];
+    }
+
+    it('should call goBack on Android back button when not on first step', async () => {
+      render(<UnifiedOnboarding />);
+      await screen.findByTestId('welcome-slides');
+
+      // Navigate to slide 2 (section=1, step=1)
+      fireEvent.click(screen.getByTestId('onboarding-next-btn'));
+      await waitFor(() => {
+        expect(screen.getByText('welcome.slide2Title')).toBeInTheDocument();
+      });
+
+      // Simulate Android back button
+      const handler = getLatestBackButtonHandler();
+      act(() => { handler(); });
+
+      // Should go back to slide 1
+      await waitFor(() => {
+        expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
+      });
+    });
+
+    it('should not exit app on first step (section=1, step=0)', async () => {
+      render(<UnifiedOnboarding />);
+      await screen.findByTestId('welcome-slides');
+      expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
+
+      // Simulate Android back button on very first step — should do nothing
+      const handler = getLatestBackButtonHandler();
+      act(() => { handler(); });
+
+      // Still on slide 1
+      expect(screen.getByText('welcome.slide1Title')).toBeInTheDocument();
+    });
+
+    it('should go back from section 2 to section 1 via back button', async () => {
+      render(<UnifiedOnboarding />);
+      await screen.findByTestId('welcome-slides');
+
+      // Navigate through all welcome slides to reach section 2
+      fireEvent.click(screen.getByTestId('onboarding-next-btn'));
+      fireEvent.click(screen.getByTestId('onboarding-next-btn'));
+      fireEvent.click(screen.getByTestId('onboarding-next-btn'));
+      await screen.findByTestId('health-basic-step');
+
+      // Simulate Android back button
+      const handler = getLatestBackButtonHandler();
+      act(() => { handler(); });
+
+      // Should go back to section 1, last step (slide 3)
+      expect(await screen.findByText('welcome.slide3Title')).toBeInTheDocument();
+    });
+  });
 });

@@ -224,11 +224,12 @@ describe('useFitnessNutritionBridge hook', () => {
   });
 
   it('calculates weekly training load for current week', () => {
-    const today = new Date();
-    const d1 = formatDate(today);
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    const d2 = formatDate(yesterday);
+    // Pin to Wednesday so both today and yesterday are in the same ISO week
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-25T12:00:00')); // Wednesday
+
+    const d1 = '2026-03-25'; // Wed
+    const d2 = '2026-03-24'; // Tue (same week)
 
     (useFitnessStore as unknown as Mock).mockImplementation(
       (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
@@ -239,6 +240,8 @@ describe('useFitnessNutritionBridge hook', () => {
 
     const { result } = renderHook(() => useFitnessNutritionBridge());
     expect(result.current.weeklyTrainingLoad).toBe(2);
+
+    vi.useRealTimers();
   });
 
   it('excludes workouts from previous weeks', () => {

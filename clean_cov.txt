@@ -1,0 +1,1204 @@
+
+> react-example@0.0.0 test:coverage
+> vitest run --coverage
+
+
+ RUN  v4.0.18 /Users/khanhhuynh/person_project/MealPlaning
+      Coverage enabled with v8
+
+stdout | src/__tests__/dishEditModal.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/unifiedOnboardingIntegration.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/HealthProfileForm.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/app.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/managers.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/ingredientEditModal.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/NotificationContext.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/WorkoutLogger.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/CardioLogger.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/fitnessStore.test.ts
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/SessionTabs.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stderr | src/__tests__/SessionTabs.test.tsx > SessionTabs > delete session > shows confirmation on context menu (right-click) with 2+ sessions
+In HTML, <button> cannot be a descendant of <button>.
+This will cause a hydration error.
+
+  <SessionTabsInner sessions={[...]} activeSessionId="pd-1" completedSessionIds={[...]} onSelectSession={function Mock} ...>
+    <div className="px-1 py-2">
+      <div className="flex items...">
+        <div role="tablist" aria-label="Buổi tập" className="flex items...">
+>         <button
+>           role="tab"
+>           type="button"
+>           aria-selected={true}
+>           data-completed={undefined}
+>           data-session-id="pd-1"
+>           onClick={function}
+>           onPointerDown={function}
+>           onPointerUp={function}
+>           onPointerLeave={function}
+>           onContextMenu={function}
+>           className="flex items-center gap-1.5 rounded-full py-3 px-4 text-sm font-medium transition-colors min-h-[4..."
+>         >
+            <Sun>
+>           <button
+>             type="button"
+>             data-testid="delete-session-pd-1"
+>             onClick={function onClick}
+>             aria-label="fitness.plan.deleteSession"
+>             className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/30 text-current transitio..."
+>           >
+          ...
+        ...
+
+
+stderr | src/__tests__/fitnessStore.test.ts > fitnessStore dual-layer SQLite > read-after-write: data persists through SQLite round-trip
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/SessionTabs.test.tsx (19 tests) 1431ms
+     ✓ renders with add button when only 1 session  372ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > save creates workout and calls onComplete
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > save creates workout and calls onComplete
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/NotificationContext.test.tsx (15 tests) 2323ms
+     ✓ renders success toast  335ms
+     ✓ dismissAll removes all toasts  312ms
+     ✓ limits to MAX_TOASTS (5)  666ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > save via finish button in header also works
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > save via finish button in header also works
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > saves with distance and heart rate when provided
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > saves with distance and heart rate when provided
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/fitnessStore.test.ts > fitnessStore – removePlanDaySession reorder edge case > does not reorder days from a different planId or dayOfWeek
+[fitnessStore] SQLite removePlanDaySession delete failed: Error: SQLite write error
+    at Object.execute (/Users/khanhhuynh/person_project/MealPlaning/src/__tests__/fitnessStore.test.ts:1341:37)
+    at Object.removePlanDaySession (/Users/khanhhuynh/person_project/MealPlaning/src/store/fitnessStore.ts:210:15)
+    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/fitnessStore.test.ts:1584:32
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37
+    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)
+[fitnessStore] SQLite removePlanDaySession reorder failed: Error: SQLite write error
+    at Object.execute (/Users/khanhhuynh/person_project/MealPlaning/src/__tests__/fitnessStore.test.ts:1341:37)
+    at Object.removePlanDaySession (/Users/khanhhuynh/person_project/MealPlaning/src/store/fitnessStore.ts:217:17)
+    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/fitnessStore.test.ts:1584:32
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)
+    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37
+    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)
+
+ ✓ src/__tests__/fitnessStore.test.ts (89 tests) 2486ms
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > saveRef.current returns true on successful save
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > saveRef.current returns true on successful save
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > saveRef.current returns true on successful save
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > saveRef.current returns true on successful save
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to StringNumberController inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > save returns false when saveProfile throws
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > save returns false when saveProfile throws
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/HealthProfileForm.test.tsx > HealthProfileForm > save returns false when saveProfile throws
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HealthProfileForm inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > save with zero duration sends undefined durationMin
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/CardioLogger.test.tsx > CardioLogger > save with zero duration sends undefined durationMin
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Controller inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CardioLogger inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > AI button is disabled when name is empty
+An update to IngredientEditModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/CardioLogger.test.tsx (21 tests) 2018ms
+     ✓ stopwatch mode: start/pause/stop buttons work  308ms
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/HealthProfileForm.test.tsx (13 tests) 2285ms
+     ✓ renders all form fields  438ms
+     ✓ populates with current profile data  537ms
+     ✓ BMR override toggle works  362ms
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/SwapExerciseSheet.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/WorkoutLogger.test.tsx (44 tests) 2726ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > shows error notification on AI search failure
+[IngredientEditModal] aiSearch {
+  message: 'Network error',
+  name: 'Error',
+  stack: 'Error: Network error\n' +
+    '    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/ingredientEditModal.test.tsx:261:53\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37\n' +
+    '    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)\n' +
+    '    at trace (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)\n' +
+    '    at runTest (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:12)'
+}
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/saveTemplateModal.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > shows warning notification on AI search timeout
+[IngredientEditModal] aiSearch {
+  message: 'Timeout',
+  name: 'Error',
+  stack: 'Error: Timeout\n' +
+    '    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/ingredientEditModal.test.tsx:275:53\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37\n' +
+    '    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)\n' +
+    '    at trace (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)\n' +
+    '    at runTest (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:12)'
+}
+
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/scheduleComponents.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/unifiedOnboardingIntegration.test.tsx (10 tests) 4876ms
+       ✓ navigates through all 7 sections and reaches preview  3451ms
+       ✓ navigates through 5 sections, skips computing, and completes  307ms
+       ✓ calls all store setters on completeOnboarding  386ms
+       ✓ calls saveProfile and saveGoal during health confirm step  304ms
+stdout | src/__tests__/aiSuggestionPreview.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stdout | src/__tests__/groceryList.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > shows unsaved dialog when closing with unit change
+An update to IngredientEditModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/SwapExerciseSheet.test.tsx (16 tests) 1742ms
+     ✓ search filters exercises by Vietnamese name  839ms
+     ✓ shows empty state when search has no matches  351ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/unifiedOnboarding.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/scheduleComponents.test.tsx (69 tests) 2077ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/saveTemplateModal.test.tsx (18 tests) 2038ms
+     ✓ shows validation error when submitting empty name  966ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/aiSuggestionPreview.test.tsx (14 tests) 1875ms
+     ✓ toggles meal selection via checkbox  890ms
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/QuickActionsBar.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > prevents double submission
+An update to IngredientEditModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > prevents double submission
+An update to IngredientEditModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > AI search returns early when name is empty
+An update to IngredientEditModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/groceryList.test.tsx (35 tests) 2484ms
+     ✓ shows all done message when all items are checked  733ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > AI search handles timeout error and shows warning
+[IngredientEditModal] aiSearch {
+  message: 'Timeout',
+  name: 'Error',
+  stack: 'Error: Timeout\n' +
+    '    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/ingredientEditModal.test.tsx:488:53\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37\n' +
+    '    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)\n' +
+    '    at trace (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)\n' +
+    '    at runTest (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:12)'
+}
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/quickAddIngredientForm.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > AI search handles generic error and shows error notification
+[IngredientEditModal] aiSearch {
+  message: 'Network failed',
+  name: 'Error',
+  stack: 'Error: Network failed\n' +
+    '    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/ingredientEditModal.test.tsx:505:53\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37\n' +
+    '    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)\n' +
+    '    at trace (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)\n' +
+    '    at runTest (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:12)'
+}
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/SetEditor.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > handleAISearch returns early when name is empty (line 138)
+An update to IngredientEditModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/goalSettingsModal.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/__tests__/ingredientEditModal.test.tsx > IngredientEditModal > handles AI error after unmount (line 155 isMounted guard)
+[IngredientEditModal] aiSearch {
+  message: 'Network error',
+  name: 'Error',
+  stack: 'Error: Network error\n' +
+    '    at /Users/khanhhuynh/person_project/MealPlaning/src/__tests__/ingredientEditModal.test.tsx:560:53\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:145:11\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:915:26\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1243:20\n' +
+    '    at new Promise (<anonymous>)\n' +
+    '    at runWithTimeout (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1209:10)\n' +
+    '    at file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:37\n' +
+    '    at Traces.$ (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/traces.CCmnQaNT.js:142:27)\n' +
+    '    at trace (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)\n' +
+    '    at runTest (file:///Users/khanhhuynh/person_project/MealPlaning/node_modules/@vitest/runner/dist/index.js:1653:12)'
+}
+
+Not implemented: Window's scrollTo() method
+stdout | src/__tests__/mealPlannerModal.test.tsx
+🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+Not implemented: Window's scrollTo() method
+ ✓ src/__tests__/ingredientEditModal.test.tsx (48 tests) 9730ms
+     ✓ AI button is disabled when name is empty  652ms
+     ✓ fills nutrition fields after successful AI search  564ms
+     ✓ shows warning notification on AI search timeout  381ms
+     ✓ calls onClose directly when no changes made  341ms
+     ✓ shows unsaved dialog when closing with name change  312ms
+     ✓ shows unsaved dialog when closing with unit change  466ms
+     ✓ discards changes via unsaved dialog  530ms
+     ✓ saves and closes via unsaved dialog when form is valid  371ms
+     ✓ stays in dialog when save fails validation from unsaved dialog  441ms
+     ✓ cancels unsaved dialog and returns to editing  324ms
+     ✓ AI search handles timeout error and shows warning  423ms
+     ✓ AI search handles generic error and shows error notification  447ms
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: ENOENT: no such file or directory, open '/Users/khanhhuynh/person_project/MealPlaning/coverage/.tmp/coverage-12.json'
+ ❯ open node:internal/fs/promises:642:25
+ ❯ Object.writeFile node:internal/fs/promises:1249:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -2, code: 'ENOENT', syscall: 'open', path: '/Users/khanhhuynh/person_project/MealPlaning/coverage/.tmp/coverage-12.json' }
+
+
+
