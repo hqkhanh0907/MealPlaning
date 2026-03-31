@@ -16,6 +16,7 @@ import { NutritionGoalStep } from '../components/onboarding/NutritionGoalStep';
 import { HealthConfirmStep } from '../components/onboarding/HealthConfirmStep';
 import { TrainingCoreStep } from '../components/onboarding/TrainingCoreStep';
 import { TrainingDetailSteps } from '../components/onboarding/TrainingDetailSteps';
+import { getTrainingDetailStepCount } from '../components/onboarding/trainingStepConfig';
 import { PlanStrategyChoice } from '../components/onboarding/PlanStrategyChoice';
 import { PlanComputingScreen } from '../components/onboarding/PlanComputingScreen';
 import { PlanPreviewScreen } from '../components/onboarding/PlanPreviewScreen';
@@ -1126,6 +1127,41 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
+  });
+
+  it('getTrainingDetailStepCount returns correct counts per experience level', () => {
+    expect(getTrainingDetailStepCount('beginner')).toBe(4);
+    expect(getTrainingDetailStepCount('intermediate')).toBe(5);
+    expect(getTrainingDetailStepCount('advanced')).toBe(5);
+  });
+
+  it('step count matches actual renderable steps (no phantom steps)', () => {
+    const beginnerCount = getTrainingDetailStepCount('beginner');
+    const intermediateCount = getTrainingDetailStepCount('intermediate');
+    // Beginner: last step (count-1) should be confirm
+    const { unmount: u1 } = renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: beginnerCount - 1, setOnboardingSection },
+      { experience: 'beginner' },
+    );
+    expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
+    u1();
+
+    // Intermediate: last step (count-1) should be confirm
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: intermediateCount - 1, setOnboardingSection },
       { experience: 'intermediate' },
     );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();

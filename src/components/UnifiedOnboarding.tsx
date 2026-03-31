@@ -10,6 +10,7 @@ import { useHealthProfileStore } from '@/features/health-profile/store/healthPro
 import { OnboardingProgress } from './onboarding/OnboardingProgress';
 import { OnboardingErrorBoundary } from './onboarding/OnboardingErrorBoundary';
 import { onboardingSchema, type OnboardingFormData } from './onboarding/onboardingSchema';
+import { getTrainingDetailStepCount } from './onboarding/trainingStepConfig';
 
 const WelcomeSlides = React.lazy(
   () => import('./onboarding/WelcomeSlides').then((m) => ({ default: m.WelcomeSlides })),
@@ -53,7 +54,7 @@ const SECTION_STEPS: Record<Section, number> = {
   1: 3, // 3 welcome slides
   2: 4, // 4 health steps
   3: 1, // 1 training core
-  4: 4, // 4 for beginner, overridden to 5 for intermediate/advanced (adds Periodization step)
+  4: 4, // default; overridden at runtime by getTrainingDetailStepCount()
   5: 1, // strategy choice
   6: 1, // computing
   7: 1, // preview
@@ -125,7 +126,7 @@ export function UnifiedOnboarding() {
   const sectionSteps = useMemo(() => {
     return {
       ...SECTION_STEPS,
-      4: watchedExperience === 'beginner' ? 4 : 5,
+      4: getTrainingDetailStepCount(watchedExperience as 'beginner' | 'intermediate' | 'advanced'),
     };
   }, [watchedExperience]);
 
