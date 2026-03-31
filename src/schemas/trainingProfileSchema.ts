@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const TRAINING_GOAL_VALUES = ['strength', 'hypertrophy', 'endurance', 'general'] as const;
 const TRAINING_EXPERIENCE_VALUES = ['beginner', 'intermediate', 'advanced'] as const;
-const EQUIPMENT_TYPE_VALUES = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands'] as const;
+const EQUIPMENT_TYPE_VALUES = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands', 'kettlebell'] as const;
 const BODY_REGION_VALUES = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'] as const;
 const PERIODIZATION_MODEL_VALUES = ['linear', 'undulating', 'block'] as const;
 const MUSCLE_GROUP_VALUES = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'] as const;

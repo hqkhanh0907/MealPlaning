@@ -164,10 +164,35 @@ describe('WorkoutLogger', () => {
     onBack: vi.fn(),
   };
 
+  const makeExercisesJson = (...ids: string[]): string =>
+    JSON.stringify(
+      ids.map(id => ({
+        exercise: {
+          id,
+          nameVi: id === 'bench-press' ? 'Đẩy tạ nằm' : 'Gánh tạ',
+          nameEn: id === 'bench-press' ? 'Bench Press' : 'Squat',
+          muscleGroup: id === 'bench-press' ? 'chest' : 'legs',
+          secondaryMuscles: id === 'bench-press' ? ['shoulders', 'arms'] : ['core', 'glutes'],
+          category: 'compound',
+          equipment: ['barbell'],
+          contraindicated: [],
+          exerciseType: 'strength',
+          defaultRepsMin: id === 'bench-press' ? 8 : 6,
+          defaultRepsMax: id === 'bench-press' ? 12 : 10,
+          isCustom: false,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        sets: 4,
+        repsMin: id === 'bench-press' ? 8 : 6,
+        repsMax: id === 'bench-press' ? 12 : 10,
+        restSeconds: 120,
+      })),
+    );
+
   const planDayWithExercises = {
     dayOfWeek: 1,
     workoutType: 'Push Day',
-    exercises: ['bench-press'],
+    exercises: makeExercisesJson('bench-press'),
   };
 
   it('renders header with back button and timer', () => {
@@ -222,7 +247,7 @@ describe('WorkoutLogger', () => {
     const emptyPlan = {
       dayOfWeek: 1,
       workoutType: 'Test',
-      exercises: [] as string[],
+      exercises: '[]',
     };
     render(<WorkoutLogger {...defaultProps} planDay={emptyPlan} />);
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
@@ -461,7 +486,7 @@ describe('WorkoutLogger', () => {
     const multiPlan = {
       dayOfWeek: 1,
       workoutType: 'Full Body',
-      exercises: ['bench-press', 'squat'],
+      exercises: makeExercisesJson('bench-press', 'squat'),
     };
     render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
 
@@ -596,7 +621,7 @@ describe('WorkoutLogger', () => {
     const multiPlan = {
       dayOfWeek: 1,
       workoutType: 'Full Body',
-      exercises: ['bench-press', 'squat'],
+      exercises: makeExercisesJson('bench-press', 'squat'),
     };
     render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
 
@@ -713,11 +738,11 @@ describe('WorkoutLogger', () => {
     expect(mockSetWorkoutDraft).not.toHaveBeenCalled();
   });
 
-  it('resolves exercises from string[] without JSON.parse', () => {
+  it('resolves exercises from JSON string (SelectedExercise format)', () => {
     const planDay = {
       dayOfWeek: 1,
       workoutType: 'Push Day',
-      exercises: ['bench-press', 'squat'],
+      exercises: makeExercisesJson('bench-press', 'squat'),
     };
     render(<WorkoutLogger {...defaultProps} planDay={planDay} />);
 
@@ -737,7 +762,16 @@ describe('WorkoutLogger', () => {
     const planDay = {
       dayOfWeek: 1,
       workoutType: 'Test',
-      exercises: ['bench-press', 'nonexistent-exercise'],
+      exercises: JSON.stringify([
+        {
+          exercise: { id: 'bench-press', nameVi: 'Đẩy tạ nằm', nameEn: 'Bench Press', muscleGroup: 'chest', secondaryMuscles: ['shoulders'], category: 'compound', equipment: ['barbell'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12, isCustom: false, updatedAt: '2025-01-01' },
+          sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90,
+        },
+        {
+          exercise: { id: 'nonexistent-exercise', nameVi: 'Không tồn tại', nameEn: 'Nonexistent', muscleGroup: 'chest', secondaryMuscles: [], category: 'isolation', equipment: ['machine'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12, isCustom: false, updatedAt: '2025-01-01' },
+          sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90,
+        },
+      ]),
     };
     render(<WorkoutLogger {...defaultProps} planDay={planDay} />);
 
@@ -824,7 +858,7 @@ describe('WorkoutLogger', () => {
       id: 'pd-1',
       dayOfWeek: 1,
       workoutType: 'Push Day',
-      exercises: ['bench-press'],
+      exercises: makeExercisesJson('bench-press'),
     };
     render(
       <WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithId} />,
@@ -963,5 +997,74 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('weight-plus-bench-press'));
     expect(weightInput.value).toBe('2.5');
+  });
+
+  /* ---------- TC_WL_04: Invalid JSON exercises → graceful fallback ---------- */
+  it('falls back to empty exercises when planDay.exercises is invalid JSON', () => {
+    const invalidPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Bad Data',
+      exercises: 'not valid json {{{',
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={invalidPlan} />);
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+  });
+
+  /* ---------- TC_WL_05: Timer auto-start with planned exercises ---------- */
+  it('auto-starts timer when planDay has exercises', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    expect(screen.getByTestId('elapsed-timer')).toBeInTheDocument();
+  });
+
+  /* ---------- TC_WL_06: Draft takes priority over planDay ---------- */
+  it('uses draft exercises instead of planDay exercises when draft exists', () => {
+    const draft = {
+      exercises: [
+        {
+          id: 'squat',
+          nameVi: 'Gánh tạ',
+          nameEn: 'Squat',
+          muscleGroup: 'legs',
+          secondaryMuscles: ['core', 'glutes'],
+          category: 'compound' as const,
+          equipment: ['barbell'] as string[],
+          contraindicated: [] as string[],
+          exerciseType: 'strength' as const,
+          defaultRepsMin: 6,
+          defaultRepsMax: 10,
+          isCustom: false,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      sets: [],
+      elapsedSeconds: 60,
+    };
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
+      () => ({ workoutDraft: draft }),
+    );
+
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    expect(
+      screen.getByTestId('exercise-section-squat'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('exercise-section-bench-press'),
+    ).not.toBeInTheDocument();
+  });
+
+  /* ---------- TC_WL_02: Empty JSON string → empty state ---------- */
+  it('shows empty state when planDay.exercises is empty JSON array "[]"', () => {
+    const emptyJsonPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Empty Day',
+      exercises: '[]',
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={emptyJsonPlan} />);
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
 });

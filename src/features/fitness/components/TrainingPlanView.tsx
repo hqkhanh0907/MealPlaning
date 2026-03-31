@@ -184,7 +184,7 @@ function TrainingPlanViewInner({
       pushPage({
         id: 'workout-logger',
         component: 'WorkoutLogger',
-        props: { workoutPlanDay: planDay },
+        props: { planDay },
       });
     },
     [pushPage],

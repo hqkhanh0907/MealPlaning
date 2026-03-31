@@ -35,7 +35,7 @@ export const onboardingSchema = z.object({
 
   // Section 4: Training Details
   sessionDuration: z.number().optional(),
-  equipment: z.array(z.string()).optional(),
+  equipment: z.array(z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands', 'kettlebell'])).optional(),
   injuries: z.array(z.enum(['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'])).optional(),
   cardioSessions: z.number().optional(),
   periodization: z.enum(['linear', 'undulating', 'block']).optional(),

@@ -60,6 +60,7 @@ export interface GeneratedPlan {
   plan: TrainingPlan;
   days: TrainingPlanDay[];
   deloadSuggestion?: DeloadSuggestion;
+  warnings?: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -273,9 +274,21 @@ function selectExercisesForMuscle(
       !ex.contraindicated.some((ci) => injuries.includes(ci)),
   );
 
-  if (eligible.length === 0) return [];
+  // Fallback: if no exercises match, try bodyweight exercises for this muscle group
+  let pool = eligible;
+  if (pool.length === 0 && !availableEquipment.includes('bodyweight')) {
+    pool = exerciseDB.filter(
+      (ex) =>
+        ex.muscleGroup === muscleGroup &&
+        ex.exerciseType === 'strength' &&
+        ex.equipment.includes('bodyweight') &&
+        !ex.contraindicated.some((ci) => injuries.includes(ci)),
+    );
+  }
 
-  const sorted = [...eligible].sort(
+  if (pool.length === 0) return [];
+
+  const sorted = [...pool].sort(
     (a, b) => CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category],
   );
 
@@ -451,6 +464,7 @@ export function generateTrainingPlan(
   const deloadNote = buildDeloadNotes(trainingProfile);
 
   // Steps 3 + 4: build each day
+  const warnings: string[] = [];
   const days: TrainingPlanDay[] = sessions.map((session, index) => {
     const sessionSets = setsPerSession[index];
 
@@ -464,6 +478,9 @@ export function generateTrainingPlan(
         trainingProfile.injuryRestrictions,
         exerciseDB,
       );
+      if (selected.length === 0) {
+        warnings.push(muscle);
+      }
       rawExercises.push(...selected);
     }
 
@@ -695,7 +712,13 @@ export function generateTrainingPlan(
     restDays,
   };
 
-  return { plan, days, deloadSuggestion };
+  const uniqueWarnings = [...new Set(warnings)];
+  return {
+    plan,
+    days,
+    deloadSuggestion,
+    ...(uniqueWarnings.length > 0 ? { warnings: uniqueWarnings } : {}),
+  };
 }
 
 /* ------------------------------------------------------------------ */

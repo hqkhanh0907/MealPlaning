@@ -1131,6 +1131,21 @@ describe('TrainingDetailSteps', () => {
     expect(screen.getByText('fitness.onboarding.period_block')).toBeInTheDocument();
   });
 
+  it('renders periodization model descriptions below each option name', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 4, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    expect(screen.getByText('fitness.onboarding.period_linear_desc')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_undulating_desc')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_block_desc')).toBeInTheDocument();
+  });
+
   it('renders TrainingConfirmStep at step 7 for intermediate', () => {
     renderWithForm(
       TrainingDetailSteps as React.ComponentType<{
@@ -1931,6 +1946,40 @@ describe('CycleWeeksStep', () => {
     expect(screen.getByText('fitness.onboarding.cycleWeeks')).toBeInTheDocument();
     [4, 6, 8, 12].forEach((w) => {
       expect(screen.getByText(new RegExp(`^${w}\\s`))).toBeInTheDocument();
+    });
+  });
+
+  it('renders descriptions below each cycle week option', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 5, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    expect(screen.getByText('fitness.onboarding.cycleWeeks4Desc')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.cycleWeeks6Desc')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.cycleWeeks8Desc')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.cycleWeeks12Desc')).toBeInTheDocument();
+  });
+
+  it('uses vertical stack layout with name on top and description below', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 5, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    const buttons = screen.getAllByRole('radio');
+    buttons.forEach((btn) => {
+      expect(btn.className).toContain('flex-col');
+      expect(btn.className).toContain('items-start');
+      expect(btn.className).not.toContain('justify-between');
     });
   });
 

@@ -439,7 +439,7 @@ describe('TrainingPlanView', () => {
     expect(mockPushPage).toHaveBeenCalledWith({
       id: 'workout-logger',
       component: 'WorkoutLogger',
-      props: { workoutPlanDay: planDays[0] },
+      props: { planDay: planDays[0] },
     });
   });
 
@@ -459,7 +459,7 @@ describe('TrainingPlanView', () => {
     expect(mockPushPage).toHaveBeenCalledWith({
       id: 'workout-logger',
       component: 'WorkoutLogger',
-      props: { workoutPlanDay: dayWithoutExercises },
+      props: { planDay: dayWithoutExercises },
     });
   });
 

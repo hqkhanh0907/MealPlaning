@@ -26,7 +26,7 @@ export function CycleWeeksStep({ form, goNext, goBack }: StepProps) {
             aria-checked={field.field.value === weeks}
             onClick={() => field.field.onChange(weeks)}
             className={cn(
-              'flex w-full min-h-[56px] items-center justify-between rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+              'flex w-full min-h-[56px] flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
               field.field.value === weeks
                 ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
                 : 'border-slate-200 dark:border-slate-700',
@@ -40,7 +40,7 @@ export function CycleWeeksStep({ form, goNext, goBack }: StepProps) {
             )}>
               {weeks} {t('fitness.onboarding.weeksUnit')}
             </span>
-            <span className="text-xs text-slate-400 dark:text-slate-500">
+            <span className="mt-1 text-xs text-slate-400 dark:text-slate-500">
               {t(`fitness.onboarding.cycleWeeks${weeks}Desc`)}
             </span>
           </button>

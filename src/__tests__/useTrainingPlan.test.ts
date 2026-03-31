@@ -1362,3 +1362,216 @@ const ALL_MUSCLES: MuscleGroup[] = [
   'core',
   'glutes',
 ];
+
+/* ------------------------------------------------------------------ */
+/*  Equipment matching & fallback edge-case tests                       */
+/* ------------------------------------------------------------------ */
+
+describe('Equipment matching and fallback', () => {
+  const bandsOnlyDB: Exercise[] = [
+    createExercise({
+      id: 'band-pull-apart',
+      muscleGroup: 'back',
+      equipment: ['bands'],
+      category: 'isolation',
+      exerciseType: 'strength',
+    }),
+  ];
+
+  const bodyweightOnlyDB: Exercise[] = ALL_MUSCLES.map((m) =>
+    createExercise({
+      id: `bw-${m}`,
+      muscleGroup: m,
+      equipment: ['bodyweight'],
+      category: 'compound',
+      exerciseType: 'strength',
+    }),
+  );
+
+  it('generates plan with kettlebell equipment type', () => {
+    const profile = createProfile({
+      availableEquipment: ['kettlebell', 'bodyweight'],
+      daysPerWeek: 3,
+      cardioSessionsWeek: 0,
+    });
+    const db: Exercise[] = [
+      ...ALL_MUSCLES.map((m) =>
+        createExercise({
+          id: `kb-${m}`,
+          muscleGroup: m,
+          equipment: ['kettlebell'],
+          category: 'compound',
+          exerciseType: 'strength',
+        }),
+      ),
+    ];
+    const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
+    expect(result.days.length).toBeGreaterThan(0);
+    result.days.forEach((day) => {
+      if (!day.exercises) return;
+      const exercises: SelectedExercise[] = JSON.parse(day.exercises);
+      expect(exercises.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('matches exercises when user selects bands equipment', () => {
+    const profile = createProfile({
+      availableEquipment: ['bands', 'bodyweight'],
+      daysPerWeek: 3,
+      cardioSessionsWeek: 0,
+    });
+    const db: Exercise[] = [
+      ...bodyweightOnlyDB,
+      ...bandsOnlyDB,
+    ];
+    const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
+    const allExercises = result.days
+      .filter((d): d is typeof d & { exercises: string } => !!d.exercises && d.exercises !== '[]')
+      .flatMap((d) => JSON.parse(d.exercises) as SelectedExercise[]);
+    const bandsExercise = allExercises.find((e) => e.exercise.id === 'band-pull-apart');
+    expect(bandsExercise).toBeDefined();
+  });
+
+  it('falls back to bodyweight exercises when no matching equipment exercises', () => {
+    const profile = createProfile({
+      availableEquipment: ['bands'],
+      daysPerWeek: 3,
+      cardioSessionsWeek: 0,
+    });
+    const db: Exercise[] = [
+      createExercise({
+        id: 'band-back',
+        muscleGroup: 'back',
+        equipment: ['bands'],
+        category: 'isolation',
+        exerciseType: 'strength',
+      }),
+      ...bodyweightOnlyDB,
+    ];
+    const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
+    const allExercises = result.days
+      .filter((d): d is typeof d & { exercises: string } => !!d.exercises && d.exercises !== '[]')
+      .flatMap((d) => JSON.parse(d.exercises) as SelectedExercise[]);
+    const bwExercises = allExercises.filter((e) => e.exercise.equipment.includes('bodyweight'));
+    expect(bwExercises.length).toBeGreaterThan(0);
+  });
+
+  it('returns warnings when muscle groups have no exercises', () => {
+    const profile = createProfile({
+      availableEquipment: ['bands'],
+      daysPerWeek: 3,
+      cardioSessionsWeek: 0,
+    });
+    // Only provide exercises for 1 muscle group, no bodyweight fallback
+    const db: Exercise[] = [
+      createExercise({
+        id: 'band-back',
+        muscleGroup: 'back',
+        equipment: ['bands'],
+        category: 'isolation',
+        exerciseType: 'strength',
+      }),
+    ];
+    const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
+    expect(result.warnings).toBeDefined();
+    expect(result.warnings!.length).toBeGreaterThan(0);
+  });
+
+  it('no warnings when all muscle groups have exercises', () => {
+    const profile = createProfile({
+      availableEquipment: ['bodyweight'],
+      daysPerWeek: 3,
+      cardioSessionsWeek: 0,
+    });
+    const result = generateTrainingPlan({
+      trainingProfile: profile,
+      exerciseDB: bodyweightOnlyDB,
+    });
+    expect(result.warnings).toBeUndefined();
+  });
+
+  it('generates plan with all exercises having matching equipment', () => {
+    const profile = createProfile({
+      availableEquipment: ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight', 'bands', 'kettlebell'],
+      daysPerWeek: 4,
+      cardioSessionsWeek: 0,
+    });
+    const result = generateTrainingPlan({ trainingProfile: profile });
+    result.days.forEach((day) => {
+      if (!day.exercises || day.exercises === '[]') return;
+      const exercises: SelectedExercise[] = JSON.parse(day.exercises);
+      exercises.forEach((ex) => {
+        const hasMatchingEquipment = ex.exercise.equipment.some((eq) =>
+          profile.availableEquipment.includes(eq as typeof profile.availableEquipment[number]),
+        );
+        expect(hasMatchingEquipment).toBe(true);
+      });
+    });
+  });
+
+  it('respects injury restrictions even with bodyweight fallback', () => {
+    const profile = createProfile({
+      availableEquipment: ['bands'],
+      injuryRestrictions: ['shoulders'],
+      daysPerWeek: 3,
+      cardioSessionsWeek: 0,
+    });
+    const db: Exercise[] = [
+      createExercise({
+        id: 'bw-chest-contra',
+        muscleGroup: 'chest',
+        equipment: ['bodyweight'],
+        category: 'compound',
+        exerciseType: 'strength',
+        contraindicated: ['shoulders'],
+      }),
+      createExercise({
+        id: 'bw-chest-safe',
+        muscleGroup: 'chest',
+        equipment: ['bodyweight'],
+        category: 'isolation',
+        exerciseType: 'strength',
+        contraindicated: [],
+      }),
+      ...ALL_MUSCLES.filter((m) => m !== 'chest').map((m) =>
+        createExercise({
+          id: `bw-${m}-safe`,
+          muscleGroup: m,
+          equipment: ['bodyweight'],
+          category: 'compound',
+          exerciseType: 'strength',
+          contraindicated: [],
+        }),
+      ),
+    ];
+    const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
+    const allExercises = result.days
+      .filter((d): d is typeof d & { exercises: string } => !!d.exercises && d.exercises !== '[]')
+      .flatMap((d) => JSON.parse(d.exercises) as SelectedExercise[]);
+    const contraindicatedEx = allExercises.find((e) => e.exercise.id === 'bw-chest-contra');
+    expect(contraindicatedEx).toBeUndefined();
+  });
+
+  it('unique warnings — no duplicate muscle group names', () => {
+    const profile = createProfile({
+      availableEquipment: ['bands'],
+      daysPerWeek: 4,
+      cardioSessionsWeek: 0,
+    });
+    // Upper/Lower split = chest appears in multiple sessions
+    const db: Exercise[] = [
+      createExercise({
+        id: 'band-back',
+        muscleGroup: 'back',
+        equipment: ['bands'],
+        category: 'compound',
+        exerciseType: 'strength',
+      }),
+    ];
+    const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
+    if (result.warnings) {
+      const uniqueCheck = new Set(result.warnings);
+      expect(result.warnings.length).toBe(uniqueCheck.size);
+    }
+  });
+});

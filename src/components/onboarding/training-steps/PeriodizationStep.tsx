@@ -26,7 +26,7 @@ export function PeriodizationStep({ form, goNext, goBack }: StepProps) {
             aria-checked={field.field.value === opt}
             onClick={() => field.field.onChange(opt)}
             className={cn(
-              'flex w-full min-h-[56px] items-center rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+              'flex w-full min-h-[56px] flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
               field.field.value === opt
                 ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
                 : 'border-slate-200 dark:border-slate-700',
@@ -39,6 +39,9 @@ export function PeriodizationStep({ form, goNext, goBack }: StepProps) {
                 : 'text-slate-700 dark:text-slate-300',
             )}>
               {t(`fitness.onboarding.period_${opt}`)}
+            </span>
+            <span className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+              {t(`fitness.onboarding.period_${opt}_desc`)}
             </span>
           </button>
         ))}

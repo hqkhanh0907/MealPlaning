@@ -7,7 +7,7 @@ import type { StepProps } from './types';
 
 const EQUIPMENT_OPTIONS = [
   'barbell', 'dumbbell', 'cable', 'machine',
-  'bodyweight', 'resistance_band', 'kettlebell',
+  'bodyweight', 'bands', 'kettlebell',
 ] as const;
 
 export function EquipmentStep({ form, goNext, goBack }: StepProps) {

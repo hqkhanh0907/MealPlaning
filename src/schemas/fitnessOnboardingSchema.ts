@@ -13,6 +13,7 @@ const EQUIPMENT_TYPE_VALUES = [
   'cable',
   'bodyweight',
   'bands',
+  'kettlebell',
 ] as const;
 
 const BODY_REGION_VALUES = [

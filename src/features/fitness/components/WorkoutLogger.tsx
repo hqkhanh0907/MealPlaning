@@ -22,7 +22,9 @@ import type {
   WorkoutSet,
   MuscleGroup,
   EquipmentType,
+  SelectedExercise,
 } from '../types';
+import { safeParseJsonArray } from '../types';
 import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
 import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
@@ -38,7 +40,7 @@ interface WorkoutLoggerProps {
     id?: string;
     dayOfWeek: number;
     workoutType: string;
-    exercises?: string[];
+    exercises?: string;
     muscleGroups?: string;
   };
   onComplete: () => void;
@@ -100,12 +102,15 @@ function seedToExercise(seed: ExerciseSeed): Exercise {
   };
 }
 
-function resolveExercises(exerciseIds?: string[]): Exercise[] {
-  if (!exerciseIds || exerciseIds.length === 0) return [];
-  return exerciseIds
-    .map((id) => EXERCISES.find((e) => e.id === id))
-    .filter((e): e is ExerciseSeed => e !== undefined)
-    .map(seedToExercise);
+function parseExercisesFromPlan(exercisesJson?: string): Exercise[] {
+  const selected = safeParseJsonArray<SelectedExercise>(exercisesJson);
+  if (selected.length === 0) return [];
+  return selected
+    .map(se => {
+      const seed = EXERCISES.find(e => e.id === se.exercise.id);
+      return seed ? seedToExercise(seed) : null;
+    })
+    .filter((e): e is Exercise => e !== null);
 }
 
 function ProgressiveOverloadChip({
@@ -160,7 +165,7 @@ export function WorkoutLogger({
 
   const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
-    return draft ? draft.exercises : resolveExercises(planDay?.exercises);
+    return draft ? draft.exercises : parseExercisesFromPlan(planDay?.exercises);
   });
   const [loggedSets, setLoggedSets] = useState<WorkoutSet[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
@@ -180,7 +185,7 @@ export function WorkoutLogger({
     const draft = useFitnessStore.getState().workoutDraft;
     const hasExercises = draft
       ? draft.exercises.length > 0
-      : (planDay?.exercises ?? []).length > 0;
+      : parseExercisesFromPlan(planDay?.exercises).length > 0;
     return hasExercises || initialElapsed > 0;
   });
 

@@ -1,6 +1,6 @@
 // Enums / Unions
 export type MuscleGroup = 'chest' | 'back' | 'shoulders' | 'legs' | 'arms' | 'core' | 'glutes';
-export type EquipmentType = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'bands';
+export type EquipmentType = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'bands' | 'kettlebell';
 export type BodyRegion = 'shoulders' | 'lower_back' | 'knees' | 'wrists' | 'neck' | 'hips';
 
 const BODY_REGIONS: readonly BodyRegion[] = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'];

@@ -970,7 +970,7 @@ describe('TrainingProfileForm – accessibility roles', () => {
   it('ChipSelect options have role=checkbox', () => {
     render(<TrainingProfileForm />);
     const checkboxes = screen.getAllByRole('checkbox');
-    // equipment(6) + injuries(6) + muscles(7) = 19
-    expect(checkboxes.length).toBe(19);
+    // equipment(7) + injuries(6) + muscles(7) = 20
+    expect(checkboxes.length).toBe(20);
   });
 });

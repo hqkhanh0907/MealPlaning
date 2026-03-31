@@ -180,7 +180,7 @@ describe('TodaysPlanCard', () => {
       expect(cta).toHaveTextContent('Bắt đầu');
     });
 
-    it('CTA navigates to WorkoutLogger via pushPage', () => {
+    it('CTA navigates to WorkoutLogger via pushPage with planDay props', () => {
       render(<TodaysPlanCard />);
 
       fireEvent.click(screen.getByTestId('start-workout-cta'));
@@ -188,7 +188,10 @@ describe('TodaysPlanCard', () => {
       const { pageStack } = useNavigationStore.getState();
       expect(pageStack).toHaveLength(1);
       expect(pageStack[0]).toEqual(
-        expect.objectContaining({ component: 'WorkoutLogger' }),
+        expect.objectContaining({
+          component: 'WorkoutLogger',
+          props: expect.objectContaining({ planDay: expect.objectContaining({ id: 'day-wed' }) }),
+        }),
       );
     });
 
@@ -352,6 +355,13 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByText('Ngày nghỉ phục hồi')).toBeInTheDocument();
+    });
+
+    it('rest-day does not show start or continue workout CTA', () => {
+      render(<TodaysPlanCard />);
+
+      expect(screen.queryByTestId('start-workout-cta')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('continue-session-cta')).not.toBeInTheDocument();
     });
   });
 
@@ -589,7 +599,7 @@ describe('TodaysPlanCard', () => {
       expect(cta).toHaveTextContent('Tiếp tục buổi tập');
     });
 
-    it('continue CTA navigates to WorkoutLogger via pushPage', () => {
+    it('continue CTA navigates to WorkoutLogger via pushPage with planDay props', () => {
       render(<TodaysPlanCard />);
 
       fireEvent.click(screen.getByTestId('continue-session-cta'));
@@ -597,7 +607,10 @@ describe('TodaysPlanCard', () => {
       const { pageStack } = useNavigationStore.getState();
       expect(pageStack).toHaveLength(1);
       expect(pageStack[0]).toEqual(
-        expect.objectContaining({ component: 'WorkoutLogger' }),
+        expect.objectContaining({
+          component: 'WorkoutLogger',
+          props: expect.objectContaining({ planDay: expect.objectContaining({ id: 'day-s2' }) }),
+        }),
       );
     });
 

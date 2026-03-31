@@ -118,8 +118,12 @@ const TodaysPlanCard: React.FC = React.memo(() => {
   const [showWeightLog, setShowWeightLog] = useState(false);
 
   const handleStartWorkout = useCallback(() => {
-    pushPage({ id: 'workout-logger', component: 'WorkoutLogger' });
-  }, [pushPage]);
+    pushPage({
+      id: 'workout-logger',
+      component: 'WorkoutLogger',
+      props: { planDay: data.nextUncompletedSession },
+    });
+  }, [pushPage, data.nextUncompletedSession]);
 
   const handleCreatePlan = useCallback(() => {
     navigateTab('fitness');
