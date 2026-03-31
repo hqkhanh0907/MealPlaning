@@ -6,7 +6,7 @@ import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, fallback?: string) => {
+    t: (key: string, optionsOrFallback?: string | Record<string, unknown>) => {
       const translations: Record<string, string> = {
         'fitness.plan.todayWorkout': 'Buổi tập hôm nay',
         'fitness.plan.startWorkout': 'Bắt đầu',
@@ -47,9 +47,17 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.setsLabel': 'hiệp',
         'fitness.plan.repsLabel': 'lần',
         'fitness.plan.coachingHint': 'Nhấn giữ hoặc nhấp chuột phải vào ngày để xem tùy chọn',
+        'fitness.plan.moreExercises': '+{{remaining}} bài tập nữa',
+        'fitness.plan.showLess': 'Thu gọn',
         'common.dismiss': 'Bỏ qua',
       };
-      return translations[key] ?? fallback ?? key;
+      const template = translations[key];
+      if (template && typeof optionsOrFallback === 'object' && optionsOrFallback !== null) {
+        return template.replace(/\{\{(\w+)\}\}/g, (_, k) => String((optionsOrFallback as Record<string, unknown>)[k] ?? ''));
+      }
+      if (template) return template;
+      if (typeof optionsOrFallback === 'string') return optionsOrFallback;
+      return key;
     },
     i18n: { language: 'vi' },
   }),
@@ -430,6 +438,61 @@ describe('TrainingPlanView', () => {
     });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
+  });
+
+  it('shows all exercises without collapse button when ≤ 3 exercises', () => {
+    mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+    render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+    expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
+    expect(screen.queryByTestId('exercise-collapse-toggle')).not.toBeInTheDocument();
+  });
+
+  it('collapses exercises to 3 with "+N bài tập nữa" when > 3 exercises', () => {
+    const sixExercises = JSON.stringify([
+      ...mockExercisesData,
+      { exercise: { id: 'e4', nameVi: 'Dips' }, sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90 },
+      { exercise: { id: 'e5', nameVi: 'Cable Fly' }, sets: 3, repsMin: 10, repsMax: 15, restSeconds: 60 },
+      { exercise: { id: 'e6', nameVi: 'Tricep Push' }, sets: 2, repsMin: 12, repsMax: 15, restSeconds: 60 },
+    ]);
+    mockStore({
+      trainingPlans: [activePlan],
+      trainingPlanDays: [{ ...planDays[0], exercises: sixExercises }],
+    });
+    render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+    expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
+    const toggle = screen.getByTestId('exercise-collapse-toggle');
+    expect(toggle).toHaveTextContent('+3 bài tập nữa');
+  });
+
+  it('expands all exercises on toggle click and collapses back', () => {
+    const sixExercises = JSON.stringify([
+      ...mockExercisesData,
+      { exercise: { id: 'e4', nameVi: 'Dips' }, sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90 },
+      { exercise: { id: 'e5', nameVi: 'Cable Fly' }, sets: 3, repsMin: 10, repsMax: 15, restSeconds: 60 },
+      { exercise: { id: 'e6', nameVi: 'Tricep Push' }, sets: 2, repsMin: 12, repsMax: 15, restSeconds: 60 },
+    ]);
+    mockStore({
+      trainingPlans: [activePlan],
+      trainingPlanDays: [{ ...planDays[0], exercises: sixExercises }],
+    });
+    render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+
+    fireEvent.click(screen.getByTestId('exercise-collapse-toggle'));
+    expect(screen.getByTestId('exercise-list').children).toHaveLength(6);
+    expect(screen.getByTestId('exercise-collapse-toggle')).toHaveTextContent('Thu gọn');
+
+    fireEvent.click(screen.getByTestId('exercise-collapse-toggle'));
+    expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
+  });
+
+  it('does not show exercise list or collapse button when exercises is empty', () => {
+    mockStore({
+      trainingPlans: [activePlan],
+      trainingPlanDays: [{ ...planDays[0], exercises: '[]' }],
+    });
+    render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+    expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-collapse-toggle')).not.toBeInTheDocument();
   });
 
   it('"Bắt đầu" button calls pushPage with workout plan day', () => {

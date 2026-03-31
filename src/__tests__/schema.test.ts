@@ -113,7 +113,7 @@ describe('createSchema', () => {
   it('sets schema version to current SCHEMA_VERSION', async () => {
     const version = await getSchemaVersion(db);
     expect(version).toBe(SCHEMA_VERSION);
-    expect(version).toBe(4);
+    expect(version).toBe(5);
   });
 
   it('is idempotent — running createSchema twice does not error', async () => {

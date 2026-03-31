@@ -787,6 +787,8 @@
       "tomorrow": "Ngày mai",
       "exercises": "bài tập",
       "startWorkout": "Bắt đầu tập",
+      "moreExercises": "+{{remaining}} bài tập nữa",
+      "showLess": "Thu gọn",
       "restDay": "Ngày nghỉ",
       "restDayTip1": "Ngủ đủ 7-9 giờ để phục hồi cơ bắp",
       "restDayTip2": "Uống đủ nước và ăn giàu protein",

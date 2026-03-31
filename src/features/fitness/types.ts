@@ -91,7 +91,7 @@ export interface TrainingPlan {
   status: PlanStatus;
   splitType: SplitType;
   durationWeeks: number;
-  currentWeek: number;
+  currentWeek?: number;
   startDate: string;
   endDate?: string;
   templateId?: string | null;

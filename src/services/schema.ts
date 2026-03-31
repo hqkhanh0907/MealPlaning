@@ -1,6 +1,6 @@
 import type { DatabaseService } from './databaseService';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const SCHEMA_TABLES = new Set([
   'ingredients',
@@ -162,6 +162,7 @@ export async function createSchema(db: DatabaseService): Promise<void> {
       status TEXT DEFAULT 'active' CHECK(status IN ('active', 'completed', 'paused')),
       split_type TEXT NOT NULL,
       duration_weeks INTEGER NOT NULL,
+      current_week INTEGER DEFAULT 1,
       start_date TEXT NOT NULL,
       end_date TEXT,
       template_id TEXT,
@@ -514,5 +515,17 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
     `);
 
     await db.execute('PRAGMA user_version = 4');
+  }
+
+  if (currentVersion < 5) {
+    const cols = await db.query<{ name: string }>(
+      "PRAGMA table_info('training_plans')",
+    );
+    if (!cols.some(c => c.name === 'current_week')) {
+      await db.execute(
+        'ALTER TABLE training_plans ADD COLUMN current_week INTEGER DEFAULT 1',
+      );
+    }
+    await db.execute('PRAGMA user_version = 5');
   }
 }

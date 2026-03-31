@@ -93,6 +93,7 @@ function TrainingPlanViewInner({
       return false;
     }
   });
+  const [exercisesExpanded, setExercisesExpanded] = useState(false);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const todayCaloriesOut = useMemo(() => {
@@ -640,21 +641,45 @@ function TrainingPlanViewInner({
             </span>
           </div>
 
-          {viewedExercises.length > 0 && (
-            <ul data-testid="exercise-list" className="mt-3 space-y-1.5">
-              {viewedExercises.map((ex) => (
-                <li
-                  key={ex.exercise.id}
-                  className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300"
-                >
-                  <span>{ex.exercise.nameVi}</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">
-                    {ex.sets} {t('fitness.plan.setsLabel')} × {ex.repsMin}-{ex.repsMax} {t('fitness.plan.repsLabel')}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          {viewedExercises.length > 0 && (() => {
+            const COLLAPSE_THRESHOLD = 3;
+            const shouldCollapse = viewedExercises.length > COLLAPSE_THRESHOLD;
+            const displayedExercises = shouldCollapse && !exercisesExpanded
+              ? viewedExercises.slice(0, COLLAPSE_THRESHOLD)
+              : viewedExercises;
+            const hiddenCount = viewedExercises.length - COLLAPSE_THRESHOLD;
+
+            return (
+              <>
+                <ul data-testid="exercise-list" className="mt-3 space-y-1.5">
+                  {displayedExercises.map((ex) => (
+                    <li
+                      key={ex.exercise.id}
+                      className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300"
+                    >
+                      <span>{ex.exercise.nameVi}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                        {ex.sets} {t('fitness.plan.setsLabel')} × {ex.repsMin}-{ex.repsMax} {t('fitness.plan.repsLabel')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {shouldCollapse && (
+                  <button
+                    type="button"
+                    data-testid="exercise-collapse-toggle"
+                    onClick={() => setExercisesExpanded(prev => !prev)}
+                    className="mt-1.5 text-sm font-medium text-emerald-600 transition-colors hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-emerald-400 dark:hover:text-emerald-300"
+                    aria-label={exercisesExpanded ? t('fitness.plan.showLess') : t('fitness.plan.moreExercises', { remaining: hiddenCount })}
+                  >
+                    {exercisesExpanded
+                      ? t('fitness.plan.showLess')
+                      : t('fitness.plan.moreExercises', { remaining: hiddenCount })}
+                  </button>
+                )}
+              </>
+            );
+          })()}
 
           {isViewingToday && (
             <button
