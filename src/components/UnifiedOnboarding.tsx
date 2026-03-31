@@ -115,6 +115,8 @@ export function UnifiedOnboarding() {
       trainingGoal: 'hypertrophy',
       experience: 'beginner',
       daysPerWeek: 4,
+      injuries: [],
+      priorityMuscles: [],
     },
   });
 

@@ -695,7 +695,17 @@
       "sessionDurationDesc": "Thời gian mỗi buổi tập bạn mong muốn",
       "equipmentDesc": "Chọn thiết bị bạn có sẵn",
       "cardioSessionsDesc": "Số buổi cardio mong muốn mỗi tuần",
-      "periodizationDesc": "Phương pháp phân chia chu kỳ tập"
+      "periodizationDesc": "Phương pháp phân chia chu kỳ tập",
+      "injuriesDesc": "Chọn vùng cơ thể bạn đang bị chấn thương hoặc cần tránh",
+      "cycleWeeksDesc": "Số tuần cho mỗi chu kỳ tập luyện trước khi đánh giá lại",
+      "cycleWeeks4Desc": "Chu kỳ ngắn, phù hợp cho người mới hoặc cần đánh giá nhanh",
+      "cycleWeeks6Desc": "Chu kỳ cân bằng giữa tiến bộ và phục hồi",
+      "cycleWeeks8Desc": "Chu kỳ tiêu chuẩn cho đa số người tập trung cấp",
+      "cycleWeeks12Desc": "Chu kỳ dài, phù hợp người tập nâng cao có mục tiêu rõ ràng",
+      "priorityMusclesDesc": "Chọn tối đa 3 nhóm cơ bạn muốn tập trung phát triển",
+      "sleepHoursDesc": "Giờ ngủ trung bình mỗi đêm ảnh hưởng đến khối lượng tập",
+      "sleepWarning": "Ngủ dưới 7 giờ sẽ giảm 10% khối lượng tập để bảo vệ phục hồi",
+      "hoursUnit": "giờ"
     },
     "deload": {
       "title": "Đề xuất giảm tải",

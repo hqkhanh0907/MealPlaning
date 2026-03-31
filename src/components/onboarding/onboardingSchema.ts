@@ -36,13 +36,13 @@ export const onboardingSchema = z.object({
   // Section 4: Training Details
   sessionDuration: z.number().optional(),
   equipment: z.array(z.string()).optional(),
-  injuries: z.array(z.string()).optional(),
+  injuries: z.array(z.enum(['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'])).optional(),
   cardioSessions: z.number().optional(),
-  periodization: z.string().optional(),
-  cycleWeeks: z.number().optional(),
-  priorityMuscles: z.array(z.string()).optional(),
+  periodization: z.enum(['linear', 'undulating', 'block']).optional(),
+  cycleWeeks: z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(12)]).optional(),
+  priorityMuscles: z.array(z.enum(['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'])).max(3).optional(),
   known1rm: z.record(z.string(), z.number()).optional(),
-  sleepHours: z.number().optional(),
+  sleepHours: z.number().min(3).max(12).optional(),
 }).superRefine((data, ctx) => {
   // Cross-field: goal direction must match target weight (shared validation)
   if (data.goalType !== 'maintain' && data.targetWeightKg != null) {

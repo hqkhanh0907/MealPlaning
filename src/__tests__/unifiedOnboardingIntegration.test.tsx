@@ -245,11 +245,14 @@ async function navigateTrainingSections() {
   await screen.findByTestId('training-core-step');
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
-  // Section 4: DurationStep → EquipmentStep → CardioStep → TrainingConfirmStep
+  // Section 4: DurationStep → EquipmentStep → InjuriesStep → CardioStep → TrainingConfirmStep
   await screen.findByText('fitness.onboarding.sessionDuration');
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
   await screen.findByText('fitness.onboarding.equipment');
+  fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
+
+  await screen.findByText('fitness.onboarding.injuries');
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
   await screen.findByText('fitness.onboarding.cardioSessions');

@@ -1074,7 +1074,7 @@ describe('TrainingDetailSteps', () => {
     expect(screen.getByText('Barbell')).toBeInTheDocument();
   });
 
-  it('renders CardioStep at step 2', () => {
+  it('renders InjuriesStep at step 2', () => {
     renderWithForm(
       TrainingDetailSteps as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
@@ -1083,43 +1083,39 @@ describe('TrainingDetailSteps', () => {
       }>,
       { step: 2, setOnboardingSection },
     );
+    expect(screen.getByText('fitness.onboarding.injuries')).toBeInTheDocument();
+  });
+
+  it('renders CardioStep at step 3', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 3, setOnboardingSection },
+    );
     expect(screen.getByText('fitness.onboarding.cardioSessions')).toBeInTheDocument();
     [0, 1, 2, 3].forEach((n) => {
       expect(screen.getByText(String(n))).toBeInTheDocument();
     });
   });
 
-  it('renders TrainingConfirmStep at step 3 for beginner', () => {
+  it('renders TrainingConfirmStep at step 4 for beginner', () => {
     renderWithForm(
       TrainingDetailSteps as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
       }>,
-      { step: 3, setOnboardingSection },
+      { step: 4, setOnboardingSection },
       { experience: 'beginner' },
     );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
     expect(screen.getByText('onboarding.confirm.trainingTitle')).toBeInTheDocument();
   });
 
-  it('renders PeriodizationStep at step 3 for intermediate', () => {
-    renderWithForm(
-      TrainingDetailSteps as React.ComponentType<{
-        form: UseFormReturn<OnboardingFormData>;
-        goNext: () => void;
-        goBack: () => void;
-      }>,
-      { step: 3, setOnboardingSection },
-      { experience: 'intermediate' },
-    );
-    expect(screen.getByText('fitness.onboarding.periodization')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.period_linear')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.period_undulating')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.period_block')).toBeInTheDocument();
-  });
-
-  it('renders TrainingConfirmStep at step 4 (default)', () => {
+  it('renders PeriodizationStep at step 4 for intermediate', () => {
     renderWithForm(
       TrainingDetailSteps as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
@@ -1129,13 +1125,29 @@ describe('TrainingDetailSteps', () => {
       { step: 4, setOnboardingSection },
       { experience: 'intermediate' },
     );
+    expect(screen.getByText('fitness.onboarding.periodization')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_linear')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_undulating')).toBeInTheDocument();
+    expect(screen.getByText('fitness.onboarding.period_block')).toBeInTheDocument();
+  });
+
+  it('renders TrainingConfirmStep at step 7 for intermediate', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
   });
 
   it('getTrainingDetailStepCount returns correct counts per experience level', () => {
-    expect(getTrainingDetailStepCount('beginner')).toBe(4);
-    expect(getTrainingDetailStepCount('intermediate')).toBe(5);
-    expect(getTrainingDetailStepCount('advanced')).toBe(5);
+    expect(getTrainingDetailStepCount('beginner')).toBe(5);
+    expect(getTrainingDetailStepCount('intermediate')).toBe(8);
+    expect(getTrainingDetailStepCount('advanced')).toBe(9);
   });
 
   it('step count matches actual renderable steps (no phantom steps)', () => {
@@ -1174,7 +1186,7 @@ describe('TrainingDetailSteps', () => {
         goNext: () => void;
         goBack: () => void;
       }>,
-      { step: 3, setOnboardingSection },
+      { step: 4, setOnboardingSection },
       { experience: 'beginner', daysPerWeek: 4, trainingGoal: 'hypertrophy' },
     );
     expect(screen.getByText('fitness.onboarding.hypertrophy')).toBeInTheDocument();
@@ -1216,7 +1228,7 @@ describe('TrainingDetailSteps', () => {
         goNext: () => void;
         goBack: () => void;
       }>,
-      { step: 3, setOnboardingSection: mockSetSection },
+      { step: 4, setOnboardingSection: mockSetSection },
       { experience: 'beginner' },
     );
     fireEvent.click(screen.getByText('onboarding.nav.next'));
@@ -1786,7 +1798,7 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
         goNext: () => void;
         goBack: () => void;
       }>,
-      { step: 2, setOnboardingSection },
+      { step: 3, setOnboardingSection },
     );
     const btn0 = getByText('0');
     fireEvent.click(btn0);
@@ -1804,7 +1816,7 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
         goNext: () => void;
         goBack: () => void;
       }>,
-      { step: 3, setOnboardingSection },
+      { step: 4, setOnboardingSection },
       { experience: 'intermediate' },
     );
     const linearBtn = getByText('fitness.onboarding.period_linear');
@@ -1835,8 +1847,389 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
 });
 
 /* ================================================================== */
-/*  18. Additional coverage – HealthConfirmStep with empty dateOfBirth */
+/*  17b. New Training Step Components – InjuriesStep                   */
 /* ================================================================== */
+
+describe('InjuriesStep', () => {
+  const setOnboardingSection = vi.fn();
+  it('renders all 6 body region checkboxes', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 2, setOnboardingSection },
+    );
+    expect(screen.getByText('fitness.onboarding.injuries')).toBeInTheDocument();
+    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach((region) => {
+      expect(screen.getByText(`fitness.onboarding.injury_${region}`)).toBeInTheDocument();
+    });
+  });
+
+  it('toggles injury selection on and off', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 2, setOnboardingSection },
+    );
+    const shouldersBtn = screen.getByText('fitness.onboarding.injury_shoulders');
+    fireEvent.click(shouldersBtn);
+    expect(shouldersBtn.className).toContain('border-emerald-500');
+    fireEvent.click(shouldersBtn);
+    expect(shouldersBtn.className).not.toContain('border-emerald-500');
+  });
+
+  it('allows selecting multiple injuries', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 2, setOnboardingSection },
+    );
+    fireEvent.click(screen.getByText('fitness.onboarding.injury_shoulders'));
+    fireEvent.click(screen.getByText('fitness.onboarding.injury_knees'));
+    expect(screen.getByText('fitness.onboarding.injury_shoulders').className).toContain('border-emerald-500');
+    expect(screen.getByText('fitness.onboarding.injury_knees').className).toContain('border-emerald-500');
+  });
+
+  it('proceeds with empty injuries (no injuries is valid)', () => {
+    const { goNext } = renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 2, setOnboardingSection },
+    );
+    fireEvent.click(screen.getByText('onboarding.nav.next'));
+    expect(goNext).toHaveBeenCalledTimes(1);
+  });
+});
+
+/* ================================================================== */
+/*  17c. CycleWeeksStep                                                */
+/* ================================================================== */
+
+describe('CycleWeeksStep', () => {
+  const setOnboardingSection = vi.fn();
+  it('renders all 4 cycle week options for intermediate', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 5, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    expect(screen.getByText('fitness.onboarding.cycleWeeks')).toBeInTheDocument();
+    [4, 6, 8, 12].forEach((w) => {
+      expect(screen.getByText(new RegExp(`^${w}\\s`))).toBeInTheDocument();
+    });
+  });
+
+  it('selects a cycle week option', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 5, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    const btn8 = screen.getByText(new RegExp('^8\\s'));
+    fireEvent.click(btn8);
+    expect(btn8.closest('button')?.className).toContain('border-emerald-500');
+  });
+
+  it('switches selection between options', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 5, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    const btn4 = screen.getByText(new RegExp('^4\\s'));
+    const btn12 = screen.getByText(new RegExp('^12\\s'));
+    fireEvent.click(btn4);
+    expect(btn4.closest('button')?.className).toContain('border-emerald-500');
+    fireEvent.click(btn12);
+    expect(btn12.closest('button')?.className).toContain('border-emerald-500');
+    expect(btn4.closest('button')?.className).not.toContain('border-emerald-500');
+  });
+});
+
+/* ================================================================== */
+/*  17d. PriorityMusclesStep                                           */
+/* ================================================================== */
+
+describe('PriorityMusclesStep', () => {
+  const setOnboardingSection = vi.fn();
+  it('renders all 7 muscle groups for intermediate', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 6, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    expect(screen.getByText('fitness.onboarding.priorityMuscles')).toBeInTheDocument();
+    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach((m) => {
+      expect(screen.getByText(`fitness.onboarding.muscle_${m}`)).toBeInTheDocument();
+    });
+  });
+
+  it('shows max 3 counter', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 6, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    expect(screen.getByText(/0\/3/)).toBeInTheDocument();
+  });
+
+  it('disables remaining muscles after selecting 3', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 6, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_chest'));
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_back'));
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_legs'));
+    expect(screen.getByText(/3\/3/)).toBeInTheDocument();
+    // 4th muscle should be disabled
+    const armsBtn = screen.getByText('fitness.onboarding.muscle_arms').closest('button');
+    expect(armsBtn).toBeDisabled();
+  });
+
+  it('allows deselecting a muscle at max to re-enable others', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 6, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_chest'));
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_back'));
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_legs'));
+    // Deselect one
+    fireEvent.click(screen.getByText('fitness.onboarding.muscle_chest'));
+    expect(screen.getByText(/2\/3/)).toBeInTheDocument();
+    const armsBtn = screen.getByText('fitness.onboarding.muscle_arms').closest('button');
+    expect(armsBtn).not.toBeDisabled();
+  });
+
+  it('proceeds with empty priority muscles (optional)', () => {
+    const { goNext } = renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 6, setOnboardingSection },
+      { experience: 'intermediate' },
+    );
+    fireEvent.click(screen.getByText('onboarding.nav.next'));
+    expect(goNext).toHaveBeenCalledTimes(1);
+  });
+});
+
+/* ================================================================== */
+/*  17e. SleepHoursStep                                                */
+/* ================================================================== */
+
+describe('SleepHoursStep', () => {
+  const setOnboardingSection = vi.fn();
+  it('renders all 7 sleep hour options for advanced', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'advanced' },
+    );
+    expect(screen.getByText('fitness.onboarding.sleepHours')).toBeInTheDocument();
+    [4, 5, 6, 7, 8, 9, 10].forEach((h) => {
+      expect(screen.getByText(String(h))).toBeInTheDocument();
+    });
+  });
+
+  it('shows amber warning when sleep < 7 hours', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'advanced' },
+    );
+    fireEvent.click(screen.getByText('5'));
+    expect(screen.getByText('fitness.onboarding.sleepWarning')).toBeInTheDocument();
+  });
+
+  it('does not show warning when sleep >= 7 hours', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'advanced' },
+    );
+    fireEvent.click(screen.getByText('8'));
+    expect(screen.queryByText('fitness.onboarding.sleepWarning')).not.toBeInTheDocument();
+  });
+
+  it('shows amber styling for low sleep selection', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'advanced' },
+    );
+    const btn6 = screen.getByText('6');
+    fireEvent.click(btn6);
+    expect(btn6.className).toContain('border-amber-500');
+  });
+
+  it('shows emerald styling for adequate sleep selection', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'advanced' },
+    );
+    const btn7 = screen.getByText('7');
+    fireEvent.click(btn7);
+    expect(btn7.className).toContain('border-emerald-500');
+  });
+
+  it('switches warning on/off as selection changes', () => {
+    renderWithForm(
+      TrainingDetailSteps as React.ComponentType<{
+        form: UseFormReturn<OnboardingFormData>;
+        goNext: () => void;
+        goBack: () => void;
+      }>,
+      { step: 7, setOnboardingSection },
+      { experience: 'advanced' },
+    );
+    fireEvent.click(screen.getByText('5'));
+    expect(screen.getByText('fitness.onboarding.sleepWarning')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('8'));
+    expect(screen.queryByText('fitness.onboarding.sleepWarning')).not.toBeInTheDocument();
+  });
+});
+
+/* ================================================================== */
+/*  17f. Schema tightened validation for new fields                    */
+/* ================================================================== */
+
+describe('onboardingSchema – new field validation', () => {
+  it('accepts valid cycleWeeks values (4, 6, 8, 12)', () => {
+    [4, 6, 8, 12].forEach((w) => {
+      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, cycleWeeks: w });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  it('rejects invalid cycleWeeks value', () => {
+    const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, cycleWeeks: 5 });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts priorityMuscles up to 3', () => {
+    const result = onboardingSchema.safeParse({
+      ...DEFAULT_VALUES,
+      priorityMuscles: ['chest', 'back', 'legs'],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects priorityMuscles more than 3', () => {
+    const result = onboardingSchema.safeParse({
+      ...DEFAULT_VALUES,
+      priorityMuscles: ['chest', 'back', 'legs', 'arms'],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts valid sleepHours range', () => {
+    [3, 7, 12].forEach((h) => {
+      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: h });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  it('rejects sleepHours out of range', () => {
+    const too_low = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: 2 });
+    expect(too_low.success).toBe(false);
+    const too_high = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: 13 });
+    expect(too_high.success).toBe(false);
+  });
+
+  it('accepts valid injury regions', () => {
+    const result = onboardingSchema.safeParse({
+      ...DEFAULT_VALUES,
+      injuries: ['shoulders', 'knees'],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects invalid injury region', () => {
+    const result = onboardingSchema.safeParse({
+      ...DEFAULT_VALUES,
+      injuries: ['invalid_region'],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts valid periodization values', () => {
+    ['linear', 'undulating', 'block'].forEach((p) => {
+      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodization: p });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  it('rejects invalid periodization value', () => {
+    const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodization: 'custom' });
+    expect(result.success).toBe(false);
+  });
+});
 
 describe('HealthConfirmStep – edge cases', () => {
   it('shows age as 0 when dateOfBirth is empty', () => {
