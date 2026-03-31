@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { validateTargetWeight } from '@/schemas/goalValidation';
 
 export const onboardingSchema = z.object({
   // Section 2a: Basic Info
@@ -43,20 +44,16 @@ export const onboardingSchema = z.object({
   known1rm: z.record(z.string(), z.number()).optional(),
   sleepHours: z.number().optional(),
 }).superRefine((data, ctx) => {
-  // Cross-field: goal direction must match target weight
-  if (data.goalType === 'cut' && data.targetWeightKg != null && data.targetWeightKg >= data.weightKg) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['targetWeightKg'],
-      message: 'onboarding.validation.cutTargetTooHigh',
-    });
-  }
-  if (data.goalType === 'bulk' && data.targetWeightKg != null && data.targetWeightKg <= data.weightKg) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['targetWeightKg'],
-      message: 'onboarding.validation.bulkTargetTooLow',
-    });
+  // Cross-field: goal direction must match target weight (shared validation)
+  if (data.goalType !== 'maintain' && data.targetWeightKg != null) {
+    const error = validateTargetWeight(data.goalType, data.weightKg, data.targetWeightKg);
+    if (error) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['targetWeightKg'],
+        message: error,
+      });
+    }
   }
 
   // Cross-field: BMI sanity check (warning-level, uses custom code)

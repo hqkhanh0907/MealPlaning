@@ -38,6 +38,7 @@ export const EQUIPMENT_DISPLAY: Record<string, string> = {
   bodyweight: 'Bodyweight',
   kettlebell: 'Kettlebell',
   bands: 'Bands',
+  resistance_band: 'Resistance Band',
   trx: 'TRX',
 };
 

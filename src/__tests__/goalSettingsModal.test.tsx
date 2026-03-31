@@ -143,9 +143,9 @@ describe('GoalSettingsModal', () => {
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 80 });
     });
 
-    it('does not update profile for weight < 1', () => {
+    it('does not update profile for weight < 20 (Zod minimum)', () => {
       const { props } = renderModal();
-      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '0' } });
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '10' } });
       expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
@@ -161,28 +161,28 @@ describe('GoalSettingsModal', () => {
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 76 });
     });
 
-    it('restores previous weight on blur when input is empty', () => {
+    it('keeps empty weight on blur when input is empty', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-weight');
       fireEvent.change(input, { target: { value: '' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(70);
+      expect(input).toHaveValue(null);
     });
 
-    it('restores previous weight on blur when input is NaN', () => {
+    it('keeps NaN weight on blur when input is NaN', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-weight');
       fireEvent.change(input, { target: { value: 'abc' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(70);
+      expect(input).toHaveValue(null);
     });
 
-    it('restores previous weight on blur with whitespace-only input', () => {
+    it('keeps empty weight on blur with whitespace-only input', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-weight');
       fireEvent.change(input, { target: { value: '   ' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(70);
+      expect(input).toHaveValue(null);
     });
   });
 
@@ -193,15 +193,15 @@ describe('GoalSettingsModal', () => {
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, proteinRatio: 2.5 });
     });
 
-    it('clamps protein ratio minimum to 1', () => {
+    it('updates profile for protein ratio of 0.5 (Zod minimum)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '0.5' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, proteinRatio: 1 });
+      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, proteinRatio: 0.5 });
     });
 
-    it('does not update profile for protein value < 0.1', () => {
+    it('does not update profile for protein value < 0.5', () => {
       const { props } = renderModal();
-      fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '0.05' } });
+      fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '0.3' } });
       expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
@@ -217,20 +217,20 @@ describe('GoalSettingsModal', () => {
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, proteinRatio: 2.6 });
     });
 
-    it('restores previous protein ratio on blur when input is empty', () => {
+    it('keeps empty protein ratio on blur when input is empty', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-protein');
       fireEvent.change(input, { target: { value: '' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(1.6);
+      expect(input).toHaveValue(null);
     });
 
-    it('restores previous protein ratio on blur when input is NaN', () => {
+    it('keeps NaN protein ratio on blur when input is NaN', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-protein');
       fireEvent.change(input, { target: { value: 'abc' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(1.6);
+      expect(input).toHaveValue(null);
     });
   });
 
@@ -241,9 +241,9 @@ describe('GoalSettingsModal', () => {
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, targetCalories: 2500 });
     });
 
-    it('does not update profile for calories < 100', () => {
+    it('does not update profile for calories < 800 (Zod minimum)', () => {
       const { props } = renderModal();
-      fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '50' } });
+      fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '500' } });
       expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
@@ -259,20 +259,20 @@ describe('GoalSettingsModal', () => {
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, targetCalories: 1851 });
     });
 
-    it('restores previous calories on blur when input is empty', () => {
+    it('keeps empty calories on blur when input is empty', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-calories');
       fireEvent.change(input, { target: { value: '' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(2000);
+      expect(input).toHaveValue(null);
     });
 
-    it('restores previous calories on blur when input is NaN', () => {
+    it('keeps NaN calories on blur when input is NaN', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-calories');
       fireEvent.change(input, { target: { value: 'abc' } });
       fireEvent.blur(input);
-      expect(input).toHaveValue(2000);
+      expect(input).toHaveValue(null);
     });
   });
 
@@ -436,46 +436,70 @@ describe('GoalSettingsModal', () => {
   });
 
   describe('Edge cases', () => {
-    it('handles weight of 1 (minimum)', () => {
+    it('rejects weight of 1 (below Zod minimum 20)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '1' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 1 });
+      expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
-    it('handles weight of 500 (max attribute)', () => {
+    it('rejects weight of 500 (above Zod maximum 300)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '500' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 500 });
+      expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
-    it('handles calories of 100 (minimum)', () => {
+    it('accepts weight at Zod minimum boundary (20)', () => {
+      const { props } = renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '20' } });
+      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 20 });
+    });
+
+    it('accepts weight at Zod maximum boundary (300)', () => {
+      const { props } = renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '300' } });
+      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 300 });
+    });
+
+    it('rejects calories of 100 (below Zod minimum 800)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '100' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, targetCalories: 100 });
+      expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
-    it('handles calories of 10000 (max attribute)', () => {
+    it('accepts calories at Zod minimum boundary (800)', () => {
+      const { props } = renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '800' } });
+      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, targetCalories: 800 });
+    });
+
+    it('accepts calories at Zod maximum boundary (10000)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '10000' } });
       expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, targetCalories: 10000 });
     });
 
-    it('handles protein ratio at exactly 0.1 boundary (triggers update but clamps to 1)', () => {
+    it('accepts protein ratio at Zod minimum boundary (0.5)', () => {
+      const { props } = renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '0.5' } });
+      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, proteinRatio: 0.5 });
+    });
+
+    it('rejects protein ratio of 0.1 (below Zod minimum 0.5)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '0.1' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, proteinRatio: 1 });
+      expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
-    it('handles very large weight gracefully', () => {
+    it('does not update for weight above 300 (Zod maximum)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '999' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, weight: 999 });
+      expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
-    it('handles very large calorie value', () => {
+    it('does not update for calories above 10000 (Zod maximum)', () => {
       const { props } = renderModal();
       fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '99999' } });
-      expect(props.onUpdateProfile).toHaveBeenCalledWith({ ...defaultProfile, targetCalories: 99999 });
+      expect(props.onUpdateProfile).not.toHaveBeenCalled();
     });
 
     it('preserves weight when goal preset is applied', () => {
@@ -550,8 +574,8 @@ describe('GoalSettingsModal', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-weight');
       expect(input).toHaveAttribute('type', 'number');
-      expect(input).toHaveAttribute('min', '1');
-      expect(input).toHaveAttribute('max', '500');
+      expect(input).toHaveAttribute('min', '20');
+      expect(input).toHaveAttribute('max', '300');
       expect(input).toHaveAttribute('inputmode', 'numeric');
       expect(input).toHaveAttribute('autocomplete', 'off');
     });
@@ -561,7 +585,7 @@ describe('GoalSettingsModal', () => {
       const input = screen.getByTestId('input-goal-protein');
       expect(input).toHaveAttribute('type', 'number');
       expect(input).toHaveAttribute('step', '0.1');
-      expect(input).toHaveAttribute('min', '1');
+      expect(input).toHaveAttribute('min', '0.5');
       expect(input).toHaveAttribute('max', '5');
       expect(input).toHaveAttribute('inputmode', 'decimal');
       expect(input).toHaveAttribute('autocomplete', 'off');
@@ -571,7 +595,7 @@ describe('GoalSettingsModal', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-calories');
       expect(input).toHaveAttribute('type', 'number');
-      expect(input).toHaveAttribute('min', '100');
+      expect(input).toHaveAttribute('min', '800');
       expect(input).toHaveAttribute('max', '10000');
       expect(input).toHaveAttribute('inputmode', 'numeric');
       expect(input).toHaveAttribute('autocomplete', 'off');
@@ -596,6 +620,60 @@ describe('GoalSettingsModal', () => {
       const label = screen.getByText('goalSettings.caloriesGoal');
       expect(label).toHaveAttribute('for', 'goal-calories');
       expect(screen.getByTestId('input-goal-calories')).toHaveAttribute('id', 'goal-calories');
+    });
+  });
+
+  describe('Zod validation error display', () => {
+    it('shows error when weight is below minimum', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '10' } });
+      expect(screen.getByTestId('error-goal-weight')).toBeInTheDocument();
+    });
+
+    it('shows error when weight is above maximum', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '500' } });
+      expect(screen.getByTestId('error-goal-weight')).toBeInTheDocument();
+    });
+
+    it('clears weight error on valid input', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '10' } });
+      expect(screen.getByTestId('error-goal-weight')).toBeInTheDocument();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '70' } });
+      expect(screen.queryByTestId('error-goal-weight')).not.toBeInTheDocument();
+    });
+
+    it('shows error when calories are below minimum', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '500' } });
+      expect(screen.getByTestId('error-goal-calories')).toBeInTheDocument();
+    });
+
+    it('shows error when protein ratio is below minimum', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '0.3' } });
+      expect(screen.getByTestId('error-goal-protein')).toBeInTheDocument();
+    });
+
+    it('no error for valid input values', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '80' } });
+      fireEvent.change(screen.getByTestId('input-goal-protein'), { target: { value: '2.0' } });
+      fireEvent.change(screen.getByTestId('input-goal-calories'), { target: { value: '2500' } });
+      expect(screen.queryByTestId('error-goal-weight')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('error-goal-protein')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('error-goal-calories')).not.toBeInTheDocument();
+    });
+
+    it('clears error on blur when input is empty (restores valid value)', () => {
+      renderModal();
+      fireEvent.change(screen.getByTestId('input-goal-weight'), { target: { value: '10' } });
+      expect(screen.getByTestId('error-goal-weight')).toBeInTheDocument();
+      const input = screen.getByTestId('input-goal-weight');
+      fireEvent.change(input, { target: { value: '' } });
+      fireEvent.blur(input);
+      expect(screen.queryByTestId('error-goal-weight')).not.toBeInTheDocument();
     });
   });
 });

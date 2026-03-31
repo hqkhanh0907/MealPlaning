@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { getCalorieOffset } from '@/services/nutritionEngine';
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
+import { validateTargetWeight } from '@/schemas/goalValidation';
 import { getAge, type HealthProfile } from '@/features/health-profile/types';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { useHealthProfileStore } from '@/features/health-profile/store/healthProfileStore';
@@ -63,13 +64,12 @@ export function HealthConfirmStep({
     if (!isValid) return;
 
     const v = form.getValues();
-    if (v.goalType === 'cut' && v.targetWeightKg != null && v.targetWeightKg >= v.weightKg) {
-      form.setError('targetWeightKg', { message: t('onboarding.validation.cutTargetTooHigh') });
-      return;
-    }
-    if (v.goalType === 'bulk' && v.targetWeightKg != null && v.targetWeightKg <= v.weightKg) {
-      form.setError('targetWeightKg', { message: t('onboarding.validation.bulkTargetTooLow') });
-      return;
+    if (v.goalType !== 'maintain' && v.targetWeightKg != null) {
+      const error = validateTargetWeight(v.goalType, v.weightKg, v.targetWeightKg);
+      if (error) {
+        form.setError('targetWeightKg', { message: t(error) });
+        return;
+      }
     }
 
     setSaving(true);
@@ -139,12 +139,15 @@ export function HealthConfirmStep({
         {/* Hero Calorie */}
         <div className="mb-6 rounded-2xl bg-emerald-50 p-6 text-center dark:bg-emerald-900/20">
           <p className="mb-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
-            {t('onboarding.confirm.dailyCalories')}
+            {t('onboarding.confirm.dailyCaloriesLabel')}
           </p>
           <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-300">
             {estimatedTdee}
           </p>
           <p className="mt-1 text-xs text-emerald-500/70">kcal / {t('onboarding.confirm.day')}</p>
+          <p className="mt-2 text-xs leading-relaxed text-emerald-600/70 dark:text-emerald-400/70">
+            {t('onboarding.confirm.dailyCaloriesDesc')}
+          </p>
         </div>
 
         {/* Summary */}
@@ -169,7 +172,7 @@ export function HealthConfirmStep({
         {expanded && (
           <div className="mt-2 rounded-xl border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
             <p>{t('onboarding.confirm.activityLevel')}: {t(`health.activityLevel.${values.activityLevel}`)}</p>
-            <p>{t('onboarding.goal.title')}: {t(`onboarding.goal.type_${values.goalType}`)}</p>
+            <p>{t('onboarding.confirm.goalLabel')}: {t(`onboarding.goal.type_${values.goalType}`)}</p>
             {values.goalType !== 'maintain' && (
               <>
                 <p>{t('onboarding.goal.rate')}: {t(`onboarding.goal.rate_${values.rateOfChange ?? 'moderate'}`)}</p>

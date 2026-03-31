@@ -213,8 +213,8 @@ describe('SwapExerciseSheet', () => {
     const compoundBadges = screen.getAllByText('Đa khớp');
     expect(compoundBadges.length).toBeGreaterThan(0);
 
-    // Equipment shown
-    expect(screen.getAllByText('dumbbell').length).toBeGreaterThan(0);
+    // Equipment shown in English via EQUIPMENT_DISPLAY constant (not raw ID)
+    expect(screen.getAllByText('Dumbbell').length).toBeGreaterThan(0);
   });
 
   it('search filters exercises by Vietnamese name', async () => {

@@ -198,7 +198,7 @@ describe('DailyWeightInput', () => {
     expect(screen.getByTestId('save-weight-btn')).toBeDisabled();
   });
 
-  it('blur restores previous value when input is cleared', () => {
+  it('blur keeps empty value when input is cleared', () => {
     resetStore([makeEntry({ date: '2025-01-01', weightKg: 70.0 })]);
     renderWithNotification();
 
@@ -209,10 +209,10 @@ describe('DailyWeightInput', () => {
     expect(input.value).toBe('');
 
     fireEvent.blur(input);
-    expect(input.value).toBe('70');
+    expect(input.value).toBe('');
   });
 
-  it('blur restores previous value after non-numeric input', () => {
+  it('blur clears non-numeric input on blur', () => {
     resetStore([makeEntry({ date: '2025-01-01', weightKg: 70.0 })]);
     renderWithNotification();
 
@@ -220,7 +220,7 @@ describe('DailyWeightInput', () => {
     fireEvent.change(input, { target: { value: 'abc' } });
 
     fireEvent.blur(input);
-    expect(input.value).toBe('70');
+    expect(input.value).toBe('');
   });
 
   it('does not force zero when user clears input', () => {

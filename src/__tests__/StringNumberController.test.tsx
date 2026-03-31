@@ -57,17 +57,17 @@ function TestWrapperWithSetValue({ defaultValue = 50 }: { defaultValue?: number 
 }
 
 describe('StringNumberController – handleBlur', () => {
-  it('restores previous value on blur when input is empty', () => {
+  it('keeps empty value on blur when input is cleared', () => {
     render(<TestWrapper defaultValue={50} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
 
-    expect(input.value).toBe('50');
+    expect(input.value).toBe('');
   });
 
-  it('restores previous value on repeated clear and blur', () => {
+  it('keeps empty value on repeated clear and blur without reverting', () => {
     render(<TestWrapper defaultValue={50} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
@@ -75,22 +75,22 @@ describe('StringNumberController – handleBlur', () => {
     expect(input.value).toBe('');
 
     fireEvent.blur(input);
-    expect(input.value).toBe('50');
+    expect(input.value).toBe('');
 
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
 
-    expect(input.value).toBe('50');
+    expect(input.value).toBe('');
   });
 
-  it('restores previous value when input is non-numeric on blur', () => {
+  it('keeps non-numeric value on blur without reverting', () => {
     render(<TestWrapper defaultValue={50} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: 'abc' } });
     fireEvent.blur(input);
 
-    expect(input.value).toBe('50');
+    expect(input.value).toBe('abc');
   });
 
   it('clamps value on blur when input is valid', () => {
@@ -123,30 +123,30 @@ describe('StringNumberController – handleBlur', () => {
     expect(input.value).toBe('75');
   });
 
-  it('handles blur when localValue is "-"', () => {
+  it('keeps "-" on blur without reverting', () => {
     render(<TestWrapper defaultValue={50} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: '-' } });
     fireEvent.blur(input);
 
-    expect(input.value).toBe('50');
+    expect(input.value).toBe('-');
   });
 
-  it('restores previous value (0) when repeatedly clearing and blurring', () => {
+  it('keeps empty value on blur when default is 0 and input cleared', () => {
     render(<TestWrapper defaultValue={0} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect(input.value).toBe('0');
+    expect(input.value).toBe('');
 
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect(input.value).toBe('0');
+    expect(input.value).toBe('');
   });
 
-  it('restores previous valid value on blur when cleared', () => {
+  it('keeps empty value on blur even after prior valid input', () => {
     render(<TestWrapper defaultValue={50} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
@@ -154,17 +154,17 @@ describe('StringNumberController – handleBlur', () => {
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
 
-    expect(input.value).toBe('42');
+    expect(input.value).toBe('');
   });
 
-  it('falls back to min prop when no previous value', () => {
+  it('keeps empty value on blur even when min prop is set', () => {
     render(<TestWrapper defaultValue={NaN} min={5} />);
     const input = screen.getByTestId('test-input') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
 
-    expect(input.value).toBe('5');
+    expect(input.value).toBe('');
   });
 });
 

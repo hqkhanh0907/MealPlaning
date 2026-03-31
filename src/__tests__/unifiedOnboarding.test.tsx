@@ -917,8 +917,10 @@ describe('HealthConfirmStep', () => {
     renderWithForm(HealthConfirmStep);
     // The BMR is calculated: 10*70 + 6.25*170 - 5*age + 5, * 1.55
     // With age from 1990-01-01 it varies, but a number should be present
-    const calorieText = screen.getByText('onboarding.confirm.dailyCalories');
+    const calorieText = screen.getByText('onboarding.confirm.dailyCaloriesLabel');
     expect(calorieText).toBeInTheDocument();
+    // Also check the explanation text is present
+    expect(screen.getByText('onboarding.confirm.dailyCaloriesDesc')).toBeInTheDocument();
   });
 
   it('shows BMI value', () => {
@@ -1050,8 +1052,8 @@ describe('TrainingDetailSteps', () => {
       { step: 1, setOnboardingSection },
     );
     expect(screen.getByText('fitness.onboarding.equipment')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.equip_barbell')).toBeInTheDocument();
-    expect(screen.getByText('fitness.onboarding.equip_dumbbell')).toBeInTheDocument();
+    expect(screen.getByText('Barbell')).toBeInTheDocument();
+    expect(screen.getByText('Dumbbell')).toBeInTheDocument();
   });
 
   it('allows toggling equipment selection', () => {
@@ -1063,12 +1065,12 @@ describe('TrainingDetailSteps', () => {
       }>,
       { step: 1, setOnboardingSection },
     );
-    const barbellBtn = screen.getByText('fitness.onboarding.equip_barbell').closest('button');
+    const barbellBtn = screen.getByText('Barbell').closest('button');
     if (barbellBtn) {
       fireEvent.click(barbellBtn);
       fireEvent.click(barbellBtn);
     }
-    expect(screen.getByText('fitness.onboarding.equip_barbell')).toBeInTheDocument();
+    expect(screen.getByText('Barbell')).toBeInTheDocument();
   });
 
   it('renders CardioStep at step 2', () => {
@@ -1373,7 +1375,7 @@ describe('PlanComputingScreen', () => {
 
     expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
     expect(screen.getByText('onboarding.computing.retry')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.computing.skipToManual')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.computing.returnToStrategy')).toBeInTheDocument();
   });
 
   it('retry button resets error and restarts animation', () => {
@@ -1398,51 +1400,27 @@ describe('PlanComputingScreen', () => {
     expect(screen.queryByText('onboarding.computing.error')).not.toBeInTheDocument();
   });
 
-  it('skipToManual button calls goNext on error', () => {
+  it('returnToStrategy button calls goBack on error', () => {
     mockGeneratePlan.mockReturnValue(null);
-    const { goNext } = renderWithForm(PlanComputingScreen);
-
-    act(() => { vi.advanceTimersByTime(2500); });
-    act(() => { vi.advanceTimersByTime(2500); });
-
-    fireEvent.click(screen.getByText('onboarding.computing.skipToManual'));
-    expect(goNext).toHaveBeenCalledTimes(1);
-  });
-
-  it('skip button calls goNext immediately', () => {
-    const { goNext } = renderWithForm(PlanComputingScreen);
-    fireEvent.click(screen.getByText('onboarding.computing.skip'));
-    expect(goNext).toHaveBeenCalledTimes(1);
-  });
-
-  it('back button calls goBack', () => {
     const { goBack } = renderWithForm(PlanComputingScreen);
-    fireEvent.click(screen.getByText('onboarding.nav.back'));
+
+    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => { vi.advanceTimersByTime(2500); });
+
+    fireEvent.click(screen.getByText('onboarding.computing.returnToStrategy'));
     expect(goBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('no skip or back buttons during happy path (non-interruptible)', () => {
+    renderWithForm(PlanComputingScreen);
+    expect(screen.queryByText('onboarding.computing.skip')).not.toBeInTheDocument();
+    expect(screen.queryByText('onboarding.nav.back')).not.toBeInTheDocument();
   });
 
   it('has aria-live region for accessibility', () => {
     renderWithForm(PlanComputingScreen);
     const region = screen.getByRole('status');
     expect(region).toHaveAttribute('aria-live', 'polite');
-  });
-
-  it('skip button attempts generation if not already generated', async () => {
-    mockGeneratePlan.mockClear();
-    const { goNext } = renderWithForm(PlanComputingScreen);
-    fireEvent.click(screen.getByText('onboarding.computing.skip'));
-    expect(mockGeneratePlan).toHaveBeenCalledTimes(1);
-    expect(goNext).toHaveBeenCalledTimes(1);
-  });
-
-  it('skip button does not re-generate if already generated', async () => {
-    const { goNext } = renderWithForm(PlanComputingScreen);
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    mockGeneratePlan.mockClear();
-    fireEvent.click(screen.getByText('onboarding.computing.skip'));
-    expect(mockGeneratePlan).not.toHaveBeenCalled();
-    expect(goNext).toHaveBeenCalledTimes(1);
   });
 
   it('respects reduced motion preference', () => {
@@ -1539,8 +1517,8 @@ describe('PlanPreviewScreen', () => {
     expect(completeOnboarding).toHaveBeenCalledTimes(1);
   });
 
-  it('calls goBack on back button click', () => {
-    const { goBack } = renderWithForm(
+  it('does not render back button on preview screen', () => {
+    renderWithForm(
       PlanPreviewScreen as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
@@ -1548,8 +1526,7 @@ describe('PlanPreviewScreen', () => {
       }>,
       { completeOnboarding },
     );
-    fireEvent.click(screen.getByText('onboarding.nav.back'));
-    expect(goBack).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('onboarding.nav.back')).not.toBeInTheDocument();
   });
 
   it('displays session duration default of 60 when not set', () => {
@@ -1812,7 +1789,7 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
       }>,
       { step: 1, setOnboardingSection },
     );
-    const barbellBtn = getByText('fitness.onboarding.equip_barbell');
+    const barbellBtn = getByText('Barbell');
     fireEvent.click(barbellBtn);
     expect(barbellBtn.className).toContain('border-emerald-500');
     // Toggle off

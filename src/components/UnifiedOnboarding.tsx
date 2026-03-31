@@ -53,7 +53,7 @@ const SECTION_STEPS: Record<Section, number> = {
   1: 3, // 3 welcome slides
   2: 4, // 4 health steps
   3: 1, // 1 training core
-  4: 4, // 4-9 adaptive (default 4 for beginner)
+  4: 4, // 4 for beginner, overridden to 5 for intermediate/advanced (adds Periodization step)
   5: 1, // strategy choice
   6: 1, // computing
   7: 1, // preview
@@ -125,7 +125,7 @@ export function UnifiedOnboarding() {
   const sectionSteps = useMemo(() => {
     return {
       ...SECTION_STEPS,
-      4: watchedExperience === 'advanced' ? 9 : watchedExperience === 'intermediate' ? 8 : 4,
+      4: watchedExperience === 'beginner' ? 4 : 5,
     };
   }, [watchedExperience]);
 

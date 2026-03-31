@@ -4,6 +4,7 @@ import { Search, Plus } from 'lucide-react';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 import { EXERCISES } from '../data/exerciseDatabase';
+import { EQUIPMENT_DISPLAY } from '../constants';
 import { CustomExerciseModal } from './CustomExerciseModal';
 import type { CustomExerciseFormData } from './CustomExerciseModal';
 import type {
@@ -271,7 +272,7 @@ export function ExerciseSelector({
                       </span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
                         {exercise.equipment
-                          .map((eq) => t(`fitness.equipment.${eq}`))
+                          .map((eq) => EQUIPMENT_DISPLAY[eq] ?? eq)
                           .join(', ')}
                       </span>
                     </div>

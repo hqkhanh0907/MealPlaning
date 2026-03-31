@@ -217,28 +217,28 @@ describe('GoalSettingsModal', () => {
     expect(onUpdateProfile).not.toHaveBeenCalled();
   });
 
-  it('resets weight to profile value on blur when empty', () => {
+  it('keeps weight empty on blur when cleared', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     const input = screen.getByLabelText('Cân nặng hiện tại (kg)');
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe(String(defaultProfile.weight));
+    expect((input as HTMLInputElement).value).toBe('');
   });
 
-  it('resets protein ratio to profile value on blur when empty', () => {
+  it('keeps protein ratio empty on blur when cleared', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     const input = screen.getByLabelText('Lượng Protein mong muốn');
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe(String(defaultProfile.proteinRatio));
+    expect((input as HTMLInputElement).value).toBe('');
   });
 
-  it('resets calories to profile value on blur when empty', () => {
+  it('keeps calories empty on blur when cleared', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     const input = screen.getByLabelText(/Mục tiêu Calo/);
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe(String(defaultProfile.targetCalories));
+    expect((input as HTMLInputElement).value).toBe('');
   });
 
   it('renders all 4 protein preset buttons', () => {

@@ -30,6 +30,28 @@ afterEach(() => {
 });
 
 /* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+function setupProfileWithWeight(weight: number) {
+  useHealthProfileStore.setState({
+    profile: {
+      id: 'default',
+      name: 'Test',
+      gender: 'male',
+      age: 30,
+      dateOfBirth: null,
+      heightCm: 170,
+      weightKg: weight,
+      activityLevel: 'moderate',
+      proteinRatio: 2.0,
+      fatPct: 0.25,
+      targetCalories: 2000,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
 /*  Tests                                                              */
 /* ------------------------------------------------------------------ */
 describe('GoalPhaseSelector', () => {
@@ -55,17 +77,19 @@ describe('GoalPhaseSelector', () => {
     expect(screen.getByText('Tốc độ thay đổi')).toBeInTheDocument();
   });
 
-  it('selecting Maintain hides rate selector', async () => {
+  it('selecting Maintain hides rate selector and target weight', async () => {
     const user = userEvent.setup();
     render(<GoalPhaseSelector />);
 
-    // First select Cut to show rate selector
+    // First select Cut to show rate selector and target weight
     await user.click(screen.getByTestId('goal-type-cut'));
     expect(screen.getByTestId('rate-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('target-weight-input')).toBeInTheDocument();
 
-    // Then select Maintain to hide it
+    // Then select Maintain to hide both
     await user.click(screen.getByTestId('goal-type-maintain'));
     expect(screen.queryByTestId('rate-selector')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('target-weight-input')).not.toBeInTheDocument();
   });
 
   it('rate change updates calorie offset display', async () => {
@@ -235,5 +259,118 @@ describe('GoalPhaseSelector', () => {
     const { activeGoal } = useHealthProfileStore.getState();
     expect(activeGoal).not.toBeNull();
     expect(activeGoal!.type).toBe('bulk');
+  });
+
+  // --- New validation tests ---
+
+  it('blocks save when cut target weight >= current weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '85');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    // Should show error and NOT save
+    expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu giảm cân phải nhỏ hơn cân nặng hiện tại');
+    expect(useHealthProfileStore.getState().activeGoal).toBeNull();
+  });
+
+  it('blocks save when bulk target weight <= current weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '75');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu tăng cơ phải lớn hơn cân nặng hiện tại');
+    expect(useHealthProfileStore.getState().activeGoal).toBeNull();
+  });
+
+  it('blocks save when cut target weight equals current weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '80');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(useHealthProfileStore.getState().activeGoal).toBeNull();
+  });
+
+  it('allows save when cut target weight < current weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '75');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).not.toBeNull();
+    expect(activeGoal!.targetWeightKg).toBe(75);
+  });
+
+  it('allows save when bulk target weight > current weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(70);
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '85');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).not.toBeNull();
+    expect(activeGoal!.targetWeightKg).toBe(85);
+  });
+
+  it('hides target weight entirely for maintain', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    // Maintain is default — target weight should not appear
+    expect(screen.queryByTestId('target-weight-input')).not.toBeInTheDocument();
+
+    // Select cut — target weight should appear
+    await user.click(screen.getByTestId('goal-type-cut'));
+    expect(screen.getByTestId('target-weight-input')).toBeInTheDocument();
+
+    // Back to maintain — target weight hidden again
+    await user.click(screen.getByTestId('goal-type-maintain'));
+    expect(screen.queryByTestId('target-weight-input')).not.toBeInTheDocument();
+  });
+
+  it('clears target weight error when switching to maintain', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Enter invalid cut target
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '90');
+    await user.click(screen.getByTestId('save-goal-button'));
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    // Switch to maintain — error should be gone and save should work
+    await user.click(screen.getByTestId('goal-type-maintain'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('save-goal-button'));
+    const { activeGoal } = useHealthProfileStore.getState();
+    expect(activeGoal).not.toBeNull();
+    expect(activeGoal!.type).toBe('maintain');
   });
 });

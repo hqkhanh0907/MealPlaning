@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useFitnessStore } from '@/store/fitnessStore';
+import { EQUIPMENT_DISPLAY } from '@/features/fitness/constants';
 import type { EquipmentType, PeriodizationModel, TrainingExperience, TrainingGoal } from '@/features/fitness/types';
 import type { OnboardingFormData } from './onboardingSchema';
 
@@ -135,7 +136,7 @@ function EquipmentStep({ form, goNext, goBack }: { form: UseFormReturn<Onboardin
                 : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
             )}
           >
-            {t(`fitness.onboarding.equip_${eq}`)}
+            {EQUIPMENT_DISPLAY[eq] ?? eq}
           </button>
         ))}
       </div>

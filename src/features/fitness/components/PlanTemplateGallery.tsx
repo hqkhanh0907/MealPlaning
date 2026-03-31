@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
 import { TemplateMatchBadge } from './TemplateMatchBadge';
 import { computeMatchScore } from '../utils/templateMatcher';
+import { EQUIPMENT_DISPLAY } from '../constants';
 import type { PlanTemplate, SplitType } from '../types';
 
 interface PlanTemplateGalleryProps {
@@ -67,7 +68,7 @@ function TemplateCard({
             key={eq}
             className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700"
           >
-            {t(`fitness.equipment.${eq}`, eq)}
+            {EQUIPMENT_DISPLAY[eq] ?? eq}
           </span>
         ))}
       </div>

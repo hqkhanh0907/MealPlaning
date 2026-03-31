@@ -4,6 +4,7 @@ import { ArrowLeftRight, Search } from 'lucide-react';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 import { EXERCISES } from '../data/exerciseDatabase';
+import { EQUIPMENT_DISPLAY } from '../constants';
 import type {
   Exercise,
   MuscleGroup,
@@ -190,7 +191,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
                         •
                       </span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {exercise.equipment.join(', ')}
+                        {exercise.equipment.map((eq) => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
                       </span>
                     </div>
                   </button>

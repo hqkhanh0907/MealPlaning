@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
+import { validateTargetWeight } from '@/schemas/goalValidation';
 
 interface NutritionGoalStepProps {
   form: UseFormReturn<OnboardingFormData>;
@@ -29,8 +30,21 @@ export function NutritionGoalStep({ form, goNext, goBack }: NutritionGoalStepPro
   const showConditional = goalField.field.value !== 'maintain';
 
   const handleNext = async () => {
-    const valid = await form.trigger([...STEP_FIELDS['2c']]);
-    if (valid) goNext();
+    const valid = await form.trigger([...STEP_FIELDS['2c']], { shouldFocus: true });
+    if (!valid) return;
+
+    // Cross-field validation: trigger() doesn't run superRefine,
+    // so we must manually check goal direction vs current weight.
+    const v = form.getValues();
+    if (v.goalType !== 'maintain' && v.targetWeightKg != null) {
+      const error = validateTargetWeight(v.goalType, v.weightKg, v.targetWeightKg);
+      if (error) {
+        form.setError('targetWeightKg', { message: error }, { shouldFocus: true });
+        return;
+      }
+    }
+
+    goNext();
   };
 
   return (

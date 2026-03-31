@@ -184,12 +184,12 @@ function DailyWeightInputInner(): React.JSX.Element {
   );
 
   const handleInputBlur = useCallback(() => {
-    if (displayValue === '' || Number.isNaN(parseFloat(displayValue))) {
-      const restoreVal = numericValue > 0 ? numericValue : initialWeight;
-      setDisplayValue(restoreVal > 0 ? String(restoreVal) : '');
-      setNumericValue(restoreVal);
+    if (displayValue !== '' && !Number.isNaN(parseFloat(displayValue))) {
+      const num = parseFloat(displayValue);
+      setNumericValue(num);
+      setDisplayValue(String(num));
     }
-  }, [displayValue, numericValue, initialWeight]);
+  }, [displayValue]);
 
   const handleChipSelect = useCallback((weight: number) => {
     setNumericValue(weight);

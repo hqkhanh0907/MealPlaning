@@ -3,6 +3,7 @@ import { useForm, useWatch, Controller } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle } from 'lucide-react';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../store/healthProfileStore';
 import {
@@ -46,6 +47,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   const db = useDatabase();
   const profile = useHealthProfileStore((s) => s.profile);
   const saveProfileAction = useHealthProfileStore((s) => s.saveProfile);
+  const activeGoal = useHealthProfileStore((s) => s.activeGoal);
 
   const {
     control,
@@ -149,6 +151,20 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       bodyFatFraction,
     );
   }, [tdee, watchedWeightKg, watchedProteinRatio, profile.fatPct, watchedBodyFatPct]);
+
+  const goalWeightWarning = useMemo(() => {
+    if (!activeGoal || activeGoal.type === 'maintain' || !activeGoal.targetWeightKg) return null;
+    const w = Number(watchedWeightKg);
+    if (!w || isNaN(w)) return null;
+    const target = activeGoal.targetWeightKg;
+    if (activeGoal.type === 'cut' && w <= target) {
+      return t('healthProfile.goalWeightConflictCut');
+    }
+    if (activeGoal.type === 'bulk' && w >= target) {
+      return t('healthProfile.goalWeightConflictBulk');
+    }
+    return null;
+  }, [activeGoal, watchedWeightKg, t]);
 
   async function onSubmit(data: HealthProfileFormData): Promise<boolean> {
     try {
@@ -256,6 +272,17 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           className={inputClass('weightKg')}
         />
       </FormField>
+
+      {goalWeightWarning && (
+        <div
+          data-testid="goal-weight-warning"
+          className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+          role="alert"
+        >
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{goalWeightWarning}</span>
+        </div>
+      )}
 
       {/* Activity Level */}
       <div>

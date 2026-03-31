@@ -251,4 +251,158 @@ describe('HealthProfileForm', () => {
     expect(autoBtn).toHaveAttribute('aria-checked', 'true');
     expect(screen.queryByTestId('bmr-override-input')).not.toBeInTheDocument();
   });
+
+  /* ------------------------------------------------------------------ */
+  /*  Goal-aware weight warning tests                                    */
+  /* ------------------------------------------------------------------ */
+
+  it('shows warning when weight drops below cut goal target', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'cut',
+        rateOfChange: 'moderate',
+        targetWeightKg: 65,
+        calorieOffset: -500,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '60' } });
+
+    expect(screen.getByTestId('goal-weight-warning')).toBeInTheDocument();
+  });
+
+  it('shows warning when weight equals cut goal target', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'cut',
+        rateOfChange: 'moderate',
+        targetWeightKg: 65,
+        calorieOffset: -500,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '65' } });
+
+    expect(screen.getByTestId('goal-weight-warning')).toBeInTheDocument();
+  });
+
+  it('no warning when weight is above cut goal target', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'cut',
+        rateOfChange: 'moderate',
+        targetWeightKg: 65,
+        calorieOffset: -500,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '75' } });
+
+    expect(screen.queryByTestId('goal-weight-warning')).not.toBeInTheDocument();
+  });
+
+  it('shows warning when weight rises above bulk goal target', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'bulk',
+        rateOfChange: 'moderate',
+        targetWeightKg: 85,
+        calorieOffset: 500,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '90' } });
+
+    expect(screen.getByTestId('goal-weight-warning')).toBeInTheDocument();
+  });
+
+  it('shows warning when weight equals bulk goal target', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'bulk',
+        rateOfChange: 'moderate',
+        targetWeightKg: 85,
+        calorieOffset: 500,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '85' } });
+
+    expect(screen.getByTestId('goal-weight-warning')).toBeInTheDocument();
+  });
+
+  it('no warning for maintain goal regardless of weight', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'maintain',
+        rateOfChange: 'moderate',
+        calorieOffset: 0,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '50' } });
+
+    expect(screen.queryByTestId('goal-weight-warning')).not.toBeInTheDocument();
+  });
+
+  it('no warning when no active goal exists', () => {
+    resetStore({
+      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      activeGoal: null,
+    });
+    render(<HealthProfileForm />);
+
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '50' } });
+
+    expect(screen.queryByTestId('goal-weight-warning')).not.toBeInTheDocument();
+  });
 });

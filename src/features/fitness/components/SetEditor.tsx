@@ -57,7 +57,7 @@ export const SetEditor = React.memo(function SetEditor({
       if (raw !== '') {
         const value = Number(raw);
         if (!Number.isNaN(value)) {
-          setWeight(Math.max(MIN_WEIGHT_KG, value));
+          setWeight(value);
         }
       }
     },
@@ -65,8 +65,10 @@ export const SetEditor = React.memo(function SetEditor({
   );
 
   const handleWeightBlur = useCallback(() => {
-    setWeightStr(String(weight));
-  }, [weight]);
+    if (weightStr !== '' && !Number.isNaN(Number(weightStr))) {
+      setWeightStr(String(weight));
+    }
+  }, [weightStr, weight]);
 
   const handleWeightChip = useCallback((value: number) => {
     setWeight(value);
@@ -96,7 +98,7 @@ export const SetEditor = React.memo(function SetEditor({
       if (raw !== '') {
         const value = Number(raw);
         if (!Number.isNaN(value)) {
-          setReps(Math.max(MIN_REPS, value));
+          setReps(value);
         }
       }
     },
@@ -104,8 +106,10 @@ export const SetEditor = React.memo(function SetEditor({
   );
 
   const handleRepsBlur = useCallback(() => {
-    setRepsStr(String(reps));
-  }, [reps]);
+    if (repsStr !== '' && !Number.isNaN(Number(repsStr))) {
+      setRepsStr(String(reps));
+    }
+  }, [repsStr, reps]);
 
   const handleRpeSelect = useCallback((value: number) => {
     setRpe((prev) => (prev === value ? undefined : value));

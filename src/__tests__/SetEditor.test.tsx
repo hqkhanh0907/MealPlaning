@@ -71,12 +71,12 @@ describe('SetEditor', () => {
     expect((input as HTMLInputElement).value).toBe('80');
   });
 
-  it('direct weight input clamps negative to 0', () => {
+  it('direct weight input accepts negative values during typing', () => {
     renderEditor({ initialWeight: 60 });
     const input = screen.getByTestId('weight-input');
     fireEvent.change(input, { target: { value: '-5' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('0');
+    expect((input as HTMLInputElement).value).toBe('-5');
   });
 
   // Quick weight chips
@@ -128,12 +128,12 @@ describe('SetEditor', () => {
     expect((input as HTMLInputElement).value).toBe('15');
   });
 
-  it('direct reps input clamps to minimum 1', () => {
+  it('direct reps input accepts zero during typing', () => {
     renderEditor({ initialReps: 10 });
     const input = screen.getByTestId('reps-input');
     fireEvent.change(input, { target: { value: '0' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('1');
+    expect((input as HTMLInputElement).value).toBe('0');
   });
 
   // RPE selector
@@ -277,20 +277,20 @@ describe('SetEditor', () => {
     expect((input as HTMLInputElement).value).toBe('');
   });
 
-  it('blur after clearing weight restores previous value', () => {
+  it('blur after clearing weight keeps empty', () => {
     renderEditor({ initialWeight: 60 });
     const input = screen.getByTestId('weight-input');
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('60');
+    expect((input as HTMLInputElement).value).toBe('');
   });
 
-  it('blur after clearing reps restores previous value', () => {
+  it('blur after clearing reps keeps empty', () => {
     renderEditor({ initialReps: 10 });
     const input = screen.getByTestId('reps-input');
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('10');
+    expect((input as HTMLInputElement).value).toBe('');
   });
 
   it('save after clear and blur uses last valid weight', () => {

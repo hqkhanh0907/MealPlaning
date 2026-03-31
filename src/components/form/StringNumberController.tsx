@@ -90,10 +90,8 @@ function StringNumberControllerInner<T extends FieldValues>(
 
   const handleBlur = () => {
     if (localValue === '' || Number.isNaN(parseNumericInput(localValue, NaN))) {
-      const lastValid = !Number.isNaN(prevFieldValue) ? prevFieldValue : (min ?? 0);
-      setLocalValue(String(lastValid));
-      setPrevFieldValue(lastValid);
-      field.onChange(lastValid as unknown as typeof field.value);
+      // Allow empty — don't revert to previous value.
+      // RHF field already holds NaN from handleChange; just fire onBlur.
     } else {
       const clamped = clampValue(parseNumericInput(localValue));
       setPrevFieldValue(clamped);

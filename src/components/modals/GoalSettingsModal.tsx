@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Target, Zap, Scale, Dumbbell, Leaf, Salad } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
@@ -27,6 +28,12 @@ interface GoalPreset {
   proteinRatio: number;
 }
 
+const goalSettingsSchema = z.object({
+  weight: z.number().min(20).max(300),
+  proteinRatio: z.number().min(0.5).max(5),
+  targetCalories: z.number().min(800).max(10000),
+});
+
 const GOAL_PRESETS: GoalPreset[] = [
   { labelKey: 'goalSettings.presetBalanced', icon: Scale, calories: 2000, proteinRatio: 1.6 },
   { labelKey: 'goalSettings.presetHighProtein', icon: Dumbbell, calories: 2200, proteinRatio: 2.5 },
@@ -42,6 +49,16 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
   const [weightStr, setWeightStr] = useState(() => String(userProfile.weight));
   const [proteinStr, setProteinStr] = useState(() => String(userProfile.proteinRatio));
   const [caloriesStr, setCaloriesStr] = useState(() => String(userProfile.targetCalories));
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
+
+  const validateField = useCallback(
+    (field: keyof z.infer<typeof goalSettingsSchema>, value: number): string | undefined => {
+      const result = goalSettingsSchema.shape[field].safeParse(value);
+      return result.success ? undefined : t('goalSettings.invalidValue');
+    },
+    [t],
+  );
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-80">
@@ -99,16 +116,26 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             <div className="relative">
               <Input
                 id="goal-weight"
-                type="number" min="1" max="500" step="1" inputMode="numeric"
+                type="number" min="20" max="300" step="1" inputMode="numeric"
                 autoComplete="off"
                 value={weightStr}
-                onChange={(e) => { const v = e.target.value; setWeightStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 1) onUpdateProfile({ ...userProfile, weight: n }); }}
-                onBlur={() => { if (weightStr.trim() === '' || Number.isNaN(Number.parseFloat(weightStr))) setWeightStr(String(userProfile.weight)); }}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setWeightStr(v);
+                  const n = Math.round(Number.parseFloat(v));
+                  if (Number.isNaN(n)) { setFieldErrors(prev => ({ ...prev, weight: undefined })); return; }
+                  const err = validateField('weight', n);
+                  setFieldErrors(prev => ({ ...prev, weight: err }));
+                  if (!err) onUpdateProfile({ ...userProfile, weight: n });
+                }}
+                onBlur={() => { if (weightStr.trim() !== '' && !Number.isNaN(Number.parseFloat(weightStr))) { const n = Math.round(Number.parseFloat(weightStr)); const err = validateField('weight', n); setFieldErrors(prev => ({ ...prev, weight: err })); } }}
                 data-testid="input-goal-weight"
-                className="w-full pl-4 pr-12 font-bold text-lg text-slate-800"
+                aria-invalid={!!fieldErrors.weight}
+                className={`w-full pl-4 pr-12 font-bold text-lg text-slate-800 ${fieldErrors.weight ? 'border-red-400 focus:ring-red-400' : ''}`}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-medium">kg</span>
             </div>
+            {fieldErrors.weight && <p data-testid="error-goal-weight" className="text-xs text-red-500 mt-1">{fieldErrors.weight}</p>}
           </div>
 
           <div>
@@ -122,16 +149,27 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
               <div className="relative">
                 <Input
                   id="goal-protein"
-                  type="number" step="0.1" min="1" max="5" inputMode="decimal"
+                  type="number" step="0.1" min="0.5" max="5" inputMode="decimal"
                   autoComplete="off"
                   value={proteinStr}
-                  onChange={(e) => { const v = e.target.value; setProteinStr(v); const raw = Number.parseFloat(v); if (!Number.isNaN(raw) && raw >= 0.1) { const rounded = Math.round(Math.max(1, raw) * 10) / 10; onUpdateProfile({ ...userProfile, proteinRatio: rounded }); } }}
-                  onBlur={() => { if (proteinStr.trim() === '' || Number.isNaN(Number.parseFloat(proteinStr))) setProteinStr(String(userProfile.proteinRatio)); }}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setProteinStr(v);
+                    const raw = Number.parseFloat(v);
+                    if (Number.isNaN(raw)) { setFieldErrors(prev => ({ ...prev, proteinRatio: undefined })); return; }
+                    const rounded = Math.round(raw * 10) / 10;
+                    const err = validateField('proteinRatio', rounded);
+                    setFieldErrors(prev => ({ ...prev, proteinRatio: err }));
+                    if (!err) onUpdateProfile({ ...userProfile, proteinRatio: rounded });
+                  }}
+                  onBlur={() => { if (proteinStr.trim() !== '' && !Number.isNaN(Number.parseFloat(proteinStr))) { const raw = Number.parseFloat(proteinStr); const rounded = Math.round(raw * 10) / 10; const err = validateField('proteinRatio', rounded); setFieldErrors(prev => ({ ...prev, proteinRatio: err })); } }}
                   data-testid="input-goal-protein"
-                  className="w-full pl-4 pr-16 font-bold text-lg text-slate-800"
+                  aria-invalid={!!fieldErrors.proteinRatio}
+                  className={`w-full pl-4 pr-16 font-bold text-lg text-slate-800 ${fieldErrors.proteinRatio ? 'border-red-400 focus:ring-red-400' : ''}`}
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-medium">{t('goalSettings.perKg')}</span>
               </div>
+              {fieldErrors.proteinRatio && <p data-testid="error-goal-protein" className="text-xs text-red-500 mt-1">{fieldErrors.proteinRatio}</p>}
               <div className="flex flex-wrap gap-2">
                 {PROTEIN_PRESETS.map(ratio => (
                   <button
@@ -155,16 +193,26 @@ export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfil
             <div className="relative">
               <Input
                 id="goal-calories"
-                type="number" min="100" max="10000" step="1" inputMode="numeric"
+                type="number" min="800" max="10000" step="1" inputMode="numeric"
                 autoComplete="off"
                 value={caloriesStr}
-                onChange={(e) => { const v = e.target.value; setCaloriesStr(v); const n = Math.round(Number.parseFloat(v)); if (!Number.isNaN(n) && n >= 100) onUpdateProfile({ ...userProfile, targetCalories: n }); }}
-                onBlur={() => { if (caloriesStr.trim() === '' || Number.isNaN(Number.parseFloat(caloriesStr))) setCaloriesStr(String(userProfile.targetCalories)); }}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCaloriesStr(v);
+                  const n = Math.round(Number.parseFloat(v));
+                  if (Number.isNaN(n)) { setFieldErrors(prev => ({ ...prev, targetCalories: undefined })); return; }
+                  const err = validateField('targetCalories', n);
+                  setFieldErrors(prev => ({ ...prev, targetCalories: err }));
+                  if (!err) onUpdateProfile({ ...userProfile, targetCalories: n });
+                }}
+                onBlur={() => { if (caloriesStr.trim() !== '' && !Number.isNaN(Number.parseFloat(caloriesStr))) { const n = Math.round(Number.parseFloat(caloriesStr)); const err = validateField('targetCalories', n); setFieldErrors(prev => ({ ...prev, targetCalories: err })); } }}
                 data-testid="input-goal-calories"
-                className="w-full pl-4 pr-16 font-bold text-lg text-slate-800"
+                aria-invalid={!!fieldErrors.targetCalories}
+                className={`w-full pl-4 pr-16 font-bold text-lg text-slate-800 ${fieldErrors.targetCalories ? 'border-red-400 focus:ring-red-400' : ''}`}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-medium">kcal</span>
             </div>
+            {fieldErrors.targetCalories && <p data-testid="error-goal-calories" className="text-xs text-red-500 mt-1">{fieldErrors.targetCalories}</p>}
           </div>
 
           <p className="text-xs text-slate-400 dark:text-slate-500 text-center">{t('goalSettings.autoSaveHint')}</p>

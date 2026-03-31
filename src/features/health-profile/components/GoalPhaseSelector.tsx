@@ -1,11 +1,28 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrendingDown, TrendingUp, Equal, Check } from 'lucide-react';
+import { useForm, useController } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { TrendingDown, TrendingUp, Equal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../store/healthProfileStore';
 import { getCalorieOffset } from '../../../services/nutritionEngine';
+import { validateTargetWeight } from '@/schemas/goalValidation';
 import type { GoalType, RateOfChange, Goal } from '../types';
+
+/* ------------------------------------------------------------------ */
+/*  Schema                                                             */
+/* ------------------------------------------------------------------ */
+const goalPhaseSelectorSchema = z.object({
+  goalType: z.enum(['cut', 'maintain', 'bulk']),
+  rateOfChange: z.enum(['conservative', 'moderate', 'aggressive']),
+  targetWeight: z.string(),
+  manualOverride: z.boolean(),
+  customOffset: z.string(),
+});
+
+type GoalPhaseSelectorFormData = z.infer<typeof goalPhaseSelectorSchema>;
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -79,73 +96,105 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
   const { t } = useTranslation();
   const db = useDatabase();
   const saveGoal = useHealthProfileStore((s) => s.saveGoal);
+  const currentWeight = useHealthProfileStore((s) => s.profile.weightKg);
 
-  const [goalType, setGoalType] = useState<GoalType>('maintain');
-  const [rateOfChange, setRateOfChange] = useState<RateOfChange>('moderate');
-  const [targetWeight, setTargetWeight] = useState('');
-  const [manualOverride, setManualOverride] = useState(false);
-  const [customOffset, setCustomOffset] = useState('');
-  const [saved, setSaved] = useState(false);
+  const form = useForm<GoalPhaseSelectorFormData>({
+    resolver: zodResolver(goalPhaseSelectorSchema),
+    defaultValues: {
+      goalType: 'maintain',
+      rateOfChange: 'moderate',
+      targetWeight: '',
+      manualOverride: false,
+      customOffset: '',
+    },
+    mode: 'onChange',
+  });
+
+  const goalTypeField = useController({ control: form.control, name: 'goalType' });
+  const rateField = useController({ control: form.control, name: 'rateOfChange' });
+  const targetWeightField = useController({ control: form.control, name: 'targetWeight' });
+  const manualOverrideField = useController({ control: form.control, name: 'manualOverride' });
+  const customOffsetField = useController({ control: form.control, name: 'customOffset' });
+
+  const goalType = goalTypeField.field.value as GoalType;
+  const rateOfChange = rateField.field.value as RateOfChange;
 
   const autoOffset = useMemo(
     () => getCalorieOffset(goalType, rateOfChange),
     [goalType, rateOfChange],
   );
 
-  const effectiveOffset = manualOverride
-    ? Math.round(Number(customOffset)) || 0
+  const effectiveOffset = manualOverrideField.field.value
+    ? Math.round(Number(customOffsetField.field.value)) || 0
     : autoOffset;
 
   const handleGoalTypeChange = useCallback((type: GoalType) => {
-    setGoalType(type);
-    setSaved(false);
-  }, []);
+    goalTypeField.field.onChange(type);
+    if (type === 'maintain') {
+      targetWeightField.field.onChange('');
+      form.clearErrors('targetWeight');
+    }
+  }, [goalTypeField.field, targetWeightField.field, form]);
 
   const handleRateChange = useCallback((rate: RateOfChange) => {
-    setRateOfChange(rate);
-    setSaved(false);
-  }, []);
+    rateField.field.onChange(rate);
+  }, [rateField.field]);
 
   const handleTargetWeightChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
       if (val === '' || /^\d*\.?\d*$/.test(val)) {
-        setTargetWeight(val);
-        setSaved(false);
+        targetWeightField.field.onChange(val);
+        form.clearErrors('targetWeight');
       }
     },
-    [],
+    [targetWeightField.field, form],
   );
 
   const handleCustomOffsetChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
       if (val === '' || val === '-' || /^-?\d*$/.test(val)) {
-        setCustomOffset(val);
-        setSaved(false);
+        customOffsetField.field.onChange(val);
       }
     },
-    [],
+    [customOffsetField.field],
   );
 
   const handleToggleOverride = useCallback(() => {
-    setManualOverride((prev) => {
-      if (!prev) {
-        setCustomOffset(String(autoOffset));
-      }
-      return !prev;
-    });
-    setSaved(false);
-  }, [autoOffset]);
+    const next = !manualOverrideField.field.value;
+    manualOverrideField.field.onChange(next);
+    if (next) {
+      customOffsetField.field.onChange(String(autoOffset));
+    }
+  }, [manualOverrideField.field, customOffsetField.field, autoOffset]);
 
   const handleSave = useCallback(async (): Promise<boolean> => {
+    const values = form.getValues();
+    const parsedTarget = values.targetWeight ? Number(values.targetWeight) : undefined;
+
+    // Validate target weight vs current weight for cut/bulk
+    if (values.goalType !== 'maintain' && parsedTarget != null && currentWeight != null) {
+      const error = validateTargetWeight(values.goalType as GoalType, currentWeight, parsedTarget);
+      if (error) {
+        form.setError('targetWeight', { message: error });
+        return false;
+      }
+    }
+
+    // Validate target weight range
+    if (parsedTarget != null && (parsedTarget < 30 || parsedTarget > 300)) {
+      form.setError('targetWeight', { message: 'onboarding.validation.targetWeightRange' });
+      return false;
+    }
+
     try {
       const now = new Date().toISOString();
       const goal: Goal = {
         id: generateId(),
-        type: goalType,
-        rateOfChange,
-        targetWeightKg: targetWeight ? Number(targetWeight) : undefined,
+        type: values.goalType as GoalType,
+        rateOfChange: values.rateOfChange as RateOfChange,
+        targetWeightKg: parsedTarget,
         calorieOffset: effectiveOffset,
         startDate: now,
         isActive: true,
@@ -153,12 +202,11 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
         updatedAt: now,
       };
       await saveGoal(db, goal);
-      setSaved(true);
       return true;
     } catch {
       return false;
     }
-  }, [db, goalType, rateOfChange, targetWeight, effectiveOffset, saveGoal]);
+  }, [db, form, currentWeight, effectiveOffset, saveGoal]);
 
   useEffect(() => {
     if (saveRef) {
@@ -167,6 +215,8 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
   });
 
   const showRateSelector = goalType !== 'maintain';
+  const showTargetWeight = goalType !== 'maintain';
+  const targetWeightError = form.formState.errors.targetWeight;
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
@@ -233,25 +283,35 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
         </div>
       )}
 
-      {/* Target Weight */}
-      <div>
-        <label
-          htmlFor="target-weight"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
-          {t('goal.targetWeight')}
-        </label>
-        <Input
-          id="target-weight"
-          type="text"
-          inputMode="decimal"
-          data-testid="target-weight-input"
-          value={targetWeight}
-          onChange={handleTargetWeightChange}
-          placeholder={t('goal.targetWeightOptional')}
-          className="w-full text-slate-800"
-        />
-      </div>
+      {/* Target Weight — hidden for maintain */}
+      {showTargetWeight && (
+        <div>
+          <label
+            htmlFor="target-weight"
+            className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+          >
+            {t('goal.targetWeight')}
+          </label>
+          <Input
+            id="target-weight"
+            type="text"
+            inputMode="decimal"
+            data-testid="target-weight-input"
+            value={targetWeightField.field.value}
+            onChange={handleTargetWeightChange}
+            onBlur={targetWeightField.field.onBlur}
+            placeholder={t('goal.targetWeightOptional')}
+            aria-invalid={!!targetWeightError}
+            aria-describedby={targetWeightError ? 'target-weight-error' : undefined}
+            className="w-full text-slate-800"
+          />
+          {targetWeightError && (
+            <p id="target-weight-error" role="alert" className="mt-1 text-xs text-red-500">
+              {t(targetWeightError.message ?? 'onboarding.validation.required')}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Calorie Offset Display */}
       <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-3">
@@ -270,7 +330,7 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
         {/* Manual Override Toggle */}
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            {manualOverride
+            {manualOverrideField.field.value
               ? t('goal.calorieOffsetCustom')
               : t('goal.calorieOffsetAuto')}
           </span>
@@ -279,28 +339,28 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
             data-testid="manual-override-toggle"
             onClick={handleToggleOverride}
             role="switch"
-            aria-checked={manualOverride}
+            aria-checked={manualOverrideField.field.value}
             className={`relative w-10 h-5 rounded-full transition-colors ${
-              manualOverride
+              manualOverrideField.field.value
                 ? 'bg-emerald-500'
                 : 'bg-slate-300 dark:bg-slate-600'
             }`}
           >
             <span
               className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                manualOverride ? 'translate-x-5' : 'translate-x-0'
+                manualOverrideField.field.value ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
           </button>
         </div>
 
         {/* Custom Offset Input */}
-        {manualOverride && (
+        {manualOverrideField.field.value && (
           <Input
             type="text"
             inputMode="numeric"
             data-testid="custom-offset-input"
-            value={customOffset}
+            value={customOffsetField.field.value}
             onChange={handleCustomOffsetChange}
             className="w-full text-slate-800"
           />
@@ -311,21 +371,10 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
         <button
           type="button"
           data-testid="save-goal-button"
-          onClick={handleSave}
-          className={`w-full py-3 rounded-xl font-bold text-white transition-all ${
-            saved
-              ? 'bg-emerald-500'
-              : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
-          }`}
+          onClick={() => void handleSave()}
+          className="w-full py-3 rounded-xl font-bold text-white transition-all bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800"
         >
-          {saved ? (
-            <span className="flex items-center justify-center gap-2">
-              <Check className="w-5 h-5" />
-              {t('goal.saved')}
-            </span>
-          ) : (
-            t('goal.save')
-          )}
+          {t('goal.save')}
         </button>
       )}
     </div>

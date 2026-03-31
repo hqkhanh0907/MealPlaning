@@ -11,7 +11,7 @@ interface PlanPreviewScreenProps {
   completeOnboarding: () => void;
 }
 
-export function PlanPreviewScreen({ form, goBack, completeOnboarding }: PlanPreviewScreenProps) {
+export function PlanPreviewScreen({ form, completeOnboarding }: PlanPreviewScreenProps) {
   const { t } = useTranslation();
   const values = form.getValues();
   const daysPerWeek = values.daysPerWeek;
@@ -76,14 +76,7 @@ export function PlanPreviewScreen({ form, goBack, completeOnboarding }: PlanPrev
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
-        <button
-          type="button"
-          onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
-        >
-          {t('onboarding.nav.back')}
-        </button>
+      <div className="fixed inset-x-0 bottom-0 flex items-center justify-center border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
         <Button
           onClick={completeOnboarding}
           className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"

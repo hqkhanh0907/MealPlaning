@@ -422,7 +422,8 @@
     "presetBalanced": "Cân bằng",
     "presetHighProtein": "Tăng cơ",
     "presetLowCarb": "Low Carb",
-    "presetLightDiet": "Ăn nhẹ"
+    "presetLightDiet": "Ăn nhẹ",
+    "invalidValue": "Giá trị không hợp lệ"
   },
   "saveAnalyzed": {
     "title": "Xác nhận lưu món ăn",
@@ -671,14 +672,6 @@
       "minutesUnit": "phút",
       "sessionsUnit": "buổi/tuần",
       "weeksUnit": "tuần",
-      "equip_barbell": "Thanh tạ",
-      "equip_dumbbell": "Tạ tay",
-      "equip_machine": "Máy tập",
-      "equip_cable": "Cáp kéo",
-      "equip_bodyweight": "Tự trọng",
-      "equip_bands": "Dây kháng lực",
-      "equip_resistance_band": "Dây kháng lực",
-      "equip_kettlebell": "Tạ ấm",
       "injury_shoulders": "Vai",
       "injury_lower_back": "Lưng dưới",
       "injury_knees": "Đầu gối",
@@ -974,23 +967,6 @@
       "recoveryTitle": "Ngày nghỉ phục hồi",
       "recoveryMessage": "{{count}} buổi tập tuần này — hãy nghỉ ngơi và ăn đủ dinh dưỡng."
     },
-    "equipment": {
-      "barbell": "Tạ đòn",
-      "bench": "Ghế tập",
-      "bodyweight": "Không tạ",
-      "box": "Hộp nhảy",
-      "cable": "Cáp",
-      "dumbbell": "Tạ tay",
-      "elliptical": "Máy elip",
-      "kettlebell": "Tạ ấm",
-      "landmine": "Thanh landmine",
-      "machine": "Máy tập",
-      "plate": "Đĩa tạ",
-      "pool": "Hồ bơi",
-      "rack": "Khung squat",
-      "treadmill": "Máy chạy bộ",
-      "bands": "Dây kháng lực"
-    },
     "scheduleEditor": {
       "weeklyCalendar": "Lịch tuần",
       "monday": "T2",
@@ -1256,7 +1232,9 @@
     "macroPreview": "Xem trước macros",
     "save": "Lưu",
     "saved": "Đã lưu",
-    "other": "Khác"
+    "other": "Khác",
+    "goalWeightConflictCut": "Cân nặng hiện tại đã thấp hơn hoặc bằng mục tiêu giảm cân. Hãy cập nhật lại mục tiêu của bạn.",
+    "goalWeightConflictBulk": "Cân nặng hiện tại đã cao hơn hoặc bằng mục tiêu tăng cân. Hãy cập nhật lại mục tiêu của bạn."
   },
   "insightCard": {
     "dismiss": "Bỏ qua"
@@ -1391,6 +1369,9 @@
       "age": "Tuổi",
       "years": "tuổi",
       "dailyCalories": "Lượng calo hàng ngày",
+      "dailyCaloriesLabel": "Mức calo mục tiêu mỗi ngày",
+      "dailyCaloriesDesc": "Đây là lượng calo ước tính bạn nên nạp mỗi ngày để đạt được mục tiêu đã chọn, dựa trên chỉ số cơ thể và mức hoạt động.",
+      "goalLabel": "Mục tiêu",
       "day": "ngày",
       "confirm": "Xác nhận",
       "moreDetail": "Xem chi tiết",
@@ -1428,6 +1409,7 @@
       "processing": "Đang xử lý…",
       "error": "Có lỗi xảy ra khi tạo kế hoạch",
       "retry": "Thử lại",
+      "returnToStrategy": "Quay lại chọn phương thức",
       "switchManual": "Tự lên kế hoạch",
       "skipToManual": "Tự lên kế hoạch",
       "skip": "Bỏ qua",
