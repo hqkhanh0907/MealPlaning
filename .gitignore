@@ -29,3 +29,7 @@ client_secret*.json
 stats.html
 .superpowers/
 .superpowers/
+clean_cov.txt
+cov_raw.txt
+vitest_stderr.txt
+screenshots/
