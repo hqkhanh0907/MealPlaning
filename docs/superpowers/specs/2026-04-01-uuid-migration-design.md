@@ -135,7 +135,7 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 ```
 
-**Note:** Fisher-Yates still uses `Math.random()` which is acceptable for non-security shuffle randomization. SonarQube rule S2245 will still flag this as a Security Hotspot — it does not perform semantic analysis. After migration, this single hotspot should be manually marked as "Safe" in SonarQube since it's used for array shuffle, not crypto/ID generation.
+**Note:** Fisher-Yates uses `crypto.getRandomValues()` for cryptographically secure randomness — no `Math.random()` remains in production code. Zero SonarQube security hotspots from this migration.
 
 ### 7. Test file updates (minimal)
 
@@ -167,12 +167,12 @@ Only tests that assert ID **format** need changes:
 |---|---|---|
 | Existing data has old format IDs | None | DB uses TEXT columns, old IDs remain valid |
 | Old/new format IDs coexist | None | All code uses opaque equality, never parses format |
-| Fisher-Yates still uses Math.random() | Low | Acceptable for non-security shuffle; SonarQube will flag as hotspot — mark as "Safe" during review |
+| Fisher-Yates shuffle | None | Uses `crypto.getRandomValues()` — fully crypto-safe, no SonarQube hotspot |
 | Test assertions on ID format break | Expected | Part of the migration — update assertions to UUID regex |
 
 ## Expected Outcomes
 
-- **5 SonarQube security hotspots eliminated** from Math.random() ID generation (1 reviewed-safe hotspot remains in Fisher-Yates shuffle for `geminiService.ts`)
+- **All SonarQube security hotspots eliminated** from this migration (0 new hotspots, 2 pre-existing regex hotspots remain)
 - **0 collision risk** — crypto.randomUUID() is RFC 4122 v4 compliant
 - **1 single source** for all ID generation — `generateUUID()` in `utils/helpers.ts`
 - **Consistent format** across entire app
