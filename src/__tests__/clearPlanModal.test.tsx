@@ -253,11 +253,13 @@ describe('ClearPlanModal', () => {
     const expandBtn = screen.getAllByTestId(/btn-expand/)[0];
     fireEvent.click(expandBtn);
     fireEvent.click(expandBtn);
+    expect(expandBtn).toBeInTheDocument();
   });
 
   it('collapses affected dates when clicking a different scope expand', () => {
     renderModal();
     const expandBtns = screen.getAllByTestId(/btn-expand/);
+    expect(expandBtns.length).toBeGreaterThanOrEqual(2);
     if (expandBtns.length >= 2) {
       fireEvent.click(expandBtns[0]);
       fireEvent.click(expandBtns[1]);

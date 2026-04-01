@@ -16,7 +16,7 @@ interface StreakMiniProps {
   onTap?: () => void;
 }
 
-function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
+function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactElement {
   const { t } = useTranslation();
   const workouts = useFitnessStore((s) => s.workouts);
   const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
@@ -54,7 +54,6 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
       <button
         type="button"
         data-testid="streak-mini-empty"
-        role="button"
         tabIndex={0}
         aria-label={t('dashboard.streakMini.a11yEmpty')}
         onClick={handleTap}
@@ -78,7 +77,6 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
     <button
       type="button"
       data-testid="streak-mini"
-      role="button"
       tabIndex={0}
       aria-label={t('dashboard.streakMini.a11y', {
         days: streakInfo.currentStreak,

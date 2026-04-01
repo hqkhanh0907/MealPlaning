@@ -159,13 +159,11 @@ export const useFitnessStore = create<FitnessState>()(
 
       setActivePlan: (planId) =>
         set((state) => ({
-          trainingPlans: state.trainingPlans.map((p) =>
-            p.id === planId
-              ? { ...p, status: 'active' as const }
-              : p.status === 'active'
-                ? { ...p, status: 'paused' as const }
-                : p,
-          ),
+          trainingPlans: state.trainingPlans.map((p) => {
+            if (p.id === planId) return { ...p, status: 'active' as const };
+            if (p.status === 'active') return { ...p, status: 'paused' as const };
+            return p;
+          }),
         })),
 
       addPlanDays: (days) => {

@@ -106,27 +106,23 @@ function useLongPress(
     tickCountRef.current = 0;
 
     timerRef.current = setTimeout(() => {
-      const runInterval = () => {
-        tickCountRef.current += 1;
-        const interval =
-          tickCountRef.current > ACCELERATION_THRESHOLD
-            ? LONG_PRESS_INTERVAL_FAST
-            : LONG_PRESS_INTERVAL_INITIAL;
+      tickCountRef.current += 1;
+      const interval =
+        tickCountRef.current > ACCELERATION_THRESHOLD
+          ? LONG_PRESS_INTERVAL_FAST
+          : LONG_PRESS_INTERVAL_INITIAL;
 
-        clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(() => {
-          onTick();
-          tickCountRef.current += 1;
-          if (tickCountRef.current > ACCELERATION_THRESHOLD) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = setInterval(onTick, LONG_PRESS_INTERVAL_FAST);
-          }
-        }, interval);
-
+      clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(() => {
         onTick();
-      };
+        tickCountRef.current += 1;
+        if (tickCountRef.current > ACCELERATION_THRESHOLD) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = setInterval(onTick, LONG_PRESS_INTERVAL_FAST);
+        }
+      }, interval);
 
-      runInterval();
+      onTick();
     }, LONG_PRESS_DELAY);
   }, [onTick]);
 
@@ -146,7 +142,7 @@ function useLongPress(
   };
 }
 
-function WeightQuickLogInner({ onClose }: WeightQuickLogProps): React.JSX.Element {
+function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.JSX.Element {
   const { t } = useTranslation();
   const notify = useNotification();
 
@@ -293,7 +289,6 @@ function WeightQuickLogInner({ onClose }: WeightQuickLogProps): React.JSX.Elemen
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <dialog
         open
-        role="dialog"
         data-testid="weight-quick-log"
         className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md"
         aria-label={t('fitness.weight.quickLogTitle')}

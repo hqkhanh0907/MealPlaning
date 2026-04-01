@@ -11,7 +11,7 @@ function getScoreColor(score: number): string {
   return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
 }
 
-function TemplateMatchBadgeInner({ score }: TemplateMatchBadgeProps): React.JSX.Element {
+function TemplateMatchBadgeInner({ score }: Readonly<TemplateMatchBadgeProps>): React.JSX.Element {
   const { t } = useTranslation();
   const clamped = Math.max(0, Math.min(100, Math.round(score)));
 

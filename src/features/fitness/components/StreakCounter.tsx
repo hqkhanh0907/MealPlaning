@@ -5,7 +5,7 @@ import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateStreak } from '../utils/gamification';
 import { DAY_LABELS } from '../constants';
 
-function DotIcon({ status }: { status: string }): React.JSX.Element {
+function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
   switch (status) {
     case 'completed':
       return <CheckCircle className="h-5 w-5 text-emerald-500" aria-hidden="true" />;

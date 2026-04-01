@@ -27,7 +27,7 @@ interface CardioLoggerProps {
   onBack: () => void;
 }
 
-export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.JSX.Element {
+export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>): React.JSX.Element {
   const { t } = useTranslation();
   const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
   const weightKg = useHealthProfileStore((s) => s.profile.weightKg);
@@ -201,13 +201,13 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
               {t('fitness.cardio.stopwatch')}
             </Button>
             <Button
-              variant={!isStopwatchMode ? 'default' : 'outline'}
+              variant={isStopwatchMode ? 'outline' : 'default'}
               onClick={() => setValue('isStopwatchMode', false)}
               className={cn(
                 'flex-1 rounded-lg py-2',
-                !isStopwatchMode
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                  : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+                isStopwatchMode
+                  ? 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+                  : 'bg-emerald-500 text-white hover:bg-emerald-600'
               )}
               data-testid="manual-mode-button"
             >
@@ -224,16 +224,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                 {formatElapsed(stopwatch.elapsed)}
               </p>
               <div className="flex gap-2">
-                {!stopwatch.isRunning ? (
-                  <Button
-                    variant="default"
-                    onClick={handleStartStopwatch}
-                    className="flex-1 bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
-                    data-testid="start-button"
-                  >
-                    {t('fitness.cardio.start')}
-                  </Button>
-                ) : (
+                {stopwatch.isRunning ? (
                   <Button
                     variant="default"
                     onClick={handlePauseStopwatch}
@@ -241,6 +232,15 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
                     data-testid="pause-button"
                   >
                     {t('fitness.cardio.pause')}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    onClick={handleStartStopwatch}
+                    className="flex-1 bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
+                    data-testid="start-button"
+                  >
+                    {t('fitness.cardio.start')}
                   </Button>
                 )}
                 <Button

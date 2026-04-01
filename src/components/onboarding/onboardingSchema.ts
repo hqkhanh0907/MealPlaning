@@ -8,7 +8,7 @@ export const onboardingSchema = z.object({
   dateOfBirth: z.string().min(1).refine(
     (v) => {
       const d = new Date(v);
-      return !isNaN(d.getTime()) && d < new Date();
+      return !Number.isNaN(d.getTime()) && d < new Date();
     },
     { message: 'onboarding.validation.dobInvalid' }
   ),

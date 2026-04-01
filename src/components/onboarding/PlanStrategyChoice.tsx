@@ -12,7 +12,7 @@ interface PlanStrategyChoiceProps {
   goToSection: (section: 1 | 2 | 3 | 4 | 5 | 6 | 7) => void;
 }
 
-export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goToSection }: PlanStrategyChoiceProps) {
+export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goToSection }: Readonly<PlanStrategyChoiceProps>) {
   const { t } = useTranslation();
   const values = form.getValues();
 

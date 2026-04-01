@@ -11,7 +11,7 @@ interface HealthBasicStepProps {
   goBack: () => void;
 }
 
-export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) {
+export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicStepProps>) {
   const { t } = useTranslation();
   const { control, trigger } = form;
 

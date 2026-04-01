@@ -6,7 +6,7 @@ import { TrainingProfileForm } from '../../features/fitness/components/TrainingP
 import { useFitnessStore } from '../../store/fitnessStore';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
 
-function TrainingProfileDetailPageInner({ onBack }: { onBack: () => void }) {
+function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const trainingProfile = useFitnessStore((s) => s.trainingProfile);
@@ -36,27 +36,23 @@ function TrainingProfileDetailPageInner({ onBack }: { onBack: () => void }) {
       onSave={() => void handleSave()}
       onCancel={handleCancel}
     >
-      {isEditing ? (
-        <TrainingProfileForm embedded saveRef={saveRef} />
-      ) : (
-        trainingProfile ? (
-          <TrainingProfileSection />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="training-profile-empty">
-            <Dumbbell className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              {t('settings.notConfigured')}
-            </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-              {t('settings.notConfiguredDesc')}
-            </p>
-          </div>
-        )
+      {isEditing && <TrainingProfileForm embedded saveRef={saveRef} />}
+      {!isEditing && trainingProfile && <TrainingProfileSection />}
+      {!isEditing && !trainingProfile && (
+        <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="training-profile-empty">
+          <Dumbbell className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+            {t('settings.notConfigured')}
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+            {t('settings.notConfiguredDesc')}
+          </p>
+        </div>
       )}
     </SettingsDetailLayout>
   );
 }
 
-export default function TrainingProfileDetailPage({ onBack }: { onBack: () => void }) {
+export default function TrainingProfileDetailPage({ onBack }: Readonly<{ onBack: () => void }>) {
   return <TrainingProfileDetailPageInner onBack={onBack} />;
 }

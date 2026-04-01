@@ -57,8 +57,8 @@ export const useDishStore = create<DishState>((set, get) => ({
           name: { vi: r.name_vi, ...(r.name_en ? { en: r.name_en } : {}) },
           ingredients: ings.map((i) => ({ ingredientId: i.ingredient_id, amount: i.amount })),
           tags: JSON.parse(r.tags),
-          ...(r.rating != null ? { rating: r.rating } : {}),
-          ...(r.notes != null ? { notes: r.notes } : {}),
+          ...(r.rating == null ? {} : { rating: r.rating }),
+          ...(r.notes == null ? {} : { notes: r.notes }),
         };
       }),
     );

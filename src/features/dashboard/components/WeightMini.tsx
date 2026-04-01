@@ -123,7 +123,7 @@ interface WeightMiniProps {
   onTap?: () => void;
 }
 
-function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
+function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactElement {
   const { t } = useTranslation();
   const weightEntries = useFitnessStore((s) => s.weightEntries);
   const activeGoal = useHealthProfileStore((s) => s.activeGoal);
@@ -167,7 +167,6 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
       <button
         type="button"
         data-testid="weight-mini-empty"
-        role="button"
         tabIndex={0}
         aria-label={t('dashboard.weightMini.a11yEmpty')}
         onClick={handleTap}
@@ -207,7 +206,6 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
     <button
       type="button"
       data-testid="weight-mini"
-      role="button"
       tabIndex={0}
       aria-label={t('dashboard.weightMini.a11y', {
         weight: latestWeight.weightKg,

@@ -84,7 +84,6 @@ export const RestTimer = React.memo(function RestTimer({
   return (
     <dialog
       open
-      role="dialog"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       aria-modal="true"
       aria-label={t('fitness.timer.rest')}
@@ -107,7 +106,6 @@ export const RestTimer = React.memo(function RestTimer({
             className="sr-only"
             value={Math.round(progress * 100)}
             max={100}
-            role="progressbar"
             aria-valuenow={Math.round(progress * 100)}
             aria-valuemin={0}
             aria-valuemax={100}

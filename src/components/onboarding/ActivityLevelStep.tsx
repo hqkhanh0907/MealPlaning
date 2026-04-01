@@ -19,7 +19,7 @@ const LEVELS = [
   { value: 'extra_active', emoji: '⚡', multiplier: 1.9 },
 ] as const;
 
-export function ActivityLevelStep({ form, goNext, goBack }: ActivityLevelStepProps) {
+export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLevelStepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'activityLevel' });
 

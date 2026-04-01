@@ -24,7 +24,7 @@ function SessionTabsInner({
   onAddSession,
   onDeleteSession,
   maxSessions = 3,
-}: SessionTabsProps): React.JSX.Element | null {
+}: Readonly<SessionTabsProps>): React.JSX.Element | null {
   const { t } = useTranslation();
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -13,7 +13,7 @@ export function DeloadModal({
   reason,
   onAccept,
   onOverride,
-}: DeloadModalProps) {
+}: Readonly<DeloadModalProps>) {
   const { t } = useTranslation();
 
   if (!isOpen) return null;

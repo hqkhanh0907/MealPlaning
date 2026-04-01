@@ -21,7 +21,7 @@ function AddSessionModalInner({
   onSelectCardio,
   onSelectFreestyle,
   currentSessionCount,
-}: AddSessionModalProps): React.JSX.Element | null {
+}: Readonly<AddSessionModalProps>): React.JSX.Element | null {
   const { t } = useTranslation();
   const [step, setStep] = useState<'options' | 'muscle-groups'>('options');
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);

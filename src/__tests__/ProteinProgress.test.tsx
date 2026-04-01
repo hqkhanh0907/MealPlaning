@@ -179,7 +179,6 @@ describe('ProteinProgress', () => {
     render(<ProteinProgress current={142} target={166} />);
 
     const container = screen.getByTestId('protein-progress');
-    expect(container).toHaveAttribute('role', 'progressbar');
     expect(container).toHaveAttribute('aria-valuenow', '142');
     expect(container).toHaveAttribute('aria-valuemin', '0');
     expect(container).toHaveAttribute('aria-valuemax', '166');

@@ -90,7 +90,6 @@ describe('EnergyBalanceMini', () => {
     render(<EnergyBalanceMini {...baseProps} onTapDetail={handler} />);
 
     const container = screen.getByTestId('energy-balance-mini');
-    expect(container).toHaveAttribute('role', 'button');
     expect(container).toHaveAttribute('tabindex', '0');
   });
 

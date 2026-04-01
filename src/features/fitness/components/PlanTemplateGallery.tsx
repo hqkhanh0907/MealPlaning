@@ -29,11 +29,11 @@ function TemplateCard({
   template,
   matchScore,
   onApply,
-}: {
+}: Readonly<{
   template: PlanTemplate;
   matchScore?: number;
   onApply: (template: PlanTemplate) => void;
-}): React.JSX.Element {
+}>): React.JSX.Element {
   const { t } = useTranslation();
 
   return (
@@ -89,7 +89,7 @@ function LoadingSkeleton(): React.JSX.Element {
   );
 }
 
-function PlanTemplateGalleryInner({ planId }: PlanTemplateGalleryProps): React.JSX.Element {
+function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>): React.JSX.Element {
   const { t } = useTranslation();
   const popPage = useNavigationStore((s) => s.popPage);
 
@@ -366,7 +366,6 @@ function PlanTemplateGalleryInner({ planId }: PlanTemplateGalleryProps): React.J
       {showSaveDialog && (
         <dialog
           open
-          role="dialog"
           data-testid="save-template-dialog"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           aria-modal="true"

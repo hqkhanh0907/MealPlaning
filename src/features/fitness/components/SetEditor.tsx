@@ -129,7 +129,6 @@ export const SetEditor = React.memo(function SetEditor({
     <ModalBackdrop onClose={onCancel} zIndex="z-50">
       <dialog
         open
-        role="dialog"
         className="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-xl sm:rounded-3xl dark:bg-slate-800"
         aria-modal="true"
         aria-label={t('fitness.editor.title')}

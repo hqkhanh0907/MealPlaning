@@ -19,7 +19,7 @@ export function QuickConfirmCard({
   suggestion,
   onConfirm,
   onCustomize,
-}: QuickConfirmCardProps) {
+}: Readonly<QuickConfirmCardProps>) {
   return (
     <div
       className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-800 dark:bg-blue-900/20"

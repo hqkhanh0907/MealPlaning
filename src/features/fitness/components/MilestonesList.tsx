@@ -70,7 +70,6 @@ export const MilestonesList = React.memo(function MilestonesList() {
                 className="sr-only"
                 value={progress}
                 max={100}
-                role="progressbar"
                 aria-valuenow={progress}
                 aria-valuemin={0}
                 aria-valuemax={100}

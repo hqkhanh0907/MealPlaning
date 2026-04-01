@@ -37,7 +37,7 @@ function getCutoffDate(range: TimeRange): string {
   return d.toISOString().split('T')[0];
 }
 
-function SimpleBarChart({ data }: { data: number[] }) {
+function SimpleBarChart({ data }: Readonly<{ data: number[] }>) {
   const maxVal = Math.max(...data, 1);
   return (
     <div data-testid="bottom-sheet-chart" className="flex h-32 items-end gap-1">

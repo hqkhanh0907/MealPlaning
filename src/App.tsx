@@ -74,7 +74,7 @@ const UnifiedOnboarding = React.lazy(() => import('./components/UnifiedOnboardin
 import type { PageEntry } from './store/navigationStore';
 
 // Generic page stack renderer for full-screen pages
-function PageStackOverlay({ page, onBack }: { page: PageEntry; onBack: () => void }): React.JSX.Element | null {
+function PageStackOverlay({ page, onBack }: Readonly<{ page: PageEntry; onBack: () => void }>): React.JSX.Element | null {
   const handleWorkoutComplete = useCallback(() => {
     onBack();
   }, [onBack]);

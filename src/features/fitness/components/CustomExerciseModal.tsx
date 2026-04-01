@@ -12,7 +12,7 @@ import {
   type CustomExerciseFormData,
 } from '../../../schemas/customExerciseSchema';
 
-export type { CustomExerciseFormData };
+export type { CustomExerciseFormData } from '../../../schemas/customExerciseSchema';
 
 interface CustomExerciseModalProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ export function CustomExerciseModal({
   isOpen,
   onClose,
   onSave,
-}: CustomExerciseModalProps): React.JSX.Element | null {
+}: Readonly<CustomExerciseModalProps>): React.JSX.Element | null {
   const { t } = useTranslation();
 
   const {

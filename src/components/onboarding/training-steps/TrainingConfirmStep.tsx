@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { SummaryRow } from './SummaryRow';
 import type { StepProps } from './types';
 
-export function TrainingConfirmStep({ form, goNext, goBack }: StepProps) {
+export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const values = form.getValues();
   const experience = values.experience;

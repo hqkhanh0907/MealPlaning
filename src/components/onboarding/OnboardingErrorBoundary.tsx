@@ -11,7 +11,7 @@ interface State {
   hasError: boolean;
 }
 
-function FallbackUI({ onReset }: { onReset: () => void }) {
+function FallbackUI({ onReset }: Readonly<{ onReset: () => void }>) {
   const { t } = useTranslation();
 
   return (

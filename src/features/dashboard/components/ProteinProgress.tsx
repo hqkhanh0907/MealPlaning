@@ -58,7 +58,6 @@ export const ProteinProgress: React.FC<ProteinProgressProps> = React.memo(
           style={{ minHeight: 48 }}
           value={roundedCurrent}
           max={roundedTarget}
-          role="progressbar"
           aria-valuenow={roundedCurrent}
           aria-valuemin={0}
           aria-valuemax={roundedTarget}

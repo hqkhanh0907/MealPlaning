@@ -87,5 +87,6 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   getScrollPosition: (tab: string) => get().tabScrollPositions[tab] ?? 0,
 }));
 
-export type { PageEntry, NavigationState, MainTab };
+export type { PageEntry, NavigationState };
+export type { MainTab } from '../components/navigation/types';
 export { useNavigationStore };

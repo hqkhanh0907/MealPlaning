@@ -236,7 +236,6 @@ describe('SetEditor', () => {
   it('editor has proper aria attributes', () => {
     renderEditor();
     const editor = screen.getByTestId('set-editor');
-    expect(editor).toHaveAttribute('role', 'dialog');
     expect(editor).toHaveAttribute('aria-modal', 'true');
     expect(editor).toHaveAttribute('aria-label', 'Chỉnh sửa set');
   });

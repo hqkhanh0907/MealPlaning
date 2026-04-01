@@ -1136,6 +1136,7 @@ describe('TrainingPlanView', () => {
         return originalQS(sel);
       });
       fireEvent.click(screen.getByTestId('quick-log-weight'));
+      expect(spy).toHaveBeenCalled();
       spy.mockRestore();
     });
   });

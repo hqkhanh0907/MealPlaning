@@ -29,11 +29,11 @@ function SessionInfo({
   totalSessions,
   completedSessions,
   variant,
-}: {
+}: Readonly<{
   totalSessions: number;
   completedSessions: number;
   variant: 'pending' | 'completed';
-}) {
+}>) {
   const { t } = useTranslation();
   if (totalSessions <= 1) return null;
 
@@ -61,13 +61,13 @@ function MealsSection({
   hasReachedTarget,
   nextMealToLog,
   onLogMeal,
-}: {
+}: Readonly<{
   mealsLogged: number;
   totalMealsPlanned: number;
   hasReachedTarget: boolean;
   nextMealToLog?: string;
   onLogMeal?: () => void;
-}) {
+}>) {
   const { t } = useTranslation();
   const nextMealKey = nextMealToLog
     ? MEAL_LOG_KEYS[nextMealToLog]

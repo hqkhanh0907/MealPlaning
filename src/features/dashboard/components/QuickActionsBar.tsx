@@ -77,9 +77,9 @@ const ActionButton = React.memo(function ActionButton({
 
 function QuickActionsBarInner({
   onLogWeight,
-}: {
+}: Readonly<{
   onLogWeight?: () => void;
-}): React.ReactElement {
+}>): React.ReactElement {
   const { t } = useTranslation();
   const { actions, handleAction } = useQuickActions({ onLogWeight });
   const [left, center, right] = actions;

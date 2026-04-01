@@ -5,7 +5,7 @@ import { isMigrationNeeded, migrateFromLocalStorage, isFitnessMigrationCompleted
 
 const DatabaseContext = createContext<DatabaseService | null>(null);
 
-export function DatabaseProvider({ children }: { children: React.ReactNode }) {
+export function DatabaseProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [db, setDb] = useState<DatabaseService | null>(null);
   const [error, setError] = useState<string | null>(null);
 

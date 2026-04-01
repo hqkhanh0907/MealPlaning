@@ -8,7 +8,7 @@ import type { StepProps } from './types';
 const SLEEP_OPTIONS = [4, 5, 6, 7, 8, 9, 10] as const;
 const LOW_SLEEP_THRESHOLD = 7;
 
-export function SleepHoursStep({ form, goNext, goBack }: StepProps) {
+export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'sleepHours' });
   const showWarning = field.field.value != null && field.field.value < LOW_SLEEP_THRESHOLD;
@@ -21,24 +21,33 @@ export function SleepHoursStep({ form, goNext, goBack }: StepProps) {
       goBack={goBack}
     >
       <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.sleepHours')}>
-        {SLEEP_OPTIONS.map((hours) => (
-          <button
-            key={hours}
-            type="button"
-            aria-pressed={field.field.value === hours}
-            onClick={() => field.field.onChange(hours)}
-            className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
-              field.field.value === hours
-                ? hours < LOW_SLEEP_THRESHOLD
-                  ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                  : 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
-            )}
-          >
-            {hours}
-          </button>
-        ))}
+        {SLEEP_OPTIONS.map((hours) => {
+          const isActive = field.field.value === hours;
+
+          let stateClass: string;
+          if (isActive && hours < LOW_SLEEP_THRESHOLD) {
+            stateClass = 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+          } else if (isActive) {
+            stateClass = 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+          } else {
+            stateClass = 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400';
+          }
+
+          return (
+            <button
+              key={hours}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => field.field.onChange(hours)}
+              className={cn(
+                'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                stateClass,
+              )}
+            >
+              {hours}
+            </button>
+          );
+        })}
       </fieldset>
       <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
         {t('fitness.onboarding.hoursUnit')}

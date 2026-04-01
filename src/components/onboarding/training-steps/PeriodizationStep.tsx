@@ -7,7 +7,7 @@ import type { StepProps } from './types';
 
 const PERIODIZATION_OPTIONS = ['linear', 'undulating', 'block'] as const;
 
-export function PeriodizationStep({ form, goNext, goBack }: StepProps) {
+export function PeriodizationStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'periodization' });
 

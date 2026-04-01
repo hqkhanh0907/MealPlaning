@@ -46,7 +46,11 @@ export const OnboardingProgress: React.FC<OnboardingProgressProps> = React.memo(
             <div
               key={sectionIndex}
               className="flex-1 bg-gray-200 dark:bg-slate-700 overflow-hidden"
-              style={i === 0 ? { borderRadius: '2px 0 0 2px' } : i === totalSections - 1 ? { borderRadius: '0 2px 2px 0' } : undefined}
+              style={(() => {
+                if (i === 0) return { borderRadius: '2px 0 0 2px' };
+                if (i === totalSections - 1) return { borderRadius: '0 2px 2px 0' };
+                return undefined;
+              })()}
             >
               <div
                 className="h-full bg-emerald-500 motion-safe:transition-[width] motion-safe:duration-300"

@@ -61,7 +61,7 @@ function StringNumberControllerInner<T extends FieldValues>(
   if (fieldNum !== prevFieldValue && !bothNaN) {
     if (!Number.isNaN(fieldNum)) {
       setPrevFieldValue(fieldNum);
-      const parsed = parseNumericInput(localValue, NaN);
+      const parsed = parseNumericInput(localValue, Number.NaN);
       if (Number.isNaN(parsed) || parsed !== fieldNum) {
         setLocalValue(fieldNum === 0 ? '0' : String(fieldNum ?? ''));
       }
@@ -75,12 +75,12 @@ function StringNumberControllerInner<T extends FieldValues>(
     if (raw === '-') return;
 
     if (raw === '') {
-      const nanVal = NaN as unknown as typeof field.value;
+      const nanVal = Number.NaN as unknown as typeof field.value;
       field.onChange(nanVal);
       return;
     }
 
-    const parsed = parseNumericInput(raw, NaN);
+    const parsed = parseNumericInput(raw, Number.NaN);
     if (!Number.isNaN(parsed)) {
       const clamped = clampValue(parsed);
       setPrevFieldValue(clamped);
@@ -89,7 +89,7 @@ function StringNumberControllerInner<T extends FieldValues>(
   };
 
   const handleBlur = () => {
-    if (localValue === '' || Number.isNaN(parseNumericInput(localValue, NaN))) {
+    if (localValue === '' || Number.isNaN(parseNumericInput(localValue, Number.NaN))) {
       // Allow empty — don't revert to previous value.
       // RHF field already holds NaN from handleChange; just fire onBlur.
     } else {

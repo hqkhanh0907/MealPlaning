@@ -422,7 +422,6 @@ export const PlanDayEditor = memo(function PlanDayEditor({
       {showConfirmDialog && (
         <dialog
           open
-          role="dialog"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
           aria-modal="true"
           aria-labelledby={confirmDialogTitleId}

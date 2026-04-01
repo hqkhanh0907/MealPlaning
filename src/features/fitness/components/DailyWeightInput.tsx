@@ -133,7 +133,7 @@ function DailyWeightInputInner(): React.JSX.Element {
 
   const isValid =
     displayValue !== '' &&
-    !Number.isNaN(parseFloat(displayValue)) &&
+    !Number.isNaN(Number.parseFloat(displayValue)) &&
     numericValue >= MIN_WEIGHT &&
     numericValue <= MAX_WEIGHT;
 
@@ -171,7 +171,7 @@ function DailyWeightInputInner(): React.JSX.Element {
       const raw = e.target.value;
       setDisplayValue(raw);
       if (raw !== '') {
-        const num = parseFloat(raw);
+        const num = Number.parseFloat(raw);
         if (!Number.isNaN(num)) {
           setNumericValue(num);
         }
@@ -182,8 +182,8 @@ function DailyWeightInputInner(): React.JSX.Element {
   );
 
   const handleInputBlur = useCallback(() => {
-    if (displayValue !== '' && !Number.isNaN(parseFloat(displayValue))) {
-      const num = parseFloat(displayValue);
+    if (displayValue !== '' && !Number.isNaN(Number.parseFloat(displayValue))) {
+      const num = Number.parseFloat(displayValue);
       setNumericValue(num);
       setDisplayValue(String(num));
     }
@@ -364,13 +364,11 @@ function DailyWeightInputInner(): React.JSX.Element {
             {delta !== null && (
               <span
                 data-testid="weight-delta"
-                className={`ml-1 font-medium ${
-                  delta < 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : delta > 0
-                      ? 'text-red-500 dark:text-red-400'
-                      : 'text-slate-400'
-                }`}
+                className={`ml-1 font-medium ${(() => {
+                  if (delta < 0) return 'text-emerald-600 dark:text-emerald-400';
+                  if (delta > 0) return 'text-red-500 dark:text-red-400';
+                  return 'text-slate-400';
+                })()}`}
               >
                 ({delta > 0 ? '+' : ''}
                 {delta})

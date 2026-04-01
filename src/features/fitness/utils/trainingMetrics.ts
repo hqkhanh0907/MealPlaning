@@ -1,6 +1,6 @@
 import type { Workout, WorkoutSet } from '../types';
 
-export type { Workout, WorkoutSet };
+export type { Workout, WorkoutSet } from '../types';
 
 /** Exercise volume (total weight × reps for all sets) */
 export function calculateExerciseVolume(sets: WorkoutSet[]): number {

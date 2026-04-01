@@ -10,7 +10,7 @@ const EQUIPMENT_OPTIONS = [
   'bodyweight', 'bands', 'kettlebell',
 ] as const;
 
-export function EquipmentStep({ form, goNext, goBack }: StepProps) {
+export function EquipmentStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'equipment' });
   const selected = field.field.value ?? [];

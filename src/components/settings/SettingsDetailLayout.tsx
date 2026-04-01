@@ -24,7 +24,7 @@ export function SettingsDetailLayout({
   onSave,
   onCancel,
   children,
-}: SettingsDetailLayoutProps) {
+}: Readonly<SettingsDetailLayoutProps>) {
   const { t } = useTranslation();
 
   return (

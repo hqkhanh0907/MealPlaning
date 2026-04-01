@@ -342,9 +342,9 @@ export function useProgressiveOverload(): {
         ...(plateauResult.isPlateaued
           ? { isPlateaued: true, plateauWeeks: plateauResult.weeks }
           : {}),
-        ...(fatigueResult.level !== 'none'
-          ? { isOvertraining: true, avgRpe }
-          : {}),
+        ...(fatigueResult.level === 'none'
+          ? {}
+          : { isOvertraining: true, avgRpe }),
       };
     },
     [getLastSets, trainingProfile, checkPlateauFn, workoutSets],

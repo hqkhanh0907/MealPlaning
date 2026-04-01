@@ -22,7 +22,7 @@ export function HealthConfirmStep({
   form,
   goNext,
   goBack,
-}: HealthConfirmStepProps) {
+}: Readonly<HealthConfirmStepProps>) {
   const { t } = useTranslation();
   const db = useDatabase();
   const saveProfile = useHealthProfileStore((s) => s.saveProfile);

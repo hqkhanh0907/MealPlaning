@@ -277,7 +277,6 @@ describe('RestTimer a11y', () => {
     );
 
     const ring = screen.getByTestId('progress-ring');
-    expect(ring).toHaveAttribute('role', 'progressbar');
     expect(ring).toHaveAttribute('aria-valuenow');
     expect(ring).toHaveAttribute('aria-valuemax', '100');
     expect(ring).toHaveAttribute('aria-label');
@@ -293,7 +292,6 @@ describe('RestTimer a11y', () => {
     );
 
     const overlay = screen.getByTestId('rest-timer-overlay');
-    expect(overlay).toHaveAttribute('role', 'dialog');
     expect(overlay).toHaveAttribute('aria-modal', 'true');
     expect(overlay).toHaveAttribute('aria-label');
   });
@@ -367,7 +365,6 @@ describe('MilestonesList a11y', () => {
     fireEvent.click(screen.getByTestId('milestones-toggle'));
 
     const progressBar = screen.getByTestId('progress-bar');
-    expect(progressBar).toHaveAttribute('role', 'progressbar');
     expect(progressBar).toHaveAttribute('aria-valuenow');
     expect(progressBar).toHaveAttribute('aria-valuemax', '100');
     expect(progressBar).toHaveAttribute('aria-label');
@@ -416,7 +413,6 @@ describe('StreakMini a11y', () => {
     render(<StreakMini onTap={vi.fn()} />);
 
     const el = screen.getByTestId('streak-mini-empty');
-    expect(el).toHaveAttribute('role', 'button');
     expect(el).toHaveAttribute('tabindex', '0');
     expect(el).toHaveAttribute('aria-label');
     expect(el.className).toContain('focus:ring-2');
@@ -442,7 +438,6 @@ describe('StreakMini a11y', () => {
     render(<StreakMini onTap={vi.fn()} />);
 
     const el = screen.getByTestId('streak-mini');
-    expect(el).toHaveAttribute('role', 'button');
     expect(el).toHaveAttribute('aria-label');
     expect(el.className).toContain('focus:ring-2');
   });
@@ -452,7 +447,6 @@ describe('StreakMini a11y', () => {
     render(<StreakMini onTap={onTap} />);
 
     const el = screen.getByTestId('streak-mini-empty');
-    expect(el).toHaveAttribute('role', 'button');
     fireEvent.click(el);
     expect(onTap).toHaveBeenCalledTimes(1);
   });
@@ -479,7 +473,6 @@ describe('WeightQuickLog a11y', () => {
     render(<WeightQuickLog onClose={vi.fn()} />);
 
     const dialog = screen.getByTestId('weight-quick-log');
-    expect(dialog).toHaveAttribute('role', 'dialog');
     expect(dialog).toHaveAttribute('aria-label');
   });
 
@@ -632,7 +625,6 @@ describe('EnergyBalanceMini a11y', () => {
     );
 
     const container = screen.getByTestId('energy-balance-mini');
-    expect(container).toHaveAttribute('role', 'button');
     expect(container).toHaveAttribute('aria-label');
     expect(container.className).toContain('focus:ring-2');
   });
@@ -659,7 +651,6 @@ describe('EnergyBalanceMini a11y', () => {
     );
 
     const container = screen.getByTestId('energy-balance-mini');
-    expect(container).toHaveAttribute('role', 'button');
     fireEvent.click(container);
     expect(onTap).toHaveBeenCalledTimes(1);
   });

@@ -38,7 +38,7 @@ const SLIDES: SlideContent[] = [
   },
 ];
 
-function DotIndicator({ total, current, ariaLabel }: { total: number; current: number; ariaLabel: string }) {
+function DotIndicator({ total, current, ariaLabel }: Readonly<{ total: number; current: number; ariaLabel: string }>) {
   return (
     <fieldset className="flex items-center gap-2 border-0 p-0 m-0" aria-label={ariaLabel}>
       {Array.from({ length: total }, (_, i) => (
@@ -57,7 +57,7 @@ function DotIndicator({ total, current, ariaLabel }: { total: number; current: n
   );
 }
 
-export function WelcomeSlides({ step, goNext, goToSection }: WelcomeSlidesProps) {
+export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSlidesProps>) {
   const { t } = useTranslation();
   const slide = SLIDES[step];
 

@@ -29,7 +29,7 @@ const THEME_OPTIONS = [
   { value: 'schedule', labelKey: 'settings.themeSchedule', icon: Clock },
 ] as const;
 
-export function SettingsMenu({ onNavigate, theme, setTheme }: SettingsMenuProps) {
+export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsMenuProps>) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = React.useState('');
 

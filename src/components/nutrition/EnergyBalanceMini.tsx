@@ -103,7 +103,6 @@ export const EnergyBalanceMini: React.FC<EnergyBalanceMiniProps> = React.memo(
           className={`${baseClass} ${interactiveClass}`}
           style={{ minHeight: 80 }}
           onClick={onTapDetail}
-          role="button"
           aria-label={t('nutrition.energyBalance')}
           tabIndex={0}
           onKeyDown={handleKeyDown}

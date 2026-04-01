@@ -28,7 +28,6 @@ function RadioPillsInner<T extends FieldValues>({
       render={({ field }) => (
         <fieldset
           className={[className ?? 'flex flex-wrap gap-2', 'border-0 p-0 m-0'].join(' ')}
-          role="radiogroup"
           aria-label={name}
         >
           {options.map((option) => {

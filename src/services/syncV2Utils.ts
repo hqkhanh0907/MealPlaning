@@ -115,8 +115,8 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
         name: { vi: r.name_vi as string, ...(r.name_en ? { en: r.name_en } : {}) },
         ingredients: diMap.get(r.id as string) ?? [],
         tags: safeJsonParse(r.tags) ?? [],
-        ...(r.rating != null ? { rating: r.rating } : {}),
-        ...(r.notes != null ? { notes: r.notes } : {}),
+        ...(r.rating == null ? {} : { rating: r.rating }),
+        ...(r.notes == null ? {} : { notes: r.notes }),
       };
     });
   }
@@ -130,7 +130,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
         breakfastDishIds: safeJsonParse(r.breakfast_dish_ids) ?? [],
         lunchDishIds: safeJsonParse(r.lunch_dish_ids) ?? [],
         dinnerDishIds: safeJsonParse(r.dinner_dish_ids) ?? [],
-        ...(r.servings != null ? { servings: safeJsonParse(r.servings) } : {}),
+        ...(r.servings == null ? {} : { servings: safeJsonParse(r.servings) }),
       };
     });
   }
@@ -158,6 +158,75 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
   return legacy;
 }
 
+function transformLegacyIngredients(rawIngredients: unknown[]): unknown[] {
+  return rawIngredients.map((ing) => {
+    const i = ing as Record<string, unknown>;
+    const name = i.name as Record<string, unknown> | undefined;
+    const unit = i.unit as Record<string, unknown> | undefined;
+    return {
+      id: i.id,
+      name_vi: name?.vi ?? '',
+      name_en: name?.en ?? null,
+      calories_per_100: i.caloriesPer100 ?? i.calories_per_100 ?? 0,
+      protein_per_100: i.proteinPer100 ?? i.protein_per_100 ?? 0,
+      carbs_per_100: i.carbsPer100 ?? i.carbs_per_100 ?? 0,
+      fat_per_100: i.fatPer100 ?? i.fat_per_100 ?? 0,
+      fiber_per_100: i.fiberPer100 ?? i.fiber_per_100 ?? 0,
+      unit_vi: unit?.vi ?? 'g',
+      unit_en: unit?.en ?? null,
+    };
+  });
+}
+
+function transformLegacyDishes(
+  rawDishes: unknown[],
+  tables: Record<string, unknown[]>,
+): void {
+  const dishRows: unknown[] = [];
+  const diRows: unknown[] = [];
+  for (const dish of rawDishes) {
+    const d = dish as Record<string, unknown>;
+    const name = d.name as Record<string, unknown> | undefined;
+    const tags = Array.isArray(d.tags) ? JSON.stringify(d.tags) : (d.tags ?? '[]');
+    dishRows.push({
+      id: d.id,
+      name_vi: name?.vi ?? '',
+      name_en: name?.en ?? null,
+      tags,
+      rating: d.rating ?? null,
+      notes: d.notes ?? null,
+    });
+    const ings = d.ingredients;
+    if (Array.isArray(ings)) {
+      for (const di of ings) {
+        const r = di as Record<string, unknown>;
+        diRows.push({
+          dish_id: d.id,
+          ingredient_id: r.ingredientId ?? r.ingredient_id,
+          amount: r.amount ?? 0,
+        });
+      }
+    }
+  }
+  tables['dishes'] = dishRows;
+  if (diRows.length > 0) {
+    tables['dish_ingredients'] = diRows;
+  }
+}
+
+function transformLegacyDayPlans(rawDayPlans: unknown[]): unknown[] {
+  return rawDayPlans.map((plan) => {
+    const p = plan as Record<string, unknown>;
+    return {
+      date: p.date,
+      breakfast_dish_ids: JSON.stringify(p.breakfastDishIds ?? p.breakfast_dish_ids ?? []),
+      lunch_dish_ids: JSON.stringify(p.lunchDishIds ?? p.lunch_dish_ids ?? []),
+      dinner_dish_ids: JSON.stringify(p.dinnerDishIds ?? p.dinner_dish_ids ?? []),
+      servings: p.servings ? JSON.stringify(p.servings) : null,
+    };
+  });
+}
+
 /**
  * Transform v1.x localStorage objects into flat v2 table rows.
  */
@@ -166,71 +235,17 @@ function transformLegacyToV2Tables(data: Record<string, unknown>): Record<string
 
   const rawIngredients = data['mp-ingredients'];
   if (Array.isArray(rawIngredients)) {
-    tables['ingredients'] = rawIngredients.map((ing) => {
-      const i = ing as Record<string, unknown>;
-      const name = i.name as Record<string, unknown> | undefined;
-      const unit = i.unit as Record<string, unknown> | undefined;
-      return {
-        id: i.id,
-        name_vi: name?.vi ?? '',
-        name_en: name?.en ?? null,
-        calories_per_100: i.caloriesPer100 ?? i.calories_per_100 ?? 0,
-        protein_per_100: i.proteinPer100 ?? i.protein_per_100 ?? 0,
-        carbs_per_100: i.carbsPer100 ?? i.carbs_per_100 ?? 0,
-        fat_per_100: i.fatPer100 ?? i.fat_per_100 ?? 0,
-        fiber_per_100: i.fiberPer100 ?? i.fiber_per_100 ?? 0,
-        unit_vi: unit?.vi ?? 'g',
-        unit_en: unit?.en ?? null,
-      };
-    });
+    tables['ingredients'] = transformLegacyIngredients(rawIngredients);
   }
 
   const rawDishes = data['mp-dishes'];
   if (Array.isArray(rawDishes)) {
-    const dishRows: unknown[] = [];
-    const diRows: unknown[] = [];
-    for (const dish of rawDishes) {
-      const d = dish as Record<string, unknown>;
-      const name = d.name as Record<string, unknown> | undefined;
-      const tags = Array.isArray(d.tags) ? JSON.stringify(d.tags) : (d.tags ?? '[]');
-      dishRows.push({
-        id: d.id,
-        name_vi: name?.vi ?? '',
-        name_en: name?.en ?? null,
-        tags,
-        rating: d.rating ?? null,
-        notes: d.notes ?? null,
-      });
-      const ings = d.ingredients;
-      if (Array.isArray(ings)) {
-        for (const di of ings) {
-          const r = di as Record<string, unknown>;
-          diRows.push({
-            dish_id: d.id,
-            ingredient_id: r.ingredientId ?? r.ingredient_id,
-            amount: r.amount ?? 0,
-          });
-        }
-      }
-    }
-    tables['dishes'] = dishRows;
-    if (diRows.length > 0) {
-      tables['dish_ingredients'] = diRows;
-    }
+    transformLegacyDishes(rawDishes, tables);
   }
 
   const rawDayPlans = data['mp-day-plans'];
   if (Array.isArray(rawDayPlans)) {
-    tables['day_plans'] = rawDayPlans.map((plan) => {
-      const p = plan as Record<string, unknown>;
-      return {
-        date: p.date,
-        breakfast_dish_ids: JSON.stringify(p.breakfastDishIds ?? p.breakfast_dish_ids ?? []),
-        lunch_dish_ids: JSON.stringify(p.lunchDishIds ?? p.lunch_dish_ids ?? []),
-        dinner_dish_ids: JSON.stringify(p.dinnerDishIds ?? p.dinner_dish_ids ?? []),
-        servings: p.servings ? JSON.stringify(p.servings) : null,
-      };
-    });
+    tables['day_plans'] = transformLegacyDayPlans(rawDayPlans);
   }
 
   const rawProfile = data['mp-user-profile'];

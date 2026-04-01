@@ -24,6 +24,12 @@ const getDisplayUnit = (unit: string) => {
   return `1 ${unit}`;
 };
 
+function toggleMealTag(currentTags: MealType[], tagType: MealType): MealType[] {
+  return currentTags.includes(tagType)
+    ? currentTags.filter(v => v !== tagType)
+    : [...currentTags, tagType];
+}
+
 interface SaveAnalyzedDishModalProps {
   onClose: () => void;
   result: AnalyzedDishResult;
@@ -217,10 +223,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                               key={opt.type}
                               type="button"
                               onClick={() => {
-                                const next = isActive
-                                  ? tagsField.value.filter((v) => v !== opt.type)
-                                  : [...tagsField.value, opt.type];
-                                tagsField.onChange(next);
+                                tagsField.onChange(toggleMealTag(tagsField.value, opt.type));
                                 setTagError(null);
                               }}
                               className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${

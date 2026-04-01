@@ -34,13 +34,17 @@ function GoalViewMode() {
     if (activeGoal.targetWeightKg) {
       result.push({ label: t('goal.targetWeight'), value: `${activeGoal.targetWeightKg} kg`, icon: Scale });
     }
+    let calorieLabel: string;
+    if (activeGoal.calorieOffset > 0) {
+      calorieLabel = `+${activeGoal.calorieOffset} kcal`;
+    } else if (activeGoal.calorieOffset < 0) {
+      calorieLabel = `${activeGoal.calorieOffset} kcal`;
+    } else {
+      calorieLabel = '±0 kcal';
+    }
     result.push({
       label: t('goal.calorieOffset'),
-      value: activeGoal.calorieOffset > 0
-        ? `+${activeGoal.calorieOffset} kcal`
-        : activeGoal.calorieOffset < 0
-          ? `${activeGoal.calorieOffset} kcal`
-          : '±0 kcal',
+      value: calorieLabel,
       icon: Flame,
     });
     return result;
@@ -97,7 +101,7 @@ function GoalViewMode() {
   );
 }
 
-function GoalDetailPageInner({ onBack }: { onBack: () => void }) {
+function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const saveRef = useRef<(() => Promise<boolean>) | null>(null);
@@ -137,6 +141,6 @@ function GoalDetailPageInner({ onBack }: { onBack: () => void }) {
   );
 }
 
-export default function GoalDetailPage({ onBack }: { onBack: () => void }) {
+export default function GoalDetailPage({ onBack }: Readonly<{ onBack: () => void }>) {
   return <GoalDetailPageInner onBack={onBack} />;
 }

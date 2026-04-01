@@ -75,7 +75,7 @@ export function ExerciseSelector({
   onSelect,
   muscleGroupFilter,
   equipmentFilter,
-}: ExerciseSelectorProps): React.JSX.Element | null {
+}: Readonly<ExerciseSelectorProps>): React.JSX.Element | null {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<

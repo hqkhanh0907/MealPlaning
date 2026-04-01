@@ -21,7 +21,7 @@ const STEPS = [
   { key: 'finalizing', delay: 7.5 },
 ] as const;
 
-export function PlanComputingScreen({ form, goNext, goBack }: PlanComputingScreenProps) {
+export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanComputingScreenProps>) {
   const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
   const [error, setError] = useState(false);

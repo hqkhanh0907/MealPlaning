@@ -9,7 +9,7 @@ interface PlanPreviewScreenProps {
   completeOnboarding: () => void;
 }
 
-export function PlanPreviewScreen({ form, completeOnboarding }: PlanPreviewScreenProps) {
+export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPreviewScreenProps>) {
   const { t } = useTranslation();
   const values = form.getValues();
   const daysPerWeek = values.daysPerWeek;

@@ -37,7 +37,7 @@ const STEP_COMPONENTS: Record<string, React.ComponentType<{ form: UseFormReturn<
   confirm: TrainingConfirmStep,
 };
 
-export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingSection }: TrainingDetailStepsProps) {
+export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingSection }: Readonly<TrainingDetailStepsProps>) {
   const experience = useWatch({ control: form.control, name: 'experience' }) as TrainingExperience;
   const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);
 

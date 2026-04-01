@@ -65,6 +65,58 @@ function formatCompletionTime(isoStr: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+function ExerciseGroupDetail({
+  exerciseId,
+  sets,
+  t,
+}: Readonly<{
+  exerciseId: string;
+  sets: WorkoutSet[];
+  t: (key: string) => string;
+}>): React.JSX.Element {
+  const exerciseVolume = calculateExerciseVolume(sets);
+  return (
+    <div
+      data-testid={`exercise-group-${exerciseId}`}
+      className="py-2"
+    >
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          {EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}
+        </span>
+        {exerciseVolume > 0 && (
+          <span className="text-xs text-emerald-600 dark:text-emerald-400">
+            {t('fitness.history.volume')}:{' '}
+            {exerciseVolume} kg
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {sets.map((set) => (
+          <span
+            key={set.id}
+            data-testid={`set-detail-${set.id}`}
+            className="text-xs bg-slate-50 dark:bg-slate-700 px-2 py-1 rounded"
+          >
+            {set.weightKg > 0 && (
+              <>
+                {set.weightKg}kg × {set.reps ?? 0}
+              </>
+            )}
+            {(set.durationMin ?? 0) > 0 && (
+              <>
+                {set.durationMin}{' '}
+                {t('fitness.history.minutes')}
+              </>
+            )}
+            {set.rpe ? ` RPE ${set.rpe}` : ''}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function WorkoutHistoryInner(): React.JSX.Element {
   const { t } = useTranslation();
   const workouts = useFitnessStore((s) => s.workouts);
@@ -306,51 +358,14 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         className="px-4 pb-3 border-t border-slate-100 dark:border-slate-700"
                       >
                         {Object.entries(groupSetsByExercise(workout.id)).map(
-                          ([exerciseId, sets]) => {
-                            const exerciseVolume =
-                              calculateExerciseVolume(sets);
-                            return (
-                              <div
-                                key={exerciseId}
-                                data-testid={`exercise-group-${exerciseId}`}
-                                className="py-2"
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                                    {EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}
-                                  </span>
-                                  {exerciseVolume > 0 && (
-                                    <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                                      {t('fitness.history.volume')}:{' '}
-                                      {exerciseVolume} kg
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                  {sets.map((set) => (
-                                    <span
-                                      key={set.id}
-                                      data-testid={`set-detail-${set.id}`}
-                                      className="text-xs bg-slate-50 dark:bg-slate-700 px-2 py-1 rounded"
-                                    >
-                                      {set.weightKg > 0 && (
-                                        <>
-                                          {set.weightKg}kg × {set.reps ?? 0}
-                                        </>
-                                      )}
-                                      {(set.durationMin ?? 0) > 0 && (
-                                        <>
-                                          {set.durationMin}{' '}
-                                          {t('fitness.history.minutes')}
-                                        </>
-                                      )}
-                                      {set.rpe ? ` RPE ${set.rpe}` : ''}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          },
+                          ([exerciseId, sets]) => (
+                            <ExerciseGroupDetail
+                              key={exerciseId}
+                              exerciseId={exerciseId}
+                              sets={sets}
+                              t={t}
+                            />
+                          ),
                         )}
 
                         <div

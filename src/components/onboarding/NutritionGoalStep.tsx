@@ -21,7 +21,7 @@ const GOALS = [
 
 const RATES = ['conservative', 'moderate', 'aggressive'] as const;
 
-export function NutritionGoalStep({ form, goNext, goBack }: NutritionGoalStepProps) {
+export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGoalStepProps>) {
   const { t } = useTranslation();
   const goalField = useController({ control: form.control, name: 'goalType' });
   const rateField = useController({ control: form.control, name: 'rateOfChange' });

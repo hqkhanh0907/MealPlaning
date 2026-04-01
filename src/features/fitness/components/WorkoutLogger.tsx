@@ -118,10 +118,10 @@ function parseExercisesFromPlan(exercisesJson?: string): Exercise[] {
 function ProgressiveOverloadChip({
   suggestion,
   onApply,
-}: {
+}: Readonly<{
   suggestion: OverloadSuggestion | null;
   onApply: (s: OverloadSuggestion) => void;
-}): React.JSX.Element | null {
+}>): React.JSX.Element | null {
   if (!suggestion) return null;
   const isPlateaued = suggestion.isPlateaued ?? false;
   return (
@@ -149,7 +149,7 @@ export function WorkoutLogger({
   planDay,
   onComplete,
   onBack,
-}: WorkoutLoggerProps): React.JSX.Element {
+}: Readonly<WorkoutLoggerProps>): React.JSX.Element {
   const { t } = useTranslation();
   const notify = useNotification();
   const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
@@ -582,7 +582,7 @@ export function WorkoutLogger({
                         const cur = getValues(key) ?? { ...setInputDefaults };
                         setValue(key, {
                           ...cur,
-                          weight: raw === '' ? NaN : Math.max(0, Number(raw)),
+                          weight: raw === '' ? Number.NaN : Math.max(0, Number(raw)),
                         });
                       }}
                       className="w-20 text-center font-semibold text-slate-800"
@@ -614,7 +614,7 @@ export function WorkoutLogger({
                         const raw = e.target.value;
                         const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
                         const cur = getValues(key) ?? { ...setInputDefaults };
-                        setValue(key, { ...cur, reps: raw === '' ? NaN : Math.max(0, Number(raw)) });
+                        setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(0, Number(raw)) });
                       }}
                       className="w-20 text-center font-semibold text-slate-800"
                       data-testid={`reps-input-${exercise.id}`}

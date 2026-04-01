@@ -16,7 +16,7 @@ describe('MacroDonutChart', () => {
 
     const svg = chart.querySelector('svg');
     expect(svg).toBeInTheDocument();
-    expect(svg).toHaveAttribute('role', 'img');
+    expect(svg).toHaveAttribute('aria-label');
   });
 
   it('shows 3 arcs for macros', () => {

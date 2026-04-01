@@ -4,11 +4,12 @@ import type {
   TrainingPlan,
   TrainingPlanDay,
   Workout,
+  WorkoutSet,
   SelectedExercise,
   TodayPlanState,
 } from '../../fitness/types';
 
-export type { TodayPlanState };
+export type { TodayPlanState } from '../../fitness/types';
 
 export interface TodaysPlanData {
   state: TodayPlanState;
@@ -81,6 +82,50 @@ function estimateDurationMinutes(exercises: SelectedExercise[]): number {
 
 const TOTAL_MEALS_PLANNED = 3;
 
+interface DayPlanMeals {
+  breakfastDishIds: string[];
+  lunchDishIds: string[];
+  dinnerDishIds: string[];
+}
+
+function computeCompletedWorkout(
+  todayWorkouts: Workout[],
+  workoutSets: WorkoutSet[],
+): TodaysPlanData['completedWorkout'] {
+  if (todayWorkouts.length === 0) return undefined;
+  const totalDuration = todayWorkouts.reduce(
+    (sum, w) => sum + (w.durationMin ?? 0),
+    0,
+  );
+  const allSets = workoutSets.filter((s) =>
+    todayWorkouts.some((w) => w.id === s.workoutId),
+  );
+  return {
+    durationMin: totalDuration,
+    totalSets: allSets.length,
+    hasPR: false,
+  };
+}
+
+function computeMealsLogged(todayDayPlan: DayPlanMeals | undefined): number {
+  if (!todayDayPlan) return 0;
+  let count = 0;
+  if (todayDayPlan.breakfastDishIds.length > 0) count++;
+  if (todayDayPlan.lunchDishIds.length > 0) count++;
+  if (todayDayPlan.dinnerDishIds.length > 0) count++;
+  return count;
+}
+
+function computeNextMealToLog(
+  todayDayPlan: DayPlanMeals | undefined,
+): 'breakfast' | 'lunch' | 'dinner' | undefined {
+  if (!todayDayPlan) return 'breakfast';
+  if (todayDayPlan.breakfastDishIds.length === 0) return 'breakfast';
+  if (todayDayPlan.lunchDishIds.length === 0) return 'lunch';
+  if (todayDayPlan.dinnerDishIds.length === 0) return 'dinner';
+  return undefined;
+}
+
 export function useTodaysPlan(): TodaysPlanData {
   const today = new Date();
   const todayStr = formatDateToISO(today);
@@ -124,36 +169,12 @@ export function useTodaysPlan(): TodaysPlanData {
 
   let completedWorkout: TodaysPlanData['completedWorkout'];
   if (todayWorkouts.length > 0) {
-    const totalDuration = todayWorkouts.reduce(
-      (sum, w) => sum + (w.durationMin ?? 0),
-      0,
-    );
-    const allSets = workoutSets.filter((s) =>
-      todayWorkouts.some((w) => w.id === s.workoutId),
-    );
-    completedWorkout = {
-      durationMin: totalDuration,
-      totalSets: allSets.length,
-      hasPR: false,
-    };
+    completedWorkout = computeCompletedWorkout(todayWorkouts, workoutSets);
   }
 
   const todayDayPlan = dayPlans.find((p) => p.date === todayStr);
-  let mealsLogged = 0;
-  if (todayDayPlan) {
-    if (todayDayPlan.breakfastDishIds.length > 0) mealsLogged++;
-    if (todayDayPlan.lunchDishIds.length > 0) mealsLogged++;
-    if (todayDayPlan.dinnerDishIds.length > 0) mealsLogged++;
-  }
-
-  let nextMealToLog: 'breakfast' | 'lunch' | 'dinner' | undefined;
-  if (todayDayPlan) {
-    if (todayDayPlan.breakfastDishIds.length === 0) nextMealToLog = 'breakfast';
-    else if (todayDayPlan.lunchDishIds.length === 0) nextMealToLog = 'lunch';
-    else if (todayDayPlan.dinnerDishIds.length === 0) nextMealToLog = 'dinner';
-  } else {
-    nextMealToLog = 'breakfast';
-  }
+  const mealsLogged = computeMealsLogged(todayDayPlan);
+  const nextMealToLog = computeNextMealToLog(todayDayPlan);
 
   const completedSessionCount = todayPlanDays.filter((d) =>
     todayWorkouts.some((w) => w.planDayId === d.id),

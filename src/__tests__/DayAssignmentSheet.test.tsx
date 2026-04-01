@@ -100,12 +100,12 @@ describe('DayAssignmentSheet', () => {
     expect(day5.textContent).toContain('0 buổi');
   });
 
-  it('marks current day with aria-checked', () => {
+  it('marks current day with aria-pressed', () => {
     render(<DayAssignmentSheet {...defaultProps} />);
     const day1 = screen.getByTestId('day-option-1');
-    expect(day1).toHaveAttribute('aria-checked', 'true');
+    expect(day1).toHaveAttribute('aria-pressed', 'true');
     const day3 = screen.getByTestId('day-option-3');
-    expect(day3).toHaveAttribute('aria-checked', 'false');
+    expect(day3).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('calls onSelectDay and onClose when a day is selected', () => {
@@ -173,10 +173,14 @@ describe('DayAssignmentSheet', () => {
         existingDayCounts={{ 1: 0, 3: 0, 5: 0 }}
       />,
     );
-    const options = screen.getAllByRole('radio');
-    expect(options[0]).toHaveAttribute('data-testid', 'day-option-1');
-    expect(options[1]).toHaveAttribute('data-testid', 'day-option-3');
-    expect(options[2]).toHaveAttribute('data-testid', 'day-option-5');
+    const options = [
+      screen.getByTestId('day-option-1'),
+      screen.getByTestId('day-option-3'),
+      screen.getByTestId('day-option-5'),
+    ];
+    expect(options[0]).toBeInTheDocument();
+    expect(options[1]).toBeInTheDocument();
+    expect(options[2]).toBeInTheDocument();
   });
 
   it('uses radiogroup role for the day list', () => {

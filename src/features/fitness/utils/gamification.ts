@@ -55,18 +55,13 @@ export const MILESTONES: Milestone[] = [
 
 // ===== Core Functions =====
 
-export function calculateStreak(
-  workouts: Workout[],
-  planDays: number[],
-  today?: string,
-): StreakInfo {
-  const todayStr = today ?? formatDate(new Date());
-  const workoutDates = new Set(workouts.map((w) => w.date.split('T')[0]));
-  const planDaySet = new Set(planDays);
+function buildWeekDots(
+  todayStr: string,
+  monday: string,
+  workoutDates: Set<string>,
+  planDaySet: Set<number>,
+): StreakInfo['weekDots'] {
   const hasPlan = planDaySet.size > 0;
-
-  // Weekly dots (Mon–Sun)
-  const monday = getMondayOfWeek(todayStr);
   const weekDots: StreakInfo['weekDots'] = [];
   for (let i = 0; i < 7; i++) {
     const d = addDays(monday, i);
@@ -83,18 +78,15 @@ export function calculateStreak(
       weekDots.push({ day: dow, status: 'missed' });
     }
   }
+  return weekDots;
+}
 
-  if (workouts.length === 0) {
-    return {
-      currentStreak: 0,
-      longestStreak: 0,
-      weekDots,
-      gracePeriodUsed: false,
-      streakAtRisk: false,
-    };
-  }
-
-  // --- Current streak (backward from today) ---
+function computeCurrentStreak(
+  todayStr: string,
+  workoutDates: Set<string>,
+  planDaySet: Set<number>,
+): { currentStreak: number; gracePeriodUsed: boolean; streakAtRisk: boolean } {
+  const hasPlan = planDaySet.size > 0;
   let currentStreak = 0;
   let graceUsed = false;
   let atRisk = false;
@@ -110,28 +102,35 @@ export function calculateStreak(
         currentStreak++;
       } else if (d === todayStr) {
         // Today is planned but no workout yet — don't penalize
-      } else if (!graceUsed) {
+      } else if (graceUsed) {
+        break;
+      } else {
         graceUsed = true;
         atRisk = true;
-      } else {
-        break;
       }
-    } else {
-      if (hasWorkout) {
+    } else if (hasWorkout) {
         currentStreak++;
       } else if (d === todayStr) {
         // No plan, no workout today — skip
       } else {
         break;
       }
-    }
   }
 
-  // --- Longest streak (forward scan) ---
-  let longestStreak = 0;
+  return { currentStreak, gracePeriodUsed: graceUsed, streakAtRisk: atRisk };
+}
+
+function computeLongestStreak(
+  todayStr: string,
+  workoutDates: Set<string>,
+  planDaySet: Set<number>,
+  currentStreak: number,
+): number {
+  const hasPlan = planDaySet.size > 0;
   const sorted = [...workoutDates].sort((a, b) => a.localeCompare(b));
   const earliest = sorted[0];
   const totalDays = daysBetween(earliest, todayStr);
+  let longestStreak = 0;
   let tempStreak = 0;
   let tempGrace = false;
 
@@ -146,15 +145,14 @@ export function calculateStreak(
         tempStreak++;
       } else if (d === todayStr) {
         // skip today — day not over
-      } else if (!tempGrace) {
-        tempGrace = true;
-      } else {
+      } else if (tempGrace) {
         longestStreak = Math.max(longestStreak, tempStreak);
         tempStreak = 0;
         tempGrace = false;
+      } else {
+        tempGrace = true;
       }
-    } else {
-      if (hasWorkout) {
+    } else if (hasWorkout) {
         tempStreak++;
       } else if (d === todayStr) {
         // skip today
@@ -162,17 +160,46 @@ export function calculateStreak(
         longestStreak = Math.max(longestStreak, tempStreak);
         tempStreak = 0;
       }
-    }
   }
-  longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
+  return Math.max(longestStreak, tempStreak, currentStreak);
+}
 
-  return {
+export function calculateStreak(
+  workouts: Workout[],
+  planDays: number[],
+  today?: string,
+): StreakInfo {
+  const todayStr = today ?? formatDate(new Date());
+  const workoutDates = new Set(workouts.map((w) => w.date.split('T')[0]));
+  const planDaySet = new Set(planDays);
+
+  const monday = getMondayOfWeek(todayStr);
+  const weekDots = buildWeekDots(todayStr, monday, workoutDates, planDaySet);
+
+  if (workouts.length === 0) {
+    return {
+      currentStreak: 0,
+      longestStreak: 0,
+      weekDots,
+      gracePeriodUsed: false,
+      streakAtRisk: false,
+    };
+  }
+
+  const { currentStreak, gracePeriodUsed, streakAtRisk } = computeCurrentStreak(
+    todayStr,
+    workoutDates,
+    planDaySet,
+  );
+
+  const longestStreak = computeLongestStreak(
+    todayStr,
+    workoutDates,
+    planDaySet,
     currentStreak,
-    longestStreak,
-    weekDots,
-    gracePeriodUsed: graceUsed,
-    streakAtRisk: atRisk,
-  };
+  );
+
+  return { currentStreak, longestStreak, weekDots, gracePeriodUsed, streakAtRisk };
 }
 
 export function checkMilestones(

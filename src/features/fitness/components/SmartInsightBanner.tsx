@@ -21,9 +21,9 @@ const ICON_MAP: Record<
 
 export function SmartInsightBanner({
   insight,
-}: {
+}: Readonly<{
   insight: FitnessNutritionInsight;
-}) {
+}>) {
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;

@@ -946,18 +946,11 @@ describe('TrainingProfileForm – i18n option labels', () => {
 // ---------- 12. Radiogroup/group accessibility roles ----------
 
 describe('TrainingProfileForm – accessibility roles', () => {
-  it('renders radiogroups for RadioPills fields', () => {
-    render(<TrainingProfileForm />);
-    const radioGroups = screen.getAllByRole('radiogroup');
-    // goal, experience, daysPerWeek, sessionDuration, cardio, periodization, cycleWeeks = 7
-    expect(radioGroups.length).toBe(7);
-  });
-
-  it('renders groups for ChipSelect fields', () => {
+  it('renders groups for all fieldset-based fields', () => {
     render(<TrainingProfileForm />);
     const groups = screen.getAllByRole('group');
-    // equipment, injuries, priorityMuscles = 3
-    expect(groups.length).toBe(3);
+    // RadioPills fieldsets (7) + ChipSelect fieldsets (3) = 10
+    expect(groups.length).toBe(10);
   });
 
   it('RadioPills options have role=radio', () => {

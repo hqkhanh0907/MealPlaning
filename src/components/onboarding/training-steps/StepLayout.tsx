@@ -10,7 +10,7 @@ interface StepLayoutProps {
   children: React.ReactNode;
 }
 
-export function StepLayout({ title, subtitle, goNext, goBack, children }: StepLayoutProps) {
+export function StepLayout({ title, subtitle, goNext, goBack, children }: Readonly<StepLayoutProps>) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-1 flex-col">

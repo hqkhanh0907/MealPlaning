@@ -41,7 +41,7 @@ interface TrainingProfileFormProps {
   saveRef?: React.RefObject<(() => Promise<boolean>) | null>;
 }
 
-export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormProps) {
+export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProfileFormProps>) {
   const { t } = useTranslation();
   const trainingProfile = useFitnessStore((s) => s.trainingProfile);
   const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);

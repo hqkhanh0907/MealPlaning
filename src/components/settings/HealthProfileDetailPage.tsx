@@ -26,7 +26,7 @@ function HealthProfileViewMode() {
   );
   const tdee = useMemo(() => calculateTDEE(bmr, profile.activityLevel), [bmr, profile.activityLevel]);
   const macros = useMemo(() => {
-    const bodyFatFraction = profile.bodyFatPct != null ? profile.bodyFatPct / 100 : undefined;
+    const bodyFatFraction = profile.bodyFatPct == null ? undefined : profile.bodyFatPct / 100;
     return calculateMacros(tdee, profile.weightKg, profile.proteinRatio, profile.fatPct, bodyFatFraction);
   }, [tdee, profile.weightKg, profile.proteinRatio, profile.fatPct, profile.bodyFatPct]);
 
@@ -37,7 +37,7 @@ function HealthProfileViewMode() {
     { label: t('healthProfile.weight'), value: `${profile.weightKg} kg`, icon: Scale },
     { label: t('healthProfile.activityLevel'), value: t(ACTIVITY_LEVEL_I18N[profile.activityLevel] ?? ''), icon: Activity },
     { label: t('healthProfile.proteinRatio'), value: `${profile.proteinRatio} g/kg`, icon: Beef },
-    ...(profile.bodyFatPct != null ? [{ label: t('healthProfile.bodyFat'), value: `${profile.bodyFatPct}%`, icon: BarChart3 }] : []),
+    ...(profile.bodyFatPct == null ? [] : [{ label: t('healthProfile.bodyFat'), value: `${profile.bodyFatPct}%`, icon: BarChart3 }]),
   ];
 
   return (
@@ -92,7 +92,7 @@ function HealthProfileViewMode() {
   );
 }
 
-function HealthProfileDetailPageInner({ onBack }: { onBack: () => void }) {
+function HealthProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const saveRef = useRef<(() => Promise<boolean>) | null>(null);
@@ -132,6 +132,6 @@ function HealthProfileDetailPageInner({ onBack }: { onBack: () => void }) {
   );
 }
 
-export default function HealthProfileDetailPage({ onBack }: { onBack: () => void }) {
+export default function HealthProfileDetailPage({ onBack }: Readonly<{ onBack: () => void }>) {
   return <HealthProfileDetailPageInner onBack={onBack} />;
 }

@@ -31,7 +31,7 @@ const SPLIT_OPTIONS: Array<{ value: SplitType; labelKey: string; descKey: string
   { value: 'custom', labelKey: 'fitness.splitChanger.custom', descKey: 'fitness.splitChanger.customDesc' },
 ];
 
-export function SplitChanger({ planId, currentSplit, onComplete }: SplitChangerProps) {
+export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<SplitChangerProps>) {
   const { t } = useTranslation();
   const { popPage } = useNavigationStore();
   const { changeSplitType, previewSplitChange } = useFitnessStore();

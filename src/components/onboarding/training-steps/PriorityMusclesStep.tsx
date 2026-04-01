@@ -7,7 +7,7 @@ import type { StepProps } from './types';
 const MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'] as const;
 const MAX_PRIORITY_MUSCLES = 3;
 
-export function PriorityMusclesStep({ form, goNext, goBack }: StepProps) {
+export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'priorityMuscles' });
   const selected = (field.field.value ?? []) as string[];
@@ -35,6 +35,16 @@ export function PriorityMusclesStep({ form, goNext, goBack }: StepProps) {
         {MUSCLE_GROUPS.map((muscle) => {
           const isSelected = selected.includes(muscle);
           const isDisabled = atMax && !isSelected;
+
+          let stateClass: string;
+          if (isSelected) {
+            stateClass = 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+          } else if (isDisabled) {
+            stateClass = 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600';
+          } else {
+            stateClass = 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400';
+          }
+
           return (
             <button
               key={muscle}
@@ -44,11 +54,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: StepProps) {
               onClick={() => toggle(muscle)}
               className={cn(
                 'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
-                isSelected
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                  : isDisabled
-                    ? 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600'
-                    : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                stateClass,
               )}
             >
               {t(`fitness.onboarding.muscle_${muscle}`)}

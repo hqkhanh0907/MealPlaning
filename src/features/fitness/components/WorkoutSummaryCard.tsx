@@ -16,7 +16,7 @@ export function WorkoutSummaryCard({
   setsCompleted,
   personalRecords,
   onSave,
-}: WorkoutSummaryCardProps) {
+}: Readonly<WorkoutSummaryCardProps>) {
   const { t } = useTranslation();
   const hasPR = personalRecords.length > 0;
 

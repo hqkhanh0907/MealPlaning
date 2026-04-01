@@ -7,7 +7,7 @@ import type { StepProps } from './types';
 
 const CYCLE_OPTIONS = [4, 6, 8, 12] as const;
 
-export function CycleWeeksStep({ form, goNext, goBack }: StepProps) {
+export function CycleWeeksStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'cycleWeeks' });
 

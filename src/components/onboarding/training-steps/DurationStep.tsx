@@ -6,7 +6,7 @@ import type { StepProps } from './types';
 
 const DURATIONS = [30, 45, 60, 75, 90] as const;
 
-export function DurationStep({ form, goNext, goBack }: StepProps) {
+export function DurationStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'sessionDuration' });
 

@@ -110,7 +110,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                   />
                   <button
                     type="button"
-                    aria-checked={isCurrent}
+                    aria-pressed={isCurrent}
                     aria-disabled={isFull}
                     data-testid={`day-option-${day}`}
                     disabled={isFull}

@@ -6,7 +6,7 @@ import type { StepProps } from './types';
 
 const INJURY_REGIONS = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'] as const;
 
-export function InjuriesStep({ form, goNext, goBack }: StepProps) {
+export function InjuriesStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'injuries' });
   const selected = (field.field.value ?? []) as string[];

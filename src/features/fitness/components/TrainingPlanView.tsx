@@ -66,7 +66,7 @@ function TrainingPlanViewInner({
   onCreateManualPlan,
   planStrategy,
   isGenerating = false,
-}: TrainingPlanViewProps): React.JSX.Element {
+}: Readonly<TrainingPlanViewProps>): React.JSX.Element {
   const { t } = useTranslation();
   const { trainingPlans, trainingPlanDays, workouts, workoutSets } = useFitnessStore(
     useShallow((s) => ({
@@ -408,11 +408,14 @@ function TrainingPlanViewInner({
               : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300';
           }
 
-          const ringClass = isToday
-            ? 'ring-2 ring-emerald-500'
-            : isSelected
-              ? 'ring-2 ring-slate-400'
-              : '';
+          let ringClass: string;
+          if (isToday) {
+            ringClass = 'ring-2 ring-emerald-500';
+          } else if (isSelected) {
+            ringClass = 'ring-2 ring-slate-400';
+          } else {
+            ringClass = '';
+          }
 
           return (
             <button

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { StepLayout } from './StepLayout';
 import type { StepProps } from './types';
 
-export function CardioStep({ form, goNext, goBack }: StepProps) {
+export function CardioStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const field = useController({ control: form.control, name: 'cardioSessions' });
 

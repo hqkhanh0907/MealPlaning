@@ -37,7 +37,7 @@ export function SplitChangeConfirm({
   mode,
   preview,
   isLoading,
-}: SplitChangeConfirmProps) {
+}: Readonly<SplitChangeConfirmProps>) {
   const { t } = useTranslation();
 
   const isRegenerate = mode === 'regenerate';

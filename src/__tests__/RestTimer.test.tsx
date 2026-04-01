@@ -88,7 +88,7 @@ describe('RestTimer', () => {
     renderTimer();
     const ring = screen.getByTestId('progress-ring');
     expect(ring).toBeInTheDocument();
-    expect(ring.tagName).toBe('svg');
+    expect(ring.tagName.toLowerCase()).toBe('progress');
   });
 
   it('progress ring depletes over time', () => {
@@ -154,7 +154,6 @@ describe('RestTimer', () => {
     renderTimer();
     const overlay = screen.getByTestId('rest-timer-overlay');
     expect(overlay).toHaveAttribute('aria-label', 'Nghỉ giữa set');
-    expect(overlay).toHaveAttribute('role', 'dialog');
     expect(overlay).toHaveAttribute('aria-modal', 'true');
   });
 

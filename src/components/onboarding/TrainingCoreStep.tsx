@@ -15,7 +15,7 @@ interface TrainingCoreStepProps {
 const TRAINING_GOALS = ['strength', 'hypertrophy', 'endurance', 'general'] as const;
 const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 
-export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps) {
+export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCoreStepProps>) {
   const { t } = useTranslation();
   const goalField = useController({ control: form.control, name: 'trainingGoal' });
   const expField = useController({ control: form.control, name: 'experience' });
