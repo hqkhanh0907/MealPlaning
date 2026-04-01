@@ -428,7 +428,7 @@ describe('WorkoutLogger', () => {
     expect(rpe8).not.toHaveClass('bg-emerald-500');
   });
 
-  it('adjusts weight with ±2.5kg buttons', () => {
+  it('adjusts weight with ±0.5kg buttons', () => {
     render(
       <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
     );
@@ -439,13 +439,13 @@ describe('WorkoutLogger', () => {
     expect(weightInput.value).toBe('0');
 
     fireEvent.click(screen.getByTestId('weight-plus-bench-press'));
-    expect(weightInput.value).toBe('2.5');
+    expect(weightInput.value).toBe('0.5');
 
     fireEvent.click(screen.getByTestId('weight-plus-bench-press'));
-    expect(weightInput.value).toBe('5');
+    expect(weightInput.value).toBe('1');
 
     fireEvent.click(screen.getByTestId('weight-minus-bench-press'));
-    expect(weightInput.value).toBe('2.5');
+    expect(weightInput.value).toBe('0.5');
 
     fireEvent.click(screen.getByTestId('weight-minus-bench-press'));
     fireEvent.click(screen.getByTestId('weight-minus-bench-press'));
@@ -996,7 +996,7 @@ describe('WorkoutLogger', () => {
     expect(weightInput.value).toBe('');
 
     fireEvent.click(screen.getByTestId('weight-plus-bench-press'));
-    expect(weightInput.value).toBe('2.5');
+    expect(weightInput.value).toBe('0.5');
   });
 
   /* ---------- TC_WL_04: Invalid JSON exercises → graceful fallback ---------- */
@@ -1409,5 +1409,111 @@ describe('WorkoutLogger', () => {
         planDayId: 'pd-42',
       }),
     );
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* BUG FIX TESTS: Reps stepper buttons                                */
+  /* ------------------------------------------------------------------ */
+  it('renders reps +/- stepper buttons for each exercise', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    expect(screen.getByTestId('reps-minus-bench-press')).toBeInTheDocument();
+    expect(screen.getByTestId('reps-plus-bench-press')).toBeInTheDocument();
+  });
+
+  it('reps + button increments reps by 1', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    const repsInput = screen.getByTestId('reps-input-bench-press') as HTMLInputElement;
+    // Default reps is NaN (empty), clicking + should set to MIN_REPS + 1 = 2
+    fireEvent.click(screen.getByTestId('reps-plus-bench-press'));
+    expect(Number(repsInput.value)).toBeGreaterThanOrEqual(1);
+  });
+
+  it('reps - button decrements reps by 1, cannot go below 1', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    const repsInput = screen.getByTestId('reps-input-bench-press') as HTMLInputElement;
+    // Set reps to 3 first
+    fireEvent.change(repsInput, { target: { value: '3' } });
+    expect(repsInput.value).toBe('3');
+
+    fireEvent.click(screen.getByTestId('reps-minus-bench-press'));
+    expect(repsInput.value).toBe('2');
+
+    fireEvent.click(screen.getByTestId('reps-minus-bench-press'));
+    expect(repsInput.value).toBe('1');
+
+    // Cannot go below MIN_REPS=1
+    fireEvent.click(screen.getByTestId('reps-minus-bench-press'));
+    expect(repsInput.value).toBe('1');
+  });
+
+  it('reps stepper buttons have correct aria-labels', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+    expect(screen.getByTestId('reps-minus-bench-press')).toHaveAttribute('aria-label', 'Giảm số lần');
+    expect(screen.getByTestId('reps-plus-bench-press')).toHaveAttribute('aria-label', 'Tăng số lần');
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* BUG FIX TESTS: Save workout error handling                          */
+  /* ------------------------------------------------------------------ */
+  it('shows error notification when save fails', async () => {
+    mockSaveWorkoutAtomic.mockRejectedValueOnce(new Error('DB error'));
+    const onComplete = vi.fn();
+    render(
+      <WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithExercises} />,
+    );
+
+    // Log a set
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    // Finish workout
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    // Save
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('save-workout-button'));
+    });
+
+    expect(mockNotify.error).toHaveBeenCalledWith('Lưu buổi tập thất bại. Vui lòng thử lại.');
+    // Should NOT have navigated away
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('disables save button while saving', async () => {
+    let resolvePromise: () => void;
+    const savePromise = new Promise<void>((resolve) => {
+      resolvePromise = resolve;
+    });
+    mockSaveWorkoutAtomic.mockReturnValueOnce(savePromise);
+
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '60', '10');
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    const saveButton = screen.getByTestId('save-workout-button');
+    expect(saveButton).not.toBeDisabled();
+
+    // Start save (don't await)
+    act(() => {
+      fireEvent.click(saveButton);
+    });
+
+    // Button should be disabled while saving
+    expect(screen.getByTestId('save-workout-button')).toBeDisabled();
+
+    // Resolve the save
+    await act(async () => {
+      resolvePromise!();
+    });
   });
 });

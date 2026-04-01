@@ -11,7 +11,7 @@ export const DAY_LABELS_SUNDAY_FIRST = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'
 export const RPE_OPTIONS = [6, 7, 8, 9, 10] as const;
 
 // Weight/Reps increments
-export const WEIGHT_INCREMENT = 2.5;
+export const WEIGHT_INCREMENT = 0.5;
 export const REPS_INCREMENT = 1;
 export const MIN_WEIGHT_KG = 0;
 export const MIN_REPS = 1;

@@ -26,7 +26,7 @@ import type {
   SelectedExercise,
 } from '../types';
 import { safeParseJsonArray } from '../types';
-import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
+import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT, REPS_INCREMENT, MIN_REPS } from '../constants';
 import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
 import { generateUUID } from '@/utils/helpers';
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
@@ -178,6 +178,7 @@ export function WorkoutLogger({
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingSet, setEditingSet] = useState<WorkoutSet | null>(null);
   const [freestyleName, setFreestyleName] = useState('');
   const isFreestyle = !planDay;
@@ -316,6 +317,15 @@ export function WorkoutLogger({
     [getValues, setValue],
   );
 
+  const handleRepsChange = useCallback(
+    (exerciseId: string, delta: number) => {
+      const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
+      const current = getValues(key) ?? { ...setInputDefaults };
+      setValue(key, { ...current, reps: Math.max(MIN_REPS, (Number.isNaN(current.reps) ? MIN_REPS : current.reps) + delta) });
+    },
+    [getValues, setValue],
+  );
+
   const handleRpeSelect = useCallback(
     (exerciseId: string, rpe: number) => {
       const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
@@ -362,6 +372,8 @@ export function WorkoutLogger({
   );
 
   const handleSave = useCallback(async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const durationMin = Math.floor(elapsedRef.current / 60);
     const now = new Date().toISOString();
     const workoutId = generateUUID();
@@ -382,12 +394,15 @@ export function WorkoutLogger({
       await saveWorkoutAtomic(workout, sets);
     } catch (error) {
       console.error('[WorkoutLogger] Save failed, draft preserved:', error);
+      notify.error(t('fitness.logger.saveFailed'));
+      setIsSaving(false);
       return;
     }
     clearWorkoutDraft();
     notify.success(t('fitness.logger.saveSuccess'));
     onComplete();
   }, [
+    isSaving,
     planDay,
     loggedSets,
     saveWorkoutAtomic,
@@ -434,6 +449,7 @@ export function WorkoutLogger({
           setsCompleted={loggedSets.length}
           personalRecords={detectedPRs}
           onSave={handleSave}
+          isSaving={isSaving}
         />
       </>
     );
@@ -606,6 +622,18 @@ export function WorkoutLogger({
                     <span className="w-16 text-xs text-slate-500">
                       {t('fitness.logger.reps')}
                     </span>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={() =>
+                        handleRepsChange(exercise.id, -REPS_INCREMENT)
+                      }
+                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                      data-testid={`reps-minus-${exercise.id}`}
+                      aria-label={t('fitness.logger.decreaseReps')}
+                    >
+                      −
+                    </Button>
                     <Input
                       type="number"
                       autoComplete="off"
@@ -619,6 +647,18 @@ export function WorkoutLogger({
                       className="w-20 text-center font-semibold text-slate-800"
                       data-testid={`reps-input-${exercise.id}`}
                     />
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={() =>
+                        handleRepsChange(exercise.id, REPS_INCREMENT)
+                      }
+                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                      data-testid={`reps-plus-${exercise.id}`}
+                      aria-label={t('fitness.logger.increaseReps')}
+                    >
+                      +
+                    </Button>
                   </div>
 
                   <div className="flex items-center gap-2">

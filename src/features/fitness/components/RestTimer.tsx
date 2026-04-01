@@ -82,10 +82,10 @@ export const RestTimer = React.memo(function RestTimer({
   const dashoffset = CIRCUMFERENCE * (1 - progress);
 
   return (
-    <dialog
-      open
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+    <div
+      role="alertdialog"
       aria-modal="true"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60"
       aria-label={t('fitness.timer.rest')}
       data-testid="rest-timer-overlay"
     >
@@ -177,6 +177,6 @@ export const RestTimer = React.memo(function RestTimer({
           </Button>
         </div>
       </div>
-    </dialog>
+    </div>
   );
 });

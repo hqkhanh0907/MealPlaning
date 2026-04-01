@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Trophy, Clock, Dumbbell, Flame } from 'lucide-react';
+import { Trophy, Clock, Dumbbell, Flame, Loader2 } from 'lucide-react';
 import { formatElapsed } from '../utils/timeFormat';
 
 interface WorkoutSummaryCardProps {
@@ -8,6 +8,7 @@ interface WorkoutSummaryCardProps {
   setsCompleted: number;
   personalRecords: { exerciseName: string; weight: number }[];
   onSave: () => void;
+  isSaving?: boolean;
 }
 
 export function WorkoutSummaryCard({
@@ -16,6 +17,7 @@ export function WorkoutSummaryCard({
   setsCompleted,
   personalRecords,
   onSave,
+  isSaving = false,
 }: Readonly<WorkoutSummaryCardProps>) {
   const { t } = useTranslation();
   const hasPR = personalRecords.length > 0;
@@ -75,10 +77,18 @@ export function WorkoutSummaryCard({
         <button
           type="button"
           onClick={onSave}
-          className="mt-8 w-full max-w-sm rounded-xl bg-blue-600 py-3 font-semibold text-white"
+          disabled={isSaving}
+          className="mt-8 w-full max-w-sm rounded-xl bg-blue-600 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="save-workout-button"
         >
-          {t('fitness.logger.save')}
+          {isSaving ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t('fitness.logger.saving')}
+            </span>
+          ) : (
+            t('fitness.logger.save')
+          )}
         </button>
       </div>
     </div>

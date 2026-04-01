@@ -356,9 +356,11 @@ export const useFitnessStore = create<FitnessState>()(
       },
 
       saveWorkoutAtomic: async (workout, sets) => {
-        if (_db) {
-          await _db.transaction(async () => {
-            await _db!.execute(
+        if (!_db) {
+          throw new Error('Database not initialized — cannot save workout');
+        }
+        await _db.transaction(async () => {
+          await _db!.execute(
               `INSERT INTO workouts (id, date, name, plan_day_id, duration_min, notes, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [
@@ -421,7 +423,6 @@ export const useFitnessStore = create<FitnessState>()(
               );
             }
           });
-        }
         set((state) => ({
           workouts: [...state.workouts, workout],
           workoutSets: [...state.workoutSets, ...sets],

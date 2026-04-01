@@ -42,25 +42,27 @@ describe('SetEditor', () => {
     expect(input.value).toBe('12');
   });
 
-  // Weight ±2.5kg tests
-  it('+2.5kg button increments weight', () => {
+  // Weight ±0.5kg tests
+  it('+0.5kg button increments weight', () => {
     renderEditor({ initialWeight: 60 });
     fireEvent.click(screen.getByTestId('weight-plus-button'));
     const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('62.5');
+    expect(input.value).toBe('60.5');
   });
 
-  it('-2.5kg button decrements weight', () => {
+  it('-0.5kg button decrements weight', () => {
     renderEditor({ initialWeight: 60 });
     fireEvent.click(screen.getByTestId('weight-minus-button'));
     const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('57.5');
+    expect(input.value).toBe('59.5');
   });
 
   it('weight does not go below 0', () => {
-    renderEditor({ initialWeight: 1 });
+    renderEditor({ initialWeight: 0.5 });
     fireEvent.click(screen.getByTestId('weight-minus-button'));
     const input = screen.getByTestId('weight-input') as HTMLInputElement;
+    expect(input.value).toBe('0');
+    fireEvent.click(screen.getByTestId('weight-minus-button'));
     expect(input.value).toBe('0');
   });
 
@@ -187,7 +189,7 @@ describe('SetEditor', () => {
 
     expect(onSave).toHaveBeenCalledTimes(1);
     expect(onSave).toHaveBeenCalledWith({
-      weight: 62.5,
+      weight: 60.5,
       reps: 11,
       rpe: 8,
     });
