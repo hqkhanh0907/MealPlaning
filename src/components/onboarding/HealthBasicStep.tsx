@@ -64,13 +64,12 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
             <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               {t('onboarding.health.gender')}
             </label>
-            <div className="flex gap-3" role="radiogroup" aria-label={t('onboarding.health.gender')}>
+            <fieldset className="flex gap-3 border-0 p-0 m-0" aria-label={t('onboarding.health.gender')}>
               {(['male', 'female'] as const).map((g) => (
                 <button
                   key={g}
                   type="button"
-                  role="radio"
-                  aria-checked={genderField.field.value === g}
+                  aria-pressed={genderField.field.value === g}
                   onClick={() => genderField.field.onChange(g)}
                   className={`min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
                     genderField.field.value === g
@@ -81,7 +80,7 @@ export function HealthBasicStep({ form, goNext, goBack }: HealthBasicStepProps) 
                   {t(`onboarding.health.gender_${g}`)}
                 </button>
               ))}
-            </div>
+            </fieldset>
           </div>
 
           {/* Date of Birth */}

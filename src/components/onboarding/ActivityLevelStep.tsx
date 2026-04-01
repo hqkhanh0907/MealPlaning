@@ -33,13 +33,12 @@ export function ActivityLevelStep({ form, goNext, goBack }: ActivityLevelStepPro
           {t('onboarding.health.activityLevelDesc')}
         </p>
 
-        <div className="space-y-3" role="radiogroup" aria-label={t('onboarding.health.activityLevel')}>
+        <fieldset className="space-y-3 border-0 p-0 m-0" aria-label={t('onboarding.health.activityLevel')}>
           {LEVELS.map((level) => (
             <button
               key={level.value}
               type="button"
-              role="radio"
-              aria-checked={field.field.value === level.value}
+              aria-pressed={field.field.value === level.value}
               onClick={() => field.field.onChange(level.value)}
               className={cn(
                 'flex w-full min-h-[56px] items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -67,7 +66,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: ActivityLevelStepPro
               </span>
             </button>
           ))}
-        </div>
+        </fieldset>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">

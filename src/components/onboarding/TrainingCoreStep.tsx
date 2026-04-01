@@ -41,13 +41,12 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('fitness.onboarding.goal')}
           </label>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t('fitness.onboarding.goal')}>
+          <fieldset className="grid grid-cols-2 gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.goal')}>
             {TRAINING_GOALS.map((goal) => (
               <button
                 key={goal}
                 type="button"
-                role="radio"
-                aria-checked={goalField.field.value === goal}
+                aria-pressed={goalField.field.value === goal}
                 onClick={() => goalField.field.onChange(goal)}
                 className={cn(
                   'min-h-[44px] rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -59,7 +58,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
                 {t(`fitness.onboarding.${goal}`)}
               </button>
             ))}
-          </div>
+          </fieldset>
         </div>
 
         {/* Experience Level */}
@@ -67,13 +66,12 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('fitness.onboarding.experience')}
           </label>
-          <div className="flex gap-2" role="radiogroup" aria-label={t('fitness.onboarding.experience')}>
+          <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.experience')}>
             {EXPERIENCE_LEVELS.map((level) => (
               <button
                 key={level}
                 type="button"
-                role="radio"
-                aria-checked={expField.field.value === level}
+                aria-pressed={expField.field.value === level}
                 onClick={() => expField.field.onChange(level)}
                 className={cn(
                   'min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -85,7 +83,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
                 {t(`fitness.onboarding.${level}`)}
               </button>
             ))}
-          </div>
+          </fieldset>
         </div>
 
         {/* Days Per Week */}
@@ -93,13 +91,12 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('fitness.onboarding.daysPerWeek')}
           </label>
-          <div className="flex gap-2" role="radiogroup" aria-label={t('fitness.onboarding.daysPerWeek')}>
+          <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.daysPerWeek')}>
             {[2, 3, 4, 5, 6].map((d) => (
               <button
                 key={d}
                 type="button"
-                role="radio"
-                aria-checked={daysField.field.value === d}
+                aria-pressed={daysField.field.value === d}
                 onClick={() => daysField.field.onChange(d)}
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -111,7 +108,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: TrainingCoreStepProps
                 {d}
               </button>
             ))}
-          </div>
+          </fieldset>
           <p className="mt-1 text-xs text-slate-400">
             {t('fitness.onboarding.daysPerWeekUnit')}
           </p>

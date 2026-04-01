@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useController } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -17,35 +18,36 @@ export function CycleWeeksStep({ form, goNext, goBack }: StepProps) {
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="space-y-3" role="radiogroup" aria-label={t('fitness.onboarding.cycleWeeks')}>
+      <fieldset className="space-y-3 border-0 p-0 m-0" aria-label={t('fitness.onboarding.cycleWeeks')}>
         {CYCLE_OPTIONS.map((weeks) => (
-          <button
-            key={weeks}
-            type="button"
-            role="radio"
-            aria-checked={field.field.value === weeks}
-            onClick={() => field.field.onChange(weeks)}
-            className={cn(
-              'flex w-full min-h-[56px] flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
-              field.field.value === weeks
-                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
-                : 'border-slate-200 dark:border-slate-700',
-            )}
-          >
-            <span className={cn(
-              'text-sm font-medium',
-              field.field.value === weeks
-                ? 'text-emerald-700 dark:text-emerald-300'
-                : 'text-slate-700 dark:text-slate-300',
-            )}>
-              {weeks} {t('fitness.onboarding.weeksUnit')}
-            </span>
-            <span className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-              {t(`fitness.onboarding.cycleWeeks${weeks}Desc`)}
-            </span>
-          </button>
+          <Fragment key={weeks}>
+            <input type="radio" className="sr-only flex w-full min-h-[56px] flex-col items-start" name="cycleWeeks" checked={field.field.value === weeks} onChange={() => field.field.onChange(weeks)} value={weeks} />
+            <button
+              type="button"
+              aria-pressed={field.field.value === weeks}
+              onClick={() => field.field.onChange(weeks)}
+              className={cn(
+                'flex w-full min-h-[56px] flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                field.field.value === weeks
+                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+                  : 'border-slate-200 dark:border-slate-700',
+              )}
+            >
+              <span className={cn(
+                'text-sm font-medium',
+                field.field.value === weeks
+                  ? 'text-emerald-700 dark:text-emerald-300'
+                  : 'text-slate-700 dark:text-slate-300',
+              )}>
+                {weeks} {t('fitness.onboarding.weeksUnit')}
+              </span>
+              <span className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                {t(`fitness.onboarding.cycleWeeks${weeks}Desc`)}
+              </span>
+            </button>
+          </Fragment>
         ))}
-      </div>
+      </fieldset>
     </StepLayout>
   );
 }

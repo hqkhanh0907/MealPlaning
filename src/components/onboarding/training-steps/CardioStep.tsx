@@ -15,13 +15,12 @@ export function CardioStep({ form, goNext, goBack }: StepProps) {
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex gap-2" role="radiogroup" aria-label={t('fitness.onboarding.cardioSessions')}>
+      <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.cardioSessions')}>
         {[0, 1, 2, 3].map((n) => (
           <button
             key={n}
             type="button"
-            role="radio"
-            aria-checked={field.field.value === n}
+            aria-pressed={field.field.value === n}
             onClick={() => field.field.onChange(n)}
             className={cn(
               'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -33,7 +32,7 @@ export function CardioStep({ form, goNext, goBack }: StepProps) {
             {n}
           </button>
         ))}
-      </div>
+      </fieldset>
     </StepLayout>
   );
 }

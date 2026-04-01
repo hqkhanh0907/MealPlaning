@@ -20,13 +20,12 @@ export function SleepHoursStep({ form, goNext, goBack }: StepProps) {
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('fitness.onboarding.sleepHours')}>
+      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.sleepHours')}>
         {SLEEP_OPTIONS.map((hours) => (
           <button
             key={hours}
             type="button"
-            role="radio"
-            aria-checked={field.field.value === hours}
+            aria-pressed={field.field.value === hours}
             onClick={() => field.field.onChange(hours)}
             className={cn(
               'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -40,17 +39,17 @@ export function SleepHoursStep({ form, goNext, goBack }: StepProps) {
             {hours}
           </button>
         ))}
-      </div>
+      </fieldset>
       <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
         {t('fitness.onboarding.hoursUnit')}
       </p>
       {showWarning && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20" role="status">
+        <output className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden="true" />
-          <p className="text-xs text-amber-700 dark:text-amber-300">
+          <span className="text-xs text-amber-700 dark:text-amber-300">
             {t('fitness.onboarding.sleepWarning')}
-          </p>
-        </div>
+          </span>
+        </output>
       )}
     </StepLayout>
   );

@@ -31,7 +31,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: StepProps) {
       <p className="mb-3 text-xs font-medium text-slate-400 dark:text-slate-500">
         {t('fitness.onboarding.maxItems', { count: MAX_PRIORITY_MUSCLES })} ({selected.length}/{MAX_PRIORITY_MUSCLES})
       </p>
-      <div className="flex flex-wrap gap-2" role="group" aria-label={t('fitness.onboarding.priorityMuscles')}>
+      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.priorityMuscles')}>
         {MUSCLE_GROUPS.map((muscle) => {
           const isSelected = selected.includes(muscle);
           const isDisabled = atMax && !isSelected;
@@ -39,9 +39,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: StepProps) {
             <button
               key={muscle}
               type="button"
-              role="checkbox"
-              aria-checked={isSelected}
-              aria-disabled={isDisabled}
+              aria-pressed={isSelected}
               disabled={isDisabled}
               onClick={() => toggle(muscle)}
               className={cn(
@@ -57,7 +55,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: StepProps) {
             </button>
           );
         })}
-      </div>
+      </fieldset>
     </StepLayout>
   );
 }

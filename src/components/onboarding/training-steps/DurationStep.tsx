@@ -17,13 +17,12 @@ export function DurationStep({ form, goNext, goBack }: StepProps) {
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('fitness.onboarding.sessionDuration')}>
+      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.sessionDuration')}>
         {DURATIONS.map((d) => (
           <button
             key={d}
             type="button"
-            role="radio"
-            aria-checked={field.field.value === d}
+            aria-pressed={field.field.value === d}
             onClick={() => field.field.onChange(d)}
             className={cn(
               'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -35,7 +34,7 @@ export function DurationStep({ form, goNext, goBack }: StepProps) {
             {d} {t('fitness.onboarding.minutes')}
           </button>
         ))}
-      </div>
+      </fieldset>
     </StepLayout>
   );
 }

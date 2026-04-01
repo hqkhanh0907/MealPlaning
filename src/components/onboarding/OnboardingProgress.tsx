@@ -25,12 +25,13 @@ export const OnboardingProgress: React.FC<OnboardingProgressProps> = React.memo(
 
   return (
     <div className="w-full px-4 py-2">
-      <div
-        role="progressbar"
+      <progress
+        value={overallProgress}
+        max={100}
         aria-label={sectionLabel}
         aria-valuenow={overallProgress}
         aria-valuemax={100}
-        className="flex gap-[1px] w-full h-1 rounded-sm overflow-hidden"
+        className="flex gap-[1px] w-full h-1 rounded-sm overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
       >
         {Array.from({ length: totalSections }, (_, i) => {
           const sectionIndex = i + 1;
@@ -54,7 +55,7 @@ export const OnboardingProgress: React.FC<OnboardingProgressProps> = React.memo(
             </div>
           );
         })}
-      </div>
+      </progress>
       <p className="mt-1.5 text-xs text-center text-slate-500 dark:text-slate-400 font-medium">
         {sectionLabel}
       </p>

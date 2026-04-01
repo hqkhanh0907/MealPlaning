@@ -154,7 +154,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: PlanComputingScree
       </p>
 
       {/* (b7-aria-live) accessible steps region */}
-      <div className="w-full max-w-xs space-y-3" role="status" aria-live="polite">
+      <output className="block w-full max-w-xs space-y-3" aria-live="polite">
         {STEPS.map((step, i) => (
           <motion.div
             key={step.key}
@@ -194,7 +194,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: PlanComputingScree
             )}
           </motion.div>
         ))}
-      </div>
+      </output>
     </div>
   );
 }

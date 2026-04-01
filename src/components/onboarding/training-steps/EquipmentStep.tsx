@@ -31,13 +31,12 @@ export function EquipmentStep({ form, goNext, goBack }: StepProps) {
       goNext={goNext}
       goBack={goBack}
     >
-      <div className="flex flex-wrap gap-2" role="group" aria-label={t('fitness.onboarding.equipment')}>
+      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.equipment')}>
         {EQUIPMENT_OPTIONS.map((eq) => (
           <button
             key={eq}
             type="button"
-            role="checkbox"
-            aria-checked={(selected as string[]).includes(eq)}
+            aria-pressed={(selected as string[]).includes(eq)}
             onClick={() => toggle(eq)}
             className={cn(
               'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -49,7 +48,7 @@ export function EquipmentStep({ form, goNext, goBack }: StepProps) {
             {EQUIPMENT_DISPLAY[eq] ?? eq}
           </button>
         ))}
-      </div>
+      </fieldset>
     </StepLayout>
   );
 }

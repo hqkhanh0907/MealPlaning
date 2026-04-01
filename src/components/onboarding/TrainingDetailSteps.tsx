@@ -1,7 +1,7 @@
 import { useWatch, type UseFormReturn } from 'react-hook-form';
 import { useFitnessStore } from '@/store/fitnessStore';
 import { getSmartDefaults } from '@/features/fitness/utils/getSmartDefaults';
-import type { BodyRegion, EquipmentType, MuscleGroup, PeriodizationModel, TrainingExperience, TrainingGoal } from '@/features/fitness/types';
+import type { BodyRegion, EquipmentType, MuscleGroup, TrainingExperience, TrainingGoal } from '@/features/fitness/types';
 import { generateUUID } from '@/utils/helpers';
 import type { OnboardingFormData } from './onboardingSchema';
 import { getActiveSteps } from './trainingStepConfig';
@@ -57,7 +57,7 @@ export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingS
       sessionDurationMin: values.sessionDuration ?? smart.sessionDurationMin,
       availableEquipment: (values.equipment ?? []) as EquipmentType[],
       cardioSessionsWeek: values.cardioSessions ?? smart.cardioSessionsWeek,
-      periodizationModel: (values.periodization ?? smart.periodizationModel) as PeriodizationModel,
+      periodizationModel: (values.periodization ?? smart.periodizationModel),
       injuryRestrictions: (values.injuries ?? []) as BodyRegion[],
       planCycleWeeks: values.cycleWeeks ?? smart.planCycleWeeks,
       priorityMuscles: (values.priorityMuscles ?? []) as MuscleGroup[],

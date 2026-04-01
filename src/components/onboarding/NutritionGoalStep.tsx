@@ -58,13 +58,12 @@ export function NutritionGoalStep({ form, goNext, goBack }: NutritionGoalStepPro
         </p>
 
         {/* Goal Type */}
-        <div className="mb-6 space-y-3" role="radiogroup" aria-label={t('onboarding.goal.title')}>
+        <fieldset className="mb-6 space-y-3 border-0 p-0 m-0" aria-label={t('onboarding.goal.title')}>
           {GOALS.map(({ value, icon: Icon, color }) => (
             <button
               key={value}
               type="button"
-              role="radio"
-              aria-checked={goalField.field.value === value}
+              aria-pressed={goalField.field.value === value}
               onClick={() => goalField.field.onChange(value)}
               className={cn(
                 'flex w-full min-h-[56px] items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -89,7 +88,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: NutritionGoalStepPro
               </div>
             </button>
           ))}
-        </div>
+        </fieldset>
 
         {/* Conditional: Rate & Target Weight */}
         {showConditional && (
@@ -98,13 +97,12 @@ export function NutritionGoalStep({ form, goNext, goBack }: NutritionGoalStepPro
               <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 {t('onboarding.goal.rate')}
               </label>
-              <div className="flex gap-2" role="radiogroup" aria-label={t('onboarding.goal.rate')}>
+              <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('onboarding.goal.rate')}>
                 {RATES.map((rate) => (
                   <button
                     key={rate}
                     type="button"
-                    role="radio"
-                    aria-checked={rateField.field.value === rate}
+                    aria-pressed={rateField.field.value === rate}
                     onClick={() => rateField.field.onChange(rate)}
                     className={cn(
                       'min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
@@ -116,7 +114,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: NutritionGoalStepPro
                     {t(`onboarding.goal.rate_${rate}`)}
                   </button>
                 ))}
-              </div>
+              </fieldset>
             </div>
 
             <div>
