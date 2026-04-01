@@ -98,9 +98,18 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
               return (
                 <li key={day}>
+                  <input
+                    type="radio"
+                    className="sr-only"
+                    checked={isCurrent}
+                    disabled={isFull}
+                    onChange={() => handleSelect(day)}
+                    name="day-selection"
+                    tabIndex={-1}
+                    aria-label={`${shortLabel} (${fullLabel})`}
+                  />
                   <button
                     type="button"
-                    role="radio"
                     aria-checked={isCurrent}
                     aria-disabled={isFull}
                     data-testid={`day-option-${day}`}

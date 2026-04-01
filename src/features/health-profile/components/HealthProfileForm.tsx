@@ -155,7 +155,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   const goalWeightWarning = useMemo(() => {
     if (!activeGoal || activeGoal.type === 'maintain' || !activeGoal.targetWeightKg) return null;
     const w = Number(watchedWeightKg);
-    if (!w || isNaN(w)) return null;
+    if (!w || Number.isNaN(w)) return null;
     const target = activeGoal.targetWeightKg;
     if (activeGoal.type === 'cut' && w <= target) {
       return t('healthProfile.goalWeightConflictCut');
@@ -349,32 +349,40 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               role="radiogroup"
               aria-label={t('healthProfile.bmr')}
             >
-              <button
-                type="button"
-                role="radio"
-                aria-checked={!field.value}
-                onClick={() => field.onChange(false)}
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  !field.value
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+              <label
+                className={`cursor-pointer flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 ${
+                  field.value
+                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    : 'bg-emerald-500 text-white'
                 }`}
               >
+                <input
+                  type="radio"
+                  className="sr-only"
+                  checked={!field.value}
+                  aria-checked={!field.value}
+                  onChange={() => field.onChange(false)}
+                  name="bmr-override"
+                />
                 {t('healthProfile.bmrAuto')}
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={field.value === true}
-                onClick={() => field.onChange(true)}
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              </label>
+              <label
+                className={`cursor-pointer flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 ${
                   field.value
                     ? 'bg-emerald-500 text-white'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
+                <input
+                  type="radio"
+                  className="sr-only"
+                  checked={field.value === true}
+                  aria-checked={field.value === true}
+                  onChange={() => field.onChange(true)}
+                  name="bmr-override"
+                />
                 {t('healthProfile.bmrCustom')}
-              </button>
+              </label>
             </div>
           )}
         />

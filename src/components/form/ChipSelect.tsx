@@ -24,7 +24,7 @@ function ChipSelectInner<T extends FieldValues>({
   minItems,
   className,
   testIdPrefix,
-}: ChipSelectProps<T>) {
+}: Readonly<ChipSelectProps<T>>) {
   const toggleValue = useCallback(
     (current: string[], value: string): string[] => {
       const isSelected = current.includes(value);
@@ -56,21 +56,25 @@ function ChipSelectInner<T extends FieldValues>({
               const isActive = selected.includes(option.value);
 
               return (
-                <button
+                <label
                   key={option.value}
-                  type="button"
-                  role="checkbox"
                   aria-checked={isActive}
                   data-testid={testIdPrefix ? `${testIdPrefix}-${option.value}` : undefined}
-                  onClick={() => field.onChange(toggleValue(selected, option.value))}
                   className={
                     isActive
-                      ? 'min-h-[44px] min-w-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm'
-                      : 'min-h-[44px] min-w-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      ? 'cursor-pointer min-h-[44px] min-w-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2'
+                      : 'cursor-pointer min-h-[44px] min-w-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2'
                   }
                 >
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={isActive}
+                    aria-checked={isActive}
+                    onChange={() => field.onChange(toggleValue(selected, option.value))}
+                  />
                   {option.label}
-                </button>
+                </label>
               );
             })}
           </fieldset>

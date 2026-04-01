@@ -65,14 +65,20 @@ export const MilestonesList = React.memo(function MilestonesList() {
                 {nextMilestone.emoji}{' '}
                 {t(`fitness.gamification.${nextMilestone.label}`)}
               </p>
-              <div
+              <progress
                 data-testid="progress-bar"
-                className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
+                className="sr-only"
+                value={progress}
+                max={100}
                 role="progressbar"
                 aria-valuenow={progress}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={t('fitness.gamification.nextMilestone')}
+              />
+              <div
+                className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
+                aria-hidden="true"
               >
                 <div
                   data-testid="progress-fill"

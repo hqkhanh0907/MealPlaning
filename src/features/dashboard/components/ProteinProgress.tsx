@@ -49,15 +49,23 @@ export const ProteinProgress: React.FC<ProteinProgressProps> = React.memo(
 
     return (
       <div
-        data-testid="protein-progress"
         className="space-y-1"
         style={{ minHeight: 48 }}
-        role="progressbar"
-        aria-valuenow={roundedCurrent}
-        aria-valuemin={0}
-        aria-valuemax={roundedTarget}
+        >
+        <progress
+          data-testid="protein-progress"
+          className="sr-only"
+          style={{ minHeight: 48 }}
+          value={roundedCurrent}
+          max={roundedTarget}
+          role="progressbar"
+          aria-valuenow={roundedCurrent}
+          aria-valuemin={0}
+          aria-valuemax={roundedTarget}
           aria-label={`Protein: ${roundedCurrent}g trên ${roundedTarget}g. ${suggestion}`}
         >
+          {t('nutrition.protein')}: {roundedCurrent}g / {roundedTarget}g. {suggestion}
+        </progress>
         {/* Header: label + number */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-slate-700 dark:text-slate-300">

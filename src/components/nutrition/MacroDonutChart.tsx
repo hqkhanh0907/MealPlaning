@@ -66,7 +66,6 @@ export const MacroDonutChart: React.FC<MacroDonutChartProps> = React.memo(
           width={size}
           height={size}
           viewBox={`0 0 ${size} ${size}`}
-          role="img"
           aria-label={`${t('nutrition.protein')}: ${proteinG}${t('nutrition.grams')}, ${t('nutrition.fat')}: ${fatG}${t('nutrition.grams')}, ${t('nutrition.carbs')}: ${carbsG}${t('nutrition.grams')}`}
         >
           {/* Background circle */}

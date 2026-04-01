@@ -102,17 +102,23 @@ export const RestTimer = React.memo(function RestTimer({
         </div>
 
         <div className="relative mb-6 flex items-center justify-center">
-          <svg
-            className="h-32 w-32 -rotate-90 transform"
-            width="128"
-            height="128"
-            viewBox="0 0 128 128"
+          <progress
             data-testid="progress-ring"
+            className="sr-only"
+            value={Math.round(progress * 100)}
+            max={100}
             role="progressbar"
             aria-valuenow={Math.round(progress * 100)}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label={t('fitness.timer.rest')}
+          />
+          <svg
+            className="h-32 w-32 -rotate-90 transform"
+            width="128"
+            height="128"
+            viewBox="0 0 128 128"
+            aria-hidden="true"
           >
             <circle
               cx="64"

@@ -20,7 +20,7 @@ function RadioPillsInner<T extends FieldValues>({
   options,
   className,
   testIdPrefix,
-}: RadioPillsProps<T>) {
+}: Readonly<RadioPillsProps<T>>) {
   return (
     <Controller
       name={name}
@@ -35,21 +35,26 @@ function RadioPillsInner<T extends FieldValues>({
             const isActive = field.value === option.value;
 
             return (
-              <button
+              <label
                 key={option.value}
-                type="button"
-                role="radio"
                 aria-checked={isActive}
                 data-testid={testIdPrefix ? `${testIdPrefix}-${option.value}` : undefined}
-                onClick={() => field.onChange(option.value)}
                 className={
                   isActive
-                    ? 'min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm'
-                    : 'min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    ? 'cursor-pointer min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2'
+                    : 'cursor-pointer min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2'
                 }
               >
+                <input
+                  type="radio"
+                  className="sr-only"
+                  checked={isActive}
+                  aria-checked={isActive}
+                  onChange={() => field.onChange(option.value)}
+                  name={name}
+                />
                 {option.label}
-              </button>
+              </label>
             );
           })}
         </fieldset>
