@@ -68,7 +68,7 @@ export const TIPS_POOL: ReadonlyArray<{ title: string; message: string }> = [
 function hashDateToIndex(dateStr: string, poolSize: number): number {
   let hash = 0;
   for (let i = 0; i < dateStr.length; i++) {
-    hash = (hash << 5) - hash + dateStr.charCodeAt(i);
+    hash = (hash << 5) - hash + dateStr.codePointAt(i)!;
     hash = Math.trunc(hash);
   }
   return Math.abs(hash) % poolSize;

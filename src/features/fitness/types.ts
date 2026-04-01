@@ -66,7 +66,7 @@ export function isSplitType(value: string): value is SplitType {
 }
 
 export function normalizeSplitType(raw: string): SplitType {
-  const lower = raw.toLowerCase().replace(/[\s/-]/g, '_');
+  const lower = raw.toLowerCase().replaceAll(/[\s/-]/g, '_');
   if (lower.includes('full') && lower.includes('body')) return 'full_body';
   if (lower.includes('upper') && lower.includes('lower')) return 'upper_lower';
   if (lower.includes('push') || lower === 'ppl') return 'ppl';

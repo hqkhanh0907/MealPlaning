@@ -82,6 +82,15 @@ export const PlanDayEditor = memo(function PlanDayEditor({
     setShowConfirmDialog(false);
   }, []);
 
+  useEffect(() => {
+    if (!showConfirmDialog) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCancelDiscard();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showConfirmDialog, handleCancelDiscard]);
+
   const pendingRemovalRef = useRef<{
     index: number;
     exercise: SelectedExercise;
@@ -416,9 +425,6 @@ export const PlanDayEditor = memo(function PlanDayEditor({
           role="dialog"
           aria-modal="true"
           aria-labelledby={confirmDialogTitleId}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') handleCancelDiscard();
-          }}
         >
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
             <p id={confirmDialogTitleId} className="mb-6 text-sm text-slate-700 dark:text-slate-300">

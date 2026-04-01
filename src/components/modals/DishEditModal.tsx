@@ -101,7 +101,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
       const entry = indexed?.[i];
       if (entry?.amount) {
         const ingId = watchedIngredients[i]?.ingredientId;
-        const inputEl = ingId ? document.querySelector(`[data-testid="input-dish-amount-${ingId}"]`) as HTMLInputElement | null : null;
+        const inputEl = ingId ? document.querySelector<HTMLInputElement>(`[data-testid="input-dish-amount-${ingId}"]`) : null;
         const displayValue = inputEl?.value ?? '';
         const parsedDisplay = Number.parseFloat(displayValue);
         if (displayValue !== '' && !Number.isNaN(parsedDisplay) && parsedDisplay >= 0) {
@@ -143,7 +143,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
     }
 
     for (let i = 0; i < values.ingredients.length; i++) {
-      const inputEl = document.querySelector(`[data-testid="input-dish-amount-${values.ingredients[i].ingredientId}"]`) as HTMLInputElement | null;
+      const inputEl = document.querySelector<HTMLInputElement>(`[data-testid="input-dish-amount-${values.ingredients[i].ingredientId}"]`);
       const displayValue = inputEl ? inputEl.value : String(values.ingredients[i].amount);
       if (displayValue === '' || Number.isNaN(Number.parseFloat(displayValue))) {
         setError(`ingredients.${i}.amount`, { message: t('dish.validationAmountRequired') });
@@ -242,7 +242,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   const handleTagToggle = (type: MealType, isActive: boolean) => {
     const currentTags = getValues('tags');
     if (isActive) {
-      setValue('tags', currentTags.filter(t2 => t2 !== type) as DishEditFormData['tags'], { shouldDirty: true });
+      setValue('tags', currentTags.filter(t2 => t2 !== type), { shouldDirty: true });
     } else {
       setValue('tags', [...currentTags, type] as DishEditFormData['tags'], { shouldDirty: true });
       if (errors.tags) clearErrors('tags');
@@ -266,7 +266,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
           <div>
             <label htmlFor="dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('dish.dishName')}</label>
             <div className="flex items-center gap-2">
-              <Input id="dish-name" autoComplete="off" value={watchedName} onChange={e => { setValue('name', e.target.value, { shouldDirty: true }); if (errors.name) clearErrors('name'); setAiSuggestError(''); }} className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
+              <Input id="dish-name" autoComplete="off" value={watchedName} onChange={e => { setValue('name', e.target.value, { shouldDirty: true }); if (errors.name) { clearErrors('name'); } setAiSuggestError(''); }} className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`} placeholder={t('dish.namePlaceholder')} data-testid="input-dish-name" />
               {aiSuggestLoading ? (
                 <div className="shrink-0 w-10 h-10 min-h-11 min-w-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center" data-testid="ai-suggest-loading">
                   <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />

@@ -132,9 +132,10 @@ export default function App() {
 
   // Reset runtime-only stores on mount (no persistent data — safe to keep)
   // Data stores (ingredients, dishes, dayPlans, templates) are now loaded from SQLite by DatabaseContext
-  useState(() => {
+  const [_initDone] = useState(() => {
     useUIStore.getState().hydrate();
     useNavigationStore.setState({ activeTab: 'calendar', pageStack: [], showBottomNav: true, tabScrollPositions: {} });
+    return true;
   });
 
   // Read state from Zustand stores

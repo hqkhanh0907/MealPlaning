@@ -22,7 +22,7 @@ function getLast7Weights(entries: WeightEntry[]): WeightEntry[] {
 function computeWeeklyChange(entries: WeightEntry[]): number {
   if (entries.length < 2) return 0;
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
-  const latest = sorted[sorted.length - 1];
+  const latest = sorted.at(-1)!;
   const oldest = sorted[0];
   const daysDiff = Math.max(
     1,
@@ -164,7 +164,8 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
 
   if (!latestWeight) {
     return (
-      <div
+      <button
+        type="button"
         data-testid="weight-mini-empty"
         role="button"
         tabIndex={0}
@@ -182,7 +183,7 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
             {t('dashboard.weightMini.logFirst')}
           </p>
         </div>
-      </div>
+      </button>
     );
   }
 
@@ -203,7 +204,8 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
         };
 
   return (
-    <div
+    <button
+      type="button"
       data-testid="weight-mini"
       role="button"
       tabIndex={0}
@@ -257,7 +259,7 @@ function WeightMiniInner({ onTap }: WeightMiniProps): React.ReactElement {
           />
         </svg>
       )}
-    </div>
+    </button>
   );
 }
 
