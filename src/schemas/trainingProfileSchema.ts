@@ -22,11 +22,11 @@ export const trainingProfileSchema = z.object({
   trainingExperience: z.enum(TRAINING_EXPERIENCE_VALUES),
 
   daysPerWeek: z.enum(DAYS_PER_WEEK_STR, {
-    message: 'Số ngày tập phải là 2, 3, 4, 5 hoặc 6',
+    error: 'Số ngày tập phải là 2, 3, 4, 5 hoặc 6',
   }),
 
   sessionDurationMin: z.enum(SESSION_DURATION_STR, {
-    message: 'Thời lượng buổi tập phải là 30, 45, 60 hoặc 90 phút',
+    error: 'Thời lượng buổi tập phải là 30, 45, 60 hoặc 90 phút',
   }),
 
   availableEquipment: z.array(z.enum(EQUIPMENT_TYPE_VALUES)),
@@ -34,26 +34,26 @@ export const trainingProfileSchema = z.object({
   injuryRestrictions: z.array(z.enum(BODY_REGION_VALUES)),
 
   cardioSessionsWeek: z.enum(CARDIO_SESSIONS_STR, {
-    message: 'Số buổi cardio phải từ 0 đến 5',
+    error: 'Số buổi cardio phải từ 0 đến 5',
   }),
 
   periodizationModel: z.enum(PERIODIZATION_MODEL_VALUES),
 
   planCycleWeeks: z.enum(CYCLE_WEEKS_STR, {
-    message: 'Số tuần chu kỳ phải là 4, 6, 8 hoặc 12',
+    error: 'Số tuần chu kỳ phải là 4, 6, 8 hoặc 12',
   }),
 
   priorityMuscles: z
     .array(z.enum(MUSCLE_GROUP_VALUES))
     .max(MAX_PRIORITY_MUSCLES, {
-      message: `Chọn tối đa ${MAX_PRIORITY_MUSCLES} nhóm cơ ưu tiên`,
+      error: `Chọn tối đa ${MAX_PRIORITY_MUSCLES} nhóm cơ ưu tiên`,
     }),
 
   avgSleepHours: z.preprocess(
     (val) => (val === '' || val === undefined || val === null || Number.isNaN(Number(val)) ? undefined : Number(val)),
     z.number()
-      .min(3, { message: 'Giờ ngủ tối thiểu là 3' })
-      .max(12, { message: 'Giờ ngủ tối đa là 12' })
+      .min(3, { error: 'Giờ ngủ tối thiểu là 3' })
+      .max(12, { error: 'Giờ ngủ tối đa là 12' })
       .optional(),
   ),
 });

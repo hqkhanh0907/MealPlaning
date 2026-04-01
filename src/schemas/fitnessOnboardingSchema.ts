@@ -61,7 +61,7 @@ export const fitnessOnboardingSchema = z.object({
     .refine(
       (v): v is (typeof DAYS_PER_WEEK_VALUES)[number] =>
         (DAYS_PER_WEEK_VALUES as readonly number[]).includes(v),
-      { message: 'Days per week must be 2, 3, 4, 5, or 6' },
+      { error: 'Days per week must be 2, 3, 4, 5, or 6' },
     ),
 
   /** Step 1 – session duration in minutes (discrete set, nullable = "use smart default") */
@@ -71,7 +71,7 @@ export const fitnessOnboardingSchema = z.object({
     .refine(
       (v): v is (typeof SESSION_DURATION_VALUES)[number] =>
         (SESSION_DURATION_VALUES as readonly number[]).includes(v),
-      { message: 'Session duration must be 30, 45, 60, or 90' },
+      { error: 'Session duration must be 30, 45, 60, or 90' },
     )
     .nullable(),
 
@@ -100,7 +100,7 @@ export const fitnessOnboardingSchema = z.object({
     .refine(
       (v): v is (typeof CYCLE_WEEKS_VALUES)[number] =>
         (CYCLE_WEEKS_VALUES as readonly number[]).includes(v),
-      { message: 'Cycle weeks must be 4, 6, 8, or 12' },
+      { error: 'Cycle weeks must be 4, 6, 8, or 12' },
     )
     .nullable(),
 
@@ -111,7 +111,7 @@ export const fitnessOnboardingSchema = z.object({
   priorityMuscles: z
     .array(z.enum(MUSCLE_GROUP_VALUES))
     .max(MAX_PRIORITY_MUSCLES, {
-      message: `Select at most ${MAX_PRIORITY_MUSCLES} priority muscles`,
+      error: `Select at most ${MAX_PRIORITY_MUSCLES} priority muscles`,
     }),
 
   /**

@@ -35,7 +35,7 @@ export const saveAnalyzedDishSchema = z
   })
   .refine(
     (data) => !data.saveDish || data.dishTags.length > 0,
-    { message: 'At least one meal tag is required when saving dish', path: ['dishTags'] },
+    { error: 'At least one meal tag is required when saving dish', path: ['dishTags'] },
   );
 
 export type SaveAnalyzedDishFormData = z.infer<typeof saveAnalyzedDishSchema>;

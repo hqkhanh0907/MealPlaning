@@ -10,7 +10,7 @@ export const onboardingSchema = z.object({
       const d = new Date(v);
       return !Number.isNaN(d.getTime()) && d < new Date();
     },
-    { message: 'onboarding.validation.dobInvalid' }
+    { error: 'onboarding.validation.dobInvalid' }
   ),
   heightCm: z.number().min(100).max(250),
   weightKg: z.number().min(30).max(300),

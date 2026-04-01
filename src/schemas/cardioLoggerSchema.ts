@@ -35,7 +35,7 @@ export const cardioLoggerSchema = z
       return true;
     },
     {
-      message: 'Distance must be a non-negative number for running, cycling, or swimming',
+      error: 'Distance must be a non-negative number for running, cycling, or swimming',
       path: ['distanceKm'],
     },
   );
