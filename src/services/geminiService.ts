@@ -195,8 +195,10 @@ export async function suggestMealPlan(
   const MAX_PER_SLOT = 20;
   const shuffle = <T>(arr: T[]): T[] => {
     const result = [...arr];
+    const randomBytes = new Uint32Array(result.length);
+    crypto.getRandomValues(randomBytes);
     for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = randomBytes[i] % (i + 1);
       [result[i], result[j]] = [result[j], result[i]];
     }
     return result;
