@@ -28,7 +28,7 @@ export function useActivityMultiplier(): UseActivityMultiplierReturn {
   }, [workouts, workoutSets, profile.activityLevel]);
 
   const applySuggestion = useCallback(() => {
-    if (!analysis || !analysis.needsAdjustment) return;
+    if (!analysis?.needsAdjustment) return;
     const currentProfile = useHealthProfileStore.getState().profile;
     useHealthProfileStore.setState({
       profile: {

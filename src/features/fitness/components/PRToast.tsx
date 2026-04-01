@@ -18,28 +18,22 @@ export const PRToast = React.memo(function PRToast({ pr, onDismiss }: PRToastPro
   }, [onDismiss]);
 
   return (
-    <div
+    <button
+      type="button"
       data-testid="pr-toast"
-      className="fixed inset-x-4 top-4 z-50 cursor-pointer rounded-xl p-4 shadow-lg"
+      className="fixed inset-x-4 top-4 z-50 cursor-pointer rounded-xl p-4 shadow-lg text-left w-auto appearance-none border-none"
       style={{ background: `linear-gradient(to right, ${COLORS.amber500}, ${COLORS.amber600})` }}
       onClick={onDismiss}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onDismiss();
-        }
-      }}
-      role="alert"
-      tabIndex={0}
+      aria-label={t('fitness.gamification.newPR')}
     >
       <p className="flex items-center gap-2 text-lg font-bold text-amber-900">
         <Trophy className="h-5 w-5" aria-hidden="true" />
         {t('fitness.gamification.newPR')}
       </p>
       <p data-testid="pr-details" className="text-sm text-amber-800">
-        {pr.exerciseName}: {pr.newWeight}kg × {pr.reps} reps (+
+        {pr.exerciseName}: {pr.newWeight}kg \u00d7 {pr.reps} reps (+
         {pr.improvement}kg)
       </p>
-    </div>
+    </button>
   );
 });

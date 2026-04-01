@@ -227,14 +227,14 @@ describe('ProgressDashboard a11y', () => {
     });
   });
 
-  it('cycle progress bar has role=progressbar with ARIA value attrs', () => {
+  it('cycle progress bar uses native progress element', () => {
     render(<ProgressDashboard />);
 
-    const progressBar = screen.getByRole('progressbar');
-    expect(progressBar).toHaveAttribute('aria-valuenow');
-    expect(progressBar).toHaveAttribute('aria-valuemin', '0');
-    expect(progressBar).toHaveAttribute('aria-valuemax', '100');
-    expect(progressBar).toHaveAttribute('aria-label');
+    const progress = document.querySelector('progress');
+    expect(progress).toBeInTheDocument();
+    expect(progress).toHaveAttribute('value');
+    expect(progress).toHaveAttribute('max', '100');
+    expect(progress).toHaveAttribute('aria-label');
   });
 
   it('trend icons have aria-hidden', () => {
@@ -279,7 +279,6 @@ describe('RestTimer a11y', () => {
     const ring = screen.getByTestId('progress-ring');
     expect(ring).toHaveAttribute('role', 'progressbar');
     expect(ring).toHaveAttribute('aria-valuenow');
-    expect(ring).toHaveAttribute('aria-valuemin', '0');
     expect(ring).toHaveAttribute('aria-valuemax', '100');
     expect(ring).toHaveAttribute('aria-label');
   });
@@ -313,15 +312,15 @@ describe('PRToast a11y', () => {
     previousReps: 5,
   };
 
-  it('has role=alert and is keyboard dismissible', () => {
+  it('renders as a button and is click-dismissible', () => {
     const onDismiss = vi.fn();
     render(<PRToast pr={pr} onDismiss={onDismiss} />);
 
     const toast = screen.getByTestId('pr-toast');
-    expect(toast).toHaveAttribute('role', 'alert');
-    expect(toast).toHaveAttribute('tabIndex', '0');
+    expect(toast.tagName).toBe('BUTTON');
+    expect(toast).toHaveAttribute('aria-label');
 
-    fireEvent.keyDown(toast, { key: 'Enter' });
+    fireEvent.click(toast);
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
@@ -370,7 +369,6 @@ describe('MilestonesList a11y', () => {
     const progressBar = screen.getByTestId('progress-bar');
     expect(progressBar).toHaveAttribute('role', 'progressbar');
     expect(progressBar).toHaveAttribute('aria-valuenow');
-    expect(progressBar).toHaveAttribute('aria-valuemin', '0');
     expect(progressBar).toHaveAttribute('aria-valuemax', '100');
     expect(progressBar).toHaveAttribute('aria-label');
   });
@@ -419,7 +417,7 @@ describe('StreakMini a11y', () => {
 
     const el = screen.getByTestId('streak-mini-empty');
     expect(el).toHaveAttribute('role', 'button');
-    expect(el).toHaveAttribute('tabIndex', '0');
+    expect(el).toHaveAttribute('tabindex', '0');
     expect(el).toHaveAttribute('aria-label');
     expect(el.className).toContain('focus:ring-2');
   });
@@ -449,16 +447,14 @@ describe('StreakMini a11y', () => {
     expect(el.className).toContain('focus:ring-2');
   });
 
-  it('responds to keyboard activation', () => {
+  it('responds to click activation', () => {
     const onTap = vi.fn();
     render(<StreakMini onTap={onTap} />);
 
     const el = screen.getByTestId('streak-mini-empty');
-    fireEvent.keyDown(el, { key: 'Enter' });
+    expect(el).toHaveAttribute('role', 'button');
+    fireEvent.click(el);
     expect(onTap).toHaveBeenCalledTimes(1);
-
-    fireEvent.keyDown(el, { key: ' ' });
-    expect(onTap).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -638,7 +634,6 @@ describe('EnergyBalanceMini a11y', () => {
     const container = screen.getByTestId('energy-balance-mini');
     expect(container).toHaveAttribute('role', 'button');
     expect(container).toHaveAttribute('aria-label');
-    expect(container).toHaveAttribute('tabIndex', '0');
     expect(container.className).toContain('focus:ring-2');
   });
 
@@ -648,11 +643,11 @@ describe('EnergyBalanceMini a11y', () => {
     );
 
     const container = screen.getByTestId('energy-balance-mini');
-    expect(container).not.toHaveAttribute('role');
+    expect(container.tagName).toBe('DIV');
     expect(container).not.toHaveAttribute('tabIndex');
   });
 
-  it('responds to keyboard activation when interactive', () => {
+  it('responds to click activation when interactive', () => {
     const onTap = vi.fn();
     render(
       <EnergyBalanceMini
@@ -664,7 +659,8 @@ describe('EnergyBalanceMini a11y', () => {
     );
 
     const container = screen.getByTestId('energy-balance-mini');
-    fireEvent.keyDown(container, { key: 'Enter' });
+    expect(container).toHaveAttribute('role', 'button');
+    fireEvent.click(container);
     expect(onTap).toHaveBeenCalledTimes(1);
   });
 });

@@ -154,8 +154,8 @@ export default function App() {
     pushPage({ id: 'settings', component: 'SettingsTab' });
   }, [pushPage]);
 
-  const isSettingsOpen = pageStack.length > 0 && pageStack[pageStack.length - 1].id === 'settings';
-  const topPage = pageStack.length > 0 ? pageStack[pageStack.length - 1] : null;
+  const isSettingsOpen = pageStack.length > 0 && pageStack.at(-1)!.id === 'settings';
+  const topPage = pageStack.length > 0 ? pageStack.at(-1)! : null;
   const isFitnessPageOpen = topPage !== null && topPage.id !== 'settings';
 
   const handleTabChange = useCallback((tab: MainTab) => {

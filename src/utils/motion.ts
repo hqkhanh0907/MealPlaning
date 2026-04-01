@@ -28,7 +28,7 @@ export function staggerDelay(tierIndex: number): string {
  */
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() => {
-    if (typeof globalThis.window === 'undefined') return false;
+    if (globalThis.window === undefined) return false;
     return globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 

@@ -88,7 +88,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
         {/* Day list */}
         <div className="px-4 pb-safe">
-          <ul role="radiogroup" aria-label={t('fitness.scheduleEditor.selectDay')} className="space-y-2 pb-4">
+          <div role="radiogroup" aria-label={t('fitness.scheduleEditor.selectDay')} className="space-y-2 pb-4">
             {sortedDays.map((day) => {
               const count = existingDayCounts[day] ?? 0;
               const isFull = count >= MAX_SESSIONS_PER_DAY;
@@ -158,7 +158,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                 </li>
               );
             })}
-          </ul>
+          </div>
         </div>
       </div>
     </ModalBackdrop>

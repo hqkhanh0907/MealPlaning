@@ -183,8 +183,9 @@ class WebDatabaseService implements DatabaseService {
         const r = row as Record<string, unknown>;
         const placeholders = columns.map(() => '?').join(', ');
         const values = columns.map((c) => r[c]);
+        const columnList = columns.map((c) => `"${c}"`).join(', ');
         db.run(
-          `INSERT INTO "${tableName}" (${columns.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`,
+          `INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`,
           values,
         );
       }

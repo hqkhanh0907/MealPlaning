@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
@@ -51,7 +51,7 @@ interface WorkoutLoggerProps {
 
 interface TimerDisplayProps {
   startSeconds: number;
-  elapsedRef: MutableRefObject<number>;
+  elapsedRef: RefObject<number>;
   isRunning: boolean;
 }
 

@@ -78,7 +78,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
     <ul
       data-testid="workout-assignment-list"
       className="space-y-2"
-      role="list"
+     
     >
       {planDays.map((day, index) => (
         <li

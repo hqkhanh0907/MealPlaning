@@ -129,7 +129,7 @@ export function calculateStreak(
 
   // --- Longest streak (forward scan) ---
   let longestStreak = 0;
-  const sorted = [...workoutDates].sort();
+  const sorted = [...workoutDates].sort((a, b) => a.localeCompare(b));
   const earliest = sorted[0];
   const totalDays = daysBetween(earliest, todayStr);
   let tempStreak = 0;

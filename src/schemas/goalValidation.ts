@@ -47,7 +47,7 @@ export function createGoalFieldsSchema(getCurrentWeight: () => number | undefine
         const error = validateTargetWeight(data.goalType, currentWeight, data.targetWeightKg);
         if (error) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['targetWeightKg'],
             message: error,
           });

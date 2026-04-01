@@ -136,7 +136,7 @@ function TrainingPlanViewInner({
     for (const day of planDays) {
       const existing = map.get(day.dayOfWeek) ?? [];
       existing.push(day);
-      map.set(day.dayOfWeek, existing.sort((a, b) => (a.sessionOrder ?? 1) - (b.sessionOrder ?? 1)));
+      map.set(day.dayOfWeek, [...existing].sort((a, b) => (a.sessionOrder ?? 1) - (b.sessionOrder ?? 1)));
     }
     return map;
   }, [planDays]);
@@ -523,10 +523,9 @@ function TrainingPlanViewInner({
       )}
 
       {!coachingDismissed && (
-        <div
+        <output
           data-testid="plan-coaching-hint"
-          role="status"
-          className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20"
+          className="block flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20"
         >
           <span className="flex-1 text-sm text-emerald-700 dark:text-emerald-300">
             {t('fitness.plan.coachingHint')}
@@ -539,7 +538,7 @@ function TrainingPlanViewInner({
           >
             <X className="h-4 w-4" />
           </button>
-        </div>
+        </output>
       )}
 
       <button

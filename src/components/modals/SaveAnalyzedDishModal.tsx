@@ -229,7 +229,7 @@ export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ on
                                   : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'
                               }`}
                             >
-                              {(() => { const Icon = opt.icon; return <Icon className="size-4 inline-block" aria-hidden="true" />; })()} {opt.label}
+                              <opt.icon className="size-4 inline-block" aria-hidden="true" /> {opt.label}
                             </button>
                           );
                         })}

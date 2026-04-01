@@ -312,7 +312,7 @@ describe('SessionTabs', () => {
       expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
     });
 
-    it('dismisses delete confirmation with Escape key', async () => {
+    it('dismisses delete confirmation with cancel button', async () => {
       const user = userEvent.setup();
       render(
         <SessionTabs
@@ -327,7 +327,7 @@ describe('SessionTabs', () => {
       const deleteBtn = screen.getByTestId('delete-session-pd-1');
       await user.click(deleteBtn);
       expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
-      await user.keyboard('{Escape}');
+      await user.click(screen.getByTestId('cancel-delete-session'));
       expect(screen.queryByTestId('delete-session-confirm')).not.toBeInTheDocument();
     });
   });

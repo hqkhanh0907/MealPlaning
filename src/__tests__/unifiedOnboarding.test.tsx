@@ -468,7 +468,7 @@ describe('onboardingSchema', () => {
 /* ================================================================== */
 
 describe('OnboardingProgress', () => {
-  it('renders progressbar with correct aria attributes', () => {
+  it('renders progressbar with correct ARIA attributes', () => {
     render(
       <OnboardingProgress
         currentSection={2}
@@ -477,10 +477,10 @@ describe('OnboardingProgress', () => {
         totalStepsInSection={3}
       />,
     );
-    const progressbar = screen.getByRole('progressbar');
-    expect(progressbar).toBeInTheDocument();
-    expect(progressbar).toHaveAttribute('aria-valuemax', '100');
-    expect(progressbar).toHaveAttribute('aria-valuenow');
+    const progress = screen.getByRole('progressbar');
+    expect(progress).toBeInTheDocument();
+    expect(progress).toHaveAttribute('aria-valuemax', '100');
+    expect(progress).toHaveAttribute('aria-valuenow');
   });
 
   it('computes overall progress correctly', () => {
@@ -492,9 +492,9 @@ describe('OnboardingProgress', () => {
         totalStepsInSection={4}
       />,
     );
-    const progressbar = screen.getByRole('progressbar');
+    const progress = screen.getByRole('progressbar');
     // (3-1 + 2/4) / 5 * 100 = 50
-    expect(progressbar.getAttribute('aria-valuenow')).toBe('50');
+    expect(progress).toHaveAttribute('aria-valuenow', '50');
   });
 
   it('shows 0% at the very beginning', () => {
@@ -506,8 +506,8 @@ describe('OnboardingProgress', () => {
         totalStepsInSection={3}
       />,
     );
-    const progressbar = screen.getByRole('progressbar');
-    expect(progressbar.getAttribute('aria-valuenow')).toBe('0');
+    const progress = screen.getByRole('progressbar');
+    expect(progress).toHaveAttribute('aria-valuenow', '0');
   });
 
   it('renders correct number of section segments', () => {
@@ -519,8 +519,8 @@ describe('OnboardingProgress', () => {
         totalStepsInSection={3}
       />,
     );
-    const progressbar = screen.getByRole('progressbar');
-    const segments = progressbar.children;
+    const progressBar = screen.getByRole('progressbar');
+    const segments = progressBar.children;
     expect(segments.length).toBe(7);
   });
 
@@ -606,7 +606,7 @@ describe('OnboardingErrorBoundary', () => {
 describe('WelcomeSlides', () => {
   it('renders slide content for step 0', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -620,7 +620,7 @@ describe('WelcomeSlides', () => {
 
   it('renders slide content for step 1', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -633,7 +633,7 @@ describe('WelcomeSlides', () => {
 
   it('renders slide content for step 2', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -645,7 +645,7 @@ describe('WelcomeSlides', () => {
 
   it('shows "Start" text on last slide', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -657,7 +657,7 @@ describe('WelcomeSlides', () => {
 
   it('shows "Next" text on non-last slide', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -669,7 +669,7 @@ describe('WelcomeSlides', () => {
 
   it('calls goNext when next button clicked', () => {
     const { goNext } = renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -683,7 +683,7 @@ describe('WelcomeSlides', () => {
   it('calls goToSection(2) when skip button clicked', () => {
     const goToSection = vi.fn();
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -696,7 +696,7 @@ describe('WelcomeSlides', () => {
 
   it('renders dot indicators with correct count', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -710,7 +710,7 @@ describe('WelcomeSlides', () => {
 
   it('marks current dot with aria-current', () => {
     renderWithForm(
-      WelcomeSlides as React.ComponentType<{
+      WelcomeSlides as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1514,7 +1514,7 @@ describe('PlanPreviewScreen', () => {
 
   it('renders preview screen', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1528,7 +1528,7 @@ describe('PlanPreviewScreen', () => {
 
   it('shows correct week day labels', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1542,7 +1542,7 @@ describe('PlanPreviewScreen', () => {
 
   it('shows workout and rest day stats', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1557,7 +1557,7 @@ describe('PlanPreviewScreen', () => {
 
   it('shows edit note', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1569,7 +1569,7 @@ describe('PlanPreviewScreen', () => {
 
   it('calls completeOnboarding on complete button click', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1582,7 +1582,7 @@ describe('PlanPreviewScreen', () => {
 
   it('does not render back button on preview screen', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1594,7 +1594,7 @@ describe('PlanPreviewScreen', () => {
 
   it('displays session duration default of 60 when not set', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1607,7 +1607,7 @@ describe('PlanPreviewScreen', () => {
 
   it('displays custom session duration when set', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;
@@ -1620,7 +1620,7 @@ describe('PlanPreviewScreen', () => {
 
   it('shows correct number of rest days', () => {
     renderWithForm(
-      PlanPreviewScreen as React.ComponentType<{
+      PlanPreviewScreen as unknown as React.ComponentType<{
         form: UseFormReturn<OnboardingFormData>;
         goNext: () => void;
         goBack: () => void;

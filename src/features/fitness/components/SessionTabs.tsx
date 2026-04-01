@@ -162,9 +162,7 @@ function SessionTabsInner({
           data-testid="delete-session-confirm"
           role="alertdialog"
           aria-label={t('fitness.plan.deleteSessionConfirm')}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') handleCancelDelete();
-          }}
+
           className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20"
         >
           <Trash2 className="h-4 w-4 shrink-0 text-red-500" aria-hidden="true" />

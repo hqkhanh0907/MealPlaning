@@ -25,6 +25,42 @@ import { safeParseJsonArray } from '../features/fitness/types';
 
 let _db: DatabaseService | null = null;
 
+function scoreDaySlot(
+  td: number,
+  primaryMuscle: string,
+  daySlots: Map<number, string[]>,
+  assigned: Array<{ id: string; dayOfWeek: number }>,
+  sortedPlanDays: TrainingPlanDay[],
+): number {
+  const slotsUsed = daySlots.get(td)?.length ?? 0;
+  let score = -slotsUsed * 100;
+
+  const hasSameMuscleAdjacent = assigned.some((a) => {
+    const diff = Math.abs(a.dayOfWeek - td);
+    if (diff !== 1 && diff !== 6) return false;
+    const existingDay = sortedPlanDays.find((d) => d.id === a.id);
+    const existingMuscle = (existingDay?.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+    return existingMuscle === primaryMuscle && primaryMuscle !== '';
+  });
+
+  if (hasSameMuscleAdjacent) {
+    score -= 20;
+  }
+
+  return score;
+}
+
+function mergePlanDays(
+  current: TrainingPlanDay[],
+  planId: string,
+  updates: TrainingPlanDay[],
+): TrainingPlanDay[] {
+  return current.map((d) => {
+    if (d.planId !== planId) return d;
+    return updates.find((r) => r.id === d.id) ?? d;
+  });
+}
+
 export interface FitnessState {
   trainingProfile: TrainingProfile | null;
   trainingPlans: TrainingPlan[];
@@ -506,8 +542,9 @@ export const useFitnessStore = create<FitnessState>()(
           return;
         }
 
+        const trainingDaysSet = new Set(trainingDays);
         const allDays = [1, 2, 3, 4, 5, 6, 7];
-        const restDays = allDays.filter((d) => !trainingDays.includes(d));
+        const restDays = allDays.filter((d) => !trainingDaysSet.has(d));
 
         const plan = get().trainingPlans.find((p) => p.id === planId);
         if (!plan) {
@@ -515,9 +552,9 @@ export const useFitnessStore = create<FitnessState>()(
           return;
         }
 
-        const removedDays = plan.trainingDays.filter((d) => !trainingDays.includes(d));
+        const removedDays = new Set(plan.trainingDays.filter((d) => !trainingDaysSet.has(d)));
         const planDays = get().trainingPlanDays.filter((d) => d.planId === planId);
-        const orphanedSessions = planDays.filter((d) => removedDays.includes(d.dayOfWeek));
+        const orphanedSessions = planDays.filter((d) => removedDays.has(d.dayOfWeek));
 
         const reassignedSessions = orphanedSessions.map((session) => {
           const sorted = [...trainingDays].sort(
@@ -532,12 +569,7 @@ export const useFitnessStore = create<FitnessState>()(
               ? { ...p, trainingDays: [...trainingDays], restDays: [...restDays], updatedAt: new Date().toISOString() }
               : p,
           ),
-          trainingPlanDays: state.trainingPlanDays.map((d) => {
-            if (d.planId !== planId) return d;
-            const reassigned = reassignedSessions.find((r) => r.id === d.id);
-            if (reassigned) return reassigned;
-            return d;
-          }),
+          trainingPlanDays: mergePlanDays(state.trainingPlanDays, planId, reassignedSessions),
         }));
 
         if (_db) {
@@ -571,7 +603,7 @@ export const useFitnessStore = create<FitnessState>()(
           return;
         }
 
-        if (!plan.trainingDays.includes(newDayOfWeek)) {
+        if (!new Set(plan.trainingDays).has(newDayOfWeek)) {
           console.error('[fitnessStore] reassignWorkoutToDay: target day is not a training day');
           return;
         }
@@ -634,23 +666,7 @@ export const useFitnessStore = create<FitnessState>()(
           let bestScore = -Infinity;
 
           for (const td of sortedTrainingDays) {
-            const slotsUsed = daySlots.get(td)?.length ?? 0;
-            let score = -slotsUsed * 100;
-
-            const assignedToAdjacentDays = assigned.filter((a) => {
-              const diff = Math.abs(a.dayOfWeek - td);
-              return diff === 1 || diff === 6;
-            });
-
-            const hasSameMuscleAdjacent = assignedToAdjacentDays.some((a) => {
-              const existingDay = sortedPlanDays.find((d) => d.id === a.id);
-              const existingMuscle = (existingDay?.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
-              return existingMuscle === primaryMuscle && primaryMuscle !== '';
-            });
-
-            if (hasSameMuscleAdjacent) {
-              score -= 20;
-            }
+            const score = scoreDaySlot(td, primaryMuscle, daySlots, assigned, sortedPlanDays);
 
             if (score > bestScore) {
               bestScore = score;
@@ -703,8 +719,9 @@ export const useFitnessStore = create<FitnessState>()(
 
         const allDays = [1, 2, 3, 4, 5, 6, 7];
         const usedDays = [...new Set(restoredDays.map((d) => d.dayOfWeek))];
-        const newTrainingDays = allDays.filter((d) => usedDays.includes(d));
-        const newRestDays = allDays.filter((d) => !usedDays.includes(d));
+        const usedDaysSet = new Set(usedDays);
+        const newTrainingDays = allDays.filter((d) => usedDaysSet.has(d));
+        const newRestDays = allDays.filter((d) => !usedDaysSet.has(d));
 
         set((state) => ({
           trainingPlans: state.trainingPlans.map((p) =>
@@ -712,11 +729,7 @@ export const useFitnessStore = create<FitnessState>()(
               ? { ...p, trainingDays: newTrainingDays, restDays: newRestDays, updatedAt: new Date().toISOString() }
               : p,
           ),
-          trainingPlanDays: state.trainingPlanDays.map((d) => {
-            if (d.planId !== planId) return d;
-            const restored = restoredDays.find((r) => r.id === d.id);
-            return restored ?? d;
-          }),
+          trainingPlanDays: mergePlanDays(state.trainingPlanDays, planId, restoredDays),
         }));
 
         if (_db) {

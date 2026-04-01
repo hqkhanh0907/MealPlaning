@@ -38,7 +38,7 @@ const ACTIVITY_LEVEL_I18N: Record<ActivityLevel, string> = {
 
 interface HealthProfileFormProps {
   embedded?: boolean;
-  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
+  saveRef?: React.RefObject<(() => Promise<boolean>) | null>;
   blankDefaults?: boolean;
 }
 

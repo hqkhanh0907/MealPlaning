@@ -49,7 +49,7 @@ export const onboardingSchema = z.object({
     const error = validateTargetWeight(data.goalType, data.weightKg, data.targetWeightKg);
     if (error) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['targetWeightKg'],
         message: error,
       });
@@ -60,7 +60,7 @@ export const onboardingSchema = z.object({
   const bmi = data.weightKg / Math.pow(data.heightCm / 100, 2);
   if (bmi < 12 || bmi > 60) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['weightKg'],
       message: 'onboarding.validation.bmiWarning',
     });

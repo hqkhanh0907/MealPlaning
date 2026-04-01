@@ -38,7 +38,7 @@ const MAX_PRIORITY_MUSCLES = 3;
 
 interface TrainingProfileFormProps {
   embedded?: boolean;
-  saveRef?: React.MutableRefObject<(() => Promise<boolean>) | null>;
+  saveRef?: React.RefObject<(() => Promise<boolean>) | null>;
 }
 
 export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormProps) {

@@ -52,7 +52,6 @@ function AddSessionModalInner({
     <ModalBackdrop onClose={onClose}>
       <div
         className="relative w-full rounded-t-3xl bg-white p-6 dark:bg-slate-800 sm:mx-auto sm:max-w-md sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
       >
         {step === 'options' && (
           <>

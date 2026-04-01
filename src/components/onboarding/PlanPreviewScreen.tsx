@@ -6,8 +6,6 @@ import type { OnboardingFormData } from './onboardingSchema';
 
 interface PlanPreviewScreenProps {
   form: UseFormReturn<OnboardingFormData>;
-  goNext: () => void;
-  goBack: () => void;
   completeOnboarding: () => void;
 }
 
@@ -17,7 +15,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: PlanPreviewScree
   const daysPerWeek = values.daysPerWeek;
 
   const weekDays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-  const activeDays = weekDays.slice(0, daysPerWeek);
+  const activeDays = new Set(weekDays.slice(0, daysPerWeek));
   const restDays = weekDays.slice(daysPerWeek);
 
   return (
@@ -33,7 +31,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: PlanPreviewScree
         {/* Week Overview */}
         <div className="mb-6 flex gap-1.5">
           {weekDays.map((day) => {
-            const isActive = activeDays.includes(day);
+            const isActive = activeDays.has(day);
             return (
               <div
                 key={day}

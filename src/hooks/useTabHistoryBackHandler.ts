@@ -25,7 +25,7 @@ export function useTabHistoryBackHandler(): void {
         const state = useNavigationStore.getState();
         const history = state.tabHistory;
         if (history.length > 0) {
-          const prevTab = history[history.length - 1];
+          const prevTab = history.at(-1)!;
           useNavigationStore.setState({ tabHistory: history.slice(0, -1) });
           isBackNavigatingRef.current = true;
           state.navigateTabBack(prevTab);

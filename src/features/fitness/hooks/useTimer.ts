@@ -7,9 +7,7 @@ export function useTimer(autoStart = false) {
 
   useEffect(() => {
     if (!isRunning) return;
-    if (startTimeRef.current === null) {
-      startTimeRef.current = Date.now();
-    }
+    startTimeRef.current ??= Date.now();
     const id = setInterval(() => {
       setElapsed(Math.floor((Date.now() - startTimeRef.current!) / 1000));
     }, 1000);

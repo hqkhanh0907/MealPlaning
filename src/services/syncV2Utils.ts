@@ -345,8 +345,9 @@ export async function importV2Data(
             const v = obj[c];
             return v === undefined ? null : v;
           });
+          const columnList = columns.map((c) => `"${c}"`).join(', ');
           await db.execute(
-            `INSERT INTO "${tableName}" (${columns.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`,
+            `INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`,
             values,
           );
         }

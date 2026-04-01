@@ -7,15 +7,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { UseFormReturn } from 'react-hook-form';
-import type { OnboardingFormData } from './onboardingSchema';
 
 interface WelcomeSlidesProps {
   step: number;
   goNext: () => void;
-  goBack: () => void;
   goToSection: (section: 1 | 2 | 3 | 4 | 5 | 6 | 7) => void;
-  form: UseFormReturn<OnboardingFormData>;
 }
 
 interface SlideContent {
@@ -44,7 +40,7 @@ const SLIDES: SlideContent[] = [
 
 function DotIndicator({ total, current, ariaLabel }: { total: number; current: number; ariaLabel: string }) {
   return (
-    <div className="flex items-center gap-2" role="group" aria-label={ariaLabel}>
+    <fieldset className="flex items-center gap-2 border-0 p-0 m-0" aria-label={ariaLabel}>
       {Array.from({ length: total }, (_, i) => (
         <div
           key={i}
@@ -57,7 +53,7 @@ function DotIndicator({ total, current, ariaLabel }: { total: number; current: n
           )}
         />
       ))}
-    </div>
+    </fieldset>
   );
 }
 

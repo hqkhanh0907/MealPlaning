@@ -56,7 +56,7 @@ export function suggestNextSet(
     return { weight: 0, reps: targetRepsMin, source: 'manual' };
   }
 
-  const lastSet = lastSets[lastSets.length - 1];
+  const lastSet = lastSets.at(-1)!;
   const lastReps = lastSet.reps ?? 0;
 
   if (lastReps >= targetRepsMax) {
@@ -87,7 +87,7 @@ export function detectPlateau(
   );
 
   let streakCount = 1;
-  const latestMax = maxWeights[maxWeights.length - 1];
+  const latestMax = maxWeights.at(-1)!;
 
   for (let i = maxWeights.length - 2; i >= 0; i--) {
     if (isWeightSimilar(maxWeights[i], latestMax)) {
@@ -103,9 +103,11 @@ export function detectPlateau(
   };
 }
 
+export type FatigueLevel = 'none' | 'moderate' | 'high';
+
 export function detectAcuteFatigue(
   recentSets: WorkoutSet[],
-): { level: 'none' | 'moderate' | 'high'; message: string } {
+): { level: FatigueLevel; message: string } {
   if (recentSets.length < 3) return { level: 'none', message: '' };
   const last3Rpes = recentSets
     .slice(-9)
@@ -139,7 +141,7 @@ export function detectAcuteFatigue(
 
 export function detectChronicOvertraining(
   historySets: WorkoutSet[],
-): { level: 'none' | 'moderate' | 'high'; message: string } {
+): { level: FatigueLevel; message: string } {
   if (historySets.length < 12) return { level: 'none', message: '' };
   const weekMs = 7 * 24 * 60 * 60 * 1000;
   const now = Date.now();
@@ -193,12 +195,12 @@ export function useProgressiveOverload(): {
   checkAcuteFatigue: (
     exerciseId: string,
     recentSets: WorkoutSet[],
-  ) => { level: 'none' | 'moderate' | 'high'; message: string };
+  ) => { level: FatigueLevel; message: string };
   checkChronicOvertraining: (
     exerciseId: string,
-  ) => { level: 'none' | 'moderate' | 'high'; message: string };
-  acuteFatigue: { level: 'none' | 'moderate' | 'high'; message: string };
-  chronicOvertraining: { level: 'none' | 'moderate' | 'high'; message: string };
+  ) => { level: FatigueLevel; message: string };
+  acuteFatigue: { level: FatigueLevel; message: string };
+  chronicOvertraining: { level: FatigueLevel; message: string };
 } {
   const workoutSets = useFitnessStore((state) => state.workoutSets);
   const workouts = useFitnessStore((state) => state.workouts);
@@ -278,7 +280,7 @@ export function useProgressiveOverload(): {
     (
       exerciseId: string,
       recentSets: WorkoutSet[],
-    ): { level: 'none' | 'moderate' | 'high'; message: string } => {
+    ): { level: FatigueLevel; message: string } => {
       const exerciseSets = recentSets.filter(
         (s) => s.exerciseId === exerciseId,
       );
@@ -290,7 +292,7 @@ export function useProgressiveOverload(): {
   const checkChronicOvertrainingFn = useCallback(
     (
       exerciseId: string,
-    ): { level: 'none' | 'moderate' | 'high'; message: string } => {
+    ): { level: FatigueLevel; message: string } => {
       const exerciseSets = workoutSets.filter(
         (s) => s.exerciseId === exerciseId,
       );

@@ -43,7 +43,7 @@ function SimpleBarChart({ data }: { data: number[] }) {
     <div data-testid="bottom-sheet-chart" className="flex h-32 items-end gap-1">
       {data.map((val, idx) => (
         <div
-          key={idx}
+          key={`item-${String(idx)}`}
           data-testid="chart-bar"
           className="flex-1 rounded-t bg-emerald-400"
           style={{
@@ -279,7 +279,7 @@ function ProgressDashboardInner() {
           weekMap.set(key, (weekMap.get(key) ?? 0) + 1);
         }
         return Array.from(weekMap.keys())
-          .sort()
+          .sort((a, b) => a.localeCompare(b))
           .map((key) =>
             Math.min(
               100,
@@ -298,7 +298,7 @@ function ProgressDashboardInner() {
           weekMap.set(key, (weekMap.get(key) ?? 0) + 1);
         }
         return Array.from(weekMap.keys())
-          .sort()
+          .sort((a, b) => a.localeCompare(b))
           .map((key) => weekMap.get(key) ?? 0);
       }
       /* v8 ignore next 3 -- TypeScript exhaustiveness check: all MetricCardType values handled above */
@@ -387,7 +387,7 @@ function ProgressDashboardInner() {
         >
           {sparklineData.map((val, idx) => (
             <div
-              key={idx}
+              key={`item-${String(idx)}`}
               className="flex-1 rounded-sm bg-white/30"
               style={{
                 height: `${(val / maxSparkline) * 100}%`,
@@ -500,17 +500,14 @@ function ProgressDashboardInner() {
             </p>
           </div>
           <div className="mt-2 h-2 w-full rounded-full bg-slate-100 dark:bg-slate-700"
-            role="progressbar"
-            aria-valuenow={cycleProgress.percentComplete}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={t('fitness.progress.cycleProgress')}
+            aria-hidden="true"
           >
             <div
               className="h-full rounded-full bg-emerald-500 transition-all"
               style={{ width: `${cycleProgress.percentComplete}%` }}
             />
           </div>
+          <progress className="sr-only" value={cycleProgress.percentComplete} max={100} aria-label={t('fitness.progress.cycleProgress')} />
         </div>
       )}
 

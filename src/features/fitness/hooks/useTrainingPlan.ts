@@ -696,7 +696,7 @@ export function generateTrainingPlan(
     }
   }
 
-  const trainingDays = [...new Set(days.filter((d) => d.sessionOrder === 1).map((d) => d.dayOfWeek))].sort();
+  const trainingDays = [...new Set(days.filter((d) => d.sessionOrder === 1).map((d) => d.dayOfWeek))].sort((a, b) => a - b);
   const restDays = [1, 2, 3, 4, 5, 6, 7].filter((d) => !trainingDays.includes(d));
 
   const plan: TrainingPlan = {

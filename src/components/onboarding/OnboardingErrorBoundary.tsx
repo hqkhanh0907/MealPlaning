@@ -49,7 +49,7 @@ export class OnboardingErrorBoundary extends React.Component<Props, State> {
     console.error('[OnboardingErrorBoundary]', error, errorInfo);
   }
 
-  private handleReset = () => {
+  private readonly handleReset = () => {
     this.setState({ hasError: false });
     this.props.onReset();
   };

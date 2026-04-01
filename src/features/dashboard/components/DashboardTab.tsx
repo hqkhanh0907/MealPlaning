@@ -17,7 +17,7 @@ import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() => {
-    if (typeof globalThis.window === 'undefined') return false;
+    if (globalThis.window === undefined) return false;
     return globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 

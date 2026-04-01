@@ -83,7 +83,7 @@ export const DataBackup: React.FC = () => {
   };
 
   const exportNative = async (data: Uint8Array, fileName: string) => {
-    const base64 = btoa(String.fromCharCode(...data));
+    const base64 = btoa(String.fromCodePoint(...data));
     const result = await Filesystem.writeFile({
       path: fileName,
       data: base64,
