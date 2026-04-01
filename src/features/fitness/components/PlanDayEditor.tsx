@@ -420,9 +420,10 @@ export const PlanDayEditor = memo(function PlanDayEditor({
 
       {/* Unsaved changes confirm dialog */}
       {showConfirmDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        <dialog
+          open
           role="dialog"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
           aria-modal="true"
           aria-labelledby={confirmDialogTitleId}
         >
@@ -448,12 +449,12 @@ export const PlanDayEditor = memo(function PlanDayEditor({
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
 
       {/* Undo removal toast */}
       {pendingRemoval && (
-        <div role="status" aria-live="polite" className="fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg bg-slate-800 px-4 py-3 text-white shadow-lg">
+        <output aria-live="polite" className="fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg bg-slate-800 px-4 py-3 text-white shadow-lg">
           <span className="text-sm">
             {pendingRemoval.exercise.exercise.nameVi} {t('fitness.plan.exerciseRemoved')}
           </span>
@@ -464,7 +465,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({
           >
             {t('fitness.plan.undo')}
           </button>
-        </div>
+        </output>
       )}
 
       {/* Exercise selector bottom sheet */}
@@ -502,7 +503,7 @@ interface StepperFieldProps {
 
 const StepperField = memo(function StepperField({ label, value, suffix, onDecrement, onIncrement, min, max, testId }: StepperFieldProps) {
   return (
-    <div role="group" aria-label={label} className="flex flex-col items-center gap-1" data-testid={testId}>
+    <fieldset aria-label={label} className="flex flex-col items-center gap-1 border-0 p-0 m-0" data-testid={testId}>
       <span className="text-xs text-slate-500 dark:text-slate-400">{label}</span>
       <div className="flex items-center gap-2">
         <button
@@ -527,6 +528,6 @@ const StepperField = memo(function StepperField({ label, value, suffix, onDecrem
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
-    </div>
+    </fieldset>
   );
 });

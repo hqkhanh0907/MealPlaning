@@ -66,9 +66,8 @@ function DailyScoreHeroInner(): React.ReactElement {
 
   if (isFirstTimeUser) {
     return (
-      <div
+      <section
         className={`w-full rounded-2xl bg-gradient-to-r ${gradient} p-6`}
-        role="region"
         aria-label={t('dashboard.hero.firstTime.a11y')}
         data-testid="daily-score-hero"
       >
@@ -89,14 +88,13 @@ function DailyScoreHeroInner(): React.ReactElement {
             </li>
           ))}
         </ul>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div
+    <section
       className={`w-full rounded-2xl bg-gradient-to-r ${gradient} p-6`}
-      role="region"
       aria-label={t('dashboard.hero.a11yLabel', {
         score: totalScore,
         label: scoreLabel,
@@ -150,7 +148,7 @@ function DailyScoreHeroInner(): React.ReactElement {
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 

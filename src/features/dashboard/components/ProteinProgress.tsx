@@ -56,8 +56,8 @@ export const ProteinProgress: React.FC<ProteinProgressProps> = React.memo(
         aria-valuenow={roundedCurrent}
         aria-valuemin={0}
         aria-valuemax={roundedTarget}
-        aria-label={`Protein: ${roundedCurrent}g trên ${roundedTarget}g. ${suggestion}`}
-      >
+          aria-label={`Protein: ${roundedCurrent}g trên ${roundedTarget}g. ${suggestion}`}
+        >
         {/* Header: label + number */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-slate-700 dark:text-slate-300">

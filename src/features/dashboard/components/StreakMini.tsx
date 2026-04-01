@@ -51,7 +51,8 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
 
   if (workouts.length === 0) {
     return (
-      <div
+      <button
+        type="button"
         data-testid="streak-mini-empty"
         role="button"
         tabIndex={0}
@@ -69,12 +70,13 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
             {t('dashboard.streakMini.startFirst')}
           </p>
         </div>
-      </div>
+      </button>
     );
   }
 
   return (
-    <div
+    <button
+      type="button"
       data-testid="streak-mini"
       role="button"
       tabIndex={0}
@@ -126,7 +128,7 @@ function StreakMiniInner({ onTap }: StreakMiniProps): React.ReactElement {
           />
         ))}
       </div>
-    </div>
+    </button>
   );
 }
 

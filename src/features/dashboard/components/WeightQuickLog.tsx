@@ -291,10 +291,11 @@ function WeightQuickLogInner({ onClose }: WeightQuickLogProps): React.JSX.Elemen
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-60">
-      <div
+      <dialog
+        open
+        role="dialog"
         data-testid="weight-quick-log"
         className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md"
-        role="dialog"
         aria-label={t('fitness.weight.quickLogTitle')}
       >
         {/* Header */}
@@ -437,7 +438,7 @@ function WeightQuickLogInner({ onClose }: WeightQuickLogProps): React.JSX.Elemen
             {t('common.save')}
           </button>
         </div>
-      </div>
+      </dialog>
     </ModalBackdrop>
   );
 }

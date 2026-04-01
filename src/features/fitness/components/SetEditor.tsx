@@ -127,9 +127,10 @@ export const SetEditor = React.memo(function SetEditor({
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-50">
-      <div
-        className="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-xl sm:rounded-3xl dark:bg-slate-800"
+      <dialog
+        open
         role="dialog"
+        className="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-xl sm:rounded-3xl dark:bg-slate-800"
         aria-modal="true"
         aria-label={t('fitness.editor.title')}
         data-testid="set-editor"
@@ -251,9 +252,8 @@ export const SetEditor = React.memo(function SetEditor({
           <label className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">
             {t('fitness.editor.rpe')}
           </label>
-          <div
-            className="flex gap-2"
-            role="group"
+          <fieldset
+            className="flex gap-2 border-0 p-0 m-0"
             aria-label={t('fitness.editor.rpe')}
             data-testid="rpe-selector"
           >
@@ -270,7 +270,7 @@ export const SetEditor = React.memo(function SetEditor({
                 {value}
               </Button>
             ))}
-          </div>
+          </fieldset>
         </div>
 
         {/* Action buttons */}
@@ -296,7 +296,7 @@ export const SetEditor = React.memo(function SetEditor({
             {t('fitness.editor.save')}
           </Button>
         </div>
-      </div>
+      </dialog>
     </ModalBackdrop>
   );
 });

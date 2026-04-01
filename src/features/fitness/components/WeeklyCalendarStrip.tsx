@@ -54,11 +54,10 @@ export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
   );
 
   return (
-    <div
-      role="group"
+    <fieldset
+      className="flex items-center justify-center gap-2 border-0 p-0 m-0"
       aria-label={t('fitness.scheduleEditor.weeklyCalendar')}
       data-testid="weekly-calendar-strip"
-      className="flex items-center justify-center gap-2"
     >
       {[1, 2, 3, 4, 5, 6, 7].map((day) => {
         const isTraining = trainingDaySet.has(day);
@@ -98,6 +97,6 @@ export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 });

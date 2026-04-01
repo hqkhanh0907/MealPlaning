@@ -332,9 +332,10 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
 
       {/* Unsaved Changes Confirmation Dialog */}
       {showConfirmDialog && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+        <dialog
+          open
           role="dialog"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
           aria-modal="true"
           aria-labelledby={confirmDialogTitleId}
         >
@@ -364,7 +365,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );

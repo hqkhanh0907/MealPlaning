@@ -127,9 +127,8 @@ export const AiInsightCard: React.FC = React.memo(function AiInsightCard() {
   const iconPrefix = ICON_PREFIX_MAP[currentInsight.type];
 
   return (
-    <div
+    <section
       data-testid="ai-insight-card"
-      role="region"
       aria-label={`${iconPrefix} ${currentInsight.title}`}
       className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} p-3 flex items-start gap-3`}
     >
@@ -177,6 +176,6 @@ export const AiInsightCard: React.FC = React.memo(function AiInsightCard() {
           <X className="w-4 h-4" />
         </Button>
       )}
-    </div>
+    </section>
   );
 });

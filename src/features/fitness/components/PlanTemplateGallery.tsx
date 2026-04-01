@@ -364,10 +364,11 @@ function PlanTemplateGalleryInner({ planId }: PlanTemplateGalleryProps): React.J
 
       {/* Save Template Dialog */}
       {showSaveDialog && (
-        <div
+        <dialog
+          open
+          role="dialog"
           data-testid="save-template-dialog"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
           aria-modal="true"
           aria-label={t('fitness.templateGallery.saveNamePrompt')}
         >
@@ -409,7 +410,7 @@ function PlanTemplateGalleryInner({ planId }: PlanTemplateGalleryProps): React.J
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );

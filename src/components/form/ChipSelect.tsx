@@ -48,9 +48,8 @@ function ChipSelectInner<T extends FieldValues>({
         const selected: string[] = Array.isArray(field.value) ? (field.value as string[]) : [];
 
         return (
-          <div
-            className={className ?? 'flex flex-wrap gap-2'}
-            role="group"
+          <fieldset
+            className={[className ?? 'flex flex-wrap gap-2', 'border-0 p-0 m-0'].join(' ')}
             aria-label={name}
           >
             {options.map((option) => {
@@ -74,7 +73,7 @@ function ChipSelectInner<T extends FieldValues>({
                 </button>
               );
             })}
-          </div>
+          </fieldset>
         );
       }}
     />

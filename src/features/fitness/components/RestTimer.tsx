@@ -82,9 +82,10 @@ export const RestTimer = React.memo(function RestTimer({
   const dashoffset = CIRCUMFERENCE * (1 - progress);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+    <dialog
+      open
       role="dialog"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       aria-modal="true"
       aria-label={t('fitness.timer.rest')}
       data-testid="rest-timer-overlay"
@@ -102,6 +103,7 @@ export const RestTimer = React.memo(function RestTimer({
 
         <div className="relative mb-6 flex items-center justify-center">
           <svg
+            className="h-32 w-32 -rotate-90 transform"
             width="128"
             height="128"
             viewBox="0 0 128 128"
@@ -171,6 +173,6 @@ export const RestTimer = React.memo(function RestTimer({
           </Button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 });
