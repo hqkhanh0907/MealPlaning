@@ -270,7 +270,7 @@ function selectExercisesForMuscle(
       ex.muscleGroup === muscleGroup &&
       ex.exerciseType === 'strength' &&
       ex.equipment.some((eq) =>
-        availableEquipment.includes(eq as EquipmentType),
+        availableEquipment.includes(eq),
       ) &&
       !ex.contraindicated.some((ci) => injuries.includes(ci)),
   );

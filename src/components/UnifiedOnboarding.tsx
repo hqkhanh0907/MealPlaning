@@ -128,7 +128,7 @@ export function UnifiedOnboarding() {
   const sectionSteps = useMemo(() => {
     return {
       ...SECTION_STEPS,
-      4: getTrainingDetailStepCount(watchedExperience as 'beginner' | 'intermediate' | 'advanced'),
+      4: getTrainingDetailStepCount(watchedExperience),
     };
   }, [watchedExperience]);
 

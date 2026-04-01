@@ -24,7 +24,6 @@ const FACTOR_CONFIG = [
   { key: 'streak' as const, icon: Flame },
 ];
 
-type FactorKey = (typeof FACTOR_CONFIG)[number]['key'];
 
 const CHECKLIST_KEYS = [
   'dashboard.hero.firstTime.step1',
@@ -50,11 +49,11 @@ function DailyScoreHeroInner(): React.ReactElement {
   const activeBadges = useMemo(
     () =>
       FACTOR_CONFIG.filter(
-        (cfg) => factors[cfg.key as FactorKey] !== null,
+        (cfg) => factors[cfg.key] !== null,
       ).map((cfg) => ({
         key: cfg.key,
         Icon: cfg.icon,
-        score: factors[cfg.key as FactorKey] as number,
+        score: factors[cfg.key]!,
       })),
     [factors],
   );

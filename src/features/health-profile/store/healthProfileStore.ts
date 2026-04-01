@@ -42,7 +42,7 @@ interface GoalRow {
 function rowToProfile(row: ProfileRow): HealthProfile {
   return {
     id: row.id,
-    name: (row.name as string) ?? '',
+    name: row.name ?? '',
     gender: row.gender as HealthProfile['gender'],
     age: row.age,
     dateOfBirth: (row.date_of_birth as string) ?? null,

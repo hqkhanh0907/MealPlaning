@@ -223,9 +223,9 @@ export function WorkoutLogger({
 
   const ensureInput = useCallback(
     (exerciseId: string): void => {
-      const current = getValues(`setInputs.${exerciseId}` as `setInputs.${string}`);
+      const current = getValues(`setInputs.${exerciseId}` as const);
       if (!current) {
-        setValue(`setInputs.${exerciseId}` as `setInputs.${string}`, { ...setInputDefaults });
+        setValue(`setInputs.${exerciseId}` as const, { ...setInputDefaults });
       }
     },
     [getValues, setValue],
@@ -233,7 +233,7 @@ export function WorkoutLogger({
 
   const handleApplySuggestion = useCallback(
     (exerciseId: string, s: OverloadSuggestion) => {
-      const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
+      const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
       const current = getValues(key) ?? { ...setInputDefaults };
       setValue(key, { ...current, weight: s.weight, reps: s.reps });
     },
@@ -309,7 +309,7 @@ export function WorkoutLogger({
 
   const handleWeightChange = useCallback(
     (exerciseId: string, delta: number) => {
-      const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
+      const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
       const current = getValues(key) ?? { ...setInputDefaults };
       setValue(key, { ...current, weight: Math.max(0, (Number.isNaN(current.weight) ? 0 : current.weight) + delta) });
     },
@@ -318,7 +318,7 @@ export function WorkoutLogger({
 
   const handleRpeSelect = useCallback(
     (exerciseId: string, rpe: number) => {
-      const key = `setInputs.${exerciseId}` as `setInputs.${string}`;
+      const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
       const current = getValues(key) ?? { ...setInputDefaults };
       setValue(key, { ...current, rpe: current.rpe === rpe ? undefined : rpe });
     },
@@ -487,7 +487,7 @@ export function WorkoutLogger({
               (s) => s.exerciseId === exercise.id,
             );
             ensureInput(exercise.id);
-            const formInput = watch(`setInputs.${exercise.id}` as `setInputs.${string}`);
+            const formInput = watch(`setInputs.${exercise.id}` as const);
             const input: SetInputData = formInput ?? setInputDefaults;
             const suggestion = getOverloadSuggestion(
               exercise.id,
@@ -578,7 +578,7 @@ export function WorkoutLogger({
                       value={Number.isNaN(input.weight) ? '' : input.weight}
                       onChange={(e) => {
                         const raw = e.target.value;
-                        const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
+                        const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
                         const cur = getValues(key) ?? { ...setInputDefaults };
                         setValue(key, {
                           ...cur,
@@ -612,7 +612,7 @@ export function WorkoutLogger({
                       value={Number.isNaN(input.reps) ? '' : (input.reps ?? '')}
                       onChange={(e) => {
                         const raw = e.target.value;
-                        const key = `setInputs.${exercise.id}` as `setInputs.${string}`;
+                        const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
                         const cur = getValues(key) ?? { ...setInputDefaults };
                         setValue(key, { ...cur, reps: raw === '' ? NaN : Math.max(0, Number(raw)) });
                       }}
