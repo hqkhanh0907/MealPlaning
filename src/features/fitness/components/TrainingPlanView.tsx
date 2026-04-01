@@ -15,6 +15,7 @@ import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import type { SelectedExercise, TrainingPlanDay } from '../types';
 import { DAY_LABELS } from '../constants';
 import { safeJsonParse } from '../utils/safeJsonParse';
+import { translateWorkoutType } from '../utils/translateWorkoutType';
 
 const DAY_FULL_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'] as const;
 
@@ -581,7 +582,7 @@ function TrainingPlanViewInner({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                {viewedPlanDay.workoutType}
+                {translateWorkoutType(t, viewedPlanDay.workoutType)}
               </h3>
               {viewedPlanDay.originalExercises != null && viewedPlanDay.exercises !== viewedPlanDay.originalExercises && (
                 <span
@@ -622,9 +623,10 @@ function TrainingPlanViewInner({
 
           {viewedPlanDay.muscleGroups && (
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {viewedPlanDay.muscleGroups
-                .split(',')
-                .map((g) => g.trim())
+              {(viewedPlanDay.muscleGroups.startsWith('[')
+                ? safeJsonParse<string[]>(viewedPlanDay.muscleGroups, [])
+                : viewedPlanDay.muscleGroups.split(',').map((g) => g.trim()).filter(Boolean)
+              )
                 .map((g) => t(`fitness.onboarding.muscle_${g}`, g))
                 .join(', ')}
             </p>
@@ -737,7 +739,7 @@ function TrainingPlanViewInner({
               data-testid="tomorrow-preview"
               className="mt-3 text-sm text-white/80"
             >
-              <ClipboardList className="size-4 inline-block" aria-hidden="true" /> {t('fitness.plan.tomorrow')}: {tomorrowPlanDay.workoutType} —{' '}
+              <ClipboardList className="size-4 inline-block" aria-hidden="true" /> {t('fitness.plan.tomorrow')}: {translateWorkoutType(t, tomorrowPlanDay.workoutType)} —{' '}
               {tomorrowExercises.length} {t('fitness.plan.exercises')}
             </p>
           )}

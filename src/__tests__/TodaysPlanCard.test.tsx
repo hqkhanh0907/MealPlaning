@@ -787,4 +787,69 @@ describe('TodaysPlanCard', () => {
       expect(screen.queryByTestId('weight-quick-log')).not.toBeInTheDocument();
     });
   });
+
+  describe('workoutType translation and multi-session aggregation', () => {
+    it('TC_TPC_01: workoutType displayed with proper Vietnamese translation', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay({ workoutType: 'Push' })],
+      });
+
+      render(<TodaysPlanCard />);
+
+      expect(screen.getByTestId('workout-name')).toHaveTextContent('Đẩy');
+    });
+
+    it('TC_TPC_02: multi-session completed stats aggregate all workouts', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1, workoutType: 'Push' }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
+        ],
+        workouts: [
+          makeWorkout({ id: 'w-1', planDayId: 'day-s1', durationMin: 45 }),
+          makeWorkout({ id: 'w-2', planDayId: 'day-s2', durationMin: 30 }),
+        ],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-agg-1', workoutId: 'w-1' }),
+          makeWorkoutSet({ id: 'set-agg-2', workoutId: 'w-1', setNumber: 2 }),
+          makeWorkoutSet({ id: 'set-agg-3', workoutId: 'w-2' }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      // Duration aggregated: 45 + 30 = 75
+      expect(screen.getByTestId('workout-duration')).toHaveTextContent('75 phút');
+      // Sets aggregated: 2 (w-1) + 1 (w-2) = 3
+      expect(screen.getByTestId('workout-sets')).toHaveTextContent('3 set');
+    });
+
+    it('TC_TPC_03: completedWorkout.totalSets counts ALL workout sets (not just first workout)', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1, workoutType: 'Push' }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Pull' }),
+        ],
+        workouts: [
+          makeWorkout({ id: 'w-1', planDayId: 'day-s1', durationMin: 40 }),
+          makeWorkout({ id: 'w-2', planDayId: 'day-s2', durationMin: 35 }),
+        ],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-x1', workoutId: 'w-1', setNumber: 1 }),
+          makeWorkoutSet({ id: 'set-x2', workoutId: 'w-1', setNumber: 2 }),
+          makeWorkoutSet({ id: 'set-x3', workoutId: 'w-1', setNumber: 3 }),
+          makeWorkoutSet({ id: 'set-y1', workoutId: 'w-2', setNumber: 1 }),
+          makeWorkoutSet({ id: 'set-y2', workoutId: 'w-2', setNumber: 2 }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      // All 5 sets counted (3 from w-1 + 2 from w-2), not just 3 from first workout
+      expect(screen.getByTestId('workout-sets')).toHaveTextContent('5 set');
+    });
+  });
 });

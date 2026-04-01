@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, X, Plus } from 'lucide-react';
+import { ArrowLeft, X, Plus, Pencil, Trash2 } from 'lucide-react';
+import { SetEditor } from './SetEditor';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -165,15 +166,18 @@ export function WorkoutLogger({
 
   const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
-    return draft ? draft.exercises : parseExercisesFromPlan(planDay?.exercises);
+    const draftMatchesPlan = draft && (!planDay?.id || draft.planDayId === planDay.id);
+    return draftMatchesPlan ? draft.exercises : parseExercisesFromPlan(planDay?.exercises);
   });
   const [loggedSets, setLoggedSets] = useState<WorkoutSet[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
-    return draft ? draft.sets : [];
+    const draftMatchesPlan = draft && (!planDay?.id || draft.planDayId === planDay.id);
+    return draftMatchesPlan ? draft.sets : [];
   });
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [editingSet, setEditingSet] = useState<WorkoutSet | null>(null);
   const [freestyleName, setFreestyleName] = useState('');
   const isFreestyle = !planDay;
   const initialElapsed = useMemo(() => {
@@ -183,7 +187,8 @@ export function WorkoutLogger({
   const elapsedRef = useRef(initialElapsed);
   const [timerRunning, setTimerRunning] = useState(() => {
     const draft = useFitnessStore.getState().workoutDraft;
-    const hasExercises = draft
+    const draftMatchesPlan = draft && (!planDay?.id || draft.planDayId === planDay.id);
+    const hasExercises = draftMatchesPlan
       ? draft.exercises.length > 0
       : parseExercisesFromPlan(planDay?.exercises).length > 0;
     return hasExercises || initialElapsed > 0;
@@ -200,11 +205,12 @@ export function WorkoutLogger({
           exercises: currentExercises,
           sets: loggedSets,
           elapsedSeconds: elapsedRef.current,
+          planDayId: planDay?.id,
         });
       }
     }, 500);
     return () => clearTimeout(timeout);
-  }, [currentExercises, loggedSets, setWorkoutDraft]);
+  }, [currentExercises, loggedSets, setWorkoutDraft, planDay?.id]);
 
   const getInput = useCallback(
     (exerciseId: string): SetInputData => {
@@ -256,6 +262,49 @@ export function WorkoutLogger({
     },
     [getInput],
   );
+
+  const handleDeleteSet = useCallback((setId: string) => {
+    setLoggedSets((prev) => {
+      const target = prev.find((s) => s.id === setId);
+      if (!target) return prev;
+      const filtered = prev.filter((s) => s.id !== setId);
+      let counter = 0;
+      return filtered.map((s) => {
+        if (s.exerciseId === target.exerciseId) {
+          counter++;
+          return { ...s, setNumber: counter };
+        }
+        return s;
+      });
+    });
+  }, []);
+
+  const handleEditSetSave = useCallback(
+    (data: { weight: number; reps: number; rpe?: number }) => {
+      if (!editingSet) return;
+      setLoggedSets((prev) =>
+        prev.map((s) =>
+          s.id === editingSet.id
+            ? { ...s, weightKg: data.weight, reps: data.reps, rpe: data.rpe, updatedAt: new Date().toISOString() }
+            : s,
+        ),
+      );
+      setEditingSet(null);
+    },
+    [editingSet],
+  );
+
+  const handleEditSetCancel = useCallback(() => {
+    setEditingSet(null);
+  }, []);
+
+  const recentWeightsForEdit = useMemo(() => {
+    if (!editingSet) return [];
+    const weights = loggedSets
+      .filter((s) => s.exerciseId === editingSet.exerciseId && s.id !== editingSet.id)
+      .map((s) => s.weightKg);
+    return [...new Set(weights)].slice(0, 5);
+  }, [editingSet, loggedSets]);
 
   const handleWeightChange = useCallback(
     (exerciseId: string, delta: number) => {
@@ -474,6 +523,26 @@ export function WorkoutLogger({
                         RPE {set.rpe}
                       </span>
                     )}
+                    <span className="ml-auto flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditingSet(set)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                        aria-label={t('fitness.logger.editSet')}
+                        data-testid={`edit-set-${set.id}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSet(set.id)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                        aria-label={t('fitness.logger.deleteSet')}
+                        data-testid={`delete-set-${set.id}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </span>
                   </div>
                 ))}
 
@@ -634,6 +703,18 @@ export function WorkoutLogger({
         onClose={handleCloseSelector}
         onSelect={handleSelectExercise}
       />
+
+      {editingSet && (
+        <SetEditor
+          initialWeight={editingSet.weightKg}
+          initialReps={editingSet.reps ?? 1}
+          initialRpe={editingSet.rpe}
+          recentWeights={recentWeightsForEdit}
+          onSave={handleEditSetSave}
+          onCancel={handleEditSetCancel}
+          isVisible
+        />
+      )}
     </div>
   );
 }

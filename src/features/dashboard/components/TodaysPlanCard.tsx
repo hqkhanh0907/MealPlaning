@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useTodaysPlan } from '../hooks/useTodaysPlan';
 import { useNavigationStore } from '../../../store/navigationStore';
 import { WeightQuickLog } from './WeightQuickLog';
+import { translateWorkoutType } from '../../fitness/utils/translateWorkoutType';
 
 const MEAL_LOG_KEYS: Record<string, string> = {
   breakfast: 'dashboard.todaysPlan.logBreakfast',
@@ -169,7 +170,7 @@ const TodaysPlanCard: React.FC = React.memo(() => {
                   data-testid="workout-name"
                   className="text-sm font-semibold text-slate-800 dark:text-slate-100"
                 >
-                  {data.workoutType}
+                  {translateWorkoutType(t, data.workoutType)}
                 </p>
               )}
               {data.exerciseCount != null && (
@@ -228,7 +229,7 @@ const TodaysPlanCard: React.FC = React.memo(() => {
                 className="text-sm font-semibold text-slate-800 dark:text-slate-100"
               >
                 {t('dashboard.todaysPlan.nextSession', {
-                  name: data.nextUncompletedSession.workoutType,
+                  name: translateWorkoutType(t, data.nextUncompletedSession.workoutType),
                 })}
               </p>
             )}
@@ -324,7 +325,7 @@ const TodaysPlanCard: React.FC = React.memo(() => {
               {data.tomorrowWorkoutType ? (
                 <p className="text-sm text-slate-700 dark:text-slate-200">
                   {t('dashboard.todaysPlan.tomorrowPreview', {
-                    name: data.tomorrowWorkoutType,
+                    name: translateWorkoutType(t, data.tomorrowWorkoutType),
                     count: data.tomorrowExerciseCount ?? 0,
                   })}
                 </p>

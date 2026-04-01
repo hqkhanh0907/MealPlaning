@@ -1067,4 +1067,347 @@ describe('WorkoutLogger', () => {
     render(<WorkoutLogger {...defaultProps} planDay={emptyJsonPlan} />);
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
+
+  /* ================================================================
+   *  TC_SET_01 – TC_SET_06: Set Edit / Delete
+   * ================================================================ */
+
+  /** Helper: log a set and dismiss the rest timer so subsequent interactions work. */
+  function logSetAndDismissRest(
+    exerciseId: string,
+    weight: string,
+    reps: string,
+    rpe?: number,
+  ) {
+    fireEvent.change(screen.getByTestId(`weight-input-${exerciseId}`), {
+      target: { value: weight },
+    });
+    fireEvent.change(screen.getByTestId(`reps-input-${exerciseId}`), {
+      target: { value: reps },
+    });
+    if (rpe !== undefined) {
+      fireEvent.click(screen.getByTestId(`rpe-${rpe}-${exerciseId}`));
+    }
+    fireEvent.click(screen.getByTestId(`log-set-${exerciseId}`));
+    // Dismiss rest timer so UI doesn't block the next action
+    fireEvent.click(screen.getByText('Skip'));
+  }
+
+  /* TC_SET_06: Edit/delete buttons exist for each logged set */
+  it('TC_SET_06: renders edit and delete buttons for each logged set', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '60', '10');
+    logSetAndDismissRest('bench-press', '65', '8');
+
+    // Both sets should have edit and delete buttons
+    const editButtons = screen.getAllByRole('button', {
+      name: 'Chỉnh sửa set',
+    });
+    const deleteButtons = screen.getAllByRole('button', {
+      name: 'Xóa set',
+    });
+    expect(editButtons).toHaveLength(2);
+    expect(deleteButtons).toHaveLength(2);
+  });
+
+  /* TC_SET_01: Clicking edit opens SetEditor with that set's data */
+  it('TC_SET_01: clicking edit opens SetEditor with set data', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '75', '10');
+
+    // Click the edit button for the logged set
+    const editBtn = screen.getByRole('button', {
+      name: 'Chỉnh sửa set',
+    });
+    fireEvent.click(editBtn);
+
+    // SetEditor should be visible
+    expect(screen.getByTestId('set-editor')).toBeInTheDocument();
+    // Weight input should reflect the logged set value
+    expect(
+      (screen.getByTestId('weight-input') as HTMLInputElement).value,
+    ).toBe('75');
+    // Reps input should reflect the logged set value
+    expect(
+      (screen.getByTestId('reps-input') as HTMLInputElement).value,
+    ).toBe('10');
+  });
+
+  /* TC_SET_02: Saving edit updates weight/reps/rpe in displayed list */
+  it('TC_SET_02: saving edit updates set weight/reps/rpe', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
+
+    // Open editor
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Chỉnh sửa set' }),
+    );
+    expect(screen.getByTestId('set-editor')).toBeInTheDocument();
+
+    // Change weight to 70 and reps to 8
+    fireEvent.change(screen.getByTestId('weight-input'), {
+      target: { value: '70' },
+    });
+    fireEvent.change(screen.getByTestId('reps-input'), {
+      target: { value: '8' },
+    });
+    // Save
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    // SetEditor should close
+    expect(screen.queryByTestId('set-editor')).not.toBeInTheDocument();
+    // Updated values displayed
+    expect(screen.getByText(/70kg × 8/)).toBeInTheDocument();
+    expect(screen.queryByText(/60kg × 10/)).not.toBeInTheDocument();
+  });
+
+  /* TC_SET_03: Clicking delete removes the set */
+  it('TC_SET_03: clicking delete removes the set', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Xóa set' }),
+    );
+
+    expect(screen.queryByText(/60kg × 10/)).not.toBeInTheDocument();
+  });
+
+  /* TC_SET_04: Deleting middle set renumbers remaining sets */
+  it('TC_SET_04: deleting middle set renumbers remaining to 1, 2', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '60', '10');
+    logSetAndDismissRest('bench-press', '65', '8');
+    logSetAndDismissRest('bench-press', '70', '6');
+
+    // Verify all 3 sets exist with set numbers 1, 2, 3
+    const allSetRows = screen.getAllByText(/kg ×/);
+    expect(allSetRows).toHaveLength(3);
+
+    // Delete the second set (65kg × 8) – middle delete button
+    const deleteButtons = screen.getAllByRole('button', {
+      name: 'Xóa set',
+    });
+    // deleteButtons[1] is the middle set
+    fireEvent.click(deleteButtons[1]);
+
+    // Now only 2 sets remain
+    expect(screen.queryByText(/65kg × 8/)).not.toBeInTheDocument();
+    expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
+    expect(screen.getByText(/70kg × 6/)).toBeInTheDocument();
+
+    // The remaining sets should be renumbered to Set 1, Set 2
+    const loggedSetDivs = screen.getAllByText(/kg ×/);
+    expect(loggedSetDivs).toHaveLength(2);
+
+    // Get the parent containers to check set numbers
+    const setLabels = screen.getAllByText(/^Set \d+$/);
+    expect(setLabels).toHaveLength(2);
+    expect(setLabels[0]).toHaveTextContent('Set 1');
+    expect(setLabels[1]).toHaveTextContent('Set 2');
+  });
+
+  /* TC_SET_05: Edit does not change the set's setNumber */
+  it('TC_SET_05: editing a set preserves its setNumber', () => {
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
+    );
+
+    logSetAndDismissRest('bench-press', '60', '10');
+    logSetAndDismissRest('bench-press', '65', '8');
+
+    // Verify Set 1 and Set 2 labels exist
+    const setLabels = screen.getAllByText(/^Set \d+$/);
+    expect(setLabels).toHaveLength(2);
+    expect(setLabels[0]).toHaveTextContent('Set 1');
+    expect(setLabels[1]).toHaveTextContent('Set 2');
+
+    // Edit the first set (60kg × 10)
+    const editButtons = screen.getAllByRole('button', {
+      name: 'Chỉnh sửa set',
+    });
+    fireEvent.click(editButtons[0]);
+
+    // Change weight and save
+    fireEvent.change(screen.getByTestId('weight-input'), {
+      target: { value: '62.5' },
+    });
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    // Set numbers should be unchanged
+    const updatedLabels = screen.getAllByText(/^Set \d+$/);
+    expect(updatedLabels).toHaveLength(2);
+    expect(updatedLabels[0]).toHaveTextContent('Set 1');
+    expect(updatedLabels[1]).toHaveTextContent('Set 2');
+
+    // Value should be updated
+    expect(screen.getByText(/62\.5kg × 10/)).toBeInTheDocument();
+  });
+
+  /* ================================================================
+   *  TC_DRAFT_01 – TC_DRAFT_03: Stale Draft / planDayId
+   * ================================================================ */
+
+  /* TC_DRAFT_01: Draft with different planDayId is ignored */
+  it('TC_DRAFT_01: draft with different planDayId is ignored – shows planDay exercises', () => {
+    const draft = {
+      exercises: [
+        {
+          id: 'squat',
+          nameVi: 'Gánh tạ',
+          nameEn: 'Squat',
+          muscleGroup: 'legs',
+          secondaryMuscles: ['core', 'glutes'],
+          category: 'compound' as const,
+          equipment: ['barbell'] as string[],
+          contraindicated: [] as string[],
+          exerciseType: 'strength' as const,
+          defaultRepsMin: 6,
+          defaultRepsMax: 10,
+          isCustom: false,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      sets: [
+        {
+          id: 'stale-set-1',
+          workoutId: '',
+          exerciseId: 'squat',
+          setNumber: 1,
+          reps: 5,
+          weightKg: 100,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      elapsedSeconds: 300,
+      planDayId: 'old-plan-day-id',
+    };
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
+      () => ({ workoutDraft: draft }),
+    );
+
+    const planDayWithId = {
+      id: 'current-plan-day-id',
+      dayOfWeek: 1,
+      workoutType: 'Push Day',
+      exercises: makeExercisesJson('bench-press'),
+    };
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithId} />,
+    );
+
+    // The stale draft's squat exercise should NOT appear
+    expect(
+      screen.queryByTestId('exercise-section-squat'),
+    ).not.toBeInTheDocument();
+    // The planDay's bench-press exercise SHOULD appear
+    expect(
+      screen.getByTestId('exercise-section-bench-press'),
+    ).toBeInTheDocument();
+    // The stale draft's logged set should NOT appear
+    expect(screen.queryByText(/100kg × 5/)).not.toBeInTheDocument();
+  });
+
+  /* TC_DRAFT_02: Draft with matching planDayId is restored */
+  it('TC_DRAFT_02: draft with matching planDayId is restored', () => {
+    const matchingDraft = {
+      exercises: [
+        {
+          id: 'bench-press',
+          nameVi: 'Đẩy tạ nằm',
+          nameEn: 'Bench Press',
+          muscleGroup: 'chest',
+          secondaryMuscles: ['shoulders', 'arms'],
+          category: 'compound' as const,
+          equipment: ['barbell'] as string[],
+          contraindicated: [] as string[],
+          exerciseType: 'strength' as const,
+          defaultRepsMin: 8,
+          defaultRepsMax: 12,
+          isCustom: false,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      sets: [
+        {
+          id: 'draft-set-1',
+          workoutId: '',
+          exerciseId: 'bench-press',
+          setNumber: 1,
+          reps: 10,
+          weightKg: 80,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      elapsedSeconds: 180,
+      planDayId: 'pd-matching',
+    };
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
+      () => ({ workoutDraft: matchingDraft }),
+    );
+
+    const planDayWithId = {
+      id: 'pd-matching',
+      dayOfWeek: 1,
+      workoutType: 'Push Day',
+      exercises: makeExercisesJson('bench-press'),
+    };
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithId} />,
+    );
+
+    // Draft exercises should be restored
+    expect(
+      screen.getByTestId('exercise-section-bench-press'),
+    ).toBeInTheDocument();
+    // Draft set should be visible
+    expect(screen.getByText(/80kg × 10/)).toBeInTheDocument();
+    // Elapsed time should be restored (180s = 03:00)
+    expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('03:00');
+  });
+
+  /* TC_DRAFT_03: Draft saves include planDayId */
+  it('TC_DRAFT_03: draft save includes planDayId', () => {
+    const planDayWithId = {
+      id: 'pd-42',
+      dayOfWeek: 1,
+      workoutType: 'Push Day',
+      exercises: makeExercisesJson('bench-press'),
+    };
+    render(
+      <WorkoutLogger {...defaultProps} planDay={planDayWithId} />,
+    );
+
+    // Log a set so the draft save is triggered
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(mockSetWorkoutDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        planDayId: 'pd-42',
+      }),
+    );
+  });
 });

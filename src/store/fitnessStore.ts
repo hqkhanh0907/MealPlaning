@@ -37,6 +37,7 @@ export interface FitnessState {
     exercises: Exercise[];
     sets: WorkoutSet[];
     elapsedSeconds: number;
+    planDayId?: string;
   } | null;
   planStrategy: 'auto' | 'manual' | null;
   sqliteReady: boolean;
@@ -820,8 +821,8 @@ export const useFitnessStore = create<FitnessState>()(
             planId,
             dayOfWeek: plan.trainingDays[i] ?? i,
             sessionOrder: 1,
-            workoutType: s.muscleGroups.length > 4 ? 'full_body' : s.muscleGroups.join('_'),
-            muscleGroups: JSON.stringify(s.muscleGroups),
+            workoutType: s.day,
+            muscleGroups: s.muscleGroups.join(','),
             exercises: '[]',
             originalExercises: '[]',
             isUserAssigned: false,
@@ -864,8 +865,8 @@ export const useFitnessStore = create<FitnessState>()(
 
           const updatedDays: TrainingPlanDay[] = preview.mapped.map((m) => ({
             ...m.from,
-            workoutType: m.toMuscleGroups.length > 4 ? 'full_body' : m.toMuscleGroups.join('_'),
-            muscleGroups: JSON.stringify(m.toMuscleGroups),
+            workoutType: m.toDay,
+            muscleGroups: m.toMuscleGroups.join(','),
             notes: m.toDay,
           }));
 
@@ -874,8 +875,8 @@ export const useFitnessStore = create<FitnessState>()(
             planId,
             dayOfWeek: plan.trainingDays[updatedDays.length + i] ?? (updatedDays.length + i),
             sessionOrder: 1,
-            workoutType: s.muscleGroups.length > 4 ? 'full_body' : s.muscleGroups.join('_'),
-            muscleGroups: JSON.stringify(s.muscleGroups),
+            workoutType: s.day,
+            muscleGroups: s.muscleGroups.join(','),
             exercises: '[]',
             originalExercises: '[]',
             isUserAssigned: false,

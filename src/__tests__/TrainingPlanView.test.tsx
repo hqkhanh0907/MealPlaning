@@ -50,6 +50,7 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.moreExercises': '+{{remaining}} bài tập nữa',
         'fitness.plan.showLess': 'Thu gọn',
         'common.dismiss': 'Bỏ qua',
+        'fitness.workoutType.Upper Body A': 'Thân trên A',
       };
       const template = translations[key];
       if (template && typeof optionsOrFallback === 'object' && optionsOrFallback !== null) {
@@ -57,6 +58,9 @@ vi.mock('react-i18next', () => ({
       }
       if (template) return template;
       if (typeof optionsOrFallback === 'string') return optionsOrFallback;
+      if (typeof optionsOrFallback === 'object' && optionsOrFallback !== null && 'defaultValue' in optionsOrFallback) {
+        return String((optionsOrFallback as Record<string, unknown>).defaultValue);
+      }
       return key;
     },
     i18n: { language: 'vi' },
@@ -1493,6 +1497,52 @@ describe('TrainingPlanView', () => {
       fireEvent.click(screen.getByTestId('rest-add-workout-btn'));
 
       expect(screen.getByTestId('add-session-modal')).toBeInTheDocument();
+    });
+  });
+
+  describe('muscleGroups parsing fix', () => {
+    it('TC_TPV_01: muscleGroups comma-separated format renders translated muscle names', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Push', muscleGroups: 'chest, shoulders, back', exercises: mockExercises },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByText('Ngực, Vai, Lưng')).toBeInTheDocument();
+    });
+
+    it('TC_TPV_02: muscleGroups JSON format renders translated muscle names (backward compat)', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Push', muscleGroups: '["chest","shoulders","back"]', exercises: mockExercises },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByText('Ngực, Vai, Lưng')).toBeInTheDocument();
+    });
+
+    it('TC_TPV_03: workoutType displays with Vietnamese translation', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Upper Body A', muscleGroups: 'chest', exercises: mockExercises },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByText('Thân trên A')).toBeInTheDocument();
+    });
+
+    it('TC_TPV_04: workoutType with no translation falls back to raw value', () => {
+      mockStore({
+        trainingPlans: [activePlan],
+        trainingPlanDays: [
+          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'SuperCustomWorkout', muscleGroups: 'chest', exercises: mockExercises },
+        ],
+      });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      expect(screen.getByText('SuperCustomWorkout')).toBeInTheDocument();
     });
   });
 });

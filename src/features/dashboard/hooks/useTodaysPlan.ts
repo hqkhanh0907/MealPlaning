@@ -122,15 +122,18 @@ export function useTodaysPlan(): TodaysPlanData {
     ? parseExercises(tomorrowPlanDay.exercises)
     : [];
 
-  const firstTodayWorkout = todayWorkouts[0];
   let completedWorkout: TodaysPlanData['completedWorkout'];
-  if (firstTodayWorkout) {
-    const sets = workoutSets.filter(
-      (s) => s.workoutId === firstTodayWorkout.id,
+  if (todayWorkouts.length > 0) {
+    const totalDuration = todayWorkouts.reduce(
+      (sum, w) => sum + (w.durationMin ?? 0),
+      0,
+    );
+    const allSets = workoutSets.filter((s) =>
+      todayWorkouts.some((w) => w.id === s.workoutId),
     );
     completedWorkout = {
-      durationMin: firstTodayWorkout.durationMin ?? 0,
-      totalSets: sets.length,
+      durationMin: totalDuration,
+      totalSets: allSets.length,
       hasPR: false,
     };
   }

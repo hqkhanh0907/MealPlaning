@@ -479,4 +479,71 @@ describe('useTodaysPlan', () => {
     expect(result.current.completedSessions).toBe(1);
     expect(result.current.nextUncompletedSession).toBeUndefined();
   });
+
+  describe('multi-workout aggregation fix', () => {
+    it('TC_UTP_01: completedWorkout aggregates duration from all today\'s workouts', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
+          makePlanDay({ id: 'pd-pm', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio', muscleGroups: undefined, exercises: undefined }),
+        ],
+        workouts: [
+          makeWorkout({ id: 'w-1', planDayId: 'pd-am', durationMin: 45 }),
+          makeWorkout({ id: 'w-2', planDayId: 'pd-pm', durationMin: 30 }),
+        ],
+        workoutSets: [makeWorkoutSet({ id: 'set-agg-1', workoutId: 'w-1' })],
+      });
+
+      const { result } = renderHook(() => useTodaysPlan());
+
+      // Duration aggregated: 45 + 30 = 75
+      expect(result.current.completedWorkout?.durationMin).toBe(75);
+    });
+
+    it('TC_UTP_02: completedWorkout.totalSets counts sets from all workouts', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
+          makePlanDay({ id: 'pd-pm', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio', muscleGroups: undefined, exercises: undefined }),
+        ],
+        workouts: [
+          makeWorkout({ id: 'w-1', planDayId: 'pd-am', durationMin: 45 }),
+          makeWorkout({ id: 'w-2', planDayId: 'pd-pm', durationMin: 30 }),
+        ],
+        workoutSets: [
+          makeWorkoutSet({ id: 's-a1', workoutId: 'w-1', setNumber: 1 }),
+          makeWorkoutSet({ id: 's-a2', workoutId: 'w-1', setNumber: 2 }),
+          makeWorkoutSet({ id: 's-b1', workoutId: 'w-2', setNumber: 1 }),
+          makeWorkoutSet({ id: 's-b2', workoutId: 'w-2', setNumber: 2 }),
+        ],
+      });
+
+      const { result } = renderHook(() => useTodaysPlan());
+
+      // 2 sets from w-1 + 2 sets from w-2 = 4
+      expect(result.current.completedWorkout?.totalSets).toBe(4);
+    });
+
+    it('TC_UTP_03: single workout returns same values as before (regression)', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+        workouts: [makeWorkout({ planDayId: 'day-wed', durationMin: 50 })],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-r1' }),
+          makeWorkoutSet({ id: 'set-r2', setNumber: 2 }),
+        ],
+      });
+
+      const { result } = renderHook(() => useTodaysPlan());
+
+      expect(result.current.completedWorkout).toEqual({
+        durationMin: 50,
+        totalSets: 2,
+        hasPR: false,
+      });
+    });
+  });
 });

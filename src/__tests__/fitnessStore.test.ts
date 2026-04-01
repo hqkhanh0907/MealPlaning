@@ -1679,3 +1679,186 @@ describe('fitnessStore – persist migrate via rehydration', () => {
     expect(result.planStrategy).toBe('auto');
   });
 });
+
+describe('fitnessStore – changeSplitType data format', () => {
+  const PLAN_ID = 'plan-split-test';
+
+  const exercisesJson = JSON.stringify([
+    {
+      exercise: {
+        id: 'bench',
+        name: 'Bench Press',
+        primaryMuscle: 'chest',
+        equipment: 'barbell',
+        category: 'compound',
+      },
+      sets: 4,
+      repsMin: 6,
+      repsMax: 10,
+      restSeconds: 120,
+    },
+  ]);
+
+  function setupPplPlan() {
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3, 4, 5],
+      restDays: [6, 7],
+    });
+
+    const days: TrainingPlanDay[] = [
+      samplePlanDay({
+        id: 'split-day-1',
+        planId: PLAN_ID,
+        dayOfWeek: 1,
+        workoutType: 'Push',
+        muscleGroups: '["chest","shoulders"]',
+        exercises: exercisesJson,
+        originalExercises: exercisesJson,
+      }),
+      samplePlanDay({
+        id: 'split-day-2',
+        planId: PLAN_ID,
+        dayOfWeek: 2,
+        workoutType: 'Pull',
+        muscleGroups: '["back"]',
+        exercises: exercisesJson,
+        originalExercises: exercisesJson,
+      }),
+      samplePlanDay({
+        id: 'split-day-3',
+        planId: PLAN_ID,
+        dayOfWeek: 3,
+        workoutType: 'Legs',
+        muscleGroups: '["legs","glutes"]',
+        exercises: exercisesJson,
+        originalExercises: exercisesJson,
+      }),
+    ];
+
+    useFitnessStore.setState({
+      trainingPlans: [plan],
+      trainingPlanDays: days,
+    });
+
+    return { plan, days };
+  }
+
+  beforeEach(() => {
+    resetStore();
+  });
+
+  it('TC_SPLIT_01: regenerate mode produces workoutType = dayLabel', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(newDays).toHaveLength(5);
+
+    const types = newDays.map(d => d.workoutType);
+    expect(types[0]).toBe('Upper');
+    expect(types[1]).toBe('Lower');
+    expect(types[2]).toBe('Upper 3');
+    expect(types[3]).toBe('Lower 3');
+    expect(types[4]).toBe('Upper 4');
+
+    for (const wt of types) {
+      expect(wt).not.toMatch(/_/);
+    }
+  });
+
+  it('TC_SPLIT_02: regenerate mode produces muscleGroups as comma-separated', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    for (const day of newDays) {
+      expect(day.muscleGroups).toBeDefined();
+      expect(day.muscleGroups).not.toMatch(/^\[/);
+      expect(day.muscleGroups).not.toMatch(/"/);
+
+      const groups = day.muscleGroups!.split(',');
+      expect(groups.length).toBeGreaterThan(0);
+      for (const g of groups) {
+        expect(g).toMatch(/^[a-z]+$/);
+      }
+    }
+
+    const upperDay = newDays.find(d => d.workoutType === 'Upper')!;
+    expect(upperDay.muscleGroups).toBe('chest,back,shoulders,arms');
+
+    const lowerDay = newDays.find(d => d.workoutType === 'Lower')!;
+    expect(lowerDay.muscleGroups).toBe('legs,glutes,core');
+  });
+
+  it('TC_SPLIT_03: remap mode produces workoutType = toDay for mapped days', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(newDays).toHaveLength(5);
+
+    for (const day of newDays) {
+      expect(day.workoutType).not.toMatch(/_/);
+      expect(day.workoutType).toMatch(/^[A-Z]/);
+    }
+
+    const types = newDays.map(d => d.workoutType);
+    expect(types).toContain('Upper');
+    expect(types).toContain('Lower');
+  });
+
+  it('TC_SPLIT_04: remap mode produces muscleGroups as comma-separated', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    for (const day of newDays) {
+      expect(day.muscleGroups).toBeDefined();
+      expect(day.muscleGroups).not.toMatch(/^\[/);
+      expect(day.muscleGroups).not.toMatch(/"/);
+
+      const groups = day.muscleGroups!.split(',');
+      expect(groups.length).toBeGreaterThan(0);
+      for (const g of groups) {
+        expect(g).toMatch(/^[a-z]+$/);
+      }
+    }
+  });
+
+  it('TC_SPLIT_05: remap mode preserves exercises for mapped days', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    const mappedDays = newDays.filter(d => d.exercises !== '[]');
+    expect(mappedDays).toHaveLength(3);
+
+    for (const day of mappedDays) {
+      expect(day.exercises).toBe(exercisesJson);
+    }
+  });
+
+  it('TC_SPLIT_06: regenerate mode sets exercises to empty JSON array', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    for (const day of newDays) {
+      expect(day.exercises).toBe('[]');
+      expect(day.originalExercises).toBe('[]');
+    }
+  });
+
+  it('TC_SPLIT_07: workoutType matches expected split labels', () => {
+    setupPplPlan();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'bro_split', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(newDays).toHaveLength(5);
+
+    const types = newDays.map(d => d.workoutType);
+    expect(types).toEqual(['Chest', 'Back', 'Shoulders', 'Legs', 'Arms']);
+  });
+});

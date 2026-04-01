@@ -735,7 +735,11 @@
       "nextUp": "Tiếp theo",
       "decreaseWeight": "Giảm cân nặng",
       "increaseWeight": "Tăng cân nặng",
-      "saveSuccess": "Đã lưu buổi tập thành công!"
+      "saveSuccess": "Đã lưu buổi tập thành công!",
+      "editSet": "Chỉnh sửa set",
+      "deleteSet": "Xóa set",
+      "deleteSetConfirm": "Bạn có chắc muốn xóa set này?",
+      "setDeleted": "Đã xóa set"
     },
     "summary": {
       "title": "Tổng kết buổi tập",
@@ -778,6 +782,26 @@
       "muscleArms": "Tay",
       "muscleCore": "Bụng",
       "muscleGlutes": "Mông"
+    },
+    "workoutType": {
+      "Push": "Đẩy",
+      "Pull": "Kéo",
+      "Legs": "Chân",
+      "Upper": "Thân trên",
+      "Upper A": "Thân trên A",
+      "Upper B": "Thân trên B",
+      "Lower": "Thân dưới",
+      "Full Body A": "Toàn thân A",
+      "Full Body B": "Toàn thân B",
+      "Full Body C": "Toàn thân C",
+      "Chest": "Ngực",
+      "Back": "Lưng",
+      "Shoulders": "Vai",
+      "Arms": "Tay",
+      "Cardio": "Cardio",
+      "Push B": "Đẩy B",
+      "Pull B": "Kéo B",
+      "Legs B": "Chân B"
     },
     "plan": {
       "tab": "Kế hoạch",
