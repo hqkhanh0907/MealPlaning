@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Cloud, Upload, Download, LogOut, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -10,7 +10,7 @@ import { getSetting, setSetting, deleteSetting } from '../services/appSettings';
 import { reloadAllStores } from '../services/storeLoader';
 import type { SyncStatus } from '../types';
 
-export const GoogleDriveSync: React.FC = () => {
+export const GoogleDriveSync = () => {
   const { t } = useTranslation();
   const { user, accessToken, isLoading: authLoading, signIn, signOut } = useAuth();
   const notify = useNotification();

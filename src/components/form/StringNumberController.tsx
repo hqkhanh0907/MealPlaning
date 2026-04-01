@@ -32,8 +32,8 @@ function StringNumberControllerInner<T extends FieldValues>(
     testId,
     ariaLabel,
     disabled,
-  }: StringNumberControllerProps<T>,
-  ref: React.ForwardedRef<HTMLInputElement>,
+    ref,
+  }: StringNumberControllerProps<T> & { ref?: React.Ref<HTMLInputElement> },
 ) {
   const { field } = useController({ name, control });
   const [localValue, setLocalValue] = useState(() =>
@@ -134,10 +134,10 @@ function StringNumberControllerInner<T extends FieldValues>(
 }
 
 export const StringNumberController = React.memo(
-  React.forwardRef(StringNumberControllerInner),
+  StringNumberControllerInner,
 ) as <T extends FieldValues>(
   props: StringNumberControllerProps<T> & { ref?: React.Ref<HTMLInputElement> },
 ) => React.ReactElement | null;
 
 const displayName = 'StringNumberController';
-(StringNumberController as React.FC).displayName = displayName;
+(StringNumberController as unknown as { displayName: string }).displayName = displayName;

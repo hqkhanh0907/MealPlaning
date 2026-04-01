@@ -137,7 +137,7 @@ const isNativePlatform = (): boolean => {
   }
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const db = useDatabase();
 
   const [state, setState] = useState<AuthState>({

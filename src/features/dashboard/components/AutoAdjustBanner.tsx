@@ -10,8 +10,8 @@ export interface AutoAdjustBannerProps {
   onDismiss: () => void;
 }
 
-export const AutoAdjustBanner: React.FC<AutoAdjustBannerProps> = React.memo(
-  function AutoAdjustBanner({ adjustment, onApply, onDismiss }) {
+export const AutoAdjustBanner = React.memo(
+  function AutoAdjustBanner({ adjustment, onApply, onDismiss }: AutoAdjustBannerProps) {
     const { t } = useTranslation();
 
     const handleApply = useCallback(() => {

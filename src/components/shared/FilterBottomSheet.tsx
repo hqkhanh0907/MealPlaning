@@ -23,11 +23,11 @@ const SORT_OPTIONS: { value: SortOption; labelKey: string }[] = [
 
 const DEFAULT_CONFIG: FilterConfig = { sortBy: 'name-asc' };
 
-export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
+export const FilterBottomSheet = ({
   config,
   onChange,
   onClose,
-}) => {
+}: FilterBottomSheetProps) => {
   const { t } = useTranslation();
   const [draft, setDraft] = React.useState<FilterConfig>(config);
 

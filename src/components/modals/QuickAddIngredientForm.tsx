@@ -37,7 +37,7 @@ const NUTRITION_FIELDS = [
   { label: 'Fiber', name: 'qaFiber' as const },
 ];
 
-const QuickAddIngredientFormInner: React.FC<QuickAddIngredientFormProps> = ({ onAdd, onCancel }) => {
+const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientFormProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
 

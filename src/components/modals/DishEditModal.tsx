@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
@@ -38,9 +38,9 @@ const getAmountStep = (amount: number): number => {
   return 10;
 };
 
-export const DishEditModal: React.FC<DishEditModalProps> = ({
+export const DishEditModal = ({
   editingItem, ingredients, allDishes = [], onSubmit, onClose, onCreateIngredient,
-}) => {
+}: DishEditModalProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
 

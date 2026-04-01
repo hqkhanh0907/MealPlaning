@@ -89,4 +89,4 @@ export const ChipSelect = React.memo(ChipSelectInner) as <T extends FieldValues>
 ) => React.ReactElement | null;
 
 const displayName = 'ChipSelect';
-(ChipSelect as React.FC).displayName = displayName;
+(ChipSelect as unknown as { displayName: string }).displayName = displayName;

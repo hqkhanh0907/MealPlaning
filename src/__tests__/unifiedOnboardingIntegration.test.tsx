@@ -106,8 +106,7 @@ vi.mock('motion/react', () => ({
     {},
     {
       get: (_target, prop: string) => {
-        return React.forwardRef(
-          (props: Record<string, unknown>, ref: React.Ref<HTMLElement>) => {
+        return ({ ref, ...props }: Record<string, unknown> & { ref?: React.Ref<HTMLElement> }) => {
             const {
               animate: _animate,
               initial: _initial,
@@ -126,8 +125,7 @@ vi.mock('motion/react', () => ({
               if (typeof v.exit === 'function') { v.exit(d); v.exit(-d); }
             }
             return React.createElement(prop, { ...rest, ref });
-          },
-        );
+          };
       },
     },
   ),

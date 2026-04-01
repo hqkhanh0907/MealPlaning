@@ -16,7 +16,7 @@ import type { InsightType, InsightColor } from '../hooks/useInsightEngine';
 import { Button } from '@/components/ui/button';
 import { useInsightEngine } from '../hooks/useInsightEngine';
 
-const ICON_MAP: Record<InsightType, React.FC<{ className?: string }>> = {
+const ICON_MAP: Record<InsightType, React.ComponentType<{ className?: string }>> = {
   alert: AlertTriangle,
   action: Beef,
   remind: Scale,
@@ -96,7 +96,7 @@ const ICON_PREFIX_MAP: Record<InsightType, string> = {
   tip: '💡',
 };
 
-export const AiInsightCard: React.FC = React.memo(function AiInsightCard() {
+export const AiInsightCard = React.memo(function AiInsightCard() {
   const { t } = useTranslation();
   const { currentInsight, dismissInsight, handleAction } = useInsightEngine();
 

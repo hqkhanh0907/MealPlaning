@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Ingredient, Dish, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
@@ -29,7 +29,7 @@ const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
   return `1 ${getLocalizedField(unit, lang)}`;
 };
 
-export const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, dishes = [], onAdd, onUpdate, onDelete, isUsed }) => {
+export const IngredientManager = ({ ingredients, dishes = [], onAdd, onUpdate, onDelete, isUsed }: IngredientManagerProps) => {
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;

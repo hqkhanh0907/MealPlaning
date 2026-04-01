@@ -23,11 +23,11 @@ interface MenuItem {
   testId: string;
 }
 
-export const MealActionBar: React.FC<MealActionBarProps> = React.memo(({
+export const MealActionBar = React.memo(function MealActionBar({
   allEmpty, isSuggesting,
   onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onOpenGrocery,
-}) => {
+}: MealActionBarProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

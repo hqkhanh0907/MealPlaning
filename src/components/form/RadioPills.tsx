@@ -67,4 +67,4 @@ export const RadioPills = React.memo(RadioPillsInner) as <T extends FieldValues>
 ) => React.ReactElement | null;
 
 const displayName = 'RadioPills';
-(RadioPills as React.FC).displayName = displayName;
+(RadioPills as unknown as { displayName: string }).displayName = displayName;

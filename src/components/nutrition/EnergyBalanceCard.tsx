@@ -11,8 +11,8 @@ export interface EnergyBalanceCardProps {
   isCollapsible?: boolean;
 }
 
-export const EnergyBalanceCard: React.FC<EnergyBalanceCardProps> = React.memo(
-  ({ caloriesIn, caloriesOut, targetCalories, proteinCurrent, proteinTarget, isCollapsible = false }) => {
+export const EnergyBalanceCard = React.memo(
+  function EnergyBalanceCard({ caloriesIn, caloriesOut, targetCalories, proteinCurrent, proteinTarget, isCollapsible = false }: EnergyBalanceCardProps) {
     const { t } = useTranslation();
     const [collapsed, setCollapsed] = useState(false);
 

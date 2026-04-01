@@ -31,7 +31,7 @@ type GoalPhaseSelectorFormData = z.infer<typeof goalPhaseSelectorSchema>;
 const GOAL_OPTIONS: {
   type: GoalType;
   labelKey: string;
-  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   color: string;
   activeBg: string;
   activeBorder: string;
@@ -90,7 +90,7 @@ interface GoalPhaseSelectorProps {
   saveRef?: React.RefObject<(() => Promise<boolean>) | null>;
 }
 
-export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, saveRef } = {}) => {
+export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps = {}) => {
   const { t } = useTranslation();
   const db = useDatabase();
   const saveGoal = useHealthProfileStore((s) => s.saveGoal);

@@ -25,7 +25,7 @@ const NAV_CONFIG: NavItemConfig[] = [
   { tab: 'dashboard', mobileIcon: <LayoutDashboard className="w-5 h-5" />, desktopIcon: <LayoutDashboard className="w-4 h-4" />, labelKey: 'nav.dashboard' },
 ];
 
-export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }> = ({ activeTab, onTabChange, showAIBadge }) => {
+export const BottomNavBar = ({ activeTab, onTabChange, showAIBadge }: { activeTab: MainTab; onTabChange: (tab: MainTab) => void; showAIBadge?: boolean }) => {
   const { t } = useTranslation();
   return (
     <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 z-30 sm:hidden" aria-label={t('nav.mainNav')}>
@@ -59,7 +59,7 @@ export const BottomNavBar: React.FC<{ activeTab: MainTab; onTabChange: (tab: Mai
   );
 };
 
-export const DesktopNav: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainTab) => void }> = ({ activeTab, onTabChange }) => {
+export const DesktopNav = ({ activeTab, onTabChange }: { activeTab: MainTab; onTabChange: (tab: MainTab) => void }) => {
   const { t } = useTranslation();
   return (
     <nav className="hidden sm:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl" aria-label={t('nav.mainNav')}>
@@ -78,7 +78,7 @@ export const DesktopNav: React.FC<{ activeTab: MainTab; onTabChange: (tab: MainT
   );
 };
 
-export const TabLoadingFallback: React.FC = () => {
+export const TabLoadingFallback = () => {
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-center py-20">

@@ -11,7 +11,7 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ icon, searchQuery, entityName, actionLabel, onAction, className = '' }) => {
+export const EmptyState = ({ icon, searchQuery, entityName, actionLabel, onAction, className = '' }: EmptyStateProps) => {
   const { t } = useTranslation();
   return (
   <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-8 sm:p-12 text-center ${className}`}>

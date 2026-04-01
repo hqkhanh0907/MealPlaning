@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
@@ -11,7 +10,7 @@ interface UnsavedChangesDialogProps {
   onCancel: () => void;
 }
 
-export const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({ isOpen, onSave, onDiscard, onCancel }) => {
+export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: UnsavedChangesDialogProps) => {
   const { t } = useTranslation();
   // Nested inside another modal — useModalBackHandler's programmaticBackCount
   // mechanism correctly handles stacked history entries on Android.

@@ -23,7 +23,7 @@ interface SaveTemplateModalProps {
   onClose: () => void;
 }
 
-export const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({ currentPlan, dishes, onSave, onClose }) => {
+export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: SaveTemplateModalProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   useModalBackHandler(true, onClose);

@@ -56,7 +56,7 @@ export const useNotification = (): NotifyAPI => {
 
 // --- Toast Component ---
 
-const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = ({ toast, onDismiss }) => {
+const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string) => void }) => {
   const styles = TOAST_STYLES[toast.type];
   const duration = toast.duration ?? DEFAULT_DURATION[toast.type];
   const [isExiting, setIsExiting] = useState(false);
@@ -140,7 +140,7 @@ const Toast: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = (
 
 const MAX_TOASTS = 5;
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const addToast = useCallback((type: NotificationType, title: string, message = '', options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => {

@@ -21,8 +21,8 @@ function getBarColorClass(pct: number): string {
   return 'bg-gray-400';
 }
 
-export const ProteinProgress: React.FC<ProteinProgressProps> = React.memo(
-  ({ current, target }) => {
+export const ProteinProgress = React.memo(
+  function ProteinProgress({ current, target }: ProteinProgressProps) {
     const { t } = useTranslation();
 
     const safeTarget = target > 0 ? target : 1;

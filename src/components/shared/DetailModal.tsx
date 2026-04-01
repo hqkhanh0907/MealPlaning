@@ -11,7 +11,7 @@ interface DetailModalProps {
   children: React.ReactNode;
 }
 
-export const DetailModal: React.FC<DetailModalProps> = ({ title, editLabel, onClose, onEdit, children }) => {
+export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: DetailModalProps) => {
   const { t } = useTranslation();
   return (
   <ModalBackdrop onClose={onClose} zIndex="z-60">

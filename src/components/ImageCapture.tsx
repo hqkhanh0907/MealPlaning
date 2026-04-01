@@ -10,7 +10,7 @@ interface ImageCaptureProps {
   onClear: () => void;
 }
 
-export const ImageCapture: React.FC<ImageCaptureProps> = ({ image, onImageReady, onClear }) => {
+export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');

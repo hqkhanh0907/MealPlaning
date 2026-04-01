@@ -28,9 +28,9 @@ const TEST_ID_MAP: Record<MealType, string> = {
   dinner: 'meal-slot-dinner',
 };
 
-export const MealSlot: React.FC<MealSlotProps> = React.memo(({
+export const MealSlot = React.memo(function MealSlot({
   type, slot, dishes, servings, onEdit, onUpdateServings,
-}) => {
+}: MealSlotProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const hasDishes = slot.dishIds.length > 0;

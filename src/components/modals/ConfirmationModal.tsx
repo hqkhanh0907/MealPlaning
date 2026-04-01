@@ -23,7 +23,7 @@ const VARIANT_STYLES: Record<ConfirmVariant, { iconBg: string; iconText: string;
   warning: { iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconText: 'text-amber-500 dark:text-amber-400', btnBg: 'bg-amber-500', btnHover: 'hover:bg-amber-600', btnShadow: 'shadow-amber-200' },
 };
 
-export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+export const ConfirmationModal = ({
   isOpen,
   variant = 'danger',
   icon,
@@ -33,7 +33,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   cancelLabel,
   onConfirm,
   onCancel,
-}) => {
+}: ConfirmationModalProps) => {
   const { t } = useTranslation();
   useModalBackHandler(isOpen, onCancel);
 

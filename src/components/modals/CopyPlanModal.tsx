@@ -28,7 +28,7 @@ const addDays = (dateStr: string, days: number): string => {
   return `${y}-${m}-${day}`;
 };
 
-export const CopyPlanModal: React.FC<CopyPlanModalProps> = ({ sourceDate, sourcePlan, dishes, onCopy, onClose }) => {
+export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose }: CopyPlanModalProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';

@@ -24,11 +24,11 @@ export interface AdjustmentHistoryProps {
   defaultCollapsed?: boolean;
 }
 
-export const AdjustmentHistory: React.FC<AdjustmentHistoryProps> = React.memo(
+export const AdjustmentHistory = React.memo(
   function AdjustmentHistory({
     adjustments,
     defaultCollapsed = true,
-  }) {
+  }: AdjustmentHistoryProps) {
     const { t } = useTranslation();
     const [collapsed, setCollapsed] = useState(defaultCollapsed);
 

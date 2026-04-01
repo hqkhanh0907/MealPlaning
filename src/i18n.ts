@@ -10,7 +10,7 @@ i18n
       vi: { translation: vi },
     },
     lng: 'vi',
-    fallbackLng: 'vi',
+    fallbackLng: ['vi'],
     interpolation: {
       escapeValue: false, // React already escapes
     },

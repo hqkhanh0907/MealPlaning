@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React, { useImperativeHandle, forwardRef } from 'react';
+import React, { useImperativeHandle } from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthProvider } from '../contexts/AuthContext';
@@ -48,16 +48,15 @@ interface ContextCaptureHandle {
   getCtx: () => AuthContextValue;
 }
 
-const ContextCapture = forwardRef<ContextCaptureHandle>((_props, ref) => {
+const ContextCapture = ({ ref }: { ref?: React.Ref<ContextCaptureHandle> }) => {
   const ctx = useAuth();
   useImperativeHandle(ref, () => ({ getCtx: () => ctx }));
   return null;
-});
-ContextCapture.displayName = 'ContextCapture';
+};
 
 const ctxRef = { current: null as ContextCaptureHandle | null };
 
-const TestConsumer: React.FC = () => {
+const TestConsumer = () => {
   const { user, accessToken, isLoading, isInitialized, signIn, signOut } = useAuth();
   return (
     <div>

@@ -9,7 +9,7 @@ describe('useAuth', () => {
   it('should throw when used outside AuthProvider', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const BadComponent: React.FC = () => {
+    const BadComponent = () => {
       useAuth();
       return null;
     };
@@ -31,7 +31,7 @@ describe('useAuth', () => {
       signOut: vi.fn(),
     };
 
-    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
       <AuthContext.Provider value={mockValue}>{children}</AuthContext.Provider>
     );
 

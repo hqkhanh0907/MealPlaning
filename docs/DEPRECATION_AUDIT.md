@@ -1,28 +1,32 @@
 # 🔍 Deprecation & Code Quality Audit
 
 > **Ngày audit**: 2026-04-01
+> **Cập nhật lần cuối**: 2026-04-01
 > **Phiên bản dự án**: MealPlaning v1.x
-> **Công cụ**: Context7 MCP, codebase static analysis
+> **Công cụ**: Context7 MCP (Zod 4, React 19, i18next v25), web search, runtime tests, 9 skill reviews
 > **Phạm vi**: Toàn bộ `src/` (không bao gồm `node_modules/`, `dist/`)
 
 ---
 
 ## Tổng quan
 
-| Mức độ | Số lượng | Mô tả |
-|--------|----------|-------|
-| 🔴 CRITICAL | 4 | Cần xử lý ngay — API đã bị xóa hoặc thay đổi breaking |
-| 🟡 WARNING | 5 | Nên xử lý — deprecated nhưng vẫn hoạt động, sẽ bị xóa trong tương lai |
-| 🟢 INFO | 5 | Ghi nhận — anti-pattern hoặc cải thiện chất lượng code |
+| Mức độ | Tổng | ✅ Fixed | ⏸️ Deferred | ❌ Excluded | Còn lại |
+|--------|------|---------|-------------|------------|---------|
+| 🔴 CRITICAL | 4 | 2 (C-02, C-03) | 2 (C-01, C-04) | 0 | 0 |
+| 🟡 WARNING | 5 | 3 (W-01, W-03, W-05) | 0 | 2 (W-02, W-04) | 0 |
+| 🟢 INFO | 5 | 0 | 1 (I-02) | 0 | 0 (4 = no action needed) |
 
 ---
 
 ## 🔴 CRITICAL
 
-### C-01: Zod 4 — `z.preprocess()` deprecated
+### C-01: ⏸️ DEFERRED — Zod 4 — `z.preprocess()` internal change
 
+**Mức độ gốc**: 🔴 CRITICAL → **Đánh giá lại**: 🟡 WARNING (deferred)
 **Thư viện**: `zod@^4.3.6`
-**Vấn đề**: `z.preprocess()` không còn trả về `ZodPreprocess` mà trả về `ZodPipe`. API vẫn hoạt động nhưng đã deprecated và sẽ bị xóa. Nên dùng `z.pipe()` hoặc `z.coerce`.
+**Vấn đề gốc**: `z.preprocess()` không còn trả về `ZodPreprocess` mà trả về `ZodPipe`.
+**Phân tích thực tế**: Context7 Zod 4 docs xác nhận: "z.preprocess() function now returns a ZodPipe instance" — API public **không thay đổi**, chỉ internal class thay đổi. Không có migration path bắt buộc. Force migrate sang `z.pipe()` thay đổi function signature → tăng risk mà không có runtime benefit.
+**Quyết định**: DEFERRED — revisit khi Zod 5 xóa `z.preprocess()` hoàn toàn.
 **Số lượng**: 6 instances
 
 | File | Dòng | Field |
@@ -50,11 +54,12 @@ z.pipe(z.unknown(), z.transform(val => val === '' ? undefined : Number(val)), z.
 
 ---
 
-### C-02: Zod 4 — `message` parameter deprecated → dùng `error`
+### C-02: ✅ FIXED — Zod 4 — `message` parameter deprecated → dùng `error`
 
 **Thư viện**: `zod@^4.3.6`
 **Vấn đề**: Zod 4 thống nhất error customization dưới tham số `error`, thay thế `message`, `invalid_type_error`, `required_error`.
-**Số lượng**: 28 instances
+**Số lượng**: **38 instances** (verified) trong **10 files**
+**Đã fix**: 2026-04-01 — Tất cả `{ message: }` → `{ error: }` trong Zod validator calls. `ctx.addIssue({ message: })` giữ nguyên (không deprecated).
 
 | File | Ví dụ |
 |------|-------|
@@ -85,11 +90,12 @@ z.string({
 
 ---
 
-### C-03: React 19 — `forwardRef` deprecated (app code)
+### C-03: ✅ FIXED — React 19 — `forwardRef` deprecated (app code + test mocks)
 
 **Thư viện**: `react@^19.0.0`
-**Vấn đề**: React 19 cho phép truyền `ref` như một prop thông thường. `forwardRef` vẫn hoạt động nhưng sẽ bị xóa trong phiên bản tương lai.
-**Số lượng**: 1 instance trong app code, 4 trong test code
+**Vấn đề**: React 19 cho phép truyền `ref` như một prop thông thường. `forwardRef` sẽ bị xóa trong phiên bản tương lai.
+**Số lượng**: 1 app code + 3 test mocks = **4 instances total**
+**Đã fix**: 2026-04-01 — Tất cả migrated sang ref-as-prop pattern.
 
 | File | Dòng | Context |
 |------|------|---------|
@@ -113,9 +119,10 @@ function MyComponent({ ref, ...props }) {
 
 ---
 
-### C-04: Components quá lớn (>400 dòng)
+### C-04: ⏸️ DEFERRED — Components quá lớn (>400 dòng)
 
 **Vấn đề**: Vi phạm Single Responsibility Principle, khó maintain và test.
+**Quyết định**: DEFERRED — Architectural refactoring scope quá lớn (5 files, 700+→200 lines). Cần design decisions, new component APIs, route changes. Không nên bundle với type-only changes. Tách thành plan riêng.
 
 | File | Số dòng | Đề xuất |
 |------|---------|---------|
@@ -129,11 +136,16 @@ function MyComponent({ ref, ...props }) {
 
 ## 🟡 WARNING
 
-### W-01: `React.FC` anti-pattern (77 instances)
+### W-01: ✅ FIXED — `React.FC` anti-pattern (88 instances)
 
 **Thư viện**: `react@^19.0.0`
-**Vấn đề**: `React.FC` implicit thêm `children` prop (đã sửa trong React 18 types), và gây phức tạp khi dùng generics. React community khuyến nghị dùng plain function signatures.
-**Số lượng**: 77 instances trong 64 files
+**Vấn đề**: `React.FC` implicit thêm `children` prop (đã sửa trong React 18 types), và gây phức tạp khi dùng generics.
+**Số lượng**: **88 instances** (verified) trong **68 files**
+**Đã fix**: 2026-04-01 — 4 migration patterns:
+- Pattern 1: Simple → inline props (31 files)
+- Pattern 2: + React.memo → named function in memo (18 files)
+- Pattern 3: displayName cast → `as unknown as { displayName: string }` (2 files)
+- Pattern 4: Icon type → `React.ComponentType<P>` (3 files)
 
 **Files bị ảnh hưởng** (trích):
 - `src/components/CalendarTab.tsx`
@@ -160,9 +172,10 @@ const MyComponent = ({ title }: Props) => { ... }
 
 ---
 
-### W-02: Console statements không dùng logger utility
+### W-02: ❌ EXCLUDED — Console statements không dùng logger utility
 
-**Vấn đề**: Dự án có `src/utils/logger.ts` nhưng 7 files vẫn dùng `console.error/warn` trực tiếp. Không kiểm soát được log level trong production.
+**Vấn đề gốc**: Dự án có `src/utils/logger.ts` nhưng 7 files vẫn dùng `console.error/warn` trực tiếp.
+**Lý do loại bỏ**: Logger API **KHÁC hoàn toàn** — `logger.error(ctx: LogContext, error)` cần `{ component, action }` object, KHÔNG phải drop-in replacement cho `console.error()`. ESLint cho phép `console.error/warn` (eslint.config.js line 21: `allow: ['warn', 'error']`). Vite tự drop ALL console trong production (vite.config.ts line 60: `drop: isProduction ? ['console', 'debugger'] : []`). Migration cần refactor ~46 call sites với context objects → high effort, zero runtime benefit.
 **Số lượng**: ~46 instances trong 7 files
 
 | File | Số lượng | Loại |
@@ -179,11 +192,12 @@ const MyComponent = ({ title }: Props) => { ... }
 
 ---
 
-### W-03: i18next `fallbackLng` dùng string thay vì array
+### W-03: ✅ FIXED — i18next `fallbackLng` dùng string thay vì array
 
 **Thư viện**: `i18next@^25.8.13`
 **Vấn đề**: i18next v25+ khuyến nghị `fallbackLng` dạng array cho consistency.
 **Số lượng**: 2 instances
+**Đã fix**: 2026-04-01 — `fallbackLng: 'vi'` → `fallbackLng: ['vi']`
 
 | File | Dòng |
 |------|------|
@@ -194,10 +208,10 @@ const MyComponent = ({ title }: Props) => { ... }
 
 ---
 
-### W-04: `valueAsNumber` kết hợp `z.preprocess()` gây conflict
+### W-04: ❌ EXCLUDED — `valueAsNumber` kết hợp `z.preprocess()` gây conflict
 
-**Thư viện**: `react-hook-form@^7.72.0` + `zod@^4.3.6`
-**Vấn đề**: `valueAsNumber` trong RHF `register()` đã coerce value sang number, nhưng `z.preprocess()` cũng làm điều tương tự → double coercion, có thể gây NaN.
+**Vấn đề gốc**: Double coercion khi dùng `valueAsNumber` + `z.preprocess()`.
+**Lý do loại bỏ**: `valueAsNumber` là valid RHF v7.72 option (Context7 confirmed). `Number()` coercion là idempotent: `Number(5)===5`, `Number(NaN)===NaN`. Validation vẫn fails/passes correctly. Double coercion vô hại — không gây NaN trên valid input.
 **Số lượng**: 2 instances
 
 | File | Dòng |
@@ -209,9 +223,10 @@ const MyComponent = ({ title }: Props) => { ... }
 
 ---
 
-### W-05: Magic numbers không có constants
+### W-05: ✅ FIXED — Magic numbers không có constants
 
 **Vấn đề**: Hard-coded values trong business logic khiến khó thay đổi và test.
+**Đã fix**: 2026-04-01 — Extracted 5 constants: `PROTEIN_RATIO_MIN`, `WEIGHT_LOG_STALE_DAYS`, `STREAK_RECORD_DAYS_DIFF`, `ADHERENCE_THRESHOLD_PCT`, `WEIGHT_TREND_MIN_WEEKS`
 
 | File | Ví dụ | Đề xuất |
 |------|-------|---------|
@@ -279,26 +294,30 @@ const MyComponent = ({ title }: Props) => { ... }
 
 ---
 
-## Kế hoạch xử lý (Priority Order)
+## Kế hoạch xử lý — Trạng thái
 
-### Phase 1: Breaking Changes (CRITICAL)
-1. **C-01**: Migrate `z.preprocess()` → `z.coerce` / `z.pipe()` (6 instances)
-2. **C-02**: Migrate Zod `{ message }` → `{ error }` (28 instances)
-3. **C-03**: Migrate `forwardRef` → ref-as-prop (1 app file)
+| Item | Trạng thái | Ngày | Ghi chú |
+|------|-----------|------|---------|
+| C-01 | ⏸️ DEFERRED | — | Revisit khi Zod 5 xóa `z.preprocess()` |
+| C-02 | ✅ FIXED | 2026-04-01 | 38 instances → `{ error: }` |
+| C-03 | ✅ FIXED | 2026-04-01 | 4 instances (1 app + 3 test) → ref-as-prop |
+| C-04 | ⏸️ DEFERRED | — | Tách plan riêng cho architectural refactoring |
+| W-01 | ✅ FIXED | 2026-04-01 | 88 instances trong 68 files → plain functions |
+| W-02 | ❌ EXCLUDED | — | Logger API khác, ESLint allows, Vite drops in prod |
+| W-03 | ✅ FIXED | 2026-04-01 | 2 files → `['vi']` array format |
+| W-04 | ❌ EXCLUDED | — | Idempotent coercion, harmless |
+| W-05 | ✅ FIXED | 2026-04-01 | 5 constants extracted |
+| I-01 | No action | — | `@apply` still supported in Tailwind v4 |
+| I-02 | ⏸️ DEFERRED | — | `.refine()` works fine, low priority |
+| I-03 | No action | — | Test fixtures, not deprecated pattern |
+| I-04 | No action | — | Required TypeScript syntax |
+| I-05 | No action | — | All libraries using correct patterns |
 
-### Phase 2: Anti-patterns (WARNING)
-4. **W-01**: Refactor `React.FC` → plain functions (77 instances, batch refactor)
-5. **W-02**: Replace `console.*` → `logger.*` (46 instances, 7 files)
-6. **W-03**: Fix `fallbackLng` format (2 files)
-7. **W-04**: Remove `valueAsNumber` khi dùng `z.coerce` (2 files)
-8. **W-05**: Extract magic numbers (1 file)
-
-### Phase 3: Code Architecture (CRITICAL — long-term)
-9. **C-04**: Split large components (5 files, >400 lines each)
-
-### Phase 4: Nice-to-have (INFO)
-10. **I-02**: Evaluate `.refine()` → `.superRefine()` migration
-11. **I-01**: Reduce `@apply` usage
+### Quality Gates kết quả
+- `npm run lint` → 0 errors ✅
+- `npm run test` → 4365/4365 passed ✅
+- `npm run build` → clean (1.96s) ✅
+- Post-migration grep → 0 React.FC, 0 { message: }, 0 forwardRef ✅
 
 ---
 

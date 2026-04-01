@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LucideIcon } from 'lucide-react';
 
@@ -10,13 +9,13 @@ interface FitnessEmptyStateProps {
   onCtaClick?: () => void;
 }
 
-export const FitnessEmptyState: React.FC<FitnessEmptyStateProps> = ({
+export const FitnessEmptyState = ({
   icon: Icon,
   titleKey,
   descriptionKey,
   ctaKey,
   onCtaClick,
-}) => {
+}: FitnessEmptyStateProps) => {
   const { t } = useTranslation();
 
   return (

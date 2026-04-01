@@ -9,7 +9,7 @@ import type { GoalType } from '../../health-profile/types';
 
 interface TrendResult {
   color: 'green' | 'amber';
-  icon: React.FC<{ className?: string; 'aria-hidden'?: boolean }>;
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
   text: string;
   weeklyChange: number;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -36,9 +36,9 @@ const fuzzyMatch = (aiName: string, ingredientName: string): boolean => {
   return a.includes(b) || b.includes(a);
 };
 
-export const AISuggestIngredientsPreview: React.FC<AISuggestIngredientsPreviewProps> = ({
+export const AISuggestIngredientsPreview = ({
   dishName, suggestions, existingIngredients, onConfirm, onClose,
-}) => {
+}: AISuggestIngredientsPreviewProps) => {
   const { t } = useTranslation();
 
   const [keys] = useState(() => suggestions.map(() => nextKey()));

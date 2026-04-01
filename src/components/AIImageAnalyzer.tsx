@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { analyzeDishImage } from '../services/geminiService';
@@ -14,7 +14,7 @@ interface AIImageAnalyzerProps {
   onSave?: (result: SaveAnalyzedDishPayload) => void;
 }
 
-export const AIImageAnalyzer: React.FC<AIImageAnalyzerProps> = ({ onAnalysisComplete, onSave }) => {
+export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerProps) => {
   const notify = useNotification();
   const { t } = useTranslation();
   // Ref avoids stale closures in async callbacks

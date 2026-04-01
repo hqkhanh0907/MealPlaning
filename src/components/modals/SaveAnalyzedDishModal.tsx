@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
@@ -36,7 +36,7 @@ interface SaveAnalyzedDishModalProps {
   onSave: (payload: SaveAnalyzedDishPayload) => void;
 }
 
-export const SaveAnalyzedDishModal: React.FC<SaveAnalyzedDishModalProps> = ({ onClose, result, onSave }) => {
+export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedDishModalProps) => {
   const { t } = useTranslation();
   const notify = useNotification();
 

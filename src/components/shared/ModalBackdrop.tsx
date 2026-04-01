@@ -48,7 +48,7 @@ function _handleGlobalEscape(e: KeyboardEvent) {
  * lock so that stacked modals (e.g. a confirmation dialog rendered
  * over a form modal) do not fight over the body style on unmount.
  */
-export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ onClose, zIndex = 'z-50', children }) => {
+export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackdropProps) => {
   const { t } = useTranslation();
   const onCloseRef = React.useRef(onClose);
   onCloseRef.current = onClose;

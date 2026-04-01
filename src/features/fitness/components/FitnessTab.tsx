@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ClipboardList, History, BarChart3 } from 'lucide-react';
 import { SubTabBar } from '../../../components/shared/SubTabBar';
@@ -17,7 +17,7 @@ import { useNotification } from '../../../contexts/NotificationContext';
 
 type FitnessSubTab = 'plan' | 'history' | 'progress';
 
-const FitnessTabInner: React.FC = () => {
+const FitnessTabInner = () => {
   const { t } = useTranslation();
   const [activeSubTab, setActiveSubTab] = useState<FitnessSubTab>('plan');
   const { insight } = useFitnessNutritionBridge();

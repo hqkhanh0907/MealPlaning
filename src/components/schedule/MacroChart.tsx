@@ -25,7 +25,7 @@ const STROKE_WIDTH = 12;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const CENTER = 50;
 
-export const MacroChart: React.FC<MacroChartProps> = React.memo(({ dayNutrition }) => {
+export const MacroChart = React.memo(function MacroChart({ dayNutrition }: MacroChartProps) {
   const { t } = useTranslation();
 
   const segments: MacroSegment[] = useMemo(() => {

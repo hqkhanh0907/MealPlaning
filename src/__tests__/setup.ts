@@ -6,7 +6,7 @@ import vi from '../locales/vi.json';
 // Initialize i18n for tests — loads Vietnamese translations so existing assertions keep working.
 i18n.use(initReactI18next).init({
   lng: 'vi',
-  fallbackLng: 'vi',
+  fallbackLng: ['vi'],
   resources: { vi: { translation: vi } },
   interpolation: { escapeValue: false },
 });

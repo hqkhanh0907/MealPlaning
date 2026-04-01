@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useCallback } from 'react';
+import { lazy, Suspense, useState, useCallback } from 'react';
 import { SettingsMenu } from './settings/SettingsMenu';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
@@ -22,7 +22,7 @@ function DetailLoadingFallback() {
   );
 }
 
-export const SettingsTab: React.FC<SettingsTabProps> = ({ theme, setTheme }) => {
+export const SettingsTab = ({ theme, setTheme }: SettingsTabProps) => {
   const [currentView, setCurrentView] = useState<SettingsView>('menu');
 
   const handleNavigate = useCallback((section: 'health-profile' | 'goal' | 'training-profile') => {

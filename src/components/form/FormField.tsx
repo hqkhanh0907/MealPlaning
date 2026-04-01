@@ -9,8 +9,9 @@ interface FormFieldProps {
   required?: boolean;
 }
 
-export const FormField: React.FC<FormFieldProps> = React.memo(
-  ({ label, error, children, className, required }) => (
+export const FormField = React.memo(
+  function FormField({ label, error, children, className, required }: FormFieldProps) {
+    return (
     <div className={className ?? 'mb-4'}>
       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
         {label}
@@ -25,7 +26,8 @@ export const FormField: React.FC<FormFieldProps> = React.memo(
         </p>
       )}
     </div>
-  ),
+    );
+  },
 );
 
 FormField.displayName = 'FormField';

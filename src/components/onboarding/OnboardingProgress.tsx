@@ -8,12 +8,12 @@ interface OnboardingProgressProps {
   totalStepsInSection: number;
 }
 
-export const OnboardingProgress: React.FC<OnboardingProgressProps> = React.memo(({
+export const OnboardingProgress = React.memo(function OnboardingProgress({
   currentSection,
   totalSections,
   stepInSection,
   totalStepsInSection,
-}) => {
+}: OnboardingProgressProps) {
   const { t } = useTranslation();
 
   const overallProgress = Math.round(

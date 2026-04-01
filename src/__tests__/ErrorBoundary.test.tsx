@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
@@ -8,7 +7,7 @@ vi.mock('../utils/logger', () => ({
 }));
 
 // Component that throws
-const ThrowingChild: React.FC<{ shouldThrow: boolean }> = ({ shouldThrow }) => {
+const ThrowingChild = ({ shouldThrow }: { shouldThrow: boolean }) => {
   if (shouldThrow) throw new Error('Test error');
   return <div>Working</div>;
 };

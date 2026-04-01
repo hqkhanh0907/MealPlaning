@@ -45,7 +45,7 @@ const HEALTH_STYLES = {
   critical: { bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-700 dark:text-rose-400', Icon: ShieldX },
 };
 
-const BackupHealthIndicator: React.FC = () => {
+const BackupHealthIndicator = () => {
   const { t } = useTranslation();
   const { level, daysSince } = useBackupHealthStatus();
   const style = HEALTH_STYLES[level];
@@ -61,7 +61,7 @@ const BackupHealthIndicator: React.FC = () => {
   );
 };
 
-export const DataBackup: React.FC = () => {
+export const DataBackup = () => {
   const { t } = useTranslation();
   const notify = useNotification();
   const db = useDatabase();

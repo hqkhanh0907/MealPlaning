@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { SubTabBar } from '../components/shared/SubTabBar';
 import type { SubTab } from '../components/shared/SubTabBar';
 
-const MockIcon: React.FC<{ className?: string }> = ({ className }) => (
+const MockIcon = ({ className }: { className?: string }) => (
   <svg data-testid="mock-icon" className={className} />
 );
 

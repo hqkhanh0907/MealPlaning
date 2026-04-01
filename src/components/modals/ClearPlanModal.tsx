@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { DayPlan, MealType } from '../../types';
@@ -17,7 +17,7 @@ const hasPlan = (p: DayPlan): boolean =>
   p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0;
 
 
-export const ClearPlanModal: React.FC<ClearPlanModalProps> = ({ dayPlans, selectedDate, onClear, onClose }) => {
+export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: ClearPlanModalProps) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   useModalBackHandler(true, onClose);

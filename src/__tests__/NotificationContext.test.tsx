@@ -1,10 +1,9 @@
-import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NotificationProvider, useNotification } from '../contexts/NotificationContext';
 
 // Test consumer component
-const TestConsumer: React.FC = () => {
+const TestConsumer = () => {
   const notify = useNotification();
   return (
     <div>
@@ -22,7 +21,7 @@ describe('NotificationContext', () => {
     // Suppress console.error for expected error
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => {
-      const Broken: React.FC = () => { useNotification(); return null; };
+      const Broken = () => { useNotification(); return null; };
       render(<Broken />);
     }).toThrow('useNotification must be used within <NotificationProvider>');
     consoleError.mockRestore();
@@ -117,7 +116,7 @@ describe('NotificationContext', () => {
 
   it('handles toast with onClick callback', async () => {
     const onClick = vi.fn();
-    const ClickConsumer: React.FC = () => {
+    const ClickConsumer = () => {
       const notify = useNotification();
       return (
         <button onClick={() => notify.info('Clickable', 'Click me', { onClick })}>
@@ -146,7 +145,7 @@ describe('NotificationContext', () => {
 
   it('handles toast with action button', async () => {
     const actionClick = vi.fn();
-    const ActionConsumer: React.FC = () => {
+    const ActionConsumer = () => {
       const notify = useNotification();
       return (
         <button onClick={() => notify.success('With Action', 'msg', { action: { label: 'Undo', onClick: actionClick } })}>
@@ -187,7 +186,7 @@ describe('NotificationContext', () => {
 
   it('handles keyboard interaction on clickable toast', async () => {
     const onClick = vi.fn();
-    const KeyConsumer: React.FC = () => {
+    const KeyConsumer = () => {
       const notify = useNotification();
       return (
         <button onClick={() => notify.info('Key', 'msg', { onClick })}>show-key</button>
@@ -251,7 +250,7 @@ describe('NotificationContext', () => {
   it('action button stopPropagation does not trigger toast onClick', async () => {
     const toastOnClick = vi.fn();
     const actionClick = vi.fn();
-    const BothConsumer: React.FC = () => {
+    const BothConsumer = () => {
       const notify = useNotification();
       return (
         <button

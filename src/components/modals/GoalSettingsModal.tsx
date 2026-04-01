@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Target, Zap, Scale, Dumbbell, Leaf, Salad } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -41,7 +41,7 @@ const GOAL_PRESETS: GoalPreset[] = [
   { labelKey: 'goalSettings.presetLightDiet', icon: Salad, calories: 1400, proteinRatio: 1.2 },
 ];
 
-export const GoalSettingsModal: React.FC<GoalSettingsModalProps> = ({ userProfile, onUpdateProfile, onClose }) => {
+export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: GoalSettingsModalProps) => {
   const { t } = useTranslation();
   useModalBackHandler(true, onClose);
 

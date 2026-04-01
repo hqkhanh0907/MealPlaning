@@ -53,7 +53,7 @@ type UnitSelectorProps = SingleProps | BilingualProps;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const UnitSelector: React.FC<UnitSelectorProps> = (props) => {
+export const UnitSelector = (props: UnitSelectorProps) => {
   const { className = '', error = false, onBlur, id } = props;
   const currentVi = props.mode === 'single' ? props.value : props.value.vi;
 

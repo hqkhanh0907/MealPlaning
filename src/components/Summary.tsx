@@ -10,7 +10,7 @@ interface SummaryProps {
   onEditGoals?: () => void;
 }
 
-export const Summary: React.FC<SummaryProps> = React.memo(({ dayNutrition, targetCalories, targetProtein, onEditGoals }) => {
+export const Summary = React.memo(function Summary({ dayNutrition, targetCalories, targetProtein, onEditGoals }: SummaryProps) {
   const { t } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const totalCalories = dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories;

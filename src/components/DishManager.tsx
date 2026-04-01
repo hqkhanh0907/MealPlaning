@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dish, Ingredient, MealType, NutritionInfo, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
@@ -30,7 +30,7 @@ interface DishManagerProps {
 
 const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
 
-export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, onAdd, onUpdate, onDelete, isUsed, onCreateIngredient }) => {
+export const DishManager = ({ dishes, ingredients, onAdd, onUpdate, onDelete, isUsed, onCreateIngredient }: DishManagerProps) => {
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;

@@ -27,8 +27,8 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
   return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
 }
 
-export const MacroDonutChart: React.FC<MacroDonutChartProps> = React.memo(
-  ({ proteinG, fatG, carbsG, size = 120 }) => {
+export const MacroDonutChart = React.memo(
+  function MacroDonutChart({ proteinG, fatG, carbsG, size = 120 }: MacroDonutChartProps) {
     const { t } = useTranslation();
 
     const proteinCal = proteinG * PROTEIN_CAL_PER_G;

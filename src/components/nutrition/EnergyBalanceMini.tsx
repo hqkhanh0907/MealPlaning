@@ -16,8 +16,8 @@ function getNetColorClass(net: number, target: number): string {
   return 'text-slate-600 dark:text-slate-300';
 }
 
-export const EnergyBalanceMini: React.FC<EnergyBalanceMiniProps> = React.memo(
-  ({ eaten, burned, target, onTapDetail }) => {
+export const EnergyBalanceMini = React.memo(
+  function EnergyBalanceMini({ eaten, burned, target, onTapDetail }: EnergyBalanceMiniProps) {
     const { t } = useTranslation();
 
     const net = Math.round(eaten - burned);

@@ -38,13 +38,13 @@ const TEST_ID_MAP: Record<MealType, string> = {
   dinner: 'quick-preview-row-dinner',
 };
 
-export const QuickPreviewPanel: React.FC<QuickPreviewPanelProps> = React.memo(({
+export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
   currentPlan,
   dishes,
   ingredients,
   onPlanMeal,
   onPlanAll,
-}) => {
+}: QuickPreviewPanelProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
 
@@ -103,9 +103,9 @@ interface MealRowProps {
   onPlanMeal: (type: MealType) => void;
 }
 
-const MealRow: React.FC<MealRowProps> = React.memo(({
+const MealRow = React.memo(function MealRow({
   type, icon: MealIcon, label, dishIds, dishes, ingredients, lang, t, onPlanMeal,
-}) => {
+}: MealRowProps) {
   const hasDishes = dishIds.length > 0;
 
   const resolvedDishes = useMemo(() => {

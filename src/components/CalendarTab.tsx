@@ -37,12 +37,12 @@ export interface CalendarTabProps {
   onUpdateServings?: (dishId: string, servings: number) => void;
 }
 
-export const CalendarTab: React.FC<CalendarTabProps> = React.memo(({
+export const CalendarTab = React.memo(function CalendarTab({
   selectedDate, onSelectDate, dayPlans, dishes, ingredients,
   currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
   isSuggesting, servings, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onQuickAdd, onUpdateServings,
-}) => {
+}: CalendarTabProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   const [activeSubTab, setActiveSubTab] = useState<ScheduleSubTab>('meals');

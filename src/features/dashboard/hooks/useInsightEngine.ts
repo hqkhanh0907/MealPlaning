@@ -15,6 +15,12 @@ export type InsightType =
 
 export type InsightColor = 'dark-amber' | 'amber' | 'blue' | 'green' | 'gray';
 
+const PROTEIN_RATIO_MIN = 0.7;
+const WEIGHT_LOG_STALE_DAYS = 3;
+const STREAK_RECORD_DAYS_DIFF = 2;
+const ADHERENCE_THRESHOLD_PCT = 85;
+const WEIGHT_TREND_MIN_WEEKS = 2;
+
 export interface Insight {
   id: string;
   priority: number;
@@ -95,7 +101,7 @@ function createP1(input: InsightInput): Insight | null {
 function createP2(input: InsightInput): Insight | null {
   if (
     input.proteinRatio === undefined ||
-    input.proteinRatio >= 0.7 ||
+    input.proteinRatio >= PROTEIN_RATIO_MIN ||
     !input.isAfterEvening
   ) {
     return null;
@@ -114,7 +120,7 @@ function createP2(input: InsightInput): Insight | null {
 }
 
 function createP3(input: InsightInput): Insight | null {
-  if (input.daysSinceWeightLog === undefined || input.daysSinceWeightLog < 3) {
+  if (input.daysSinceWeightLog === undefined || input.daysSinceWeightLog < WEIGHT_LOG_STALE_DAYS) {
     return null;
   }
   return {
@@ -135,7 +141,7 @@ function createP4(input: InsightInput): Insight | null {
     input.currentStreak === undefined ||
     input.longestStreak === undefined ||
     input.currentStreak >= input.longestStreak ||
-    input.longestStreak - input.currentStreak > 2
+    input.longestStreak - input.currentStreak > STREAK_RECORD_DAYS_DIFF
   ) {
     return null;
   }
@@ -166,7 +172,7 @@ function createP5(input: InsightInput): Insight | null {
 }
 
 function createP6(input: InsightInput): Insight | null {
-  if (input.weeklyAdherence === undefined || input.weeklyAdherence < 85) {
+  if (input.weeklyAdherence === undefined || input.weeklyAdherence < ADHERENCE_THRESHOLD_PCT) {
     return null;
   }
   return {
@@ -185,7 +191,7 @@ function createP7(input: InsightInput): Insight | null {
   if (
     !input.weightTrendCorrect ||
     input.weightTrendWeeks === undefined ||
-    input.weightTrendWeeks < 2
+    input.weightTrendWeeks < WEIGHT_TREND_MIN_WEEKS
   ) {
     return null;
   }

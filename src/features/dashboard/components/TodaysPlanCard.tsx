@@ -111,7 +111,7 @@ function MealsSection({
   );
 }
 
-const TodaysPlanCard: React.FC = React.memo(() => {
+const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   const { t } = useTranslation();
   const data = useTodaysPlan();
   const pushPage = useNavigationStore((s) => s.pushPage);

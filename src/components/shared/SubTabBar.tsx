@@ -13,8 +13,8 @@ export interface SubTabBarProps {
   className?: string;
 }
 
-export const SubTabBar: React.FC<SubTabBarProps> = React.memo(
-  ({ tabs, activeTab, onTabChange, className = '' }) => {
+export const SubTabBar = React.memo(
+  function SubTabBar({ tabs, activeTab, onTabChange, className = '' }: SubTabBarProps) {
     return (
       <div
         role="tablist"

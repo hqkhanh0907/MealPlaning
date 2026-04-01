@@ -30,14 +30,14 @@ export interface MealsSubTabProps {
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
 
-export const MealsSubTab: React.FC<MealsSubTabProps> = React.memo(({
+export const MealsSubTab = React.memo(function MealsSubTab({
   dayNutrition, dishes,
   targetCalories, targetProtein, isSuggesting,
   servings,
   onPlanMeal, onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
   onCopyPlan, onSaveTemplate, onOpenTemplateManager, onSwitchToNutrition,
   recentDishIds, onQuickAdd, onUpdateServings, onOpenGrocery,
-}) => {
+}: MealsSubTabProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const [quickAddDishId, setQuickAddDishId] = useState<string | null>(null);

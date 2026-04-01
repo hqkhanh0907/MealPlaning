@@ -1,9 +1,8 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PartyPopper, X } from 'lucide-react';
 import { useFitnessStore } from '../../../store/fitnessStore';
 
-export const PlanGeneratedCard: React.FC = () => {
+export const PlanGeneratedCard = () => {
   const { t } = useTranslation();
   const showPlanCelebration = useFitnessStore((s) => s.showPlanCelebration);
   const dismissPlanCelebration = useFitnessStore((s) => s.dismissPlanCelebration);

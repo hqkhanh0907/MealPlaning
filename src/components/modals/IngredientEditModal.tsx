@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,9 +35,9 @@ const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
   return `1 ${getLocalizedField(unit, lang)}`;
 };
 
-export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
+export const IngredientEditModal = ({
   editingItem, onSubmit, onClose,
-}) => {
+}: IngredientEditModalProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const notify = useNotification();

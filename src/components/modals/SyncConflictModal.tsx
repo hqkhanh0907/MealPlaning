@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Monitor, Cloud } from 'lucide-react';
 
@@ -9,12 +8,12 @@ interface SyncConflictModalProps {
   onClose: () => void;
 }
 
-export const SyncConflictModal: React.FC<SyncConflictModalProps> = ({
+export const SyncConflictModal = ({
   localTime,
   remoteTime,
   onResolve,
   onClose,
-}) => {
+}: SyncConflictModalProps) => {
   const { t } = useTranslation();
 
   const formatTime = (iso: string) => new Date(iso).toLocaleString();

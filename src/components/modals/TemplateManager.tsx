@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Pencil, Trash2, BookTemplate, Search, Tag, Sunrise, Sun, Moon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -16,9 +16,9 @@ interface TemplateManagerProps {
   onClose: () => void;
 }
 
-export const TemplateManager: React.FC<TemplateManagerProps> = ({
+export const TemplateManager = ({
   templates, dishes, onApply, onDelete, onRename, onClose,
-}) => {
+}: TemplateManagerProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   useModalBackHandler(true, onClose);

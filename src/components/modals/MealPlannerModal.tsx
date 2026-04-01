@@ -53,7 +53,7 @@ interface MealPlannerModalProps {
   onClose: () => void;
 }
 
-export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
+export const MealPlannerModal = ({
   dishes,
   ingredients,
   currentPlan,
@@ -63,7 +63,7 @@ export const MealPlannerModal: React.FC<MealPlannerModalProps> = ({
   targetProtein,
   onConfirm,
   onClose,
-}) => {
+}: MealPlannerModalProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
 

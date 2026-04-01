@@ -10,9 +10,9 @@ export interface MiniNutritionBarProps {
   onSwitchToNutrition: () => void;
 }
 
-export const MiniNutritionBar: React.FC<MiniNutritionBarProps> = React.memo(({
+export const MiniNutritionBar = React.memo(function MiniNutritionBar({
   dayNutrition, targetCalories, targetProtein, onSwitchToNutrition,
-}) => {
+}: MiniNutritionBarProps) {
   const { t } = useTranslation();
   const totalCal = Math.round(
     dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
 import { DayPlan } from '../types';
@@ -86,7 +86,7 @@ const formatWeekLabel = (dates: Date[]): string => {
   return `${fmt(dates[0])} - ${fmt(dates[6])}`;
 };
 
-export const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }) => {
+export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans = [] }: DateSelectorProps) => {
   const { t } = useTranslation();
   const db = useDatabase();
   const [currentMonth, setCurrentMonth] = useState(() => {

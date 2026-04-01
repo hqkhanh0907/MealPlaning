@@ -29,7 +29,7 @@ interface AISuggestionPreviewModalProps {
   onEditMeal: (type: MealType) => void;
 }
 
-export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> = ({
+export const AISuggestionPreviewModal = ({
   isOpen,
   suggestion,
   dishes,
@@ -42,7 +42,7 @@ export const AISuggestionPreviewModal: React.FC<AISuggestionPreviewModalProps> =
   onApply,
   onRegenerate,
   onEditMeal,
-}) => {
+}: AISuggestionPreviewModalProps) => {
   useModalBackHandler(isOpen, onClose);
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;

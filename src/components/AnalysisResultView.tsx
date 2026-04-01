@@ -1,4 +1,3 @@
-import React from 'react';
 import { Loader2, Image as ImageIcon, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,7 +10,7 @@ interface AnalysisResultViewProps {
   onOpenSaveModal?: () => void;
 }
 
-const AnalysisSkeleton: React.FC = () => {
+const AnalysisSkeleton = () => {
   const { t } = useTranslation();
   return (
   <div className="space-y-6">
@@ -47,7 +46,7 @@ const AnalysisSkeleton: React.FC = () => {
   );
 };
 
-const EmptyState: React.FC = () => {
+const EmptyState = () => {
   const { t } = useTranslation();
   return (
   <div className="h-full flex flex-col items-center justify-center text-center space-y-5 py-8">
@@ -62,14 +61,14 @@ const EmptyState: React.FC = () => {
   );
 };
 
-const NutritionCard: React.FC<{ label: string; value: number; unit: string; color: string }> = ({ label, value, unit, color }) => (
+const NutritionCard = ({ label, value, unit, color }: { label: string; value: number; unit: string; color: string }) => (
   <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-600 shadow-sm">
     <p className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase mb-1">{label}</p>
     <p className={`text-2xl font-bold ${color}`}>{value} <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">{unit}</span></p>
   </div>
 );
 
-const IngredientRow: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
+const IngredientRow = ({ ing }: { ing: AnalyzedIngredient }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
   return (
     <tr className="hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
@@ -83,7 +82,7 @@ const IngredientRow: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
   );
 };
 
-const IngredientCard: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
+const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
   const { t } = useTranslation();
   return (
@@ -114,7 +113,7 @@ const IngredientCard: React.FC<{ ing: AnalyzedIngredient }> = ({ ing }) => {
   );
 };
 
-export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result, isAnalyzing, onOpenSaveModal }) => {
+export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: AnalysisResultViewProps) => {
   const { t } = useTranslation();
   if (isAnalyzing) return <AnalysisSkeleton />;
   if (!result) return <EmptyState />;

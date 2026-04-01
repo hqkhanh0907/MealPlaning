@@ -133,7 +133,7 @@ const AISLE_LABEL_KEYS: Record<AisleCategory, string> = {
 
 const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', 'other'];
 
-const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
+const GroceryEmptyState = ({ t }: { t: (key: string) => string }) => (
   <div data-testid="grocery-empty-state" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
       <ShoppingCart className="w-10 h-10 text-emerald-300" aria-hidden="true" />
@@ -152,7 +152,7 @@ const GroceryEmptyState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
   </div>
 );
 
-export const GroceryList: React.FC<GroceryListProps> = React.memo(({ currentPlan, dayPlans, selectedDate, allDishes, allIngredients }) => {
+export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPlans, selectedDate, allDishes, allIngredients }: GroceryListProps) {
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;

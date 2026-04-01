@@ -22,12 +22,12 @@ interface ManagementTabProps {
   isDishUsed: (id: string) => boolean;
 }
 
-export const ManagementTab: React.FC<ManagementTabProps> = React.memo(({
+export const ManagementTab = React.memo(function ManagementTab({
   activeSubTab, onSubTabChange,
   ingredients, dishes,
   onAddIngredient, onUpdateIngredient, onDeleteIngredient, isIngredientUsed,
   onAddDish, onUpdateDish, onDeleteDish, isDishUsed,
-}) => {
+}: ManagementTabProps) {
   const { t } = useTranslation();
 
   const SUB_TABS: { key: SubTab; label: string }[] = [

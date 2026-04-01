@@ -20,9 +20,9 @@ const TIP_STYLES: Record<NutritionTip['type'], string> = {
   info: 'bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-300',
 };
 
-const RecommendationPanel: React.FC<RecommendationPanelProps> = ({
+const RecommendationPanel = ({
   weight, targetCalories, targetProtein, dayNutrition, onSwitchToMeals,
-}) => {
+}: RecommendationPanelProps) => {
   const { t } = useTranslation();
   const tips = React.useMemo(
     () => getDynamicTips(dayNutrition, targetCalories, targetProtein, t),
@@ -100,9 +100,9 @@ export interface NutritionSubTabProps {
   onSwitchToMeals?: () => void;
 }
 
-export const NutritionSubTab: React.FC<NutritionSubTabProps> = React.memo(({
+export const NutritionSubTab = React.memo(function NutritionSubTab({
   dayNutrition, targetCalories, targetProtein, userWeight, onEditGoals, onSwitchToMeals,
-}) => {
+}: NutritionSubTabProps) {
   return (
     <div data-testid="nutrition-subtab" className="space-y-6">
       <Summary

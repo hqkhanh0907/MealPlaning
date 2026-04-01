@@ -27,14 +27,14 @@ interface ListToolbarProps {
   sortTestId?: string;
 }
 
-export const ListToolbar: React.FC<ListToolbarProps> = ({
+export const ListToolbar = ({
   searchQuery, onSearchChange, searchPlaceholder,
   sortOptions, sortBy, onSortChange,
   viewLayout, onLayoutChange,
   onAdd, addLabel,
   children,
   searchTestId, addTestId, sortTestId,
-}) => {
+}: ListToolbarProps) => {
   const { t } = useTranslation();
   return (
   <>
