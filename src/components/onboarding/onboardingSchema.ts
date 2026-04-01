@@ -26,7 +26,7 @@ export const onboardingSchema = z.object({
   // Section 2d: Advanced (optional)
   bodyFatPct: z.number().min(3).max(60).optional(),
   bmrOverride: z.number().min(500).max(5000).optional(),
-  proteinRatio: z.number().min(0.8).max(4.0).optional(),
+  proteinRatio: z.number().min(0.8).max(4).optional(),
 
   // Section 3: Training Core
   trainingGoal: z.enum(['strength', 'hypertrophy', 'endurance', 'general']),

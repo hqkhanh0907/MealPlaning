@@ -59,7 +59,7 @@ export const DEFAULT_HEALTH_PROFILE: HealthProfile = {
   heightCm: 170,
   weightKg: 70,
   activityLevel: 'moderate',
-  proteinRatio: 2.0,
+  proteinRatio: 2,
   fatPct: 0.25,
   targetCalories: 1500,
   updatedAt: new Date().toISOString(),

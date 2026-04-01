@@ -23,7 +23,7 @@ export const GOAL_REP_SCHEMES: Record<TrainingGoal, RepScheme> = {
 };
 
 export const OVERLOAD_RATES: Record<TrainingExperience, OverloadRate> = {
-  beginner: { upperBodyKg: 2.5, lowerBodyKg: 5.0, perWeeks: 1 },
+  beginner: { upperBodyKg: 2.5, lowerBodyKg: 5, perWeeks: 1 },
   intermediate: { upperBodyKg: 1.25, lowerBodyKg: 2.5, perWeeks: 2 },
   advanced: { upperBodyKg: 1.25, lowerBodyKg: 2.5, perWeeks: 4 },
 };
@@ -86,7 +86,7 @@ export interface DeloadSuggestion {
 export function shouldAutoDeload(
   weeklyIntensities: number[],
   consecutiveHighWeeks = 4,
-  highRpeThreshold = 8.0,
+  highRpeThreshold = 8,
 ): DeloadSuggestion {
   const recentHigh = weeklyIntensities
     .slice(-consecutiveHighWeeks)

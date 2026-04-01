@@ -86,7 +86,7 @@ export function HealthConfirmStep({
         activityLevel: currentValues.activityLevel,
         bodyFatPct: currentValues.bodyFatPct,
         bmrOverride: currentValues.bmrOverride,
-        proteinRatio: currentValues.proteinRatio ?? 2.0,
+        proteinRatio: currentValues.proteinRatio ?? 2,
         fatPct: 0.25,
         targetCalories: estimatedTdee,
       } as HealthProfile;

@@ -140,7 +140,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
     const r = userProfile[0] as Record<string, unknown>;
     legacy['mp-user-profile'] = {
       weight: r.weight_kg ?? 0,
-      proteinRatio: r.protein_ratio ?? 2.0,
+      proteinRatio: r.protein_ratio ?? 2,
       targetCalories: 0,
     };
   }
@@ -246,7 +246,7 @@ function transformLegacyToV2Tables(data: Record<string, unknown>): Record<string
         activity_level: 'moderate',
         body_fat_pct: null,
         bmr_override: null,
-        protein_ratio: p.proteinRatio ?? 2.0,
+        protein_ratio: p.proteinRatio ?? 2,
         fat_pct: 0.25,
         updated_at: new Date().toISOString(),
       },

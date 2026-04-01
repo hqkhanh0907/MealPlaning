@@ -11,7 +11,7 @@ export interface ActivityAnalysis {
   confidence: 'low' | 'medium' | 'high';
 }
 
-const STRENGTH_MET = 5.0;
+const STRENGTH_MET = 5;
 
 /**
  * Calculate confidence based on data availability.

@@ -63,5 +63,5 @@ export const healthProfileDefaults: HealthProfileFormData = {
   bodyFatPct: undefined,
   bmrOverrideEnabled: false,
   bmrOverride: undefined,
-  proteinRatio: 2.0,
+  proteinRatio: 2,
 };

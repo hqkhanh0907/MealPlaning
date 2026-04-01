@@ -124,13 +124,13 @@ export function detectAcuteFatigue(
       .reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0) / 2;
   const volumeSpikeRatio =
     avgSessionVolume > 0 ? lastSessionVolume / avgSessionVolume : 1;
-  if (avgRpe >= 9.0 || volumeSpikeRatio > 1.3) {
+  if (avgRpe >= 9 || volumeSpikeRatio > 1.3) {
     return {
       level: 'high',
       message: `Acute fatigue: avg RPE ${avgRpe.toFixed(1)}, volume spike ${Math.round(volumeSpikeRatio * 100)}%`,
     };
   }
-  if (avgRpe >= 8.0) {
+  if (avgRpe >= 8) {
     return {
       level: 'moderate',
       message: `Moderate fatigue: avg RPE ${avgRpe.toFixed(1)}`,

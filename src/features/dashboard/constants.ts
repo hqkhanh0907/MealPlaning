@@ -18,7 +18,7 @@ export const CALORIE_THRESHOLDS = [
 export const CALORIE_MIN_SCORE = 10;
 
 export const PROTEIN_THRESHOLDS = [
-  { minRatio: 1.0, score: 100 },
+  { minRatio: 1, score: 100 },
   { minRatio: 0.9, score: 80 },
   { minRatio: 0.7, score: 60 },
   { minRatio: 0.5, score: 40 },
