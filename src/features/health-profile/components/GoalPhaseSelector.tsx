@@ -141,7 +141,8 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
   const handleTargetWeightChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
-      if (val === '' || /^\d*\.?\d*$/.test(val)) {
+      const isValidDecimal = val === '' || (!Number.isNaN(Number(val)) && !val.includes(' ') && !val.includes('-'));
+      if (isValidDecimal) {
         targetWeightField.field.onChange(val);
         form.clearErrors('targetWeight');
       }
