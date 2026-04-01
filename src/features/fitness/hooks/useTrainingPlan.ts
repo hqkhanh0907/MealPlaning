@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { generateUUID } from '@/utils/helpers';
 import type {
   TrainingProfile,
   TrainingPlan,
@@ -457,7 +458,7 @@ export function generateTrainingPlan(
   // Day-of-week mapping
   const dayOfWeekAssignment = assignDaysOfWeek(sessions.length);
 
-  const planId = `plan_${Date.now()}`;
+  const planId = generateUUID();
   const now = new Date().toISOString();
 
   // Step 6

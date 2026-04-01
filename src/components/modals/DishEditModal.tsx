@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Save, Search, Minus, X, Loader2, Sparkles, Clock, Flame, Dumbbell, Wheat, Droplets } from 'lucide-react';
 import { Dish, Ingredient, MealType, SupportedLang, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
-import { generateId } from '../../utils/helpers';
+import { generateUUID } from '../../utils/helpers';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { getMealTagOptions } from '../../data/constants';
@@ -112,7 +112,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
   });
 
   const buildDish = (values: DishEditFormData): Dish => ({
-    id: editingItem ? editingItem.id : generateId('dish'),
+    id: editingItem ? editingItem.id : generateUUID(),
     name: {
       vi: values.name.trim(),
     },
@@ -206,7 +206,7 @@ export const DishEditModal: React.FC<DishEditModalProps> = ({
         }
       } else {
         const newIng: Ingredient = {
-          id: generateId('ing'),
+          id: generateUUID(),
           name: { vi: item.suggestion.name, en: item.suggestion.name },
           unit: { vi: item.suggestion.unit, en: item.suggestion.unit },
           caloriesPer100: item.suggestion.calories,

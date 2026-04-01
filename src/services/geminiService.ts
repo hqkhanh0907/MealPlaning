@@ -193,7 +193,14 @@ export async function suggestMealPlan(
   // #9 Smart dish sampling — pick up to MAX_PER_SLOT dishes per meal slot (shuffled
   //     for variety), then deduplicate. Keeps prompt lean even with 1000+ dish libraries.
   const MAX_PER_SLOT = 20;
-  const shuffle = <T>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+  const shuffle = <T>(arr: T[]): T[] => {
+    const result = [...arr];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  };
 
   const seen = new Set<string>();
   const addSlot = (tag: 'breakfast' | 'lunch' | 'dinner') =>

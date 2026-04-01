@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { calculateMovingAverage } from '../../dashboard/hooks/useFeedbackLoop';
+import { generateUUID } from '@/utils/helpers';
 import type { WeightEntry } from '../types';
 
 const STEP = 0.5;
@@ -31,9 +32,6 @@ function yesterdayStr(): string {
   return `${y}-${m}-${day}`;
 }
 
-function generateId(): string {
-  return `w-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -209,7 +207,7 @@ function DailyWeightInputInner(): React.JSX.Element {
       });
     } else {
       const entry: WeightEntry = {
-        id: generateId(),
+        id: generateUUID(),
         date: today,
         weightKg: numericValue,
         createdAt: now,

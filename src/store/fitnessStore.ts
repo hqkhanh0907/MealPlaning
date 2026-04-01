@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { DatabaseService } from '../services/databaseService';
 import { EXERCISES } from '../features/fitness/data/exerciseDatabase';
 import { BUILTIN_TEMPLATES } from '../features/fitness/data/builtinTemplates';
+import { generateUUID } from '@/utils/helpers';
 import { computeMatchScore } from '../features/fitness/utils/templateMatcher';
 import { remapExercisesToNewSplit } from '../features/fitness/utils/splitRemapper';
 import type {
@@ -192,7 +193,7 @@ export const useFitnessStore = create<FitnessState>()(
 
         const newDay: TrainingPlanDay = {
           ...session,
-          id: `${planId}_day_${String(dayOfWeek)}_s${String(existing.length + 1)}_${String(Date.now())}`,
+          id: generateUUID(),
         };
         set((state) => ({
           trainingPlanDays: [...state.trainingPlanDays, newDay],
@@ -817,7 +818,7 @@ export const useFitnessStore = create<FitnessState>()(
           const daysPerWeek = plan.trainingDays.length;
           const preview = remapExercisesToNewSplit([], newSplit, daysPerWeek);
           const newDays: TrainingPlanDay[] = preview.suggested.map((s, i) => ({
-            id: `${planId}_split_${String(i)}_${String(Date.now())}`,
+            id: generateUUID(),
             planId,
             dayOfWeek: plan.trainingDays[i] ?? i,
             sessionOrder: 1,
@@ -871,7 +872,7 @@ export const useFitnessStore = create<FitnessState>()(
           }));
 
           const newSuggestedDays: TrainingPlanDay[] = preview.suggested.map((s, i) => ({
-            id: `${planId}_remap_${String(i)}_${String(Date.now())}`,
+            id: generateUUID(),
             planId,
             dayOfWeek: plan.trainingDays[updatedDays.length + i] ?? (updatedDays.length + i),
             sessionOrder: 1,
@@ -992,7 +993,7 @@ export const useFitnessStore = create<FitnessState>()(
           : Array.from({ length: template.daysPerWeek }, (_, i) => plan.trainingDays[i] ?? i);
 
         const newDays: TrainingPlanDay[] = template.dayConfigs.map((config, i) => ({
-          id: `${planId}_tpl_${String(i)}_${String(Date.now())}`,
+          id: generateUUID(),
           planId,
           dayOfWeek: trainingDays[i] ?? i,
           sessionOrder: 1,
@@ -1052,7 +1053,7 @@ export const useFitnessStore = create<FitnessState>()(
 
         const currentDays = get().trainingPlanDays.filter((d) => d.planId === planId);
         const now = new Date().toISOString();
-        const templateId = `user_tpl_${String(Date.now())}`;
+        const templateId = generateUUID();
 
         const dayConfigs = currentDays.map((day) => ({
           dayLabel: day.notes ?? `Day ${String(day.dayOfWeek)}`,

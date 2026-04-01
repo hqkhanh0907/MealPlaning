@@ -2,6 +2,7 @@ import { useWatch, type UseFormReturn } from 'react-hook-form';
 import { useFitnessStore } from '@/store/fitnessStore';
 import { getSmartDefaults } from '@/features/fitness/utils/getSmartDefaults';
 import type { BodyRegion, EquipmentType, MuscleGroup, PeriodizationModel, TrainingExperience, TrainingGoal } from '@/features/fitness/types';
+import { generateUUID } from '@/utils/helpers';
 import type { OnboardingFormData } from './onboardingSchema';
 import { getActiveSteps } from './trainingStepConfig';
 import {
@@ -49,7 +50,7 @@ export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingS
     );
 
     setTrainingProfile({
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       trainingGoal: values.trainingGoal as TrainingGoal,
       trainingExperience: values.experience as TrainingExperience,
       daysPerWeek: values.daysPerWeek,

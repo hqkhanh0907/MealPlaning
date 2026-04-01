@@ -24,9 +24,9 @@ vi.mock('../hooks/useModalBackHandler', () => ({
   useModalBackHandler: vi.fn(),
 }));
 
-// Mock generateId
+// Mock generateUUID
 vi.mock('../utils/helpers', () => ({
-  generateId: (prefix: string) => `${prefix}-test-id`,
+  generateUUID: () => 'test-uuid-id',
   parseLocalDate: (dateStr: string) => {
     const [y, m, d] = dateStr.split('-').map(Number);
     return new Date(y, m - 1, d);

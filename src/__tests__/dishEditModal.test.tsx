@@ -318,7 +318,7 @@ describe('DishEditModal', () => {
     expect(saved.ingredients).toHaveLength(1);
     expect(saved.ingredients[0].ingredientId).toBe('i1');
     expect(saved.ingredients[0].amount).toBe(100);
-    expect(saved.id).toMatch(/^dish-/);
+    expect(saved.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
   });
 
   it('preserves existing dish ID when editing', () => {

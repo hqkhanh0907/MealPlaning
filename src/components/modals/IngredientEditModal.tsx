@@ -12,6 +12,7 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { UnitSelector } from '../shared/UnitSelector';
 import { logger } from '../../utils/logger';
+import { generateUUID } from '@/utils/helpers';
 import { Input } from '@/components/ui/input';
 import {
   ingredientEditSchema,
@@ -78,7 +79,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
   const watchUnit = watch('unit');
 
   const buildIngredient = useCallback((data: IngredientEditFormData): Ingredient => ({
-    id: editingItem ? editingItem.id : `ing-${Date.now()}`,
+    id: editingItem ? editingItem.id : generateUUID(),
     name: { vi: data.name.vi },
     unit: { vi: data.unit.vi },
     caloriesPer100: Math.round(data.caloriesPer100),

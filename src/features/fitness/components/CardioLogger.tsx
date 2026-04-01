@@ -15,6 +15,7 @@ import { formatElapsed } from '../utils/timeFormat';
 import type { Workout } from '../types';
 import { CARDIO_TYPES, DISTANCE_CARDIO_TYPES, INTENSITY_OPTIONS } from '../constants';
 import { useTimer } from '../hooks/useTimer';
+import { generateUUID } from '@/utils/helpers';
 import {
   cardioLoggerSchema,
   cardioLoggerDefaults,
@@ -72,7 +73,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
         ? Math.floor(stopwatch.elapsed / 60)
         : (data.manualDuration ?? 0);
       const now = new Date().toISOString();
-      const workoutId = `workout-${Date.now()}`;
+      const workoutId = generateUUID();
       const workout: Workout = {
         id: workoutId,
         date: now.split('T')[0],
@@ -83,7 +84,7 @@ export function CardioLogger({ onComplete, onBack }: CardioLoggerProps): React.J
       };
       const sets = [
         {
-          id: `set-${Date.now()}-cardio`,
+          id: generateUUID(),
           workoutId,
           exerciseId: data.selectedType,
           setNumber: 1,

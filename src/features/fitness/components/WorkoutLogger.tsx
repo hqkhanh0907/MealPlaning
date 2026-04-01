@@ -28,6 +28,7 @@ import type {
 import { safeParseJsonArray } from '../types';
 import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
 import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
+import { generateUUID } from '@/utils/helpers';
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
 import {
   workoutLoggerSchema,
@@ -247,7 +248,7 @@ export function WorkoutLogger({
           (s) => s.exerciseId === exerciseId,
         ).length;
         const newSet: WorkoutSet = {
-          id: `set-${Date.now()}-${existingCount + 1}`,
+          id: generateUUID(),
           workoutId: '',
           exerciseId,
           setNumber: existingCount + 1,
@@ -363,7 +364,7 @@ export function WorkoutLogger({
   const handleSave = useCallback(async () => {
     const durationMin = Math.floor(elapsedRef.current / 60);
     const now = new Date().toISOString();
-    const workoutId = `workout-${Date.now()}`;
+    const workoutId = generateUUID();
     const workoutName = planDay
       ? (planDay.workoutType || t('fitness.logger.title'))
       : (freestyleName.trim() || t('fitness.plan.freestyleDefault'));

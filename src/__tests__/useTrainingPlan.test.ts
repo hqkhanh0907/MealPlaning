@@ -1041,7 +1041,7 @@ describe('generateTrainingPlan', () => {
       expect(result.plan.name).toContain('strength');
       expect(result.plan.status).toBe('active');
       expect(result.plan.splitType).toBe('upper_lower');
-      expect(result.plan.id).toMatch(/^plan_/);
+      expect(result.plan.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
       expect(result.plan.startDate).toBeTruthy();
       expect(result.plan.createdAt).toBeTruthy();
       expect(result.plan.updatedAt).toBeTruthy();

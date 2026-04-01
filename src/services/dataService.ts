@@ -2,7 +2,7 @@
 
 import { DayPlan, Dish, MealType, Ingredient, DishIngredient, SaveAnalyzedDishPayload } from '../types';
 import { createEmptyDayPlan } from './planService';
-import { generateId } from '../utils/helpers';
+import { generateUUID } from '../utils/helpers';
 import { logger } from '../utils/logger';
 import { toLocalized, getLocalizedField } from '../utils/localize';
 
@@ -106,7 +106,7 @@ export const processAnalyzedDish = (
     });
     if (!existingIng) {
       const newIng: Ingredient = {
-        id: generateId('ing'),
+        id: generateUUID(),
         name: toLocalized(aiIng.name),
         unit: toLocalized(aiIng.unit),
         caloriesPer100: aiIng.nutritionPerStandardUnit.calories,

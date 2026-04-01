@@ -9,6 +9,7 @@ import { useDatabase } from '../../../contexts/DatabaseContext';
 import { useHealthProfileStore } from '../store/healthProfileStore';
 import { getCalorieOffset } from '../../../services/nutritionEngine';
 import { validateTargetWeight } from '@/schemas/goalValidation';
+import { generateUUID } from '@/utils/helpers';
 import type { GoalType, RateOfChange, Goal } from '../types';
 
 /* ------------------------------------------------------------------ */
@@ -80,9 +81,6 @@ function formatOffset(offset: number): string {
   return '±0 kcal';
 }
 
-function generateId(): string {
-  return `goal-${Date.now()}`;
-}
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -191,7 +189,7 @@ export const GoalPhaseSelector: React.FC<GoalPhaseSelectorProps> = ({ embedded, 
     try {
       const now = new Date().toISOString();
       const goal: Goal = {
-        id: generateId(),
+        id: generateUUID(),
         type: values.goalType as GoalType,
         rateOfChange: values.rateOfChange as RateOfChange,
         targetWeightKg: parsedTarget,

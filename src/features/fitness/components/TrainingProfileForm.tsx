@@ -12,6 +12,7 @@ import {
 import { RadioPills } from '../../../components/form/RadioPills';
 import { ChipSelect } from '../../../components/form/ChipSelect';
 import { FormField } from '../../../components/form/FormField';
+import { generateUUID } from '@/utils/helpers';
 import { EQUIPMENT_DISPLAY } from '../constants';
 import type {
   TrainingGoal,
@@ -74,7 +75,7 @@ export function TrainingProfileForm({ embedded, saveRef }: TrainingProfileFormPr
   function onSubmit(data: TrainingProfileFormData): boolean {
     // Coerce string RadioPills values to numbers for TrainingProfile interface
     const updatedProfile: TrainingProfile = {
-      id: trainingProfile?.id ?? crypto.randomUUID(),
+      id: trainingProfile?.id ?? generateUUID(),
       trainingGoal: data.trainingGoal,
       trainingExperience: data.trainingExperience,
       daysPerWeek: Number(data.daysPerWeek),

@@ -175,7 +175,7 @@ describe('QuickAddIngredientForm', () => {
       expect(createdIngredient.fatPer100).toBe(4);
       expect(createdIngredient.fiberPer100).toBe(0);
       expect(createdIngredient.unit.vi).toBe('g');
-      expect(createdIngredient.id).toMatch(/^ing-/);
+      expect(createdIngredient.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     });
 
     it('trims the name on submission', async () => {

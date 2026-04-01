@@ -7,7 +7,7 @@ import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ingredient, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
-import { generateId } from '../../utils/helpers';
+import { generateUUID } from '../../utils/helpers';
 import { suggestIngredientInfo } from '../../services/geminiService';
 import { UnitSelector } from '../shared/UnitSelector';
 import { StringNumberController } from '../form/StringNumberController';
@@ -108,7 +108,7 @@ const QuickAddIngredientFormInner: React.FC<QuickAddIngredientFormProps> = ({ on
       return;
     }
     const newIng: Ingredient = {
-      id: generateId('ing'),
+      id: generateUUID(),
       name: { vi: data.qaName.trim(), en: data.qaName.trim() },
       unit: { vi: data.qaUnit.vi.trim() || 'g' },
       caloriesPer100: data.qaCal || 0,

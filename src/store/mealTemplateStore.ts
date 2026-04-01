@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { DayPlan, MealTemplate } from '../types';
 import type { DatabaseService } from '../services/databaseService';
-import { generateId } from '../utils/helpers';
+import { generateUUID } from '../utils/helpers';
 
 interface MealTemplateRow {
   id: string;
@@ -22,7 +22,7 @@ export const useMealTemplateStore = create<MealTemplateState>((set) => ({
   templates: [],
   saveTemplate: (name, plan, tags) => {
     const template: MealTemplate = {
-      id: generateId('tpl'),
+      id: generateUUID(),
       name,
       breakfastDishIds: [...plan.breakfastDishIds],
       lunchDishIds: [...plan.lunchDishIds],

@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Ingredient, Dish, DayPlan, AnalyzedIngredient } from '../types';
 import { calculateDishNutrition, calculateDishesNutrition, toTempIngredient, calculateIngredientNutrition } from '../utils/nutrition';
-import { generateId } from '../utils/helpers';
+import { generateUUID } from '../utils/helpers';
 import { updateDayPlanSlot, clearPlansByScope, applySuggestionToDayPlans } from '../services/planService';
 import { removeIngredientFromDishes, migrateDishes, migrateDayPlans, processAnalyzedDish } from '../services/dataService';
 
@@ -239,7 +239,7 @@ describe('Flow: AI Analyzed Dish → Save to Library', () => {
     // Verify nutrition of the created dish
     const allIngredients = [...ingredients, ...newIngredients];
     const newDish: Dish = {
-      id: generateId('dish'),
+      id: generateUUID(),
       name: { vi: payload.name, en: payload.name },
       ingredients: dishIngredients,
       tags: ['lunch'],

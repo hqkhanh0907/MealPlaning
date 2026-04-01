@@ -13,7 +13,7 @@ import { DetailModal } from './shared/DetailModal';
 import { useItemModalFlow } from '../hooks/useItemModalFlow';
 import { useListManager } from '../hooks/useListManager';
 import { getMealTagOptions, getTagShortLabels, getBaseSortOptions, UNDO_TOAST_DURATION_MS, MEAL_TYPE_ICONS } from '../data/constants';
-import { generateId } from '../utils/helpers';
+import { generateUUID } from '../utils/helpers';
 import type { BaseSortOption } from '../data/constants';
 
 type DishSortOption = BaseSortOption | 'ing-asc' | 'ing-desc' | 'rating-asc' | 'rating-desc';
@@ -137,7 +137,7 @@ export const DishManager: React.FC<DishManagerProps> = ({ dishes, ingredients, o
     const suffix = t('dish.copySuffix');
     const cloned: Dish = {
       ...dish,
-      id: generateId('dish'),
+      id: generateUUID(),
       name: Object.fromEntries(
         Object.entries(dish.name).map(([k, v]) => [k, `${v} ${suffix}`])
       ) as Dish['name'],

@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { generateUUID } from '@/utils/helpers';
 
 // --- Types ---
 
@@ -143,7 +144,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const addToast = useCallback((type: NotificationType, title: string, message = '', options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const id = generateUUID();
     const newToast: ToastItem = { id, type, title, message, onClick: options?.onClick, duration: options?.duration, action: options?.action };
     setToasts(prev => [...prev.slice(-(MAX_TOASTS - 1)), newToast]);
   }, []);

@@ -1,9 +1,5 @@
-/**
- * Generate a unique ID with a given prefix.
- * Uses timestamp + random string to minimize collision risk.
- */
-export const generateId = (prefix: string): string =>
-  `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+/** Generate a cryptographically secure UUID v4 using the native Web Crypto API. */
+export const generateUUID = (): string => crypto.randomUUID();
 
 /**
  * Parse a YYYY-MM-DD string into a local Date (avoids UTC timezone issues).

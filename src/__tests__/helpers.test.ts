@@ -1,24 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { generateId, parseLocalDate, getWeekRange, isDateInRange } from '../utils/helpers';
+import { generateUUID, parseLocalDate, getWeekRange, isDateInRange } from '../utils/helpers';
 
-describe('generateId', () => {
-  it('should generate ID with correct prefix', () => {
-    const id = generateId('ing');
-    expect(id.startsWith('ing-')).toBe(true);
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+describe('generateUUID', () => {
+  it('should return a valid UUID v4 string', () => {
+    const id = generateUUID();
+    expect(id).toMatch(UUID_V4_REGEX);
   });
 
-  it('should generate unique IDs', () => {
-    const ids = new Set(Array.from({ length: 100 }, () => generateId('test')));
+  it('should return unique values on consecutive calls', () => {
+    const ids = new Set(Array.from({ length: 100 }, () => generateUUID()));
     expect(ids.size).toBe(100);
   });
 
-  it('should include timestamp and random part', () => {
-    const id = generateId('dish');
-    const parts = id.split('-');
-    expect(parts.length).toBeGreaterThanOrEqual(3);
-    expect(parts[0]).toBe('dish');
-    // Second part should be numeric timestamp
-    expect(Number(parts[1])).toBeGreaterThan(0);
+  it('should return a string', () => {
+    const id = generateUUID();
+    expect(typeof id).toBe('string');
   });
 });
 

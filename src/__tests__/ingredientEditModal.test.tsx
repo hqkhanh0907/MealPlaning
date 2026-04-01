@@ -300,7 +300,7 @@ describe('IngredientEditModal', () => {
     expect(saved.name).toEqual({ vi: 'Thịt bò' });
     expect(saved.unit).toEqual({ vi: 'g' });
     expect(saved.caloriesPer100).toBe(0);
-    expect(saved.id).toMatch(/^ing-/);
+    expect(saved.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
   });
 
   it('preserves existing ingredient ID when editing', async () => {

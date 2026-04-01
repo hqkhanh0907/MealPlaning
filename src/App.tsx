@@ -36,7 +36,7 @@ import {
   SlidersHorizontal,
   ChevronLeft,
 } from 'lucide-react';
-import { generateId, parseLocalDate } from './utils/helpers';
+import { generateUUID, parseLocalDate } from './utils/helpers';
 import { getLocalizedField } from './utils/localize';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useAISuggestion } from './hooks/useAISuggestion';
@@ -267,7 +267,7 @@ export default function App() {
       navigateTab('library');
       setActiveManagementSubTab('ingredients');
     } else {
-      setDishes(prev => [...prev, { id: generateId('dish'), name: { vi: result.name, en: result.name }, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
+      setDishes(prev => [...prev, { id: generateUUID(), name: { vi: result.name, en: result.name }, ingredients: dishIngredients, tags: result.tags ?? ['lunch'] }]);
       notify.success(t('notification.saveSuccess'), t('notification.savedDish', { name: result.name, count: newIngredients.length }));
       navigateTab('library');
       setActiveManagementSubTab('dishes');

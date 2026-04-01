@@ -7,6 +7,7 @@ import { EXERCISES } from '../data/exerciseDatabase';
 import { EQUIPMENT_DISPLAY } from '../constants';
 import { CustomExerciseModal } from './CustomExerciseModal';
 import type { CustomExerciseFormData } from './CustomExerciseModal';
+import { generateUUID } from '@/utils/helpers';
 import type {
   Exercise,
   MuscleGroup,
@@ -147,7 +148,7 @@ export function ExerciseSelector({
   const handleSaveCustomExercise = useCallback(
     (data: CustomExerciseFormData) => {
       const customExercise: Exercise = {
-        id: `custom-${Date.now()}`,
+        id: generateUUID(),
         nameVi: data.name,
         nameEn: data.name,
         muscleGroup: (data.muscleGroup || 'chest') as MuscleGroup,

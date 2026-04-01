@@ -6,6 +6,7 @@ import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { calculateMovingAverage } from '../hooks/useFeedbackLoop';
+import { generateUUID } from '@/utils/helpers';
 import type { WeightEntry } from '../../fitness/types';
 
 const STEP = 0.1;
@@ -36,9 +37,6 @@ function yesterdayStr(): string {
   return `${y}-${m}-${day}`;
 }
 
-function generateId(): string {
-  return `w-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -243,7 +241,7 @@ function WeightQuickLogInner({ onClose }: WeightQuickLogProps): React.JSX.Elemen
       });
       savedEntryId = todayEntry.id;
     } else {
-      const newId = generateId();
+      const newId = generateUUID();
       const entry: WeightEntry = {
         id: newId,
         date: today,

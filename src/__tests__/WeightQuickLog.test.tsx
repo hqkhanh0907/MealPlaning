@@ -36,7 +36,7 @@ function daysAgoStr(n: number): string {
 
 function makeEntry(overrides: Partial<WeightEntry> = {}): WeightEntry {
   return {
-    id: `w-${Math.random().toString(36).slice(2, 9)}`,
+    id: crypto.randomUUID(),
     date: todayStr(),
     weightKg: 72.5,
     createdAt: new Date().toISOString(),
