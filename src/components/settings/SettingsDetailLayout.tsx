@@ -36,7 +36,7 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onBack}
             data-testid="settings-detail-back"
-            className="-ml-1.5 rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label={t('settings.back')}
           >
             <ChevronLeft className="h-5 w-5 text-slate-600 dark:text-slate-400" />
@@ -54,7 +54,7 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onEdit}
             data-testid="settings-detail-edit"
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
           >
             <Pencil className="h-3.5 w-3.5" />
             {t('settings.edit')}

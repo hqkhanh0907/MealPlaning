@@ -114,7 +114,7 @@ function AddSessionModalInner({
                 type="button"
                 onClick={handleBack}
                 aria-label={t('common.back')}
-                className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 <ChevronLeft className="h-5 w-5 text-slate-600 dark:text-slate-300" />
               </button>
