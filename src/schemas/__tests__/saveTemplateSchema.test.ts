@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { saveTemplateSchema, saveTemplateDefaults } from '../saveTemplateSchema';
+import { describe, expect, it } from 'vitest';
+
+import { saveTemplateDefaults, saveTemplateSchema } from '../saveTemplateSchema';
 
 describe('saveTemplateSchema', () => {
   it('validates correct data', () => {

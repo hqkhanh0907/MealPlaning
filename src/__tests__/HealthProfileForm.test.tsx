@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { HealthProfileForm } from '../features/health-profile/components/HealthProfileForm';
+import type { HealthProfileState } from '../features/health-profile/store/healthProfileStore';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
-import type { HealthProfileState } from '../features/health-profile/store/healthProfileStore';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
@@ -64,9 +65,7 @@ describe('HealthProfileForm', () => {
     expect(screen.getByLabelText(/Tỉ lệ mỡ cơ thể/)).toBeInTheDocument();
     expect(screen.getAllByText('BMR').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Lưu' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lưu' })).toBeInTheDocument();
   });
 
   it('populates with current profile data', () => {

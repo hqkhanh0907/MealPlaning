@@ -1,4 +1,4 @@
-import type { PlanTemplate, TrainingProfile, TrainingExperience } from '../types';
+import type { PlanTemplate, TrainingExperience, TrainingProfile } from '../types';
 
 const WEIGHT_DAYS = 0.3;
 const WEIGHT_GOAL = 0.25;

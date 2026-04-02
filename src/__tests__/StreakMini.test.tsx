@@ -1,8 +1,9 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import { StreakMini } from '../features/dashboard/components/StreakMini';
-import { useFitnessStore } from '../store/fitnessStore';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
-import type { Workout, TrainingPlan, TrainingPlanDay } from '../features/fitness/types';
+
+import { StreakMini } from '../features/dashboard/components/StreakMini';
+import type { TrainingPlan, TrainingPlanDay, Workout } from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
@@ -45,9 +46,7 @@ function setupStore(data: StoreData = {}) {
     trainingPlanDays: data.trainingPlanDays ?? [],
     trainingPlans: data.trainingPlans ?? [],
   };
-  mockFitnessStore.mockImplementation(
-    (selector: (s: typeof state) => unknown) => selector(state),
-  );
+  mockFitnessStore.mockImplementation((selector: (s: typeof state) => unknown) => selector(state));
 }
 
 function makePlan(): TrainingPlan {
@@ -67,7 +66,7 @@ function makePlan(): TrainingPlan {
 }
 
 function makePlanDays(daysOfWeek: number[]): TrainingPlanDay[] {
-  return daysOfWeek.map((d) => ({
+  return daysOfWeek.map(d => ({
     id: `pd-${d}`,
     planId: 'plan1',
     dayOfWeek: d,
@@ -95,10 +94,7 @@ describe('StreakMini', () => {
     setupStore();
     render(<StreakMini />);
 
-    expect(screen.getByTestId('streak-mini-empty')).toHaveAttribute(
-      'aria-label',
-      'Chưa có chuỗi tập luyện',
-    );
+    expect(screen.getByTestId('streak-mini-empty')).toHaveAttribute('aria-label', 'Chưa có chuỗi tập luyện');
   });
 
   // ===== Basic Display =====
@@ -106,11 +102,7 @@ describe('StreakMini', () => {
   it('shows streak count with tabular-nums', () => {
     // Fixed date is 2024-01-10 (Wednesday)
     // Workouts on 2024-01-08 (Mon), 2024-01-09 (Tue), 2024-01-10 (Wed)
-    const workouts = [
-      makeWorkout('2024-01-08'),
-      makeWorkout('2024-01-09'),
-      makeWorkout('2024-01-10'),
-    ];
+    const workouts = [makeWorkout('2024-01-08'), makeWorkout('2024-01-09'), makeWorkout('2024-01-10')];
     setupStore({ workouts });
     render(<StreakMini />);
 
@@ -122,11 +114,7 @@ describe('StreakMini', () => {
   });
 
   it('shows personal record', () => {
-    const workouts = [
-      makeWorkout('2024-01-08'),
-      makeWorkout('2024-01-09'),
-      makeWorkout('2024-01-10'),
-    ];
+    const workouts = [makeWorkout('2024-01-08'), makeWorkout('2024-01-09'), makeWorkout('2024-01-10')];
     setupStore({ workouts });
     render(<StreakMini />);
 
@@ -216,11 +204,7 @@ describe('StreakMini', () => {
 
   it('streak count matches calculated value', () => {
     // 3 consecutive days: Mon, Tue, Wed (today)
-    const workouts = [
-      makeWorkout('2024-01-08'),
-      makeWorkout('2024-01-09'),
-      makeWorkout('2024-01-10'),
-    ];
+    const workouts = [makeWorkout('2024-01-08'), makeWorkout('2024-01-09'), makeWorkout('2024-01-10')];
     setupStore({ workouts });
     render(<StreakMini />);
 
@@ -290,19 +274,12 @@ describe('StreakMini', () => {
   // ===== Accessibility =====
 
   it('has proper aria-label with streak info', () => {
-    const workouts = [
-      makeWorkout('2024-01-08'),
-      makeWorkout('2024-01-09'),
-      makeWorkout('2024-01-10'),
-    ];
+    const workouts = [makeWorkout('2024-01-08'), makeWorkout('2024-01-09'), makeWorkout('2024-01-10')];
     setupStore({ workouts });
     render(<StreakMini />);
 
     const mini = screen.getByTestId('streak-mini');
-    expect(mini).toHaveAttribute(
-      'aria-label',
-      expect.stringContaining('3'),
-    );
+    expect(mini).toHaveAttribute('aria-label', expect.stringContaining('3'));
   });
 
   it('week-dots container has aria-hidden', () => {
@@ -310,10 +287,7 @@ describe('StreakMini', () => {
     setupStore({ workouts });
     render(<StreakMini />);
 
-    expect(screen.getByTestId('week-dots')).toHaveAttribute(
-      'aria-hidden',
-      'true',
-    );
+    expect(screen.getByTestId('week-dots')).toHaveAttribute('aria-hidden', 'true');
   });
 
   // ===== With Plan =====

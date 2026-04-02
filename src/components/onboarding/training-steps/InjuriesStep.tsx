@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import { useController } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { cn } from '@/lib/utils';
+
 import { StepLayout } from './StepLayout';
 import type { StepProps } from './types';
 
@@ -13,7 +15,7 @@ export function InjuriesStep({ form, goNext, goBack }: Readonly<StepProps>) {
 
   const toggle = (item: string) => {
     if (selected.includes(item)) {
-      field.field.onChange(selected.filter((i) => i !== item));
+      field.field.onChange(selected.filter(i => i !== item));
     } else {
       field.field.onChange([...selected, item]);
     }
@@ -26,8 +28,8 @@ export function InjuriesStep({ form, goNext, goBack }: Readonly<StepProps>) {
       goNext={goNext}
       goBack={goBack}
     >
-      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.injuries')}>
-        {INJURY_REGIONS.map((region) => (
+      <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0" aria-label={t('fitness.onboarding.injuries')}>
+        {INJURY_REGIONS.map(region => (
           <button
             key={region}
             type="button"

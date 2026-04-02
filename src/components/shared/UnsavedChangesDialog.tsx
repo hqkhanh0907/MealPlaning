@@ -1,5 +1,6 @@
-import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { ModalBackdrop } from './ModalBackdrop';
 
@@ -20,30 +21,30 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-70">
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-sm overflow-hidden sm:mx-4">
+      <div className="relative w-full overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-3xl dark:bg-slate-800">
         <div className="p-6 text-center">
-          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Save className="w-8 h-8" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-500 dark:bg-amber-900/30">
+            <Save className="h-8 w-8" />
           </div>
-          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-xl mb-2">{t('unsavedChanges.title')}</h4>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">{t('unsavedChanges.description')}</p>
+          <h4 className="mb-2 text-xl font-bold text-slate-800 dark:text-slate-100">{t('unsavedChanges.title')}</h4>
+          <p className="mb-6 text-slate-600 dark:text-slate-400">{t('unsavedChanges.description')}</p>
           <div className="flex flex-col gap-2">
             <button
               onClick={onSave}
-              className="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all min-h-12"
+              className="min-h-12 w-full rounded-xl bg-emerald-500 py-3 font-bold text-white transition-all hover:bg-emerald-600 active:scale-[0.98]"
             >
               {t('unsavedChanges.saveAndBack')}
             </button>
             <button
               onClick={onDiscard}
               data-testid="btn-discard-unsaved"
-              className="w-full py-3 rounded-xl font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:scale-[0.98] transition-all min-h-12"
+              className="min-h-12 w-full rounded-xl py-3 font-bold text-rose-600 transition-all hover:bg-rose-50 active:scale-[0.98] dark:hover:bg-rose-900/20"
             >
               {t('unsavedChanges.discard')}
             </button>
             <button
               onClick={onCancel}
-              className="w-full py-3 rounded-xl font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-[0.98] transition-all min-h-12"
+              className="min-h-12 w-full rounded-xl py-3 font-bold text-slate-500 transition-all hover:bg-slate-100 active:scale-[0.98] dark:text-slate-400 dark:hover:bg-slate-700"
             >
               {t('unsavedChanges.stayEditing')}
             </button>
@@ -53,4 +54,3 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
     </ModalBackdrop>
   );
 };
-

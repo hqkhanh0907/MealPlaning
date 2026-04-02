@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+
 import { MealType } from '../types';
 
 export const useModalManager = () => {
@@ -19,27 +20,45 @@ export const useModalManager = () => {
     setIsSaveTemplateOpen(false);
   }, []);
 
-  const openMealPlanner = useCallback((type: MealType) => {
-    closeAll();
-    setPlanningType(type);
-    setIsMealPlannerOpen(true);
-  }, [closeAll]);
+  const openMealPlanner = useCallback(
+    (type: MealType) => {
+      closeAll();
+      setPlanningType(type);
+      setIsMealPlannerOpen(true);
+    },
+    [closeAll],
+  );
 
   const closeMealPlanner = useCallback(() => setIsMealPlannerOpen(false), []);
 
-  const openClearPlan = useCallback(() => { closeAll(); setIsClearPlanModalOpen(true); }, [closeAll]);
+  const openClearPlan = useCallback(() => {
+    closeAll();
+    setIsClearPlanModalOpen(true);
+  }, [closeAll]);
   const closeClearPlan = useCallback(() => setIsClearPlanModalOpen(false), []);
 
-  const openGoalModal = useCallback(() => { closeAll(); setIsGoalModalOpen(true); }, [closeAll]);
+  const openGoalModal = useCallback(() => {
+    closeAll();
+    setIsGoalModalOpen(true);
+  }, [closeAll]);
   const closeGoalModal = useCallback(() => setIsGoalModalOpen(false), []);
 
-  const openCopyPlanModal = useCallback(() => { closeAll(); setIsCopyPlanOpen(true); }, [closeAll]);
+  const openCopyPlanModal = useCallback(() => {
+    closeAll();
+    setIsCopyPlanOpen(true);
+  }, [closeAll]);
   const closeCopyPlanModal = useCallback(() => setIsCopyPlanOpen(false), []);
 
-  const openTemplateManager = useCallback(() => { closeAll(); setIsTemplateManagerOpen(true); }, [closeAll]);
+  const openTemplateManager = useCallback(() => {
+    closeAll();
+    setIsTemplateManagerOpen(true);
+  }, [closeAll]);
   const closeTemplateManager = useCallback(() => setIsTemplateManagerOpen(false), []);
 
-  const openSaveTemplate = useCallback(() => { closeAll(); setIsSaveTemplateOpen(true); }, [closeAll]);
+  const openSaveTemplate = useCallback(() => {
+    closeAll();
+    setIsSaveTemplateOpen(true);
+  }, [closeAll]);
   const closeSaveTemplate = useCallback(() => setIsSaveTemplateOpen(false), []);
 
   return {

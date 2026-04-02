@@ -3,12 +3,7 @@
 // Boundary: nutrition.ts = "what's in the food", nutritionEngine.ts = "what the user needs"
 
 export type Gender = 'male' | 'female';
-export type ActivityLevel =
-  | 'sedentary'
-  | 'light'
-  | 'moderate'
-  | 'active'
-  | 'extra_active';
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'extra_active';
 export type RateOfChange = 'conservative' | 'moderate' | 'aggressive';
 export type GoalType = 'cut' | 'bulk' | 'maintain';
 
@@ -44,10 +39,7 @@ export function calculateBMR(
 }
 
 /** TDEE = BMR × activity multiplier */
-export function calculateTDEE(
-  bmr: number,
-  activityLevel: ActivityLevel,
-): number {
+export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number {
   return Math.round(bmr * ACTIVITY_MULTIPLIERS[activityLevel]);
 }
 
@@ -61,10 +53,7 @@ export function sessionsToLevel(sessions: number): ActivityLevel {
 }
 
 /** Blend 70% auto-detected level + 30% user-selected base level */
-export function getAutoAdjustedMultiplier(
-  baseLevel: ActivityLevel,
-  sessionsPerWeek: number,
-): number {
+export function getAutoAdjustedMultiplier(baseLevel: ActivityLevel, sessionsPerWeek: number): number {
   const autoLevel = sessionsToLevel(sessionsPerWeek);
   const base = ACTIVITY_MULTIPLIERS[baseLevel];
   const auto = ACTIVITY_MULTIPLIERS[autoLevel];
@@ -72,10 +61,7 @@ export function getAutoAdjustedMultiplier(
 }
 
 /** Caloric target = TDEE + offset (cut < 0, bulk > 0, maintain = 0) */
-export function calculateTarget(
-  tdee: number,
-  calorieOffset: number,
-): number {
+export function calculateTarget(tdee: number, calorieOffset: number): number {
   return Math.round(Number(tdee) + Number(calorieOffset));
 }
 
@@ -88,8 +74,7 @@ export function calculateMacros(
   bodyFatPct?: number,
 ): MacroSplit {
   // Priority 1: Protein (use LBM if bodyFatPct available)
-  const effectiveWeight =
-    bodyFatPct == null ? weightKg : weightKg * (1 - bodyFatPct);
+  const effectiveWeight = bodyFatPct == null ? weightKg : weightKg * (1 - bodyFatPct);
   const proteinG = Math.round(effectiveWeight * proteinRatio);
   const proteinCal = proteinG * 4;
 
@@ -114,10 +99,7 @@ export function calculateMacros(
 }
 
 /** Get calorie offset for a given goal and rate of change */
-export function getCalorieOffset(
-  goalType: GoalType,
-  rate: RateOfChange,
-): number {
+export function getCalorieOffset(goalType: GoalType, rate: RateOfChange): number {
   if (goalType === 'maintain') return 0;
   const offsets: Record<RateOfChange, number> = {
     conservative: 275,

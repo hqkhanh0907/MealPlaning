@@ -1,7 +1,8 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Summary } from '../components/Summary';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { ManagementTab } from '../components/ManagementTab';
-import type { DayNutritionSummary, Ingredient, Dish } from '../types';
+import { Summary } from '../components/Summary';
+import type { DayNutritionSummary, Dish, Ingredient } from '../types';
 
 // Mock notification
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
@@ -18,7 +19,12 @@ vi.mock('../components/IngredientManager', () => ({
 }));
 
 const makeSlot = (dishIds: string[], cal: number, pro: number, carbs = 0, fat = 0, fiber = 0) => ({
-  dishIds, calories: cal, protein: pro, carbs, fat, fiber,
+  dishIds,
+  calories: cal,
+  protein: pro,
+  carbs,
+  fat,
+  fiber,
 });
 
 const makeNutrition = (): DayNutritionSummary => ({
@@ -62,7 +68,9 @@ describe('Summary', () => {
 
   it('renders edit goals button when onEditGoals is provided', () => {
     const onEditGoals = vi.fn();
-    render(<Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} onEditGoals={onEditGoals} />);
+    render(
+      <Summary dayNutrition={makeNutrition()} targetCalories={2000} targetProtein={100} onEditGoals={onEditGoals} />,
+    );
     const editBtn = screen.getByLabelText('Chỉnh sửa mục tiêu dinh dưỡng');
     fireEvent.click(editBtn);
     expect(onEditGoals).toHaveBeenCalled();

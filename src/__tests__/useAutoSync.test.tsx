@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import React from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../contexts/DatabaseContext', () => ({
   DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -57,8 +57,7 @@ vi.mock('../store/ingredientStore', () => ({
 }));
 
 vi.mock('../store/dishStore', () => ({
-  useDishStore: (selector: (s: { dishes: unknown[] }) => unknown) =>
-    selector({ dishes: mockStoreData.dishes }),
+  useDishStore: (selector: (s: { dishes: unknown[] }) => unknown) => selector({ dishes: mockStoreData.dishes }),
 }));
 
 vi.mock('../store/dayPlanStore', () => ({
@@ -93,7 +92,11 @@ describe('useAutoSync', () => {
     mockStoreData = { ingredients: [], dishes: [], dayPlans: [], templates: [] };
     mockDb.exportBinary.mockReturnValue(new Uint8Array([1, 2, 3]));
     mockDb.importBinary.mockResolvedValue(undefined);
-    (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-01-01T00:00:00Z' });
+    (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'f1',
+      name: 'backup.sqlite',
+      modifiedTime: '2026-01-01T00:00:00Z',
+    });
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue(null);
   });
 
@@ -173,7 +176,9 @@ describe('useAutoSync', () => {
     const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     // Flush sync-on-launch (multiple await levels)
-    await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
 
     await act(async () => {
       await result.current.triggerDownload();
@@ -190,7 +195,9 @@ describe('useAutoSync', () => {
 
     const { result } = renderHook(() => useAutoSync(), { wrapper });
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
 
     await act(async () => {
       await result.current.triggerDownload();
@@ -244,7 +251,9 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
     (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
-      id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-03-11T08:00:00Z',
+      id: 'f1',
+      name: 'backup.sqlite',
+      modifiedTime: '2026-03-11T08:00:00Z',
     });
 
     const { result } = renderHook(() => useAutoSync(), { wrapper });
@@ -268,7 +277,9 @@ describe('useAutoSync', () => {
     const { result } = renderHook(() => useAutoSync(), { wrapper });
 
     // Flush sync-on-launch (also downloads and sets lastSyncAt)
-    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
 
     expect(result.current.lastSyncAt).toBe('2026-05-20T12:00:00Z');
   });
@@ -295,7 +306,9 @@ describe('useAutoSync', () => {
       await vi.advanceTimersByTimeAsync(3100);
     });
 
-    expect((driveService.uploadBackup as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(uploadCallsBefore);
+    expect((driveService.uploadBackup as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(
+      uploadCallsBefore,
+    );
   });
 
   it('should cancel pending debounce on rapid data changes', async () => {

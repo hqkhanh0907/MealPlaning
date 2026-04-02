@@ -1,12 +1,12 @@
 import {
-  formatDate,
-  parseDate,
-  getDayOfWeek,
   addDays,
-  getMondayOfWeek,
   daysBetween,
-  isToday,
+  formatDate,
+  getDayOfWeek,
+  getMondayOfWeek,
   getWeekBounds,
+  isToday,
+  parseDate,
 } from '../features/fitness/utils/dateUtils';
 
 describe('dateUtils', () => {

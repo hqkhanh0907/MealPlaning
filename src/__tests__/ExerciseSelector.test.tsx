@@ -1,19 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ExerciseSelector } from '../features/fitness/components/ExerciseSelector';
-import type { Exercise, EquipmentType } from '../features/fitness/types';
+import type { EquipmentType, Exercise } from '../features/fitness/types';
 
 // Mock ModalBackdrop — render children directly with a backdrop button
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-    onClose,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-  }) => (
+  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
     <div data-testid="modal-backdrop">
       <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
       {children}
@@ -130,9 +125,7 @@ describe('ExerciseSelector', () => {
   });
 
   it('returns null when isOpen is false', () => {
-    const { container } = render(
-      <ExerciseSelector {...defaultProps} isOpen={false} />,
-    );
+    const { container } = render(<ExerciseSelector {...defaultProps} isOpen={false} />);
     expect(container.innerHTML).toBe('');
   });
 
@@ -146,10 +139,7 @@ describe('ExerciseSelector', () => {
     render(<ExerciseSelector {...defaultProps} />);
     const input = screen.getByTestId('exercise-search-input');
     expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute(
-      'placeholder',
-      'Tìm bài tập...',
-    );
+    expect(input).toHaveAttribute('placeholder', 'Tìm bài tập...');
   });
 
   it('search filters exercises by Vietnamese name', async () => {
@@ -195,23 +185,17 @@ describe('ExerciseSelector', () => {
 
     const chipRow = screen.getByTestId('muscle-group-chips');
     const findChip = (label: string) =>
-      Array.from(chipRow.querySelectorAll('button')).find(
-        (btn) => btn.textContent === label,
-      ) as HTMLElement;
+      Array.from(chipRow.querySelectorAll('button')).find(btn => btn.textContent === label) as HTMLElement;
 
     // Click "Lưng" (back) chip
     await user.click(findChip('Lưng'));
 
     expect(screen.getByText('Chèo tạ đòn')).toBeInTheDocument();
     expect(screen.getByText('Kéo xô máy')).toBeInTheDocument();
-    expect(
-      screen.queryByText('Đẩy tạ đòn nằm ngang'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Đẩy tạ đòn nằm ngang')).not.toBeInTheDocument();
 
     // Click "Tất cả" (all) chip to reset filter
-    await user.click(
-      findChip('Tất cả'),
-    );
+    await user.click(findChip('Tất cả'));
 
     expect(screen.getByText('Đẩy tạ đòn nằm ngang')).toBeInTheDocument();
     expect(screen.getByText('Chèo tạ đòn')).toBeInTheDocument();
@@ -219,18 +203,11 @@ describe('ExerciseSelector', () => {
   });
 
   it('pre-filters by equipment when equipmentFilter provided', () => {
-    render(
-      <ExerciseSelector
-        {...defaultProps}
-        equipmentFilter={['cable'] as EquipmentType[]}
-      />,
-    );
+    render(<ExerciseSelector {...defaultProps} equipmentFilter={['cable'] as EquipmentType[]} />);
 
     // Only cable exercises should appear
     expect(screen.getByText('Kéo xô máy')).toBeInTheDocument();
-    expect(
-      screen.queryByText('Đẩy tạ đòn nằm ngang'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Đẩy tạ đòn nằm ngang')).not.toBeInTheDocument();
     expect(screen.queryByText('Chèo tạ đòn')).not.toBeInTheDocument();
   });
 
@@ -238,17 +215,9 @@ describe('ExerciseSelector', () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     const onClose = vi.fn();
-    render(
-      <ExerciseSelector
-        {...defaultProps}
-        onSelect={onSelect}
-        onClose={onClose}
-      />,
-    );
+    render(<ExerciseSelector {...defaultProps} onSelect={onSelect} onClose={onClose} />);
 
-    await user.click(
-      screen.getByTestId('exercise-item-barbell-bench-press'),
-    );
+    await user.click(screen.getByTestId('exercise-item-barbell-bench-press'));
 
     expect(onSelect).toHaveBeenCalledTimes(1);
     const selectedExercise = onSelect.mock.calls[0][0] as Exercise;
@@ -275,9 +244,7 @@ describe('ExerciseSelector', () => {
     await user.type(input, 'xyznonexistent');
 
     expect(screen.getByTestId('exercise-empty-state')).toBeInTheDocument();
-    expect(
-      screen.getByText('Không tìm thấy bài tập'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Không tìm thấy bài tập')).toBeInTheDocument();
   });
 
   it('shows exercise details (name, category, equipment)', () => {
@@ -321,14 +288,7 @@ describe('ExerciseSelector', () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     const onClose = vi.fn();
-    render(
-      <ExerciseSelector
-        isOpen
-        onClose={onClose}
-        onSelect={onSelect}
-        equipmentFilter={[]}
-      />,
-    );
+    render(<ExerciseSelector isOpen onClose={onClose} onSelect={onSelect} equipmentFilter={[]} />);
 
     await user.click(screen.getByTestId('add-custom-exercise'));
     expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();

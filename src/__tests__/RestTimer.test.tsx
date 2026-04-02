@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+
 import { RestTimer } from '../features/fitness/components/RestTimer';
 
 afterEach(cleanup);
@@ -187,9 +188,7 @@ describe('RestTimer', () => {
   });
 
   it('works without onAddTime prop', () => {
-    render(
-      <RestTimer durationSeconds={60} onComplete={vi.fn()} onSkip={vi.fn()} />
-    );
+    render(<RestTimer durationSeconds={60} onComplete={vi.fn()} onSkip={vi.fn()} />);
 
     expect(() => {
       fireEvent.click(screen.getByTestId('add-time-button'));

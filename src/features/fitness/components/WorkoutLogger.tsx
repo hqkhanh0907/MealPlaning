@@ -1,41 +1,36 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, type RefObject } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, X, Plus, Pencil, Trash2 } from 'lucide-react';
-import { SetEditor } from './SetEditor';
+import { ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react';
+import React, { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Resolver } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { RestTimer } from './RestTimer';
-import { ExerciseSelector } from './ExerciseSelector';
-import { WorkoutSummaryCard } from './WorkoutSummaryCard';
-import { useNotification } from '../../../contexts/NotificationContext';
-import { useFitnessStore } from '../../../store/fitnessStore';
-import { EXERCISES } from '../data/exerciseDatabase';
-import { formatElapsed } from '../utils/timeFormat';
-import { detectPRs } from '../utils/gamification';
-import type { ExerciseSeed } from '../data/exerciseDatabase';
-import type {
-  Exercise,
-  Workout,
-  WorkoutSet,
-  MuscleGroup,
-  EquipmentType,
-  SelectedExercise,
-} from '../types';
-import { safeParseJsonArray } from '../types';
-import { DEFAULT_REST_SECONDS, RPE_OPTIONS, WEIGHT_INCREMENT, REPS_INCREMENT, MIN_REPS } from '../constants';
-import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
+import { cn } from '@/lib/utils';
 import { generateUUID } from '@/utils/helpers';
-import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
+
+import { useNotification } from '../../../contexts/NotificationContext';
 import {
-  workoutLoggerSchema,
+  type SetInputData,
   setInputDefaults,
   type WorkoutLoggerFormData,
-  type SetInputData,
+  workoutLoggerSchema,
 } from '../../../schemas/workoutLoggerSchema';
+import { useFitnessStore } from '../../../store/fitnessStore';
+import { DEFAULT_REST_SECONDS, MIN_REPS, REPS_INCREMENT, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
+import type { ExerciseSeed } from '../data/exerciseDatabase';
+import { EXERCISES } from '../data/exerciseDatabase';
+import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
+import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
+import type { EquipmentType, Exercise, MuscleGroup, SelectedExercise, Workout, WorkoutSet } from '../types';
+import { safeParseJsonArray } from '../types';
+import { detectPRs } from '../utils/gamification';
+import { formatElapsed } from '../utils/timeFormat';
+import { ExerciseSelector } from './ExerciseSelector';
+import { RestTimer } from './RestTimer';
+import { SetEditor } from './SetEditor';
+import { WorkoutSummaryCard } from './WorkoutSummaryCard';
 
 interface WorkoutLoggerProps {
   planDay?: {
@@ -65,7 +60,7 @@ const TimerDisplay = React.memo(function TimerDisplay({
   useEffect(() => {
     if (!isRunning) return;
     const id = setInterval(() => {
-      setSeconds((prev) => {
+      setSeconds(prev => {
         const next = prev + 1;
         elapsedRef.current = next;
         return next;
@@ -75,16 +70,11 @@ const TimerDisplay = React.memo(function TimerDisplay({
   }, [elapsedRef, isRunning]);
 
   return (
-    <span
-      className="font-mono text-lg font-semibold tabular-nums"
-      data-testid="elapsed-timer"
-    >
+    <span className="font-mono text-lg font-semibold tabular-nums" data-testid="elapsed-timer">
       {formatElapsed(seconds)}
     </span>
   );
 });
-
-
 
 function seedToExercise(seed: ExerciseSeed): Exercise {
   return {
@@ -133,29 +123,23 @@ function ProgressiveOverloadChip({
         'rounded-full px-3 py-1.5 text-xs',
         isPlateaued
           ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300'
-          : 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300'
+          : 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300',
       )}
       data-testid="overload-chip"
     >
       {isPlateaued ? '⚠️' : '📈'} {suggestion.weight}kg × {suggestion.reps}
-      {isPlateaued &&
-        suggestion.plateauWeeks != null &&
-        ` (plateau ${suggestion.plateauWeeks}w)`}
+      {isPlateaued && suggestion.plateauWeeks != null && ` (plateau ${suggestion.plateauWeeks}w)`}
     </Button>
   );
 }
 
-export function WorkoutLogger({
-  planDay,
-  onComplete,
-  onBack,
-}: Readonly<WorkoutLoggerProps>): React.JSX.Element {
+export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutLoggerProps>): React.JSX.Element {
   const { t } = useTranslation();
   const notify = useNotification();
-  const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
-  const setWorkoutDraft = useFitnessStore((s) => s.setWorkoutDraft);
-  const clearWorkoutDraft = useFitnessStore((s) => s.clearWorkoutDraft);
-  const loadWorkoutDraft = useFitnessStore((s) => s.loadWorkoutDraft);
+  const saveWorkoutAtomic = useFitnessStore(s => s.saveWorkoutAtomic);
+  const setWorkoutDraft = useFitnessStore(s => s.setWorkoutDraft);
+  const clearWorkoutDraft = useFitnessStore(s => s.clearWorkoutDraft);
+  const loadWorkoutDraft = useFitnessStore(s => s.loadWorkoutDraft);
 
   const { suggestNextSet: getOverloadSuggestion } = useProgressiveOverload();
 
@@ -244,10 +228,8 @@ export function WorkoutLogger({
   const handleLogSet = useCallback(
     (exerciseId: string) => {
       const input = getInput(exerciseId);
-      setLoggedSets((prev) => {
-        const existingCount = prev.filter(
-          (s) => s.exerciseId === exerciseId,
-        ).length;
+      setLoggedSets(prev => {
+        const existingCount = prev.filter(s => s.exerciseId === exerciseId).length;
         const newSet: WorkoutSet = {
           id: generateUUID(),
           workoutId: '',
@@ -266,12 +248,12 @@ export function WorkoutLogger({
   );
 
   const handleDeleteSet = useCallback((setId: string) => {
-    setLoggedSets((prev) => {
-      const target = prev.find((s) => s.id === setId);
+    setLoggedSets(prev => {
+      const target = prev.find(s => s.id === setId);
       if (!target) return prev;
-      const filtered = prev.filter((s) => s.id !== setId);
+      const filtered = prev.filter(s => s.id !== setId);
       let counter = 0;
-      return filtered.map((s) => {
+      return filtered.map(s => {
         if (s.exerciseId === target.exerciseId) {
           counter++;
           return { ...s, setNumber: counter };
@@ -284,8 +266,8 @@ export function WorkoutLogger({
   const handleEditSetSave = useCallback(
     (data: { weight: number; reps: number; rpe?: number }) => {
       if (!editingSet) return;
-      setLoggedSets((prev) =>
-        prev.map((s) =>
+      setLoggedSets(prev =>
+        prev.map(s =>
           s.id === editingSet.id
             ? { ...s, weightKg: data.weight, reps: data.reps, rpe: data.rpe, updatedAt: new Date().toISOString() }
             : s,
@@ -303,8 +285,8 @@ export function WorkoutLogger({
   const recentWeightsForEdit = useMemo(() => {
     if (!editingSet) return [];
     const weights = loggedSets
-      .filter((s) => s.exerciseId === editingSet.exerciseId && s.id !== editingSet.id)
-      .map((s) => s.weightKg);
+      .filter(s => s.exerciseId === editingSet.exerciseId && s.id !== editingSet.id)
+      .map(s => s.weightKg);
     return [...new Set(weights)].slice(0, 5);
   }, [editingSet, loggedSets]);
 
@@ -321,7 +303,10 @@ export function WorkoutLogger({
     (exerciseId: string, delta: number) => {
       const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
       const current = getValues(key) ?? { ...setInputDefaults };
-      setValue(key, { ...current, reps: Math.max(MIN_REPS, (Number.isNaN(current.reps) ? MIN_REPS : current.reps) + delta) });
+      setValue(key, {
+        ...current,
+        reps: Math.max(MIN_REPS, (Number.isNaN(current.reps) ? MIN_REPS : current.reps) + delta),
+      });
     },
     [getValues, setValue],
   );
@@ -343,11 +328,14 @@ export function WorkoutLogger({
     setShowRestTimer(false);
   }, []);
 
-  const handleSelectExercise = useCallback((exercise: Exercise) => {
-    setCurrentExercises((prev) => [...prev, exercise]);
-    setShowExerciseSelector(false);
-    if (!timerRunning) setTimerRunning(true);
-  }, [timerRunning]);
+  const handleSelectExercise = useCallback(
+    (exercise: Exercise) => {
+      setCurrentExercises(prev => [...prev, exercise]);
+      setShowExerciseSelector(false);
+      if (!timerRunning) setTimerRunning(true);
+    },
+    [timerRunning],
+  );
 
   const handleCloseSelector = useCallback(() => {
     setShowExerciseSelector(false);
@@ -363,11 +351,7 @@ export function WorkoutLogger({
   }, [clearWorkoutDraft, onBack]);
 
   const totalVolume = useMemo(
-    () =>
-      loggedSets.reduce(
-        (sum, set) => sum + set.weightKg * (set.reps ?? 0),
-        0,
-      ),
+    () => loggedSets.reduce((sum, set) => sum + set.weightKg * (set.reps ?? 0), 0),
     [loggedSets],
   );
 
@@ -378,8 +362,8 @@ export function WorkoutLogger({
     const now = new Date().toISOString();
     const workoutId = generateUUID();
     const workoutName = planDay
-      ? (planDay.workoutType || t('fitness.logger.title'))
-      : (freestyleName.trim() || t('fitness.plan.freestyleDefault'));
+      ? planDay.workoutType || t('fitness.logger.title')
+      : freestyleName.trim() || t('fitness.plan.freestyleDefault');
     const workout: Workout = {
       id: workoutId,
       date: now.split('T')[0],
@@ -389,7 +373,7 @@ export function WorkoutLogger({
       createdAt: now,
       updatedAt: now,
     };
-    const sets = loggedSets.map((s) => ({ ...s, workoutId: workout.id }));
+    const sets = loggedSets.map(s => ({ ...s, workoutId: workout.id }));
     try {
       await saveWorkoutAtomic(workout, sets);
     } catch (error) {
@@ -401,25 +385,13 @@ export function WorkoutLogger({
     clearWorkoutDraft();
     notify.success(t('fitness.logger.saveSuccess'));
     onComplete();
-  }, [
-    isSaving,
-    planDay,
-    loggedSets,
-    saveWorkoutAtomic,
-    clearWorkoutDraft,
-    onComplete,
-    notify,
-    t,
-    freestyleName,
-  ]);
+  }, [isSaving, planDay, loggedSets, saveWorkoutAtomic, clearWorkoutDraft, onComplete, notify, t, freestyleName]);
 
   const detectedPRs = useMemo(() => {
     if (!showSummary) return [];
     const previousSets = useFitnessStore.getState().workoutSets ?? [];
-    const exerciseMap = new Map<string, string>(
-      currentExercises.map((ex) => [ex.id, ex.nameVi]),
-    );
-    return detectPRs(loggedSets, previousSets, exerciseMap).map((pr) => ({
+    const exerciseMap = new Map<string, string>(currentExercises.map(ex => [ex.id, ex.nameVi]));
+    return detectPRs(loggedSets, previousSets, exerciseMap).map(pr => ({
       exerciseName: pr.exerciseName,
       weight: pr.newWeight,
     }));
@@ -436,7 +408,7 @@ export function WorkoutLogger({
             <input
               type="text"
               value={freestyleName}
-              onChange={(e) => setFreestyleName(e.target.value)}
+              onChange={e => setFreestyleName(e.target.value)}
               placeholder={t('fitness.plan.freestyleDefault')}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
               data-testid="freestyle-name-input"
@@ -456,12 +428,9 @@ export function WorkoutLogger({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900"
-      data-testid="workout-logger"
-    >
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900" data-testid="workout-logger">
       <header
-        className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 pt-safe text-white"
+        className="pt-safe sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
         data-testid="workout-header"
       >
         <Button
@@ -489,19 +458,12 @@ export function WorkoutLogger({
 
       <div className="flex-1 space-y-6 overflow-y-auto p-4">
         {currentExercises.length === 0 ? (
-          <div
-            className="flex flex-col items-center justify-center py-16 text-center"
-            data-testid="empty-state"
-          >
-            <p className="text-slate-500 dark:text-slate-400">
-              {t('fitness.logger.noExercises')}
-            </p>
+          <div className="flex flex-col items-center justify-center py-16 text-center" data-testid="empty-state">
+            <p className="text-slate-500 dark:text-slate-400">{t('fitness.logger.noExercises')}</p>
           </div>
         ) : (
           currentExercises.map((exercise, exerciseIndex) => {
-            const exerciseSets = loggedSets.filter(
-              (s) => s.exerciseId === exercise.id,
-            );
+            const exerciseSets = loggedSets.filter(s => s.exerciseId === exercise.id);
             ensureInput(exercise.id);
             const formInput = watch(`setInputs.${exercise.id}` as const);
             const input: SetInputData = formInput ?? setInputDefaults;
@@ -510,216 +472,196 @@ export function WorkoutLogger({
               exercise.defaultRepsMin ?? 8,
               exercise.defaultRepsMax ?? 12,
             );
-            const overloadSuggestion =
-              suggestion.weight > 0 ? suggestion : null;
+            const overloadSuggestion = suggestion.weight > 0 ? suggestion : null;
             const nextExercise = currentExercises[exerciseIndex + 1];
             return (
               <React.Fragment key={exercise.id}>
-              <section
-                className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
-                data-testid={`exercise-section-${exercise.id}`}
-              >
-                <h3 className="mb-3 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {exercise.nameVi}
-                </h3>
-
-                {exerciseSets.map((set) => (
-                  <div
-                    key={set.id}
-                    className="flex items-center gap-3 py-2 text-sm text-slate-600 dark:text-slate-300"
-                    data-testid={`logged-set-${set.id}`}
-                  >
-                    <span className="font-medium">
-                      {t('fitness.logger.set')} {set.setNumber}
-                    </span>
-                    <span>
-                      {set.weightKg}kg × {set.reps ?? 0}
-                    </span>
-                    {set.rpe !== undefined && (
-                      <span className="text-xs text-emerald-600">
-                        RPE {set.rpe}
-                      </span>
-                    )}
-                    <span className="ml-auto flex gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setEditingSet(set)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                        aria-label={t('fitness.logger.editSet')}
-                        data-testid={`edit-set-${set.id}`}
-                      >
-                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSet(set.id)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
-                        aria-label={t('fitness.logger.deleteSet')}
-                        data-testid={`delete-set-${set.id}`}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      </button>
-                    </span>
-                  </div>
-                ))}
-
-                <ProgressiveOverloadChip
-                  suggestion={overloadSuggestion}
-                  onApply={(s) => handleApplySuggestion(exercise.id, s)}
-                />
-
-                <div
-                  className="mt-3 space-y-3 border-t border-slate-100 pt-3 dark:border-slate-700"
-                  data-testid={`set-editor-${exercise.id}`}
+                <section
+                  className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
+                  data-testid={`exercise-section-${exercise.id}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="w-16 text-xs text-slate-500">
-                      {t('fitness.logger.weight')}
-                    </span>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={() =>
-                        handleWeightChange(exercise.id, -WEIGHT_INCREMENT)
-                      }
-                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                      data-testid={`weight-minus-${exercise.id}`}
-                      aria-label={t('fitness.logger.decreaseWeight')}
-                    >
-                      −
-                    </Button>
-                    <Input
-                      type="number"
-                      autoComplete="off"
-                      value={Number.isNaN(input.weight) ? '' : input.weight}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
-                        const cur = getValues(key) ?? { ...setInputDefaults };
-                        setValue(key, {
-                          ...cur,
-                          weight: raw === '' ? Number.NaN : Math.max(0, Number(raw)),
-                        });
-                      }}
-                      className="w-20 text-center font-semibold text-slate-800"
-                      data-testid={`weight-input-${exercise.id}`}
-                    />
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={() =>
-                        handleWeightChange(exercise.id, WEIGHT_INCREMENT)
-                      }
-                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                      data-testid={`weight-plus-${exercise.id}`}
-                      aria-label={t('fitness.logger.increaseWeight')}
-                    >
-                      +
-                    </Button>
-                  </div>
+                  <h3 className="mb-3 text-base font-semibold text-slate-800 dark:text-slate-100">{exercise.nameVi}</h3>
 
-                  <div className="flex items-center gap-2">
-                    <span className="w-16 text-xs text-slate-500">
-                      {t('fitness.logger.reps')}
-                    </span>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={() =>
-                        handleRepsChange(exercise.id, -REPS_INCREMENT)
-                      }
-                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                      data-testid={`reps-minus-${exercise.id}`}
-                      aria-label={t('fitness.logger.decreaseReps')}
-                    >
-                      −
-                    </Button>
-                    <Input
-                      type="number"
-                      autoComplete="off"
-                      value={Number.isNaN(input.reps) ? '' : (input.reps ?? '')}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
-                        const cur = getValues(key) ?? { ...setInputDefaults };
-                        setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(0, Number(raw)) });
-                      }}
-                      className="w-20 text-center font-semibold text-slate-800"
-                      data-testid={`reps-input-${exercise.id}`}
-                    />
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={() =>
-                        handleRepsChange(exercise.id, REPS_INCREMENT)
-                      }
-                      className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                      data-testid={`reps-plus-${exercise.id}`}
-                      aria-label={t('fitness.logger.increaseReps')}
-                    >
-                      +
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="w-16 text-xs text-slate-500">
-                      {t('fitness.logger.rpe')}
-                    </span>
+                  {exerciseSets.map(set => (
                     <div
-                      className="flex gap-1"
-                      data-testid={`rpe-selector-${exercise.id}`}
+                      key={set.id}
+                      className="flex items-center gap-3 py-2 text-sm text-slate-600 dark:text-slate-300"
+                      data-testid={`logged-set-${set.id}`}
                     >
-                      {RPE_OPTIONS.map((rpe) => (
-                        <Button
-                          key={rpe}
-                          variant={input.rpe === rpe ? 'default' : 'outline'}
-                          size="icon"
-                          onClick={() => handleRpeSelect(exercise.id, rpe)}
-                          className={cn(
-                            'h-9 w-9 rounded-full text-xs',
-                            input.rpe === rpe
-                              ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                              : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
-                          )}
-                          data-testid={`rpe-${rpe}-${exercise.id}`}
+                      <span className="font-medium">
+                        {t('fitness.logger.set')} {set.setNumber}
+                      </span>
+                      <span>
+                        {set.weightKg}kg × {set.reps ?? 0}
+                      </span>
+                      {set.rpe !== undefined && <span className="text-xs text-emerald-600">RPE {set.rpe}</span>}
+                      <span className="ml-auto flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingSet(set)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                          aria-label={t('fitness.logger.editSet')}
+                          data-testid={`edit-set-${set.id}`}
                         >
-                          {rpe}
-                        </Button>
-                      ))}
+                          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSet(set.id)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                          aria-label={t('fitness.logger.deleteSet')}
+                          data-testid={`delete-set-${set.id}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                      </span>
                     </div>
-                  </div>
+                  ))}
 
-                  <Button
-                    variant="default"
-                    onClick={() => handleLogSet(exercise.id)}
-                    className="w-full bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
-                    data-testid={`log-set-${exercise.id}`}
+                  <ProgressiveOverloadChip
+                    suggestion={overloadSuggestion}
+                    onApply={s => handleApplySuggestion(exercise.id, s)}
+                  />
+
+                  <div
+                    className="mt-3 space-y-3 border-t border-slate-100 pt-3 dark:border-slate-700"
+                    data-testid={`set-editor-${exercise.id}`}
                   >
-                    {t('fitness.logger.logSet')}
-                  </Button>
-                </div>
-              </section>
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 text-xs text-slate-500">{t('fitness.logger.weight')}</span>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => handleWeightChange(exercise.id, -WEIGHT_INCREMENT)}
+                        className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                        data-testid={`weight-minus-${exercise.id}`}
+                        aria-label={t('fitness.logger.decreaseWeight')}
+                      >
+                        −
+                      </Button>
+                      <Input
+                        type="number"
+                        autoComplete="off"
+                        value={Number.isNaN(input.weight) ? '' : input.weight}
+                        onChange={e => {
+                          const raw = e.target.value;
+                          const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
+                          const cur = getValues(key) ?? { ...setInputDefaults };
+                          setValue(key, {
+                            ...cur,
+                            weight: raw === '' ? Number.NaN : Math.max(0, Number(raw)),
+                          });
+                        }}
+                        className="w-20 text-center font-semibold text-slate-800"
+                        data-testid={`weight-input-${exercise.id}`}
+                      />
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => handleWeightChange(exercise.id, WEIGHT_INCREMENT)}
+                        className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                        data-testid={`weight-plus-${exercise.id}`}
+                        aria-label={t('fitness.logger.increaseWeight')}
+                      >
+                        +
+                      </Button>
+                    </div>
 
-              {nextExercise && (
-                <div
-                  data-testid={`transition-card-${exercise.id}`}
-                  className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-2.5 dark:bg-slate-700/50"
-                >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
-                    {exerciseIndex + 2}
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 text-xs text-slate-500">{t('fitness.logger.reps')}</span>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => handleRepsChange(exercise.id, -REPS_INCREMENT)}
+                        className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                        data-testid={`reps-minus-${exercise.id}`}
+                        aria-label={t('fitness.logger.decreaseReps')}
+                      >
+                        −
+                      </Button>
+                      <Input
+                        type="number"
+                        autoComplete="off"
+                        value={Number.isNaN(input.reps) ? '' : (input.reps ?? '')}
+                        onChange={e => {
+                          const raw = e.target.value;
+                          const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
+                          const cur = getValues(key) ?? { ...setInputDefaults };
+                          setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(0, Number(raw)) });
+                        }}
+                        className="w-20 text-center font-semibold text-slate-800"
+                        data-testid={`reps-input-${exercise.id}`}
+                      />
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => handleRepsChange(exercise.id, REPS_INCREMENT)}
+                        className="h-10 w-10 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                        data-testid={`reps-plus-${exercise.id}`}
+                        aria-label={t('fitness.logger.increaseReps')}
+                      >
+                        +
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 text-xs text-slate-500">{t('fitness.logger.rpe')}</span>
+                      <div className="flex gap-1" data-testid={`rpe-selector-${exercise.id}`}>
+                        {RPE_OPTIONS.map(rpe => (
+                          <Button
+                            key={rpe}
+                            variant={input.rpe === rpe ? 'default' : 'outline'}
+                            size="icon"
+                            onClick={() => handleRpeSelect(exercise.id, rpe)}
+                            className={cn(
+                              'h-9 w-9 rounded-full text-xs',
+                              input.rpe === rpe
+                                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                            )}
+                            data-testid={`rpe-${rpe}-${exercise.id}`}
+                          >
+                            {rpe}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="default"
+                      onClick={() => handleLogSet(exercise.id)}
+                      className="w-full bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
+                      data-testid={`log-set-${exercise.id}`}
+                    >
+                      {t('fitness.logger.logSet')}
+                    </Button>
                   </div>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">
-                    {t('fitness.logger.nextUp')}: <span className="font-medium text-slate-700 dark:text-slate-200">{nextExercise.nameVi}</span>
-                  </span>
-                </div>
-              )}
+                </section>
+
+                {nextExercise && (
+                  <div
+                    data-testid={`transition-card-${exercise.id}`}
+                    className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-2.5 dark:bg-slate-700/50"
+                  >
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
+                      {exerciseIndex + 2}
+                    </div>
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      {t('fitness.logger.nextUp')}:{' '}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{nextExercise.nameVi}</span>
+                    </span>
+                  </div>
+                )}
               </React.Fragment>
             );
           })
         )}
       </div>
 
-      <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 pb-safe backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95" data-testid="add-exercise-container">
+      <div
+        className="pb-safe sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95"
+        data-testid="add-exercise-container"
+      >
         <Button
           variant="outline"
           onClick={() => setShowExerciseSelector(true)}
@@ -732,18 +674,10 @@ export function WorkoutLogger({
       </div>
 
       {showRestTimer && (
-        <RestTimer
-          durationSeconds={DEFAULT_REST_SECONDS}
-          onComplete={handleRestComplete}
-          onSkip={handleRestSkip}
-        />
+        <RestTimer durationSeconds={DEFAULT_REST_SECONDS} onComplete={handleRestComplete} onSkip={handleRestSkip} />
       )}
 
-      <ExerciseSelector
-        isOpen={showExerciseSelector}
-        onClose={handleCloseSelector}
-        onSelect={handleSelectExercise}
-      />
+      <ExerciseSelector isOpen={showExerciseSelector} onClose={handleCloseSelector} onSelect={handleSelectExercise} />
 
       {editingSet && (
         <SetEditor

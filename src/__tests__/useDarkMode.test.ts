@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 vi.mock('../contexts/DatabaseContext', () => ({
   DatabaseProvider: ({ children }: { children: unknown }) => children,
@@ -98,7 +98,9 @@ describe('useDarkMode', () => {
     mockGetSettingValue = 'invalid-value';
     const { result } = renderHook(() => useDarkMode());
     // Wait for the async getSetting to resolve - invalid value should be ignored
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(result.current.theme).toBe('light');
   });
 
@@ -143,7 +145,9 @@ describe('useDarkMode', () => {
       result.current.setTheme('system');
     });
     expect(changeHandler).toBeDefined();
-    act(() => { changeHandler?.(); });
+    act(() => {
+      changeHandler?.();
+    });
   });
 
   it('re-applies system theme when matchMedia change fires and theme is system', () => {
@@ -167,7 +171,9 @@ describe('useDarkMode', () => {
     });
     expect(result.current.theme).toBe('system');
     expect(changeHandler).toBeDefined();
-    act(() => { changeHandler?.(); });
+    act(() => {
+      changeHandler?.();
+    });
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
@@ -180,7 +186,9 @@ describe('useDarkMode', () => {
   it('still changes theme when setSetting rejects', () => {
     mockSetSetting.mockRejectedValueOnce(new Error('DB error'));
     const { result } = renderHook(() => useDarkMode());
-    act(() => { result.current.cycleTheme(); });
+    act(() => {
+      result.current.cycleTheme();
+    });
     // Theme changed from 'light' to 'dark' despite storage error
     expect(result.current.theme).toBe('dark');
   });

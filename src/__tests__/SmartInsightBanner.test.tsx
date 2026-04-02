@@ -1,19 +1,28 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+
 import { SmartInsightBanner } from '../features/fitness/components/SmartInsightBanner';
 import type { FitnessNutritionInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
 
 vi.mock('lucide-react', () => ({
   Info: ({ className }: { className?: string }) => (
-    <span data-testid="icon-info" className={className}>info</span>
+    <span data-testid="icon-info" className={className}>
+      info
+    </span>
   ),
   AlertTriangle: ({ className }: { className?: string }) => (
-    <span data-testid="icon-warning" className={className}>warning</span>
+    <span data-testid="icon-warning" className={className}>
+      warning
+    </span>
   ),
   CheckCircle: ({ className }: { className?: string }) => (
-    <span data-testid="icon-success" className={className}>success</span>
+    <span data-testid="icon-success" className={className}>
+      success
+    </span>
   ),
   X: ({ className }: { className?: string }) => (
-    <span data-testid="icon-x" className={className}>x</span>
+    <span data-testid="icon-x" className={className}>
+      x
+    </span>
   ),
 }));
 
@@ -22,9 +31,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function makeInsight(
-  overrides: Partial<FitnessNutritionInsight> = {},
-): FitnessNutritionInsight {
+function makeInsight(overrides: Partial<FitnessNutritionInsight> = {}): FitnessNutritionInsight {
   return {
     type: 'deficit-on-training',
     title: 'Calorie deficit on training day',

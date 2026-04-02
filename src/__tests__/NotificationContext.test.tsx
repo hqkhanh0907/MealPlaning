@@ -1,5 +1,6 @@
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { NotificationProvider, useNotification } from '../contexts/NotificationContext';
 
 // Test consumer component
@@ -21,7 +22,10 @@ describe('NotificationContext', () => {
     // Suppress console.error for expected error
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => {
-      const Broken = () => { useNotification(); return null; };
+      const Broken = () => {
+        useNotification();
+        return null;
+      };
       render(<Broken />);
     }).toThrow('useNotification must be used within <NotificationProvider>');
     consoleError.mockRestore();
@@ -95,7 +99,9 @@ describe('NotificationContext', () => {
     expect(screen.getByText('Success!')).toBeInTheDocument();
 
     // Success duration is 3000ms + 300ms exit animation
-    act(() => { vi.advanceTimersByTime(3500); });
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
     expect(screen.queryByText('Success!')).not.toBeInTheDocument();
     vi.useRealTimers();
   });
@@ -118,11 +124,7 @@ describe('NotificationContext', () => {
     const onClick = vi.fn();
     const ClickConsumer = () => {
       const notify = useNotification();
-      return (
-        <button onClick={() => notify.info('Clickable', 'Click me', { onClick })}>
-          show-clickable
-        </button>
-      );
+      return <button onClick={() => notify.info('Clickable', 'Click me', { onClick })}>show-clickable</button>;
     };
 
     render(
@@ -148,7 +150,9 @@ describe('NotificationContext', () => {
     const ActionConsumer = () => {
       const notify = useNotification();
       return (
-        <button onClick={() => notify.success('With Action', 'msg', { action: { label: 'Undo', onClick: actionClick } })}>
+        <button
+          onClick={() => notify.success('With Action', 'msg', { action: { label: 'Undo', onClick: actionClick } })}
+        >
           show-action
         </button>
       );
@@ -188,9 +192,7 @@ describe('NotificationContext', () => {
     const onClick = vi.fn();
     const KeyConsumer = () => {
       const notify = useNotification();
-      return (
-        <button onClick={() => notify.info('Key', 'msg', { onClick })}>show-key</button>
-      );
+      return <button onClick={() => notify.info('Key', 'msg', { onClick })}>show-key</button>;
     };
 
     render(
@@ -222,12 +224,20 @@ describe('NotificationContext', () => {
 
     if (toastEl) {
       // Use native dispatchEvent to ensure v8 coverage tracks DOM listeners
-      act(() => { toastEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true })); });
-      act(() => { vi.advanceTimersByTime(5000); });
+      act(() => {
+        toastEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      });
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
       expect(screen.getByText('Success!')).toBeInTheDocument();
 
-      act(() => { toastEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true })); });
-      act(() => { vi.advanceTimersByTime(2500); });
+      act(() => {
+        toastEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      });
+      act(() => {
+        vi.advanceTimersByTime(2500);
+      });
       expect(screen.queryByText('Success!')).not.toBeInTheDocument();
     }
     vi.useRealTimers();

@@ -82,7 +82,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
 
   const ingredients = tables['ingredients'] ?? [];
   if (ingredients.length > 0) {
-    legacy['mp-ingredients'] = ingredients.map((row) => {
+    legacy['mp-ingredients'] = ingredients.map(row => {
       const r = row as Record<string, unknown>;
       return {
         id: r.id,
@@ -108,7 +108,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
       arr.push({ ingredientId: r.ingredient_id as string, amount: r.amount as number });
       diMap.set(dishId, arr);
     }
-    legacy['mp-dishes'] = dishes.map((row) => {
+    legacy['mp-dishes'] = dishes.map(row => {
       const r = row as Record<string, unknown>;
       return {
         id: r.id,
@@ -123,7 +123,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
 
   const dayPlans = tables['day_plans'] ?? [];
   if (dayPlans.length > 0) {
-    legacy['mp-day-plans'] = dayPlans.map((row) => {
+    legacy['mp-day-plans'] = dayPlans.map(row => {
       const r = row as Record<string, unknown>;
       return {
         date: r.date,
@@ -147,7 +147,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
 
   const templates = tables['meal_templates'] ?? [];
   if (templates.length > 0) {
-    legacy['meal-templates'] = templates.map((row) => {
+    legacy['meal-templates'] = templates.map(row => {
       const r = row as Record<string, unknown>;
       const parsed = safeJsonParse(r.data);
       if (parsed && typeof parsed === 'object') return parsed;
@@ -159,7 +159,7 @@ export function buildLegacyFormat(tables: Record<string, unknown[]>): Record<str
 }
 
 function transformLegacyIngredients(rawIngredients: unknown[]): unknown[] {
-  return rawIngredients.map((ing) => {
+  return rawIngredients.map(ing => {
     const i = ing as Record<string, unknown>;
     const name = i.name as Record<string, unknown> | undefined;
     const unit = i.unit as Record<string, unknown> | undefined;
@@ -178,10 +178,7 @@ function transformLegacyIngredients(rawIngredients: unknown[]): unknown[] {
   });
 }
 
-function transformLegacyDishes(
-  rawDishes: unknown[],
-  tables: Record<string, unknown[]>,
-): void {
+function transformLegacyDishes(rawDishes: unknown[], tables: Record<string, unknown[]>): void {
   const dishRows: unknown[] = [];
   const diRows: unknown[] = [];
   for (const dish of rawDishes) {
@@ -215,7 +212,7 @@ function transformLegacyDishes(
 }
 
 function transformLegacyDayPlans(rawDayPlans: unknown[]): unknown[] {
-  return rawDayPlans.map((plan) => {
+  return rawDayPlans.map(plan => {
     const p = plan as Record<string, unknown>;
     return {
       date: p.date,
@@ -270,7 +267,7 @@ function transformLegacyToV2Tables(data: Record<string, unknown>): Record<string
 
   const rawTemplates = data['meal-templates'];
   if (Array.isArray(rawTemplates)) {
-    tables['meal_templates'] = rawTemplates.map((tpl) => {
+    tables['meal_templates'] = rawTemplates.map(tpl => {
       const t = tpl as Record<string, unknown>;
       return {
         id: t.id,
@@ -294,13 +291,10 @@ export async function createV2Export(
   const tables: Record<string, unknown[]> = {};
   for (const name of SCHEMA_TABLES) {
     const rows = await db.query(`SELECT * FROM "${name}"`);
-    tables[name] = rows.map((row) => typeToRow(row as Record<string, unknown>));
+    tables[name] = rows.map(row => typeToRow(row as Record<string, unknown>));
   }
 
-  const legacy =
-    legacyData && Object.keys(legacyData).length > 0
-      ? legacyData
-      : buildLegacyFormat(tables);
+  const legacy = legacyData && Object.keys(legacyData).length > 0 ? legacyData : buildLegacyFormat(tables);
 
   const payload: V2ExportPayload = {
     _version: '2.0',
@@ -320,10 +314,7 @@ export async function createV2Export(
 /*  Import                                                               */
 /* ------------------------------------------------------------------ */
 
-export async function importV2Data(
-  db: DatabaseService,
-  data: Record<string, unknown>,
-): Promise<ImportResult> {
+export async function importV2Data(db: DatabaseService, data: Record<string, unknown>): Promise<ImportResult> {
   const version = detectVersion(data);
 
   let tables: Record<string, unknown[]>;
@@ -356,15 +347,12 @@ export async function importV2Data(
           const columns = Object.keys(obj);
           if (columns.length === 0) continue;
           const placeholders = columns.map(() => '?').join(', ');
-          const values = columns.map((c) => {
+          const values = columns.map(c => {
             const v = obj[c];
             return v === undefined ? null : v;
           });
-          const columnList = columns.map((c) => `"${c}"`).join(', ');
-          await db.execute(
-            `INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`,
-            values,
-          );
+          const columnList = columns.map(c => `"${c}"`).join(', ');
+          await db.execute(`INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`, values);
         }
 
         counts[tableName] = rows.length;

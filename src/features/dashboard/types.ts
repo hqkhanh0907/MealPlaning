@@ -2,12 +2,7 @@ export type ScoreColor = 'emerald' | 'amber' | 'slate';
 
 export type InsightPriority = 'high' | 'medium' | 'low';
 
-export type InsightCategory =
-  | 'nutrition'
-  | 'workout'
-  | 'weight'
-  | 'streak'
-  | 'general';
+export type InsightCategory = 'nutrition' | 'workout' | 'weight' | 'streak' | 'general';
 
 export interface ScoreInput {
   actualCalories?: number;

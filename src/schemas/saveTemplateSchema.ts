@@ -3,7 +3,8 @@ import { z } from 'zod';
 const MAX_NAME_LENGTH = 100;
 
 export const saveTemplateSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .trim()
     .min(1, { error: 'Tên mẫu không được bỏ trống' })
     .max(MAX_NAME_LENGTH, { error: `Tên mẫu không được vượt quá ${MAX_NAME_LENGTH} ký tự` }),

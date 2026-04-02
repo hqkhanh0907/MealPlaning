@@ -1,10 +1,11 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import { WeightMini } from '../features/dashboard/components/WeightMini';
-import { useFitnessStore } from '../store/fitnessStore';
-import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
+
+import { WeightMini } from '../features/dashboard/components/WeightMini';
 import type { WeightEntry } from '../features/fitness/types';
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import type { Goal } from '../features/health-profile/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
@@ -19,10 +20,7 @@ const mockHealthStore = useHealthProfileStore as unknown as Mock;
 
 afterEach(cleanup);
 
-function makeWeightEntries(
-  weights: number[],
-  startDate = '2024-01-01',
-): WeightEntry[] {
+function makeWeightEntries(weights: number[], startDate = '2024-01-01'): WeightEntry[] {
   return weights.map((w, i) => {
     const d = new Date(startDate);
     d.setDate(d.getDate() + i);
@@ -50,17 +48,12 @@ function makeGoal(type: 'cut' | 'bulk' | 'maintain'): Goal {
   };
 }
 
-function setupStores(
-  entries: WeightEntry[],
-  goal: Goal | null,
-) {
-  mockFitnessStore.mockImplementation(
-    (selector: (s: { weightEntries: WeightEntry[] }) => unknown) =>
-      selector({ weightEntries: entries }),
+function setupStores(entries: WeightEntry[], goal: Goal | null) {
+  mockFitnessStore.mockImplementation((selector: (s: { weightEntries: WeightEntry[] }) => unknown) =>
+    selector({ weightEntries: entries }),
   );
-  mockHealthStore.mockImplementation(
-    (selector: (s: { activeGoal: Goal | null }) => unknown) =>
-      selector({ activeGoal: goal }),
+  mockHealthStore.mockImplementation((selector: (s: { activeGoal: Goal | null }) => unknown) =>
+    selector({ activeGoal: goal }),
   );
 }
 
@@ -72,19 +65,14 @@ describe('WeightMini', () => {
     expect(screen.getByTestId('weight-mini-empty')).toBeInTheDocument();
     expect(screen.queryByTestId('weight-mini')).not.toBeInTheDocument();
     expect(screen.getByText('Chưa có dữ liệu cân nặng')).toBeInTheDocument();
-    expect(
-      screen.getByText('Ghi cân nặng đầu tiên'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Ghi cân nặng đầu tiên')).toBeInTheDocument();
   });
 
   it('empty state has proper aria-label', () => {
     setupStores([], null);
     render(<WeightMini />);
 
-    expect(screen.getByTestId('weight-mini-empty')).toHaveAttribute(
-      'aria-label',
-      'Chưa ghi cân nặng',
-    );
+    expect(screen.getByTestId('weight-mini-empty')).toHaveAttribute('aria-label', 'Chưa ghi cân nặng');
   });
 
   it('shows current weight with tabular-nums', () => {
@@ -237,14 +225,8 @@ describe('WeightMini', () => {
     render(<WeightMini />);
 
     const mini = screen.getByTestId('weight-mini');
-    expect(mini).toHaveAttribute(
-      'aria-label',
-      expect.stringContaining('70.05'),
-    );
-    expect(mini).toHaveAttribute(
-      'aria-label',
-      expect.stringContaining('Ổn định'),
-    );
+    expect(mini).toHaveAttribute('aria-label', expect.stringContaining('70.05'));
+    expect(mini).toHaveAttribute('aria-label', expect.stringContaining('Ổn định'));
   });
 
   // ===== Edge cases =====

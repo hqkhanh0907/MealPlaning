@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { customExerciseSchema, customExerciseDefaults } from '../customExerciseSchema';
+import { describe, expect, it } from 'vitest';
+
+import { customExerciseDefaults, customExerciseSchema } from '../customExerciseSchema';
 
 describe('customExerciseSchema', () => {
   it('validates correct data', () => {

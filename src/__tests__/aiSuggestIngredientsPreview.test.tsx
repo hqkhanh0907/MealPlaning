@@ -1,12 +1,31 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { AISuggestIngredientsPreview } from '../components/modals/AISuggestIngredientsPreview';
 import type { Ingredient, SuggestedDishIngredient } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const existingIngredients: Ingredient[] = [
-  { id: 'i1', name: { vi: 'Bánh phở', en: 'Rice noodles' }, caloriesPer100: 356, proteinPer100: 3, carbsPer100: 80, fatPer100: 0.5, fiberPer100: 1, unit: { vi: 'g', en: 'g' } },
-  { id: 'i2', name: { vi: 'Thịt bò', en: 'Beef' }, caloriesPer100: 250, proteinPer100: 26, carbsPer100: 0, fatPer100: 15, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
+  {
+    id: 'i1',
+    name: { vi: 'Bánh phở', en: 'Rice noodles' },
+    caloriesPer100: 356,
+    proteinPer100: 3,
+    carbsPer100: 80,
+    fatPer100: 0.5,
+    fiberPer100: 1,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i2',
+    name: { vi: 'Thịt bò', en: 'Beef' },
+    caloriesPer100: 250,
+    proteinPer100: 26,
+    carbsPer100: 0,
+    fatPer100: 15,
+    fiberPer100: 0,
+    unit: { vi: 'g', en: 'g' },
+  },
 ];
 
 const suggestions: SuggestedDishIngredient[] = [
@@ -25,7 +44,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('renders all suggestions with correct badges', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     expect(screen.getByText(/Phở bò/)).toBeInTheDocument();
     expect(screen.getByTestId('ai-suggest-item-0')).toBeInTheDocument();
@@ -40,14 +65,26 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('shows empty state when suggestions array is empty', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Unknown" suggestions={[]} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Unknown"
+        suggestions={[]}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     expect(screen.getByTestId('ai-suggest-empty')).toBeInTheDocument();
   });
 
   it('toggles checkbox when clicked', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     const checkbox0 = screen.getByTestId('ai-suggest-checkbox-0');
     // Initially checked (emerald bg)
@@ -62,7 +99,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('allows editing amount for an item', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     const amountInput = screen.getByTestId('ai-suggest-amount-1');
     expect((amountInput as HTMLInputElement).value).toBe('150');
@@ -72,7 +115,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('calls onConfirm with only checked items and custom amounts', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     // Uncheck item 2 (Giá đỗ)
     fireEvent.click(screen.getByTestId('ai-suggest-checkbox-2'));
@@ -92,7 +141,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('calls onClose when cancel button is clicked', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     fireEvent.click(screen.getByTestId('btn-ai-suggest-cancel'));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -101,7 +156,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('calls onClose when X button is clicked', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     fireEvent.click(screen.getByTestId('btn-ai-suggest-close'));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -109,7 +170,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('disables confirm button when no items are checked', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     // Uncheck all 3
     fireEvent.click(screen.getByTestId('ai-suggest-checkbox-0'));
@@ -121,7 +188,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('shows nutrition info for each item', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     expect(screen.getByText(/356cal/)).toBeInTheDocument();
     expect(screen.getByText(/250cal/)).toBeInTheDocument();
@@ -130,7 +203,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('handles amount with invalid value gracefully on confirm', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Phở bò" suggestions={suggestions} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Phở bò"
+        suggestions={suggestions}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     // Set invalid amount
     fireEvent.change(screen.getByTestId('ai-suggest-amount-0'), { target: { value: '' } });
@@ -145,7 +224,13 @@ describe('AISuggestIngredientsPreview', () => {
 
   it('calls onClose when empty state cancel is clicked', () => {
     render(
-      <AISuggestIngredientsPreview dishName="Unknown" suggestions={[]} existingIngredients={existingIngredients} onConfirm={onConfirm} onClose={onClose} />
+      <AISuggestIngredientsPreview
+        dishName="Unknown"
+        suggestions={[]}
+        existingIngredients={existingIngredients}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />,
     );
     // The cancel button in empty state
     const buttons = screen.getAllByRole('button');

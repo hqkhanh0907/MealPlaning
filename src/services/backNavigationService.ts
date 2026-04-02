@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 type BackHandler = () => void;
 
@@ -60,7 +60,9 @@ export function initBackNavigation(): () => void {
         void App.exitApp();
       }
     }).then(handle => {
-      removeCapacitorListener = () => { void handle.remove(); };
+      removeCapacitorListener = () => {
+        void handle.remove();
+      };
     });
   }
 

@@ -1,8 +1,10 @@
-import { useTranslation } from 'react-i18next';
-import { useController, type UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
+import { useController, type UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
 
@@ -28,21 +30,19 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
 
   return (
     <div className="flex flex-1 flex-col" data-testid="training-core-step">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('fitness.onboarding.step1Title')}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          {t('fitness.onboarding.step1Desc')}
-        </p>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('fitness.onboarding.step1Desc')}</p>
 
         {/* Training Goal */}
         <div className="mb-6">
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('fitness.onboarding.goal')}
           </label>
-          <fieldset className="grid grid-cols-2 gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.goal')}>
-            {TRAINING_GOALS.map((goal) => (
+          <fieldset className="m-0 grid grid-cols-2 gap-2 border-0 p-0" aria-label={t('fitness.onboarding.goal')}>
+            {TRAINING_GOALS.map(goal => (
               <button
                 key={goal}
                 type="button"
@@ -66,8 +66,8 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('fitness.onboarding.experience')}
           </label>
-          <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.experience')}>
-            {EXPERIENCE_LEVELS.map((level) => (
+          <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('fitness.onboarding.experience')}>
+            {EXPERIENCE_LEVELS.map(level => (
               <button
                 key={level}
                 type="button"
@@ -91,8 +91,8 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('fitness.onboarding.daysPerWeek')}
           </label>
-          <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.daysPerWeek')}>
-            {[2, 3, 4, 5, 6].map((d) => (
+          <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('fitness.onboarding.daysPerWeek')}>
+            {[2, 3, 4, 5, 6].map(d => (
               <button
                 key={d}
                 type="button"
@@ -109,9 +109,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
               </button>
             ))}
           </fieldset>
-          <p className="mt-1 text-xs text-slate-400">
-            {t('fitness.onboarding.daysPerWeekUnit')}
-          </p>
+          <p className="mt-1 text-xs text-slate-400">{t('fitness.onboarding.daysPerWeekUnit')}</p>
         </div>
       </div>
 

@@ -2,15 +2,13 @@ import type { Workout, WorkoutSet } from '../features/fitness/types';
 import {
   calculateExerciseVolume,
   calculateWeeklyVolume,
-  getSessionsInPeriod,
   estimate1RM,
+  getSessionsInPeriod,
   getVolumeByMuscleGroup,
   isPersonalRecord,
 } from '../features/fitness/utils/trainingMetrics';
 
-function makeSet(
-  overrides: Partial<WorkoutSet> & { weightKg: number },
-): WorkoutSet {
+function makeSet(overrides: Partial<WorkoutSet> & { weightKg: number }): WorkoutSet {
   return {
     id: 'set-1',
     workoutId: 'w-1',
@@ -42,8 +40,20 @@ describe('calculateExerciseVolume', () => {
 describe('calculateWeeklyVolume', () => {
   it('aggregates volume across multiple workouts', () => {
     const workouts: Workout[] = [
-      { id: 'w-1', date: '2025-01-06', name: 'Push Day', createdAt: '2025-01-06T00:00:00Z', updatedAt: '2025-01-06T00:00:00Z' },
-      { id: 'w-2', date: '2025-01-08', name: 'Pull Day', createdAt: '2025-01-08T00:00:00Z', updatedAt: '2025-01-08T00:00:00Z' },
+      {
+        id: 'w-1',
+        date: '2025-01-06',
+        name: 'Push Day',
+        createdAt: '2025-01-06T00:00:00Z',
+        updatedAt: '2025-01-06T00:00:00Z',
+      },
+      {
+        id: 'w-2',
+        date: '2025-01-08',
+        name: 'Pull Day',
+        createdAt: '2025-01-08T00:00:00Z',
+        updatedAt: '2025-01-08T00:00:00Z',
+      },
     ];
     const allSets: WorkoutSet[] = [
       makeSet({ id: 's1', workoutId: 'w-1', reps: 10, weightKg: 60 }),
@@ -62,8 +72,20 @@ describe('getSessionsInPeriod', () => {
     yesterday.setDate(today.getDate() - 1);
 
     const workouts: Workout[] = [
-      { id: 'w-1', date: today.toISOString(), name: 'Day A', createdAt: today.toISOString(), updatedAt: today.toISOString() },
-      { id: 'w-2', date: yesterday.toISOString(), name: 'Day B', createdAt: yesterday.toISOString(), updatedAt: yesterday.toISOString() },
+      {
+        id: 'w-1',
+        date: today.toISOString(),
+        name: 'Day A',
+        createdAt: today.toISOString(),
+        updatedAt: today.toISOString(),
+      },
+      {
+        id: 'w-2',
+        date: yesterday.toISOString(),
+        name: 'Day B',
+        createdAt: yesterday.toISOString(),
+        updatedAt: yesterday.toISOString(),
+      },
     ];
     expect(getSessionsInPeriod(workouts, 7)).toBe(2);
   });
@@ -73,7 +95,13 @@ describe('getSessionsInPeriod', () => {
     old.setDate(old.getDate() - 30);
 
     const workouts: Workout[] = [
-      { id: 'w-1', date: old.toISOString(), name: 'Old Session', createdAt: old.toISOString(), updatedAt: old.toISOString() },
+      {
+        id: 'w-1',
+        date: old.toISOString(),
+        name: 'Old Session',
+        createdAt: old.toISOString(),
+        updatedAt: old.toISOString(),
+      },
     ];
     expect(getSessionsInPeriod(workouts, 7)).toBe(0);
   });
@@ -129,9 +157,7 @@ describe('isPersonalRecord', () => {
   });
 
   it('returns false when current estimated 1RM is below history', () => {
-    const historicalSets: WorkoutSet[] = [
-      makeSet({ id: 's1', exerciseId: 'bench', reps: 5, weightKg: 100 }),
-    ];
+    const historicalSets: WorkoutSet[] = [makeSet({ id: 's1', exerciseId: 'bench', reps: 5, weightKg: 100 })];
     // New attempt: 80 kg × 5 reps → lower estimated 1RM
     expect(isPersonalRecord('bench', 80, 5, historicalSets)).toBe(false);
   });

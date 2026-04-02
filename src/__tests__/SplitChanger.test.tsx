@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // --- Mocks ---
 
@@ -61,9 +61,12 @@ vi.mock('@/store/fitnessStore', () => ({
 }));
 
 vi.mock('lucide-react', () => {
-  const icon = (name: string) =>
+  const icon =
+    (name: string) =>
     ({ className, ...rest }: Record<string, unknown>) => (
-      <span data-testid={`icon-${name}`} className={className as string} {...rest}>{name}</span>
+      <span data-testid={`icon-${name}`} className={className as string} {...rest}>
+        {name}
+      </span>
     );
   return {
     ArrowLeft: icon('arrow-left'),
@@ -83,15 +86,29 @@ vi.mock('lucide-react', () => {
 vi.mock('@/components/ui/sheet', () => ({
   Sheet: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
     open ? <div data-testid="mock-sheet">{children}</div> : null,
-  SheetContent: ({ children, showCloseButton: _, ...props }: { children: React.ReactNode; showCloseButton?: boolean; [key: string]: unknown }) => (
-    <div data-testid="split-change-confirm-sheet" {...props}>{children}</div>
+  SheetContent: ({
+    children,
+    showCloseButton: _,
+    ...props
+  }: {
+    children: React.ReactNode;
+    showCloseButton?: boolean;
+    [key: string]: unknown;
+  }) => (
+    <div data-testid="split-change-confirm-sheet" {...props}>
+      {children}
+    </div>
   ),
   SheetHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   SheetTitle: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
-    <h2 data-testid="confirm-title" {...props}>{children}</h2>
+    <h2 data-testid="confirm-title" {...props}>
+      {children}
+    </h2>
   ),
   SheetDescription: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
-    <p data-testid="confirm-description" {...props}>{children}</p>
+    <p data-testid="confirm-description" {...props}>
+      {children}
+    </p>
   ),
   SheetFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -119,9 +136,7 @@ function makeMockPreview(overrides: Partial<SplitChangePreview> = {}): SplitChan
         toMuscleGroups: ['chest', 'shoulders'],
       },
     ],
-    suggested: [
-      { day: 'Pull Day', muscleGroups: ['back', 'arms'], reason: 'Gợi ý dựa trên profile' },
-    ],
+    suggested: [{ day: 'Pull Day', muscleGroups: ['back', 'arms'], reason: 'Gợi ý dựa trên profile' }],
     unmapped: [
       {
         id: 'd3',

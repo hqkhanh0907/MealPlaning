@@ -1,5 +1,6 @@
+import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+
 import { generateUUID } from '@/utils/helpers';
 
 // --- Types ---
@@ -20,21 +21,60 @@ export interface ToastItem {
 }
 
 export interface NotifyAPI {
-  success: (title: string, message?: string, options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => void;
+  success: (
+    title: string,
+    message?: string,
+    options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } },
+  ) => void;
   error: (title: string, message?: string, options?: { duration?: number }) => void;
   warning: (title: string, message?: string, options?: { duration?: number }) => void;
-  info: (title: string, message?: string, options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => void;
+  info: (
+    title: string,
+    message?: string,
+    options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } },
+  ) => void;
   dismiss: (id: string) => void;
   dismissAll: () => void;
 }
 
 // --- Styles ---
 
-const TOAST_STYLES: Record<NotificationType, { border: string; iconBg: string; title: string; message: string; icon: React.ReactNode; progressBar: string }> = {
-  success: { border: 'border-emerald-200 dark:border-emerald-800', iconBg: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400', title: 'text-emerald-800 dark:text-emerald-300', message: 'text-emerald-600 dark:text-emerald-400', icon: <CheckCircle2 className="w-5 h-5" />, progressBar: 'bg-emerald-500' },
-  error: { border: 'border-rose-200 dark:border-rose-800', iconBg: 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400', title: 'text-rose-800 dark:text-rose-300', message: 'text-rose-600 dark:text-rose-400', icon: <XCircle className="w-5 h-5" />, progressBar: 'bg-rose-500' },
-  warning: { border: 'border-amber-200 dark:border-amber-800', iconBg: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400', title: 'text-amber-800 dark:text-amber-300', message: 'text-amber-600 dark:text-amber-400', icon: <AlertTriangle className="w-5 h-5" />, progressBar: 'bg-amber-500' },
-  info: { border: 'border-sky-200 dark:border-sky-800', iconBg: 'bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400', title: 'text-sky-800 dark:text-sky-300', message: 'text-sky-600 dark:text-sky-400', icon: <Info className="w-5 h-5" />, progressBar: 'bg-sky-500' },
+const TOAST_STYLES: Record<
+  NotificationType,
+  { border: string; iconBg: string; title: string; message: string; icon: React.ReactNode; progressBar: string }
+> = {
+  success: {
+    border: 'border-emerald-200 dark:border-emerald-800',
+    iconBg: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+    title: 'text-emerald-800 dark:text-emerald-300',
+    message: 'text-emerald-600 dark:text-emerald-400',
+    icon: <CheckCircle2 className="h-5 w-5" />,
+    progressBar: 'bg-emerald-500',
+  },
+  error: {
+    border: 'border-rose-200 dark:border-rose-800',
+    iconBg: 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400',
+    title: 'text-rose-800 dark:text-rose-300',
+    message: 'text-rose-600 dark:text-rose-400',
+    icon: <XCircle className="h-5 w-5" />,
+    progressBar: 'bg-rose-500',
+  },
+  warning: {
+    border: 'border-amber-200 dark:border-amber-800',
+    iconBg: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
+    title: 'text-amber-800 dark:text-amber-300',
+    message: 'text-amber-600 dark:text-amber-400',
+    icon: <AlertTriangle className="h-5 w-5" />,
+    progressBar: 'bg-amber-500',
+  },
+  info: {
+    border: 'border-sky-200 dark:border-sky-800',
+    iconBg: 'bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400',
+    title: 'text-sky-800 dark:text-sky-300',
+    message: 'text-sky-600 dark:text-sky-400',
+    icon: <Info className="h-5 w-5" />,
+    progressBar: 'bg-sky-500',
+  },
 };
 
 const DEFAULT_DURATION: Record<NotificationType, number> = {
@@ -81,7 +121,9 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
   useEffect(() => {
     const el = containerRef.current;
     const pause = () => clearTimeout(timerRef.current);
-    const resume = () => { timerRef.current = setTimeout(handleDismiss, 2000); };
+    const resume = () => {
+      timerRef.current = setTimeout(handleDismiss, 2000);
+    };
     el?.addEventListener('mouseenter', pause);
     el?.addEventListener('mouseleave', resume);
     return () => {
@@ -100,26 +142,29 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
   return (
     <div
       ref={containerRef}
-      className={`
-        relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg border ${styles.border}
-        px-4 py-3 flex items-start gap-3 w-full max-w-sm text-left
-        transition-all duration-300 ease-out
-        ${isExiting ? 'opacity-0 translate-x-full sm:translate-x-full' : 'opacity-100 translate-x-0'}
-        ${toast.onClick ? 'cursor-pointer hover:shadow-xl active:scale-[0.98]' : ''}
-      `}
+      className={`relative rounded-2xl border bg-white shadow-lg dark:bg-slate-800 ${styles.border} flex w-full max-w-sm items-start gap-3 px-4 py-3 text-left transition-all duration-300 ease-out ${isExiting ? 'translate-x-full opacity-0 sm:translate-x-full' : 'translate-x-0 opacity-100'} ${toast.onClick ? 'cursor-pointer hover:shadow-xl active:scale-[0.98]' : ''} `}
     >
       {toast.onClick && (
-        <button type="button" onClick={handleClick} className="absolute inset-0 w-full h-full cursor-pointer" aria-label={toast.title} />
+        <button
+          type="button"
+          onClick={handleClick}
+          className="absolute inset-0 h-full w-full cursor-pointer"
+          aria-label={toast.title}
+        />
       )}
-      <div className={`relative z-10 p-2 rounded-xl shrink-0 ${styles.iconBg}`}>{styles.icon}</div>
-      <div className="relative z-10 flex-1 min-w-0 py-0.5">
-        <p className={`font-semibold text-sm leading-tight ${styles.title}`}>{toast.title}</p>
-        {toast.message && <p className={`text-xs mt-0.5 leading-snug ${styles.message}`}>{toast.message}</p>}
+      <div className={`relative z-10 shrink-0 rounded-xl p-2 ${styles.iconBg}`}>{styles.icon}</div>
+      <div className="relative z-10 min-w-0 flex-1 py-0.5">
+        <p className={`text-sm leading-tight font-semibold ${styles.title}`}>{toast.title}</p>
+        {toast.message && <p className={`mt-0.5 text-xs leading-snug ${styles.message}`}>{toast.message}</p>}
         {toast.action && (
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); toast.action?.onClick(); handleDismiss(); }}
-            className="mt-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 active:text-emerald-800 underline underline-offset-2 transition-colors min-h-10 flex items-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+            onClick={e => {
+              e.stopPropagation();
+              toast.action?.onClick();
+              handleDismiss();
+            }}
+            className="focus-visible:ring-ring mt-1.5 flex min-h-10 items-center rounded text-xs font-bold text-emerald-600 underline underline-offset-2 transition-colors hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-offset-2 active:text-emerald-800"
           >
             {toast.action.label}
           </button>
@@ -127,10 +172,13 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
       </div>
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
-        className="relative z-10 p-2 min-h-10 min-w-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500 shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        onClick={e => {
+          e.stopPropagation();
+          handleDismiss();
+        }}
+        className="focus-visible:ring-ring relative z-10 flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-slate-500 dark:hover:bg-slate-700"
       >
-        <X className="w-4 h-4" />
+        <X className="h-4 w-4" />
       </button>
     </div>
   );
@@ -143,11 +191,27 @@ const MAX_TOASTS = 5;
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const addToast = useCallback((type: NotificationType, title: string, message = '', options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } }) => {
-    const id = generateUUID();
-    const newToast: ToastItem = { id, type, title, message, onClick: options?.onClick, duration: options?.duration, action: options?.action };
-    setToasts(prev => [...prev.slice(-(MAX_TOASTS - 1)), newToast]);
-  }, []);
+  const addToast = useCallback(
+    (
+      type: NotificationType,
+      title: string,
+      message = '',
+      options?: { onClick?: () => void; duration?: number; action?: { label: string; onClick: () => void } },
+    ) => {
+      const id = generateUUID();
+      const newToast: ToastItem = {
+        id,
+        type,
+        title,
+        message,
+        onClick: options?.onClick,
+        duration: options?.duration,
+        action: options?.action,
+      };
+      setToasts(prev => [...prev.slice(-(MAX_TOASTS - 1)), newToast]);
+    },
+    [],
+  );
 
   const dismiss = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
@@ -155,14 +219,17 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
   const dismissAll = useCallback(() => setToasts([]), []);
 
-  const api: NotifyAPI = React.useMemo(() => ({
-    success: (title, message, options) => addToast('success', title, message, options),
-    error: (title, message, options) => addToast('error', title, message, options),
-    warning: (title, message, options) => addToast('warning', title, message, options),
-    info: (title, message, options) => addToast('info', title, message, options),
-    dismiss,
-    dismissAll,
-  }), [addToast, dismiss, dismissAll]);
+  const api: NotifyAPI = React.useMemo(
+    () => ({
+      success: (title, message, options) => addToast('success', title, message, options),
+      error: (title, message, options) => addToast('error', title, message, options),
+      warning: (title, message, options) => addToast('warning', title, message, options),
+      info: (title, message, options) => addToast('info', title, message, options),
+      dismiss,
+      dismissAll,
+    }),
+    [addToast, dismiss, dismissAll],
+  );
 
   return (
     <NotificationContext.Provider value={api}>
@@ -171,7 +238,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       {/* Toast Container — top on mobile, bottom-right on desktop */}
       <div
         aria-live="polite"
-        className="fixed top-[env(safe-area-inset-top)] right-0 left-0 sm:left-auto sm:top-auto sm:bottom-6 sm:right-6 z-9999 flex flex-col gap-2 p-3 sm:p-0 pointer-events-none"
+        className="pointer-events-none fixed top-[env(safe-area-inset-top)] right-0 left-0 z-9999 flex flex-col gap-2 p-3 sm:top-auto sm:right-6 sm:bottom-6 sm:left-auto sm:p-0"
       >
         {toasts.map(toast => (
           <div key={toast.id} className="pointer-events-auto">

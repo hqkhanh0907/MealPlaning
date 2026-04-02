@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import * as backService from '../services/backNavigationService';
 
 vi.mock('../services/backNavigationService', () => ({
@@ -50,7 +51,7 @@ describe('usePageStackBackHandler', () => {
 
   it('back handler calls popPage', async () => {
     let capturedHandler: (() => void) | null = null;
-    vi.mocked(backService.pushBackEntry).mockImplementation((handler) => {
+    vi.mocked(backService.pushBackEntry).mockImplementation(handler => {
       capturedHandler = handler;
     });
 

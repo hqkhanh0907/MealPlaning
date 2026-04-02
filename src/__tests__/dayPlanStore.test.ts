@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { useDayPlanStore } from '../store/dayPlanStore';
 import type { DayPlan } from '../types';
 
@@ -67,10 +68,7 @@ describe('dayPlanStore', () => {
     it('accepts an updater function', () => {
       useDayPlanStore.setState({ dayPlans: [makePlan()] });
 
-      useDayPlanStore.getState().setDayPlans((prev) => [
-        ...prev,
-        makePlan({ date: '2025-01-16' }),
-      ]);
+      useDayPlanStore.getState().setDayPlans(prev => [...prev, makePlan({ date: '2025-01-16' })]);
 
       expect(useDayPlanStore.getState().dayPlans).toHaveLength(2);
     });

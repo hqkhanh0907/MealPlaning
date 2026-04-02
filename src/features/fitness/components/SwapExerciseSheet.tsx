@@ -1,16 +1,12 @@
-import React, { memo, useMemo, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, Search } from 'lucide-react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
-import { EXERCISES } from '../data/exerciseDatabase';
 import { EQUIPMENT_DISPLAY } from '../constants';
-import type {
-  Exercise,
-  MuscleGroup,
-  EquipmentType,
-  ExerciseCategory,
-} from '../types';
+import { EXERCISES } from '../data/exerciseDatabase';
+import type { EquipmentType, Exercise, ExerciseCategory, MuscleGroup } from '../types';
 
 interface SwapExerciseSheetProps {
   isOpen: boolean;
@@ -69,15 +65,13 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
   const alternatives = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
 
-    return allExercises.filter((exercise) => {
+    return allExercises.filter(exercise => {
       if (exercise.id === currentExercise.id) return false;
       if (exercise.muscleGroup !== currentExercise.muscleGroup) return false;
 
       if (query) {
         const nameViMatch = exercise.nameVi.toLowerCase().includes(query);
-        const nameEnMatch = exercise.nameEn
-          ? exercise.nameEn.toLowerCase().includes(query)
-          : false;
+        const nameEnMatch = exercise.nameEn ? exercise.nameEn.toLowerCase().includes(query) : false;
         if (!nameViMatch && !nameEnMatch) return false;
       }
 
@@ -93,12 +87,9 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
     [onSelect, onClose],
   );
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    },
-    [],
-  );
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -106,40 +97,34 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div
         data-testid="swap-exercise-sheet"
-        className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md max-h-[85vh] flex flex-col"
+        className="relative flex max-h-[85vh] w-full flex-col rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+          <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
         </div>
 
         {/* Header */}
         <div className="px-4 pb-3 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <ArrowLeftRight className="w-5 h-5 text-emerald-500" />
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-              {t('fitness.swap.title')}
-            </h2>
+          <div className="mb-1 flex items-center justify-center gap-2">
+            <ArrowLeftRight className="h-5 w-5 text-emerald-500" />
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('fitness.swap.title')}</h2>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             <span>{t('fitness.swap.current')}: </span>
-            <span
-              className="font-medium text-slate-700 dark:text-slate-300"
-              data-testid="swap-current-name"
-            >
+            <span className="font-medium text-slate-700 dark:text-slate-300" data-testid="swap-current-name">
               {currentExercise.nameVi}
             </span>
           </p>
-          <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-            {t('fitness.swap.sameGroup')}:{' '}
-            {t(MUSCLE_GROUP_I18N_KEYS[currentExercise.muscleGroup])}
+          <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+            {t('fitness.swap.sameGroup')}: {t(MUSCLE_GROUP_I18N_KEYS[currentExercise.muscleGroup])}
           </p>
         </div>
 
         {/* Search bar */}
         <div className="px-4 pb-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               data-testid="swap-search-input"
@@ -147,51 +132,47 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.swap.search')}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 pl-9 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm placeholder:text-slate-400 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 pl-9 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
             />
           </div>
         </div>
 
         {/* Section label */}
         <div className="px-4 pb-2">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+          <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
             {t('fitness.swap.alternatives')} ({alternatives.length})
           </p>
         </div>
 
         {/* Exercise list */}
-        <div className="flex-1 overflow-y-auto px-4 pb-safe">
+        <div className="pb-safe flex-1 overflow-y-auto px-4">
           {alternatives.length === 0 ? (
             <div
               data-testid="swap-empty-state"
               className="flex flex-col items-center justify-center py-12 text-slate-400"
             >
-              <ArrowLeftRight className="w-8 h-8 mb-2 opacity-40" />
+              <ArrowLeftRight className="mb-2 h-8 w-8 opacity-40" />
               <p className="text-sm">{t('fitness.swap.noAlternatives')}</p>
             </div>
           ) : (
             <ul className="divide-y divide-slate-100 dark:divide-slate-700">
-              {alternatives.map((exercise) => (
+              {alternatives.map(exercise => (
                 <li key={exercise.id}>
                   <button
                     type="button"
                     data-testid={`swap-item-${exercise.id}`}
                     aria-label={`${t('fitness.swap.title')}: ${exercise.nameVi}`}
                     onClick={() => handleSelect(exercise)}
-                    className="w-full text-left px-3 py-3 min-h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                    className="min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:hover:bg-slate-700/50"
                   >
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                      {exercise.nameVi}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{exercise.nameVi}</p>
+                    <div className="mt-0.5 flex items-center gap-2">
                       <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         {t(CATEGORY_I18N_KEYS[exercise.category])}
                       </span>
-                      <span className="text-xs text-slate-300 dark:text-slate-600">
-                        •
-                      </span>
+                      <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {exercise.equipment.map((eq) => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
+                        {exercise.equipment.map(eq => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
                       </span>
                     </div>
                   </button>

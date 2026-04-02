@@ -55,19 +55,17 @@ export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
 
   return (
     <fieldset
-      className="flex items-center justify-center gap-2 border-0 p-0 m-0"
+      className="m-0 flex items-center justify-center gap-2 border-0 p-0"
       aria-label={t('fitness.scheduleEditor.weeklyCalendar')}
       data-testid="weekly-calendar-strip"
     >
-      {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+      {[1, 2, 3, 4, 5, 6, 7].map(day => {
         const isTraining = trainingDaySet.has(day);
         const isSelected = selectedDay === day;
         const isToday = todayDow === day;
         const label = t(DAY_LABEL_KEYS[day - 1]);
         const fullLabel = t(DAY_FULL_KEYS[day - 1]);
-        const statusLabel = isTraining
-          ? t('fitness.scheduleEditor.trainingDay')
-          : t('fitness.scheduleEditor.restDay');
+        const statusLabel = isTraining ? t('fitness.scheduleEditor.trainingDay') : t('fitness.scheduleEditor.restDay');
 
         return (
           <button
@@ -83,7 +81,7 @@ export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
               'touch-manipulation',
               'motion-reduce:transition-none',
               'transition-colors duration-150',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+              'focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:outline-none',
               isTraining
                 ? 'bg-emerald-500 text-white dark:bg-emerald-600'
                 : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300',

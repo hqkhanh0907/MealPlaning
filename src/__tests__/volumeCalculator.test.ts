@@ -2,38 +2,25 @@ import {
   calculateTargetWeeklySets,
   distributeVolume,
   getVolumeLandmarks,
-  VOLUME_TABLE,
-  MEV_TABLE,
   MAV_TABLE,
+  MEV_TABLE,
   MRV_TABLE,
   type MuscleGroup,
   type TrainingExperience,
+  VOLUME_TABLE,
 } from '../features/fitness/utils/volumeCalculator';
 
 describe('volumeCalculator', () => {
-  const allMuscles: MuscleGroup[] = [
-    'chest',
-    'back',
-    'shoulders',
-    'legs',
-    'arms',
-    'core',
-    'glutes',
-  ];
+  const allMuscles: MuscleGroup[] = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'];
   const allExperiences: TrainingExperience[] = ['beginner', 'intermediate', 'advanced'];
 
   describe('calculateTargetWeeklySets — base volume per experience level', () => {
-    it.each(allExperiences)(
-      'returns base volume for %s with maintain goal, age ≤ 40',
-      (exp) => {
-        for (const muscle of allMuscles) {
-          const result = calculateTargetWeeklySets(muscle, exp, 'maintain', 30);
-          expect(result).toBe(
-            Math.max(Math.round(VOLUME_TABLE[exp][muscle]), MEV_TABLE[muscle]),
-          );
-        }
-      },
-    );
+    it.each(allExperiences)('returns base volume for %s with maintain goal, age ≤ 40', exp => {
+      for (const muscle of allMuscles) {
+        const result = calculateTargetWeeklySets(muscle, exp, 'maintain', 30);
+        expect(result).toBe(Math.max(Math.round(VOLUME_TABLE[exp][muscle]), MEV_TABLE[muscle]));
+      }
+    });
   });
 
   describe('calculateTargetWeeklySets — cut modifier (-20%)', () => {
@@ -164,7 +151,7 @@ describe('volumeCalculator', () => {
   });
 
   describe('getVolumeLandmarks', () => {
-    it.each(allMuscles)('returns correct landmarks for %s', (muscle) => {
+    it.each(allMuscles)('returns correct landmarks for %s', muscle => {
       const result = getVolumeLandmarks(muscle);
       expect(result).toEqual({
         mev: MEV_TABLE[muscle],

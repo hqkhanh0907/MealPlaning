@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { Dish } from '../types';
-import type { DatabaseService } from '../services/databaseService';
+
 import { initialDishes } from '../data/initialData';
+import type { DatabaseService } from '../services/databaseService';
+import type { Dish } from '../types';
 
 interface DishRow {
   id: string;
@@ -29,25 +30,28 @@ interface DishState {
 
 export const useDishStore = create<DishState>((set, get) => ({
   dishes: initialDishes,
-  setDishes: (updater) => set((state) => ({
-    dishes: typeof updater === 'function' ? updater(state.dishes) : updater,
-  })),
-  addDish: (dish) => set((state) => ({
-    dishes: [...state.dishes, dish],
-  })),
-  updateDish: (dish) => set((state) => ({
-    dishes: state.dishes.map(d => d.id === dish.id ? dish : d),
-  })),
-  deleteDish: (id) => set((state) => ({
-    dishes: state.dishes.filter(d => d.id !== id),
-  })),
-  isIngredientUsed: (ingId) =>
-    get().dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)),
+  setDishes: updater =>
+    set(state => ({
+      dishes: typeof updater === 'function' ? updater(state.dishes) : updater,
+    })),
+  addDish: dish =>
+    set(state => ({
+      dishes: [...state.dishes, dish],
+    })),
+  updateDish: dish =>
+    set(state => ({
+      dishes: state.dishes.map(d => (d.id === dish.id ? dish : d)),
+    })),
+  deleteDish: id =>
+    set(state => ({
+      dishes: state.dishes.filter(d => d.id !== id),
+    })),
+  isIngredientUsed: ingId => get().dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)),
   loadAll: async (db: DatabaseService) => {
     const dishRows = await db.query<DishRow>('SELECT * FROM dishes');
     if (dishRows.length === 0) return;
     const dishes: Dish[] = await Promise.all(
-      dishRows.map(async (r) => {
+      dishRows.map(async r => {
         const ings = await db.query<DishIngredientRow>(
           'SELECT ingredient_id, amount FROM dish_ingredients WHERE dish_id = ?',
           [r.id],
@@ -55,7 +59,7 @@ export const useDishStore = create<DishState>((set, get) => ({
         return {
           id: r.id,
           name: { vi: r.name_vi, ...(r.name_en ? { en: r.name_en } : {}) },
-          ingredients: ings.map((i) => ({ ingredientId: i.ingredient_id, amount: i.amount })),
+          ingredients: ings.map(i => ({ ingredientId: i.ingredient_id, amount: i.amount })),
           tags: JSON.parse(r.tags),
           ...(r.rating == null ? {} : { rating: r.rating }),
           ...(r.notes == null ? {} : { notes: r.notes }),

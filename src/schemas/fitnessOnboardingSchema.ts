@@ -6,36 +6,13 @@ const TRAINING_GOAL_VALUES = ['strength', 'hypertrophy', 'endurance', 'general']
 
 const TRAINING_EXPERIENCE_VALUES = ['beginner', 'intermediate', 'advanced'] as const;
 
-const EQUIPMENT_TYPE_VALUES = [
-  'barbell',
-  'dumbbell',
-  'machine',
-  'cable',
-  'bodyweight',
-  'bands',
-  'kettlebell',
-] as const;
+const EQUIPMENT_TYPE_VALUES = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands', 'kettlebell'] as const;
 
-const BODY_REGION_VALUES = [
-  'shoulders',
-  'lower_back',
-  'knees',
-  'wrists',
-  'neck',
-  'hips',
-] as const;
+const BODY_REGION_VALUES = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'] as const;
 
 const PERIODIZATION_MODEL_VALUES = ['linear', 'undulating', 'block'] as const;
 
-const MUSCLE_GROUP_VALUES = [
-  'chest',
-  'back',
-  'shoulders',
-  'legs',
-  'arms',
-  'core',
-  'glutes',
-] as const;
+const MUSCLE_GROUP_VALUES = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'] as const;
 
 const DAYS_PER_WEEK_VALUES = [2, 3, 4, 5, 6] as const;
 
@@ -59,8 +36,7 @@ export const fitnessOnboardingSchema = z.object({
     .number()
     .int()
     .refine(
-      (v): v is (typeof DAYS_PER_WEEK_VALUES)[number] =>
-        (DAYS_PER_WEEK_VALUES as readonly number[]).includes(v),
+      (v): v is (typeof DAYS_PER_WEEK_VALUES)[number] => (DAYS_PER_WEEK_VALUES as readonly number[]).includes(v),
       { error: 'Days per week must be 2, 3, 4, 5, or 6' },
     ),
 
@@ -69,8 +45,7 @@ export const fitnessOnboardingSchema = z.object({
     .number()
     .int()
     .refine(
-      (v): v is (typeof SESSION_DURATION_VALUES)[number] =>
-        (SESSION_DURATION_VALUES as readonly number[]).includes(v),
+      (v): v is (typeof SESSION_DURATION_VALUES)[number] => (SESSION_DURATION_VALUES as readonly number[]).includes(v),
       { error: 'Session duration must be 30, 45, 60, or 90' },
     )
     .nullable(),
@@ -97,22 +72,18 @@ export const fitnessOnboardingSchema = z.object({
   cycleWeeks: z.coerce
     .number()
     .int()
-    .refine(
-      (v): v is (typeof CYCLE_WEEKS_VALUES)[number] =>
-        (CYCLE_WEEKS_VALUES as readonly number[]).includes(v),
-      { error: 'Cycle weeks must be 4, 6, 8, or 12' },
-    )
+    .refine((v): v is (typeof CYCLE_WEEKS_VALUES)[number] => (CYCLE_WEEKS_VALUES as readonly number[]).includes(v), {
+      error: 'Cycle weeks must be 4, 6, 8, or 12',
+    })
     .nullable(),
 
   /**
    * Step 7 – priority muscle groups, max 3 (intermediate+ only).
    * Conditionally visible when experience >= 'intermediate'.
    */
-  priorityMuscles: z
-    .array(z.enum(MUSCLE_GROUP_VALUES))
-    .max(MAX_PRIORITY_MUSCLES, {
-      error: `Select at most ${MAX_PRIORITY_MUSCLES} priority muscles`,
-    }),
+  priorityMuscles: z.array(z.enum(MUSCLE_GROUP_VALUES)).max(MAX_PRIORITY_MUSCLES, {
+    error: `Select at most ${MAX_PRIORITY_MUSCLES} priority muscles`,
+  }),
 
   /**
    * Step 8 – known 1-rep-max values keyed by lift id (squat | bench | deadlift | ohp).

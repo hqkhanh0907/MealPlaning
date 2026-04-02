@@ -1,11 +1,12 @@
-import { deriveInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
-import type { FitnessNutritionInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
-import { useFitnessNutritionBridge } from '../features/fitness/hooks/useFitnessNutritionBridge';
 import { renderHook } from '@testing-library/react';
 import type { Mock } from 'vitest';
-import { useFitnessStore } from '../store/fitnessStore';
+
+import type { FitnessNutritionInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
+import { deriveInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
+import { useFitnessNutritionBridge } from '../features/fitness/hooks/useFitnessNutritionBridge';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import * as todayNutrition from '../hooks/useTodayNutrition';
+import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
@@ -26,14 +27,7 @@ vi.mock('../services/nutritionEngine', () => ({
 
 describe('deriveInsight', () => {
   it('returns deficit-on-training when calories < 75% budget on training day', () => {
-    const result = deriveInsight(
-      true,
-      3,
-      2500,
-      1000,
-      120,
-      112,
-    );
+    const result = deriveInsight(true, 3, 2500, 1000, 120, 112);
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('deficit-on-training');
     expect((result as FitnessNutritionInsight).severity).toBe('warning');
@@ -41,26 +35,12 @@ describe('deriveInsight', () => {
   });
 
   it('returns null on training day when calories are adequate', () => {
-    const result = deriveInsight(
-      true,
-      3,
-      2500,
-      2200,
-      120,
-      112,
-    );
+    const result = deriveInsight(true, 3, 2500, 2200, 120, 112);
     expect(result).toBeNull();
   });
 
   it('returns protein-low when protein < 60% target', () => {
-    const result = deriveInsight(
-      false,
-      2,
-      2500,
-      2200,
-      30,
-      112,
-    );
+    const result = deriveInsight(false, 2, 2500, 2200, 30, 112);
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('protein-low');
     expect((result as FitnessNutritionInsight).severity).toBe('warning');
@@ -68,14 +48,7 @@ describe('deriveInsight', () => {
   });
 
   it('returns recovery-day on rest day with high weekly load', () => {
-    const result = deriveInsight(
-      false,
-      5,
-      2500,
-      2200,
-      120,
-      112,
-    );
+    const result = deriveInsight(false, 5, 2500, 2200, 120, 112);
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('recovery-day');
     expect((result as FitnessNutritionInsight).severity).toBe('info');
@@ -83,77 +56,35 @@ describe('deriveInsight', () => {
   });
 
   it('returns null when everything is balanced', () => {
-    const result = deriveInsight(
-      false,
-      2,
-      2500,
-      2200,
-      120,
-      112,
-    );
+    const result = deriveInsight(false, 2, 2500, 2200, 120, 112);
     expect(result).toBeNull();
   });
 
   it('returns null when protein target is zero', () => {
-    const result = deriveInsight(
-      false,
-      2,
-      2500,
-      2200,
-      0,
-      0,
-    );
+    const result = deriveInsight(false, 2, 2500, 2200, 0, 0);
     expect(result).toBeNull();
   });
 
   it('prioritizes deficit-on-training over protein-low', () => {
-    const result = deriveInsight(
-      true,
-      5,
-      2500,
-      500,
-      10,
-      112,
-    );
+    const result = deriveInsight(true, 5, 2500, 500, 10, 112);
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('deficit-on-training');
   });
 
   it('prioritizes protein-low over recovery-day', () => {
-    const result = deriveInsight(
-      false,
-      5,
-      2500,
-      2200,
-      10,
-      112,
-    );
+    const result = deriveInsight(false, 5, 2500, 2200, 10, 112);
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('protein-low');
   });
 
   it('returns recovery-day with exactly 4 weekly workouts', () => {
-    const result = deriveInsight(
-      false,
-      4,
-      2500,
-      2200,
-      120,
-      112,
-    );
+    const result = deriveInsight(false, 4, 2500, 2200, 120, 112);
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('recovery-day');
   });
 
   it('returns null on rest day with 3 weekly workouts (below threshold)', () => {
-    const result = deriveInsight(
-      false,
-      3,
-      2500,
-      2200,
-      120,
-      112,
-    );
+    const result = deriveInsight(false, 3, 2500, 2200, 120, 112);
     expect(result).toBeNull();
   });
 });
@@ -187,13 +118,11 @@ const DEFAULT_PROFILE = {
 describe('useFitnessNutritionBridge hook', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: unknown[] }) => unknown) =>
-        selector({ workouts: [] }),
+    (useFitnessStore as unknown as Mock).mockImplementation((selector: (s: { workouts: unknown[] }) => unknown) =>
+      selector({ workouts: [] }),
     );
     (useHealthProfileStore as unknown as Mock).mockImplementation(
-      (selector: (s: { profile: typeof DEFAULT_PROFILE }) => unknown) =>
-        selector({ profile: DEFAULT_PROFILE }),
+      (selector: (s: { profile: typeof DEFAULT_PROFILE }) => unknown) => selector({ profile: DEFAULT_PROFILE }),
     );
     vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
       eaten: 2000,
@@ -207,6 +136,18 @@ describe('useFitnessNutritionBridge hook', () => {
     expect(result.current.isTrainingDay).toBe(false);
     expect(result.current.weeklyTrainingLoad).toBe(0);
     expect(result.current.todayCalorieBudget).toBe(2500);
+  });
+
+  it('returns null insight and zero calorie budget when profile is null', () => {
+    (useHealthProfileStore as unknown as Mock).mockImplementation((selector: (s: { profile: null }) => unknown) =>
+      selector({ profile: null }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.insight).toBeNull();
+    expect(result.current.todayCalorieBudget).toBe(0);
+    expect(result.current.isTrainingDay).toBe(false);
+    expect(result.current.weeklyTrainingLoad).toBe(0);
   });
 
   it('identifies training day when workout matches today', () => {
@@ -264,8 +205,7 @@ describe('useFitnessNutritionBridge hook', () => {
   it('returns insight object from deriveInsight integration', () => {
     const today = formatDate(new Date());
     (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
-        selector({ workouts: [{ date: today }] }),
+      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) => selector({ workouts: [{ date: today }] }),
     );
     vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
       eaten: 500,

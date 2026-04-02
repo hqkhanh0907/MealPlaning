@@ -1,15 +1,27 @@
-import { detectVersion, createV2Export, importV2Data, buildLegacyFormat } from '../services/syncV2Utils';
-import type { V2ExportPayload, ImportResult } from '../services/syncV2Utils';
 import type { DatabaseService } from '../services/databaseService';
+import type { ImportResult, V2ExportPayload } from '../services/syncV2Utils';
+import { buildLegacyFormat, createV2Export, detectVersion, importV2Data } from '../services/syncV2Utils';
 
 /* ------------------------------------------------------------------ */
 /*  All 16 schema table names                                           */
 /* ------------------------------------------------------------------ */
 const ALL_TABLES = [
-  'ingredients', 'dishes', 'dish_ingredients', 'day_plans',
-  'meal_templates', 'user_profile', 'goals', 'exercises',
-  'training_profile', 'training_plans', 'training_plan_days',
-  'workouts', 'workout_sets', 'weight_log', 'daily_log', 'adjustments',
+  'ingredients',
+  'dishes',
+  'dish_ingredients',
+  'day_plans',
+  'meal_templates',
+  'user_profile',
+  'goals',
+  'exercises',
+  'training_profile',
+  'training_plans',
+  'training_plan_days',
+  'workouts',
+  'workout_sets',
+  'weight_log',
+  'daily_log',
+  'adjustments',
 ];
 
 /* ------------------------------------------------------------------ */
@@ -20,10 +32,7 @@ interface MockDb extends DatabaseService {
   _stored: Record<string, unknown[]>;
 }
 
-function createMockDb(
-  tables: Record<string, unknown[]> = {},
-  opts?: { executeError?: (sql: string) => void },
-): MockDb {
+function createMockDb(tables: Record<string, unknown[]> = {}, opts?: { executeError?: (sql: string) => void }): MockDb {
   const _stored: Record<string, unknown[]> = {};
   for (const t of ALL_TABLES) _stored[t] = [];
   for (const [k, v] of Object.entries(tables)) _stored[k] = structuredClone(v);
@@ -41,7 +50,7 @@ function createMockDb(
     const insMatch = sql.match(/INSERT\s+INTO\s+"?(\w+)"?\s*\(([^)]+)\)/i);
     if (insMatch) {
       const tbl = insMatch[1];
-      const cols = insMatch[2].split(',').map((c) => c.trim().replace(/"/g, ''));
+      const cols = insMatch[2].split(',').map(c => c.trim().replace(/"/g, ''));
       if (!_stored[tbl]) _stored[tbl] = [];
       const row: Record<string, unknown> = {};
       cols.forEach((col, i) => {
@@ -124,7 +133,20 @@ describe('syncV2Utils', () => {
   describe('createV2Export', () => {
     it('produces correct structure with _version, _exportedAt, tables', async () => {
       const db = createMockDb({
-        ingredients: [{ id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 100, protein_per_100: 2, carbs_per_100: 22, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' }],
+        ingredients: [
+          {
+            id: 'i1',
+            name_vi: 'Gạo',
+            name_en: 'Rice',
+            calories_per_100: 100,
+            protein_per_100: 2,
+            carbs_per_100: 22,
+            fat_per_100: 0.3,
+            fiber_per_100: 0.4,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
+        ],
         dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: null, tags: '[]', rating: null, notes: null }],
       });
 
@@ -171,10 +193,37 @@ describe('syncV2Utils', () => {
 
     it('auto-generates _legacyFormat from SQL data when no legacy provided', async () => {
       const db = createMockDb({
-        ingredients: [{ id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' }],
+        ingredients: [
+          {
+            id: 'i1',
+            name_vi: 'Gạo',
+            name_en: 'Rice',
+            calories_per_100: 130,
+            protein_per_100: 2.7,
+            carbs_per_100: 28,
+            fat_per_100: 0.3,
+            fiber_per_100: 0.4,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
+        ],
         dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: null, tags: '["breakfast"]', rating: 5, notes: null }],
         dish_ingredients: [{ dish_id: 'd1', ingredient_id: 'i1', amount: 200 }],
-        user_profile: [{ id: 'default', gender: 'male', age: 30, height_cm: 170, weight_kg: 65, activity_level: 'moderate', body_fat_pct: null, bmr_override: null, protein_ratio: 2.0, fat_pct: 0.25, updated_at: '2026-01-01' }],
+        user_profile: [
+          {
+            id: 'default',
+            gender: 'male',
+            age: 30,
+            height_cm: 170,
+            weight_kg: 65,
+            activity_level: 'moderate',
+            body_fat_pct: null,
+            bmr_override: null,
+            protein_ratio: 2.0,
+            fat_pct: 0.25,
+            updated_at: '2026-01-01',
+          },
+        ],
       });
 
       const result = await createV2Export(db);
@@ -182,7 +231,16 @@ describe('syncV2Utils', () => {
       expect(result._legacyFormat).toBeDefined();
       const legacy = result._legacyFormat as Record<string, unknown>;
       expect(legacy['mp-ingredients']).toEqual([
-        { id: 'i1', name: { vi: 'Gạo', en: 'Rice' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
+        {
+          id: 'i1',
+          name: { vi: 'Gạo', en: 'Rice' },
+          caloriesPer100: 130,
+          proteinPer100: 2.7,
+          carbsPer100: 28,
+          fatPer100: 0.3,
+          fiberPer100: 0.4,
+          unit: { vi: 'g', en: 'g' },
+        },
       ]);
       const dishes = legacy['mp-dishes'] as Array<Record<string, unknown>>;
       expect(dishes[0].id).toBe('d1');
@@ -201,8 +259,30 @@ describe('syncV2Utils', () => {
     it('transforms ingredients with LocalizedString names', () => {
       const tables: Record<string, unknown[]> = {
         ingredients: [
-          { id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' },
-          { id: 'i2', name_vi: 'Trứng', name_en: null, calories_per_100: 155, protein_per_100: 13, carbs_per_100: 1.1, fat_per_100: 11, fiber_per_100: 0, unit_vi: 'quả', unit_en: null },
+          {
+            id: 'i1',
+            name_vi: 'Gạo',
+            name_en: 'Rice',
+            calories_per_100: 130,
+            protein_per_100: 2.7,
+            carbs_per_100: 28,
+            fat_per_100: 0.3,
+            fiber_per_100: 0.4,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
+          {
+            id: 'i2',
+            name_vi: 'Trứng',
+            name_en: null,
+            calories_per_100: 155,
+            protein_per_100: 13,
+            carbs_per_100: 1.1,
+            fat_per_100: 11,
+            fiber_per_100: 0,
+            unit_vi: 'quả',
+            unit_en: null,
+          },
         ],
       };
 
@@ -218,9 +298,7 @@ describe('syncV2Utils', () => {
 
     it('transforms dishes with embedded dish_ingredients', () => {
       const tables: Record<string, unknown[]> = {
-        dishes: [
-          { id: 'd1', name_vi: 'Cơm', name_en: 'Rice', tags: '["breakfast"]', rating: 5, notes: null },
-        ],
+        dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: 'Rice', tags: '["breakfast"]', rating: 5, notes: null }],
         dish_ingredients: [
           { dish_id: 'd1', ingredient_id: 'i1', amount: 200 },
           { dish_id: 'd1', ingredient_id: 'i2', amount: 50 },
@@ -242,7 +320,13 @@ describe('syncV2Utils', () => {
     it('transforms day_plans with JSON-parsed arrays', () => {
       const tables: Record<string, unknown[]> = {
         day_plans: [
-          { date: '2024-01-01', breakfast_dish_ids: '["d1"]', lunch_dish_ids: '["d2"]', dinner_dish_ids: '[]', servings: '{"d1":2}' },
+          {
+            date: '2024-01-01',
+            breakfast_dish_ids: '["d1"]',
+            lunch_dish_ids: '["d2"]',
+            dinner_dish_ids: '[]',
+            servings: '{"d1":2}',
+          },
         ],
       };
 
@@ -297,7 +381,20 @@ describe('syncV2Utils', () => {
         _exportedAt: '2026-03-23T10:00:00.000Z',
         _format: 'sqlite-json',
         tables: {
-          ingredients: [{ id: 'i1', name_vi: 'Gạo', name_en: null, calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: null }],
+          ingredients: [
+            {
+              id: 'i1',
+              name_vi: 'Gạo',
+              name_en: null,
+              calories_per_100: 130,
+              protein_per_100: 2.7,
+              carbs_per_100: 28,
+              fat_per_100: 0.3,
+              fiber_per_100: 0.4,
+              unit_vi: 'g',
+              unit_en: null,
+            },
+          ],
           dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: null, tags: '[]', rating: null, notes: null }],
         },
       };
@@ -307,7 +404,18 @@ describe('syncV2Utils', () => {
       expect(result.success).toBe(true);
       expect(db.transaction).toHaveBeenCalledTimes(1);
       expect(db._stored['ingredients']).toEqual([
-        { id: 'i1', name_vi: 'Gạo', name_en: null, calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: null },
+        {
+          id: 'i1',
+          name_vi: 'Gạo',
+          name_en: null,
+          calories_per_100: 130,
+          protein_per_100: 2.7,
+          carbs_per_100: 28,
+          fat_per_100: 0.3,
+          fiber_per_100: 0.4,
+          unit_vi: 'g',
+          unit_en: null,
+        },
       ]);
       expect(db._stored['dishes']).toEqual([
         { id: 'd1', name_vi: 'Cơm', name_en: null, tags: '[]', rating: null, notes: null },
@@ -322,7 +430,10 @@ describe('syncV2Utils', () => {
         _format: 'sqlite-json',
         tables: {
           ingredients: [{ id: 'i1', name_vi: 'A' }],
-          dishes: [{ id: 'd1', name_vi: 'B' }, { id: 'd2', name_vi: 'C' }],
+          dishes: [
+            { id: 'd1', name_vi: 'B' },
+            { id: 'd2', name_vi: 'C' },
+          ],
         },
       };
 
@@ -338,22 +449,191 @@ describe('syncV2Utils', () => {
     it('imports all 16 tables populated with data', async () => {
       const db = createMockDb();
       const tables: Record<string, unknown[]> = {
-        ingredients: [{ id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' }],
+        ingredients: [
+          {
+            id: 'i1',
+            name_vi: 'Gạo',
+            name_en: 'Rice',
+            calories_per_100: 130,
+            protein_per_100: 2.7,
+            carbs_per_100: 28,
+            fat_per_100: 0.3,
+            fiber_per_100: 0.4,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
+        ],
         dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: 'Rice', tags: '["breakfast"]', rating: 5, notes: null }],
         dish_ingredients: [{ dish_id: 'd1', ingredient_id: 'i1', amount: 200 }],
-        day_plans: [{ date: '2024-01-01', breakfast_dish_ids: '["d1"]', lunch_dish_ids: '[]', dinner_dish_ids: '[]', servings: null }],
+        day_plans: [
+          {
+            date: '2024-01-01',
+            breakfast_dish_ids: '["d1"]',
+            lunch_dish_ids: '[]',
+            dinner_dish_ids: '[]',
+            servings: null,
+          },
+        ],
         meal_templates: [{ id: 't1', name: 'Bulk', data: '{}' }],
-        user_profile: [{ id: 'default', gender: 'male', age: 30, height_cm: 170, weight_kg: 65, activity_level: 'moderate', body_fat_pct: null, bmr_override: null, protein_ratio: 2.0, fat_pct: 0.25, updated_at: '2026-01-01' }],
-        goals: [{ id: 'g1', type: 'cut', rate_of_change: 'moderate', target_weight_kg: 60, calorie_offset: -300, start_date: '2024-01-01', end_date: null, is_active: 1, created_at: '2024-01-01', updated_at: '2024-01-01' }],
-        exercises: [{ id: 'e1', name_vi: 'Squat', name_en: 'Squat', muscle_group: 'legs', secondary_muscles: '[]', category: 'compound', equipment: '["barbell"]', contraindicated: '[]', exercise_type: 'strength', default_reps_min: 5, default_reps_max: 8, is_custom: 0, updated_at: '2024-01-01' }],
-        training_profile: [{ id: 'default', training_experience: 'intermediate', days_per_week: 4, session_duration_min: 60, training_goal: 'hypertrophy', available_equipment: '["barbell"]', injury_restrictions: '[]', periodization_model: 'linear', plan_cycle_weeks: 4, priority_muscles: '[]', cardio_sessions_week: 2, cardio_type_pref: 'mixed', cardio_duration_min: 30, known_1rm: null, avg_sleep_hours: 7.5, updated_at: '2024-01-01' }],
-        training_plans: [{ id: 'tp1', name: 'PPL', status: 'active', split_type: 'push_pull_legs', duration_weeks: 8, start_date: '2024-01-01', end_date: null, created_at: '2024-01-01', updated_at: '2024-01-01' }],
-        training_plan_days: [{ id: 'tpd1', plan_id: 'tp1', day_of_week: 1, workout_type: 'push', muscle_groups: '["chest"]', exercises: '["e1"]', notes: null }],
-        workouts: [{ id: 'w1', date: '2024-01-01', name: 'Push Day', duration_min: 60, notes: null, created_at: '2024-01-01', updated_at: '2024-01-01' }],
-        workout_sets: [{ id: 'ws1', workout_id: 'w1', exercise_id: 'e1', set_number: 1, reps: 8, weight_kg: 80, rpe: 8, rest_seconds: 120, duration_min: null, distance_km: null, avg_heart_rate: null, intensity: 'high', estimated_calories: null, updated_at: '2024-01-01' }],
-        weight_log: [{ id: 'wl1', date: '2024-01-01', weight_kg: 65, notes: null, created_at: '2024-01-01', updated_at: '2024-01-01' }],
-        daily_log: [{ id: 'dl1', date: '2024-01-01', target_calories: 2200, actual_calories: 2100, target_protein: 130, actual_protein: 125, target_fat: null, actual_fat: 0, target_carbs: null, actual_carbs: 0, adherence_cal: 95, adherence_protein: 96, updated_at: '2024-01-01' }],
-        adjustments: [{ id: 'a1', date: '2024-01-01', reason: 'weight stall', old_target_cal: 2200, new_target_cal: 2000, trigger_type: 'auto', moving_avg_weight: 65.2, applied: 1, created_at: '2024-01-01' }],
+        user_profile: [
+          {
+            id: 'default',
+            gender: 'male',
+            age: 30,
+            height_cm: 170,
+            weight_kg: 65,
+            activity_level: 'moderate',
+            body_fat_pct: null,
+            bmr_override: null,
+            protein_ratio: 2.0,
+            fat_pct: 0.25,
+            updated_at: '2026-01-01',
+          },
+        ],
+        goals: [
+          {
+            id: 'g1',
+            type: 'cut',
+            rate_of_change: 'moderate',
+            target_weight_kg: 60,
+            calorie_offset: -300,
+            start_date: '2024-01-01',
+            end_date: null,
+            is_active: 1,
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+          },
+        ],
+        exercises: [
+          {
+            id: 'e1',
+            name_vi: 'Squat',
+            name_en: 'Squat',
+            muscle_group: 'legs',
+            secondary_muscles: '[]',
+            category: 'compound',
+            equipment: '["barbell"]',
+            contraindicated: '[]',
+            exercise_type: 'strength',
+            default_reps_min: 5,
+            default_reps_max: 8,
+            is_custom: 0,
+            updated_at: '2024-01-01',
+          },
+        ],
+        training_profile: [
+          {
+            id: 'default',
+            training_experience: 'intermediate',
+            days_per_week: 4,
+            session_duration_min: 60,
+            training_goal: 'hypertrophy',
+            available_equipment: '["barbell"]',
+            injury_restrictions: '[]',
+            periodization_model: 'linear',
+            plan_cycle_weeks: 4,
+            priority_muscles: '[]',
+            cardio_sessions_week: 2,
+            cardio_type_pref: 'mixed',
+            cardio_duration_min: 30,
+            known_1rm: null,
+            avg_sleep_hours: 7.5,
+            updated_at: '2024-01-01',
+          },
+        ],
+        training_plans: [
+          {
+            id: 'tp1',
+            name: 'PPL',
+            status: 'active',
+            split_type: 'push_pull_legs',
+            duration_weeks: 8,
+            start_date: '2024-01-01',
+            end_date: null,
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+          },
+        ],
+        training_plan_days: [
+          {
+            id: 'tpd1',
+            plan_id: 'tp1',
+            day_of_week: 1,
+            workout_type: 'push',
+            muscle_groups: '["chest"]',
+            exercises: '["e1"]',
+            notes: null,
+          },
+        ],
+        workouts: [
+          {
+            id: 'w1',
+            date: '2024-01-01',
+            name: 'Push Day',
+            duration_min: 60,
+            notes: null,
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+          },
+        ],
+        workout_sets: [
+          {
+            id: 'ws1',
+            workout_id: 'w1',
+            exercise_id: 'e1',
+            set_number: 1,
+            reps: 8,
+            weight_kg: 80,
+            rpe: 8,
+            rest_seconds: 120,
+            duration_min: null,
+            distance_km: null,
+            avg_heart_rate: null,
+            intensity: 'high',
+            estimated_calories: null,
+            updated_at: '2024-01-01',
+          },
+        ],
+        weight_log: [
+          {
+            id: 'wl1',
+            date: '2024-01-01',
+            weight_kg: 65,
+            notes: null,
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+          },
+        ],
+        daily_log: [
+          {
+            id: 'dl1',
+            date: '2024-01-01',
+            target_calories: 2200,
+            actual_calories: 2100,
+            target_protein: 130,
+            actual_protein: 125,
+            target_fat: null,
+            actual_fat: 0,
+            target_carbs: null,
+            actual_carbs: 0,
+            adherence_cal: 95,
+            adherence_protein: 96,
+            updated_at: '2024-01-01',
+          },
+        ],
+        adjustments: [
+          {
+            id: 'a1',
+            date: '2024-01-01',
+            reason: 'weight stall',
+            old_target_cal: 2200,
+            new_target_cal: 2000,
+            trigger_type: 'auto',
+            moving_avg_weight: 65.2,
+            applied: 1,
+            created_at: '2024-01-01',
+          },
+        ],
       };
 
       const v2Data: V2ExportPayload = {
@@ -405,14 +685,17 @@ describe('syncV2Utils', () => {
 
     it('rolls back on transaction failure', async () => {
       let callCount = 0;
-      const db = createMockDb({}, {
-        executeError: (sql: string) => {
-          if (sql.includes('INSERT')) {
-            callCount += 1;
-            if (callCount > 1) throw new Error('Simulated FK constraint violation');
-          }
+      const db = createMockDb(
+        {},
+        {
+          executeError: (sql: string) => {
+            if (sql.includes('INSERT')) {
+              callCount += 1;
+              if (callCount > 1) throw new Error('Simulated FK constraint violation');
+            }
+          },
         },
-      });
+      );
 
       const v2Data: V2ExportPayload = {
         _version: '2.0',
@@ -433,11 +716,14 @@ describe('syncV2Utils', () => {
     });
 
     it('handles corrupted data gracefully', async () => {
-      const db = createMockDb({}, {
-        executeError: () => {
-          throw new Error('malformed SQL');
+      const db = createMockDb(
+        {},
+        {
+          executeError: () => {
+            throw new Error('malformed SQL');
+          },
         },
-      });
+      );
 
       const v2Data: V2ExportPayload = {
         _version: '2.0',
@@ -496,7 +782,16 @@ describe('syncV2Utils', () => {
       const db = createMockDb();
       const v1Data: Record<string, unknown> = {
         'mp-ingredients': [
-          { id: 'i1', name: { vi: 'Gạo', en: 'Rice' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
+          {
+            id: 'i1',
+            name: { vi: 'Gạo', en: 'Rice' },
+            caloriesPer100: 130,
+            proteinPer100: 2.7,
+            carbsPer100: 28,
+            fatPer100: 0.3,
+            fiberPer100: 0.4,
+            unit: { vi: 'g', en: 'g' },
+          },
         ],
         _syncedAt: '2024-01-01T00:00:00Z',
       };
@@ -505,7 +800,18 @@ describe('syncV2Utils', () => {
 
       expect(result.success).toBe(true);
       expect(db._stored['ingredients']).toEqual([
-        { id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' },
+        {
+          id: 'i1',
+          name_vi: 'Gạo',
+          name_en: 'Rice',
+          calories_per_100: 130,
+          protein_per_100: 2.7,
+          carbs_per_100: 28,
+          fat_per_100: 0.3,
+          fiber_per_100: 0.4,
+          unit_vi: 'g',
+          unit_en: 'g',
+        },
       ]);
     });
 
@@ -529,16 +835,20 @@ describe('syncV2Utils', () => {
       expect(db._stored['dishes']).toEqual([
         { id: 'd1', name_vi: 'Cơm rang', name_en: null, tags: '["breakfast"]', rating: 5, notes: null },
       ]);
-      expect(db._stored['dish_ingredients']).toEqual([
-        { dish_id: 'd1', ingredient_id: 'i1', amount: 200 },
-      ]);
+      expect(db._stored['dish_ingredients']).toEqual([{ dish_id: 'd1', ingredient_id: 'i1', amount: 200 }]);
     });
 
     it('transforms v1.x day_plans with camelCase to snake_case', async () => {
       const db = createMockDb();
       const v1Data: Record<string, unknown> = {
         'mp-day-plans': [
-          { date: '2024-01-01', breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: [], servings: { d1: 2 } },
+          {
+            date: '2024-01-01',
+            breakfastDishIds: ['d1'],
+            lunchDishIds: ['d2'],
+            dinnerDishIds: [],
+            servings: { d1: 2 },
+          },
         ],
       };
 
@@ -546,7 +856,13 @@ describe('syncV2Utils', () => {
 
       expect(result.success).toBe(true);
       expect(db._stored['day_plans']).toEqual([
-        { date: '2024-01-01', breakfast_dish_ids: '["d1"]', lunch_dish_ids: '["d2"]', dinner_dish_ids: '[]', servings: '{"d1":2}' },
+        {
+          date: '2024-01-01',
+          breakfast_dish_ids: '["d1"]',
+          lunch_dish_ids: '["d2"]',
+          dinner_dish_ids: '[]',
+          servings: '{"d1":2}',
+        },
       ]);
     });
 
@@ -577,9 +893,7 @@ describe('syncV2Utils', () => {
       const result = await importV2Data(db, v1Data);
 
       expect(result.success).toBe(true);
-      expect(db._stored['meal_templates']).toEqual([
-        { id: 't1', name: 'Bulk', data: JSON.stringify(tpl) },
-      ]);
+      expect(db._stored['meal_templates']).toEqual([{ id: 't1', name: 'Bulk', data: JSON.stringify(tpl) }]);
     });
 
     it('handles v1.x data with missing keys gracefully', async () => {
@@ -601,7 +915,18 @@ describe('syncV2Utils', () => {
       const db = createMockDb();
       const v1Data: Record<string, unknown> = {
         _version: '1.0',
-        'mp-ingredients': [{ id: 'i1', name: { vi: 'Gạo' }, caloriesPer100: 100, proteinPer100: 2, carbsPer100: 20, fatPer100: 0.5, fiberPer100: 0.3, unit: { vi: 'g' } }],
+        'mp-ingredients': [
+          {
+            id: 'i1',
+            name: { vi: 'Gạo' },
+            caloriesPer100: 100,
+            proteinPer100: 2,
+            carbsPer100: 20,
+            fatPer100: 0.5,
+            fiberPer100: 0.3,
+            unit: { vi: 'g' },
+          },
+        ],
       };
 
       const result = await importV2Data(db, v1Data);
@@ -617,14 +942,21 @@ describe('syncV2Utils', () => {
     it('export → import → export produces same table data', async () => {
       const seedTables: Record<string, unknown[]> = {
         ingredients: [
-          { id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' },
+          {
+            id: 'i1',
+            name_vi: 'Gạo',
+            name_en: 'Rice',
+            calories_per_100: 130,
+            protein_per_100: 2.7,
+            carbs_per_100: 28,
+            fat_per_100: 0.3,
+            fiber_per_100: 0.4,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
         ],
-        dishes: [
-          { id: 'd1', name_vi: 'Cơm', name_en: 'Rice', tags: '["breakfast"]', rating: 5, notes: null },
-        ],
-        dish_ingredients: [
-          { dish_id: 'd1', ingredient_id: 'i1', amount: 200 },
-        ],
+        dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: 'Rice', tags: '["breakfast"]', rating: 5, notes: null }],
+        dish_ingredients: [{ dish_id: 'd1', ingredient_id: 'i1', amount: 200 }],
         day_plans: [],
         meal_templates: [],
         user_profile: [],
@@ -658,14 +990,21 @@ describe('syncV2Utils', () => {
     it('round-trip preserves _legacyFormat structure', async () => {
       const seedTables: Record<string, unknown[]> = {
         ingredients: [
-          { id: 'i1', name_vi: 'Gạo', name_en: 'Rice', calories_per_100: 130, protein_per_100: 2.7, carbs_per_100: 28, fat_per_100: 0.3, fiber_per_100: 0.4, unit_vi: 'g', unit_en: 'g' },
+          {
+            id: 'i1',
+            name_vi: 'Gạo',
+            name_en: 'Rice',
+            calories_per_100: 130,
+            protein_per_100: 2.7,
+            carbs_per_100: 28,
+            fat_per_100: 0.3,
+            fiber_per_100: 0.4,
+            unit_vi: 'g',
+            unit_en: 'g',
+          },
         ],
-        dishes: [
-          { id: 'd1', name_vi: 'Cơm', name_en: null, tags: '["breakfast"]', rating: 5, notes: null },
-        ],
-        dish_ingredients: [
-          { dish_id: 'd1', ingredient_id: 'i1', amount: 200 },
-        ],
+        dishes: [{ id: 'd1', name_vi: 'Cơm', name_en: null, tags: '["breakfast"]', rating: 5, notes: null }],
+        dish_ingredients: [{ dish_id: 'd1', ingredient_id: 'i1', amount: 200 }],
       };
 
       const db = createMockDb(seedTables);

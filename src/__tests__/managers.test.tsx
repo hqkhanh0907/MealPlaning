@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { DishManager } from '../components/DishManager';
 import { IngredientManager } from '../components/IngredientManager';
 import type { Dish, Ingredient } from '../types';
@@ -12,20 +13,68 @@ vi.mock('../contexts/NotificationContext', () => ({
 
 vi.mock('../services/geminiService', () => ({
   suggestIngredientInfo: vi.fn().mockResolvedValue({
-    calories: 200, protein: 25, carbs: 0, fat: 8, fiber: 0,
+    calories: 200,
+    protein: 25,
+    carbs: 0,
+    fat: 8,
+    fiber: 0,
   }),
 }));
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: { vi: 'Ức gà', en: 'Ức gà' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
-  { id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
+  {
+    id: 'i1',
+    name: { vi: 'Ức gà', en: 'Ức gà' },
+    caloriesPer100: 165,
+    proteinPer100: 31,
+    carbsPer100: 0,
+    fatPer100: 3.6,
+    fiberPer100: 0,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i2',
+    name: { vi: 'Cơm trắng', en: 'Cơm trắng' },
+    caloriesPer100: 130,
+    proteinPer100: 2.7,
+    carbsPer100: 28,
+    fatPer100: 0.3,
+    fiberPer100: 0.4,
+    unit: { vi: 'g', en: 'g' },
+  },
 ];
 
 const dishes: Dish[] = [
-  { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-  { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
-  { id: 'd3', name: { vi: 'Salad gà', en: 'Salad gà' }, ingredients: [{ ingredientId: 'i1', amount: 150 }], tags: ['dinner'] },
-  { id: 'd4', name: { vi: 'Cháo gà', en: 'Cháo gà' }, ingredients: [{ ingredientId: 'i1', amount: 50 }, { ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
+  {
+    id: 'd1',
+    name: { vi: 'Gà nướng', en: 'Gà nướng' },
+    ingredients: [{ ingredientId: 'i1', amount: 200 }],
+    tags: ['lunch', 'dinner'],
+  },
+  {
+    id: 'd2',
+    name: { vi: 'Cơm gà', en: 'Cơm gà' },
+    ingredients: [
+      { ingredientId: 'i1', amount: 100 },
+      { ingredientId: 'i2', amount: 200 },
+    ],
+    tags: ['lunch'],
+  },
+  {
+    id: 'd3',
+    name: { vi: 'Salad gà', en: 'Salad gà' },
+    ingredients: [{ ingredientId: 'i1', amount: 150 }],
+    tags: ['dinner'],
+  },
+  {
+    id: 'd4',
+    name: { vi: 'Cháo gà', en: 'Cháo gà' },
+    ingredients: [
+      { ingredientId: 'i1', amount: 50 },
+      { ingredientId: 'i2', amount: 100 },
+    ],
+    tags: ['breakfast'],
+  },
 ];
 
 // --- DishManager ---
@@ -163,8 +212,18 @@ describe('DishManager', () => {
 
   it('filters dishes by tag Sáng — only shows breakfast dishes', () => {
     const dishesWithBreakfast: Dish[] = [
-      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-      { id: 'd3', name: { vi: 'Bánh mì', en: 'Bánh mì' }, ingredients: [{ ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
+      {
+        id: 'd1',
+        name: { vi: 'Gà nướng', en: 'Gà nướng' },
+        ingredients: [{ ingredientId: 'i1', amount: 200 }],
+        tags: ['lunch', 'dinner'],
+      },
+      {
+        id: 'd3',
+        name: { vi: 'Bánh mì', en: 'Bánh mì' },
+        ingredients: [{ ingredientId: 'i2', amount: 100 }],
+        tags: ['breakfast'],
+      },
     ];
     render(<DishManager {...defaultProps} dishes={dishesWithBreakfast} />);
     // Click the Sáng filter chip (contains count)
@@ -178,8 +237,18 @@ describe('DishManager', () => {
 
   it('removes tag filter when clicking the same tag again', () => {
     const dishesWithBreakfast: Dish[] = [
-      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-      { id: 'd3', name: { vi: 'Bánh mì', en: 'Bánh mì' }, ingredients: [{ ingredientId: 'i2', amount: 100 }], tags: ['breakfast'] },
+      {
+        id: 'd1',
+        name: { vi: 'Gà nướng', en: 'Gà nướng' },
+        ingredients: [{ ingredientId: 'i1', amount: 200 }],
+        tags: ['lunch', 'dinner'],
+      },
+      {
+        id: 'd3',
+        name: { vi: 'Bánh mì', en: 'Bánh mì' },
+        ingredients: [{ ingredientId: 'i2', amount: 100 }],
+        tags: ['breakfast'],
+      },
     ];
     render(<DishManager {...defaultProps} dishes={dishesWithBreakfast} />);
     // Click Sáng filter chip (contains count)
@@ -212,7 +281,9 @@ describe('DishManager', () => {
     // Trigger undo
     options.action.onClick();
     // onAdd should be called with the deleted dish
-    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'd4', name: { vi: 'Cháo gà', en: 'Cháo gà' } }));
+    expect(defaultProps.onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'd4', name: { vi: 'Cháo gà', en: 'Cháo gà' } }),
+    );
   });
 
   it('opens edit modal when dish edit button is clicked', () => {
@@ -251,9 +322,7 @@ describe('DishManager', () => {
     const sortSelect = screen.getByDisplayValue('Tên (A-Z)');
     fireEvent.change(sortSelect, { target: { value: 'ing-desc' } });
     // Cơm gà (2 ingredients) should appear before Gà nướng (1 ingredient)
-    expect(document.body.innerHTML.indexOf('Cơm gà')).toBeLessThan(
-      document.body.innerHTML.indexOf('Gà nướng'),
-    );
+    expect(document.body.innerHTML.indexOf('Cơm gà')).toBeLessThan(document.body.innerHTML.indexOf('Gà nướng'));
   });
 
   it('sorts dishes by name descending', () => {
@@ -294,7 +363,8 @@ describe('DishManager', () => {
 
   it('renders detail modal with missing ingredient gracefully', () => {
     const dishWithMissingIng: Dish = {
-      id: 'dm-bad', name: { vi: 'Món lỗi', en: 'Bad Dish' },
+      id: 'dm-bad',
+      name: { vi: 'Món lỗi', en: 'Bad Dish' },
       ingredients: [{ ingredientId: 'nonexistent-ing', amount: 100 }],
       tags: ['lunch'],
     };
@@ -331,9 +401,9 @@ describe('DishManager', () => {
     // Switch to list view
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     // Table should render dish names as buttons
-    const dishNameBtns = screen.getAllByRole('button').filter(btn =>
-      btn.textContent === 'Gà nướng' || btn.textContent === 'Cơm gà'
-    );
+    const dishNameBtns = screen
+      .getAllByRole('button')
+      .filter(btn => btn.textContent === 'Gà nướng' || btn.textContent === 'Cơm gà');
     expect(dishNameBtns.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -507,7 +577,7 @@ describe('DishManager', () => {
       expect.objectContaining({
         ingredients: expect.any(Array),
         tags: expect.any(Array),
-      })
+      }),
     );
   });
 
@@ -795,9 +865,24 @@ describe('IngredientManager', () => {
 
   it('truncates "Used in" when ingredient appears in 3+ dishes', () => {
     const threeDishes: Dish[] = [
-      { id: 'd1', name: { vi: 'Gà nướng', en: 'Gà nướng' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch'] },
-      { id: 'd2', name: { vi: 'Cơm gà', en: 'Cơm gà' }, ingredients: [{ ingredientId: 'i1', amount: 100 }], tags: ['lunch'] },
-      { id: 'd3', name: { vi: 'Bún gà', en: 'Bún gà' }, ingredients: [{ ingredientId: 'i1', amount: 150 }], tags: ['dinner'] },
+      {
+        id: 'd1',
+        name: { vi: 'Gà nướng', en: 'Gà nướng' },
+        ingredients: [{ ingredientId: 'i1', amount: 200 }],
+        tags: ['lunch'],
+      },
+      {
+        id: 'd2',
+        name: { vi: 'Cơm gà', en: 'Cơm gà' },
+        ingredients: [{ ingredientId: 'i1', amount: 100 }],
+        tags: ['lunch'],
+      },
+      {
+        id: 'd3',
+        name: { vi: 'Bún gà', en: 'Bún gà' },
+        ingredients: [{ ingredientId: 'i1', amount: 150 }],
+        tags: ['dinner'],
+      },
     ];
     render(<IngredientManager {...defaultProps} dishes={threeDishes} />);
     // Should show first 2 names and +1 for the third
@@ -806,8 +891,14 @@ describe('IngredientManager', () => {
 
   it('shows "100ml" display unit for ml ingredient', () => {
     const mlIngredient: Ingredient = {
-      id: 'i3', name: { vi: 'Sữa', en: 'Sữa' }, caloriesPer100: 61, proteinPer100: 3.2,
-      carbsPer100: 4.8, fatPer100: 3.3, fiberPer100: 0, unit: { vi: 'ml', en: 'ml' },
+      id: 'i3',
+      name: { vi: 'Sữa', en: 'Sữa' },
+      caloriesPer100: 61,
+      proteinPer100: 3.2,
+      carbsPer100: 4.8,
+      fatPer100: 3.3,
+      fiberPer100: 0,
+      unit: { vi: 'ml', en: 'ml' },
     };
     render(<IngredientManager {...defaultProps} ingredients={[mlIngredient]} />);
     expect(screen.getByText('100ml')).toBeInTheDocument();
@@ -815,8 +906,14 @@ describe('IngredientManager', () => {
 
   it('shows "1 cái" display unit for custom unit ingredient', () => {
     const caiIngredient: Ingredient = {
-      id: 'i4', name: { vi: 'Trứng gà', en: 'Trứng gà' }, caloriesPer100: 155, proteinPer100: 13,
-      carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0, unit: { vi: 'cái', en: 'cái' },
+      id: 'i4',
+      name: { vi: 'Trứng gà', en: 'Trứng gà' },
+      caloriesPer100: 155,
+      proteinPer100: 13,
+      carbsPer100: 1.1,
+      fatPer100: 11,
+      fiberPer100: 0,
+      unit: { vi: 'cái', en: 'cái' },
     };
     render(<IngredientManager {...defaultProps} ingredients={[caiIngredient]} />);
     expect(screen.getByText('1 cái')).toBeInTheDocument();
@@ -835,7 +932,9 @@ describe('IngredientManager', () => {
     // Trigger undo
     options.action.onClick();
     // onAdd should be called with the deleted ingredient (sorted: "Cơm trắng" first)
-    expect(defaultProps.onAdd).toHaveBeenCalledWith(expect.objectContaining({ id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' } }));
+    expect(defaultProps.onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' } }),
+    );
   });
 
   it('opens detail modal from list view when ingredient name clicked', () => {
@@ -850,8 +949,14 @@ describe('IngredientManager', () => {
 
   it('shows no "used in" section for ingredients not used in any dish', () => {
     const unusedIngredient: Ingredient = {
-      id: 'i99', name: { vi: 'Muối', en: 'Muối' }, caloriesPer100: 0, proteinPer100: 0,
-      carbsPer100: 0, fatPer100: 0, fiberPer100: 0, unit: { vi: 'g', en: 'g' },
+      id: 'i99',
+      name: { vi: 'Muối', en: 'Muối' },
+      caloriesPer100: 0,
+      proteinPer100: 0,
+      carbsPer100: 0,
+      fatPer100: 0,
+      fiberPer100: 0,
+      unit: { vi: 'g', en: 'g' },
     };
     render(<IngredientManager {...defaultProps} ingredients={[unusedIngredient]} dishes={[]} />);
     expect(screen.queryByText(/Dùng trong/)).not.toBeInTheDocument();

@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
+import {
+  isFitnessMigrationCompleted,
+  isMigrationNeeded,
+  migrateFitnessData,
+  migrateFromLocalStorage,
+} from '../services/migrationService';
 import { createSchema } from '../services/schema';
-import { isMigrationNeeded, migrateFromLocalStorage, isFitnessMigrationCompleted, migrateFitnessData } from '../services/migrationService';
 
 const DatabaseContext = createContext<DatabaseService | null>(null);
 

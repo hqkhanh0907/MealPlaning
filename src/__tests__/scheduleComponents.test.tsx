@@ -1,18 +1,29 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MealSlot } from '../components/schedule/MealSlot';
-import { MealActionBar } from '../components/schedule/MealActionBar';
-import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
-import { MealsSubTab } from '../components/schedule/MealsSubTab';
-import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { MacroChart } from '../components/schedule/MacroChart';
+import { MealActionBar } from '../components/schedule/MealActionBar';
+import { MealSlot } from '../components/schedule/MealSlot';
+import { MealsSubTab } from '../components/schedule/MealsSubTab';
+import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
+import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
 import type { DayNutritionSummary, Dish, SlotInfo } from '../types';
 
 const makeSlot = (dishIds: string[], cal = 0, pro = 0): SlotInfo => ({
-  dishIds, calories: cal, protein: pro, carbs: 0, fat: 0, fiber: 0,
+  dishIds,
+  calories: cal,
+  protein: pro,
+  carbs: 0,
+  fat: 0,
+  fiber: 0,
 });
 
 const makeFullSlot = (dishIds: string[], cal: number, pro: number, carbs: number, fat: number): SlotInfo => ({
-  dishIds, calories: cal, protein: pro, carbs, fat, fiber: 0,
+  dishIds,
+  calories: cal,
+  protein: pro,
+  carbs,
+  fat,
+  fiber: 0,
 });
 
 const emptyNutrition: DayNutritionSummary = {
@@ -39,14 +50,7 @@ const dishes: Dish[] = [
 describe('MealSlot', () => {
   it('renders empty state with "Chưa có món" and "Thêm" button', () => {
     const onEdit = vi.fn();
-    render(
-      <MealSlot
-        type="breakfast"
-        slot={makeSlot([])}
-        dishes={dishes}
-        onEdit={onEdit}
-      />,
-    );
+    render(<MealSlot type="breakfast" slot={makeSlot([])} dishes={dishes} onEdit={onEdit} />);
     expect(screen.getByText('Chưa có món')).toBeInTheDocument();
     const addBtn = screen.getByLabelText('Thêm');
     expect(addBtn).toBeInTheDocument();
@@ -55,28 +59,14 @@ describe('MealSlot', () => {
   });
 
   it('renders filled state with dish names', () => {
-    render(
-      <MealSlot
-        type="breakfast"
-        slot={makeSlot(['d1'], 400, 20)}
-        dishes={dishes}
-        onEdit={vi.fn()}
-      />,
-    );
+    render(<MealSlot type="breakfast" slot={makeSlot(['d1'], 400, 20)} dishes={dishes} onEdit={vi.fn()} />);
     expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
     expect(screen.getByText('400 kcal')).toBeInTheDocument();
     expect(screen.getByText('20g Pro')).toBeInTheDocument();
   });
 
   it('renders "+N món nữa" when more than 2 dishes', () => {
-    render(
-      <MealSlot
-        type="breakfast"
-        slot={makeSlot(['d1', 'd2', 'd3'], 900, 45)}
-        dishes={dishes}
-        onEdit={vi.fn()}
-      />,
-    );
+    render(<MealSlot type="breakfast" slot={makeSlot(['d1', 'd2', 'd3'], 900, 45)} dishes={dishes} onEdit={vi.fn()} />);
     // Only first 2 visible
     expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
     expect(screen.getByText('Cơm gà')).toBeInTheDocument();
@@ -86,56 +76,33 @@ describe('MealSlot', () => {
 
   it('renders "+N món nữa" with count > 1 when more than 3 dishes', () => {
     render(
-      <MealSlot
-        type="lunch"
-        slot={makeSlot(['d1', 'd2', 'd3', 'd4'], 1200, 60)}
-        dishes={dishes}
-        onEdit={vi.fn()}
-      />,
+      <MealSlot type="lunch" slot={makeSlot(['d1', 'd2', 'd3', 'd4'], 1200, 60)} dishes={dishes} onEdit={vi.fn()} />,
     );
     expect(screen.getByText('+2 món nữa')).toBeInTheDocument();
   });
 
   it('fires onEdit when edit button clicked on filled card', () => {
     const onEdit = vi.fn();
-    render(
-      <MealSlot
-        type="lunch"
-        slot={makeSlot(['d2'], 600, 30)}
-        dishes={dishes}
-        onEdit={onEdit}
-      />,
-    );
+    render(<MealSlot type="lunch" slot={makeSlot(['d2'], 600, 30)} dishes={dishes} onEdit={onEdit} />);
     const editBtn = screen.getByLabelText('Chỉnh sửa Trưa');
     fireEvent.click(editBtn);
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
   it('renders correct meal icons for each type', () => {
-    const { rerender } = render(
-      <MealSlot type="breakfast" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />,
-    );
+    const { rerender } = render(<MealSlot type="breakfast" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />);
     expect(screen.getByText('Sáng')).toBeInTheDocument();
 
-    rerender(
-      <MealSlot type="lunch" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />,
-    );
+    rerender(<MealSlot type="lunch" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />);
     expect(screen.getByText('Trưa')).toBeInTheDocument();
 
-    rerender(
-      <MealSlot type="dinner" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />,
-    );
+    rerender(<MealSlot type="dinner" slot={makeSlot([])} dishes={[]} onEdit={vi.fn()} />);
     expect(screen.getByText('Tối')).toBeInTheDocument();
   });
 
   it('filters out dishes not found in the dishes array', () => {
     render(
-      <MealSlot
-        type="breakfast"
-        slot={makeSlot(['d1', 'nonexistent'], 400, 20)}
-        dishes={dishes}
-        onEdit={vi.fn()}
-      />,
+      <MealSlot type="breakfast" slot={makeSlot(['d1', 'nonexistent'], 400, 20)} dishes={dishes} onEdit={vi.fn()} />,
     );
     expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
     expect(screen.queryByText('nonexistent')).not.toBeInTheDocument();
@@ -161,8 +128,12 @@ describe('MealSlot', () => {
   it('serving buttons meet WCAG touch target minimum', () => {
     render(
       <MealSlot
-        type="breakfast" slot={makeSlot(['d1'], 400, 20)} dishes={dishes}
-        onEdit={vi.fn()} servings={{}} onUpdateServings={vi.fn()}
+        type="breakfast"
+        slot={makeSlot(['d1'], 400, 20)}
+        dishes={dishes}
+        onEdit={vi.fn()}
+        servings={{}}
+        onUpdateServings={vi.fn()}
       />,
     );
     const plusBtn = screen.getByTestId('btn-serving-plus-d1');
@@ -174,14 +145,7 @@ describe('MealSlot', () => {
   });
 
   it('does not render serving stepper when onUpdateServings is absent', () => {
-    render(
-      <MealSlot
-        type="breakfast"
-        slot={makeSlot(['d1'], 400, 20)}
-        dishes={dishes}
-        onEdit={vi.fn()}
-      />,
-    );
+    render(<MealSlot type="breakfast" slot={makeSlot(['d1'], 400, 20)} dishes={dishes} onEdit={vi.fn()} />);
     expect(screen.queryByTestId('serving-count-d1')).not.toBeInTheDocument();
   });
 
@@ -383,12 +347,7 @@ describe('MealActionBar', () => {
 
   it('hides more actions button when no callbacks are provided', () => {
     render(
-      <MealActionBar
-        allEmpty={false}
-        isSuggesting={false}
-        onOpenTypeSelection={vi.fn()}
-        onSuggestMealPlan={vi.fn()}
-      />,
+      <MealActionBar allEmpty={false} isSuggesting={false} onOpenTypeSelection={vi.fn()} onSuggestMealPlan={vi.fn()} />,
     );
     expect(screen.queryByTestId('btn-more-actions')).not.toBeInTheDocument();
   });

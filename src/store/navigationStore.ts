@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import type { MainTab } from '../components/navigation/types';
 
 const MAX_PAGE_STACK_DEPTH = 2;
@@ -33,7 +34,7 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   tabHistory: [],
 
   navigateTab: (tab: MainTab) => {
-    set((state) => ({
+    set(state => ({
       activeTab: tab,
       tabHistory: [...state.tabHistory, state.activeTab],
       pageStack: [],
@@ -50,7 +51,7 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   },
 
   pushPage: (page: PageEntry) => {
-    set((state) => {
+    set(state => {
       const stack = state.pageStack;
       if (stack.length >= MAX_PAGE_STACK_DEPTH) {
         return {
@@ -66,7 +67,7 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   },
 
   popPage: () => {
-    set((state) => {
+    set(state => {
       if (state.pageStack.length === 0) return state;
       const newStack = state.pageStack.slice(0, -1);
       return {
@@ -79,7 +80,7 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   canGoBack: () => get().pageStack.length > 0,
 
   setScrollPosition: (tab: string, position: number) => {
-    set((state) => ({
+    set(state => ({
       tabScrollPositions: { ...state.tabScrollPositions, [tab]: position },
     }));
   },
@@ -87,6 +88,6 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   getScrollPosition: (tab: string) => get().tabScrollPositions[tab] ?? 0,
 }));
 
-export type { PageEntry, NavigationState };
+export type { NavigationState, PageEntry };
 export type { MainTab } from '../components/navigation/types';
 export { useNavigationStore };

@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import { Check, Minus, Plus, X } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Minus, Plus, X, Check } from 'lucide-react';
-import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { RPE_OPTIONS, WEIGHT_INCREMENT, REPS_INCREMENT, MIN_WEIGHT_KG, MIN_REPS } from '../constants';
+
+import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { MIN_REPS, MIN_WEIGHT_KG, REPS_INCREMENT, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
 
 interface SetEditorProps {
   initialWeight: number;
@@ -15,8 +17,6 @@ interface SetEditorProps {
   onCancel: () => void;
   isVisible: boolean;
 }
-
-
 
 export const SetEditor = React.memo(function SetEditor({
   initialWeight,
@@ -35,7 +35,7 @@ export const SetEditor = React.memo(function SetEditor({
   const [repsStr, setRepsStr] = useState(String(initialReps));
 
   const handleWeightDecrement = useCallback(() => {
-    setWeight((prev) => {
+    setWeight(prev => {
       const next = Math.max(MIN_WEIGHT_KG, prev - WEIGHT_INCREMENT);
       setWeightStr(String(next));
       return next;
@@ -43,26 +43,23 @@ export const SetEditor = React.memo(function SetEditor({
   }, []);
 
   const handleWeightIncrement = useCallback(() => {
-    setWeight((prev) => {
+    setWeight(prev => {
       const next = prev + WEIGHT_INCREMENT;
       setWeightStr(String(next));
       return next;
     });
   }, []);
 
-  const handleWeightInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
-      setWeightStr(raw);
-      if (raw !== '') {
-        const value = Number(raw);
-        if (!Number.isNaN(value)) {
-          setWeight(value);
-        }
+  const handleWeightInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setWeightStr(raw);
+    if (raw !== '') {
+      const value = Number(raw);
+      if (!Number.isNaN(value)) {
+        setWeight(value);
       }
-    },
-    [],
-  );
+    }
+  }, []);
 
   const handleWeightBlur = useCallback(() => {
     if (weightStr !== '' && !Number.isNaN(Number(weightStr))) {
@@ -76,7 +73,7 @@ export const SetEditor = React.memo(function SetEditor({
   }, []);
 
   const handleRepsDecrement = useCallback(() => {
-    setReps((prev) => {
+    setReps(prev => {
       const next = Math.max(MIN_REPS, prev - REPS_INCREMENT);
       setRepsStr(String(next));
       return next;
@@ -84,26 +81,23 @@ export const SetEditor = React.memo(function SetEditor({
   }, []);
 
   const handleRepsIncrement = useCallback(() => {
-    setReps((prev) => {
+    setReps(prev => {
       const next = prev + REPS_INCREMENT;
       setRepsStr(String(next));
       return next;
     });
   }, []);
 
-  const handleRepsInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
-      setRepsStr(raw);
-      if (raw !== '') {
-        const value = Number(raw);
-        if (!Number.isNaN(value)) {
-          setReps(value);
-        }
+  const handleRepsInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setRepsStr(raw);
+    if (raw !== '') {
+      const value = Number(raw);
+      if (!Number.isNaN(value)) {
+        setReps(value);
       }
-    },
-    [],
-  );
+    }
+  }, []);
 
   const handleRepsBlur = useCallback(() => {
     if (repsStr !== '' && !Number.isNaN(Number(repsStr))) {
@@ -112,7 +106,7 @@ export const SetEditor = React.memo(function SetEditor({
   }, [repsStr, reps]);
 
   const handleRpeSelect = useCallback((value: number) => {
-    setRpe((prev) => (prev === value ? undefined : value));
+    setRpe(prev => (prev === value ? undefined : value));
   }, []);
 
   const handleSave = useCallback(() => {
@@ -135,9 +129,7 @@ export const SetEditor = React.memo(function SetEditor({
         data-testid="set-editor"
       >
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-            {t('fitness.editor.title')}
-          </h3>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{t('fitness.editor.title')}</h3>
           <Button
             variant="ghost"
             size="icon"
@@ -171,7 +163,7 @@ export const SetEditor = React.memo(function SetEditor({
               onBlur={handleWeightBlur}
               min={MIN_WEIGHT_KG}
               step={WEIGHT_INCREMENT}
-              className="w-full text-center font-semibold tabular-nums text-slate-800"
+              className="w-full text-center font-semibold text-slate-800 tabular-nums"
               data-testid="weight-input"
             />
             <Button
@@ -193,7 +185,7 @@ export const SetEditor = React.memo(function SetEditor({
               {t('fitness.editor.recentWeights')}
             </span>
             <div className="flex flex-wrap gap-2">
-              {recentWeights.map((w) => (
+              {recentWeights.map(w => (
                 <Button
                   key={w}
                   variant={weight === w ? 'default' : 'outline'}
@@ -231,7 +223,7 @@ export const SetEditor = React.memo(function SetEditor({
               onBlur={handleRepsBlur}
               min={MIN_REPS}
               step={REPS_INCREMENT}
-              className="w-full text-center font-semibold tabular-nums text-slate-800"
+              className="w-full text-center font-semibold text-slate-800 tabular-nums"
               data-testid="reps-input"
             />
             <Button
@@ -252,11 +244,11 @@ export const SetEditor = React.memo(function SetEditor({
             {t('fitness.editor.rpe')}
           </label>
           <fieldset
-            className="flex gap-2 border-0 p-0 m-0"
+            className="m-0 flex gap-2 border-0 p-0"
             aria-label={t('fitness.editor.rpe')}
             data-testid="rpe-selector"
           >
-            {RPE_OPTIONS.map((value) => (
+            {RPE_OPTIONS.map(value => (
               <Button
                 key={value}
                 variant={rpe === value ? 'default' : 'outline'}
@@ -274,23 +266,11 @@ export const SetEditor = React.memo(function SetEditor({
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={onCancel}
-            className="flex-1"
-            data-testid="cancel-button"
-          >
+          <Button variant="outline" size="lg" onClick={onCancel} className="flex-1" data-testid="cancel-button">
             <X className="h-4 w-4" aria-hidden="true" />
             {t('fitness.editor.cancel')}
           </Button>
-          <Button
-            variant="default"
-            size="lg"
-            onClick={handleSave}
-            className="flex-1"
-            data-testid="save-button"
-          >
+          <Button variant="default" size="lg" onClick={handleSave} className="flex-1" data-testid="save-button">
             <Check className="h-4 w-4" aria-hidden="true" />
             {t('fitness.editor.save')}
           </Button>

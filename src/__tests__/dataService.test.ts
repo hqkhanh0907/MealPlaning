@@ -1,18 +1,30 @@
-import { describe, it, expect, vi } from 'vitest';
-import { removeIngredientFromDishes, migrateDayPlans, migrateDishes, migrateIngredients, processAnalyzedDish, validateImportData } from '../services/dataService';
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  migrateDayPlans,
+  migrateDishes,
+  migrateIngredients,
+  processAnalyzedDish,
+  removeIngredientFromDishes,
+  validateImportData,
+} from '../services/dataService';
 import { Dish, Ingredient, SaveAnalyzedDishPayload } from '../types';
 
 describe('removeIngredientFromDishes', () => {
   const dishes: Dish[] = [
     {
-      id: 'd1', name: { vi: 'Dish 1', en: 'Dish 1' }, tags: ['lunch'],
+      id: 'd1',
+      name: { vi: 'Dish 1', en: 'Dish 1' },
+      tags: ['lunch'],
       ingredients: [
         { ingredientId: 'ing-1', amount: 100 },
         { ingredientId: 'ing-2', amount: 200 },
       ],
     },
     {
-      id: 'd2', name: { vi: 'Dish 2', en: 'Dish 2' }, tags: ['dinner'],
+      id: 'd2',
+      name: { vi: 'Dish 2', en: 'Dish 2' },
+      tags: ['dinner'],
       ingredients: [{ ingredientId: 'ing-1', amount: 50 }],
     },
   ];
@@ -142,7 +154,16 @@ describe('migrateIngredients', () => {
 
   it('should migrate valid ingredients with string names to LocalizedString', () => {
     const result = migrateIngredients([
-      { id: 'i1', name: 'Chicken', unit: 'g', caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
+      {
+        id: 'i1',
+        name: 'Chicken',
+        unit: 'g',
+        caloriesPer100: 165,
+        proteinPer100: 31,
+        carbsPer100: 0,
+        fatPer100: 3.6,
+        fiberPer100: 0,
+      },
     ]);
     expect(result).toHaveLength(1);
     expect(result[0].name).toEqual({ vi: 'Chicken' });
@@ -155,11 +176,7 @@ describe('migrateIngredients', () => {
 
   it('should keep valid ingredients and filter invalid ones in mixed input', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const result = migrateIngredients([
-      { id: 'i1', name: 'Valid', unit: 'g' },
-      null as unknown,
-      42 as unknown,
-    ]);
+    const result = migrateIngredients([{ id: 'i1', name: 'Valid', unit: 'g' }, null as unknown, 42 as unknown]);
     expect(result).toHaveLength(1);
     expect(result[0].name).toEqual({ vi: 'Valid' });
     warnSpy.mockRestore();
@@ -168,16 +185,29 @@ describe('migrateIngredients', () => {
 
 describe('processAnalyzedDish', () => {
   const existingIngredients: Ingredient[] = [
-    { id: 'ing-1', name: { vi: 'Ức gà', en: 'Ức gà' }, unit: { vi: 'g' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
+    {
+      id: 'ing-1',
+      name: { vi: 'Ức gà', en: 'Ức gà' },
+      unit: { vi: 'g' },
+      caloriesPer100: 165,
+      proteinPer100: 31,
+      carbsPer100: 0,
+      fatPer100: 3.6,
+      fiberPer100: 0,
+    },
   ];
 
   it('should match existing ingredient by name (case-insensitive)', () => {
     const payload: SaveAnalyzedDishPayload = {
       name: 'Test Dish',
-      ingredients: [{
-        name: 'ức gà', amount: 100, unit: 'g',
-        nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
-      }],
+      ingredients: [
+        {
+          name: 'ức gà',
+          amount: 100,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+        },
+      ],
     };
     const result = processAnalyzedDish(payload, existingIngredients);
     expect(result.newIngredients).toHaveLength(0);
@@ -188,10 +218,14 @@ describe('processAnalyzedDish', () => {
   it('should create new ingredient when not found', () => {
     const payload: SaveAnalyzedDishPayload = {
       name: 'Test Dish',
-      ingredients: [{
-        name: 'Cà rốt', amount: 50, unit: 'g',
-        nutritionPerStandardUnit: { calories: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8 },
-      }],
+      ingredients: [
+        {
+          name: 'Cà rốt',
+          amount: 50,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8 },
+        },
+      ],
     };
     const result = processAnalyzedDish(payload, existingIngredients);
     expect(result.newIngredients).toHaveLength(1);
@@ -204,8 +238,18 @@ describe('processAnalyzedDish', () => {
     const payload: SaveAnalyzedDishPayload = {
       name: 'Mixed',
       ingredients: [
-        { name: 'Ức gà', amount: 150, unit: 'g', nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 } },
-        { name: 'Hành tím', amount: 20, unit: 'g', nutritionPerStandardUnit: { calories: 40, protein: 1.1, carbs: 9, fat: 0.1, fiber: 1.7 } },
+        {
+          name: 'Ức gà',
+          amount: 150,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+        },
+        {
+          name: 'Hành tím',
+          amount: 20,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 40, protein: 1.1, carbs: 9, fat: 0.1, fiber: 1.7 },
+        },
       ],
     };
     const result = processAnalyzedDish(payload, existingIngredients);
@@ -219,8 +263,18 @@ describe('processAnalyzedDish', () => {
     const payload: SaveAnalyzedDishPayload = {
       name: 'Double',
       ingredients: [
-        { name: 'Tỏi', amount: 5, unit: 'g', nutritionPerStandardUnit: { calories: 149, protein: 6.4, carbs: 33, fat: 0.5, fiber: 2.1 } },
-        { name: 'tỏi', amount: 10, unit: 'g', nutritionPerStandardUnit: { calories: 149, protein: 6.4, carbs: 33, fat: 0.5, fiber: 2.1 } },
+        {
+          name: 'Tỏi',
+          amount: 5,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 149, protein: 6.4, carbs: 33, fat: 0.5, fiber: 2.1 },
+        },
+        {
+          name: 'tỏi',
+          amount: 10,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 149, protein: 6.4, carbs: 33, fat: 0.5, fiber: 2.1 },
+        },
       ],
     };
     const result = processAnalyzedDish(payload, []);

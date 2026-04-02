@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useNavigationStore } from '../store/navigationStore';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import type { PageEntry } from '../store/navigationStore';
+import { useNavigationStore } from '../store/navigationStore';
 
 const initialState = () => ({
   activeTab: 'calendar' as const,

@@ -1,14 +1,10 @@
-export { MealSlot } from './MealSlot';
-export type { MealSlotProps } from './MealSlot';
-
-export { MealActionBar } from './MealActionBar';
 export type { MealActionBarProps } from './MealActionBar';
-
-export { MiniNutritionBar } from './MiniNutritionBar';
-export type { MiniNutritionBarProps } from './MiniNutritionBar';
-
-export { MealsSubTab } from './MealsSubTab';
+export { MealActionBar } from './MealActionBar';
+export type { MealSlotProps } from './MealSlot';
+export { MealSlot } from './MealSlot';
 export type { MealsSubTabProps } from './MealsSubTab';
-
-export { NutritionSubTab } from './NutritionSubTab';
+export { MealsSubTab } from './MealsSubTab';
+export type { MiniNutritionBarProps } from './MiniNutritionBar';
+export { MiniNutritionBar } from './MiniNutritionBar';
 export type { NutritionSubTabProps } from './NutritionSubTab';
+export { NutritionSubTab } from './NutritionSubTab';

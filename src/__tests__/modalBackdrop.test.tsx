@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { ModalBackdrop } from '../components/shared/ModalBackdrop';
 
 // ModalBackdrop renders <dialog open> with aria-modal="true" and a backdrop button

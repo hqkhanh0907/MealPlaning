@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useNavigationStore } from '../store/navigationStore';
+
 import { pushBackEntry } from '../services/backNavigationService';
+import { useNavigationStore } from '../store/navigationStore';
 
 /**
  * Syncs tab changes with the centralized back navigation service.

@@ -1,8 +1,10 @@
-import { useTranslation } from 'react-i18next';
-import { useController, type UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
+import { useController, type UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
 import type { OnboardingFormData } from './onboardingSchema';
 
 interface ActivityLevelStepProps {
@@ -25,45 +27,45 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
 
   return (
     <div className="flex flex-1 flex-col" data-testid="activity-level-step">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.health.activityLevel')}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          {t('onboarding.health.activityLevelDesc')}
-        </p>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.health.activityLevelDesc')}</p>
 
-        <fieldset className="space-y-3 border-0 p-0 m-0" aria-label={t('onboarding.health.activityLevel')}>
-          {LEVELS.map((level) => (
+        <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('onboarding.health.activityLevel')}>
+          {LEVELS.map(level => (
             <button
               key={level.value}
               type="button"
               aria-pressed={field.field.value === level.value}
               onClick={() => field.field.onChange(level.value)}
               className={cn(
-                'flex w-full min-h-[56px] items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
                 field.field.value === level.value
                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
                   : 'border-slate-200 dark:border-slate-700',
               )}
             >
-              <span className="text-2xl" aria-hidden="true">{level.emoji}</span>
+              <span className="text-2xl" aria-hidden="true">
+                {level.emoji}
+              </span>
               <div className="flex-1">
-                <p className={cn(
-                  'text-sm font-medium',
-                  field.field.value === level.value
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : 'text-slate-700 dark:text-slate-300',
-                )}>
+                <p
+                  className={cn(
+                    'text-sm font-medium',
+                    field.field.value === level.value
+                      ? 'text-emerald-700 dark:text-emerald-300'
+                      : 'text-slate-700 dark:text-slate-300',
+                  )}
+                >
                   {t(`health.activityLevel.${level.value}`)}
                 </p>
                 <p className="text-xs text-slate-400 dark:text-slate-500">
                   {t(`onboarding.health.activity_${level.value}_desc`)}
                 </p>
               </div>
-              <span className="shrink-0 text-xs font-mono text-slate-400">
-                ×{level.multiplier}
-              </span>
+              <span className="shrink-0 font-mono text-xs text-slate-400">×{level.multiplier}</span>
             </button>
           ))}
         </fieldset>

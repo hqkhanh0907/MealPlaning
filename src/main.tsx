@@ -1,13 +1,15 @@
-import {StrictMode} from 'react';
-import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
-import { NotificationProvider } from './contexts/NotificationContext.tsx';
-import { AuthProvider } from './contexts/AuthContext.tsx';
-import { DatabaseProvider } from './contexts/DatabaseContext.tsx';
-import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import './i18n';
 import './index.css';
+
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+
+import App from './App.tsx';
+import { AuthProvider } from './contexts/AuthContext.tsx';
+import { DatabaseProvider } from './contexts/DatabaseContext.tsx';
+import { NotificationProvider } from './contexts/NotificationContext.tsx';
 
 // Configure native status bar when running as a native app
 const initNativeStatusBar = async () => {

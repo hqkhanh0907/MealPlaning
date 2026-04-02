@@ -1,24 +1,26 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, Save, Sparkles, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Resolver } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Save, Sparkles, Loader2, X } from 'lucide-react';
-import { Ingredient, SupportedLang } from '../../types';
-import { getLocalizedField } from '../../utils/localize';
-import { suggestIngredientInfo } from '../../services/geminiService';
-import { useNotification } from '../../contexts/NotificationContext';
-import { ModalBackdrop } from '../shared/ModalBackdrop';
-import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
-import { UnitSelector } from '../shared/UnitSelector';
-import { logger } from '../../utils/logger';
-import { generateUUID } from '@/utils/helpers';
+
 import { Input } from '@/components/ui/input';
+import { generateUUID } from '@/utils/helpers';
+
+import { useNotification } from '../../contexts/NotificationContext';
 import {
-  ingredientEditSchema,
   ingredientEditDefaults,
   type IngredientEditFormData,
+  ingredientEditSchema,
 } from '../../schemas/ingredientEditSchema';
+import { suggestIngredientInfo } from '../../services/geminiService';
+import { Ingredient, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
+import { logger } from '../../utils/logger';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { UnitSelector } from '../shared/UnitSelector';
+import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 
 interface IngredientEditModalProps {
   editingItem: Ingredient | null;
@@ -35,9 +37,7 @@ const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
   return `1 ${getLocalizedField(unit, lang)}`;
 };
 
-export const IngredientEditModal = ({
-  editingItem, onSubmit, onClose,
-}: IngredientEditModalProps) => {
+export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: IngredientEditModalProps) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const notify = useNotification();
@@ -70,7 +70,9 @@ export const IngredientEditModal = ({
   const isMountedRef = useRef(true);
   useEffect(() => {
     isMountedRef.current = true;
-    return () => { isMountedRef.current = false; };
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   const hasSubmittedRef = useRef(false);
@@ -78,34 +80,46 @@ export const IngredientEditModal = ({
   const watchName = watch('name.vi');
   const watchUnit = watch('unit');
 
-  const buildIngredient = useCallback((data: IngredientEditFormData): Ingredient => ({
-    id: editingItem ? editingItem.id : generateUUID(),
-    name: { vi: data.name.vi },
-    unit: { vi: data.unit.vi },
-    caloriesPer100: Math.round(data.caloriesPer100),
-    proteinPer100: Math.round(data.proteinPer100),
-    carbsPer100: Math.round(data.carbsPer100),
-    fatPer100: Math.round(data.fatPer100),
-    fiberPer100: Math.round(data.fiberPer100),
-  }), [editingItem]);
+  const buildIngredient = useCallback(
+    (data: IngredientEditFormData): Ingredient => ({
+      id: editingItem ? editingItem.id : generateUUID(),
+      name: { vi: data.name.vi },
+      unit: { vi: data.unit.vi },
+      caloriesPer100: Math.round(data.caloriesPer100),
+      proteinPer100: Math.round(data.proteinPer100),
+      carbsPer100: Math.round(data.carbsPer100),
+      fatPer100: Math.round(data.fatPer100),
+      fiberPer100: Math.round(data.fiberPer100),
+    }),
+    [editingItem],
+  );
 
-  const onFormSubmit = useCallback((data: IngredientEditFormData) => {
-    if (hasSubmittedRef.current) return;
-    hasSubmittedRef.current = true;
-    onSubmit(buildIngredient(data));
-  }, [onSubmit, buildIngredient]);
+  const onFormSubmit = useCallback(
+    (data: IngredientEditFormData) => {
+      if (hasSubmittedRef.current) return;
+      hasSubmittedRef.current = true;
+      onSubmit(buildIngredient(data));
+    },
+    [onSubmit, buildIngredient],
+  );
 
   const handleClose = useCallback(() => {
-    if (isDirty) { setShowUnsavedDialog(true); return; }
+    if (isDirty) {
+      setShowUnsavedDialog(true);
+      return;
+    }
     onClose();
   }, [isDirty, onClose]);
 
   const handleSaveAndBack = useCallback(() => {
-    rhfSubmit((data) => {
-      onSubmit(buildIngredient(data));
-    }, () => {
-      setShowUnsavedDialog(false);
-    })();
+    rhfSubmit(
+      data => {
+        onSubmit(buildIngredient(data));
+      },
+      () => {
+        setShowUnsavedDialog(false);
+      },
+    )();
   }, [rhfSubmit, onSubmit, buildIngredient]);
 
   const handleAISearch = async () => {
@@ -135,61 +149,136 @@ export const IngredientEditModal = ({
 
   return (
     <>
-    <ModalBackdrop onClose={handleClose} zIndex="z-60">
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden max-h-[90dvh] overflow-y-auto overscroll-contain sm:mx-4">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}</h4>
-                <button onClick={handleClose} data-testid="btn-close-ingredient" aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500"><X className="w-5 h-5" /></button>
-        </div>
-        <form onSubmit={rhfSubmit(onFormSubmit)} className="p-6 space-y-4">
-          <div>
-            <label htmlFor="ing-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.ingredientName')}</label>
-            <div className="flex gap-2">
-              <Input id="ing-name" {...register('name.vi')} className={`flex-1 ${errors.name?.vi ? 'border-rose-500' : ''}`} placeholder={t('ingredient.namePlaceholder')} data-testid="input-ing-name" />
-              <button type="button" onClick={handleAISearch} disabled={!watchName || !getLocalizedField(watchUnit, lang) || isSearchingAI} data-testid="btn-ai-search" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" aria-label={getLocalizedField(watchUnit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')}>
-                {isSearchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+      <ModalBackdrop onClose={handleClose} zIndex="z-60">
+        <div className="relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto overscroll-contain rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+            <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              {editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}
+            </h4>
+            <button
+              onClick={handleClose}
+              data-testid="btn-close-ingredient"
+              aria-label={t('common.closeDialog')}
+              className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <form onSubmit={rhfSubmit(onFormSubmit)} className="space-y-4 p-6">
+            <div>
+              <label
+                htmlFor="ing-name"
+                className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+              >
+                {t('ingredient.ingredientName')}
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="ing-name"
+                  {...register('name.vi')}
+                  className={`flex-1 ${errors.name?.vi ? 'border-rose-500' : ''}`}
+                  placeholder={t('ingredient.namePlaceholder')}
+                  data-testid="input-ing-name"
+                />
+                <button
+                  type="button"
+                  onClick={handleAISearch}
+                  disabled={!watchName || !getLocalizedField(watchUnit, lang) || isSearchingAI}
+                  data-testid="btn-ai-search"
+                  className="rounded-xl bg-indigo-50 px-3 py-2 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                  aria-label={
+                    getLocalizedField(watchUnit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')
+                  }
+                >
+                  {isSearchingAI ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                </button>
+              </div>
+              {errors.name?.vi && (
+                <p data-testid="error-ing-name" className="mt-1 text-xs text-rose-500" role="alert">
+                  {errors.name.vi.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="ing-unit"
+                className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+              >
+                {t('ingredient.unitLabel')}
+              </label>
+              <UnitSelector
+                mode="bilingual"
+                id="ing-unit"
+                value={watchUnit}
+                onChange={v => setValue('unit', v, { shouldDirty: true, shouldValidate: true })}
+                error={!!errors.unit?.vi}
+                data-testid="input-ing-unit"
+              />
+              {errors.unit?.vi && (
+                <p className="mt-1 text-xs text-rose-500" role="alert">
+                  {errors.unit.vi.message}
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {NUMERIC_FIELDS.map(field => {
+                const labels: Record<string, string> = {
+                  caloriesPer100: 'Calories',
+                  proteinPer100: 'Protein',
+                  carbsPer100: 'Carbs',
+                  fatPer100: 'Fat',
+                  fiberPer100: 'Fiber',
+                };
+                return (
+                  <div key={field}>
+                    <label
+                      htmlFor={`ing-${field}`}
+                      className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                    >
+                      {labels[field]} / {getDisplayUnit(watchUnit, lang)}
+                    </label>
+                    <Input
+                      id={`ing-${field}`}
+                      type="number"
+                      step="1"
+                      inputMode="numeric"
+                      {...register(field, { valueAsNumber: true })}
+                      data-testid={`input-ing-${field.replace('Per100', '')}`}
+                      className={`w-full ${errors[field] ? 'border-rose-500' : ''}`}
+                    />
+                    {errors[field] && (
+                      <p
+                        className="mt-1 text-xs text-rose-500"
+                        role="alert"
+                        data-testid={`error-ing-${field.replace('Per100', '')}`}
+                      >
+                        {errors[field].message}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="pt-4">
+              <button
+                type="submit"
+                data-testid="btn-save-ingredient"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-lg font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 dark:shadow-emerald-900"
+              >
+                <Save className="h-5 w-5" /> {t('ingredient.saveIngredient')}
               </button>
             </div>
-            {errors.name?.vi && <p data-testid="error-ing-name" className="text-xs text-rose-500 mt-1" role="alert">{errors.name.vi.message}</p>}
-          </div>
+          </form>
+        </div>
+      </ModalBackdrop>
 
-          <div>
-            <label htmlFor="ing-unit" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('ingredient.unitLabel')}</label>
-            <UnitSelector
-              mode="bilingual"
-              id="ing-unit"
-              value={watchUnit}
-              onChange={v => setValue('unit', v, { shouldDirty: true, shouldValidate: true })}
-              error={!!errors.unit?.vi}
-              data-testid="input-ing-unit"
-            />
-            {errors.unit?.vi && <p className="text-xs text-rose-500 mt-1" role="alert">{errors.unit.vi.message}</p>}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {NUMERIC_FIELDS.map(field => {
-              const labels: Record<string, string> = { caloriesPer100: 'Calories', proteinPer100: 'Protein', carbsPer100: 'Carbs', fatPer100: 'Fat', fiberPer100: 'Fiber' };
-              return (
-                <div key={field}>
-                  <label htmlFor={`ing-${field}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{labels[field]} / {getDisplayUnit(watchUnit, lang)}</label>
-                  <Input id={`ing-${field}`} type="number" step="1" inputMode="numeric" {...register(field, { valueAsNumber: true })} data-testid={`input-ing-${field.replace('Per100', '')}`} className={`w-full ${errors[field] ? 'border-rose-500' : ''}`} />
-                  {errors[field] && <p className="text-xs text-rose-500 mt-1" role="alert" data-testid={`error-ing-${field.replace('Per100', '')}`}>{errors[field].message}</p>}
-                </div>
-              );
-            })}
-          </div>
-          <div className="pt-4">
-            <button type="submit" data-testid="btn-save-ingredient" className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 dark:shadow-emerald-900 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 text-lg"><Save className="w-5 h-5" /> {t('ingredient.saveIngredient')}</button>
-          </div>
-        </form>
-      </div>
-    </ModalBackdrop>
-
-    <UnsavedChangesDialog
-      isOpen={showUnsavedDialog}
-      onSave={handleSaveAndBack}
-      onDiscard={onClose}
-      onCancel={() => setShowUnsavedDialog(false)}
-    />
+      <UnsavedChangesDialog
+        isOpen={showUnsavedDialog}
+        onSave={handleSaveAndBack}
+        onDiscard={onClose}
+        onCancel={() => setShowUnsavedDialog(false)}
+      />
     </>
   );
 };

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Timer } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
 
 interface RestTimerProps {
@@ -47,7 +48,7 @@ export const RestTimer = React.memo(function RestTimer({
     }
 
     intervalRef.current = setInterval(() => {
-      setRemaining((prev) => {
+      setRemaining(prev => {
         if (prev <= 1) {
           return 0;
         }
@@ -66,8 +67,8 @@ export const RestTimer = React.memo(function RestTimer({
   }, [remaining, clearTimer, onComplete]);
 
   const handleAddTime = useCallback(() => {
-    setRemaining((prev) => prev + ADD_SECONDS);
-    setTotalDuration((prev) => prev + ADD_SECONDS);
+    setRemaining(prev => prev + ADD_SECONDS);
+    setTotalDuration(prev => prev + ADD_SECONDS);
     onAddTime?.(ADD_SECONDS);
   }, [onAddTime]);
 
@@ -91,13 +92,8 @@ export const RestTimer = React.memo(function RestTimer({
     >
       <div className="flex flex-col items-center rounded-2xl bg-white p-8 shadow-xl dark:bg-slate-800">
         <div className="mb-4 flex items-center gap-2">
-          <Timer
-            className="h-4 w-4 text-slate-500 dark:text-slate-400"
-            aria-hidden="true"
-          />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {t('fitness.timer.rest')}
-          </p>
+          <Timer className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('fitness.timer.rest')}</p>
         </div>
 
         <div className="relative mb-6 flex items-center justify-center">
@@ -147,7 +143,7 @@ export const RestTimer = React.memo(function RestTimer({
             />
           </svg>
           <span
-            className="absolute text-2xl font-bold tabular-nums text-slate-800 dark:text-slate-100"
+            className="absolute text-2xl font-bold text-slate-800 tabular-nums dark:text-slate-100"
             data-testid="timer-display"
           >
             {formatTime(remaining)}

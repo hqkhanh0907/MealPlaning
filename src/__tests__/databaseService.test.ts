@@ -1,10 +1,10 @@
 import {
-  snakeToCamel,
   camelToSnake,
-  rowToType,
-  typeToRow,
   createDatabaseService,
   type DatabaseService,
+  rowToType,
+  snakeToCamel,
+  typeToRow,
 } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
@@ -77,16 +77,12 @@ describe('DatabaseService', () => {
   });
 
   it('execute() runs DDL (CREATE TABLE) without error', async () => {
-    await expect(
-      db.execute('CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT)'),
-    ).resolves.toBeUndefined();
+    await expect(db.execute('CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT)')).resolves.toBeUndefined();
   });
 
   it('execute() runs INSERT with params', async () => {
     await db.execute('CREATE TABLE users (id INTEGER PRIMARY KEY, user_name TEXT)');
-    await expect(
-      db.execute('INSERT INTO users VALUES (?, ?)', [1, 'Alice']),
-    ).resolves.toBeUndefined();
+    await expect(db.execute('INSERT INTO users VALUES (?, ?)', [1, 'Alice'])).resolves.toBeUndefined();
 
     const rows = await db.query<{ id: number; userName: string }>('SELECT * FROM users');
     expect(rows).toHaveLength(1);
@@ -98,9 +94,7 @@ describe('DatabaseService', () => {
     await db.execute("INSERT INTO items VALUES (1, 'Widget', '2024-01-01')");
     await db.execute("INSERT INTO items VALUES (2, 'Gadget', '2024-02-01')");
 
-    const rows = await db.query<{ itemId: number; itemName: string; createdAt: string }>(
-      'SELECT * FROM items',
-    );
+    const rows = await db.query<{ itemId: number; itemName: string; createdAt: string }>('SELECT * FROM items');
     expect(rows).toHaveLength(2);
     expect(rows[0]).toEqual({ itemId: 1, itemName: 'Widget', createdAt: '2024-01-01' });
     expect(rows[1]).toEqual({ itemId: 2, itemName: 'Gadget', createdAt: '2024-02-01' });
@@ -116,20 +110,14 @@ describe('DatabaseService', () => {
     await db.execute('CREATE TABLE people (id INTEGER, full_name TEXT)');
     await db.execute("INSERT INTO people VALUES (1, 'Bob')");
 
-    const result = await db.queryOne<{ id: number; fullName: string }>(
-      'SELECT * FROM people WHERE id = ?',
-      [1],
-    );
+    const result = await db.queryOne<{ id: number; fullName: string }>('SELECT * FROM people WHERE id = ?', [1]);
     expect(result).toEqual({ id: 1, fullName: 'Bob' });
   });
 
   it('queryOne<T>() returns null when no match', async () => {
     await db.execute('CREATE TABLE people (id INTEGER, full_name TEXT)');
 
-    const result = await db.queryOne<{ id: number; fullName: string }>(
-      'SELECT * FROM people WHERE id = ?',
-      [999],
-    );
+    const result = await db.queryOne<{ id: number; fullName: string }>('SELECT * FROM people WHERE id = ?', [999]);
     expect(result).toBeNull();
   });
 
@@ -274,15 +262,11 @@ describe('NativeDatabaseService', () => {
   });
 
   it('queryOne() throws not initialized', async () => {
-    await expect(nativeDb.queryOne('SELECT 1')).rejects.toThrow(
-      'not initialized',
-    );
+    await expect(nativeDb.queryOne('SELECT 1')).rejects.toThrow('not initialized');
   });
 
   it('transaction() throws not initialized', async () => {
-    await expect(nativeDb.transaction(async () => {})).rejects.toThrow(
-      'not initialized',
-    );
+    await expect(nativeDb.transaction(async () => {})).rejects.toThrow('not initialized');
   });
 
   it('exportToJSON() throws not initialized', async () => {
@@ -290,8 +274,6 @@ describe('NativeDatabaseService', () => {
   });
 
   it('importFromJSON() throws not initialized', async () => {
-    await expect(nativeDb.importFromJSON('{}')).rejects.toThrow(
-      'not initialized',
-    );
+    await expect(nativeDb.importFromJSON('{}')).rejects.toThrow('not initialized');
   });
 });

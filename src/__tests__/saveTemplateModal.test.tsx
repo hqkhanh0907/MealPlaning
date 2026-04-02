@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { SaveTemplateModal } from '../components/modals/SaveTemplateModal';
 import { DayPlan, Dish } from '../types';
 
@@ -15,7 +16,9 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
   ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <div data-testid="backdrop" onClick={onClose}>{children}</div>
+    <div data-testid="backdrop" onClick={onClose}>
+      {children}
+    </div>
   ),
 }));
 

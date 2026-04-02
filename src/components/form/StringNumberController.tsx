@@ -1,7 +1,9 @@
-import React, { useState, useCallback } from 'react';
-import { useController, type Control, type FieldValues, type Path } from 'react-hook-form';
-import { parseNumericInput } from '../../features/fitness/utils/parseNumericInput';
+import React, { useCallback, useState } from 'react';
+import { type Control, type FieldValues, type Path, useController } from 'react-hook-form';
+
 import { Input } from '@/components/ui/input';
+
+import { parseNumericInput } from '../../features/fitness/utils/parseNumericInput';
 
 interface StringNumberControllerProps<T extends FieldValues> {
   name: Path<T>;
@@ -18,27 +20,23 @@ interface StringNumberControllerProps<T extends FieldValues> {
   disabled?: boolean;
 }
 
-function StringNumberControllerInner<T extends FieldValues>(
-  {
-    name,
-    control,
-    inputMode = 'decimal',
-    placeholder,
-    min,
-    max,
-    step,
-    className,
-    label,
-    testId,
-    ariaLabel,
-    disabled,
-    ref,
-  }: StringNumberControllerProps<T> & { ref?: React.Ref<HTMLInputElement> },
-) {
+function StringNumberControllerInner<T extends FieldValues>({
+  name,
+  control,
+  inputMode = 'decimal',
+  placeholder,
+  min,
+  max,
+  step,
+  className,
+  label,
+  testId,
+  ariaLabel,
+  disabled,
+  ref,
+}: StringNumberControllerProps<T> & { ref?: React.Ref<HTMLInputElement> }) {
   const { field } = useController({ name, control });
-  const [localValue, setLocalValue] = useState(() =>
-    field.value === 0 ? '0' : String(field.value ?? ''),
-  );
+  const [localValue, setLocalValue] = useState(() => (field.value === 0 ? '0' : String(field.value ?? '')));
   const [prevFieldValue, setPrevFieldValue] = useState<number>(field.value as number);
 
   const clampValue = useCallback(
@@ -104,10 +102,7 @@ function StringNumberControllerInner<T extends FieldValues>(
   return (
     <>
       {label && (
-        <label
-          htmlFor={testId ?? name}
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
+        <label htmlFor={testId ?? name} className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
           {label}
         </label>
       )}
@@ -124,18 +119,13 @@ function StringNumberControllerInner<T extends FieldValues>(
         step={step}
         disabled={disabled}
         aria-label={ariaLabel ?? label}
-        className={
-          className ??
-          'w-full text-slate-800 min-h-[44px]'
-        }
+        className={className ?? 'min-h-[44px] w-full text-slate-800'}
       />
     </>
   );
 }
 
-export const StringNumberController = React.memo(
-  StringNumberControllerInner,
-) as <T extends FieldValues>(
+export const StringNumberController = React.memo(StringNumberControllerInner) as <T extends FieldValues>(
   props: StringNumberControllerProps<T> & { ref?: React.Ref<HTMLInputElement> },
 ) => React.ReactElement | null;
 

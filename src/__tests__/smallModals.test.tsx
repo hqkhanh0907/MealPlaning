@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { ClearPlanModal } from '../components/modals/ClearPlanModal';
 import { GoalSettingsModal } from '../components/modals/GoalSettingsModal';
 import type { DayPlan } from '../types';
@@ -39,9 +40,7 @@ describe('ClearPlanModal', () => {
   });
 
   it('disables button when count is 0', () => {
-    const emptyPlans: DayPlan[] = [
-      { date: '2024-01-15', breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] },
-    ];
+    const emptyPlans: DayPlan[] = [{ date: '2024-01-15', breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }];
     render(<ClearPlanModal dayPlans={emptyPlans} selectedDate="2024-01-15" onClear={onClear} onClose={onClose} />);
     // All buttons should be disabled because no plans have data
     const buttons = screen.getAllByRole('button');
@@ -268,17 +267,33 @@ describe('GoalSettingsModal', () => {
   });
 
   it('updates computed protein display when weight changes', () => {
-    const { rerender } = render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const { rerender } = render(
+      <GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />,
+    );
     expect(screen.getByText('140g / ng\u00e0y')).toBeInTheDocument(); // 70 * 2 = 140
     // Simulate weight change via rerender (parent updates profile)
-    rerender(<GoalSettingsModal userProfile={{ ...defaultProfile, weight: 80 }} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    rerender(
+      <GoalSettingsModal
+        userProfile={{ ...defaultProfile, weight: 80 }}
+        onUpdateProfile={onUpdateProfile}
+        onClose={onClose}
+      />,
+    );
     expect(screen.getByText('160g / ng\u00e0y')).toBeInTheDocument(); // 80 * 2 = 160
   });
 
   it('updates computed protein display when ratio changes', () => {
-    const { rerender } = render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    const { rerender } = render(
+      <GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />,
+    );
     expect(screen.getByText('140g / ng\u00e0y')).toBeInTheDocument(); // 70 * 2 = 140
-    rerender(<GoalSettingsModal userProfile={{ ...defaultProfile, proteinRatio: 4 }} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
+    rerender(
+      <GoalSettingsModal
+        userProfile={{ ...defaultProfile, proteinRatio: 4 }}
+        onUpdateProfile={onUpdateProfile}
+        onClose={onClose}
+      />,
+    );
     expect(screen.getByText('280g / ng\u00e0y')).toBeInTheDocument(); // 70 * 4 = 280
   });
 

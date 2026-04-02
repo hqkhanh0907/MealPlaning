@@ -26,7 +26,7 @@ export const clearPlansByScope = (
   plans: DayPlan[],
   selectedDate: string,
   scope: 'day' | 'week' | 'month',
-  meals?: MealType[]
+  meals?: MealType[],
 ): DayPlan[] => {
   const allMeals = !meals || meals.length === 3;
   const clearMeals = (p: DayPlan): DayPlan => ({
@@ -37,7 +37,7 @@ export const clearPlansByScope = (
   });
   const filterOrClear = (predicate: (p: DayPlan) => boolean): DayPlan[] => {
     if (allMeals) return plans.filter(p => !predicate(p));
-    return plans.map(p => predicate(p) ? clearMeals(p) : p);
+    return plans.map(p => (predicate(p) ? clearMeals(p) : p));
   };
 
   if (scope === 'day') return filterOrClear(p => p.date === selectedDate);
@@ -58,23 +58,18 @@ export const clearPlansByScope = (
 export const applySuggestionToDayPlans = (
   plans: DayPlan[],
   selectedDate: string,
-  suggestion: { breakfastDishIds: string[]; lunchDishIds: string[]; dinnerDishIds: string[] }
+  suggestion: { breakfastDishIds: string[]; lunchDishIds: string[]; dinnerDishIds: string[] },
 ): DayPlan[] => {
   const existing = plans.find(p => p.date === selectedDate);
   const merged: DayPlan = {
     date: selectedDate,
-    breakfastDishIds: suggestion.breakfastDishIds.length > 0
-      ? suggestion.breakfastDishIds
-      : (existing?.breakfastDishIds ?? []),
-    lunchDishIds: suggestion.lunchDishIds.length > 0
-      ? suggestion.lunchDishIds
-      : (existing?.lunchDishIds ?? []),
-    dinnerDishIds: suggestion.dinnerDishIds.length > 0
-      ? suggestion.dinnerDishIds
-      : (existing?.dinnerDishIds ?? []),
+    breakfastDishIds:
+      suggestion.breakfastDishIds.length > 0 ? suggestion.breakfastDishIds : (existing?.breakfastDishIds ?? []),
+    lunchDishIds: suggestion.lunchDishIds.length > 0 ? suggestion.lunchDishIds : (existing?.lunchDishIds ?? []),
+    dinnerDishIds: suggestion.dinnerDishIds.length > 0 ? suggestion.dinnerDishIds : (existing?.dinnerDishIds ?? []),
   };
   if (existing) {
-    return plans.map(p => p.date === selectedDate ? merged : p);
+    return plans.map(p => (p.date === selectedDate ? merged : p));
   }
   return [...plans, merged];
 };
@@ -83,15 +78,12 @@ export const updateDayPlanSlot = (
   plans: DayPlan[],
   selectedDate: string,
   type: MealType,
-  dishIds: string[]
+  dishIds: string[],
 ): DayPlan[] => {
   const slotKey = getDayPlanSlotKey(type);
   const existing = plans.find(p => p.date === selectedDate);
   if (existing) {
-    return plans.map(p =>
-      p.date === selectedDate ? { ...p, [slotKey]: dishIds } : p
-    );
+    return plans.map(p => (p.date === selectedDate ? { ...p, [slotKey]: dishIds } : p));
   }
   return [...plans, { ...createEmptyDayPlan(selectedDate), [slotKey]: dishIds }];
 };
-

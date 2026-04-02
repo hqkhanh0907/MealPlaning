@@ -219,9 +219,4 @@ export interface SelectedExercise {
 }
 
 // Today's plan state for multi-session support
-export type TodayPlanState =
-  | 'training-pending'
-  | 'training-partial'
-  | 'training-completed'
-  | 'rest-day'
-  | 'no-plan';
+export type TodayPlanState = 'training-pending' | 'training-partial' | 'training-completed' | 'rest-day' | 'no-plan';

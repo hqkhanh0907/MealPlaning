@@ -1,10 +1,6 @@
+import { BarChart3, ChevronRight, Dumbbell, UtensilsCrossed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import {
-  UtensilsCrossed,
-  BarChart3,
-  Dumbbell,
-  ChevronRight,
-} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -40,16 +36,14 @@ const SLIDES: SlideContent[] = [
 
 function DotIndicator({ total, current, ariaLabel }: Readonly<{ total: number; current: number; ariaLabel: string }>) {
   return (
-    <fieldset className="flex items-center gap-2 border-0 p-0 m-0" aria-label={ariaLabel}>
+    <fieldset className="m-0 flex items-center gap-2 border-0 p-0" aria-label={ariaLabel}>
       {Array.from({ length: total }, (_, i) => (
         <div
           key={i}
           aria-current={i === current ? 'step' : undefined}
           className={cn(
             'h-2 rounded-full motion-safe:transition-[width] motion-safe:duration-300',
-            i === current
-              ? 'w-6 bg-emerald-500'
-              : 'w-2 bg-slate-300 dark:bg-slate-600',
+            i === current ? 'w-6 bg-emerald-500' : 'w-2 bg-slate-300 dark:bg-slate-600',
           )}
         />
       ))}
@@ -82,12 +76,8 @@ export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSli
         <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
           {slide.icon}
         </div>
-        <h1 className="mb-4 text-2xl font-bold text-slate-800 dark:text-slate-100">
-          {t(slide.titleKey)}
-        </h1>
-        <p className="max-w-sm text-base leading-relaxed text-slate-500 dark:text-slate-400">
-          {t(slide.descKey)}
-        </p>
+        <h1 className="mb-4 text-2xl font-bold text-slate-800 dark:text-slate-100">{t(slide.titleKey)}</h1>
+        <p className="max-w-sm text-base leading-relaxed text-slate-500 dark:text-slate-400">{t(slide.descKey)}</p>
       </div>
 
       <div className="flex items-center justify-between px-8 pb-12">

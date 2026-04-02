@@ -1,16 +1,18 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useForm, useController } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Equal, TrendingDown, TrendingUp } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useController, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { TrendingDown, TrendingUp, Equal } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
-import { useDatabase } from '../../../contexts/DatabaseContext';
-import { useHealthProfileStore } from '../store/healthProfileStore';
-import { getCalorieOffset } from '../../../services/nutritionEngine';
 import { validateTargetWeight } from '@/schemas/goalValidation';
 import { generateUUID } from '@/utils/helpers';
-import type { GoalType, RateOfChange, Goal } from '../types';
+
+import { useDatabase } from '../../../contexts/DatabaseContext';
+import { getCalorieOffset } from '../../../services/nutritionEngine';
+import { useHealthProfileStore } from '../store/healthProfileStore';
+import type { Goal, GoalType, RateOfChange } from '../types';
 
 /* ------------------------------------------------------------------ */
 /*  Schema                                                             */
@@ -81,7 +83,6 @@ function formatOffset(offset: number): string {
   return '±0 kcal';
 }
 
-
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
@@ -93,8 +94,8 @@ interface GoalPhaseSelectorProps {
 export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps = {}) => {
   const { t } = useTranslation();
   const db = useDatabase();
-  const saveGoal = useHealthProfileStore((s) => s.saveGoal);
-  const currentWeight = useHealthProfileStore((s) => s.profile.weightKg);
+  const saveGoal = useHealthProfileStore(s => s.saveGoal);
+  const currentWeight = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
 
   const form = useForm<GoalPhaseSelectorFormData>({
     resolver: zodResolver(goalPhaseSelectorSchema),
@@ -117,26 +118,29 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
   const goalType = goalTypeField.field.value as GoalType;
   const rateOfChange = rateField.field.value as RateOfChange;
 
-  const autoOffset = useMemo(
-    () => getCalorieOffset(goalType, rateOfChange),
-    [goalType, rateOfChange],
-  );
+  const autoOffset = useMemo(() => getCalorieOffset(goalType, rateOfChange), [goalType, rateOfChange]);
 
   const effectiveOffset = manualOverrideField.field.value
     ? Math.round(Number(customOffsetField.field.value)) || 0
     : autoOffset;
 
-  const handleGoalTypeChange = useCallback((type: GoalType) => {
-    goalTypeField.field.onChange(type);
-    if (type === 'maintain') {
-      targetWeightField.field.onChange('');
-      form.clearErrors('targetWeight');
-    }
-  }, [goalTypeField.field, targetWeightField.field, form]);
+  const handleGoalTypeChange = useCallback(
+    (type: GoalType) => {
+      goalTypeField.field.onChange(type);
+      if (type === 'maintain') {
+        targetWeightField.field.onChange('');
+        form.clearErrors('targetWeight');
+      }
+    },
+    [goalTypeField.field, targetWeightField.field, form],
+  );
 
-  const handleRateChange = useCallback((rate: RateOfChange) => {
-    rateField.field.onChange(rate);
-  }, [rateField.field]);
+  const handleRateChange = useCallback(
+    (rate: RateOfChange) => {
+      rateField.field.onChange(rate);
+    },
+    [rateField.field],
+  );
 
   const handleTargetWeightChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,23 +223,11 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
-      {!embedded && (
-        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-          {t('goal.title')}
-        </h3>
-      )}
+      {!embedded && <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('goal.title')}</h3>}
 
       {/* Phase Cards */}
       <div className="grid grid-cols-3 gap-3">
-        {GOAL_OPTIONS.map(({
-          type,
-          labelKey,
-          icon: Icon,
-          color,
-          activeBg,
-          activeBorder,
-          activeText,
-        }) => {
+        {GOAL_OPTIONS.map(({ type, labelKey, icon: Icon, color, activeBg, activeBorder, activeText }) => {
           const isActive = goalType === type;
           return (
             <button
@@ -243,14 +235,14 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
               type="button"
               data-testid={`goal-type-${type}`}
               onClick={() => handleGoalTypeChange(type)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all ${
                 isActive
                   ? `${activeBorder} ${activeBg} ${activeText}`
-                  : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300'
+                  : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500'
               }`}
             >
-              <Icon className={`w-6 h-6 ${isActive ? color : ''}`} />
-              <span className="font-bold text-sm">{t(labelKey)}</span>
+              <Icon className={`h-6 w-6 ${isActive ? color : ''}`} />
+              <span className="text-sm font-bold">{t(labelKey)}</span>
             </button>
           );
         })}
@@ -259,7 +251,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       {/* Rate of Change Selector */}
       {showRateSelector && (
         <div data-testid="rate-selector">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('goal.rateOfChange')}
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -269,10 +261,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
                 type="button"
                 data-testid={`rate-${rate}`}
                 onClick={() => handleRateChange(rate)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
+                className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                   rateOfChange === rate
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:text-slate-400'
                 }`}
               >
                 {t(labelKey)}
@@ -285,10 +277,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       {/* Target Weight — hidden for maintain */}
       {showTargetWeight && (
         <div>
-          <label
-            htmlFor="target-weight"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-          >
+          <label htmlFor="target-weight" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('goal.targetWeight')}
           </label>
           <Input
@@ -313,15 +302,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       )}
 
       {/* Calorie Offset Display */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-3">
+      <div className="space-y-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('goal.calorieOffset')}
-          </span>
-          <span
-            data-testid="calorie-offset-display"
-            className="text-lg font-bold text-slate-800 dark:text-slate-100"
-          >
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('goal.calorieOffset')}</span>
+          <span data-testid="calorie-offset-display" className="text-lg font-bold text-slate-800 dark:text-slate-100">
             {formatOffset(effectiveOffset)}
           </span>
         </div>
@@ -329,9 +313,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
         {/* Manual Override Toggle */}
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            {manualOverrideField.field.value
-              ? t('goal.calorieOffsetCustom')
-              : t('goal.calorieOffsetAuto')}
+            {manualOverrideField.field.value ? t('goal.calorieOffsetCustom') : t('goal.calorieOffsetAuto')}
           </span>
           <button
             type="button"
@@ -339,14 +321,12 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             onClick={handleToggleOverride}
             role="switch"
             aria-checked={manualOverrideField.field.value}
-            className={`relative w-10 h-5 rounded-full transition-colors ${
-              manualOverrideField.field.value
-                ? 'bg-emerald-500'
-                : 'bg-slate-300 dark:bg-slate-600'
+            className={`relative h-5 w-10 rounded-full transition-colors ${
+              manualOverrideField.field.value ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
             }`}
           >
             <span
-              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
                 manualOverrideField.field.value ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
@@ -371,7 +351,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
           type="button"
           data-testid="save-goal-button"
           onClick={() => void handleSave()}
-          className="w-full py-3 rounded-xl font-bold text-white transition-all bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800"
+          className="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white transition-all hover:bg-emerald-700 active:bg-emerald-800"
         >
           {t('goal.save')}
         </button>

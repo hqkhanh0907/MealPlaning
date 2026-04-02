@@ -1,11 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import {
-  staggerDelay,
-  useReducedMotion,
-  getAnimationClass,
-  MOTION_PRESETS,
-} from '../utils/motion';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { getAnimationClass, MOTION_PRESETS, staggerDelay, useReducedMotion } from '../utils/motion';
 
 describe('MOTION_PRESETS', () => {
   it('has correct fadeIn preset', () => {
@@ -82,7 +78,7 @@ describe('useReducedMotion', () => {
     expect(result.current).toBe(false);
 
     act(() => {
-      matchMediaListeners.forEach((listener) => listener({ matches: true }));
+      matchMediaListeners.forEach(listener => listener({ matches: true }));
     });
     expect(result.current).toBe(true);
   });
@@ -111,9 +107,7 @@ describe('getAnimationClass', () => {
 
   it('supports stagger tiers 1 through 5', () => {
     for (let tier = 1; tier <= 5; tier++) {
-      expect(getAnimationClass('slideUp', tier)).toBe(
-        `animate-slide-up animate-stagger-${tier}`,
-      );
+      expect(getAnimationClass('slideUp', tier)).toBe(`animate-slide-up animate-stagger-${tier}`);
     }
   });
 

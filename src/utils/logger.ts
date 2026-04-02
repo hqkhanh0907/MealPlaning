@@ -41,5 +41,4 @@ export const logger = {
 };
 
 /** Generate a short random trace ID for correlating logs within a user action flow. */
-export const generateTraceId = (): string =>
-  crypto.randomUUID().slice(0, 8);
+export const generateTraceId = (): string => crypto.randomUUID().slice(0, 8);

@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import type { SplitChangePreview } from '../features/fitness/types';
 
 // --- Mocks ---
@@ -32,35 +33,65 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('lucide-react', () => ({
   AlertTriangle: ({ className }: { className?: string }) => (
-    <span data-testid="warning-icon" className={className}>warning</span>
+    <span data-testid="warning-icon" className={className}>
+      warning
+    </span>
   ),
   Info: ({ className }: { className?: string }) => (
-    <span data-testid="info-icon" className={className}>info</span>
+    <span data-testid="info-icon" className={className}>
+      info
+    </span>
   ),
   XIcon: ({ className }: { className?: string }) => (
-    <span data-testid="icon-x" className={className}>x</span>
+    <span data-testid="icon-x" className={className}>
+      x
+    </span>
   ),
 }));
 
 vi.mock('@/components/ui/sheet', () => ({
-  Sheet: ({ open, children, onOpenChange }: { open: boolean; children: React.ReactNode; onOpenChange?: (v: boolean) => void }) => {
+  Sheet: ({
+    open,
+    children,
+    onOpenChange,
+  }: {
+    open: boolean;
+    children: React.ReactNode;
+    onOpenChange?: (v: boolean) => void;
+  }) => {
     if (!open) return null;
     return (
       <div data-testid="mock-sheet">
         {children}
-        <button data-testid="sheet-close-trigger" onClick={() => onOpenChange?.(false)}>close</button>
+        <button data-testid="sheet-close-trigger" onClick={() => onOpenChange?.(false)}>
+          close
+        </button>
       </div>
     );
   },
-  SheetContent: ({ children, showCloseButton: _, ...props }: { children: React.ReactNode; showCloseButton?: boolean; [key: string]: unknown }) => (
-    <div data-testid="split-change-confirm-sheet" {...props}>{children}</div>
+  SheetContent: ({
+    children,
+    showCloseButton: _,
+    ...props
+  }: {
+    children: React.ReactNode;
+    showCloseButton?: boolean;
+    [key: string]: unknown;
+  }) => (
+    <div data-testid="split-change-confirm-sheet" {...props}>
+      {children}
+    </div>
   ),
   SheetHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   SheetTitle: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
-    <h2 data-testid="confirm-title" {...props}>{children}</h2>
+    <h2 data-testid="confirm-title" {...props}>
+      {children}
+    </h2>
   ),
   SheetDescription: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
-    <p data-testid="confirm-description" {...props}>{children}</p>
+    <p data-testid="confirm-description" {...props}>
+      {children}
+    </p>
   ),
   SheetFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -105,9 +136,7 @@ function makeMockPreview(overrides: Partial<SplitChangePreview> = {}): SplitChan
         toMuscleGroups: ['back', 'arms'],
       },
     ],
-    suggested: [
-      { day: 'Legs Day', muscleGroups: ['legs', 'glutes'], reason: 'Gợi ý' },
-    ],
+    suggested: [{ day: 'Legs Day', muscleGroups: ['legs', 'glutes'], reason: 'Gợi ý' }],
     unmapped: [
       {
         id: 'd4',
@@ -169,9 +198,7 @@ describe('SplitChangeConfirm', () => {
 
   it('displays regenerate warning text', () => {
     render(<SplitChangeConfirm {...defaultProps} mode="regenerate" />);
-    expect(screen.getByTestId('confirm-description')).toHaveTextContent(
-      'Tất cả bài tập tùy chỉnh sẽ bị mất',
-    );
+    expect(screen.getByTestId('confirm-description')).toHaveTextContent('Tất cả bài tập tùy chỉnh sẽ bị mất');
   });
 
   it('displays remap description text', () => {

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
-import { translateWorkoutType } from '@/features/fitness/utils/translateWorkoutType';
 import type { TFunction } from 'i18next';
+import { describe, expect, it, vi } from 'vitest';
+
+import { translateWorkoutType } from '@/features/fitness/utils/translateWorkoutType';
 
 describe('translateWorkoutType', () => {
   const translations: Record<string, string> = {

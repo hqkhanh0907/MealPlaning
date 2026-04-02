@@ -1932,9 +1932,7 @@ export const EXERCISES: ExerciseSeed[] = [
 /*  Seed function                                                        */
 /* ------------------------------------------------------------------ */
 export async function seedExercises(db: DatabaseService): Promise<number> {
-  const existing = await db.query<{ count: number }>(
-    'SELECT COUNT(*) as count FROM exercises',
-  );
+  const existing = await db.query<{ count: number }>('SELECT COUNT(*) as count FROM exercises');
   if (existing[0]?.count > 0) return 0;
 
   for (const exercise of EXERCISES) {

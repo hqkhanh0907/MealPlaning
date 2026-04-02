@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { ImageCapture } from '../components/ImageCapture';
 import { compressImage } from '../utils/imageCompression';
 
@@ -121,7 +122,9 @@ describe('ImageCapture', () => {
     });
 
     render(<ImageCapture {...defaultProps} />);
-    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
     await waitFor(() => expect(screen.getByLabelText('Đổi camera')).toBeInTheDocument());
   });
 
@@ -158,13 +161,17 @@ describe('ImageCapture', () => {
     });
 
     render(<ImageCapture {...defaultProps} />);
-    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
     await waitFor(() => expect(screen.getByLabelText('Đổi camera')).toBeInTheDocument());
 
     // First call is with environment (back camera)
     expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: 'environment' } });
 
-    await act(async () => { fireEvent.click(screen.getByLabelText('Đổi camera')); });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Đổi camera'));
+    });
 
     // After switch, called again with user (front camera)
     await waitFor(() => {
@@ -306,13 +313,19 @@ describe('ImageCapture', () => {
       configurable: true,
     });
 
-    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as typeof HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = vi
+      .fn()
+      .mockReturnValue(null) as typeof HTMLCanvasElement.prototype.getContext;
 
     render(<ImageCapture {...defaultProps} />);
-    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
     await waitFor(() => expect(screen.getByLabelText('Chụp ảnh')).toBeInTheDocument());
 
-    await act(async () => { fireEvent.click(screen.getByLabelText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Chụp ảnh'));
+    });
 
     // context is null, so onImageReady should never be called
     expect(defaultProps.onImageReady).not.toHaveBeenCalled();
@@ -348,7 +361,8 @@ describe('ImageCapture', () => {
   it('shows error when switchCamera fails', async () => {
     const mockTrack = { stop: vi.fn() };
     const mockStream = { getTracks: () => [mockTrack] } as unknown as MediaStream;
-    const getUserMedia = vi.fn()
+    const getUserMedia = vi
+      .fn()
       .mockResolvedValueOnce(mockStream) // startCamera succeeds
       .mockRejectedValueOnce(new Error('Switch failed')); // switchCamera fails
 
@@ -359,10 +373,14 @@ describe('ImageCapture', () => {
     });
 
     render(<ImageCapture {...defaultProps} />);
-    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
     await waitFor(() => expect(screen.getByLabelText('Đổi camera')).toBeInTheDocument());
 
-    await act(async () => { fireEvent.click(screen.getByLabelText('Đổi camera')); });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Đổi camera'));
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Không thể truy cập camera/)).toBeInTheDocument();
@@ -403,15 +421,21 @@ describe('ImageCapture', () => {
       configurable: true,
     });
 
-    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({ drawImage: vi.fn() }) as typeof HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = vi
+      .fn()
+      .mockReturnValue({ drawImage: vi.fn() }) as typeof HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue('data:image/png;base64,raw');
     vi.mocked(compressImage).mockRejectedValueOnce(new Error('compress fail'));
 
     render(<ImageCapture {...defaultProps} />);
-    await act(async () => { fireEvent.click(screen.getByText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Chụp ảnh'));
+    });
     await waitFor(() => expect(screen.getByLabelText('Chụp ảnh')).toBeInTheDocument());
 
-    await act(async () => { fireEvent.click(screen.getByLabelText('Chụp ảnh')); });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Chụp ảnh'));
+    });
 
     await waitFor(() => {
       expect(defaultProps.onImageReady).toHaveBeenCalledWith('data:image/png;base64,raw');

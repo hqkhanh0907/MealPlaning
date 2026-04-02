@@ -1,15 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import {
-  suggestNextSet,
-  detectPlateau,
   detectAcuteFatigue,
   detectChronicOvertraining,
+  detectPlateau,
   isLowerBodyExercise,
   isWeightSimilar,
+  suggestNextSet,
   useProgressiveOverload,
 } from '../features/fitness/hooks/useProgressiveOverload';
-import type { WorkoutSet, TrainingProfile } from '../features/fitness/types';
+import type { TrainingProfile, WorkoutSet } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
@@ -31,9 +32,7 @@ function createSet(overrides?: Partial<WorkoutSet>): WorkoutSet {
   };
 }
 
-function createProfile(
-  overrides?: Partial<TrainingProfile>,
-): TrainingProfile {
+function createProfile(overrides?: Partial<TrainingProfile>): TrainingProfile {
   return {
     id: 'test-profile',
     trainingExperience: 'intermediate',
@@ -120,13 +119,7 @@ describe('suggestNextSet', () => {
   it('uses correct overload increment for experience level', () => {
     const sets = [createSet({ reps: 12, weightKg: 60 })];
     const beginnerResult = suggestNextSet(sets, 'beginner', 8, 12, false);
-    const intermediateResult = suggestNextSet(
-      sets,
-      'intermediate',
-      8,
-      12,
-      false,
-    );
+    const intermediateResult = suggestNextSet(sets, 'intermediate', 8, 12, false);
     // beginner upper: 2.5, intermediate upper: 1.25
     expect(beginnerResult.weight).toBe(62.5);
     expect(intermediateResult.weight).toBe(61.25);
@@ -216,30 +209,19 @@ describe('isWeightSimilar', () => {
 
 describe('detectPlateau', () => {
   it('detects plateau when 3 sessions have same max weight', () => {
-    const sessions = [
-      [createSet({ weightKg: 60 })],
-      [createSet({ weightKg: 60 })],
-      [createSet({ weightKg: 60 })],
-    ];
+    const sessions = [[createSet({ weightKg: 60 })], [createSet({ weightKg: 60 })], [createSet({ weightKg: 60 })]];
     const result = detectPlateau(sessions);
     expect(result).toEqual({ isPlateaued: true, weeks: 3 });
   });
 
   it('returns no plateau when weight increased recently', () => {
-    const sessions = [
-      [createSet({ weightKg: 60 })],
-      [createSet({ weightKg: 60 })],
-      [createSet({ weightKg: 65 })],
-    ];
+    const sessions = [[createSet({ weightKg: 60 })], [createSet({ weightKg: 60 })], [createSet({ weightKg: 65 })]];
     const result = detectPlateau(sessions);
     expect(result).toEqual({ isPlateaued: false, weeks: 1 });
   });
 
   it('returns no plateau when fewer sessions than threshold', () => {
-    const sessions = [
-      [createSet({ weightKg: 60 })],
-      [createSet({ weightKg: 60 })],
-    ];
+    const sessions = [[createSet({ weightKg: 60 })], [createSet({ weightKg: 60 })]];
     const result = detectPlateau(sessions);
     expect(result).toEqual({ isPlateaued: false, weeks: 0 });
   });
@@ -256,10 +238,7 @@ describe('detectPlateau', () => {
   });
 
   it('supports custom threshold', () => {
-    const sessions = [
-      [createSet({ weightKg: 60 })],
-      [createSet({ weightKg: 60 })],
-    ];
+    const sessions = [[createSet({ weightKg: 60 })], [createSet({ weightKg: 60 })]];
     expect(detectPlateau(sessions, 3).isPlateaued).toBe(false);
     expect(detectPlateau(sessions, 2).isPlateaued).toBe(true);
   });
@@ -288,21 +267,13 @@ describe('detectPlateau', () => {
   });
 
   it('detects plateau with ±2% weight tolerance (e.g. 80 vs 80.5)', () => {
-    const sessions = [
-      [createSet({ weightKg: 80 })],
-      [createSet({ weightKg: 80.5 })],
-      [createSet({ weightKg: 79.5 })],
-    ];
+    const sessions = [[createSet({ weightKg: 80 })], [createSet({ weightKg: 80.5 })], [createSet({ weightKg: 79.5 })]];
     const result = detectPlateau(sessions);
     expect(result).toEqual({ isPlateaued: true, weeks: 3 });
   });
 
   it('does not detect plateau when weight difference exceeds 2%', () => {
-    const sessions = [
-      [createSet({ weightKg: 80 })],
-      [createSet({ weightKg: 80 })],
-      [createSet({ weightKg: 85 })],
-    ];
+    const sessions = [[createSet({ weightKg: 80 })], [createSet({ weightKg: 80 })], [createSet({ weightKg: 85 })]];
     const result = detectPlateau(sessions);
     expect(result).toEqual({ isPlateaued: false, weeks: 1 });
   });
@@ -319,11 +290,7 @@ describe('detectAcuteFatigue', () => {
   });
 
   it('detects high fatigue when avg RPE >= 9.0', () => {
-    const sets = [
-      createSet({ rpe: 9.5 }),
-      createSet({ rpe: 9.5 }),
-      createSet({ rpe: 9.5 }),
-    ];
+    const sets = [createSet({ rpe: 9.5 }), createSet({ rpe: 9.5 }), createSet({ rpe: 9.5 })];
     const result = detectAcuteFatigue(sets);
     expect(result.level).toBe('high');
     expect(result.message).toContain('Acute fatigue');
@@ -331,22 +298,14 @@ describe('detectAcuteFatigue', () => {
   });
 
   it('detects moderate fatigue when avg RPE >= 8.0 and < 9.0', () => {
-    const sets = [
-      createSet({ rpe: 8.0 }),
-      createSet({ rpe: 8.5 }),
-      createSet({ rpe: 8.0 }),
-    ];
+    const sets = [createSet({ rpe: 8.0 }), createSet({ rpe: 8.5 }), createSet({ rpe: 8.0 })];
     const result = detectAcuteFatigue(sets);
     expect(result.level).toBe('moderate');
     expect(result.message).toContain('Moderate fatigue');
   });
 
   it('returns none when avg RPE < 8.0', () => {
-    const sets = [
-      createSet({ rpe: 6.0 }),
-      createSet({ rpe: 7.0 }),
-      createSet({ rpe: 7.0 }),
-    ];
+    const sets = [createSet({ rpe: 6.0 }), createSet({ rpe: 7.0 }), createSet({ rpe: 7.0 })];
     expect(detectAcuteFatigue(sets)).toEqual({ level: 'none', message: '' });
   });
 
@@ -355,11 +314,7 @@ describe('detectAcuteFatigue', () => {
   });
 
   it('handles sets without RPE values', () => {
-    const sets = [
-      createSet({ rpe: undefined }),
-      createSet({ rpe: undefined }),
-      createSet({ rpe: undefined }),
-    ];
+    const sets = [createSet({ rpe: undefined }), createSet({ rpe: undefined }), createSet({ rpe: undefined })];
     expect(detectAcuteFatigue(sets)).toEqual({ level: 'none', message: '' });
   });
 
@@ -499,9 +454,7 @@ describe('useProgressiveOverload hook', () => {
 
     it('returns empty when sets exist but no matching workouts', () => {
       useFitnessStore.setState({
-        workoutSets: [
-          createSet({ exerciseId: 'bench', workoutId: 'w-orphan' }),
-        ],
+        workoutSets: [createSet({ exerciseId: 'bench', workoutId: 'w-orphan' })],
         workouts: [],
       });
       const { result } = renderHook(() => useProgressiveOverload());
@@ -560,7 +513,7 @@ describe('useProgressiveOverload hook', () => {
       expect(sets[0].setNumber).toBe(1);
       expect(sets[1].setNumber).toBe(2);
       expect(sets[2].setNumber).toBe(3);
-      expect(sets.every((s) => s.workoutId === 'w2')).toBe(true);
+      expect(sets.every(s => s.workoutId === 'w2')).toBe(true);
     });
   });
 
@@ -655,10 +608,7 @@ describe('useProgressiveOverload hook', () => {
 
     it('filters by exerciseId from store data', () => {
       useFitnessStore.setState({
-        workoutSets: [
-          createSet({ exerciseId: 'bench' }),
-          createSet({ exerciseId: 'squat' }),
-        ],
+        workoutSets: [createSet({ exerciseId: 'bench' }), createSet({ exerciseId: 'squat' })],
       });
       const { result } = renderHook(() => useProgressiveOverload());
       const res = result.current.checkChronicOvertraining('bench');
@@ -683,11 +633,7 @@ describe('useProgressiveOverload hook', () => {
   describe('suggestNextSet (hook integration)', () => {
     it('returns manual suggestion when no history and defaults to beginner', () => {
       const { result } = renderHook(() => useProgressiveOverload());
-      const suggestion = result.current.suggestNextSet(
-        'barbell-bench-press',
-        8,
-        12,
-      );
+      const suggestion = result.current.suggestNextSet('barbell-bench-press', 8, 12);
       expect(suggestion.source).toBe('manual');
       expect(suggestion.weight).toBe(0);
       expect(suggestion.reps).toBe(8);
@@ -718,11 +664,7 @@ describe('useProgressiveOverload hook', () => {
         }),
       });
       const { result } = renderHook(() => useProgressiveOverload());
-      const suggestion = result.current.suggestNextSet(
-        'barbell-bench-press',
-        8,
-        12,
-      );
+      const suggestion = result.current.suggestNextSet('barbell-bench-press', 8, 12);
       expect(suggestion.source).toBe('rep_progression');
       expect(suggestion.weight).toBe(60);
       expect(suggestion.reps).toBe(11);
@@ -786,11 +728,7 @@ describe('useProgressiveOverload hook', () => {
         }),
       });
       const { result } = renderHook(() => useProgressiveOverload());
-      const suggestion = result.current.suggestNextSet(
-        'barbell-bench-press',
-        8,
-        12,
-      );
+      const suggestion = result.current.suggestNextSet('barbell-bench-press', 8, 12);
       // intermediate upper body increment: 1.25
       expect(suggestion.source).toBe('progressive_overload');
       expect(suggestion.weight).toBe(61.25);
@@ -826,11 +764,7 @@ describe('useProgressiveOverload hook', () => {
         }),
       });
       const { result } = renderHook(() => useProgressiveOverload());
-      const suggestion = result.current.suggestNextSet(
-        'barbell-bench-press',
-        8,
-        12,
-      );
+      const suggestion = result.current.suggestNextSet('barbell-bench-press', 8, 12);
       // advanced upper body increment: 1.25
       expect(suggestion.weight).toBe(61.25);
     });
@@ -872,8 +806,8 @@ describe('useProgressiveOverload hook', () => {
 
       const lastSets = result.current.getLastSets('barbell-bench-press');
       expect(lastSets.length).toBeGreaterThan(0);
-      expect(lastSets.every((s) => s.exerciseId === 'barbell-bench-press')).toBe(true);
-      expect(lastSets.every((s) => s.workoutId === lastSets[0].workoutId)).toBe(true);
+      expect(lastSets.every(s => s.exerciseId === 'barbell-bench-press')).toBe(true);
+      expect(lastSets.every(s => s.workoutId === lastSets[0].workoutId)).toBe(true);
 
       const plateau = result.current.checkPlateau('barbell-bench-press');
       expect(plateau.isPlateaued).toBe(true);

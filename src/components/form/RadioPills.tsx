@@ -1,5 +1,5 @@
 import React from 'react';
-import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { type Control, Controller, type FieldValues, type Path } from 'react-hook-form';
 
 interface PillOption {
   value: string;
@@ -26,11 +26,8 @@ function RadioPillsInner<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field }) => (
-        <fieldset
-          className={[className ?? 'flex flex-wrap gap-2', 'border-0 p-0 m-0'].join(' ')}
-          aria-label={name}
-        >
-          {options.map((option) => {
+        <fieldset className={[className ?? 'flex flex-wrap gap-2', 'm-0 border-0 p-0'].join(' ')} aria-label={name}>
+          {options.map(option => {
             const isActive = field.value === option.value;
 
             return (
@@ -40,8 +37,8 @@ function RadioPillsInner<T extends FieldValues>({
                 data-testid={testIdPrefix ? `${testIdPrefix}-${option.value}` : undefined}
                 className={
                   isActive
-                    ? 'cursor-pointer min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-emerald-500 dark:bg-emerald-600 text-white shadow-sm has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2'
-                    : 'cursor-pointer min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-colors bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2'
+                    ? 'min-h-[44px] cursor-pointer rounded-full bg-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none dark:bg-emerald-600'
+                    : 'min-h-[44px] cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                 }
               >
                 <input

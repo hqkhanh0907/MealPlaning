@@ -1,16 +1,18 @@
-import { useTranslation } from 'react-i18next';
-import { type UseFormReturn } from 'react-hook-form';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { type UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
-import { getCalorieOffset } from '@/services/nutritionEngine';
-import type { OnboardingFormData } from './onboardingSchema';
-import { STEP_FIELDS } from './onboardingSchema';
-import { validateTargetWeight } from '@/schemas/goalValidation';
-import { getAge, type HealthProfile } from '@/features/health-profile/types';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { useHealthProfileStore } from '@/features/health-profile/store/healthProfileStore';
+import { getAge, type HealthProfile } from '@/features/health-profile/types';
+import { validateTargetWeight } from '@/schemas/goalValidation';
+import { getCalorieOffset } from '@/services/nutritionEngine';
 import { useAppOnboardingStore } from '@/store/appOnboardingStore';
+
+import type { OnboardingFormData } from './onboardingSchema';
+import { STEP_FIELDS } from './onboardingSchema';
 
 interface HealthConfirmStepProps {
   form: UseFormReturn<OnboardingFormData>;
@@ -18,16 +20,12 @@ interface HealthConfirmStepProps {
   goBack: () => void;
 }
 
-export function HealthConfirmStep({
-  form,
-  goNext,
-  goBack,
-}: Readonly<HealthConfirmStepProps>) {
+export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfirmStepProps>) {
   const { t } = useTranslation();
   const db = useDatabase();
-  const saveProfile = useHealthProfileStore((s) => s.saveProfile);
-  const saveGoal = useHealthProfileStore((s) => s.saveGoal);
-  const setOnboardingSection = useAppOnboardingStore((s) => s.setOnboardingSection);
+  const saveProfile = useHealthProfileStore(s => s.saveProfile);
+  const saveGoal = useHealthProfileStore(s => s.saveGoal);
+  const setOnboardingSection = useAppOnboardingStore(s => s.setOnboardingSection);
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const values = form.getValues();
@@ -45,21 +43,22 @@ export function HealthConfirmStep({
   }, [values.heightCm, values.weightKg]);
 
   const estimatedTdee = useMemo(() => {
-    const base = values.gender === 'male'
-      ? 10 * values.weightKg + 6.25 * values.heightCm - 5 * age + 5
-      : 10 * values.weightKg + 6.25 * values.heightCm - 5 * age - 161;
+    const base =
+      values.gender === 'male'
+        ? 10 * values.weightKg + 6.25 * values.heightCm - 5 * age + 5
+        : 10 * values.weightKg + 6.25 * values.heightCm - 5 * age - 161;
     const multipliers: Record<string, number> = {
-      sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, extra_active: 1.9,
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      active: 1.725,
+      extra_active: 1.9,
     };
     return Math.round(base * (multipliers[values.activityLevel] ?? 1.55));
   }, [values, age]);
 
   const handleConfirm = async () => {
-    const healthFields = [
-      ...STEP_FIELDS['2a'],
-      ...STEP_FIELDS['2b'],
-      ...STEP_FIELDS['2c'],
-    ] as const;
+    const healthFields = [...STEP_FIELDS['2a'], ...STEP_FIELDS['2b'], ...STEP_FIELDS['2c']] as const;
     const isValid = await form.trigger([...healthFields]);
     if (!isValid) return;
 
@@ -92,9 +91,10 @@ export function HealthConfirmStep({
       } as HealthProfile;
       await saveProfile(db, profileData);
 
-      const calorieOffset = currentValues.goalType === 'maintain'
-        ? 0
-        : getCalorieOffset(currentValues.goalType, currentValues.rateOfChange ?? 'moderate');
+      const calorieOffset =
+        currentValues.goalType === 'maintain'
+          ? 0
+          : getCalorieOffset(currentValues.goalType, currentValues.rateOfChange ?? 'moderate');
       const now = new Date().toISOString();
       await saveGoal(db, {
         id: 'default',
@@ -128,22 +128,18 @@ export function HealthConfirmStep({
 
   return (
     <div className="flex flex-1 flex-col" data-testid="health-confirm-step">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.confirm.title', { name: values.name })}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          {t('onboarding.confirm.subtitle')}
-        </p>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.confirm.subtitle')}</p>
 
         {/* Hero Calorie */}
         <div className="mb-6 rounded-2xl bg-emerald-50 p-6 text-center dark:bg-emerald-900/20">
           <p className="mb-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
             {t('onboarding.confirm.dailyCaloriesLabel')}
           </p>
-          <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-300">
-            {estimatedTdee}
-          </p>
+          <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-300">{estimatedTdee}</p>
           <p className="mt-1 text-xs text-emerald-500/70">kcal / {t('onboarding.confirm.day')}</p>
           <p className="mt-2 text-xs leading-relaxed text-emerald-600/70 dark:text-emerald-400/70">
             {t('onboarding.confirm.dailyCaloriesDesc')}
@@ -152,7 +148,7 @@ export function HealthConfirmStep({
 
         {/* Summary */}
         <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
-          {summaryItems.map((item) => (
+          {summaryItems.map(item => (
             <div key={item.label} className="flex items-center justify-between px-4 py-3">
               <span className="text-sm text-slate-500 dark:text-slate-400">{item.label}</span>
               <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.value}</span>
@@ -164,19 +160,31 @@ export function HealthConfirmStep({
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 flex w-full min-h-[44px] items-center justify-center gap-1 text-sm font-medium text-emerald-600 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-emerald-400"
+          className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-1 text-sm font-medium text-emerald-600 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-emerald-400"
         >
           {expanded ? t('onboarding.confirm.lessDetail') : t('onboarding.confirm.moreDetail')}
-          {expanded ? <ChevronUp className="h-4 w-4" aria-hidden="true" /> : <ChevronDown className="h-4 w-4" aria-hidden="true" />}
+          {expanded ? (
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          )}
         </button>
         {expanded && (
           <div className="mt-2 rounded-xl border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-            <p>{t('onboarding.confirm.activityLevel')}: {t(`health.activityLevel.${values.activityLevel}`)}</p>
-            <p>{t('onboarding.confirm.goalLabel')}: {t(`onboarding.goal.type_${values.goalType}`)}</p>
+            <p>
+              {t('onboarding.confirm.activityLevel')}: {t(`health.activityLevel.${values.activityLevel}`)}
+            </p>
+            <p>
+              {t('onboarding.confirm.goalLabel')}: {t(`onboarding.goal.type_${values.goalType}`)}
+            </p>
             {values.goalType !== 'maintain' && (
               <>
-                <p>{t('onboarding.goal.rate')}: {t(`onboarding.goal.rate_${values.rateOfChange ?? 'moderate'}`)}</p>
-                <p>{t('onboarding.goal.targetWeight')}: {values.targetWeightKg ?? values.weightKg} kg</p>
+                <p>
+                  {t('onboarding.goal.rate')}: {t(`onboarding.goal.rate_${values.rateOfChange ?? 'moderate'}`)}
+                </p>
+                <p>
+                  {t('onboarding.goal.targetWeight')}: {values.targetWeightKg ?? values.weightKg} kg
+                </p>
               </>
             )}
           </div>

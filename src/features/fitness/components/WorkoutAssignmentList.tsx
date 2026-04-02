@@ -1,6 +1,7 @@
+import { ChevronDown, ChevronUp, Dumbbell, GripVertical } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GripVertical, ChevronUp, ChevronDown, Dumbbell } from 'lucide-react';
+
 import type { TrainingPlanDay } from '../types';
 
 export interface WorkoutAssignmentListProps {
@@ -75,11 +76,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
   }
 
   return (
-    <ul
-      data-testid="workout-assignment-list"
-      className="space-y-2"
-     
-    >
+    <ul data-testid="workout-assignment-list" className="space-y-2">
       {planDays.map((day, index) => (
         <li
           key={day.id}
@@ -96,13 +93,9 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
 
           {/* Workout info */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
-              {day.workoutType}
-            </p>
+            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{day.workoutType}</p>
             {day.muscleGroups && (
-              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                {day.muscleGroups}
-              </p>
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{day.muscleGroups}</p>
             )}
           </div>
 
@@ -112,7 +105,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
             data-testid={`reassign-btn-${day.id}`}
             aria-label={`${t('fitness.scheduleEditor.reassignDay')}: ${day.workoutType}`}
             onClick={() => handleReassign(day.id)}
-            className="flex-shrink-0 rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 touch-manipulation transition-colors hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
+            className="flex-shrink-0 touch-manipulation rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-200 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:outline-none dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
           >
             {getDayLabel(day.dayOfWeek)}
           </button>
@@ -125,7 +118,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
               aria-label={t('fitness.scheduleEditor.moveUp')}
               disabled={index === 0}
               onClick={() => handleMoveUp(index)}
-              className="flex h-7 w-7 items-center justify-center rounded text-slate-400 touch-manipulation transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="flex h-7 w-7 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700"
             >
               <ChevronUp className="h-4 w-4" />
             </button>
@@ -135,7 +128,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
               aria-label={t('fitness.scheduleEditor.moveDown')}
               disabled={index === planDays.length - 1}
               onClick={() => handleMoveDown(index)}
-              className="flex h-7 w-7 items-center justify-center rounded text-slate-400 touch-manipulation transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="flex h-7 w-7 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700"
             >
               <ChevronDown className="h-4 w-4" />
             </button>

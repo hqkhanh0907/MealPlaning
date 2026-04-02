@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { SaveAnalyzedDishModal } from '../components/modals/SaveAnalyzedDishModal';
 import { AnalyzedDishResult } from '../types';
 
@@ -17,8 +18,18 @@ const result: AnalyzedDishResult = {
   description: 'Món phở truyền thống',
   totalNutrition: { calories: 500, protein: 30, fat: 10, carbs: 60 },
   ingredients: [
-    { name: 'Bánh phở', amount: 200, unit: 'g', nutritionPerStandardUnit: { calories: 220, protein: 4, carbs: 44, fat: 0.8, fiber: 0.5 } },
-    { name: 'Thịt bò', amount: 100, unit: 'g', nutritionPerStandardUnit: { calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 } },
+    {
+      name: 'Bánh phở',
+      amount: 200,
+      unit: 'g',
+      nutritionPerStandardUnit: { calories: 220, protein: 4, carbs: 44, fat: 0.8, fiber: 0.5 },
+    },
+    {
+      name: 'Thịt bò',
+      amount: 100,
+      unit: 'g',
+      nutritionPerStandardUnit: { calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
+    },
   ],
 };
 
@@ -66,11 +77,13 @@ describe('SaveAnalyzedDishModal', () => {
     // Select "Sáng" tag
     fireEvent.click(screen.getByText(/Sáng/));
     fireEvent.click(screen.getByText('Xác nhận lưu'));
-    expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Phở bò',
-      shouldCreateDish: true,
-      tags: ['breakfast'],
-    }));
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Phở bò',
+        shouldCreateDish: true,
+        tags: ['breakfast'],
+      }),
+    );
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
@@ -113,10 +126,12 @@ describe('SaveAnalyzedDishModal', () => {
     fireEvent.click(screen.getByText('Chọn tất cả'));
     // Submit
     fireEvent.click(screen.getByText('Xác nhận lưu'));
-    expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({
-      ingredients: expect.any(Array),
-      shouldCreateDish: true,
-    }));
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ingredients: expect.any(Array),
+        shouldCreateDish: true,
+      }),
+    );
   });
 
   it('saves without creating dish when saveDish unchecked', () => {
@@ -125,10 +140,12 @@ describe('SaveAnalyzedDishModal', () => {
     fireEvent.click(screen.getByLabelText('Lưu món ăn này'));
     // Now confirm save should work without tags
     fireEvent.click(screen.getByText('Xác nhận lưu'));
-    expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({
-      shouldCreateDish: false,
-      tags: undefined,
-    }));
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shouldCreateDish: false,
+        tags: undefined,
+      }),
+    );
   });
 
   it('calls onClose when cancel button clicked', () => {
@@ -146,7 +163,11 @@ describe('SaveAnalyzedDishModal', () => {
 
   it('handles AI Research for ingredient', async () => {
     mockSuggestIngredientInfo.mockResolvedValueOnce({
-      calories: 300, protein: 10, carbs: 50, fat: 5, fiber: 2,
+      calories: 300,
+      protein: 10,
+      carbs: 50,
+      fat: 5,
+      fiber: 2,
     });
     render(<SaveAnalyzedDishModal {...defaultProps} />);
     const researchBtns = screen.getAllByText(/AI Research/i);
@@ -281,9 +302,7 @@ describe('SaveAnalyzedDishModal', () => {
     fireEvent.click(screen.getByText('Xác nhận lưu'));
     expect(defaultProps.onSave).toHaveBeenCalledWith(
       expect.objectContaining({
-        ingredients: expect.arrayContaining([
-          expect.objectContaining({ name: 'Thịt bò' }),
-        ]),
+        ingredients: expect.arrayContaining([expect.objectContaining({ name: 'Thịt bò' })]),
         shouldCreateDish: true,
       }),
     );
@@ -308,8 +327,18 @@ describe('SaveAnalyzedDishModal', () => {
     const resultWithEmptyName: AnalyzedDishResult = {
       ...result,
       ingredients: [
-        { name: '', amount: 200, unit: 'g', nutritionPerStandardUnit: { calories: 220, protein: 4, carbs: 44, fat: 0.8, fiber: 0.5 } },
-        { name: 'Thịt bò', amount: 100, unit: 'g', nutritionPerStandardUnit: { calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 } },
+        {
+          name: '',
+          amount: 200,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 220, protein: 4, carbs: 44, fat: 0.8, fiber: 0.5 },
+        },
+        {
+          name: 'Thịt bò',
+          amount: 100,
+          unit: 'g',
+          nutritionPerStandardUnit: { calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0 },
+        },
       ],
     };
     render(<SaveAnalyzedDishModal {...defaultProps} result={resultWithEmptyName} />);
@@ -336,7 +365,12 @@ describe('SaveAnalyzedDishModal', () => {
     const customResult: AnalyzedDishResult = {
       ...result,
       ingredients: [
-        { name: 'Trứng gà', amount: 2, unit: 'quả', nutritionPerStandardUnit: { calories: 78, protein: 6, carbs: 0.6, fat: 5, fiber: 0 } },
+        {
+          name: 'Trứng gà',
+          amount: 2,
+          unit: 'quả',
+          nutritionPerStandardUnit: { calories: 78, protein: 6, carbs: 0.6, fat: 5, fiber: 0 },
+        },
       ],
     };
     render(<SaveAnalyzedDishModal {...defaultProps} result={customResult} />);

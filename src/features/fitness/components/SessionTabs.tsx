@@ -1,6 +1,7 @@
+import { Check, Moon, Plus, Sun, Sunset, Trash2, X } from 'lucide-react';
 import React, { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Sunset, Plus, Check, Trash2, X } from 'lucide-react';
+
 import type { TrainingPlanDay } from '../types';
 
 interface SessionTabsProps {
@@ -91,11 +92,7 @@ function SessionTabsInner({
   return (
     <div className="px-1 py-2">
       <div className="flex items-center gap-2">
-        <div
-          role="tablist"
-          aria-label={t('fitness.plan.sessionTabs')}
-          className="flex items-center gap-2"
-        >
+        <div role="tablist" aria-label={t('fitness.plan.sessionTabs')} className="flex items-center gap-2">
           {sessions.map((session, index) => {
             const isActive = session.id === activeSessionId;
             const isCompleted = completedSessionIds.includes(session.id);
@@ -114,7 +111,7 @@ function SessionTabsInner({
                 onPointerUp={handlePointerUpOrLeave}
                 onPointerLeave={handlePointerUpOrLeave}
                 onContextMenu={handleContextMenu}
-                className={`flex items-center gap-1.5 rounded-full py-3 px-4 text-sm font-medium transition-colors min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
+                className={`flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
                   isActive
                     ? 'bg-emerald-500 text-white dark:bg-emerald-600'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
@@ -130,7 +127,7 @@ function SessionTabsInner({
                   <button
                     type="button"
                     data-testid={`delete-session-${session.id}`}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       setConfirmDeleteId(session.id);
                     }}
@@ -151,7 +148,7 @@ function SessionTabsInner({
           disabled={isMaxReached}
           onClick={onAddSession}
           aria-label={t('fitness.plan.addSession')}
-          className="flex items-center justify-center rounded-full min-h-[44px] min-w-[44px] p-3 text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed dark:hover:bg-slate-700"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-3 text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-700"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -162,19 +159,16 @@ function SessionTabsInner({
           data-testid="delete-session-confirm"
           role="alertdialog"
           aria-label={t('fitness.plan.deleteSessionConfirm')}
-
           className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20"
         >
           <Trash2 className="h-4 w-4 shrink-0 text-red-500" aria-hidden="true" />
-          <span className="text-sm text-red-700 dark:text-red-300">
-            {t('fitness.plan.deleteSessionConfirm')}
-          </span>
+          <span className="text-sm text-red-700 dark:text-red-300">{t('fitness.plan.deleteSessionConfirm')}</span>
           <button
             data-testid="confirm-delete-session"
             type="button"
             onClick={handleConfirmDelete}
             aria-label={t('fitness.plan.deleteSession')}
-            className="ml-auto rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+            className="ml-auto min-h-[44px] min-w-[44px] rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
           >
             <Trash2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
             {t('fitness.plan.delete')}
@@ -185,7 +179,7 @@ function SessionTabsInner({
             onClick={handleCancelDelete}
             autoFocus
             aria-label={t('fitness.plan.cancelDelete')}
-            className="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-300 min-h-[44px] min-w-[44px] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500"
+            className="min-h-[44px] min-w-[44px] rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-300 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500"
           >
             {t('fitness.plan.cancelDelete')}
           </button>

@@ -1,48 +1,33 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import type { DayPlan, Dish, Ingredient } from '../../types';
-import type {
-  TrainingPlan,
-  TrainingPlanDay,
-  Workout,
-  WorkoutSet,
-} from '../../features/fitness/types';
-import type { HealthProfile } from '../../features/health-profile/types';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import type { InsightInput } from '../../features/dashboard/hooks/useInsightEngine';
+import { selectInsight } from '../../features/dashboard/hooks/useInsightEngine';
+import { determineTodayPlanState } from '../../features/dashboard/hooks/useTodaysPlan';
+import type { ScoreInput } from '../../features/dashboard/types';
 // ─── Pure-function imports (NOT mocked) ───────────────────────────────
 import {
-  calculateDailyScore,
   calculateCalorieScore,
+  calculateDailyScore,
   calculateProteinScore,
-  calculateWorkoutScore,
-  calculateWeightLogScore,
   calculateStreakBonus,
+  calculateWeightLogScore,
+  calculateWorkoutScore,
 } from '../../features/dashboard/utils/scoreCalculator';
-import {
-  calculateDishesNutrition,
-} from '../../utils/nutrition';
-import {
-  calculateStreak,
-  detectPRs,
-  checkMilestones,
-} from '../../features/fitness/utils/gamification';
+import type { TrainingPlan, TrainingPlanDay, Workout, WorkoutSet } from '../../features/fitness/types';
+import { calculateStreak, checkMilestones, detectPRs } from '../../features/fitness/utils/gamification';
+import type { HealthProfile } from '../../features/health-profile/types';
 import {
   calculateBMR,
-  calculateTDEE,
-  calculateTarget,
   calculateMacros,
-  sessionsToLevel,
+  calculateTarget,
+  calculateTDEE,
   getAutoAdjustedMultiplier,
   getCalorieOffset,
+  sessionsToLevel,
 } from '../../services/nutritionEngine';
-import type { ScoreInput } from '../../features/dashboard/types';
-import {
-  determineTodayPlanState,
-} from '../../features/dashboard/hooks/useTodaysPlan';
-import {
-  selectInsight,
-} from '../../features/dashboard/hooks/useInsightEngine';
-import type { InsightInput } from '../../features/dashboard/hooks/useInsightEngine';
 import { useNavigationStore } from '../../store/navigationStore';
+import type { DayPlan, Dish, Ingredient } from '../../types';
+import { calculateDishesNutrition } from '../../utils/nutrition';
 
 // ─── Shared test-data helpers ─────────────────────────────────────────
 
@@ -198,16 +183,8 @@ describe('Cross-Feature: Nutrition → Dashboard', () => {
       breakfastDishIds: ['dish-egg-rice'],
       lunchDishIds: ['dish-chicken-rice'],
     });
-    const allDishIds = [
-      ...plan.breakfastDishIds,
-      ...plan.lunchDishIds,
-      ...plan.dinnerDishIds,
-    ];
-    const nutrition = calculateDishesNutrition(
-      allDishIds,
-      sampleDishes,
-      sampleIngredients,
-    );
+    const allDishIds = [...plan.breakfastDishIds, ...plan.lunchDishIds, ...plan.dinnerDishIds];
+    const nutrition = calculateDishesNutrition(allDishIds, sampleDishes, sampleIngredients);
 
     const scoreInput: ScoreInput = {
       actualCalories: nutrition.calories,
@@ -246,16 +223,8 @@ describe('Cross-Feature: Nutrition → Dashboard', () => {
       lunchDishIds: ['dish-chicken-rice'],
       dinnerDishIds: ['dish-grilled-chicken'],
     });
-    const allDishIds = [
-      ...plan.breakfastDishIds,
-      ...plan.lunchDishIds,
-      ...plan.dinnerDishIds,
-    ];
-    const nutrition = calculateDishesNutrition(
-      allDishIds,
-      sampleDishes,
-      sampleIngredients,
-    );
+    const allDishIds = [...plan.breakfastDishIds, ...plan.lunchDishIds, ...plan.dinnerDishIds];
+    const nutrition = calculateDishesNutrition(allDishIds, sampleDishes, sampleIngredients);
 
     expect(nutrition.calories).toBeGreaterThan(0);
     expect(nutrition.protein).toBeGreaterThan(0);
@@ -301,17 +270,10 @@ describe('Cross-Feature: Nutrition → Dashboard', () => {
   });
 
   it('servings multiplier affects calories flowing to dashboard', () => {
-    const baseNutrition = calculateDishesNutrition(
-      ['dish-chicken-rice'],
-      sampleDishes,
-      sampleIngredients,
-    );
-    const doubleServings = calculateDishesNutrition(
-      ['dish-chicken-rice'],
-      sampleDishes,
-      sampleIngredients,
-      { 'dish-chicken-rice': 2 },
-    );
+    const baseNutrition = calculateDishesNutrition(['dish-chicken-rice'], sampleDishes, sampleIngredients);
+    const doubleServings = calculateDishesNutrition(['dish-chicken-rice'], sampleDishes, sampleIngredients, {
+      'dish-chicken-rice': 2,
+    });
 
     expect(doubleServings.calories).toBeCloseTo(baseNutrition.calories * 2, 1);
     expect(doubleServings.protein).toBeCloseTo(baseNutrition.protein * 2, 1);
@@ -494,12 +456,7 @@ describe('Cross-Feature: Nutrition ↔ Fitness (TDEE)', () => {
     for (const goalType of ['cut', 'bulk', 'maintain'] as const) {
       const offset = getCalorieOffset(goalType, 'moderate');
       const targetCal = calculateTarget(tdee, offset);
-      const macros = calculateMacros(
-        targetCal,
-        profile.weightKg,
-        profile.proteinRatio,
-        profile.fatPct,
-      );
+      const macros = calculateMacros(targetCal, profile.weightKg, profile.proteinRatio, profile.fatPct);
 
       expect(macros.proteinG).toBeGreaterThan(0);
       expect(macros.fatG).toBeGreaterThan(0);
@@ -516,7 +473,12 @@ describe('Cross-Feature: Health Profile → All Features', () => {
     const profileBefore = mkHealthProfile({ weightKg: 80 });
     const profileAfter = mkHealthProfile({ weightKg: 75 });
 
-    const bmrBefore = calculateBMR(profileBefore.weightKg, profileBefore.heightCm, profileBefore.age, profileBefore.gender);
+    const bmrBefore = calculateBMR(
+      profileBefore.weightKg,
+      profileBefore.heightCm,
+      profileBefore.age,
+      profileBefore.gender,
+    );
     const bmrAfter = calculateBMR(profileAfter.weightKg, profileAfter.heightCm, profileAfter.age, profileAfter.gender);
 
     const tdeeBefore = calculateTDEE(bmrBefore, profileBefore.activityLevel);
@@ -743,12 +705,8 @@ describe('Cross-Feature: Insight Engine ← Multi-Feature Data', () => {
 
   it('milestone check uses total sessions from fitness store', () => {
     const milestones = checkMilestones(50, 14);
-    const sessionsAchieved = milestones.filter(
-      (m) => m.type === 'sessions' && m.achievedDate,
-    );
-    const streakAchieved = milestones.filter(
-      (m) => m.type === 'streak' && m.achievedDate,
-    );
+    const sessionsAchieved = milestones.filter(m => m.type === 'sessions' && m.achievedDate);
+    const streakAchieved = milestones.filter(m => m.type === 'streak' && m.achievedDate);
 
     expect(sessionsAchieved.length).toBeGreaterThanOrEqual(4);
     expect(streakAchieved.length).toBeGreaterThanOrEqual(2);

@@ -22,7 +22,10 @@ export async function reloadAllStores(db: DatabaseService): Promise<void> {
     useDishStore.getState().loadAll(db),
     useDayPlanStore.getState().loadAll(db),
     useMealTemplateStore.getState().loadAll(db),
-    useHealthProfileStore.getState().loadProfile(db),
+    useHealthProfileStore
+      .getState()
+      .loadProfile(db)
+      .then(() => useHealthProfileStore.getState().loadActiveGoal(db)),
     useFitnessStore.getState().initializeFromSQLite(db),
   ]);
 }

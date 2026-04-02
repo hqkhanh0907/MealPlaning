@@ -1,18 +1,55 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { MealPlannerModal } from '../components/modals/MealPlannerModal';
-import type { Dish, Ingredient, DayPlan } from '../types';
+import type { DayPlan, Dish, Ingredient } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: { vi: 'Ức gà', en: 'Ức gà' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
-  { id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
+  {
+    id: 'i1',
+    name: { vi: 'Ức gà', en: 'Ức gà' },
+    caloriesPer100: 165,
+    proteinPer100: 31,
+    carbsPer100: 0,
+    fatPer100: 3.6,
+    fiberPer100: 0,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i2',
+    name: { vi: 'Cơm trắng', en: 'Cơm trắng' },
+    caloriesPer100: 130,
+    proteinPer100: 2.7,
+    carbsPer100: 28,
+    fatPer100: 0.3,
+    fiberPer100: 0.4,
+    unit: { vi: 'g', en: 'g' },
+  },
 ];
 
 const dishes: Dish[] = [
-  { id: 'd1', name: { vi: 'Gà nướng', en: 'Grilled chicken' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['lunch', 'dinner'] },
-  { id: 'd2', name: { vi: 'Cơm gà', en: 'Chicken rice' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
-  { id: 'd3', name: { vi: 'Cháo gà', en: 'Chicken porridge' }, ingredients: [{ ingredientId: 'i1', amount: 50 }], tags: ['breakfast'] },
+  {
+    id: 'd1',
+    name: { vi: 'Gà nướng', en: 'Grilled chicken' },
+    ingredients: [{ ingredientId: 'i1', amount: 200 }],
+    tags: ['lunch', 'dinner'],
+  },
+  {
+    id: 'd2',
+    name: { vi: 'Cơm gà', en: 'Chicken rice' },
+    ingredients: [
+      { ingredientId: 'i1', amount: 100 },
+      { ingredientId: 'i2', amount: 200 },
+    ],
+    tags: ['lunch'],
+  },
+  {
+    id: 'd3',
+    name: { vi: 'Cháo gà', en: 'Chicken porridge' },
+    ingredients: [{ ingredientId: 'i1', amount: 50 }],
+    tags: ['breakfast'],
+  },
 ];
 
 const emptyPlan: DayPlan = {
@@ -107,9 +144,7 @@ describe('MealPlannerModal', () => {
     fireEvent.click(screen.getByText('Bữa Sáng'));
     fireEvent.click(screen.getByText('Cháo gà'));
     fireEvent.click(screen.getByTestId('btn-confirm-plan'));
-    expect(defaultProps.onConfirm).toHaveBeenCalledWith(
-      expect.objectContaining({ lunch: ['d1'], breakfast: ['d3'] })
-    );
+    expect(defaultProps.onConfirm).toHaveBeenCalledWith(expect.objectContaining({ lunch: ['d1'], breakfast: ['d3'] }));
   });
 
   it('shows "Lưu tất cả" when multiple tabs changed', () => {
@@ -247,7 +282,13 @@ describe('MealPlannerModal', () => {
   });
 
   it('shows accurate total nutrition for multiple selected dishes', () => {
-    render(<MealPlannerModal {...defaultProps} currentPlan={{ ...emptyPlan, lunchDishIds: ['d1', 'd2'] }} initialTab="lunch" />);
+    render(
+      <MealPlannerModal
+        {...defaultProps}
+        currentPlan={{ ...emptyPlan, lunchDishIds: ['d1', 'd2'] }}
+        initialTab="lunch"
+      />,
+    );
     const footer = screen.getByTestId('btn-confirm-plan').closest('div')?.parentElement;
     expect(footer?.textContent).toContain('2');
     const calMatches = screen.getAllByText(/755/);
@@ -334,7 +375,15 @@ describe('MealPlannerModal', () => {
     });
 
     it('shows remaining budget for pre-populated plan', () => {
-      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
+      render(
+        <MealPlannerModal
+          {...defaultProps}
+          currentPlan={populatedPlan}
+          initialTab="lunch"
+          targetCalories={2000}
+          targetProtein={150}
+        />,
+      );
       expect(screen.getByTestId('meal-planner-remaining-budget')).toBeInTheDocument();
     });
   });

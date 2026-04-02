@@ -1,14 +1,13 @@
-import { useTranslation } from 'react-i18next';
 import { useController } from 'react-hook-form';
-import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+
 import { EQUIPMENT_DISPLAY } from '@/features/fitness/constants';
+import { cn } from '@/lib/utils';
+
 import { StepLayout } from './StepLayout';
 import type { StepProps } from './types';
 
-const EQUIPMENT_OPTIONS = [
-  'barbell', 'dumbbell', 'cable', 'machine',
-  'bodyweight', 'bands', 'kettlebell',
-] as const;
+const EQUIPMENT_OPTIONS = ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight', 'bands', 'kettlebell'] as const;
 
 export function EquipmentStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
@@ -18,7 +17,7 @@ export function EquipmentStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const toggle = (item: string) => {
     const current = selected as string[];
     if (current.includes(item)) {
-      field.field.onChange(current.filter((i) => i !== item));
+      field.field.onChange(current.filter(i => i !== item));
     } else {
       field.field.onChange([...current, item]);
     }
@@ -31,8 +30,8 @@ export function EquipmentStep({ form, goNext, goBack }: Readonly<StepProps>) {
       goNext={goNext}
       goBack={goBack}
     >
-      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.equipment')}>
-        {EQUIPMENT_OPTIONS.map((eq) => (
+      <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0" aria-label={t('fitness.onboarding.equipment')}>
+        {EQUIPMENT_OPTIONS.map(eq => (
           <button
             key={eq}
             type="button"

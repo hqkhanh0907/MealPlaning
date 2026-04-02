@@ -1,17 +1,10 @@
+import type { BodyRegion, Exercise } from '../features/fitness/types';
 import { isBodyRegion } from '../features/fitness/types';
-import type { Exercise, BodyRegion } from '../features/fitness/types';
 
 describe('isBodyRegion', () => {
-  const VALID_REGIONS: BodyRegion[] = [
-    'shoulders',
-    'lower_back',
-    'knees',
-    'wrists',
-    'neck',
-    'hips',
-  ];
+  const VALID_REGIONS: BodyRegion[] = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'];
 
-  it.each(VALID_REGIONS)('returns true for valid region "%s"', (region) => {
+  it.each(VALID_REGIONS)('returns true for valid region "%s"', region => {
     expect(isBodyRegion(region)).toBe(true);
   });
 

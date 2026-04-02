@@ -1,15 +1,10 @@
+import { Activity, Dumbbell, type LucideIcon, Plus, Scale, TrendingUp } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Scale,
-  Plus,
-  Dumbbell,
-  Activity,
-  TrendingUp,
-  type LucideIcon,
-} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { useQuickActions, type QuickAction, type ActionType } from '../hooks/useQuickActions';
+
+import { type ActionType, type QuickAction, useQuickActions } from '../hooks/useQuickActions';
 
 const ACTION_ICON_MAP: Record<ActionType, LucideIcon> = {
   'log-weight': Scale,
@@ -28,10 +23,7 @@ interface ActionButtonProps {
   onPress: (action: QuickAction) => void;
 }
 
-const ActionButton = React.memo(function ActionButton({
-  action,
-  onPress,
-}: ActionButtonProps) {
+const ActionButton = React.memo(function ActionButton({ action, onPress }: ActionButtonProps) {
   const { t } = useTranslation();
   const Icon = ACTION_ICON_MAP[action.id];
 
@@ -44,7 +36,7 @@ const ActionButton = React.memo(function ActionButton({
       <Button
         variant="default"
         onClick={handleClick}
-        className="flex min-w-[100px] flex-col items-center justify-center gap-1 rounded-full bg-emerald-500 px-4 text-white hover:bg-emerald-600 h-14"
+        className="flex h-14 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full bg-emerald-500 px-4 text-white hover:bg-emerald-600"
         style={{
           boxShadow: 'var(--shadow-glow)',
         }}
@@ -52,9 +44,7 @@ const ActionButton = React.memo(function ActionButton({
         data-testid={`quick-action-${action.id}`}
       >
         <Icon size={24} aria-hidden="true" />
-        <span className="text-[10px] font-medium leading-tight">
-          {t(action.label)}
-        </span>
+        <span className="text-[10px] leading-tight font-medium">{t(action.label)}</span>
       </Button>
     );
   }
@@ -63,14 +53,12 @@ const ActionButton = React.memo(function ActionButton({
     <Button
       variant="outline"
       onClick={handleClick}
-      className="flex min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border-gray-200 bg-white px-4 text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-emerald-400 h-12"
+      className="flex h-12 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border-gray-200 bg-white px-4 text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-emerald-400"
       aria-label={t(action.label)}
       data-testid={`quick-action-${action.id}`}
     >
       <Icon size={20} aria-hidden="true" />
-      <span className="text-[10px] font-medium leading-tight">
-        {t(action.label)}
-      </span>
+      <span className="text-[10px] leading-tight font-medium">{t(action.label)}</span>
     </Button>
   );
 });

@@ -1,14 +1,10 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+
 import { useNutritionTargets } from '../features/health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import type { Goal, HealthProfile } from '../features/health-profile/types';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
-import type { HealthProfile, Goal } from '../features/health-profile/types';
-import {
-  calculateBMR,
-  calculateTDEE,
-  calculateTarget,
-  calculateMacros,
-} from '../services/nutritionEngine';
+import { calculateBMR, calculateMacros, calculateTarget, calculateTDEE } from '../services/nutritionEngine';
 
 describe('useNutritionTargets', () => {
   beforeEach(() => {
@@ -30,6 +26,19 @@ describe('useNutritionTargets', () => {
     expect(result.current.tdee).toBe(0);
     expect(result.current.targetFat).toBe(0);
     expect(result.current.targetCarbs).toBe(0);
+  });
+
+  it('returns zero targets when profile is null', () => {
+    useHealthProfileStore.setState({ profile: null });
+    const { result } = renderHook(() => useNutritionTargets());
+    expect(result.current).toEqual({
+      targetCalories: 0,
+      targetProtein: 0,
+      targetFat: 0,
+      targetCarbs: 0,
+      bmr: 0,
+      tdee: 0,
+    });
   });
 
   it('returns computed targets when health profile is configured', () => {

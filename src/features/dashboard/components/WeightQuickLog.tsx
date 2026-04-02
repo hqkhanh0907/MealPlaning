@@ -1,13 +1,15 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { Minus, Plus, Scale, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Minus, Plus, X, Scale } from 'lucide-react';
+
+import { generateUUID } from '@/utils/helpers';
+
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { useNotification } from '../../../contexts/NotificationContext';
-import { calculateMovingAverage } from '../hooks/useFeedbackLoop';
-import { generateUUID } from '@/utils/helpers';
 import type { WeightEntry } from '../../fitness/types';
+import { calculateMovingAverage } from '../hooks/useFeedbackLoop';
 
 const STEP = 0.1;
 const MIN_WEIGHT = 30;
@@ -37,15 +39,12 @@ function yesterdayStr(): string {
   return `${y}-${m}-${day}`;
 }
 
-
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
 function getRecentUniqueWeights(entries: WeightEntry[], excludeDate: string): number[] {
-  const sorted = [...entries]
-    .filter((e) => e.date !== excludeDate)
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const sorted = [...entries].filter(e => e.date !== excludeDate).sort((a, b) => b.date.localeCompare(a.date));
   const seen = new Set<number>();
   const result: number[] = [];
   for (const entry of sorted) {
@@ -63,7 +62,7 @@ function getEntriesLast7Days(entries: WeightEntry[]): WeightEntry[] {
   now.setHours(0, 0, 0, 0);
   const cutoff = new Date(now);
   cutoff.setDate(cutoff.getDate() - MOVING_AVG_DAYS);
-  return entries.filter((e) => {
+  return entries.filter(e => {
     const d = new Date(e.date);
     d.setHours(0, 0, 0, 0);
     return d >= cutoff && d <= now;
@@ -108,9 +107,7 @@ function useLongPress(
     timerRef.current = setTimeout(() => {
       tickCountRef.current += 1;
       const interval =
-        tickCountRef.current > ACCELERATION_THRESHOLD
-          ? LONG_PRESS_INTERVAL_FAST
-          : LONG_PRESS_INTERVAL_INITIAL;
+        tickCountRef.current > ACCELERATION_THRESHOLD ? LONG_PRESS_INTERVAL_FAST : LONG_PRESS_INTERVAL_INITIAL;
 
       clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
@@ -130,10 +127,7 @@ function useLongPress(
     return stop;
   }, [stop]);
 
-  const atBound =
-    direction === 'increment'
-      ? currentValue >= maxWeight
-      : currentValue <= minWeight;
+  const atBound = direction === 'increment' ? currentValue >= maxWeight : currentValue <= minWeight;
 
   return {
     onPointerDown: atBound ? undefined : start,
@@ -146,78 +140,54 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
   const { t } = useTranslation();
   const notify = useNotification();
 
-  const weightEntries = useFitnessStore((s) => s.weightEntries);
-  const addWeightEntry = useFitnessStore((s) => s.addWeightEntry);
-  const updateWeightEntry = useFitnessStore((s) => s.updateWeightEntry);
-  const removeWeightEntry = useFitnessStore((s) => s.removeWeightEntry);
+  const weightEntries = useFitnessStore(s => s.weightEntries);
+  const addWeightEntry = useFitnessStore(s => s.addWeightEntry);
+  const updateWeightEntry = useFitnessStore(s => s.updateWeightEntry);
+  const removeWeightEntry = useFitnessStore(s => s.removeWeightEntry);
 
   const today = todayStr();
   const yesterday = yesterdayStr();
 
   useModalBackHandler(true, onClose);
 
-  const todayEntry = useMemo(
-    () => weightEntries.find((e) => e.date === today),
-    [weightEntries, today],
-  );
+  const todayEntry = useMemo(() => weightEntries.find(e => e.date === today), [weightEntries, today]);
 
-  const yesterdayEntry = useMemo(
-    () => weightEntries.find((e) => e.date === yesterday),
-    [weightEntries, yesterday],
-  );
+  const yesterdayEntry = useMemo(() => weightEntries.find(e => e.date === yesterday), [weightEntries, yesterday]);
 
   const latestEntry = useMemo(() => {
     if (weightEntries.length === 0) return undefined;
     return [...weightEntries].sort((a, b) => b.date.localeCompare(a.date))[0];
   }, [weightEntries]);
 
-  const recentChips = useMemo(
-    () => getRecentUniqueWeights(weightEntries, today),
-    [weightEntries, today],
-  );
+  const recentChips = useMemo(() => getRecentUniqueWeights(weightEntries, today), [weightEntries, today]);
 
   const movingAvg = useMemo(() => {
     const last7 = getEntriesLast7Days(weightEntries);
     return calculateMovingAverage(last7);
   }, [weightEntries]);
 
-  const trend = useMemo(
-    () => getTrendIndicator(movingAvg, yesterdayEntry?.weightKg),
-    [movingAvg, yesterdayEntry],
-  );
+  const trend = useMemo(() => getTrendIndicator(movingAvg, yesterdayEntry?.weightKg), [movingAvg, yesterdayEntry]);
 
   const initialWeight = todayEntry?.weightKg ?? yesterdayEntry?.weightKg ?? latestEntry?.weightKg ?? 0;
   const [inputValue, setInputValue] = useState<number>(initialWeight);
 
   const handleIncrement = useCallback(() => {
-    setInputValue((prev) => {
+    setInputValue(prev => {
       const next = round1(prev + STEP);
       return next <= MAX_WEIGHT ? next : prev;
     });
   }, []);
 
   const handleDecrement = useCallback(() => {
-    setInputValue((prev) => {
+    setInputValue(prev => {
       const next = round1(prev - STEP);
       return next >= MIN_WEIGHT ? next : prev;
     });
   }, []);
 
-  const incrementLongPress = useLongPress(
-    handleIncrement,
-    MIN_WEIGHT,
-    MAX_WEIGHT,
-    inputValue,
-    'increment',
-  );
+  const incrementLongPress = useLongPress(handleIncrement, MIN_WEIGHT, MAX_WEIGHT, inputValue, 'increment');
 
-  const decrementLongPress = useLongPress(
-    handleDecrement,
-    MIN_WEIGHT,
-    MAX_WEIGHT,
-    inputValue,
-    'decrement',
-  );
+  const decrementLongPress = useLongPress(handleDecrement, MIN_WEIGHT, MAX_WEIGHT, inputValue, 'decrement');
 
   const handleChipSelect = useCallback((weight: number) => {
     setInputValue(weight);
@@ -251,37 +221,23 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
 
     onClose();
 
-    notify.success(
-      t('fitness.weight.savedWeight'),
-      `${savedWeight} ${t('fitness.weight.kg')}`,
-      {
-        duration: UNDO_DURATION,
-        action: {
-          label: t('fitness.weight.undoAction'),
-          onClick: () => {
-            if (wasUpdate && savedEntryId && previousWeight !== undefined) {
-              updateWeightEntry(savedEntryId, {
-                weightKg: previousWeight,
-                updatedAt: new Date().toISOString(),
-              });
-            } else if (savedEntryId) {
-              removeWeightEntry(savedEntryId);
-            }
-          },
+    notify.success(t('fitness.weight.savedWeight'), `${savedWeight} ${t('fitness.weight.kg')}`, {
+      duration: UNDO_DURATION,
+      action: {
+        label: t('fitness.weight.undoAction'),
+        onClick: () => {
+          if (wasUpdate && savedEntryId && previousWeight !== undefined) {
+            updateWeightEntry(savedEntryId, {
+              weightKg: previousWeight,
+              updatedAt: new Date().toISOString(),
+            });
+          } else if (savedEntryId) {
+            removeWeightEntry(savedEntryId);
+          }
         },
       },
-    );
-  }, [
-    todayEntry,
-    inputValue,
-    today,
-    updateWeightEntry,
-    addWeightEntry,
-    removeWeightEntry,
-    onClose,
-    notify,
-    t,
-  ]);
+    });
+  }, [todayEntry, inputValue, today, updateWeightEntry, addWeightEntry, removeWeightEntry, onClose, notify, t]);
 
   const isValid = inputValue >= MIN_WEIGHT && inputValue <= MAX_WEIGHT;
 
@@ -290,7 +246,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
       <dialog
         open
         data-testid="weight-quick-log"
-        className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md"
+        className="relative w-full rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
         aria-label={t('fitness.weight.quickLogTitle')}
       >
         {/* Header */}
@@ -306,7 +262,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             data-testid="close-btn"
             aria-label={t('common.close')}
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 active:scale-95 transition-colors dark:text-slate-500 dark:hover:bg-slate-700"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 active:scale-95 dark:text-slate-500 dark:hover:bg-slate-700"
           >
             <X className="h-5 w-5" />
           </button>
@@ -322,9 +278,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             >
               {inputValue > 0 ? inputValue : '—'}
             </span>
-            <span className="text-lg text-slate-400 dark:text-slate-500">
-              {t('fitness.weight.kg')}
-            </span>
+            <span className="text-lg text-slate-400 dark:text-slate-500">{t('fitness.weight.kg')}</span>
           </div>
         </div>
 
@@ -339,7 +293,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             onPointerDown={decrementLongPress.onPointerDown}
             onPointerUp={decrementLongPress.onPointerUp}
             onPointerLeave={decrementLongPress.onPointerLeave}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
           >
             <Minus className="h-5 w-5" />
           </button>
@@ -353,7 +307,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             onPointerDown={incrementLongPress.onPointerDown}
             onPointerUp={incrementLongPress.onPointerUp}
             onPointerLeave={incrementLongPress.onPointerLeave}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
           >
             <Plus className="h-5 w-5" />
           </button>
@@ -361,11 +315,8 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
 
         {/* Quick Select Chips */}
         {recentChips.length > 0 && (
-          <div
-            data-testid="quick-select-chips"
-            className="flex gap-2 px-6 pb-4 overflow-x-auto scrollbar-hide"
-          >
-            {recentChips.map((w) => {
+          <div data-testid="quick-select-chips" className="scrollbar-hide flex gap-2 overflow-x-auto px-6 pb-4">
+            {recentChips.map(w => {
               const isYesterdayWeight = w === yesterdayEntry?.weightKg;
               const isActive = inputValue === w;
               return (
@@ -422,13 +373,13 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         </div>
 
         {/* Save Button */}
-        <div className="px-6 pb-6 pt-2">
+        <div className="px-6 pt-2 pb-6">
           <button
             type="button"
             data-testid="save-btn"
             disabled={!isValid}
             onClick={handleSave}
-            className="w-full flex items-center justify-center gap-2 bg-emerald-500 text-white px-6 py-3.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-12 dark:shadow-none"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-none"
           >
             {t('common.save')}
           </button>

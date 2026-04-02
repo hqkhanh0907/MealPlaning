@@ -1,5 +1,5 @@
-import { EXERCISES, seedExercises } from '../features/fitness/data/exerciseDatabase';
 import type { ExerciseSeed } from '../features/fitness/data/exerciseDatabase';
+import { EXERCISES, seedExercises } from '../features/fitness/data/exerciseDatabase';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
@@ -26,16 +26,7 @@ function createMockDb(): DatabaseService & { rows: Record<string, unknown>[] } {
 /* ------------------------------------------------------------------ */
 /*  Valid values from schema                                             */
 /* ------------------------------------------------------------------ */
-const VALID_MUSCLE_GROUPS = [
-  'chest',
-  'back',
-  'shoulders',
-  'legs',
-  'arms',
-  'core',
-  'glutes',
-  'cardio',
-] as const;
+const VALID_MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes', 'cardio'] as const;
 
 const VALID_CATEGORIES = ['compound', 'secondary', 'isolation'] as const;
 const VALID_EXERCISE_TYPES = ['strength', 'cardio'] as const;
@@ -80,7 +71,7 @@ describe('exerciseDatabase', () => {
   });
 
   it('all IDs are unique', () => {
-    const ids = EXERCISES.map((e) => e.id);
+    const ids = EXERCISES.map(e => e.id);
     const uniqueIds = new Set(ids);
     expect(uniqueIds.size).toBe(ids.length);
   });
@@ -105,7 +96,7 @@ describe('exerciseDatabase', () => {
 
   it('each muscle group has at least 5 exercises', () => {
     for (const group of VALID_MUSCLE_GROUPS) {
-      const count = EXERCISES.filter((e) => e.muscleGroup === group).length;
+      const count = EXERCISES.filter(e => e.muscleGroup === group).length;
       expect(count).toBeGreaterThanOrEqual(5);
     }
   });

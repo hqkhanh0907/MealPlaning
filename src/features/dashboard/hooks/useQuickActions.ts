@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+
 import { useDayPlanStore } from '../../../store/dayPlanStore';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
@@ -32,12 +33,7 @@ export interface QuickActionsInput {
   hasTrainingPlan: boolean;
 }
 
-function makeAction(
-  id: ActionType,
-  icon: string,
-  label: string,
-  isPrimary: boolean,
-): QuickAction {
+function makeAction(id: ActionType, icon: string, label: string, isPrimary: boolean): QuickAction {
   return { id, icon, label, isPrimary };
 }
 
@@ -75,11 +71,8 @@ function determineRightAction(input: QuickActionsInput, allMealsLogged: boolean)
   return makeAction('log-cardio', '🏃', 'quickActions.logCardio', false);
 }
 
-export function determineQuickActions(
-  input: QuickActionsInput,
-): [QuickAction, QuickAction, QuickAction] {
-  const allMealsLogged =
-    input.hasBreakfast && input.hasLunch && input.hasDinner;
+export function determineQuickActions(input: QuickActionsInput): [QuickAction, QuickAction, QuickAction] {
+  const allMealsLogged = input.hasBreakfast && input.hasLunch && input.hasDinner;
 
   const left = makeAction('log-weight', '⚖️', 'quickActions.logWeight', false);
   const center = determineCenterAction(input, allMealsLogged);
@@ -88,35 +81,28 @@ export function determineQuickActions(
   return [left, center, right];
 }
 
-export function useQuickActions(options?: {
-  onLogWeight?: () => void;
-}): {
+export function useQuickActions(options?: { onLogWeight?: () => void }): {
   actions: [QuickAction, QuickAction, QuickAction];
   handleAction: (action: QuickAction) => void;
 } {
-  const dayPlans = useDayPlanStore((s) => s.dayPlans);
-  const weightEntries = useFitnessStore((s) => s.weightEntries);
-  const workouts = useFitnessStore((s) => s.workouts);
-  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
-  const navigateTab = useNavigationStore((s) => s.navigateTab);
+  const dayPlans = useDayPlanStore(s => s.dayPlans);
+  const weightEntries = useFitnessStore(s => s.weightEntries);
+  const workouts = useFitnessStore(s => s.workouts);
+  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const navigateTab = useNavigationStore(s => s.navigateTab);
 
   const actions = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    const todayPlan = dayPlans.find((p) => p.date === today);
+    const todayPlan = dayPlans.find(p => p.date === today);
 
     const hasBreakfast = (todayPlan?.breakfastDishIds?.length ?? 0) > 0;
     const hasLunch = (todayPlan?.lunchDishIds?.length ?? 0) > 0;
     const hasDinner = (todayPlan?.dinnerDishIds?.length ?? 0) > 0;
-    const mealsCount =
-      (hasBreakfast ? 1 : 0) + (hasLunch ? 1 : 0) + (hasDinner ? 1 : 0);
+    const mealsCount = (hasBreakfast ? 1 : 0) + (hasLunch ? 1 : 0) + (hasDinner ? 1 : 0);
 
-    const weightLoggedToday = weightEntries.some(
-      (w) => w.date.split('T')[0] === today,
-    );
-    const workoutCompleted = workouts.some(
-      (w) => w.date.split('T')[0] === today,
-    );
-    const hasTrainingPlan = trainingPlans.some((p) => p.status === 'active');
+    const weightLoggedToday = weightEntries.some(w => w.date.split('T')[0] === today);
+    const workoutCompleted = workouts.some(w => w.date.split('T')[0] === today);
+    const hasTrainingPlan = trainingPlans.some(p => p.status === 'active');
 
     return determineQuickActions({
       mealsLoggedToday: mealsCount,

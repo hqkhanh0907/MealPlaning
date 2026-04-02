@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import { useController } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { cn } from '@/lib/utils';
+
 import { StepLayout } from './StepLayout';
 import type { StepProps } from './types';
 
@@ -17,8 +19,8 @@ export function DurationStep({ form, goNext, goBack }: Readonly<StepProps>) {
       goNext={goNext}
       goBack={goBack}
     >
-      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.sessionDuration')}>
-        {DURATIONS.map((d) => (
+      <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0" aria-label={t('fitness.onboarding.sessionDuration')}>
+        {DURATIONS.map(d => (
           <button
             key={d}
             type="button"

@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { QuickActionsBar } from '../features/dashboard/components/QuickActionsBar';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import { useFitnessStore } from '../store/fitnessStore';
@@ -18,11 +19,7 @@ function resetStores() {
   useNavigationStore.setState({ navigateTab: vi.fn() });
 }
 
-function setMeals(meals: {
-  breakfast?: boolean;
-  lunch?: boolean;
-  dinner?: boolean;
-}) {
+function setMeals(meals: { breakfast?: boolean; lunch?: boolean; dinner?: boolean }) {
   useDayPlanStore.setState({
     dayPlans: [
       {
@@ -37,7 +34,7 @@ function setMeals(meals: {
 }
 
 function setWorkoutCompleted() {
-  useFitnessStore.setState((prev) => ({
+  useFitnessStore.setState(prev => ({
     ...prev,
     workouts: [
       {
@@ -52,7 +49,7 @@ function setWorkoutCompleted() {
 }
 
 function setActiveTrainingPlan() {
-  useFitnessStore.setState((prev) => ({
+  useFitnessStore.setState(prev => ({
     ...prev,
     trainingPlans: [
       {
@@ -108,9 +105,7 @@ describe('QuickActionsBar', () => {
 
     it('shows log-breakfast in the center', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-log-breakfast'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-log-breakfast')).toBeInTheDocument();
     });
 
     it('shows log-cardio on the right (no training plan)', () => {
@@ -121,9 +116,7 @@ describe('QuickActionsBar', () => {
     it('shows start-workout on the right when training plan exists', () => {
       setActiveTrainingPlan();
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-start-workout'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-start-workout')).toBeInTheDocument();
     });
   });
 
@@ -144,16 +137,12 @@ describe('QuickActionsBar', () => {
 
     it('shows log-dinner in the center', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-log-dinner'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-log-dinner')).toBeInTheDocument();
     });
 
     it('shows start-workout on the right', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-start-workout'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-start-workout')).toBeInTheDocument();
     });
   });
 
@@ -178,9 +167,7 @@ describe('QuickActionsBar', () => {
 
     it('shows view-results on the right', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-view-results'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-view-results')).toBeInTheDocument();
     });
   });
 
@@ -201,16 +188,12 @@ describe('QuickActionsBar', () => {
 
     it('shows start-workout in the center', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-start-workout'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-start-workout')).toBeInTheDocument();
     });
 
     it('shows log-snack on the right', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-log-snack'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-log-snack')).toBeInTheDocument();
     });
   });
 
@@ -231,16 +214,12 @@ describe('QuickActionsBar', () => {
 
     it('shows view-results in the center', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-view-results'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-view-results')).toBeInTheDocument();
     });
 
     it('shows log-snack on the right', () => {
       render(<QuickActionsBar />);
-      expect(
-        screen.getByTestId('quick-action-log-snack'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('quick-action-log-snack')).toBeInTheDocument();
     });
   });
 

@@ -1,7 +1,9 @@
-import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import type { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@/components/ui/button';
+
 import type { OnboardingFormData } from './onboardingSchema';
 
 interface PlanPreviewScreenProps {
@@ -20,17 +22,15 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
 
   return (
     <div className="flex flex-1 flex-col" data-testid="plan-preview">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.preview.title', { name: values.name })}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          {t('onboarding.preview.subtitle')}
-        </p>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.preview.subtitle')}</p>
 
         {/* Week Overview */}
         <div className="mb-6 flex gap-1.5">
-          {weekDays.map((day) => {
+          {weekDays.map(day => {
             const isActive = activeDays.has(day);
             return (
               <div
@@ -42,9 +42,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
                 }`}
               >
                 <span>{day}</span>
-                <span className="mt-1 text-[10px]">
-                  {isActive ? '💪' : t('fitness.plan.restDay')}
-                </span>
+                <span className="mt-1 text-[10px]">{isActive ? '💪' : t('fitness.plan.restDay')}</span>
               </div>
             );
           })}
@@ -68,9 +66,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
 
         {/* Plan note */}
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
-          <p className="text-sm text-emerald-700 dark:text-emerald-300">
-            {t('onboarding.preview.editNote')}
-          </p>
+          <p className="text-sm text-emerald-700 dark:text-emerald-300">{t('onboarding.preview.editNote')}</p>
         </div>
       </div>
 

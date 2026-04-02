@@ -1,11 +1,6 @@
+import { deleteSetting, getAllSettings, getSetting, setSetting } from '../services/appSettings';
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import { createSchema } from '../services/schema';
-import {
-  getSetting,
-  setSetting,
-  deleteSetting,
-  getAllSettings,
-} from '../services/appSettings';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },

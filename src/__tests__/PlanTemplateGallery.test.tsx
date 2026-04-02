@@ -1,10 +1,11 @@
-import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PlanTemplateGallery } from '../features/fitness/components/PlanTemplateGallery';
 import { TemplateMatchBadge } from '../features/fitness/components/TemplateMatchBadge';
+import type { TrainingProfile } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
-import type { TrainingProfile } from '../features/fitness/types';
 
 // ---------- helpers ----------
 

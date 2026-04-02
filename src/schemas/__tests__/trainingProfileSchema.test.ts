@@ -1,9 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import {
-  trainingProfileSchema,
-  trainingProfileDefaults,
-  type TrainingProfileFormData,
-} from '../trainingProfileSchema';
+import { describe, expect, it } from 'vitest';
+
+import { trainingProfileDefaults, type TrainingProfileFormData, trainingProfileSchema } from '../trainingProfileSchema';
 
 describe('trainingProfileSchema', () => {
   it('accepts valid complete data', () => {

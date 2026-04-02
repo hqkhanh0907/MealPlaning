@@ -1,7 +1,8 @@
-import { render, screen, cleanup } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
+
 import { StreakCounter } from '../features/fitness/components/StreakCounter';
 import { useFitnessStore } from '../store/fitnessStore';
-import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -39,9 +40,7 @@ function setupStore(overrides: Record<string, unknown> = {}) {
     trainingPlans: [],
     ...overrides,
   };
-  mockStore.mockImplementation(
-    (selector: (s: typeof state) => unknown) => selector(state),
-  );
+  mockStore.mockImplementation((selector: (s: typeof state) => unknown) => selector(state));
 }
 
 describe('StreakCounter', () => {
@@ -178,8 +177,6 @@ describe('StreakCounter', () => {
       ],
     });
     render(<StreakCounter />);
-    expect(screen.getByTestId('streak-warning')).toHaveTextContent(
-      'Streak sắp mất!',
-    );
+    expect(screen.getByTestId('streak-warning')).toHaveTextContent('Streak sắp mất!');
   });
 });

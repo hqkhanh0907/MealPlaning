@@ -1,19 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { SwapExerciseSheet } from '../features/fitness/components/SwapExerciseSheet';
 import type { Exercise } from '../features/fitness/types';
 
 // Mock ModalBackdrop — render children directly with a backdrop button
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-    onClose,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-  }) => (
+  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
     <div data-testid="modal-backdrop">
       <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
       {children}
@@ -148,9 +143,7 @@ describe('SwapExerciseSheet', () => {
   });
 
   it('returns null when isOpen is false', () => {
-    const { container } = render(
-      <SwapExerciseSheet {...defaultProps} isOpen={false} />,
-    );
+    const { container } = render(<SwapExerciseSheet {...defaultProps} isOpen={false} />);
     expect(container.innerHTML).toBe('');
   });
 
@@ -163,9 +156,7 @@ describe('SwapExerciseSheet', () => {
   it('shows header with title and current exercise name', () => {
     render(<SwapExerciseSheet {...defaultProps} />);
     expect(screen.getByText('Đổi bài tập')).toBeInTheDocument();
-    expect(screen.getByTestId('swap-current-name')).toHaveTextContent(
-      'Đẩy tạ đòn nằm ngang',
-    );
+    expect(screen.getByTestId('swap-current-name')).toHaveTextContent('Đẩy tạ đòn nằm ngang');
   });
 
   it('shows muscle group label in header', () => {
@@ -191,15 +182,11 @@ describe('SwapExerciseSheet', () => {
     render(<SwapExerciseSheet {...defaultProps} />);
 
     // currentExercise is barbell-bench-press — should NOT appear in list
-    expect(
-      screen.queryByTestId('swap-item-barbell-bench-press'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('swap-item-barbell-bench-press')).not.toBeInTheDocument();
 
     // Other chest exercises should appear
     expect(screen.getByTestId('swap-item-dumbbell-fly')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('swap-item-incline-dumbbell-press'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('swap-item-incline-dumbbell-press')).toBeInTheDocument();
   });
 
   it('shows exercise details (category badge and equipment)', () => {
@@ -225,9 +212,7 @@ describe('SwapExerciseSheet', () => {
     await user.type(input, 'Bay tạ');
 
     expect(screen.getByText('Bay tạ tay')).toBeInTheDocument();
-    expect(
-      screen.queryByText('Đẩy tạ tay ghế nghiêng'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Đẩy tạ tay ghế nghiêng')).not.toBeInTheDocument();
   });
 
   it('search filters exercises by English name', async () => {
@@ -249,22 +234,14 @@ describe('SwapExerciseSheet', () => {
     await user.type(input, 'xyznonexistent');
 
     expect(screen.getByTestId('swap-empty-state')).toBeInTheDocument();
-    expect(
-      screen.getByText('Không có bài tập thay thế'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Không có bài tập thay thế')).toBeInTheDocument();
   });
 
   it('calls onSelect and onClose when an exercise is tapped', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     const onClose = vi.fn();
-    render(
-      <SwapExerciseSheet
-        {...defaultProps}
-        onSelect={onSelect}
-        onClose={onClose}
-      />,
-    );
+    render(<SwapExerciseSheet {...defaultProps} onSelect={onSelect} onClose={onClose} />);
 
     await user.click(screen.getByTestId('swap-item-dumbbell-fly'));
 
@@ -292,17 +269,10 @@ describe('SwapExerciseSheet', () => {
       muscleGroup: 'legs',
     });
 
-    render(
-      <SwapExerciseSheet
-        {...defaultProps}
-        currentExercise={squatExercise}
-      />,
-    );
+    render(<SwapExerciseSheet {...defaultProps} currentExercise={squatExercise} />);
 
     expect(screen.getByTestId('swap-empty-state')).toBeInTheDocument();
-    expect(
-      screen.getByText('Không có bài tập thay thế'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Không có bài tập thay thế')).toBeInTheDocument();
   });
 
   it('displays alternatives count in the section label', () => {
@@ -322,9 +292,6 @@ describe('SwapExerciseSheet', () => {
     render(<SwapExerciseSheet {...defaultProps} />);
 
     const flyButton = screen.getByTestId('swap-item-dumbbell-fly');
-    expect(flyButton).toHaveAttribute(
-      'aria-label',
-      'Đổi bài tập: Bay tạ tay',
-    );
+    expect(flyButton).toHaveAttribute('aria-label', 'Đổi bài tập: Bay tạ tay');
   });
 });

@@ -1,35 +1,38 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { PlanDayEditor } from '../features/fitness/components/PlanDayEditor';
+import type { SelectedExercise, TrainingPlanDay } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
-import type { TrainingPlanDay, SelectedExercise } from '../features/fitness/types';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => {
-    const map: Record<string, string> = {
-      'fitness.plan.editExercises': 'Chỉnh sửa bài tập',
-      'fitness.plan.addExercise': 'Thêm bài tập',
-      'fitness.plan.save': 'Lưu',
-      'fitness.plan.restore': 'Khôi phục gốc',
-      'fitness.plan.modified': 'Đã chỉnh sửa',
-      'fitness.plan.noExercises': 'Chưa có bài tập nào',
-      'fitness.plan.unsavedChanges': 'Bạn có thay đổi chưa lưu. Bỏ thay đổi?',
-      'fitness.plan.exerciseRemoved': 'đã xóa',
-      'fitness.plan.undo': 'Hoàn tác',
-      'fitness.plan.setsLabel': 'hiệp',
-      'fitness.plan.repsLabel': 'lần',
-      'fitness.plan.repsMinLabel': 'Lần tối thiểu',
-      'fitness.plan.repsMaxLabel': 'Lần tối đa',
-      'fitness.plan.restLabel': 'Nghỉ',
-      'fitness.plan.editParams': 'Chỉnh thông số',
-      'fitness.swap.title': 'Đổi bài tập',
-      'common.back': 'Quay lại',
-      'common.confirm': 'Xác nhận',
-      'common.cancel': 'Hủy',
-      'common.close': 'Đóng',
-    };
-    return map[key] ?? key;
-  } }),
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'fitness.plan.editExercises': 'Chỉnh sửa bài tập',
+        'fitness.plan.addExercise': 'Thêm bài tập',
+        'fitness.plan.save': 'Lưu',
+        'fitness.plan.restore': 'Khôi phục gốc',
+        'fitness.plan.modified': 'Đã chỉnh sửa',
+        'fitness.plan.noExercises': 'Chưa có bài tập nào',
+        'fitness.plan.unsavedChanges': 'Bạn có thay đổi chưa lưu. Bỏ thay đổi?',
+        'fitness.plan.exerciseRemoved': 'đã xóa',
+        'fitness.plan.undo': 'Hoàn tác',
+        'fitness.plan.setsLabel': 'hiệp',
+        'fitness.plan.repsLabel': 'lần',
+        'fitness.plan.repsMinLabel': 'Lần tối thiểu',
+        'fitness.plan.repsMaxLabel': 'Lần tối đa',
+        'fitness.plan.restLabel': 'Nghỉ',
+        'fitness.plan.editParams': 'Chỉnh thông số',
+        'fitness.swap.title': 'Đổi bài tập',
+        'common.back': 'Quay lại',
+        'common.confirm': 'Xác nhận',
+        'common.cancel': 'Hủy',
+        'common.close': 'Đóng',
+      };
+      return map[key] ?? key;
+    },
+  }),
 }));
 
 const mockPopPage = vi.fn();
@@ -39,14 +42,37 @@ vi.mock('../store/navigationStore', () => ({
 
 // Mock ExerciseSelector
 vi.mock('../features/fitness/components/ExerciseSelector', () => ({
-  ExerciseSelector: ({ isOpen, onSelect, onClose }: { isOpen: boolean; onSelect: (ex: unknown) => void; onClose: () => void }) => {
+  ExerciseSelector: ({
+    isOpen,
+    onSelect,
+    onClose,
+  }: {
+    isOpen: boolean;
+    onSelect: (ex: unknown) => void;
+    onClose: () => void;
+  }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="exercise-selector">
-        <button onClick={() => onSelect({ id: 'new-ex', nameVi: 'Squat', muscleGroup: 'legs', category: 'compound', equipment: ['barbell'], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12 })}>
+        <button
+          onClick={() =>
+            onSelect({
+              id: 'new-ex',
+              nameVi: 'Squat',
+              muscleGroup: 'legs',
+              category: 'compound',
+              equipment: ['barbell'],
+              exerciseType: 'strength',
+              defaultRepsMin: 8,
+              defaultRepsMax: 12,
+            })
+          }
+        >
           Add Squat
         </button>
-        <button data-testid="close-selector" onClick={onClose}>Close Selector</button>
+        <button data-testid="close-selector" onClick={onClose}>
+          Close Selector
+        </button>
       </div>
     );
   },
@@ -54,15 +80,46 @@ vi.mock('../features/fitness/components/ExerciseSelector', () => ({
 
 // Mock SwapExerciseSheet
 vi.mock('../features/fitness/components/SwapExerciseSheet', () => ({
-  SwapExerciseSheet: ({ isOpen, currentExercise, onSelect, onClose }: { isOpen: boolean; currentExercise: { nameVi: string }; onSelect: (ex: unknown) => void; onClose: () => void }) => {
+  SwapExerciseSheet: ({
+    isOpen,
+    currentExercise,
+    onSelect,
+    onClose,
+  }: {
+    isOpen: boolean;
+    currentExercise: { nameVi: string };
+    onSelect: (ex: unknown) => void;
+    onClose: () => void;
+  }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="swap-exercise-sheet">
         <span data-testid="swap-current">{currentExercise.nameVi}</span>
-        <button data-testid="swap-select" onClick={() => onSelect({ id: 'fly', nameVi: 'Chest Fly', nameEn: 'Chest Fly', muscleGroup: 'chest', secondaryMuscles: [], category: 'isolation', equipment: ['dumbbell'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 10, defaultRepsMax: 15, isCustom: false, updatedAt: '' })}>
+        <button
+          data-testid="swap-select"
+          onClick={() =>
+            onSelect({
+              id: 'fly',
+              nameVi: 'Chest Fly',
+              nameEn: 'Chest Fly',
+              muscleGroup: 'chest',
+              secondaryMuscles: [],
+              category: 'isolation',
+              equipment: ['dumbbell'],
+              contraindicated: [],
+              exerciseType: 'strength',
+              defaultRepsMin: 10,
+              defaultRepsMax: 15,
+              isCustom: false,
+              updatedAt: '',
+            })
+          }
+        >
           Select Fly
         </button>
-        <button data-testid="swap-close" onClick={onClose}>Close</button>
+        <button data-testid="swap-close" onClick={onClose}>
+          Close
+        </button>
       </div>
     );
   },
@@ -74,13 +131,47 @@ afterEach(() => {
 });
 
 const sampleExercise: SelectedExercise = {
-  exercise: { id: 'bench', nameVi: 'Bench Press', nameEn: 'Bench Press', muscleGroup: 'chest', secondaryMuscles: [], category: 'compound', equipment: ['barbell'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 6, defaultRepsMax: 10, isCustom: false, updatedAt: '' },
-  sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120,
+  exercise: {
+    id: 'bench',
+    nameVi: 'Bench Press',
+    nameEn: 'Bench Press',
+    muscleGroup: 'chest',
+    secondaryMuscles: [],
+    category: 'compound',
+    equipment: ['barbell'],
+    contraindicated: [],
+    exerciseType: 'strength',
+    defaultRepsMin: 6,
+    defaultRepsMax: 10,
+    isCustom: false,
+    updatedAt: '',
+  },
+  sets: 4,
+  repsMin: 6,
+  repsMax: 10,
+  restSeconds: 120,
 };
 
 const sampleExercise2: SelectedExercise = {
-  exercise: { id: 'ohp', nameVi: 'OHP', nameEn: 'Overhead Press', muscleGroup: 'shoulders', secondaryMuscles: [], category: 'compound', equipment: ['barbell'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12, isCustom: false, updatedAt: '' },
-  sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90,
+  exercise: {
+    id: 'ohp',
+    nameVi: 'OHP',
+    nameEn: 'Overhead Press',
+    muscleGroup: 'shoulders',
+    secondaryMuscles: [],
+    category: 'compound',
+    equipment: ['barbell'],
+    contraindicated: [],
+    exerciseType: 'strength',
+    defaultRepsMin: 8,
+    defaultRepsMax: 12,
+    isCustom: false,
+    updatedAt: '',
+  },
+  sets: 3,
+  repsMin: 8,
+  repsMax: 12,
+  restSeconds: 90,
 };
 
 const makePlanDay = (exercises: SelectedExercise[] = [sampleExercise, sampleExercise2]): TrainingPlanDay => ({
@@ -438,7 +529,9 @@ describe('PlanDayEditor', () => {
     fireEvent.click(removeButtons[0]);
     expect(screen.getByText('Hoàn tác')).toBeInTheDocument();
     fireEvent.click(screen.getAllByLabelText(/remove/i)[1]);
-    await act(async () => { vi.advanceTimersByTime(5000); });
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
     expect(screen.queryByText('Bench Press')).not.toBeInTheDocument();
     vi.useRealTimers();
   });

@@ -1,10 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  hapticFeedback,
-  tapFeedback,
-  successFeedback,
-  errorFeedback,
-} from '../utils/haptics';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { errorFeedback, hapticFeedback, successFeedback, tapFeedback } from '../utils/haptics';
 
 const mockImpact = vi.fn().mockResolvedValue(undefined);
 
@@ -47,19 +43,19 @@ describe('convenience functions', () => {
 
   it('tapFeedback triggers light haptic', async () => {
     tapFeedback();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(mockImpact).toHaveBeenCalledWith({ style: 'LIGHT' });
   });
 
   it('successFeedback triggers medium haptic', async () => {
     successFeedback();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(mockImpact).toHaveBeenCalledWith({ style: 'MEDIUM' });
   });
 
   it('errorFeedback triggers heavy haptic', async () => {
     errorFeedback();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(mockImpact).toHaveBeenCalledWith({ style: 'HEAVY' });
   });
 });

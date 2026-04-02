@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PlanScheduleEditor } from '../features/fitness/components/PlanScheduleEditor';
-import { useFitnessStore } from '../store/fitnessStore';
 import type { TrainingPlan, TrainingPlanDay } from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 /* ---------- i18n mock ---------- */
 vi.mock('react-i18next', () => ({
@@ -17,12 +18,10 @@ vi.mock('react-i18next', () => ({
         'fitness.scheduleEditor.restoreOriginal': 'Khôi phục gốc',
         'fitness.scheduleEditor.save': 'Lưu thay đổi',
         'fitness.scheduleEditor.saved': 'Đã lưu lịch tập',
-        'fitness.scheduleEditor.unsavedWarning':
-          'Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?',
+        'fitness.scheduleEditor.unsavedWarning': 'Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?',
         'fitness.scheduleEditor.minDaysError': 'Cần ít nhất 2 ngày tập',
         'fitness.scheduleEditor.maxDaysError': 'Tối đa 6 ngày tập',
-        'fitness.scheduleEditor.unassignedWarning':
-          'Còn bài tập chưa được phân công',
+        'fitness.scheduleEditor.unassignedWarning': 'Còn bài tập chưa được phân công',
         'fitness.scheduleEditor.emptyPlan': 'Chưa có kế hoạch tập',
         'fitness.scheduleEditor.emptyPlanCta': 'Tạo kế hoạch tập mới',
         'fitness.scheduleEditor.weeklyCalendar': 'Lịch tuần',
@@ -130,12 +129,8 @@ vi.mock('../features/fitness/components/WorkoutAssignmentList', () => ({
     <div data-testid="workout-assignment-list">
       <span data-testid="plan-days-count">{planDays.length}</span>
       {onReassign &&
-        planDays.map((d) => (
-          <button
-            key={d.id}
-            data-testid={`reassign-${d.id}`}
-            onClick={() => onReassign(d.id)}
-          >
+        planDays.map(d => (
+          <button key={d.id} data-testid={`reassign-${d.id}`} onClick={() => onReassign(d.id)}>
             Reassign {d.id}
           </button>
         ))}
@@ -211,16 +206,12 @@ const makePlanDay = (id: string, dow: number): TrainingPlanDay => ({
   originalDayOfWeek: dow,
 });
 
-function setupStoreMock(
-  plan: TrainingPlan | undefined,
-  planDays: TrainingPlanDay[],
-) {
-  (useFitnessStore as unknown as Mock).mockImplementation(
-    (selector: (s: Record<string, unknown>) => unknown) =>
-      selector({
-        trainingPlans: plan ? [plan] : [],
-        trainingPlanDays: planDays,
-      }),
+function setupStoreMock(plan: TrainingPlan | undefined, planDays: TrainingPlanDay[]) {
+  (useFitnessStore as unknown as Mock).mockImplementation((selector: (s: Record<string, unknown>) => unknown) =>
+    selector({
+      trainingPlans: plan ? [plan] : [],
+      trainingPlanDays: planDays,
+    }),
   );
 
   (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({
@@ -260,9 +251,7 @@ describe('PlanScheduleEditor', () => {
       setupStoreMock(makePlan(), []);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
-      expect(
-        screen.getByText('Chỉnh sửa lịch tập'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Chỉnh sửa lịch tập')).toBeInTheDocument();
 
       const backBtn = screen.getByTestId('back-button');
       expect(backBtn).toBeInTheDocument();
@@ -292,9 +281,7 @@ describe('PlanScheduleEditor', () => {
       setupStoreMock(makePlan({ trainingDays: [1, 3, 5] }), []);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
-      expect(screen.getByTestId('training-days-display')).toHaveTextContent(
-        '[1,3,5]',
-      );
+      expect(screen.getByTestId('training-days-display')).toHaveTextContent('[1,3,5]');
     });
   });
 
@@ -377,10 +364,7 @@ describe('PlanScheduleEditor', () => {
       fireEvent.click(screen.getByTestId('toggle-day-7'));
       fireEvent.click(screen.getByTestId('save-button'));
 
-      expect(mockUpdateTrainingDays).toHaveBeenCalledWith(
-        PLAN_ID,
-        [1, 3, 5, 7],
-      );
+      expect(mockUpdateTrainingDays).toHaveBeenCalledWith(PLAN_ID, [1, 3, 5, 7]);
       expect(mockNotify.success).toHaveBeenCalledWith('Đã lưu lịch tập');
       expect(mockPopPage).toHaveBeenCalledTimes(1);
     });
@@ -399,12 +383,8 @@ describe('PlanScheduleEditor', () => {
       render(<PlanScheduleEditor planId="nonexistent" />);
 
       expect(screen.getByTestId('empty-plan-state')).toBeInTheDocument();
-      expect(
-        screen.getByText('Chưa có kế hoạch tập'),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText('Tạo kế hoạch tập mới'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Chưa có kế hoạch tập')).toBeInTheDocument();
+      expect(screen.getByText('Tạo kế hoạch tập mới')).toBeInTheDocument();
     });
 
     it('shows back button in empty state', () => {
@@ -421,18 +401,12 @@ describe('PlanScheduleEditor', () => {
   describe('Validation: unassigned workouts', () => {
     it('shows warning when workouts are on non-training days', () => {
       // Plan has training days [1, 3], but day d3 is assigned to dow 5 (not a training day)
-      const days = [
-        makePlanDay('d1', 1),
-        makePlanDay('d2', 3),
-        makePlanDay('d3', 5),
-      ];
+      const days = [makePlanDay('d1', 1), makePlanDay('d2', 3), makePlanDay('d3', 5)];
       setupStoreMock(makePlan({ trainingDays: [1, 3] }), days);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
       expect(screen.getByTestId('unassigned-warning')).toBeInTheDocument();
-      expect(
-        screen.getByText('Còn bài tập chưa được phân công'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Còn bài tập chưa được phân công')).toBeInTheDocument();
     });
 
     it('does not show warning when all workouts are on training days', () => {
@@ -452,9 +426,7 @@ describe('PlanScheduleEditor', () => {
       fireEvent.click(screen.getByTestId('auto-assign-button'));
       fireEvent.click(screen.getByTestId('save-button'));
 
-      expect(mockNotify.warning).toHaveBeenCalledWith(
-        'Còn bài tập chưa được phân công',
-      );
+      expect(mockNotify.warning).toHaveBeenCalledWith('Còn bài tập chưa được phân công');
       expect(mockUpdateTrainingDays).not.toHaveBeenCalled();
       expect(mockPopPage).not.toHaveBeenCalled();
     });
@@ -472,11 +444,7 @@ describe('PlanScheduleEditor', () => {
       // Confirm dialog should appear
       const dialog = screen.getByRole('dialog');
       expect(dialog).toHaveAttribute('aria-modal', 'true');
-      expect(
-        screen.getByText(
-          'Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?',
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?')).toBeInTheDocument();
     });
 
     it('confirm discard navigates back', () => {
@@ -545,22 +513,15 @@ describe('PlanScheduleEditor', () => {
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
       fireEvent.click(screen.getByTestId('toggle-day-1'));
-      expect(mockNotify.warning).toHaveBeenCalledWith(
-        'Cần ít nhất 2 ngày tập',
-      );
+      expect(mockNotify.warning).toHaveBeenCalledWith('Cần ít nhất 2 ngày tập');
     });
 
     it('shows warning when trying to add beyond max days', () => {
-      setupStoreMock(
-        makePlan({ trainingDays: [1, 2, 3, 4, 5, 6] }),
-        [],
-      );
+      setupStoreMock(makePlan({ trainingDays: [1, 2, 3, 4, 5, 6] }), []);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
       fireEvent.click(screen.getByTestId('toggle-day-7'));
-      expect(mockNotify.warning).toHaveBeenCalledWith(
-        'Tối đa 6 ngày tập',
-      );
+      expect(mockNotify.warning).toHaveBeenCalledWith('Tối đa 6 ngày tập');
     });
   });
 

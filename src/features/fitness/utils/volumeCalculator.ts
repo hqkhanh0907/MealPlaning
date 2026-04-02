@@ -1,11 +1,4 @@
-export type MuscleGroup =
-  | 'chest'
-  | 'back'
-  | 'shoulders'
-  | 'legs'
-  | 'arms'
-  | 'core'
-  | 'glutes';
+export type MuscleGroup = 'chest' | 'back' | 'shoulders' | 'legs' | 'arms' | 'core' | 'glutes';
 
 export type TrainingExperience = 'beginner' | 'intermediate' | 'advanced';
 

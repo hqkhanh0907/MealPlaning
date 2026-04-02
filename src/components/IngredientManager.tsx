@@ -1,17 +1,18 @@
-import { useState, useCallback } from 'react';
+import { Apple, Edit3, Trash2 } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Ingredient, Dish, SupportedLang } from '../types';
-import { getLocalizedField } from '../utils/localize';
-import { Trash2, Edit3, Apple } from 'lucide-react';
+
 import { useNotification } from '../contexts/NotificationContext';
-import { ConfirmationModal } from './modals/ConfirmationModal';
-import { IngredientEditModal } from './modals/IngredientEditModal';
-import { ListToolbar } from './shared/ListToolbar';
-import { EmptyState } from './shared/EmptyState';
-import { DetailModal } from './shared/DetailModal';
+import { BaseSortOption, getBaseSortOptions, UNDO_TOAST_DURATION_MS } from '../data/constants';
 import { useItemModalFlow } from '../hooks/useItemModalFlow';
 import { useListManager } from '../hooks/useListManager';
-import { BaseSortOption, getBaseSortOptions, UNDO_TOAST_DURATION_MS } from '../data/constants';
+import { Dish, Ingredient, SupportedLang } from '../types';
+import { getLocalizedField } from '../utils/localize';
+import { ConfirmationModal } from './modals/ConfirmationModal';
+import { IngredientEditModal } from './modals/IngredientEditModal';
+import { DetailModal } from './shared/DetailModal';
+import { EmptyState } from './shared/EmptyState';
+import { ListToolbar } from './shared/ListToolbar';
 
 interface IngredientManagerProps {
   ingredients: Ingredient[];
@@ -29,13 +30,22 @@ const getDisplayUnit = (unit: Ingredient['unit'], lang: SupportedLang) => {
   return `1 ${getLocalizedField(unit, lang)}`;
 };
 
-export const IngredientManager = ({ ingredients, dishes = [], onAdd, onUpdate, onDelete, isUsed }: IngredientManagerProps) => {
+export const IngredientManager = ({
+  ingredients,
+  dishes = [],
+  onAdd,
+  onUpdate,
+  onDelete,
+  isUsed,
+}: IngredientManagerProps) => {
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
 
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
-    isOpen: boolean; ingredientId: string | null; ingredientName: string;
+    isOpen: boolean;
+    ingredientId: string | null;
+    ingredientName: string;
   }>({ isOpen: false, ingredientId: null, ingredientName: '' });
 
   // --- Shared hooks ---
@@ -45,33 +55,53 @@ export const IngredientManager = ({ ingredients, dishes = [], onAdd, onUpdate, o
     const ql = q.toLowerCase();
     return Object.values(ing.name).some(n => n.toLowerCase().includes(ql));
   }, []);
-  const sortFn = useCallback((a: Ingredient, b: Ingredient, s: BaseSortOption) => {
-    switch (s) {
-      case 'name-asc': return getLocalizedField(a.name, lang).localeCompare(getLocalizedField(b.name, lang));
-      case 'name-desc': return getLocalizedField(b.name, lang).localeCompare(getLocalizedField(a.name, lang));
-      case 'cal-asc': return a.caloriesPer100 - b.caloriesPer100;
-      case 'cal-desc': return b.caloriesPer100 - a.caloriesPer100;
-      case 'pro-asc': return a.proteinPer100 - b.proteinPer100;
-      case 'pro-desc': return b.proteinPer100 - a.proteinPer100;
-    }
-  }, [lang]);
+  const sortFn = useCallback(
+    (a: Ingredient, b: Ingredient, s: BaseSortOption) => {
+      switch (s) {
+        case 'name-asc':
+          return getLocalizedField(a.name, lang).localeCompare(getLocalizedField(b.name, lang));
+        case 'name-desc':
+          return getLocalizedField(b.name, lang).localeCompare(getLocalizedField(a.name, lang));
+        case 'cal-asc':
+          return a.caloriesPer100 - b.caloriesPer100;
+        case 'cal-desc':
+          return b.caloriesPer100 - a.caloriesPer100;
+        case 'pro-asc':
+          return a.proteinPer100 - b.proteinPer100;
+        case 'pro-desc':
+          return b.proteinPer100 - a.proteinPer100;
+      }
+    },
+    [lang],
+  );
 
-  const list = useListManager<Ingredient, BaseSortOption>({ items: ingredients, searchFn, sortFn, defaultSort: 'name-asc' });
+  const list = useListManager<Ingredient, BaseSortOption>({
+    items: ingredients,
+    searchFn,
+    sortFn,
+    defaultSort: 'name-asc',
+  });
 
   // --- Domain helpers ---
   const getDishesUsingIngredient = (ingId: string): string[] =>
     dishes.filter(d => d.ingredients.some(di => di.ingredientId === ingId)).map(d => getLocalizedField(d.name, lang));
 
   // --- Domain handlers ---
-  const handleSaveIngredient = useCallback((ing: Ingredient) => {
-    const isEdit = ingredients.some(i => i.id === ing.id);
-    if (isEdit) onUpdate(ing); else onAdd(ing);
-    modal.closeEdit(false);
-  }, [ingredients, onUpdate, onAdd, modal]);
-
+  const handleSaveIngredient = useCallback(
+    (ing: Ingredient) => {
+      const isEdit = ingredients.some(i => i.id === ing.id);
+      if (isEdit) onUpdate(ing);
+      else onAdd(ing);
+      modal.closeEdit(false);
+    },
+    [ingredients, onUpdate, onAdd, modal],
+  );
 
   const handleDelete = (id: string, iname: string) => {
-    if (isUsed(id)) { notify.warning(t('ingredient.cannotDelete'), t('ingredient.usedInDish')); return; }
+    if (isUsed(id)) {
+      notify.warning(t('ingredient.cannotDelete'), t('ingredient.usedInDish'));
+      return;
+    }
     setDeleteConfirmation({ isOpen: true, ingredientId: id, ingredientName: iname });
   };
 
@@ -85,7 +115,13 @@ export const IngredientManager = ({ ingredients, dishes = [], onAdd, onUpdate, o
       const displayName = getLocalizedField(deleted.name, lang);
       notify.info(t('ingredient.deleted'), t('ingredient.deletedDesc', { name: displayName }), {
         duration: UNDO_TOAST_DURATION_MS,
-        action: { label: t('common.undo'), onClick: () => { onAdd(deleted); notify.success(t('common.undone'), t('ingredient.restoredDesc', { name: displayName })); } },
+        action: {
+          label: t('common.undo'),
+          onClick: () => {
+            onAdd(deleted);
+            notify.success(t('common.undone'), t('ingredient.restoredDesc', { name: displayName }));
+          },
+        },
       });
     }
   };
@@ -104,125 +140,332 @@ export const IngredientManager = ({ ingredients, dishes = [], onAdd, onUpdate, o
   };
 
   // --- Render ---
-  const emptyIcon = <Apple className="w-8 h-8 text-emerald-300" />;
+  const emptyIcon = <Apple className="h-8 w-8 text-emerald-300" />;
 
   return (
     <div className="space-y-6">
       <ListToolbar
-        searchQuery={list.searchQuery} onSearchChange={list.setSearchQuery} searchPlaceholder={t('ingredient.searchPlaceholder')}
-        sortOptions={getBaseSortOptions(t)} sortBy={list.sortBy} onSortChange={v => list.setSortBy(v as BaseSortOption)}
-        viewLayout={list.viewLayout} onLayoutChange={list.setViewLayout}
-        onAdd={() => modal.openEdit()} addLabel={t('ingredient.addNew')}
-        searchTestId="input-search-ingredient" addTestId="btn-add-ingredient" sortTestId="select-sort-ingredient"
+        searchQuery={list.searchQuery}
+        onSearchChange={list.setSearchQuery}
+        searchPlaceholder={t('ingredient.searchPlaceholder')}
+        sortOptions={getBaseSortOptions(t)}
+        sortBy={list.sortBy}
+        onSortChange={v => list.setSortBy(v as BaseSortOption)}
+        viewLayout={list.viewLayout}
+        onLayoutChange={list.setViewLayout}
+        onAdd={() => modal.openEdit()}
+        addLabel={t('ingredient.addNew')}
+        searchTestId="input-search-ingredient"
+        addTestId="btn-add-ingredient"
+        sortTestId="select-sort-ingredient"
       />
 
       {/* Grid View */}
       {list.viewLayout === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.filteredItems.map(ing => (
-            <div key={ing.id} className="relative bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all flex flex-col group text-left w-full">
-              <div className="flex items-start justify-between mb-4">
+            <div
+              key={ing.id}
+              className="group relative flex w-full flex-col rounded-2xl border border-slate-100 bg-white p-5 text-left shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+            >
+              <div className="mb-4 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500"><Apple className="w-5 h-5" /></div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                    <Apple className="h-5 w-5" />
+                  </div>
                   <div>
-                    <button type="button" onClick={() => modal.openView(ing)} className="font-bold text-slate-800 dark:text-slate-100 text-lg text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded">{getLocalizedField(ing.name, lang)}</button>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{getDisplayUnit(ing.unit, lang)}</p>
+                    <button
+                      type="button"
+                      onClick={() => modal.openView(ing)}
+                      className="cursor-pointer rounded text-left text-lg font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-slate-100"
+                    >
+                      {getLocalizedField(ing.name, lang)}
+                    </button>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      {getDisplayUnit(ing.unit, lang)}
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase">{t('common.calories')}</span><span className="text-sm font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span></div>
-                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-blue-400 font-bold uppercase">{t('common.protein')}</span><span className="text-sm font-bold text-blue-700 dark:text-blue-400">{ing.proteinPer100}g</span></div>
-                <div className="bg-amber-50 dark:bg-amber-900/30 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-amber-400 font-bold uppercase">{t('common.carbs')}</span><span className="text-sm font-bold text-amber-700 dark:text-amber-400">{ing.carbsPer100}g</span></div>
-                <div className="bg-rose-50 dark:bg-rose-900/30 rounded-lg p-2 flex items-center justify-between"><span className="text-[10px] text-rose-400 font-bold uppercase">{t('common.fat')}</span><span className="text-sm font-bold text-rose-700 dark:text-rose-400">{ing.fatPer100}g</span></div>
+              <div className="mb-3 grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2 dark:bg-slate-700/50">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">
+                    {t('common.calories')}
+                  </span>
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
+                  <span className="text-[10px] font-bold text-blue-400 uppercase">{t('common.protein')}</span>
+                  <span className="text-sm font-bold text-blue-700 dark:text-blue-400">{ing.proteinPer100}g</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase">{t('common.carbs')}</span>
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{ing.carbsPer100}g</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-rose-50 p-2 dark:bg-rose-900/30">
+                  <span className="text-[10px] font-bold text-rose-400 uppercase">{t('common.fat')}</span>
+                  <span className="text-sm font-bold text-rose-700 dark:text-rose-400">{ing.fatPer100}g</span>
+                </div>
               </div>
               {renderUsedInDishes(ing.id)}
-              <div className="relative z-10 mt-auto flex items-center gap-4 pt-4 border-t border-slate-50 dark:border-slate-700">
-                <button data-testid={`btn-edit-ingredient-${ing.id}`} onClick={() => modal.openEdit(ing)} className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all"><Edit3 className="w-4 h-4" /> {t('common.edit')}</button>
-                <button data-testid={`btn-delete-ingredient-${ing.id}`} onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))} aria-disabled={isUsed(ing.id)} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-xl transition-all ${isUsed(ing.id) ? 'text-slate-400 dark:text-slate-500 opacity-40' : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /> {t('common.delete')}</button>
+              <div className="relative z-10 mt-auto flex items-center gap-4 border-t border-slate-50 pt-4 dark:border-slate-700">
+                <button
+                  data-testid={`btn-edit-ingredient-${ing.id}`}
+                  onClick={() => modal.openEdit(ing)}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold text-slate-500 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-400 dark:hover:bg-emerald-900/30"
+                >
+                  <Edit3 className="h-4 w-4" /> {t('common.edit')}
+                </button>
+                <button
+                  data-testid={`btn-delete-ingredient-${ing.id}`}
+                  onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
+                  aria-disabled={isUsed(ing.id)}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(ing.id) ? 'text-slate-400 opacity-40 dark:text-slate-500' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-900/30'}`}
+                >
+                  <Trash2 className="h-4 w-4" /> {t('common.delete')}
+                </button>
               </div>
             </div>
           ))}
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('ingredient.title').toLowerCase()} actionLabel={t('ingredient.addNew')} onAction={() => modal.openEdit()} className="col-span-full" />}
+          {list.filteredItems.length === 0 && (
+            <EmptyState
+              icon={emptyIcon}
+              searchQuery={list.searchQuery}
+              entityName={t('ingredient.title').toLowerCase()}
+              actionLabel={t('ingredient.addNew')}
+              onAction={() => modal.openEdit()}
+              className="col-span-full"
+            />
+          )}
         </div>
       )}
 
       {/* List View */}
       {list.viewLayout === 'list' && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div className="hidden sm:block overflow-x-auto">
+        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full">
-              <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-100 dark:border-slate-700">
+              <thead className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-700">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('ingredient.title')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('common.calories')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('common.protein')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('common.carbs')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('common.fat')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('ingredient.title')}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('common.calories')}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('common.protein')}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('common.carbs')}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('common.fat')}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('common.actions')}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {list.filteredItems.map(ing => (
-                  <tr key={ing.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                    <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-500 shrink-0"><Apple className="w-4 h-4" /></div><div><button type="button" onClick={() => modal.openView(ing)} className="font-bold text-slate-800 dark:text-slate-100 text-left cursor-pointer hover:text-emerald-600 transition-colors">{getLocalizedField(ing.name, lang)}</button><p className="text-xs text-slate-500 dark:text-slate-400">{getDisplayUnit(ing.unit, lang)}</p></div></div></td>
-                    <td className="px-4 py-3 text-right"><span className="font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span></td>
-                    <td className="px-4 py-3 text-right"><span className="font-bold text-blue-600 dark:text-blue-400">{ing.proteinPer100}g</span></td>
-                    <td className="px-4 py-3 text-right"><span className="font-bold text-amber-600 dark:text-amber-400">{ing.carbsPer100}g</span></td>
-                    <td className="px-4 py-3 text-right"><span className="font-bold text-rose-600 dark:text-rose-400">{ing.fatPer100}g</span></td>
-                    <td className="px-4 py-3"><div className="flex items-center justify-end gap-3">
-                      <button data-testid={`btn-edit-ingredient-${ing.id}`} onClick={() => modal.openEdit(ing)} aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                      <button data-testid={`btn-delete-ingredient-${ing.id}`} onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))} aria-disabled={isUsed(ing.id)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className={`p-2 rounded-lg transition-all ${isUsed(ing.id) ? 'text-slate-300 dark:text-slate-500 opacity-40' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
-                    </div></td>
+                  <tr key={ing.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                          <Apple className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => modal.openView(ing)}
+                            className="cursor-pointer text-left font-bold text-slate-800 transition-colors hover:text-emerald-600 dark:text-slate-100"
+                          >
+                            {getLocalizedField(ing.name, lang)}
+                          </button>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{getDisplayUnit(ing.unit, lang)}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-bold text-blue-600 dark:text-blue-400">{ing.proteinPer100}g</span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-bold text-amber-600 dark:text-amber-400">{ing.carbsPer100}g</span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-bold text-rose-600 dark:text-rose-400">{ing.fatPer100}g</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          data-testid={`btn-edit-ingredient-${ing.id}`}
+                          onClick={() => modal.openEdit(ing)}
+                          aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
+                          className="rounded-lg p-2 text-slate-400 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          data-testid={`btn-delete-ingredient-${ing.id}`}
+                          onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
+                          aria-disabled={isUsed(ing.id)}
+                          aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
+                          className={`rounded-lg p-2 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40 dark:text-slate-500' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="sm:hidden divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="divide-y divide-slate-100 sm:hidden dark:divide-slate-700">
             {list.filteredItems.map(ing => (
-              <div key={ing.id} className="relative p-4 flex items-center justify-between gap-3 active:bg-slate-50 dark:active:bg-slate-700 transition-colors w-full text-left">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-500 shrink-0"><Apple className="w-5 h-5" /></div>
-                  <div className="min-w-0"><button type="button" onClick={() => modal.openView(ing)} className="font-bold text-slate-800 dark:text-slate-100 truncate text-left cursor-pointer after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">{getLocalizedField(ing.name, lang)}</button><div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"><span>{ing.caloriesPer100} kcal</span><span className="text-blue-600 dark:text-blue-400">{ing.proteinPer100}g Pro</span></div></div>
+              <div
+                key={ing.id}
+                className="relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors active:bg-slate-50 dark:active:bg-slate-700"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                    <Apple className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => modal.openView(ing)}
+                      className="cursor-pointer truncate rounded text-left font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-slate-100"
+                    >
+                      {getLocalizedField(ing.name, lang)}
+                    </button>
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <span>{ing.caloriesPer100} kcal</span>
+                      <span className="text-blue-600 dark:text-blue-400">{ing.proteinPer100}g Pro</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="relative z-10 flex items-center gap-3 shrink-0">
-                  <button data-testid={`btn-edit-ingredient-${ing.id}`} onClick={() => modal.openEdit(ing)} aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`} className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                  <button data-testid={`btn-delete-ingredient-${ing.id}`} onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))} aria-disabled={isUsed(ing.id)} aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`} className={`p-2.5 rounded-lg transition-all ${isUsed(ing.id) ? 'text-slate-300 dark:text-slate-500 opacity-40' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30'}`}><Trash2 className="w-4 h-4" /></button>
+                <div className="relative z-10 flex shrink-0 items-center gap-3">
+                  <button
+                    data-testid={`btn-edit-ingredient-${ing.id}`}
+                    onClick={() => modal.openEdit(ing)}
+                    aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
+                    className="rounded-lg p-2.5 text-slate-400 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    data-testid={`btn-delete-ingredient-${ing.id}`}
+                    onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
+                    aria-disabled={isUsed(ing.id)}
+                    aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
+                    className={`rounded-lg p-2.5 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40 dark:text-slate-500' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
-          {list.filteredItems.length === 0 && <EmptyState icon={emptyIcon} searchQuery={list.searchQuery} entityName={t('ingredient.title').toLowerCase()} actionLabel={t('ingredient.addNew')} onAction={() => modal.openEdit()} />}
+          {list.filteredItems.length === 0 && (
+            <EmptyState
+              icon={emptyIcon}
+              searchQuery={list.searchQuery}
+              entityName={t('ingredient.title').toLowerCase()}
+              actionLabel={t('ingredient.addNew')}
+              onAction={() => modal.openEdit()}
+            />
+          )}
         </div>
       )}
 
       {/* View Detail Modal */}
-      {modal.viewingItem && (() => {
-        const ing = modal.viewingItem;
-        const usedIn = getDishesUsingIngredient(ing.id);
-        return (
-          <DetailModal title={t('ingredient.detail')} editLabel={t('ingredient.editIngredient')} onClose={modal.closeView} onEdit={() => modal.openEditFromView(ing)}>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0"><Apple className="w-7 h-7" /></div>
-              <div><h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{getLocalizedField(ing.name, lang)}</h3><p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{getDisplayUnit(ing.unit, lang)}</p></div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3.5"><p className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase mb-1">{t('common.calories')}</p><p className="text-xl font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100} <span className="text-xs font-medium text-slate-500">kcal</span></p></div>
-              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3.5"><p className="text-[10px] text-blue-400 font-bold uppercase mb-1">{t('common.protein')}</p><p className="text-xl font-bold text-blue-700 dark:text-blue-400">{ing.proteinPer100}<span className="text-xs font-medium text-blue-400">g</span></p></div>
-              <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3.5"><p className="text-[10px] text-amber-400 font-bold uppercase mb-1">{t('common.carbs')}</p><p className="text-xl font-bold text-amber-700 dark:text-amber-400">{ing.carbsPer100}<span className="text-xs font-medium text-amber-400">g</span></p></div>
-              <div className="bg-rose-50 dark:bg-rose-900/30 rounded-xl p-3.5"><p className="text-[10px] text-rose-400 font-bold uppercase mb-1">{t('common.fat')}</p><p className="text-xl font-bold text-rose-700 dark:text-rose-400">{ing.fatPer100}<span className="text-xs font-medium text-rose-400">g</span></p></div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-3.5"><p className="text-[10px] text-green-400 font-bold uppercase mb-1">{t('common.fiber')}</p><p className="text-xl font-bold text-green-700 dark:text-green-400">{ing.fiberPer100}<span className="text-xs font-medium text-green-400">g</span></p></div>
-            {usedIn.length > 0 && (
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('ingredient.usedIn')}</p>
-                <div className="flex flex-wrap gap-1.5">{usedIn.map(n => <span key={n} className="text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">{n}</span>)}</div>
+      {modal.viewingItem &&
+        (() => {
+          const ing = modal.viewingItem;
+          const usedIn = getDishesUsingIngredient(ing.id);
+          return (
+            <DetailModal
+              title={t('ingredient.detail')}
+              editLabel={t('ingredient.editIngredient')}
+              onClose={modal.closeView}
+              onEdit={() => modal.openEditFromView(ing)}
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                  <Apple className="h-7 w-7" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                    {getLocalizedField(ing.name, lang)}
+                  </h3>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    {getDisplayUnit(ing.unit, lang)}
+                  </p>
+                </div>
               </div>
-            )}
-          </DetailModal>
-        );
-      })()}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-700/50">
+                  <p className="mb-1 text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">
+                    {t('common.calories')}
+                  </p>
+                  <p className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                    {ing.caloriesPer100} <span className="text-xs font-medium text-slate-500">kcal</span>
+                  </p>
+                </div>
+                <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
+                  <p className="mb-1 text-[10px] font-bold text-blue-400 uppercase">{t('common.protein')}</p>
+                  <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
+                    {ing.proteinPer100}
+                    <span className="text-xs font-medium text-blue-400">g</span>
+                  </p>
+                </div>
+                <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
+                  <p className="mb-1 text-[10px] font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
+                  <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
+                    {ing.carbsPer100}
+                    <span className="text-xs font-medium text-amber-400">g</span>
+                  </p>
+                </div>
+                <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
+                  <p className="mb-1 text-[10px] font-bold text-rose-400 uppercase">{t('common.fat')}</p>
+                  <p className="text-xl font-bold text-rose-700 dark:text-rose-400">
+                    {ing.fatPer100}
+                    <span className="text-xs font-medium text-rose-400">g</span>
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-xl bg-green-50 p-3.5 dark:bg-green-900/30">
+                <p className="mb-1 text-[10px] font-bold text-green-400 uppercase">{t('common.fiber')}</p>
+                <p className="text-xl font-bold text-green-700 dark:text-green-400">
+                  {ing.fiberPer100}
+                  <span className="text-xs font-medium text-green-400">g</span>
+                </p>
+              </div>
+              {usedIn.length > 0 && (
+                <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
+                  <p className="mb-2 text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                    {t('ingredient.usedIn')}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {usedIn.map(n => (
+                      <span
+                        key={n}
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                      >
+                        {n}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </DetailModal>
+          );
+        })()}
 
       {/* Edit Modal */}
       {modal.isEditOpen && (
@@ -233,7 +476,23 @@ export const IngredientManager = ({ ingredients, dishes = [], onAdd, onUpdate, o
         />
       )}
 
-      <ConfirmationModal isOpen={deleteConfirmation.isOpen} variant="danger" title={t('ingredient.confirmDelete')} message={<p>{t('ingredient.confirmDeleteMsg')} <span className="font-bold text-slate-800 dark:text-slate-100">&quot;{deleteConfirmation.ingredientName}&quot;</span>?</p>} confirmLabel={t('common.deleteNow')} onConfirm={confirmDelete} onCancel={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })} />
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        variant="danger"
+        title={t('ingredient.confirmDelete')}
+        message={
+          <p>
+            {t('ingredient.confirmDeleteMsg')}{' '}
+            <span className="font-bold text-slate-800 dark:text-slate-100">
+              &quot;{deleteConfirmation.ingredientName}&quot;
+            </span>
+            ?
+          </p>
+        }
+        confirmLabel={t('common.deleteNow')}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })}
+      />
     </div>
   );
 };

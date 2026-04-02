@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../contexts/DatabaseContext', () => ({
   DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -12,15 +12,20 @@ vi.mock('../contexts/DatabaseContext', () => ({
 }));
 
 import { CalendarTab } from '../components/CalendarTab';
-import type { DayPlan, DayNutritionSummary } from '../types';
 import { useIsDesktop } from '../hooks/useIsDesktop';
+import type { DayNutritionSummary, DayPlan } from '../types';
 
 vi.mock('../hooks/useIsDesktop', () => ({
   useIsDesktop: vi.fn(() => true),
 }));
 
 const makeSlot = (dishIds: string[], cal = 0, pro = 0) => ({
-  dishIds, calories: cal, protein: pro, carbs: 0, fat: 0, fiber: 0,
+  dishIds,
+  calories: cal,
+  protein: pro,
+  carbs: 0,
+  fat: 0,
+  fiber: 0,
 });
 
 const filledNutrition: DayNutritionSummary = {
@@ -32,9 +37,7 @@ const filledNutrition: DayNutritionSummary = {
 const today = new Date();
 const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-const dayPlans: DayPlan[] = [
-  { date: todayStr, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] },
-];
+const dayPlans: DayPlan[] = [{ date: todayStr, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] }];
 
 const defaultProps = {
   selectedDate: todayStr,

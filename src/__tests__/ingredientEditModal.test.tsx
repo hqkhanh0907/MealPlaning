@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { IngredientEditModal } from '../components/modals/IngredientEditModal';
 import type { Ingredient } from '../types';
 
@@ -243,7 +244,11 @@ describe('IngredientEditModal', () => {
 
   it('fills nutrition fields after successful AI search', async () => {
     mockSuggestIngredientInfo.mockResolvedValueOnce({
-      calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0,
+      calories: 250,
+      protein: 26,
+      carbs: 0,
+      fat: 15,
+      fiber: 0,
     });
 
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
@@ -264,10 +269,7 @@ describe('IngredientEditModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' }));
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith(
-        'Tra cứu thất bại',
-        expect.stringContaining('Ức gà'),
-      );
+      expect(mockNotify.error).toHaveBeenCalledWith('Tra cứu thất bại', expect.stringContaining('Ức gà'));
     });
   });
 
@@ -278,10 +280,7 @@ describe('IngredientEditModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' }));
 
     await waitFor(() => {
-      expect(mockNotify.warning).toHaveBeenCalledWith(
-        'Phản hồi quá lâu',
-        expect.stringContaining('Ức gà'),
-      );
+      expect(mockNotify.warning).toHaveBeenCalledWith('Phản hồi quá lâu', expect.stringContaining('Ức gà'));
     });
   });
 
@@ -479,7 +478,9 @@ describe('IngredientEditModal', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Both name and unit empty — AI button disabled
     const aiButtons = screen.getAllByRole('button');
-    const disabledAI = aiButtons.find(b => b.getAttribute('aria-label')?.includes('Tự động') || b.getAttribute('aria-label')?.includes('Vui lòng'));
+    const disabledAI = aiButtons.find(
+      b => b.getAttribute('aria-label')?.includes('Tự động') || b.getAttribute('aria-label')?.includes('Vui lòng'),
+    );
     expect(disabledAI).toBeDefined();
     expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
   });
@@ -492,10 +493,7 @@ describe('IngredientEditModal', () => {
     fireEvent.click(aiButton);
 
     await waitFor(() => {
-      expect(mockNotify.warning).toHaveBeenCalledWith(
-        'Phản hồi quá lâu',
-        expect.stringContaining('Ức gà'),
-      );
+      expect(mockNotify.warning).toHaveBeenCalledWith('Phản hồi quá lâu', expect.stringContaining('Ức gà'));
     });
     // AI loading state should be cleared
     expect(aiButton).not.toBeDisabled();
@@ -509,19 +507,20 @@ describe('IngredientEditModal', () => {
     fireEvent.click(aiButton);
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith(
-        'Tra cứu thất bại',
-        expect.stringContaining('Ức gà'),
-      );
+      expect(mockNotify.error).toHaveBeenCalledWith('Tra cứu thất bại', expect.stringContaining('Ức gà'));
     });
   });
 
   it('does not update state after unmount during AI search', async () => {
     let resolveFn: (v: unknown) => void = () => {};
-    const aiPromise = new Promise(resolve => { resolveFn = resolve; });
+    const aiPromise = new Promise(resolve => {
+      resolveFn = resolve;
+    });
     mockSuggestIngredientInfo.mockReturnValueOnce(aiPromise);
 
-    const { unmount } = render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const { unmount } = render(
+      <IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
     fireEvent.click(aiButton);
 
@@ -558,7 +557,9 @@ describe('IngredientEditModal', () => {
 
   it('handles AI error after unmount (line 155 isMounted guard)', async () => {
     mockSuggestIngredientInfo.mockRejectedValueOnce(new Error('Network error'));
-    const { unmount } = render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+    const { unmount } = render(
+      <IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
     fireEvent.click(aiButton);
     // Unmount before the error resolves

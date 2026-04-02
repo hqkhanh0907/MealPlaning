@@ -1,7 +1,8 @@
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
+
 import { WorkoutHistory } from '../features/fitness/components/WorkoutHistory';
 import { useFitnessStore } from '../store/fitnessStore';
-import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -12,8 +13,7 @@ vi.mock('react-i18next', () => ({
         'fitness.history.strength': 'Sức mạnh',
         'fitness.history.cardio': 'Cardio',
         'fitness.history.noHistory': 'Chưa có lịch sử tập luyện',
-        'fitness.history.emptySubtitle':
-          'Bắt đầu buổi tập đầu tiên để ghi nhận tại đây',
+        'fitness.history.emptySubtitle': 'Bắt đầu buổi tập đầu tiên để ghi nhận tại đây',
         'fitness.history.startTraining': 'Bắt đầu tập ngay',
         'fitness.history.volume': 'Volume',
         'fitness.history.sets': 'set',
@@ -162,27 +162,20 @@ afterAll(() => {
 describe('WorkoutHistory', () => {
   describe('empty state', () => {
     beforeEach(() => {
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: Record<string, unknown>) => unknown) =>
-          selector({ workouts: [], workoutSets: [] }),
+      mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+        selector({ workouts: [], workoutSets: [] }),
       );
     });
 
     it('renders empty state when no workouts', () => {
       render(<WorkoutHistory />);
-      expect(
-        screen.getByTestId('workout-history-empty'),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText('Chưa có lịch sử tập luyện'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('workout-history-empty')).toBeInTheDocument();
+      expect(screen.getByText('Chưa có lịch sử tập luyện')).toBeInTheDocument();
     });
 
     it('shows correct subtitle in empty state', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('empty-subtitle')).toHaveTextContent(
-        'Bắt đầu buổi tập đầu tiên để ghi nhận tại đây',
-      );
+      expect(screen.getByTestId('empty-subtitle')).toHaveTextContent('Bắt đầu buổi tập đầu tiên để ghi nhận tại đây');
     });
 
     it('renders skeleton preview with 3 placeholder cards', () => {
@@ -205,13 +198,12 @@ describe('WorkoutHistory', () => {
 
     beforeEach(() => {
       mockDeleteWorkout.mockClear();
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: Record<string, unknown>) => unknown) =>
-          selector({
-            workouts: mockWorkouts,
-            workoutSets: mockWorkoutSets,
-            deleteWorkout: mockDeleteWorkout,
-          }),
+      mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+        selector({
+          workouts: mockWorkouts,
+          workoutSets: mockWorkoutSets,
+          deleteWorkout: mockDeleteWorkout,
+        }),
       );
     });
 
@@ -227,38 +219,22 @@ describe('WorkoutHistory', () => {
 
     it('shows workout name', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('workout-name-w1')).toHaveTextContent(
-        'Chest Day',
-      );
-      expect(screen.getByTestId('workout-name-w2')).toHaveTextContent(
-        'Morning Run',
-      );
-      expect(screen.getByTestId('workout-name-w3')).toHaveTextContent(
-        'Leg Day',
-      );
-      expect(screen.getByTestId('workout-name-w4')).toHaveTextContent(
-        'Back Day',
-      );
+      expect(screen.getByTestId('workout-name-w1')).toHaveTextContent('Chest Day');
+      expect(screen.getByTestId('workout-name-w2')).toHaveTextContent('Morning Run');
+      expect(screen.getByTestId('workout-name-w3')).toHaveTextContent('Leg Day');
+      expect(screen.getByTestId('workout-name-w4')).toHaveTextContent('Back Day');
     });
 
     it('displays relative dates for recent workouts', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('workout-date-w3')).toHaveTextContent(
-        'Hôm nay',
-      );
-      expect(screen.getByTestId('workout-date-w1')).toHaveTextContent(
-        '2 ngày trước',
-      );
-      expect(screen.getByTestId('workout-date-w2')).toHaveTextContent(
-        '4 ngày trước',
-      );
+      expect(screen.getByTestId('workout-date-w3')).toHaveTextContent('Hôm nay');
+      expect(screen.getByTestId('workout-date-w1')).toHaveTextContent('2 ngày trước');
+      expect(screen.getByTestId('workout-date-w2')).toHaveTextContent('4 ngày trước');
     });
 
     it('displays full date for older workouts (>6 days)', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('workout-date-w4')).toHaveTextContent(
-        'T3, 10/03/2026',
-      );
+      expect(screen.getByTestId('workout-date-w4')).toHaveTextContent('T3, 10/03/2026');
     });
 
     it('groups workouts by week with headers', () => {
@@ -275,109 +251,65 @@ describe('WorkoutHistory', () => {
 
     it('shows exercise count per workout', () => {
       render(<WorkoutHistory />);
-      expect(
-        screen.getByTestId('workout-exercises-w1'),
-      ).toHaveTextContent('2 bài tập');
-      expect(
-        screen.getByTestId('workout-exercises-w2'),
-      ).toHaveTextContent('1 bài tập');
-      expect(
-        screen.getByTestId('workout-exercises-w3'),
-      ).toHaveTextContent('1 bài tập');
-      expect(
-        screen.getByTestId('workout-exercises-w4'),
-      ).toHaveTextContent('1 bài tập');
+      expect(screen.getByTestId('workout-exercises-w1')).toHaveTextContent('2 bài tập');
+      expect(screen.getByTestId('workout-exercises-w2')).toHaveTextContent('1 bài tập');
+      expect(screen.getByTestId('workout-exercises-w3')).toHaveTextContent('1 bài tập');
+      expect(screen.getByTestId('workout-exercises-w4')).toHaveTextContent('1 bài tập');
     });
 
     it('renders filter chips (All, Strength, Cardio)', () => {
       render(<WorkoutHistory />);
       expect(screen.getByTestId('filter-chips')).toBeInTheDocument();
       expect(screen.getByTestId('filter-all')).toHaveTextContent('Tất cả');
-      expect(screen.getByTestId('filter-strength')).toHaveTextContent(
-        'Sức mạnh',
-      );
-      expect(screen.getByTestId('filter-cardio')).toHaveTextContent(
-        'Cardio',
-      );
+      expect(screen.getByTestId('filter-strength')).toHaveTextContent('Sức mạnh');
+      expect(screen.getByTestId('filter-cardio')).toHaveTextContent('Cardio');
     });
 
     it('"All" filter is selected by default', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('filter-all')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
-      expect(screen.getByTestId('filter-strength')).toHaveAttribute(
-        'aria-pressed',
-        'false',
-      );
-      expect(screen.getByTestId('filter-cardio')).toHaveAttribute(
-        'aria-pressed',
-        'false',
-      );
+      expect(screen.getByTestId('filter-all')).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByTestId('filter-strength')).toHaveAttribute('aria-pressed', 'false');
+      expect(screen.getByTestId('filter-cardio')).toHaveAttribute('aria-pressed', 'false');
     });
 
     it('filter chips have aria-label', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('filter-all')).toHaveAttribute(
-        'aria-label',
-        'Tất cả',
-      );
-      expect(screen.getByTestId('filter-strength')).toHaveAttribute(
-        'aria-label',
-        'Sức mạnh',
-      );
-      expect(screen.getByTestId('filter-cardio')).toHaveAttribute(
-        'aria-label',
-        'Cardio',
-      );
+      expect(screen.getByTestId('filter-all')).toHaveAttribute('aria-label', 'Tất cả');
+      expect(screen.getByTestId('filter-strength')).toHaveAttribute('aria-label', 'Sức mạnh');
+      expect(screen.getByTestId('filter-cardio')).toHaveAttribute('aria-label', 'Cardio');
     });
 
     it('strength filter shows only strength workouts', () => {
       render(<WorkoutHistory />);
       fireEvent.click(screen.getByTestId('filter-strength'));
 
-      expect(screen.getByTestId('filter-strength')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
+      expect(screen.getByTestId('filter-strength')).toHaveAttribute('aria-pressed', 'true');
       const cards = screen.getAllByTestId(/^workout-card-/);
       expect(cards).toHaveLength(3);
       expect(screen.getByTestId('workout-card-w1')).toBeInTheDocument();
       expect(screen.getByTestId('workout-card-w3')).toBeInTheDocument();
       expect(screen.getByTestId('workout-card-w4')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('workout-card-w2'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-card-w2')).not.toBeInTheDocument();
     });
 
     it('cardio filter shows only cardio workouts', () => {
       render(<WorkoutHistory />);
       fireEvent.click(screen.getByTestId('filter-cardio'));
 
-      expect(screen.getByTestId('filter-cardio')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
+      expect(screen.getByTestId('filter-cardio')).toHaveAttribute('aria-pressed', 'true');
       const cards = screen.getAllByTestId(/^workout-card-/);
       expect(cards).toHaveLength(1);
       expect(screen.getByTestId('workout-card-w2')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('workout-card-w1'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-card-w1')).not.toBeInTheDocument();
     });
 
     it('tap workout expands to show sets', () => {
       render(<WorkoutHistory />);
-      expect(
-        screen.queryByTestId('workout-detail-w3'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-detail-w3')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('workout-toggle-w3'));
       expect(screen.getByTestId('workout-detail-w3')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('exercise-group-squat'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('exercise-group-squat')).toBeInTheDocument();
     });
 
     it('toggle button has aria-expanded attribute', () => {
@@ -414,9 +346,7 @@ describe('WorkoutHistory', () => {
       expect(screen.getByTestId('workout-detail-w3')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('workout-toggle-w3'));
-      expect(
-        screen.queryByTestId('workout-detail-w3'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-detail-w3')).not.toBeInTheDocument();
     });
 
     it('only one workout expanded at a time', () => {
@@ -426,9 +356,7 @@ describe('WorkoutHistory', () => {
       expect(screen.getByTestId('workout-detail-w3')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('workout-toggle-w2'));
-      expect(
-        screen.queryByTestId('workout-detail-w3'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-detail-w3')).not.toBeInTheDocument();
       expect(screen.getByTestId('workout-detail-w2')).toBeInTheDocument();
 
       const s3Detail = screen.getByTestId('set-detail-s3');
@@ -446,21 +374,13 @@ describe('WorkoutHistory', () => {
     it('total volume shown per workout', () => {
       render(<WorkoutHistory />);
 
-      expect(screen.getByTestId('workout-volume-w1')).toHaveTextContent(
-        '1160 kg',
-      );
+      expect(screen.getByTestId('workout-volume-w1')).toHaveTextContent('1160 kg');
 
-      expect(screen.getByTestId('workout-volume-w3')).toHaveTextContent(
-        '1340 kg',
-      );
+      expect(screen.getByTestId('workout-volume-w3')).toHaveTextContent('1340 kg');
 
-      expect(screen.getByTestId('workout-volume-w4')).toHaveTextContent(
-        '500 kg',
-      );
+      expect(screen.getByTestId('workout-volume-w4')).toHaveTextContent('500 kg');
 
-      expect(
-        screen.queryByTestId('workout-volume-w2'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-volume-w2')).not.toBeInTheDocument();
     });
 
     it('expanded view shows completion time', () => {
@@ -479,9 +399,7 @@ describe('WorkoutHistory', () => {
       render(<WorkoutHistory />);
       fireEvent.click(screen.getByTestId('workout-toggle-w1'));
 
-      expect(
-        screen.getByTestId('workout-duration-detail-w1'),
-      ).toHaveTextContent('60 phút');
+      expect(screen.getByTestId('workout-duration-detail-w1')).toHaveTextContent('60 phút');
     });
 
     it('expanded view shows notes when present', () => {
@@ -497,9 +415,7 @@ describe('WorkoutHistory', () => {
       render(<WorkoutHistory />);
       fireEvent.click(screen.getByTestId('workout-toggle-w3'));
 
-      expect(
-        screen.queryByTestId('workout-notes-w3'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workout-notes-w3')).not.toBeInTheDocument();
     });
 
     it('shows delete button when workout is expanded', () => {

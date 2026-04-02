@@ -1,37 +1,80 @@
-import { describe, it, expect } from 'vitest';
-import { normalizeUnit, calculateIngredientNutrition, calculateDishNutrition, calculateDishesNutrition, toTempIngredient } from '../utils/nutrition';
-import { Ingredient, Dish, AnalyzedIngredient } from '../types';
+import { describe, expect, it } from 'vitest';
+
+import { AnalyzedIngredient, Dish, Ingredient } from '../types';
+import {
+  calculateDishesNutrition,
+  calculateDishNutrition,
+  calculateIngredientNutrition,
+  normalizeUnit,
+  toTempIngredient,
+} from '../utils/nutrition';
 
 // --- Test fixtures ---
 
 const chicken: Ingredient = {
-  id: 'ing-1', name: { vi: 'Ức gà', en: 'Ức gà' }, unit: { vi: 'g', en: 'g' },
-  caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0,
+  id: 'ing-1',
+  name: { vi: 'Ức gà', en: 'Ức gà' },
+  unit: { vi: 'g', en: 'g' },
+  caloriesPer100: 165,
+  proteinPer100: 31,
+  carbsPer100: 0,
+  fatPer100: 3.6,
+  fiberPer100: 0,
 };
 
 const rice: Ingredient = {
-  id: 'ing-2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, unit: { vi: 'g', en: 'g' },
-  caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4,
+  id: 'ing-2',
+  name: { vi: 'Cơm trắng', en: 'Cơm trắng' },
+  unit: { vi: 'g', en: 'g' },
+  caloriesPer100: 130,
+  proteinPer100: 2.7,
+  carbsPer100: 28,
+  fatPer100: 0.3,
+  fiberPer100: 0.4,
 };
 
 const egg: Ingredient = {
-  id: 'ing-3', name: { vi: 'Trứng gà', en: 'Trứng gà' }, unit: { vi: 'quả', en: 'quả' },
-  caloriesPer100: 155, proteinPer100: 13, carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0,
+  id: 'ing-3',
+  name: { vi: 'Trứng gà', en: 'Trứng gà' },
+  unit: { vi: 'quả', en: 'quả' },
+  caloriesPer100: 155,
+  proteinPer100: 13,
+  carbsPer100: 1.1,
+  fatPer100: 11,
+  fiberPer100: 0,
 };
 
 const oil: Ingredient = {
-  id: 'ing-4', name: { vi: 'Dầu ăn', en: 'Dầu ăn' }, unit: { vi: 'ml', en: 'ml' },
-  caloriesPer100: 884, proteinPer100: 0, carbsPer100: 0, fatPer100: 100, fiberPer100: 0,
+  id: 'ing-4',
+  name: { vi: 'Dầu ăn', en: 'Dầu ăn' },
+  unit: { vi: 'ml', en: 'ml' },
+  caloriesPer100: 884,
+  proteinPer100: 0,
+  carbsPer100: 0,
+  fatPer100: 100,
+  fiberPer100: 0,
 };
 
 const butter: Ingredient = {
-  id: 'ing-5', name: { vi: 'Bơ', en: 'Bơ' }, unit: { vi: 'kg', en: 'kg' },
-  caloriesPer100: 717, proteinPer100: 0.85, carbsPer100: 0.06, fatPer100: 81, fiberPer100: 0,
+  id: 'ing-5',
+  name: { vi: 'Bơ', en: 'Bơ' },
+  unit: { vi: 'kg', en: 'kg' },
+  caloriesPer100: 717,
+  proteinPer100: 0.85,
+  carbsPer100: 0.06,
+  fatPer100: 81,
+  fiberPer100: 0,
 };
 
 const vitaminC: Ingredient = {
-  id: 'ing-6', name: { vi: 'Vitamin C', en: 'Vitamin C' }, unit: { vi: 'mg', en: 'mg' },
-  caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0,
+  id: 'ing-6',
+  name: { vi: 'Vitamin C', en: 'Vitamin C' },
+  unit: { vi: 'mg', en: 'mg' },
+  caloriesPer100: 0,
+  proteinPer100: 0,
+  carbsPer100: 0,
+  fatPer100: 0,
+  fiberPer100: 0,
 };
 
 const allIngredients = [chicken, rice, egg, oil, butter, vitaminC];
@@ -141,7 +184,8 @@ describe('calculateIngredientNutrition', () => {
 describe('calculateDishNutrition', () => {
   it('should sum nutrition of all ingredients in a dish', () => {
     const dish: Dish = {
-      id: 'dish-1', name: { vi: 'Cơm gà', en: 'Cơm gà' },
+      id: 'dish-1',
+      name: { vi: 'Cơm gà', en: 'Cơm gà' },
       ingredients: [
         { ingredientId: 'ing-1', amount: 150 }, // 150g chicken
         { ingredientId: 'ing-2', amount: 200 }, // 200g rice
@@ -167,7 +211,8 @@ describe('calculateDishNutrition', () => {
 
   it('should skip unknown ingredients', () => {
     const dish: Dish = {
-      id: 'dish-3', name: { vi: 'Unknown', en: 'Unknown' },
+      id: 'dish-3',
+      name: { vi: 'Unknown', en: 'Unknown' },
       ingredients: [{ ingredientId: 'unknown-id', amount: 100 }],
       tags: ['lunch'],
     };
@@ -177,7 +222,8 @@ describe('calculateDishNutrition', () => {
 
   it('should handle mix of known and unknown ingredients', () => {
     const dish: Dish = {
-      id: 'dish-4', name: { vi: 'Mixed', en: 'Mixed' },
+      id: 'dish-4',
+      name: { vi: 'Mixed', en: 'Mixed' },
       ingredients: [
         { ingredientId: 'ing-1', amount: 100 },
         { ingredientId: 'unknown-id', amount: 100 },
@@ -192,7 +238,8 @@ describe('calculateDishNutrition', () => {
 describe('calculateDishesNutrition', () => {
   const dishes: Dish[] = [
     {
-      id: 'dish-1', name: { vi: 'Cơm gà', en: 'Cơm gà' },
+      id: 'dish-1',
+      name: { vi: 'Cơm gà', en: 'Cơm gà' },
       ingredients: [
         { ingredientId: 'ing-1', amount: 100 }, // 165 cal
         { ingredientId: 'ing-2', amount: 100 }, // 130 cal
@@ -200,7 +247,8 @@ describe('calculateDishesNutrition', () => {
       tags: ['lunch'],
     },
     {
-      id: 'dish-2', name: { vi: 'Trứng luộc', en: 'Trứng luộc' },
+      id: 'dish-2',
+      name: { vi: 'Trứng luộc', en: 'Trứng luộc' },
       ingredients: [{ ingredientId: 'ing-3', amount: 2 }], // 310 cal
       tags: ['breakfast'],
     },
@@ -295,9 +343,14 @@ describe('toTempIngredient', () => {
 describe('calculateIngredientNutrition with plain string unit', () => {
   it('handles ingredient with unit as a plain string (backward compat)', () => {
     const legacyIngredient: Ingredient = {
-      id: 'ing-legacy', name: { vi: 'Test', en: 'Test' },
+      id: 'ing-legacy',
+      name: { vi: 'Test', en: 'Test' },
       unit: 'g' as unknown as Ingredient['unit'],
-      caloriesPer100: 100, proteinPer100: 10, carbsPer100: 20, fatPer100: 5, fiberPer100: 2,
+      caloriesPer100: 100,
+      proteinPer100: 10,
+      carbsPer100: 20,
+      fatPer100: 5,
+      fiberPer100: 2,
     };
     const result = calculateIngredientNutrition(legacyIngredient, 200);
     expect(result.calories).toBe(200);
@@ -306,13 +359,17 @@ describe('calculateIngredientNutrition with plain string unit', () => {
 
   it('handles ingredient with unit as a plain string for countable unit', () => {
     const legacyCountable: Ingredient = {
-      id: 'ing-legacy2', name: { vi: 'Trứng', en: 'Egg' },
+      id: 'ing-legacy2',
+      name: { vi: 'Trứng', en: 'Egg' },
       unit: 'quả' as unknown as Ingredient['unit'],
-      caloriesPer100: 155, proteinPer100: 13, carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0,
+      caloriesPer100: 155,
+      proteinPer100: 13,
+      carbsPer100: 1.1,
+      fatPer100: 11,
+      fiberPer100: 0,
     };
     const result = calculateIngredientNutrition(legacyCountable, 2);
     expect(result.calories).toBe(310);
     expect(result.protein).toBe(26);
   });
 });
-

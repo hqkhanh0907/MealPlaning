@@ -43,18 +43,13 @@ export const trainingProfileSchema = z.object({
     error: 'Số tuần chu kỳ phải là 4, 6, 8 hoặc 12',
   }),
 
-  priorityMuscles: z
-    .array(z.enum(MUSCLE_GROUP_VALUES))
-    .max(MAX_PRIORITY_MUSCLES, {
-      error: `Chọn tối đa ${MAX_PRIORITY_MUSCLES} nhóm cơ ưu tiên`,
-    }),
+  priorityMuscles: z.array(z.enum(MUSCLE_GROUP_VALUES)).max(MAX_PRIORITY_MUSCLES, {
+    error: `Chọn tối đa ${MAX_PRIORITY_MUSCLES} nhóm cơ ưu tiên`,
+  }),
 
   avgSleepHours: z.preprocess(
-    (val) => (val === '' || val === undefined || val === null || Number.isNaN(Number(val)) ? undefined : Number(val)),
-    z.number()
-      .min(3, { error: 'Giờ ngủ tối thiểu là 3' })
-      .max(12, { error: 'Giờ ngủ tối đa là 12' })
-      .optional(),
+    val => (val === '' || val === undefined || val === null || Number.isNaN(Number(val)) ? undefined : Number(val)),
+    z.number().min(3, { error: 'Giờ ngủ tối thiểu là 3' }).max(12, { error: 'Giờ ngủ tối đa là 12' }).optional(),
   ),
 });
 

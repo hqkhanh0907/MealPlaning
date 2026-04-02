@@ -1,34 +1,44 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import type { Resolver, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import type { FieldError, Resolver } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useFitnessStore } from '../../../store/fitnessStore';
-import {
-  trainingProfileSchema,
-  trainingProfileDefaults,
-  type TrainingProfileFormData,
-} from '../../../schemas/trainingProfileSchema';
-import { RadioPills } from '../../../components/form/RadioPills';
+
+import { generateUUID } from '@/utils/helpers';
+
 import { ChipSelect } from '../../../components/form/ChipSelect';
 import { FormField } from '../../../components/form/FormField';
-import { generateUUID } from '@/utils/helpers';
+import { RadioPills } from '../../../components/form/RadioPills';
+import {
+  trainingProfileDefaults,
+  type TrainingProfileFormData,
+  trainingProfileSchema,
+} from '../../../schemas/trainingProfileSchema';
+import { useFitnessStore } from '../../../store/fitnessStore';
 import { EQUIPMENT_DISPLAY } from '../constants';
 import type {
-  TrainingGoal,
-  TrainingExperience,
-  TrainingProfile,
-  PeriodizationModel,
-  EquipmentType,
   BodyRegion,
+  EquipmentType,
   MuscleGroup,
+  PeriodizationModel,
+  TrainingExperience,
+  TrainingGoal,
+  TrainingProfile,
 } from '../types';
 
 const GOALS: TrainingGoal[] = ['strength', 'hypertrophy', 'endurance', 'general'];
 const EXPERIENCES: TrainingExperience[] = ['beginner', 'intermediate', 'advanced'];
 const DAYS_OPTIONS = [2, 3, 4, 5, 6];
 const SESSION_DURATIONS = [30, 45, 60, 90];
-const EQUIPMENT_OPTIONS: EquipmentType[] = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands', 'kettlebell'];
+const EQUIPMENT_OPTIONS: EquipmentType[] = [
+  'barbell',
+  'dumbbell',
+  'machine',
+  'cable',
+  'bodyweight',
+  'bands',
+  'kettlebell',
+];
 const INJURY_OPTIONS: BodyRegion[] = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'];
 const CARDIO_OPTIONS = [0, 1, 2, 3, 4, 5];
 const PERIODIZATION_OPTIONS: PeriodizationModel[] = ['linear', 'undulating', 'block'];
@@ -43,8 +53,8 @@ interface TrainingProfileFormProps {
 
 export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProfileFormProps>) {
   const { t } = useTranslation();
-  const trainingProfile = useFitnessStore((s) => s.trainingProfile);
-  const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);
+  const trainingProfile = useFitnessStore(s => s.trainingProfile);
+  const setTrainingProfile = useFitnessStore(s => s.setTrainingProfile);
 
   const {
     control,
@@ -60,10 +70,14 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
           trainingGoal: trainingProfile.trainingGoal,
           trainingExperience: trainingProfile.trainingExperience,
           daysPerWeek: String(trainingProfile.daysPerWeek) as TrainingProfileFormData['daysPerWeek'],
-          sessionDurationMin: String(trainingProfile.sessionDurationMin) as TrainingProfileFormData['sessionDurationMin'],
+          sessionDurationMin: String(
+            trainingProfile.sessionDurationMin,
+          ) as TrainingProfileFormData['sessionDurationMin'],
           availableEquipment: trainingProfile.availableEquipment,
           injuryRestrictions: trainingProfile.injuryRestrictions,
-          cardioSessionsWeek: String(trainingProfile.cardioSessionsWeek) as TrainingProfileFormData['cardioSessionsWeek'],
+          cardioSessionsWeek: String(
+            trainingProfile.cardioSessionsWeek,
+          ) as TrainingProfileFormData['cardioSessionsWeek'],
           periodizationModel: trainingProfile.periodizationModel,
           planCycleWeeks: String(trainingProfile.planCycleWeeks) as TrainingProfileFormData['planCycleWeeks'],
           priorityMuscles: trainingProfile.priorityMuscles,
@@ -100,7 +114,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
 
   async function handleSave(): Promise<boolean> {
     let result = false;
-    await handleSubmit((data) => {
+    await handleSubmit(data => {
       result = onSubmit(data);
     })();
     return result;
@@ -118,7 +132,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="trainingGoal"
           control={control}
-          options={GOALS.map((g) => ({ value: g, label: t(`fitness.onboarding.${g}`) }))}
+          options={GOALS.map(g => ({ value: g, label: t(`fitness.onboarding.${g}`) }))}
           testIdPrefix="goal"
         />
       </FormField>
@@ -127,7 +141,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="trainingExperience"
           control={control}
-          options={EXPERIENCES.map((e) => ({ value: e, label: t(`fitness.onboarding.${e}`) }))}
+          options={EXPERIENCES.map(e => ({ value: e, label: t(`fitness.onboarding.${e}`) }))}
           testIdPrefix="experience"
         />
       </FormField>
@@ -136,7 +150,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="daysPerWeek"
           control={control}
-          options={DAYS_OPTIONS.map((d) => ({ value: String(d), label: `${d}` }))}
+          options={DAYS_OPTIONS.map(d => ({ value: String(d), label: `${d}` }))}
           testIdPrefix="days"
         />
       </FormField>
@@ -145,7 +159,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="sessionDurationMin"
           control={control}
-          options={SESSION_DURATIONS.map((d) => ({
+          options={SESSION_DURATIONS.map(d => ({
             value: String(d),
             label: `${d} ${t('fitness.onboarding.minutesUnit')}`,
           }))}
@@ -157,7 +171,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <ChipSelect<TrainingProfileFormData>
           name="availableEquipment"
           control={control}
-          options={EQUIPMENT_OPTIONS.map((eq) => ({
+          options={EQUIPMENT_OPTIONS.map(eq => ({
             value: eq,
             label: EQUIPMENT_DISPLAY[eq] ?? eq,
           }))}
@@ -169,7 +183,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <ChipSelect<TrainingProfileFormData>
           name="injuryRestrictions"
           control={control}
-          options={INJURY_OPTIONS.map((inj) => ({
+          options={INJURY_OPTIONS.map(inj => ({
             value: inj,
             label: t(`fitness.onboarding.injury_${inj}`),
           }))}
@@ -181,7 +195,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="cardioSessionsWeek"
           control={control}
-          options={CARDIO_OPTIONS.map((c) => ({ value: String(c), label: `${c}` }))}
+          options={CARDIO_OPTIONS.map(c => ({ value: String(c), label: `${c}` }))}
           testIdPrefix="cardio"
         />
       </FormField>
@@ -190,7 +204,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="periodizationModel"
           control={control}
-          options={PERIODIZATION_OPTIONS.map((p) => ({
+          options={PERIODIZATION_OPTIONS.map(p => ({
             value: p,
             label: t(`fitness.onboarding.period_${p}`),
           }))}
@@ -202,7 +216,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="planCycleWeeks"
           control={control}
-          options={CYCLE_WEEKS_OPTIONS.map((w) => ({
+          options={CYCLE_WEEKS_OPTIONS.map(w => ({
             value: String(w),
             label: `${w} ${t('fitness.onboarding.weeksUnit')}`,
           }))}
@@ -217,7 +231,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <ChipSelect<TrainingProfileFormData>
           name="priorityMuscles"
           control={control}
-          options={MUSCLE_OPTIONS.map((m) => ({
+          options={MUSCLE_OPTIONS.map(m => ({
             value: m,
             label: t(`fitness.onboarding.muscle_${m}`),
           }))}
@@ -232,7 +246,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
           min={3}
           max={12}
           step={0.5}
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 transition-colors outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
           data-testid="sleep-hours-input"
           {...register('avgSleepHours', { valueAsNumber: true })}
         />

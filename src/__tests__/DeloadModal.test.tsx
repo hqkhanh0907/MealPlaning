@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { DeloadModal } from '../features/fitness/components/DeloadModal';
 
 vi.mock('react-i18next', () => ({
@@ -7,8 +8,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'fitness.deload.title': 'Đề xuất giảm tải',
-        'fitness.deload.explanation':
-          'Hệ thống phát hiện bạn đã tập với cường độ cao liên tục nhiều tuần.',
+        'fitness.deload.explanation': 'Hệ thống phát hiện bạn đã tập với cường độ cao liên tục nhiều tuần.',
         'fitness.deload.accept': 'Chấp nhận giảm tải',
         'fitness.deload.override': 'Bỏ qua',
         'common.close': 'Đóng',
@@ -20,13 +20,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    onClose,
-    children,
-  }: {
-    onClose: () => void;
-    children: React.ReactNode;
-  }) => (
+  ModalBackdrop: ({ onClose, children }: { onClose: () => void; children: React.ReactNode }) => (
     <div data-testid="modal-backdrop">
       <button data-testid="backdrop-close" onClick={onClose} />
       {children}
@@ -59,18 +53,12 @@ describe('DeloadModal', () => {
 
   it('displays the translated explanation', () => {
     render(<DeloadModal {...defaultProps} />);
-    expect(
-      screen.getByText(
-        'Hệ thống phát hiện bạn đã tập với cường độ cao liên tục nhiều tuần.',
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Hệ thống phát hiện bạn đã tập với cường độ cao liên tục nhiều tuần.')).toBeInTheDocument();
   });
 
   it('displays the reason text', () => {
     render(<DeloadModal {...defaultProps} />);
-    expect(
-      screen.getByText('4 consecutive weeks with avg RPE ≥ 8'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('4 consecutive weeks with avg RPE ≥ 8')).toBeInTheDocument();
   });
 
   it('calls onAccept when accept button is clicked', () => {
@@ -88,9 +76,7 @@ describe('DeloadModal', () => {
   });
 
   it('renders nothing when isOpen is false', () => {
-    const { container } = render(
-      <DeloadModal {...defaultProps} isOpen={false} />,
-    );
+    const { container } = render(<DeloadModal {...defaultProps} isOpen={false} />);
     expect(container.innerHTML).toBe('');
   });
 

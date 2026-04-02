@@ -1,6 +1,6 @@
-import { render, screen, act, cleanup } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /* ================================================================== */
 /*  i18n mock — returns key so we can assert on translation keys       */
@@ -22,7 +22,8 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../../contexts/DatabaseContext', () => ({
-  DatabaseProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  DatabaseProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
   useDatabase: () => ({
     query: vi.fn().mockResolvedValue([]),
     queryOne: vi.fn().mockResolvedValue(null),
@@ -37,24 +38,17 @@ vi.mock('../../contexts/DatabaseContext', () => ({
 /* ================================================================== */
 let mockDayPlans: unknown[] = [];
 vi.mock('../../store/dayPlanStore', () => ({
-  useDayPlanStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) =>
-    sel({ dayPlans: mockDayPlans }),
-  ),
+  useDayPlanStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel({ dayPlans: mockDayPlans })),
 }));
 
 let mockDishes: unknown[] = [];
 vi.mock('../../store/dishStore', () => ({
-  useDishStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) =>
-    sel({ dishes: mockDishes }),
-  ),
+  useDishStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel({ dishes: mockDishes })),
 }));
 
 let mockIngredients: unknown[] = [];
 vi.mock('../../store/ingredientStore', () => ({
-  useIngredientStore: vi.fn(
-    (sel: (s: Record<string, unknown>) => unknown) =>
-      sel({ ingredients: mockIngredients }),
-  ),
+  useIngredientStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel({ ingredients: mockIngredients })),
 }));
 
 let mockFitnessState: Record<string, unknown> = {
@@ -67,23 +61,19 @@ let mockFitnessState: Record<string, unknown> = {
   isOnboarded: false,
 };
 vi.mock('../../store/fitnessStore', () => ({
-  useFitnessStore: vi.fn(
-    (sel: (s: Record<string, unknown>) => unknown) =>
-      sel(mockFitnessState),
-  ),
+  useFitnessStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel(mockFitnessState)),
 }));
 
 let mockNavigateTab = vi.fn();
 let mockPushPage = vi.fn();
 vi.mock('../../store/navigationStore', () => ({
-  useNavigationStore: vi.fn(
-    (sel: (s: Record<string, unknown>) => unknown) =>
-      sel({
-        activeTab: 'dashboard',
-        pageStack: [],
-        navigateTab: mockNavigateTab,
-        pushPage: mockPushPage,
-      }),
+  useNavigationStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) =>
+    sel({
+      activeTab: 'dashboard',
+      pageStack: [],
+      navigateTab: mockNavigateTab,
+      pushPage: mockPushPage,
+    }),
   ),
 }));
 
@@ -99,28 +89,24 @@ let mockHealthProfile: Record<string, unknown> = {
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
 let mockActiveGoal: unknown = null;
-vi.mock(
-  '../../features/health-profile/store/healthProfileStore',
-  () => ({
-    useHealthProfileStore: Object.assign(
-      vi.fn(
-        (sel: (s: Record<string, unknown>) => unknown) =>
-          sel({
-            profile: mockHealthProfile,
-            activeGoal: mockActiveGoal,
-            loading: false,
-          }),
-      ),
-      {
-        getState: () => ({
-          profile: mockHealthProfile,
-          activeGoal: mockActiveGoal,
-        }),
-        setState: vi.fn(),
-      },
+vi.mock('../../features/health-profile/store/healthProfileStore', () => ({
+  useHealthProfileStore: Object.assign(
+    vi.fn((sel: (s: Record<string, unknown>) => unknown) =>
+      sel({
+        profile: mockHealthProfile,
+        activeGoal: mockActiveGoal,
+        loading: false,
+      }),
     ),
-  }),
-);
+    {
+      getState: () => ({
+        profile: mockHealthProfile,
+        activeGoal: mockActiveGoal,
+      }),
+      setState: vi.fn(),
+    },
+  ),
+}));
 
 /* ============ nutrition targets mock ============ */
 let mockNutritionTargets = {
@@ -131,12 +117,9 @@ let mockNutritionTargets = {
   bmr: 1700,
   tdee: 2200,
 };
-vi.mock(
-  '../../features/health-profile/hooks/useNutritionTargets',
-  () => ({
-    useNutritionTargets: () => mockNutritionTargets,
-  }),
-);
+vi.mock('../../features/health-profile/hooks/useNutritionTargets', () => ({
+  useNutritionTargets: () => mockNutritionTargets,
+}));
 
 /* ============ utility mocks ============ */
 vi.mock('../../utils/nutrition', () => ({
@@ -184,9 +167,8 @@ vi.mock('../../features/dashboard/utils/scoreCalculator', () => ({
   }),
 }));
 
-vi.mock('../../features/health-profile/types', async (importOriginal) => {
-  const original =
-    (await importOriginal()) as Record<string, unknown>;
+vi.mock('../../features/health-profile/types', async importOriginal => {
+  const original = (await importOriginal()) as Record<string, unknown>;
   return {
     ...original,
     DEFAULT_HEALTH_PROFILE: {
@@ -218,57 +200,34 @@ vi.mock('../../hooks/useModalBackHandler', () => ({
 }));
 
 vi.mock('../../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-    onClose,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-  }) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'modal-backdrop', onClick: onClose },
-      children,
-    ),
+  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) =>
+    React.createElement('div', { 'data-testid': 'modal-backdrop', onClick: onClose }, children),
 }));
 
 /* ============ ErrorBoundary — transparent wrapper ============ */
 vi.mock('../../components/ErrorBoundary', () => ({
-  ErrorBoundary: ({
-    children,
-    fallbackTitle,
-  }: {
-    children: React.ReactNode;
-    fallbackTitle?: string;
-  }) =>
-    React.createElement(
-      'div',
-      { 'data-error-boundary': fallbackTitle },
-      children,
-    ),
+  ErrorBoundary: ({ children, fallbackTitle }: { children: React.ReactNode; fallbackTitle?: string }) =>
+    React.createElement('div', { 'data-error-boundary': fallbackTitle }, children),
 }));
 
 /* ============ localStorage mock ============ */
 const localStorageMock: Record<string, string> = {};
-vi.stubGlobal(
-  'localStorage',
-  {
-    getItem: (key: string) => localStorageMock[key] ?? null,
-    setItem: (key: string, value: string) => {
-      localStorageMock[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete localStorageMock[key];
-    },
-    clear: () => {
-      for (const key of Object.keys(localStorageMock)) {
-        delete localStorageMock[key];
-      }
-    },
-    length: 0,
-    key: () => null,
+vi.stubGlobal('localStorage', {
+  getItem: (key: string) => localStorageMock[key] ?? null,
+  setItem: (key: string, value: string) => {
+    localStorageMock[key] = value;
   },
-);
+  removeItem: (key: string) => {
+    delete localStorageMock[key];
+  },
+  clear: () => {
+    for (const key of Object.keys(localStorageMock)) {
+      delete localStorageMock[key];
+    }
+  },
+  length: 0,
+  key: () => null,
+});
 
 /* ============ matchMedia mock ============ */
 function createMatchMediaMock(matches: boolean) {
@@ -285,14 +244,14 @@ function createMatchMediaMock(matches: boolean) {
 }
 
 /* ============ import components under test ============ */
-import { DashboardTab } from '../../features/dashboard/components/DashboardTab';
-import { DailyScoreHero } from '../../features/dashboard/components/DailyScoreHero';
-import { TodaysPlanCard } from '../../features/dashboard/components/TodaysPlanCard';
-import { ProteinProgress } from '../../features/dashboard/components/ProteinProgress';
-import { WeightMini } from '../../features/dashboard/components/WeightMini';
-import { StreakMini } from '../../features/dashboard/components/StreakMini';
 import { AiInsightCard } from '../../features/dashboard/components/AiInsightCard';
+import { DailyScoreHero } from '../../features/dashboard/components/DailyScoreHero';
+import { DashboardTab } from '../../features/dashboard/components/DashboardTab';
+import { ProteinProgress } from '../../features/dashboard/components/ProteinProgress';
 import { QuickActionsBar } from '../../features/dashboard/components/QuickActionsBar';
+import { StreakMini } from '../../features/dashboard/components/StreakMini';
+import { TodaysPlanCard } from '../../features/dashboard/components/TodaysPlanCard';
+import { WeightMini } from '../../features/dashboard/components/WeightMini';
 
 /* ============ helpers ============ */
 function flushRaf() {
@@ -392,18 +351,10 @@ describe('Edge Case 1: First-time user (day 0)', () => {
     render(React.createElement(DailyScoreHero));
     const hero = screen.getByTestId('daily-score-hero');
     expect(hero).toBeInTheDocument();
-    expect(hero.textContent).toContain(
-      'dashboard.hero.firstTime.title',
-    );
-    expect(hero.textContent).toContain(
-      'dashboard.hero.firstTime.step1',
-    );
-    expect(hero.textContent).toContain(
-      'dashboard.hero.firstTime.step2',
-    );
-    expect(hero.textContent).toContain(
-      'dashboard.hero.firstTime.step3',
-    );
+    expect(hero.textContent).toContain('dashboard.hero.firstTime.title');
+    expect(hero.textContent).toContain('dashboard.hero.firstTime.step1');
+    expect(hero.textContent).toContain('dashboard.hero.firstTime.step2');
+    expect(hero.textContent).toContain('dashboard.hero.firstTime.step3');
   });
 
   it('DailyScoreHero uses slate gradient for first-time user', () => {
@@ -414,20 +365,14 @@ describe('Edge Case 1: First-time user (day 0)', () => {
 
   it('WeightMini shows empty state when no weight entries exist', () => {
     render(React.createElement(WeightMini));
-    expect(
-      screen.getByTestId('weight-mini-empty'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('weight-mini-empty')).toBeInTheDocument();
     expect(screen.queryByTestId('weight-mini')).not.toBeInTheDocument();
   });
 
   it('StreakMini shows empty state when no workouts exist', () => {
     render(React.createElement(StreakMini));
-    expect(
-      screen.getByTestId('streak-mini-empty'),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('streak-mini'),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('streak-mini-empty')).toBeInTheDocument();
+    expect(screen.queryByTestId('streak-mini')).not.toBeInTheDocument();
   });
 
   it('ProteinProgress renders with zero values safely', () => {
@@ -439,39 +384,27 @@ describe('Edge Case 1: First-time user (day 0)', () => {
     );
     const progress = screen.getByTestId('protein-progress');
     expect(progress).toBeInTheDocument();
-    expect(screen.getByTestId('protein-display').textContent).toContain(
-      '0g',
-    );
+    expect(screen.getByTestId('protein-display').textContent).toContain('0g');
   });
 
   it('TodaysPlanCard shows no-plan state for first-time user', () => {
     render(React.createElement(TodaysPlanCard));
     expect(screen.getByTestId('todays-plan-card')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('no-plan-section'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('create-plan-cta'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('no-plan-section')).toBeInTheDocument();
+    expect(screen.getByTestId('create-plan-cta')).toBeInTheDocument();
   });
 
   it('QuickActionsBar renders without crashing with empty data', () => {
     render(React.createElement(QuickActionsBar));
-    expect(
-      screen.getByTestId('quick-actions-bar'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('quick-actions-bar')).toBeInTheDocument();
   });
 
   it('AiInsightCard renders a tip of the day even with no input data', () => {
     render(React.createElement(AiInsightCard));
     const card = screen.getByTestId('ai-insight-card');
     expect(card).toBeInTheDocument();
-    expect(
-      screen.getByTestId('insight-title'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('insight-message'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('insight-title')).toBeInTheDocument();
+    expect(screen.getByTestId('insight-message')).toBeInTheDocument();
   });
 });
 
@@ -542,28 +475,20 @@ describe('Edge Case 2: Nutrition-only user', () => {
   it('TodaysPlanCard shows no-plan state with create plan CTA', () => {
     render(React.createElement(TodaysPlanCard));
     expect(screen.getByTestId('todays-plan-card')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('no-plan-section'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('no-plan-section')).toBeInTheDocument();
     const cta = screen.getByTestId('create-plan-cta');
     expect(cta).toBeInTheDocument();
-    expect(cta.textContent).toContain(
-      'dashboard.todaysPlan.createPlan',
-    );
+    expect(cta.textContent).toContain('dashboard.todaysPlan.createPlan');
   });
 
   it('WeightMini shows empty state for nutrition-only user', () => {
     render(React.createElement(WeightMini));
-    expect(
-      screen.getByTestId('weight-mini-empty'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('weight-mini-empty')).toBeInTheDocument();
   });
 
   it('StreakMini shows empty state when no workouts logged', () => {
     render(React.createElement(StreakMini));
-    expect(
-      screen.getByTestId('streak-mini-empty'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('streak-mini-empty')).toBeInTheDocument();
   });
 
   it('ProteinProgress works with valid targets', () => {
@@ -689,9 +614,7 @@ describe('Edge Case 3: Fitness-only user', () => {
     render(React.createElement(TodaysPlanCard));
     const card = screen.getByTestId('todays-plan-card');
     expect(card).toBeInTheDocument();
-    expect(
-      screen.getByTestId('workout-summary'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('workout-summary')).toBeInTheDocument();
   });
 
   it('TodaysPlanCard meals section shows 0/3 meals logged', () => {
@@ -705,9 +628,7 @@ describe('Edge Case 3: Fitness-only user', () => {
   it('WeightMini shows weight data when entries exist', () => {
     render(React.createElement(WeightMini));
     expect(screen.getByTestId('weight-mini')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('weight-mini-empty'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('weight-mini-empty')).not.toBeInTheDocument();
     const weightValue = screen.getByTestId('weight-value');
     expect(weightValue.textContent).toContain('75');
   });
@@ -715,9 +636,7 @@ describe('Edge Case 3: Fitness-only user', () => {
   it('StreakMini shows streak info when workouts exist', () => {
     render(React.createElement(StreakMini));
     expect(screen.getByTestId('streak-mini')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('streak-mini-empty'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streak-mini-empty')).not.toBeInTheDocument();
     expect(screen.getByTestId('streak-count')).toBeInTheDocument();
     expect(screen.getByTestId('week-dots')).toBeInTheDocument();
   });
@@ -803,9 +722,7 @@ describe('Edge Case 4: Offline mode', () => {
 
   it('QuickActionsBar renders with local data in offline mode', () => {
     render(React.createElement(QuickActionsBar));
-    expect(
-      screen.getByTestId('quick-actions-bar'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('quick-actions-bar')).toBeInTheDocument();
   });
 
   it('no console errors when rendering offline', () => {
@@ -813,9 +730,7 @@ describe('Edge Case 4: Offline mode', () => {
     render(React.createElement(DashboardTab));
     flushRaf();
     const reactErrors = consoleSpy.mock.calls.filter(
-      (args) =>
-        !String(args[0]).includes('act(') &&
-        !String(args[0]).includes('Warning:'),
+      args => !String(args[0]).includes('act(') && !String(args[0]).includes('Warning:'),
     );
     expect(reactErrors).toHaveLength(0);
     consoleSpy.mockRestore();
@@ -957,9 +872,7 @@ describe('Edge Case 5: Data overflow (365+ days)', () => {
     expect(screen.getByTestId('weight-mini')).toBeInTheDocument();
     expect(screen.getByTestId('weight-value')).toBeInTheDocument();
     expect(screen.getByTestId('weight-trend')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('weight-sparkline'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('weight-sparkline')).toBeInTheDocument();
   });
 
   it('StreakMini handles 200 workouts without crashing', () => {
@@ -1085,18 +998,14 @@ describe('Edge Case 6: Midnight rollover', () => {
   it('DailyScoreHero greeting changes based on time of day', () => {
     // Morning
     vi.setSystemTime(new Date(2024, 5, 16, 8, 0, 0));
-    const { unmount: u1 } = render(
-      React.createElement(DailyScoreHero),
-    );
+    const { unmount: u1 } = render(React.createElement(DailyScoreHero));
     let hero = screen.getByTestId('daily-score-hero');
     expect(hero.textContent).toContain('Chào buổi sáng!');
     u1();
 
     // Afternoon
     vi.setSystemTime(new Date(2024, 5, 16, 14, 0, 0));
-    const { unmount: u2 } = render(
-      React.createElement(DailyScoreHero),
-    );
+    const { unmount: u2 } = render(React.createElement(DailyScoreHero));
     hero = screen.getByTestId('daily-score-hero');
     expect(hero.textContent).toContain('Chào buổi chiều!');
     u2();
@@ -1121,9 +1030,7 @@ describe('Edge Case 6: Midnight rollover', () => {
     flushRaf();
 
     const realErrors = consoleSpy.mock.calls.filter(
-      (args) =>
-        !String(args[0]).includes('act(') &&
-        !String(args[0]).includes('Warning:'),
+      args => !String(args[0]).includes('act(') && !String(args[0]).includes('Warning:'),
     );
     expect(realErrors).toHaveLength(0);
     consoleSpy.mockRestore();

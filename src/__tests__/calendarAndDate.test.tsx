@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 let mockDateHintDismissed: string | null = null;
 const mockSetSetting = vi.fn().mockResolvedValue(undefined);
@@ -24,12 +24,17 @@ vi.mock('../services/appSettings', () => ({
   deleteSetting: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { DateSelector } from '../components/DateSelector';
 import { CalendarTab } from '../components/CalendarTab';
-import type { DayPlan, DayNutritionSummary } from '../types';
+import { DateSelector } from '../components/DateSelector';
+import type { DayNutritionSummary, DayPlan } from '../types';
 
 const makeSlot = (dishIds: string[], cal = 0, pro = 0) => ({
-  dishIds, calories: cal, protein: pro, carbs: 0, fat: 0, fiber: 0,
+  dishIds,
+  calories: cal,
+  protein: pro,
+  carbs: 0,
+  fat: 0,
+  fiber: 0,
 });
 
 const emptyNutrition: DayNutritionSummary = {
@@ -47,9 +52,7 @@ const filledNutrition: DayNutritionSummary = {
 const today = new Date();
 const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-const dayPlans: DayPlan[] = [
-  { date: todayStr, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] },
-];
+const dayPlans: DayPlan[] = [{ date: todayStr, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] }];
 
 // --- DateSelector ---
 describe('DateSelector', () => {
@@ -336,7 +339,9 @@ describe('DateSelector', () => {
 
   it('handles localStorage errors gracefully on read', () => {
     const originalGetItem = Storage.prototype.getItem;
-    Storage.prototype.getItem = () => { throw new Error('denied'); };
+    Storage.prototype.getItem = () => {
+      throw new Error('denied');
+    };
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
     // Should not throw and defaults to showing hints
     render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
@@ -346,7 +351,9 @@ describe('DateSelector', () => {
 
   it('handles localStorage errors gracefully on write', () => {
     const originalSetItem = Storage.prototype.setItem;
-    Storage.prototype.setItem = () => { throw new Error('quota exceeded'); };
+    Storage.prototype.setItem = () => {
+      throw new Error('quota exceeded');
+    };
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
     const onSelectDate = vi.fn();
     render(<DateSelector selectedDate={todayStr} onSelectDate={onSelectDate} />);
@@ -447,7 +454,13 @@ describe('CalendarTab', () => {
   });
 
   it('shows consolidated empty state when all meals are empty', () => {
-    render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }} />);
+    render(
+      <CalendarTab
+        {...defaultProps}
+        dayNutrition={emptyNutrition}
+        currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }}
+      />,
+    );
     expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
   });
 
@@ -461,7 +474,13 @@ describe('CalendarTab', () => {
   });
 
   it('hides clear plan button when all meals are empty', () => {
-    render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }} />);
+    render(
+      <CalendarTab
+        {...defaultProps}
+        dayNutrition={emptyNutrition}
+        currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }}
+      />,
+    );
     expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
   });
 
@@ -568,20 +587,14 @@ describe('CalendarTab', () => {
         currentPlan={multiDayPlans[1]}
         dayNutrition={emptyNutr}
         onQuickAdd={vi.fn()}
-      />
+      />,
     );
     expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
   });
 
   it('renders serving stepper and calls onUpdateServings when plus is clicked', () => {
     const onUpdateServings = vi.fn();
-    render(
-      <CalendarTab
-        {...defaultProps}
-        servings={{ d1: 2 }}
-        onUpdateServings={onUpdateServings}
-      />,
-    );
+    render(<CalendarTab {...defaultProps} servings={{ d1: 2 }} onUpdateServings={onUpdateServings} />);
     expect(screen.getByTestId('serving-count-d1')).toHaveTextContent('2x');
     fireEvent.click(screen.getByTestId('btn-serving-plus-d1'));
     expect(onUpdateServings).toHaveBeenCalledWith('d1', 3);
@@ -589,13 +602,7 @@ describe('CalendarTab', () => {
 
   it('renders serving stepper and calls onUpdateServings when minus is clicked', () => {
     const onUpdateServings = vi.fn();
-    render(
-      <CalendarTab
-        {...defaultProps}
-        servings={{ d1: 3 }}
-        onUpdateServings={onUpdateServings}
-      />,
-    );
+    render(<CalendarTab {...defaultProps} servings={{ d1: 3 }} onUpdateServings={onUpdateServings} />);
     fireEvent.click(screen.getByTestId('btn-serving-minus-d1'));
     expect(onUpdateServings).toHaveBeenCalledWith('d1', 2);
   });

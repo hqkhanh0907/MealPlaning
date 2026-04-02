@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useCurrentDate(): Date {
   const [now, setNow] = useState(() => new Date());

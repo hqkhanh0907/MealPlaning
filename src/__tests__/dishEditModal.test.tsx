@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+
 import { DishEditModal } from '../components/modals/DishEditModal';
 import type { Dish, Ingredient } from '../types';
 
@@ -12,9 +13,36 @@ vi.mock('../services/geminiService', () => ({
 }));
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: { vi: 'Ức gà', en: 'Ức gà' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
-  { id: 'i2', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
-  { id: 'i3', name: { vi: 'Rau xà lách', en: 'Rau xà lách' }, caloriesPer100: 15, proteinPer100: 1.4, carbsPer100: 2.9, fatPer100: 0.2, fiberPer100: 1.3, unit: { vi: 'g', en: 'g' } },
+  {
+    id: 'i1',
+    name: { vi: 'Ức gà', en: 'Ức gà' },
+    caloriesPer100: 165,
+    proteinPer100: 31,
+    carbsPer100: 0,
+    fatPer100: 3.6,
+    fiberPer100: 0,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i2',
+    name: { vi: 'Cơm trắng', en: 'Cơm trắng' },
+    caloriesPer100: 130,
+    proteinPer100: 2.7,
+    carbsPer100: 28,
+    fatPer100: 0.3,
+    fiberPer100: 0.4,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i3',
+    name: { vi: 'Rau xà lách', en: 'Rau xà lách' },
+    caloriesPer100: 15,
+    proteinPer100: 1.4,
+    carbsPer100: 2.9,
+    fatPer100: 0.2,
+    fiberPer100: 1.3,
+    unit: { vi: 'g', en: 'g' },
+  },
 ];
 
 const existingDish: Dish = {
@@ -50,7 +78,9 @@ describe('DishEditModal', () => {
   });
 
   it('renders edit existing dish form with pre-populated data', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
     expect(screen.getByLabelText('Tên món ăn')).toHaveValue('Cơm gà');
     // Should show selected ingredients
@@ -86,7 +116,9 @@ describe('DishEditModal', () => {
   });
 
   it('shows active state on pre-selected tags for existing dish', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const lunchTag = screen.getByText(/Trưa/).closest('button') as HTMLElement;
     const dinnerTag = screen.getByText(/Tối/).closest('button') as HTMLElement;
     const breakfastTag = screen.getByText(/Sáng/).closest('button') as HTMLElement;
@@ -161,7 +193,9 @@ describe('DishEditModal', () => {
   });
 
   it('removes ingredient from selected list', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // Find delete button for first selected ingredient
     const deleteButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-trash-2'));
     expect(deleteButtons.length).toBe(2); // 2 selected ingredients
@@ -174,14 +208,18 @@ describe('DishEditModal', () => {
   });
 
   it('updates ingredient amount via input field', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '150' } });
     expect(screen.getByDisplayValue('150')).toBeInTheDocument();
   });
 
   it('increments ingredient amount with + button', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // Find + buttons (Plus icons inside selected ingredients)
     const plusButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-plus'));
     // The first + button is in the selected ingredient section (not the picker add buttons)
@@ -195,7 +233,9 @@ describe('DishEditModal', () => {
   });
 
   it('decrements ingredient amount with - button, minimum 0', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const firstMinusBtn = screen.getAllByRole('button').find(b => b.querySelector('.lucide-minus') !== null);
     if (firstMinusBtn) {
       // First - button should decrement i1 amount from 200 to 190
@@ -205,21 +245,27 @@ describe('DishEditModal', () => {
   });
 
   it('allows zero amount input without clamping', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '0' } });
     expect(screen.getByDisplayValue('0')).toBeInTheDocument();
   });
 
   it('allows negative amount input without clamping', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '-5' } });
     expect(screen.getByDisplayValue('-5')).toBeInTheDocument();
   });
 
   it('shows amount validation error on submit when amount is negative', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '-5' } });
     fireEvent.click(screen.getByText('Lưu món ăn'));
@@ -228,7 +274,9 @@ describe('DishEditModal', () => {
   });
 
   it('shows amount validation error on submit when amount is empty', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '' } });
     fireEvent.click(screen.getByText('Lưu món ăn'));
@@ -262,7 +310,9 @@ describe('DishEditModal', () => {
   });
 
   it('clears amount error when user types a valid amount', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '-5' } });
     fireEvent.click(screen.getByText('Lưu món ăn'));
@@ -322,7 +372,9 @@ describe('DishEditModal', () => {
   });
 
   it('preserves existing dish ID when editing', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     fireEvent.click(screen.getByText('Lưu món ăn'));
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit.mock.calls[0][0].id).toBe('dish-1');
@@ -369,7 +421,6 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByLabelText('Đóng'));
     fireEvent.click(screen.getByText('Bỏ thay đổi'));
 
-
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -396,14 +447,18 @@ describe('DishEditModal', () => {
   // --- Edge Cases ---
 
   it('detects changes in edited dish when name changes', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Modified name' } });
     fireEvent.click(screen.getByLabelText('Đóng'));
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
   });
 
   it('detects changes in edited dish when tag toggled', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // Toggle breakfast tag (not in original)
     fireEvent.click(screen.getByText(/Sáng/).closest('button') as HTMLElement);
     fireEvent.click(screen.getByLabelText('Đóng'));
@@ -487,7 +542,15 @@ describe('DishEditModal', () => {
   });
 
   it('creates ingredient and adds to selected list via quick-add', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        onSubmit={onSubmit}
+        onClose={onClose}
+        onCreateIngredient={onCreateIngredient}
+      />,
+    );
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     // Fill name
@@ -510,7 +573,15 @@ describe('DishEditModal', () => {
   });
 
   it('quick-add uses primary name for both languages', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        onSubmit={onSubmit}
+        onClose={onClose}
+        onCreateIngredient={onCreateIngredient}
+      />,
+    );
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Đậu phộng' } });
@@ -522,7 +593,12 @@ describe('DishEditModal', () => {
 
   it('triggers AI fill on blur of name input', async () => {
     mockSuggestIngredientInfo.mockResolvedValue({
-      calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, unit: 'g',
+      calories: 165,
+      protein: 31,
+      carbs: 0,
+      fat: 3.6,
+      fiber: 0,
+      unit: 'g',
     });
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
@@ -532,14 +608,18 @@ describe('DishEditModal', () => {
     fireEvent.blur(nameInput);
 
     // triggerAIFill has 800ms debounce
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
 
     expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Ức gà', 'g', expect.any(AbortSignal));
   });
 
   it('shows AI loading state in quick-add form', async () => {
     let resolveFn: (v: unknown) => void = () => {};
-    const promise = new Promise(resolve => { resolveFn = resolve; });
+    const promise = new Promise(resolve => {
+      resolveFn = resolve;
+    });
     mockSuggestIngredientInfo.mockReturnValue(promise);
 
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
@@ -549,7 +629,9 @@ describe('DishEditModal', () => {
     fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
     fireEvent.blur(nameInput);
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
 
     expect(screen.getByText('AI đang điền...')).toBeInTheDocument();
 
@@ -567,7 +649,12 @@ describe('DishEditModal', () => {
 
   it('fills nutrition values after AI returns successfully', async () => {
     mockSuggestIngredientInfo.mockResolvedValue({
-      calories: 200, protein: 25, carbs: 10, fat: 5, fiber: 3, unit: 'g',
+      calories: 200,
+      protein: 25,
+      carbs: 10,
+      fat: 5,
+      fiber: 3,
+      unit: 'g',
     });
 
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
@@ -577,7 +664,9 @@ describe('DishEditModal', () => {
     fireEvent.change(nameInput, { target: { value: 'Thịt bò' } });
     fireEvent.blur(nameInput);
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
 
     expect(screen.getByLabelText('Cal / 100g')).toHaveValue('200');
     expect(screen.getByLabelText('Protein / 100g')).toHaveValue('25');
@@ -593,7 +682,9 @@ describe('DishEditModal', () => {
     const nameInput = screen.getByTestId('input-qa-name');
     fireEvent.blur(nameInput);
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
     expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
   });
 
@@ -607,7 +698,9 @@ describe('DishEditModal', () => {
     fireEvent.change(nameInput, { target: { value: 'Cà rốt' } });
     fireEvent.blur(nameInput);
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
 
     expect(screen.queryByText('AI đang điền...')).not.toBeInTheDocument();
 
@@ -628,7 +721,12 @@ describe('DishEditModal', () => {
 
   it('triggers AI fill when manual AI button is clicked', async () => {
     mockSuggestIngredientInfo.mockResolvedValue({
-      calories: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8, unit: 'g',
+      calories: 41,
+      protein: 0.9,
+      carbs: 10,
+      fat: 0.2,
+      fiber: 2.8,
+      unit: 'g',
     });
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
@@ -636,7 +734,9 @@ describe('DishEditModal', () => {
     fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Cà rốt' } });
     fireEvent.click(screen.getByTestId('btn-qa-ai-fill'));
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
     expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Cà rốt', 'g', expect.any(AbortSignal));
   });
 
@@ -655,7 +755,15 @@ describe('DishEditModal', () => {
   });
 
   it('calls onCreateIngredient for quick-added ingredients on dish save', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        onSubmit={onSubmit}
+        onClose={onClose}
+        onCreateIngredient={onCreateIngredient}
+      />,
+    );
 
     // Quick-add an ingredient
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
@@ -675,7 +783,15 @@ describe('DishEditModal', () => {
   });
 
   it('does not call onCreateIngredient when dish is not saved', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        onSubmit={onSubmit}
+        onClose={onClose}
+        onCreateIngredient={onCreateIngredient}
+      />,
+    );
 
     // Quick-add an ingredient
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
@@ -692,12 +808,14 @@ describe('DishEditModal', () => {
   // --- Increment/Decrement Amount Buttons (edge cases) ---
 
   it('increments amount by 10 when current amount is >= 100', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // i1 has amount 200. Step = 10 for amounts >= 100
     // Amount +/- buttons have rounded-lg; quick-add toggle has rounded-xl
-    const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
-      btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
-    );
+    const selectedPlusBtn = screen
+      .getAllByRole('button')
+      .find(btn => btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'));
     if (selectedPlusBtn) fireEvent.click(selectedPlusBtn);
     expect(screen.getByDisplayValue('210')).toBeInTheDocument();
   });
@@ -710,9 +828,9 @@ describe('DishEditModal', () => {
       tags: ['lunch'],
     };
     render(<DishEditModal editingItem={dishWith50} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
-      btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
-    );
+    const selectedPlusBtn = screen
+      .getAllByRole('button')
+      .find(btn => btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'));
     if (selectedPlusBtn) fireEvent.click(selectedPlusBtn);
     expect(screen.getByDisplayValue('55')).toBeInTheDocument();
   });
@@ -725,9 +843,9 @@ describe('DishEditModal', () => {
       tags: ['lunch'],
     };
     render(<DishEditModal editingItem={dishWith5} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const selectedPlusBtn = screen.getAllByRole('button').find(btn =>
-      btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'),
-    );
+    const selectedPlusBtn = screen
+      .getAllByRole('button')
+      .find(btn => btn.querySelector('.lucide-plus') && btn.classList.contains('rounded-lg'));
     if (selectedPlusBtn) fireEvent.click(selectedPlusBtn);
     expect(screen.getByDisplayValue('6')).toBeInTheDocument();
   });
@@ -740,9 +858,9 @@ describe('DishEditModal', () => {
       tags: ['lunch'],
     };
     render(<DishEditModal editingItem={dishWith0} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    const minusBtn = screen.getAllByRole('button').find(btn =>
-      btn.querySelector('.lucide-minus') && btn.classList.contains('rounded-lg'),
-    );
+    const minusBtn = screen
+      .getAllByRole('button')
+      .find(btn => btn.querySelector('.lucide-minus') && btn.classList.contains('rounded-lg'));
     if (minusBtn) fireEvent.click(minusBtn);
     // Should stay at 0, not go negative
     expect(screen.getByDisplayValue('0')).toBeInTheDocument();
@@ -774,7 +892,12 @@ describe('DishEditModal', () => {
 
   it('triggers AI fill when quick-add unit selector changes', async () => {
     mockSuggestIngredientInfo.mockResolvedValue({
-      calories: 78, protein: 6, carbs: 0.6, fat: 5, fiber: 0, unit: 'quả',
+      calories: 78,
+      protein: 6,
+      carbs: 0.6,
+      fat: 5,
+      fiber: 0,
+      unit: 'quả',
     });
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
@@ -786,13 +909,17 @@ describe('DishEditModal', () => {
     const unitSelect = screen.getByLabelText(/Đơn vị/);
     fireEvent.change(unitSelect, { target: { value: 'quả' } });
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
 
     expect(mockSuggestIngredientInfo).toHaveBeenCalled();
   });
 
   it('detects changes when ingredient count differs from original', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // existingDish has 2 ingredients. Remove one to trigger hasChanges ingredient length diff
     const deleteButton = screen.getAllByRole('button').find(btn => btn.querySelector('.lucide-trash-2'));
     if (deleteButton) fireEvent.click(deleteButton);
@@ -810,7 +937,9 @@ describe('DishEditModal', () => {
       ingredients: [{ ingredientId: 'i1', amount: 100 }],
       tags: ['lunch'],
     };
-    render(<DishEditModal editingItem={singleIngDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={singleIngDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // Remove the existing ingredient
     const deleteBtn = screen.getAllByRole('button').find(btn => btn.querySelector('.lucide-trash-2'));
     if (deleteBtn) fireEvent.click(deleteBtn);
@@ -822,7 +951,9 @@ describe('DishEditModal', () => {
   });
 
   it('detects changes when amount string is empty', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // Clear the amount field (makes it empty string)
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: '' } });
@@ -832,7 +963,9 @@ describe('DishEditModal', () => {
   });
 
   it('shows NaN validation error when amount is non-numeric text (line 110)', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByDisplayValue('200');
     fireEvent.change(amountInput, { target: { value: 'abc' } });
     fireEvent.click(screen.getByText('Lưu món ăn'));
@@ -841,7 +974,9 @@ describe('DishEditModal', () => {
   });
 
   it('prevents double submission (line 122)', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const saveBtn = screen.getByText('Lưu món ăn');
     fireEvent.click(saveBtn);
     expect(onSubmit).toHaveBeenCalledTimes(1);
@@ -880,12 +1015,22 @@ describe('DishEditModal', () => {
       ],
       tags: ['lunch'],
     };
-    render(<DishEditModal editingItem={dishWithUnknown} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={dishWithUnknown} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     expect(screen.getByText('Ức gà')).toBeInTheDocument();
   });
 
   it('handleSaveAndBack flushes extra ingredients on success (line 137)', () => {
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        onSubmit={onSubmit}
+        onClose={onClose}
+        onCreateIngredient={onCreateIngredient}
+      />,
+    );
     // Quick-add an ingredient
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
     fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Hành lá' } });
@@ -901,7 +1046,9 @@ describe('DishEditModal', () => {
   });
 
   it('validates NaN amount when submitting', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByTestId('input-dish-amount-i1');
     fireEvent.change(amountInput, { target: { value: 'abc' } });
     fireEvent.click(screen.getByTestId('btn-save-dish'));
@@ -926,7 +1073,9 @@ describe('DishEditModal', () => {
   });
 
   it('validates NaN amount string on submit (branch: non-empty non-numeric)', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     const amountInput = screen.getByTestId('input-dish-amount-i1');
     // jsdom sanitises non-numeric strings on type="number" inputs to '',
     // so temporarily switch to "text" to set a truly non-numeric value
@@ -941,7 +1090,12 @@ describe('DishEditModal', () => {
 
   it('triggerAIFill clears previous timer on second blur (branch: aiTimerRef truthy)', async () => {
     mockSuggestIngredientInfo.mockResolvedValue({
-      calories: 100, protein: 10, carbs: 20, fat: 5, fiber: 2, unit: 'g',
+      calories: 100,
+      protein: 10,
+      carbs: 20,
+      fat: 5,
+      fiber: 2,
+      unit: 'g',
     });
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
@@ -951,13 +1105,17 @@ describe('DishEditModal', () => {
     fireEvent.change(viInput, { target: { value: 'Thịt bò' } });
     fireEvent.blur(viInput);
     // Advance only 400ms (timer is 800ms), so the first timer is still pending
-    await act(async () => { await vi.advanceTimersByTimeAsync(400); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(400);
+    });
 
     // Second blur — triggerAIFill should clear the previous timer (line 175 branch)
     fireEvent.change(viInput, { target: { value: 'Thịt heo' } });
     fireEvent.blur(viInput);
     // Advance past both debounce windows
-    await act(async () => { await vi.advanceTimersByTimeAsync(850); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(850);
+    });
 
     // The AI call should have been made with the SECOND name, not the first
     const lastCall = mockSuggestIngredientInfo.mock.calls.at(-1);
@@ -965,7 +1123,9 @@ describe('DishEditModal', () => {
   });
 
   it('picker filters out already-selected ingredients (no duplicate add possible)', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     // i1 and i2 are already selected; only i3 should appear in the picker
     expect(screen.getByTestId('btn-add-ing-i3')).toBeInTheDocument();
     expect(screen.queryByTestId('btn-add-ing-i1')).not.toBeInTheDocument();
@@ -1002,7 +1162,12 @@ describe('DishEditModal', () => {
 
   it('shows loading state when AI suggest is called', async () => {
     let resolvePromise: (value: unknown) => void;
-    mockSuggestDishIngredients.mockImplementation(() => new Promise(resolve => { resolvePromise = resolve; }));
+    mockSuggestDishIngredients.mockImplementation(
+      () =>
+        new Promise(resolve => {
+          resolvePromise = resolve;
+        }),
+    );
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Phở bò' } });
     await act(async () => {
@@ -1010,7 +1175,9 @@ describe('DishEditModal', () => {
     });
     expect(screen.getByTestId('ai-suggest-loading')).toBeInTheDocument();
     // Resolve to clear loading
-    await act(async () => { resolvePromise([]); });
+    await act(async () => {
+      resolvePromise([]);
+    });
   });
 
   it('opens preview popup after AI returns suggestions', async () => {
@@ -1034,7 +1201,15 @@ describe('DishEditModal', () => {
       { name: 'Giá đỗ', amount: 50, unit: 'g', calories: 31, protein: 3, carbs: 5, fat: 0.2, fiber: 2 },
     ];
     mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
-    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} onCreateIngredient={onCreateIngredient} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        onSubmit={onSubmit}
+        onClose={onClose}
+        onCreateIngredient={onCreateIngredient}
+      />,
+    );
     fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Phở' } });
     await act(async () => {
       fireEvent.click(screen.getByTestId('btn-ai-suggest'));
@@ -1130,7 +1305,9 @@ describe('DishEditModal', () => {
   });
 
   it('includes rating and notes in submitted dish', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     fireEvent.click(screen.getByTestId('star-5'));
     fireEvent.change(screen.getByTestId('dish-notes'), { target: { value: 'Great meal' } });
     fireEvent.click(screen.getByTestId('btn-save-dish'));
@@ -1138,14 +1315,18 @@ describe('DishEditModal', () => {
   });
 
   it('detects rating change as unsaved change', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     fireEvent.click(screen.getByTestId('star-4'));
     fireEvent.click(screen.getByLabelText('Đóng'));
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
   });
 
   it('detects notes change as unsaved change', () => {
-    render(<DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
     fireEvent.change(screen.getByTestId('dish-notes'), { target: { value: 'Some notes' } });
     fireEvent.click(screen.getByLabelText('Đóng'));
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
@@ -1153,18 +1334,49 @@ describe('DishEditModal', () => {
 
   it('shows recently used section when allDishes is provided', () => {
     const allDishes: Dish[] = [
-      { id: 'd1', name: { vi: 'Gà nướng', en: 'Grilled Chicken' }, ingredients: [{ ingredientId: 'i3', amount: 100 }], tags: ['lunch'] },
-      { id: 'd2', name: { vi: 'Salad', en: 'Salad' }, ingredients: [{ ingredientId: 'i3', amount: 50 }], tags: ['dinner'] },
+      {
+        id: 'd1',
+        name: { vi: 'Gà nướng', en: 'Grilled Chicken' },
+        ingredients: [{ ingredientId: 'i3', amount: 100 }],
+        tags: ['lunch'],
+      },
+      {
+        id: 'd2',
+        name: { vi: 'Salad', en: 'Salad' },
+        ingredients: [{ ingredientId: 'i3', amount: 50 }],
+        tags: ['dinner'],
+      },
     ];
-    render(<DishEditModal editingItem={null} ingredients={ingredients} allDishes={allDishes} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        allDishes={allDishes}
+        onSubmit={onSubmit}
+        onClose={onClose}
+      />,
+    );
     expect(screen.getByTestId('recently-used-header')).toBeInTheDocument();
   });
 
   it('hides recently used when search is active', () => {
     const allDishes: Dish[] = [
-      { id: 'd1', name: { vi: 'Gà nướng', en: 'Grilled Chicken' }, ingredients: [{ ingredientId: 'i3', amount: 100 }], tags: ['lunch'] },
+      {
+        id: 'd1',
+        name: { vi: 'Gà nướng', en: 'Grilled Chicken' },
+        ingredients: [{ ingredientId: 'i3', amount: 100 }],
+        tags: ['lunch'],
+      },
     ];
-    render(<DishEditModal editingItem={null} ingredients={ingredients} allDishes={allDishes} onSubmit={onSubmit} onClose={onClose} />);
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        allDishes={allDishes}
+        onSubmit={onSubmit}
+        onClose={onClose}
+      />,
+    );
     fireEvent.change(screen.getByTestId('input-dish-ingredient-search'), { target: { value: 'gà' } });
     expect(screen.queryByTestId('recently-used-header')).not.toBeInTheDocument();
   });

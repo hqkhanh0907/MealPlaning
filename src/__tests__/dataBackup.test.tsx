@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { DataBackup } from '../components/DataBackup';
 
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
@@ -107,9 +108,7 @@ describe('DataBackup', () => {
           directory: 'CACHE',
         }),
       );
-      expect(mockShare).toHaveBeenCalledWith(
-        expect.objectContaining({ url: 'file:///cache/backup.sqlite' }),
-      );
+      expect(mockShare).toHaveBeenCalledWith(expect.objectContaining({ url: 'file:///cache/backup.sqlite' }));
       expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
     });
   });
@@ -127,7 +126,9 @@ describe('DataBackup', () => {
   });
 
   it('shows error notification when export fails', () => {
-    mockDb.exportBinary.mockImplementationOnce(() => { throw new Error('fail'); });
+    mockDb.exportBinary.mockImplementationOnce(() => {
+      throw new Error('fail');
+    });
 
     render(<DataBackup />);
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
@@ -178,7 +179,11 @@ describe('DataBackup', () => {
     });
 
     // Allow async arrayBuffer() to resolve
-    await act(async () => { await new Promise(r => { setTimeout(r, 50); }); });
+    await act(async () => {
+      await new Promise(r => {
+        setTimeout(r, 50);
+      });
+    });
 
     expect(mockNotify.error).toHaveBeenCalled();
     expect(mockDb.importBinary).not.toHaveBeenCalled();
@@ -335,7 +340,11 @@ describe('DataBackup', () => {
         fireEvent.change(input);
       }
     });
-    await act(async () => { await new Promise(r => { setTimeout(r, 50); }); });
+    await act(async () => {
+      await new Promise(r => {
+        setTimeout(r, 50);
+      });
+    });
 
     expect(mockNotify.error).toHaveBeenCalled();
     expect(mockDb.importBinary).not.toHaveBeenCalled();
@@ -355,7 +364,11 @@ describe('DataBackup', () => {
         fireEvent.change(input);
       }
     });
-    await act(async () => { await new Promise(r => { setTimeout(r, 50); }); });
+    await act(async () => {
+      await new Promise(r => {
+        setTimeout(r, 50);
+      });
+    });
 
     expect(mockNotify.error).toHaveBeenCalled();
   });

@@ -1,5 +1,13 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { AnalyzedDishResult, AvailableDishInfo, IngredientSuggestion, MealPlanSuggestion, NotFoodImageError, SuggestedDishIngredient } from '../types';
+import { GoogleGenAI, Type } from '@google/genai';
+
+import {
+  AnalyzedDishResult,
+  AvailableDishInfo,
+  IngredientSuggestion,
+  MealPlanSuggestion,
+  NotFoodImageError,
+  SuggestedDishIngredient,
+} from '../types';
 
 // ─── #4 Singleton AI client ───────────────────────────────────────────────────
 let _ai: GoogleGenAI | null = null;
@@ -7,14 +15,16 @@ let _ai: GoogleGenAI | null = null;
 const getAI = (): GoogleGenAI => {
   if (!_ai) {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) throw new Error("Gemini API key is missing");
+    if (!apiKey) throw new Error('Gemini API key is missing');
     _ai = new GoogleGenAI({ apiKey });
   }
   return _ai;
 };
 
 /** @internal For testing only — resets the AI singleton so API-key changes take effect */
-export const _resetAISingleton = (): void => { _ai = null; };
+export const _resetAISingleton = (): void => {
+  _ai = null;
+};
 
 // --- Shared resilience utilities ---
 
@@ -24,13 +34,16 @@ const AI_CALL_TIMEOUT_MS = 30_000;
 
 const callWithTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
   new Promise<T>((resolve, reject) => {
-    const timerId = setTimeout(
-      () => reject(new Error(`${label} timed out after ${ms / 1000}s`)),
-      ms,
-    );
+    const timerId = setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms);
     promise.then(
-      value => { clearTimeout(timerId); resolve(value); },
-      err   => { clearTimeout(timerId); reject(err); },
+      value => {
+        clearTimeout(timerId);
+        resolve(value);
+      },
+      err => {
+        clearTimeout(timerId);
+        reject(err);
+      },
     );
   });
 
@@ -39,26 +52,24 @@ const MAX_RETRIES = 2;
 
 const isRetryableError = (err: unknown): boolean => {
   if (!(err instanceof Error)) return false;
-  if (err.name === 'AbortError') return false;               // user cancelled — never retry
+  if (err.name === 'AbortError') return false; // user cancelled — never retry
   if (err.message.includes('timed out after')) return false; // timeout — don't compound wait
-  if (err.message.includes('response from AI')) return false;// validation / empty — won't improve on retry
-  if (err.message.includes('API key')) return false;         // config error — won't self-heal
-  return true;                                               // network/503 — transient, safe to retry
+  if (err.message.includes('response from AI')) return false; // validation / empty — won't improve on retry
+  if (err.message.includes('API key')) return false; // config error — won't self-heal
+  return true; // network/503 — transient, safe to retry
 };
 
 const withRetry = <T>(fn: () => Promise<T>, signal?: AbortSignal): Promise<T> => {
   const attempt = (n: number): Promise<T> =>
     fn().catch((err: unknown) => {
       if (n >= MAX_RETRIES || !isRetryableError(err) || signal?.aborted) throw err;
-      return new Promise<void>(resolve => setTimeout(resolve, 1_000 * Math.pow(2, n)))
-        .then(() => attempt(n + 1));
+      return new Promise<void>(resolve => setTimeout(resolve, 1_000 * Math.pow(2, n))).then(() => attempt(n + 1));
     });
   return attempt(0);
 };
 
 // ─── #2 Input sanitization — prompt injection guard ──────────────────────────
-const sanitizeForPrompt = (input: string): string =>
-  input.replaceAll(/[`"\\]/g, "'").slice(0, 200);
+const sanitizeForPrompt = (input: string): string => input.replaceAll(/[`"\\]/g, "'").slice(0, 200);
 
 // ─── #13 Telemetry — observable warnings for slow/failed calls ───────────────
 const logAICall = (label: string, startMs: number, success: boolean): void => {
@@ -72,7 +83,10 @@ const logAICall = (label: string, startMs: number, success: boolean): void => {
 
 // ─── #11 Ingredient info cache — 1-hour TTL ──────────────────────────────────
 const CACHE_TTL_MS = 60 * 60 * 1_000;
-interface CacheEntry { data: IngredientSuggestion; ts: number; }
+interface CacheEntry {
+  data: IngredientSuggestion;
+  ts: number;
+}
 const nutritionCache = new Map<string, CacheEntry>();
 
 /** @internal For testing only — clears the nutrition info cache */
@@ -95,21 +109,31 @@ const parseJSON = <T>(text: string | undefined, validator: (v: unknown) => v is 
 
 // ─── #7 Validators — full field coverage ────────────────────────────────────
 const isMealPlanSuggestion = (v: unknown): v is MealPlanSuggestion =>
-  typeof v === 'object' && v !== null &&
-  'breakfastDishIds' in v && Array.isArray((v as MealPlanSuggestion).breakfastDishIds) &&
-  'lunchDishIds' in v && Array.isArray((v as MealPlanSuggestion).lunchDishIds) &&
-  'dinnerDishIds' in v && Array.isArray((v as MealPlanSuggestion).dinnerDishIds) &&
-  'reasoning' in v && typeof (v as MealPlanSuggestion).reasoning === 'string';
+  typeof v === 'object' &&
+  v !== null &&
+  'breakfastDishIds' in v &&
+  Array.isArray((v as MealPlanSuggestion).breakfastDishIds) &&
+  'lunchDishIds' in v &&
+  Array.isArray((v as MealPlanSuggestion).lunchDishIds) &&
+  'dinnerDishIds' in v &&
+  Array.isArray((v as MealPlanSuggestion).dinnerDishIds) &&
+  'reasoning' in v &&
+  typeof (v as MealPlanSuggestion).reasoning === 'string';
 
 const isValidNutrition = (n: unknown): boolean => {
   if (typeof n !== 'object' || n === null) return false;
   const v = n as Record<string, unknown>;
   return (
-    typeof v.calories === 'number' && !Number.isNaN(v.calories) &&
-    typeof v.protein === 'number' && !Number.isNaN(v.protein) &&
-    typeof v.carbs === 'number' && !Number.isNaN(v.carbs) &&
-    typeof v.fat === 'number' && !Number.isNaN(v.fat) &&
-    typeof v.fiber === 'number' && !Number.isNaN(v.fiber)
+    typeof v.calories === 'number' &&
+    !Number.isNaN(v.calories) &&
+    typeof v.protein === 'number' &&
+    !Number.isNaN(v.protein) &&
+    typeof v.carbs === 'number' &&
+    !Number.isNaN(v.carbs) &&
+    typeof v.fat === 'number' &&
+    !Number.isNaN(v.fat) &&
+    typeof v.fiber === 'number' &&
+    !Number.isNaN(v.fiber)
   );
 };
 
@@ -118,14 +142,10 @@ const isAnalyzedDishResult = (v: unknown): v is AnalyzedDishResult => {
   const r = v as Record<string, unknown>;
   if (typeof r.isFood !== 'boolean') return false;
   if (!r.isFood) return true;
-  if (
-    typeof r.name !== 'string' ||
-    typeof r.description !== 'string' ||
-    !Array.isArray(r.ingredients)
-  ) {
+  if (typeof r.name !== 'string' || typeof r.description !== 'string' || !Array.isArray(r.ingredients)) {
     return false;
   }
-  return (r.ingredients as unknown[]).every((ing) => {
+  return (r.ingredients as unknown[]).every(ing => {
     if (typeof ing !== 'object' || ing === null) return false;
     const i = ing as Record<string, unknown>;
     return (
@@ -142,11 +162,11 @@ const isIngredientSuggestion = (v: unknown): v is IngredientSuggestion => {
   const s = v as Record<string, unknown>;
   return (
     typeof s.calories === 'number' &&
-    typeof s.protein  === 'number' &&
-    typeof s.carbs    === 'number' &&
-    typeof s.fat      === 'number' &&
-    typeof s.fiber    === 'number' &&
-    typeof s.unit     === 'string'
+    typeof s.protein === 'number' &&
+    typeof s.carbs === 'number' &&
+    typeof s.fat === 'number' &&
+    typeof s.fiber === 'number' &&
+    typeof s.unit === 'string'
   );
 };
 
@@ -156,19 +176,17 @@ const isSuggestedDishIngredients = (v: unknown): v is SuggestedDishIngredient[] 
     if (typeof item !== 'object' || item === null) return false;
     const s = item as Record<string, unknown>;
     return (
-      typeof s.name     === 'string' &&
-      typeof s.amount   === 'number' &&
-      typeof s.unit     === 'string' &&
+      typeof s.name === 'string' &&
+      typeof s.amount === 'number' &&
+      typeof s.unit === 'string' &&
       typeof s.calories === 'number' &&
-      typeof s.protein  === 'number' &&
-      typeof s.carbs    === 'number' &&
-      typeof s.fat      === 'number' &&
-      typeof s.fiber    === 'number'
+      typeof s.protein === 'number' &&
+      typeof s.carbs === 'number' &&
+      typeof s.fat === 'number' &&
+      typeof s.fiber === 'number'
     );
   });
 };
-
-
 
 /**
  * Suggest a daily meal plan (breakfast, lunch, dinner) using Gemini AI.
@@ -184,7 +202,7 @@ export async function suggestMealPlan(
   targetCalories: number,
   targetProtein: number,
   availableDishes: AvailableDishInfo[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<MealPlanSuggestion> {
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
@@ -215,16 +233,14 @@ export async function suggestMealPlan(
     .slice(0, 10)
     .filter(d => !seen.has(d.id) && (seen.add(d.id), true));
 
-  const selectedDishes = [
-    ...addSlot('breakfast'),
-    ...addSlot('lunch'),
-    ...addSlot('dinner'),
-    ...fallback,
-  ];
+  const selectedDishes = [...addSlot('breakfast'), ...addSlot('lunch'), ...addSlot('dinner'), ...fallback];
 
   const dishSummaries = selectedDishes.map(d => ({
-    id: d.id, name: d.name, tags: d.tags,
-    cal: Math.round(d.calories), pro: Math.round(d.protein),
+    id: d.id,
+    name: d.name,
+    tags: d.tags,
+    cal: Math.round(d.calories),
+    pro: Math.round(d.protein),
   }));
 
   const prompt = `
@@ -246,44 +262,46 @@ export async function suggestMealPlan(
 
   const start = Date.now();
   const responsePromise = withRetry(
-    () => callWithTimeout(
-      ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              breakfastDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
-              lunchDishIds:     { type: Type.ARRAY, items: { type: Type.STRING } },
-              dinnerDishIds:    { type: Type.ARRAY, items: { type: Type.STRING } },
-              reasoning: { type: Type.STRING, description: "Giải thích ngắn gọn lý do chọn thực đơn này bằng tiếng Việt" }
+    () =>
+      callWithTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                breakfastDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+                lunchDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+                dinnerDishIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+                reasoning: {
+                  type: Type.STRING,
+                  description: 'Giải thích ngắn gọn lý do chọn thực đơn này bằng tiếng Việt',
+                },
+              },
+              required: ['breakfastDishIds', 'lunchDishIds', 'dinnerDishIds', 'reasoning'],
             },
-            required: ["breakfastDishIds", "lunchDishIds", "dinnerDishIds", "reasoning"]
-          }
-        }
-      }),
-      AI_CALL_TIMEOUT_MS,
-      'Meal plan suggestion'
-    ),
-    signal
+          },
+        }),
+        AI_CALL_TIMEOUT_MS,
+        'Meal plan suggestion',
+      ),
+    signal,
   );
 
-  const effectivePromise = abortPromise === null
-    ? responsePromise
-    : Promise.race([responsePromise, abortPromise]);
+  const effectivePromise = abortPromise === null ? responsePromise : Promise.race([responsePromise, abortPromise]);
 
-  return effectivePromise.then(
-    (response: { text?: string }) => {
+  return effectivePromise
+    .then((response: { text?: string }) => {
       const result = parseJSON(response.text ?? '', isMealPlanSuggestion, 'MealPlanSuggestion');
       logAICall('suggestMealPlan', start, true);
       return result;
-    },
-  ).catch((err: unknown) => {
-    logAICall('suggestMealPlan', start, false);
-    throw err;
-  });
+    })
+    .catch((err: unknown) => {
+      logAICall('suggestMealPlan', start, false);
+      throw err;
+    });
 }
 
 /**
@@ -298,7 +316,7 @@ export async function suggestMealPlan(
 export async function analyzeDishImage(
   base64Image: string,
   mimeType: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<AnalyzedDishResult> {
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
@@ -366,86 +384,82 @@ export async function analyzeDishImage(
 
   const start = Date.now();
   const responsePromise = withRetry(
-    () => callWithTimeout(
-      ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: {
-          parts: [
-            { inlineData: { data: base64Image, mimeType } },
-            { text: prompt }
-          ]
-        },
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              isFood:        { type: Type.BOOLEAN, description: "true nếu ảnh chứa món ăn/thực phẩm, false nếu không phải" },
-              notFoodReason: { type: Type.STRING,  description: "Lý do ngắn gọn bằng tiếng Việt khi isFood = false" },
-              name:        { type: Type.STRING, description: "Tên món ăn" },
-              description: { type: Type.STRING, description: "Mô tả ngắn gọn" },
-              totalNutrition: {
-                type: Type.OBJECT,
-                properties: {
-                  calories: { type: Type.NUMBER },
-                  protein:  { type: Type.NUMBER },
-                  fat:      { type: Type.NUMBER },
-                  carbs:    { type: Type.NUMBER }
-                },
-                required: ["calories", "protein", "fat", "carbs"]
-              },
-              ingredients: {
-                type: Type.ARRAY,
-                items: {
+    () =>
+      callWithTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: {
+            parts: [{ inlineData: { data: base64Image, mimeType } }, { text: prompt }],
+          },
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                isFood: { type: Type.BOOLEAN, description: 'true nếu ảnh chứa món ăn/thực phẩm, false nếu không phải' },
+                notFoodReason: { type: Type.STRING, description: 'Lý do ngắn gọn bằng tiếng Việt khi isFood = false' },
+                name: { type: Type.STRING, description: 'Tên món ăn' },
+                description: { type: Type.STRING, description: 'Mô tả ngắn gọn' },
+                totalNutrition: {
                   type: Type.OBJECT,
                   properties: {
-                    name:   { type: Type.STRING },
-                    amount: { type: Type.NUMBER, description: "Số lượng trong món ăn này" },
-                    unit:   { type: Type.STRING },
-                    nutritionPerStandardUnit: {
-                      type: Type.OBJECT,
-                      description: "Dinh dưỡng cho 100g/ml hoặc 1 đơn vị",
-                      properties: {
-                        calories: { type: Type.NUMBER },
-                        protein:  { type: Type.NUMBER },
-                        fat:      { type: Type.NUMBER },
-                        carbs:    { type: Type.NUMBER },
-                        fiber:    { type: Type.NUMBER }
-                      },
-                      required: ["calories", "protein", "fat", "carbs", "fiber"]
-                    }
+                    calories: { type: Type.NUMBER },
+                    protein: { type: Type.NUMBER },
+                    fat: { type: Type.NUMBER },
+                    carbs: { type: Type.NUMBER },
                   },
-                  required: ["name", "amount", "unit", "nutritionPerStandardUnit"]
-                }
-              }
+                  required: ['calories', 'protein', 'fat', 'carbs'],
+                },
+                ingredients: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING },
+                      amount: { type: Type.NUMBER, description: 'Số lượng trong món ăn này' },
+                      unit: { type: Type.STRING },
+                      nutritionPerStandardUnit: {
+                        type: Type.OBJECT,
+                        description: 'Dinh dưỡng cho 100g/ml hoặc 1 đơn vị',
+                        properties: {
+                          calories: { type: Type.NUMBER },
+                          protein: { type: Type.NUMBER },
+                          fat: { type: Type.NUMBER },
+                          carbs: { type: Type.NUMBER },
+                          fiber: { type: Type.NUMBER },
+                        },
+                        required: ['calories', 'protein', 'fat', 'carbs', 'fiber'],
+                      },
+                    },
+                    required: ['name', 'amount', 'unit', 'nutritionPerStandardUnit'],
+                  },
+                },
+              },
+              required: ['isFood', 'name', 'description', 'totalNutrition', 'ingredients'],
             },
-            required: ["isFood", "name", "description", "totalNutrition", "ingredients"]
-          }
-        }
-      }),
-      AI_CALL_TIMEOUT_MS,
-      'Dish image analysis'
-    ),
-    signal
+          },
+        }),
+        AI_CALL_TIMEOUT_MS,
+        'Dish image analysis',
+      ),
+    signal,
   );
 
-  const effectivePromise = abortPromise === null
-    ? responsePromise
-    : Promise.race([responsePromise, abortPromise]);
+  const effectivePromise = abortPromise === null ? responsePromise : Promise.race([responsePromise, abortPromise]);
 
-  return effectivePromise.then(
-    (response: { text?: string }) => {
+  return effectivePromise
+    .then((response: { text?: string }) => {
       const result = parseJSON(response.text ?? '', isAnalyzedDishResult, 'AnalyzedDishResult');
       if (!result.isFood) {
         throw new NotFoodImageError(result.notFoodReason ?? 'Không phải món ăn');
       }
       logAICall('analyzeDishImage', start, true);
       return result;
-    },
-  ).catch((err: unknown) => {
-    logAICall('analyzeDishImage', start, false);
-    throw err;
-  });
+    })
+    .catch((err: unknown) => {
+      logAICall('analyzeDishImage', start, false);
+      throw err;
+    });
 }
 
 /**
@@ -461,7 +475,7 @@ export async function analyzeDishImage(
 export async function suggestIngredientInfo(
   ingredientName: string,
   unit: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<IngredientSuggestion> {
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
@@ -501,47 +515,46 @@ export async function suggestIngredientInfo(
 
   const start = Date.now();
   const responsePromise = withRetry(
-    () => callWithTimeout(
-      ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              calories: { type: Type.NUMBER },
-              protein:  { type: Type.NUMBER },
-              carbs:    { type: Type.NUMBER },
-              fat:      { type: Type.NUMBER },
-              fiber:    { type: Type.NUMBER },
-              unit:     { type: Type.STRING }
+    () =>
+      callWithTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                calories: { type: Type.NUMBER },
+                protein: { type: Type.NUMBER },
+                carbs: { type: Type.NUMBER },
+                fat: { type: Type.NUMBER },
+                fiber: { type: Type.NUMBER },
+                unit: { type: Type.STRING },
+              },
+              required: ['calories', 'protein', 'carbs', 'fat', 'fiber', 'unit'],
             },
-            required: ["calories", "protein", "carbs", "fat", "fiber", "unit"]
-          }
-        }
-      }),
-      AI_CALL_TIMEOUT_MS,
-      'Ingredient info lookup'
-    ),
-    signal
+          },
+        }),
+        AI_CALL_TIMEOUT_MS,
+        'Ingredient info lookup',
+      ),
+    signal,
   );
 
-  const effectivePromise = abortPromise === null
-    ? responsePromise
-    : Promise.race([responsePromise, abortPromise]);
+  const effectivePromise = abortPromise === null ? responsePromise : Promise.race([responsePromise, abortPromise]);
 
-  return effectivePromise.then(
-    (response: { text?: string }) => {
+  return effectivePromise
+    .then((response: { text?: string }) => {
       const result = parseJSON(response.text ?? '', isIngredientSuggestion, 'IngredientSuggestion');
       nutritionCache.set(cacheKey, { data: result, ts: Date.now() });
       logAICall('suggestIngredientInfo', start, true);
       return result;
-    },
-  ).catch((err: unknown) => {
-    logAICall('suggestIngredientInfo', start, false);
-    throw err;
-  });
+    })
+    .catch((err: unknown) => {
+      logAICall('suggestIngredientInfo', start, false);
+      throw err;
+    });
 }
 
 /**
@@ -554,7 +567,7 @@ export async function suggestIngredientInfo(
  */
 export async function suggestDishIngredients(
   dishName: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<SuggestedDishIngredient[]> {
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
@@ -583,49 +596,48 @@ export async function suggestDishIngredients(
 
   const start = Date.now();
   const responsePromise = withRetry(
-    () => callWithTimeout(
-      ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name:     { type: Type.STRING, description: "Tên nguyên liệu" },
-                amount:   { type: Type.NUMBER, description: "Lượng cho 1 phần ăn" },
-                unit:     { type: Type.STRING, description: "Đơn vị (g, ml, cái, quả...)" },
-                calories: { type: Type.NUMBER, description: "Kcal per 100g hoặc 1 đơn vị" },
-                protein:  { type: Type.NUMBER, description: "Gram protein per 100g hoặc 1 đơn vị" },
-                carbs:    { type: Type.NUMBER, description: "Gram carbs per 100g hoặc 1 đơn vị" },
-                fat:      { type: Type.NUMBER, description: "Gram fat per 100g hoặc 1 đơn vị" },
-                fiber:    { type: Type.NUMBER, description: "Gram fiber per 100g hoặc 1 đơn vị" },
+    () =>
+      callWithTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING, description: 'Tên nguyên liệu' },
+                  amount: { type: Type.NUMBER, description: 'Lượng cho 1 phần ăn' },
+                  unit: { type: Type.STRING, description: 'Đơn vị (g, ml, cái, quả...)' },
+                  calories: { type: Type.NUMBER, description: 'Kcal per 100g hoặc 1 đơn vị' },
+                  protein: { type: Type.NUMBER, description: 'Gram protein per 100g hoặc 1 đơn vị' },
+                  carbs: { type: Type.NUMBER, description: 'Gram carbs per 100g hoặc 1 đơn vị' },
+                  fat: { type: Type.NUMBER, description: 'Gram fat per 100g hoặc 1 đơn vị' },
+                  fiber: { type: Type.NUMBER, description: 'Gram fiber per 100g hoặc 1 đơn vị' },
+                },
+                required: ['name', 'amount', 'unit', 'calories', 'protein', 'carbs', 'fat', 'fiber'],
               },
-              required: ["name", "amount", "unit", "calories", "protein", "carbs", "fat", "fiber"]
-            }
-          }
-        }
-      }),
-      AI_CALL_TIMEOUT_MS,
-      'Dish ingredients suggestion'
-    ),
-    signal
+            },
+          },
+        }),
+        AI_CALL_TIMEOUT_MS,
+        'Dish ingredients suggestion',
+      ),
+    signal,
   );
 
-  const effectivePromise = abortPromise === null
-    ? responsePromise
-    : Promise.race([responsePromise, abortPromise]);
+  const effectivePromise = abortPromise === null ? responsePromise : Promise.race([responsePromise, abortPromise]);
 
-  return effectivePromise.then(
-    (response: { text?: string }) => {
+  return effectivePromise
+    .then((response: { text?: string }) => {
       const result = parseJSON(response.text ?? '', isSuggestedDishIngredients, 'SuggestedDishIngredients');
       logAICall('suggestDishIngredients', start, true);
       return result;
-    },
-  ).catch((err: unknown) => {
-    logAICall('suggestDishIngredients', start, false);
-    throw err;
-  });
+    })
+    .catch((err: unknown) => {
+      logAICall('suggestDishIngredients', start, false);
+      throw err;
+    });
 }

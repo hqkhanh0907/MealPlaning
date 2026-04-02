@@ -1,6 +1,7 @@
-import { lazy, Suspense, useState, useCallback } from 'react';
-import { SettingsMenu } from './settings/SettingsMenu';
+import { lazy, Suspense, useCallback, useState } from 'react';
+
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { SettingsMenu } from './settings/SettingsMenu';
 
 type Theme = 'light' | 'dark' | 'system' | 'schedule';
 type SettingsView = 'menu' | 'health-profile' | 'goal' | 'training-profile';
@@ -17,7 +18,7 @@ const TrainingProfileDetailPage = lazy(() => import('./settings/TrainingProfileD
 function DetailLoadingFallback() {
   return (
     <div className="flex items-center justify-center py-20">
-      <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
     </div>
   );
 }
@@ -59,12 +60,5 @@ export const SettingsTab = ({ theme, setTheme }: SettingsTabProps) => {
     );
   }
 
-  return (
-    <SettingsMenu
-      onNavigate={handleNavigate}
-      theme={theme}
-      setTheme={setTheme}
-    />
-  );
+  return <SettingsMenu onNavigate={handleNavigate} theme={theme} setTheme={setTheme} />;
 };
-

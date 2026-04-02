@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { useActivityMultiplier } from '../features/fitness/hooks/useActivityMultiplier';
-import { useFitnessStore } from '../store/fitnessStore';
+import type { Workout, WorkoutSet } from '../features/fitness/types';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
-import type { Workout, WorkoutSet } from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
@@ -62,6 +63,17 @@ describe('useActivityMultiplier', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('returns null analysis when profile is null', () => {
+    useFitnessStore.setState({
+      workouts: [createWorkout()],
+      workoutSets: [createSet({ workoutId: 'w-1', reps: 10 })],
+    });
+    useHealthProfileStore.setState({ profile: null });
+    const { result } = renderHook(() => useActivityMultiplier());
+    expect(result.current.analysis).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+  });
+
   it('returns analysis when workouts exist', () => {
     const workouts: Workout[] = [];
     const sets: WorkoutSet[] = [];
@@ -102,7 +114,8 @@ describe('useActivityMultiplier', () => {
     });
 
     const updatedProfile = useHealthProfileStore.getState().profile;
-    expect(updatedProfile.activityLevel).toBe('extra_active');
+    expect(updatedProfile).not.toBeNull();
+    expect(updatedProfile!.activityLevel).toBe('extra_active');
   });
 
   it('applySuggestion is a no-op when no adjustment needed', () => {
@@ -126,7 +139,8 @@ describe('useActivityMultiplier', () => {
     });
 
     const profile = useHealthProfileStore.getState().profile;
-    expect(profile.activityLevel).toBe('moderate');
+    expect(profile).not.toBeNull();
+    expect(profile!.activityLevel).toBe('moderate');
   });
 
   it('dismissSuggestion hides suggestion', () => {

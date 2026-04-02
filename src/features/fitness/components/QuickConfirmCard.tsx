@@ -1,4 +1,5 @@
-import { Check, Pencil, Dumbbell } from 'lucide-react';
+import { Check, Dumbbell, Pencil } from 'lucide-react';
+
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
 
 interface QuickConfirmCardProps {
@@ -34,9 +35,7 @@ export function QuickConfirmCard({
           <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">
             {suggestion.weight}kg × {suggestion.reps}
           </p>
-          <p className="text-xs text-slate-400">
-            {SOURCE_LABELS[suggestion.source] ?? suggestion.source}
-          </p>
+          <p className="text-xs text-slate-400">{SOURCE_LABELS[suggestion.source] ?? suggestion.source}</p>
         </div>
         <div className="flex gap-2">
           <button

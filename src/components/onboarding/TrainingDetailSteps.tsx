@@ -1,21 +1,29 @@
-import { useWatch, type UseFormReturn } from 'react-hook-form';
-import { useFitnessStore } from '@/store/fitnessStore';
+import { type UseFormReturn, useWatch } from 'react-hook-form';
+
+import type {
+  BodyRegion,
+  EquipmentType,
+  MuscleGroup,
+  TrainingExperience,
+  TrainingGoal,
+} from '@/features/fitness/types';
 import { getSmartDefaults } from '@/features/fitness/utils/getSmartDefaults';
-import type { BodyRegion, EquipmentType, MuscleGroup, TrainingExperience, TrainingGoal } from '@/features/fitness/types';
+import { useFitnessStore } from '@/store/fitnessStore';
 import { generateUUID } from '@/utils/helpers';
+
 import type { OnboardingFormData } from './onboardingSchema';
-import { getActiveSteps } from './trainingStepConfig';
 import {
+  CardioStep,
+  CycleWeeksStep,
   DurationStep,
   EquipmentStep,
   InjuriesStep,
-  CardioStep,
   PeriodizationStep,
-  CycleWeeksStep,
   PriorityMusclesStep,
   SleepHoursStep,
   TrainingConfirmStep,
 } from './training-steps';
+import { getActiveSteps } from './trainingStepConfig';
 
 interface TrainingDetailStepsProps {
   step: number;
@@ -25,7 +33,10 @@ interface TrainingDetailStepsProps {
   setOnboardingSection: (section: number | null) => void;
 }
 
-const STEP_COMPONENTS: Record<string, React.ComponentType<{ form: UseFormReturn<OnboardingFormData>; goNext: () => void; goBack: () => void }>> = {
+const STEP_COMPONENTS: Record<
+  string,
+  React.ComponentType<{ form: UseFormReturn<OnboardingFormData>; goNext: () => void; goBack: () => void }>
+> = {
   duration: DurationStep,
   equipment: EquipmentStep,
   injuries: InjuriesStep,
@@ -37,9 +48,15 @@ const STEP_COMPONENTS: Record<string, React.ComponentType<{ form: UseFormReturn<
   confirm: TrainingConfirmStep,
 };
 
-export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingSection }: Readonly<TrainingDetailStepsProps>) {
+export function TrainingDetailSteps({
+  step,
+  form,
+  goNext,
+  goBack,
+  setOnboardingSection,
+}: Readonly<TrainingDetailStepsProps>) {
   const experience = useWatch({ control: form.control, name: 'experience' }) as TrainingExperience;
-  const setTrainingProfile = useFitnessStore((s) => s.setTrainingProfile);
+  const setTrainingProfile = useFitnessStore(s => s.setTrainingProfile);
 
   const handleConfirmTraining = () => {
     const values = form.getValues();
@@ -57,7 +74,7 @@ export function TrainingDetailSteps({ step, form, goNext, goBack, setOnboardingS
       sessionDurationMin: values.sessionDuration ?? smart.sessionDurationMin,
       availableEquipment: (values.equipment ?? []) as EquipmentType[],
       cardioSessionsWeek: values.cardioSessions ?? smart.cardioSessionsWeek,
-      periodizationModel: (values.periodization ?? smart.periodizationModel),
+      periodizationModel: values.periodization ?? smart.periodizationModel,
       injuryRestrictions: (values.injuries ?? []) as BodyRegion[],
       planCycleWeeks: values.cycleWeeks ?? smart.planCycleWeeks,
       priorityMuscles: (values.priorityMuscles ?? []) as MuscleGroup[],

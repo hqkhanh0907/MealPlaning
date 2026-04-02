@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { BookTemplate, Copy, Loader2, MoreVertical, Plus, Save, ShoppingCart, Sparkles, Trash2 } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Sparkles, Loader2, Trash2, Copy, Save, BookTemplate, MoreVertical, ShoppingCart } from 'lucide-react';
 
 export interface MealActionBarProps {
   allEmpty: boolean;
@@ -24,9 +24,15 @@ interface MenuItem {
 }
 
 export const MealActionBar = React.memo(function MealActionBar({
-  allEmpty, isSuggesting,
-  onOpenTypeSelection, onSuggestMealPlan, onOpenClearPlan,
-  onCopyPlan, onSaveTemplate, onOpenTemplateManager, onOpenGrocery,
+  allEmpty,
+  isSuggesting,
+  onOpenTypeSelection,
+  onSuggestMealPlan,
+  onOpenClearPlan,
+  onCopyPlan,
+  onSaveTemplate,
+  onOpenTemplateManager,
+  onOpenGrocery,
 }: MealActionBarProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,7 +56,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (!allEmpty && onOpenClearPlan) {
     menuItems.push({
       key: 'clear',
-      icon: <Trash2 className="w-4 h-4" />,
+      icon: <Trash2 className="h-4 w-4" />,
       label: t('calendar.clearPlan'),
       onClick: onOpenClearPlan,
       className: 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30',
@@ -60,7 +66,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (!allEmpty && onCopyPlan) {
     menuItems.push({
       key: 'copy',
-      icon: <Copy className="w-4 h-4" />,
+      icon: <Copy className="h-4 w-4" />,
       label: t('template.copyPlan'),
       onClick: onCopyPlan,
       className: 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30',
@@ -70,7 +76,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (!allEmpty && onSaveTemplate) {
     menuItems.push({
       key: 'save',
-      icon: <Save className="w-4 h-4" />,
+      icon: <Save className="h-4 w-4" />,
       label: t('template.saveAs'),
       onClick: onSaveTemplate,
       className: 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30',
@@ -80,7 +86,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (onOpenTemplateManager) {
     menuItems.push({
       key: 'template',
-      icon: <BookTemplate className="w-4 h-4" />,
+      icon: <BookTemplate className="h-4 w-4" />,
       label: t('template.manageTemplates'),
       onClick: onOpenTemplateManager,
       className: 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30',
@@ -89,22 +95,22 @@ export const MealActionBar = React.memo(function MealActionBar({
   }
 
   return (
-    <div data-testid="meal-action-bar" className="flex items-center gap-2 w-full flex-wrap">
+    <div data-testid="meal-action-bar" className="flex w-full flex-wrap items-center gap-2">
       <button
         onClick={onOpenTypeSelection}
         data-testid="btn-plan-meal-section"
-        className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 dark:shadow-none min-h-11"
+        className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] dark:shadow-none"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="h-4 w-4" />
         {t('calendar.planMeal')}
       </button>
       <button
         onClick={onSuggestMealPlan}
         disabled={isSuggesting}
         data-testid="btn-ai-suggest"
-        className="flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-4 py-2.5 rounded-xl font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 active:scale-[0.98] transition-all disabled:opacity-50 min-h-11"
+        className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-medium text-indigo-600 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
       >
-        {isSuggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+        {isSuggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
         <span className="hidden sm:inline">{t('calendar.aiSuggest')}</span>
         <span className="sm:hidden">AI</span>
       </button>
@@ -112,9 +118,9 @@ export const MealActionBar = React.memo(function MealActionBar({
         <button
           onClick={onOpenGrocery}
           data-testid="btn-open-grocery"
-          className="flex items-center justify-center gap-2 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-4 py-2.5 rounded-xl font-medium hover:bg-amber-100 dark:hover:bg-amber-900/50 active:scale-[0.98] transition-all min-h-11"
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 font-medium text-amber-600 transition-all hover:bg-amber-100 active:scale-[0.98] dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50"
         >
-          <ShoppingCart className="w-4 h-4" />
+          <ShoppingCart className="h-4 w-4" />
           <span className="hidden sm:inline">{t('grocery.title')}</span>
           <span className="sm:hidden">{t('grocery.titleShort')}</span>
         </button>
@@ -122,25 +128,28 @@ export const MealActionBar = React.memo(function MealActionBar({
       {menuItems.length > 0 && (
         <div className="relative ml-auto" ref={menuRef}>
           <button
-            onClick={() => setMenuOpen((prev) => !prev)}
+            onClick={() => setMenuOpen(prev => !prev)}
             data-testid="btn-more-actions"
-            className="flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 transition-all min-h-11 min-w-11"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:active:bg-slate-600"
             aria-label={t('calendar.moreActions')}
             title={t('calendar.moreActions')}
           >
-            <MoreVertical className="w-5 h-5" />
+            <MoreVertical className="h-5 w-5" />
           </button>
           {menuOpen && (
             <div
               data-testid="more-actions-menu"
-              className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-200 dark:border-slate-700 py-1 min-w-[200px]"
+              className="absolute top-full right-0 z-50 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-200/50 dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50"
             >
-              {menuItems.map((item) => (
+              {menuItems.map(item => (
                 <button
                   key={item.key}
-                  onClick={() => { item.onClick(); closeMenu(); }}
+                  onClick={() => {
+                    item.onClick();
+                    closeMenu();
+                  }}
                   data-testid={item.testId}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all min-h-11 ${item.className}`}
+                  className={`flex min-h-11 w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all ${item.className}`}
                 >
                   {item.icon}
                   {item.label}

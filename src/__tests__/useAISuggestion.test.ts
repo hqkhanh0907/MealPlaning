@@ -1,6 +1,7 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+
 import { useAISuggestion } from '../hooks/useAISuggestion';
-import type { Dish, Ingredient, DayPlan, MealPlanSuggestion } from '../types';
+import type { DayPlan, Dish, Ingredient, MealPlanSuggestion } from '../types';
 
 // Mock dependencies
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
@@ -27,10 +28,20 @@ vi.mock('../utils/nutrition', () => ({
 }));
 
 const makeDish = (id: string, name: string): Dish => ({
-  id, name: { vi: name, en: name }, tags: ['lunch'], ingredients: [], 
+  id,
+  name: { vi: name, en: name },
+  tags: ['lunch'],
+  ingredients: [],
 });
 const makeIngredient = (id: string, name: string): Ingredient => ({
-  id, name: { vi: name, en: name }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 50, proteinPer100: 5, carbsPer100: 20, fatPer100: 2, fiberPer100: 1,
+  id,
+  name: { vi: name, en: name },
+  unit: { vi: 'g', en: 'g' },
+  caloriesPer100: 50,
+  proteinPer100: 5,
+  carbsPer100: 20,
+  fatPer100: 2,
+  fiberPer100: 1,
 });
 
 const baseSuggestion: MealPlanSuggestion = {
@@ -75,7 +86,8 @@ describe('useAISuggestion', () => {
     expect(result.current.suggestion).toEqual(baseSuggestion);
     expect(result.current.isLoading).toBe(false);
     expect(mockSuggestMealPlan).toHaveBeenCalledWith(
-      2000, 100,
+      2000,
+      100,
       expect.arrayContaining([expect.objectContaining({ id: 'd1', name: 'Phở' })]),
       expect.any(AbortSignal),
     );
@@ -210,7 +222,10 @@ describe('useAISuggestion', () => {
   it('startSuggestion aborts previous request', async () => {
     // First request that never resolves
     mockSuggestMealPlan.mockImplementationOnce(
-      () => new Promise<MealPlanSuggestion>(() => { /* intentionally unresolved */ }),
+      () =>
+        new Promise<MealPlanSuggestion>(() => {
+          /* intentionally unresolved */
+        }),
     );
 
     const { result } = renderHook(() => useAISuggestion(baseParams));
@@ -244,9 +259,13 @@ describe('useAISuggestion', () => {
   it('close resets isLoading when a request is in-flight', () => {
     mockSuggestMealPlan.mockImplementationOnce(() => new Promise(() => {})); // never resolves
     const { result } = renderHook(() => useAISuggestion(baseParams));
-    act(() => { result.current.startSuggestion(); });
+    act(() => {
+      result.current.startSuggestion();
+    });
     expect(result.current.isLoading).toBe(true);
-    act(() => { result.current.close(); });
+    act(() => {
+      result.current.close();
+    });
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isModalOpen).toBe(false);
   });
@@ -254,7 +273,9 @@ describe('useAISuggestion', () => {
   it('apply with all meals false calls setDayPlans with empty dish arrays', async () => {
     mockSuggestMealPlan.mockResolvedValueOnce(baseSuggestion);
     const { result } = renderHook(() => useAISuggestion(baseParams));
-    await act(async () => { result.current.startSuggestion(); });
+    await act(async () => {
+      result.current.startSuggestion();
+    });
     expect(result.current.suggestion).toEqual(baseSuggestion);
 
     act(() => {

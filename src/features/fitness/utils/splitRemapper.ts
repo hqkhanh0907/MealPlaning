@@ -1,4 +1,4 @@
-import type { MuscleGroup, SplitType, TrainingPlanDay, SplitChangePreview } from '../types';
+import type { MuscleGroup, SplitChangePreview, SplitType, TrainingPlanDay } from '../types';
 import { safeParseJsonArray } from '../types';
 
 interface SplitDayDefinition {

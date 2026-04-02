@@ -1,11 +1,5 @@
 import type { Workout, WorkoutSet } from '../types';
-import {
-  formatDate,
-  getDayOfWeek,
-  addDays,
-  getMondayOfWeek,
-  daysBetween,
-} from './dateUtils';
+import { addDays, daysBetween, formatDate, getDayOfWeek, getMondayOfWeek } from './dateUtils';
 
 // ===== Interfaces =====
 
@@ -109,12 +103,12 @@ function computeCurrentStreak(
         atRisk = true;
       }
     } else if (hasWorkout) {
-        currentStreak++;
-      } else if (d === todayStr) {
-        // No plan, no workout today — skip
-      } else {
-        break;
-      }
+      currentStreak++;
+    } else if (d === todayStr) {
+      // No plan, no workout today — skip
+    } else {
+      break;
+    }
   }
 
   return { currentStreak, gracePeriodUsed: graceUsed, streakAtRisk: atRisk };
@@ -153,24 +147,20 @@ function computeLongestStreak(
         tempGrace = true;
       }
     } else if (hasWorkout) {
-        tempStreak++;
-      } else if (d === todayStr) {
-        // skip today
-      } else {
-        longestStreak = Math.max(longestStreak, tempStreak);
-        tempStreak = 0;
-      }
+      tempStreak++;
+    } else if (d === todayStr) {
+      // skip today
+    } else {
+      longestStreak = Math.max(longestStreak, tempStreak);
+      tempStreak = 0;
+    }
   }
   return Math.max(longestStreak, tempStreak, currentStreak);
 }
 
-export function calculateStreak(
-  workouts: Workout[],
-  planDays: number[],
-  today?: string,
-): StreakInfo {
+export function calculateStreak(workouts: Workout[], planDays: number[], today?: string): StreakInfo {
   const todayStr = today ?? formatDate(new Date());
-  const workoutDates = new Set(workouts.map((w) => w.date.split('T')[0]));
+  const workoutDates = new Set(workouts.map(w => w.date.split('T')[0]));
   const planDaySet = new Set(planDays);
 
   const monday = getMondayOfWeek(todayStr);
@@ -186,28 +176,16 @@ export function calculateStreak(
     };
   }
 
-  const { currentStreak, gracePeriodUsed, streakAtRisk } = computeCurrentStreak(
-    todayStr,
-    workoutDates,
-    planDaySet,
-  );
+  const { currentStreak, gracePeriodUsed, streakAtRisk } = computeCurrentStreak(todayStr, workoutDates, planDaySet);
 
-  const longestStreak = computeLongestStreak(
-    todayStr,
-    workoutDates,
-    planDaySet,
-    currentStreak,
-  );
+  const longestStreak = computeLongestStreak(todayStr, workoutDates, planDaySet, currentStreak);
 
   return { currentStreak, longestStreak, weekDots, gracePeriodUsed, streakAtRisk };
 }
 
-export function checkMilestones(
-  totalSessions: number,
-  longestStreak: number,
-): Milestone[] {
+export function checkMilestones(totalSessions: number, longestStreak: number): Milestone[] {
   const today = formatDate(new Date());
-  return MILESTONES.map((m) => {
+  return MILESTONES.map(m => {
     const value = m.type === 'sessions' ? totalSessions : longestStreak;
     return {
       ...m,
@@ -229,12 +207,10 @@ export function detectPRs(
       continue;
     }
 
-    const prevForExercise = allPreviousSets.filter(
-      (s) => s.exerciseId === set.exerciseId && s.reps === set.reps,
-    );
+    const prevForExercise = allPreviousSets.filter(s => s.exerciseId === set.exerciseId && s.reps === set.reps);
     if (prevForExercise.length === 0) continue;
 
-    const previousMax = Math.max(...prevForExercise.map((s) => s.weightKg));
+    const previousMax = Math.max(...prevForExercise.map(s => s.weightKg));
     if (set.weightKg > previousMax) {
       seen.add(set.exerciseId);
       prs.push({

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FilterConfig } from '../../types';
+
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import type { FilterConfig } from '../../types';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface FilterBottomSheetProps {
@@ -23,11 +24,7 @@ const SORT_OPTIONS: { value: SortOption; labelKey: string }[] = [
 
 const DEFAULT_CONFIG: FilterConfig = { sortBy: 'name-asc' };
 
-export const FilterBottomSheet = ({
-  config,
-  onChange,
-  onClose,
-}: FilterBottomSheetProps) => {
+export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomSheetProps) => {
   const { t } = useTranslation();
   const [draft, setDraft] = React.useState<FilterConfig>(config);
 
@@ -64,14 +61,12 @@ export const FilterBottomSheet = ({
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="filter-bottom-sheet"
-        className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md max-h-[70dvh] overflow-y-auto sm:mx-4"
+        className="relative max-h-[70dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
       >
-        <div className="px-5 pt-5 pb-4 space-y-5">
+        <div className="space-y-5 px-5 pt-5 pb-4">
           {/* Sort section */}
           <div>
-            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">
-              {t('filter.sortTitle')}
-            </h4>
+            <h4 className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{t('filter.sortTitle')}</h4>
             <div className="flex flex-wrap gap-2">
               {SORT_OPTIONS.map(opt => {
                 const isActive = draft.sortBy === opt.value;
@@ -80,10 +75,10 @@ export const FilterBottomSheet = ({
                     key={opt.value}
                     type="button"
                     onClick={() => handleSortChange(opt.value)}
-                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-all min-h-11 ${
+                    className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-emerald-500 text-white'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {t(opt.labelKey)}
@@ -95,17 +90,15 @@ export const FilterBottomSheet = ({
 
           {/* Quick filter section */}
           <div>
-            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">
-              {t('filter.filterTitle')}
-            </h4>
+            <h4 className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{t('filter.filterTitle')}</h4>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => toggleMaxCalories(300)}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all min-h-11 ${
+                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.maxCalories === 300
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
                 {t('filter.lessThan300')}
@@ -113,10 +106,10 @@ export const FilterBottomSheet = ({
               <button
                 type="button"
                 onClick={() => toggleMaxCalories(500)}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all min-h-11 ${
+                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.maxCalories === 500
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
                 {t('filter.lessThan500')}
@@ -124,10 +117,10 @@ export const FilterBottomSheet = ({
               <button
                 type="button"
                 onClick={() => toggleMinProtein(20)}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all min-h-11 ${
+                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.minProtein === 20
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
                 {t('filter.highProtein')}
@@ -141,7 +134,7 @@ export const FilterBottomSheet = ({
               type="button"
               data-testid="filter-reset-btn"
               onClick={handleReset}
-              className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium text-sm min-h-11 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              className="min-h-11 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               {t('filter.reset')}
             </button>
@@ -149,7 +142,7 @@ export const FilterBottomSheet = ({
               type="button"
               data-testid="filter-apply-btn"
               onClick={handleApply}
-              className="flex-1 px-4 py-3 rounded-xl bg-emerald-500 text-white font-bold text-sm min-h-11 hover:bg-emerald-600 active:scale-[0.98] transition-all"
+              className="min-h-11 flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600 active:scale-[0.98]"
             >
               {t('filter.apply')}
             </button>

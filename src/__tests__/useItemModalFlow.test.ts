@@ -1,4 +1,5 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+
 import { useItemModalFlow } from '../hooks/useItemModalFlow';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 

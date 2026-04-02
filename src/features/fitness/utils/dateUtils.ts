@@ -37,9 +37,7 @@ export function getMondayOfWeek(dateStr: string): string {
 }
 
 export function daysBetween(from: string, to: string): number {
-  return Math.round(
-    (parseDate(to).getTime() - parseDate(from).getTime()) / 86400000,
-  );
+  return Math.round((parseDate(to).getTime() - parseDate(from).getTime()) / 86400000);
 }
 
 export function isToday(dateStr: string): boolean {

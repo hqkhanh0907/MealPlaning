@@ -15,21 +15,26 @@ vi.mock('@google/genai', () => {
 // Set env before import
 (import.meta.env as Record<string, string>).VITE_GEMINI_API_KEY = 'test-key';
 
-import { suggestMealPlan, analyzeDishImage, suggestIngredientInfo, suggestDishIngredients, _resetAISingleton, _clearNutritionCache } from '../services/geminiService';
+import {
+  _clearNutritionCache,
+  _resetAISingleton,
+  analyzeDishImage,
+  suggestDishIngredients,
+  suggestIngredientInfo,
+  suggestMealPlan,
+} from '../services/geminiService';
 
 describe('geminiService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    _resetAISingleton();       // Reset singleton so API-key changes apply per test
-    _clearNutritionCache();    // Clear cache so cache tests are isolated
+    _resetAISingleton(); // Reset singleton so API-key changes apply per test
+    _clearNutritionCache(); // Clear cache so cache tests are isolated
     (import.meta.env as Record<string, string>).VITE_GEMINI_API_KEY = 'test-key';
   });
 
   // --- suggestMealPlan ---
   describe('suggestMealPlan', () => {
-    const availableDishes = [
-      { id: 'd1', name: 'Dish 1', tags: ['breakfast' as const], calories: 300, protein: 20 },
-    ];
+    const availableDishes = [{ id: 'd1', name: 'Dish 1', tags: ['breakfast' as const], calories: 300, protein: 20 }];
 
     it('returns valid MealPlanSuggestion on success', async () => {
       const mockResult = {
@@ -60,11 +65,12 @@ describe('geminiService', () => {
 
     it('throws AbortError when signal aborts during request', async () => {
       const controller = new AbortController();
-      mockGenerateContent.mockImplementation(() =>
-        new Promise((_, reject) => {
-          setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 10);
-          setTimeout(() => controller.abort(), 5);
-        })
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 10);
+            setTimeout(() => controller.abort(), 5);
+          }),
       );
       // The abort promise should race and win
       await expect(suggestMealPlan(2000, 100, availableDishes, controller.signal)).rejects.toThrow();
@@ -82,7 +88,12 @@ describe('geminiService', () => {
 
     it('handles timeout correctly', async () => {
       vi.useFakeTimers();
-      mockGenerateContent.mockImplementation(() => new Promise(() => { /* never resolves */ }));
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* never resolves */
+          }),
+      );
 
       const promise = suggestMealPlan(2000, 100, availableDishes);
       vi.advanceTimersByTime(30001);
@@ -100,7 +111,14 @@ describe('geminiService', () => {
         name: 'Phở',
         description: 'Vietnamese soup',
         totalNutrition: { calories: 400, protein: 20, fat: 10, carbs: 50 },
-        ingredients: [{ name: 'Noodles', amount: 200, unit: 'g', nutritionPerStandardUnit: { calories: 130, protein: 3, fat: 1, carbs: 28, fiber: 1 } }],
+        ingredients: [
+          {
+            name: 'Noodles',
+            amount: 200,
+            unit: 'g',
+            nutritionPerStandardUnit: { calories: 130, protein: 3, fat: 1, carbs: 28, fiber: 1 },
+          },
+        ],
       };
       mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockResult) });
 
@@ -125,7 +143,12 @@ describe('geminiService', () => {
 
     it('handles timeout correctly', async () => {
       vi.useFakeTimers();
-      mockGenerateContent.mockImplementation(() => new Promise(() => { /* never resolves */ }));
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* never resolves */
+          }),
+      );
 
       const promise = analyzeDishImage('base64data', 'image/jpeg');
       vi.advanceTimersByTime(30001);
@@ -161,7 +184,12 @@ describe('geminiService', () => {
 
     it('handles timeout correctly', async () => {
       vi.useFakeTimers();
-      mockGenerateContent.mockImplementation(() => new Promise(() => { /* never resolves */ }));
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* never resolves */
+          }),
+      );
 
       const promise = suggestIngredientInfo('Slow item', 'g');
       vi.advanceTimersByTime(30001);
@@ -195,7 +223,7 @@ describe('geminiService', () => {
     it('retries on transient network error and returns result on 2nd attempt', async () => {
       const mockResult = { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, unit: 'g' };
       mockGenerateContent
-        .mockRejectedValueOnce(new Error('Network error'))  // 1st attempt fails
+        .mockRejectedValueOnce(new Error('Network error')) // 1st attempt fails
         .mockResolvedValue({ text: JSON.stringify(mockResult) }); // 2nd succeeds
 
       vi.useFakeTimers();
@@ -213,7 +241,12 @@ describe('geminiService', () => {
 
     it('does NOT retry on timeout errors', async () => {
       vi.useFakeTimers();
-      mockGenerateContent.mockImplementation(() => new Promise(() => { /* never resolves */ }));
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* never resolves */
+          }),
+      );
       const promise = suggestIngredientInfo('Slow item', 'g');
       vi.advanceTimersByTime(30001); // same sync pattern as other timeout tests
 
@@ -284,11 +317,12 @@ describe('geminiService', () => {
 
     it('throws AbortError when signal aborts during request', async () => {
       const controller = new AbortController();
-      mockGenerateContent.mockImplementation(() =>
-        new Promise((_, reject) => {
-          setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 50);
-          setTimeout(() => controller.abort(), 10);
-        })
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 50);
+            setTimeout(() => controller.abort(), 10);
+          }),
       );
       await expect(suggestIngredientInfo('Test', 'g', controller.signal)).rejects.toThrow();
     });
@@ -349,9 +383,9 @@ describe('geminiService', () => {
 
   describe('isRetryableError branches', () => {
     it('does NOT retry on validation errors (contains "response from AI")', async () => {
-      mockGenerateContent
-        .mockResolvedValueOnce({ text: JSON.stringify({ bad: 'data' }) })
-        .mockResolvedValue({ text: JSON.stringify({ calories: 100, protein: 5, carbs: 1, fat: 1, fiber: 0, unit: 'g' }) });
+      mockGenerateContent.mockResolvedValueOnce({ text: JSON.stringify({ bad: 'data' }) }).mockResolvedValue({
+        text: JSON.stringify({ calories: 100, protein: 5, carbs: 1, fat: 1, fiber: 0, unit: 'g' }),
+      });
       await expect(suggestIngredientInfo('Test', 'g')).rejects.toThrow('Invalid IngredientSuggestion');
       expect(mockGenerateContent).toHaveBeenCalledTimes(1);
     });
@@ -415,7 +449,10 @@ describe('geminiService', () => {
         { id: 'd8', name: 'Xôi', tags: [] as ('breakfast' | 'lunch' | 'dinner')[], calories: 300, protein: 8 },
       ];
       const mockResult = {
-        breakfastDishIds: ['d1'], lunchDishIds: ['d3'], dinnerDishIds: ['d5'], reasoning: 'Varied menu',
+        breakfastDishIds: ['d1'],
+        lunchDishIds: ['d3'],
+        dinnerDishIds: ['d5'],
+        reasoning: 'Varied menu',
       };
       mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockResult) });
 
@@ -427,13 +464,14 @@ describe('geminiService', () => {
   describe('analyzeDishImage abort during request', () => {
     it('throws AbortError when signal aborts while API call is in progress', async () => {
       const controller = new AbortController();
-      mockGenerateContent.mockImplementation(() =>
-        new Promise((_, reject) => {
-          setTimeout(() => {
-            controller.abort();
-            reject(new DOMException('Aborted', 'AbortError'));
-          }, 10);
-        })
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise((_, reject) => {
+            setTimeout(() => {
+              controller.abort();
+              reject(new DOMException('Aborted', 'AbortError'));
+            }, 10);
+          }),
       );
       await expect(analyzeDishImage('base64', 'image/jpeg', controller.signal)).rejects.toThrow('Aborted');
     });
@@ -477,13 +515,14 @@ describe('geminiService', () => {
 
     it('throws AbortError when signal aborts during request', async () => {
       const controller = new AbortController();
-      mockGenerateContent.mockImplementation(() =>
-        new Promise((_, reject) => {
-          setTimeout(() => {
-            controller.abort();
-            reject(new DOMException('Aborted', 'AbortError'));
-          }, 10);
-        })
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise((_, reject) => {
+            setTimeout(() => {
+              controller.abort();
+              reject(new DOMException('Aborted', 'AbortError'));
+            }, 10);
+          }),
       );
       await expect(suggestDishIngredients('Phở', controller.signal)).rejects.toThrow('Aborted');
     });
@@ -500,7 +539,12 @@ describe('geminiService', () => {
 
     it('handles timeout correctly', async () => {
       vi.useFakeTimers();
-      mockGenerateContent.mockImplementation(() => new Promise(() => { /* never resolves */ }));
+      mockGenerateContent.mockImplementation(
+        () =>
+          new Promise(() => {
+            /* never resolves */
+          }),
+      );
       const promise = suggestDishIngredients('Phở');
       vi.advanceTimersByTime(30001);
       await expect(promise).rejects.toThrow('timed out after 30s');

@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
+
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
 
@@ -40,9 +41,7 @@ vi.mock('../hooks/useModalBackHandler', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="modal-backdrop">{children}</div>
-  ),
+  ModalBackdrop: ({ children }: { children: React.ReactNode }) => <div data-testid="modal-backdrop">{children}</div>,
 }));
 
 // ── Store helpers ──────────────────────────────────────────────────
@@ -67,15 +66,12 @@ function setupFitnessStore(overrides: Record<string, unknown> = {}) {
     getLatestWeight: () => undefined,
     ...overrides,
   };
-  mockFitnessStore.mockImplementation(
-    (selector: (s: Record<string, unknown>) => unknown) => selector(state),
-  );
+  mockFitnessStore.mockImplementation((selector: (s: Record<string, unknown>) => unknown) => selector(state));
 }
 
 function setupNavStore() {
-  mockNavStore.mockImplementation(
-    (selector: (s: Record<string, unknown>) => unknown) =>
-      selector({ pushPage: vi.fn() }),
+  mockNavStore.mockImplementation((selector: (s: Record<string, unknown>) => unknown) =>
+    selector({ pushPage: vi.fn() }),
   );
 }
 
@@ -87,18 +83,18 @@ beforeEach(() => {
 
 // ── Imports (after mocks) ──────────────────────────────────────────
 
-import { WorkoutHistory } from '../features/fitness/components/WorkoutHistory';
-import { ProgressDashboard } from '../features/fitness/components/ProgressDashboard';
-import { RestTimer } from '../features/fitness/components/RestTimer';
-import { PRToast } from '../features/fitness/components/PRToast';
-import { MilestonesList } from '../features/fitness/components/MilestonesList';
-import { TrainingPlanView } from '../features/fitness/components/TrainingPlanView';
-import { TodaysPlanCard } from '../features/dashboard/components/TodaysPlanCard';
-import { StreakMini } from '../features/dashboard/components/StreakMini';
-import { WeightQuickLog } from '../features/dashboard/components/WeightQuickLog';
-import { AutoAdjustBanner } from '../features/dashboard/components/AutoAdjustBanner';
-import { AdjustmentHistory } from '../features/dashboard/components/AdjustmentHistory';
 import { EnergyBalanceMini } from '../components/nutrition/EnergyBalanceMini';
+import { AdjustmentHistory } from '../features/dashboard/components/AdjustmentHistory';
+import { AutoAdjustBanner } from '../features/dashboard/components/AutoAdjustBanner';
+import { StreakMini } from '../features/dashboard/components/StreakMini';
+import { TodaysPlanCard } from '../features/dashboard/components/TodaysPlanCard';
+import { WeightQuickLog } from '../features/dashboard/components/WeightQuickLog';
+import { MilestonesList } from '../features/fitness/components/MilestonesList';
+import { ProgressDashboard } from '../features/fitness/components/ProgressDashboard';
+import { PRToast } from '../features/fitness/components/PRToast';
+import { RestTimer } from '../features/fitness/components/RestTimer';
+import { TrainingPlanView } from '../features/fitness/components/TrainingPlanView';
+import { WorkoutHistory } from '../features/fitness/components/WorkoutHistory';
 
 // ── 1. WorkoutHistory ─────────────────────────────────────────────
 
@@ -119,7 +115,7 @@ describe('WorkoutHistory a11y', () => {
 
     const toggle = screen.getByTestId(`workout-toggle-${workout.id}`);
     const svgs = toggle.querySelectorAll('svg');
-    svgs.forEach((svg) => {
+    svgs.forEach(svg => {
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });
   });
@@ -209,7 +205,7 @@ describe('ProgressDashboard a11y', () => {
     render(<ProgressDashboard />);
 
     const cards = ['weight', '1rm', 'adherence', 'sessions'];
-    cards.forEach((card) => {
+    cards.forEach(card => {
       const btn = screen.getByTestId(`metric-card-${card}`);
       expect(btn).toHaveAttribute('aria-label');
       expect(btn.getAttribute('aria-label')).not.toBe('');
@@ -220,7 +216,7 @@ describe('ProgressDashboard a11y', () => {
     render(<ProgressDashboard />);
 
     const cards = ['weight', '1rm', 'adherence', 'sessions'];
-    cards.forEach((card) => {
+    cards.forEach(card => {
       const btn = screen.getByTestId(`metric-card-${card}`);
       const svg = btn.querySelector('svg');
       expect(svg).toHaveAttribute('aria-hidden', 'true');
@@ -242,7 +238,7 @@ describe('ProgressDashboard a11y', () => {
 
     const heroCard = screen.getByTestId('hero-metric-card');
     const svgs = heroCard.querySelectorAll('svg');
-    svgs.forEach((svg) => {
+    svgs.forEach(svg => {
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });
   });
@@ -268,13 +264,7 @@ describe('RestTimer a11y', () => {
   });
 
   it('SVG progress ring has role=progressbar with ARIA attrs', () => {
-    render(
-      <RestTimer
-        durationSeconds={90}
-        onComplete={vi.fn()}
-        onSkip={vi.fn()}
-      />,
-    );
+    render(<RestTimer durationSeconds={90} onComplete={vi.fn()} onSkip={vi.fn()} />);
 
     const ring = screen.getByTestId('progress-ring');
     expect(ring).toHaveAttribute('aria-valuenow');
@@ -283,13 +273,7 @@ describe('RestTimer a11y', () => {
   });
 
   it('dialog has correct ARIA attributes', () => {
-    render(
-      <RestTimer
-        durationSeconds={90}
-        onComplete={vi.fn()}
-        onSkip={vi.fn()}
-      />,
-    );
+    render(<RestTimer durationSeconds={90} onComplete={vi.fn()} onSkip={vi.fn()} />);
 
     const overlay = screen.getByTestId('rest-timer-overlay');
     expect(overlay).toHaveAttribute('aria-modal', 'true');
@@ -400,7 +384,7 @@ describe('TodaysPlanCard a11y', () => {
 
     const card = screen.getByTestId('todays-plan-card');
     const svgs = card.querySelectorAll('svg');
-    svgs.forEach((svg) => {
+    svgs.forEach(svg => {
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });
   });
@@ -507,13 +491,7 @@ describe('AutoAdjustBanner a11y', () => {
   };
 
   it('has role=alert with aria-label', () => {
-    render(
-      <AutoAdjustBanner
-        adjustment={adjustment}
-        onApply={vi.fn()}
-        onDismiss={vi.fn()}
-      />,
-    );
+    render(<AutoAdjustBanner adjustment={adjustment} onApply={vi.fn()} onDismiss={vi.fn()} />);
 
     const banner = screen.getByTestId('auto-adjust-banner');
     expect(banner).toHaveAttribute('role', 'alert');
@@ -521,13 +499,7 @@ describe('AutoAdjustBanner a11y', () => {
   });
 
   it('icon has aria-hidden', () => {
-    render(
-      <AutoAdjustBanner
-        adjustment={adjustment}
-        onApply={vi.fn()}
-        onDismiss={vi.fn()}
-      />,
-    );
+    render(<AutoAdjustBanner adjustment={adjustment} onApply={vi.fn()} onDismiss={vi.fn()} />);
 
     const icon = screen.getByTestId('banner-icon');
     expect(icon).toHaveAttribute('aria-hidden', 'true');
@@ -559,9 +531,7 @@ describe('AdjustmentHistory a11y', () => {
   ];
 
   it('toggle button has aria-expanded that toggles', () => {
-    render(
-      <AdjustmentHistory adjustments={adjustments} defaultCollapsed />,
-    );
+    render(<AdjustmentHistory adjustments={adjustments} defaultCollapsed />);
 
     const toggle = screen.getByTestId('adjustment-history-toggle');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -571,9 +541,7 @@ describe('AdjustmentHistory a11y', () => {
   });
 
   it('chevron icons have aria-hidden', () => {
-    render(
-      <AdjustmentHistory adjustments={adjustments} defaultCollapsed />,
-    );
+    render(<AdjustmentHistory adjustments={adjustments} defaultCollapsed />);
 
     const toggle = screen.getByTestId('adjustment-history-toggle');
     const svg = toggle.querySelector('svg');
@@ -581,17 +549,12 @@ describe('AdjustmentHistory a11y', () => {
   });
 
   it('status icons and trend icons have aria-hidden when expanded', () => {
-    render(
-      <AdjustmentHistory
-        adjustments={adjustments}
-        defaultCollapsed={false}
-      />,
-    );
+    render(<AdjustmentHistory adjustments={adjustments} defaultCollapsed={false} />);
 
     const rows = screen.getAllByTestId(/^adjustment-row-/);
-    rows.forEach((row) => {
+    rows.forEach(row => {
       const svgs = row.querySelectorAll('svg');
-      svgs.forEach((svg) => {
+      svgs.forEach(svg => {
         expect(svg).toHaveAttribute('aria-hidden', 'true');
       });
     });
@@ -602,27 +565,18 @@ describe('AdjustmentHistory a11y', () => {
 
 describe('EnergyBalanceMini a11y', () => {
   it('decorative icons have aria-hidden', () => {
-    render(
-      <EnergyBalanceMini eaten={1500} burned={300} target={2000} />,
-    );
+    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} />);
 
     const container = screen.getByTestId('energy-balance-mini');
     const svgs = container.querySelectorAll('svg');
     expect(svgs.length).toBe(3);
-    svgs.forEach((svg) => {
+    svgs.forEach(svg => {
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
   it('when interactive, has role=button with aria-label and focus ring', () => {
-    render(
-      <EnergyBalanceMini
-        eaten={1500}
-        burned={300}
-        target={2000}
-        onTapDetail={vi.fn()}
-      />,
-    );
+    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} onTapDetail={vi.fn()} />);
 
     const container = screen.getByTestId('energy-balance-mini');
     expect(container).toHaveAttribute('aria-label');
@@ -630,9 +584,7 @@ describe('EnergyBalanceMini a11y', () => {
   });
 
   it('when non-interactive, has no role or tabIndex', () => {
-    render(
-      <EnergyBalanceMini eaten={1500} burned={300} target={2000} />,
-    );
+    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} />);
 
     const container = screen.getByTestId('energy-balance-mini');
     expect(container.tagName).toBe('DIV');
@@ -641,14 +593,7 @@ describe('EnergyBalanceMini a11y', () => {
 
   it('responds to click activation when interactive', () => {
     const onTap = vi.fn();
-    render(
-      <EnergyBalanceMini
-        eaten={1500}
-        burned={300}
-        target={2000}
-        onTapDetail={onTap}
-      />,
-    );
+    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} onTapDetail={onTap} />);
 
     const container = screen.getByTestId('energy-balance-mini');
     fireEvent.click(container);

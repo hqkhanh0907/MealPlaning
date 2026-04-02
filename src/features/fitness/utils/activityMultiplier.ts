@@ -17,10 +17,7 @@ const STRENGTH_MET = 5;
  * Calculate confidence based on data availability.
  * low: <2 weeks or no workouts, medium: 2-3 weeks, high: 4+ weeks
  */
-export function getConfidence(
-  workouts: Workout[],
-  weeksAnalyzed: number,
-): 'low' | 'medium' | 'high' {
+export function getConfidence(workouts: Workout[], weeksAnalyzed: number): 'low' | 'medium' | 'high' {
   if (workouts.length === 0 || weeksAnalyzed < 2) return 'low';
   if (weeksAnalyzed < 4) return 'medium';
   return 'high';
@@ -41,18 +38,14 @@ export function mapToActivityLevel(
   totalVolumePerWeek: number,
 ): ActivityLevel {
   if (strengthSessionsPerWeek >= 6) return 'extra_active';
-  if (cardioMinutesPerWeek > 150 && totalVolumePerWeek > 0)
-    return 'extra_active';
+  if (cardioMinutesPerWeek > 150 && totalVolumePerWeek > 0) return 'extra_active';
 
   if (strengthSessionsPerWeek >= 5) return 'active';
-  if (strengthSessionsPerWeek >= 4 && cardioMinutesPerWeek > 90)
-    return 'active';
+  if (strengthSessionsPerWeek >= 4 && cardioMinutesPerWeek > 90) return 'active';
 
-  if (strengthSessionsPerWeek >= 3 || cardioMinutesPerWeek >= 90)
-    return 'moderate';
+  if (strengthSessionsPerWeek >= 3 || cardioMinutesPerWeek >= 90) return 'moderate';
 
-  if (strengthSessionsPerWeek >= 1 || cardioMinutesPerWeek >= 30)
-    return 'light';
+  if (strengthSessionsPerWeek >= 1 || cardioMinutesPerWeek >= 30) return 'light';
 
   return 'sedentary';
 }
@@ -71,40 +64,26 @@ export function analyzeActivityLevel(
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - weeksToAnalyze * 7);
 
-  const recentWorkouts = workouts.filter(
-    (w) => new Date(w.date) >= cutoffDate,
-  );
+  const recentWorkouts = workouts.filter(w => new Date(w.date) >= cutoffDate);
 
-  const recentWorkoutIds = new Set(recentWorkouts.map((w) => w.id));
-  const recentSets = workoutSets.filter((s) =>
-    recentWorkoutIds.has(s.workoutId),
-  );
+  const recentWorkoutIds = new Set(recentWorkouts.map(w => w.id));
+  const recentSets = workoutSets.filter(s => recentWorkoutIds.has(s.workoutId));
 
-  const strengthWorkoutCount = recentWorkouts.filter((w) => {
-    const sets = recentSets.filter((s) => s.workoutId === w.id);
-    return sets.some((s) => s.weightKg > 0 && (s.reps ?? 0) > 0);
+  const strengthWorkoutCount = recentWorkouts.filter(w => {
+    const sets = recentSets.filter(s => s.workoutId === w.id);
+    return sets.some(s => s.weightKg > 0 && (s.reps ?? 0) > 0);
   }).length;
 
-  const totalCardioMinutes = recentSets.reduce(
-    (sum, s) => sum + (s.durationMin ?? 0),
-    0,
-  );
+  const totalCardioMinutes = recentSets.reduce((sum, s) => sum + (s.durationMin ?? 0), 0);
 
-  const totalVolume = recentSets.reduce(
-    (sum, s) => sum + (s.reps ?? 0) * s.weightKg,
-    0,
-  );
+  const totalVolume = recentSets.reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0);
 
   const weeks = Math.max(weeksToAnalyze, 1);
   const weeklyStrengthSessions = strengthWorkoutCount / weeks;
   const weeklyCardioMinutes = totalCardioMinutes / weeks;
   const weeklyTotalVolume = totalVolume / weeks;
 
-  const suggestedLevel = mapToActivityLevel(
-    weeklyStrengthSessions,
-    weeklyCardioMinutes,
-    weeklyTotalVolume,
-  );
+  const suggestedLevel = mapToActivityLevel(weeklyStrengthSessions, weeklyCardioMinutes, weeklyTotalVolume);
 
   const confidence = getConfidence(recentWorkouts, weeksToAnalyze);
 
@@ -135,21 +114,14 @@ export function calculateExerciseAdjustment(
   let totalCalories = 0;
 
   for (const workout of workouts) {
-    const sets = workoutSets.filter((s) => s.workoutId === workout.id);
+    const sets = workoutSets.filter(s => s.workoutId === workout.id);
 
-    const estimatedCalories = sets.reduce(
-      (sum, s) => sum + (s.estimatedCalories ?? 0),
-      0,
-    );
+    const estimatedCalories = sets.reduce((sum, s) => sum + (s.estimatedCalories ?? 0), 0);
     totalCalories += estimatedCalories;
 
-    const hasStrengthWork = sets.some(
-      (s) => s.weightKg > 0 && (s.reps ?? 0) > 0 && !s.estimatedCalories,
-    );
+    const hasStrengthWork = sets.some(s => s.weightKg > 0 && (s.reps ?? 0) > 0 && !s.estimatedCalories);
     if (hasStrengthWork && workout.durationMin) {
-      totalCalories += Math.round(
-        (STRENGTH_MET * weightKg * workout.durationMin) / 60,
-      );
+      totalCalories += Math.round((STRENGTH_MET * weightKg * workout.durationMin) / 60);
     }
   }
 

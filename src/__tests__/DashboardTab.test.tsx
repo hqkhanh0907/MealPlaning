@@ -1,6 +1,6 @@
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /* ============ i18n mock ============ */
 vi.mock('react-i18next', () => ({
@@ -12,22 +12,15 @@ vi.mock('react-i18next', () => ({
 
 /* ============ store mocks ============ */
 vi.mock('../store/dayPlanStore', () => ({
-  useDayPlanStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) =>
-    sel({ dayPlans: [] }),
-  ),
+  useDayPlanStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel({ dayPlans: [] })),
 }));
 
 vi.mock('../store/dishStore', () => ({
-  useDishStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) =>
-    sel({ dishes: [] }),
-  ),
+  useDishStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel({ dishes: [] })),
 }));
 
 vi.mock('../store/ingredientStore', () => ({
-  useIngredientStore: vi.fn(
-    (sel: (s: Record<string, unknown>) => unknown) =>
-      sel({ ingredients: [] }),
-  ),
+  useIngredientStore: vi.fn((sel: (s: Record<string, unknown>) => unknown) => sel({ ingredients: [] })),
 }));
 
 /* ============ hook mocks ============ */
@@ -67,9 +60,7 @@ vi.mock('../utils/nutrition', () => ({
 
 /* ============ child component mocks ============ */
 vi.mock('../features/dashboard/components/DailyScoreHero', () => ({
-  DailyScoreHero: () => (
-    <div data-testid="daily-score-hero">DailyScoreHero</div>
-  ),
+  DailyScoreHero: () => <div data-testid="daily-score-hero">DailyScoreHero</div>,
 }));
 
 vi.mock('../components/nutrition/EnergyBalanceMini', () => ({
@@ -89,16 +80,18 @@ vi.mock('../features/dashboard/components/ProteinProgress', () => ({
 }));
 
 vi.mock('../features/dashboard/components/TodaysPlanCard', () => ({
-  TodaysPlanCard: () => (
-    <div data-testid="todays-plan-card">TodaysPlanCard</div>
-  ),
+  TodaysPlanCard: () => <div data-testid="todays-plan-card">TodaysPlanCard</div>,
 }));
 
 let capturedWeightMiniOnTap: (() => void) | undefined;
 vi.mock('../features/dashboard/components/WeightMini', () => ({
   WeightMini: ({ onTap }: { onTap?: () => void }) => {
     capturedWeightMiniOnTap = onTap;
-    return <div data-testid="weight-mini" onClick={onTap}>WeightMini</div>;
+    return (
+      <div data-testid="weight-mini" onClick={onTap}>
+        WeightMini
+      </div>
+    );
   },
 }));
 
@@ -107,15 +100,11 @@ vi.mock('../features/dashboard/components/StreakMini', () => ({
 }));
 
 vi.mock('../features/dashboard/components/AiInsightCard', () => ({
-  AiInsightCard: () => (
-    <div data-testid="ai-insight-card">AiInsightCard</div>
-  ),
+  AiInsightCard: () => <div data-testid="ai-insight-card">AiInsightCard</div>,
 }));
 
 vi.mock('../features/dashboard/components/QuickActionsBar', () => ({
-  QuickActionsBar: () => (
-    <div data-testid="quick-actions-bar">QuickActionsBar</div>
-  ),
+  QuickActionsBar: () => <div data-testid="quick-actions-bar">QuickActionsBar</div>,
 }));
 
 let capturedWeightQuickLogOnClose: (() => void) | undefined;
@@ -135,8 +124,12 @@ vi.mock('../features/dashboard/components/WeightQuickLog', () => ({
 vi.mock('../features/dashboard/components/AutoAdjustBanner', () => ({
   AutoAdjustBanner: (props: { onApply: () => void; onDismiss: () => void }) => (
     <div data-testid="auto-adjust-banner">
-      <button data-testid="apply-btn" onClick={props.onApply}>Apply</button>
-      <button data-testid="dismiss-btn" onClick={props.onDismiss}>Dismiss</button>
+      <button data-testid="apply-btn" onClick={props.onApply}>
+        Apply
+      </button>
+      <button data-testid="dismiss-btn" onClick={props.onDismiss}>
+        Dismiss
+      </button>
     </div>
   ),
 }));
@@ -164,11 +157,9 @@ function createMatchMediaMock(matches: boolean) {
     onchange: null,
     addListener: vi.fn(),
     removeListener: vi.fn(),
-    addEventListener: vi.fn(
-      (_event: string, handler: (e: MediaQueryListEvent) => void) => {
-        listeners.push(handler);
-      },
-    ),
+    addEventListener: vi.fn((_event: string, handler: (e: MediaQueryListEvent) => void) => {
+      listeners.push(handler);
+    }),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
     _listeners: listeners,
@@ -259,23 +250,15 @@ describe('DashboardTab', () => {
       act(() => {
         result = render(<DashboardTab />);
       });
-      expect(
-        result.container.querySelector('[data-testid="dashboard-tier-4-placeholder"]'),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('dashboard-tier-4'),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('dashboard-tier-5'),
-      ).not.toBeInTheDocument();
+      expect(result.container.querySelector('[data-testid="dashboard-tier-4-placeholder"]')).toBeInTheDocument();
+      expect(screen.queryByTestId('dashboard-tier-4')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dashboard-tier-5')).not.toBeInTheDocument();
 
       flushRaf();
 
       expect(screen.getByTestId('dashboard-tier-4')).toBeInTheDocument();
       expect(screen.getByTestId('dashboard-tier-5')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('dashboard-tier-4-placeholder'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dashboard-tier-4-placeholder')).not.toBeInTheDocument();
     });
 
     it('WeightMini and StreakMini are in a side-by-side grid row', () => {
@@ -443,9 +426,7 @@ describe('DashboardTab', () => {
       act(() => {
         result = render(<DashboardTab />);
       });
-      const placeholder = result.container.querySelector(
-        '[data-testid="dashboard-tier-4-placeholder"]',
-      );
+      const placeholder = result.container.querySelector('[data-testid="dashboard-tier-4-placeholder"]');
       expect(placeholder).toBeInTheDocument();
       expect(placeholder?.className).toContain('min-h-[56px]');
     });
@@ -460,18 +441,14 @@ describe('DashboardTab', () => {
   describe('error isolation', () => {
     it('wraps each tier in an ErrorBoundary', () => {
       renderDashboard();
-      const boundaries = screen.getByTestId('dashboard-tab')
-        .querySelectorAll('[data-error-boundary]');
+      const boundaries = screen.getByTestId('dashboard-tab').querySelectorAll('[data-error-boundary]');
       expect(boundaries.length).toBeGreaterThanOrEqual(5);
     });
 
     it('each ErrorBoundary has a distinct fallbackTitle', () => {
       renderDashboard();
-      const boundaries = screen.getByTestId('dashboard-tab')
-        .querySelectorAll('[data-error-boundary]');
-      const titles = Array.from(boundaries).map((el) =>
-        el.getAttribute('data-error-boundary'),
-      );
+      const boundaries = screen.getByTestId('dashboard-tab').querySelectorAll('[data-error-boundary]');
+      const titles = Array.from(boundaries).map(el => el.getAttribute('data-error-boundary'));
       const uniqueTitles = new Set(titles.filter(Boolean));
       expect(uniqueTitles.size).toBeGreaterThanOrEqual(5);
     });
@@ -493,9 +470,7 @@ describe('DashboardTab', () => {
 
   describe('React.memo', () => {
     it('exports a memoized component', async () => {
-      const mod = await import(
-        '../features/dashboard/components/DashboardTab'
-      );
+      const mod = await import('../features/dashboard/components/DashboardTab');
       expect(mod.DashboardTab.$$typeof).toBe(Symbol.for('react.memo'));
     });
   });

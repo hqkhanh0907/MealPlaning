@@ -1,4 +1,4 @@
-import { BottomNavBar, DesktopNav, TabLoadingFallback, getTabLabels } from '../components/navigation/index';
+import { BottomNavBar, DesktopNav, getTabLabels, TabLoadingFallback } from '../components/navigation/index';
 
 describe('navigation/index barrel exports', () => {
   it('re-exports BottomNavBar', () => {

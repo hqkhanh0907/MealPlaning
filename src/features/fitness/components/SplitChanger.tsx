@@ -1,20 +1,13 @@
+import { AlertTriangle, ArrowLeft, Check, CircleAlert, Lightbulb, Loader2, RefreshCw, Shuffle } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ArrowLeft,
-  Check,
-  AlertTriangle,
-  Lightbulb,
-  CircleAlert,
-  Loader2,
-  RefreshCw,
-  Shuffle,
-} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useNavigationStore } from '@/store/navigationStore';
 import { useFitnessStore } from '@/store/fitnessStore';
-import type { SplitType, SplitChangePreview } from '../types';
+import { useNavigationStore } from '@/store/navigationStore';
+
+import type { SplitChangePreview, SplitType } from '../types';
 import { SplitChangeConfirm } from './SplitChangeConfirm';
 
 interface SplitChangerProps {
@@ -96,7 +89,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 pt-safe dark:border-slate-700">
+      <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
         <button
           type="button"
           onClick={handleBack}
@@ -107,9 +100,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="truncate text-lg font-semibold text-white">
-          {t('fitness.splitChanger.title')}
-        </h1>
+        <h1 className="truncate text-lg font-semibold text-white">{t('fitness.splitChanger.title')}</h1>
       </div>
 
       {/* Content */}
@@ -121,7 +112,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
           className="gap-3"
           data-testid="split-radio-group"
         >
-          {SPLIT_OPTIONS.map((option) => (
+          {SPLIT_OPTIONS.map(option => (
             <label
               key={option.value}
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
@@ -135,9 +126,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
               <RadioGroupItem value={option.value} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    {t(option.labelKey)}
-                  </span>
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{t(option.labelKey)}</span>
                   {option.value === currentSplit && (
                     <Check
                       className="h-4 w-4 text-emerald-600 dark:text-emerald-400"
@@ -146,9 +135,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                     />
                   )}
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {t(option.descKey)}
-                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t(option.descKey)}</p>
               </div>
             </label>
           ))}
@@ -172,10 +159,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 style={{ touchAction: 'manipulation' }}
                 data-testid="mode-regenerate"
               >
-                <RefreshCw
-                  className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
-                  aria-hidden="true"
-                />
+                <RefreshCw className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <span className="font-medium text-slate-900 dark:text-slate-100">
                     {t('fitness.splitChanger.regenerate')}
@@ -240,10 +224,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
             {preview && !isLoadingPreview && (
               <div className="space-y-3">
                 {/* Summary counts */}
-                <div
-                  className="flex gap-3 text-sm tabular-nums"
-                  data-testid="preview-summary"
-                >
+                <div className="flex gap-3 text-sm tabular-nums" data-testid="preview-summary">
                   <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
                     {String(preview.mapped.length)} {t('fitness.splitChanger.mapped')}
                   </span>
@@ -258,7 +239,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 {/* Mapped items */}
                 {preview.mapped.length > 0 && (
                   <div className="space-y-2">
-                    {preview.mapped.map((item) => (
+                    {preview.mapped.map(item => (
                       <div
                         key={item.from.id}
                         className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-950"
@@ -296,7 +277,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 {/* Unmapped items */}
                 {preview.unmapped.length > 0 && (
                   <div className="space-y-2">
-                    {preview.unmapped.map((item) => (
+                    {preview.unmapped.map(item => (
                       <div
                         key={item.id}
                         className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-950"
@@ -317,7 +298,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
       </div>
 
       {/* Bottom action bar */}
-      <div className="border-t border-slate-200 bg-white px-4 py-3 pb-safe dark:border-slate-700 dark:bg-slate-900">
+      <div className="pb-safe border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
         <Button
           onClick={handleApply}
           disabled={!isDifferentSplit || isApplying}

@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+
 import { AiInsightCard } from '../features/dashboard/components/AiInsightCard';
 import type { Insight } from '../features/dashboard/hooks/useInsightEngine';
 
@@ -358,17 +359,14 @@ describe('AiInsightCard', () => {
       { color: 'gray', borderClass: 'border-slate-400' },
     ];
 
-    it.each(colorCases)(
-      'applies $borderClass for $color color',
-      ({ color, borderClass }) => {
-        mockInsight = makeInsight({ color });
-        render(<AiInsightCard />);
-        const card = screen.getByTestId('ai-insight-card');
-        expect(card.className).toContain('border-l-4');
-        expect(card.className).toContain(borderClass);
-        cleanup();
-      },
-    );
+    it.each(colorCases)('applies $borderClass for $color color', ({ color, borderClass }) => {
+      mockInsight = makeInsight({ color });
+      render(<AiInsightCard />);
+      const card = screen.getByTestId('ai-insight-card');
+      expect(card.className).toContain('border-l-4');
+      expect(card.className).toContain(borderClass);
+      cleanup();
+    });
   });
 
   /* ========== ICON MAPPING ========== */
@@ -385,36 +383,28 @@ describe('AiInsightCard', () => {
       { type: 'tip', prefix: '💡' },
     ];
 
-    it.each(iconCases)(
-      'uses $prefix prefix in aria-label for $type',
-      ({ type, prefix }) => {
-        mockInsight = makeInsight({ type, title: 'Test' });
-        render(<AiInsightCard />);
-        const region = screen.getByRole('region');
-        expect(region.getAttribute('aria-label')).toContain(prefix);
-        cleanup();
-      },
-    );
+    it.each(iconCases)('uses $prefix prefix in aria-label for $type', ({ type, prefix }) => {
+      mockInsight = makeInsight({ type, title: 'Test' });
+      render(<AiInsightCard />);
+      const region = screen.getByRole('region');
+      expect(region.getAttribute('aria-label')).toContain(prefix);
+      cleanup();
+    });
 
-    it.each(iconCases)(
-      'renders SVG icon for $type type',
-      ({ type }) => {
-        mockInsight = makeInsight({ type });
-        render(<AiInsightCard />);
-        const iconEl = screen.getByTestId('insight-icon');
-        expect(iconEl.querySelector('svg')).toBeInTheDocument();
-        cleanup();
-      },
-    );
+    it.each(iconCases)('renders SVG icon for $type type', ({ type }) => {
+      mockInsight = makeInsight({ type });
+      render(<AiInsightCard />);
+      const iconEl = screen.getByTestId('insight-icon');
+      expect(iconEl.querySelector('svg')).toBeInTheDocument();
+      cleanup();
+    });
   });
 
   /* ========== React.memo ========== */
 
   describe('React.memo', () => {
     it('component is wrapped in React.memo', () => {
-      expect((AiInsightCard as unknown as { $$typeof: symbol }).$$typeof).toBe(
-        Symbol.for('react.memo'),
-      );
+      expect((AiInsightCard as unknown as { $$typeof: symbol }).$$typeof).toBe(Symbol.for('react.memo'));
     });
   });
 });

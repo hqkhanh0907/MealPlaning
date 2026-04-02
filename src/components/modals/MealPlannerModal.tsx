@@ -1,14 +1,16 @@
+import type { LucideIcon } from 'lucide-react';
+import { CheckCircle2, ChefHat, Dumbbell, Flame, Moon, Search, SlidersHorizontal, Sun, Sunrise, X } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Search, CheckCircle2, ChefHat, SlidersHorizontal, Sunrise, Sun, Moon, Flame, Dumbbell } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
-import { Dish, Ingredient, MealType, DayPlan, NutritionInfo, SupportedLang, FilterConfig } from '../../types';
-import { getLocalizedField } from '../../utils/localize';
-import { calculateDishNutrition, calculateDishesNutrition } from '../../utils/nutrition';
+
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
-import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { DayPlan, Dish, FilterConfig, Ingredient, MealType, NutritionInfo, SupportedLang } from '../../types';
+import { getLocalizedField } from '../../utils/localize';
+import { calculateDishesNutrition, calculateDishNutrition } from '../../utils/nutrition';
 import { FilterBottomSheet } from '../shared/FilterBottomSheet';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 type SortOption = 'name-asc' | 'name-desc' | 'cal-asc' | 'cal-desc' | 'pro-asc' | 'pro-desc';
 
@@ -18,20 +20,29 @@ const sortDishes = (
   sortBy: SortOption,
 ): number => {
   switch (sortBy) {
-    case 'name-asc': return a.name.localeCompare(b.name);
-    case 'name-desc': return b.name.localeCompare(a.name);
-    case 'cal-asc': return a.nutrition.calories - b.nutrition.calories;
-    case 'cal-desc': return b.nutrition.calories - a.nutrition.calories;
-    case 'pro-asc': return a.nutrition.protein - b.nutrition.protein;
-    case 'pro-desc': return b.nutrition.protein - a.nutrition.protein;
+    case 'name-asc':
+      return a.name.localeCompare(b.name);
+    case 'name-desc':
+      return b.name.localeCompare(a.name);
+    case 'cal-asc':
+      return a.nutrition.calories - b.nutrition.calories;
+    case 'cal-desc':
+      return b.nutrition.calories - a.nutrition.calories;
+    case 'pro-asc':
+      return a.nutrition.protein - b.nutrition.protein;
+    case 'pro-desc':
+      return b.nutrition.protein - a.nutrition.protein;
   }
 };
 
 const getDishIdsForMeal = (plan: DayPlan, type: MealType): string[] => {
   switch (type) {
-    case 'breakfast': return plan.breakfastDishIds;
-    case 'lunch': return plan.lunchDishIds;
-    case 'dinner': return plan.dinnerDishIds;
+    case 'breakfast':
+      return plan.breakfastDishIds;
+    case 'lunch':
+      return plan.lunchDishIds;
+    case 'dinner':
+      return plan.dinnerDishIds;
   }
 };
 
@@ -92,30 +103,32 @@ export const MealPlannerModal = ({
     });
   };
 
-  const hasTabChanged = React.useCallback((type: MealType): boolean => {
-    const original = new Set(getDishIdsForMeal(currentPlan, type));
-    const current = selections[type];
-    if (original.size !== current.size) return true;
-    for (const id of original) {
-      if (!current.has(id)) return true;
-    }
-    return false;
-  }, [currentPlan, selections]);
+  const hasTabChanged = React.useCallback(
+    (type: MealType): boolean => {
+      const original = new Set(getDishIdsForMeal(currentPlan, type));
+      const current = selections[type];
+      if (original.size !== current.size) return true;
+      for (const id of original) {
+        if (!current.has(id)) return true;
+      }
+      return false;
+    },
+    [currentPlan, selections],
+  );
 
   const changedTabs = React.useMemo(() => {
     return MEAL_TABS.filter(tab => hasTabChanged(tab.type));
   }, [hasTabChanged]);
 
-  const hasActiveFilters = filterConfig.maxCalories !== undefined || filterConfig.minProtein !== undefined || (filterConfig.tags !== undefined && filterConfig.tags.length > 0);
+  const hasActiveFilters =
+    filterConfig.maxCalories !== undefined ||
+    filterConfig.minProtein !== undefined ||
+    (filterConfig.tags !== undefined && filterConfig.tags.length > 0);
 
   const filteredDishes = React.useMemo(() => {
     return dishes
       .filter(d => d.tags?.includes(activeTab))
-      .filter(d =>
-        Object.values(d.name).some((n: string) =>
-          n.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
-      )
+      .filter(d => Object.values(d.name).some((n: string) => n.toLowerCase().includes(searchQuery.toLowerCase())))
       .map(d => ({ dish: d, nutrition: calculateDishNutrition(d, ingredients) }))
       .filter(({ nutrition }) => {
         if (filterConfig.maxCalories && nutrition.calories > filterConfig.maxCalories) return false;
@@ -177,28 +190,26 @@ export const MealPlannerModal = ({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-2xl h-[92dvh] sm:h-auto sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
+      <div className="relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-3xl dark:bg-slate-800">
         {/* Header */}
-        <div className="px-4 py-4 sm:px-8 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">
+            <h3 className="text-lg font-bold text-slate-800 sm:text-xl dark:text-slate-100">
               {t('planning.planTitle')} — {selectedDate}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              {t('planning.planSubtitle')}
-            </p>
+            <p className="text-xs text-slate-500 sm:text-sm dark:text-slate-400">{t('planning.planSubtitle')}</p>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all min-h-11 min-w-11 flex items-center justify-center"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
           >
-            <X className="w-6 h-6" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="px-4 sm:px-8 pt-3 pb-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="border-b border-slate-100 bg-slate-50 px-4 pt-3 pb-3 sm:px-8 dark:border-slate-700 dark:bg-slate-800/50">
           <div className="flex gap-2">
             {MEAL_TABS.map(tab => {
               const isActive = activeTab === tab.type;
@@ -208,31 +219,29 @@ export const MealPlannerModal = ({
                 <button
                   key={tab.type}
                   onClick={() => handleTabChange(tab.type)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm transition-all min-h-11 ${
+                  className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
                     isActive
-                      ? 'bg-emerald-500 text-white shadow-sm font-bold'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 font-medium'
+                      ? 'bg-emerald-500 font-bold text-white shadow-sm'
+                      : 'bg-white font-medium text-slate-600 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                   }`}
                 >
-                  <span><tab.icon className="size-4 inline-block" aria-hidden="true" /></span>
+                  <span>
+                    <tab.icon className="inline-block size-4" aria-hidden="true" />
+                  </span>
                   <span>{t(tab.labelKey)}</span>
                   {count > 0 && (
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center ${
+                      className={`min-w-5 rounded-full px-1.5 py-0.5 text-center text-xs ${
                         isActive
                           ? 'bg-white/20 text-white'
-                          : 'bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
+                          : 'bg-slate-100 text-slate-600 dark:bg-slate-600 dark:text-slate-300'
                       }`}
                     >
                       {count}
                     </span>
                   )}
                   {changed && (
-                    <span
-                      className={`w-2 h-2 rounded-full shrink-0 ${
-                        isActive ? 'bg-white' : 'bg-emerald-500'
-                      }`}
-                    />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
                   )}
                 </button>
               );
@@ -241,10 +250,10 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Search + Sort */}
-        <div className="px-4 py-3 sm:px-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 sticky top-0 z-10">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="sticky top-0 z-10 border-b border-slate-100 bg-slate-50 px-4 py-3 sm:px-8 dark:border-slate-700 dark:bg-slate-800/50">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="relative flex-1">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
               <Input
                 type="text"
                 id="meal-planner-search"
@@ -255,32 +264,30 @@ export const MealPlannerModal = ({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 data-testid="input-search-plan"
-                className="w-full pl-10 pr-4 shadow-sm"
+                className="w-full pr-4 pl-10 shadow-sm"
               />
             </div>
             <button
               onClick={() => setIsFilterOpen(true)}
               data-testid="btn-filter"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-medium text-sm min-h-11 hover:border-emerald-400 transition-all"
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-emerald-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              <SlidersHorizontal className="h-4 w-4" />
               {t('filter.button')}
-              {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              )}
+              {hasActiveFilters && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
             </button>
           </div>
         </div>
 
         {/* Dish list */}
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 space-y-3">
+        <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-4 sm:p-8">
           {filteredDishes.length === 0 && (
-            <div className="text-center py-12">
-              <ChefHat className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-500 dark:text-slate-400 font-medium">
+            <div className="py-12 text-center">
+              <ChefHat className="mx-auto mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+              <p className="font-medium text-slate-500 dark:text-slate-400">
                 {t('planning.noMatchTitle', { meal: activeTabLabel })}
               </p>
-              <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">
                 {t('planning.noMatchHint', { meal: activeTabLabel })}
               </p>
             </div>
@@ -291,50 +298,50 @@ export const MealPlannerModal = ({
               <button
                 key={dish.id}
                 onClick={() => toggleDish(dish.id)}
-                className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all flex items-center justify-between group min-h-16 active:scale-[0.98] ${
+                className={`group flex min-h-16 w-full items-center justify-between rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] sm:p-5 ${
                   isSelected
                     ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20'
-                    : 'border-slate-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-600'
+                    : 'border-slate-100 hover:border-emerald-200 dark:border-slate-700 dark:hover:border-emerald-600'
                 }`}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                       isSelected
-                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-500'
+                        ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+                        : 'bg-slate-50 text-slate-500 dark:bg-slate-700 dark:text-slate-500'
                     }`}
                   >
-                    <ChefHat className="w-5 h-5" />
+                    <ChefHat className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <h4
-                      className={`font-bold text-base truncate ${
-                        isSelected
-                          ? 'text-emerald-900 dark:text-emerald-300'
-                          : 'text-slate-800 dark:text-slate-100'
+                      className={`truncate text-base font-bold ${
+                        isSelected ? 'text-emerald-900 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'
                       }`}
                     >
                       {getLocalizedField(dish.name, lang)}
                     </h4>
-                    <div className="flex gap-2 mt-1">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
-                        <Flame className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(nutrition.calories)} kcal
+                    <div className="mt-1 flex gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">
+                        <Flame className="inline-block size-3.5" aria-hidden="true" /> {Math.round(nutrition.calories)}{' '}
+                        kcal
                       </span>
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                        <Dumbbell className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(nutrition.protein)}g
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                        <Dumbbell className="inline-block size-3.5" aria-hidden="true" />{' '}
+                        {Math.round(nutrition.protein)}g
                       </span>
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ml-3 ${
+                  className={`ml-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                     isSelected
-                      ? 'bg-emerald-500 border-emerald-500 text-white'
-                      : 'border-slate-200 dark:border-slate-600 text-transparent group-hover:border-emerald-300'
+                      ? 'border-emerald-500 bg-emerald-500 text-white'
+                      : 'border-slate-200 text-transparent group-hover:border-emerald-300 dark:border-slate-600'
                   }`}
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="h-4 w-4" />
                 </div>
               </button>
             );
@@ -342,9 +349,9 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-4 sm:px-8 sm:py-5 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
-          <div className="flex items-center justify-between mb-2 text-sm">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">
+        <div className="border-t border-slate-100 bg-white px-4 py-4 sm:px-8 sm:py-5 dark:border-slate-700 dark:bg-slate-800">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="font-medium text-slate-500 dark:text-slate-400">
               {t('planning.totalDay')}:{' '}
               <span className="font-bold text-slate-800 dark:text-slate-100">
                 {totalDayDishCount} {t('common.item')}
@@ -352,21 +359,29 @@ export const MealPlannerModal = ({
             </span>
             {totalDayDishCount > 0 && (
               <span className="text-slate-500 dark:text-slate-400">
-                <Flame className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(totalDayNutrition.calories)} kcal · <Dumbbell className="size-3.5 inline-block" aria-hidden="true" /> {Math.round(totalDayNutrition.protein)}g Pro
+                <Flame className="inline-block size-3.5" aria-hidden="true" /> {Math.round(totalDayNutrition.calories)}{' '}
+                kcal · <Dumbbell className="inline-block size-3.5" aria-hidden="true" />{' '}
+                {Math.round(totalDayNutrition.protein)}g Pro
               </span>
             )}
           </div>
           {remainingBudget && totalDayDishCount > 0 && (
-            <div data-testid="meal-planner-remaining-budget" className="flex items-center justify-between text-xs mb-1">
+            <div data-testid="meal-planner-remaining-budget" className="mb-1 flex items-center justify-between text-xs">
               {remainingBudget.calories !== null && (
-                <span data-testid="meal-planner-remaining-cal" className={`font-medium ${remainingBudget.calories >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                <span
+                  data-testid="meal-planner-remaining-cal"
+                  className={`font-medium ${remainingBudget.calories >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                >
                   {remainingBudget.calories >= 0
                     ? t('summary.remaining', { value: remainingBudget.calories, unit: 'kcal' })
                     : t('summary.over', { value: Math.abs(remainingBudget.calories), unit: 'kcal' })}
                 </span>
               )}
               {remainingBudget.protein !== null && (
-                <span data-testid="meal-planner-remaining-pro" className={`font-medium ${remainingBudget.protein >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                <span
+                  data-testid="meal-planner-remaining-pro"
+                  className={`font-medium ${remainingBudget.protein >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                >
                   {remainingBudget.protein >= 0
                     ? t('summary.remaining', { value: remainingBudget.protein, unit: 'g' })
                     : t('summary.over', { value: Math.abs(remainingBudget.protein), unit: 'g' })}
@@ -374,7 +389,7 @@ export const MealPlannerModal = ({
               )}
             </div>
           )}
-          <div className="flex items-center justify-between mb-3 text-xs">
+          <div className="mb-3 flex items-center justify-between text-xs">
             <span className="text-slate-500 dark:text-slate-500">
               {activeTabLabel}:{' '}
               <span className="font-semibold text-slate-600 dark:text-slate-300">
@@ -390,18 +405,14 @@ export const MealPlannerModal = ({
           <button
             onClick={handleConfirm}
             data-testid="btn-confirm-plan"
-            className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 hover:bg-emerald-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg min-h-12"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-lg font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
           >
-            <CheckCircle2 className="w-5 h-5" />
+            <CheckCircle2 className="h-5 w-5" />
             {confirmButtonLabel}
           </button>
         </div>
         {isFilterOpen && (
-          <FilterBottomSheet
-            config={filterConfig}
-            onChange={setFilterConfig}
-            onClose={() => setIsFilterOpen(false)}
-          />
+          <FilterBottomSheet config={filterConfig} onChange={setFilterConfig} onClose={() => setIsFilterOpen(false)} />
         )}
       </div>
     </ModalBackdrop>

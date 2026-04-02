@@ -1,24 +1,21 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
+
 import { FitnessTab } from '../features/fitness/components/FitnessTab';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
-import type { Mock } from 'vitest';
 
-const {
-  mockGeneratePlan,
-  mockNotifySuccess,
-  mockNotifyError,
-  mockPushPage,
-  mockInsightRef,
-  mockHealthProfileRef,
-} = vi.hoisted(() => ({
-  mockGeneratePlan: vi.fn(),
-  mockNotifySuccess: vi.fn(),
-  mockNotifyError: vi.fn(),
-  mockPushPage: vi.fn(),
-  mockInsightRef: { current: null as string | null },
-  mockHealthProfileRef: { current: { age: 25 as number | null, weightKg: 83 } },
-}));
+const { mockGeneratePlan, mockNotifySuccess, mockNotifyError, mockPushPage, mockInsightRef, mockHealthProfileRef } =
+  vi.hoisted(() => ({
+    mockGeneratePlan: vi.fn(),
+    mockNotifySuccess: vi.fn(),
+    mockNotifyError: vi.fn(),
+    mockPushPage: vi.fn(),
+    mockInsightRef: { current: null as string | null },
+    mockHealthProfileRef: {
+      current: { age: 25 as number | null, weightKg: 83 } as { age: number | null; weightKg: number } | null,
+    },
+  }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -68,33 +65,23 @@ vi.mock('../features/fitness/components/TrainingPlanView', () => ({
 }));
 
 vi.mock('../features/fitness/components/WorkoutHistory', () => ({
-  WorkoutHistory: () => (
-    <div data-testid="workout-history">WorkoutHistory</div>
-  ),
+  WorkoutHistory: () => <div data-testid="workout-history">WorkoutHistory</div>,
 }));
 
 vi.mock('../features/fitness/components/ProgressDashboard', () => ({
-  ProgressDashboard: () => (
-    <div data-testid="progress-dashboard">ProgressDashboard</div>
-  ),
+  ProgressDashboard: () => <div data-testid="progress-dashboard">ProgressDashboard</div>,
 }));
 
 vi.mock('../features/fitness/components/StreakCounter', () => ({
-  StreakCounter: () => (
-    <div data-testid="streak-counter">StreakCounter</div>
-  ),
+  StreakCounter: () => <div data-testid="streak-counter">StreakCounter</div>,
 }));
 
 vi.mock('../features/fitness/components/SmartInsightBanner', () => ({
-  SmartInsightBanner: ({ insight }: { insight: string }) => (
-    <div data-testid="smart-insight-banner">{insight}</div>
-  ),
+  SmartInsightBanner: ({ insight }: { insight: string }) => <div data-testid="smart-insight-banner">{insight}</div>,
 }));
 
 vi.mock('../features/fitness/components/PlanGeneratedCard', () => ({
-  PlanGeneratedCard: () => (
-    <div data-testid="plan-generated-card">PlanGeneratedCard</div>
-  ),
+  PlanGeneratedCard: () => <div data-testid="plan-generated-card">PlanGeneratedCard</div>,
 }));
 
 vi.mock('../features/fitness/hooks/useFitnessNutritionBridge', () => ({
@@ -110,7 +97,7 @@ vi.mock('../features/fitness/hooks/useTrainingPlan', () => ({
 }));
 
 vi.mock('../features/health-profile/store/healthProfileStore', () => ({
-  useHealthProfileStore: (selector: (state: { profile: { age: number | null; weightKg: number } }) => unknown) =>
+  useHealthProfileStore: (selector: (state: { profile: { age: number | null; weightKg: number } | null }) => unknown) =>
     selector({ profile: mockHealthProfileRef.current }),
 }));
 
@@ -148,18 +135,16 @@ describe('FitnessTab', () => {
       mockPushPage.mockClear();
       mockInsightRef.current = null;
       mockHealthProfileRef.current = { age: 25, weightKg: 83 };
-      mockUseNavigationStore.mockImplementation(
-        (selector: (s: { pushPage: Mock }) => unknown) =>
-          selector({ pushPage: mockPushPage }),
+      mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
+        selector({ pushPage: mockPushPage }),
       );
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            trainingProfile: null,
-            planStrategy: null,
-            addTrainingPlan: mockAddTrainingPlan,
-            addPlanDays: mockAddPlanDays,
-          }),
+      mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
+        selector({
+          trainingProfile: null,
+          planStrategy: null,
+          addTrainingPlan: mockAddTrainingPlan,
+          addPlanDays: mockAddPlanDays,
+        }),
       );
     });
 
@@ -178,39 +163,26 @@ describe('FitnessTab', () => {
 
     it('defaults to Kế hoạch tab with TrainingPlanView', () => {
       render(<FitnessTab />);
-      expect(screen.getByTestId('subtab-plan')).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
+      expect(screen.getByTestId('subtab-plan')).toHaveAttribute('aria-selected', 'true');
       expect(screen.getByTestId('plan-subtab-content')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('training-plan-view'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
     });
 
     it('clicking Lịch sử tab shows WorkoutHistory', () => {
       render(<FitnessTab />);
       fireEvent.click(screen.getByTestId('subtab-history'));
 
-      expect(
-        screen.getByTestId('history-subtab-content'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('history-subtab-content')).toBeInTheDocument();
       expect(screen.getByTestId('workout-history')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('plan-subtab-content'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('plan-subtab-content')).not.toBeInTheDocument();
     });
 
     it('clicking Tiến trình tab shows ProgressDashboard', () => {
       render(<FitnessTab />);
       fireEvent.click(screen.getByTestId('subtab-progress'));
 
-      expect(
-        screen.getByTestId('progress-subtab-content'),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId('progress-dashboard'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('progress-subtab-content')).toBeInTheDocument();
+      expect(screen.getByTestId('progress-dashboard')).toBeInTheDocument();
     });
 
     it('sub-tab labels are correct per spec §5.1', () => {
@@ -230,71 +202,41 @@ describe('FitnessTab', () => {
       render(<FitnessTab />);
 
       fireEvent.click(screen.getByTestId('subtab-history'));
-      expect(
-        screen.getByTestId('history-subtab-content'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('history-subtab-content')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('subtab-plan'));
       expect(screen.getByTestId('plan-subtab-content')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('history-subtab-content'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('history-subtab-content')).not.toBeInTheDocument();
     });
 
     it('only renders active tab content (lazy rendering)', () => {
       render(<FitnessTab />);
       expect(screen.getByTestId('plan-subtab-content')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('history-subtab-content'),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('progress-subtab-content'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('history-subtab-content')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('progress-subtab-content')).not.toBeInTheDocument();
     });
 
     it('all three sub-tab buttons have correct aria-selected', () => {
       render(<FitnessTab />);
 
-      expect(screen.getByTestId('subtab-plan')).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
-      expect(screen.getByTestId('subtab-progress')).toHaveAttribute(
-        'aria-selected',
-        'false',
-      );
-      expect(screen.getByTestId('subtab-history')).toHaveAttribute(
-        'aria-selected',
-        'false',
-      );
+      expect(screen.getByTestId('subtab-plan')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('subtab-progress')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.getByTestId('subtab-history')).toHaveAttribute('aria-selected', 'false');
 
       fireEvent.click(screen.getByTestId('subtab-progress'));
-      expect(screen.getByTestId('subtab-plan')).toHaveAttribute(
-        'aria-selected',
-        'false',
-      );
-      expect(screen.getByTestId('subtab-progress')).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
+      expect(screen.getByTestId('subtab-plan')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.getByTestId('subtab-progress')).toHaveAttribute('aria-selected', 'true');
     });
 
     it('each sub-tab content has role tabpanel', () => {
       render(<FitnessTab />);
-      expect(screen.getByTestId('plan-subtab-content')).toHaveAttribute(
-        'role',
-        'tabpanel',
-      );
+      expect(screen.getByTestId('plan-subtab-content')).toHaveAttribute('role', 'tabpanel');
 
       fireEvent.click(screen.getByTestId('subtab-history'));
-      expect(
-        screen.getByTestId('history-subtab-content'),
-      ).toHaveAttribute('role', 'tabpanel');
+      expect(screen.getByTestId('history-subtab-content')).toHaveAttribute('role', 'tabpanel');
 
       fireEvent.click(screen.getByTestId('subtab-progress'));
-      expect(
-        screen.getByTestId('progress-subtab-content'),
-      ).toHaveAttribute('role', 'tabpanel');
+      expect(screen.getByTestId('progress-subtab-content')).toHaveAttribute('role', 'tabpanel');
     });
   });
 
@@ -303,19 +245,17 @@ describe('FitnessTab', () => {
     const localAddPlanDays = vi.fn();
 
     function setupStore(overrides: Partial<MockFitnessState> = {}) {
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            trainingProfile: null,
-            planStrategy: 'auto',
-            addTrainingPlan: localAddTrainingPlan,
-            addPlanDays: localAddPlanDays,
-            ...overrides,
-          }),
+      mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
+        selector({
+          trainingProfile: null,
+          planStrategy: 'auto',
+          addTrainingPlan: localAddTrainingPlan,
+          addPlanDays: localAddPlanDays,
+          ...overrides,
+        }),
       );
-      mockUseNavigationStore.mockImplementation(
-        (selector: (s: { pushPage: Mock }) => unknown) =>
-          selector({ pushPage: mockPushPage }),
+      mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
+        selector({ pushPage: mockPushPage }),
       );
     }
 
@@ -385,6 +325,23 @@ describe('FitnessTab', () => {
         }),
       );
     });
+
+    it('uses fallback values when profile is null', () => {
+      const mockPlan = { id: 'p3', name: 'Plan' };
+      const mockDays = [{ id: 'd1', planId: 'p3' }];
+      mockGeneratePlan.mockReturnValue({ plan: mockPlan, days: mockDays });
+      mockHealthProfileRef.current = null;
+      setupStore({ trainingProfile: { level: 'beginner', goal: 'strength' } });
+
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+
+      expect(mockGeneratePlan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          healthProfile: { age: 30, weightKg: 70 },
+        }),
+      );
+    });
   });
 
   describe('handleCreateManualPlan', () => {
@@ -392,19 +349,17 @@ describe('FitnessTab', () => {
     const localAddPlanDays = vi.fn();
 
     function setupStore(overrides: Partial<MockFitnessState> = {}) {
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            trainingProfile: null,
-            planStrategy: 'manual',
-            addTrainingPlan: localAddTrainingPlan,
-            addPlanDays: localAddPlanDays,
-            ...overrides,
-          }),
+      mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
+        selector({
+          trainingProfile: null,
+          planStrategy: 'manual',
+          addTrainingPlan: localAddTrainingPlan,
+          addPlanDays: localAddPlanDays,
+          ...overrides,
+        }),
       );
-      mockUseNavigationStore.mockImplementation(
-        (selector: (s: { pushPage: Mock }) => unknown) =>
-          selector({ pushPage: mockPushPage }),
+      mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
+        selector({ pushPage: mockPushPage }),
       );
     }
 
@@ -464,7 +419,7 @@ describe('FitnessTab', () => {
       expect(addedDays).toHaveLength(7);
       expect(addedDays[0].dayOfWeek).toBe(1);
       expect(addedDays[6].dayOfWeek).toBe(7);
-      addedDays.forEach((day) => {
+      addedDays.forEach(day => {
         expect(day.planId).toBe(expectedPlanId);
         expect(day.workoutType).toBe('Rest');
         expect(day.exercises).toBe('[]');
@@ -524,18 +479,16 @@ describe('FitnessTab', () => {
       mockNotifyError.mockClear();
       mockPushPage.mockClear();
       mockHealthProfileRef.current = { age: 25, weightKg: 83 };
-      mockUseNavigationStore.mockImplementation(
-        (selector: (s: { pushPage: Mock }) => unknown) =>
-          selector({ pushPage: mockPushPage }),
+      mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
+        selector({ pushPage: mockPushPage }),
       );
-      mockUseFitnessStore.mockImplementation(
-        (selector: (state: MockFitnessState) => unknown) =>
-          selector({
-            trainingProfile: null,
-            planStrategy: null,
-            addTrainingPlan: vi.fn(),
-            addPlanDays: vi.fn(),
-          }),
+      mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
+        selector({
+          trainingProfile: null,
+          planStrategy: null,
+          addTrainingPlan: vi.fn(),
+          addPlanDays: vi.fn(),
+        }),
       );
     });
 
@@ -558,8 +511,7 @@ describe('FitnessTab', () => {
     });
 
     it('is wrapped in React.memo', () => {
-      const memoType = (FitnessTab as unknown as { $$typeof: symbol })
-        .$$typeof;
+      const memoType = (FitnessTab as unknown as { $$typeof: symbol }).$$typeof;
       expect(memoType).toBe(Symbol.for('react.memo'));
     });
   });

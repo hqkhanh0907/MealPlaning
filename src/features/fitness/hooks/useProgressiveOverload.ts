@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from 'react';
+
 import { useFitnessStore } from '../../../store/fitnessStore';
-import type { WorkoutSet, TrainingExperience, SetSuggestion } from '../types';
-import { getOverloadIncrement } from '../utils/periodization';
 import { EXERCISES } from '../data/exerciseDatabase';
-import { analyzePlateau } from '../utils/plateauAnalysis';
+import type { SetSuggestion, TrainingExperience, WorkoutSet } from '../types';
+import { getOverloadIncrement } from '../utils/periodization';
 import type { PlateauResult } from '../utils/plateauAnalysis';
+import { analyzePlateau } from '../utils/plateauAnalysis';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -22,17 +23,13 @@ export interface OverloadSuggestion extends SetSuggestion {
 /* ------------------------------------------------------------------ */
 
 const LOWER_BODY_MUSCLES = new Set(['legs', 'glutes']);
-const EXERCISE_MAP = new Map(EXERCISES.map((e) => [e.id, e]));
+const EXERCISE_MAP = new Map(EXERCISES.map(e => [e.id, e]));
 
 /* ------------------------------------------------------------------ */
 /*  Pure functions (exported for testing)                                */
 /* ------------------------------------------------------------------ */
 
-export function isWeightSimilar(
-  a: number,
-  b: number,
-  tolerance = 0.02,
-): boolean {
+export function isWeightSimilar(a: number, b: number, tolerance = 0.02): boolean {
   if (a === b) return true;
   const reference = Math.max(Math.abs(a), Math.abs(b));
   if (reference === 0) return true;
@@ -74,17 +71,12 @@ export function suggestNextSet(
   };
 }
 
-export function detectPlateau(
-  historySets: WorkoutSet[][],
-  threshold = 3,
-): { isPlateaued: boolean; weeks: number } {
+export function detectPlateau(historySets: WorkoutSet[][], threshold = 3): { isPlateaued: boolean; weeks: number } {
   if (historySets.length < threshold) {
     return { isPlateaued: false, weeks: 0 };
   }
 
-  const maxWeights = historySets.map((sets) =>
-    sets.length > 0 ? Math.max(...sets.map((s) => s.weightKg)) : 0,
-  );
+  const maxWeights = historySets.map(sets => (sets.length > 0 ? Math.max(...sets.map(s => s.weightKg)) : 0));
 
   let streakCount = 1;
   const latestMax = maxWeights.at(-1)!;
@@ -105,25 +97,17 @@ export function detectPlateau(
 
 export type FatigueLevel = 'none' | 'moderate' | 'high';
 
-export function detectAcuteFatigue(
-  recentSets: WorkoutSet[],
-): { level: FatigueLevel; message: string } {
+export function detectAcuteFatigue(recentSets: WorkoutSet[]): { level: FatigueLevel; message: string } {
   if (recentSets.length < 3) return { level: 'none', message: '' };
   const last3Rpes = recentSets
     .slice(-9)
-    .map((s) => s.rpe ?? 0)
-    .filter((r) => r > 0);
+    .map(s => s.rpe ?? 0)
+    .filter(r => r > 0);
   if (last3Rpes.length === 0) return { level: 'none', message: '' };
   const avgRpe = last3Rpes.reduce((a, b) => a + b, 0) / last3Rpes.length;
-  const lastSessionVolume = recentSets
-    .slice(-3)
-    .reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0);
-  const avgSessionVolume =
-    recentSets
-      .slice(-9, -3)
-      .reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0) / 2;
-  const volumeSpikeRatio =
-    avgSessionVolume > 0 ? lastSessionVolume / avgSessionVolume : 1;
+  const lastSessionVolume = recentSets.slice(-3).reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0);
+  const avgSessionVolume = recentSets.slice(-9, -3).reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0) / 2;
+  const volumeSpikeRatio = avgSessionVolume > 0 ? lastSessionVolume / avgSessionVolume : 1;
   if (avgRpe >= 9 || volumeSpikeRatio > 1.3) {
     return {
       level: 'high',
@@ -139,9 +123,7 @@ export function detectAcuteFatigue(
   return { level: 'none', message: '' };
 }
 
-export function detectChronicOvertraining(
-  historySets: WorkoutSet[],
-): { level: FatigueLevel; message: string } {
+export function detectChronicOvertraining(historySets: WorkoutSet[]): { level: FatigueLevel; message: string } {
   if (historySets.length < 12) return { level: 'none', message: '' };
   const weekMs = 7 * 24 * 60 * 60 * 1000;
   const now = Date.now();
@@ -149,13 +131,11 @@ export function detectChronicOvertraining(
   for (let w = 0; w < 6; w++) {
     const weekStart = now - (w + 1) * weekMs;
     const weekEnd = now - w * weekMs;
-    const weekSets = historySets.filter((s) => {
+    const weekSets = historySets.filter(s => {
       const t = new Date(s.updatedAt).getTime();
       return t >= weekStart && t < weekEnd;
     });
-    weeklyVolumes.unshift(
-      weekSets.reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0),
-    );
+    weeklyVolumes.unshift(weekSets.reduce((sum, s) => sum + (s.reps ?? 0) * s.weightKg, 0));
   }
   let decliningWeeks = 0;
   for (let i = 1; i < weeklyVolumes.length; i++) {
@@ -182,29 +162,18 @@ export function detectChronicOvertraining(
 /* ------------------------------------------------------------------ */
 
 export function useProgressiveOverload(): {
-  suggestNextSet: (
-    exerciseId: string,
-    targetRepsMin: number,
-    targetRepsMax: number,
-  ) => OverloadSuggestion;
+  suggestNextSet: (exerciseId: string, targetRepsMin: number, targetRepsMax: number) => OverloadSuggestion;
   getLastSets: (exerciseId: string) => WorkoutSet[];
-  checkPlateau: (
-    exerciseId: string,
-  ) => { isPlateaued: boolean; weeks: number };
+  checkPlateau: (exerciseId: string) => { isPlateaued: boolean; weeks: number };
   analyzeExercisePlateau: (exerciseId: string) => PlateauResult;
-  checkAcuteFatigue: (
-    exerciseId: string,
-    recentSets: WorkoutSet[],
-  ) => { level: FatigueLevel; message: string };
-  checkChronicOvertraining: (
-    exerciseId: string,
-  ) => { level: FatigueLevel; message: string };
+  checkAcuteFatigue: (exerciseId: string, recentSets: WorkoutSet[]) => { level: FatigueLevel; message: string };
+  checkChronicOvertraining: (exerciseId: string) => { level: FatigueLevel; message: string };
   acuteFatigue: { level: FatigueLevel; message: string };
   chronicOvertraining: { level: FatigueLevel; message: string };
 } {
-  const workoutSets = useFitnessStore((state) => state.workoutSets);
-  const workouts = useFitnessStore((state) => state.workouts);
-  const trainingProfile = useFitnessStore((state) => state.trainingProfile);
+  const workoutSets = useFitnessStore(state => state.workoutSets);
+  const workouts = useFitnessStore(state => state.workouts);
+  const trainingProfile = useFitnessStore(state => state.trainingProfile);
 
   const workoutSetsByWorkoutId = useMemo(() => {
     const map = new Map<string, WorkoutSet[]>();
@@ -216,32 +185,24 @@ export function useProgressiveOverload(): {
     return map;
   }, [workoutSets]);
 
-  const acuteFatigue = useMemo(
-    () => detectAcuteFatigue(workoutSets),
-    [workoutSets],
-  );
+  const acuteFatigue = useMemo(() => detectAcuteFatigue(workoutSets), [workoutSets]);
 
-  const chronicOvertraining = useMemo(
-    () => detectChronicOvertraining(workoutSets),
-    [workoutSets],
-  );
+  const chronicOvertraining = useMemo(() => detectChronicOvertraining(workoutSets), [workoutSets]);
 
   const getLastSets = useCallback(
     (exerciseId: string): WorkoutSet[] => {
-      const exerciseSets = workoutSets.filter(
-        (s) => s.exerciseId === exerciseId,
-      );
+      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
       if (exerciseSets.length === 0) return [];
 
-      const workoutIdSet = new Set(exerciseSets.map((s) => s.workoutId));
+      const workoutIdSet = new Set(exerciseSets.map(s => s.workoutId));
       const relevantWorkouts = workouts
-        .filter((w) => workoutIdSet.has(w.id))
+        .filter(w => workoutIdSet.has(w.id))
         .sort((a, b) => b.date.localeCompare(a.date));
 
       if (relevantWorkouts.length === 0) return [];
 
       return (workoutSetsByWorkoutId.get(relevantWorkouts[0].id) ?? [])
-        .filter((s) => s.exerciseId === exerciseId)
+        .filter(s => s.exerciseId === exerciseId)
         .sort((a, b) => a.setNumber - b.setNumber);
     },
     [workoutSets, workouts, workoutSetsByWorkoutId],
@@ -249,20 +210,16 @@ export function useProgressiveOverload(): {
 
   const checkPlateauFn = useCallback(
     (exerciseId: string): { isPlateaued: boolean; weeks: number } => {
-      const exerciseSets = workoutSets.filter(
-        (s) => s.exerciseId === exerciseId,
-      );
+      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
       if (exerciseSets.length === 0) return { isPlateaued: false, weeks: 0 };
 
-      const workoutIdSet = new Set(exerciseSets.map((s) => s.workoutId));
+      const workoutIdSet = new Set(exerciseSets.map(s => s.workoutId));
       const relevantWorkouts = workouts
-        .filter((w) => workoutIdSet.has(w.id))
+        .filter(w => workoutIdSet.has(w.id))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      const groupedSets = relevantWorkouts.map((w) =>
-        (workoutSetsByWorkoutId.get(w.id) ?? []).filter(
-          (s) => s.exerciseId === exerciseId,
-        ),
+      const groupedSets = relevantWorkouts.map(w =>
+        (workoutSetsByWorkoutId.get(w.id) ?? []).filter(s => s.exerciseId === exerciseId),
       );
 
       return detectPlateau(groupedSets);
@@ -271,80 +228,47 @@ export function useProgressiveOverload(): {
   );
 
   const analyzeExercisePlateauFn = useCallback(
-    (exerciseId: string): PlateauResult =>
-      analyzePlateau(workouts, workoutSets, exerciseId),
+    (exerciseId: string): PlateauResult => analyzePlateau(workouts, workoutSets, exerciseId),
     [workouts, workoutSets],
   );
 
   const checkAcuteFatigueFn = useCallback(
-    (
-      exerciseId: string,
-      recentSets: WorkoutSet[],
-    ): { level: FatigueLevel; message: string } => {
-      const exerciseSets = recentSets.filter(
-        (s) => s.exerciseId === exerciseId,
-      );
+    (exerciseId: string, recentSets: WorkoutSet[]): { level: FatigueLevel; message: string } => {
+      const exerciseSets = recentSets.filter(s => s.exerciseId === exerciseId);
       return detectAcuteFatigue(exerciseSets);
     },
     [],
   );
 
   const checkChronicOvertrainingFn = useCallback(
-    (
-      exerciseId: string,
-    ): { level: FatigueLevel; message: string } => {
-      const exerciseSets = workoutSets.filter(
-        (s) => s.exerciseId === exerciseId,
-      );
+    (exerciseId: string): { level: FatigueLevel; message: string } => {
+      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
       return detectChronicOvertraining(exerciseSets);
     },
     [workoutSets],
   );
 
   const suggestNextSetFn = useCallback(
-    (
-      exerciseId: string,
-      targetRepsMin: number,
-      targetRepsMax: number,
-    ): OverloadSuggestion => {
+    (exerciseId: string, targetRepsMin: number, targetRepsMax: number): OverloadSuggestion => {
       const lastSets = getLastSets(exerciseId);
-      const experience =
-        trainingProfile?.trainingExperience ?? 'beginner';
+      const experience = trainingProfile?.trainingExperience ?? 'beginner';
       const isLower = isLowerBodyExercise(exerciseId);
 
-      const suggestion = suggestNextSet(
-        lastSets,
-        experience,
-        targetRepsMin,
-        targetRepsMax,
-        isLower,
-      );
+      const suggestion = suggestNextSet(lastSets, experience, targetRepsMin, targetRepsMax, isLower);
 
       const plateauResult = checkPlateauFn(exerciseId);
-      const exerciseSets = workoutSets.filter(
-        (s) => s.exerciseId === exerciseId,
-      );
+      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
       const fatigueResult = detectAcuteFatigue(exerciseSets);
-      const setsWithRpe = exerciseSets.filter(
-        (s) => s.rpe != null && s.rpe > 0,
-      );
+      const setsWithRpe = exerciseSets.filter(s => s.rpe != null && s.rpe > 0);
       const avgRpe =
         setsWithRpe.length > 0
-          ? Math.round(
-              (setsWithRpe.reduce((sum, s) => sum + (s.rpe ?? 0), 0) /
-                setsWithRpe.length) *
-                100,
-            ) / 100
+          ? Math.round((setsWithRpe.reduce((sum, s) => sum + (s.rpe ?? 0), 0) / setsWithRpe.length) * 100) / 100
           : 0;
 
       return {
         ...suggestion,
-        ...(plateauResult.isPlateaued
-          ? { isPlateaued: true, plateauWeeks: plateauResult.weeks }
-          : {}),
-        ...(fatigueResult.level === 'none'
-          ? {}
-          : { isOvertraining: true, avgRpe }),
+        ...(plateauResult.isPlateaued ? { isPlateaued: true, plateauWeeks: plateauResult.weeks } : {}),
+        ...(fatigueResult.level === 'none' ? {} : { isOvertraining: true, avgRpe }),
       };
     },
     [getLastSets, trainingProfile, checkPlateauFn, workoutSets],

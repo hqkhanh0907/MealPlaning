@@ -1,13 +1,12 @@
 import { render, screen } from '@testing-library/react';
+
 import { ProteinProgress } from '../features/dashboard/components/ProteinProgress';
 
 describe('ProteinProgress', () => {
   it('renders with correct display text', () => {
     render(<ProteinProgress current={142} target={166} />);
 
-    expect(screen.getByTestId('protein-display')).toHaveTextContent(
-      '142g / 166g',
-    );
+    expect(screen.getByTestId('protein-display')).toHaveTextContent('142g / 166g');
   });
 
   it('has minimum height of 48px', () => {
@@ -87,33 +86,25 @@ describe('ProteinProgress', () => {
   it('shows met goal message when target reached', () => {
     render(<ProteinProgress current={170} target={166} />);
 
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Đã đạt mục tiêu protein!',
-    );
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Đã đạt mục tiêu protein!');
   });
 
   it('shows met goal message when exactly at target', () => {
     render(<ProteinProgress current={166} target={166} />);
 
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Đã đạt mục tiêu protein!',
-    );
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Đã đạt mục tiêu protein!');
   });
 
   it('shows near goal message when deficit ≤20g', () => {
     render(<ProteinProgress current={150} target={166} />);
 
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Gần đạt mục tiêu protein',
-    );
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Gần đạt mục tiêu protein');
   });
 
   it('shows near goal message at deficit exactly 20g', () => {
     render(<ProteinProgress current={146} target={166} />);
 
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Gần đạt mục tiêu protein',
-    );
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Gần đạt mục tiêu protein');
   });
 
   it('shows food suggestion when deficit 20-50g', () => {
@@ -133,9 +124,7 @@ describe('ProteinProgress', () => {
   it('shows significant deficit message when deficit >50g', () => {
     render(<ProteinProgress current={50} target={166} />);
 
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Cần bổ sung thêm protein',
-    );
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Cần bổ sung thêm protein');
   });
 
   // --- Edge cases ---
@@ -143,34 +132,24 @@ describe('ProteinProgress', () => {
   it('handles zero current', () => {
     render(<ProteinProgress current={0} target={100} />);
 
-    expect(screen.getByTestId('protein-display')).toHaveTextContent(
-      '0g / 100g',
-    );
+    expect(screen.getByTestId('protein-display')).toHaveTextContent('0g / 100g');
     expect(screen.getByTestId('protein-bar')).toHaveStyle({ width: '0%' });
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Cần bổ sung thêm protein',
-    );
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Cần bổ sung thêm protein');
   });
 
   it('handles zero target gracefully', () => {
     render(<ProteinProgress current={50} target={0} />);
 
     expect(screen.getByTestId('protein-progress')).toBeInTheDocument();
-    expect(screen.getByTestId('protein-display')).toHaveTextContent(
-      '50g / 0g',
-    );
+    expect(screen.getByTestId('protein-display')).toHaveTextContent('50g / 0g');
   });
 
   it('handles both zero values', () => {
     render(<ProteinProgress current={0} target={0} />);
 
     expect(screen.getByTestId('protein-progress')).toBeInTheDocument();
-    expect(screen.getByTestId('protein-display')).toHaveTextContent(
-      '0g / 0g',
-    );
-    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent(
-      'Đã đạt mục tiêu protein!',
-    );
+    expect(screen.getByTestId('protein-display')).toHaveTextContent('0g / 0g');
+    expect(screen.getByTestId('protein-suggestion')).toHaveTextContent('Đã đạt mục tiêu protein!');
   });
 
   // --- Accessibility ---

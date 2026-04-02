@@ -1,12 +1,12 @@
 import {
-  calculateBMR,
-  calculateTDEE,
-  sessionsToLevel,
-  getAutoAdjustedMultiplier,
-  calculateTarget,
-  calculateMacros,
-  getCalorieOffset,
   ACTIVITY_MULTIPLIERS,
+  calculateBMR,
+  calculateMacros,
+  calculateTarget,
+  calculateTDEE,
+  getAutoAdjustedMultiplier,
+  getCalorieOffset,
+  sessionsToLevel,
 } from '../services/nutritionEngine';
 
 // ---------------------------------------------------------------------------
@@ -60,12 +60,9 @@ describe('calculateTDEE', () => {
     ['moderate', 1.55, Math.round(bmr * 1.55)],
     ['active', 1.725, Math.round(bmr * 1.725)],
     ['extra_active', 1.9, Math.round(bmr * 1.9)],
-  ] as const)(
-    'calculates TDEE for %s (×%s)',
-    (level, _mult, expected) => {
-      expect(calculateTDEE(bmr, level)).toBe(expected);
-    },
-  );
+  ] as const)('calculates TDEE for %s (×%s)', (level, _mult, expected) => {
+    expect(calculateTDEE(bmr, level)).toBe(expected);
+  });
 
   it('rounds result to nearest integer', () => {
     // 1345 * 1.375 = 1849.375 → 1849
@@ -224,7 +221,7 @@ describe('ACTIVITY_MULTIPLIERS', () => {
   });
 
   it('values are within physiological range', () => {
-    Object.values(ACTIVITY_MULTIPLIERS).forEach((v) => {
+    Object.values(ACTIVITY_MULTIPLIERS).forEach(v => {
       expect(v).toBeGreaterThanOrEqual(1.0);
       expect(v).toBeLessThanOrEqual(2.5);
     });

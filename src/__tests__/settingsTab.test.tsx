@@ -1,5 +1,6 @@
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+
 import { SettingsTab } from '../components/SettingsTab';
 
 // Mock notification
@@ -14,18 +15,39 @@ vi.mock('../contexts/DatabaseContext', () => ({
   DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// Mutable mock profile so individual tests can override
+let mockSettingsProfile: Record<string, unknown> | null = {
+  weightKg: 70,
+  heightCm: 170,
+  age: 30,
+  gender: 'male',
+  activityLevel: 'moderate',
+  proteinRatio: 2,
+  fatPct: 25,
+  bodyFatPct: null,
+  bmrOverride: null,
+  name: 'Test User',
+  dateOfBirth: '1995-06-15',
+};
+
 // Mock stores for SettingsMenu summary data
 vi.mock('../features/health-profile/store/healthProfileStore', () => ({
-  useHealthProfileStore: (selector: (s: Record<string, unknown>) => unknown) => selector({
-    profile: { weightKg: 70, heightCm: 170, age: 30, gender: 'male', activityLevel: 'moderate', proteinRatio: 2, fatPct: 25, bodyFatPct: null, bmrOverride: null },
-    activeGoal: null,
-  }),
+  useHealthProfileStore: (selector: (s: Record<string, unknown>) => unknown) =>
+    selector({
+      profile: mockSettingsProfile,
+      activeGoal: null,
+    }),
+}));
+
+vi.mock('../features/health-profile/types', () => ({
+  getAge: () => 30,
 }));
 
 vi.mock('../store/fitnessStore', () => ({
-  useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) => selector({
-    trainingProfile: { daysPerWeek: 5, sessionDurationMin: 60 },
-  }),
+  useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) =>
+    selector({
+      trainingProfile: { daysPerWeek: 5, sessionDurationMin: 60 },
+    }),
 }));
 
 vi.mock('../services/nutritionEngine', () => ({
@@ -38,15 +60,11 @@ vi.mock('../services/nutritionEngine', () => ({
 const mockSetTheme = vi.fn();
 
 vi.mock('../components/DataBackup', () => ({
-  DataBackup: () => (
-    <div data-testid="data-backup">DataBackup</div>
-  ),
+  DataBackup: () => <div data-testid="data-backup">DataBackup</div>,
 }));
 
 vi.mock('../components/GoogleDriveSync', () => ({
-  GoogleDriveSync: () => (
-    <div data-testid="google-drive-sync">GoogleDriveSync</div>
-  ),
+  GoogleDriveSync: () => <div data-testid="google-drive-sync">GoogleDriveSync</div>,
 }));
 
 vi.mock('../features/health-profile/components/HealthProfileForm', () => ({
@@ -61,15 +79,35 @@ vi.mock('../features/fitness/components/TrainingProfileSection', () => ({
   TrainingProfileSection: () => <div data-testid="training-profile-section">TrainingProfileSection</div>,
 }));
 
-
-
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  mockSettingsProfile = {
+    weightKg: 70,
+    heightCm: 170,
+    age: 30,
+    gender: 'male',
+    activityLevel: 'moderate',
+    proteinRatio: 2,
+    fatPct: 25,
+    bodyFatPct: null,
+    bmrOverride: null,
+    name: 'Test User',
+    dateOfBirth: '1995-06-15',
+  };
+});
 
 describe('SettingsTab', () => {
   const defaultProps = {
     theme: 'system' as const,
     setTheme: mockSetTheme,
   };
+
+  it('renders with BMR=0 and TDEE=0 when profile is null', () => {
+    mockSettingsProfile = null;
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByText(/BMR: 0/)).toBeInTheDocument();
+    expect(screen.getByText(/TDEE: 0/)).toBeInTheDocument();
+  });
 
   it('renders settings page without duplicate heading', () => {
     render(<SettingsTab {...defaultProps} />);

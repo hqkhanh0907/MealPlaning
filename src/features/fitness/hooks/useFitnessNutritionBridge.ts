@@ -1,17 +1,13 @@
 import { useMemo } from 'react';
+
+import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import i18n from '../../../i18n';
+import { calculateBMR, calculateTDEE } from '../../../services/nutritionEngine';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
-import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
-import { calculateBMR, calculateTDEE } from '../../../services/nutritionEngine';
 
 export interface FitnessNutritionInsight {
-  type:
-    | 'surplus-on-rest'
-    | 'deficit-on-training'
-    | 'protein-low'
-    | 'recovery-day'
-    | 'balanced';
+  type: 'surplus-on-rest' | 'deficit-on-training' | 'protein-low' | 'recovery-day' | 'balanced';
   title: string;
   message: string;
   severity: 'info' | 'warning' | 'success';
@@ -87,19 +83,21 @@ export interface FitnessNutritionBridgeResult {
 }
 
 export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
-  const workouts = useFitnessStore((s) => s.workouts);
-  const healthProfile = useHealthProfileStore((s) => s.profile);
+  const workouts = useFitnessStore(s => s.workouts);
+  const healthProfile = useHealthProfileStore(s => s.profile);
   const { eaten, protein } = useTodayNutrition();
 
   return useMemo(() => {
     const today = toDateString(new Date());
-    const isTrainingDay = workouts.some((w) => w.date === today);
+    const isTrainingDay = workouts.some(w => w.date === today);
 
     const weekStart = getWeekStart(new Date());
     const weekStartStr = toDateString(weekStart);
-    const weeklyTrainingLoad = workouts.filter(
-      (w) => w.date >= weekStartStr && w.date <= today,
-    ).length;
+    const weeklyTrainingLoad = workouts.filter(w => w.date >= weekStartStr && w.date <= today).length;
+
+    if (!healthProfile) {
+      return { insight: null, todayCalorieBudget: 0, isTrainingDay, weeklyTrainingLoad };
+    }
 
     const bmr = calculateBMR(
       healthProfile.weightKg,

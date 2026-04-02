@@ -1,9 +1,10 @@
-import { describe, it, expect, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { createRef } from 'react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { TrainingProfileForm } from '../features/fitness/components/TrainingProfileForm';
-import { useFitnessStore } from '../store/fitnessStore';
 import type { TrainingProfile } from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 // ---------- helpers ----------
 
@@ -81,56 +82,56 @@ describe('TrainingProfileForm – rendering', () => {
 
   it('renders days-per-week options (2–6)', () => {
     render(<TrainingProfileForm />);
-    [2, 3, 4, 5, 6].forEach((d) => {
+    [2, 3, 4, 5, 6].forEach(d => {
       expect(screen.getByTestId(`days-${d}`)).toBeInTheDocument();
     });
   });
 
   it('renders session duration options', () => {
     render(<TrainingProfileForm />);
-    [30, 45, 60, 90].forEach((d) => {
+    [30, 45, 60, 90].forEach(d => {
       expect(screen.getByTestId(`duration-${d}`)).toBeInTheDocument();
     });
   });
 
   it('renders equipment chip options', () => {
     render(<TrainingProfileForm />);
-    ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands'].forEach((eq) => {
+    ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands'].forEach(eq => {
       expect(screen.getByTestId(`equipment-${eq}`)).toBeInTheDocument();
     });
   });
 
   it('renders injury chip options', () => {
     render(<TrainingProfileForm />);
-    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach((inj) => {
+    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach(inj => {
       expect(screen.getByTestId(`injury-${inj}`)).toBeInTheDocument();
     });
   });
 
   it('renders cardio session options (0–5)', () => {
     render(<TrainingProfileForm />);
-    [0, 1, 2, 3, 4, 5].forEach((c) => {
+    [0, 1, 2, 3, 4, 5].forEach(c => {
       expect(screen.getByTestId(`cardio-${c}`)).toBeInTheDocument();
     });
   });
 
   it('renders periodization options', () => {
     render(<TrainingProfileForm />);
-    ['linear', 'undulating', 'block'].forEach((p) => {
+    ['linear', 'undulating', 'block'].forEach(p => {
       expect(screen.getByTestId(`periodization-${p}`)).toBeInTheDocument();
     });
   });
 
   it('renders cycle weeks options', () => {
     render(<TrainingProfileForm />);
-    [4, 6, 8, 12].forEach((w) => {
+    [4, 6, 8, 12].forEach(w => {
       expect(screen.getByTestId(`cycle-weeks-${w}`)).toBeInTheDocument();
     });
   });
 
   it('renders priority muscles chip options', () => {
     render(<TrainingProfileForm />);
-    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach((m) => {
+    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
       expect(screen.getByTestId(`priority-muscles-${m}`)).toBeInTheDocument();
     });
   });
@@ -180,7 +181,7 @@ describe('TrainingProfileForm – default values (no store profile)', () => {
 
   it('has no injury restrictions by default', () => {
     render(<TrainingProfileForm />);
-    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach((inj) => {
+    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach(inj => {
       expect(screen.getByTestId(`injury-${inj}`)).toHaveAttribute('aria-checked', 'false');
     });
   });
@@ -202,7 +203,7 @@ describe('TrainingProfileForm – default values (no store profile)', () => {
 
   it('has no priority muscles selected by default', () => {
     render(<TrainingProfileForm />);
-    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach((m) => {
+    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
       expect(screen.getByTestId(`priority-muscles-${m}`)).toHaveAttribute('aria-checked', 'false');
     });
   });
@@ -809,7 +810,7 @@ describe('TrainingProfileForm – full save flow', () => {
     fireEvent.click(screen.getByTestId('duration-45'));
     // Equipment: deselect defaults, select new ones
     fireEvent.click(screen.getByTestId('equipment-bodyweight')); // deselect
-    fireEvent.click(screen.getByTestId('equipment-dumbbell'));   // deselect
+    fireEvent.click(screen.getByTestId('equipment-dumbbell')); // deselect
     fireEvent.click(screen.getByTestId('equipment-machine'));
     fireEvent.click(screen.getByTestId('equipment-cable'));
     // Injuries

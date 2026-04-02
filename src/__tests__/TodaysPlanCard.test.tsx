@@ -1,15 +1,11 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { useFitnessStore } from '../store/fitnessStore';
-import { useDayPlanStore } from '../store/dayPlanStore';
-import { useNavigationStore } from '../store/navigationStore';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { TodaysPlanCard } from '../features/dashboard/components/TodaysPlanCard';
-import type {
-  TrainingPlan,
-  TrainingPlanDay,
-  Workout,
-  WorkoutSet,
-} from '../features/fitness/types';
+import type { TrainingPlan, TrainingPlanDay, Workout, WorkoutSet } from '../features/fitness/types';
+import { useDayPlanStore } from '../store/dayPlanStore';
+import { useFitnessStore } from '../store/fitnessStore';
+import { useNavigationStore } from '../store/navigationStore';
 import type { DayPlan } from '../types';
 
 vi.mock('../features/dashboard/components/WeightQuickLog', () => ({
@@ -79,9 +75,7 @@ const makePlan = (overrides: Partial<TrainingPlan> = {}): TrainingPlan => ({
   ...overrides,
 });
 
-const makePlanDay = (
-  overrides: Partial<TrainingPlanDay> = {},
-): TrainingPlanDay => ({
+const makePlanDay = (overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay => ({
   id: 'day-wed',
   planId: 'plan-1',
   dayOfWeek: 3,
@@ -164,12 +158,8 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('workout-section')).toBeInTheDocument();
-      expect(screen.getByTestId('workout-name')).toHaveTextContent(
-        'Upper Body A',
-      );
-      expect(screen.getByTestId('exercise-count')).toHaveTextContent(
-        '2 bài tập',
-      );
+      expect(screen.getByTestId('workout-name')).toHaveTextContent('Upper Body A');
+      expect(screen.getByTestId('exercise-count')).toHaveTextContent('2 bài tập');
     });
 
     it('renders start workout CTA', () => {
@@ -208,9 +198,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '2/3 bữa',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('2/3 bữa');
       expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa tối');
     });
   });
@@ -233,9 +221,7 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('workout-summary')).toBeInTheDocument();
-      expect(screen.getByTestId('workout-duration')).toHaveTextContent(
-        '65 phút',
-      );
+      expect(screen.getByTestId('workout-duration')).toHaveTextContent('65 phút');
       expect(screen.getByTestId('workout-sets')).toHaveTextContent('3 set');
     });
 
@@ -267,9 +253,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '3/3 bữaĐã đạt mục tiêu bữa ăn',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('3/3 bữaĐã đạt mục tiêu bữa ăn');
     });
   });
 
@@ -321,12 +305,8 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('quick-actions')).toBeInTheDocument();
-      expect(screen.getByTestId('log-weight-chip')).toHaveTextContent(
-        'Ghi cân nặng',
-      );
-      expect(screen.getByTestId('log-cardio-chip')).toHaveTextContent(
-        'Ghi cardio',
-      );
+      expect(screen.getByTestId('log-weight-chip')).toHaveTextContent('Ghi cân nặng');
+      expect(screen.getByTestId('log-cardio-chip')).toHaveTextContent('Ghi cardio');
     });
 
     it('log weight chip opens WeightQuickLog modal', () => {
@@ -346,9 +326,7 @@ describe('TodaysPlanCard', () => {
 
       const { pageStack } = useNavigationStore.getState();
       expect(pageStack).toHaveLength(1);
-      expect(pageStack[0]).toEqual(
-        expect.objectContaining({ component: 'CardioLogger' }),
-      );
+      expect(pageStack[0]).toEqual(expect.objectContaining({ component: 'CardioLogger' }));
     });
 
     it('shows rest day title', () => {
@@ -370,9 +348,7 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('no-plan-section')).toBeInTheDocument();
-      expect(screen.getByTestId('no-plan-section')).toHaveTextContent(
-        'Chưa có kế hoạch tập luyện',
-      );
+      expect(screen.getByTestId('no-plan-section')).toHaveTextContent('Chưa có kế hoạch tập luyện');
     });
 
     it('renders create plan CTA', () => {
@@ -396,9 +372,7 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('meals-section')).toBeInTheDocument();
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '0/3 bữa',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('0/3 bữa');
     });
   });
 
@@ -411,9 +385,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '0/3 bữa',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('0/3 bữa');
     });
 
     it('shows 1/3 when one meal logged', () => {
@@ -433,9 +405,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '1/3 bữa',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('1/3 bữa');
     });
 
     it('shows 2/3 when two meals logged', () => {
@@ -455,9 +425,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '2/3 bữa',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('2/3 bữa');
     });
 
     it('shows 3/3 with target reached when all meals logged', () => {
@@ -469,12 +437,8 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        '3/3 bữa',
-      );
-      expect(screen.getByTestId('meals-progress')).toHaveTextContent(
-        'Đã đạt mục tiêu bữa ăn',
-      );
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('3/3 bữa');
+      expect(screen.getByTestId('meals-progress')).toHaveTextContent('Đã đạt mục tiêu bữa ăn');
     });
 
     it('shows log breakfast CTA when no meals logged', () => {
@@ -568,12 +532,8 @@ describe('TodaysPlanCard', () => {
           makePlanDay({ id: 'day-s1', sessionOrder: 1, workoutType: 'Strength' }),
           makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
         ],
-        workouts: [
-          makeWorkout({ id: 'w-1', planDayId: 'day-s1' }),
-        ],
-        workoutSets: [
-          makeWorkoutSet({ id: 'set-partial-1', workoutId: 'w-1' }),
-        ],
+        workouts: [makeWorkout({ id: 'w-1', planDayId: 'day-s1' })],
+        workoutSets: [makeWorkoutSet({ id: 'set-partial-1', workoutId: 'w-1' })],
       });
     });
 
@@ -587,9 +547,7 @@ describe('TodaysPlanCard', () => {
     it('shows next uncompleted session name', () => {
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('next-session-name')).toHaveTextContent(
-        'Tiếp theo: Cardio',
-      );
+      expect(screen.getByTestId('next-session-name')).toHaveTextContent('Tiếp theo: Cardio');
     });
 
     it('renders continue session CTA', () => {
@@ -633,9 +591,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('session-info')).toHaveTextContent(
-        '2 buổi tập hôm nay',
-      );
+      expect(screen.getByTestId('session-info')).toHaveTextContent('2 buổi tập hôm nay');
     });
 
     it('does not show session info for single session in training-pending', () => {
@@ -656,10 +612,7 @@ describe('TodaysPlanCard', () => {
           makePlanDay({ id: 'day-s1', sessionOrder: 1 }),
           makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
         ],
-        workouts: [
-          makeWorkout({ id: 'w-1', planDayId: 'day-s1' }),
-          makeWorkout({ id: 'w-2', planDayId: 'day-s2' }),
-        ],
+        workouts: [makeWorkout({ id: 'w-1', planDayId: 'day-s1' }), makeWorkout({ id: 'w-2', planDayId: 'day-s2' })],
         workoutSets: [
           makeWorkoutSet({ id: 'set-c1', workoutId: 'w-1' }),
           makeWorkoutSet({ id: 'set-c2', workoutId: 'w-2' }),
@@ -668,9 +621,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('session-info')).toHaveTextContent(
-        'Hoàn thành 2/2 buổi',
-      );
+      expect(screen.getByTestId('session-info')).toHaveTextContent('Hoàn thành 2/2 buổi');
     });
 
     it('does not show session info for single session in training-completed', () => {

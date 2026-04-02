@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { DailyWeightInput } from '../features/fitness/components/DailyWeightInput';
-import { useFitnessStore } from '../store/fitnessStore';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { NotificationProvider } from '../contexts/NotificationContext';
+import { DailyWeightInput } from '../features/fitness/components/DailyWeightInput';
 import type { WeightEntry } from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
@@ -260,7 +261,7 @@ describe('DailyWeightInput', () => {
     fireEvent.click(saveBtn);
 
     const entries = useFitnessStore.getState().weightEntries;
-    const todayEntry = entries.find((e) => e.date === todayStr());
+    const todayEntry = entries.find(e => e.date === todayStr());
     expect(todayEntry).toBeDefined();
     expect(todayEntry?.weightKg).toBe(71.5);
   });
@@ -438,9 +439,7 @@ describe('DailyWeightInput', () => {
 
     renderWithNotification();
 
-    expect(
-      screen.queryByTestId('quick-select-chips'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('quick-select-chips')).not.toBeInTheDocument();
   });
 
   it('chips show unique weight values only', () => {
@@ -560,9 +559,7 @@ describe('DailyWeightInput', () => {
 
     renderWithNotification();
 
-    expect(
-      screen.queryByTestId('trend-indicator'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('trend-indicator')).not.toBeInTheDocument();
   });
 
   /* ---- Undo toast behavior ---- */
@@ -586,17 +583,13 @@ describe('DailyWeightInput', () => {
     fireEvent.click(saveBtn);
 
     const entriesAfterSave = useFitnessStore.getState().weightEntries;
-    expect(
-      entriesAfterSave.find((e) => e.date === todayStr()),
-    ).toBeDefined();
+    expect(entriesAfterSave.find(e => e.date === todayStr())).toBeDefined();
 
     const undoBtn = screen.getByText('↩ Hoàn tác');
     fireEvent.click(undoBtn);
 
     const entriesAfterUndo = useFitnessStore.getState().weightEntries;
-    expect(
-      entriesAfterUndo.find((e) => e.date === todayStr()),
-    ).toBeUndefined();
+    expect(entriesAfterUndo.find(e => e.date === todayStr())).toBeUndefined();
   });
 
   it('undo on updated entry restores previous weight', () => {

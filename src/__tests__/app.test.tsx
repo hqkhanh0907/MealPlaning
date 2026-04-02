@@ -1,11 +1,12 @@
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+
 import App from '../App';
-import type { Dish, Ingredient } from '../types';
+import { initialDishes } from '../data/initialData';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import { useDishStore } from '../store/dishStore';
 import { useMealTemplateStore } from '../store/mealTemplateStore';
-import { initialDishes } from '../data/initialData';
+import type { Dish, Ingredient } from '../types';
 
 const getLocalToday = () => {
   const now = new Date();
@@ -24,10 +25,19 @@ vi.mock('../contexts/NotificationContext', () => ({
 
 let mockThemeValue: 'light' | 'dark' | 'system' = 'light';
 
-
 // Mock ManagementTab to expose dish + ingredient callbacks for testing
 vi.mock('../components/ManagementTab', () => ({
-  ManagementTab: ({ dishes, onAddDish, onUpdateDish, onDeleteDish, onAddIngredient, onUpdateIngredient, onDeleteIngredient, isDishUsed, isIngredientUsed }: {
+  ManagementTab: ({
+    dishes,
+    onAddDish,
+    onUpdateDish,
+    onDeleteDish,
+    onAddIngredient,
+    onUpdateIngredient,
+    onDeleteIngredient,
+    isDishUsed,
+    isIngredientUsed,
+  }: {
     dishes: Dish[];
     onAddDish: (d: Dish) => void;
     onUpdateDish: (d: Dish) => void;
@@ -43,40 +53,132 @@ vi.mock('../components/ManagementTab', () => ({
       <span data-testid="dish-count">{dishes.length}</span>
       <span data-testid="dish-used-d1">{isDishUsed('d1') ? 'yes' : 'no'}</span>
       <span data-testid="ingredient-used-i1">{isIngredientUsed('i1') ? 'yes' : 'no'}</span>
-      <button data-testid="add-dish-btn" onClick={() => onAddDish({
-        id: 'new-dish', name: { vi: 'Món mới' }, ingredients: [], tags: ['lunch'],
-      })}>Add Dish</button>
-      <button data-testid="add-dish-empty-name-btn" onClick={() => onAddDish({
-        id: 'empty-dish', name: { vi: '' }, ingredients: [], tags: ['lunch'],
-      })}>Add Dish Empty Name</button>
-      <button data-testid="update-dish-btn" onClick={() => onUpdateDish({
-        id: 'd1', name: { vi: 'Cập nhật' }, ingredients: [], tags: ['dinner'],
-      })}>Update Dish</button>
-      <button data-testid="update-dish-empty-name-btn" onClick={() => onUpdateDish({
-        id: 'd1', name: { vi: '' }, ingredients: [], tags: ['dinner'],
-      })}>Update Dish Empty Name</button>
-      <button data-testid="delete-dish-btn" onClick={() => onDeleteDish('d1')}>Delete Dish</button>
-      <button data-testid="delete-ingredient-btn" onClick={() => onDeleteIngredient('i1')}>Delete Ingredient</button>
-      <button data-testid="add-ingredient-btn" onClick={() => onAddIngredient({
-        id: 'new-ing', name: { vi: 'Nguyên liệu mới' },
-        caloriesPer100: 100, proteinPer100: 10, carbsPer100: 5, fatPer100: 3, fiberPer100: 1,
-        unit: { vi: 'g' },
-      })}>Add Ingredient</button>
-      <button data-testid="add-ingredient-empty-btn" onClick={() => onAddIngredient({
-        id: 'empty-ing', name: { vi: '' },
-        caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0,
-        unit: { vi: 'g' },
-      })}>Add Ingredient Empty</button>
-      <button data-testid="update-ingredient-btn" onClick={() => onUpdateIngredient({
-        id: 'i1', name: { vi: 'Cập nhật NL' },
-        caloriesPer100: 100, proteinPer100: 10, carbsPer100: 5, fatPer100: 3, fiberPer100: 1,
-        unit: { vi: 'g' },
-      })}>Update Ingredient</button>
-      <button data-testid="update-ingredient-empty-btn" onClick={() => onUpdateIngredient({
-        id: 'i1', name: { vi: '' },
-        caloriesPer100: 0, proteinPer100: 0, carbsPer100: 0, fatPer100: 0, fiberPer100: 0,
-        unit: { vi: 'g' },
-      })}>Update Ingredient Empty</button>
+      <button
+        data-testid="add-dish-btn"
+        onClick={() =>
+          onAddDish({
+            id: 'new-dish',
+            name: { vi: 'Món mới' },
+            ingredients: [],
+            tags: ['lunch'],
+          })
+        }
+      >
+        Add Dish
+      </button>
+      <button
+        data-testid="add-dish-empty-name-btn"
+        onClick={() =>
+          onAddDish({
+            id: 'empty-dish',
+            name: { vi: '' },
+            ingredients: [],
+            tags: ['lunch'],
+          })
+        }
+      >
+        Add Dish Empty Name
+      </button>
+      <button
+        data-testid="update-dish-btn"
+        onClick={() =>
+          onUpdateDish({
+            id: 'd1',
+            name: { vi: 'Cập nhật' },
+            ingredients: [],
+            tags: ['dinner'],
+          })
+        }
+      >
+        Update Dish
+      </button>
+      <button
+        data-testid="update-dish-empty-name-btn"
+        onClick={() =>
+          onUpdateDish({
+            id: 'd1',
+            name: { vi: '' },
+            ingredients: [],
+            tags: ['dinner'],
+          })
+        }
+      >
+        Update Dish Empty Name
+      </button>
+      <button data-testid="delete-dish-btn" onClick={() => onDeleteDish('d1')}>
+        Delete Dish
+      </button>
+      <button data-testid="delete-ingredient-btn" onClick={() => onDeleteIngredient('i1')}>
+        Delete Ingredient
+      </button>
+      <button
+        data-testid="add-ingredient-btn"
+        onClick={() =>
+          onAddIngredient({
+            id: 'new-ing',
+            name: { vi: 'Nguyên liệu mới' },
+            caloriesPer100: 100,
+            proteinPer100: 10,
+            carbsPer100: 5,
+            fatPer100: 3,
+            fiberPer100: 1,
+            unit: { vi: 'g' },
+          })
+        }
+      >
+        Add Ingredient
+      </button>
+      <button
+        data-testid="add-ingredient-empty-btn"
+        onClick={() =>
+          onAddIngredient({
+            id: 'empty-ing',
+            name: { vi: '' },
+            caloriesPer100: 0,
+            proteinPer100: 0,
+            carbsPer100: 0,
+            fatPer100: 0,
+            fiberPer100: 0,
+            unit: { vi: 'g' },
+          })
+        }
+      >
+        Add Ingredient Empty
+      </button>
+      <button
+        data-testid="update-ingredient-btn"
+        onClick={() =>
+          onUpdateIngredient({
+            id: 'i1',
+            name: { vi: 'Cập nhật NL' },
+            caloriesPer100: 100,
+            proteinPer100: 10,
+            carbsPer100: 5,
+            fatPer100: 3,
+            fiberPer100: 1,
+            unit: { vi: 'g' },
+          })
+        }
+      >
+        Update Ingredient
+      </button>
+      <button
+        data-testid="update-ingredient-empty-btn"
+        onClick={() =>
+          onUpdateIngredient({
+            id: 'i1',
+            name: { vi: '' },
+            caloriesPer100: 0,
+            proteinPer100: 0,
+            carbsPer100: 0,
+            fatPer100: 0,
+            fiberPer100: 0,
+            unit: { vi: 'g' },
+          })
+        }
+      >
+        Update Ingredient Empty
+      </button>
     </div>
   ),
 }));
@@ -94,8 +196,7 @@ vi.mock('../contexts/DatabaseContext', () => ({
   }),
 }));
 vi.mock('../store/appOnboardingStore', () => ({
-  useAppOnboardingStore: (selector: (s: { isAppOnboarded: boolean }) => boolean) =>
-    selector({ isAppOnboarded: true }),
+  useAppOnboardingStore: (selector: (s: { isAppOnboarded: boolean }) => boolean) => selector({ isAppOnboarded: true }),
 }));
 vi.mock('../hooks/useAutoSync', () => ({
   useAutoSync: () => ({ syncStatus: 'idle', lastSyncAt: null, triggerUpload: vi.fn(), triggerDownload: vi.fn() }),
@@ -121,7 +222,9 @@ vi.mock('../hooks/useAISuggestion', () => ({
 // Mock heavy child components to keep test fast
 vi.mock('../components/modals/AISuggestionPreviewModal', () => ({
   AISuggestionPreviewModal: ({ onEditMeal }: { onEditMeal: (type: string) => void }) => (
-    <button data-testid="ai-edit-meal" onClick={() => onEditMeal('lunch')}>Edit AI Meal</button>
+    <button data-testid="ai-edit-meal" onClick={() => onEditMeal('lunch')}>
+      Edit AI Meal
+    </button>
   ),
 }));
 
@@ -134,10 +237,52 @@ vi.mock('../components/AIImageAnalyzer', () => ({
     capturedAnalysisComplete = onAnalysisComplete;
     return (
       <div data-testid="ai-image-analyzer">
-        <button data-testid="ai-complete" onClick={() => onAnalysisComplete()}>Complete Analysis</button>
-        <button data-testid="ai-save-dish" onClick={() => onSave({ name: 'Test Dish', ingredients: [{ name: 'ZUniqueTestIng999', amount: 200, unit: 'g', nutritionPerStandardUnit: { calories: 165, protein: 31, fat: 3.6, carbs: 0, fiber: 0 } }], tags: ['lunch'] })}>Save as Dish</button>
-        <button data-testid="ai-save-dish-no-tags" onClick={() => onSave({ name: 'No Tags Dish', ingredients: [{ name: 'ZUniqueNoTag777', amount: 100, unit: 'g', nutritionPerStandardUnit: { calories: 50, protein: 5, carbs: 10, fat: 2, fiber: 1 } }] })}>Save No Tags</button>
-        <button data-testid="ai-save-ingredients" onClick={() => onSave({ name: 'Test', ingredients: [], tags: ['lunch'], shouldCreateDish: false })}>Save Ingredients Only</button>
+        <button data-testid="ai-complete" onClick={() => onAnalysisComplete()}>
+          Complete Analysis
+        </button>
+        <button
+          data-testid="ai-save-dish"
+          onClick={() =>
+            onSave({
+              name: 'Test Dish',
+              ingredients: [
+                {
+                  name: 'ZUniqueTestIng999',
+                  amount: 200,
+                  unit: 'g',
+                  nutritionPerStandardUnit: { calories: 165, protein: 31, fat: 3.6, carbs: 0, fiber: 0 },
+                },
+              ],
+              tags: ['lunch'],
+            })
+          }
+        >
+          Save as Dish
+        </button>
+        <button
+          data-testid="ai-save-dish-no-tags"
+          onClick={() =>
+            onSave({
+              name: 'No Tags Dish',
+              ingredients: [
+                {
+                  name: 'ZUniqueNoTag777',
+                  amount: 100,
+                  unit: 'g',
+                  nutritionPerStandardUnit: { calories: 50, protein: 5, carbs: 10, fat: 2, fiber: 1 },
+                },
+              ],
+            })
+          }
+        >
+          Save No Tags
+        </button>
+        <button
+          data-testid="ai-save-ingredients"
+          onClick={() => onSave({ name: 'Test', ingredients: [], tags: ['lunch'], shouldCreateDish: false })}
+        >
+          Save Ingredients Only
+        </button>
       </div>
     );
   },
@@ -148,7 +293,11 @@ vi.mock('../components/SettingsTab', () => ({
   SettingsTab: ({ theme, setTheme }: { theme?: string; setTheme?: (t: string) => void }) => (
     <div data-testid="settings-tab">
       {theme && <span data-testid="current-theme">{theme}</span>}
-      {setTheme && <button data-testid="btn-theme-light" onClick={() => setTheme('light')}>Light</button>}
+      {setTheme && (
+        <button data-testid="btn-theme-light" onClick={() => setTheme('light')}>
+          Light
+        </button>
+      )}
     </div>
   ),
 }));
@@ -170,7 +319,9 @@ vi.mock('../features/dashboard/components/DashboardTab', () => ({
 vi.mock('../components/modals/ClearPlanModal', () => ({
   ClearPlanModal: ({ onClear }: { onClear: (scope: 'day' | 'week' | 'month') => void }) => (
     <div data-testid="clear-plan-modal">
-      <button data-testid="clear-scope-day" onClick={() => onClear('day')}>Clear Day</button>
+      <button data-testid="clear-scope-day" onClick={() => onClear('day')}>
+        Clear Day
+      </button>
     </div>
   ),
 }));
@@ -310,8 +461,6 @@ describe('App', () => {
     expect(mockNotify.success).not.toHaveBeenCalled();
   });
 
-
-
   it('navigates to dashboard tab and renders content', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
@@ -321,9 +470,7 @@ describe('App', () => {
   });
 
   it('navigates to dashboard tab and renders content', async () => {
-    localStorage.setItem('mp-dishes', JSON.stringify([
-      { id: 'd99', name: 'Old Dish', ingredients: [], tags: [] },
-    ]));
+    localStorage.setItem('mp-dishes', JSON.stringify([{ id: 'd99', name: 'Old Dish', ingredients: [], tags: [] }]));
     render(<App />);
     expect(screen.getAllByRole('tablist').length).toBeGreaterThanOrEqual(1);
     localStorage.removeItem('mp-dishes');
@@ -347,7 +494,6 @@ describe('App', () => {
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
-
   it('onDeleteDish removes the dish from state', async () => {
     render(<App />);
     const initialCount = Number(screen.getByTestId('dish-count').textContent);
@@ -356,7 +502,6 @@ describe('App', () => {
       expect(Number(screen.getByTestId('dish-count').textContent)).toBe(initialCount - 1);
     });
   });
-
 
   it('isDishUsed returns true when dish is used in a plan', () => {
     render(<App />);
@@ -388,18 +533,24 @@ describe('App', () => {
     // Verify we left the AI tab
     await waitFor(() => expect(screen.queryByTestId('ai-image-analyzer')).not.toBeInTheDocument());
     // Call captured callback; activeMainTabRef.current should now be 'calendar'
-    act(() => { if (capturedAnalysisComplete) capturedAnalysisComplete(); });
+    act(() => {
+      if (capturedAnalysisComplete) capturedAnalysisComplete();
+    });
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
   it('handleClearPlan clears plans via ClearPlanModal', async () => {
     // Seed a day plan so the clear button is visible
-    useDayPlanStore.setState({ dayPlans: [{
-      date: getLocalToday(),
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: getLocalToday(),
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     render(<App />);
     // Open more-actions menu first (buttons are in dropdown)
     await waitFor(() => {
@@ -417,12 +568,16 @@ describe('App', () => {
   });
 
   it('undo restores plans after clear', async () => {
-    useDayPlanStore.setState({ dayPlans: [{
-      date: getLocalToday(),
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: getLocalToday(),
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => {
       expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument();
@@ -441,7 +596,9 @@ describe('App', () => {
     expect(options).toBeDefined();
     expect(options.action).toBeDefined();
     // Execute the undo callback
-    act(() => { options.action.onClick(); });
+    act(() => {
+      options.action.onClick();
+    });
     // Undo should trigger another success notification
     expect(mockNotify.success).toHaveBeenCalledTimes(mockNotify.success.mock.calls.length);
   });
@@ -450,10 +607,12 @@ describe('App', () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-    useDayPlanStore.setState({ dayPlans: [
-      { date: yesterdayStr, breakfastDishIds: ['quick1'], lunchDishIds: [], dinnerDishIds: [] },
-      { date: getLocalToday(), breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] },
-    ] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        { date: yesterdayStr, breakfastDishIds: ['quick1'], lunchDishIds: [], dinnerDishIds: [] },
+        { date: getLocalToday(), breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] },
+      ],
+    });
     useDishStore.getState().addDish({ id: 'quick1', name: { vi: 'Quick Dish' }, ingredients: [], tags: [] });
     render(<App />);
     // Wait for the recent dishes section
@@ -483,7 +642,9 @@ describe('App', () => {
     if (calTab) fireEvent.click(calTab);
     await waitFor(() => expect(screen.queryByTestId('ai-image-analyzer')).not.toBeInTheDocument());
     // Call the captured callback from non-AI tab
-    act(() => { if (capturedAnalysisComplete) capturedAnalysisComplete(); });
+    act(() => {
+      if (capturedAnalysisComplete) capturedAnalysisComplete();
+    });
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
@@ -504,7 +665,6 @@ describe('App', () => {
     await waitFor(() => screen.getByTestId('btn-confirm-plan'));
   });
 
-
   it('handleSaveAnalyzedDish without tags defaults to lunch', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
@@ -524,9 +684,13 @@ describe('App', () => {
     const calTab = navTabs.find(b => b.textContent?.includes('Lịch trình'));
     if (calTab) fireEvent.click(calTab);
     await waitFor(() => expect(screen.queryByTestId('ai-image-analyzer')).not.toBeInTheDocument());
-    act(() => { if (capturedAnalysisComplete) capturedAnalysisComplete(); });
+    act(() => {
+      if (capturedAnalysisComplete) capturedAnalysisComplete();
+    });
     const onClickArg = (mockNotify.success.mock.calls[0][2] as { onClick: () => void })?.onClick;
-    act(() => { if (onClickArg) onClickArg(); });
+    act(() => {
+      if (onClickArg) onClickArg();
+    });
     await waitFor(() => screen.getByTestId('ai-image-analyzer'));
   });
 
@@ -542,15 +706,18 @@ describe('App', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument();
   });
 
-
   it('opens copy plan modal and copies plan', async () => {
     const today = getLocalToday();
-    useDayPlanStore.setState({ dayPlans: [{
-      date: today,
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: today,
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -564,12 +731,16 @@ describe('App', () => {
 
   it('undo copy plan restores previous state', async () => {
     const today = getLocalToday();
-    useDayPlanStore.setState({ dayPlans: [{
-      date: today,
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: today,
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -581,7 +752,9 @@ describe('App', () => {
     const successCall = mockNotify.success.mock.calls[mockNotify.success.mock.calls.length - 1];
     const undoAction = successCall[2]?.action;
     expect(undoAction).toBeDefined();
-    act(() => { undoAction.onClick(); });
+    act(() => {
+      undoAction.onClick();
+    });
     expect(mockNotify.info).toHaveBeenCalled();
   });
 
@@ -596,12 +769,16 @@ describe('App', () => {
 
   it('saves current plan as template via save template modal', async () => {
     const today = getLocalToday();
-    useDayPlanStore.setState({ dayPlans: [{
-      date: today,
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: today,
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -627,14 +804,18 @@ describe('App', () => {
 
   it('template apply adds new plan when no existing plan for date', async () => {
     // No day plans seeded — applying template should create a new plan
-    useMealTemplateStore.setState({ templates: [{
-      id: 'tpl-test',
-      name: 'Preset',
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-      createdAt: new Date().toISOString(),
-    }] });
+    useMealTemplateStore.setState({
+      templates: [
+        {
+          id: 'tpl-test',
+          name: 'Preset',
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -648,19 +829,46 @@ describe('App', () => {
 
   it('template manager applies, deletes and renames templates', async () => {
     const today = getLocalToday();
-    useDayPlanStore.setState({ dayPlans: [{
-      date: today,
-      breakfastDishIds: ['d1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: today,
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     // Pre-seed templates so the manager has data
     const now = new Date().toISOString();
-    useMealTemplateStore.setState({ templates: [
-      { id: 'tpl-1', name: 'Test Template', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [], createdAt: now },
-      { id: 'tpl-2', name: 'Template Delete', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [], createdAt: now },
-      { id: 'tpl-3', name: 'Template Rename', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [], createdAt: now },
-    ] });
+    useMealTemplateStore.setState({
+      templates: [
+        {
+          id: 'tpl-1',
+          name: 'Test Template',
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+          createdAt: now,
+        },
+        {
+          id: 'tpl-2',
+          name: 'Template Delete',
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+          createdAt: now,
+        },
+        {
+          id: 'tpl-3',
+          name: 'Template Rename',
+          breakfastDishIds: ['d1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+          createdAt: now,
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
 
@@ -728,12 +936,16 @@ describe('App', () => {
 
   it('handleUpdateServings updates serving count for a dish', async () => {
     useDishStore.getState().addDish({ id: 'srv1', name: { vi: 'Serving Dish' }, ingredients: [], tags: ['breakfast'] });
-    useDayPlanStore.setState({ dayPlans: [{
-      date: getLocalToday(),
-      breakfastDishIds: ['srv1'],
-      lunchDishIds: [],
-      dinnerDishIds: [],
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: getLocalToday(),
+          breakfastDishIds: ['srv1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => {
       expect(screen.getByTestId('serving-count-srv1')).toBeInTheDocument();
@@ -749,13 +961,17 @@ describe('App', () => {
 
   it('handleUpdateServings removes serving entry when reset to 1', async () => {
     useDishStore.getState().addDish({ id: 'srv2', name: { vi: 'Reset Dish' }, ingredients: [], tags: ['lunch'] });
-    useDayPlanStore.setState({ dayPlans: [{
-      date: getLocalToday(),
-      breakfastDishIds: [],
-      lunchDishIds: ['srv2'],
-      dinnerDishIds: [],
-      servings: { srv2: 2 },
-    }] });
+    useDayPlanStore.setState({
+      dayPlans: [
+        {
+          date: getLocalToday(),
+          breakfastDishIds: [],
+          lunchDishIds: ['srv2'],
+          dinnerDishIds: [],
+          servings: { srv2: 2 },
+        },
+      ],
+    });
     render(<App />);
     await waitFor(() => {
       expect(screen.getByTestId('serving-count-srv2')).toBeInTheDocument();

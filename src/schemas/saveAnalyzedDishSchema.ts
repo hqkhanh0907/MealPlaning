@@ -33,10 +33,10 @@ export const saveAnalyzedDishSchema = z
     dishTags: z.array(z.enum(MEAL_TYPE_VALUES)),
     ingredients: z.array(ingredientNutritionSchema).min(1),
   })
-  .refine(
-    (data) => !data.saveDish || data.dishTags.length > 0,
-    { error: 'At least one meal tag is required when saving dish', path: ['dishTags'] },
-  );
+  .refine(data => !data.saveDish || data.dishTags.length > 0, {
+    error: 'At least one meal tag is required when saving dish',
+    path: ['dishTags'],
+  });
 
 export type SaveAnalyzedDishFormData = z.infer<typeof saveAnalyzedDishSchema>;
 

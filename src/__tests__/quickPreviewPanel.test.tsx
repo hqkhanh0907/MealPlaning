@@ -1,19 +1,78 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { QuickPreviewPanel } from '../components/QuickPreviewPanel';
 import type { DayPlan, Dish, Ingredient, MealType } from '../types';
 
 const ingredients: Ingredient[] = [
-  { id: 'i1', name: { vi: 'Ức gà', en: 'Chicken breast' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0, unit: { vi: 'g', en: 'g' } },
-  { id: 'i2', name: { vi: 'Cơm trắng', en: 'White rice' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4, unit: { vi: 'g', en: 'g' } },
-  { id: 'i3', name: { vi: 'Rau xà lách', en: 'Lettuce' }, caloriesPer100: 15, proteinPer100: 1.4, carbsPer100: 2.9, fatPer100: 0.2, fiberPer100: 1.3, unit: { vi: 'g', en: 'g' } },
+  {
+    id: 'i1',
+    name: { vi: 'Ức gà', en: 'Chicken breast' },
+    caloriesPer100: 165,
+    proteinPer100: 31,
+    carbsPer100: 0,
+    fatPer100: 3.6,
+    fiberPer100: 0,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i2',
+    name: { vi: 'Cơm trắng', en: 'White rice' },
+    caloriesPer100: 130,
+    proteinPer100: 2.7,
+    carbsPer100: 28,
+    fatPer100: 0.3,
+    fiberPer100: 0.4,
+    unit: { vi: 'g', en: 'g' },
+  },
+  {
+    id: 'i3',
+    name: { vi: 'Rau xà lách', en: 'Lettuce' },
+    caloriesPer100: 15,
+    proteinPer100: 1.4,
+    carbsPer100: 2.9,
+    fatPer100: 0.2,
+    fiberPer100: 1.3,
+    unit: { vi: 'g', en: 'g' },
+  },
 ];
 
 const dishes: Dish[] = [
-  { id: 'd1', name: { vi: 'Gà nướng', en: 'Grilled chicken' }, ingredients: [{ ingredientId: 'i1', amount: 200 }], tags: ['breakfast'] },
-  { id: 'd2', name: { vi: 'Cơm gà', en: 'Chicken rice' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i2', amount: 150 }], tags: ['lunch'] },
-  { id: 'd3', name: { vi: 'Salad gà', en: 'Chicken salad' }, ingredients: [{ ingredientId: 'i1', amount: 100 }, { ingredientId: 'i3', amount: 100 }], tags: ['dinner'] },
-  { id: 'd4', name: { vi: 'Cơm chiên', en: 'Fried rice' }, ingredients: [{ ingredientId: 'i2', amount: 200 }], tags: ['lunch'] },
-  { id: 'd5', name: { vi: 'Trứng luộc', en: 'Boiled egg' }, ingredients: [{ ingredientId: 'i1', amount: 50 }], tags: ['breakfast'] },
+  {
+    id: 'd1',
+    name: { vi: 'Gà nướng', en: 'Grilled chicken' },
+    ingredients: [{ ingredientId: 'i1', amount: 200 }],
+    tags: ['breakfast'],
+  },
+  {
+    id: 'd2',
+    name: { vi: 'Cơm gà', en: 'Chicken rice' },
+    ingredients: [
+      { ingredientId: 'i1', amount: 100 },
+      { ingredientId: 'i2', amount: 150 },
+    ],
+    tags: ['lunch'],
+  },
+  {
+    id: 'd3',
+    name: { vi: 'Salad gà', en: 'Chicken salad' },
+    ingredients: [
+      { ingredientId: 'i1', amount: 100 },
+      { ingredientId: 'i3', amount: 100 },
+    ],
+    tags: ['dinner'],
+  },
+  {
+    id: 'd4',
+    name: { vi: 'Cơm chiên', en: 'Fried rice' },
+    ingredients: [{ ingredientId: 'i2', amount: 200 }],
+    tags: ['lunch'],
+  },
+  {
+    id: 'd5',
+    name: { vi: 'Trứng luộc', en: 'Boiled egg' },
+    ingredients: [{ ingredientId: 'i1', amount: 50 }],
+    tags: ['breakfast'],
+  },
 ];
 
 const emptyPlan: DayPlan = {
@@ -44,7 +103,10 @@ const planWithManyDishes: DayPlan = {
   dinnerDishIds: [],
 };
 
-const renderPanel = (plan: DayPlan, overrides?: Partial<{ onPlanMeal: (t: MealType) => void; onPlanAll: () => void }>) => {
+const renderPanel = (
+  plan: DayPlan,
+  overrides?: Partial<{ onPlanMeal: (t: MealType) => void; onPlanAll: () => void }>,
+) => {
   const onPlanMeal = overrides?.onPlanMeal ?? vi.fn();
   const onPlanAll = overrides?.onPlanAll ?? vi.fn();
   return {

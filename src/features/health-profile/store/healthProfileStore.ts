@@ -1,7 +1,7 @@
 import { create } from 'zustand';
+
 import type { DatabaseService } from '../../../services/databaseService';
-import type { HealthProfile, Goal } from '../types';
-import { DEFAULT_HEALTH_PROFILE } from '../types';
+import type { Goal, HealthProfile } from '../types';
 
 /* ------------------------------------------------------------------ */
 /*  SQLite row types (snake_case)                                      */
@@ -77,7 +77,7 @@ function rowToGoal(row: GoalRow): Goal {
 /*  Store interface                                                     */
 /* ------------------------------------------------------------------ */
 export interface HealthProfileState {
-  profile: HealthProfile;
+  profile: HealthProfile | null;
   activeGoal: Goal | null;
   loading: boolean;
 
@@ -92,18 +92,16 @@ export interface HealthProfileState {
 /* ------------------------------------------------------------------ */
 /*  Store implementation                                                */
 /* ------------------------------------------------------------------ */
-export const useHealthProfileStore = create<HealthProfileState>((set) => ({
-  profile: { ...DEFAULT_HEALTH_PROFILE },
+export const useHealthProfileStore = create<HealthProfileState>(set => ({
+  profile: null,
   activeGoal: null,
   loading: false,
 
   loadProfile: async (db: DatabaseService) => {
     set({ loading: true });
     try {
-      const row = await db.queryOne<ProfileRow>(
-        "SELECT * FROM user_profile WHERE id = 'default'",
-      );
-      set({ profile: row ? rowToProfile(row) : { ...DEFAULT_HEALTH_PROFILE } });
+      const row = await db.queryOne<ProfileRow>("SELECT * FROM user_profile WHERE id = 'default'");
+      set({ profile: row ? rowToProfile(row) : null });
     } finally {
       set({ loading: false });
     }
@@ -143,9 +141,7 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
   loadActiveGoal: async (db: DatabaseService) => {
     set({ loading: true });
     try {
-      const row = await db.queryOne<GoalRow>(
-        'SELECT * FROM goals WHERE is_active = 1 LIMIT 1',
-      );
+      const row = await db.queryOne<GoalRow>('SELECT * FROM goals WHERE is_active = 1 LIMIT 1');
       set({ activeGoal: row ? rowToGoal(row) : null });
     } finally {
       set({ loading: false });
@@ -155,9 +151,7 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
   saveGoal: async (db: DatabaseService, goal: Goal) => {
     const now = new Date().toISOString();
 
-    await db.execute('UPDATE goals SET is_active = 0, updated_at = ? WHERE is_active = 1', [
-      now,
-    ]);
+    await db.execute('UPDATE goals SET is_active = 0, updated_at = ? WHERE is_active = 1', [now]);
 
     const saved: Goal = { ...goal, isActive: true, updatedAt: now };
 
@@ -185,9 +179,7 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
 
   deactivateAllGoals: async (db: DatabaseService) => {
     const now = new Date().toISOString();
-    await db.execute('UPDATE goals SET is_active = 0, updated_at = ? WHERE is_active = 1', [
-      now,
-    ]);
+    await db.execute('UPDATE goals SET is_active = 0, updated_at = ? WHERE is_active = 1', [now]);
     set({ activeGoal: null });
   },
 }));

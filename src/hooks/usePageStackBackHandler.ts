@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useNavigationStore } from '../store/navigationStore';
+
 import { pushBackEntry, removeBackEntries } from '../services/backNavigationService';
+import { useNavigationStore } from '../store/navigationStore';
 
 /**
  * Syncs navigationStore.pageStack with the centralized back navigation service.

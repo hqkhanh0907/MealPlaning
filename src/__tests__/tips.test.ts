@@ -1,17 +1,18 @@
-import { getDynamicTips } from '../utils/tips';
-import { DayNutritionSummary, SlotInfo } from '../types';
-import i18n from '../i18n';
 import {
-  ClipboardList,
   AlertTriangle,
-  TrendingDown,
-  Dumbbell,
   Beef,
-  Leaf,
-  Droplets,
-  FileText,
   CheckCircle2,
+  ClipboardList,
+  Droplets,
+  Dumbbell,
+  FileText,
+  Leaf,
+  TrendingDown,
 } from 'lucide-react';
+
+import i18n from '../i18n';
+import { DayNutritionSummary, SlotInfo } from '../types';
+import { getDynamicTips } from '../utils/tips';
 
 const t = i18n.t.bind(i18n);
 
@@ -225,15 +226,7 @@ describe('getDynamicTips', () => {
   });
 
   it('handles zero calories gracefully (no calorie tip)', () => {
-    const tips = getDynamicTips(
-      makeDay(
-        { calories: 0, protein: 0 },
-        {}, {},
-      ),
-      TARGET_CAL,
-      TARGET_PROT,
-      t,
-    );
+    const tips = getDynamicTips(makeDay({ calories: 0, protein: 0 }, {}, {}), TARGET_CAL, TARGET_PROT, t);
     // Should not crash, should have missing meals tip
     const calorieTip = tips.find(t => t.icon === AlertTriangle || t.icon === TrendingDown);
     expect(calorieTip).toBeUndefined();

@@ -1,9 +1,10 @@
+import { BookOpen } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BookOpen } from 'lucide-react';
-import { Ingredient, Dish } from '../types';
-import { IngredientManager } from './IngredientManager';
+
+import { Dish, Ingredient } from '../types';
 import { DishManager } from './DishManager';
+import { IngredientManager } from './IngredientManager';
 
 type SubTab = 'ingredients' | 'dishes';
 
@@ -23,10 +24,18 @@ interface ManagementTabProps {
 }
 
 export const ManagementTab = React.memo(function ManagementTab({
-  activeSubTab, onSubTabChange,
-  ingredients, dishes,
-  onAddIngredient, onUpdateIngredient, onDeleteIngredient, isIngredientUsed,
-  onAddDish, onUpdateDish, onDeleteDish, isDishUsed,
+  activeSubTab,
+  onSubTabChange,
+  ingredients,
+  dishes,
+  onAddIngredient,
+  onUpdateIngredient,
+  onDeleteIngredient,
+  isIngredientUsed,
+  onAddDish,
+  onUpdateDish,
+  onDeleteDish,
+  isDishUsed,
 }: ManagementTabProps) {
   const { t } = useTranslation();
 
@@ -37,18 +46,18 @@ export const ManagementTab = React.memo(function ManagementTab({
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
+      <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
         <div className="flex items-center gap-3">
-          <BookOpen className="w-6 h-6 text-emerald-500 shrink-0" />
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{t('management.title')}</h2>
+          <BookOpen className="h-6 w-6 shrink-0 text-emerald-500" />
+          <h2 className="text-xl font-bold text-slate-800 sm:text-2xl dark:text-slate-100">{t('management.title')}</h2>
         </div>
-        <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-hide bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex-nowrap">
+        <div className="scrollbar-hide flex w-full flex-nowrap overflow-x-auto rounded-xl bg-slate-100 p-1 sm:w-auto dark:bg-slate-800">
           {SUB_TABS.map(tab => (
             <button
               key={tab.key}
               data-testid={`tab-management-${tab.key}`}
               onClick={() => onSubTabChange(tab.key)}
-              className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-bold transition-all whitespace-nowrap min-h-11 sm:min-h-0 ${activeSubTab === tab.key ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'}`}
+              className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all sm:min-h-0 sm:flex-initial sm:py-1.5 sm:text-xs ${activeSubTab === tab.key ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-400' : 'text-slate-500 active:bg-slate-200 dark:text-slate-400 dark:active:bg-slate-600'}`}
             >
               {tab.label}
             </button>
@@ -58,17 +67,23 @@ export const ManagementTab = React.memo(function ManagementTab({
 
       {activeSubTab === 'dishes' && (
         <DishManager
-          dishes={dishes} ingredients={ingredients}
-          onAdd={onAddDish} onUpdate={onUpdateDish}
-          onDelete={onDeleteDish} isUsed={isDishUsed}
+          dishes={dishes}
+          ingredients={ingredients}
+          onAdd={onAddDish}
+          onUpdate={onUpdateDish}
+          onDelete={onDeleteDish}
+          isUsed={isDishUsed}
           onCreateIngredient={onAddIngredient}
         />
       )}
       {activeSubTab === 'ingredients' && (
         <IngredientManager
-          ingredients={ingredients} dishes={dishes}
-          onAdd={onAddIngredient} onUpdate={onUpdateIngredient}
-          onDelete={onDeleteIngredient} isUsed={isIngredientUsed}
+          ingredients={ingredients}
+          dishes={dishes}
+          onAdd={onAddIngredient}
+          onUpdate={onUpdateIngredient}
+          onDelete={onDeleteIngredient}
+          isUsed={isIngredientUsed}
         />
       )}
     </div>

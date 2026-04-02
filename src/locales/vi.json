@@ -1277,7 +1277,11 @@
     "saved": "Đã lưu",
     "other": "Khác",
     "goalWeightConflictCut": "Cân nặng hiện tại đã thấp hơn hoặc bằng mục tiêu giảm cân. Hãy cập nhật lại mục tiêu của bạn.",
-    "goalWeightConflictBulk": "Cân nặng hiện tại đã cao hơn hoặc bằng mục tiêu tăng cân. Hãy cập nhật lại mục tiêu của bạn."
+    "goalWeightConflictBulk": "Cân nặng hiện tại đã cao hơn hoặc bằng mục tiêu tăng cân. Hãy cập nhật lại mục tiêu của bạn.",
+    "name": "Tên",
+    "dateOfBirth": "Ngày sinh",
+    "notSet": "Chưa thiết lập",
+    "notConfigured": "Chưa thiết lập hồ sơ sức khỏe"
   },
   "insightCard": {
     "dismiss": "Bỏ qua"

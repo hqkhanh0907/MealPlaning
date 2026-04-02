@@ -1,20 +1,22 @@
+import {
+  CheckCircle,
+  ChevronRight,
+  Droplets,
+  Dumbbell,
+  Footprints,
+  Play,
+  RotateCw,
+  UtensilsCrossed,
+} from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Play,
-  CheckCircle,
-  Dumbbell,
-  UtensilsCrossed,
-  ChevronRight,
-  Footprints,
-  Droplets,
-  RotateCw,
-} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { useTodaysPlan } from '../hooks/useTodaysPlan';
+
 import { useNavigationStore } from '../../../store/navigationStore';
-import { WeightQuickLog } from './WeightQuickLog';
 import { translateWorkoutType } from '../../fitness/utils/translateWorkoutType';
+import { useTodaysPlan } from '../hooks/useTodaysPlan';
+import { WeightQuickLog } from './WeightQuickLog';
 
 const MEAL_LOG_KEYS: Record<string, string> = {
   breakfast: 'dashboard.todaysPlan.logBreakfast',
@@ -22,8 +24,7 @@ const MEAL_LOG_KEYS: Record<string, string> = {
   dinner: 'dashboard.todaysPlan.logDinner',
 };
 
-const CARD_CLASS =
-  'bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4';
+const CARD_CLASS = 'bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4';
 
 function SessionInfo({
   totalSessions,
@@ -46,10 +47,7 @@ function SessionInfo({
       : t('dashboard.todaysPlan.sessionsToday', { count: totalSessions });
 
   return (
-    <p
-      data-testid="session-info"
-      className="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-    >
+    <p data-testid="session-info" className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
       {text}
     </p>
   );
@@ -69,29 +67,24 @@ function MealsSection({
   onLogMeal?: () => void;
 }>) {
   const { t } = useTranslation();
-  const nextMealKey = nextMealToLog
-    ? MEAL_LOG_KEYS[nextMealToLog]
-    : undefined;
+  const nextMealKey = nextMealToLog ? MEAL_LOG_KEYS[nextMealToLog] : undefined;
 
   return (
     <div data-testid="meals-section">
-      <div className="flex items-center gap-1.5 mb-2">
-        <UtensilsCrossed className="w-4 h-4 text-orange-500" aria-hidden="true" />
+      <div className="mb-2 flex items-center gap-1.5">
+        <UtensilsCrossed className="h-4 w-4 text-orange-500" aria-hidden="true" />
         <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
           {t('dashboard.todaysPlan.meals')}
         </span>
       </div>
-      <div
-        data-testid="meals-progress"
-        className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-      >
+      <div data-testid="meals-progress" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
         {t('dashboard.todaysPlan.mealsProgress', {
           logged: mealsLogged,
           total: totalMealsPlanned,
         })}
         {hasReachedTarget && (
-          <span className="inline-flex items-center gap-1 ml-1 text-emerald-600 dark:text-emerald-400">
-            <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />
+          <span className="ml-1 inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+            <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
             {t('dashboard.todaysPlan.mealsReachedTarget')}
           </span>
         )}
@@ -114,8 +107,8 @@ function MealsSection({
 const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   const { t } = useTranslation();
   const data = useTodaysPlan();
-  const pushPage = useNavigationStore((s) => s.pushPage);
-  const navigateTab = useNavigationStore((s) => s.navigateTab);
+  const pushPage = useNavigationStore(s => s.pushPage);
+  const navigateTab = useNavigationStore(s => s.navigateTab);
   const [showWeightLog, setShowWeightLog] = useState(false);
 
   const handleStartWorkout = useCallback(() => {
@@ -154,30 +147,24 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     return (
       <>
         <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+          <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
             {t('dashboard.todaysPlan.title')}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="workout-section">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Dumbbell className="w-4 h-4 text-blue-500" aria-hidden="true" />
+              <div className="mb-2 flex items-center gap-1.5">
+                <Dumbbell className="h-4 w-4 text-blue-500" aria-hidden="true" />
                 <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
                   {t('dashboard.todaysPlan.workout')}
                 </span>
               </div>
               {data.workoutType && (
-                <p
-                  data-testid="workout-name"
-                  className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-                >
+                <p data-testid="workout-name" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {translateWorkoutType(t, data.workoutType)}
                 </p>
               )}
               {data.exerciseCount != null && (
-                <p
-                  data-testid="exercise-count"
-                  className="text-xs text-slate-500 dark:text-slate-400"
-                >
+                <p data-testid="exercise-count" className="text-xs text-slate-500 dark:text-slate-400">
                   {t('dashboard.todaysPlan.exercisesCount', {
                     count: data.exerciseCount,
                   })}
@@ -194,7 +181,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                 data-testid="start-workout-cta"
                 className="mt-2 gap-1 bg-blue-600 text-white hover:bg-blue-700"
               >
-                <Play className="w-3.5 h-3.5" aria-hidden="true" />
+                <Play className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('dashboard.todaysPlan.startCta')}
               </Button>
             </div>
@@ -209,13 +196,13 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   if (data.state === 'training-partial') {
     return (
       <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+        <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
           {t('dashboard.todaysPlan.title')}
         </h3>
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="partial-progress-section">
-            <div className="flex items-center gap-1.5 mb-2">
-              <RotateCw className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+            <div className="mb-2 flex items-center gap-1.5">
+              <RotateCw className="h-4 w-4 text-emerald-500" aria-hidden="true" />
               <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                 {t('dashboard.todaysPlan.sessionProgress', {
                   completed: data.completedSessions,
@@ -224,10 +211,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               </span>
             </div>
             {data.nextUncompletedSession && (
-              <p
-                data-testid="next-session-name"
-                className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
+              <p data-testid="next-session-name" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                 {t('dashboard.todaysPlan.nextSession', {
                   name: translateWorkoutType(t, data.nextUncompletedSession.workoutType),
                 })}
@@ -239,7 +223,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               data-testid="continue-session-cta"
               className="mt-2 gap-1 bg-emerald-600 text-white hover:bg-emerald-700"
             >
-              <Play className="w-3.5 h-3.5" aria-hidden="true" />
+              <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t('dashboard.todaysPlan.continueSession')}
             </Button>
           </div>
@@ -252,40 +236,31 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   if (data.state === 'training-completed') {
     return (
       <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+        <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
           {t('dashboard.todaysPlan.title')}
         </h3>
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="workout-summary">
-            <div className="flex items-center gap-1.5 mb-2">
-              <CheckCircle className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+            <div className="mb-2 flex items-center gap-1.5">
+              <CheckCircle className="h-4 w-4 text-emerald-500" aria-hidden="true" />
               <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                 {t('dashboard.todaysPlan.completed')}
               </span>
             </div>
             {data.completedWorkout && (
               <>
-                <p
-                  data-testid="workout-duration"
-                  className="text-sm text-slate-700 dark:text-slate-200"
-                >
+                <p data-testid="workout-duration" className="text-sm text-slate-700 dark:text-slate-200">
                   {t('dashboard.todaysPlan.duration', {
                     minutes: data.completedWorkout.durationMin,
                   })}
                 </p>
-                <p
-                  data-testid="workout-sets"
-                  className="text-sm text-slate-700 dark:text-slate-200"
-                >
+                <p data-testid="workout-sets" className="text-sm text-slate-700 dark:text-slate-200">
                   {t('dashboard.todaysPlan.setsCount', {
                     count: data.completedWorkout.totalSets,
                   })}
                 </p>
                 {data.completedWorkout.hasPR && (
-                  <p
-                    data-testid="pr-highlight"
-                    className="text-sm font-bold text-amber-500"
-                  >
+                  <p data-testid="pr-highlight" className="text-sm font-bold text-amber-500">
                     {t('dashboard.todaysPlan.prHighlight')}
                   </p>
                 )}
@@ -307,17 +282,21 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     return (
       <>
         <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+          <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
             {t('dashboard.todaysPlan.restDayTitle')}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="recovery-tips">
               <p className="text-sm text-slate-700 dark:text-slate-200">
-                <span aria-hidden="true"><Footprints className="size-4 inline-block mr-1" /></span>
+                <span aria-hidden="true">
+                  <Footprints className="mr-1 inline-block size-4" />
+                </span>
                 {t('dashboard.todaysPlan.recoveryTip1')}
               </p>
-              <p className="text-sm text-slate-700 dark:text-slate-200 mt-1">
-                <span aria-hidden="true"><Droplets className="size-4 inline-block mr-1" /></span>
+              <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
+                <span aria-hidden="true">
+                  <Droplets className="mr-1 inline-block size-4" />
+                </span>
                 {t('dashboard.todaysPlan.recoveryTip2')}
               </p>
             </div>
@@ -330,13 +309,11 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   })}
                 </p>
               ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {t('dashboard.todaysPlan.tomorrowRest')}
-                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('dashboard.todaysPlan.tomorrowRest')}</p>
               )}
             </div>
           </div>
-          <div className="flex gap-2 mt-3" data-testid="quick-actions">
+          <div className="mt-3 flex gap-2" data-testid="quick-actions">
             <Button
               variant="outline"
               size="sm"
@@ -364,17 +341,12 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
 
   return (
     <div data-testid="todays-plan-card" className={CARD_CLASS}>
-      <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">
+      <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
         {t('dashboard.todaysPlan.title')}
       </h3>
-      <div
-        data-testid="no-plan-section"
-        className="flex flex-col items-center py-4"
-      >
-        <Dumbbell className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" aria-hidden="true" />
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-          {t('dashboard.todaysPlan.noPlan')}
-        </p>
+      <div data-testid="no-plan-section" className="flex flex-col items-center py-4">
+        <Dumbbell className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
+        <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">{t('dashboard.todaysPlan.noPlan')}</p>
         <Button
           size="sm"
           onClick={handleCreatePlan}
@@ -382,10 +354,10 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           className="gap-1 bg-blue-600 text-white hover:bg-blue-700"
         >
           {t('dashboard.todaysPlan.createPlan')}
-          <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
-      <div className="border-t border-slate-100 dark:border-slate-700 pt-3 mt-1">
+      <div className="mt-1 border-t border-slate-100 pt-3 dark:border-slate-700">
         <MealsSection {...mealsProps} />
       </div>
     </div>

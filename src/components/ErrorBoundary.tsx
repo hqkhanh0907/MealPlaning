@@ -1,7 +1,8 @@
-import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { logger } from '../utils/logger';
+import React from 'react';
+
 import i18n from '../i18n';
+import { logger } from '../utils/logger';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -27,7 +28,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     logger.error({ component: 'ErrorBoundary', action: 'componentDidCatch' }, error);
     // errorInfo contains component stack trace for debugging
     if (errorInfo?.componentStack) {
-      logger.error({ component: 'ErrorBoundary', action: 'componentStack' }, { componentStack: errorInfo.componentStack });
+      logger.error(
+        { component: 'ErrorBoundary', action: 'componentStack' },
+        { componentStack: errorInfo.componentStack },
+      );
     }
   }
 
@@ -38,35 +42,37 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-          <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4">
-            <AlertTriangle className="w-8 h-8 text-amber-500 dark:text-amber-400" />
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
+            <AlertTriangle className="h-8 w-8 text-amber-500 dark:text-amber-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
+          <h3 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
             {this.props.fallbackTitle || i18n.t('errorBoundary.defaultTitle')}
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
+          <p className="mb-6 max-w-sm text-sm text-slate-500 dark:text-slate-400">
             {i18n.t('errorBoundary.description')}
           </p>
           <div className="flex gap-3">
             <button
               onClick={this.handleRetry}
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 min-h-11"
+              className="flex min-h-11 items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="h-4 w-4" />
               {i18n.t('errorBoundary.retry')}
             </button>
             <button
               onClick={() => globalThis.location.reload()}
-              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-[0.98] transition-all min-h-11"
+              className="min-h-11 rounded-xl bg-slate-100 px-5 py-2.5 font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-[0.98] dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
             >
               {i18n.t('errorBoundary.reload')}
             </button>
           </div>
           {this.state.error && (
-            <details className="mt-6 text-left w-full max-w-md">
-              <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-500">{i18n.t('errorBoundary.errorDetails')}</summary>
-              <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-700 p-3 rounded-xl overflow-x-auto text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+            <details className="mt-6 w-full max-w-md text-left">
+              <summary className="cursor-pointer text-xs text-slate-400 hover:text-slate-500 dark:text-slate-500">
+                {i18n.t('errorBoundary.errorDetails')}
+              </summary>
+              <pre className="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-100 p-3 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
                 {this.state.error.message}
               </pre>
             </details>

@@ -1,11 +1,13 @@
-import { useTranslation } from 'react-i18next';
+import { ChevronRight, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useController, type UseFormReturn } from 'react-hook-form';
-import { ChevronRight, TrendingDown, Minus, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { validateTargetWeight } from '@/schemas/goalValidation';
+
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
-import { validateTargetWeight } from '@/schemas/goalValidation';
 
 interface NutritionGoalStepProps {
   form: UseFormReturn<OnboardingFormData>;
@@ -49,16 +51,12 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
 
   return (
     <div className="flex flex-1 flex-col" data-testid="nutrition-goal-step">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.goal.title')}
-        </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          {t('onboarding.goal.subtitle')}
-        </p>
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
+        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{t('onboarding.goal.title')}</h2>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.goal.subtitle')}</p>
 
         {/* Goal Type */}
-        <fieldset className="mb-6 space-y-3 border-0 p-0 m-0" aria-label={t('onboarding.goal.title')}>
+        <fieldset className="m-0 mb-6 space-y-3 border-0 p-0" aria-label={t('onboarding.goal.title')}>
           {GOALS.map(({ value, icon: Icon, color }) => (
             <button
               key={value}
@@ -66,7 +64,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
               aria-pressed={goalField.field.value === value}
               onClick={() => goalField.field.onChange(value)}
               className={cn(
-                'flex w-full min-h-[56px] items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
                 goalField.field.value === value
                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
                   : 'border-slate-200 dark:border-slate-700',
@@ -74,17 +72,17 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
             >
               <Icon className={cn('h-5 w-5 shrink-0', color)} aria-hidden="true" />
               <div>
-                <p className={cn(
-                  'text-sm font-medium',
-                  goalField.field.value === value
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : 'text-slate-700 dark:text-slate-300',
-                )}>
+                <p
+                  className={cn(
+                    'text-sm font-medium',
+                    goalField.field.value === value
+                      ? 'text-emerald-700 dark:text-emerald-300'
+                      : 'text-slate-700 dark:text-slate-300',
+                  )}
+                >
                   {t(`onboarding.goal.type_${value}`)}
                 </p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
-                  {t(`onboarding.goal.type_${value}_desc`)}
-                </p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{t(`onboarding.goal.type_${value}_desc`)}</p>
               </div>
             </button>
           ))}
@@ -97,8 +95,8 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
               <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 {t('onboarding.goal.rate')}
               </label>
-              <fieldset className="flex gap-2 border-0 p-0 m-0" aria-label={t('onboarding.goal.rate')}>
-                {RATES.map((rate) => (
+              <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('onboarding.goal.rate')}>
+                {RATES.map(rate => (
                   <button
                     key={rate}
                     type="button"
@@ -131,10 +129,10 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   value={targetField.field.value ?? ''}
-                  onChange={(e) => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={e => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                   onBlur={targetField.field.onBlur}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">kg</span>
+                <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">kg</span>
               </div>
               {targetField.fieldState.error && (
                 <p id="ob-target-error" role="alert" className="mt-1 text-xs text-red-500">

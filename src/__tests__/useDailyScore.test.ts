@@ -1,15 +1,16 @@
 import { renderHook } from '@testing-library/react';
+
 import { useDailyScore } from '../features/dashboard/hooks/useDailyScore';
-import { useFitnessStore } from '../store/fitnessStore';
+import { calculateDailyScore } from '../features/dashboard/utils/scoreCalculator';
+import { calculateStreak } from '../features/fitness/utils/gamification';
+import { useNutritionTargets } from '../features/health-profile/hooks/useNutritionTargets';
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import { useDishStore } from '../store/dishStore';
+import { useFitnessStore } from '../store/fitnessStore';
 import { useIngredientStore } from '../store/ingredientStore';
-import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
-import { useNutritionTargets } from '../features/health-profile/hooks/useNutritionTargets';
-import { calculateStreak } from '../features/fitness/utils/gamification';
 import { calculateDishesNutrition } from '../utils/nutrition';
-import { calculateDailyScore } from '../features/dashboard/utils/scoreCalculator';
-import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 
 vi.mock('../store/fitnessStore', () => ({ useFitnessStore: vi.fn() }));
 vi.mock('../store/dayPlanStore', () => ({ useDayPlanStore: vi.fn() }));
@@ -51,47 +52,35 @@ function setupFitnessStore(overrides: Record<string, unknown> = {}) {
     trainingPlanDays: [],
     ...overrides,
   };
-  mockFitnessStore.mockImplementation(
-    ((selector: (s: typeof state) => unknown) =>
-      selector(state)) as typeof useFitnessStore,
-  );
+  mockFitnessStore.mockImplementation(((selector: (s: typeof state) => unknown) =>
+    selector(state)) as typeof useFitnessStore);
 }
 
 function setupDayPlanStore(overrides: Record<string, unknown> = {}) {
   const state = { dayPlans: [], ...overrides };
-  mockDayPlanStore.mockImplementation(
-    ((selector: (s: typeof state) => unknown) =>
-      selector(state)) as typeof useDayPlanStore,
-  );
+  mockDayPlanStore.mockImplementation(((selector: (s: typeof state) => unknown) =>
+    selector(state)) as typeof useDayPlanStore);
 }
 
 function setupDishStore(overrides: Record<string, unknown> = {}) {
   const state = { dishes: [], ...overrides };
-  mockDishStore.mockImplementation(
-    ((selector: (s: typeof state) => unknown) =>
-      selector(state)) as typeof useDishStore,
-  );
+  mockDishStore.mockImplementation(((selector: (s: typeof state) => unknown) =>
+    selector(state)) as typeof useDishStore);
 }
 
 function setupIngredientStore(overrides: Record<string, unknown> = {}) {
   const state = { ingredients: [], ...overrides };
-  mockIngredientStore.mockImplementation(
-    ((selector: (s: typeof state) => unknown) =>
-      selector(state)) as typeof useIngredientStore,
-  );
+  mockIngredientStore.mockImplementation(((selector: (s: typeof state) => unknown) =>
+    selector(state)) as typeof useIngredientStore);
 }
 
-function setupHealthProfileStore(
-  overrides: Record<string, unknown> = {},
-) {
+function setupHealthProfileStore(overrides: Record<string, unknown> = {}) {
   const state = {
     profile: { ...DEFAULT_HEALTH_PROFILE },
     ...overrides,
   };
-  mockHealthProfileStore.mockImplementation(
-    ((selector: (s: typeof state) => unknown) =>
-      selector(state)) as typeof useHealthProfileStore,
-  );
+  mockHealthProfileStore.mockImplementation(((selector: (s: typeof state) => unknown) =>
+    selector(state)) as typeof useHealthProfileStore);
 }
 
 const defaultScoreResult = {
@@ -342,9 +331,7 @@ describe('useDailyScore', () => {
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ workoutCompleted: true }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ workoutCompleted: true }));
     });
 
     it('detects no workout today', () => {
@@ -362,46 +349,32 @@ describe('useDailyScore', () => {
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ workoutCompleted: false }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ workoutCompleted: false }));
     });
 
     it('detects rest day when active plan has no scheduled day for today', () => {
       const todayDow = new Date().getDay();
       const otherDow = (todayDow + 1) % 7;
       setupFitnessStore({
-        trainingPlans: [
-          { id: 'p1', name: 'Plan', status: 'active' },
-        ],
-        trainingPlanDays: [
-          { id: 'pd1', planId: 'p1', dayOfWeek: otherDow },
-        ],
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: otherDow }],
       });
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ isRestDay: true }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: true }));
     });
 
     it('detects training day when active plan is scheduled for today', () => {
       const todayDow = new Date().getDay();
       setupFitnessStore({
-        trainingPlans: [
-          { id: 'p1', name: 'Plan', status: 'active' },
-        ],
-        trainingPlanDays: [
-          { id: 'pd1', planId: 'p1', dayOfWeek: todayDow },
-        ],
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: todayDow }],
       });
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ isRestDay: false }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: false }));
     });
 
     it('passes isBeforeEvening true when hour < 20', () => {
@@ -409,9 +382,7 @@ describe('useDailyScore', () => {
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ isBeforeEvening: true }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isBeforeEvening: true }));
     });
 
     it('passes isBeforeEvening false when hour >= 20', () => {
@@ -419,9 +390,7 @@ describe('useDailyScore', () => {
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ isBeforeEvening: false }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isBeforeEvening: false }));
     });
   });
 
@@ -502,9 +471,7 @@ describe('useDailyScore', () => {
       ];
       setupFitnessStore({
         workouts,
-        trainingPlans: [
-          { id: 'p1', name: 'Plan', status: 'active' },
-        ],
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
         trainingPlanDays: [
           { id: 'pd1', planId: 'p1', dayOfWeek: 1 },
           { id: 'pd2', planId: 'p1', dayOfWeek: 3 },
@@ -518,14 +485,8 @@ describe('useDailyScore', () => {
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalculateStreak).toHaveBeenCalledWith(
-        workouts,
-        [1, 3],
-        today,
-      );
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ streakDays: 5 }),
-      );
+      expect(mockCalculateStreak).toHaveBeenCalledWith(workouts, [1, 3], today);
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ streakDays: 5 }));
     });
 
     it('passes empty plan days when no active plan', () => {
@@ -551,6 +512,14 @@ describe('useDailyScore', () => {
       expect(result.current.factors).toEqual(defaultScoreResult.factors);
     });
 
+    it('treats null profile as first-time user', () => {
+      setupHealthProfileStore({ profile: null });
+
+      const { result } = renderHook(() => useDailyScore());
+
+      expect(result.current.isFirstTimeUser).toBe(true);
+    });
+
     it('handles day plan without servings field', () => {
       const today = todayStr();
       setupDayPlanStore({
@@ -573,29 +542,18 @@ describe('useDailyScore', () => {
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcNutrition).toHaveBeenCalledWith(
-        ['d1'],
-        [],
-        [],
-        undefined,
-      );
+      expect(mockCalcNutrition).toHaveBeenCalledWith(['d1'], [], [], undefined);
     });
 
     it('handles no active training plan for rest day and streak', () => {
       setupFitnessStore({
-        trainingPlans: [
-          { id: 'p1', name: 'Plan', status: 'completed' },
-        ],
-        trainingPlanDays: [
-          { id: 'pd1', planId: 'p1', dayOfWeek: 1 },
-        ],
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'completed' }],
+        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: 1 }],
       });
 
       renderHook(() => useDailyScore());
 
-      expect(mockCalcDailyScore).toHaveBeenCalledWith(
-        expect.objectContaining({ isRestDay: false }),
-      );
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: false }));
       expect(mockCalculateStreak).toHaveBeenCalledWith([], [], todayStr());
     });
   });

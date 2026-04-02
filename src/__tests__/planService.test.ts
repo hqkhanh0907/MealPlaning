@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
+  applySuggestionToDayPlans,
+  clearPlansByScope,
   createEmptyDayPlan,
   getDayPlanSlotKey,
-  clearPlansByScope,
-  applySuggestionToDayPlans,
   updateDayPlanSlot,
 } from '../services/planService';
 import { DayPlan } from '../types';
@@ -164,15 +165,17 @@ describe('applySuggestionToDayPlans', () => {
   });
 
   it('should merge with existing plan, replacing non-empty slots', () => {
-    const plans: DayPlan[] = [{
-      date: '2026-03-02',
-      breakfastDishIds: ['old-b'],
-      lunchDishIds: ['old-l'],
-      dinnerDishIds: ['old-d'],
-    }];
+    const plans: DayPlan[] = [
+      {
+        date: '2026-03-02',
+        breakfastDishIds: ['old-b'],
+        lunchDishIds: ['old-l'],
+        dinnerDishIds: ['old-d'],
+      },
+    ];
     const suggestion = {
       breakfastDishIds: ['new-b'],
-      lunchDishIds: [],  // Empty → keep existing
+      lunchDishIds: [], // Empty → keep existing
       dinnerDishIds: ['new-d'],
     };
     const result = applySuggestionToDayPlans(plans, '2026-03-02', suggestion);
@@ -273,4 +276,3 @@ describe('updateDayPlanSlot', () => {
     expect(result[1].breakfastDishIds).toEqual(['d4']);
   });
 });
-

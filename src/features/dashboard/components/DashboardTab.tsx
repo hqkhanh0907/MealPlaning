@@ -1,19 +1,20 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
-import { DailyScoreHero } from './DailyScoreHero';
 import { EnergyBalanceMini } from '../../../components/nutrition/EnergyBalanceMini';
+import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
+import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
+import { useFeedbackLoop } from '../hooks/useFeedbackLoop';
+import { AiInsightCard } from './AiInsightCard';
+import { AutoAdjustBanner } from './AutoAdjustBanner';
+import { DailyScoreHero } from './DailyScoreHero';
 import { ProteinProgress } from './ProteinProgress';
+import { QuickActionsBar } from './QuickActionsBar';
+import { StreakMini } from './StreakMini';
 import { TodaysPlanCard } from './TodaysPlanCard';
 import { WeightMini } from './WeightMini';
-import { StreakMini } from './StreakMini';
-import { AiInsightCard } from './AiInsightCard';
-import { QuickActionsBar } from './QuickActionsBar';
 import { WeightQuickLog } from './WeightQuickLog';
-import { AutoAdjustBanner } from './AutoAdjustBanner';
-import { useFeedbackLoop } from '../hooks/useFeedbackLoop';
-import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
-import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() => {
@@ -39,8 +40,7 @@ function DashboardTabInner(): React.ReactElement {
   const [weightQuickLogOpen, setWeightQuickLogOpen] = useState(false);
   const [lowerTiersVisible, setLowerTiersVisible] = useState(false);
 
-  const { adjustment, applyAdjustment, dismissAdjustment } =
-    useFeedbackLoop();
+  const { adjustment, applyAdjustment, dismissAdjustment } = useFeedbackLoop();
   const { targetCalories, targetProtein } = useNutritionTargets();
   const { eaten, protein } = useTodayNutrition();
 
@@ -70,10 +70,7 @@ function DashboardTabInner(): React.ReactElement {
   const tierClassName = reducedMotion ? '' : 'dashboard-stagger';
 
   return (
-    <div
-      className="flex flex-col gap-3 px-4 pb-6 overflow-y-auto"
-      data-testid="dashboard-tab"
-    >
+    <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-6" data-testid="dashboard-tab">
       {/* Tier 1: DailyScoreHero — immediate render */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.hero')}>
         <div data-testid="dashboard-tier-1">
@@ -88,11 +85,7 @@ function DashboardTabInner(): React.ReactElement {
           data-testid="dashboard-tier-2"
           style={staggerStyle(STAGGER_DELAYS.tier2)}
         >
-          <EnergyBalanceMini
-            eaten={eaten}
-            burned={0}
-            target={targetCalories}
-          />
+          <EnergyBalanceMini eaten={eaten} burned={0} target={targetCalories} />
           <ProteinProgress current={protein} target={targetProtein} />
         </div>
       </ErrorBoundary>
@@ -115,25 +108,14 @@ function DashboardTabInner(): React.ReactElement {
       {/* Tier 4: AutoAdjustBanner + AiInsightCard — lazy loaded */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.insight')}>
         {lowerTiersVisible ? (
-          <div
-            className="flex flex-col gap-3 min-h-[56px]"
-            data-testid="dashboard-tier-4"
-          >
+          <div className="flex min-h-[56px] flex-col gap-3" data-testid="dashboard-tier-4">
             {adjustment && (
-              <AutoAdjustBanner
-                adjustment={adjustment}
-                onApply={applyAdjustment}
-                onDismiss={dismissAdjustment}
-              />
+              <AutoAdjustBanner adjustment={adjustment} onApply={applyAdjustment} onDismiss={dismissAdjustment} />
             )}
             <AiInsightCard />
           </div>
         ) : (
-          <div
-            className="min-h-[56px]"
-            data-testid="dashboard-tier-4-placeholder"
-            aria-hidden="true"
-          />
+          <div className="min-h-[56px]" data-testid="dashboard-tier-4-placeholder" aria-hidden="true" />
         )}
       </ErrorBoundary>
 
@@ -147,9 +129,7 @@ function DashboardTabInner(): React.ReactElement {
       )}
 
       {/* WeightQuickLog bottom sheet */}
-      {weightQuickLogOpen && (
-        <WeightQuickLog onClose={handleCloseWeightLog} />
-      )}
+      {weightQuickLogOpen && <WeightQuickLog onClose={handleCloseWeightLog} />}
     </div>
   );
 }

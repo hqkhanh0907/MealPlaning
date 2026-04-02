@@ -1,5 +1,5 @@
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
-import { createSchema, getSchemaVersion, SCHEMA_VERSION, runSchemaMigrations } from '../services/schema';
+import { createSchema, getSchemaVersion, runSchemaMigrations, SCHEMA_VERSION } from '../services/schema';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -64,11 +64,10 @@ describe('createSchema', () => {
     expect(tables).toHaveLength(22);
   });
 
-  it.each(EXPECTED_TABLES)('table "%s" exists in sqlite_master', async (tableName) => {
-    const result = await db.query<{ name: string }>(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-      [tableName],
-    );
+  it.each(EXPECTED_TABLES)('table "%s" exists in sqlite_master', async tableName => {
+    const result = await db.query<{ name: string }>("SELECT name FROM sqlite_master WHERE type='table' AND name=?", [
+      tableName,
+    ]);
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe(tableName);
   });
@@ -103,7 +102,7 @@ describe('createSchema', () => {
     const indexes = await db.query<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_%'",
     );
-    const indexNames = indexes.map((row) => row.name);
+    const indexNames = indexes.map(row => row.name);
     for (const expected of EXPECTED_INDEXES) {
       expect(indexNames).toContain(expected);
     }
@@ -280,24 +279,17 @@ describe('runSchemaMigrations', () => {
 
     expect(await getSchemaVersion(db)).toBe(SCHEMA_VERSION);
 
-    const days = await db.query<Record<string, unknown>>(
-      'SELECT * FROM training_plan_days WHERE id = ?',
-      ['day-1'],
-    );
+    const days = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE id = ?', ['day-1']);
     expect(days).toHaveLength(1);
     expect(days[0].sessionOrder).toBe(1);
     expect(days[0].originalExercises).toBe('["bench","ohp"]');
 
-    const workoutCols = await db.query<{ name: string }>(
-      "PRAGMA table_info(workouts)",
-    );
-    const colNames = workoutCols.map((c) => c.name);
+    const workoutCols = await db.query<{ name: string }>('PRAGMA table_info(workouts)');
+    const colNames = workoutCols.map(c => c.name);
     expect(colNames).toContain('plan_day_id');
 
-    const profileCols = await db.query<{ name: string }>(
-      "PRAGMA table_info(user_profile)",
-    );
-    const profileColNames = profileCols.map((c) => c.name);
+    const profileCols = await db.query<{ name: string }>('PRAGMA table_info(user_profile)');
+    const profileColNames = profileCols.map(c => c.name);
     expect(profileColNames).toContain('name');
     expect(profileColNames).toContain('date_of_birth');
   });
@@ -313,10 +305,8 @@ describe('runSchemaMigrations', () => {
 
     expect(await getSchemaVersion(db)).toBe(SCHEMA_VERSION);
 
-    const profileCols = await db.query<{ name: string }>(
-      "PRAGMA table_info(user_profile)",
-    );
-    const colNames = profileCols.map((c) => c.name);
+    const profileCols = await db.query<{ name: string }>('PRAGMA table_info(user_profile)');
+    const colNames = profileCols.map(c => c.name);
     expect(colNames).toContain('name');
     expect(colNames).toContain('date_of_birth');
   });

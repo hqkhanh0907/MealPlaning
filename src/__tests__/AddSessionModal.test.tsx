@@ -1,31 +1,36 @@
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { AddSessionModal } from '../features/fitness/components/AddSessionModal';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => {
-    const map: Record<string, string> = {
-      'fitness.plan.addSession': 'Thêm buổi tập',
-      'fitness.plan.strengthOption': 'Sức mạnh (Strength)',
-      'fitness.plan.strengthDesc': 'Chọn nhóm cơ → auto-gợi ý bài tập',
-      'fitness.plan.cardioOption': 'Cardio',
-      'fitness.plan.cardioDesc': 'HIIT, chạy bộ, đạp xe, bơi...',
-      'fitness.plan.freestyleOption': 'Tập tự do (Freestyle)',
-      'fitness.plan.freestyleDesc': 'Tự chọn bài tập, không theo template',
-      'fitness.plan.maxSessions': 'Tối đa 3 buổi/ngày',
-      'fitness.plan.selectMuscleGroups': 'Chọn nhóm cơ',
-      'fitness.plan.createSession': 'Tạo buổi tập',
-      'common.close': 'Đóng',
-      'common.back': 'Quay lại',
-    };
-    return map[key] ?? key;
-  } }),
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'fitness.plan.addSession': 'Thêm buổi tập',
+        'fitness.plan.strengthOption': 'Sức mạnh (Strength)',
+        'fitness.plan.strengthDesc': 'Chọn nhóm cơ → auto-gợi ý bài tập',
+        'fitness.plan.cardioOption': 'Cardio',
+        'fitness.plan.cardioDesc': 'HIIT, chạy bộ, đạp xe, bơi...',
+        'fitness.plan.freestyleOption': 'Tập tự do (Freestyle)',
+        'fitness.plan.freestyleDesc': 'Tự chọn bài tập, không theo template',
+        'fitness.plan.maxSessions': 'Tối đa 3 buổi/ngày',
+        'fitness.plan.selectMuscleGroups': 'Chọn nhóm cơ',
+        'fitness.plan.createSession': 'Tạo buổi tập',
+        'common.close': 'Đóng',
+        'common.back': 'Quay lại',
+      };
+      return map[key] ?? key;
+    },
+  }),
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
   ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <div data-testid="modal-backdrop" onClick={onClose}>{children}</div>
+    <div data-testid="modal-backdrop" onClick={onClose}>
+      {children}
+    </div>
   ),
 }));
 

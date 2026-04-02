@@ -1,7 +1,8 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
+
 import { ProgressDashboard } from '../features/fitness/components/ProgressDashboard';
 import { useFitnessStore } from '../store/fitnessStore';
-import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -73,9 +74,7 @@ function setupStore(overrides: Record<string, unknown> = {}) {
     getLatestWeight: () => undefined,
     ...overrides,
   };
-  mockUseFitnessStore.mockImplementation((selector: (s: typeof state) => unknown) =>
-    selector(state),
-  );
+  mockUseFitnessStore.mockImplementation((selector: (s: typeof state) => unknown) => selector(state));
 }
 
 // ── Shared test data ──
@@ -180,9 +179,7 @@ describe('ProgressDashboard', () => {
     setupStore();
     render(<ProgressDashboard />);
     expect(screen.getByTestId('progress-empty-state')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('progress-dashboard'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('progress-dashboard')).not.toBeInTheDocument();
   });
 
   it('empty state has CTA button', () => {
@@ -248,9 +245,7 @@ describe('ProgressDashboard', () => {
     expect(screen.getByTestId('insights-section')).toBeInTheDocument();
     // volume up insight
     expect(screen.getByTestId('insight-volume-up')).toBeInTheDocument();
-    expect(
-      screen.getByText('Volume tăng 25% so với tuần trước'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Volume tăng 25% so với tuần trước')).toBeInTheDocument();
     // missed sessions insight (planned 4, completed 1 → missed 3)
     expect(screen.getByTestId('insight-missed-sessions')).toBeInTheDocument();
     // weight change insight
@@ -262,9 +257,7 @@ describe('ProgressDashboard', () => {
     render(<ProgressDashboard />);
     expect(screen.getByTestId('insight-volume-up')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('dismiss-volume-up'));
-    expect(
-      screen.queryByTestId('insight-volume-up'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('insight-volume-up')).not.toBeInTheDocument();
   });
 
   it('handles zero division (no previous week data)', () => {
@@ -341,10 +334,7 @@ describe('ProgressDashboard', () => {
     setupStore({
       workouts: [thisWeekWorkout],
       workoutSets: [thisWeekSet],
-      weightEntries: [
-        recentWeight,
-        { ...oldWeight, weightKg: 75 },
-      ],
+      weightEntries: [recentWeight, { ...oldWeight, weightKg: 75 }],
       trainingProfile: null,
       getActivePlan: () => undefined,
     });
@@ -363,9 +353,7 @@ describe('ProgressDashboard', () => {
       getActivePlan: () => undefined,
     });
     render(<ProgressDashboard />);
-    expect(
-      screen.queryByTestId('insights-section'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('insights-section')).not.toBeInTheDocument();
   });
 
   it('dismissing all insights hides the section', () => {
@@ -376,9 +364,7 @@ describe('ProgressDashboard', () => {
     fireEvent.click(screen.getByTestId('dismiss-volume-up'));
     fireEvent.click(screen.getByTestId('dismiss-missed-sessions'));
     fireEvent.click(screen.getByTestId('dismiss-weight-change'));
-    expect(
-      screen.queryByTestId('insights-section'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('insights-section')).not.toBeInTheDocument();
   });
 
   it('shows volume down insight when volume decreases', () => {
@@ -393,9 +379,7 @@ describe('ProgressDashboard', () => {
     });
     render(<ProgressDashboard />);
     expect(screen.getByTestId('insight-volume-down')).toBeInTheDocument();
-    expect(
-      screen.getByText('Volume giảm 70% so với tuần trước'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Volume giảm 70% so với tuần trước')).toBeInTheDocument();
   });
 
   // ── Bottom sheet tests ──
@@ -403,17 +387,13 @@ describe('ProgressDashboard', () => {
   it('bottom sheet opens on card tap', () => {
     setupStore(fullState());
     render(<ProgressDashboard />);
-    expect(
-      screen.queryByTestId('metric-bottom-sheet'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('metric-bottom-sheet')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('metric-card-weight'));
     expect(screen.getByTestId('metric-bottom-sheet')).toBeInTheDocument();
     expect(screen.getByTestId('bottom-sheet-chart')).toBeInTheDocument();
     expect(screen.getByTestId('time-range-filter')).toBeInTheDocument();
     // Shows card title in sheet header
-    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain(
-      'Cân nặng',
-    );
+    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain('Cân nặng');
   });
 
   it('bottom sheet closes on backdrop click', () => {
@@ -422,9 +402,7 @@ describe('ProgressDashboard', () => {
     fireEvent.click(screen.getByTestId('metric-card-weight'));
     expect(screen.getByTestId('metric-bottom-sheet')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('bottom-sheet-backdrop'));
-    expect(
-      screen.queryByTestId('metric-bottom-sheet'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('metric-bottom-sheet')).not.toBeInTheDocument();
   });
 
   it('bottom sheet closes on X button click', () => {
@@ -433,9 +411,7 @@ describe('ProgressDashboard', () => {
     fireEvent.click(screen.getByTestId('metric-card-1rm'));
     expect(screen.getByTestId('metric-bottom-sheet')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('close-bottom-sheet'));
-    expect(
-      screen.queryByTestId('metric-bottom-sheet'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('metric-bottom-sheet')).not.toBeInTheDocument();
   });
 
   it('time range filter changes chart data', () => {
@@ -478,23 +454,17 @@ describe('ProgressDashboard', () => {
 
     // Test sessions card
     fireEvent.click(screen.getByTestId('metric-card-sessions'));
-    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain(
-      'Buổi tập',
-    );
+    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain('Buổi tập');
     fireEvent.click(screen.getByTestId('close-bottom-sheet'));
 
     // Test adherence card
     fireEvent.click(screen.getByTestId('metric-card-adherence'));
-    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain(
-      'Tuân thủ',
-    );
+    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain('Tuân thủ');
     fireEvent.click(screen.getByTestId('close-bottom-sheet'));
 
     // Test 1RM card
     fireEvent.click(screen.getByTestId('metric-card-1rm'));
-    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain(
-      '1RM ước tính',
-    );
+    expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain('1RM ước tính');
   });
 
   it('shows plateau insight when exercise shows no strength improvement', () => {
@@ -519,8 +489,6 @@ describe('ProgressDashboard', () => {
     render(<ProgressDashboard />);
 
     expect(screen.getByTestId('insight-plateau-e2')).toBeInTheDocument();
-    expect(screen.getByTestId('insight-plateau-e2').textContent).toContain(
-      'Strength stagnation',
-    );
+    expect(screen.getByTestId('insight-plateau-e2').textContent).toContain('Strength stagnation');
   });
 });

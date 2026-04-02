@@ -1,17 +1,8 @@
 import { createDatabaseService, type DatabaseService } from '../../services/databaseService';
-import {
-  migrateFromLocalStorage,
-  isMigrationNeeded,
-  isMigrationCompleted,
-} from '../../services/migrationService';
-import {
-  detectVersion,
-  importV2Data,
-  createV2Export,
-  buildLegacyFormat,
-} from '../../services/syncV2Utils';
-import type { V2ExportPayload } from '../../services/syncV2Utils';
+import { isMigrationCompleted, isMigrationNeeded, migrateFromLocalStorage } from '../../services/migrationService';
 import { createSchema, SCHEMA_TABLES } from '../../services/schema';
+import type { V2ExportPayload } from '../../services/syncV2Utils';
+import { buildLegacyFormat, createV2Export, detectVersion, importV2Data } from '../../services/syncV2Utils';
 
 /* ------------------------------------------------------------------ */
 /*  Mocks                                                               */
@@ -210,9 +201,7 @@ describe('Migration Integration — Full Pipeline', () => {
       setupFullLocalStorage();
       await migrateFromLocalStorage(db);
 
-      const rows = await db.query<Record<string, unknown>>(
-        'SELECT * FROM ingredients ORDER BY id',
-      );
+      const rows = await db.query<Record<string, unknown>>('SELECT * FROM ingredients ORDER BY id');
       expect(rows).toHaveLength(5);
 
       expect(rows[0]).toMatchObject({
@@ -283,9 +272,7 @@ describe('Migration Integration — Full Pipeline', () => {
       setupFullLocalStorage();
       await migrateFromLocalStorage(db);
 
-      const plans = await db.query<Record<string, unknown>>(
-        'SELECT * FROM day_plans ORDER BY date',
-      );
+      const plans = await db.query<Record<string, unknown>>('SELECT * FROM day_plans ORDER BY date');
       expect(plans).toHaveLength(2);
 
       expect(plans[0]).toMatchObject({
@@ -306,9 +293,7 @@ describe('Migration Integration — Full Pipeline', () => {
       setupFullLocalStorage();
       await migrateFromLocalStorage(db);
 
-      const tpls = await db.query<Record<string, unknown>>(
-        'SELECT * FROM meal_templates ORDER BY id',
-      );
+      const tpls = await db.query<Record<string, unknown>>('SELECT * FROM meal_templates ORDER BY id');
       expect(tpls).toHaveLength(2);
 
       const data1 = JSON.parse(tpls[0].data as string) as Record<string, unknown>;
@@ -325,10 +310,9 @@ describe('Migration Integration — Full Pipeline', () => {
       setupFullLocalStorage();
       await migrateFromLocalStorage(db);
 
-      const profile = await db.queryOne<Record<string, unknown>>(
-        'SELECT * FROM user_profile WHERE id = ?',
-        ['default'],
-      );
+      const profile = await db.queryOne<Record<string, unknown>>('SELECT * FROM user_profile WHERE id = ?', [
+        'default',
+      ]);
       expect(profile).not.toBeNull();
       expect(profile).toMatchObject({
         id: 'default',
@@ -570,9 +554,7 @@ describe('Migration Integration — Full Pipeline', () => {
 
       await importV2Data(db, legacyData);
 
-      const ingredients = await db.query<Record<string, unknown>>(
-        'SELECT * FROM ingredients',
-      );
+      const ingredients = await db.query<Record<string, unknown>>('SELECT * FROM ingredients');
       expect(ingredients).toHaveLength(1);
       expect(ingredients[0]).toMatchObject({
         id: 'ing-1',
@@ -581,9 +563,7 @@ describe('Migration Integration — Full Pipeline', () => {
         caloriesPer_100: 130,
       });
 
-      const dishIngs = await db.query<Record<string, unknown>>(
-        'SELECT * FROM dish_ingredients',
-      );
+      const dishIngs = await db.query<Record<string, unknown>>('SELECT * FROM dish_ingredients');
       expect(dishIngs).toHaveLength(1);
       expect(dishIngs[0]).toMatchObject({
         dishId: 'dish-1',
@@ -612,12 +592,8 @@ describe('Migration Integration — Full Pipeline', () => {
               unit_en: 'g',
             },
           ],
-          dishes: [
-            { id: 'dish-1', name_vi: 'Cơm gà', name_en: null, tags: '["lunch"]', rating: null, notes: null },
-          ],
-          dish_ingredients: [
-            { dish_id: 'dish-1', ingredient_id: 'ing-1', amount: 200 },
-          ],
+          dishes: [{ id: 'dish-1', name_vi: 'Cơm gà', name_en: null, tags: '["lunch"]', rating: null, notes: null }],
+          dish_ingredients: [{ dish_id: 'dish-1', ingredient_id: 'ing-1', amount: 200 }],
         },
       };
 
@@ -655,18 +631,14 @@ describe('Migration Integration — Full Pipeline', () => {
       setupFullLocalStorage();
       await migrateFromLocalStorage(db);
 
-      const ing = await db.queryOne<Record<string, unknown>>(
-        'SELECT * FROM ingredients WHERE id = ?',
-        ['ing-1'],
-      );
+      const ing = await db.queryOne<Record<string, unknown>>('SELECT * FROM ingredients WHERE id = ?', ['ing-1']);
       expect(typeof ing?.caloriesPer_100).toBe('number');
       expect(typeof ing?.proteinPer_100).toBe('number');
       expect(typeof ing?.nameVi).toBe('string');
 
-      const profile = await db.queryOne<Record<string, unknown>>(
-        'SELECT * FROM user_profile WHERE id = ?',
-        ['default'],
-      );
+      const profile = await db.queryOne<Record<string, unknown>>('SELECT * FROM user_profile WHERE id = ?', [
+        'default',
+      ]);
       expect(typeof profile?.weightKg).toBe('number');
       expect(typeof profile?.age).toBe('number');
       expect(typeof profile?.gender).toBe('string');
@@ -680,7 +652,7 @@ describe('Migration Integration — Full Pipeline', () => {
       const indexes = await db.query<Record<string, unknown>>(
         "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%' ORDER BY name",
       );
-      const indexNames = indexes.map((idx) => idx.name);
+      const indexNames = indexes.map(idx => idx.name);
 
       expect(indexNames).toContain('idx_dish_ingredients_dish');
       expect(indexNames).toContain('idx_dish_ingredients_ingredient');
@@ -752,21 +724,13 @@ describe('Migration Integration — Full Pipeline', () => {
       setupFullLocalStorage();
       await migrateFromLocalStorage(db);
 
-      const ingredientsBefore = await db.query<Record<string, unknown>>(
-        'SELECT * FROM ingredients ORDER BY id',
-      );
-      const dishesBefore = await db.query<Record<string, unknown>>(
-        'SELECT * FROM dishes ORDER BY id',
-      );
+      const ingredientsBefore = await db.query<Record<string, unknown>>('SELECT * FROM ingredients ORDER BY id');
+      const dishesBefore = await db.query<Record<string, unknown>>('SELECT * FROM dishes ORDER BY id');
 
       await migrateFromLocalStorage(db);
 
-      const ingredientsAfter = await db.query<Record<string, unknown>>(
-        'SELECT * FROM ingredients ORDER BY id',
-      );
-      const dishesAfter = await db.query<Record<string, unknown>>(
-        'SELECT * FROM dishes ORDER BY id',
-      );
+      const ingredientsAfter = await db.query<Record<string, unknown>>('SELECT * FROM ingredients ORDER BY id');
+      const dishesAfter = await db.query<Record<string, unknown>>('SELECT * FROM dishes ORDER BY id');
 
       expect(ingredientsAfter).toEqual(ingredientsBefore);
       expect(dishesAfter).toEqual(dishesBefore);
@@ -793,15 +757,10 @@ describe('Migration Integration — Full Pipeline', () => {
       await db2.initialize();
       await createSchema(db2);
 
-      const importResult = await importV2Data(
-        db2,
-        exported as unknown as Record<string, unknown>,
-      );
+      const importResult = await importV2Data(db2, exported as unknown as Record<string, unknown>);
       expect(importResult.success).toBe(true);
 
-      const ingredients = await db2.query<Record<string, unknown>>(
-        'SELECT * FROM ingredients ORDER BY id',
-      );
+      const ingredients = await db2.query<Record<string, unknown>>('SELECT * FROM ingredients ORDER BY id');
       expect(ingredients).toHaveLength(5);
       expect(ingredients[0]).toMatchObject({ id: 'ing-1', nameVi: 'Gạo' });
 
@@ -853,9 +812,7 @@ describe('Migration Integration — Full Pipeline', () => {
       expect(result.importedCounts?.ingredients).toBe(5);
       expect(result.importedCounts?.dishes).toBe(3);
 
-      const ingredientsInDb3 = await db3.query<Record<string, unknown>>(
-        'SELECT * FROM ingredients ORDER BY id',
-      );
+      const ingredientsInDb3 = await db3.query<Record<string, unknown>>('SELECT * FROM ingredients ORDER BY id');
       expect(ingredientsInDb3).toHaveLength(5);
     });
   });
@@ -868,7 +825,7 @@ describe('Migration Integration — Full Pipeline', () => {
       const tables = await db.query<Record<string, unknown>>(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
       );
-      const tableNames = new Set(tables.map((t) => t.name));
+      const tableNames = new Set(tables.map(t => t.name));
 
       for (const expected of SCHEMA_TABLES) {
         expect(tableNames).toContain(expected);

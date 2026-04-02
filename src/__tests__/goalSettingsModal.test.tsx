@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { GoalSettingsModal } from '../components/modals/GoalSettingsModal';
 
 vi.mock('react-i18next', () => ({
@@ -11,7 +12,9 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
   ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <div data-testid="backdrop" onClick={onClose}>{children}</div>
+    <div data-testid="backdrop" onClick={onClose}>
+      {children}
+    </div>
   ),
 }));
 
@@ -25,14 +28,18 @@ const defaultProfile = {
   targetCalories: 2000,
 };
 
-function renderModal(overrides: Partial<{
-  userProfile: { weight: number; proteinRatio: number; targetCalories: number };
-  onUpdateProfile: (profile: { weight: number; proteinRatio: number; targetCalories: number }) => void;
-  onClose: () => void;
-}> = {}) {
+function renderModal(
+  overrides: Partial<{
+    userProfile: { weight: number; proteinRatio: number; targetCalories: number };
+    onUpdateProfile: (profile: { weight: number; proteinRatio: number; targetCalories: number }) => void;
+    onClose: () => void;
+  }> = {},
+) {
   const props = {
     userProfile: overrides.userProfile ?? { ...defaultProfile },
-    onUpdateProfile: overrides.onUpdateProfile ?? vi.fn<(profile: { weight: number; proteinRatio: number; targetCalories: number }) => void>(),
+    onUpdateProfile:
+      overrides.onUpdateProfile ??
+      vi.fn<(profile: { weight: number; proteinRatio: number; targetCalories: number }) => void>(),
     onClose: overrides.onClose ?? vi.fn<() => void>(),
   };
   const result = render(<GoalSettingsModal {...props} />);
@@ -330,7 +337,7 @@ describe('GoalSettingsModal', () => {
           userProfile={{ weight: 70, proteinRatio: 1.6, targetCalories: 2000 }}
           onUpdateProfile={vi.fn()}
           onClose={vi.fn()}
-        />
+        />,
       );
       const balancedBtn = screen.getByTestId('btn-goal-preset-2000');
       expect(balancedBtn.className).toContain('border-emerald-500');

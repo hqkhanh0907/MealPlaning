@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /** Timing preset for a single animation type */
 export interface MotionPreset {
@@ -54,11 +54,7 @@ const ANIMATION_CLASS_MAP: Record<string, string> = {
  * Optionally applies a stagger tier delay class.
  * Returns empty string when reduced motion is preferred.
  */
-export function getAnimationClass(
-  preset: string,
-  tier?: number,
-  reducedMotion = false,
-): string {
+export function getAnimationClass(preset: string, tier?: number, reducedMotion = false): string {
   if (reducedMotion) return '';
 
   const base = ANIMATION_CLASS_MAP[preset] ?? '';

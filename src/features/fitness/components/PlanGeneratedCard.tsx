@@ -1,16 +1,17 @@
-import { useTranslation } from 'react-i18next';
 import { PartyPopper, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { useFitnessStore } from '../../../store/fitnessStore';
 
 export const PlanGeneratedCard = () => {
   const { t } = useTranslation();
-  const showPlanCelebration = useFitnessStore((s) => s.showPlanCelebration);
-  const dismissPlanCelebration = useFitnessStore((s) => s.dismissPlanCelebration);
-  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
+  const showPlanCelebration = useFitnessStore(s => s.showPlanCelebration);
+  const dismissPlanCelebration = useFitnessStore(s => s.dismissPlanCelebration);
+  const trainingPlans = useFitnessStore(s => s.trainingPlans);
 
   if (!showPlanCelebration) return null;
 
-  const activePlan = trainingPlans.find((p) => p.status === 'active');
+  const activePlan = trainingPlans.find(p => p.status === 'active');
 
   return (
     <div
@@ -21,7 +22,7 @@ export const PlanGeneratedCard = () => {
         data-testid="dismiss-celebration"
         type="button"
         onClick={dismissPlanCelebration}
-        className="absolute right-3 top-3 rounded-full p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+        className="absolute top-3 right-3 rounded-full p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
         aria-label={t('common.close')}
       >
         <X className="h-4 w-4" aria-hidden="true" />

@@ -1,7 +1,9 @@
-import { useTranslation } from 'react-i18next';
-import { Sparkles, PenLine } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { PenLine, Sparkles } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { cn } from '@/lib/utils';
+
 import type { OnboardingFormData } from './onboardingSchema';
 
 interface PlanStrategyChoiceProps {
@@ -12,7 +14,13 @@ interface PlanStrategyChoiceProps {
   goToSection: (section: 1 | 2 | 3 | 4 | 5 | 6 | 7) => void;
 }
 
-export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goToSection }: Readonly<PlanStrategyChoiceProps>) {
+export function PlanStrategyChoice({
+  form,
+  goNext,
+  goBack,
+  setPlanStrategy,
+  goToSection,
+}: Readonly<PlanStrategyChoiceProps>) {
   const { t } = useTranslation();
   const values = form.getValues();
 
@@ -41,7 +49,7 @@ export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goTo
             type="button"
             onClick={handleAuto}
             className={cn(
-              'flex w-full min-h-[72px] items-center gap-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-left transition-colors',
+              'flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-left transition-colors',
               'focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:outline-none',
               'dark:bg-emerald-900/20',
             )}
@@ -64,7 +72,7 @@ export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goTo
             type="button"
             onClick={handleManual}
             className={cn(
-              'flex w-full min-h-[72px] items-center gap-4 rounded-2xl border-2 border-slate-200 px-5 py-4 text-left transition-colors',
+              'flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 border-slate-200 px-5 py-4 text-left transition-colors',
               'focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:outline-none',
               'hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600',
             )}
@@ -74,12 +82,8 @@ export function PlanStrategyChoice({ form, goNext, goBack, setPlanStrategy, goTo
               <PenLine className="h-6 w-6 text-slate-500 dark:text-slate-400" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                {t('onboarding.strategy.manual')}
-              </p>
-              <p className="text-xs text-slate-500/70 dark:text-slate-400/70">
-                {t('onboarding.strategy.manualDesc')}
-              </p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('onboarding.strategy.manual')}</p>
+              <p className="text-xs text-slate-500/70 dark:text-slate-400/70">{t('onboarding.strategy.manualDesc')}</p>
             </div>
           </button>
         </div>

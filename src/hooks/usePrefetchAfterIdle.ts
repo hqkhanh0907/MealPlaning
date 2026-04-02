@@ -5,9 +5,16 @@ import { useEffect, useRef } from 'react';
  */
 const schedulePreload = (fn: () => Promise<unknown>): void => {
   if ('requestIdleCallback' in globalThis) {
-    requestIdleCallback(() => { void fn(); }, { timeout: 5000 });
+    requestIdleCallback(
+      () => {
+        void fn();
+      },
+      { timeout: 5000 },
+    );
   } else {
-    setTimeout(() => { void fn(); }, 100);
+    setTimeout(() => {
+      void fn();
+    }, 100);
   }
 };
 
@@ -15,10 +22,7 @@ const schedulePreload = (fn: () => Promise<unknown>): void => {
  * Prefetch lazy-loaded chunks after the browser has been idle for a specified delay.
  * Uses `requestIdleCallback` when available, falling back to `setTimeout`.
  */
-export function usePrefetchAfterIdle(
-  preloadFns: Array<() => Promise<unknown>>,
-  delay = 2000,
-): void {
+export function usePrefetchAfterIdle(preloadFns: Array<() => Promise<unknown>>, delay = 2000): void {
   const prefetched = useRef(false);
 
   useEffect(() => {

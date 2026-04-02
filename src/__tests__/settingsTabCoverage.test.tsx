@@ -1,9 +1,23 @@
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+
 import { SettingsTab } from '../components/SettingsTab';
 
 // Mutable mock state so individual tests can override
 let mockActiveGoal: { type: string } | null = null;
+let mockCoverageProfile: Record<string, unknown> | null = {
+  weightKg: 70,
+  heightCm: 170,
+  age: 30,
+  gender: 'male',
+  activityLevel: 'moderate',
+  proteinRatio: 2,
+  fatPct: 25,
+  bodyFatPct: null,
+  bmrOverride: null,
+  name: 'Test User',
+  dateOfBirth: '1995-06-15',
+};
 
 const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismissAll: vi.fn() };
 vi.mock('../contexts/NotificationContext', () => ({
@@ -19,19 +33,13 @@ vi.mock('../contexts/DatabaseContext', () => ({
 vi.mock('../features/health-profile/store/healthProfileStore', () => ({
   useHealthProfileStore: (selector: (s: Record<string, unknown>) => unknown) =>
     selector({
-      profile: {
-        weightKg: 70,
-        heightCm: 170,
-        age: 30,
-        gender: 'male',
-        activityLevel: 'moderate',
-        proteinRatio: 2,
-        fatPct: 25,
-        bodyFatPct: null,
-        bmrOverride: null,
-      },
+      profile: mockCoverageProfile,
       activeGoal: mockActiveGoal,
     }),
+}));
+
+vi.mock('../features/health-profile/types', () => ({
+  getAge: () => 30,
 }));
 
 vi.mock('../store/fitnessStore', () => ({
@@ -90,6 +98,19 @@ vi.mock('../components/settings/TrainingProfileDetailPage', () => ({
 afterEach(() => {
   cleanup();
   mockActiveGoal = null;
+  mockCoverageProfile = {
+    weightKg: 70,
+    heightCm: 170,
+    age: 30,
+    gender: 'male',
+    activityLevel: 'moderate',
+    proteinRatio: 2,
+    fatPct: 25,
+    bodyFatPct: null,
+    bmrOverride: null,
+    name: 'Test User',
+    dateOfBirth: '1995-06-15',
+  };
 });
 
 describe('SettingsTab navigation (coverage)', () => {
@@ -140,5 +161,16 @@ describe('SettingsMenu activeGoal branch (coverage)', () => {
     render(<SettingsTab {...defaultProps} />);
 
     expect(screen.getByText('Giảm cân')).toBeInTheDocument();
+  });
+});
+
+describe('SettingsMenu null profile branch (coverage)', () => {
+  const defaultProps = { theme: 'system' as const, setTheme: vi.fn() };
+
+  it('renders with BMR=0 and TDEE=0 when profile is null', () => {
+    mockCoverageProfile = null;
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByText(/BMR: 0/)).toBeInTheDocument();
+    expect(screen.getByText(/TDEE: 0/)).toBeInTheDocument();
   });
 });

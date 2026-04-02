@@ -1,32 +1,20 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useForm, useWatch, Controller } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
-import { useDatabase } from '../../../contexts/DatabaseContext';
-import { useHealthProfileStore } from '../store/healthProfileStore';
-import {
-  calculateBMR,
-  calculateTDEE,
-  calculateMacros,
-} from '../../../services/nutritionEngine';
-import type { HealthProfile, ActivityLevel } from '../types';
-import {
-  healthProfileSchema,
-  type HealthProfileFormData,
-} from '../../../schemas/healthProfileSchema';
-import { StringNumberController } from '../../../components/form/StringNumberController';
+import { useEffect, useMemo, useState } from 'react';
+import type { Resolver } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { FormField } from '../../../components/form/FormField';
 import { RadioPills } from '../../../components/form/RadioPills';
+import { StringNumberController } from '../../../components/form/StringNumberController';
+import { useDatabase } from '../../../contexts/DatabaseContext';
+import { type HealthProfileFormData, healthProfileSchema } from '../../../schemas/healthProfileSchema';
+import { calculateBMR, calculateMacros, calculateTDEE } from '../../../services/nutritionEngine';
+import { useHealthProfileStore } from '../store/healthProfileStore';
+import type { ActivityLevel, HealthProfile } from '../types';
 
-const ACTIVITY_LEVELS: ActivityLevel[] = [
-  'sedentary',
-  'light',
-  'moderate',
-  'active',
-  'extra_active',
-];
+const ACTIVITY_LEVELS: ActivityLevel[] = ['sedentary', 'light', 'moderate', 'active', 'extra_active'];
 
 const ACTIVITY_LEVEL_I18N: Record<ActivityLevel, string> = {
   sedentary: 'healthProfile.sedentary',
@@ -45,9 +33,9 @@ interface HealthProfileFormProps {
 export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthProfileFormProps = {}) {
   const { t } = useTranslation();
   const db = useDatabase();
-  const profile = useHealthProfileStore((s) => s.profile);
-  const saveProfileAction = useHealthProfileStore((s) => s.saveProfile);
-  const activeGoal = useHealthProfileStore((s) => s.activeGoal);
+  const profile = useHealthProfileStore(s => s.profile);
+  const saveProfileAction = useHealthProfileStore(s => s.saveProfile);
+  const activeGoal = useHealthProfileStore(s => s.activeGoal);
 
   const {
     control,
@@ -57,29 +45,30 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   } = useForm<HealthProfileFormData>({
     resolver: zodResolver(healthProfileSchema) as unknown as Resolver<HealthProfileFormData>,
     mode: 'onBlur',
-    defaultValues: blankDefaults
-      ? {
-          gender: 'male' as const,
-          age: '' as unknown as number,
-          heightCm: '' as unknown as number,
-          weightKg: '' as unknown as number,
-          activityLevel: 'moderate' as const,
-          bodyFatPct: undefined,
-          bmrOverrideEnabled: false,
-          bmrOverride: undefined,
-          proteinRatio: '' as unknown as number,
-        }
-      : {
-          gender: profile.gender,
-          age: profile.age,
-          heightCm: profile.heightCm,
-          weightKg: profile.weightKg,
-          activityLevel: profile.activityLevel,
-          bodyFatPct: profile.bodyFatPct,
-          bmrOverrideEnabled: profile.bmrOverride != null,
-          bmrOverride: profile.bmrOverride,
-          proteinRatio: profile.proteinRatio,
-        },
+    defaultValues:
+      blankDefaults || !profile
+        ? {
+            gender: 'male' as const,
+            age: '' as unknown as number,
+            heightCm: '' as unknown as number,
+            weightKg: '' as unknown as number,
+            activityLevel: 'moderate' as const,
+            bodyFatPct: undefined,
+            bmrOverrideEnabled: false,
+            bmrOverride: undefined,
+            proteinRatio: '' as unknown as number,
+          }
+        : {
+            gender: profile.gender,
+            age: profile.age,
+            heightCm: profile.heightCm,
+            weightKg: profile.weightKg,
+            activityLevel: profile.activityLevel,
+            bodyFatPct: profile.bodyFatPct,
+            bmrOverrideEnabled: profile.bmrOverride != null,
+            bmrOverride: profile.bmrOverride,
+            proteinRatio: profile.proteinRatio,
+          },
   });
 
   const [saved, setSaved] = useState(false);
@@ -110,8 +99,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   });
 
   const bmr = useMemo(() => {
-    if (watchedBmrOverrideEnabled && watchedBmrOverride)
-      return watchedBmrOverride;
+    if (watchedBmrOverrideEnabled && watchedBmrOverride) return watchedBmrOverride;
     const isValid =
       watchedWeightKg >= 30 &&
       watchedWeightKg <= 300 &&
@@ -120,37 +108,15 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       watchedAge >= 10 &&
       watchedAge <= 100;
     if (!isValid) return 0;
-    return Math.max(
-      0,
-      calculateBMR(watchedWeightKg, watchedHeightCm, watchedAge, watchedGender),
-    );
-  }, [
-    watchedBmrOverrideEnabled,
-    watchedBmrOverride,
-    watchedWeightKg,
-    watchedHeightCm,
-    watchedAge,
-    watchedGender,
-  ]);
+    return Math.max(0, calculateBMR(watchedWeightKg, watchedHeightCm, watchedAge, watchedGender));
+  }, [watchedBmrOverrideEnabled, watchedBmrOverride, watchedWeightKg, watchedHeightCm, watchedAge, watchedGender]);
 
-  const tdee = useMemo(
-    () => calculateTDEE(bmr, watchedActivityLevel),
-    [bmr, watchedActivityLevel],
-  );
+  const tdee = useMemo(() => calculateTDEE(bmr, watchedActivityLevel), [bmr, watchedActivityLevel]);
 
   const macros = useMemo(() => {
-    const bodyFatFraction =
-      typeof watchedBodyFatPct === 'number'
-        ? watchedBodyFatPct / 100
-        : undefined;
-    return calculateMacros(
-      tdee,
-      watchedWeightKg,
-      watchedProteinRatio,
-      profile.fatPct,
-      bodyFatFraction,
-    );
-  }, [tdee, watchedWeightKg, watchedProteinRatio, profile.fatPct, watchedBodyFatPct]);
+    const bodyFatFraction = typeof watchedBodyFatPct === 'number' ? watchedBodyFatPct / 100 : undefined;
+    return calculateMacros(tdee, watchedWeightKg, watchedProteinRatio, profile?.fatPct ?? 0.25, bodyFatFraction);
+  }, [tdee, watchedWeightKg, watchedProteinRatio, profile?.fatPct, watchedBodyFatPct]);
 
   const goalWeightWarning = useMemo(() => {
     if (!activeGoal || activeGoal.type === 'maintain' || !activeGoal.targetWeightKg) return null;
@@ -168,15 +134,28 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
   async function onSubmit(data: HealthProfileFormData): Promise<boolean> {
     try {
+      const base: HealthProfile = profile ?? {
+        id: 'default',
+        name: '',
+        gender: 'male',
+        age: 30,
+        dateOfBirth: null,
+        heightCm: 170,
+        weightKg: 70,
+        activityLevel: 'moderate',
+        proteinRatio: 2,
+        fatPct: 0.25,
+        targetCalories: 1500,
+        updatedAt: new Date().toISOString(),
+      };
       const profileToSave: HealthProfile = {
-        ...profile,
+        ...base,
         gender: data.gender,
         age: data.age,
         heightCm: data.heightCm,
         weightKg: data.weightKg,
         activityLevel: data.activityLevel,
-        bodyFatPct:
-          typeof data.bodyFatPct === 'number' ? data.bodyFatPct : undefined,
+        bodyFatPct: typeof data.bodyFatPct === 'number' ? data.bodyFatPct : undefined,
         bmrOverride: data.bmrOverrideEnabled ? data.bmrOverride : undefined,
         proteinRatio: data.proteinRatio,
       };
@@ -191,7 +170,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
   async function handleSave(): Promise<boolean> {
     let result = false;
-    await handleSubmit(async (data) => {
+    await handleSubmit(async data => {
       result = await onSubmit(data);
     })();
     return result;
@@ -216,14 +195,12 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   return (
     <div className="space-y-6" data-testid="health-profile-form">
       {!embedded && (
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('healthProfile.title')}
-        </h3>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('healthProfile.title')}</h3>
       )}
 
       {/* Gender Toggle */}
       <fieldset>
-        <legend className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+        <legend className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
           {t('healthProfile.gender')}
         </legend>
         <RadioPills<HealthProfileFormData>
@@ -286,10 +263,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
       {/* Activity Level */}
       <div>
-        <label
-          htmlFor="hp-activity"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
+        <label htmlFor="hp-activity" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
           {t('healthProfile.activityLevel')}
         </label>
         <Controller
@@ -301,9 +275,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
-              className={`${inputBase} border border-slate-300 dark:border-slate-600 focus:ring-emerald-500/50 focus:border-emerald-500`}
+              className={`${inputBase} border border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/50 dark:border-slate-600`}
             >
-              {ACTIVITY_LEVELS.map((level) => (
+              {ACTIVITY_LEVELS.map(level => (
                 <option key={level} value={level}>
                   {t(ACTIVITY_LEVEL_I18N[level])}
                 </option>
@@ -315,14 +289,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
       {/* Body Fat % */}
       <div>
-        <label
-          htmlFor="hp-bodyfat"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-        >
+        <label htmlFor="hp-bodyfat" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
           {t('healthProfile.bodyFat')}
-          <span className="ml-1 text-slate-400 text-xs">
-            ({t('healthProfile.bodyFatOptional')})
-          </span>
+          <span className="ml-1 text-xs text-slate-400">({t('healthProfile.bodyFatOptional')})</span>
         </label>
         <StringNumberController<HealthProfileFormData>
           name="bodyFatPct"
@@ -337,22 +306,18 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
       {/* BMR Override */}
       <fieldset>
-        <legend className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+        <legend className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
           {t('healthProfile.bmr')}
         </legend>
         <Controller
           name="bmrOverrideEnabled"
           control={control}
           render={({ field }) => (
-            <div
-              className="flex gap-2 mb-2"
-              role="radiogroup"
-              aria-label={t('healthProfile.bmr')}
-            >
+            <div className="mb-2 flex gap-2" role="radiogroup" aria-label={t('healthProfile.bmr')}>
               <label
-                className={`cursor-pointer flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 ${
+                className={`flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
                   field.value
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                     : 'bg-emerald-500 text-white'
                 }`}
               >
@@ -367,10 +332,10 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
                 {t('healthProfile.bmrAuto')}
               </label>
               <label
-                className={`cursor-pointer flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 ${
+                className={`flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
                   field.value
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                 }`}
               >
                 <input
@@ -399,11 +364,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </fieldset>
 
       {/* Protein Ratio */}
-      <FormField
-        label={t('healthProfile.proteinRatio')}
-        error={errors.proteinRatio}
-        className=""
-      >
+      <FormField label={t('healthProfile.proteinRatio')} error={errors.proteinRatio} className="">
         <StringNumberController<HealthProfileFormData>
           name="proteinRatio"
           control={control}
@@ -415,64 +376,39 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </FormField>
 
       {/* Computed Values */}
-      <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl space-y-3">
+      <div className="space-y-3 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-600 dark:text-slate-400">
-            {t('healthProfile.bmr')}
-          </span>
-          <span
-            className="font-semibold text-slate-800 dark:text-slate-200"
-            data-testid="bmr-value"
-          >
+          <span className="text-slate-600 dark:text-slate-400">{t('healthProfile.bmr')}</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200" data-testid="bmr-value">
             {bmr} kcal
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-600 dark:text-slate-400">
-            {t('healthProfile.tdee')}
-          </span>
-          <span
-            className="font-semibold text-slate-800 dark:text-slate-200"
-            data-testid="tdee-value"
-          >
+          <span className="text-slate-600 dark:text-slate-400">{t('healthProfile.tdee')}</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200" data-testid="tdee-value">
             {tdee} kcal
           </span>
         </div>
-        <div className="border-t border-emerald-200 dark:border-emerald-800 pt-2">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+        <div className="border-t border-emerald-200 pt-2 dark:border-emerald-800">
+          <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('healthProfile.macroPreview')}
           </p>
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-500 dark:text-slate-400">
-                {t('common.protein')}
-              </p>
-              <p
-                className="font-bold text-emerald-600 dark:text-emerald-400"
-                data-testid="macro-protein"
-              >
+            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
+              <p className="text-slate-500 dark:text-slate-400">{t('common.protein')}</p>
+              <p className="font-bold text-emerald-600 dark:text-emerald-400" data-testid="macro-protein">
                 {macros.proteinG}g
               </p>
             </div>
-            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-500 dark:text-slate-400">
-                {t('common.fat')}
-              </p>
-              <p
-                className="font-bold text-amber-600 dark:text-amber-400"
-                data-testid="macro-fat"
-              >
+            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
+              <p className="text-slate-500 dark:text-slate-400">{t('common.fat')}</p>
+              <p className="font-bold text-amber-600 dark:text-amber-400" data-testid="macro-fat">
                 {macros.fatG}g
               </p>
             </div>
-            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-500 dark:text-slate-400">
-                {t('common.carbs')}
-              </p>
-              <p
-                className="font-bold text-blue-600 dark:text-blue-400"
-                data-testid="macro-carbs"
-              >
+            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
+              <p className="text-slate-500 dark:text-slate-400">{t('common.carbs')}</p>
+              <p className="font-bold text-blue-600 dark:text-blue-400" data-testid="macro-carbs">
                 {macros.carbsG}g
               </p>
             </div>
@@ -484,11 +420,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         <button
           type="button"
           onClick={() => void handleSave()}
-          className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-all active:scale-[0.98] shadow-sm"
+          className="w-full rounded-xl bg-emerald-500 py-3 font-medium text-white shadow-sm transition-all hover:bg-emerald-600 active:scale-[0.98]"
         >
-          {saved && !isDirty
-            ? t('healthProfile.saved')
-            : t('healthProfile.save')}
+          {saved && !isDirty ? t('healthProfile.saved') : t('healthProfile.save')}
         </button>
       )}
     </div>

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ConfirmationModal } from '../components/modals/ConfirmationModal';
 
 vi.mock('../hooks/useModalBackHandler', () => ({
@@ -8,11 +9,7 @@ vi.mock('../hooks/useModalBackHandler', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) => <div>{children}</div>,
+  ModalBackdrop: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 describe('ConfirmationModal', () => {
@@ -41,9 +38,7 @@ describe('ConfirmationModal', () => {
   it('renders title and message when isOpen is true', () => {
     renderModal();
     expect(screen.getByText('Xóa món ăn?')).toBeInTheDocument();
-    expect(
-      screen.getByText('Bạn có chắc chắn muốn xóa món ăn này không?'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Bạn có chắc chắn muốn xóa món ăn này không?')).toBeInTheDocument();
   });
 
   it('does not render anything when isOpen is false', () => {
@@ -61,24 +56,18 @@ describe('ConfirmationModal', () => {
 
   it('renders default confirm and cancel button labels', () => {
     renderModal();
-    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent(
-      'Xác nhận',
-    );
+    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Xác nhận');
     expect(screen.getByTestId('btn-cancel-action')).toHaveTextContent('Hủy');
   });
 
   it('renders custom confirm label when provided', () => {
     renderModal({ confirmLabel: 'Đồng ý xóa' });
-    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent(
-      'Đồng ý xóa',
-    );
+    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Đồng ý xóa');
   });
 
   it('renders custom cancel label when provided', () => {
     renderModal({ cancelLabel: 'Quay lại' });
-    expect(screen.getByTestId('btn-cancel-action')).toHaveTextContent(
-      'Quay lại',
-    );
+    expect(screen.getByTestId('btn-cancel-action')).toHaveTextContent('Quay lại');
   });
 
   it('renders both custom labels when provided', () => {
@@ -182,8 +171,7 @@ describe('ConfirmationModal', () => {
     renderModal({
       message: (
         <div>
-          <strong data-testid="strong-msg">Cẩn thận!</strong> Hành động này
-          không thể hoàn tác.
+          <strong data-testid="strong-msg">Cẩn thận!</strong> Hành động này không thể hoàn tác.
         </div>
       ),
     });

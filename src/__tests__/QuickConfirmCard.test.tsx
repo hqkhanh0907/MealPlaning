@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
 import { QuickConfirmCard } from '../features/fitness/components/QuickConfirmCard';
 
 vi.mock('lucide-react', () => ({
@@ -32,22 +33,12 @@ describe('QuickConfirmCard', () => {
   });
 
   it('shows rep progression label', () => {
-    render(
-      <QuickConfirmCard
-        {...defaultProps}
-        suggestion={{ weight: 75, reps: 8, source: 'rep_progression' }}
-      />,
-    );
+    render(<QuickConfirmCard {...defaultProps} suggestion={{ weight: 75, reps: 8, source: 'rep_progression' }} />);
     expect(screen.getByText('Rep progression')).toBeInTheDocument();
   });
 
   it('shows manual entry label', () => {
-    render(
-      <QuickConfirmCard
-        {...defaultProps}
-        suggestion={{ weight: 0, reps: 5, source: 'manual' }}
-      />,
-    );
+    render(<QuickConfirmCard {...defaultProps} suggestion={{ weight: 0, reps: 5, source: 'manual' }} />);
     expect(screen.getByText('Manual entry')).toBeInTheDocument();
   });
 
@@ -81,10 +72,7 @@ describe('QuickConfirmCard', () => {
 
   it('renders weight and reps formatting correctly', () => {
     render(
-      <QuickConfirmCard
-        {...defaultProps}
-        suggestion={{ weight: 100.5, reps: 12, source: 'progressive_overload' }}
-      />,
+      <QuickConfirmCard {...defaultProps} suggestion={{ weight: 100.5, reps: 12, source: 'progressive_overload' }} />,
     );
     expect(screen.getByText('100.5kg × 12')).toBeInTheDocument();
   });

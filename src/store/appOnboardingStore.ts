@@ -10,12 +10,11 @@ interface AppOnboardingState {
 
 export const useAppOnboardingStore = create<AppOnboardingState>()(
   persist(
-    (set) => ({
+    set => ({
       isAppOnboarded: false,
       onboardingSection: null,
       setAppOnboarded: (value: boolean) => set({ isAppOnboarded: value }),
-      setOnboardingSection: (section: number | null) =>
-        set({ onboardingSection: section }),
+      setOnboardingSection: (section: number | null) => set({ onboardingSection: section }),
     }),
     {
       name: 'app-onboarding-storage',

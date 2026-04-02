@@ -1,15 +1,17 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Loader2, RotateCw, Save } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
-import { useNavigationStore } from '@/store/navigationStore';
-import { useFitnessStore } from '@/store/fitnessStore';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
-import { TemplateMatchBadge } from './TemplateMatchBadge';
-import { computeMatchScore } from '../utils/templateMatcher';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useFitnessStore } from '@/store/fitnessStore';
+import { useNavigationStore } from '@/store/navigationStore';
+
 import { EQUIPMENT_DISPLAY } from '../constants';
 import type { PlanTemplate, SplitType } from '../types';
+import { computeMatchScore } from '../utils/templateMatcher';
+import { TemplateMatchBadge } from './TemplateMatchBadge';
 
 interface PlanTemplateGalleryProps {
   planId: string;
@@ -41,18 +43,14 @@ function TemplateCard({
       type="button"
       data-testid={`template-card-${template.id}`}
       onClick={() => onApply(template)}
-      className="flex w-full flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750"
+      className="dark:hover:bg-slate-750 flex w-full flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800"
       style={{ touchAction: 'manipulation' }}
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-          {template.name}
-        </h3>
+        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{template.name}</h3>
         {matchScore != null && <TemplateMatchBadge score={matchScore} />}
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-        {template.description}
-      </p>
+      <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{template.description}</p>
       <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
         <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700">
           {SPLIT_GROUP_LABELS[template.splitType]}
@@ -63,11 +61,8 @@ function TemplateCard({
         >
           {t('fitness.templateGallery.daysPerWeek', { count: template.daysPerWeek })}
         </span>
-        {template.equipmentRequired.map((eq) => (
-          <span
-            key={eq}
-            className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700"
-          >
+        {template.equipmentRequired.map(eq => (
+          <span key={eq} className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700">
             {EQUIPMENT_DISPLAY[eq] ?? eq}
           </span>
         ))}
@@ -91,11 +86,11 @@ function LoadingSkeleton(): React.JSX.Element {
 
 function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>): React.JSX.Element {
   const { t } = useTranslation();
-  const popPage = useNavigationStore((s) => s.popPage);
+  const popPage = useNavigationStore(s => s.popPage);
 
   const { getTemplates, getRecommendedTemplates, applyTemplate, saveCurrentAsTemplate, trainingProfile } =
     useFitnessStore(
-      useShallow((s) => ({
+      useShallow(s => ({
         getTemplates: s.getTemplates,
         getRecommendedTemplates: s.getRecommendedTemplates,
         applyTemplate: s.applyTemplate,
@@ -204,7 +199,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
   if (isLoading) {
     return (
       <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-        <div className="flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 pt-safe dark:border-slate-700">
+        <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
           <button
             type="button"
             onClick={handleBack}
@@ -215,9 +210,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-lg font-semibold text-white">
-            {t('fitness.templateGallery.title')}
-          </h1>
+          <h1 className="truncate text-lg font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
         </div>
         <LoadingSkeleton />
       </div>
@@ -227,7 +220,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
   if (loadError || allTemplates.length === 0) {
     return (
       <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-        <div className="flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 pt-safe dark:border-slate-700">
+        <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
           <button
             type="button"
             onClick={handleBack}
@@ -238,17 +231,13 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-lg font-semibold text-white">
-            {t('fitness.templateGallery.title')}
-          </h1>
+          <h1 className="truncate text-lg font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
         </div>
         <div
           data-testid="template-empty-state"
           className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-12 text-center"
         >
-          <p className="text-slate-500 dark:text-slate-400">
-            {t('fitness.templateGallery.empty')}
-          </p>
+          <p className="text-slate-500 dark:text-slate-400">{t('fitness.templateGallery.empty')}</p>
           <button
             type="button"
             onClick={loadTemplates}
@@ -267,7 +256,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 pt-safe dark:border-slate-700">
+      <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
         <button
           type="button"
           onClick={handleBack}
@@ -278,9 +267,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="truncate text-lg font-semibold text-white">
-          {t('fitness.templateGallery.title')}
-        </h1>
+        <h1 className="truncate text-lg font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
       </div>
 
       {/* Scrollable Content */}
@@ -288,11 +275,11 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
         {/* Recommended Section */}
         {recommendedTemplates.length > 0 && (
           <section data-testid="recommended-section" className="mb-6">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <h2 className="mb-3 text-sm font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
               {t('fitness.templateGallery.recommended')}
             </h2>
             <div className="space-y-3">
-              {recommendedTemplates.map((tpl) => (
+              {recommendedTemplates.map(tpl => (
                 <TemplateCard
                   key={tpl.id}
                   template={tpl}
@@ -306,10 +293,10 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
 
         {/* All Templates grouped by split type */}
         <section data-testid="all-templates-section">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <h2 className="mb-3 text-sm font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
             {t('fitness.templateGallery.allTemplates')}
           </h2>
-          {SPLIT_GROUP_ORDER.map((splitType) => {
+          {SPLIT_GROUP_ORDER.map(splitType => {
             const templates = groupedTemplates.get(splitType);
             if (!templates || templates.length === 0) return null;
             return (
@@ -318,12 +305,8 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
                   {SPLIT_GROUP_LABELS[splitType]}
                 </h3>
                 <div className="space-y-3">
-                  {templates.map((tpl) => (
-                    <TemplateCard
-                      key={tpl.id}
-                      template={tpl}
-                      onApply={handleApplyRequest}
-                    />
+                  {templates.map(tpl => (
+                    <TemplateCard key={tpl.id} template={tpl} onApply={handleApplyRequest} />
                   ))}
                 </div>
               </div>
@@ -352,11 +335,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
         variant="warning"
         title={t('fitness.templateGallery.apply')}
         message={t('fitness.templateGallery.applyConfirm')}
-        confirmLabel={
-          isApplying
-            ? t('fitness.templateGallery.apply')
-            : t('fitness.templateGallery.confirm')
-        }
+        confirmLabel={isApplying ? t('fitness.templateGallery.apply') : t('fitness.templateGallery.confirm')}
         cancelLabel={t('fitness.templateGallery.cancel')}
         onConfirm={handleConfirmApply}
         onCancel={handleCancelApply}
@@ -379,7 +358,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
               data-testid="save-template-input"
               type="text"
               value={saveName}
-              onChange={(e) => setSaveName(e.target.value)}
+              onChange={e => setSaveName(e.target.value)}
               placeholder={t('fitness.templateGallery.saveNamePrompt')}
               className="mb-4 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
               autoFocus
@@ -402,9 +381,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
                 className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none disabled:opacity-60"
                 style={{ touchAction: 'manipulation' }}
               >
-                {isSaving && (
-                  <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
-                )}
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                 {t('fitness.templateGallery.confirm')}
               </button>
             </div>

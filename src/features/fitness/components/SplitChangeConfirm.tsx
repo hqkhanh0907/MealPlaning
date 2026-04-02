@@ -1,15 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@/components/ui/sheet';
-import type { SplitType, SplitChangePreview } from '../types';
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+
+import type { SplitChangePreview, SplitType } from '../types';
 
 interface SplitChangeConfirmProps {
   open: boolean;
@@ -44,7 +39,12 @@ export function SplitChangeConfirm({
   const splitName = t(splitNameKeys[newSplit]);
 
   return (
-    <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={isOpen => {
+        if (!isOpen) onClose();
+      }}
+    >
       <SheetContent
         side="bottom"
         showCloseButton={false}
@@ -55,35 +55,22 @@ export function SplitChangeConfirm({
         <SheetHeader>
           <div className="flex items-center gap-2">
             {isRegenerate ? (
-              <AlertTriangle
-                className="h-5 w-5 text-amber-500"
-                aria-hidden="true"
-                data-testid="warning-icon"
-              />
+              <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden="true" data-testid="warning-icon" />
             ) : (
-              <Info
-                className="h-5 w-5 text-blue-500"
-                aria-hidden="true"
-                data-testid="info-icon"
-              />
+              <Info className="h-5 w-5 text-blue-500" aria-hidden="true" data-testid="info-icon" />
             )}
             <SheetTitle data-testid="confirm-title">
               {t('fitness.splitChanger.changeTo', { split: splitName })}
             </SheetTitle>
           </div>
           <SheetDescription data-testid="confirm-description">
-            {isRegenerate
-              ? t('fitness.splitChanger.regenerateWarning')
-              : t('fitness.splitChanger.remapDesc')}
+            {isRegenerate ? t('fitness.splitChanger.regenerateWarning') : t('fitness.splitChanger.remapDesc')}
           </SheetDescription>
         </SheetHeader>
 
         {/* Remap preview summary */}
         {!isRegenerate && (
-          <div
-            className="flex flex-wrap gap-2 px-4 text-sm tabular-nums"
-            data-testid="confirm-remap-summary"
-          >
+          <div className="flex flex-wrap gap-2 px-4 text-sm tabular-nums" data-testid="confirm-remap-summary">
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
               {String(preview.mapped.length)} {t('fitness.splitChanger.mapped')}
             </span>

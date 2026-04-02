@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { FilterBottomSheet } from '../components/shared/FilterBottomSheet';
 import type { FilterConfig } from '../types';
 
@@ -16,7 +17,11 @@ describe('FilterBottomSheet', () => {
 
   it('renders sort chips with correct active state', () => {
     render(<FilterBottomSheet {...defaultProps} />);
-    const chips = screen.getAllByRole('button').filter(b => b.textContent?.includes('Tên') || b.textContent?.includes('Calo') || b.textContent?.includes('Protein'));
+    const chips = screen
+      .getAllByRole('button')
+      .filter(
+        b => b.textContent?.includes('Tên') || b.textContent?.includes('Calo') || b.textContent?.includes('Protein'),
+      );
     const activeChips = chips.filter(b => b.className.includes('bg-emerald-500'));
     expect(activeChips).toHaveLength(1);
     expect(activeChips[0].textContent).toContain('Tên (A-Z)');
@@ -70,12 +75,7 @@ describe('FilterBottomSheet', () => {
   });
 
   it('reset button clears all filters', () => {
-    render(
-      <FilterBottomSheet
-        {...defaultProps}
-        config={{ sortBy: 'cal-desc', maxCalories: 300, minProtein: 20 }}
-      />,
-    );
+    render(<FilterBottomSheet {...defaultProps} config={{ sortBy: 'cal-desc', maxCalories: 300, minProtein: 20 }} />);
     const calDescChip = screen.getByText('Calo (Cao → Thấp)');
     expect(calDescChip.className).toContain('bg-emerald-500');
 

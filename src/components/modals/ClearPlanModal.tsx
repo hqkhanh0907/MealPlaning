@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { CalendarDays, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
-import { DayPlan, MealType } from '../../types';
+
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
-import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { DayPlan, MealType } from '../../types';
 import { getWeekRange, isDateInRange, parseLocalDate } from '../../utils/helpers';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface ClearPlanModalProps {
   dayPlans: DayPlan[];
@@ -15,7 +16,6 @@ interface ClearPlanModalProps {
 
 const hasPlan = (p: DayPlan): boolean =>
   p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0;
-
 
 export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: ClearPlanModalProps) => {
   const { t, i18n } = useTranslation();
@@ -58,8 +58,8 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
       return pDate.getFullYear() === year && pDate.getMonth() === month;
     });
 
-    const countMeals = (plans: DayPlan[]) => plans.reduce((sum, p) =>
-      sum + p.breakfastDishIds.length + p.lunchDishIds.length + p.dinnerDishIds.length, 0);
+    const countMeals = (plans: DayPlan[]) =>
+      plans.reduce((sum, p) => sum + p.breakfastDishIds.length + p.lunchDishIds.length + p.dinnerDishIds.length, 0);
 
     return {
       day: { plans: dayItems, mealCount: countMeals(dayItems) },
@@ -71,25 +71,57 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
   const formatShortDate = (dateStr: string) =>
     parseLocalDate(dateStr).toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'short' });
 
-  const SCOPE_OPTIONS: { scope: 'day' | 'week' | 'month'; label: string; desc: string; count: number; mealCount: number; dates: string[] }[] = [
-    { scope: 'day', label: t('clearPlan.scopeDay'), desc: t('clearPlan.scopeDayDesc'), count: scopeData.day.plans.length, mealCount: scopeData.day.mealCount, dates: scopeData.day.plans.map(p => p.date) },
-    { scope: 'week', label: t('clearPlan.scopeWeek'), desc: t('clearPlan.scopeWeekDesc'), count: scopeData.week.plans.length, mealCount: scopeData.week.mealCount, dates: scopeData.week.plans.map(p => p.date) },
-    { scope: 'month', label: t('clearPlan.scopeMonth'), desc: t('clearPlan.scopeMonthDesc'), count: scopeData.month.plans.length, mealCount: scopeData.month.mealCount, dates: scopeData.month.plans.map(p => p.date) },
+  const SCOPE_OPTIONS: {
+    scope: 'day' | 'week' | 'month';
+    label: string;
+    desc: string;
+    count: number;
+    mealCount: number;
+    dates: string[];
+  }[] = [
+    {
+      scope: 'day',
+      label: t('clearPlan.scopeDay'),
+      desc: t('clearPlan.scopeDayDesc'),
+      count: scopeData.day.plans.length,
+      mealCount: scopeData.day.mealCount,
+      dates: scopeData.day.plans.map(p => p.date),
+    },
+    {
+      scope: 'week',
+      label: t('clearPlan.scopeWeek'),
+      desc: t('clearPlan.scopeWeekDesc'),
+      count: scopeData.week.plans.length,
+      mealCount: scopeData.week.mealCount,
+      dates: scopeData.week.plans.map(p => p.date),
+    },
+    {
+      scope: 'month',
+      label: t('clearPlan.scopeMonth'),
+      desc: t('clearPlan.scopeMonthDesc'),
+      count: scopeData.month.plans.length,
+      mealCount: scopeData.month.mealCount,
+      dates: scopeData.month.plans.map(p => p.date),
+    },
   ];
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90dvh] sm:mx-4">
-        <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+      <div className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('clearPlan.title')}</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">{t('clearPlan.subtitle')}</p>
           </div>
-          <button onClick={onClose} aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all">
-            <X className="w-6 h-6" />
+          <button
+            onClick={onClose}
+            aria-label={t('common.closeDialog')}
+            className="rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+          >
+            <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-6 sm:p-8 space-y-4">
+        <div className="space-y-4 p-6 sm:p-8">
           {/* Meal selection */}
           <div className="flex gap-2" data-testid="meal-filter">
             {MEAL_LABELS.map(({ type, labelKey }) => (
@@ -98,10 +130,10 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 type="button"
                 data-testid={`meal-toggle-${type}`}
                 onClick={() => toggleMeal(type)}
-                className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all border-2 ${
+                className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-bold transition-all ${
                   selectedMeals.has(type)
-                    ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300'
-                    : 'border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500'
+                    ? 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
+                    : 'border-slate-200 text-slate-400 dark:border-slate-600 dark:text-slate-500'
                 }`}
               >
                 {t(labelKey)}
@@ -115,26 +147,36 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 data-testid={`btn-clear-scope-${scope}`}
                 onClick={() => onClear(scope, selectedMeals.size === 3 ? undefined : Array.from(selectedMeals))}
                 disabled={count === 0}
-                className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 group min-h-16 ${
+                className={`group flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 p-4 transition-all ${
                   count === 0
-                    ? 'border-slate-50 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 opacity-50 cursor-not-allowed'
-                    : 'border-slate-100 dark:border-slate-700 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:scale-[0.98]'
+                    ? 'cursor-not-allowed border-slate-50 bg-slate-50 opacity-50 dark:border-slate-700 dark:bg-slate-800'
+                    : 'border-slate-100 hover:border-rose-500 hover:bg-rose-50 active:scale-[0.98] dark:border-slate-700 dark:hover:bg-rose-900/20'
                 }`}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform ${
-                  count > 0 ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 group-hover:scale-110' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
-                }`}>
-                  <CalendarDays className="w-6 h-6" />
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl transition-transform ${
+                    count > 0
+                      ? 'bg-rose-100 text-rose-600 group-hover:scale-110 dark:bg-rose-900/30 dark:text-rose-400'
+                      : 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
+                  }`}
+                >
+                  <CalendarDays className="h-6 w-6" />
                 </div>
-                <div className="text-left flex-1">
-                  <p className={`font-bold text-lg ${count > 0 ? 'text-slate-800 dark:text-slate-100 group-hover:text-rose-700 dark:group-hover:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>{label}</p>
+                <div className="flex-1 text-left">
+                  <p
+                    className={`text-lg font-bold ${count > 0 ? 'text-slate-800 group-hover:text-rose-700 dark:text-slate-100 dark:group-hover:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}
+                  >
+                    {label}
+                  </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">{desc}</p>
                   {count > 0 && mealCount > 0 && (
-                    <p className="text-xs text-rose-500 dark:text-rose-400 mt-0.5">{t('clearPlan.totalMeals', { count: mealCount })}</p>
+                    <p className="mt-0.5 text-xs text-rose-500 dark:text-rose-400">
+                      {t('clearPlan.totalMeals', { count: mealCount })}
+                    </p>
                   )}
                 </div>
                 {count > 0 && (
-                  <span className="text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-full shrink-0">
+                  <span className="shrink-0 rounded-full bg-rose-100 px-2.5 py-1 text-xs font-bold text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
                     {t('clearPlan.dayCount', { count })}
                   </span>
                 )}
@@ -142,20 +184,25 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
               {count > 1 && (
                 <button
                   data-testid={`btn-expand-${scope}`}
-                  onClick={() => setExpandedScope(prev => prev === scope ? null : scope)}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 mt-1.5 ml-4 transition-colors"
+                  onClick={() => setExpandedScope(prev => (prev === scope ? null : scope))}
+                  className="mt-1.5 ml-4 flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
                 >
-                  {expandedScope === scope ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {expandedScope === scope ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                   {t('clearPlan.affectedDates')}
                 </button>
               )}
               {expandedScope === scope && dates.length > 0 && (
-                <div className="ml-4 mt-1.5 flex flex-wrap gap-1.5">
-                  {[...dates].sort((a, b) => a.localeCompare(b)).map(d => (
-                    <span key={d} className="text-xs bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full">
-                      {formatShortDate(d)}
-                    </span>
-                  ))}
+                <div className="mt-1.5 ml-4 flex flex-wrap gap-1.5">
+                  {[...dates]
+                    .sort((a, b) => a.localeCompare(b))
+                    .map(d => (
+                      <span
+                        key={d}
+                        className="rounded-full bg-rose-50 px-2 py-0.5 text-xs text-rose-600 dark:bg-rose-900/20 dark:text-rose-400"
+                      >
+                        {formatShortDate(d)}
+                      </span>
+                    ))}
                 </div>
               )}
             </div>

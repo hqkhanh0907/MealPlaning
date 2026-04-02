@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { ingredientEditSchema, ingredientEditDefaults } from '../ingredientEditSchema';
+import { describe, expect, it } from 'vitest';
+
+import { ingredientEditDefaults, ingredientEditSchema } from '../ingredientEditSchema';
 
 describe('ingredientEditSchema', () => {
   it('rejects default data (empty name/unit)', () => {
@@ -45,8 +46,13 @@ describe('ingredientEditSchema', () => {
 
   it('coerces string numbers to numbers', () => {
     const data = {
-      name: { vi: 'Gà' }, unit: { vi: 'g' },
-      caloriesPer100: '165', proteinPer100: '31', carbsPer100: '0', fatPer100: '3.6', fiberPer100: '0',
+      name: { vi: 'Gà' },
+      unit: { vi: 'g' },
+      caloriesPer100: '165',
+      proteinPer100: '31',
+      carbsPer100: '0',
+      fatPer100: '3.6',
+      fiberPer100: '0',
     };
     const result = ingredientEditSchema.safeParse(data);
     expect(result.success).toBe(true);

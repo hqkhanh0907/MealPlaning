@@ -2,21 +2,12 @@ import { z } from 'zod';
 
 const GENDER_VALUES = ['male', 'female'] as const;
 
-const ACTIVITY_LEVEL_VALUES = [
-  'sedentary',
-  'light',
-  'moderate',
-  'active',
-  'extra_active',
-] as const;
+const ACTIVITY_LEVEL_VALUES = ['sedentary', 'light', 'moderate', 'active', 'extra_active'] as const;
 
 export const healthProfileSchema = z
   .object({
     gender: z.enum(GENDER_VALUES),
-    age: z.coerce
-      .number()
-      .min(10, { error: 'Tuổi tối thiểu là 10' })
-      .max(100, { error: 'Tuổi tối đa là 100' }),
+    age: z.coerce.number().min(10, { error: 'Tuổi tối thiểu là 10' }).max(100, { error: 'Tuổi tối đa là 100' }),
     heightCm: z.coerce
       .number()
       .min(100, { error: 'Chiều cao tối thiểu là 100 cm' })
@@ -33,24 +24,16 @@ export const healthProfileSchema = z
       .or(z.literal('')),
     activityLevel: z.enum(ACTIVITY_LEVEL_VALUES),
     bmrOverrideEnabled: z.boolean(),
-    bmrOverride: z.coerce
-      .number()
-      .positive({ error: 'BMR phải là số dương' })
-      .optional(),
+    bmrOverride: z.coerce.number().positive({ error: 'BMR phải là số dương' }).optional(),
     proteinRatio: z.coerce
       .number()
       .min(0.8, { error: 'Tỉ lệ protein tối thiểu là 0.8 g/kg' })
       .max(4, { error: 'Tỉ lệ protein tối đa là 4 g/kg' }),
   })
-  .refine(
-    (data) =>
-      !data.bmrOverrideEnabled ||
-      (data.bmrOverride !== undefined && data.bmrOverride > 0),
-    {
-      error: 'Vui lòng nhập giá trị BMR khi bật ghi đè',
-      path: ['bmrOverride'],
-    },
-  );
+  .refine(data => !data.bmrOverrideEnabled || (data.bmrOverride !== undefined && data.bmrOverride > 0), {
+    error: 'Vui lòng nhập giá trị BMR khi bật ghi đè',
+    path: ['bmrOverride'],
+  });
 
 export type HealthProfileFormData = z.infer<typeof healthProfileSchema>;
 

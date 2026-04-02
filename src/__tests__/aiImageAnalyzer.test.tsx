@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { AIImageAnalyzer } from '../components/AIImageAnalyzer';
 import { AnalyzedDishResult, NotFoodImageError } from '../types';
 
@@ -14,7 +15,15 @@ vi.mock('../services/geminiService', () => ({
 
 // Mock child components for isolation
 vi.mock('../components/ImageCapture', () => ({
-  ImageCapture: ({ image, onImageReady, onClear }: { image: string | null; onImageReady: (b64: string) => void; onClear: () => void }) => (
+  ImageCapture: ({
+    image,
+    onImageReady,
+    onClear,
+  }: {
+    image: string | null;
+    onImageReady: (b64: string) => void;
+    onClear: () => void;
+  }) => (
     <div data-testid="image-capture">
       <button onClick={() => onImageReady('data:image/png;base64,abc123')}>Select Image</button>
       {image && <button onClick={onClear}>Clear</button>}
@@ -24,7 +33,15 @@ vi.mock('../components/ImageCapture', () => ({
 }));
 
 vi.mock('../components/AnalysisResultView', () => ({
-  AnalysisResultView: ({ result, isAnalyzing, onOpenSaveModal }: { result: AnalyzedDishResult | null; isAnalyzing: boolean; onOpenSaveModal?: () => void }) => (
+  AnalysisResultView: ({
+    result,
+    isAnalyzing,
+    onOpenSaveModal,
+  }: {
+    result: AnalyzedDishResult | null;
+    isAnalyzing: boolean;
+    onOpenSaveModal?: () => void;
+  }) => (
     <div data-testid="analysis-result">
       {isAnalyzing && <span>analyzing</span>}
       {result && <span>{result.name}</span>}
@@ -35,7 +52,9 @@ vi.mock('../components/AnalysisResultView', () => ({
 
 vi.mock('../components/modals/SaveAnalyzedDishModal', () => ({
   SaveAnalyzedDishModal: ({ onClose }: { onClose: () => void }) => (
-    <div data-testid="save-modal"><button onClick={onClose}>Close Save Modal</button></div>
+    <div data-testid="save-modal">
+      <button onClick={onClose}>Close Save Modal</button>
+    </div>
   ),
 }));
 
@@ -99,7 +118,7 @@ describe('AIImageAnalyzer', () => {
     await waitFor(() => {
       expect(mockNotify.warning).toHaveBeenCalledWith(
         'Ảnh không phải món ăn',
-        'Đây là ảnh phong cảnh, không phải thực phẩm'
+        'Đây là ảnh phong cảnh, không phải thực phẩm',
       );
     });
     expect(mockNotify.error).not.toHaveBeenCalled();
@@ -166,7 +185,7 @@ describe('AIImageAnalyzer', () => {
     expect(analyzeBtn.closest('button')).not.toBeDisabled();
     // Now analyze normally to ensure the function works
     fireEvent.click(analyzeBtn);
-    // Wait for analyze to complete  
+    // Wait for analyze to complete
     await waitFor(() => {
       expect(mockAnalyzeDishImage).toHaveBeenCalled();
     });

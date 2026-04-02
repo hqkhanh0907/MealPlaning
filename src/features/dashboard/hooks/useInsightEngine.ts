@@ -1,17 +1,10 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { getSetting, setSetting } from '../../../services/appSettings';
 import type { DatabaseService } from '../../../services/databaseService';
 
-export type InsightType =
-  | 'alert'
-  | 'action'
-  | 'remind'
-  | 'motivate'
-  | 'celebrate'
-  | 'praise'
-  | 'progress'
-  | 'tip';
+export type InsightType = 'alert' | 'action' | 'remind' | 'motivate' | 'celebrate' | 'praise' | 'progress' | 'tip';
 
 export type InsightColor = 'dark-amber' | 'amber' | 'blue' | 'green' | 'gray';
 
@@ -99,11 +92,7 @@ function createP1(input: InsightInput): Insight | null {
 }
 
 function createP2(input: InsightInput): Insight | null {
-  if (
-    input.proteinRatio === undefined ||
-    input.proteinRatio >= PROTEIN_RATIO_MIN ||
-    !input.isAfterEvening
-  ) {
+  if (input.proteinRatio === undefined || input.proteinRatio >= PROTEIN_RATIO_MIN || !input.isAfterEvening) {
     return null;
   }
   return {
@@ -207,14 +196,17 @@ function createP7(input: InsightInput): Insight | null {
   };
 }
 
-const INSIGHT_GENERATORS: ReadonlyArray<
-  (input: InsightInput) => Insight | null
-> = [createP1, createP2, createP3, createP4, createP5, createP6, createP7];
+const INSIGHT_GENERATORS: ReadonlyArray<(input: InsightInput) => Insight | null> = [
+  createP1,
+  createP2,
+  createP3,
+  createP4,
+  createP5,
+  createP6,
+  createP7,
+];
 
-export function getTipOfTheDay(
-  today?: string,
-  recentTipIds?: string[],
-): Insight {
+export function getTipOfTheDay(today?: string, recentTipIds?: string[]): Insight {
   const dateStr = today ?? new Date().toISOString().split('T')[0];
   const recent = recentTipIds ?? [];
   const poolSize = TIPS_POOL.length;
@@ -247,11 +239,7 @@ export function getTipOfTheDay(
   };
 }
 
-export function selectInsight(
-  input: InsightInput,
-  dismissedIds: string[],
-  today?: string,
-): Insight {
+export function selectInsight(input: InsightInput, dismissedIds: string[], today?: string): Insight {
   for (const generator of INSIGHT_GENERATORS) {
     const insight = generator(input);
     if (insight && !dismissedIds.includes(insight.id)) {
@@ -260,7 +248,7 @@ export function selectInsight(
   }
   return getTipOfTheDay(
     today,
-    dismissedIds.filter((id) => id.startsWith('p8-tip-')),
+    dismissedIds.filter(id => id.startsWith('p8-tip-')),
   );
 }
 
@@ -275,7 +263,9 @@ async function loadDismissedIds(db: DatabaseService): Promise<string[]> {
 }
 
 function persistDismissedIds(db: DatabaseService, ids: string[]): void {
-  setSetting(db, 'insight_dismissed', JSON.stringify(ids)).catch(() => { /* db write error */ });
+  setSetting(db, 'insight_dismissed', JSON.stringify(ids)).catch(() => {
+    /* db write error */
+  });
 }
 
 export function useInsightEngine(): {
@@ -287,32 +277,39 @@ export function useInsightEngine(): {
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    loadDismissedIds(db).then(setDismissedIds).catch(() => { /* db read error */ });
+    loadDismissedIds(db)
+      .then(setDismissedIds)
+      .catch(() => {
+        /* db read error */
+      });
   }, [db]);
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const input: InsightInput = useMemo(() => ({}), []);
 
-  const currentInsight = useMemo(
-    () => selectInsight(input, dismissedIds, today),
-    [input, dismissedIds, today],
+  const currentInsight = useMemo(() => selectInsight(input, dismissedIds, today), [input, dismissedIds, today]);
+
+  const dismissInsight = useCallback(
+    (id: string) => {
+      setDismissedIds(prev => {
+        const next = [...prev, id];
+        persistDismissedIds(db, next);
+        return next;
+      });
+    },
+    [db],
   );
 
-  const dismissInsight = useCallback((id: string) => {
-    setDismissedIds((prev) => {
-      const next = [...prev, id];
-      persistDismissedIds(db, next);
-      return next;
-    });
-  }, [db]);
-
-  const handleAction = useCallback((insight: Insight) => {
-    setDismissedIds((prev) => {
-      const next = [...prev, insight.id];
-      persistDismissedIds(db, next);
-      return next;
-    });
-  }, [db]);
+  const handleAction = useCallback(
+    (insight: Insight) => {
+      setDismissedIds(prev => {
+        const next = [...prev, insight.id];
+        persistDismissedIds(db, next);
+        return next;
+      });
+    },
+    [db],
+  );
 
   return { currentInsight, dismissInsight, handleAction };
 }

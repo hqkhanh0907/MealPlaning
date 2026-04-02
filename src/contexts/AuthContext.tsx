@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
-import type { AuthUser } from '../types';
-import { AuthContext } from './authContextDef';
-import type { AuthContextValue, AuthState } from './authContextDef';
-import { useDatabase } from './DatabaseContext';
-import { getSetting, setSetting, deleteSetting } from '../services/appSettings';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { deleteSetting, getSetting, setSetting } from '../services/appSettings';
 import type { DatabaseService } from '../services/databaseService';
+import type { AuthUser } from '../types';
+import type { AuthContextValue, AuthState } from './authContextDef';
+import { AuthContext } from './authContextDef';
+import { useDatabase } from './DatabaseContext';
 
 export type { AuthContextValue, AuthState } from './authContextDef';
 
@@ -76,9 +77,11 @@ declare global {
     };
   }
   // Typed global for globalThis access
-  var google: {
-    accounts: GoogleAccountsNamespace;
-  } | undefined;
+  var google:
+    | {
+        accounts: GoogleAccountsNamespace;
+      }
+    | undefined;
 }
 
 const loadGISScript = (): Promise<void> => {
@@ -102,7 +105,7 @@ const fetchGoogleUserInfo = async (accessToken: string): Promise<AuthUser> => {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   if (!res.ok) throw new Error(`Failed to fetch user info: ${res.status}`);
-  const data = await res.json() as { sub: string; email: string; name: string; picture?: string };
+  const data = (await res.json()) as { sub: string; email: string; name: string; picture?: string };
   return {
     id: data.sub,
     email: data.email,
@@ -191,27 +194,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         void loadGISScript();
       }
-      setState(prev => prev.isInitialized ? prev : { ...prev, isInitialized: true });
+      setState(prev => (prev.isInitialized ? prev : { ...prev, isInitialized: true }));
     };
     void init();
   }, [db]);
 
-  const processTokenResponse = useCallback(async (tokenResponse: GISTokenResponse) => {
-    try {
-      const user = await fetchGoogleUserInfo(tokenResponse.access_token);
-      const authData = { user, accessToken: tokenResponse.access_token };
-      persistAuth(db, authData);
-      setState({ ...authData, isLoading: false, isInitialized: true });
-      signInResolverRef.current?.resolve();
-    } catch (error_) {
-      setState(prev => ({ ...prev, isLoading: false }));
-      persistAuth(db, null);
-      signInResolverRef.current?.reject(
-        error_ instanceof Error ? error_ : new Error('Failed to fetch user info'),
-      );
-    }
-    signInResolverRef.current = null;
-  }, [db]);
+  const processTokenResponse = useCallback(
+    async (tokenResponse: GISTokenResponse) => {
+      try {
+        const user = await fetchGoogleUserInfo(tokenResponse.access_token);
+        const authData = { user, accessToken: tokenResponse.access_token };
+        persistAuth(db, authData);
+        setState({ ...authData, isLoading: false, isInitialized: true });
+        signInResolverRef.current?.resolve();
+      } catch (error_) {
+        setState(prev => ({ ...prev, isLoading: false }));
+        persistAuth(db, null);
+        signInResolverRef.current?.reject(error_ instanceof Error ? error_ : new Error('Failed to fetch user info'));
+      }
+      signInResolverRef.current = null;
+    },
+    [db],
+  );
 
   const signIn = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true }));
@@ -248,9 +252,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const handleTokenError = (error: GISErrorResponse) => {
       setState(prev => ({ ...prev, isLoading: false }));
       const err = new Error(
-        error.type === 'popup_closed'
-          ? 'Sign-in popup was closed'
-          : `Google sign-in error: ${error.type}`,
+        error.type === 'popup_closed' ? 'Sign-in popup was closed' : `Google sign-in error: ${error.type}`,
       );
       signInResolverRef.current?.reject(err);
       signInResolverRef.current = null;
@@ -299,11 +301,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setState({ user: null, accessToken: null, isLoading: false, isInitialized: true });
   }, [state.accessToken, db]);
 
-  const value = useMemo<AuthContextValue>(() => ({
-    ...state,
-    signIn,
-    signOut,
-  }), [state, signIn, signOut]);
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      ...state,
+      signIn,
+      signOut,
+    }),
+    [state, signIn, signOut],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { EnergyBalanceCard } from '../components/nutrition/EnergyBalanceCard';
 
 describe('EnergyBalanceCard', () => {
@@ -62,12 +63,7 @@ describe('EnergyBalanceCard', () => {
   });
 
   it('zero exercise calories handled', () => {
-    render(
-      <EnergyBalanceCard
-        {...baseProps}
-        caloriesOut={0}
-      />,
-    );
+    render(<EnergyBalanceCard {...baseProps} caloriesOut={0} />);
 
     expect(screen.getByTestId('calories-out')).toHaveTextContent('0');
     expect(screen.getByTestId('net-calories')).toHaveTextContent('1800');
@@ -81,47 +77,25 @@ describe('EnergyBalanceCard', () => {
   });
 
   it('shows negative remaining when over target', () => {
-    render(
-      <EnergyBalanceCard
-        {...baseProps}
-        caloriesIn={2500}
-        caloriesOut={0}
-      />,
-    );
+    render(<EnergyBalanceCard {...baseProps} caloriesIn={2500} caloriesOut={0} />);
 
     expect(screen.getByTestId('remaining-display')).toHaveTextContent('-500');
   });
 
   it('handles zero target calories gracefully', () => {
-    render(
-      <EnergyBalanceCard
-        {...baseProps}
-        targetCalories={0}
-      />,
-    );
+    render(<EnergyBalanceCard {...baseProps} targetCalories={0} />);
 
     expect(screen.getByTestId('energy-balance-card')).toBeInTheDocument();
   });
 
   it('handles zero protein target gracefully', () => {
-    render(
-      <EnergyBalanceCard
-        {...baseProps}
-        proteinTarget={0}
-      />,
-    );
+    render(<EnergyBalanceCard {...baseProps} proteinTarget={0} />);
 
     expect(screen.getByTestId('protein-bar')).toBeInTheDocument();
   });
 
   it('caps progress bar at 100% when over target', () => {
-    render(
-      <EnergyBalanceCard
-        {...baseProps}
-        caloriesIn={3000}
-        proteinCurrent={200}
-      />,
-    );
+    render(<EnergyBalanceCard {...baseProps} caloriesIn={3000} proteinCurrent={200} />);
 
     expect(screen.getByTestId('bar-food')).toHaveStyle({ width: '100%' });
     expect(screen.getByTestId('protein-bar')).toHaveStyle({ width: '100%' });

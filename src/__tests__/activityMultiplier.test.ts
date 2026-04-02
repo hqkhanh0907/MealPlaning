@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
+import type { Workout, WorkoutSet } from '../features/fitness/types';
 import {
   analyzeActivityLevel,
   calculateExerciseAdjustment,
-  mapToActivityLevel,
   getConfidence,
+  mapToActivityLevel,
 } from '../features/fitness/utils/activityMultiplier';
-import type { Workout, WorkoutSet } from '../features/fitness/types';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
@@ -44,9 +45,7 @@ function createSet(overrides?: Partial<WorkoutSet>): WorkoutSet {
   };
 }
 
-function createWorkoutsWithSets(
-  count: number,
-): { workouts: Workout[]; sets: WorkoutSet[] } {
+function createWorkoutsWithSets(count: number): { workouts: Workout[]; sets: WorkoutSet[] } {
   const workouts: Workout[] = [];
   const sets: WorkoutSet[] = [];
   for (let i = 0; i < count; i++) {
@@ -195,9 +194,7 @@ describe('calculateExerciseAdjustment', () => {
 
   it('returns daily calorie burn from workouts', () => {
     const workouts = [createWorkout({ durationMin: 60 })];
-    const sets = [
-      createSet({ workoutId: workouts[0].id, weightKg: 60, reps: 10 }),
-    ];
+    const sets = [createSet({ workoutId: workouts[0].id, weightKg: 60, reps: 10 })];
     // STRENGTH_MET(5) * weightKg(70) * durationMin(60) / 60 = 350
     // Daily = 350 / 7 = 50
     const result = calculateExerciseAdjustment(workouts, sets, 70, 7);
@@ -220,12 +217,7 @@ describe('calculateExerciseAdjustment', () => {
       weightKg: 60,
       reps: 10,
     });
-    const result = calculateExerciseAdjustment(
-      [w],
-      [cardioSet, strengthSet],
-      70,
-      7,
-    );
+    const result = calculateExerciseAdjustment([w], [cardioSet, strengthSet], 70, 7);
     // No durationMin on workout → strength portion skipped, only 350 cardio
     expect(result).toBe(50); // 350 / 7 = 50
   });

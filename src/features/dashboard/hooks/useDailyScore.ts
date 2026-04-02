@@ -1,15 +1,17 @@
 import { useMemo } from 'react';
-import { useFitnessStore } from '../../../store/fitnessStore';
+
 import { useDayPlanStore } from '../../../store/dayPlanStore';
 import { useDishStore } from '../../../store/dishStore';
+import { useFitnessStore } from '../../../store/fitnessStore';
 import { useIngredientStore } from '../../../store/ingredientStore';
-import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
-import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
-import { calculateStreak } from '../../fitness/utils/gamification';
 import { calculateDishesNutrition } from '../../../utils/nutrition';
-import { calculateDailyScore } from '../utils/scoreCalculator';
+import { calculateStreak } from '../../fitness/utils/gamification';
+import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
+import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
+import type { HealthProfile } from '../../health-profile/types';
 import { DEFAULT_HEALTH_PROFILE } from '../../health-profile/types';
 import type { ScoreColor } from '../types';
+import { calculateDailyScore } from '../utils/scoreCalculator';
 
 export interface DailyScoreData {
   totalScore: number;
@@ -38,9 +40,8 @@ function getGreeting(hour: number): string {
   return 'Chào buổi tối!';
 }
 
-function isDefaultProfile(
-  profile: typeof DEFAULT_HEALTH_PROFILE,
-): boolean {
+function isDefaultProfile(profile: HealthProfile | null): boolean {
+  if (!profile) return true;
   return (
     profile.id === DEFAULT_HEALTH_PROFILE.id &&
     profile.gender === DEFAULT_HEALTH_PROFILE.gender &&
@@ -52,85 +53,59 @@ function isDefaultProfile(
 }
 
 export function useDailyScore(): DailyScoreData {
-  const profile = useHealthProfileStore((s) => s.profile);
+  const profile = useHealthProfileStore(s => s.profile);
   const { targetCalories, targetProtein } = useNutritionTargets();
-  const dayPlans = useDayPlanStore((s) => s.dayPlans);
-  const dishes = useDishStore((s) => s.dishes);
-  const ingredients = useIngredientStore((s) => s.ingredients);
-  const workouts = useFitnessStore((s) => s.workouts);
-  const weightEntries = useFitnessStore((s) => s.weightEntries);
-  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
-  const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
+  const dayPlans = useDayPlanStore(s => s.dayPlans);
+  const dishes = useDishStore(s => s.dishes);
+  const ingredients = useIngredientStore(s => s.ingredients);
+  const workouts = useFitnessStore(s => s.workouts);
+  const weightEntries = useFitnessStore(s => s.weightEntries);
+  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
 
   return useMemo(() => {
     const now = new Date();
     const today = formatLocalDate(now);
-    const yesterday = formatLocalDate(
-      new Date(now.getTime() - 86_400_000),
-    );
+    const yesterday = formatLocalDate(new Date(now.getTime() - 86_400_000));
     const hour = now.getHours();
     const greeting = getGreeting(hour);
 
     const hasAnyMeals = dayPlans.some(
-      (p) =>
-        p.breakfastDishIds.length > 0 ||
-        p.lunchDishIds.length > 0 ||
-        p.dinnerDishIds.length > 0,
+      p => p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0,
     );
     const isFirstTimeUser = isDefaultProfile(profile) || !hasAnyMeals;
 
-    const todayPlan = dayPlans.find((p) => p.date === today);
+    const todayPlan = dayPlans.find(p => p.date === today);
     let actualCalories: number | undefined;
     let actualProtein: number | undefined;
 
     if (todayPlan) {
-      const allDishIds = [
-        ...todayPlan.breakfastDishIds,
-        ...todayPlan.lunchDishIds,
-        ...todayPlan.dinnerDishIds,
-      ];
+      const allDishIds = [...todayPlan.breakfastDishIds, ...todayPlan.lunchDishIds, ...todayPlan.dinnerDishIds];
       if (allDishIds.length > 0) {
-        const nutrition = calculateDishesNutrition(
-          allDishIds,
-          dishes,
-          ingredients,
-          todayPlan.servings,
-        );
+        const nutrition = calculateDishesNutrition(allDishIds, dishes, ingredients, todayPlan.servings);
         actualCalories = nutrition.calories;
         actualProtein = nutrition.protein;
       }
     }
 
-    const workoutCompleted = workouts.some((w) => w.date === today);
+    const workoutCompleted = workouts.some(w => w.date === today);
 
-    const activePlan = trainingPlans.find((p) => p.status === 'active');
+    const activePlan = trainingPlans.find(p => p.status === 'active');
     const todayDayOfWeek = now.getDay();
     let isRestDay = false;
 
     if (activePlan) {
-      const scheduledDays = trainingPlanDays
-        .filter((d) => d.planId === activePlan.id)
-        .map((d) => d.dayOfWeek);
+      const scheduledDays = trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek);
       isRestDay = !scheduledDays.includes(todayDayOfWeek);
     }
 
-    const weightLoggedToday = weightEntries.some(
-      (e) => e.date === today,
-    );
-    const weightLoggedYesterday = weightEntries.some(
-      (e) => e.date === yesterday,
-    );
+    const weightLoggedToday = weightEntries.some(e => e.date === today);
+    const weightLoggedYesterday = weightEntries.some(e => e.date === yesterday);
 
     const planDaysForStreak = activePlan
-      ? trainingPlanDays
-          .filter((d) => d.planId === activePlan.id)
-          .map((d) => d.dayOfWeek)
+      ? trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek)
       : [];
-    const streakInfo = calculateStreak(
-      workouts,
-      planDaysForStreak,
-      today,
-    );
+    const streakInfo = calculateStreak(workouts, planDaysForStreak, today);
 
     const scoreResult = calculateDailyScore({
       actualCalories,

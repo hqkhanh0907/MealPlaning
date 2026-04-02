@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, render, screen, fireEvent } from '@testing-library/react';
-import { useCopyPlan } from '../hooks/useCopyPlan';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { CopyPlanModal } from '../components/modals/CopyPlanModal';
+import { useCopyPlan } from '../hooks/useCopyPlan';
 import { DayPlan } from '../types';
 
 // Mock i18n
@@ -57,10 +58,7 @@ describe('useCopyPlan', () => {
   });
 
   it('overwrites existing plan on target date', () => {
-    const plans = [
-      makePlan('2025-01-01', ['new1']),
-      makePlan('2025-01-02', ['old1']),
-    ];
+    const plans = [makePlan('2025-01-01', ['new1']), makePlan('2025-01-02', ['old1'])];
     const setPlans = vi.fn();
     const { result } = renderHook(() => useCopyPlan(plans, setPlans));
 
@@ -91,10 +89,7 @@ describe('useCopyPlan', () => {
   });
 
   it('merge mode does not add duplicate dish ids', () => {
-    const plans = [
-      makePlan('2025-01-01', ['d1']),
-      makePlan('2025-01-02', ['d1']),
-    ];
+    const plans = [makePlan('2025-01-01', ['d1']), makePlan('2025-01-02', ['d1'])];
     const setPlans = vi.fn();
     const { result } = renderHook(() => useCopyPlan(plans, setPlans));
 

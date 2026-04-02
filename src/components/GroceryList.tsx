@@ -1,13 +1,28 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ShoppingCart, Check, Copy, Share2, CheckCircle2, CalendarDays, ChevronDown, ChevronUp, Beef, GlassWater, Wheat, Leaf, Package } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Ingredient, Dish, DayPlan, SupportedLang } from '../types';
-import { getLocalizedField } from '../utils/localize';
-import { useNotification } from '../contexts/NotificationContext';
-import { getWeekRange, isDateInRange } from '../utils/helpers';
+import {
+  Beef,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  GlassWater,
+  Leaf,
+  Package,
+  Share2,
+  ShoppingCart,
+  Wheat,
+} from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useDatabase } from '../contexts/DatabaseContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { getSetting, setSetting } from '../services/appSettings';
+import { DayPlan, Dish, Ingredient, SupportedLang } from '../types';
+import { getWeekRange, isDateInRange } from '../utils/helpers';
+import { getLocalizedField } from '../utils/localize';
 
 type GroceryScope = 'day' | 'week' | 'custom';
 
@@ -40,17 +55,32 @@ const DAIRY_KEYWORDS_EN = ['milk', 'yogurt', 'cheese', 'butter', 'cream'];
 const GRAIN_KEYWORDS_VI = ['gạo', 'yến mạch', 'bột', 'bánh mì', 'hạt'];
 const GRAIN_KEYWORDS_EN = ['rice', 'oat', 'flour', 'bread', 'seed', 'chia', 'quinoa'];
 const PRODUCE_KEYWORDS_VI = ['rau', 'củ', 'cải', 'khoai', 'cam', 'chuối', 'bông', 'xà lách', 'bina'];
-const PRODUCE_KEYWORDS_EN = ['spinach', 'broccoli', 'lettuce', 'tomato', 'carrot', 'onion', 'sweet potato', 'orange', 'banana', 'vegetable'];
+const PRODUCE_KEYWORDS_EN = [
+  'spinach',
+  'broccoli',
+  'lettuce',
+  'tomato',
+  'carrot',
+  'onion',
+  'sweet potato',
+  'orange',
+  'banana',
+  'vegetable',
+];
 
 function categorizeIngredient(name: string, ingredient: Ingredient | undefined): AisleCategory {
   const lower = name.toLowerCase();
   const viName = ingredient ? getLocalizedField(ingredient.name, 'vi').toLowerCase() : lower;
   const enName = ingredient ? getLocalizedField(ingredient.name, 'en').toLowerCase() : lower;
 
-  if (PROTEIN_KEYWORDS_VI.some(k => viName.includes(k)) || PROTEIN_KEYWORDS_EN.some(k => enName.includes(k))) return 'protein';
-  if (DAIRY_KEYWORDS_VI.some(k => viName.includes(k)) || DAIRY_KEYWORDS_EN.some(k => enName.includes(k))) return 'dairy';
-  if (GRAIN_KEYWORDS_VI.some(k => viName.includes(k)) || GRAIN_KEYWORDS_EN.some(k => enName.includes(k))) return 'grains';
-  if (PRODUCE_KEYWORDS_VI.some(k => viName.includes(k)) || PRODUCE_KEYWORDS_EN.some(k => enName.includes(k))) return 'produce';
+  if (PROTEIN_KEYWORDS_VI.some(k => viName.includes(k)) || PROTEIN_KEYWORDS_EN.some(k => enName.includes(k)))
+    return 'protein';
+  if (DAIRY_KEYWORDS_VI.some(k => viName.includes(k)) || DAIRY_KEYWORDS_EN.some(k => enName.includes(k)))
+    return 'dairy';
+  if (GRAIN_KEYWORDS_VI.some(k => viName.includes(k)) || GRAIN_KEYWORDS_EN.some(k => enName.includes(k)))
+    return 'grains';
+  if (PRODUCE_KEYWORDS_VI.some(k => viName.includes(k)) || PRODUCE_KEYWORDS_EN.some(k => enName.includes(k)))
+    return 'produce';
 
   if (ingredient) {
     if (ingredient.proteinPer100 > 15 && ingredient.carbsPer100 < 5) return 'protein';
@@ -78,7 +108,11 @@ const collectDishIngredients = (dishIds: string[], allDishes: Dish[], lang: Supp
   return result;
 };
 
-const buildGroceryList = (dishIngredients: IngredientWithSource[], allIngredients: Ingredient[], lang: SupportedLang): GroceryItemWithCategory[] => {
+const buildGroceryList = (
+  dishIngredients: IngredientWithSource[],
+  allIngredients: Ingredient[],
+  lang: SupportedLang,
+): GroceryItemWithCategory[] => {
   const map: Record<string, GroceryItemWithCategory> = {};
   for (const di of dishIngredients) {
     const ing = allIngredients.find(i => i.id === di.ingredientId);
@@ -94,7 +128,10 @@ const buildGroceryList = (dishIngredients: IngredientWithSource[], allIngredient
     } else {
       const name = getLocalizedField(ing.name, lang);
       map[ing.id] = {
-        id: ing.id, name, amount: di.amount, unit: getLocalizedField(ing.unit, lang),
+        id: ing.id,
+        name,
+        amount: di.amount,
+        unit: getLocalizedField(ing.unit, lang),
         category: categorizeIngredient(name, ing),
         usedInDishes: [{ dishId: di.dishId, dishName: di.dishName, amount: di.amount }],
       };
@@ -102,7 +139,6 @@ const buildGroceryList = (dishIngredients: IngredientWithSource[], allIngredient
   }
   return Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
 };
-
 
 const getDishIdsFromPlans = (plans: DayPlan[]): string[] => {
   const ids: string[] = [];
@@ -134,25 +170,34 @@ const AISLE_LABEL_KEYS: Record<AisleCategory, string> = {
 const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', 'other'];
 
 const GroceryEmptyState = ({ t }: { t: (key: string) => string }) => (
-  <div data-testid="grocery-empty-state" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 sm:p-12 text-center">
-    <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
-      <ShoppingCart className="w-10 h-10 text-emerald-300" aria-hidden="true" />
+  <div
+    data-testid="grocery-empty-state"
+    className="rounded-2xl border border-slate-200 bg-white p-8 text-center sm:p-12 dark:border-slate-700 dark:bg-slate-800"
+  >
+    <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30">
+      <ShoppingCart className="h-10 w-10 text-emerald-300" aria-hidden="true" />
     </div>
-    <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">{t('grocery.emptyTitle')}</h3>
-    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-2">
-      {t('grocery.emptyDescription')}
-    </p>
-    <p className="text-xs text-slate-500 dark:text-slate-500 max-w-sm mx-auto mb-6">
-      {t('grocery.emptyAutoHint')}
-    </p>
-    <button type="button" aria-label={t('grocery.emptyAction')} className="inline-flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-5 py-2.5 rounded-xl font-bold text-sm transition-all min-h-11">
-      <CalendarDays className="w-4 h-4" aria-hidden="true" />
+    <h3 className="mb-2 text-lg font-bold text-slate-700 dark:text-slate-200">{t('grocery.emptyTitle')}</h3>
+    <p className="mx-auto mb-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">{t('grocery.emptyDescription')}</p>
+    <p className="mx-auto mb-6 max-w-sm text-xs text-slate-500 dark:text-slate-500">{t('grocery.emptyAutoHint')}</p>
+    <button
+      type="button"
+      aria-label={t('grocery.emptyAction')}
+      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-700 transition-all hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+    >
+      <CalendarDays className="h-4 w-4" aria-hidden="true" />
       {t('grocery.emptyAction')}
     </button>
   </div>
 );
 
-export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPlans, selectedDate, allDishes, allIngredients }: GroceryListProps) {
+export const GroceryList = React.memo(function GroceryList({
+  currentPlan,
+  dayPlans,
+  selectedDate,
+  allDishes,
+  allIngredients,
+}: GroceryListProps) {
   const notify = useNotification();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
@@ -164,18 +209,31 @@ export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPla
 
   // Load from SQLite on mount
   useEffect(() => {
-    getSetting(db, 'grocery_checked').then((val) => {
-      if (val) {
-        try { setPersistedCheckedSnapshots(JSON.parse(val) as CheckedSnapshot[]); } catch { /* ignore corrupt */ }
-      }
-    }).catch(() => { /* db read error */ });
+    getSetting(db, 'grocery_checked')
+      .then(val => {
+        if (val) {
+          try {
+            setPersistedCheckedSnapshots(JSON.parse(val) as CheckedSnapshot[]);
+          } catch {
+            /* ignore corrupt */
+          }
+        }
+      })
+      .catch(() => {
+        /* db read error */
+      });
   }, [db]);
 
   // Save to SQLite when changed
   const isInitialMount = useRef(true);
   useEffect(() => {
-    if (isInitialMount.current) { isInitialMount.current = false; return; }
-    setSetting(db, 'grocery_checked', JSON.stringify(persistedCheckedSnapshots)).catch(() => { /* db write error */ });
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    setSetting(db, 'grocery_checked', JSON.stringify(persistedCheckedSnapshots)).catch(() => {
+      /* db write error */
+    });
   }, [db, persistedCheckedSnapshots]);
 
   const filteredPlans = useMemo(() => {
@@ -195,130 +253,156 @@ export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPla
   }, [allDishIds, allDishes, allIngredients, lang]);
 
   // Build a fast lookup: ingredientId → current rounded amount
-  const currentAmountMap = useMemo(
-    () => new Map(groceryItems.map(i => [i.id, Math.round(i.amount)])),
-    [groceryItems]
-  );
+  const currentAmountMap = useMemo(() => new Map(groceryItems.map(i => [i.id, Math.round(i.amount)])), [groceryItems]);
 
   // Only treat an item as checked if its stored amount still matches current amount
   const checkedIds = useMemo(
-    () => new Set(
-      persistedCheckedSnapshots
-        .filter(s => currentAmountMap.get(s.id) === Math.round(s.amount))
-        .map(s => s.id)
-    ),
-    [persistedCheckedSnapshots, currentAmountMap]
+    () =>
+      new Set(
+        persistedCheckedSnapshots.filter(s => currentAmountMap.get(s.id) === Math.round(s.amount)).map(s => s.id),
+      ),
+    [persistedCheckedSnapshots, currentAmountMap],
   );
 
-  const checkedCount = useMemo(() =>
-    groceryItems.filter(item => checkedIds.has(item.id)).length,
-    [groceryItems, checkedIds]
+  const checkedCount = useMemo(
+    () => groceryItems.filter(item => checkedIds.has(item.id)).length,
+    [groceryItems, checkedIds],
   );
 
   const groupedItems = useMemo(() => {
     if (!groupByAisle) return null;
-    const groups: Record<AisleCategory, GroceryItemWithCategory[]> = { produce: [], protein: [], dairy: [], grains: [], other: [] };
+    const groups: Record<AisleCategory, GroceryItemWithCategory[]> = {
+      produce: [],
+      protein: [],
+      dairy: [],
+      grains: [],
+      other: [],
+    };
     for (const item of groceryItems) {
       groups[item.category].push(item);
     }
     return AISLE_ORDER.filter(cat => groups[cat].length > 0).map(cat => ({ category: cat, items: groups[cat] }));
   }, [groceryItems, groupByAisle]);
 
-  const toggleCheck = useCallback((id: string) => {
-    const item = groceryItems.find(i => i.id === id);
-    if (!item) return;
-    setPersistedCheckedSnapshots(prev => {
-      if (prev.some(s => s.id === id)) return prev.filter(s => s.id !== id);
-      return [...prev, { id, amount: item.amount }];
-    });
-  }, [groceryItems, setPersistedCheckedSnapshots]);
+  const toggleCheck = useCallback(
+    (id: string) => {
+      const item = groceryItems.find(i => i.id === id);
+      if (!item) return;
+      setPersistedCheckedSnapshots(prev => {
+        if (prev.some(s => s.id === id)) return prev.filter(s => s.id !== id);
+        return [...prev, { id, amount: item.amount }];
+      });
+    },
+    [groceryItems, setPersistedCheckedSnapshots],
+  );
 
   const toggleExpand = useCallback((id: string) => {
-    setExpandedItemId(prev => prev === id ? null : id);
+    setExpandedItemId(prev => (prev === id ? null : id));
   }, []);
 
-  const renderGroceryItem = useCallback((item: GroceryItemWithCategory) => {
-    const isChecked = checkedIds.has(item.id);
-    const isExpanded = expandedItemId === item.id;
-    const hasDishes = item.usedInDishes.length > 0;
-    return (
-      <li key={item.id}>
-        <div className={`rounded-xl transition-all ${
-          isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
-        }`}>
-          <div className="flex items-center">
-            <button
-              data-testid={`grocery-item-${item.id}`}
-              onClick={() => toggleCheck(item.id)}
-              aria-label={`${isChecked ? t('common.deselect') : t('common.select')} ${item.name}`}
-              className="flex-1 flex items-center gap-3 px-3 sm:px-4 py-3 min-h-12 active:scale-[0.99]"
-            >
-              <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
-                isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'
-              }`}>
-                {isChecked && <Check className="w-3.5 h-3.5 text-white" />}
-              </div>
-              <span className={`flex-1 text-left font-medium text-sm sm:text-base transition-all ${
-                isChecked ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'
-              }`}>
-                {item.name}
-              </span>
-              <span className={`text-sm font-medium shrink-0 transition-all ${
-                isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
-              }`}>
-                {Math.round(item.amount)} {item.unit}
-              </span>
-            </button>
-            {hasDishes && (
+  const renderGroceryItem = useCallback(
+    (item: GroceryItemWithCategory) => {
+      const isChecked = checkedIds.has(item.id);
+      const isExpanded = expandedItemId === item.id;
+      const hasDishes = item.usedInDishes.length > 0;
+      return (
+        <li key={item.id}>
+          <div
+            className={`rounded-xl transition-all ${
+              isChecked ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
+            }`}
+          >
+            <div className="flex items-center">
               <button
-                data-testid={`grocery-expand-${item.id}`}
-                onClick={() => toggleExpand(item.id)}
-                className="p-2.5 mr-1 min-h-11 min-w-11 flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
-                title={t('grocery.usedIn')}
-                aria-label={`${t('grocery.usedIn')} ${item.name}`}
+                data-testid={`grocery-item-${item.id}`}
+                onClick={() => toggleCheck(item.id)}
+                aria-label={`${isChecked ? t('common.deselect') : t('common.select')} ${item.name}`}
+                className="flex min-h-12 flex-1 items-center gap-3 px-3 py-3 active:scale-[0.99] sm:px-4"
               >
-                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <div
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${
+                    isChecked ? 'border-emerald-500 bg-emerald-500' : 'border-slate-300 dark:border-slate-600'
+                  }`}
+                >
+                  {isChecked && <Check className="h-3.5 w-3.5 text-white" />}
+                </div>
+                <span
+                  className={`flex-1 text-left text-sm font-medium transition-all sm:text-base ${
+                    isChecked ? 'text-slate-400 line-through dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  {item.name}
+                </span>
+                <span
+                  className={`shrink-0 text-sm font-medium transition-all ${
+                    isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  {Math.round(item.amount)} {item.unit}
+                </span>
               </button>
+              {hasDishes && (
+                <button
+                  data-testid={`grocery-expand-${item.id}`}
+                  onClick={() => toggleExpand(item.id)}
+                  className="focus-visible:ring-ring mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors hover:text-emerald-600 focus-visible:ring-2 focus-visible:ring-offset-2 dark:hover:text-emerald-400"
+                  title={t('grocery.usedIn')}
+                  aria-label={`${t('grocery.usedIn')} ${item.name}`}
+                >
+                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+              )}
+            </div>
+            {isExpanded && hasDishes && (
+              <div data-testid={`grocery-dishes-${item.id}`} className="space-y-1 px-12 pb-3">
+                <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-500">
+                  {t('grocery.usedIn')}
+                </span>
+                {item.usedInDishes.map(d => (
+                  <div
+                    key={d.dishId}
+                    className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400"
+                  >
+                    <span className="font-medium">{d.dishName}</span>
+                    <span>
+                      {Math.round(d.amount)} {item.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-          {isExpanded && hasDishes && (
-            <div data-testid={`grocery-dishes-${item.id}`} className="px-12 pb-3 space-y-1">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">{t('grocery.usedIn')}</span>
-              {item.usedInDishes.map(d => (
-                <div key={d.dishId} className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                  <span className="font-medium">{d.dishName}</span>
-                  <span>{Math.round(d.amount)} {item.unit}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </li>
-    );
-  }, [checkedIds, expandedItemId, toggleCheck, toggleExpand, t]);
+        </li>
+      );
+    },
+    [checkedIds, expandedItemId, toggleCheck, toggleExpand, t],
+  );
 
   const handleCopyList = useCallback(() => {
     const text = groceryItems
       .map(item => `${checkedIds.has(item.id) ? '✅' : '☐'} ${item.name} — ${Math.round(item.amount)} ${item.unit}`)
       .join('\n');
     const header = scope === 'day' ? t('grocery.headerDay', { date: selectedDate }) : t(getScopeHeaderKey(scope));
-    navigator.clipboard.writeText(`${header}\n\n${text}`).then(() => {
-      notify.success(t('common.copied'), t('grocery.copiedDesc'));
-    }).catch(() => {
-      notify.error(t('common.copyFailed'), t('grocery.copyFailedDesc'));
-    });
+    navigator.clipboard
+      .writeText(`${header}\n\n${text}`)
+      .then(() => {
+        notify.success(t('common.copied'), t('grocery.copiedDesc'));
+      })
+      .catch(() => {
+        notify.error(t('common.copyFailed'), t('grocery.copyFailedDesc'));
+      });
   }, [groceryItems, checkedIds, scope, selectedDate, notify, t]);
 
   const handleShare = useCallback(async () => {
-    const text = groceryItems
-      .map(item => `• ${item.name} — ${Math.round(item.amount)} ${item.unit}`)
-      .join('\n');
+    const text = groceryItems.map(item => `• ${item.name} — ${Math.round(item.amount)} ${item.unit}`).join('\n');
     const header = scope === 'day' ? t('grocery.headerDay', { date: selectedDate }) : t(getScopeHeaderKey(scope));
 
     if (navigator.share) {
       try {
         await navigator.share({ title: t('grocery.shareTitle'), text: `${header}\n\n${text}` });
-      } catch { /* User cancelled */ }
+      } catch {
+        /* User cancelled */
+      }
     } else {
       handleCopyList();
     }
@@ -333,14 +417,19 @@ export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPla
   return (
     <div className="space-y-4">
       {/* Scope Tabs */}
-      <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto scrollbar-hide">
+      <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
         {SCOPE_KEYS.map(key => (
           <button
             key={key}
-            onClick={() => { setScope(key); setPersistedCheckedSnapshots([]); }}
+            onClick={() => {
+              setScope(key);
+              setPersistedCheckedSnapshots([]);
+            }}
             data-testid={`tab-grocery-${key}`}
-            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap min-h-11 ${
-              scope === key ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 active:bg-slate-200 dark:active:bg-slate-600'
+            className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all ${
+              scope === key
+                ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-400'
+                : 'text-slate-500 active:bg-slate-200 dark:text-slate-400 dark:active:bg-slate-600'
             }`}
           >
             {t(getScopeLabelKey(key))}
@@ -351,17 +440,17 @@ export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPla
       {groceryItems.length === 0 ? (
         <GroceryEmptyState t={t} />
       ) : (
-        <div className="bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm dark:border-emerald-800 dark:bg-slate-800">
           {/* Header with counter and actions */}
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-100 dark:border-emerald-800 flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-emerald-100 bg-emerald-50 px-4 py-3 sm:px-6 sm:py-4 dark:border-emerald-800 dark:bg-emerald-900/30">
             <div className="flex items-center gap-3">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700 dark:text-emerald-400" />
+              <ShoppingCart className="h-5 w-5 text-emerald-700 sm:h-6 sm:w-6 dark:text-emerald-400" />
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-emerald-900 dark:text-emerald-200">
+                <h3 className="text-base font-bold text-emerald-900 sm:text-lg dark:text-emerald-200">
                   {groceryItems.length} {t('grocery.ingredientCount')}
                 </h3>
                 {checkedCount > 0 && (
-                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
                     {t('grocery.boughtCount', { count: checkedCount, total: groceryItems.length })}
                   </p>
                 )}
@@ -371,41 +460,41 @@ export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPla
               <button
                 onClick={handleCopyList}
                 data-testid="btn-grocery-copy"
-                className="p-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 text-emerald-700 transition-all hover:bg-emerald-100 active:bg-emerald-200 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
                 title={t('common.copy')}
                 aria-label={t('common.copy')}
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="h-4 w-4" />
               </button>
               <button
                 onClick={handleShare}
-                className="p-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all min-h-11 min-w-11 flex items-center justify-center"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 text-emerald-700 transition-all hover:bg-emerald-100 active:bg-emerald-200 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
                 title={t('common.share')}
                 aria-label={t('common.share')}
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="h-4 w-4" />
               </button>
             </div>
           </div>
 
           {/* Group by aisle toggle + Progress bar */}
-          <div className="flex items-center justify-between px-4 sm:px-6 py-2 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2 sm:px-6 dark:border-slate-700">
             <button
               type="button"
               onClick={() => setGroupByAisle(g => !g)}
               data-testid="btn-group-aisle"
-              className={`text-xs font-bold px-3 py-1.5 min-h-11 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 groupByAisle
-                  ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                  : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
               }`}
             >
               {t('grocery.groupByAisle')}
             </button>
             {checkedCount > 0 && (
-              <div className="flex-1 ml-3 h-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-full overflow-hidden">
+              <div className="ml-3 h-1.5 flex-1 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/30">
                 <div
-                  className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
+                  className="h-full rounded-full bg-emerald-500 transition-all duration-300"
                   style={{ width: `${(checkedCount / groceryItems.length) * 100}%` }}
                 />
               </div>
@@ -418,29 +507,35 @@ export const GroceryList = React.memo(function GroceryList({ currentPlan, dayPla
               <div className="space-y-4">
                 {groupedItems.map(group => (
                   <div key={group.category}>
-                    <div className="flex items-center gap-2 mb-2 px-2">
-                      <span className="text-sm">{(() => { const Icon = AISLE_ICON[group.category]; return <Icon className="size-4" aria-hidden="true" />; })()}</span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t(AISLE_LABEL_KEYS[group.category])}</span>
+                    <div className="mb-2 flex items-center gap-2 px-2">
+                      <span className="text-sm">
+                        {(() => {
+                          const Icon = AISLE_ICON[group.category];
+                          return <Icon className="size-4" aria-hidden="true" />;
+                        })()}
+                      </span>
+                      <span className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                        {t(AISLE_LABEL_KEYS[group.category])}
+                      </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-500">({group.items.length})</span>
                     </div>
-                    <ul className="space-y-1">
-                      {group.items.map(item => renderGroceryItem(item))}
-                    </ul>
+                    <ul className="space-y-1">{group.items.map(item => renderGroceryItem(item))}</ul>
                   </div>
                 ))}
               </div>
             ) : (
-            <ul className="space-y-1">
-              {groceryItems.map(item => renderGroceryItem(item))}
-            </ul>
+              <ul className="space-y-1">{groceryItems.map(item => renderGroceryItem(item))}</ul>
             )}
           </div>
 
           {/* All done state */}
           {checkedCount === groceryItems.length && groceryItems.length > 0 && (
-            <div data-testid="grocery-all-bought" className="px-4 sm:px-6 py-4 border-t border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-center">
-              <div className="flex items-center justify-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold">
-                <CheckCircle2 className="w-5 h-5" />
+            <div
+              data-testid="grocery-all-bought"
+              className="border-t border-emerald-100 bg-emerald-50 px-4 py-4 text-center sm:px-6 dark:border-emerald-800 dark:bg-emerald-900/30"
+            >
+              <div className="flex items-center justify-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
+                <CheckCircle2 className="h-5 w-5" />
                 <span>{t('grocery.allBought')}</span>
               </div>
             </div>

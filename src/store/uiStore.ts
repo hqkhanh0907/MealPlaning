@@ -20,16 +20,17 @@ interface UIState {
   hydrate: () => void;
 }
 
-export const useUIStore = create<UIState>((set) => ({
+export const useUIStore = create<UIState>(set => ({
   hasNewAIResult: false,
   activeManagementSubTab: 'dishes',
   selectedDate: getLocalToday(),
-  setHasNewAIResult: (value) => set({ hasNewAIResult: value }),
-  setActiveManagementSubTab: (tab) => set({ activeManagementSubTab: tab }),
-  setSelectedDate: (date) => set({ selectedDate: date }),
-  hydrate: () => set({
-    hasNewAIResult: false,
-    activeManagementSubTab: 'dishes',
-    selectedDate: getLocalToday(),
-  }),
+  setHasNewAIResult: value => set({ hasNewAIResult: value }),
+  setActiveManagementSubTab: tab => set({ activeManagementSubTab: tab }),
+  setSelectedDate: date => set({ selectedDate: date }),
+  hydrate: () =>
+    set({
+      hasNewAIResult: false,
+      activeManagementSubTab: 'dishes',
+      selectedDate: getLocalToday(),
+    }),
 }));

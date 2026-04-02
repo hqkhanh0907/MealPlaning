@@ -12,8 +12,10 @@
  * selects "Khác..." and shows the text input pre-filled with that value.
  */
 import React, { useState } from 'react';
-import { COMMON_UNITS } from '../../data/units';
+
 import { Input } from '@/components/ui/input';
+
+import { COMMON_UNITS } from '../../data/units';
 
 const CUSTOM_VALUE = '__custom__';
 
@@ -105,9 +107,7 @@ export const UnitSelector = (props: UnitSelectorProps) => {
   const inputBase =
     'w-full px-4 py-2.5 rounded-xl border focus:border-emerald-500 outline-none ' +
     'transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100 ';
-  const borderClass = error
-    ? 'border-rose-500'
-    : 'border-slate-200 dark:border-slate-600';
+  const borderClass = error ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600';
 
   const testId = props['data-testid'];
 

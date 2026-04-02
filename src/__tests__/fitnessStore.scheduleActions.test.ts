@@ -1,9 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { TrainingPlan, TrainingPlanDay } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
-import type {
-  TrainingPlan,
-  TrainingPlanDay,
-} from '../features/fitness/types';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -84,7 +82,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().updateTrainingDays('plan-1', [1, 2, 4, 6]);
 
-      const updated = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-1');
+      const updated = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-1');
       expect(updated?.trainingDays).toEqual([1, 2, 4, 6]);
       expect(updated?.restDays).toEqual([3, 5, 7]);
     });
@@ -96,7 +94,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().updateTrainingDays('plan-1', [1]);
 
-      const unchanged = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-1');
+      const unchanged = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-1');
       expect(unchanged?.trainingDays).toEqual([1, 3, 5]);
       spy.mockRestore();
     });
@@ -108,7 +106,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().updateTrainingDays('plan-1', [1, 2, 3, 4, 5, 6, 7]);
 
-      const unchanged = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-1');
+      const unchanged = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-1');
       expect(unchanged?.trainingDays).toEqual([1, 3, 5]);
       spy.mockRestore();
     });
@@ -126,9 +124,9 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       useFitnessStore.getState().updateTrainingDays('plan-1', [1, 3]);
 
       const days = useFitnessStore.getState().trainingPlanDays;
-      const reassigned = days.find((d) => d.id === 'day-5');
+      const reassigned = days.find(d => d.id === 'day-5');
       expect(reassigned?.dayOfWeek).toBe(3); // nearest to 5 from [1, 3]
-      expect(days.find((d) => d.id === 'day-1')?.dayOfWeek).toBe(1); // unchanged
+      expect(days.find(d => d.id === 'day-1')?.dayOfWeek).toBe(1); // unchanged
     });
 
     it('does not modify sessions on kept training days', () => {
@@ -143,16 +141,14 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       useFitnessStore.getState().updateTrainingDays('plan-1', [1, 3]);
 
       const days = useFitnessStore.getState().trainingPlanDays;
-      expect(days.find((d) => d.id === 'day-1')?.dayOfWeek).toBe(1);
-      expect(days.find((d) => d.id === 'day-3')?.dayOfWeek).toBe(3);
+      expect(days.find(d => d.id === 'day-1')?.dayOfWeek).toBe(1);
+      expect(days.find(d => d.id === 'day-3')?.dayOfWeek).toBe(3);
     });
 
     it('handles non-existent plan gracefully', () => {
       const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
       useFitnessStore.getState().updateTrainingDays('nonexistent', [1, 3]);
-      expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('plan not found'),
-      );
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
 
@@ -163,7 +159,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().updateTrainingDays('plan-1', [1, 2]);
 
-      const p2 = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-2');
+      const p2 = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-2');
       expect(p2?.trainingDays).toEqual([2, 4, 6]);
     });
   });
@@ -182,7 +178,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().reassignWorkoutToDay('day-1', 3);
 
-      const updated = useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'day-1');
+      const updated = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'day-1');
       expect(updated?.dayOfWeek).toBe(3);
       expect(updated?.isUserAssigned).toBe(true);
     });
@@ -198,7 +194,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().reassignWorkoutToDay('day-1', 2);
 
-      const unchanged = useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'day-1');
+      const unchanged = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'day-1');
       expect(unchanged?.dayOfWeek).toBe(1);
       spy.mockRestore();
     });
@@ -219,7 +215,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().reassignWorkoutToDay('day-to-move', 3);
 
-      const notMoved = useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'day-to-move');
+      const notMoved = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'day-to-move');
       expect(notMoved?.dayOfWeek).toBe(1);
       spy.mockRestore();
     });
@@ -227,9 +223,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     it('handles non-existent day gracefully', () => {
       const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
       useFitnessStore.getState().reassignWorkoutToDay('nonexistent', 1);
-      expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('day not found'),
-      );
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('day not found'));
       spy.mockRestore();
     });
 
@@ -239,9 +233,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       useFitnessStore.setState({ trainingPlanDays: [day] });
 
       useFitnessStore.getState().reassignWorkoutToDay('day-1', 3);
-      expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('plan not found'),
-      );
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
   });
@@ -312,7 +304,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       const result = useFitnessStore.getState().trainingPlanDays;
       // With 3 distinct muscle groups and 3 non-consecutive training days (1, 3, 5),
       // all sessions should be on different days
-      const assignedDays = result.map((d) => d.dayOfWeek).sort((a, b) => a - b);
+      const assignedDays = result.map(d => d.dayOfWeek).sort((a, b) => a - b);
       expect(new Set(assignedDays).size).toBe(3);
     });
 
@@ -328,9 +320,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     it('handles non-existent plan gracefully', () => {
       const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
       useFitnessStore.getState().autoAssignWorkouts('nonexistent');
-      expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('plan not found'),
-      );
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
 
@@ -348,7 +338,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().autoAssignWorkouts('plan-1');
 
-      const plan2Day = useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'd2');
+      const plan2Day = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'd2');
       expect(plan2Day?.dayOfWeek).toBe(2);
     });
 
@@ -360,7 +350,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       useFitnessStore.getState().autoAssignWorkouts('plan-1');
 
       // Should not crash; day remains unchanged since no training days to assign to
-      expect(useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'd1')).toBeDefined();
+      expect(useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'd1')).toBeDefined();
     });
   });
 
@@ -384,7 +374,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().restoreOriginalSchedule('plan-1');
 
-      const restored = useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'day-1');
+      const restored = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'day-1');
       expect(restored?.dayOfWeek).toBe(1);
       expect(restored?.isUserAssigned).toBe(false);
     });
@@ -402,7 +392,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().restoreOriginalSchedule('plan-1');
 
-      const updatedPlan = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-1');
+      const updatedPlan = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-1');
       expect(updatedPlan?.trainingDays).toEqual([1, 4]);
       expect(updatedPlan?.restDays).toEqual([2, 3, 5, 6, 7]);
     });
@@ -433,16 +423,14 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       useFitnessStore.getState().restoreOriginalSchedule('plan-1');
 
       // Plan should remain unchanged since there are no days to restore from
-      const updatedPlan = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-1');
+      const updatedPlan = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-1');
       expect(updatedPlan?.trainingDays).toEqual([1, 3, 5]);
     });
 
     it('handles non-existent plan gracefully', () => {
       const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
       useFitnessStore.getState().restoreOriginalSchedule('nonexistent');
-      expect(spy).toHaveBeenCalledWith(
-        expect.stringContaining('plan not found'),
-      );
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
 
@@ -460,17 +448,31 @@ describe('fitnessStore — Schedule Editor Actions', () => {
 
       useFitnessStore.getState().restoreOriginalSchedule('plan-1');
 
-      const p2 = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-2');
+      const p2 = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-2');
       expect(p2?.trainingDays).toEqual([2, 4, 6]);
-      const p2Day = useFitnessStore.getState().trainingPlanDays.find((d) => d.id === 'd2');
+      const p2Day = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'd2');
       expect(p2Day?.dayOfWeek).toBe(2);
     });
 
     it('handles multiple sessions restoring to the same original day', () => {
       const plan = samplePlan({ trainingDays: [3, 5], restDays: [1, 2, 4, 6, 7] });
       const days = [
-        samplePlanDay({ id: 'd1', planId: 'plan-1', dayOfWeek: 3, originalDayOfWeek: 1, sessionOrder: 1, workoutType: 'push' }),
-        samplePlanDay({ id: 'd2', planId: 'plan-1', dayOfWeek: 5, originalDayOfWeek: 1, sessionOrder: 2, workoutType: 'pull' }),
+        samplePlanDay({
+          id: 'd1',
+          planId: 'plan-1',
+          dayOfWeek: 3,
+          originalDayOfWeek: 1,
+          sessionOrder: 1,
+          workoutType: 'push',
+        }),
+        samplePlanDay({
+          id: 'd2',
+          planId: 'plan-1',
+          dayOfWeek: 5,
+          originalDayOfWeek: 1,
+          sessionOrder: 2,
+          workoutType: 'pull',
+        }),
       ];
       useFitnessStore.setState({
         trainingPlans: [plan],
@@ -480,8 +482,8 @@ describe('fitnessStore — Schedule Editor Actions', () => {
       useFitnessStore.getState().restoreOriginalSchedule('plan-1');
 
       const result = useFitnessStore.getState().trainingPlanDays;
-      expect(result.every((d) => d.dayOfWeek === 1)).toBe(true);
-      const updatedPlan = useFitnessStore.getState().trainingPlans.find((p) => p.id === 'plan-1');
+      expect(result.every(d => d.dayOfWeek === 1)).toBe(true);
+      const updatedPlan = useFitnessStore.getState().trainingPlans.find(p => p.id === 'plan-1');
       expect(updatedPlan?.trainingDays).toEqual([1]);
       expect(updatedPlan?.restDays).toEqual([2, 3, 4, 5, 6, 7]);
     });

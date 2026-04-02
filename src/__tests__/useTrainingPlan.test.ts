@@ -1,38 +1,22 @@
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import {
-  generateTrainingPlan,
-  useTrainingPlan,
-  computeCurrentWeek,
-} from '../features/fitness/hooks/useTrainingPlan';
-import type {
-  TrainingProfile,
-  Exercise,
-  SelectedExercise,
-  MuscleGroup,
-} from '../features/fitness/types';
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { computeCurrentWeek, generateTrainingPlan, useTrainingPlan } from '../features/fitness/hooks/useTrainingPlan';
+import type { Exercise, MuscleGroup, SelectedExercise, TrainingProfile } from '../features/fitness/types';
 import { isBodyRegion } from '../features/fitness/types';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-function createProfile(
-  overrides?: Partial<TrainingProfile>,
-): TrainingProfile {
+function createProfile(overrides?: Partial<TrainingProfile>): TrainingProfile {
   return {
     id: 'test-profile',
     trainingExperience: 'intermediate',
     daysPerWeek: 3,
     sessionDurationMin: 60,
     trainingGoal: 'hypertrophy',
-    availableEquipment: [
-      'barbell',
-      'dumbbell',
-      'machine',
-      'cable',
-      'bodyweight',
-    ],
+    availableEquipment: ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'],
     injuryRestrictions: [],
     periodizationModel: 'linear',
     planCycleWeeks: 4,
@@ -68,10 +52,7 @@ function parseExercises(day: { exercises?: string }): SelectedExercise[] {
   return JSON.parse(day.exercises) as SelectedExercise[];
 }
 
-function getTotalSetsForMuscle(
-  days: { exercises?: string; workoutType: string }[],
-  muscle: MuscleGroup,
-): number {
+function getTotalSetsForMuscle(days: { exercises?: string; workoutType: string }[], muscle: MuscleGroup): number {
   let total = 0;
   for (const day of days) {
     if (day.workoutType === 'Cardio') continue;
@@ -215,9 +196,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('full_body');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training).toHaveLength(1);
       expect(training[0].workoutType).toBe('Full Body A');
     });
@@ -228,9 +207,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('full_body');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training).toHaveLength(2);
       expect(training[0].workoutType).toBe('Full Body A');
       expect(training[1].workoutType).toBe('Full Body B');
@@ -242,15 +219,9 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('full_body');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training).toHaveLength(3);
-      expect(training.map((d) => d.workoutType)).toEqual([
-        'Full Body A',
-        'Full Body B',
-        'Full Body A',
-      ]);
+      expect(training.map(d => d.workoutType)).toEqual(['Full Body A', 'Full Body B', 'Full Body A']);
     });
 
     it('generates Upper/Lower split for 4 days', () => {
@@ -259,11 +230,9 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('upper_lower');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training).toHaveLength(4);
-      const types = training.map((d) => d.workoutType);
+      const types = training.map(d => d.workoutType);
       expect(types).toContain('Upper A');
       expect(types).toContain('Lower A');
       expect(types).toContain('Upper B');
@@ -275,8 +244,8 @@ describe('generateTrainingPlan', () => {
         trainingProfile: createProfile({ daysPerWeek: 4 }),
         exerciseDB: mockDB,
       });
-      const upper = result.days.find((d) => d.workoutType === 'Upper A');
-      const lower = result.days.find((d) => d.workoutType === 'Lower A');
+      const upper = result.days.find(d => d.workoutType === 'Upper A');
+      const lower = result.days.find(d => d.workoutType === 'Lower A');
       expect(upper?.muscleGroups).toBe('chest,back,shoulders,arms');
       expect(lower?.muscleGroups).toBe('legs,glutes,core');
     });
@@ -287,11 +256,9 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('ppl');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training).toHaveLength(5);
-      const types = training.map((d) => d.workoutType);
+      const types = training.map(d => d.workoutType);
       expect(types).toContain('Push');
       expect(types).toContain('Pull');
       expect(types).toContain('Legs');
@@ -305,11 +272,9 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('ppl');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training).toHaveLength(6);
-      const types = training.map((d) => d.workoutType);
+      const types = training.map(d => d.workoutType);
       expect(types).toContain('Push');
       expect(types).toContain('Pull');
       expect(types).toContain('Legs');
@@ -324,9 +289,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
       expect(result.plan.splitType).toBe('ppl');
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training.length).toBeLessThanOrEqual(7);
     });
   });
@@ -349,10 +312,7 @@ describe('generateTrainingPlan', () => {
       });
 
       const chestPriority = getTotalSetsForMuscle(withPriority.days, 'chest');
-      const chestNoPriority = getTotalSetsForMuscle(
-        withoutPriority.days,
-        'chest',
-      );
+      const chestNoPriority = getTotalSetsForMuscle(withoutPriority.days, 'chest');
       expect(chestPriority).toBeGreaterThanOrEqual(chestNoPriority);
     });
 
@@ -368,14 +328,8 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const cutTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(cut.days, m),
-        0,
-      );
-      const maintainTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(maintain.days, m),
-        0,
-      );
+      const cutTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(cut.days, m), 0);
+      const maintainTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(maintain.days, m), 0);
       expect(cutTotal).toBeLessThanOrEqual(maintainTotal);
     });
 
@@ -391,14 +345,8 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const bulkTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(bulk.days, m),
-        0,
-      );
-      const maintainTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(maintain.days, m),
-        0,
-      );
+      const bulkTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(bulk.days, m), 0);
+      const maintainTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(maintain.days, m), 0);
       expect(bulkTotal).toBeGreaterThanOrEqual(maintainTotal);
     });
 
@@ -414,14 +362,8 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const youngTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(young.days, m),
-        0,
-      );
-      const olderTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(older.days, m),
-        0,
-      );
+      const youngTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(young.days, m), 0);
+      const olderTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(older.days, m), 0);
       expect(olderTotal).toBeLessThanOrEqual(youngTotal);
     });
 
@@ -437,14 +379,8 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const goodTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(goodSleep.days, m),
-        0,
-      );
-      const badTotal = ALL_MUSCLES.reduce(
-        (sum, m) => sum + getTotalSetsForMuscle(badSleep.days, m),
-        0,
-      );
+      const goodTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(goodSleep.days, m), 0);
+      const badTotal = ALL_MUSCLES.reduce((sum, m) => sum + getTotalSetsForMuscle(badSleep.days, m), 0);
       expect(badTotal).toBeLessThanOrEqual(goodTotal);
     });
   });
@@ -541,9 +477,7 @@ describe('generateTrainingPlan', () => {
         for (const group of muscleGrouped.values()) {
           const order = { compound: 0, secondary: 1, isolation: 2 };
           for (let i = 1; i < group.length; i++) {
-            expect(order[group[i].exercise.category]).toBeGreaterThanOrEqual(
-              order[group[i - 1].exercise.category],
-            );
+            expect(order[group[i].exercise.category]).toBeGreaterThanOrEqual(order[group[i - 1].exercise.category]);
           }
         }
       }
@@ -555,9 +489,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       for (const day of training) {
         const exercises = parseExercises(day);
         for (const ex of exercises) {
@@ -582,9 +514,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(3);
@@ -603,9 +533,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(8);
@@ -624,9 +552,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(15);
@@ -645,9 +571,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const ex0 = parseExercises(training[0]);
       const ex1 = parseExercises(training[1]);
       if (ex0.length > 0 && ex1.length > 0) {
@@ -668,9 +592,7 @@ describe('generateTrainingPlan', () => {
       });
 
       // Default (week 1) → phase index 0 → hypertrophy (block phase order)
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(8);
@@ -691,9 +613,7 @@ describe('generateTrainingPlan', () => {
       });
 
       // Week 5 → phase index 1 → strength (3-5 reps)
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(3);
@@ -714,9 +634,7 @@ describe('generateTrainingPlan', () => {
       });
 
       // Week 9 → phase index 2 → endurance (15-20 reps)
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(15);
@@ -726,9 +644,7 @@ describe('generateTrainingPlan', () => {
     });
 
     it('computes currentWeek from planStartDate', () => {
-      const threeWeeksAgo = new Date(
-        Date.now() - 3 * 7 * 24 * 60 * 60 * 1000,
-      ).toISOString();
+      const threeWeeksAgo = new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString();
 
       const result = generateTrainingPlan({
         trainingProfile: createProfile({
@@ -767,16 +683,12 @@ describe('generateTrainingPlan', () => {
     });
 
     it('returns 2 after exactly 7 days', () => {
-      const sevenDaysAgo = new Date(
-        Date.now() - 7 * 24 * 60 * 60 * 1000,
-      ).toISOString();
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       expect(computeCurrentWeek(sevenDaysAgo)).toBe(2);
     });
 
     it('returns 1 for a future start date', () => {
-      const tomorrow = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      ).toISOString();
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
       expect(computeCurrentWeek(tomorrow)).toBe(1);
     });
   });
@@ -797,9 +709,7 @@ describe('generateTrainingPlan', () => {
       });
 
       // Training days: 1, 3, 5 → rest days: 2, 4, 6, 7
-      const cardioDays = result.days.filter(
-        (d) => d.workoutType === 'Cardio',
-      );
+      const cardioDays = result.days.filter(d => d.workoutType === 'Cardio');
       expect(cardioDays.length).toBeGreaterThanOrEqual(1);
       for (const cd of cardioDays) {
         expect([2, 4, 6, 7]).toContain(cd.dayOfWeek);
@@ -819,9 +729,7 @@ describe('generateTrainingPlan', () => {
       });
 
       // 6 training days → 1 rest day → 3 sessions = 1 rest + 2 overflow
-      const allNotes = result.days
-        .filter((d) => d.notes?.includes('Cardio'))
-        .map((d) => d.dayOfWeek);
+      const allNotes = result.days.filter(d => d.notes?.includes('Cardio')).map(d => d.dayOfWeek);
       expect(allNotes.length).toBe(3);
     });
 
@@ -835,10 +743,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const cardioDays = result.days.filter(
-        (d) =>
-          d.workoutType === 'Cardio' || d.notes?.includes('Cardio: hiit'),
-      );
+      const cardioDays = result.days.filter(d => d.workoutType === 'Cardio' || d.notes?.includes('Cardio: hiit'));
       expect(cardioDays.length).toBeGreaterThanOrEqual(1);
       expect(cardioDays[0].notes).toContain('hiit');
     });
@@ -853,9 +758,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const cardioDays = result.days.filter((d) =>
-        d.notes?.includes('Cardio'),
-      );
+      const cardioDays = result.days.filter(d => d.notes?.includes('Cardio'));
       expect(cardioDays[0].notes).toContain('cycling');
     });
 
@@ -869,9 +772,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const cardioDays = result.days.filter((d) =>
-        d.notes?.includes('Cardio'),
-      );
+      const cardioDays = result.days.filter(d => d.notes?.includes('Cardio'));
       expect(cardioDays[0].notes).toContain('walking');
     });
 
@@ -881,9 +782,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const cardioDays = result.days.filter(
-        (d) => d.workoutType === 'Cardio',
-      );
+      const cardioDays = result.days.filter(d => d.workoutType === 'Cardio');
       expect(cardioDays).toHaveLength(0);
       for (const day of result.days) {
         expect(day.notes?.includes('Cardio') ?? false).toBe(false);
@@ -902,9 +801,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const cardioDays = result.days.filter((d) =>
-        d.notes?.includes('Cardio'),
-      );
+      const cardioDays = result.days.filter(d => d.notes?.includes('Cardio'));
       expect(cardioDays.length).toBeGreaterThanOrEqual(1);
       expect(cardioDays[0].notes).toMatch(/~\d+kcal/);
     });
@@ -921,9 +818,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       expect(training[0].notes).toContain('Deload week(s): 4');
     });
 
@@ -937,9 +832,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       // Hypertrophy deload: repsMin * 0.6 = 5, repsMax * 0.6 = 7
       expect(training[0].notes).toMatch(/\d+-\d+ reps/);
     });
@@ -953,9 +846,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       for (const day of training) {
         expect(day.notes ?? '').not.toContain('Deload');
       }
@@ -983,9 +874,7 @@ describe('generateTrainingPlan', () => {
 
       expect(result.plan).toBeDefined();
       expect(result.days.length).toBeGreaterThan(0);
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       for (const day of training) {
         const exercises = parseExercises(day);
         expect(exercises).toHaveLength(0);
@@ -998,9 +887,7 @@ describe('generateTrainingPlan', () => {
       });
 
       expect(result.plan).toBeDefined();
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       expect(exercises.length).toBeGreaterThan(0);
     });
@@ -1022,9 +909,7 @@ describe('generateTrainingPlan', () => {
       });
 
       for (let i = 1; i < result.days.length; i++) {
-        expect(result.days[i].dayOfWeek).toBeGreaterThanOrEqual(
-          result.days[i - 1].dayOfWeek,
-        );
+        expect(result.days[i].dayOfWeek).toBeGreaterThanOrEqual(result.days[i - 1].dayOfWeek);
       }
     });
 
@@ -1072,9 +957,7 @@ describe('generateTrainingPlan', () => {
 
       // With 6 training days, only 1 rest day.
       // 3 cardio sessions → 1 rest + 2 overflow as session 2
-      const session2Cardio = result.days.filter(
-        (d) => d.sessionOrder === 2 && d.workoutType.includes('Cardio'),
-      );
+      const session2Cardio = result.days.filter(d => d.sessionOrder === 2 && d.workoutType.includes('Cardio'));
       expect(session2Cardio.length).toBeGreaterThanOrEqual(1);
       for (const d of session2Cardio) {
         expect(d.notes).toContain('Cardio');
@@ -1094,9 +977,7 @@ describe('generateTrainingPlan', () => {
       });
 
       // 6 training days, 1 rest day, 3 cardio → 1 rest + 2 overflow as session 2
-      const session2Days = result.days.filter(
-        (d) => d.sessionOrder === 2,
-      );
+      const session2Days = result.days.filter(d => d.sessionOrder === 2);
       expect(session2Days.length).toBeGreaterThanOrEqual(1);
       for (const d of session2Days) {
         expect(d.notes).toContain('Cardio');
@@ -1113,9 +994,7 @@ describe('generateTrainingPlan', () => {
         exerciseDB: mockDB,
       });
 
-      const training = result.days.filter(
-        (d) => d.workoutType !== 'Cardio',
-      );
+      const training = result.days.filter(d => d.workoutType !== 'Cardio');
       const exercises = parseExercises(training[0]);
       if (exercises.length > 0) {
         expect(exercises[0].repsMin).toBe(8);
@@ -1155,9 +1034,7 @@ describe('generateTrainingPlan — multi-session', () => {
       healthProfile: { age: 30, weightKg: 75 },
       exerciseDB: mockDB,
     });
-    const cardioDays = result.days.filter(
-      (d) => d.workoutType === 'Cardio',
-    );
+    const cardioDays = result.days.filter(d => d.workoutType === 'Cardio');
     for (const day of cardioDays) {
       expect(day.sessionOrder).toBe(1);
     }
@@ -1173,7 +1050,7 @@ describe('generateTrainingPlan — multi-session', () => {
       healthProfile: { age: 30, weightKg: 75 },
       exerciseDB: mockDB,
     });
-    const session2Days = result.days.filter((d) => d.sessionOrder === 2);
+    const session2Days = result.days.filter(d => d.sessionOrder === 2);
     expect(session2Days.length).toBeGreaterThanOrEqual(1);
     for (const d of session2Days) {
       expect(d.workoutType).toContain('Cardio');
@@ -1197,8 +1074,8 @@ describe('generateTrainingPlan — multi-session', () => {
       dayGroups.set(d.dayOfWeek, arr);
     }
     for (const [, sessions] of dayGroups) {
-      const hasLegs = sessions.some((s) => s.muscleGroups?.includes('legs'));
-      const hasHIIT = sessions.some((s) => s.notes?.includes('hiit'));
+      const hasLegs = sessions.some(s => s.muscleGroups?.includes('legs'));
+      const hasHIIT = sessions.some(s => s.notes?.includes('hiit'));
       expect(hasLegs && hasHIIT).toBe(false);
     }
   });
@@ -1213,12 +1090,12 @@ describe('generateTrainingPlan — multi-session', () => {
       healthProfile: { age: 30, weightKg: 75 },
       exerciseDB: mockDB,
     });
-    const dayOfWeeks = result.days.map((d) => d.dayOfWeek);
+    const dayOfWeeks = result.days.map(d => d.dayOfWeek);
     const counts = new Map<number, number>();
     for (const dow of dayOfWeeks) {
       counts.set(dow, (counts.get(dow) ?? 0) + 1);
     }
-    const doubleDays = [...counts.values()].filter((c) => c >= 2).length;
+    const doubleDays = [...counts.values()].filter(c => c >= 2).length;
     expect(doubleDays).toBeLessThanOrEqual(2);
   });
 
@@ -1232,19 +1109,14 @@ describe('generateTrainingPlan — multi-session', () => {
       healthProfile: { age: 30, weightKg: 75 },
       exerciseDB: mockDB,
     });
-    const session2Strength = result.days.filter(
-      (d) =>
-        d.sessionOrder === 2 && !d.workoutType.includes('Cardio'),
-    );
+    const session2Strength = result.days.filter(d => d.sessionOrder === 2 && !d.workoutType.includes('Cardio'));
     expect(session2Strength.length).toBeGreaterThanOrEqual(1);
     for (const d of session2Strength) {
       expect(d.exercises).toBeTruthy();
       const exs = JSON.parse(d.exercises!) as SelectedExercise[];
       expect(exs.length).toBeGreaterThan(0);
       for (const ex of exs) {
-        expect(['isolation', 'secondary']).toContain(
-          ex.exercise.category,
-        );
+        expect(['isolation', 'secondary']).toContain(ex.exercise.category);
       }
     }
   });
@@ -1301,9 +1173,7 @@ describe('useTrainingPlan', () => {
   });
 
   it('sets error state when plan generation fails', () => {
-    const consoleSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { result } = renderHook(() => useTrainingPlan());
 
     act(() => {
@@ -1319,9 +1189,7 @@ describe('useTrainingPlan', () => {
   });
 
   it('clears previous error on successful generation', () => {
-    const consoleSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { result } = renderHook(() => useTrainingPlan());
 
     // First call fails
@@ -1353,15 +1221,7 @@ describe('useTrainingPlan', () => {
 /*  Constant for volume tests                                           */
 /* ------------------------------------------------------------------ */
 
-const ALL_MUSCLES: MuscleGroup[] = [
-  'chest',
-  'back',
-  'shoulders',
-  'legs',
-  'arms',
-  'core',
-  'glutes',
-];
+const ALL_MUSCLES: MuscleGroup[] = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'];
 
 /* ------------------------------------------------------------------ */
 /*  Equipment matching & fallback edge-case tests                       */
@@ -1378,7 +1238,7 @@ describe('Equipment matching and fallback', () => {
     }),
   ];
 
-  const bodyweightOnlyDB: Exercise[] = ALL_MUSCLES.map((m) =>
+  const bodyweightOnlyDB: Exercise[] = ALL_MUSCLES.map(m =>
     createExercise({
       id: `bw-${m}`,
       muscleGroup: m,
@@ -1395,7 +1255,7 @@ describe('Equipment matching and fallback', () => {
       cardioSessionsWeek: 0,
     });
     const db: Exercise[] = [
-      ...ALL_MUSCLES.map((m) =>
+      ...ALL_MUSCLES.map(m =>
         createExercise({
           id: `kb-${m}`,
           muscleGroup: m,
@@ -1407,7 +1267,7 @@ describe('Equipment matching and fallback', () => {
     ];
     const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
     expect(result.days.length).toBeGreaterThan(0);
-    result.days.forEach((day) => {
+    result.days.forEach(day => {
       if (!day.exercises) return;
       const exercises: SelectedExercise[] = JSON.parse(day.exercises);
       expect(exercises.length).toBeGreaterThan(0);
@@ -1420,15 +1280,12 @@ describe('Equipment matching and fallback', () => {
       daysPerWeek: 3,
       cardioSessionsWeek: 0,
     });
-    const db: Exercise[] = [
-      ...bodyweightOnlyDB,
-      ...bandsOnlyDB,
-    ];
+    const db: Exercise[] = [...bodyweightOnlyDB, ...bandsOnlyDB];
     const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
     const allExercises = result.days
       .filter((d): d is typeof d & { exercises: string } => !!d.exercises && d.exercises !== '[]')
-      .flatMap((d) => JSON.parse(d.exercises) as SelectedExercise[]);
-    const bandsExercise = allExercises.find((e) => e.exercise.id === 'band-pull-apart');
+      .flatMap(d => JSON.parse(d.exercises) as SelectedExercise[]);
+    const bandsExercise = allExercises.find(e => e.exercise.id === 'band-pull-apart');
     expect(bandsExercise).toBeDefined();
   });
 
@@ -1451,8 +1308,8 @@ describe('Equipment matching and fallback', () => {
     const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
     const allExercises = result.days
       .filter((d): d is typeof d & { exercises: string } => !!d.exercises && d.exercises !== '[]')
-      .flatMap((d) => JSON.parse(d.exercises) as SelectedExercise[]);
-    const bwExercises = allExercises.filter((e) => e.exercise.equipment.includes('bodyweight'));
+      .flatMap(d => JSON.parse(d.exercises) as SelectedExercise[]);
+    const bwExercises = allExercises.filter(e => e.exercise.equipment.includes('bodyweight'));
     expect(bwExercises.length).toBeGreaterThan(0);
   });
 
@@ -1497,12 +1354,12 @@ describe('Equipment matching and fallback', () => {
       cardioSessionsWeek: 0,
     });
     const result = generateTrainingPlan({ trainingProfile: profile });
-    result.days.forEach((day) => {
+    result.days.forEach(day => {
       if (!day.exercises || day.exercises === '[]') return;
       const exercises: SelectedExercise[] = JSON.parse(day.exercises);
-      exercises.forEach((ex) => {
-        const hasMatchingEquipment = ex.exercise.equipment.some((eq) =>
-          profile.availableEquipment.includes(eq as typeof profile.availableEquipment[number]),
+      exercises.forEach(ex => {
+        const hasMatchingEquipment = ex.exercise.equipment.some(eq =>
+          profile.availableEquipment.includes(eq as (typeof profile.availableEquipment)[number]),
         );
         expect(hasMatchingEquipment).toBe(true);
       });
@@ -1533,7 +1390,7 @@ describe('Equipment matching and fallback', () => {
         exerciseType: 'strength',
         contraindicated: [],
       }),
-      ...ALL_MUSCLES.filter((m) => m !== 'chest').map((m) =>
+      ...ALL_MUSCLES.filter(m => m !== 'chest').map(m =>
         createExercise({
           id: `bw-${m}-safe`,
           muscleGroup: m,
@@ -1547,8 +1404,8 @@ describe('Equipment matching and fallback', () => {
     const result = generateTrainingPlan({ trainingProfile: profile, exerciseDB: db });
     const allExercises = result.days
       .filter((d): d is typeof d & { exercises: string } => !!d.exercises && d.exercises !== '[]')
-      .flatMap((d) => JSON.parse(d.exercises) as SelectedExercise[]);
-    const contraindicatedEx = allExercises.find((e) => e.exercise.id === 'bw-chest-contra');
+      .flatMap(d => JSON.parse(d.exercises) as SelectedExercise[]);
+    const contraindicatedEx = allExercises.find(e => e.exercise.id === 'bw-chest-contra');
     expect(contraindicatedEx).toBeUndefined();
   });
 

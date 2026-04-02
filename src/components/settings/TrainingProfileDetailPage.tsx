@@ -1,15 +1,16 @@
-import { useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Dumbbell } from 'lucide-react';
-import { TrainingProfileSection } from '../../features/fitness/components/TrainingProfileSection';
+import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { TrainingProfileForm } from '../../features/fitness/components/TrainingProfileForm';
+import { TrainingProfileSection } from '../../features/fitness/components/TrainingProfileSection';
 import { useFitnessStore } from '../../store/fitnessStore';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
 
 function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
-  const trainingProfile = useFitnessStore((s) => s.trainingProfile);
+  const trainingProfile = useFitnessStore(s => s.trainingProfile);
   const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
   const handleSave = async () => {
@@ -28,7 +29,7 @@ function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => voi
   return (
     <SettingsDetailLayout
       title={t('settings.trainingProfileSection')}
-      icon={<Dumbbell className="w-5 h-5 text-blue-500 dark:text-blue-400" />}
+      icon={<Dumbbell className="h-5 w-5 text-blue-500 dark:text-blue-400" />}
       isEditing={isEditing}
       hasChanges={isEditing}
       onBack={onBack}
@@ -39,14 +40,13 @@ function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => voi
       {isEditing && <TrainingProfileForm embedded saveRef={saveRef} />}
       {!isEditing && trainingProfile && <TrainingProfileSection />}
       {!isEditing && !trainingProfile && (
-        <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="training-profile-empty">
-          <Dumbbell className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-            {t('settings.notConfigured')}
-          </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-            {t('settings.notConfiguredDesc')}
-          </p>
+        <div
+          className="flex flex-col items-center justify-center py-12 text-center"
+          data-testid="training-profile-empty"
+        >
+          <Dumbbell className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('settings.notConfigured')}</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{t('settings.notConfiguredDesc')}</p>
         </div>
       )}
     </SettingsDetailLayout>

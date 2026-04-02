@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { WorkoutSummaryCard } from '../features/fitness/components/WorkoutSummaryCard';
 
 afterEach(cleanup);
@@ -23,12 +24,7 @@ describe('WorkoutSummaryCard', () => {
   });
 
   it('shows PR celebration with gold gradient when PRs detected', () => {
-    render(
-      <WorkoutSummaryCard
-        {...defaultProps}
-        personalRecords={[{ exerciseName: 'Squat', weight: 140 }]}
-      />,
-    );
+    render(<WorkoutSummaryCard {...defaultProps} personalRecords={[{ exerciseName: 'Squat', weight: 140 }]} />);
     const celebration = screen.getByTestId('pr-celebration');
     expect(celebration).toBeInTheDocument();
     expect(celebration.className).toContain('from-amber-400');

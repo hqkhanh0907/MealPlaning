@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { QuickAddIngredientForm } from '../components/modals/QuickAddIngredientForm';
 import type { Ingredient } from '../types';
 
@@ -22,8 +23,7 @@ describe('QuickAddIngredientForm', () => {
     vi.useRealTimers();
   });
 
-  const renderForm = () =>
-    render(<QuickAddIngredientForm onAdd={onAdd} onCancel={onCancel} />);
+  const renderForm = () => render(<QuickAddIngredientForm onAdd={onAdd} onCancel={onCancel} />);
 
   describe('Renders all form fields', () => {
     it('renders ingredient name input', () => {
@@ -298,11 +298,7 @@ describe('QuickAddIngredientForm', () => {
       });
 
       await waitFor(() => {
-        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith(
-          'Ức gà',
-          'g',
-          expect.any(AbortSignal),
-        );
+        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Ức gà', 'g', expect.any(AbortSignal));
       });
     });
 
@@ -369,11 +365,7 @@ describe('QuickAddIngredientForm', () => {
       });
 
       await waitFor(() => {
-        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith(
-          'Thịt bò',
-          'g',
-          expect.any(AbortSignal),
-        );
+        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Thịt bò', 'g', expect.any(AbortSignal));
       });
     });
 

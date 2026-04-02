@@ -1,12 +1,13 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import type { DatabaseService } from '../services/databaseService';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
 import {
-  selectInsight,
   getTipOfTheDay,
-  useInsightEngine,
-  TIPS_POOL,
   type InsightInput,
+  selectInsight,
+  TIPS_POOL,
+  useInsightEngine,
 } from '../features/dashboard/hooks/useInsightEngine';
+import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
 /*  Mock DatabaseContext for hook tests                                 */
@@ -378,11 +379,7 @@ describe('selectInsight', () => {
         isAfterEvening: true,
         daysSinceWeightLog: 5,
       };
-      const result = selectInsight(
-        input,
-        ['p1-auto-adjust', 'p2-low-protein'],
-        '2024-01-01',
-      );
+      const result = selectInsight(input, ['p1-auto-adjust', 'p2-low-protein'], '2024-01-01');
       expect(result.priority).toBe(3);
     });
 
@@ -392,11 +389,7 @@ describe('selectInsight', () => {
         proteinRatio: 0.5,
         isAfterEvening: true,
       };
-      const result = selectInsight(
-        input,
-        ['p1-auto-adjust', 'p2-low-protein'],
-        '2024-01-01',
-      );
+      const result = selectInsight(input, ['p1-auto-adjust', 'p2-low-protein'], '2024-01-01');
       expect(result.priority).toBe(8);
     });
 
@@ -416,64 +409,32 @@ describe('selectInsight', () => {
     });
 
     it('P2-P3 are dismissable', () => {
-      const p2 = selectInsight(
-        { proteinRatio: 0.5, isAfterEvening: true },
-        [],
-        '2024-01-01',
-      );
+      const p2 = selectInsight({ proteinRatio: 0.5, isAfterEvening: true }, [], '2024-01-01');
       expect(p2.dismissable).toBe(true);
 
-      const p3 = selectInsight(
-        { daysSinceWeightLog: 5 },
-        [],
-        '2024-01-01',
-      );
+      const p3 = selectInsight({ daysSinceWeightLog: 5 }, [], '2024-01-01');
       expect(p3.dismissable).toBe(true);
     });
 
     it('P4-P7 have autoDismissHours = 24', () => {
-      const p4 = selectInsight(
-        { currentStreak: 9, longestStreak: 10 },
-        [],
-        '2024-01-01',
-      );
+      const p4 = selectInsight({ currentStreak: 9, longestStreak: 10 }, [], '2024-01-01');
       expect(p4.autoDismissHours).toBe(24);
 
-      const p5 = selectInsight(
-        { hasPRToday: true },
-        [],
-        '2024-01-01',
-      );
+      const p5 = selectInsight({ hasPRToday: true }, [], '2024-01-01');
       expect(p5.autoDismissHours).toBe(24);
 
-      const p6 = selectInsight(
-        { weeklyAdherence: 90 },
-        [],
-        '2024-01-01',
-      );
+      const p6 = selectInsight({ weeklyAdherence: 90 }, [], '2024-01-01');
       expect(p6.autoDismissHours).toBe(24);
 
-      const p7 = selectInsight(
-        { weightTrendCorrect: true, weightTrendWeeks: 3 },
-        [],
-        '2024-01-01',
-      );
+      const p7 = selectInsight({ weightTrendCorrect: true, weightTrendWeeks: 3 }, [], '2024-01-01');
       expect(p7.autoDismissHours).toBe(24);
     });
 
     it('P2-P3 do not have autoDismissHours', () => {
-      const p2 = selectInsight(
-        { proteinRatio: 0.5, isAfterEvening: true },
-        [],
-        '2024-01-01',
-      );
+      const p2 = selectInsight({ proteinRatio: 0.5, isAfterEvening: true }, [], '2024-01-01');
       expect(p2.autoDismissHours).toBeUndefined();
 
-      const p3 = selectInsight(
-        { daysSinceWeightLog: 5 },
-        [],
-        '2024-01-01',
-      );
+      const p3 = selectInsight({ daysSinceWeightLog: 5 }, [], '2024-01-01');
       expect(p3.autoDismissHours).toBeUndefined();
     });
   });
@@ -493,7 +454,7 @@ describe('getTipOfTheDay', () => {
 
   it('tip message comes from TIPS_POOL', () => {
     const tip = getTipOfTheDay('2024-01-01');
-    const poolMessages = TIPS_POOL.map((t) => t.message);
+    const poolMessages = TIPS_POOL.map(t => t.message);
     expect(poolMessages).toContain(tip.message);
   });
 

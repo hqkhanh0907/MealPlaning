@@ -1,44 +1,36 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+
 import { generateUUID } from '@/utils/helpers';
+
+import { ALL_MUSCLES, LEG_MUSCLES, LOWER_MUSCLES, PULL_MUSCLES, PUSH_MUSCLES, UPPER_MUSCLES } from '../constants';
+import type { ExerciseSeed } from '../data/exerciseDatabase';
+import { EXERCISES as EXERCISE_SEEDS } from '../data/exerciseDatabase';
 import type {
-  TrainingProfile,
-  TrainingPlan,
-  TrainingPlanDay,
-  Exercise,
-  MuscleGroup,
-  EquipmentType,
   BodyRegion,
-  ExerciseCategory,
-  SelectedExercise,
+  CardioIntensity,
   CardioType,
   CardioTypePref,
-  CardioIntensity,
+  EquipmentType,
+  Exercise,
+  ExerciseCategory,
+  MuscleGroup,
+  SelectedExercise,
+  TrainingPlan,
+  TrainingPlanDay,
+  TrainingProfile,
 } from '../types';
 import { isBodyRegion, normalizeSplitType } from '../types';
+import { estimateCardioBurn } from '../utils/cardioEstimator';
+import type { DeloadSuggestion } from '../utils/periodization';
 import {
-  calculateTargetWeeklySets,
-  distributeVolume,
-} from '../utils/volumeCalculator';
-import type { GoalType } from '../utils/volumeCalculator';
-import {
+  applyDeloadReduction,
+  getDeloadScheme,
   getWeekRepScheme,
   isDeloadWeek,
-  getDeloadScheme,
   shouldAutoDeload,
-  applyDeloadReduction,
 } from '../utils/periodization';
-import type { DeloadSuggestion } from '../utils/periodization';
-import { estimateCardioBurn } from '../utils/cardioEstimator';
-import { EXERCISES as EXERCISE_SEEDS } from '../data/exerciseDatabase';
-import type { ExerciseSeed } from '../data/exerciseDatabase';
-import {
-  ALL_MUSCLES,
-  UPPER_MUSCLES,
-  LOWER_MUSCLES,
-  PUSH_MUSCLES,
-  PULL_MUSCLES,
-  LEG_MUSCLES,
-} from '../constants';
+import type { GoalType } from '../utils/volumeCalculator';
+import { calculateTargetWeeklySets, distributeVolume } from '../utils/volumeCalculator';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -197,10 +189,7 @@ function assignDaysOfWeek(sessionCount: number): number[] {
     case 5:
       return [1, 2, 3, 5, 6];
     default:
-      return Array.from(
-        { length: Math.min(sessionCount, 7) },
-        (_, i) => i + 1,
-      );
+      return Array.from({ length: Math.min(sessionCount, 7) }, (_, i) => i + 1);
   }
 }
 
@@ -244,7 +233,7 @@ function calculateSetsPerSession(
     }
   }
 
-  return sessions.map((session) => {
+  return sessions.map(session => {
     const sets = {} as Record<MuscleGroup, number>;
     for (const muscle of session.muscleGroups) {
       const freq = muscleFrequency[muscle];
@@ -266,37 +255,30 @@ function selectExercisesForMuscle(
   exerciseDB: Exercise[],
 ): SelectedExercise[] {
   const eligible = exerciseDB.filter(
-    (ex) =>
+    ex =>
       ex.muscleGroup === muscleGroup &&
       ex.exerciseType === 'strength' &&
-      ex.equipment.some((eq) =>
-        availableEquipment.includes(eq),
-      ) &&
-      !ex.contraindicated.some((ci) => injuries.includes(ci)),
+      ex.equipment.some(eq => availableEquipment.includes(eq)) &&
+      !ex.contraindicated.some(ci => injuries.includes(ci)),
   );
 
   // Fallback: if no exercises match, try bodyweight exercises for this muscle group
   let pool = eligible;
   if (pool.length === 0 && !availableEquipment.includes('bodyweight')) {
     pool = exerciseDB.filter(
-      (ex) =>
+      ex =>
         ex.muscleGroup === muscleGroup &&
         ex.exerciseType === 'strength' &&
         ex.equipment.includes('bodyweight') &&
-        !ex.contraindicated.some((ci) => injuries.includes(ci)),
+        !ex.contraindicated.some(ci => injuries.includes(ci)),
     );
   }
 
   if (pool.length === 0) return [];
 
-  const sorted = [...pool].sort(
-    (a, b) => CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category],
-  );
+  const sorted = [...pool].sort((a, b) => CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category]);
 
-  const maxExercises = Math.min(
-    sorted.length,
-    Math.max(1, Math.ceil(setsNeeded / 3)),
-  );
+  const maxExercises = Math.min(sorted.length, Math.max(1, Math.ceil(setsNeeded / 3)));
   const selected = sorted.slice(0, maxExercises);
   const distribution = distributeVolume(selected.length, setsNeeded);
 
@@ -319,14 +301,9 @@ function applyRepScheme(
   sessionIndex: number,
   weekNumber: number,
 ): SelectedExercise[] {
-  const scheme = getWeekRepScheme(
-    profile.periodizationModel,
-    profile.trainingGoal,
-    weekNumber,
-    sessionIndex + 1,
-  );
+  const scheme = getWeekRepScheme(profile.periodizationModel, profile.trainingGoal, weekNumber, sessionIndex + 1);
 
-  return exercises.map((ex) => ({
+  return exercises.map(ex => ({
     ...ex,
     repsMin: scheme.repsMin,
     repsMax: scheme.repsMax,
@@ -352,15 +329,11 @@ function mapCardioPreference(pref: CardioTypePref): {
   }
 }
 
-function scheduleCardio(
-  profile: TrainingProfile,
-  trainingDays: number[],
-  weightKg: number,
-): CardioScheduleItem[] {
+function scheduleCardio(profile: TrainingProfile, trainingDays: number[], weightKg: number): CardioScheduleItem[] {
   if (profile.cardioSessionsWeek <= 0) return [];
 
   const allDays = [1, 2, 3, 4, 5, 6, 7];
-  const restDays = allDays.filter((d) => !trainingDays.includes(d));
+  const restDays = allDays.filter(d => !trainingDays.includes(d));
   const { type, intensity } = mapCardioPreference(profile.cardioTypePref);
   const sessions: CardioScheduleItem[] = [];
   let remaining = profile.cardioSessionsWeek;
@@ -372,12 +345,7 @@ function scheduleCardio(
       type,
       durationMin: profile.cardioDurationMin,
       intensity,
-      estimatedCalories: estimateCardioBurn(
-        type,
-        profile.cardioDurationMin,
-        intensity,
-        weightKg,
-      ),
+      estimatedCalories: estimateCardioBurn(type, profile.cardioDurationMin, intensity, weightKg),
     });
     remaining--;
   }
@@ -389,12 +357,7 @@ function scheduleCardio(
       type,
       durationMin: profile.cardioDurationMin,
       intensity,
-      estimatedCalories: estimateCardioBurn(
-        type,
-        profile.cardioDurationMin,
-        intensity,
-        weightKg,
-      ),
+      estimatedCalories: estimateCardioBurn(type, profile.cardioDurationMin, intensity, weightKg),
     });
     remaining--;
   }
@@ -417,12 +380,7 @@ function buildDeloadNotes(profile: TrainingProfile): string | undefined {
     }
   }
 
-  const baseScheme = getWeekRepScheme(
-    profile.periodizationModel,
-    profile.trainingGoal,
-    1,
-    1,
-  );
+  const baseScheme = getWeekRepScheme(profile.periodizationModel, profile.trainingGoal, 1, 1);
   const deload = getDeloadScheme(baseScheme);
 
   return `Deload week(s): ${deloadWeeks.join(', ')} — ${deload.repsMin}-${deload.repsMax} reps @ ${Math.round(deload.intensityPct * 100)}%`;
@@ -432,17 +390,11 @@ function formatCardioNote(cardio: CardioScheduleItem): string {
   return `Cardio: ${cardio.type} ${cardio.durationMin}min (~${cardio.estimatedCalories}kcal)`;
 }
 
-function assignMultiSessionCardio(
-  cardioSchedule: CardioScheduleItem[],
-  days: TrainingPlanDay[],
-  planId: string,
-): void {
+function assignMultiSessionCardio(cardioSchedule: CardioScheduleItem[], days: TrainingPlanDay[], planId: string): void {
   const overflowItems: CardioScheduleItem[] = [];
 
   for (const cardio of cardioSchedule) {
-    const isOnTrainingDay = days.some(
-      (d) => d.dayOfWeek === cardio.dayOfWeek && d.sessionOrder === 1,
-    );
+    const isOnTrainingDay = days.some(d => d.dayOfWeek === cardio.dayOfWeek && d.sessionOrder === 1);
 
     if (isOnTrainingDay) {
       overflowItems.push(cardio);
@@ -463,11 +415,9 @@ function assignMultiSessionCardio(
   if (overflowItems.length === 0) return;
 
   const strengthDays = days
-    .filter((d) => d.sessionOrder === 1 && d.exercises)
-    .map((d) => {
-      const exCount = (
-        JSON.parse(d.exercises!) as SelectedExercise[]
-      ).length;
+    .filter(d => d.sessionOrder === 1 && d.exercises)
+    .map(d => {
+      const exCount = (JSON.parse(d.exercises!) as SelectedExercise[]).length;
       return { day: d, exerciseCount: exCount };
     })
     .sort((a, b) => a.exerciseCount - b.exerciseCount);
@@ -479,14 +429,10 @@ function assignMultiSessionCardio(
     if (doubleSessionCount >= MAX_DOUBLE_SESSIONS) break;
 
     const isHIIT = cardio.type === 'hiit';
-    const target = strengthDays.find((sd) => {
-      const hasSession2 = days.some(
-        (d) =>
-          d.dayOfWeek === sd.day.dayOfWeek && d.sessionOrder === 2,
-      );
+    const target = strengthDays.find(sd => {
+      const hasSession2 = days.some(d => d.dayOfWeek === sd.day.dayOfWeek && d.sessionOrder === 2);
       if (hasSession2) return false;
-      if (isHIIT && sd.day.muscleGroups?.includes('legs'))
-        return false;
+      if (isHIIT && sd.day.muscleGroups?.includes('legs')) return false;
       return true;
     });
 
@@ -513,14 +459,10 @@ function assignSingleSessionCardio(
 ): void {
   for (const cardio of cardioSchedule) {
     const cardioNote = formatCardioNote(cardio);
-    const existingDay = days.find(
-      (d) => d.dayOfWeek === cardio.dayOfWeek,
-    );
+    const existingDay = days.find(d => d.dayOfWeek === cardio.dayOfWeek);
 
     if (existingDay) {
-      existingDay.notes = existingDay.notes
-        ? `${existingDay.notes}; ${cardioNote}`
-        : cardioNote;
+      existingDay.notes = existingDay.notes ? `${existingDay.notes}; ${cardioNote}` : cardioNote;
     } else {
       days.push({
         id: `${planId}_cardio_${cardio.dayOfWeek}`,
@@ -536,39 +478,22 @@ function assignSingleSessionCardio(
   }
 }
 
-function applySessionSplitting(
-  days: TrainingPlanDay[],
-  planId: string,
-): void {
+function applySessionSplitting(days: TrainingPlanDay[], planId: string): void {
   const splittable = days
-    .filter((d) => d.sessionOrder === 1 && d.exercises)
-    .map((d) => {
+    .filter(d => d.sessionOrder === 1 && d.exercises)
+    .map(d => {
       const exs = JSON.parse(d.exercises!) as SelectedExercise[];
-      const compounds = exs.filter(
-        (e) => e.exercise.category === 'compound',
-      );
-      const nonCompounds = exs.filter(
-        (e) =>
-          e.exercise.category === 'isolation' ||
-          e.exercise.category === 'secondary',
-      );
+      const compounds = exs.filter(e => e.exercise.category === 'compound');
+      const nonCompounds = exs.filter(e => e.exercise.category === 'isolation' || e.exercise.category === 'secondary');
       return { day: d, exercises: exs, compounds, nonCompounds };
     })
-    .filter(
-      (s) =>
-        s.exercises.length >= 4 &&
-        s.compounds.length > 0 &&
-        s.nonCompounds.length > 0,
-    )
+    .filter(s => s.exercises.length >= 4 && s.compounds.length > 0 && s.nonCompounds.length > 0)
     .sort((a, b) => b.exercises.length - a.exercises.length);
 
   if (splittable.length === 0) return;
 
   const heaviest = splittable[0];
-  const hasSession2 = days.some(
-    (d) =>
-      d.dayOfWeek === heaviest.day.dayOfWeek && d.sessionOrder === 2,
-  );
+  const hasSession2 = days.some(d => d.dayOfWeek === heaviest.day.dayOfWeek && d.sessionOrder === 2);
 
   if (hasSession2) return;
 
@@ -610,9 +535,7 @@ function applyDeloadToDays(days: TrainingPlanDay[]): void {
 /*  Main generation function (pure, exported for testing)               */
 /* ------------------------------------------------------------------ */
 
-export function generateTrainingPlan(
-  input: PlanGenerationInput,
-): GeneratedPlan {
+export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan {
   const { trainingProfile, healthProfile } = input;
   const exerciseDB = input.exerciseDB ?? getDefaultExercises();
 
@@ -625,9 +548,7 @@ export function generateTrainingPlan(
   }
 
   // Step 1
-  const { splitType, sessions } = determineSplit(
-    trainingProfile.daysPerWeek,
-  );
+  const { splitType, sessions } = determineSplit(trainingProfile.daysPerWeek);
 
   // Step 2
   const weeklyVolume = calculateVolume(trainingProfile, healthProfile);
@@ -663,12 +584,7 @@ export function generateTrainingPlan(
       rawExercises.push(...selected);
     }
 
-    const finalExercises = applyRepScheme(
-      rawExercises,
-      trainingProfile,
-      index,
-      resolvedWeek,
-    );
+    const finalExercises = applyRepScheme(rawExercises, trainingProfile, index, resolvedWeek);
 
     const exercisesJson = JSON.stringify(finalExercises);
     const dayOfWeek = dayOfWeekAssignment[index];
@@ -689,15 +605,9 @@ export function generateTrainingPlan(
 
   // Step 5: Cardio
   const weightKg = healthProfile?.weightKg ?? 70;
-  const cardioSchedule = scheduleCardio(
-    trainingProfile,
-    dayOfWeekAssignment,
-    weightKg,
-  );
+  const cardioSchedule = scheduleCardio(trainingProfile, dayOfWeekAssignment, weightKg);
 
-  const useMultiSession =
-    trainingProfile.daysPerWeek >= 5 &&
-    trainingProfile.cardioSessionsWeek > 0;
+  const useMultiSession = trainingProfile.daysPerWeek >= 5 && trainingProfile.cardioSessionsWeek > 0;
 
   if (useMultiSession) {
     assignMultiSessionCardio(cardioSchedule, days, planId);
@@ -706,27 +616,22 @@ export function generateTrainingPlan(
   }
 
   // Step 5b: Session duration splitting
-  if (
-    trainingProfile.sessionDurationMin <= 45 &&
-    trainingProfile.daysPerWeek >= 5
-  ) {
+  if (trainingProfile.sessionDurationMin <= 45 && trainingProfile.daysPerWeek >= 5) {
     applySessionSplitting(days, planId);
   }
 
   days.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
 
   // Auto-deload check: detect consecutive high-RPE weeks
-  const deloadSuggestion = input.weeklyIntensities
-    ? shouldAutoDeload(input.weeklyIntensities)
-    : undefined;
+  const deloadSuggestion = input.weeklyIntensities ? shouldAutoDeload(input.weeklyIntensities) : undefined;
 
   // If deload is suggested, reduce volume across all days
   if (deloadSuggestion?.shouldDeload) {
     applyDeloadToDays(days);
   }
 
-  const trainingDays = [...new Set(days.filter((d) => d.sessionOrder === 1).map((d) => d.dayOfWeek))].sort((a, b) => a - b);
-  const restDays = [1, 2, 3, 4, 5, 6, 7].filter((d) => !trainingDays.includes(d));
+  const trainingDays = [...new Set(days.filter(d => d.sessionOrder === 1).map(d => d.dayOfWeek))].sort((a, b) => a - b);
+  const restDays = [1, 2, 3, 4, 5, 6, 7].filter(d => !trainingDays.includes(d));
 
   const plan: TrainingPlan = {
     id: planId,
@@ -763,24 +668,20 @@ export function useTrainingPlan(): {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
-  const generatePlan = useCallback(
-    (input: PlanGenerationInput): GeneratedPlan | null => {
-      setGenerationError(null);
-      setIsGenerating(true);
-      try {
-        return generateTrainingPlan(input);
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : String(err);
-        setGenerationError(message);
-        console.error('[useTrainingPlan] Generation failed:', err);
-        return null;
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [],
-  );
+  const generatePlan = useCallback((input: PlanGenerationInput): GeneratedPlan | null => {
+    setGenerationError(null);
+    setIsGenerating(true);
+    try {
+      return generateTrainingPlan(input);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setGenerationError(message);
+      console.error('[useTrainingPlan] Generation failed:', err);
+      return null;
+    } finally {
+      setIsGenerating(false);
+    }
+  }, []);
 
   return { generatePlan, isGenerating, generationError };
 }

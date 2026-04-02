@@ -1,6 +1,7 @@
 import { TFunction } from 'i18next';
 import type { LucideIcon } from 'lucide-react';
-import { Sunrise, Sun, Moon } from 'lucide-react';
+import { Moon, Sun, Sunrise } from 'lucide-react';
+
 import { MealType } from '../types';
 
 /** i18n-aware meal tag options factory — single source of truth. */

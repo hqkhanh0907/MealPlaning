@@ -1,5 +1,5 @@
 import { getMealTagOptions, getMealTypeLabels, getTagShortLabels } from '../data/constants';
-import { initialIngredients, initialDishes } from '../data/initialData';
+import { initialDishes, initialIngredients } from '../data/initialData';
 
 // Mock TFunction — returns the key as-is for structural assertions
 const mockT = ((key: string) => key) as import('i18next').TFunction;

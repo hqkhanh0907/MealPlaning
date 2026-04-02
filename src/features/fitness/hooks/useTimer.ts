@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useTimer(autoStart = false) {
   const startTimeRef = useRef<number | null>(null);

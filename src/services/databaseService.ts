@@ -21,7 +21,7 @@ export function snakeToCamel(str: string): string {
 }
 
 export function camelToSnake(str: string): string {
-  return str.replaceAll(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  return str.replaceAll(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 }
 
 export function rowToType<T>(row: Record<string, unknown>): T {
@@ -73,10 +73,9 @@ class WebDatabaseService implements DatabaseService {
     try {
       this.getDb().run(sql, params);
     } catch (error) {
-      throw new Error(
-        `SQL execute error: ${error instanceof Error ? error.message : String(error)} | SQL: ${sql}`,
-        { cause: error },
-      );
+      throw new Error(`SQL execute error: ${error instanceof Error ? error.message : String(error)} | SQL: ${sql}`, {
+        cause: error,
+      });
     }
   }
 
@@ -85,7 +84,7 @@ class WebDatabaseService implements DatabaseService {
       const results = this.getDb().exec(sql, params);
       if (results.length === 0) return [];
       const { columns, values } = results[0];
-      return values.map((row) => {
+      return values.map(row => {
         const obj: Record<string, unknown> = {};
         columns.forEach((col, i) => {
           obj[col] = row[i];
@@ -93,10 +92,9 @@ class WebDatabaseService implements DatabaseService {
         return rowToType<T>(obj);
       });
     } catch (error) {
-      throw new Error(
-        `SQL query error: ${error instanceof Error ? error.message : String(error)} | SQL: ${sql}`,
-        { cause: error },
-      );
+      throw new Error(`SQL query error: ${error instanceof Error ? error.message : String(error)} | SQL: ${sql}`, {
+        cause: error,
+      });
     }
   }
 
@@ -130,9 +128,7 @@ class WebDatabaseService implements DatabaseService {
 
   async exportToJSON(): Promise<string> {
     const db = this.getDb();
-    const tablesResult = db.exec(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-    );
+    const tablesResult = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
     const result: Record<string, unknown[]> = {};
     if (tablesResult.length > 0) {
       for (const row of tablesResult[0].values) {
@@ -142,7 +138,7 @@ class WebDatabaseService implements DatabaseService {
           result[tableName] = [];
         } else {
           const { columns, values } = data[0];
-          result[tableName] = values.map((r) => {
+          result[tableName] = values.map(r => {
             const obj: Record<string, unknown> = {};
             columns.forEach((col, i) => {
               obj[col] = r[i];
@@ -164,9 +160,7 @@ class WebDatabaseService implements DatabaseService {
     }
 
     const db = this.getDb();
-    const existingTables = db.exec(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-    );
+    const existingTables = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
     if (existingTables.length > 0) {
       for (const row of existingTables[0].values) {
         db.run(`DROP TABLE IF EXISTS "${row[0] as string}"`);
@@ -176,18 +170,15 @@ class WebDatabaseService implements DatabaseService {
     for (const [tableName, rows] of Object.entries(data)) {
       if (!Array.isArray(rows) || rows.length === 0) continue;
       const columns = Object.keys(rows[0] as Record<string, unknown>);
-      const colDefs = columns.map((c) => `"${c}" TEXT`).join(', ');
+      const colDefs = columns.map(c => `"${c}" TEXT`).join(', ');
       db.run(`CREATE TABLE "${tableName}" (${colDefs})`);
 
       for (const row of rows) {
         const r = row as Record<string, unknown>;
         const placeholders = columns.map(() => '?').join(', ');
-        const values = columns.map((c) => r[c]);
-        const columnList = columns.map((c) => `"${c}"`).join(', ');
-        db.run(
-          `INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`,
-          values,
-        );
+        const values = columns.map(c => r[c]);
+        const columnList = columns.map(c => `"${c}"`).join(', ');
+        db.run(`INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`, values);
       }
     }
   }

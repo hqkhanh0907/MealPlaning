@@ -36,7 +36,9 @@ export const downloadBackup = async (accessToken: string, fileId: string): Promi
   return new Uint8Array(buffer);
 };
 
-export const downloadLatestBackup = async (accessToken: string): Promise<{ data: Uint8Array; file: DriveFileInfo } | null> => {
+export const downloadLatestBackup = async (
+  accessToken: string,
+): Promise<{ data: Uint8Array; file: DriveFileInfo } | null> => {
   const files = await listBackups(accessToken);
   if (files.length === 0) return null;
   const latest = files[0];

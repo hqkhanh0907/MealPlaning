@@ -1,21 +1,22 @@
-import { useTranslation } from 'react-i18next';
-import { useFitnessStore } from '../../../store/fitnessStore';
-import { EQUIPMENT_DISPLAY } from '../constants';
+import type { LucideIcon } from 'lucide-react';
 import {
-  Info,
-  Target,
   BarChart3,
   Calendar,
-  Timer,
-  Dumbbell,
-  ShieldAlert,
-  TrendingUp,
-  RefreshCw,
-  HeartPulse,
-  Moon,
   ClipboardList,
+  Dumbbell,
+  HeartPulse,
+  Info,
+  Moon,
+  RefreshCw,
+  ShieldAlert,
+  Target,
+  Timer,
+  TrendingUp,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import { useFitnessStore } from '../../../store/fitnessStore';
+import { EQUIPMENT_DISPLAY } from '../constants';
 
 const FIELD_ICON: Record<string, LucideIcon> = {
   trainingGoal: Target,
@@ -33,19 +34,15 @@ const FIELD_ICON: Record<string, LucideIcon> = {
 
 export function TrainingProfileSection() {
   const { t } = useTranslation();
-  const trainingProfile = useFitnessStore((s) => s.trainingProfile);
+  const trainingProfile = useFitnessStore(s => s.trainingProfile);
 
   if (!trainingProfile) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-        <Info className="w-5 h-5 text-slate-400 shrink-0" />
+      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
+        <Info className="h-5 w-5 shrink-0 text-slate-400" />
         <div>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            {t('settings.notConfigured')}
-          </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {t('settings.notConfiguredDesc')}
-          </p>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{t('settings.notConfigured')}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">{t('settings.notConfiguredDesc')}</p>
         </div>
       </div>
     );
@@ -75,18 +72,16 @@ export function TrainingProfileSection() {
     {
       key: 'availableEquipment',
       label: t('fitness.onboarding.equipment'),
-      value: trainingProfile.availableEquipment
-        .map((eq) => EQUIPMENT_DISPLAY[eq] ?? eq)
-        .join(', '),
+      value: trainingProfile.availableEquipment.map(eq => EQUIPMENT_DISPLAY[eq] ?? eq).join(', '),
     },
     ...(trainingProfile.injuryRestrictions.length > 0
-      ? [{
-          key: 'injuryRestrictions',
-          label: t('fitness.onboarding.injuries'),
-          value: trainingProfile.injuryRestrictions
-            .map((inj) => t(`fitness.onboarding.injury_${inj}`))
-            .join(', '),
-        }]
+      ? [
+          {
+            key: 'injuryRestrictions',
+            label: t('fitness.onboarding.injuries'),
+            value: trainingProfile.injuryRestrictions.map(inj => t(`fitness.onboarding.injury_${inj}`)).join(', '),
+          },
+        ]
       : []),
     {
       key: 'cardioSessionsWeek',
@@ -104,40 +99,38 @@ export function TrainingProfileSection() {
       value: `${trainingProfile.planCycleWeeks} ${t('fitness.onboarding.weeksUnit')}`,
     },
     ...(trainingProfile.priorityMuscles.length > 0
-      ? [{
-          key: 'priorityMuscles',
-          label: t('fitness.onboarding.priorityMuscles'),
-          value: trainingProfile.priorityMuscles
-            .map((m) => t(`fitness.onboarding.muscle_${m}`))
-            .join(', '),
-        }]
+      ? [
+          {
+            key: 'priorityMuscles',
+            label: t('fitness.onboarding.priorityMuscles'),
+            value: trainingProfile.priorityMuscles.map(m => t(`fitness.onboarding.muscle_${m}`)).join(', '),
+          },
+        ]
       : []),
     ...(trainingProfile.avgSleepHours
-      ? [{
-          key: 'avgSleepHours',
-          label: t('fitness.onboarding.sleepHours'),
-          value: `${trainingProfile.avgSleepHours}h`,
-        }]
+      ? [
+          {
+            key: 'avgSleepHours',
+            label: t('fitness.onboarding.sleepHours'),
+            value: `${trainingProfile.avgSleepHours}h`,
+          },
+        ]
       : []),
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {fields.map((field) => (
-        <div
-          key={field.key}
-          className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
-        >
-          <span className="text-base leading-none mt-0.5">
-            {(() => { const Icon = FIELD_ICON[field.key] ?? ClipboardList; return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />; })()}
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {fields.map(field => (
+        <div key={field.key} className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
+          <span className="mt-0.5 text-base leading-none">
+            {(() => {
+              const Icon = FIELD_ICON[field.key] ?? ClipboardList;
+              return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />;
+            })()}
           </span>
           <div className="min-w-0">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {field.label}
-            </p>
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
-              {field.value}
-            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+            <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
           </div>
         </div>
       ))}

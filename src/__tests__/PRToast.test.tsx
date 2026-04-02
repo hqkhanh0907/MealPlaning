@@ -1,4 +1,5 @@
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+
 import { PRToast } from '../features/fitness/components/PRToast';
 import type { PRDetection } from '../features/fitness/utils/gamification';
 

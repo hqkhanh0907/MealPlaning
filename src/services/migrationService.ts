@@ -1,5 +1,5 @@
+import type { DayPlan, Dish, Ingredient, MealTemplate, UserProfile } from '../types';
 import type { DatabaseService } from './databaseService';
-import type { Ingredient, Dish, DayPlan, UserProfile, MealTemplate } from '../types';
 
 /* ------------------------------------------------------------------ */
 /*  Public types                                                        */
@@ -90,23 +90,13 @@ async function migrateIngredients(db: DatabaseService, items: Ingredient[]): Pro
   return items.length;
 }
 
-async function migrateDishes(
-  db: DatabaseService,
-  items: Dish[],
-): Promise<{ dishes: number; dishIngredients: number }> {
+async function migrateDishes(db: DatabaseService, items: Dish[]): Promise<{ dishes: number; dishIngredients: number }> {
   let dishIngredientCount = 0;
   for (const dish of items) {
     await db.execute(
       `INSERT INTO dishes (id, name_vi, name_en, tags, rating, notes)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        dish.id,
-        dish.name.vi,
-        dish.name.en ?? null,
-        JSON.stringify(dish.tags),
-        dish.rating ?? null,
-        dish.notes ?? null,
-      ],
+      [dish.id, dish.name.vi, dish.name.en ?? null, JSON.stringify(dish.tags), dish.rating ?? null, dish.notes ?? null],
     );
 
     for (const di of dish.ingredients) {
@@ -143,17 +133,7 @@ async function migrateUserProfile(db: DatabaseService, profile: UserProfile): Pr
     `INSERT INTO user_profile
        (id, gender, age, height_cm, weight_kg, activity_level, protein_ratio, fat_pct, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      'default',
-      'male',
-      30,
-      170,
-      profile.weight,
-      'moderate',
-      profile.proteinRatio,
-      0.25,
-      new Date().toISOString(),
-    ],
+    ['default', 'male', 30, 170, profile.weight, 'moderate', profile.proteinRatio, 0.25, new Date().toISOString()],
   );
   return true;
 }
@@ -181,7 +161,7 @@ export function isMigrationNeeded(): boolean {
   if (isMigrationCompleted()) return false;
 
   const keys = [LS_INGREDIENTS, LS_DISHES, LS_DAY_PLANS, LS_USER_PROFILE, LS_MEAL_TEMPLATES];
-  return keys.some((k) => localStorage.getItem(k) !== null);
+  return keys.some(k => localStorage.getItem(k) !== null);
 }
 
 export async function migrateFromLocalStorage(db: DatabaseService): Promise<MigrationResult> {
@@ -247,9 +227,7 @@ export function isFitnessMigrationCompleted(): boolean {
   return localStorage.getItem(LS_FITNESS_MIGRATION_FLAG) !== null;
 }
 
-export async function migrateFitnessData(
-  db: DatabaseService,
-): Promise<FitnessMigrationResult> {
+export async function migrateFitnessData(db: DatabaseService): Promise<FitnessMigrationResult> {
   if (isFitnessMigrationCompleted()) {
     return { migrated: false, recordCount: 0 };
   }

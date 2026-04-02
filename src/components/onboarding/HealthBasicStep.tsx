@@ -1,7 +1,9 @@
-import { useTranslation } from 'react-i18next';
-import { useController, type UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
+import { useController, type UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
+
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
 
@@ -28,13 +30,9 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
 
   return (
     <div className="flex flex-1 flex-col" data-testid="health-basic-step">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.health.title')}
-        </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          {t('onboarding.health.subtitle')}
-        </p>
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
+        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{t('onboarding.health.title')}</h2>
+        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.health.subtitle')}</p>
 
         <div className="space-y-4">
           {/* Name */}
@@ -55,7 +53,9 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               onBlur={nameField.field.onBlur}
             />
             {nameField.fieldState.error && (
-              <p id="ob-name-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
+              <p id="ob-name-error" role="alert" className="mt-1 text-xs text-red-500">
+                {t('onboarding.validation.required')}
+              </p>
             )}
           </div>
 
@@ -64,8 +64,8 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
             <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
               {t('onboarding.health.gender')}
             </label>
-            <fieldset className="flex gap-3 border-0 p-0 m-0" aria-label={t('onboarding.health.gender')}>
-              {(['male', 'female'] as const).map((g) => (
+            <fieldset className="m-0 flex gap-3 border-0 p-0" aria-label={t('onboarding.health.gender')}>
+              {(['male', 'female'] as const).map(g => (
                 <button
                   key={g}
                   type="button"
@@ -100,7 +100,9 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               onBlur={dobField.field.onBlur}
             />
             {dobField.fieldState.error && (
-              <p id="ob-dob-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.required')}</p>
+              <p id="ob-dob-error" role="alert" className="mt-1 text-xs text-red-500">
+                {t('onboarding.validation.required')}
+              </p>
             )}
           </div>
 
@@ -120,16 +122,18 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 aria-describedby={heightField.fieldState.error ? 'ob-height-error' : undefined}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 value={heightField.field.value ?? ''}
-                onChange={(e) => heightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                onChange={e => heightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={heightField.field.onBlur}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">cm</span>
+              <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">cm</span>
             </div>
             {heightField.field.value != null && heightField.field.value < 3 && heightField.field.value > 0 && (
               <p className="mt-1 text-xs text-amber-500">{t('onboarding.validation.heightHint')}</p>
             )}
             {heightField.fieldState.error && (
-              <p id="ob-height-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.heightRange')}</p>
+              <p id="ob-height-error" role="alert" className="mt-1 text-xs text-red-500">
+                {t('onboarding.validation.heightRange')}
+              </p>
             )}
           </div>
 
@@ -149,13 +153,15 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 aria-describedby={weightField.fieldState.error ? 'ob-weight-error' : undefined}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 value={weightField.field.value ?? ''}
-                onChange={(e) => weightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                onChange={e => weightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={weightField.field.onBlur}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">kg</span>
+              <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">kg</span>
             </div>
             {weightField.fieldState.error && (
-              <p id="ob-weight-error" role="alert" className="mt-1 text-xs text-red-500">{t('onboarding.validation.weightRange')}</p>
+              <p id="ob-weight-error" role="alert" className="mt-1 text-xs text-red-500">
+                {t('onboarding.validation.weightRange')}
+              </p>
             )}
           </div>
         </div>

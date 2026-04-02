@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
   calculateCalorieScore,
-  calculateProteinScore,
-  calculateWorkoutScore,
-  calculateWeightLogScore,
-  calculateStreakBonus,
   calculateDailyScore,
+  calculateProteinScore,
+  calculateStreakBonus,
+  calculateWeightLogScore,
+  calculateWorkoutScore,
   getScoreColor,
 } from '../features/dashboard/utils/scoreCalculator';
 

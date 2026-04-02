@@ -1,13 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
-  getWeekRepScheme,
-  getOverloadIncrement,
-  isDeloadWeek,
-  getDeloadScheme,
-  shouldAutoDeload,
   applyDeloadReduction,
+  getDeloadScheme,
+  getOverloadIncrement,
+  getWeekRepScheme,
   GOAL_REP_SCHEMES,
+  isDeloadWeek,
   OVERLOAD_RATES,
+  shouldAutoDeload,
 } from '../features/fitness/utils/periodization';
 
 describe('periodization', () => {
@@ -87,15 +88,9 @@ describe('periodization', () => {
       });
 
       it('returns the goal-specific scheme for each goal', () => {
-        expect(getWeekRepScheme('linear', 'hypertrophy', 1, 1)).toEqual(
-          GOAL_REP_SCHEMES.hypertrophy,
-        );
-        expect(getWeekRepScheme('linear', 'endurance', 3, 2)).toEqual(
-          GOAL_REP_SCHEMES.endurance,
-        );
-        expect(getWeekRepScheme('linear', 'general', 2, 1)).toEqual(
-          GOAL_REP_SCHEMES.general,
-        );
+        expect(getWeekRepScheme('linear', 'hypertrophy', 1, 1)).toEqual(GOAL_REP_SCHEMES.hypertrophy);
+        expect(getWeekRepScheme('linear', 'endurance', 3, 2)).toEqual(GOAL_REP_SCHEMES.endurance);
+        expect(getWeekRepScheme('linear', 'general', 2, 1)).toEqual(GOAL_REP_SCHEMES.general);
       });
 
       it('returns a copy, not the original reference', () => {
@@ -135,39 +130,23 @@ describe('periodization', () => {
 
     describe('block model', () => {
       it('returns hypertrophy scheme for weeks 1-4', () => {
-        expect(getWeekRepScheme('block', 'general', 1, 1)).toEqual(
-          GOAL_REP_SCHEMES.hypertrophy,
-        );
-        expect(getWeekRepScheme('block', 'general', 4, 1)).toEqual(
-          GOAL_REP_SCHEMES.hypertrophy,
-        );
+        expect(getWeekRepScheme('block', 'general', 1, 1)).toEqual(GOAL_REP_SCHEMES.hypertrophy);
+        expect(getWeekRepScheme('block', 'general', 4, 1)).toEqual(GOAL_REP_SCHEMES.hypertrophy);
       });
 
       it('returns strength scheme for weeks 5-8', () => {
-        expect(getWeekRepScheme('block', 'general', 5, 1)).toEqual(
-          GOAL_REP_SCHEMES.strength,
-        );
-        expect(getWeekRepScheme('block', 'general', 8, 1)).toEqual(
-          GOAL_REP_SCHEMES.strength,
-        );
+        expect(getWeekRepScheme('block', 'general', 5, 1)).toEqual(GOAL_REP_SCHEMES.strength);
+        expect(getWeekRepScheme('block', 'general', 8, 1)).toEqual(GOAL_REP_SCHEMES.strength);
       });
 
       it('returns endurance scheme for weeks 9-12', () => {
-        expect(getWeekRepScheme('block', 'general', 9, 1)).toEqual(
-          GOAL_REP_SCHEMES.endurance,
-        );
-        expect(getWeekRepScheme('block', 'general', 12, 1)).toEqual(
-          GOAL_REP_SCHEMES.endurance,
-        );
+        expect(getWeekRepScheme('block', 'general', 9, 1)).toEqual(GOAL_REP_SCHEMES.endurance);
+        expect(getWeekRepScheme('block', 'general', 12, 1)).toEqual(GOAL_REP_SCHEMES.endurance);
       });
 
       it('cycles back to first phase after completing all phases', () => {
-        expect(getWeekRepScheme('block', 'general', 13, 1)).toEqual(
-          GOAL_REP_SCHEMES.hypertrophy,
-        );
-        expect(getWeekRepScheme('block', 'general', 16, 1)).toEqual(
-          GOAL_REP_SCHEMES.hypertrophy,
-        );
+        expect(getWeekRepScheme('block', 'general', 13, 1)).toEqual(GOAL_REP_SCHEMES.hypertrophy);
+        expect(getWeekRepScheme('block', 'general', 16, 1)).toEqual(GOAL_REP_SCHEMES.hypertrophy);
       });
     });
   });
@@ -253,13 +232,12 @@ describe('periodization', () => {
     });
 
     it('preserves rest seconds from original scheme', () => {
-      const custom: import('../features/fitness/utils/periodization').RepScheme =
-        {
-          repsMin: 10,
-          repsMax: 15,
-          intensityPct: 0.8,
-          restSeconds: 120,
-        };
+      const custom: import('../features/fitness/utils/periodization').RepScheme = {
+        repsMin: 10,
+        repsMax: 15,
+        intensityPct: 0.8,
+        restSeconds: 120,
+      };
       const deload = getDeloadScheme(custom);
       expect(deload.restSeconds).toBe(120);
       expect(deload.repsMin).toBe(6);

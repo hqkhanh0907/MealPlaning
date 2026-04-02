@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { CopyPlanModal } from '../components/modals/CopyPlanModal';
 import type { DayPlan, Dish } from '../types';
 
@@ -8,11 +9,7 @@ vi.mock('../hooks/useModalBackHandler', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) => <div>{children}</div>,
+  ModalBackdrop: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const makePlan = (
@@ -37,11 +34,7 @@ const makeDish = (id: string, viName: string): Dish => ({
 describe('CopyPlanModal', () => {
   const sourceDate = '2025-01-15';
   const sourcePlan = makePlan(sourceDate);
-  const dishes: Dish[] = [
-    makeDish('d1', 'Phở bò'),
-    makeDish('d2', 'Cơm tấm'),
-    makeDish('d3', 'Bún chả'),
-  ];
+  const dishes: Dish[] = [makeDish('d1', 'Phở bò'), makeDish('d2', 'Cơm tấm'), makeDish('d3', 'Bún chả')];
 
   let onCopy = vi.fn<(targetDates: string[], mergeMode: boolean) => void>();
   let onClose = vi.fn<() => void>();
@@ -51,19 +44,8 @@ describe('CopyPlanModal', () => {
     onClose = vi.fn<() => void>();
   });
 
-  const renderModal = (
-    plan: DayPlan = sourcePlan,
-    date: string = sourceDate,
-  ) =>
-    render(
-      <CopyPlanModal
-        sourceDate={date}
-        sourcePlan={plan}
-        dishes={dishes}
-        onCopy={onCopy}
-        onClose={onClose}
-      />,
-    );
+  const renderModal = (plan: DayPlan = sourcePlan, date: string = sourceDate) =>
+    render(<CopyPlanModal sourceDate={date} sourcePlan={plan} dishes={dishes} onCopy={onCopy} onClose={onClose} />);
 
   // --- Rendering ---
 
@@ -101,9 +83,7 @@ describe('CopyPlanModal', () => {
   it('does not render source preview when plan has no dishes', () => {
     const emptyPlan = makePlan(sourceDate, [], [], []);
     renderModal(emptyPlan);
-    expect(
-      screen.queryByText('Xem trước kế hoạch nguồn'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Xem trước kế hoạch nguồn')).not.toBeInTheDocument();
   });
 
   it('renders quick select buttons: Tomorrow, This Week, Custom', () => {
@@ -122,20 +102,14 @@ describe('CopyPlanModal', () => {
 
   it('renders mode labels in Vietnamese', () => {
     renderModal();
-    expect(screen.getByTestId('btn-mode-overwrite')).toHaveTextContent(
-      'Ghi đè',
-    );
-    expect(screen.getByTestId('btn-mode-merge')).toHaveTextContent(
-      'Gộp thêm',
-    );
+    expect(screen.getByTestId('btn-mode-overwrite')).toHaveTextContent('Ghi đè');
+    expect(screen.getByTestId('btn-mode-merge')).toHaveTextContent('Gộp thêm');
   });
 
   it('renders confirm button', () => {
     renderModal();
     expect(screen.getByTestId('btn-copy-confirm')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-copy-confirm')).toHaveTextContent(
-      'Copy kế hoạch',
-    );
+    expect(screen.getByTestId('btn-copy-confirm')).toHaveTextContent('Copy kế hoạch');
   });
 
   it('shows no selection message initially', () => {
@@ -189,14 +163,7 @@ describe('CopyPlanModal', () => {
     fireEvent.click(screen.getByTestId('btn-copy-week'));
     fireEvent.click(screen.getByTestId('btn-copy-confirm'));
 
-    const expectedDates = [
-      '2025-01-16',
-      '2025-01-17',
-      '2025-01-18',
-      '2025-01-19',
-      '2025-01-20',
-      '2025-01-21',
-    ];
+    const expectedDates = ['2025-01-16', '2025-01-17', '2025-01-18', '2025-01-19', '2025-01-20', '2025-01-21'];
     expect(onCopy).toHaveBeenCalledWith(expectedDates, false);
   });
 
@@ -232,9 +199,7 @@ describe('CopyPlanModal', () => {
     fireEvent.change(dateInput, { target: { value: '2025-02-01' } });
     fireEvent.change(dateInput, { target: { value: '2025-02-01' } });
 
-    const removeButtons = screen
-      .getAllByRole('button')
-      .filter((btn) => btn.querySelector('.lucide-trash-2'));
+    const removeButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-trash-2'));
     expect(removeButtons).toHaveLength(1);
   });
 
@@ -251,9 +216,7 @@ describe('CopyPlanModal', () => {
   it('removes a selected date when trash icon clicked', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
-    const removeButtons = screen
-      .getAllByRole('button')
-      .filter((btn) => btn.querySelector('.lucide-trash-2'));
+    const removeButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-trash-2'));
     expect(removeButtons.length).toBeGreaterThan(0);
     fireEvent.click(removeButtons[0]);
     expect(screen.getByText('Chưa chọn ngày nào')).toBeInTheDocument();
@@ -264,9 +227,7 @@ describe('CopyPlanModal', () => {
     fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
     expect(screen.getByTestId('btn-copy-confirm')).not.toBeDisabled();
 
-    const removeButtons = screen
-      .getAllByRole('button')
-      .filter((btn) => btn.querySelector('.lucide-trash-2'));
+    const removeButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.lucide-trash-2'));
     fireEvent.click(removeButtons[0]);
     expect(screen.getByTestId('btn-copy-confirm')).toBeDisabled();
   });

@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { computeMatchScore } from '../features/fitness/utils/templateMatcher';
+import { describe, expect, it } from 'vitest';
+
 import type { PlanTemplate, TrainingProfile } from '../features/fitness/types';
+import { computeMatchScore } from '../features/fitness/utils/templateMatcher';
 
 function sampleTemplate(overrides: Partial<PlanTemplate> = {}): PlanTemplate {
   return {
@@ -150,26 +151,14 @@ describe('computeMatchScore', () => {
   });
 
   it('higher popularity gives higher score', () => {
-    const lowPop = computeMatchScore(
-      sampleTemplate({ popularityScore: 10 }),
-      sampleProfile(),
-    );
-    const highPop = computeMatchScore(
-      sampleTemplate({ popularityScore: 90 }),
-      sampleProfile(),
-    );
+    const lowPop = computeMatchScore(sampleTemplate({ popularityScore: 10 }), sampleProfile());
+    const highPop = computeMatchScore(sampleTemplate({ popularityScore: 90 }), sampleProfile());
     expect(highPop).toBeGreaterThan(lowPop);
   });
 
   it('clamps popularity to 0-100 range', () => {
-    const overMax = computeMatchScore(
-      sampleTemplate({ popularityScore: 200 }),
-      sampleProfile(),
-    );
-    const atMax = computeMatchScore(
-      sampleTemplate({ popularityScore: 100 }),
-      sampleProfile(),
-    );
+    const overMax = computeMatchScore(sampleTemplate({ popularityScore: 200 }), sampleProfile());
+    const atMax = computeMatchScore(sampleTemplate({ popularityScore: 100 }), sampleProfile());
     expect(overMax).toBe(atMax);
   });
 

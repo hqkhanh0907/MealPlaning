@@ -106,13 +106,13 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
   return (
     <dialog
       open
-      className={`fixed inset-0 w-full h-full bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center ${zIndex} border-none px-0 pt-0 pb-safe sm:p-0 m-0 max-w-none max-h-none`}
+      className={`fixed inset-0 flex h-full w-full items-end justify-center bg-slate-900/50 backdrop-blur-sm sm:items-center ${zIndex} pb-safe m-0 max-h-none max-w-none border-none px-0 pt-0 sm:p-0`}
       aria-modal="true"
     >
       <button
         type="button"
         aria-label={t('common.close')}
-        className="absolute inset-0 w-full h-full cursor-default"
+        className="absolute inset-0 h-full w-full cursor-default"
         onClick={onClose}
         tabIndex={-1}
       />

@@ -1,19 +1,15 @@
+import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 import { useState } from 'react';
-import { Info, AlertTriangle, CheckCircle, X } from 'lucide-react';
+
 import type { FitnessNutritionInsight } from '../hooks/useFitnessNutritionBridge';
 
 const COLOR_MAP: Record<FitnessNutritionInsight['severity'], string> = {
   info: 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',
-  warning:
-    'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300',
-  success:
-    'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
+  warning: 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300',
+  success: 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
 };
 
-const ICON_MAP: Record<
-  FitnessNutritionInsight['severity'],
-  typeof Info
-> = {
+const ICON_MAP: Record<FitnessNutritionInsight['severity'], typeof Info> = {
   info: Info,
   warning: AlertTriangle,
   success: CheckCircle,

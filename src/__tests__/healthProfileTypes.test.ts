@@ -1,5 +1,5 @@
-import { getAge } from '../features/health-profile/types';
 import type { HealthProfile } from '../features/health-profile/types';
+import { getAge } from '../features/health-profile/types';
 
 const baseProfile: HealthProfile = {
   id: 'default',

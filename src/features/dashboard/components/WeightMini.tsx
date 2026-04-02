@@ -1,10 +1,12 @@
-import React, { useMemo, useCallback } from 'react';
+import { Minus, Scale, TrendingDown, TrendingUp } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, TrendingDown, Minus, Scale } from 'lucide-react';
+
 import { COLORS } from '@/constant/colors';
+
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import type { WeightEntry } from '../../fitness/types';
+import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import type { GoalType } from '../../health-profile/types';
 
 interface TrendResult {
@@ -24,19 +26,11 @@ function computeWeeklyChange(entries: WeightEntry[]): number {
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const latest = sorted.at(-1)!;
   const oldest = sorted[0];
-  const daysDiff = Math.max(
-    1,
-    (new Date(latest.date).getTime() - new Date(oldest.date).getTime()) /
-      86_400_000,
-  );
+  const daysDiff = Math.max(1, (new Date(latest.date).getTime() - new Date(oldest.date).getTime()) / 86_400_000);
   return ((latest.weightKg - oldest.weightKg) / daysDiff) * 7;
 }
 
-function evaluateTrend(
-  goalType: GoalType | null,
-  weeklyChange: number,
-  t: (key: string) => string,
-): TrendResult {
+function evaluateTrend(goalType: GoalType | null, weeklyChange: number, t: (key: string) => string): TrendResult {
   const absChange = Math.abs(weeklyChange);
   const gaining = weeklyChange > 0.05;
   const losing = weeklyChange < -0.05;
@@ -102,7 +96,7 @@ function evaluateTrend(
 
 function buildSparklinePath(entries: WeightEntry[], width: number, height: number): string {
   if (entries.length < 2) return '';
-  const weights = entries.map((e) => e.weightKg);
+  const weights = entries.map(e => e.weightKg);
   const min = Math.min(...weights);
   const max = Math.max(...weights);
   const range = max - min || 1;
@@ -125,14 +119,12 @@ interface WeightMiniProps {
 
 function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactElement {
   const { t } = useTranslation();
-  const weightEntries = useFitnessStore((s) => s.weightEntries);
-  const activeGoal = useHealthProfileStore((s) => s.activeGoal);
+  const weightEntries = useFitnessStore(s => s.weightEntries);
+  const activeGoal = useHealthProfileStore(s => s.activeGoal);
 
   const latestWeight = useMemo(() => {
     if (weightEntries.length === 0) return null;
-    return [...weightEntries].sort((a, b) =>
-      b.date.localeCompare(a.date),
-    )[0];
+    return [...weightEntries].sort((a, b) => b.date.localeCompare(a.date))[0];
   }, [weightEntries]);
 
   const last7 = useMemo(() => getLast7Weights(weightEntries), [weightEntries]);
@@ -143,10 +135,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
     return evaluateTrend(goalType, weeklyChange, t);
   }, [last7, activeGoal, t]);
 
-  const sparklinePath = useMemo(
-    () => buildSparklinePath(last7, 80, 32),
-    [last7],
-  );
+  const sparklinePath = useMemo(() => buildSparklinePath(last7, 80, 32), [last7]);
 
   const handleTap = useCallback(() => {
     onTap?.();
@@ -175,12 +164,8 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
       >
         <Scale className="h-5 w-5 text-slate-400" aria-hidden={true} />
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {t('dashboard.weightMini.noData')}
-          </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {t('dashboard.weightMini.logFirst')}
-          </p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('dashboard.weightMini.noData')}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.weightMini.logFirst')}</p>
         </div>
       </button>
     );
@@ -213,27 +198,22 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
       })}
       onClick={handleTap}
       onKeyDown={handleKeyDown}
-      className={`flex items-center gap-3 rounded-2xl ${colorClasses.bg} p-3 cursor-pointer transition-transform active:scale-[0.98]`}
+      className={`flex items-center gap-3 rounded-2xl ${colorClasses.bg} cursor-pointer p-3 transition-transform active:scale-[0.98]`}
     >
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <span
           className="text-base font-bold text-slate-800 dark:text-slate-200"
           style={{ fontVariantNumeric: 'tabular-nums' }}
           data-testid="weight-value"
         >
           {latestWeight.weightKg}
-          <span className="text-xs font-normal text-slate-500 dark:text-slate-400 ml-0.5">
+          <span className="ml-0.5 text-xs font-normal text-slate-500 dark:text-slate-400">
             {t('dashboard.weightMini.unit')}
           </span>
         </span>
         <div className="mt-1 flex items-center gap-1" data-testid="weight-trend">
-          <TrendIcon
-            className={`h-3.5 w-3.5 ${colorClasses.icon}`}
-            aria-hidden={true}
-          />
-          <span className={`text-xs font-medium ${colorClasses.text}`}>
-            {trend.text}
-          </span>
+          <TrendIcon className={`h-3.5 w-3.5 ${colorClasses.icon}`} aria-hidden={true} />
+          <span className={`text-xs font-medium ${colorClasses.text}`}>{trend.text}</span>
         </div>
       </div>
 

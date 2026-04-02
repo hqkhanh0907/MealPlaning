@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { useIngredientStore } from '../store/ingredientStore';
 import type { Ingredient } from '../types';
 
@@ -102,10 +103,7 @@ describe('ingredientStore', () => {
     it('accepts an updater function', () => {
       useIngredientStore.setState({ ingredients: [SAMPLE_INGREDIENT] });
 
-      useIngredientStore.getState().setIngredients((prev) => [
-        ...prev,
-        SAMPLE_INGREDIENT_NO_EN,
-      ]);
+      useIngredientStore.getState().setIngredients(prev => [...prev, SAMPLE_INGREDIENT_NO_EN]);
 
       expect(useIngredientStore.getState().ingredients).toHaveLength(2);
     });

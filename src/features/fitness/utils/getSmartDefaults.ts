@@ -1,11 +1,11 @@
 import type {
-  TrainingGoal,
-  TrainingExperience,
-  TrainingProfile,
-  PeriodizationModel,
+  CardioTypePref,
   EquipmentType,
   MuscleGroup,
-  CardioTypePref,
+  PeriodizationModel,
+  TrainingExperience,
+  TrainingGoal,
+  TrainingProfile,
 } from '../types';
 
 interface ExperienceDefaults {

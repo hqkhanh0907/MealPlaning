@@ -67,8 +67,6 @@ describe('DatabaseService – binary operations & locateFile', () => {
 
   it('importBinary() throws when SQL.js not loaded', async () => {
     const uninitDb = createDatabaseService();
-    await expect(uninitDb.importBinary(new Uint8Array())).rejects.toThrow(
-      'SQL.js not loaded',
-    );
+    await expect(uninitDb.importBinary(new Uint8Array())).rejects.toThrow('SQL.js not loaded');
   });
 });

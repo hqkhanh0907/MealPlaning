@@ -1,15 +1,26 @@
-import { Ingredient, Dish, NutritionInfo, AnalyzedIngredient } from '../types';
+import { AnalyzedIngredient, Dish, Ingredient, NutritionInfo } from '../types';
 
 const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
 
 // --- Unit Normalization (shared across app) ---
 
 const UNIT_ALIASES: Record<string, string> = {
-  g: 'g', gram: 'g', grams: 'g', gam: 'g',
-  kg: 'kg', kilogram: 'kg', kilograms: 'kg',
-  mg: 'mg', milligram: 'mg', milligrams: 'mg',
-  ml: 'ml', milliliter: 'ml', milliliters: 'ml',
-  l: 'l', liter: 'l', liters: 'l',
+  g: 'g',
+  gram: 'g',
+  grams: 'g',
+  gam: 'g',
+  kg: 'kg',
+  kilogram: 'kg',
+  kilograms: 'kg',
+  mg: 'mg',
+  milligram: 'mg',
+  milligrams: 'mg',
+  ml: 'ml',
+  milliliter: 'ml',
+  milliliters: 'ml',
+  l: 'l',
+  liter: 'l',
+  liters: 'l',
 };
 
 export const normalizeUnit = (rawUnit: string): string => {
@@ -37,7 +48,7 @@ export const calculateIngredientNutrition = (ingredient: Ingredient, amount: num
   } else {
     factor = amount;
   }
-  
+
   return {
     calories: (ingredient.caloriesPer100 || 0) * factor,
     protein: (ingredient.proteinPer100 || 0) * factor,
@@ -50,7 +61,7 @@ export const calculateIngredientNutrition = (ingredient: Ingredient, amount: num
 export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[]): NutritionInfo => {
   return dish.ingredients.reduce<NutritionInfo>(
     (acc, di) => {
-      const ingredient = allIngredients.find((i) => i.id === di.ingredientId);
+      const ingredient = allIngredients.find(i => i.id === di.ingredientId);
       if (!ingredient) return acc;
       const nutrition = calculateIngredientNutrition(ingredient, di.amount);
       return {
@@ -61,7 +72,7 @@ export const calculateDishNutrition = (dish: Dish, allIngredients: Ingredient[])
         fiber: acc.fiber + nutrition.fiber,
       };
     },
-    { ...ZERO_NUTRITION }
+    { ...ZERO_NUTRITION },
   );
 };
 
@@ -73,7 +84,7 @@ export const calculateDishesNutrition = (
 ): NutritionInfo => {
   return dishIds.reduce<NutritionInfo>(
     (acc, dishId) => {
-      const dish = allDishes.find((d) => d.id === dishId);
+      const dish = allDishes.find(d => d.id === dishId);
       if (!dish) return acc;
       const nutrition = calculateDishNutrition(dish, allIngredients);
       const multiplier = servings?.[dishId] ?? 1;
@@ -85,7 +96,7 @@ export const calculateDishesNutrition = (
         fiber: acc.fiber + nutrition.fiber * multiplier,
       };
     },
-    { ...ZERO_NUTRITION }
+    { ...ZERO_NUTRITION },
   );
 };
 

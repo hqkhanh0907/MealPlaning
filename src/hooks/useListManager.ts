@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
+
 import type { ViewLayout } from '../components/shared/ListToolbar';
 
 interface UseListManagerConfig<T, S extends string> {
@@ -20,9 +21,7 @@ interface UseListManagerReturn<T, S extends string> {
   filteredItems: T[];
 }
 
-export function useListManager<T, S extends string>(
-  config: UseListManagerConfig<T, S>
-): UseListManagerReturn<T, S> {
+export function useListManager<T, S extends string>(config: UseListManagerConfig<T, S>): UseListManagerReturn<T, S> {
   const { items, searchFn, sortFn, defaultSort, extraFilter } = config;
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<S>(defaultSort);
@@ -36,4 +35,3 @@ export function useListManager<T, S extends string>(
 
   return { searchQuery, setSearchQuery, sortBy, setSortBy, viewLayout, setViewLayout, filteredItems };
 }
-

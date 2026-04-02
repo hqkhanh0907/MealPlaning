@@ -1,11 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { EmptyState } from '../components/shared/EmptyState';
-import { DetailModal } from '../components/shared/DetailModal';
-import { ListToolbar } from '../components/shared/ListToolbar';
-import { UnsavedChangesDialog } from '../components/shared/UnsavedChangesDialog';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { ConfirmationModal } from '../components/modals/ConfirmationModal';
-import { BottomNavBar, DesktopNav, TabLoadingFallback, getTabLabels } from '../components/navigation';
+import { BottomNavBar, DesktopNav, getTabLabels, TabLoadingFallback } from '../components/navigation';
+import { DetailModal } from '../components/shared/DetailModal';
+import { EmptyState } from '../components/shared/EmptyState';
+import { ListToolbar } from '../components/shared/ListToolbar';
 import { UnitSelector } from '../components/shared/UnitSelector';
+import { UnsavedChangesDialog } from '../components/shared/UnsavedChangesDialog';
 
 // Mock useModalBackHandler to avoid history side effects
 vi.mock('../hooks/useModalBackHandler', () => ({
@@ -30,7 +31,9 @@ describe('EmptyState', () => {
 
   it('renders action button when actionLabel and onAction provided and no search', () => {
     const onAction = vi.fn();
-    render(<EmptyState icon={defaultIcon} searchQuery="" entityName="món ăn" actionLabel="Tạo món" onAction={onAction} />);
+    render(
+      <EmptyState icon={defaultIcon} searchQuery="" entityName="món ăn" actionLabel="Tạo món" onAction={onAction} />,
+    );
     const btn = screen.getByText('Tạo món');
     expect(btn).toBeInTheDocument();
     fireEvent.click(btn);
@@ -38,7 +41,9 @@ describe('EmptyState', () => {
   });
 
   it('does not render action button when searching', () => {
-    render(<EmptyState icon={defaultIcon} searchQuery="abc" entityName="món ăn" actionLabel="Tạo" onAction={vi.fn()} />);
+    render(
+      <EmptyState icon={defaultIcon} searchQuery="abc" entityName="món ăn" actionLabel="Tạo" onAction={vi.fn()} />,
+    );
     expect(screen.queryByText('Tạo')).not.toBeInTheDocument();
   });
 });
@@ -155,9 +160,7 @@ describe('UnsavedChangesDialog', () => {
   });
 
   it('renders dialog with 3 action buttons when open', () => {
-    render(
-      <UnsavedChangesDialog isOpen={true} onSave={vi.fn()} onDiscard={vi.fn()} onCancel={vi.fn()} />,
-    );
+    render(<UnsavedChangesDialog isOpen={true} onSave={vi.fn()} onDiscard={vi.fn()} onCancel={vi.fn()} />);
     expect(screen.getByText('Thay đổi chưa lưu')).toBeInTheDocument();
     expect(screen.getByText('Lưu & quay lại')).toBeInTheDocument();
     expect(screen.getByText('Bỏ thay đổi')).toBeInTheDocument();
@@ -207,7 +210,14 @@ describe('ConfirmationModal', () => {
 
   it('renders warning variant', () => {
     render(
-      <ConfirmationModal isOpen={true} variant="warning" title="Cảnh báo" message="OK?" onConfirm={vi.fn()} onCancel={vi.fn()} />,
+      <ConfirmationModal
+        isOpen={true}
+        variant="warning"
+        title="Cảnh báo"
+        message="OK?"
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />,
     );
     expect(screen.getByText('Cảnh báo')).toBeInTheDocument();
   });
@@ -230,27 +240,21 @@ describe('ConfirmationModal', () => {
 
   it('calls onConfirm when confirm clicked', () => {
     const onConfirm = vi.fn();
-    render(
-      <ConfirmationModal isOpen={true} title="T" message="M" onConfirm={onConfirm} onCancel={vi.fn()} />,
-    );
+    render(<ConfirmationModal isOpen={true} title="T" message="M" onConfirm={onConfirm} onCancel={vi.fn()} />);
     fireEvent.click(screen.getByText('Xác nhận'));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   it('calls onCancel when cancel clicked', () => {
     const onCancel = vi.fn();
-    render(
-      <ConfirmationModal isOpen={true} title="T" message="M" onConfirm={vi.fn()} onCancel={onCancel} />,
-    );
+    render(<ConfirmationModal isOpen={true} title="T" message="M" onConfirm={vi.fn()} onCancel={onCancel} />);
     fireEvent.click(screen.getByText('Hủy'));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('calls onCancel when backdrop clicked', () => {
     const onCancel = vi.fn();
-    render(
-      <ConfirmationModal isOpen={true} title="T" message="M" onConfirm={vi.fn()} onCancel={onCancel} />,
-    );
+    render(<ConfirmationModal isOpen={true} title="T" message="M" onConfirm={vi.fn()} onCancel={onCancel} />);
     fireEvent.click(screen.getByLabelText('Đóng'));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });

@@ -1,25 +1,22 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  onboardingSchema,
-  STEP_FIELDS,
-  type OnboardingFormData,
-} from '../components/onboarding/onboardingSchema';
-import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
-import { OnboardingErrorBoundary } from '../components/onboarding/OnboardingErrorBoundary';
-import { WelcomeSlides } from '../components/onboarding/WelcomeSlides';
-import { HealthBasicStep } from '../components/onboarding/HealthBasicStep';
+import { useForm, type UseFormReturn } from 'react-hook-form';
+
 import { ActivityLevelStep } from '../components/onboarding/ActivityLevelStep';
-import { NutritionGoalStep } from '../components/onboarding/NutritionGoalStep';
+import { HealthBasicStep } from '../components/onboarding/HealthBasicStep';
 import { HealthConfirmStep } from '../components/onboarding/HealthConfirmStep';
+import { NutritionGoalStep } from '../components/onboarding/NutritionGoalStep';
+import { OnboardingErrorBoundary } from '../components/onboarding/OnboardingErrorBoundary';
+import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
+import { type OnboardingFormData, onboardingSchema, STEP_FIELDS } from '../components/onboarding/onboardingSchema';
+import { PlanComputingScreen } from '../components/onboarding/PlanComputingScreen';
+import { PlanPreviewScreen } from '../components/onboarding/PlanPreviewScreen';
+import { PlanStrategyChoice } from '../components/onboarding/PlanStrategyChoice';
 import { TrainingCoreStep } from '../components/onboarding/TrainingCoreStep';
 import { TrainingDetailSteps } from '../components/onboarding/TrainingDetailSteps';
 import { getTrainingDetailStepCount } from '../components/onboarding/trainingStepConfig';
-import { PlanStrategyChoice } from '../components/onboarding/PlanStrategyChoice';
-import { PlanComputingScreen } from '../components/onboarding/PlanComputingScreen';
-import { PlanPreviewScreen } from '../components/onboarding/PlanPreviewScreen';
+import { WelcomeSlides } from '../components/onboarding/WelcomeSlides';
 import { UnifiedOnboarding } from '../components/UnifiedOnboarding';
 
 /* ------------------------------------------------------------------ */
@@ -34,9 +31,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 const { mockCapAddListener } = vi.hoisted(() => ({
-  mockCapAddListener: vi.fn((_event: string, _handler: () => void) =>
-    Promise.resolve({ remove: vi.fn() }),
-  ),
+  mockCapAddListener: vi.fn((_event: string, _handler: () => void) => Promise.resolve({ remove: vi.fn() })),
 }));
 
 vi.mock('@capacitor/app', () => ({
@@ -105,14 +100,12 @@ const defaultFitnessState = {
   setTrainingProfile: mockSetTrainingProfile,
 };
 
-const mockFitnessSelector = vi.fn(
-  (selector: (s: Record<string, unknown>) => unknown) =>
-    selector(defaultFitnessState as unknown as Record<string, unknown>),
+const mockFitnessSelector = vi.fn((selector: (s: Record<string, unknown>) => unknown) =>
+  selector(defaultFitnessState as unknown as Record<string, unknown>),
 );
 
 vi.mock('../store/fitnessStore', () => ({
-  useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) =>
-    mockFitnessSelector(selector),
+  useFitnessStore: (selector: (s: Record<string, unknown>) => unknown) => mockFitnessSelector(selector),
 }));
 
 const mockGeneratePlan = vi.fn().mockReturnValue({
@@ -154,30 +147,35 @@ vi.mock('motion/react', () => ({
     {
       get: (_target, prop: string) => {
         return ({ ref, ...props }: Record<string, unknown> & { ref?: React.Ref<HTMLElement> }) => {
-            const {
-              animate: _animate,
-              initial: _initial,
-              transition: _transition,
-              whileHover: _whileHover,
-              whileTap: _whileTap,
-              exit: _exit,
-              variants,
-              custom,
-              ...rest
-            } = props;
-            if (variants && typeof variants === 'object') {
-              const v = variants as Record<string, unknown>;
-              const d = typeof custom === 'number' ? custom : 1;
-              if (typeof v.enter === 'function') { v.enter(d); v.enter(-d); }
-              if (typeof v.exit === 'function') { v.exit(d); v.exit(-d); }
+          const {
+            animate: _animate,
+            initial: _initial,
+            transition: _transition,
+            whileHover: _whileHover,
+            whileTap: _whileTap,
+            exit: _exit,
+            variants,
+            custom,
+            ...rest
+          } = props;
+          if (variants && typeof variants === 'object') {
+            const v = variants as Record<string, unknown>;
+            const d = typeof custom === 'number' ? custom : 1;
+            if (typeof v.enter === 'function') {
+              v.enter(d);
+              v.enter(-d);
             }
-            return React.createElement(prop, { ...rest, ref });
-          };
+            if (typeof v.exit === 'function') {
+              v.exit(d);
+              v.exit(-d);
+            }
+          }
+          return React.createElement(prop, { ...rest, ref });
+        };
       },
     },
   ),
-  AnimatePresence: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
 }));
 
 /* ------------------------------------------------------------------ */
@@ -243,13 +241,11 @@ function renderWithForm(
   const result = render(
     <FormWrapper
       defaultValues={defaultValues}
-      onForm={(f) => {
+      onForm={f => {
         formRef = f;
       }}
     >
-      {(form) => (
-        <Component form={form} goNext={goNext} goBack={goBack} {...extraProps} />
-      )}
+      {form => <Component form={form} goNext={goNext} goBack={goBack} {...extraProps} />}
     </FormWrapper>,
   );
 
@@ -336,9 +332,7 @@ describe('onboardingSchema', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const targetIssue = result.error.issues.find(
-        (i) => i.path.includes('targetWeightKg'),
-      );
+      const targetIssue = result.error.issues.find(i => i.path.includes('targetWeightKg'));
       expect(targetIssue).toBeDefined();
       expect(targetIssue?.message).toBe('onboarding.validation.cutTargetTooHigh');
     }
@@ -363,9 +357,7 @@ describe('onboardingSchema', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const targetIssue = result.error.issues.find(
-        (i) => i.path.includes('targetWeightKg'),
-      );
+      const targetIssue = result.error.issues.find(i => i.path.includes('targetWeightKg'));
       expect(targetIssue).toBeDefined();
       expect(targetIssue?.message).toBe('onboarding.validation.bulkTargetTooLow');
     }
@@ -389,9 +381,7 @@ describe('onboardingSchema', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const bmiIssue = result.error.issues.find(
-        (i) => i.message === 'onboarding.validation.bmiWarning',
-      );
+      const bmiIssue = result.error.issues.find(i => i.message === 'onboarding.validation.bmiWarning');
       expect(bmiIssue).toBeDefined();
     }
   });
@@ -404,9 +394,7 @@ describe('onboardingSchema', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const bmiIssue = result.error.issues.find(
-        (i) => i.message === 'onboarding.validation.bmiWarning',
-      );
+      const bmiIssue = result.error.issues.find(i => i.message === 'onboarding.validation.bmiWarning');
       expect(bmiIssue).toBeDefined();
     }
   });
@@ -439,12 +427,8 @@ describe('onboardingSchema', () => {
   });
 
   it('rejects daysPerWeek outside 2-6 range', () => {
-    expect(
-      onboardingSchema.safeParse({ ...DEFAULT_VALUES, daysPerWeek: 1 }).success,
-    ).toBe(false);
-    expect(
-      onboardingSchema.safeParse({ ...DEFAULT_VALUES, daysPerWeek: 7 }).success,
-    ).toBe(false);
+    expect(onboardingSchema.safeParse({ ...DEFAULT_VALUES, daysPerWeek: 1 }).success).toBe(false);
+    expect(onboardingSchema.safeParse({ ...DEFAULT_VALUES, daysPerWeek: 7 }).success).toBe(false);
   });
 
   it('exposes STEP_FIELDS with correct keys', () => {
@@ -467,14 +451,7 @@ describe('onboardingSchema', () => {
 
 describe('OnboardingProgress', () => {
   it('renders progressbar with correct ARIA attributes', () => {
-    render(
-      <OnboardingProgress
-        currentSection={2}
-        totalSections={5}
-        stepInSection={1}
-        totalStepsInSection={3}
-      />,
-    );
+    render(<OnboardingProgress currentSection={2} totalSections={5} stepInSection={1} totalStepsInSection={3} />);
     const progress = screen.getByRole('progressbar');
     expect(progress).toBeInTheDocument();
     expect(progress).toHaveAttribute('aria-valuemax', '100');
@@ -482,55 +459,27 @@ describe('OnboardingProgress', () => {
   });
 
   it('computes overall progress correctly', () => {
-    render(
-      <OnboardingProgress
-        currentSection={3}
-        totalSections={5}
-        stepInSection={2}
-        totalStepsInSection={4}
-      />,
-    );
+    render(<OnboardingProgress currentSection={3} totalSections={5} stepInSection={2} totalStepsInSection={4} />);
     const progress = screen.getByRole('progressbar');
     // (3-1 + 2/4) / 5 * 100 = 50
     expect(progress).toHaveAttribute('aria-valuenow', '50');
   });
 
   it('shows 0% at the very beginning', () => {
-    render(
-      <OnboardingProgress
-        currentSection={1}
-        totalSections={5}
-        stepInSection={0}
-        totalStepsInSection={3}
-      />,
-    );
+    render(<OnboardingProgress currentSection={1} totalSections={5} stepInSection={0} totalStepsInSection={3} />);
     const progress = screen.getByRole('progressbar');
     expect(progress).toHaveAttribute('aria-valuenow', '0');
   });
 
   it('renders correct number of section segments', () => {
-    render(
-      <OnboardingProgress
-        currentSection={1}
-        totalSections={7}
-        stepInSection={0}
-        totalStepsInSection={3}
-      />,
-    );
+    render(<OnboardingProgress currentSection={1} totalSections={7} stepInSection={0} totalStepsInSection={3} />);
     const progressBar = screen.getByRole('progressbar');
     const segments = progressBar.children;
     expect(segments.length).toBe(7);
   });
 
   it('renders section label text', () => {
-    render(
-      <OnboardingProgress
-        currentSection={2}
-        totalSections={5}
-        stepInSection={1}
-        totalStepsInSection={3}
-      />,
-    );
+    render(<OnboardingProgress currentSection={2} totalSections={5} stepInSection={1} totalStepsInSection={3} />);
     expect(screen.getByText('onboarding.progress.section2')).toBeInTheDocument();
   });
 });
@@ -984,7 +933,7 @@ describe('TrainingCoreStep', () => {
 
   it('renders days per week options (2-6)', () => {
     renderWithForm(TrainingCoreStep);
-    [2, 3, 4, 5, 6].forEach((d) => {
+    [2, 3, 4, 5, 6].forEach(d => {
       expect(screen.getByText(String(d))).toBeInTheDocument();
     });
   });
@@ -1034,10 +983,8 @@ describe('TrainingDetailSteps', () => {
       { step: 0, setOnboardingSection },
     );
     expect(screen.getByText('fitness.onboarding.sessionDuration')).toBeInTheDocument();
-    [30, 45, 60, 75, 90].forEach((d) => {
-      expect(
-        screen.getByText(new RegExp(`^${d} `)),
-      ).toBeInTheDocument();
+    [30, 45, 60, 75, 90].forEach(d => {
+      expect(screen.getByText(new RegExp(`^${d} `))).toBeInTheDocument();
     });
   });
 
@@ -1094,7 +1041,7 @@ describe('TrainingDetailSteps', () => {
       { step: 3, setOnboardingSection },
     );
     expect(screen.getByText('fitness.onboarding.cardioSessions')).toBeInTheDocument();
-    [0, 1, 2, 3].forEach((n) => {
+    [0, 1, 2, 3].forEach(n => {
       expect(screen.getByText(String(n))).toBeInTheDocument();
     });
   });
@@ -1396,11 +1343,21 @@ describe('PlanComputingScreen', () => {
   it('auto-advances through steps and calls goNext', async () => {
     const { goNext } = renderWithForm(PlanComputingScreen);
 
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(1500); });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(1500);
+    });
 
     expect(goNext).toHaveBeenCalledTimes(1);
   });
@@ -1408,22 +1365,24 @@ describe('PlanComputingScreen', () => {
   it('cleans up timer on unmount', async () => {
     const { unmount } = renderWithForm(PlanComputingScreen);
     unmount();
-    await act(async () => { vi.advanceTimersByTime(20000); });
+    await act(async () => {
+      vi.advanceTimersByTime(20000);
+    });
   });
 
   it('calls generatePlan at step 2 and stores result', async () => {
     renderWithForm(PlanComputingScreen);
 
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
 
     expect(mockGeneratePlan).toHaveBeenCalledTimes(1);
-    expect(mockAddTrainingPlan).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'test-plan' }),
-    );
-    expect(mockAddPlanDays).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ id: 'day-1' })]),
-    );
+    expect(mockAddTrainingPlan).toHaveBeenCalledWith(expect.objectContaining({ id: 'test-plan' }));
+    expect(mockAddPlanDays).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ id: 'day-1' })]));
   });
 
   it('shows error card when generatePlan returns null', () => {
@@ -1431,8 +1390,12 @@ describe('PlanComputingScreen', () => {
     renderWithForm(PlanComputingScreen);
 
     // advance to step 2
-    act(() => { vi.advanceTimersByTime(2500); });
-    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
 
     expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
     expect(screen.getByText('onboarding.computing.retry')).toBeInTheDocument();
@@ -1444,8 +1407,12 @@ describe('PlanComputingScreen', () => {
     renderWithForm(PlanComputingScreen);
 
     // advance to step 2 - error
-    act(() => { vi.advanceTimersByTime(2500); });
-    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
     expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
 
     // fix the mock for retry
@@ -1465,8 +1432,12 @@ describe('PlanComputingScreen', () => {
     mockGeneratePlan.mockReturnValue(null);
     const { goBack } = renderWithForm(PlanComputingScreen);
 
-    act(() => { vi.advanceTimersByTime(2500); });
-    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
 
     fireEvent.click(screen.getByText('onboarding.computing.returnToStrategy'));
     expect(goBack).toHaveBeenCalledTimes(1);
@@ -1533,7 +1504,7 @@ describe('PlanPreviewScreen', () => {
       }>,
       { completeOnboarding },
     );
-    ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].forEach((day) => {
+    ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].forEach(day => {
       expect(screen.getByText(day)).toBeInTheDocument();
     });
   });
@@ -1734,8 +1705,13 @@ describe('NutritionGoalStep – field interactions', () => {
   it('handles clearing target weight input (empty string → undefined)', () => {
     let formRef: UseFormReturn<OnboardingFormData> | null = null;
     render(
-      <FormWrapper defaultValues={{ goalType: 'cut', targetWeightKg: 65 }} onForm={(f) => { formRef = f; }}>
-        {(form) => <NutritionGoalStep form={form} goNext={vi.fn()} goBack={vi.fn()} />}
+      <FormWrapper
+        defaultValues={{ goalType: 'cut', targetWeightKg: 65 }}
+        onForm={f => {
+          formRef = f;
+        }}
+      >
+        {form => <NutritionGoalStep form={form} goNext={vi.fn()} goBack={vi.fn()} />}
       </FormWrapper>,
     );
     const targetInput = document.querySelector('#ob-target') as HTMLInputElement;
@@ -1875,7 +1851,7 @@ describe('InjuriesStep', () => {
       { step: 2, setOnboardingSection },
     );
     expect(screen.getByText('fitness.onboarding.injuries')).toBeInTheDocument();
-    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach((region) => {
+    ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach(region => {
       expect(screen.getByText(`fitness.onboarding.injury_${region}`)).toBeInTheDocument();
     });
   });
@@ -1942,7 +1918,7 @@ describe('CycleWeeksStep', () => {
       { experience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.cycleWeeks')).toBeInTheDocument();
-    [4, 6, 8, 12].forEach((w) => {
+    [4, 6, 8, 12].forEach(w => {
       expect(screen.getByText(new RegExp(`^${w}\\s`))).toBeInTheDocument();
     });
   });
@@ -1974,7 +1950,7 @@ describe('CycleWeeksStep', () => {
       { experience: 'intermediate' },
     );
     const buttons = screen.getAllByRole('radio');
-    buttons.forEach((btn) => {
+    buttons.forEach(btn => {
       expect(btn.className).toContain('flex-col');
       expect(btn.className).toContain('items-start');
       expect(btn.className).not.toContain('justify-between');
@@ -2033,7 +2009,7 @@ describe('PriorityMusclesStep', () => {
       { experience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.priorityMuscles')).toBeInTheDocument();
-    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach((m) => {
+    ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
       expect(screen.getByText(`fitness.onboarding.muscle_${m}`)).toBeInTheDocument();
     });
   });
@@ -2122,7 +2098,7 @@ describe('SleepHoursStep', () => {
       { experience: 'advanced' },
     );
     expect(screen.getByText('fitness.onboarding.sleepHours')).toBeInTheDocument();
-    [4, 5, 6, 7, 8, 9, 10].forEach((h) => {
+    [4, 5, 6, 7, 8, 9, 10].forEach(h => {
       expect(screen.getByText(String(h))).toBeInTheDocument();
     });
   });
@@ -2208,7 +2184,7 @@ describe('SleepHoursStep', () => {
 
 describe('onboardingSchema – new field validation', () => {
   it('accepts valid cycleWeeks values (4, 6, 8, 12)', () => {
-    [4, 6, 8, 12].forEach((w) => {
+    [4, 6, 8, 12].forEach(w => {
       const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, cycleWeeks: w });
       expect(result.success).toBe(true);
     });
@@ -2236,7 +2212,7 @@ describe('onboardingSchema – new field validation', () => {
   });
 
   it('accepts valid sleepHours range', () => {
-    [3, 7, 12].forEach((h) => {
+    [3, 7, 12].forEach(h => {
       const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: h });
       expect(result.success).toBe(true);
     });
@@ -2266,7 +2242,7 @@ describe('onboardingSchema – new field validation', () => {
   });
 
   it('accepts valid periodization values', () => {
-    ['linear', 'undulating', 'block'].forEach((p) => {
+    ['linear', 'undulating', 'block'].forEach(p => {
       const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodization: p });
       expect(result.success).toBe(true);
     });
@@ -2491,8 +2467,12 @@ describe('PlanComputingScreen – trainingProfile null', () => {
     defaultFitnessState.trainingProfile = null;
 
     renderWithForm(PlanComputingScreen);
-    await act(async () => { vi.advanceTimersByTime(2500); });
-    await act(async () => { vi.advanceTimersByTime(2500); });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
 
     expect(screen.getByText('onboarding.computing.error')).toBeInTheDocument();
 
@@ -2508,7 +2488,7 @@ describe('UnifiedOnboarding – renderStep outer default', () => {
   it('renders no step content when section is out of valid range', async () => {
     // Temporarily override the appOnboardingStore mock to return an invalid section (99)
     // so the outer switch default branch (line 192) is covered.
-    const mod = await import('../store/appOnboardingStore') as Record<string, unknown>;
+    const mod = (await import('../store/appOnboardingStore')) as Record<string, unknown>;
     const original = mod.useAppOnboardingStore;
 
     mod.useAppOnboardingStore = (selector: (s: Record<string, unknown>) => unknown) =>

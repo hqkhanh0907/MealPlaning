@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { WeightQuickLog } from '../features/dashboard/components/WeightQuickLog';
-import { useFitnessStore } from '../store/fitnessStore';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+
 import { NotificationProvider } from '../contexts/NotificationContext';
+import { WeightQuickLog } from '../features/dashboard/components/WeightQuickLog';
 import type { WeightEntry } from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
 /*  Mock Capacitor (used by useModalBackHandler)                        */
@@ -89,7 +90,7 @@ describe('WeightQuickLog', () => {
     renderSheet();
 
     const backdropButtons = screen.getAllByLabelText('Đóng');
-    const backdrop = backdropButtons.find((el) => el.tabIndex === -1);
+    const backdrop = backdropButtons.find(el => el.tabIndex === -1);
     expect(backdrop).toBeDefined();
     fireEvent.click(backdrop!);
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -300,7 +301,7 @@ describe('WeightQuickLog', () => {
     fireEvent.click(screen.getByTestId('save-btn'));
 
     const entries = useFitnessStore.getState().weightEntries;
-    const todayEntry = entries.find((e) => e.date === todayStr());
+    const todayEntry = entries.find(e => e.date === todayStr());
     expect(todayEntry).toBeDefined();
     expect(todayEntry?.weightKg).toBe(70);
   });
@@ -352,13 +353,13 @@ describe('WeightQuickLog', () => {
     fireEvent.click(screen.getByTestId('save-btn'));
 
     const entriesAfterSave = useFitnessStore.getState().weightEntries;
-    expect(entriesAfterSave.find((e) => e.date === todayStr())).toBeDefined();
+    expect(entriesAfterSave.find(e => e.date === todayStr())).toBeDefined();
 
     const undoBtn = screen.getByText('Hoàn tác');
     fireEvent.click(undoBtn);
 
     const entriesAfterUndo = useFitnessStore.getState().weightEntries;
-    expect(entriesAfterUndo.find((e) => e.date === todayStr())).toBeUndefined();
+    expect(entriesAfterUndo.find(e => e.date === todayStr())).toBeUndefined();
   });
 
   it('undo on updated entry restores previous weight', () => {
@@ -500,8 +501,12 @@ describe('WeightQuickLog', () => {
 
     fireEvent.pointerDown(incBtn);
 
-    act(() => { vi.advanceTimersByTime(500); });
-    act(() => { vi.advanceTimersByTime(300); });
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
 
     fireEvent.pointerUp(incBtn);
 
@@ -543,7 +548,9 @@ describe('WeightQuickLog', () => {
 
     // LONG_PRESS_DELAY = 500ms, then 8 ticks × 150ms = 1200ms → acceleration at tick 9
     // Advance 1800ms total to ensure acceleration branch is hit
-    act(() => { vi.advanceTimersByTime(1800); });
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
 
     fireEvent.pointerUp(incBtn);
 

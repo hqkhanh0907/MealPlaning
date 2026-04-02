@@ -1,4 +1,10 @@
-import { DAY_LABELS, DAY_LABELS_SUNDAY_FIRST, ALL_MUSCLES, RPE_OPTIONS, CARDIO_TYPES } from '../features/fitness/constants';
+import {
+  ALL_MUSCLES,
+  CARDIO_TYPES,
+  DAY_LABELS,
+  DAY_LABELS_SUNDAY_FIRST,
+  RPE_OPTIONS,
+} from '../features/fitness/constants';
 
 describe('Fitness Constants', () => {
   it('DAY_LABELS has 7 days starting Monday', () => {

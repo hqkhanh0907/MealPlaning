@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
+
 import { SummaryRow } from './SummaryRow';
 import type { StepProps } from './types';
 
@@ -11,7 +13,7 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
 
   return (
     <div className="flex flex-1 flex-col" data-testid="training-confirm-step">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-6 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.confirm.trainingTitle')}
         </h2>
@@ -20,7 +22,10 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
           <SummaryRow label={t('fitness.onboarding.experience')} value={t(`fitness.onboarding.${values.experience}`)} />
           <SummaryRow label={t('fitness.onboarding.daysPerWeek')} value={`${values.daysPerWeek}`} />
           {values.sessionDuration && (
-            <SummaryRow label={t('fitness.onboarding.sessionDuration')} value={`${values.sessionDuration} ${t('fitness.onboarding.minutes')}`} />
+            <SummaryRow
+              label={t('fitness.onboarding.sessionDuration')}
+              value={`${values.sessionDuration} ${t('fitness.onboarding.minutes')}`}
+            />
           )}
           {values.cardioSessions != null && (
             <SummaryRow label={t('fitness.onboarding.cardioSessions')} value={`${values.cardioSessions}`} />
@@ -32,10 +37,16 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
             />
           )}
           {experience !== 'beginner' && values.periodization && (
-            <SummaryRow label={t('fitness.onboarding.periodization')} value={t(`fitness.onboarding.period_${values.periodization}`)} />
+            <SummaryRow
+              label={t('fitness.onboarding.periodization')}
+              value={t(`fitness.onboarding.period_${values.periodization}`)}
+            />
           )}
           {experience !== 'beginner' && values.cycleWeeks && (
-            <SummaryRow label={t('fitness.onboarding.cycleWeeks')} value={`${values.cycleWeeks} ${t('fitness.onboarding.weeksUnit')}`} />
+            <SummaryRow
+              label={t('fitness.onboarding.cycleWeeks')}
+              value={`${values.cycleWeeks} ${t('fitness.onboarding.weeksUnit')}`}
+            />
           )}
           {experience !== 'beginner' && (values.priorityMuscles ?? []).length > 0 && (
             <SummaryRow
@@ -44,7 +55,10 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
             />
           )}
           {experience === 'advanced' && values.sleepHours != null && (
-            <SummaryRow label={t('fitness.onboarding.sleepHours')} value={`${values.sleepHours} ${t('fitness.onboarding.hoursUnit')}`} />
+            <SummaryRow
+              label={t('fitness.onboarding.sleepHours')}
+              value={`${values.sleepHours} ${t('fitness.onboarding.hoursUnit')}`}
+            />
           )}
         </div>
       </div>

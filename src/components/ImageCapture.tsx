@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Camera, X, RotateCcw } from 'lucide-react';
+import { Camera, RotateCcw, Upload, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { compressImage } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
 
@@ -31,7 +32,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
           const blob = item.getAsFile();
           if (blob) {
             const reader = new FileReader();
-            reader.onload = async (event) => {
+            reader.onload = async event => {
               try {
                 const compressed = await compressImage(event.target?.result as string);
                 onImageReady(compressed);
@@ -123,7 +124,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
+
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -142,107 +143,120 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
   return (
     <div data-testid="image-capture">
       {isCameraOpen ? (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center pt-safe pb-safe" data-testid="camera-overlay">
+        <div
+          className="pt-safe pb-safe fixed inset-0 z-50 flex flex-col items-center justify-center bg-black"
+          data-testid="camera-overlay"
+        >
           {cameraError ? (
-            <div className="text-center p-6 max-w-xs">
-              <div className="w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <X className="w-6 h-6" />
+            <div className="max-w-xs p-6 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 text-red-500">
+                <X className="h-6 w-6" />
               </div>
-              <p className="text-white font-medium mb-6">{cameraError}</p>
-              <button 
+              <p className="mb-6 font-medium text-white">{cameraError}</p>
+              <button
                 onClick={stopCamera}
-                className="bg-white text-slate-900 px-6 py-2 rounded-xl font-bold hover:bg-slate-100 transition-all"
+                className="rounded-xl bg-white px-6 py-2 font-bold text-slate-900 transition-all hover:bg-slate-100"
               >
                 {t('imageCapture.closeCamera')}
               </button>
             </div>
           ) : (
             <>
-              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover">
+              <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover">
                 <track kind="captions" />
               </video>
               <canvas ref={canvasRef} className="hidden" />
               <div className="absolute bottom-10 flex items-center gap-6">
-                <button 
+                <button
                   onClick={stopCamera}
                   aria-label={t('imageCapture.closeCamera')}
-                  className="bg-white/20 backdrop-blur text-white p-3 min-h-12 min-w-12 flex items-center justify-center rounded-full hover:bg-white/30 transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white/20 p-3 text-white backdrop-blur transition-all hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="h-6 w-6" />
                 </button>
-                <button 
+                <button
                   onClick={capturePhoto}
                   aria-label={t('imageCapture.takePhoto')}
-                  className="bg-white text-emerald-600 p-5 min-h-12 min-w-12 flex items-center justify-center rounded-full hover:bg-emerald-50 transition-all shadow-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white p-5 text-emerald-600 shadow-2xl transition-all hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
-                  <Camera className="w-9 h-9" />
+                  <Camera className="h-9 w-9" />
                 </button>
-                <button 
+                <button
                   onClick={switchCamera}
                   aria-label={t('imageCapture.switchCamera')}
-                  className="bg-white/20 backdrop-blur text-white p-3 min-h-12 min-w-12 flex items-center justify-center rounded-full hover:bg-white/30 transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white/20 p-3 text-white backdrop-blur transition-all hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
-                  <RotateCcw className="w-6 h-6" />
+                  <RotateCcw className="h-6 w-6" />
                 </button>
               </div>
             </>
           )}
         </div>
       ) : (
-        <div 
-          className={`border-2 border-dashed rounded-2xl overflow-hidden transition-all relative group ${
-            image ? 'border-emerald-200 dark:border-emerald-700' : 'border-slate-200 dark:border-slate-600 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+        <div
+          className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-all ${
+            image
+              ? 'border-emerald-200 dark:border-emerald-700'
+              : 'border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-600 dark:hover:bg-emerald-900/20'
           }`}
         >
           {image ? (
             <div className="relative aspect-video">
-              <img src={image} alt={t('imageCapture.uploadedDishAlt')} className="w-full h-full object-cover" />
-              <button 
+              <img src={image} alt={t('imageCapture.uploadedDishAlt')} className="h-full w-full object-cover" />
+              <button
                 onClick={onClear}
-                className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-white dark:hover:bg-slate-800 transition-all"
+                className="absolute top-4 right-4 rounded-xl bg-white/90 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition-all hover:bg-white dark:bg-slate-800/90 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 {t('imageCapture.chooseAnother')}
               </button>
             </div>
           ) : (
-            <div className="w-full aspect-video flex flex-col items-center justify-center gap-4 text-slate-500 dark:text-slate-400 p-8">
+            <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 p-8 text-slate-500 dark:text-slate-400">
               <div className="flex gap-4">
                 {typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getUserMedia === 'function' && (
                   <>
-                    <button 
+                    <button
                       onClick={() => startCamera()}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                      className="flex flex-col items-center gap-2 rounded-xl p-4 transition-all hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                     >
-                      <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center shadow-sm transition-all">
-                        <Camera className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 shadow-sm transition-all dark:bg-emerald-900/30">
+                        <Camera className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
                       </div>
-                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t('imageCapture.takePhoto')}</span>
+                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                        {t('imageCapture.takePhoto')}
+                      </span>
                     </button>
-                    <div className="w-px bg-slate-200 dark:bg-slate-600 h-20 self-center"></div>
+                    <div className="h-20 w-px self-center bg-slate-200 dark:bg-slate-600"></div>
                   </>
                 )}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                  className="flex flex-col items-center gap-2 rounded-xl p-4 transition-all hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
-                  <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center transition-all">
-                    <Upload className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-all dark:bg-slate-700">
+                    <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                   </div>
-                  <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{t('imageCapture.uploadImage')}</span>
+                  <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                    {t('imageCapture.uploadImage')}
+                  </span>
                 </button>
               </div>
-              <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-2">
-                <span className="hidden sm:inline">{t('imageCapture.pasteHint')}<br/></span>{t('imageCapture.supportedFormats')}
+              <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
+                <span className="hidden sm:inline">
+                  {t('imageCapture.pasteHint')}
+                  <br />
+                </span>
+                {t('imageCapture.supportedFormats')}
               </p>
             </div>
           )}
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImageUpload} 
-            accept="image/*" 
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            accept="image/*"
             aria-label={t('imageCapture.uploadImage')}
-            className="hidden" 
+            className="hidden"
           />
         </div>
       )}

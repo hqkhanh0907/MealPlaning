@@ -1,11 +1,6 @@
-import {
-  detectVersion,
-  createV2Export,
-  importV2Data,
-  buildLegacyFormat,
-} from '../../services/syncV2Utils';
-import type { V2ExportPayload, ImportResult } from '../../services/syncV2Utils';
 import type { DatabaseService } from '../../services/databaseService';
+import type { ImportResult, V2ExportPayload } from '../../services/syncV2Utils';
+import { buildLegacyFormat, createV2Export, detectVersion, importV2Data } from '../../services/syncV2Utils';
 
 /* ------------------------------------------------------------------ */
 /*  All 16 schema table names                                           */
@@ -342,10 +337,7 @@ interface MockDb extends DatabaseService {
   _stored: Record<string, unknown[]>;
 }
 
-function createMockDb(
-  tables: Record<string, unknown[]> = {},
-  opts?: { executeError?: (sql: string) => void },
-): MockDb {
+function createMockDb(tables: Record<string, unknown[]> = {}, opts?: { executeError?: (sql: string) => void }): MockDb {
   const _stored: Record<string, unknown[]> = {};
   for (const t of ALL_TABLES) _stored[t] = [];
   for (const [k, v] of Object.entries(tables)) _stored[k] = structuredClone(v);
@@ -363,7 +355,7 @@ function createMockDb(
     const insMatch = sql.match(/INSERT\s+INTO\s+"?(\w+)"?\s*\(([^)]+)\)/i);
     if (insMatch) {
       const tbl = insMatch[1];
-      const cols = insMatch[2].split(',').map((c) => c.trim().replace(/"/g, ''));
+      const cols = insMatch[2].split(',').map(c => c.trim().replace(/"/g, ''));
       if (!_stored[tbl]) _stored[tbl] = [];
       const row: Record<string, unknown> = {};
       cols.forEach((col, i) => {
@@ -428,10 +420,7 @@ describe('syncV2 Integration', () => {
       expect(export1._format).toBe('sqlite-json');
 
       const dbTarget = createMockDb();
-      const importResult = await importV2Data(
-        dbTarget,
-        export1 as unknown as Record<string, unknown>,
-      );
+      const importResult = await importV2Data(dbTarget, export1 as unknown as Record<string, unknown>);
       expect(importResult.success).toBe(true);
 
       const dbReExport = createMockDb(dbTarget._stored);
@@ -515,10 +504,7 @@ describe('syncV2 Integration', () => {
         tables: seed,
       };
 
-      const result: ImportResult = await importV2Data(
-        db,
-        v2Data as unknown as Record<string, unknown>,
-      );
+      const result: ImportResult = await importV2Data(db, v2Data as unknown as Record<string, unknown>);
 
       expect(result.success).toBe(true);
       expect(result.importedCounts).toBeDefined();
@@ -589,9 +575,7 @@ describe('syncV2 Integration', () => {
       await importV2Data(db, v2Data as unknown as Record<string, unknown>);
 
       expect(db._stored['ingredients']).toEqual(seed['ingredients']);
-      const ids = (db._stored['ingredients'] as Array<Record<string, unknown>>).map(
-        (r) => r.id,
-      );
+      const ids = (db._stored['ingredients'] as Array<Record<string, unknown>>).map(r => r.id);
       expect(ids).not.toContain('old-i1');
     });
   });
@@ -802,10 +786,7 @@ describe('syncV2 Integration', () => {
         },
       });
 
-      const snapshotBefore = JSON.parse(JSON.stringify(db._stored)) as Record<
-        string,
-        unknown[]
-      >;
+      const snapshotBefore = JSON.parse(JSON.stringify(db._stored)) as Record<string, unknown[]>;
 
       const newData: V2ExportPayload = {
         _version: '2.0',
@@ -817,10 +798,7 @@ describe('syncV2 Integration', () => {
         },
       };
 
-      const result = await importV2Data(
-        db,
-        newData as unknown as Record<string, unknown>,
-      );
+      const result = await importV2Data(db, newData as unknown as Record<string, unknown>);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Simulated constraint violation');
@@ -870,9 +848,7 @@ describe('syncV2 Integration', () => {
           proteinRatio: 2.2,
           targetCalories: 2200,
         },
-        'meal-templates': [
-          { id: 't1', name: 'Cut', breakfastDishIds: ['d1'] },
-        ],
+        'meal-templates': [{ id: 't1', name: 'Cut', breakfastDishIds: ['d1'] }],
         _syncedAt: '2024-06-01T00:00:00Z',
       };
 
@@ -909,9 +885,7 @@ describe('syncV2 Integration', () => {
         },
       ]);
 
-      expect(db._stored['dish_ingredients']).toEqual([
-        { dish_id: 'd1', ingredient_id: 'i1', amount: 200 },
-      ]);
+      expect(db._stored['dish_ingredients']).toEqual([{ dish_id: 'd1', ingredient_id: 'i1', amount: 200 }]);
 
       expect(db._stored['day_plans']).toEqual([
         {
@@ -1049,9 +1023,7 @@ describe('syncV2 Integration', () => {
       ]);
 
       const dish2 = dishes[1];
-      expect(dish2.ingredients).toEqual([
-        { ingredientId: 'i3', amount: 250 },
-      ]);
+      expect(dish2.ingredients).toEqual([{ ingredientId: 'i3', amount: 250 }]);
     });
 
     it('legacy keys contain correct mp-day-plans with camelCase keys', async () => {

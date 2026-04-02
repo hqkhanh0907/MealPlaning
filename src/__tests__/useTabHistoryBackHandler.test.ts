@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('navigationStore tabHistory', () => {
   beforeEach(async () => {

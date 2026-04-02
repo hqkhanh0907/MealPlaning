@@ -1,11 +1,13 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useReducedMotion } from '@/utils/motion';
-import { useFitnessStore } from '@/store/fitnessStore';
-import { useHealthProfileStore } from '@/features/health-profile/store/healthProfileStore';
-import { useTrainingPlan } from '@/features/fitness/hooks/useTrainingPlan';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
+import { useTrainingPlan } from '@/features/fitness/hooks/useTrainingPlan';
+import { useHealthProfileStore } from '@/features/health-profile/store/healthProfileStore';
+import { useFitnessStore } from '@/store/fitnessStore';
+import { useReducedMotion } from '@/utils/motion';
+
 import type { OnboardingFormData } from './onboardingSchema';
 
 interface PlanComputingScreenProps {
@@ -32,22 +34,28 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
 
   /* (a4-gonext-ref) stable callback refs — prevents timer restart on parent re-render */
   const goNextRef = useRef(goNext);
-  useEffect(() => { goNextRef.current = goNext; }, [goNext]);
+  useEffect(() => {
+    goNextRef.current = goNext;
+  }, [goNext]);
 
   const goBackRef = useRef(goBack);
-  useEffect(() => { goBackRef.current = goBack; }, [goBack]);
+  useEffect(() => {
+    goBackRef.current = goBack;
+  }, [goBack]);
 
   /* (a2-gen-plan) store & hook wiring */
-  const trainingProfile = useFitnessStore((s) => s.trainingProfile);
-  const addTrainingPlan = useFitnessStore((s) => s.addTrainingPlan);
-  const addPlanDays = useFitnessStore((s) => s.addPlanDays);
+  const trainingProfile = useFitnessStore(s => s.trainingProfile);
+  const addTrainingPlan = useFitnessStore(s => s.addTrainingPlan);
+  const addPlanDays = useFitnessStore(s => s.addPlanDays);
 
-  const healthAge = useHealthProfileStore((s) => s.profile.age);
-  const healthWeight = useHealthProfileStore((s) => s.profile.weightKg);
+  const healthAge = useHealthProfileStore(s => s.profile?.age ?? 30);
+  const healthWeight = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
 
   const { generatePlan } = useTrainingPlan();
   const generatePlanRef = useRef(generatePlan);
-  useEffect(() => { generatePlanRef.current = generatePlan; }, [generatePlan]);
+  useEffect(() => {
+    generatePlanRef.current = generatePlan;
+  }, [generatePlan]);
 
   const attemptGeneration = useCallback((): boolean => {
     if (planGeneratedRef.current) return true;
@@ -70,7 +78,9 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
   }, [trainingProfile, healthAge, healthWeight, addTrainingPlan, addPlanDays]);
 
   const attemptGenerationRef = useRef(attemptGeneration);
-  useEffect(() => { attemptGenerationRef.current = attemptGeneration; }, [attemptGeneration]);
+  useEffect(() => {
+    attemptGenerationRef.current = attemptGeneration;
+  }, [attemptGeneration]);
 
   useEffect(() => {
     const advanceStep = (index: number) => {
@@ -98,7 +108,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
     setError(false);
     planGeneratedRef.current = false;
     setActiveStep(0);
-    setRetryCount((c) => c + 1);
+    setRetryCount(c => c + 1);
   }, []);
 
   if (error) {
@@ -108,21 +118,19 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
         data-testid="plan-computing"
       >
         <div className="w-full max-w-xs rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <p className="mb-4 text-sm font-medium text-red-700 dark:text-red-300">
-            {t('onboarding.computing.error')}
-          </p>
+          <p className="mb-4 text-sm font-medium text-red-700 dark:text-red-300">{t('onboarding.computing.error')}</p>
           <div className="flex flex-col gap-3">
             <button
               type="button"
               onClick={handleRetry}
-              className="min-h-[44px] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+              className="min-h-[44px] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-emerald-500 dark:hover:bg-emerald-600"
             >
               {t('onboarding.computing.retry')}
             </button>
             <button
               type="button"
               onClick={() => goBackRef.current()}
-              className="min-h-[44px] rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="min-h-[44px] rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {t('onboarding.computing.returnToStrategy')}
             </button>
@@ -168,9 +176,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
           >
             <div
               className={`h-2 w-2 rounded-full ${
-                i <= activeStep
-                  ? 'bg-emerald-500'
-                  : 'bg-slate-300 dark:bg-slate-600'
+                i <= activeStep ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
               }`}
             />
             <span

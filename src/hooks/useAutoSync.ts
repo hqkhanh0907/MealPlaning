@@ -1,14 +1,15 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { useAuth } from './useAuth';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { useDatabase } from '../contexts/DatabaseContext';
-import * as driveService from '../services/googleDriveService';
 import { getSetting, setSetting } from '../services/appSettings';
+import * as driveService from '../services/googleDriveService';
 import { reloadAllStores } from '../services/storeLoader';
-import { useIngredientStore } from '../store/ingredientStore';
-import { useDishStore } from '../store/dishStore';
 import { useDayPlanStore } from '../store/dayPlanStore';
+import { useDishStore } from '../store/dishStore';
+import { useIngredientStore } from '../store/ingredientStore';
 import { useMealTemplateStore } from '../store/mealTemplateStore';
 import type { SyncStatus } from '../types';
+import { useAuth } from './useAuth';
 
 const DEBOUNCE_DELAY_MS = 3000;
 
@@ -37,7 +38,11 @@ export const useAutoSync = (): UseAutoSyncReturn => {
   const templates = useMealTemplateStore(s => s.templates);
 
   useEffect(() => {
-    getSetting(db, 'last_sync_at').then(v => { setLastSyncAt(v); }).catch(() => {});
+    getSetting(db, 'last_sync_at')
+      .then(v => {
+        setLastSyncAt(v);
+      })
+      .catch(() => {});
   }, [db]);
 
   const updateLastSync = useCallback(async (timestamp: string) => {
@@ -115,15 +120,7 @@ export const useAutoSync = (): UseAutoSyncReturn => {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [
-    user,
-    accessToken,
-    ingredients,
-    dishes,
-    dayPlans,
-    templates,
-    triggerUpload,
-  ]);
+  }, [user, accessToken, ingredients, dishes, dayPlans, templates, triggerUpload]);
 
   useEffect(() => {
     if (!user) {

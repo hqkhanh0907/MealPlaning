@@ -341,23 +341,15 @@ export async function createSchema(db: DatabaseService): Promise<void> {
 
   // --- Performance indexes ---
 
-  await db.execute(
-    'CREATE INDEX IF NOT EXISTS idx_workout_sets_workout ON workout_sets(workout_id)',
-  );
-  await db.execute(
-    'CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise ON workout_sets(exercise_id)',
-  );
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_workout_sets_workout ON workout_sets(workout_id)');
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise ON workout_sets(exercise_id)');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_weight_log_date ON weight_log(date)');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_daily_log_date ON daily_log(date)');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date)');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_goals_active ON goals(is_active)');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_adjustments_date ON adjustments(date)');
-  await db.execute(
-    'CREATE INDEX IF NOT EXISTS idx_dish_ingredients_dish ON dish_ingredients(dish_id)',
-  );
-  await db.execute(
-    'CREATE INDEX IF NOT EXISTS idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id)',
-  );
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_dish_ingredients_dish ON dish_ingredients(dish_id)');
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_dish_ingredients_ingredient ON dish_ingredients(ingredient_id)');
   await db.execute(
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_plan_day_session ON training_plan_days(plan_id, day_of_week, session_order)',
   );
@@ -393,17 +385,11 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
   // Migration v1 → v2: Fitness plan flexibility (multi-session, plan editing)
   if (currentVersion < 2) {
     // 1. Add session_order and original_exercises to training_plan_days
-    await db.execute(
-      'ALTER TABLE training_plan_days ADD COLUMN session_order INTEGER NOT NULL DEFAULT 1',
-    );
-    await db.execute(
-      'ALTER TABLE training_plan_days ADD COLUMN original_exercises TEXT',
-    );
+    await db.execute('ALTER TABLE training_plan_days ADD COLUMN session_order INTEGER NOT NULL DEFAULT 1');
+    await db.execute('ALTER TABLE training_plan_days ADD COLUMN original_exercises TEXT');
 
     // 2. Backfill original_exercises from exercises for existing data
-    await db.execute(
-      'UPDATE training_plan_days SET original_exercises = exercises WHERE original_exercises IS NULL',
-    );
+    await db.execute('UPDATE training_plan_days SET original_exercises = exercises WHERE original_exercises IS NULL');
 
     // 3. Recreate table with fixed CHECK constraint (0-6 → 1-7)
     await db.execute(`CREATE TABLE training_plan_days_v2 (
@@ -429,9 +415,7 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
     );
 
     // 5. Add plan_day_id to workouts
-    await db.execute(
-      'ALTER TABLE workouts ADD COLUMN plan_day_id TEXT REFERENCES training_plan_days(id)',
-    );
+    await db.execute('ALTER TABLE workouts ADD COLUMN plan_day_id TEXT REFERENCES training_plan_days(id)');
 
     await db.execute('PRAGMA user_version = 2');
   }
@@ -446,12 +430,8 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
   // Migration v3 → v4: Full Plan Editor (schedule editor, split changer, templates)
   if (currentVersion < 4) {
     // 1. Add new columns to training_plan_days
-    await db.execute(
-      'ALTER TABLE training_plan_days ADD COLUMN is_user_assigned INTEGER DEFAULT 0',
-    );
-    await db.execute(
-      'ALTER TABLE training_plan_days ADD COLUMN original_day_of_week INTEGER',
-    );
+    await db.execute('ALTER TABLE training_plan_days ADD COLUMN is_user_assigned INTEGER DEFAULT 0');
+    await db.execute('ALTER TABLE training_plan_days ADD COLUMN original_day_of_week INTEGER');
 
     // 2. Add new columns to training_plans
     await db.execute('ALTER TABLE training_plans ADD COLUMN template_id TEXT');
@@ -487,12 +467,13 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
         'SELECT DISTINCT day_of_week FROM training_plan_days WHERE plan_id = ?',
         [plan.id],
       );
-      const trainingDays = days.map((d) => d.day_of_week).sort((a, b) => a - b);
-      const restDays = [1, 2, 3, 4, 5, 6, 7].filter((d) => !trainingDays.includes(d));
-      await db.execute(
-        'UPDATE training_plans SET training_days = ?, rest_days = ? WHERE id = ?',
-        [JSON.stringify(trainingDays), JSON.stringify(restDays), plan.id],
-      );
+      const trainingDays = days.map(d => d.day_of_week).sort((a, b) => a - b);
+      const restDays = [1, 2, 3, 4, 5, 6, 7].filter(d => !trainingDays.includes(d));
+      await db.execute('UPDATE training_plans SET training_days = ?, rest_days = ? WHERE id = ?', [
+        JSON.stringify(trainingDays),
+        JSON.stringify(restDays),
+        plan.id,
+      ]);
     }
 
     // 6. Create plan_templates table
@@ -518,13 +499,9 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
   }
 
   if (currentVersion < 5) {
-    const cols = await db.query<{ name: string }>(
-      "PRAGMA table_info('training_plans')",
-    );
+    const cols = await db.query<{ name: string }>("PRAGMA table_info('training_plans')");
     if (!cols.some(c => c.name === 'current_week')) {
-      await db.execute(
-        'ALTER TABLE training_plans ADD COLUMN current_week INTEGER DEFAULT 1',
-      );
+      await db.execute('ALTER TABLE training_plans ADD COLUMN current_week INTEGER DEFAULT 1');
     }
     await db.execute('PRAGMA user_version = 5');
   }

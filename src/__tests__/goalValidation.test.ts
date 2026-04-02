@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { validateTargetWeight, createGoalFieldsSchema, GOAL_TYPE_VALUES, RATE_OF_CHANGE_VALUES } from '@/schemas/goalValidation';
+import { describe, expect, it } from 'vitest';
+
+import {
+  createGoalFieldsSchema,
+  GOAL_TYPE_VALUES,
+  RATE_OF_CHANGE_VALUES,
+  validateTargetWeight,
+} from '@/schemas/goalValidation';
 
 describe('goalValidation', () => {
   describe('validateTargetWeight', () => {

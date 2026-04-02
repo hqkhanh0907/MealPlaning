@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { WorkoutLogger } from '../features/fitness/components/WorkoutLogger';
 import { useFitnessStore } from '../store/fitnessStore';
 
@@ -42,18 +43,16 @@ vi.mock('../store/fitnessStore', () => ({
 }));
 
 vi.mock('../features/fitness/components/RestTimer', () => ({
-  RestTimer: vi.fn(
-    (props: { onComplete: () => void; onSkip: () => void }) => (
-      <div data-testid="rest-timer">
-        <button type="button" onClick={props.onSkip}>
-          Skip
-        </button>
-        <button type="button" onClick={props.onComplete}>
-          Done
-        </button>
-      </div>
-    ),
-  ),
+  RestTimer: vi.fn((props: { onComplete: () => void; onSkip: () => void }) => (
+    <div data-testid="rest-timer">
+      <button type="button" onClick={props.onSkip}>
+        Skip
+      </button>
+      <button type="button" onClick={props.onComplete}>
+        Done
+      </button>
+    </div>
+  )),
 }));
 
 vi.mock('../features/fitness/components/ExerciseSelector', () => ({
@@ -126,7 +125,14 @@ vi.mock('../features/fitness/hooks/useProgressiveOverload', () => ({
   }),
 }));
 
-const mockNotify = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn(), dismiss: vi.fn(), dismissAll: vi.fn() };
+const mockNotify = {
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn(),
+  info: vi.fn(),
+  dismiss: vi.fn(),
+  dismissAll: vi.fn(),
+};
 vi.mock('../contexts/NotificationContext', () => ({
   useNotification: () => mockNotify,
 }));
@@ -136,18 +142,15 @@ afterEach(cleanup);
 describe('WorkoutLogger', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: Record<string, unknown>) => unknown) =>
-        selector({
-          saveWorkoutAtomic: mockSaveWorkoutAtomic,
-          setWorkoutDraft: mockSetWorkoutDraft,
-          clearWorkoutDraft: mockClearWorkoutDraft,
-          loadWorkoutDraft: mockLoadWorkoutDraft,
-        }),
+    (useFitnessStore as unknown as Mock).mockImplementation((selector: (s: Record<string, unknown>) => unknown) =>
+      selector({
+        saveWorkoutAtomic: mockSaveWorkoutAtomic,
+        setWorkoutDraft: mockSetWorkoutDraft,
+        clearWorkoutDraft: mockClearWorkoutDraft,
+        loadWorkoutDraft: mockLoadWorkoutDraft,
+      }),
     );
-    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
-      () => ({ workoutDraft: null }),
-    );
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({ workoutDraft: null }));
     mockSaveWorkoutAtomic.mockReset().mockResolvedValue(undefined);
     mockSetWorkoutDraft.mockReset();
     mockClearWorkoutDraft.mockReset();
@@ -226,21 +229,15 @@ describe('WorkoutLogger', () => {
   });
 
   it('shows planned exercises when planDay provided', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
     expect(screen.getByText('Đẩy tạ nằm')).toBeInTheDocument();
   });
 
   it('shows empty state when no exercises', () => {
     render(<WorkoutLogger {...defaultProps} />);
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-    expect(
-      screen.getByText('Chưa có bài tập. Thêm bài tập để bắt đầu.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Chưa có bài tập. Thêm bài tập để bắt đầu.')).toBeInTheDocument();
   });
 
   it('shows empty state for empty exercises array', () => {
@@ -254,9 +251,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('can log a set with weight and reps', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '60' },
@@ -270,17 +265,13 @@ describe('WorkoutLogger', () => {
   });
 
   it('shows rest timer after logging a set', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     fireEvent.click(screen.getByTestId('log-set-bench-press'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
   });
 
   it('hides rest timer on skip', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     fireEvent.click(screen.getByTestId('log-set-bench-press'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
 
@@ -289,9 +280,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('hides rest timer on complete', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     fireEvent.click(screen.getByTestId('log-set-bench-press'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
 
@@ -310,13 +299,9 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByTestId('add-exercise-button'));
     fireEvent.click(screen.getByText('Select'));
 
-    expect(
-      screen.getByTestId('exercise-section-test-ex'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-test-ex')).toBeInTheDocument();
     expect(screen.getByText('Test Exercise')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('exercise-selector'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-selector')).not.toBeInTheDocument();
   });
 
   it('closes exercise selector without selecting', () => {
@@ -325,9 +310,7 @@ describe('WorkoutLogger', () => {
     expect(screen.getByTestId('exercise-selector')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Close'));
-    expect(
-      screen.queryByTestId('exercise-selector'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-selector')).not.toBeInTheDocument();
   });
 
   it('shows summary on finish', () => {
@@ -338,9 +321,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('shows correct duration and volume in summary', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '50' },
@@ -376,13 +357,7 @@ describe('WorkoutLogger', () => {
 
   it('calls onComplete and stores workout on save', async () => {
     const onComplete = vi.fn();
-    render(
-      <WorkoutLogger
-        {...defaultProps}
-        onComplete={onComplete}
-        planDay={planDayWithExercises}
-      />,
-    );
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '80' },
@@ -416,9 +391,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('allows RPE selection and toggle', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     const rpe8 = screen.getByTestId('rpe-8-bench-press');
     fireEvent.click(rpe8);
@@ -429,12 +402,8 @@ describe('WorkoutLogger', () => {
   });
 
   it('adjusts weight with ±0.5kg buttons', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
-    const weightInput = screen.getByTestId(
-      'weight-input-bench-press',
-    ) as HTMLInputElement;
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    const weightInput = screen.getByTestId('weight-input-bench-press') as HTMLInputElement;
 
     expect(weightInput.value).toBe('0');
 
@@ -453,9 +422,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('logs set with RPE and displays it', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '70' },
@@ -490,16 +457,10 @@ describe('WorkoutLogger', () => {
     };
     render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
 
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('exercise-section-squat'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-squat')).toBeInTheDocument();
     expect(screen.getByText('Đẩy tạ nằm')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('exercise-section-squat'),
-    ).toHaveTextContent('Gánh tạ');
+    expect(screen.getByTestId('exercise-section-squat')).toHaveTextContent('Gánh tạ');
   });
 
   /* ---------- workout draft persistence ---------- */
@@ -535,15 +496,11 @@ describe('WorkoutLogger', () => {
       ],
       elapsedSeconds: 120,
     };
-    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
-      () => ({ workoutDraft: draft }),
-    );
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({ workoutDraft: draft }));
 
     render(<WorkoutLogger {...defaultProps} />);
 
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
     expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
     expect(screen.getByTestId('elapsed-timer')).toHaveTextContent('02:00');
   });
@@ -566,17 +523,13 @@ describe('WorkoutLogger', () => {
 
     expect(mockSetWorkoutDraft).toHaveBeenCalledWith(
       expect.objectContaining({
-        exercises: expect.arrayContaining([
-          expect.objectContaining({ id: 'test-ex' }),
-        ]),
+        exercises: expect.arrayContaining([expect.objectContaining({ id: 'test-ex' })]),
       }),
     );
   });
 
   it('saves draft after debounce when sets change', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '50' },
@@ -658,9 +611,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('clears draft on save', async () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.click(screen.getByTestId('log-set-bench-press'));
     fireEvent.click(screen.getByText('Skip'));
@@ -677,13 +628,7 @@ describe('WorkoutLogger', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockSaveWorkoutAtomic.mockRejectedValueOnce(new Error('Simulated DB failure'));
 
-    render(
-      <WorkoutLogger
-        {...defaultProps}
-        onComplete={onComplete}
-        planDay={planDayWithExercises}
-      />,
-    );
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '80' },
@@ -711,10 +656,7 @@ describe('WorkoutLogger', () => {
     expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
     expect(mockClearWorkoutDraft).not.toHaveBeenCalled();
     expect(onComplete).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[WorkoutLogger] Save failed, draft preserved:',
-      expect.any(Error),
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[WorkoutLogger] Save failed, draft preserved:', expect.any(Error));
 
     consoleErrorSpy.mockRestore();
   });
@@ -746,16 +688,10 @@ describe('WorkoutLogger', () => {
     };
     render(<WorkoutLogger {...defaultProps} planDay={planDay} />);
 
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('exercise-section-squat'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-squat')).toBeInTheDocument();
     expect(screen.getByText('Đẩy tạ nằm')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('exercise-section-squat'),
-    ).toHaveTextContent('Gánh tạ');
+    expect(screen.getByTestId('exercise-section-squat')).toHaveTextContent('Gánh tạ');
   });
 
   it('ignores unknown exercise IDs gracefully', () => {
@@ -764,23 +700,53 @@ describe('WorkoutLogger', () => {
       workoutType: 'Test',
       exercises: JSON.stringify([
         {
-          exercise: { id: 'bench-press', nameVi: 'Đẩy tạ nằm', nameEn: 'Bench Press', muscleGroup: 'chest', secondaryMuscles: ['shoulders'], category: 'compound', equipment: ['barbell'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12, isCustom: false, updatedAt: '2025-01-01' },
-          sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90,
+          exercise: {
+            id: 'bench-press',
+            nameVi: 'Đẩy tạ nằm',
+            nameEn: 'Bench Press',
+            muscleGroup: 'chest',
+            secondaryMuscles: ['shoulders'],
+            category: 'compound',
+            equipment: ['barbell'],
+            contraindicated: [],
+            exerciseType: 'strength',
+            defaultRepsMin: 8,
+            defaultRepsMax: 12,
+            isCustom: false,
+            updatedAt: '2025-01-01',
+          },
+          sets: 3,
+          repsMin: 8,
+          repsMax: 12,
+          restSeconds: 90,
         },
         {
-          exercise: { id: 'nonexistent-exercise', nameVi: 'Không tồn tại', nameEn: 'Nonexistent', muscleGroup: 'chest', secondaryMuscles: [], category: 'isolation', equipment: ['machine'], contraindicated: [], exerciseType: 'strength', defaultRepsMin: 8, defaultRepsMax: 12, isCustom: false, updatedAt: '2025-01-01' },
-          sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90,
+          exercise: {
+            id: 'nonexistent-exercise',
+            nameVi: 'Không tồn tại',
+            nameEn: 'Nonexistent',
+            muscleGroup: 'chest',
+            secondaryMuscles: [],
+            category: 'isolation',
+            equipment: ['machine'],
+            contraindicated: [],
+            exerciseType: 'strength',
+            defaultRepsMin: 8,
+            defaultRepsMax: 12,
+            isCustom: false,
+            updatedAt: '2025-01-01',
+          },
+          sets: 3,
+          repsMin: 8,
+          repsMax: 12,
+          restSeconds: 90,
         },
       ]),
     };
     render(<WorkoutLogger {...defaultProps} planDay={planDay} />);
 
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('exercise-section-nonexistent-exercise'),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-section-nonexistent-exercise')).not.toBeInTheDocument();
   });
 
   it('calls loadWorkoutDraft on mount', () => {
@@ -795,12 +761,8 @@ describe('WorkoutLogger', () => {
       reps: 5,
       source: 'progressive_overload',
     });
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
-    expect(screen.getByTestId('overload-chip')).toHaveTextContent(
-      '62.5kg × 5',
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    expect(screen.getByTestId('overload-chip')).toHaveTextContent('62.5kg × 5');
   });
 
   it('applies suggestion to inputs on chip click', () => {
@@ -809,18 +771,10 @@ describe('WorkoutLogger', () => {
       reps: 5,
       source: 'progressive_overload',
     });
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     fireEvent.click(screen.getByTestId('overload-chip'));
-    expect(
-      (screen.getByTestId('weight-input-bench-press') as HTMLInputElement)
-        .value,
-    ).toBe('62.5');
-    expect(
-      (screen.getByTestId('reps-input-bench-press') as HTMLInputElement)
-        .value,
-    ).toBe('5');
+    expect((screen.getByTestId('weight-input-bench-press') as HTMLInputElement).value).toBe('62.5');
+    expect((screen.getByTestId('reps-input-bench-press') as HTMLInputElement).value).toBe('5');
   });
 
   it('shows plateau warning when plateaued', () => {
@@ -831,9 +785,7 @@ describe('WorkoutLogger', () => {
       isPlateaued: true,
       plateauWeeks: 3,
     });
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     const chip = screen.getByTestId('overload-chip');
     expect(chip).toHaveTextContent('60kg × 5');
     expect(chip).toHaveTextContent('plateau 3w');
@@ -845,9 +797,7 @@ describe('WorkoutLogger', () => {
       reps: 8,
       source: 'manual',
     });
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     expect(screen.queryByTestId('overload-chip')).not.toBeInTheDocument();
   });
 
@@ -860,9 +810,7 @@ describe('WorkoutLogger', () => {
       workoutType: 'Push Day',
       exercises: makeExercisesJson('bench-press'),
     };
-    render(
-      <WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithId} />,
-    );
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithId} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '80' },
@@ -939,12 +887,8 @@ describe('WorkoutLogger', () => {
   });
 
   it('clearing weight input shows empty string, not zero', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
-    const weightInput = screen.getByTestId(
-      'weight-input-bench-press',
-    ) as HTMLInputElement;
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    const weightInput = screen.getByTestId('weight-input-bench-press') as HTMLInputElement;
 
     fireEvent.change(weightInput, { target: { value: '60' } });
     expect(weightInput.value).toBe('60');
@@ -954,12 +898,8 @@ describe('WorkoutLogger', () => {
   });
 
   it('clearing reps input shows empty string, not zero', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
-    const repsInput = screen.getByTestId(
-      'reps-input-bench-press',
-    ) as HTMLInputElement;
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    const repsInput = screen.getByTestId('reps-input-bench-press') as HTMLInputElement;
 
     fireEvent.change(repsInput, { target: { value: '10' } });
     expect(repsInput.value).toBe('10');
@@ -969,9 +909,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('saving with cleared weight uses 0 fallback and reps uses 1 fallback', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.change(screen.getByTestId('weight-input-bench-press'), {
       target: { value: '' },
@@ -985,12 +923,8 @@ describe('WorkoutLogger', () => {
   });
 
   it('weight +/- buttons work after clearing the input', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
-    const weightInput = screen.getByTestId(
-      'weight-input-bench-press',
-    ) as HTMLInputElement;
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    const weightInput = screen.getByTestId('weight-input-bench-press') as HTMLInputElement;
 
     fireEvent.change(weightInput, { target: { value: '' } });
     expect(weightInput.value).toBe('');
@@ -1012,9 +946,7 @@ describe('WorkoutLogger', () => {
 
   /* ---------- TC_WL_05: Timer auto-start with planned exercises ---------- */
   it('auto-starts timer when planDay has exercises', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     expect(screen.getByTestId('elapsed-timer')).toBeInTheDocument();
   });
 
@@ -1041,20 +973,12 @@ describe('WorkoutLogger', () => {
       sets: [],
       elapsedSeconds: 60,
     };
-    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
-      () => ({ workoutDraft: draft }),
-    );
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({ workoutDraft: draft }));
 
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
-    expect(
-      screen.getByTestId('exercise-section-squat'),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('exercise-section-bench-press'),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-squat')).toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-section-bench-press')).not.toBeInTheDocument();
   });
 
   /* ---------- TC_WL_02: Empty JSON string → empty state ---------- */
@@ -1073,12 +997,7 @@ describe('WorkoutLogger', () => {
    * ================================================================ */
 
   /** Helper: log a set and dismiss the rest timer so subsequent interactions work. */
-  function logSetAndDismissRest(
-    exerciseId: string,
-    weight: string,
-    reps: string,
-    rpe?: number,
-  ) {
+  function logSetAndDismissRest(exerciseId: string, weight: string, reps: string, rpe?: number) {
     fireEvent.change(screen.getByTestId(`weight-input-${exerciseId}`), {
       target: { value: weight },
     });
@@ -1095,9 +1014,7 @@ describe('WorkoutLogger', () => {
 
   /* TC_SET_06: Edit/delete buttons exist for each logged set */
   it('TC_SET_06: renders edit and delete buttons for each logged set', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '60', '10');
     logSetAndDismissRest('bench-press', '65', '8');
@@ -1115,9 +1032,7 @@ describe('WorkoutLogger', () => {
 
   /* TC_SET_01: Clicking edit opens SetEditor with that set's data */
   it('TC_SET_01: clicking edit opens SetEditor with set data', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '75', '10');
 
@@ -1130,29 +1045,21 @@ describe('WorkoutLogger', () => {
     // SetEditor should be visible
     expect(screen.getByTestId('set-editor')).toBeInTheDocument();
     // Weight input should reflect the logged set value
-    expect(
-      (screen.getByTestId('weight-input') as HTMLInputElement).value,
-    ).toBe('75');
+    expect((screen.getByTestId('weight-input') as HTMLInputElement).value).toBe('75');
     // Reps input should reflect the logged set value
-    expect(
-      (screen.getByTestId('reps-input') as HTMLInputElement).value,
-    ).toBe('10');
+    expect((screen.getByTestId('reps-input') as HTMLInputElement).value).toBe('10');
   });
 
   /* TC_SET_02: Saving edit updates weight/reps/rpe in displayed list */
   it('TC_SET_02: saving edit updates set weight/reps/rpe', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '60', '10');
 
     expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
 
     // Open editor
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Chỉnh sửa set' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Chỉnh sửa set' }));
     expect(screen.getByTestId('set-editor')).toBeInTheDocument();
 
     // Change weight to 70 and reps to 8
@@ -1174,26 +1081,20 @@ describe('WorkoutLogger', () => {
 
   /* TC_SET_03: Clicking delete removes the set */
   it('TC_SET_03: clicking delete removes the set', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '60', '10');
 
     expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Xóa set' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Xóa set' }));
 
     expect(screen.queryByText(/60kg × 10/)).not.toBeInTheDocument();
   });
 
   /* TC_SET_04: Deleting middle set renumbers remaining sets */
   it('TC_SET_04: deleting middle set renumbers remaining to 1, 2', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '60', '10');
     logSetAndDismissRest('bench-press', '65', '8');
@@ -1228,9 +1129,7 @@ describe('WorkoutLogger', () => {
 
   /* TC_SET_05: Edit does not change the set's setNumber */
   it('TC_SET_05: editing a set preserves its setNumber', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '60', '10');
     logSetAndDismissRest('bench-press', '65', '8');
@@ -1301,9 +1200,7 @@ describe('WorkoutLogger', () => {
       elapsedSeconds: 300,
       planDayId: 'old-plan-day-id',
     };
-    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
-      () => ({ workoutDraft: draft }),
-    );
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({ workoutDraft: draft }));
 
     const planDayWithId = {
       id: 'current-plan-day-id',
@@ -1311,18 +1208,12 @@ describe('WorkoutLogger', () => {
       workoutType: 'Push Day',
       exercises: makeExercisesJson('bench-press'),
     };
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithId} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithId} />);
 
     // The stale draft's squat exercise should NOT appear
-    expect(
-      screen.queryByTestId('exercise-section-squat'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-section-squat')).not.toBeInTheDocument();
     // The planDay's bench-press exercise SHOULD appear
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
     // The stale draft's logged set should NOT appear
     expect(screen.queryByText(/100kg × 5/)).not.toBeInTheDocument();
   });
@@ -1361,9 +1252,7 @@ describe('WorkoutLogger', () => {
       elapsedSeconds: 180,
       planDayId: 'pd-matching',
     };
-    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(
-      () => ({ workoutDraft: matchingDraft }),
-    );
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({ workoutDraft: matchingDraft }));
 
     const planDayWithId = {
       id: 'pd-matching',
@@ -1371,14 +1260,10 @@ describe('WorkoutLogger', () => {
       workoutType: 'Push Day',
       exercises: makeExercisesJson('bench-press'),
     };
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithId} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithId} />);
 
     // Draft exercises should be restored
-    expect(
-      screen.getByTestId('exercise-section-bench-press'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-section-bench-press')).toBeInTheDocument();
     // Draft set should be visible
     expect(screen.getByText(/80kg × 10/)).toBeInTheDocument();
     // Elapsed time should be restored (180s = 03:00)
@@ -1393,9 +1278,7 @@ describe('WorkoutLogger', () => {
       workoutType: 'Push Day',
       exercises: makeExercisesJson('bench-press'),
     };
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithId} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithId} />);
 
     // Log a set so the draft save is triggered
     logSetAndDismissRest('bench-press', '60', '10');
@@ -1415,17 +1298,13 @@ describe('WorkoutLogger', () => {
   /* BUG FIX TESTS: Reps stepper buttons                                */
   /* ------------------------------------------------------------------ */
   it('renders reps +/- stepper buttons for each exercise', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     expect(screen.getByTestId('reps-minus-bench-press')).toBeInTheDocument();
     expect(screen.getByTestId('reps-plus-bench-press')).toBeInTheDocument();
   });
 
   it('reps + button increments reps by 1', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     const repsInput = screen.getByTestId('reps-input-bench-press') as HTMLInputElement;
     // Default reps is NaN (empty), clicking + should set to MIN_REPS + 1 = 2
     fireEvent.click(screen.getByTestId('reps-plus-bench-press'));
@@ -1433,9 +1312,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('reps - button decrements reps by 1, cannot go below 1', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     const repsInput = screen.getByTestId('reps-input-bench-press') as HTMLInputElement;
     // Set reps to 3 first
     fireEvent.change(repsInput, { target: { value: '3' } });
@@ -1453,9 +1330,7 @@ describe('WorkoutLogger', () => {
   });
 
   it('reps stepper buttons have correct aria-labels', () => {
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     expect(screen.getByTestId('reps-minus-bench-press')).toHaveAttribute('aria-label', 'Giảm số lần');
     expect(screen.getByTestId('reps-plus-bench-press')).toHaveAttribute('aria-label', 'Tăng số lần');
   });
@@ -1466,9 +1341,7 @@ describe('WorkoutLogger', () => {
   it('shows error notification when save fails', async () => {
     mockSaveWorkoutAtomic.mockRejectedValueOnce(new Error('DB error'));
     const onComplete = vi.fn();
-    render(
-      <WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithExercises} />);
 
     // Log a set
     logSetAndDismissRest('bench-press', '60', '10');
@@ -1488,14 +1361,12 @@ describe('WorkoutLogger', () => {
 
   it('disables save button while saving', async () => {
     let resolvePromise: () => void;
-    const savePromise = new Promise<void>((resolve) => {
+    const savePromise = new Promise<void>(resolve => {
       resolvePromise = resolve;
     });
     mockSaveWorkoutAtomic.mockReturnValueOnce(savePromise);
 
-    render(
-      <WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />,
-    );
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     logSetAndDismissRest('bench-press', '60', '10');
     fireEvent.click(screen.getByTestId('finish-button'));

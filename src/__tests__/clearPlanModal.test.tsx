@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ClearPlanModal } from '../components/modals/ClearPlanModal';
 import type { DayPlan, MealType } from '../types';
 
@@ -8,25 +9,14 @@ vi.mock('../hooks/useModalBackHandler', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-    onClose,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-  }) => (
+  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
     <div data-testid="modal-backdrop" onClick={onClose}>
       {children}
     </div>
   ),
 }));
 
-const makePlan = (
-  date: string,
-  breakfast: string[] = [],
-  lunch: string[] = [],
-  dinner: string[] = [],
-): DayPlan => ({
+const makePlan = (date: string, breakfast: string[] = [], lunch: string[] = [], dinner: string[] = []): DayPlan => ({
   date,
   breakfastDishIds: breakfast,
   lunchDishIds: lunch,
@@ -50,27 +40,15 @@ describe('ClearPlanModal', () => {
     onClose = vi.fn<() => void>();
   });
 
-  const renderModal = (
-    plans: DayPlan[] = dayPlans,
-    date: string = selectedDate,
-  ) =>
-    render(
-      <ClearPlanModal
-        dayPlans={plans}
-        selectedDate={date}
-        onClear={onClear}
-        onClose={onClose}
-      />,
-    );
+  const renderModal = (plans: DayPlan[] = dayPlans, date: string = selectedDate) =>
+    render(<ClearPlanModal dayPlans={plans} selectedDate={date} onClear={onClear} onClose={onClose} />);
 
   // --- Rendering ---
 
   it('renders title and subtitle', () => {
     renderModal();
     expect(screen.getByText('Xóa kế hoạch')).toBeInTheDocument();
-    expect(
-      screen.getByText('Chọn phạm vi thời gian muốn xóa'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Chọn phạm vi thời gian muốn xóa')).toBeInTheDocument();
   });
 
   it('renders all three scope options (day, week, month)', () => {
@@ -82,15 +60,9 @@ describe('ClearPlanModal', () => {
 
   it('renders scope descriptions', () => {
     renderModal();
-    expect(
-      screen.getByText('Chỉ xóa kế hoạch của ngày đang chọn'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Xóa kế hoạch 7 ngày trong tuần hiện tại'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Xóa tất cả kế hoạch trong tháng hiện tại'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Chỉ xóa kế hoạch của ngày đang chọn')).toBeInTheDocument();
+    expect(screen.getByText('Xóa kế hoạch 7 ngày trong tuần hiện tại')).toBeInTheDocument();
+    expect(screen.getByText('Xóa tất cả kế hoạch trong tháng hiện tại')).toBeInTheDocument();
   });
 
   it('renders meal toggle buttons for breakfast, lunch, dinner', () => {
@@ -107,9 +79,7 @@ describe('ClearPlanModal', () => {
 
   it('renders meal toggle labels in Vietnamese', () => {
     renderModal();
-    expect(screen.getByTestId('meal-toggle-breakfast')).toHaveTextContent(
-      'Sáng',
-    );
+    expect(screen.getByTestId('meal-toggle-breakfast')).toHaveTextContent('Sáng');
     expect(screen.getByTestId('meal-toggle-lunch')).toHaveTextContent('Trưa');
     expect(screen.getByTestId('meal-toggle-dinner')).toHaveTextContent('Tối');
   });
@@ -151,10 +121,7 @@ describe('ClearPlanModal', () => {
   });
 
   it('disables scope buttons when no plans have data', () => {
-    const emptyPlans: DayPlan[] = [
-      makePlan('2024-01-15'),
-      makePlan('2024-01-16'),
-    ];
+    const emptyPlans: DayPlan[] = [makePlan('2024-01-15'), makePlan('2024-01-16')];
     renderModal(emptyPlans);
 
     expect(screen.getByTestId('btn-clear-scope-day')).toBeDisabled();
@@ -163,10 +130,7 @@ describe('ClearPlanModal', () => {
   });
 
   it('enables day scope only when selected date has a plan', () => {
-    const plans: DayPlan[] = [
-      makePlan('2024-01-15', ['d1'], [], []),
-      makePlan('2024-01-16'),
-    ];
+    const plans: DayPlan[] = [makePlan('2024-01-15', ['d1'], [], []), makePlan('2024-01-16')];
     renderModal(plans);
 
     expect(screen.getByTestId('btn-clear-scope-day')).not.toBeDisabled();

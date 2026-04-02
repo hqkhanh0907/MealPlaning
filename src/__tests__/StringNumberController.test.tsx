@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
+
 import { StringNumberController } from '../components/form/StringNumberController';
 
 vi.mock('react-i18next', () => ({
@@ -10,15 +11,7 @@ interface TestFormValues {
   testField: number;
 }
 
-function TestWrapper({
-  defaultValue = 50,
-  min,
-  max,
-}: {
-  defaultValue?: number;
-  min?: number;
-  max?: number;
-}) {
+function TestWrapper({ defaultValue = 50, min, max }: { defaultValue?: number; min?: number; max?: number }) {
   const { control } = useForm<TestFormValues>({
     defaultValues: { testField: defaultValue },
   });
@@ -41,11 +34,7 @@ function TestWrapperWithSetValue({ defaultValue = 50 }: { defaultValue?: number 
 
   return (
     <>
-      <StringNumberController<TestFormValues>
-        name="testField"
-        control={control}
-        testId="test-input"
-      />
+      <StringNumberController<TestFormValues> name="testField" control={control} testId="test-input" />
       <button data-testid="set-75" onClick={() => setValue('testField', 75 as never)}>
         Set 75
       </button>

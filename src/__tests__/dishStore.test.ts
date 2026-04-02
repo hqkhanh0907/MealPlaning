@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { useDishStore } from '../store/dishStore';
 import type { Dish } from '../types';
 
@@ -49,10 +50,7 @@ describe('dishStore', () => {
     it('accepts an updater function', () => {
       useDishStore.setState({ dishes: [SAMPLE_DISH] });
 
-      useDishStore.getState().setDishes((prev) => [
-        ...prev,
-        DISH_VI_ONLY,
-      ]);
+      useDishStore.getState().setDishes(prev => [...prev, DISH_VI_ONLY]);
 
       expect(useDishStore.getState().dishes).toHaveLength(2);
     });
@@ -201,7 +199,8 @@ describe('dishStore', () => {
   describe('loadAll', () => {
     it('loads dishes with ingredients from database', async () => {
       const mockDb = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce([
             {
               id: 'db-dish-1',
@@ -235,7 +234,8 @@ describe('dishStore', () => {
 
     it('loads dish without optional fields (name_en, rating, notes)', async () => {
       const mockDb = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce([
             {
               id: 'db-dish-2',
@@ -273,7 +273,8 @@ describe('dishStore', () => {
 
     it('loads multiple dishes from database', async () => {
       const mockDb = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce([
             { id: 'd1', name_vi: 'A', name_en: null, tags: '[]', rating: null, notes: null },
             { id: 'd2', name_vi: 'B', name_en: 'B-en', tags: '["tag"]', rating: 3, notes: 'note' },

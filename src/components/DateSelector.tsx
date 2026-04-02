@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, List } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List } from 'lucide-react';
-import { DayPlan } from '../types';
-import { parseLocalDate } from '../utils/helpers';
+
 import { useDatabase } from '../contexts/DatabaseContext';
 import { getSetting, setSetting } from '../services/appSettings';
+import { DayPlan } from '../types';
+import { parseLocalDate } from '../utils/helpers';
 
 /** Format a Date to local YYYY-MM-DD (avoids UTC shift from toISOString) */
 const formatLocalDate = (d: Date): string => {
@@ -28,7 +29,12 @@ const getMealDotClass = (hasMeal: boolean, isSelected: boolean, activeColor: str
 };
 
 // Helper to get day button style class without nested ternary
-const getDayButtonClass = (isSelected: boolean, isToday: boolean, variant: 'week' | 'calendar', isSunday = false): string => {
+const getDayButtonClass = (
+  isSelected: boolean,
+  isToday: boolean,
+  variant: 'week' | 'calendar',
+  isSunday = false,
+): string => {
   if (isSelected) {
     return variant === 'week'
       ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900 scale-105'
@@ -94,7 +100,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
     return Number.isNaN(d.getTime()) ? new Date() : d;
   });
   const [viewMode, setViewMode] = useState<'calendar' | 'week'>(() =>
-    typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640 ? 'week' : 'calendar'
+    typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640 ? 'week' : 'calendar',
   );
   const [weekOffset, setWeekOffset] = useState(0);
   const [hintDismissed, setHintDismissed] = useState(false);
@@ -103,9 +109,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
-    getSetting(db, 'date_hint_dismissed').then((val) => {
-      if (val === '1') setHintDismissed(true);
-    }).catch(() => { /* db read error – keep default */ });
+    getSetting(db, 'date_hint_dismissed')
+      .then(val => {
+        if (val === '1') setHintDismissed(true);
+      })
+      .catch(() => {
+        /* db read error – keep default */
+      });
   }, [db]);
 
   const todayStr = useMemo(() => formatLocalDate(new Date()), []);
@@ -121,7 +131,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  
+
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
 
@@ -140,14 +150,20 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   };
 
   const weekDays = [
-    t('calendar.weekdays.mon'), t('calendar.weekdays.tue'), t('calendar.weekdays.wed'),
-    t('calendar.weekdays.thu'), t('calendar.weekdays.fri'), t('calendar.weekdays.sat'),
+    t('calendar.weekdays.mon'),
+    t('calendar.weekdays.tue'),
+    t('calendar.weekdays.wed'),
+    t('calendar.weekdays.thu'),
+    t('calendar.weekdays.fri'),
+    t('calendar.weekdays.sat'),
     t('calendar.weekdays.sun'),
   ];
 
   const dismissHint = useCallback(() => {
     setHintDismissed(true);
-    setSetting(db, 'date_hint_dismissed', '1').catch(() => { /* db write error */ });
+    setSetting(db, 'date_hint_dismissed', '1').catch(() => {
+      /* db write error */
+    });
   }, [db]);
 
   const goToToday = () => {
@@ -199,25 +215,25 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   const emptyCellKeys = Array.from({ length: firstDay }, (_, i) => `empty-start-${year}-${month}-${i}`);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 sm:p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-lg">
-          <CalendarIcon className="w-5 h-5 text-emerald-500" />
+    <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+      <div className="mb-4 flex items-center justify-between sm:mb-6">
+        <div className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
+          <CalendarIcon className="h-5 w-5 text-emerald-500" />
           <span>{viewMode === 'calendar' ? t('calendar.monthYear', { month: month + 1, year }) : weekLabel}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 text-slate-500 transition-all hover:bg-slate-100 active:bg-slate-200 sm:min-h-9 sm:min-w-9 sm:p-2 dark:text-slate-400 dark:hover:bg-slate-700 dark:active:bg-slate-600"
             title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
             aria-label={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
           >
-            {viewMode === 'calendar' ? <List className="w-5 h-5" /> : <CalendarIcon className="w-5 h-5" />}
+            {viewMode === 'calendar' ? <List className="h-5 w-5" /> : <CalendarIcon className="h-5 w-5" />}
           </button>
           <button
             onClick={goToToday}
             data-testid="btn-today"
-            className="px-3 py-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:bg-emerald-200 rounded-xl transition-all mr-1 sm:mr-2 min-h-11 sm:min-h-9 flex items-center"
+            className="mr-1 flex min-h-11 items-center rounded-xl bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-600 transition-all hover:bg-emerald-100 active:bg-emerald-200 sm:mr-2 sm:min-h-9 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
           >
             {t('calendar.today')}
           </button>
@@ -225,27 +241,24 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
             data-testid="btn-prev-date"
             aria-label={viewMode === 'calendar' ? t('calendar.prevMonth') : t('calendar.prevWeek')}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 flex items-center justify-center"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 text-slate-500 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:text-slate-400 dark:hover:bg-slate-700 dark:active:bg-slate-600"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
             data-testid="btn-next-date"
             aria-label={viewMode === 'calendar' ? t('calendar.nextMonth') : t('calendar.nextWeek')}
-            className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 rounded-xl text-slate-500 dark:text-slate-400 transition-all min-h-11 min-w-11 flex items-center justify-center"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 text-slate-500 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:text-slate-400 dark:hover:bg-slate-700 dark:active:bg-slate-600"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
       </div>
 
       {/* Week View — 7 days (Mon–Sun) */}
       {viewMode === 'week' && (
-        <div
-          ref={weekContainerRef}
-          className="grid grid-cols-7 gap-1.5 sm:gap-2"
-        >
+        <div ref={weekContainerRef} className="grid grid-cols-7 gap-1.5 sm:gap-2">
           {weekDates.map(date => {
             const dateStr = formatLocalDate(date);
             const isSelected = dateStr === selectedDate;
@@ -272,14 +285,20 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                     if (!hintDismissed) dismissHint();
                   }
                 }}
-                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl transition-all min-h-18 ${getDayButtonClass(isSelected, isToday, 'week', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
+                className={`flex min-h-18 flex-col items-center justify-center rounded-2xl px-1 py-2.5 transition-all ${getDayButtonClass(isSelected, isToday, 'week', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
               >
-                <span className={`text-[10px] font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>{dayLabel}</span>
+                <span className={`text-[10px] font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>
+                  {dayLabel}
+                </span>
                 <span className="text-lg font-bold">{date.getDate()}</span>
-                <div className="flex gap-0.5 mt-0.5">
-                  <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`} />
-                  <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`} />
-                  <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`} />
+                <div className="mt-0.5 flex gap-0.5">
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`}
+                  />
+                  <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`} />
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`}
+                  />
                 </div>
               </button>
             );
@@ -290,9 +309,12 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
       {/* Calendar Grid View */}
       {viewMode === 'calendar' && (
         <>
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2">
+          <div className="mb-1 grid grid-cols-7 gap-1 sm:mb-2 sm:gap-2">
             {weekDays.map((day, idx) => (
-              <div key={day} className={`text-center text-xs font-bold uppercase py-2 ${idx === 6 ? 'text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
+              <div
+                key={day}
+                className={`py-2 text-center text-xs font-bold uppercase ${idx === 6 ? 'text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}
+              >
                 {day}
               </div>
             ))}
@@ -331,28 +353,35 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                     if (onPlanClick) onPlanClick();
                   }}
                   title={isSelected ? t('calendar.tapToPlan') : t('calendar.selectDay')}
-                  className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
+                  className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
                 >
                   <span className="text-sm font-bold">{day}</span>
 
-                  <div className="absolute bottom-1 sm:bottom-2 flex gap-0.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`} />
-                    <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`} />
-                    <div className={`w-1.5 h-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`} />
+                  <div className="absolute bottom-1 flex gap-0.5 sm:bottom-2">
+                    <div
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`}
+                    />
+                    <div
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`}
+                    />
+                    <div
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`}
+                    />
                   </div>
                 </button>
               );
             })}
           </div>
-          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium gap-2 sm:gap-0">
+          <div className="mt-4 flex flex-col items-start justify-between gap-2 text-xs font-medium text-slate-400 sm:flex-row sm:items-center sm:gap-0 dark:text-slate-500">
             {(() => {
               if (hintDismissed) return <span />;
               const selectedPlan = dayPlans.find(p => p.date === selectedDate);
-              const hasAnyPlan = Boolean(selectedPlan && (
-                (selectedPlan.breakfastDishIds?.length ?? 0) > 0 ||
-                (selectedPlan.lunchDishIds?.length ?? 0) > 0 ||
-                (selectedPlan.dinnerDishIds?.length ?? 0) > 0
-              ));
+              const hasAnyPlan = Boolean(
+                selectedPlan &&
+                ((selectedPlan.breakfastDishIds?.length ?? 0) > 0 ||
+                  (selectedPlan.lunchDishIds?.length ?? 0) > 0 ||
+                  (selectedPlan.dinnerDishIds?.length ?? 0) > 0),
+              );
               if (hasAnyPlan) return <span />;
               return (
                 <>
@@ -362,21 +391,33 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
               );
             })()}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}</div>
-              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}</div>
-              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}</div>
+              <div className="flex items-center gap-1">
+                <div className="h-2 w-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-2 w-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-2 w-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}
+              </div>
             </div>
           </div>
         </>
       )}
 
       {viewMode === 'week' && (
-        <div className="mt-3 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium">
+        <div className="mt-3 flex items-center justify-between text-xs font-medium text-slate-400 dark:text-slate-500">
           {!hintDismissed && <span>{t('calendar.swipeHint')}</span>}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}</div>
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}
+            </div>
           </div>
         </div>
       )}

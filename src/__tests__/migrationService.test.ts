@@ -1,10 +1,10 @@
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import {
-  migrateFromLocalStorage,
-  isMigrationNeeded,
-  isMigrationCompleted,
-  migrateFitnessData,
   isFitnessMigrationCompleted,
+  isMigrationCompleted,
+  isMigrationNeeded,
+  migrateFitnessData,
+  migrateFromLocalStorage,
 } from '../services/migrationService';
 import { createSchema } from '../services/schema';
 
@@ -105,9 +105,7 @@ describe('migrationService', () => {
     expect(result.success).toBe(true);
     expect(result.migratedCounts?.ingredients).toBe(2);
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM ingredients ORDER BY id',
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM ingredients ORDER BY id');
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({
       id: 'ing-1',
@@ -152,9 +150,7 @@ describe('migrationService', () => {
       notes: 'Món ngon',
     });
 
-    const dishIngs = await db.query<Record<string, unknown>>(
-      'SELECT * FROM dish_ingredients ORDER BY ingredient_id',
-    );
+    const dishIngs = await db.query<Record<string, unknown>>('SELECT * FROM dish_ingredients ORDER BY ingredient_id');
     expect(dishIngs).toHaveLength(2);
     expect(dishIngs[0]).toMatchObject({ dishId: 'dish-1', ingredientId: 'ing-1', amount: 200 });
     expect(dishIngs[1]).toMatchObject({ dishId: 'dish-1', ingredientId: 'ing-2', amount: 150 });
@@ -191,10 +187,7 @@ describe('migrationService', () => {
     expect(result.success).toBe(true);
     expect(result.migratedCounts?.userProfile).toBe(true);
 
-    const profile = await db.queryOne<Record<string, unknown>>(
-      'SELECT * FROM user_profile WHERE id = ?',
-      ['default'],
-    );
+    const profile = await db.queryOne<Record<string, unknown>>('SELECT * FROM user_profile WHERE id = ?', ['default']);
     expect(profile).not.toBeNull();
     expect(profile).toMatchObject({
       id: 'default',
@@ -419,10 +412,7 @@ describe('migrationService', () => {
   });
 
   it('handles Zustand state property missing the expected key', async () => {
-    localStorage.setItem(
-      'mp-ingredients',
-      JSON.stringify({ state: { somethingElse: [] }, version: 0 }),
-    );
+    localStorage.setItem('mp-ingredients', JSON.stringify({ state: { somethingElse: [] }, version: 0 }));
 
     const result = await migrateFromLocalStorage(db);
 
@@ -583,10 +573,9 @@ describe('migrateFitnessData', () => {
 
     await migrateFitnessData(db);
 
-    const profiles = await db.query<Record<string, unknown>>(
-      'SELECT * FROM fitness_profiles WHERE id = ?',
-      ['default'],
-    );
+    const profiles = await db.query<Record<string, unknown>>('SELECT * FROM fitness_profiles WHERE id = ?', [
+      'default',
+    ]);
     expect(profiles).toHaveLength(1);
     expect(profiles[0].experience).toBe('advanced');
     expect(profiles[0].goal).toBe('hypertrophy');
@@ -616,9 +605,7 @@ describe('migrateFitnessData', () => {
 
     await migrateFitnessData(db);
 
-    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', [
-      'w1',
-    ]);
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['w1']);
     expect(rows).toHaveLength(1);
     expect(rows[0].name).toBe('Push');
     expect(rows[0].durationMin).toBe(45);
@@ -658,10 +645,7 @@ describe('migrateFitnessData', () => {
 
     await migrateFitnessData(db);
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM workout_sets WHERE id = ?',
-      ['s1'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workout_sets WHERE id = ?', ['s1']);
     expect(rows).toHaveLength(1);
     expect(rows[0].workoutId).toBe('w1');
     expect(rows[0].reps).toBe(8);
@@ -726,10 +710,7 @@ describe('migrateFitnessData', () => {
   });
 
   it('handles fitness-storage with null state', async () => {
-    localStorage.setItem(
-      'fitness-storage',
-      JSON.stringify({ state: null, version: 1 }),
-    );
+    localStorage.setItem('fitness-storage', JSON.stringify({ state: null, version: 1 }));
 
     const result = await migrateFitnessData(db);
 
@@ -759,10 +740,9 @@ describe('migrateFitnessData', () => {
 
     await migrateFitnessData(db);
 
-    const profiles = await db.query<Record<string, unknown>>(
-      'SELECT * FROM fitness_profiles WHERE id = ?',
-      ['default'],
-    );
+    const profiles = await db.query<Record<string, unknown>>('SELECT * FROM fitness_profiles WHERE id = ?', [
+      'default',
+    ]);
     expect(profiles).toHaveLength(1);
     expect(profiles[0].experience).toBe('beginner');
     expect(profiles[0].goal).toBe('general');
@@ -788,9 +768,7 @@ describe('migrateFitnessData', () => {
 
     await migrateFitnessData(db);
 
-    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', [
-      'w-minimal',
-    ]);
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['w-minimal']);
     expect(rows).toHaveLength(1);
     expect(rows[0].durationMin).toBeNull();
     expect(rows[0].notes).toBeNull();
@@ -837,9 +815,7 @@ describe('migrateFitnessData', () => {
     expect(result.migrated).toBe(false);
     expect(result.error).toContain('forced rollback');
 
-    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', [
-      'w1',
-    ]);
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['w1']);
     expect(rows).toHaveLength(0);
   });
 

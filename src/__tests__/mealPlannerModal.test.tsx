@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { MealPlannerModal } from '../components/modals/MealPlannerModal';
-import type { Dish, Ingredient, DayPlan } from '../types';
+import type { DayPlan, Dish, Ingredient } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
 
@@ -267,13 +268,7 @@ describe('MealPlannerModal', () => {
     });
 
     it('does not include unchanged tabs in onConfirm payload', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          currentPlan={populatedPlan}
-          initialTab="lunch"
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" />);
       fireEvent.click(screen.getByTestId('btn-confirm-plan'));
       expect(defaultProps.onConfirm).toHaveBeenCalledWith({});
     });
@@ -353,9 +348,7 @@ describe('MealPlannerModal', () => {
     });
 
     it('shows tab badge count for pre-selected dishes', () => {
-      render(
-        <MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" />);
       const breakfastTab = screen.getByText('Bữa Sáng').closest('button');
       expect(breakfastTab?.textContent).toContain('1');
     });
@@ -378,49 +371,25 @@ describe('MealPlannerModal', () => {
 
   describe('Pre-selected dishes are checked on open', () => {
     it('shows pre-selected lunch dishes from currentPlan', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          currentPlan={populatedPlan}
-          initialTab="lunch"
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" />);
       const footer = screen.getByTestId('btn-confirm-plan').closest('div')?.parentElement;
       expect(footer?.textContent).toContain('1');
     });
 
     it('shows pre-selected breakfast dishes from currentPlan', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          currentPlan={populatedPlan}
-          initialTab="breakfast"
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="breakfast" />);
       const breakfastTab = screen.getByText('Bữa Sáng').closest('button');
       expect(breakfastTab?.textContent).toContain('1');
     });
 
     it('shows pre-selected dinner dishes from currentPlan', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          currentPlan={populatedPlan}
-          initialTab="dinner"
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="dinner" />);
       const dinnerTab = screen.getByText('Bữa Tối').closest('button');
       expect(dinnerTab?.textContent).toContain('1');
     });
 
     it('shows total day count across all pre-selected meals', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          currentPlan={populatedPlan}
-          initialTab="lunch"
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" />);
       const footer = screen.getByTestId('btn-confirm-plan').closest('div')?.parentElement;
       expect(footer?.textContent).toContain('3 món');
     });
@@ -515,14 +484,7 @@ describe('MealPlannerModal', () => {
 
   describe('Remaining budget display', () => {
     it('shows remaining budget when targets provided and dishes selected', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          initialTab="lunch"
-          targetCalories={2000}
-          targetProtein={150}
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
       fireEvent.click(screen.getByText('Gà nướng'));
       expect(screen.getByTestId('meal-planner-remaining-budget')).toBeInTheDocument();
       expect(screen.getByTestId('meal-planner-remaining-cal')).toBeInTheDocument();
@@ -536,26 +498,12 @@ describe('MealPlannerModal', () => {
     });
 
     it('does not show remaining budget when no dishes selected', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          initialTab="lunch"
-          targetCalories={2000}
-          targetProtein={150}
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
       expect(screen.queryByTestId('meal-planner-remaining-budget')).not.toBeInTheDocument();
     });
 
     it('shows green text when remaining budget is positive', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          initialTab="lunch"
-          targetCalories={2000}
-          targetProtein={150}
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
       fireEvent.click(screen.getByText('Gà nướng'));
       const calRemaining = screen.getByTestId('meal-planner-remaining-cal');
       expect(calRemaining.className).toContain('text-emerald-600');
@@ -563,14 +511,7 @@ describe('MealPlannerModal', () => {
     });
 
     it('shows red text when budget is exceeded', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          initialTab="lunch"
-          targetCalories={100}
-          targetProtein={10}
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={100} targetProtein={10} />);
       fireEvent.click(screen.getByText('Gà nướng'));
       const calRemaining = screen.getByTestId('meal-planner-remaining-cal');
       expect(calRemaining.className).toContain('text-rose-600');
@@ -578,14 +519,7 @@ describe('MealPlannerModal', () => {
     });
 
     it('updates remaining budget as dishes are toggled', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          initialTab="lunch"
-          targetCalories={2000}
-          targetProtein={200}
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={200} />);
       fireEvent.click(screen.getByText('Gà nướng'));
       const initialText = screen.getByTestId('meal-planner-remaining-cal').textContent;
       fireEvent.click(screen.getByText('Cơm gà'));
@@ -609,13 +543,7 @@ describe('MealPlannerModal', () => {
 
   describe('Nutrition summary', () => {
     it('shows active tab nutrition when dishes selected', () => {
-      render(
-        <MealPlannerModal
-          {...defaultProps}
-          currentPlan={populatedPlan}
-          initialTab="lunch"
-        />,
-      );
+      render(<MealPlannerModal {...defaultProps} currentPlan={populatedPlan} initialTab="lunch" />);
       const calMatches = screen.getAllByText(/330/);
       expect(calMatches.length).toBeGreaterThan(0);
     });

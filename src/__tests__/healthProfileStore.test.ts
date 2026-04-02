@@ -1,10 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  useHealthProfileStore,
-  type HealthProfileState,
-} from '../features/health-profile/store/healthProfileStore';
-import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { type HealthProfileState, useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import type { Goal } from '../features/health-profile/types';
+import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
@@ -27,7 +25,7 @@ function createMockDb(overrides: Partial<DatabaseService> = {}): DatabaseService
 
 function resetStore() {
   useHealthProfileStore.setState({
-    profile: { ...DEFAULT_HEALTH_PROFILE },
+    profile: null,
     activeGoal: null,
     loading: false,
   } as Partial<HealthProfileState>);
@@ -56,16 +54,10 @@ describe('healthProfileStore', () => {
   });
 
   /* ---------- initial state ---------- */
-  it('initial state has DEFAULT_HEALTH_PROFILE', () => {
+  it('initial state has null profile', () => {
+    useHealthProfileStore.setState({ profile: null, activeGoal: null, loading: false });
     const { profile, activeGoal, loading } = useHealthProfileStore.getState();
-    expect(profile.id).toBe('default');
-    expect(profile.gender).toBe(DEFAULT_HEALTH_PROFILE.gender);
-    expect(profile.age).toBe(DEFAULT_HEALTH_PROFILE.age);
-    expect(profile.heightCm).toBe(DEFAULT_HEALTH_PROFILE.heightCm);
-    expect(profile.weightKg).toBe(DEFAULT_HEALTH_PROFILE.weightKg);
-    expect(profile.activityLevel).toBe(DEFAULT_HEALTH_PROFILE.activityLevel);
-    expect(profile.proteinRatio).toBe(DEFAULT_HEALTH_PROFILE.proteinRatio);
-    expect(profile.fatPct).toBe(DEFAULT_HEALTH_PROFILE.fatPct);
+    expect(profile).toBeNull();
     expect(activeGoal).toBeNull();
     expect(loading).toBe(false);
   });
@@ -90,31 +82,28 @@ describe('healthProfileStore', () => {
 
     await useHealthProfileStore.getState().loadProfile(db);
 
-    expect(db.queryOne).toHaveBeenCalledWith(
-      "SELECT * FROM user_profile WHERE id = 'default'",
-    );
+    expect(db.queryOne).toHaveBeenCalledWith("SELECT * FROM user_profile WHERE id = 'default'");
 
     const { profile } = useHealthProfileStore.getState();
-    expect(profile.gender).toBe('female');
-    expect(profile.age).toBe(25);
-    expect(profile.heightCm).toBe(165);
-    expect(profile.weightKg).toBe(60);
-    expect(profile.activityLevel).toBe('active');
-    expect(profile.bodyFatPct).toBe(20);
-    expect(profile.bmrOverride).toBeUndefined();
-    expect(profile.proteinRatio).toBe(1.8);
-    expect(profile.fatPct).toBe(0.3);
+    expect(profile).not.toBeNull();
+    expect(profile!.gender).toBe('female');
+    expect(profile!.age).toBe(25);
+    expect(profile!.heightCm).toBe(165);
+    expect(profile!.weightKg).toBe(60);
+    expect(profile!.activityLevel).toBe('active');
+    expect(profile!.bodyFatPct).toBe(20);
+    expect(profile!.bmrOverride).toBeUndefined();
+    expect(profile!.proteinRatio).toBe(1.8);
+    expect(profile!.fatPct).toBe(0.3);
   });
 
-  it('loadProfile returns defaults when no data', async () => {
+  it('loadProfile returns null when no data', async () => {
     const db = createMockDb({ queryOne: vi.fn().mockResolvedValue(null) });
 
     await useHealthProfileStore.getState().loadProfile(db);
 
     const { profile } = useHealthProfileStore.getState();
-    expect(profile.id).toBe(DEFAULT_HEALTH_PROFILE.id);
-    expect(profile.gender).toBe(DEFAULT_HEALTH_PROFILE.gender);
-    expect(profile.weightKg).toBe(DEFAULT_HEALTH_PROFILE.weightKg);
+    expect(profile).toBeNull();
   });
 
   /* ---------- saveProfile ---------- */
@@ -130,10 +119,7 @@ describe('healthProfileStore', () => {
     await useHealthProfileStore.getState().saveProfile(db, profile);
 
     expect(db.execute).toHaveBeenCalledTimes(1);
-    const [sql, params] = (db.execute as ReturnType<typeof vi.fn>).mock.calls[0] as [
-      string,
-      unknown[],
-    ];
+    const [sql, params] = (db.execute as ReturnType<typeof vi.fn>).mock.calls[0] as [string, unknown[]];
     expect(sql).toContain('INSERT OR REPLACE INTO user_profile');
     expect(params[0]).toBe('default');
     expect(params[1]).toBe(''); // name
@@ -142,8 +128,9 @@ describe('healthProfileStore', () => {
     expect(params[7]).toBe('active'); // activity_level
 
     const { profile: stored } = useHealthProfileStore.getState();
-    expect(stored.gender).toBe('female');
-    expect(stored.weightKg).toBe(58);
+    expect(stored).not.toBeNull();
+    expect(stored!.gender).toBe('female');
+    expect(stored!.weightKg).toBe(58);
   });
 
   /* ---------- loadActiveGoal ---------- */
@@ -165,9 +152,7 @@ describe('healthProfileStore', () => {
 
     await useHealthProfileStore.getState().loadActiveGoal(db);
 
-    expect(db.queryOne).toHaveBeenCalledWith(
-      'SELECT * FROM goals WHERE is_active = 1 LIMIT 1',
-    );
+    expect(db.queryOne).toHaveBeenCalledWith('SELECT * FROM goals WHERE is_active = 1 LIMIT 1');
 
     const { activeGoal } = useHealthProfileStore.getState();
     expect(activeGoal).not.toBeNull();
@@ -228,10 +213,7 @@ describe('healthProfileStore', () => {
 
     await useHealthProfileStore.getState().deactivateAllGoals(db);
 
-    const [sql] = (db.execute as ReturnType<typeof vi.fn>).mock.calls[0] as [
-      string,
-      unknown[],
-    ];
+    const [sql] = (db.execute as ReturnType<typeof vi.fn>).mock.calls[0] as [string, unknown[]];
     expect(sql).toContain('UPDATE goals SET is_active = 0');
     expect(useHealthProfileStore.getState().activeGoal).toBeNull();
   });

@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import { useController } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { cn } from '@/lib/utils';
+
 import { StepLayout } from './StepLayout';
 import type { StepProps } from './types';
 
@@ -15,7 +17,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
 
   const toggle = (muscle: string) => {
     if (selected.includes(muscle)) {
-      field.field.onChange(selected.filter((m) => m !== muscle));
+      field.field.onChange(selected.filter(m => m !== muscle));
     } else if (!atMax) {
       field.field.onChange([...selected, muscle]);
     }
@@ -31,14 +33,15 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
       <p className="mb-3 text-xs font-medium text-slate-400 dark:text-slate-500">
         {t('fitness.onboarding.maxItems', { count: MAX_PRIORITY_MUSCLES })} ({selected.length}/{MAX_PRIORITY_MUSCLES})
       </p>
-      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0" aria-label={t('fitness.onboarding.priorityMuscles')}>
-        {MUSCLE_GROUPS.map((muscle) => {
+      <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0" aria-label={t('fitness.onboarding.priorityMuscles')}>
+        {MUSCLE_GROUPS.map(muscle => {
           const isSelected = selected.includes(muscle);
           const isDisabled = atMax && !isSelected;
 
           let stateClass: string;
           if (isSelected) {
-            stateClass = 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+            stateClass =
+              'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
           } else if (isDisabled) {
             stateClass = 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600';
           } else {

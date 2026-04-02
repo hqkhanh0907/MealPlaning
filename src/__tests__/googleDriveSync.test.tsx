@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { GoogleDriveSync } from '../components/GoogleDriveSync';
 
 // Mock useAuth
@@ -208,7 +209,11 @@ describe('GoogleDriveSync', () => {
     });
 
     it('uploads binary backup data to Drive', async () => {
-      mockUploadBackup.mockResolvedValueOnce({ id: 'file1', name: 'backup.sqlite', modifiedTime: '2024-01-01T00:00:00Z' });
+      mockUploadBackup.mockResolvedValueOnce({
+        id: 'file1',
+        name: 'backup.sqlite',
+        modifiedTime: '2024-01-01T00:00:00Z',
+      });
 
       render(<GoogleDriveSync />);
       await act(async () => {
@@ -253,7 +258,12 @@ describe('GoogleDriveSync', () => {
 
     it('disables buttons during upload', async () => {
       let resolveUpload: (v: unknown) => void = () => {};
-      mockUploadBackup.mockImplementation(() => new Promise(r => { resolveUpload = r; }));
+      mockUploadBackup.mockImplementation(
+        () =>
+          new Promise(r => {
+            resolveUpload = r;
+          }),
+      );
 
       render(<GoogleDriveSync />);
 

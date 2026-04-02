@@ -1,20 +1,8 @@
 import { z } from 'zod';
 
-const CARDIO_TYPE_VALUES = [
-  'running',
-  'cycling',
-  'swimming',
-  'hiit',
-  'walking',
-  'elliptical',
-  'rowing',
-] as const;
+const CARDIO_TYPE_VALUES = ['running', 'cycling', 'swimming', 'hiit', 'walking', 'elliptical', 'rowing'] as const;
 
-const DISTANCE_TYPES: ReadonlySet<string> = new Set([
-  'running',
-  'cycling',
-  'swimming',
-]);
+const DISTANCE_TYPES: ReadonlySet<string> = new Set(['running', 'cycling', 'swimming']);
 
 const INTENSITY_VALUES = ['low', 'moderate', 'high'] as const;
 
@@ -28,7 +16,7 @@ export const cardioLoggerSchema = z
     intensity: z.enum(INTENSITY_VALUES),
   })
   .refine(
-    (data) => {
+    data => {
       if (DISTANCE_TYPES.has(data.selectedType) && data.distanceKm !== undefined) {
         return data.distanceKm >= 0;
       }

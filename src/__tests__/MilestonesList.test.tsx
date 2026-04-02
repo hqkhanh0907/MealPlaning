@@ -1,7 +1,8 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
+
 import { MilestonesList } from '../features/fitness/components/MilestonesList';
 import { useFitnessStore } from '../store/fitnessStore';
-import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -53,9 +54,7 @@ function setupStore(overrides: Record<string, unknown> = {}) {
     trainingPlans: [],
     ...overrides,
   };
-  mockStore.mockImplementation(
-    (selector: (s: typeof state) => unknown) => selector(state),
-  );
+  mockStore.mockImplementation((selector: (s: typeof state) => unknown) => selector(state));
 }
 
 function expand() {
@@ -80,9 +79,7 @@ describe('MilestonesList', () => {
   });
 
   it('shows progress bar to next milestone', () => {
-    const workouts = Array.from({ length: 5 }, (_, i) =>
-      makeWorkout(`2024-01-0${i + 1}`, `w${i}`),
-    );
+    const workouts = Array.from({ length: 5 }, (_, i) => makeWorkout(`2024-01-0${i + 1}`, `w${i}`));
     setupStore({ workouts });
     render(<MilestonesList />);
     expand();
@@ -118,9 +115,7 @@ describe('MilestonesList', () => {
   it('uses active plan days for streak calculation', () => {
     setupStore({
       workouts: [makeWorkout('2024-01-10', 'w0')],
-      trainingPlans: [
-        { id: 'p1', name: 'Plan', status: 'active', startDate: '2024-01-01' },
-      ],
+      trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active', startDate: '2024-01-01' }],
       trainingPlanDays: [
         { id: 'd1', planId: 'p1', dayOfWeek: 1 },
         { id: 'd3', planId: 'p1', dayOfWeek: 3 },

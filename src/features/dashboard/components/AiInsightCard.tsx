@@ -1,19 +1,21 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
   Beef,
-  Scale,
-  Flame,
-  Trophy,
   CheckCircle,
-  TrendingUp,
-  Lightbulb,
-  X,
   ChevronRight,
+  Flame,
+  Lightbulb,
+  Scale,
+  TrendingUp,
+  Trophy,
+  X,
 } from 'lucide-react';
-import type { InsightType, InsightColor } from '../hooks/useInsightEngine';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
+
+import type { InsightColor, InsightType } from '../hooks/useInsightEngine';
 import { useInsightEngine } from '../hooks/useInsightEngine';
 
 const ICON_MAP: Record<InsightType, React.ComponentType<{ className?: string }>> = {
@@ -113,13 +115,7 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
   }, [currentInsight, handleAction]);
 
   if (!currentInsight) {
-    return (
-      <div
-        data-testid="ai-insight-card-empty"
-        className="min-h-[56px]"
-        aria-hidden="true"
-      />
-    );
+    return <div data-testid="ai-insight-card-empty" className="min-h-[56px]" aria-hidden="true" />;
   }
 
   const IconComponent = ICON_MAP[currentInsight.type];
@@ -130,23 +126,17 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
     <section
       data-testid="ai-insight-card"
       aria-label={`${iconPrefix} ${currentInsight.title}`}
-      className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} p-3 flex items-start gap-3`}
+      className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} flex items-start gap-3 p-3`}
     >
-      <div className="flex-shrink-0 mt-0.5" data-testid="insight-icon">
-        <IconComponent className={`w-5 h-5 ${colors.icon}`} />
+      <div className="mt-0.5 flex-shrink-0" data-testid="insight-icon">
+        <IconComponent className={`h-5 w-5 ${colors.icon}`} />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <p
-          data-testid="insight-title"
-          className={`text-sm font-bold leading-tight ${colors.title}`}
-        >
+      <div className="min-w-0 flex-1">
+        <p data-testid="insight-title" className={`text-sm leading-tight font-bold ${colors.title}`}>
           {currentInsight.title}
         </p>
-        <p
-          data-testid="insight-message"
-          className={`text-xs mt-0.5 leading-snug ${colors.message}`}
-        >
+        <p data-testid="insight-message" className={`mt-0.5 text-xs leading-snug ${colors.message}`}>
           {currentInsight.message}
         </p>
 
@@ -156,10 +146,10 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
             size="sm"
             data-testid="insight-action-btn"
             onClick={onAction}
-            className={`mt-1.5 gap-1 px-2 py-1 min-h-11 ${colors.action}`}
+            className={`mt-1.5 min-h-11 gap-1 px-2 py-1 ${colors.action}`}
           >
             {currentInsight.actionLabel}
-            <ChevronRight className="w-3 h-3" />
+            <ChevronRight className="h-3 w-3" />
           </Button>
         )}
       </div>
@@ -171,9 +161,9 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
           data-testid="insight-dismiss-btn"
           onClick={onDismiss}
           aria-label={t('insightCard.dismiss')}
-          className={`shrink-0 min-h-11 min-w-11 ${colors.dismiss}`}
+          className={`min-h-11 min-w-11 shrink-0 ${colors.dismiss}`}
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" />
         </Button>
       )}
     </section>

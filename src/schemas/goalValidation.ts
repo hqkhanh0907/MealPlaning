@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { GoalType } from '@/features/health-profile/types';
 
 export const GOAL_TYPE_VALUES = ['cut', 'maintain', 'bulk'] as const;

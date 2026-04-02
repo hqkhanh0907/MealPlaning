@@ -8,24 +8,18 @@ export function calculateExerciseVolume(sets: WorkoutSet[]): number {
 }
 
 /** Weekly volume across all workouts */
-export function calculateWeeklyVolume(
-  workouts: Workout[],
-  allSets: WorkoutSet[],
-): number {
+export function calculateWeeklyVolume(workouts: Workout[], allSets: WorkoutSet[]): number {
   return workouts.reduce((total, w) => {
-    const workoutSets = allSets.filter((s) => s.workoutId === w.id);
+    const workoutSets = allSets.filter(s => s.workoutId === w.id);
     return total + calculateExerciseVolume(workoutSets);
   }, 0);
 }
 
 /** Sessions count in last N days */
-export function getSessionsInPeriod(
-  workouts: Workout[],
-  days: number,
-): number {
+export function getSessionsInPeriod(workouts: Workout[], days: number): number {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
-  return workouts.filter((w) => new Date(w.date) >= cutoff).length;
+  return workouts.filter(w => new Date(w.date) >= cutoff).length;
 }
 
 /** 1RM estimation (Brzycki formula — ±5% for <10 reps) */
@@ -57,13 +51,8 @@ export function isPersonalRecord(
   reps: number,
   historicalSets: WorkoutSet[],
 ): boolean {
-  const exerciseSets = historicalSets.filter(
-    (s) => s.exerciseId === exerciseId,
-  );
-  const maxEstimated1RM = Math.max(
-    0,
-    ...exerciseSets.map((s) => estimate1RM(s.weightKg, s.reps ?? 0)),
-  );
+  const exerciseSets = historicalSets.filter(s => s.exerciseId === exerciseId);
+  const maxEstimated1RM = Math.max(0, ...exerciseSets.map(s => estimate1RM(s.weightKg, s.reps ?? 0)));
   const current1RM = estimate1RM(weight, reps);
   return current1RM > maxEstimated1RM;
 }

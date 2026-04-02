@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
 import { render, renderHook } from '@testing-library/react';
-import { AuthContext } from '../contexts/authContextDef';
+import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
+
 import type { AuthContextValue } from '../contexts/authContextDef';
+import { AuthContext } from '../contexts/authContextDef';
 import { useAuth } from '../hooks/useAuth';
 
 describe('useAuth', () => {
@@ -14,9 +15,7 @@ describe('useAuth', () => {
       return null;
     };
 
-    expect(() => render(<BadComponent />)).toThrow(
-      'useAuth must be used within AuthProvider',
-    );
+    expect(() => render(<BadComponent />)).toThrow('useAuth must be used within AuthProvider');
 
     spy.mockRestore();
   });

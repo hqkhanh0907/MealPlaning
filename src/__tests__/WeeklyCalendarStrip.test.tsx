@@ -1,9 +1,7 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import {
-  WeeklyCalendarStrip,
-  type WeeklyCalendarStripProps,
-} from '../features/fitness/components/WeeklyCalendarStrip';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { WeeklyCalendarStrip, type WeeklyCalendarStripProps } from '../features/fitness/components/WeeklyCalendarStrip';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -88,26 +86,14 @@ describe('WeeklyCalendarStrip', () => {
 
   it('calls onDayToggle when interactive and clicked', () => {
     const onDayToggle = vi.fn();
-    render(
-      <WeeklyCalendarStrip
-        {...defaultProps}
-        interactive={true}
-        onDayToggle={onDayToggle}
-      />,
-    );
+    render(<WeeklyCalendarStrip {...defaultProps} interactive={true} onDayToggle={onDayToggle} />);
     fireEvent.click(screen.getByTestId('calendar-day-2'));
     expect(onDayToggle).toHaveBeenCalledWith(2);
   });
 
   it('calls onDaySelect when NOT interactive and clicked', () => {
     const onDaySelect = vi.fn();
-    render(
-      <WeeklyCalendarStrip
-        {...defaultProps}
-        interactive={false}
-        onDaySelect={onDaySelect}
-      />,
-    );
+    render(<WeeklyCalendarStrip {...defaultProps} interactive={false} onDaySelect={onDaySelect} />);
     fireEvent.click(screen.getByTestId('calendar-day-3'));
     expect(onDaySelect).toHaveBeenCalledWith(3);
   });
@@ -116,12 +102,7 @@ describe('WeeklyCalendarStrip', () => {
     const onDaySelect = vi.fn();
     const onDayToggle = vi.fn();
     render(
-      <WeeklyCalendarStrip
-        {...defaultProps}
-        interactive={true}
-        onDayToggle={onDayToggle}
-        onDaySelect={onDaySelect}
-      />,
+      <WeeklyCalendarStrip {...defaultProps} interactive={true} onDayToggle={onDayToggle} onDaySelect={onDaySelect} />,
     );
     fireEvent.click(screen.getByTestId('calendar-day-1'));
     expect(onDayToggle).toHaveBeenCalledWith(1);
@@ -132,12 +113,7 @@ describe('WeeklyCalendarStrip', () => {
     const onDayToggle = vi.fn();
     const onDaySelect = vi.fn();
     render(
-      <WeeklyCalendarStrip
-        {...defaultProps}
-        interactive={false}
-        onDayToggle={onDayToggle}
-        onDaySelect={onDaySelect}
-      />,
+      <WeeklyCalendarStrip {...defaultProps} interactive={false} onDayToggle={onDayToggle} onDaySelect={onDaySelect} />,
     );
     fireEvent.click(screen.getByTestId('calendar-day-1'));
     expect(onDaySelect).toHaveBeenCalledWith(1);
@@ -145,13 +121,7 @@ describe('WeeklyCalendarStrip', () => {
   });
 
   it('sets aria-pressed on buttons in interactive mode', () => {
-    render(
-      <WeeklyCalendarStrip
-        {...defaultProps}
-        interactive={true}
-        onDayToggle={vi.fn()}
-      />,
-    );
+    render(<WeeklyCalendarStrip {...defaultProps} interactive={true} onDayToggle={vi.fn()} />);
     const day1 = screen.getByTestId('calendar-day-1');
     expect(day1).toHaveAttribute('aria-pressed', 'true');
     const day2 = screen.getByTestId('calendar-day-2');

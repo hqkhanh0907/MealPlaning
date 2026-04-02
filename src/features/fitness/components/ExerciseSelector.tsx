@@ -1,19 +1,16 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import { Plus, Search } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Plus } from 'lucide-react';
+
+import { generateUUID } from '@/utils/helpers';
+
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
-import { EXERCISES } from '../data/exerciseDatabase';
 import { EQUIPMENT_DISPLAY } from '../constants';
-import { CustomExerciseModal } from './CustomExerciseModal';
+import { EXERCISES } from '../data/exerciseDatabase';
+import type { EquipmentType, Exercise, ExerciseCategory, MuscleGroup } from '../types';
 import type { CustomExerciseFormData } from './CustomExerciseModal';
-import { generateUUID } from '@/utils/helpers';
-import type {
-  Exercise,
-  MuscleGroup,
-  EquipmentType,
-  ExerciseCategory,
-} from '../types';
+import { CustomExerciseModal } from './CustomExerciseModal';
 
 interface ExerciseSelectorProps {
   isOpen: boolean;
@@ -23,15 +20,7 @@ interface ExerciseSelectorProps {
   equipmentFilter?: EquipmentType[];
 }
 
-const MUSCLE_GROUPS: MuscleGroup[] = [
-  'chest',
-  'back',
-  'shoulders',
-  'legs',
-  'arms',
-  'core',
-  'glutes',
-];
+const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'];
 
 const MUSCLE_GROUP_I18N_KEYS: Record<MuscleGroup, string> = {
   chest: 'fitness.exerciseSelector.muscleChest',
@@ -78,9 +67,7 @@ export function ExerciseSelector({
 }: Readonly<ExerciseSelectorProps>): React.JSX.Element | null {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<
-    MuscleGroup | 'all'
-  >(muscleGroupFilter ?? 'all');
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<MuscleGroup | 'all'>(muscleGroupFilter ?? 'all');
   const [showCustomModal, setShowCustomModal] = useState(false);
 
   useModalBackHandler(isOpen, onClose);
@@ -88,27 +75,22 @@ export function ExerciseSelector({
   const filteredExercises = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
 
-    return allExercises.filter((exercise) => {
-      if (
-        selectedMuscleGroup !== 'all' &&
-        exercise.muscleGroup !== selectedMuscleGroup
-      ) {
+    return allExercises.filter(exercise => {
+      if (selectedMuscleGroup !== 'all' && exercise.muscleGroup !== selectedMuscleGroup) {
         return false;
       }
 
       if (
         equipmentFilter &&
         equipmentFilter.length > 0 &&
-        !exercise.equipment.some((eq) => equipmentFilter.includes(eq))
+        !exercise.equipment.some(eq => equipmentFilter.includes(eq))
       ) {
         return false;
       }
 
       if (query) {
         const nameViMatch = exercise.nameVi.toLowerCase().includes(query);
-        const nameEnMatch = exercise.nameEn
-          ? exercise.nameEn.toLowerCase().includes(query)
-          : false;
+        const nameEnMatch = exercise.nameEn ? exercise.nameEn.toLowerCase().includes(query) : false;
         if (!nameViMatch && !nameEnMatch) {
           return false;
         }
@@ -126,12 +108,9 @@ export function ExerciseSelector({
     [onSelect, onClose],
   );
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    },
-    [],
-  );
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
   const handleChipClick = useCallback((group: MuscleGroup | 'all') => {
     setSelectedMuscleGroup(group);
@@ -154,9 +133,7 @@ export function ExerciseSelector({
         muscleGroup: (data.muscleGroup || 'chest') as MuscleGroup,
         secondaryMuscles: [],
         category: data.category as ExerciseCategory,
-        equipment: data.equipment
-          ? ([data.equipment] as Exercise['equipment'])
-          : [],
+        equipment: data.equipment ? ([data.equipment] as Exercise['equipment']) : [],
         contraindicated: [],
         exerciseType: 'strength',
         defaultRepsMin: 8,
@@ -176,56 +153,56 @@ export function ExerciseSelector({
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="exercise-selector-sheet"
-        className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md max-h-[85vh] flex flex-col"
+        className="relative flex max-h-[85vh] w-full flex-col rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+          <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
         </div>
 
         {/* Title */}
-        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 text-center px-4 pb-2">
+        <h2 className="px-4 pb-2 text-center text-lg font-bold text-slate-800 dark:text-slate-200">
           {t('fitness.exerciseSelector.title')}
         </h2>
 
         {/* Search bar */}
         <div className="px-4 pb-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               data-testid="exercise-search-input"
               placeholder={t('fitness.exerciseSelector.search')}
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm placeholder:text-slate-400 border-none outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full rounded-xl border-none bg-slate-100 py-2.5 pr-4 pl-10 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 dark:bg-slate-700 dark:text-slate-200"
             />
           </div>
         </div>
 
         {/* Muscle group chips */}
-        <div className="px-4 pb-3 overflow-x-auto shrink-0">
-          <div className="flex gap-2 min-w-max" data-testid="muscle-group-chips">
+        <div className="shrink-0 overflow-x-auto px-4 pb-3">
+          <div className="flex min-w-max gap-2" data-testid="muscle-group-chips">
             <button
               type="button"
               onClick={() => handleChipClick('all')}
-              className={`px-3 py-1.5 min-h-11 rounded-full text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 selectedMuscleGroup === 'all'
                   ? 'bg-emerald-500 text-white'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                  : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
               }`}
             >
               {t('fitness.exerciseSelector.all')}
             </button>
-            {MUSCLE_GROUPS.map((group) => (
+            {MUSCLE_GROUPS.map(group => (
               <button
                 key={group}
                 type="button"
                 onClick={() => handleChipClick(group)}
-                className={`px-3 py-1.5 min-h-11 rounded-full text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   selectedMuscleGroup === group
                     ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
                 {t(MUSCLE_GROUP_I18N_KEYS[group])}
@@ -241,40 +218,30 @@ export function ExerciseSelector({
               data-testid="exercise-empty-state"
               className="flex flex-col items-center justify-center py-12 text-slate-400"
             >
-              <p className="text-sm">
-                {t('fitness.exerciseSelector.noResults')}
-              </p>
+              <p className="text-sm">{t('fitness.exerciseSelector.noResults')}</p>
             </div>
           ) : (
             <ul className="divide-y divide-slate-100 dark:divide-slate-700">
-              {filteredExercises.map((exercise) => (
+              {filteredExercises.map(exercise => (
                 <li key={exercise.id}>
                   <button
                     type="button"
                     data-testid={`exercise-item-${exercise.id}`}
                     onClick={() => handleSelect(exercise)}
-                    className="w-full text-left px-2 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="focus-visible:ring-ring w-full rounded-lg px-2 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 dark:hover:bg-slate-700/50"
                   >
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                      {exercise.nameVi}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{exercise.nameVi}</p>
+                    <div className="mt-0.5 flex items-center gap-2">
                       <span className="text-xs text-slate-500 dark:text-slate-400">
                         {t(MUSCLE_GROUP_I18N_KEYS[exercise.muscleGroup])}
                       </span>
-                      <span className="text-xs text-slate-300 dark:text-slate-600">
-                        •
-                      </span>
+                      <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
                       <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         {t(CATEGORY_I18N_KEYS[exercise.category])}
                       </span>
-                      <span className="text-xs text-slate-300 dark:text-slate-600">
-                        •
-                      </span>
+                      <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {exercise.equipment
-                          .map((eq) => EQUIPMENT_DISPLAY[eq] ?? eq)
-                          .join(', ')}
+                        {exercise.equipment.map(eq => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
                       </span>
                     </div>
                   </button>
@@ -285,11 +252,11 @@ export function ExerciseSelector({
         </div>
 
         {/* Custom Exercise button — sticky footer outside scroll */}
-        <div className="border-t border-slate-200 px-4 py-3 pb-safe dark:border-slate-700">
+        <div className="pb-safe border-t border-slate-200 px-4 py-3 dark:border-slate-700">
           <button
             type="button"
             onClick={openCustomModal}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 dark:border-slate-600 dark:text-slate-500 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="focus-visible:ring-ring flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 focus-visible:ring-2 focus-visible:ring-offset-2 dark:border-slate-600 dark:text-slate-500"
             data-testid="add-custom-exercise"
           >
             <Plus className="h-4 w-4" />
@@ -298,11 +265,7 @@ export function ExerciseSelector({
         </div>
 
         {/* Custom Exercise Modal */}
-        <CustomExerciseModal
-          isOpen={showCustomModal}
-          onClose={closeCustomModal}
-          onSave={handleSaveCustomExercise}
-        />
+        <CustomExerciseModal isOpen={showCustomModal} onClose={closeCustomModal} onSave={handleSaveCustomExercise} />
       </div>
     </ModalBackdrop>
   );

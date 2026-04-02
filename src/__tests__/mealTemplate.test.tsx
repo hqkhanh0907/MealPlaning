@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { TemplateManager } from '../components/modals/TemplateManager';
-import { MealTemplate, Dish } from '../types';
+import { Dish, MealTemplate } from '../types';
 
 // Mock i18n
 vi.mock('react-i18next', () => ({

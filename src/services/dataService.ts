@@ -1,15 +1,14 @@
 // Handles legacy format conversions. Pure functions for testability.
 
-import { DayPlan, Dish, MealType, Ingredient, DishIngredient, SaveAnalyzedDishPayload } from '../types';
-import { createEmptyDayPlan } from './planService';
+import { DayPlan, Dish, DishIngredient, Ingredient, MealType, SaveAnalyzedDishPayload } from '../types';
 import { generateUUID } from '../utils/helpers';
+import { getLocalizedField, toLocalized } from '../utils/localize';
 import { logger } from '../utils/logger';
-import { toLocalized, getLocalizedField } from '../utils/localize';
+import { createEmptyDayPlan } from './planService';
 
 // --- Type guards for runtime validation during migration ---
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === 'object' && v !== null;
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 
 const isDayPlan = (v: unknown): v is DayPlan =>
   isRecord(v) &&
@@ -53,7 +52,7 @@ export const migrateDishes = (dishes: unknown[]): Dish[] => {
       if (!isDish(d)) {
         logger.warn(
           { component: 'dataService', action: 'migrateDishes' },
-          `Invalid dish data skipped during migration: ${JSON.stringify(d)}`
+          `Invalid dish data skipped during migration: ${JSON.stringify(d)}`,
         );
         return false;
       }
@@ -62,9 +61,7 @@ export const migrateDishes = (dishes: unknown[]): Dish[] => {
     .map(d => {
       const dish = d as Dish;
       const rawTags = dish.tags;
-      const tags: MealType[] = Array.isArray(rawTags) && rawTags.length > 0
-        ? rawTags
-        : ['lunch'];
+      const tags: MealType[] = Array.isArray(rawTags) && rawTags.length > 0 ? rawTags : ['lunch'];
       return { ...dish, name: toLocalized(dish.name), tags };
     });
 };
@@ -76,7 +73,7 @@ export const migrateIngredients = (ingredients: unknown[]): Ingredient[] => {
       if (!isIngredient(i)) {
         logger.warn(
           { component: 'dataService', action: 'migrateIngredients' },
-          `Invalid ingredient data skipped during migration: ${JSON.stringify(i)}`
+          `Invalid ingredient data skipped during migration: ${JSON.stringify(i)}`,
         );
         return false;
       }
@@ -90,7 +87,7 @@ export const migrateIngredients = (ingredients: unknown[]): Ingredient[] => {
 
 export const processAnalyzedDish = (
   result: SaveAnalyzedDishPayload,
-  existingIngredients: Ingredient[]
+  existingIngredients: Ingredient[],
 ): { newIngredients: Ingredient[]; dishIngredients: DishIngredient[] } => {
   const newIngredients: Ingredient[] = [];
   const dishIngredients: DishIngredient[] = [];
@@ -132,17 +129,12 @@ export interface ImportValidationResult {
 }
 
 const IMPORT_VALIDATORS: Record<string, (v: unknown) => boolean> = {
-  'mp-ingredients': (v) => Array.isArray(v) && v.every((i: unknown) =>
-    isRecord(i) && 'id' in i && 'name' in i && 'unit' in i
-  ),
-  'mp-dishes': (v) => Array.isArray(v) && v.every((d: unknown) =>
-    isRecord(d) && 'id' in d && 'name' in d && 'ingredients' in d
-  ),
-  'mp-day-plans': (v) => Array.isArray(v) && v.every((p: unknown) =>
-    isRecord(p) && 'date' in p
-  ),
-  'mp-user-profile': (v) =>
-    isRecord(v) && 'weight' in v && 'targetCalories' in v,
+  'mp-ingredients': v =>
+    Array.isArray(v) && v.every((i: unknown) => isRecord(i) && 'id' in i && 'name' in i && 'unit' in i),
+  'mp-dishes': v =>
+    Array.isArray(v) && v.every((d: unknown) => isRecord(d) && 'id' in d && 'name' in d && 'ingredients' in d),
+  'mp-day-plans': v => Array.isArray(v) && v.every((p: unknown) => isRecord(p) && 'date' in p),
+  'mp-user-profile': v => isRecord(v) && 'weight' in v && 'targetCalories' in v,
 };
 
 /** Pure validation — separates valid/invalid keys from raw import data. */

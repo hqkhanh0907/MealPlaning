@@ -1,10 +1,8 @@
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import {
-  DayAssignmentSheet,
-  type DayAssignmentSheetProps,
-} from '../features/fitness/components/DayAssignmentSheet';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { DayAssignmentSheet, type DayAssignmentSheetProps } from '../features/fitness/components/DayAssignmentSheet';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -39,13 +37,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({
-    children,
-    onClose,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-  }) => (
+  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
     <div data-testid="modal-backdrop">
       <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
       {children}
@@ -70,17 +62,13 @@ const defaultProps: DayAssignmentSheetProps = {
 
 describe('DayAssignmentSheet', () => {
   it('renders nothing when open is false', () => {
-    const { container } = render(
-      <DayAssignmentSheet {...defaultProps} open={false} />,
-    );
+    const { container } = render(<DayAssignmentSheet {...defaultProps} open={false} />);
     expect(container.innerHTML).toBe('');
   });
 
   it('renders title when open', () => {
     render(<DayAssignmentSheet {...defaultProps} />);
-    expect(screen.getByTestId('day-assignment-title')).toHaveTextContent(
-      'Chọn ngày tập',
-    );
+    expect(screen.getByTestId('day-assignment-title')).toHaveTextContent('Chọn ngày tập');
   });
 
   it('renders all training days as options', () => {
@@ -111,49 +99,27 @@ describe('DayAssignmentSheet', () => {
   it('calls onSelectDay and onClose when a day is selected', () => {
     const onSelectDay = vi.fn();
     const onClose = vi.fn();
-    render(
-      <DayAssignmentSheet
-        {...defaultProps}
-        onSelectDay={onSelectDay}
-        onClose={onClose}
-      />,
-    );
+    render(<DayAssignmentSheet {...defaultProps} onSelectDay={onSelectDay} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('day-option-3'));
     expect(onSelectDay).toHaveBeenCalledWith(3);
     expect(onClose).toHaveBeenCalled();
   });
 
   it('disables day at max capacity (3 sessions)', () => {
-    render(
-      <DayAssignmentSheet
-        {...defaultProps}
-        existingDayCounts={{ 1: 1, 3: 3, 5: 0 }}
-      />,
-    );
+    render(<DayAssignmentSheet {...defaultProps} existingDayCounts={{ 1: 1, 3: 3, 5: 0 }} />);
     const day3 = screen.getByTestId('day-option-3');
     expect(day3).toBeDisabled();
   });
 
   it('shows warning icon for full days', () => {
-    render(
-      <DayAssignmentSheet
-        {...defaultProps}
-        existingDayCounts={{ 1: 1, 3: 3, 5: 0 }}
-      />,
-    );
+    render(<DayAssignmentSheet {...defaultProps} existingDayCounts={{ 1: 1, 3: 3, 5: 0 }} />);
     expect(screen.getByTestId('day-full-warning-3')).toBeInTheDocument();
     expect(screen.queryByTestId('day-full-warning-1')).not.toBeInTheDocument();
   });
 
   it('does not call onSelectDay for disabled (full) days', () => {
     const onSelectDay = vi.fn();
-    render(
-      <DayAssignmentSheet
-        {...defaultProps}
-        onSelectDay={onSelectDay}
-        existingDayCounts={{ 1: 1, 3: 3, 5: 0 }}
-      />,
-    );
+    render(<DayAssignmentSheet {...defaultProps} onSelectDay={onSelectDay} existingDayCounts={{ 1: 1, 3: 3, 5: 0 }} />);
     fireEvent.click(screen.getByTestId('day-option-3'));
     expect(onSelectDay).not.toHaveBeenCalled();
   });
@@ -166,13 +132,7 @@ describe('DayAssignmentSheet', () => {
   });
 
   it('renders days sorted ascending', () => {
-    render(
-      <DayAssignmentSheet
-        {...defaultProps}
-        trainingDays={[5, 1, 3]}
-        existingDayCounts={{ 1: 0, 3: 0, 5: 0 }}
-      />,
-    );
+    render(<DayAssignmentSheet {...defaultProps} trainingDays={[5, 1, 3]} existingDayCounts={{ 1: 0, 3: 0, 5: 0 }} />);
     const options = [
       screen.getByTestId('day-option-1'),
       screen.getByTestId('day-option-3'),
@@ -196,13 +156,7 @@ describe('DayAssignmentSheet', () => {
 
   it('defaults existingDayCounts to empty when not provided', () => {
     render(
-      <DayAssignmentSheet
-        open={true}
-        onClose={vi.fn()}
-        trainingDays={[1, 3]}
-        currentDay={1}
-        onSelectDay={vi.fn()}
-      />,
+      <DayAssignmentSheet open={true} onClose={vi.fn()} trainingDays={[1, 3]} currentDay={1} onSelectDay={vi.fn()} />,
     );
     const day1 = screen.getByTestId('day-option-1');
     expect(day1.textContent).toContain('0 buổi');

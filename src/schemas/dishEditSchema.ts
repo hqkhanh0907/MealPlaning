@@ -45,9 +45,7 @@ export const dishEditSchema = z.object({
   tags: z.array(z.enum(MEAL_TYPE_VALUES)).min(1, 'Select at least one meal tag'),
   rating: z.number().min(0).max(5),
   notes: z.string().optional(),
-  ingredients: z
-    .array(dishIngredientSchema)
-    .min(1, 'At least one ingredient is required'),
+  ingredients: z.array(dishIngredientSchema).min(1, 'At least one ingredient is required'),
 });
 
 export type DishEditFormData = z.infer<typeof dishEditSchema>;

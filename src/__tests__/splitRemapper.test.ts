@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { remapExercisesToNewSplit } from '../features/fitness/utils/splitRemapper';
+import { describe, expect, it } from 'vitest';
+
 import type { TrainingPlanDay } from '../features/fitness/types';
+import { remapExercisesToNewSplit } from '../features/fitness/utils/splitRemapper';
 
 function makePlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay {
   return {
@@ -27,9 +28,7 @@ describe('remapExercisesToNewSplit', () => {
   });
 
   it('maps chest/back day to Upper in upper_lower split', () => {
-    const days = [
-      makePlanDay({ id: 'day-1', muscleGroups: '["chest","back","shoulders"]' }),
-    ];
+    const days = [makePlanDay({ id: 'day-1', muscleGroups: '["chest","back","shoulders"]' })];
     const result = remapExercisesToNewSplit(days, 'upper_lower', 2);
     expect(result.mapped).toHaveLength(1);
     expect(result.mapped[0].toDay).toBe('Upper');
@@ -39,27 +38,21 @@ describe('remapExercisesToNewSplit', () => {
   });
 
   it('maps legs day to Lower in upper_lower split', () => {
-    const days = [
-      makePlanDay({ id: 'day-1', muscleGroups: '["legs","glutes"]' }),
-    ];
+    const days = [makePlanDay({ id: 'day-1', muscleGroups: '["legs","glutes"]' })];
     const result = remapExercisesToNewSplit(days, 'upper_lower', 2);
     expect(result.mapped).toHaveLength(1);
     expect(result.mapped[0].toDay).toBe('Lower');
   });
 
   it('maps push muscles to Push in PPL split', () => {
-    const days = [
-      makePlanDay({ id: 'day-1', muscleGroups: '["chest","shoulders"]' }),
-    ];
+    const days = [makePlanDay({ id: 'day-1', muscleGroups: '["chest","shoulders"]' })];
     const result = remapExercisesToNewSplit(days, 'ppl', 3);
     expect(result.mapped).toHaveLength(1);
     expect(result.mapped[0].toDay).toBe('Push');
   });
 
   it('maps back muscles to Pull in PPL split', () => {
-    const days = [
-      makePlanDay({ id: 'day-1', muscleGroups: '["back"]' }),
-    ];
+    const days = [makePlanDay({ id: 'day-1', muscleGroups: '["back"]' })];
     const result = remapExercisesToNewSplit(days, 'ppl', 3);
     expect(result.mapped).toHaveLength(1);
     expect(result.mapped[0].toDay).toBe('Pull');
@@ -119,7 +112,7 @@ describe('remapExercisesToNewSplit', () => {
       makePlanDay({ id: 'day-2', muscleGroups: '["chest"]', dayOfWeek: 2 }),
     ];
     const result = remapExercisesToNewSplit(days, 'ppl', 3);
-    const mappedToDays = result.mapped.map((m) => m.toDay);
+    const mappedToDays = result.mapped.map(m => m.toDay);
     const uniqueDays = new Set(mappedToDays);
     expect(uniqueDays.size).toBe(mappedToDays.length);
   });

@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { SyncConflictModal } from '../components/modals/SyncConflictModal';
 
 const LOCAL_TIME = '2024-01-15T10:30:00Z';
@@ -13,12 +14,7 @@ describe('SyncConflictModal', () => {
 
   const renderModal = () =>
     render(
-      <SyncConflictModal
-        localTime={LOCAL_TIME}
-        remoteTime={REMOTE_TIME}
-        onResolve={onResolve}
-        onClose={onClose}
-      />,
+      <SyncConflictModal localTime={LOCAL_TIME} remoteTime={REMOTE_TIME} onResolve={onResolve} onClose={onClose} />,
     );
 
   beforeEach(() => {

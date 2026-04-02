@@ -1,5 +1,6 @@
-import { render, screen, cleanup } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { GoalPhaseSelector } from '../features/health-profile/components/GoalPhaseSelector';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import type { DatabaseService } from '../services/databaseService';
@@ -99,21 +100,15 @@ describe('GoalPhaseSelector', () => {
     await user.click(screen.getByTestId('goal-type-cut'));
 
     // Default is moderate → -550
-    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-      '-550 kcal',
-    );
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('-550 kcal');
 
     // Switch to conservative → -275
     await user.click(screen.getByTestId('rate-conservative'));
-    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-      '-275 kcal',
-    );
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('-275 kcal');
 
     // Switch to aggressive → -1100
     await user.click(screen.getByTestId('rate-aggressive'));
-    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-      '-1100 kcal',
-    );
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('-1100 kcal');
   });
 
   it('save button creates goal with correct offset', async () => {
@@ -164,9 +159,7 @@ describe('GoalPhaseSelector', () => {
     render(<GoalPhaseSelector />);
 
     await user.click(screen.getByTestId('goal-type-cut'));
-    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-      '-550 kcal',
-    );
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('-550 kcal');
 
     // Toggle to manual override
     await user.click(screen.getByTestId('manual-override-toggle'));
@@ -178,9 +171,7 @@ describe('GoalPhaseSelector', () => {
     // Clear and type custom value
     await user.clear(screen.getByTestId('custom-offset-input'));
     await user.type(screen.getByTestId('custom-offset-input'), '-400');
-    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-      '-400 kcal',
-    );
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('-400 kcal');
 
     // Save with custom offset
     await user.click(screen.getByTestId('save-goal-button'));
@@ -207,18 +198,14 @@ describe('GoalPhaseSelector', () => {
       await user.click(screen.getByTestId(goalTestId));
       await user.click(screen.getByTestId(rateTestId));
 
-      expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-        expected,
-      );
+      expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(expected);
     }
 
     // Maintain should always show ±0
     cleanup();
     render(<GoalPhaseSelector />);
     await user.click(screen.getByTestId('goal-type-maintain'));
-    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent(
-      '±0 kcal',
-    );
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('±0 kcal');
   });
 
   it('handleSave returns false when saveGoal throws', async () => {

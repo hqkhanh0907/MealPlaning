@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
+
 import { DatabaseProvider, useDatabase } from '../contexts/DatabaseContext';
 
 /* Mock createDatabaseService so we don't need real sql.js WASM */

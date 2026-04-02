@@ -1,10 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import {
-  estimateCardioBurn,
-  getMETValue,
-  MET_TABLE,
-} from '../features/fitness/utils/cardioEstimator';
-import type { CardioType, CardioIntensity } from '../features/fitness/utils/cardioEstimator';
+import { describe, expect, it } from 'vitest';
+
+import type { CardioIntensity, CardioType } from '../features/fitness/utils/cardioEstimator';
+import { estimateCardioBurn, getMETValue, MET_TABLE } from '../features/fitness/utils/cardioEstimator';
 
 const ALL_TYPES: CardioType[] = ['running', 'cycling', 'swimming', 'hiit', 'walking', 'elliptical', 'rowing'];
 const ALL_INTENSITIES: CardioIntensity[] = ['low', 'moderate', 'high'];
@@ -37,9 +34,7 @@ describe('estimateCardioBurn', () => {
 
   it('produces valid estimates for all 3 intensities of each type', () => {
     for (const type of ALL_TYPES) {
-      const results = ALL_INTENSITIES.map((intensity) =>
-        estimateCardioBurn(type, 30, intensity, 70),
-      );
+      const results = ALL_INTENSITIES.map(intensity => estimateCardioBurn(type, 30, intensity, 70));
       // low < moderate < high for every type
       expect(results[0]).toBeLessThan(results[1]);
       expect(results[1]).toBeLessThan(results[2]);

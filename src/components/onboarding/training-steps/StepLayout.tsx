@@ -1,5 +1,6 @@
-import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
 
 interface StepLayoutProps {
@@ -14,7 +15,7 @@ export function StepLayout({ title, subtitle, goNext, goBack, children }: Readon
   const { t } = useTranslation();
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto px-6 pb-24 pt-4">
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h2>
         <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
         {children}

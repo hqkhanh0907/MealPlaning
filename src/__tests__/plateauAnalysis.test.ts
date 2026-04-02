@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import type { Workout, WorkoutSet } from '../features/fitness/types';
 import { analyzePlateau } from '../features/fitness/utils/plateauAnalysis';
 
@@ -55,9 +56,7 @@ describe('analyzePlateau', () => {
     });
 
     it('returns no plateau with fewer than 6 sets', () => {
-      const sets = Array.from({ length: 5 }, (_, i) =>
-        createSet({ reps: 8, weightKg: 60 + i, updatedAt: daysAgo(i) }),
-      );
+      const sets = Array.from({ length: 5 }, (_, i) => createSet({ reps: 8, weightKg: 60 + i, updatedAt: daysAgo(i) }));
       const result = analyzePlateau(workouts, sets, exerciseId);
       expect(result).toEqual({
         strengthPlateau: false,
@@ -393,30 +392,22 @@ describe('analyzePlateau', () => {
     it('sorts sets by updatedAt descending to identify recent vs previous', () => {
       // Recent 3 at 70kg, previous 6 at 60kg → no strength plateau
       const sets = [
-        ...Array.from({ length: 3 }, (_, i) =>
-          createSet({ weightKg: 70, reps: 8, updatedAt: daysAgo(i) }),
-        ),
-        ...Array.from({ length: 6 }, (_, i) =>
-          createSet({ weightKg: 60, reps: 8, updatedAt: daysAgo(3 + i) }),
-        ),
+        ...Array.from({ length: 3 }, (_, i) => createSet({ weightKg: 70, reps: 8, updatedAt: daysAgo(i) })),
+        ...Array.from({ length: 6 }, (_, i) => createSet({ weightKg: 60, reps: 8, updatedAt: daysAgo(3 + i) })),
       ];
       const result = analyzePlateau(workouts, sets, exerciseId);
       expect(result.strengthPlateau).toBe(false);
     });
 
     it('works with exactly 6 sets (minimum threshold)', () => {
-      const sets = Array.from({ length: 6 }, (_, i) =>
-        createSet({ weightKg: 60, reps: 8, updatedAt: daysAgo(i) }),
-      );
+      const sets = Array.from({ length: 6 }, (_, i) => createSet({ weightKg: 60, reps: 8, updatedAt: daysAgo(i) }));
       const result = analyzePlateau(workouts, sets, exerciseId);
       // All same weight → strength plateau
       expect(result.strengthPlateau).toBe(true);
     });
 
     it('ignores first param (workouts) for the analysis', () => {
-      const sets = Array.from({ length: 9 }, (_, i) =>
-        createSet({ weightKg: 60, reps: 8, updatedAt: daysAgo(i) }),
-      );
+      const sets = Array.from({ length: 9 }, (_, i) => createSet({ weightKg: 60, reps: 8, updatedAt: daysAgo(i) }));
       const resultA = analyzePlateau([], sets, exerciseId);
       const resultB = analyzePlateau(workouts, sets, exerciseId);
       expect(resultA).toEqual(resultB);
@@ -424,9 +415,7 @@ describe('analyzePlateau', () => {
 
     it('handles sets with same updatedAt gracefully', () => {
       const ts = new Date().toISOString();
-      const sets = Array.from({ length: 9 }, () =>
-        createSet({ weightKg: 60, reps: 8, updatedAt: ts }),
-      );
+      const sets = Array.from({ length: 9 }, () => createSet({ weightKg: 60, reps: 8, updatedAt: ts }));
       const result = analyzePlateau(workouts, sets, exerciseId);
       expect(result.strengthPlateau).toBe(true);
     });

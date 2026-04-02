@@ -1,7 +1,8 @@
+import type { LucideIcon } from 'lucide-react';
+import { Edit3, Moon, Plus, Sun, Sunrise } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Edit3, Plus, Sunrise, Sun, Moon } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+
 import { DayPlan, Dish, Ingredient, MealType, SupportedLang } from '../types';
 import { getLocalizedField } from '../utils/localize';
 import { calculateDishesNutrition } from '../utils/nutrition';
@@ -53,10 +54,11 @@ export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
   }, [currentPlan]);
 
   return (
-    <section data-testid="quick-preview-panel" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 sm:p-6 space-y-3">
-      <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-        {t('quickPreview.title')}
-      </h3>
+    <section
+      data-testid="quick-preview-panel"
+      className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800"
+    >
+      <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{t('quickPreview.title')}</h3>
 
       <div className="space-y-2">
         {MEAL_SLOTS.map(({ type, icon, key }) => (
@@ -79,9 +81,9 @@ export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
         <button
           type="button"
           onClick={onPlanAll}
-          className="w-full min-h-11 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-medium text-sm py-2.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors active:scale-[0.98]"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 active:scale-[0.98] dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           {t('quickPreview.planAll')}
         </button>
       )}
@@ -104,14 +106,20 @@ interface MealRowProps {
 }
 
 const MealRow = React.memo(function MealRow({
-  type, icon: MealIcon, label, dishIds, dishes, ingredients, lang, t, onPlanMeal,
+  type,
+  icon: MealIcon,
+  label,
+  dishIds,
+  dishes,
+  ingredients,
+  lang,
+  t,
+  onPlanMeal,
 }: MealRowProps) {
   const hasDishes = dishIds.length > 0;
 
   const resolvedDishes = useMemo(() => {
-    return dishIds
-      .map((id) => dishes.find((d) => d.id === id))
-      .filter((d): d is Dish => d !== undefined);
+    return dishIds.map(id => dishes.find(d => d.id === id)).filter((d): d is Dish => d !== undefined);
   }, [dishIds, dishes]);
 
   const nutrition = useMemo(() => {
@@ -125,7 +133,7 @@ const MealRow = React.memo(function MealRow({
   const extraCount = resolvedDishes.length - MAX_VISIBLE_DISHES;
 
   const dishSummary = useMemo(() => {
-    const names = visibleDishes.map((d) => getLocalizedField(d.name, lang)).join(', ');
+    const names = visibleDishes.map(d => getLocalizedField(d.name, lang)).join(', ');
     if (extraCount > 0) return `${names}, ${t('quickPreview.more', { count: extraCount })}`;
     return names;
   }, [visibleDishes, extraCount, lang, t]);
@@ -133,28 +141,34 @@ const MealRow = React.memo(function MealRow({
   return (
     <div
       data-testid={TEST_ID_MAP[type]}
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+      className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-700/50 dark:hover:bg-slate-700"
     >
       <MealIcon className="size-5 shrink-0" aria-hidden="true" />
 
-      <div className="flex-1 min-w-0 space-y-1">
+      <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
-          <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+          <span className="truncate text-xs text-slate-500 dark:text-slate-400">
             {hasDishes ? dishSummary : t('quickPreview.empty')}
           </span>
         </div>
 
         {hasDishes && (
           <div className="flex gap-2">
-            <div className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-600 overflow-hidden" title={`${nutrition.calories.toFixed(0)} kcal`}>
+            <div
+              className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600"
+              title={`${nutrition.calories.toFixed(0)} kcal`}
+            >
               <div
                 className="h-full rounded-full bg-orange-400 transition-all"
                 style={{ width: `${calPercent}%` }}
                 data-testid={`cal-bar-${type}`}
               />
             </div>
-            <div className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-600 overflow-hidden" title={`${nutrition.protein.toFixed(1)}g protein`}>
+            <div
+              className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600"
+              title={`${nutrition.protein.toFixed(1)}g protein`}
+            >
               <div
                 className="h-full rounded-full bg-blue-400 transition-all"
                 style={{ width: `${proPercent}%` }}
@@ -168,18 +182,17 @@ const MealRow = React.memo(function MealRow({
       <button
         type="button"
         onClick={() => onPlanMeal(type)}
-        className="min-h-11 min-w-11 flex items-center justify-center gap-1 shrink-0 rounded-lg text-sm font-medium transition-colors active:scale-[0.98] px-2
-          text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
+        className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-900/30"
         aria-label={hasDishes ? t('quickPreview.edit') : t('quickPreview.add')}
       >
         {hasDishes ? (
           <>
-            <Edit3 className="w-4 h-4" />
+            <Edit3 className="h-4 w-4" />
             <span className="hidden sm:inline">{t('quickPreview.edit')}</span>
           </>
         ) : (
           <>
-            <Plus className="w-4 h-4" />
+            <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">{t('quickPreview.add')}</span>
           </>
         )}

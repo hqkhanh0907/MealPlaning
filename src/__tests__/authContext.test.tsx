@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React, { useImperativeHandle } from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React, { useImperativeHandle } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { AuthProvider } from '../contexts/AuthContext';
-import { useAuth } from '../hooks/useAuth';
 import type { AuthContextValue } from '../contexts/authContextDef';
+import { useAuth } from '../hooks/useAuth';
 
 const mockInitialize = vi.fn();
 const mockLogin = vi.fn();
@@ -211,11 +212,7 @@ describe('AuthProvider', () => {
         expect(screen.getByTestId('user').textContent).toBe('test@gmail.com');
       });
 
-      expect(mockSetSetting).toHaveBeenCalledWith(
-        mockDb,
-        'auth_state',
-        expect.stringContaining('test@gmail.com'),
-      );
+      expect(mockSetSetting).toHaveBeenCalledWith(mockDb, 'auth_state', expect.stringContaining('test@gmail.com'));
     });
   });
 
@@ -231,10 +228,12 @@ describe('AuthProvider', () => {
     });
 
     it('should restore persisted auth from SQLite on web', async () => {
-      mockGetSetting.mockResolvedValue(JSON.stringify({
-        user: { id: 'u1', email: 'saved@g.com', displayName: 'Saved', photoUrl: null },
-        accessToken: 'saved-token',
-      }));
+      mockGetSetting.mockResolvedValue(
+        JSON.stringify({
+          user: { id: 'u1', email: 'saved@g.com', displayName: 'Saved', photoUrl: null },
+          accessToken: 'saved-token',
+        }),
+      );
 
       renderApp();
 
@@ -367,12 +366,14 @@ describe('AuthProvider', () => {
       };
 
       const mockFetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(JSON.stringify({
-          sub: 'gis-id',
-          email: 'gis@gmail.com',
-          name: 'GIS User',
-          picture: 'https://pic.url',
-        })),
+        new Response(
+          JSON.stringify({
+            sub: 'gis-id',
+            email: 'gis@gmail.com',
+            name: 'GIS User',
+            picture: 'https://pic.url',
+          }),
+        ),
       );
 
       renderApp();
@@ -451,9 +452,7 @@ describe('AuthProvider', () => {
         },
       };
 
-      const mockFetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(null, { status: 401 }),
-      );
+      const mockFetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 401 }));
 
       renderApp();
       await waitFor(() => {
@@ -604,11 +603,7 @@ describe('AuthProvider', () => {
         expect(screen.getByTestId('user').textContent).toBe('test@gmail.com');
       });
 
-      expect(mockSetSetting).toHaveBeenCalledWith(
-        mockDb,
-        'auth_state',
-        expect.any(String),
-      );
+      expect(mockSetSetting).toHaveBeenCalledWith(mockDb, 'auth_state', expect.any(String));
 
       const user = userEvent.setup();
       await user.click(screen.getByText('sign-out'));
@@ -633,10 +628,12 @@ describe('AuthProvider', () => {
         },
       };
 
-      mockGetSetting.mockResolvedValue(JSON.stringify({
-        user: { id: 'u1', email: 'web@g.com', displayName: 'Web', photoUrl: null },
-        accessToken: 'web-token',
-      }));
+      mockGetSetting.mockResolvedValue(
+        JSON.stringify({
+          user: { id: 'u1', email: 'web@g.com', displayName: 'Web', photoUrl: null },
+          accessToken: 'web-token',
+        }),
+      );
 
       renderApp();
       await waitFor(() => {
@@ -655,10 +652,12 @@ describe('AuthProvider', () => {
     });
 
     it('should handle sign-out when no google namespace on window', async () => {
-      mockGetSetting.mockResolvedValue(JSON.stringify({
-        user: { id: 'u1', email: 'web@g.com', displayName: 'Web', photoUrl: null },
-        accessToken: 'web-token',
-      }));
+      mockGetSetting.mockResolvedValue(
+        JSON.stringify({
+          user: { id: 'u1', email: 'web@g.com', displayName: 'Web', photoUrl: null },
+          accessToken: 'web-token',
+        }),
+      );
 
       renderApp();
       await waitFor(() => {

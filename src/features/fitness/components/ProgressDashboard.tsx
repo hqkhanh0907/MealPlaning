@@ -1,21 +1,12 @@
-import { useMemo, useState, useCallback, memo } from 'react';
+import { BarChart3, Calendar, Dumbbell, Minus, Scale, Target, TrendingDown, TrendingUp, X } from 'lucide-react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Scale,
-  Dumbbell,
-  Target,
-  Calendar,
-  X,
-  BarChart3,
-} from 'lucide-react';
+
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { calculateWeeklyVolume, estimate1RM } from '../utils/trainingMetrics';
-import { getWeekBounds } from '../utils/dateUtils';
 import { useCurrentDate } from '../hooks/useCurrentDate';
+import { getWeekBounds } from '../utils/dateUtils';
 import { analyzePlateau } from '../utils/plateauAnalysis';
+import { calculateWeeklyVolume, estimate1RM } from '../utils/trainingMetrics';
 
 type MetricCardType = 'weight' | '1rm' | 'adherence' | 'sessions';
 type TimeRange = '1W' | '1M' | '3M' | 'all';
@@ -58,11 +49,11 @@ function SimpleBarChart({ data }: Readonly<{ data: number[] }>) {
 
 function ProgressDashboardInner() {
   const { t } = useTranslation();
-  const workouts = useFitnessStore((s) => s.workouts);
-  const workoutSets = useFitnessStore((s) => s.workoutSets);
-  const weightEntries = useFitnessStore((s) => s.weightEntries);
-  const trainingProfile = useFitnessStore((s) => s.trainingProfile);
-  const activePlan = useFitnessStore((s) => s.getActivePlan());
+  const workouts = useFitnessStore(s => s.workouts);
+  const workoutSets = useFitnessStore(s => s.workoutSets);
+  const weightEntries = useFitnessStore(s => s.weightEntries);
+  const trainingProfile = useFitnessStore(s => s.trainingProfile);
+  const activePlan = useFitnessStore(s => s.getActivePlan());
 
   const [dismissedInsights, setDismissedInsights] = useState<string[]>([]);
   const [selectedCard, setSelectedCard] = useState<MetricCardType | null>(null);
@@ -75,18 +66,12 @@ function ProgressDashboardInner() {
   const lastWeek = useMemo(() => getWeekBounds(-1, currentDate), [currentDate]);
 
   const thisWeekWorkouts = useMemo(
-    () =>
-      workouts.filter(
-        (w) => w.date >= thisWeek.start && w.date <= thisWeek.end,
-      ),
+    () => workouts.filter(w => w.date >= thisWeek.start && w.date <= thisWeek.end),
     [workouts, thisWeek],
   );
 
   const lastWeekWorkouts = useMemo(
-    () =>
-      workouts.filter(
-        (w) => w.date >= lastWeek.start && w.date <= lastWeek.end,
-      ),
+    () => workouts.filter(w => w.date >= lastWeek.start && w.date <= lastWeek.end),
     [workouts, lastWeek],
   );
 
@@ -101,51 +86,31 @@ function ProgressDashboardInner() {
   );
 
   const volumeChangePercent =
-    lastWeekVolume > 0
-      ? Math.round(
-          ((thisWeekVolume - lastWeekVolume) / lastWeekVolume) * 100,
-        )
-      : 0;
+    lastWeekVolume > 0 ? Math.round(((thisWeekVolume - lastWeekVolume) / lastWeekVolume) * 100) : 0;
 
-  const sortedWeights = useMemo(
-    () => [...weightEntries].sort((a, b) => b.date.localeCompare(a.date)),
-    [weightEntries],
-  );
+  const sortedWeights = useMemo(() => [...weightEntries].sort((a, b) => b.date.localeCompare(a.date)), [weightEntries]);
 
-  const latestWeight =
-    sortedWeights.length > 0 ? sortedWeights[0] : undefined;
+  const latestWeight = sortedWeights.length > 0 ? sortedWeights[0] : undefined;
 
   const weight7DaysAgo = useMemo(() => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 7);
     const cutoffStr = cutoff.toISOString().split('T')[0];
-    return sortedWeights.find((w) => w.date <= cutoffStr);
+    return sortedWeights.find(w => w.date <= cutoffStr);
   }, [sortedWeights]);
 
   const weightDelta =
-    latestWeight && weight7DaysAgo
-      ? Math.round(
-          (latestWeight.weightKg - weight7DaysAgo.weightKg) * 10,
-        ) / 10
-      : 0;
+    latestWeight && weight7DaysAgo ? Math.round((latestWeight.weightKg - weight7DaysAgo.weightKg) * 10) / 10 : 0;
 
   const best1RM = useMemo(() => {
     if (workoutSets.length === 0) return 0;
-    return Math.max(
-      0,
-      ...workoutSets.map((s) => estimate1RM(s.weightKg, s.reps ?? 0)),
-    );
+    return Math.max(0, ...workoutSets.map(s => estimate1RM(s.weightKg, s.reps ?? 0)));
   }, [workoutSets]);
 
   const plannedSessions = trainingProfile?.daysPerWeek ?? 0;
   const completedSessions = thisWeekWorkouts.length;
   const adherencePercent =
-    plannedSessions > 0
-      ? Math.min(
-          100,
-          Math.round((completedSessions / plannedSessions) * 100),
-        )
-      : 0;
+    plannedSessions > 0 ? Math.min(100, Math.round((completedSessions / plannedSessions) * 100)) : 0;
 
   const cycleProgress = useMemo(() => {
     if (!activePlan) return null;
@@ -153,13 +118,8 @@ function ProgressDashboardInner() {
     const now = new Date();
     const diffMs = now.getTime() - startDate.getTime();
     const diffWeeks = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
-    const currentWeek = Math.min(
-      Math.max(diffWeeks + 1, 1),
-      activePlan.durationWeeks,
-    );
-    const percentComplete = Math.round(
-      (currentWeek / activePlan.durationWeeks) * 100,
-    );
+    const currentWeek = Math.min(Math.max(diffWeeks + 1, 1), activePlan.durationWeeks);
+    const percentComplete = Math.round((currentWeek / activePlan.durationWeeks) * 100);
     return {
       currentWeek,
       totalWeeks: activePlan.durationWeeks,
@@ -173,14 +133,14 @@ function ProgressDashboardInner() {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const dayWorkouts = workouts.filter((w) => w.date === dateStr);
+      const dayWorkouts = workouts.filter(w => w.date === dateStr);
       days.push(calculateWeeklyVolume(dayWorkouts, workoutSets));
     }
     return days;
   }, [workouts, workoutSets]);
 
   const plateauInsights = useMemo(() => {
-    const exerciseIds = [...new Set(workoutSets.map((s) => s.exerciseId))];
+    const exerciseIds = [...new Set(workoutSets.map(s => s.exerciseId))];
     const results: { id: string; text: string }[] = [];
     for (const eid of exerciseIds) {
       const result = analyzePlateau(workouts, workoutSets, eid);
@@ -224,8 +184,7 @@ function ProgressDashboardInner() {
       result.push({
         id: 'weight-change',
         text: t('fitness.progress.weightChange', {
-          delta:
-            weightDelta > 0 ? `+${weightDelta}` : String(weightDelta),
+          delta: weightDelta > 0 ? `+${weightDelta}` : String(weightDelta),
         }),
       });
     }
@@ -242,9 +201,7 @@ function ProgressDashboardInner() {
     t,
   ]);
 
-  const visibleInsights = insights.filter(
-    (i) => !dismissedInsights.includes(i.id),
-  );
+  const visibleInsights = insights.filter(i => !dismissedInsights.includes(i.id));
 
   const bottomSheetChartData = useMemo((): number[] => {
     if (!selectedCard) return [];
@@ -253,22 +210,19 @@ function ProgressDashboardInner() {
     switch (selectedCard) {
       case 'weight':
         return sortedWeights
-          .filter((w) => w.date >= cutoffStr)
+          .filter(w => w.date >= cutoffStr)
           .reverse()
-          .map((w) => w.weightKg);
+          .map(w => w.weightKg);
       case '1rm': {
-        const filtered = workouts.filter((w) => w.date >= cutoffStr);
-        return filtered.map((w) => {
-          const sets = workoutSets.filter((s) => s.workoutId === w.id);
+        const filtered = workouts.filter(w => w.date >= cutoffStr);
+        return filtered.map(w => {
+          const sets = workoutSets.filter(s => s.workoutId === w.id);
           if (sets.length === 0) return 0;
-          return Math.max(
-            0,
-            ...sets.map((s) => estimate1RM(s.weightKg, s.reps ?? 0)),
-          );
+          return Math.max(0, ...sets.map(s => estimate1RM(s.weightKg, s.reps ?? 0)));
         });
       }
       case 'adherence': {
-        const filtered = workouts.filter((w) => w.date >= cutoffStr);
+        const filtered = workouts.filter(w => w.date >= cutoffStr);
         const target = trainingProfile?.daysPerWeek ?? 1;
         const weekMap = new Map<string, number>();
         for (const w of filtered) {
@@ -280,15 +234,10 @@ function ProgressDashboardInner() {
         }
         return Array.from(weekMap.keys())
           .sort((a, b) => a.localeCompare(b))
-          .map((key) =>
-            Math.min(
-              100,
-              Math.round(((weekMap.get(key) ?? 0) / target) * 100),
-            ),
-          );
+          .map(key => Math.min(100, Math.round(((weekMap.get(key) ?? 0) / target) * 100)));
       }
       case 'sessions': {
-        const filtered = workouts.filter((w) => w.date >= cutoffStr);
+        const filtered = workouts.filter(w => w.date >= cutoffStr);
         const weekMap = new Map<string, number>();
         for (const w of filtered) {
           const d = new Date(w.date);
@@ -299,7 +248,7 @@ function ProgressDashboardInner() {
         }
         return Array.from(weekMap.keys())
           .sort((a, b) => a.localeCompare(b))
-          .map((key) => weekMap.get(key) ?? 0);
+          .map(key => weekMap.get(key) ?? 0);
       }
       /* v8 ignore next 3 -- TypeScript exhaustiveness check: all MetricCardType values handled above */
       default: {
@@ -307,17 +256,10 @@ function ProgressDashboardInner() {
         return _exhaustive;
       }
     }
-  }, [
-    selectedCard,
-    timeRange,
-    sortedWeights,
-    workouts,
-    workoutSets,
-    trainingProfile,
-  ]);
+  }, [selectedCard, timeRange, sortedWeights, workouts, workoutSets, trainingProfile]);
 
   const handleDismiss = useCallback((id: string) => {
-    setDismissedInsights((prev) => [...prev, id]);
+    setDismissedInsights(prev => [...prev, id]);
   }, []);
 
   const handleCardClick = useCallback((card: MetricCardType) => {
@@ -335,10 +277,7 @@ function ProgressDashboardInner() {
 
   if (!hasData) {
     return (
-      <div
-        data-testid="progress-empty-state"
-        className="flex flex-col items-center px-4 py-12"
-      >
+      <div data-testid="progress-empty-state" className="flex flex-col items-center px-4 py-12">
         <div className="w-full space-y-4 opacity-30">
           <div className="h-24 rounded-2xl bg-slate-200 dark:bg-slate-700" />
           <div className="flex gap-3">
@@ -347,9 +286,7 @@ function ProgressDashboardInner() {
           </div>
           <div className="h-8 rounded-lg bg-slate-200 dark:bg-slate-700" />
         </div>
-        <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">
-          {t('fitness.progress.noData')}
-        </p>
+        <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">{t('fitness.progress.noData')}</p>
         <button
           type="button"
           data-testid="start-training-cta"
@@ -369,9 +306,7 @@ function ProgressDashboardInner() {
         data-testid="hero-metric-card"
         className="rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 text-white shadow-lg"
       >
-        <p className="text-sm font-medium opacity-80">
-          {t('fitness.progress.volumeThisWeek')}
-        </p>
+        <p className="text-sm font-medium opacity-80">{t('fitness.progress.volumeThisWeek')}</p>
         <div className="mt-1 flex items-baseline gap-2">
           <span data-testid="volume-change" className="text-3xl font-bold">
             {volumeChangePercent >= 0 ? '+' : ''}
@@ -381,10 +316,7 @@ function ProgressDashboardInner() {
           {volumeChangePercent < 0 && <TrendingDown className="h-5 w-5" aria-hidden="true" />}
           {volumeChangePercent === 0 && <Minus className="h-5 w-5" aria-hidden="true" />}
         </div>
-        <div
-          data-testid="sparkline"
-          className="mt-3 flex h-8 items-end gap-1"
-        >
+        <div data-testid="sparkline" className="mt-3 flex h-8 items-end gap-1">
           {sparklineData.map((val, idx) => (
             <div
               key={`item-${String(idx)}`}
@@ -398,10 +330,7 @@ function ProgressDashboardInner() {
         </div>
       </div>
 
-      <div
-        data-testid="metric-cards"
-        className="flex gap-3 overflow-x-auto pb-1"
-      >
+      <div data-testid="metric-cards" className="flex gap-3 overflow-x-auto pb-1">
         <button
           type="button"
           data-testid="metric-card-weight"
@@ -413,9 +342,7 @@ function ProgressDashboardInner() {
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
             {latestWeight ? `${latestWeight.weightKg}kg` : '—'}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('fitness.progress.weight')}
-          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.weight')}</p>
           {weightDelta !== 0 && (
             <span
               data-testid="weight-delta"
@@ -425,10 +352,7 @@ function ProgressDashboardInner() {
             </span>
           )}
           {weightDelta === 0 && latestWeight && (
-            <span
-              data-testid="weight-stable"
-              className="text-xs font-medium text-slate-400"
-            >
+            <span data-testid="weight-stable" className="text-xs font-medium text-slate-400">
               →
             </span>
           )}
@@ -445,9 +369,7 @@ function ProgressDashboardInner() {
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
             {best1RM > 0 ? `${best1RM}kg` : '—'}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('fitness.progress.estimated1rm')}
-          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.estimated1rm')}</p>
         </button>
 
         <button
@@ -458,12 +380,8 @@ function ProgressDashboardInner() {
           className="min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl bg-white p-4 text-left shadow-sm active:scale-95 dark:bg-slate-800"
         >
           <Target className="h-5 w-5 text-amber-500" aria-hidden="true" />
-          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-            {adherencePercent}%
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('fitness.progress.adherence')}
-          </p>
+          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{adherencePercent}%</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.adherence')}</p>
         </button>
 
         <button
@@ -474,20 +392,13 @@ function ProgressDashboardInner() {
           className="min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl bg-white p-4 text-left shadow-sm active:scale-95 dark:bg-slate-800"
         >
           <Calendar className="h-5 w-5 text-emerald-500" aria-hidden="true" />
-          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-            {completedSessions}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('fitness.progress.sessions')}
-          </p>
+          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{completedSessions}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.sessions')}</p>
         </button>
       </div>
 
       {cycleProgress && (
-        <div
-          data-testid="cycle-progress"
-          className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
-        >
+        <div data-testid="cycle-progress" className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
               {t('fitness.progress.cycleProgress')}
@@ -499,32 +410,31 @@ function ProgressDashboardInner() {
               })}
             </p>
           </div>
-          <div className="mt-2 h-2 w-full rounded-full bg-slate-100 dark:bg-slate-700"
-            aria-hidden="true"
-          >
+          <div className="mt-2 h-2 w-full rounded-full bg-slate-100 dark:bg-slate-700" aria-hidden="true">
             <div
               className="h-full rounded-full bg-emerald-500 transition-all"
               style={{ width: `${cycleProgress.percentComplete}%` }}
             />
           </div>
-          <progress className="sr-only" value={cycleProgress.percentComplete} max={100} aria-label={t('fitness.progress.cycleProgress')} />
+          <progress
+            className="sr-only"
+            value={cycleProgress.percentComplete}
+            max={100}
+            aria-label={t('fitness.progress.cycleProgress')}
+          />
         </div>
       )}
 
       {visibleInsights.length > 0 && (
         <div data-testid="insights-section" className="space-y-2">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            {t('fitness.progress.insights')}
-          </p>
-          {visibleInsights.map((insight) => (
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('fitness.progress.insights')}</p>
+          {visibleInsights.map(insight => (
             <div
               key={insight.id}
               data-testid={`insight-${insight.id}`}
               className="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800"
             >
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                {insight.text}
-              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{insight.text}</p>
               <button
                 type="button"
                 data-testid={`dismiss-${insight.id}`}
@@ -540,10 +450,7 @@ function ProgressDashboardInner() {
       )}
 
       {selectedCard && (
-        <div
-          data-testid="metric-bottom-sheet"
-          className="fixed inset-0 z-50 flex items-end"
-        >
+        <div data-testid="metric-bottom-sheet" className="fixed inset-0 z-50 flex items-end">
           <button
             type="button"
             data-testid="bottom-sheet-backdrop"
@@ -555,9 +462,7 @@ function ProgressDashboardInner() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-emerald-500" aria-hidden="true" />
-                <p className="font-medium text-slate-800 dark:text-slate-100">
-                  {t(CARD_TITLE_KEYS[selectedCard])}
-                </p>
+                <p className="font-medium text-slate-800 dark:text-slate-100">{t(CARD_TITLE_KEYS[selectedCard])}</p>
               </div>
               <button
                 type="button"
@@ -569,11 +474,8 @@ function ProgressDashboardInner() {
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <div
-              data-testid="time-range-filter"
-              className="mt-4 flex gap-2"
-            >
-              {TIME_RANGES.map((range) => (
+            <div data-testid="time-range-filter" className="mt-4 flex gap-2">
+              {TIME_RANGES.map(range => (
                 <button
                   key={range}
                   type="button"

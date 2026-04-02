@@ -1,8 +1,9 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
+
 import { TrainingPlanView } from '../features/fitness/components/TrainingPlanView';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
-import type { Mock } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -54,7 +55,9 @@ vi.mock('react-i18next', () => ({
       };
       const template = translations[key];
       if (template && typeof optionsOrFallback === 'object' && optionsOrFallback !== null) {
-        return template.replace(/\{\{(\w+)\}\}/g, (_, k) => String((optionsOrFallback as Record<string, unknown>)[k] ?? ''));
+        return template.replace(/\{\{(\w+)\}\}/g, (_, k) =>
+          String((optionsOrFallback as Record<string, unknown>)[k] ?? ''),
+        );
       }
       if (template) return template;
       if (typeof optionsOrFallback === 'string') return optionsOrFallback;
@@ -84,29 +87,73 @@ vi.mock('../features/fitness/components/StreakCounter', () => ({
 }));
 
 vi.mock('../features/fitness/components/SessionTabs', () => ({
-  SessionTabs: (props: { sessions: Array<{ id: string }>; activeSessionId: string; onSelectSession: (id: string) => void; onAddSession: () => void; onDeleteSession?: (dayId: string) => void }) => (
+  SessionTabs: (props: {
+    sessions: Array<{ id: string }>;
+    activeSessionId: string;
+    onSelectSession: (id: string) => void;
+    onAddSession: () => void;
+    onDeleteSession?: (dayId: string) => void;
+  }) => (
     <div data-testid="session-tabs" role="tablist">
       {props.sessions.map((s: { id: string }, i: number) => (
-        <button key={i} role="tab" data-testid={`session-tab-${i}`} type="button" onClick={() => props.onSelectSession(s.id)} />
+        <button
+          key={i}
+          role="tab"
+          data-testid={`session-tab-${i}`}
+          type="button"
+          onClick={() => props.onSelectSession(s.id)}
+        />
       ))}
-      <button data-testid="add-session-tab" type="button" onClick={props.onAddSession}>+</button>
+      <button data-testid="add-session-tab" type="button" onClick={props.onAddSession}>
+        +
+      </button>
       {props.onDeleteSession && props.sessions.length > 0 && (
-        <button data-testid="delete-session-btn" type="button" onClick={() => props.onDeleteSession!(props.sessions[0].id)}>Delete</button>
+        <button
+          data-testid="delete-session-btn"
+          type="button"
+          onClick={() => props.onDeleteSession!(props.sessions[0].id)}
+        >
+          Delete
+        </button>
       )}
-      <button data-testid="select-stale-session" type="button" onClick={() => props.onSelectSession('stale-nonexistent-id')}>Stale</button>
+      <button
+        data-testid="select-stale-session"
+        type="button"
+        onClick={() => props.onSelectSession('stale-nonexistent-id')}
+      >
+        Stale
+      </button>
     </div>
   ),
 }));
 
 vi.mock('../features/fitness/components/AddSessionModal', () => ({
-  AddSessionModal: (props: { isOpen: boolean; onClose: () => void; onSelectCardio: () => void; onSelectFreestyle: () => void; onSelectStrength: (g: string[]) => void }) => {
+  AddSessionModal: (props: {
+    isOpen: boolean;
+    onClose: () => void;
+    onSelectCardio: () => void;
+    onSelectFreestyle: () => void;
+    onSelectStrength: (g: string[]) => void;
+  }) => {
     if (!props.isOpen) return null;
     return (
       <div data-testid="add-session-modal">
-        <button data-testid="modal-close-btn" type="button" onClick={props.onClose}>Close</button>
-        <button data-testid="modal-cardio-btn" type="button" onClick={props.onSelectCardio}>Cardio</button>
-        <button data-testid="modal-freestyle-btn" type="button" onClick={props.onSelectFreestyle}>Freestyle</button>
-        <button data-testid="modal-strength-btn" type="button" onClick={() => props.onSelectStrength(['chest', 'back'])}>Strength</button>
+        <button data-testid="modal-close-btn" type="button" onClick={props.onClose}>
+          Close
+        </button>
+        <button data-testid="modal-cardio-btn" type="button" onClick={props.onSelectCardio}>
+          Cardio
+        </button>
+        <button data-testid="modal-freestyle-btn" type="button" onClick={props.onSelectFreestyle}>
+          Freestyle
+        </button>
+        <button
+          data-testid="modal-strength-btn"
+          type="button"
+          onClick={() => props.onSelectStrength(['chest', 'back'])}
+        >
+          Strength
+        </button>
       </div>
     );
   },
@@ -117,7 +164,15 @@ vi.mock('../components/shared/ModalBackdrop', () => ({
 }));
 
 vi.mock('../components/modals/ConfirmationModal', () => ({
-  ConfirmationModal: (props: { isOpen: boolean; title: string; message: string; confirmLabel?: string; onConfirm: () => void; onCancel: () => void; variant?: string }) => {
+  ConfirmationModal: (props: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+    variant?: string;
+  }) => {
     const slug = props.title.replace(/\s+/g, '-').toLowerCase();
     if (!props.isOpen) {
       return (
@@ -135,7 +190,9 @@ vi.mock('../components/modals/ConfirmationModal', () => ({
         <button data-testid="confirmation-confirm-btn" type="button" onClick={props.onConfirm}>
           {props.confirmLabel ?? 'Confirm'}
         </button>
-        <button data-testid="confirmation-cancel-btn" type="button" onClick={props.onCancel}>Cancel</button>
+        <button data-testid="confirmation-cancel-btn" type="button" onClick={props.onCancel}>
+          Cancel
+        </button>
       </div>
     );
   },
@@ -156,8 +213,8 @@ function mockStore(state: Record<string, unknown>) {
     workoutSets: [],
     ...state,
   };
-  mockUseFitnessStore.mockImplementation(
-    (selector: (s: Record<string, unknown>) => unknown) => selector(stateWithDefaults),
+  mockUseFitnessStore.mockImplementation((selector: (s: Record<string, unknown>) => unknown) =>
+    selector(stateWithDefaults),
   );
   const storeState = {
     ...state,
@@ -255,9 +312,8 @@ beforeEach(() => {
   mockGetActivePlan = vi.fn();
   mockRemovePlanDaySession = vi.fn();
   defaultOnGeneratePlan.mockReset();
-  mockUseNavigationStore.mockImplementation(
-    (selector: (s: Record<string, unknown>) => unknown) =>
-      selector({ pushPage: mockPushPage }),
+  mockUseNavigationStore.mockImplementation((selector: (s: Record<string, unknown>) => unknown) =>
+    selector({ pushPage: mockPushPage }),
   );
 });
 
@@ -272,9 +328,7 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
-    expect(
-      screen.getByText('Chưa có kế hoạch tập luyện'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Chưa có kế hoạch tập luyện')).toBeInTheDocument();
   });
 
   it('"Tạo kế hoạch" button calls onGeneratePlan', () => {
@@ -325,24 +379,14 @@ describe('TrainingPlanView', () => {
 
   it('renders auto plan CTA when planStrategy is auto and no active plan', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
-    render(
-      <TrainingPlanView
-        onGeneratePlan={defaultOnGeneratePlan}
-        planStrategy="auto"
-      />,
-    );
+    render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} planStrategy="auto" />);
     expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
     expect(screen.queryByTestId('manual-plan-cta')).not.toBeInTheDocument();
   });
 
   it('renders auto plan CTA when planStrategy is null', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
-    render(
-      <TrainingPlanView
-        onGeneratePlan={defaultOnGeneratePlan}
-        planStrategy={null}
-      />,
-    );
+    render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} planStrategy={null} />);
     expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
     expect(screen.queryByTestId('manual-plan-cta')).not.toBeInTheDocument();
   });
@@ -350,11 +394,7 @@ describe('TrainingPlanView', () => {
   it('manual plan CTA button has min-h-[44px] and focus-visible ring', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(
-      <TrainingPlanView
-        onGeneratePlan={defaultOnGeneratePlan}
-        onCreateManualPlan={vi.fn()}
-        planStrategy="manual"
-      />,
+      <TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} onCreateManualPlan={vi.fn()} planStrategy="manual" />,
     );
     const btn = screen.getByTestId('create-manual-plan-btn');
     expect(btn.className).toContain('min-h-[44px]');
@@ -400,9 +440,7 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     fireEvent.click(screen.getByTestId('day-pill-3'));
-    expect(screen.getByTestId('day-pill-3').className).toContain(
-      'ring-slate-400',
-    );
+    expect(screen.getByTestId('day-pill-3').className).toContain('ring-slate-400');
   });
 
   // --- Workout Card ---
@@ -436,9 +474,7 @@ describe('TrainingPlanView', () => {
   it('no exercise list shown when exercises field is undefined', () => {
     mockStore({
       trainingPlans: [activePlan],
-      trainingPlanDays: [
-        { id: 'd1', planId: 'plan1', dayOfWeek: 1, workoutType: 'Push' },
-      ],
+      trainingPlanDays: [{ id: 'd1', planId: 'plan1', dayOfWeek: 1, workoutType: 'Push' }],
     });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
@@ -628,9 +664,7 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     // Initially shows "Buổi tập hôm nay"
-    expect(screen.getByTestId('workout-card-header')).toHaveTextContent(
-      'Buổi tập hôm nay',
-    );
+    expect(screen.getByTestId('workout-card-header')).toHaveTextContent('Buổi tập hôm nay');
     // Select Wednesday (day 3) — header shows "T4"
     fireEvent.click(screen.getByTestId('day-pill-3'));
     expect(screen.getByTestId('workout-card-header')).toHaveTextContent('T4');
@@ -865,9 +899,7 @@ describe('TrainingPlanView', () => {
       expect(screen.queryByTestId('confirmation-modal')).not.toBeInTheDocument();
       fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
       expect(screen.getByTestId('confirmation-modal')).toBeInTheDocument();
-      expect(screen.getByTestId('confirmation-message')).toHaveTextContent(
-        'Bạn có chắc muốn tạo lại kế hoạch?',
-      );
+      expect(screen.getByTestId('confirmation-message')).toHaveTextContent('Bạn có chắc muốn tạo lại kế hoạch?');
     });
 
     it('confirming regenerate calls onGeneratePlan', () => {
@@ -992,11 +1024,18 @@ describe('TrainingPlanView', () => {
       ]);
       mockStore({
         trainingPlans: [activePlan],
-        trainingPlanDays: [{
-          id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1,
-          workoutType: 'Push', muscleGroups: 'chest',
-          exercises: modifiedExercises, originalExercises: mockExercises,
-        }],
+        trainingPlanDays: [
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Push',
+            muscleGroups: 'chest',
+            exercises: modifiedExercises,
+            originalExercises: mockExercises,
+          },
+        ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       const btn = screen.getByTestId('restore-original-btn');
@@ -1077,9 +1116,7 @@ describe('TrainingPlanView', () => {
         trainingPlans: [activePlan],
         trainingPlanDays: planDays,
         workouts: [{ id: 'w1', date: '2025-01-05' }],
-        workoutSets: [
-          { workoutId: 'w1', estimatedCalories: 500, weightKg: 0 },
-        ],
+        workoutSets: [{ workoutId: 'w1', estimatedCalories: 500, weightKg: 0 }],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
@@ -1090,9 +1127,7 @@ describe('TrainingPlanView', () => {
         trainingPlans: [activePlan],
         trainingPlanDays: planDays,
         workouts: [{ id: 'w1', date: '2025-01-06' }],
-        workoutSets: [
-          { workoutId: 'w1', estimatedCalories: undefined, weightKg: 0 },
-        ],
+        workoutSets: [{ workoutId: 'w1', estimatedCalories: undefined, weightKg: 0 }],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       expect(screen.getByTestId('training-plan-view')).toBeInTheDocument();
@@ -1224,15 +1259,19 @@ describe('TrainingPlanView', () => {
       fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
       fireEvent.click(screen.getByTestId('ctx-add-workout'));
       fireEvent.click(screen.getByTestId('modal-strength-btn'));
-      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 2, expect.objectContaining({
-        planId: 'plan1',
-        dayOfWeek: 2,
-        sessionOrder: 1,
-        workoutType: 'Strength',
-        muscleGroups: 'chest,back',
-        exercises: '[]',
-        originalExercises: '[]',
-      }));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith(
+        'plan1',
+        2,
+        expect.objectContaining({
+          planId: 'plan1',
+          dayOfWeek: 2,
+          sessionOrder: 1,
+          workoutType: 'Strength',
+          muscleGroups: 'chest,back',
+          exercises: '[]',
+          originalExercises: '[]',
+        }),
+      );
       expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
     });
 
@@ -1242,9 +1281,13 @@ describe('TrainingPlanView', () => {
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       fireEvent.click(screen.getByTestId('add-session-tab'));
       fireEvent.click(screen.getByTestId('modal-strength-btn'));
-      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 1, expect.objectContaining({
-        sessionOrder: 2,
-      }));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith(
+        'plan1',
+        1,
+        expect.objectContaining({
+          sessionOrder: 2,
+        }),
+      );
     });
 
     it('onSelectCardio calls addPlanDaySession for rest day', () => {
@@ -1254,15 +1297,19 @@ describe('TrainingPlanView', () => {
       fireEvent.contextMenu(screen.getByTestId('day-pill-2'));
       fireEvent.click(screen.getByTestId('ctx-add-workout'));
       fireEvent.click(screen.getByTestId('modal-cardio-btn'));
-      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 2, expect.objectContaining({
-        planId: 'plan1',
-        dayOfWeek: 2,
-        sessionOrder: 1,
-        workoutType: 'Cardio',
-        muscleGroups: '',
-        exercises: '[]',
-        originalExercises: '[]',
-      }));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith(
+        'plan1',
+        2,
+        expect.objectContaining({
+          planId: 'plan1',
+          dayOfWeek: 2,
+          sessionOrder: 1,
+          workoutType: 'Cardio',
+          muscleGroups: '',
+          exercises: '[]',
+          originalExercises: '[]',
+        }),
+      );
       expect(screen.queryByTestId('add-session-modal')).not.toBeInTheDocument();
     });
 
@@ -1272,9 +1319,13 @@ describe('TrainingPlanView', () => {
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       fireEvent.click(screen.getByTestId('add-session-tab'));
       fireEvent.click(screen.getByTestId('modal-cardio-btn'));
-      expect(mockAddPlanDaySession).toHaveBeenCalledWith('plan1', 1, expect.objectContaining({
-        sessionOrder: 2,
-      }));
+      expect(mockAddPlanDaySession).toHaveBeenCalledWith(
+        'plan1',
+        1,
+        expect.objectContaining({
+          sessionOrder: 2,
+        }),
+      );
     });
 
     it('onSelectFreestyle calls pushPage with WorkoutLogger', () => {
@@ -1386,7 +1437,7 @@ describe('TrainingPlanView', () => {
       expect(screen.getByTestId('confirmation-modal')).toBeInTheDocument();
       mockStore({
         trainingPlans: [activePlan],
-        trainingPlanDays: planDays.filter((d) => d.dayOfWeek !== 1),
+        trainingPlanDays: planDays.filter(d => d.dayOfWeek !== 1),
       });
       const newOnGenerate = vi.fn();
       rerender(<TrainingPlanView onGeneratePlan={newOnGenerate} />);
@@ -1464,7 +1515,9 @@ describe('TrainingPlanView', () => {
   describe('localStorage error handling', () => {
     it('defaults coachingDismissed to false when localStorage.getItem throws', () => {
       const originalGetItem = Storage.prototype.getItem;
-      Storage.prototype.getItem = () => { throw new Error('blocked'); };
+      Storage.prototype.getItem = () => {
+        throw new Error('blocked');
+      };
 
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
@@ -1506,7 +1559,15 @@ describe('TrainingPlanView', () => {
       mockStore({
         trainingPlans: [activePlan],
         trainingPlanDays: [
-          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Push', muscleGroups: 'chest, shoulders, back', exercises: mockExercises },
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Push',
+            muscleGroups: 'chest, shoulders, back',
+            exercises: mockExercises,
+          },
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
@@ -1517,7 +1578,15 @@ describe('TrainingPlanView', () => {
       mockStore({
         trainingPlans: [activePlan],
         trainingPlanDays: [
-          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Push', muscleGroups: '["chest","shoulders","back"]', exercises: mockExercises },
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Push',
+            muscleGroups: '["chest","shoulders","back"]',
+            exercises: mockExercises,
+          },
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
@@ -1528,7 +1597,15 @@ describe('TrainingPlanView', () => {
       mockStore({
         trainingPlans: [activePlan],
         trainingPlanDays: [
-          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'Upper Body A', muscleGroups: 'chest', exercises: mockExercises },
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'Upper Body A',
+            muscleGroups: 'chest',
+            exercises: mockExercises,
+          },
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
@@ -1539,7 +1616,15 @@ describe('TrainingPlanView', () => {
       mockStore({
         trainingPlans: [activePlan],
         trainingPlanDays: [
-          { id: 'd1', planId: 'plan1', dayOfWeek: 1, sessionOrder: 1, workoutType: 'SuperCustomWorkout', muscleGroups: 'chest', exercises: mockExercises },
+          {
+            id: 'd1',
+            planId: 'plan1',
+            dayOfWeek: 1,
+            sessionOrder: 1,
+            workoutType: 'SuperCustomWorkout',
+            muscleGroups: 'chest',
+            exercises: mockExercises,
+          },
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);

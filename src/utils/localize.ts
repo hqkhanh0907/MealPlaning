@@ -10,10 +10,7 @@ import type { LocalizedString } from '../types';
  * Reads the Vietnamese variant from a LocalizedString.
  * Also accepts a plain `string` for backward-compat during migration.
  */
-export const getLocalizedField = (
-  field: string | LocalizedString,
-  _lang?: string,
-): string => {
+export const getLocalizedField = (field: string | LocalizedString, _lang?: string): string => {
   if (typeof field === 'string') return field;
   return field.vi || '';
 };

@@ -1,6 +1,7 @@
-import React, { useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Flame } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateStreak } from '../../fitness/utils/gamification';
 
@@ -18,22 +19,17 @@ interface StreakMiniProps {
 
 function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactElement {
   const { t } = useTranslation();
-  const workouts = useFitnessStore((s) => s.workouts);
-  const trainingPlanDays = useFitnessStore((s) => s.trainingPlanDays);
-  const trainingPlans = useFitnessStore((s) => s.trainingPlans);
+  const workouts = useFitnessStore(s => s.workouts);
+  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
+  const trainingPlans = useFitnessStore(s => s.trainingPlans);
 
   const planDays = useMemo(() => {
-    const activePlan = trainingPlans.find((p) => p.status === 'active');
+    const activePlan = trainingPlans.find(p => p.status === 'active');
     if (!activePlan) return [] as number[];
-    return trainingPlanDays
-      .filter((d) => d.planId === activePlan.id)
-      .map((d) => d.dayOfWeek);
+    return trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek);
   }, [trainingPlans, trainingPlanDays]);
 
-  const streakInfo = useMemo(
-    () => calculateStreak(workouts, planDays),
-    [workouts, planDays],
-  );
+  const streakInfo = useMemo(() => calculateStreak(workouts, planDays), [workouts, planDays]);
 
   const handleTap = useCallback(() => {
     onTap?.();
@@ -58,16 +54,12 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
         aria-label={t('dashboard.streakMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+        className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none dark:bg-slate-800/50"
       >
         <Flame className="h-5 w-5 text-slate-400" aria-hidden={true} />
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {t('dashboard.streakMini.noData')}
-          </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {t('dashboard.streakMini.startFirst')}
-          </p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('dashboard.streakMini.noData')}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.streakMini.startFirst')}</p>
         </div>
       </button>
     );
@@ -84,14 +76,11 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
       })}
       onClick={handleTap}
       onKeyDown={handleKeyDown}
-      className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/50 cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+      className="flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-50 p-3 transition-transform focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none active:scale-[0.98] dark:bg-slate-800/50"
     >
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5" data-testid="streak-count">
-          <Flame
-            className="h-4 w-4 text-orange-500"
-            aria-hidden={true}
-          />
+          <Flame className="h-4 w-4 text-orange-500" aria-hidden={true} />
           <span
             className="text-base font-bold text-slate-800 dark:text-slate-200"
             style={{ fontVariantNumeric: 'tabular-nums' }}
@@ -112,12 +101,8 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
         </p>
       </div>
 
-      <div
-        className="flex items-center gap-1"
-        data-testid="week-dots"
-        aria-hidden="true"
-      >
-        {streakInfo.weekDots.map((dot) => (
+      <div className="flex items-center gap-1" data-testid="week-dots" aria-hidden="true">
+        {streakInfo.weekDots.map(dot => (
           <span
             key={dot.day}
             data-testid={`dot-${dot.day}`}

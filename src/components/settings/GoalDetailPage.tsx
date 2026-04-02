@@ -1,10 +1,11 @@
-import { useState, useMemo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Target, TrendingDown, Equal, TrendingUp, Zap, Scale, Flame } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { Equal, Flame, Scale, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { DatabaseProvider } from '../../contexts/DatabaseContext';
-import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { GoalPhaseSelector } from '../../features/health-profile/components/GoalPhaseSelector';
+import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
 
 const GOAL_ICON: Record<string, typeof TrendingDown> = {
@@ -21,7 +22,7 @@ const GOAL_COLOR: Record<string, string> = {
 
 function GoalViewMode() {
   const { t } = useTranslation();
-  const activeGoal = useHealthProfileStore((s) => s.activeGoal);
+  const activeGoal = useHealthProfileStore(s => s.activeGoal);
 
   const fields: { label: string; value: string; icon: LucideIcon }[] = useMemo(() => {
     if (!activeGoal) return [];
@@ -53,13 +54,9 @@ function GoalViewMode() {
   if (!activeGoal) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="goal-view-empty">
-        <Target className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-          {t('settings.goalNotSet')}
-        </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-          {t('settings.goalDesc')}
-        </p>
+        <Target className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('settings.goalNotSet')}</p>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{t('settings.goalDesc')}</p>
       </div>
     );
   }
@@ -70,12 +67,10 @@ function GoalViewMode() {
   return (
     <div className="space-y-6" data-testid="goal-view">
       {/* Goal Type Badge */}
-      <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-        <GoalIcon className={`w-8 h-8 ${goalColor}`} />
+      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
+        <GoalIcon className={`h-8 w-8 ${goalColor}`} />
         <div>
-          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
-            {t(`goal.${activeGoal.type}`)}
-          </p>
+          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t(`goal.${activeGoal.type}`)}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {activeGoal.startDate ? new Date(activeGoal.startDate).toLocaleDateString('vi-VN') : ''}
           </p>
@@ -84,12 +79,14 @@ function GoalViewMode() {
 
       {/* Goal Fields */}
       <div className="grid grid-cols-2 gap-3">
-        {fields.map((field) => (
-          <div
-            key={field.label}
-            className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
-          >
-            <span className="text-base leading-none mt-0.5">{(() => { const Icon = field.icon; return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />; })()}</span>
+        {fields.map(field => (
+          <div key={field.label} className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
+            <span className="mt-0.5 text-base leading-none">
+              {(() => {
+                const Icon = field.icon;
+                return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />;
+              })()}
+            </span>
             <div className="min-w-0">
               <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
@@ -122,7 +119,7 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   return (
     <SettingsDetailLayout
       title={t('settings.goalSection')}
-      icon={<Target className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />}
+      icon={<Target className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />}
       isEditing={isEditing}
       hasChanges={isEditing}
       onBack={onBack}

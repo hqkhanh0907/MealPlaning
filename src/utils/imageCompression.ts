@@ -8,12 +8,7 @@
  * @param quality - JPEG quality 0-1 (default: 0.8)
  * @returns Compressed image as base64 data URL (JPEG format)
  */
-export const compressImage = (
-  dataUrl: string,
-  maxWidth = 1024,
-  maxHeight = 1024,
-  quality = 0.8
-): Promise<string> => {
+export const compressImage = (dataUrl: string, maxWidth = 1024, maxHeight = 1024, quality = 0.8): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -44,4 +39,3 @@ export const compressImage = (
     img.src = dataUrl;
   });
 };
-

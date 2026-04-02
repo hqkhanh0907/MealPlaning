@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+
 import { SetEditor } from '../features/fitness/components/SetEditor';
 
 afterEach(cleanup);
@@ -15,7 +16,12 @@ describe('SetEditor', () => {
   };
 
   function renderEditor(overrides: Partial<typeof defaultProps> = {}) {
-    const props = { ...defaultProps, ...overrides, onSave: overrides.onSave ?? vi.fn(), onCancel: overrides.onCancel ?? vi.fn() };
+    const props = {
+      ...defaultProps,
+      ...overrides,
+      onSave: overrides.onSave ?? vi.fn(),
+      onCancel: overrides.onCancel ?? vi.fn(),
+    };
     const result = render(<SetEditor {...props} />);
     return { ...result, props };
   }

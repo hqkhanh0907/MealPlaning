@@ -17,8 +17,7 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
   const { t } = useTranslation();
 
   const overallProgress = Math.round(
-    ((currentSection - 1 + (totalStepsInSection > 0 ? stepInSection / totalStepsInSection : 0))
-      / totalSections) * 100
+    ((currentSection - 1 + (totalStepsInSection > 0 ? stepInSection / totalStepsInSection : 0)) / totalSections) * 100,
   );
 
   const sectionLabel = t(`onboarding.progress.section${currentSection}`);
@@ -31,7 +30,7 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
         aria-label={sectionLabel}
         aria-valuenow={overallProgress}
         aria-valuemax={100}
-        className="flex gap-[1px] w-full h-1 rounded-sm overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
+        className="flex h-1 w-full appearance-none gap-[1px] overflow-hidden rounded-sm [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
       >
         {Array.from({ length: totalSections }, (_, i) => {
           const sectionIndex = i + 1;
@@ -45,7 +44,7 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
           return (
             <div
               key={sectionIndex}
-              className="flex-1 bg-gray-200 dark:bg-slate-700 overflow-hidden"
+              className="flex-1 overflow-hidden bg-gray-200 dark:bg-slate-700"
               style={(() => {
                 if (i === 0) return { borderRadius: '2px 0 0 2px' };
                 if (i === totalSections - 1) return { borderRadius: '0 2px 2px 0' };
@@ -60,9 +59,7 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
           );
         })}
       </progress>
-      <p className="mt-1.5 text-xs text-center text-slate-500 dark:text-slate-400 font-medium">
-        {sectionLabel}
-      </p>
+      <p className="mt-1.5 text-center text-xs font-medium text-slate-500 dark:text-slate-400">{sectionLabel}</p>
     </div>
   );
 });

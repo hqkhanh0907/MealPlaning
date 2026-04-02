@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+
 import { pushBackEntry, removeTopBackEntry } from '../services/backNavigationService';
 
 /**

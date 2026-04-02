@@ -1,20 +1,22 @@
-import { useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Save, Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Save, Sparkles, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import type { Resolver } from 'react-hook-form';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Input } from '@/components/ui/input';
-import { AnalyzedDishResult, SaveAnalyzedDishPayload, MealType } from '../../types';
-import { suggestIngredientInfo } from '../../services/geminiService';
+
 import { useNotification } from '../../contexts/NotificationContext';
-import { useModalBackHandler } from '../../hooks/useModalBackHandler';
-import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { getMealTagOptions } from '../../data/constants';
-import { UnitSelector } from '../shared/UnitSelector';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { type SaveAnalyzedDishFormData, saveAnalyzedDishSchema } from '../../schemas/saveAnalyzedDishSchema';
+import { suggestIngredientInfo } from '../../services/geminiService';
+import { AnalyzedDishResult, MealType, SaveAnalyzedDishPayload } from '../../types';
 import { logger } from '../../utils/logger';
-import { saveAnalyzedDishSchema, type SaveAnalyzedDishFormData } from '../../schemas/saveAnalyzedDishSchema';
 import { StringNumberController } from '../form/StringNumberController';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { UnitSelector } from '../shared/UnitSelector';
 
 /** Display unit for nutrition labels: "100g" for g/kg, "100ml" for ml/l, "1 {unit}" for others. */
 const getDisplayUnit = (unit: string) => {
@@ -25,9 +27,7 @@ const getDisplayUnit = (unit: string) => {
 };
 
 function toggleMealTag(currentTags: MealType[], tagType: MealType): MealType[] {
-  return currentTags.includes(tagType)
-    ? currentTags.filter(v => v !== tagType)
-    : [...currentTags, tagType];
+  return currentTags.includes(tagType) ? currentTags.filter(v => v !== tagType) : [...currentTags, tagType];
 }
 
 interface SaveAnalyzedDishModalProps {
@@ -67,7 +67,9 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
   const saveDish = watch('saveDish');
   const watchedIngredients = watch('ingredients');
 
-  const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>(() => new Array(result.ingredients.length).fill(true));
+  const [selectedIngredients, setSelectedIngredients] = useState<boolean[]>(() =>
+    new Array(result.ingredients.length).fill(true),
+  );
   const [researchingIngredientIndex, setResearchingIngredientIndex] = useState<number | null>(null);
   const [tagError, setTagError] = useState<string | null>(null);
 
@@ -82,9 +84,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
     const parsed = saveAnalyzedDishSchema.safeParse(formData);
 
     if (!parsed.success) {
-      const hasDishTagsError = parsed.error.issues.some(
-        issue => issue.path.includes('dishTags'),
-      );
+      const hasDishTagsError = parsed.error.issues.some(issue => issue.path.includes('dishTags'));
       if (hasDishTagsError) {
         setTagError(t('saveAnalyzed.validationSelectMeal'));
       }
@@ -141,40 +141,51 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-70">
-      <div className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-4xl max-h-[85dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col sm:mx-4">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{t('saveAnalyzed.title')}</h4>
-          <button onClick={onClose} aria-label={t('common.closeDialog')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500">
-            <X className="w-5 h-5" />
+      <div className="relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-3xl dark:bg-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+          <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.title')}</h4>
+          <button
+            onClick={onClose}
+            aria-label={t('common.closeDialog')}
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
-        
-        <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-8">
+
+        <div className="flex-1 space-y-8 overflow-y-auto overscroll-contain p-6">
           {/* Dish Info */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-700">
               <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.dishInfo')}</h5>
-              <label className="flex items-center gap-2 cursor-pointer min-h-11 px-2 -mr-2 rounded-lg active:bg-slate-100 dark:active:bg-slate-700 transition-colors">
+              <label className="-mr-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 transition-colors active:bg-slate-100 dark:active:bg-slate-700">
                 <Controller
                   name="saveDish"
                   control={control}
                   render={({ field }) => (
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      onChange={e => field.onChange(e.target.checked)}
+                      className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     />
                   )}
                 />
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('saveAnalyzed.saveDish')}</span>
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {t('saveAnalyzed.saveDish')}
+                </span>
               </label>
             </div>
-            
+
             {saveDish && (
-              <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="animate-in fade-in slide-in-from-top-2 grid grid-cols-1 gap-4 duration-300">
                 <div>
-                  <label htmlFor="ai-dish-name" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('saveAnalyzed.dishName')}</label>
+                  <label
+                    htmlFor="ai-dish-name"
+                    className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                  >
+                    {t('saveAnalyzed.dishName')}
+                  </label>
                   <Controller
                     name="name"
                     control={control}
@@ -191,7 +202,12 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                   />
                 </div>
                 <div>
-                  <label htmlFor="ai-dish-desc" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">{t('saveAnalyzed.description')}</label>
+                  <label
+                    htmlFor="ai-dish-desc"
+                    className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                  >
+                    {t('saveAnalyzed.description')}
+                  </label>
                   <Controller
                     name="description"
                     control={control}
@@ -201,14 +217,14 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-base transition-all outline-none focus:border-emerald-500 sm:text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                         rows={2}
                       />
                     )}
                   />
                 </div>
                 <div>
-                  <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">
+                  <span className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
                     {t('saveAnalyzed.suitableFor')} <span className="text-rose-500">*</span>
                   </span>
                   <Controller
@@ -226,22 +242,20 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                                 tagsField.onChange(toggleMealTag(tagsField.value, opt.type));
                                 setTagError(null);
                               }}
-                              className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all min-h-11 ${
+                              className={`min-h-11 flex-1 rounded-xl py-2.5 text-sm font-bold transition-all ${
                                 isActive
                                   ? 'bg-emerald-500 text-white shadow-sm'
-                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:bg-slate-300'
+                                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
                               }`}
                             >
-                              <opt.icon className="size-4 inline-block" aria-hidden="true" /> {opt.label}
+                              <opt.icon className="inline-block size-4" aria-hidden="true" /> {opt.label}
                             </button>
                           );
                         })}
                       </div>
                     )}
                   />
-                  {tagError && (
-                    <p className="text-xs text-rose-500 mt-1.5 font-medium">{tagError}</p>
-                  )}
+                  {tagError && <p className="mt-1.5 text-xs font-medium text-rose-500">{tagError}</p>}
                 </div>
               </div>
             )}
@@ -249,46 +263,58 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
 
           {/* Ingredients List */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-700">
               <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.ingredientDetail')}</h5>
               <button
                 onClick={toggleAllIngredients}
-                className="text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors"
+                className="text-sm font-medium text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400"
               >
                 {selectedIngredients.every(Boolean) ? t('common.deselectAll') : t('common.selectAll')}
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {fields.map((field, idx) => (
-                <div key={field.id} className={`p-4 rounded-xl border transition-all ${selectedIngredients[idx] ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 opacity-60'}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <label className="flex items-center gap-3 cursor-pointer min-h-11 px-1 rounded-lg active:bg-slate-100 dark:active:bg-slate-700 transition-colors">
-                      <input 
-                        type="checkbox" 
+                <div
+                  key={field.id}
+                  className={`rounded-xl border p-4 transition-all ${selectedIngredients[idx] ? 'border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50' : 'border-slate-100 bg-white opacity-60 dark:border-slate-700 dark:bg-slate-800'}`}
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-1 transition-colors active:bg-slate-100 dark:active:bg-slate-700">
+                      <input
+                        type="checkbox"
                         checked={selectedIngredients[idx]}
                         onChange={() => toggleIngredientSelection(idx)}
-                        className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                       />
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase">{t('saveAnalyzed.ingredientNum', { num: idx + 1 })}</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase dark:text-slate-500">
+                        {t('saveAnalyzed.ingredientNum', { num: idx + 1 })}
+                      </span>
                     </label>
                     <button
                       onClick={() => handleResearchIngredient(idx)}
                       disabled={researchingIngredientIndex === idx || !selectedIngredients[idx]}
-                      className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 transition-all hover:bg-indigo-100 disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
                     >
                       {researchingIngredientIndex === idx ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Sparkles className="h-3.5 w-3.5" />
                       )}
                       {t('ai.aiResearch')}
                     </button>
                   </div>
-                  
-                  <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
+
+                  <div
+                    className={`grid grid-cols-1 gap-4 md:grid-cols-3 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}
+                  >
                     <div className="md:col-span-1">
-                      <label htmlFor={`ai-ing-name-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('common.name')}</label>
+                      <label
+                        htmlFor={`ai-ing-name-${idx}`}
+                        className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                      >
+                        {t('common.name')}
+                      </label>
                       <Controller
                         name={`ingredients.${idx}.name`}
                         control={control}
@@ -305,18 +331,28 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                       />
                     </div>
                     <div className="md:col-span-1">
-                      <label htmlFor={`ai-ing-amount-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('ingredient.quantity')}</label>
+                      <label
+                        htmlFor={`ai-ing-amount-${idx}`}
+                        className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                      >
+                        {t('ingredient.quantity')}
+                      </label>
                       <StringNumberController
                         name={`ingredients.${idx}.amount`}
                         control={control}
                         inputMode="numeric"
                         min={0}
                         testId={`ai-ing-amount-${idx}`}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 focus:border-emerald-500 outline-none text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                       />
                     </div>
                     <div className="md:col-span-1">
-                      <label htmlFor={`ai-ing-unit-${idx}`} className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">{t('common.unit')}</label>
+                      <label
+                        htmlFor={`ai-ing-unit-${idx}`}
+                        className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                      >
+                        {t('common.unit')}
+                      </label>
                       <Controller
                         name={`ingredients.${idx}.unit`}
                         control={control}
@@ -331,63 +367,92 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                       />
                     </div>
                   </div>
-                  
-                  <div className={`mt-3 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-600 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">{t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(watchedIngredients[idx]?.unit ?? 'g')}</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+                  <div
+                    className={`mt-3 rounded-lg border border-slate-100 bg-white p-3 dark:border-slate-600 dark:bg-slate-800 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}
+                  >
+                    <p className="mb-2 text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                      {t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(watchedIngredients[idx]?.unit ?? 'g')}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                       <div>
-                        <label htmlFor={`ai-ing-cal-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">{t('common.calories')}</label>
+                        <label
+                          htmlFor={`ai-ing-cal-${idx}`}
+                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
+                        >
+                          {t('common.calories')}
+                        </label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.calories`}
                           control={control}
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-cal-${idx}`}
-                          className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-pro-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Protein</label>
+                        <label
+                          htmlFor={`ai-ing-pro-${idx}`}
+                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
+                        >
+                          Protein
+                        </label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.protein`}
                           control={control}
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-pro-${idx}`}
-                          className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-carbs-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Carbs</label>
+                        <label
+                          htmlFor={`ai-ing-carbs-${idx}`}
+                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
+                        >
+                          Carbs
+                        </label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.carbs`}
                           control={control}
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-carbs-${idx}`}
-                          className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-fat-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Fat</label>
+                        <label
+                          htmlFor={`ai-ing-fat-${idx}`}
+                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
+                        >
+                          Fat
+                        </label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.fat`}
                           control={control}
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-fat-${idx}`}
-                          className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label htmlFor={`ai-ing-fiber-${idx}`} className="text-[10px] text-slate-500 dark:text-slate-500 block mb-0.5">Fiber</label>
+                        <label
+                          htmlFor={`ai-ing-fiber-${idx}`}
+                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
+                        >
+                          Fiber
+                        </label>
                         <StringNumberController
                           name={`ingredients.${idx}.nutritionPerStandardUnit.fiber`}
                           control={control}
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-fiber-${idx}`}
-                          className="w-full px-2 py-1.5 rounded border border-slate-200 dark:border-slate-600 text-sm bg-white dark:bg-slate-700 dark:text-slate-100"
+                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                     </div>
@@ -398,19 +463,19 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3 shrink-0 pb-safe">
+        <div className="pb-safe flex shrink-0 justify-end gap-3 border-t border-slate-100 bg-slate-50 p-4 sm:p-6 dark:border-slate-700 dark:bg-slate-800/50">
           <button
             onClick={onClose}
-            className="px-5 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 transition-all min-h-12"
+            className="min-h-12 rounded-xl px-5 py-3 font-bold text-slate-600 transition-all hover:bg-slate-200 active:bg-slate-300 dark:text-slate-400 dark:hover:bg-slate-700"
           >
             {t('saveAnalyzed.cancelSave')}
           </button>
-          <button 
+          <button
             onClick={handleConfirmSave}
             data-testid="btn-confirm-save-analyzed"
-            className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold shadow-sm shadow-emerald-200 hover:bg-emerald-600 active:bg-emerald-700 transition-all flex items-center gap-2 min-h-12"
+            className="flex min-h-12 items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:bg-emerald-700"
           >
-            <Save className="w-5 h-5" />
+            <Save className="h-5 w-5" />
             {t('saveAnalyzed.confirmSave')}
           </button>
         </div>

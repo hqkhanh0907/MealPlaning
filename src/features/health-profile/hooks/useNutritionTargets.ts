@@ -1,12 +1,9 @@
 import { useMemo } from 'react';
+
+import { calculateBMR, calculateMacros, calculateTarget, calculateTDEE } from '../../../services/nutritionEngine';
 import { useHealthProfileStore } from '../store/healthProfileStore';
+import type { HealthProfile } from '../types';
 import { DEFAULT_HEALTH_PROFILE } from '../types';
-import {
-  calculateBMR,
-  calculateTDEE,
-  calculateTarget,
-  calculateMacros,
-} from '../../../services/nutritionEngine';
 
 export interface NutritionTargets {
   targetCalories: number;
@@ -22,7 +19,8 @@ export interface NutritionTargets {
  * A profile that still matches every DEFAULT_HEALTH_PROFILE field
  * (except the volatile `updatedAt`) is considered "not set up".
  */
-function isProfileConfigured(profile: typeof DEFAULT_HEALTH_PROFILE): boolean {
+function isProfileConfigured(profile: HealthProfile | null): boolean {
+  if (!profile) return false;
   return (
     profile.gender !== DEFAULT_HEALTH_PROFILE.gender ||
     profile.age !== DEFAULT_HEALTH_PROFILE.age ||
@@ -43,10 +41,14 @@ function isProfileConfigured(profile: typeof DEFAULT_HEALTH_PROFILE): boolean {
  *  2. Otherwise → fall back to the default healthProfile values
  */
 export function useNutritionTargets(): NutritionTargets {
-  const healthProfile = useHealthProfileStore((s) => s.profile);
-  const activeGoal = useHealthProfileStore((s) => s.activeGoal);
+  const healthProfile = useHealthProfileStore(s => s.profile);
+  const activeGoal = useHealthProfileStore(s => s.activeGoal);
 
   return useMemo(() => {
+    if (!healthProfile) {
+      return { targetCalories: 0, targetProtein: 0, targetFat: 0, targetCarbs: 0, bmr: 0, tdee: 0 };
+    }
+
     const configured = isProfileConfigured(healthProfile);
 
     if (!configured) {

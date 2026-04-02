@@ -1,17 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useFitnessStore } from '../store/fitnessStore';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { determineTodayPlanState, useTodaysPlan } from '../features/dashboard/hooks/useTodaysPlan';
+import type { TrainingPlan, TrainingPlanDay, Workout, WorkoutSet } from '../features/fitness/types';
 import { useDayPlanStore } from '../store/dayPlanStore';
-import {
-  determineTodayPlanState,
-  useTodaysPlan,
-} from '../features/dashboard/hooks/useTodaysPlan';
-import type {
-  TrainingPlan,
-  TrainingPlanDay,
-  Workout,
-  WorkoutSet,
-} from '../features/fitness/types';
+import { useFitnessStore } from '../store/fitnessStore';
 import type { DayPlan } from '../types';
 
 const makeExercisesJson = (): string =>
@@ -73,9 +66,7 @@ const makePlan = (overrides: Partial<TrainingPlan> = {}): TrainingPlan => ({
   ...overrides,
 });
 
-const makePlanDay = (
-  overrides: Partial<TrainingPlanDay> = {},
-): TrainingPlanDay => ({
+const makePlanDay = (overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay => ({
   id: 'day-wed',
   planId: 'plan-1',
   dayOfWeek: 3,
@@ -136,19 +127,13 @@ describe('determineTodayPlanState', () => {
   });
 
   it('returns training-pending when plan day exists but no workout logged', () => {
-    expect(
-      determineTodayPlanState(makePlan(), [makePlanDay()], []),
-    ).toBe('training-pending');
+    expect(determineTodayPlanState(makePlan(), [makePlanDay()], [])).toBe('training-pending');
   });
 
   it('returns training-completed when workout logged today', () => {
-    expect(
-      determineTodayPlanState(
-        makePlan(),
-        [makePlanDay()],
-        [makeWorkout({ planDayId: 'day-wed' })],
-      ),
-    ).toBe('training-completed');
+    expect(determineTodayPlanState(makePlan(), [makePlanDay()], [makeWorkout({ planDayId: 'day-wed' })])).toBe(
+      'training-completed',
+    );
   });
 
   it('returns rest-day when active plan but no plan day for today', () => {
@@ -273,9 +258,7 @@ describe('useTodaysPlan', () => {
     const { result } = renderHook(() => useTodaysPlan());
 
     expect(result.current.tomorrowWorkoutType).toBe('Lower Body A');
-    expect(result.current.tomorrowMuscleGroups).toBe(
-      'quads, hamstrings, glutes',
-    );
+    expect(result.current.tomorrowMuscleGroups).toBe('quads, hamstrings, glutes');
   });
 
   it('returns meals logged count', () => {
@@ -446,7 +429,14 @@ describe('useTodaysPlan', () => {
       trainingPlans: [makePlan()],
       trainingPlanDays: [
         makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
-        makePlanDay({ id: 'pd-pm', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio', muscleGroups: undefined, exercises: undefined }),
+        makePlanDay({
+          id: 'pd-pm',
+          dayOfWeek: 3,
+          sessionOrder: 2,
+          workoutType: 'Cardio',
+          muscleGroups: undefined,
+          exercises: undefined,
+        }),
       ],
       workouts: [makeWorkout({ planDayId: 'pd-am' })],
     });
@@ -466,9 +456,7 @@ describe('useTodaysPlan', () => {
 
     useFitnessStore.setState({
       trainingPlans: [makePlan()],
-      trainingPlanDays: [
-        makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
-      ],
+      trainingPlanDays: [makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' })],
       workouts: [makeWorkout({ planDayId: 'pd-am' })],
     });
 
@@ -481,12 +469,19 @@ describe('useTodaysPlan', () => {
   });
 
   describe('multi-workout aggregation fix', () => {
-    it('TC_UTP_01: completedWorkout aggregates duration from all today\'s workouts', () => {
+    it("TC_UTP_01: completedWorkout aggregates duration from all today's workouts", () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [
           makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
-          makePlanDay({ id: 'pd-pm', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio', muscleGroups: undefined, exercises: undefined }),
+          makePlanDay({
+            id: 'pd-pm',
+            dayOfWeek: 3,
+            sessionOrder: 2,
+            workoutType: 'Cardio',
+            muscleGroups: undefined,
+            exercises: undefined,
+          }),
         ],
         workouts: [
           makeWorkout({ id: 'w-1', planDayId: 'pd-am', durationMin: 45 }),
@@ -506,7 +501,14 @@ describe('useTodaysPlan', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: [
           makePlanDay({ id: 'pd-am', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Upper' }),
-          makePlanDay({ id: 'pd-pm', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio', muscleGroups: undefined, exercises: undefined }),
+          makePlanDay({
+            id: 'pd-pm',
+            dayOfWeek: 3,
+            sessionOrder: 2,
+            workoutType: 'Cardio',
+            muscleGroups: undefined,
+            exercises: undefined,
+          }),
         ],
         workouts: [
           makeWorkout({ id: 'w-1', planDayId: 'pd-am', durationMin: 45 }),
@@ -531,10 +533,7 @@ describe('useTodaysPlan', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
         workouts: [makeWorkout({ planDayId: 'day-wed', durationMin: 50 })],
-        workoutSets: [
-          makeWorkoutSet({ id: 'set-r1' }),
-          makeWorkoutSet({ id: 'set-r2', setNumber: 2 }),
-        ],
+        workoutSets: [makeWorkoutSet({ id: 'set-r1' }), makeWorkoutSet({ id: 'set-r2', setNumber: 2 })],
       });
 
       const { result } = renderHook(() => useTodaysPlan());

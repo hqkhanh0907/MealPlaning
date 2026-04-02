@@ -1,14 +1,15 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { BarChart3, CalendarDays, UtensilsCrossed, X } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CalendarDays, UtensilsCrossed, BarChart3, X } from 'lucide-react';
-import { Dish, Ingredient, DayPlan, MealType, DayNutritionSummary } from '../types';
+
+import { useIsDesktop } from '../hooks/useIsDesktop';
+import { DayNutritionSummary, DayPlan, Dish, Ingredient, MealType } from '../types';
+import { parseLocalDate } from '../utils/helpers';
 import { DateSelector } from './DateSelector';
+import { GroceryList } from './GroceryList';
 import { MealsSubTab } from './schedule/MealsSubTab';
 import { NutritionSubTab } from './schedule/NutritionSubTab';
-import { GroceryList } from './GroceryList';
 import { ModalBackdrop } from './shared/ModalBackdrop';
-import { parseLocalDate } from '../utils/helpers';
-import { useIsDesktop } from '../hooks/useIsDesktop';
 
 type ScheduleSubTab = 'meals' | 'nutrition';
 
@@ -38,10 +39,28 @@ export interface CalendarTabProps {
 }
 
 export const CalendarTab = React.memo(function CalendarTab({
-  selectedDate, onSelectDate, dayPlans, dishes, ingredients,
-  currentPlan, dayNutrition, userWeight, targetCalories, targetProtein,
-  isSuggesting, servings, onOpenTypeSelection, onOpenClearPlan, onOpenGoalModal, onPlanMeal, onSuggestMealPlan,
-  onCopyPlan, onSaveTemplate, onOpenTemplateManager, onQuickAdd, onUpdateServings,
+  selectedDate,
+  onSelectDate,
+  dayPlans,
+  dishes,
+  ingredients,
+  currentPlan,
+  dayNutrition,
+  userWeight,
+  targetCalories,
+  targetProtein,
+  isSuggesting,
+  servings,
+  onOpenTypeSelection,
+  onOpenClearPlan,
+  onOpenGoalModal,
+  onPlanMeal,
+  onSuggestMealPlan,
+  onCopyPlan,
+  onSaveTemplate,
+  onOpenTemplateManager,
+  onQuickAdd,
+  onUpdateServings,
 }: CalendarTabProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
@@ -69,41 +88,59 @@ export const CalendarTab = React.memo(function CalendarTab({
   }, [dayPlans, selectedDate]);
 
   const SUB_TABS: { key: ScheduleSubTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'meals', label: t('schedule.mealsTab'), icon: <UtensilsCrossed className="w-4 h-4" /> },
-    { key: 'nutrition', label: t('schedule.nutritionTab'), icon: <BarChart3 className="w-4 h-4" /> },
+    { key: 'meals', label: t('schedule.mealsTab'), icon: <UtensilsCrossed className="h-4 w-4" /> },
+    { key: 'nutrition', label: t('schedule.nutritionTab'), icon: <BarChart3 className="h-4 w-4" /> },
   ];
 
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Date Selection */}
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-xl">
-            <CalendarDays className="w-6 h-6 text-emerald-500" />
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2 text-xl font-bold text-slate-800 dark:text-slate-100">
+            <CalendarDays className="h-6 w-6 text-emerald-500" />
             <h2>{t('calendar.selectDate')}</h2>
           </div>
-          <div className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full border border-slate-200 dark:border-slate-700 text-center">
-            <span className="sm:hidden">{parseLocalDate(selectedDate).toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'numeric' })}</span>
-            <span className="hidden sm:inline">{parseLocalDate(selectedDate).toLocaleDateString(dateLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-slate-500 sm:rounded-full sm:py-1.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+            <span className="sm:hidden">
+              {parseLocalDate(selectedDate).toLocaleDateString(dateLocale, {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'numeric',
+              })}
+            </span>
+            <span className="hidden sm:inline">
+              {parseLocalDate(selectedDate).toLocaleDateString(dateLocale, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
           </div>
         </div>
-        <DateSelector selectedDate={selectedDate} onSelectDate={onSelectDate} onPlanClick={onOpenTypeSelection} dayPlans={dayPlans} />
+        <DateSelector
+          selectedDate={selectedDate}
+          onSelectDate={onSelectDate}
+          onPlanClick={onOpenTypeSelection}
+          dayPlans={dayPlans}
+        />
       </section>
 
       {/* Mobile: Sub-tabs */}
       {!isDesktop && (
         <>
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl" data-testid="schedule-subtabs">
+          <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800" data-testid="schedule-subtabs">
             {SUB_TABS.map(({ key, label, icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setActiveSubTab(key)}
                 data-testid={`subtab-${key}`}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all min-h-11 ${
+                className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
                   activeSubTab === key
-                    ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                    ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-400'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                 }`}
               >
                 {icon}
@@ -188,23 +225,21 @@ export const CalendarTab = React.memo(function CalendarTab({
         <ModalBackdrop onClose={handleCloseGrocery} zIndex="z-50">
           <div
             data-testid="grocery-modal"
-            className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg overflow-hidden max-h-[90vh] flex flex-col sm:mx-4"
+            className="relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-3xl dark:bg-slate-800"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                {t('grocery.title')}
-              </h2>
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>
               <button
                 type="button"
                 onClick={handleCloseGrocery}
                 data-testid="btn-close-grocery"
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-700 transition-all"
+                className="rounded-xl p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
                 aria-label={t('common.close')}
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="overflow-y-auto flex-1">
+            <div className="flex-1 overflow-y-auto">
               <GroceryList
                 currentPlan={currentPlan}
                 dayPlans={dayPlans}
@@ -221,4 +256,3 @@ export const CalendarTab = React.memo(function CalendarTab({
 });
 
 CalendarTab.displayName = 'CalendarTab';
-

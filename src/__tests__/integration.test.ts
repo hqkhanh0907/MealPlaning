@@ -3,12 +3,23 @@
  * Tests: create ingredient → create dish → plan meal → verify grocery list aggregation.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Ingredient, Dish, DayPlan, AnalyzedIngredient } from '../types';
-import { calculateDishNutrition, calculateDishesNutrition, toTempIngredient, calculateIngredientNutrition } from '../utils/nutrition';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  migrateDayPlans,
+  migrateDishes,
+  processAnalyzedDish,
+  removeIngredientFromDishes,
+} from '../services/dataService';
+import { applySuggestionToDayPlans, clearPlansByScope, updateDayPlanSlot } from '../services/planService';
+import { AnalyzedIngredient, DayPlan, Dish, Ingredient } from '../types';
 import { generateUUID } from '../utils/helpers';
-import { updateDayPlanSlot, clearPlansByScope, applySuggestionToDayPlans } from '../services/planService';
-import { removeIngredientFromDishes, migrateDishes, migrateDayPlans, processAnalyzedDish } from '../services/dataService';
+import {
+  calculateDishesNutrition,
+  calculateDishNutrition,
+  calculateIngredientNutrition,
+  toTempIngredient,
+} from '../utils/nutrition';
 
 // --- Shared state for each test ---
 
@@ -18,15 +29,52 @@ let dayPlans: DayPlan[];
 
 beforeEach(() => {
   ingredients = [
-    { id: 'ing-chicken', name: { vi: 'Ức gà', en: 'Ức gà' }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 165, proteinPer100: 31, carbsPer100: 0, fatPer100: 3.6, fiberPer100: 0 },
-    { id: 'ing-rice', name: { vi: 'Cơm trắng', en: 'Cơm trắng' }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 130, proteinPer100: 2.7, carbsPer100: 28, fatPer100: 0.3, fiberPer100: 0.4 },
-    { id: 'ing-egg', name: { vi: 'Trứng gà', en: 'Trứng gà' }, unit: { vi: 'quả', en: 'quả' }, caloriesPer100: 155, proteinPer100: 13, carbsPer100: 1.1, fatPer100: 11, fiberPer100: 0 },
-    { id: 'ing-broccoli', name: { vi: 'Bông cải xanh', en: 'Bông cải xanh' }, unit: { vi: 'g', en: 'g' }, caloriesPer100: 34, proteinPer100: 2.8, carbsPer100: 7, fatPer100: 0.4, fiberPer100: 2.6 },
+    {
+      id: 'ing-chicken',
+      name: { vi: 'Ức gà', en: 'Ức gà' },
+      unit: { vi: 'g', en: 'g' },
+      caloriesPer100: 165,
+      proteinPer100: 31,
+      carbsPer100: 0,
+      fatPer100: 3.6,
+      fiberPer100: 0,
+    },
+    {
+      id: 'ing-rice',
+      name: { vi: 'Cơm trắng', en: 'Cơm trắng' },
+      unit: { vi: 'g', en: 'g' },
+      caloriesPer100: 130,
+      proteinPer100: 2.7,
+      carbsPer100: 28,
+      fatPer100: 0.3,
+      fiberPer100: 0.4,
+    },
+    {
+      id: 'ing-egg',
+      name: { vi: 'Trứng gà', en: 'Trứng gà' },
+      unit: { vi: 'quả', en: 'quả' },
+      caloriesPer100: 155,
+      proteinPer100: 13,
+      carbsPer100: 1.1,
+      fatPer100: 11,
+      fiberPer100: 0,
+    },
+    {
+      id: 'ing-broccoli',
+      name: { vi: 'Bông cải xanh', en: 'Bông cải xanh' },
+      unit: { vi: 'g', en: 'g' },
+      caloriesPer100: 34,
+      proteinPer100: 2.8,
+      carbsPer100: 7,
+      fatPer100: 0.4,
+      fiberPer100: 2.6,
+    },
   ];
 
   dishes = [
     {
-      id: 'dish-com-ga', name: { vi: 'Cơm gà', en: 'Cơm gà' },
+      id: 'dish-com-ga',
+      name: { vi: 'Cơm gà', en: 'Cơm gà' },
       ingredients: [
         { ingredientId: 'ing-chicken', amount: 150 },
         { ingredientId: 'ing-rice', amount: 200 },
@@ -34,12 +82,14 @@ beforeEach(() => {
       tags: ['lunch', 'dinner'],
     },
     {
-      id: 'dish-trung-luoc', name: { vi: 'Trứng luộc', en: 'Trứng luộc' },
+      id: 'dish-trung-luoc',
+      name: { vi: 'Trứng luộc', en: 'Trứng luộc' },
       ingredients: [{ ingredientId: 'ing-egg', amount: 2 }],
       tags: ['breakfast'],
     },
     {
-      id: 'dish-salad', name: { vi: 'Salad gà', en: 'Salad gà' },
+      id: 'dish-salad',
+      name: { vi: 'Salad gà', en: 'Salad gà' },
       ingredients: [
         { ingredientId: 'ing-chicken', amount: 100 },
         { ingredientId: 'ing-broccoli', amount: 150 },
@@ -216,12 +266,14 @@ describe('Flow: AI Analyzed Dish → Save to Library', () => {
       ingredients: [
         {
           name: 'Ức gà', // Matches existing
-          amount: 200, unit: 'g',
+          amount: 200,
+          unit: 'g',
           nutritionPerStandardUnit: { calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
         },
         {
           name: 'Dầu ăn', // New ingredient
-          amount: 30, unit: 'ml',
+          amount: 30,
+          unit: 'ml',
           nutritionPerStandardUnit: { calories: 884, protein: 0, carbs: 0, fat: 100, fiber: 0 },
         },
       ],
@@ -335,4 +387,3 @@ describe('Flow: AI Analyzed → toTempIngredient → Nutrition Calculation', () 
     expect(nutrition.calories).toBeCloseTo(165);
   });
 });
-

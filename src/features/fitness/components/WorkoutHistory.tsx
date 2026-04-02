@@ -1,27 +1,20 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { ChevronDown, ChevronUp, ClipboardList, Clock, StickyNote, Trash2 } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ClipboardList,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  StickyNote,
-  Trash2,
-} from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
+import { Skeleton } from '@/components/ui/skeleton';
+
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { calculateExerciseVolume } from '../utils/trainingMetrics';
-import { parseDate, getMondayOfWeek } from '../utils/dateUtils';
+import { DAY_LABELS_SUNDAY_FIRST } from '../constants';
 import { EXERCISES } from '../data/exerciseDatabase';
 import type { Workout, WorkoutSet } from '../types';
-import { DAY_LABELS_SUNDAY_FIRST } from '../constants';
+import { getMondayOfWeek, parseDate } from '../utils/dateUtils';
+import { calculateExerciseVolume } from '../utils/trainingMetrics';
 
 type FilterType = 'all' | 'strength' | 'cardio';
 
-const EXERCISE_NAME_MAP = new Map(
-  EXERCISES.map((e) => [e.id, e.nameVi]),
-);
+const EXERCISE_NAME_MAP = new Map(EXERCISES.map(e => [e.id, e.nameVi]));
 
 interface WeekGroup {
   weekKey: string;
@@ -29,21 +22,15 @@ interface WeekGroup {
   workouts: Workout[];
 }
 
-function getRelativeDate(
-  dateStr: string,
-  t: (key: string, opts?: Record<string, unknown>) => string,
-): string {
+function getRelativeDate(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const target = parseDate(dateStr);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.floor(
-    (today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const diffDays = Math.floor((today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return t('fitness.history.today');
   if (diffDays === 1) return t('fitness.history.yesterday');
-  if (diffDays >= 2 && diffDays <= 6)
-    return t('fitness.history.daysAgo', { count: diffDays });
+  if (diffDays >= 2 && diffDays <= 6) return t('fitness.history.daysAgo', { count: diffDays });
 
   const parts = dateStr.split('-');
   const dayName = DAY_LABELS_SUNDAY_FIRST[target.getDay()];
@@ -76,27 +63,23 @@ function ExerciseGroupDetail({
 }>): React.JSX.Element {
   const exerciseVolume = calculateExerciseVolume(sets);
   return (
-    <div
-      data-testid={`exercise-group-${exerciseId}`}
-      className="py-2"
-    >
-      <div className="flex justify-between items-center mb-1">
+    <div data-testid={`exercise-group-${exerciseId}`} className="py-2">
+      <div className="mb-1 flex items-center justify-between">
         <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
           {EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}
         </span>
         {exerciseVolume > 0 && (
           <span className="text-xs text-emerald-600 dark:text-emerald-400">
-            {t('fitness.history.volume')}:{' '}
-            {exerciseVolume} kg
+            {t('fitness.history.volume')}: {exerciseVolume} kg
           </span>
         )}
       </div>
       <div className="flex flex-wrap gap-2">
-        {sets.map((set) => (
+        {sets.map(set => (
           <span
             key={set.id}
             data-testid={`set-detail-${set.id}`}
-            className="text-xs bg-slate-50 dark:bg-slate-700 px-2 py-1 rounded"
+            className="rounded bg-slate-50 px-2 py-1 text-xs dark:bg-slate-700"
           >
             {set.weightKg > 0 && (
               <>
@@ -105,8 +88,7 @@ function ExerciseGroupDetail({
             )}
             {(set.durationMin ?? 0) > 0 && (
               <>
-                {set.durationMin}{' '}
-                {t('fitness.history.minutes')}
+                {set.durationMin} {t('fitness.history.minutes')}
               </>
             )}
             {set.rpe ? ` RPE ${set.rpe}` : ''}
@@ -119,43 +101,39 @@ function ExerciseGroupDetail({
 
 function WorkoutHistoryInner(): React.JSX.Element {
   const { t } = useTranslation();
-  const workouts = useFitnessStore((s) => s.workouts);
-  const workoutSets = useFitnessStore((s) => s.workoutSets);
-  const deleteWorkout = useFitnessStore((s) => s.deleteWorkout);
+  const workouts = useFitnessStore(s => s.workouts);
+  const workoutSets = useFitnessStore(s => s.workoutSets);
+  const deleteWorkout = useFitnessStore(s => s.deleteWorkout);
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const getSetsForWorkout = useCallback(
-    (workoutId: string): WorkoutSet[] =>
-      workoutSets.filter((s) => s.workoutId === workoutId),
+    (workoutId: string): WorkoutSet[] => workoutSets.filter(s => s.workoutId === workoutId),
     [workoutSets],
   );
 
   const getExerciseCount = useCallback(
     (workoutId: string): number => {
       const sets = getSetsForWorkout(workoutId);
-      return new Set(sets.map((s) => s.exerciseId)).size;
+      return new Set(sets.map(s => s.exerciseId)).size;
     },
     [getSetsForWorkout],
   );
 
   const filteredWorkouts = useMemo(() => {
-    const sorted = [...workouts].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    );
+    const sorted = [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     if (filter === 'all') return sorted;
-    return sorted.filter((w) => {
+    return sorted.filter(w => {
       const sets = getSetsForWorkout(w.id);
-      if (filter === 'strength') return sets.some((s) => s.weightKg > 0);
-      return sets.some((s) => (s.durationMin ?? 0) > 0);
+      if (filter === 'strength') return sets.some(s => s.weightKg > 0);
+      return sets.some(s => (s.durationMin ?? 0) > 0);
     });
   }, [workouts, filter, getSetsForWorkout]);
 
   const weekGroups = useMemo<WeekGroup[]>(() => {
-    const grouped: Record<string, { label: string; workouts: Workout[] }> =
-      {};
+    const grouped: Record<string, { label: string; workouts: Workout[] }> = {};
     for (const workout of filteredWorkouts) {
       const key = getWeekKey(workout.date);
       if (!grouped[key]) {
@@ -173,7 +151,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
   }, [filteredWorkouts]);
 
   const handleToggle = useCallback((workoutId: string) => {
-    setExpandedId((prev) => (prev === workoutId ? null : workoutId));
+    setExpandedId(prev => (prev === workoutId ? null : workoutId));
   }, []);
 
   const handleConfirmDelete = useCallback(async () => {
@@ -217,37 +195,21 @@ function WorkoutHistoryInner(): React.JSX.Element {
 
   if (workouts.length === 0) {
     return (
-      <div
-        data-testid="workout-history-empty"
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
-        <ClipboardList
-          className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4"
-          aria-hidden="true"
-        />
-        <p
-          data-testid="empty-title"
-          className="text-slate-500 dark:text-slate-400 font-medium mb-1"
-        >
+      <div data-testid="workout-history-empty" className="flex flex-col items-center justify-center py-16 text-center">
+        <ClipboardList className="mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
+        <p data-testid="empty-title" className="mb-1 font-medium text-slate-500 dark:text-slate-400">
           {t('fitness.history.noHistory')}
         </p>
-        <p
-          data-testid="empty-subtitle"
-          className="text-sm text-slate-500 dark:text-slate-500 mb-6"
-        >
+        <p data-testid="empty-subtitle" className="mb-6 text-sm text-slate-500 dark:text-slate-500">
           {t('fitness.history.emptySubtitle')}
         </p>
         <div
           data-testid="skeleton-preview"
-          className="w-full max-w-sm flex flex-col gap-3 opacity-30 blur-[1px] pointer-events-none"
+          className="pointer-events-none flex w-full max-w-sm flex-col gap-3 opacity-30 blur-[1px]"
           aria-hidden="true"
         >
-          {[1, 2, 3].map((i) => (
-            <Skeleton
-              key={i}
-              data-testid={`skeleton-card-${i}`}
-              className="h-16 rounded-xl"
-            />
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} data-testid={`skeleton-card-${i}`} className="h-16 rounded-xl" />
           ))}
         </div>
       </div>
@@ -265,7 +227,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
             onClick={() => setFilter(key)}
             aria-pressed={filter === key}
             aria-label={label}
-            className={`px-3 py-1.5 min-h-11 rounded-full text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+            className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
               filter === key
                 ? 'bg-emerald-500 text-white'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
@@ -281,12 +243,12 @@ function WorkoutHistoryInner(): React.JSX.Element {
           <div key={weekKey} data-testid={`week-group-${weekKey}`}>
             <h3
               data-testid={`week-header-${weekKey}`}
-              className="text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wide mb-2 px-1"
+              className="mb-2 px-1 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
             >
               {t('fitness.history.weekOf', { date: weekLabel })}
             </h3>
             <div className="flex flex-col gap-3">
-              {wks.map((workout) => {
+              {wks.map(workout => {
                 const isExpanded = expandedId === workout.id;
                 const volume = getWorkoutVolume(workout.id);
                 const exerciseCount = getExerciseCount(workout.id);
@@ -295,7 +257,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                   <div
                     key={workout.id}
                     data-testid={`workout-card-${workout.id}`}
-                    className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
+                    className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
                   >
                     <button
                       data-testid={`workout-toggle-${workout.id}`}
@@ -303,7 +265,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                       onClick={() => handleToggle(workout.id)}
                       aria-expanded={isExpanded}
                       aria-label={`${workout.name} - ${getRelativeDate(workout.date, t)}`}
-                      className="w-full px-4 py-3 flex items-center justify-between text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
+                      className="focus-visible:ring-ring flex w-full items-center justify-between rounded-xl px-4 py-3 text-left focus-visible:ring-2 focus-visible:ring-offset-2"
                     >
                       <div className="flex flex-col gap-1">
                         <span
@@ -332,8 +294,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         )}
                         {(workout.durationMin ?? 0) > 0 && (
                           <span className="text-sm text-slate-500 dark:text-slate-400">
-                            {workout.durationMin}{' '}
-                            {t('fitness.history.minutes')}
+                            {workout.durationMin} {t('fitness.history.minutes')}
                           </span>
                         )}
                         {volume > 0 && (
@@ -345,9 +306,9 @@ function WorkoutHistoryInner(): React.JSX.Element {
                           </span>
                         )}
                         {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                          <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
                         ) : (
-                          <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                          <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
                         )}
                       </div>
                     </button>
@@ -355,66 +316,45 @@ function WorkoutHistoryInner(): React.JSX.Element {
                     {isExpanded && (
                       <div
                         data-testid={`workout-detail-${workout.id}`}
-                        className="px-4 pb-3 border-t border-slate-100 dark:border-slate-700"
+                        className="border-t border-slate-100 px-4 pb-3 dark:border-slate-700"
                       >
-                        {Object.entries(groupSetsByExercise(workout.id)).map(
-                          ([exerciseId, sets]) => (
-                            <ExerciseGroupDetail
-                              key={exerciseId}
-                              exerciseId={exerciseId}
-                              sets={sets}
-                              t={t}
-                            />
-                          ),
-                        )}
+                        {Object.entries(groupSetsByExercise(workout.id)).map(([exerciseId, sets]) => (
+                          <ExerciseGroupDetail key={exerciseId} exerciseId={exerciseId} sets={sets} t={t} />
+                        ))}
 
                         <div
                           data-testid={`workout-meta-${workout.id}`}
-                          className="flex items-center gap-4 pt-2 mt-2 border-t border-slate-50 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-500"
+                          className="mt-2 flex items-center gap-4 border-t border-slate-50 pt-2 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-500"
                         >
                           <div className="flex items-center gap-1">
-                            <Clock
-                              className="w-3 h-3"
-                              aria-hidden="true"
-                            />
+                            <Clock className="h-3 w-3" aria-hidden="true" />
                             {(workout.durationMin ?? 0) > 0 && (
-                              <span
-                                data-testid={`workout-duration-detail-${workout.id}`}
-                              >
-                                {workout.durationMin}{' '}
-                                {t('fitness.history.minutes')}
+                              <span data-testid={`workout-duration-detail-${workout.id}`}>
+                                {workout.durationMin} {t('fitness.history.minutes')}
                               </span>
                             )}
                           </div>
-                          <span
-                            data-testid={`workout-completed-${workout.id}`}
-                          >
-                            {t('fitness.history.completedAt')}{' '}
-                            {formatCompletionTime(workout.updatedAt)}
+                          <span data-testid={`workout-completed-${workout.id}`}>
+                            {t('fitness.history.completedAt')} {formatCompletionTime(workout.updatedAt)}
                           </span>
                         </div>
 
                         {workout.notes && (
                           <div
                             data-testid={`workout-notes-${workout.id}`}
-                            className="flex items-start gap-2 pt-2 mt-2 border-t border-slate-50 dark:border-slate-700"
+                            className="mt-2 flex items-start gap-2 border-t border-slate-50 pt-2 dark:border-slate-700"
                           >
-                            <StickyNote
-                              className="w-3 h-3 text-slate-400 mt-0.5 shrink-0"
-                              aria-hidden="true"
-                            />
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {workout.notes}
-                            </p>
+                            <StickyNote className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{workout.notes}</p>
                           </div>
                         )}
 
-                        <div className="flex justify-end pt-2 mt-2 border-t border-slate-50 dark:border-slate-700">
+                        <div className="mt-2 flex justify-end border-t border-slate-50 pt-2 dark:border-slate-700">
                           <button
                             type="button"
                             data-testid={`delete-workout-${workout.id}`}
                             onClick={() => setDeleteTargetId(workout.id)}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            className="focus-visible:ring-ring flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-red-500 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-red-400 dark:hover:bg-red-950/30"
                             aria-label={t('fitness.deleteWorkout.title')}
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

@@ -1,11 +1,13 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { Check, Minus, Plus, Scale } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale, Check, Minus, Plus } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
-import { useFitnessStore } from '../../../store/fitnessStore';
-import { useNotification } from '../../../contexts/NotificationContext';
-import { calculateMovingAverage } from '../../dashboard/hooks/useFeedbackLoop';
 import { generateUUID } from '@/utils/helpers';
+
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useFitnessStore } from '../../../store/fitnessStore';
+import { calculateMovingAverage } from '../../dashboard/hooks/useFeedbackLoop';
 import type { WeightEntry } from '../types';
 
 const STEP = 0.5;
@@ -32,18 +34,12 @@ function yesterdayStr(): string {
   return `${y}-${m}-${day}`;
 }
 
-
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
-function getRecentUniqueWeights(
-  entries: WeightEntry[],
-  excludeDate: string,
-): number[] {
-  const sorted = [...entries]
-    .filter((e) => e.date !== excludeDate)
-    .sort((a, b) => b.date.localeCompare(a.date));
+function getRecentUniqueWeights(entries: WeightEntry[], excludeDate: string): number[] {
+  const sorted = [...entries].filter(e => e.date !== excludeDate).sort((a, b) => b.date.localeCompare(a.date));
   const seen = new Set<number>();
   const result: number[] = [];
   for (const entry of sorted) {
@@ -61,7 +57,7 @@ function getEntriesLast7Days(entries: WeightEntry[]): WeightEntry[] {
   now.setHours(0, 0, 0, 0);
   const cutoff = new Date(now);
   cutoff.setDate(cutoff.getDate() - MOVING_AVG_DAYS);
-  return entries.filter((e) => {
+  return entries.filter(e => {
     const d = new Date(e.date);
     d.setHours(0, 0, 0, 0);
     return d >= cutoff && d <= now;
@@ -83,51 +79,34 @@ function DailyWeightInputInner(): React.JSX.Element {
   const { t } = useTranslation();
   const notify = useNotification();
 
-  const weightEntries = useFitnessStore((s) => s.weightEntries);
-  const addWeightEntry = useFitnessStore((s) => s.addWeightEntry);
-  const updateWeightEntry = useFitnessStore((s) => s.updateWeightEntry);
-  const removeWeightEntry = useFitnessStore((s) => s.removeWeightEntry);
+  const weightEntries = useFitnessStore(s => s.weightEntries);
+  const addWeightEntry = useFitnessStore(s => s.addWeightEntry);
+  const updateWeightEntry = useFitnessStore(s => s.updateWeightEntry);
+  const removeWeightEntry = useFitnessStore(s => s.removeWeightEntry);
 
   const today = todayStr();
   const yesterday = yesterdayStr();
 
-  const todayEntry = useMemo(
-    () => weightEntries.find((e) => e.date === today),
-    [weightEntries, today],
-  );
+  const todayEntry = useMemo(() => weightEntries.find(e => e.date === today), [weightEntries, today]);
 
-  const yesterdayEntry = useMemo(
-    () => weightEntries.find((e) => e.date === yesterday),
-    [weightEntries, yesterday],
-  );
+  const yesterdayEntry = useMemo(() => weightEntries.find(e => e.date === yesterday), [weightEntries, yesterday]);
 
   const latestEntry = useMemo(() => {
     if (weightEntries.length === 0) return undefined;
-    return [...weightEntries].sort((a, b) =>
-      b.date.localeCompare(a.date),
-    )[0];
+    return [...weightEntries].sort((a, b) => b.date.localeCompare(a.date))[0];
   }, [weightEntries]);
 
-  const recentChips = useMemo(
-    () => getRecentUniqueWeights(weightEntries, today),
-    [weightEntries, today],
-  );
+  const recentChips = useMemo(() => getRecentUniqueWeights(weightEntries, today), [weightEntries, today]);
 
   const movingAvg = useMemo(() => {
     const last7 = getEntriesLast7Days(weightEntries);
     return calculateMovingAverage(last7);
   }, [weightEntries]);
 
-  const trend = useMemo(
-    () => getTrendIndicator(movingAvg, yesterdayEntry?.weightKg),
-    [movingAvg, yesterdayEntry],
-  );
+  const trend = useMemo(() => getTrendIndicator(movingAvg, yesterdayEntry?.weightKg), [movingAvg, yesterdayEntry]);
 
-  const initialWeight =
-    todayEntry?.weightKg ?? latestEntry?.weightKg ?? 0;
-  const [displayValue, setDisplayValue] = useState<string>(
-    initialWeight > 0 ? String(initialWeight) : '',
-  );
+  const initialWeight = todayEntry?.weightKg ?? latestEntry?.weightKg ?? 0;
+  const [displayValue, setDisplayValue] = useState<string>(initialWeight > 0 ? String(initialWeight) : '');
   const [numericValue, setNumericValue] = useState<number>(initialWeight);
   const [isSaved, setIsSaved] = useState<boolean>(!!todayEntry);
 
@@ -143,7 +122,7 @@ function DailyWeightInputInner(): React.JSX.Element {
   }, [yesterdayEntry, numericValue]);
 
   const handleIncrement = useCallback(() => {
-    setNumericValue((prev) => {
+    setNumericValue(prev => {
       const next = round1(prev + STEP);
       if (next <= MAX_WEIGHT) {
         setDisplayValue(String(next));
@@ -155,7 +134,7 @@ function DailyWeightInputInner(): React.JSX.Element {
   }, []);
 
   const handleDecrement = useCallback(() => {
-    setNumericValue((prev) => {
+    setNumericValue(prev => {
       const next = round1(prev - STEP);
       if (next >= MIN_WEIGHT) {
         setDisplayValue(String(next));
@@ -166,20 +145,17 @@ function DailyWeightInputInner(): React.JSX.Element {
     setIsSaved(false);
   }, []);
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
-      setDisplayValue(raw);
-      if (raw !== '') {
-        const num = Number.parseFloat(raw);
-        if (!Number.isNaN(num)) {
-          setNumericValue(num);
-        }
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setDisplayValue(raw);
+    if (raw !== '') {
+      const num = Number.parseFloat(raw);
+      if (!Number.isNaN(num)) {
+        setNumericValue(num);
       }
-      setIsSaved(false);
-    },
-    [],
-  );
+    }
+    setIsSaved(false);
+  }, []);
 
   const handleInputBlur = useCallback(() => {
     if (displayValue !== '' && !Number.isNaN(Number.parseFloat(displayValue))) {
@@ -218,45 +194,32 @@ function DailyWeightInputInner(): React.JSX.Element {
     setIsSaved(true);
 
     const savedWeight = numericValue;
-    notify.success(
-      t('fitness.weight.saved'),
-      `${savedWeight} ${t('fitness.weight.kg')}`,
-      {
-        duration: UNDO_DURATION,
-        action: {
-          label: t('common.undo'),
-          onClick: () => {
-            if (wasUpdate && todayEntry && previousWeight !== undefined) {
-              updateWeightEntry(todayEntry.id, {
-                weightKg: previousWeight,
-                updatedAt: new Date().toISOString(),
-              });
-              setNumericValue(previousWeight);
-              setDisplayValue(String(previousWeight));
-            } else {
-              const entries = useFitnessStore.getState().weightEntries;
-              const created = entries.find((e) => e.date === today);
-              if (created) {
-                removeWeightEntry(created.id);
-              }
-              setNumericValue(savedWeight);
-              setDisplayValue(String(savedWeight));
+    notify.success(t('fitness.weight.saved'), `${savedWeight} ${t('fitness.weight.kg')}`, {
+      duration: UNDO_DURATION,
+      action: {
+        label: t('common.undo'),
+        onClick: () => {
+          if (wasUpdate && todayEntry && previousWeight !== undefined) {
+            updateWeightEntry(todayEntry.id, {
+              weightKg: previousWeight,
+              updatedAt: new Date().toISOString(),
+            });
+            setNumericValue(previousWeight);
+            setDisplayValue(String(previousWeight));
+          } else {
+            const entries = useFitnessStore.getState().weightEntries;
+            const created = entries.find(e => e.date === today);
+            if (created) {
+              removeWeightEntry(created.id);
             }
-            setIsSaved(false);
-          },
+            setNumericValue(savedWeight);
+            setDisplayValue(String(savedWeight));
+          }
+          setIsSaved(false);
         },
       },
-    );
-  }, [
-    todayEntry,
-    numericValue,
-    today,
-    updateWeightEntry,
-    addWeightEntry,
-    removeWeightEntry,
-    notify,
-    t,
-  ]);
+    });
+  }, [todayEntry, numericValue, today, updateWeightEntry, addWeightEntry, removeWeightEntry, notify, t]);
 
   const barClass = isSaved
     ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-600'
@@ -268,10 +231,7 @@ function DailyWeightInputInner(): React.JSX.Element {
       className={`flex flex-col gap-1 rounded-xl border px-3 py-2 transition-colors ${barClass}`}
     >
       <div className="flex items-center gap-2">
-        <Scale
-          className="h-4 w-4 shrink-0 text-emerald-500"
-          aria-hidden="true"
-        />
+        <Scale className="h-4 w-4 shrink-0 text-emerald-500" aria-hidden="true" />
         <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
           {t('fitness.weight.todayWeight')}
         </span>
@@ -300,9 +260,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             className="w-16 text-center text-lg font-bold text-slate-800"
           />
 
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            {t('fitness.weight.kg')}
-          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.weight.kg')}</span>
 
           <button
             type="button"
@@ -316,9 +274,7 @@ function DailyWeightInputInner(): React.JSX.Element {
           <button
             type="button"
             data-testid="save-weight-btn"
-            aria-label={
-              isSaved ? t('fitness.weight.saved') : t('common.save')
-            }
+            aria-label={isSaved ? t('fitness.weight.saved') : t('common.save')}
             disabled={!isValid}
             onClick={handleSave}
             className={`ml-1 flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95 disabled:opacity-40 ${
@@ -333,11 +289,8 @@ function DailyWeightInputInner(): React.JSX.Element {
       </div>
 
       {recentChips.length > 0 && (
-        <div
-          data-testid="quick-select-chips"
-          className="ml-6 flex flex-wrap gap-1"
-        >
-          {recentChips.map((w) => (
+        <div data-testid="quick-select-chips" className="ml-6 flex flex-wrap gap-1">
+          {recentChips.map(w => (
             <button
               key={w}
               type="button"
@@ -359,8 +312,7 @@ function DailyWeightInputInner(): React.JSX.Element {
       <div className="ml-6 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500 dark:text-slate-400">
         {yesterdayEntry && (
           <span data-testid="yesterday-info">
-            {t('fitness.weight.yesterday')}: {yesterdayEntry.weightKg}{' '}
-            {t('fitness.weight.kg')}
+            {t('fitness.weight.yesterday')}: {yesterdayEntry.weightKg} {t('fitness.weight.kg')}
             {delta !== null && (
               <span
                 data-testid="weight-delta"
@@ -378,12 +330,8 @@ function DailyWeightInputInner(): React.JSX.Element {
         )}
 
         {movingAvg !== null && (
-          <span
-            data-testid="moving-average"
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {t('fitness.weight.avg7d')}: {round1(movingAvg)}{' '}
-            {t('fitness.weight.kg')}
+          <span data-testid="moving-average" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {t('fitness.weight.avg7d')}: {round1(movingAvg)} {t('fitness.weight.kg')}
           </span>
         )}
 

@@ -42,4 +42,3 @@ export function getActiveSteps(experience: TrainingExperience): StepConfig[] {
 export function getTrainingDetailStepCount(experience: TrainingExperience): number {
   return getActiveSteps(experience).length;
 }
-

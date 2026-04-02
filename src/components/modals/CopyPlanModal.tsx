@@ -1,12 +1,14 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { ChefHat, Copy, Plus, Trash2, X } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Copy, Plus, Trash2, ChefHat } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
-import { DayPlan, Dish, SupportedLang } from '../../types';
-import { getLocalizedField } from '../../utils/localize';
+
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
-import { ModalBackdrop } from '../shared/ModalBackdrop';
+import { DayPlan, Dish, SupportedLang } from '../../types';
 import { parseLocalDate } from '../../utils/helpers';
+import { getLocalizedField } from '../../utils/localize';
+import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface CopyPlanModalProps {
   sourceDate: string;
@@ -58,23 +60,29 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
     setShowCustomInput(true);
   }, []);
 
-  const handleAddDate = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value;
-    if (date && date !== sourceDate && !selectedDates.includes(date)) {
-      setSelectedDates(prev => [...prev, date].sort((a, b) => a.localeCompare(b)));
-    }
-    e.target.value = '';
-  }, [sourceDate, selectedDates]);
+  const handleAddDate = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const date = e.target.value;
+      if (date && date !== sourceDate && !selectedDates.includes(date)) {
+        setSelectedDates(prev => [...prev, date].sort((a, b) => a.localeCompare(b)));
+      }
+      e.target.value = '';
+    },
+    [sourceDate, selectedDates],
+  );
 
   const handleRemoveDate = useCallback((date: string) => {
     setSelectedDates(prev => prev.filter(d => d !== date));
   }, []);
 
-  const getDishInfo = useCallback((ids: string[]): { id: string; name: string }[] =>
-    ids.map(id => dishes.find(d => d.id === id))
-      .filter(Boolean)
-      .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
-  [dishes, lang]);
+  const getDishInfo = useCallback(
+    (ids: string[]): { id: string; name: string }[] =>
+      ids
+        .map(id => dishes.find(d => d.id === id))
+        .filter(Boolean)
+        .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
+    [dishes, lang],
+  );
 
   const sourcePreviewSections = useMemo(() => {
     const breakfast = getDishInfo(sourcePlan.breakfastDishIds);
@@ -99,10 +107,10 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
   return (
     <ModalBackdrop onClose={onClose}>
       <div
-        className="relative bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-md overflow-hidden flex flex-col max-h-[90dvh] sm:mx-4"
+        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
         data-testid="copy-plan-modal"
       >
-        <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('copyPlan.title')}</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -112,30 +120,39 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-all min-h-11 min-w-11 flex items-center justify-center"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
           >
-            <X className="w-6 h-6" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="p-6 sm:p-8 space-y-5 overflow-y-auto">
+        <div className="space-y-5 overflow-y-auto p-6 sm:p-8">
           {/* Source plan preview */}
           {sourcePreviewSections && (
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{t('copyPlan.sourcePreview')}</p>
+            <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
+              <p className="mb-2 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                {t('copyPlan.sourcePreview')}
+              </p>
               <div className="space-y-1.5">
-                {sourcePreviewSections.filter(s => s.items.length > 0).map(({ key, label, items, color }) => (
-                  <div key={key} className="flex items-start gap-2">
-                    <span className={`text-xs font-bold ${color} min-w-14`}>{label}:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {items.map((item, idx) => (
-                        <span key={item.id} className="inline-flex items-center gap-0.5 text-xs text-slate-600 dark:text-slate-300">
-                          <ChefHat className="w-3 h-3" />{item.name}{idx < items.length - 1 ? ',' : ''}
-                        </span>
-                      ))}
+                {sourcePreviewSections
+                  .filter(s => s.items.length > 0)
+                  .map(({ key, label, items, color }) => (
+                    <div key={key} className="flex items-start gap-2">
+                      <span className={`text-xs font-bold ${color} min-w-14`}>{label}:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {items.map((item, idx) => (
+                          <span
+                            key={item.id}
+                            className="inline-flex items-center gap-0.5 text-xs text-slate-600 dark:text-slate-300"
+                          >
+                            <ChefHat className="h-3 w-3" />
+                            {item.name}
+                            {idx < items.length - 1 ? ',' : ''}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           )}
@@ -145,38 +162,41 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             <button
               data-testid="btn-copy-tomorrow"
               onClick={handleTomorrow}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium border-2 transition-all min-h-11 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-[0.98]"
+              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all hover:border-emerald-500 hover:text-emerald-600 active:scale-[0.98] dark:border-slate-600 dark:text-slate-300 dark:hover:text-emerald-400"
             >
               {t('copyPlan.tomorrow')}
             </button>
             <button
               data-testid="btn-copy-week"
               onClick={handleWeek}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium border-2 transition-all min-h-11 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-[0.98]"
+              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all hover:border-emerald-500 hover:text-emerald-600 active:scale-[0.98] dark:border-slate-600 dark:text-slate-300 dark:hover:text-emerald-400"
             >
               {t('copyPlan.thisWeek')}
             </button>
             <button
               onClick={handleCustom}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium border-2 transition-all min-h-11 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-[0.98]"
+              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all hover:border-emerald-500 hover:text-emerald-600 active:scale-[0.98] dark:border-slate-600 dark:text-slate-300 dark:hover:text-emerald-400"
             >
               {t('copyPlan.custom')}
             </button>
           </div>
 
           {/* Copy mode toggle */}
-          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3" data-testid="copy-mode-toggle">
+          <div
+            className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50"
+            data-testid="copy-mode-toggle"
+          >
             <button
               data-testid="btn-mode-overwrite"
               onClick={() => setMergeMode(false)}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-10 ${mergeMode ? 'text-slate-500 dark:text-slate-400' : 'bg-white dark:bg-slate-600 text-emerald-700 dark:text-emerald-400 shadow-sm'}`}
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-slate-500 dark:text-slate-400' : 'bg-white text-emerald-700 shadow-sm dark:bg-slate-600 dark:text-emerald-400'}`}
             >
               {t('copyPlan.overwriteMode')}
             </button>
             <button
               data-testid="btn-mode-merge"
               onClick={() => setMergeMode(true)}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-10 ${mergeMode ? 'bg-white dark:bg-slate-600 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}
             >
               {t('copyPlan.mergeMode')}
             </button>
@@ -190,30 +210,33 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
                 onChange={handleAddDate}
                 min={addDays(sourceDate, 1)}
                 aria-label={t('copyPlan.selectDate')}
-                className="flex-1 text-slate-800 min-h-11"
+                className="min-h-11 flex-1 text-slate-800"
               />
-              <Plus className="w-5 h-5 text-slate-400" />
+              <Plus className="h-5 w-5 text-slate-400" />
             </div>
           )}
 
           {/* Selected dates list */}
           {selectedDates.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <h4 className="text-sm font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                 {t('copyPlan.selectedDates')}
               </h4>
               <div className="space-y-1.5">
                 {selectedDates.map(date => (
-                  <div key={date} className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl">
+                  <div
+                    key={date}
+                    className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2 dark:bg-emerald-900/20"
+                  >
                     <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
                       {formatDate(date, dateLocale)}
                     </span>
                     <button
                       onClick={() => handleRemoveDate(date)}
-                      className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-all min-h-11 min-w-11 flex items-center justify-center"
+                      className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-slate-400 transition-all hover:text-rose-500"
                       aria-label={t('copyPlan.remove')}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
@@ -222,21 +245,19 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
           )}
 
           {selectedDates.length === 0 && (
-            <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-4">
-              {t('copyPlan.noSelection')}
-            </p>
+            <p className="py-4 text-center text-sm text-slate-400 dark:text-slate-500">{t('copyPlan.noSelection')}</p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 sm:px-8 py-4 border-t border-slate-100 dark:border-slate-700">
+        <div className="border-t border-slate-100 px-6 py-4 sm:px-8 dark:border-slate-700">
           <button
             data-testid="btn-copy-confirm"
             onClick={handleConfirm}
             disabled={selectedDates.length === 0}
-            className="w-full flex items-center justify-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-sm shadow-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-12"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Copy className="w-4 h-4" />
+            <Copy className="h-4 w-4" />
             {t('copyPlan.confirm')}
           </button>
         </div>

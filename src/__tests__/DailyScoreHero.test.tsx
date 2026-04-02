@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { DailyScoreData } from '../features/dashboard/hooks/useDailyScore';
 
 vi.mock('react-i18next', () => ({
@@ -14,8 +15,7 @@ vi.mock('react-i18next', () => ({
         'dashboard.hero.firstTime.step1': 'Cập nhật hồ sơ sức khỏe',
         'dashboard.hero.firstTime.step2': 'Ghi nhận cân nặng',
         'dashboard.hero.firstTime.step3': 'Log bữa ăn đầu tiên',
-        'dashboard.hero.firstTime.a11y':
-          'Chào mừng bạn mới. Hãy bắt đầu thiết lập hồ sơ sức khỏe.',
+        'dashboard.hero.firstTime.a11y': 'Chào mừng bạn mới. Hãy bắt đầu thiết lập hồ sơ sức khỏe.',
         'dashboard.hero.a11yLabel': `Daily Score: ${params?.score ?? ''} trên 100. ${params?.label ?? ''}`,
       };
       return translations[key] ?? key;
@@ -28,8 +28,8 @@ vi.mock('../features/dashboard/hooks/useDailyScore', () => ({
   useDailyScore: vi.fn(),
 }));
 
-import { useDailyScore } from '../features/dashboard/hooks/useDailyScore';
 import { DailyScoreHero } from '../features/dashboard/components/DailyScoreHero';
+import { useDailyScore } from '../features/dashboard/hooks/useDailyScore';
 
 const mockUseDailyScore = vi.mocked(useDailyScore);
 
@@ -214,15 +214,9 @@ describe('DailyScoreHero', () => {
 
       expect(screen.getByTestId('badge-calories')).toBeInTheDocument();
       expect(screen.getByTestId('badge-protein')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('badge-workout'),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('badge-weightLog'),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('badge-streak'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('badge-workout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('badge-weightLog')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('badge-streak')).not.toBeInTheDocument();
     });
 
     it('shows partial data label when not all factors are available', () => {
@@ -239,12 +233,8 @@ describe('DailyScoreHero', () => {
       });
       render(<DailyScoreHero />);
 
-      expect(
-        screen.getByTestId('partial-data-label'),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/cập nhật khi log thêm/),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('partial-data-label')).toBeInTheDocument();
+      expect(screen.getByText(/cập nhật khi log thêm/)).toBeInTheDocument();
     });
 
     it('does not show partial data label when all factors are available', () => {
@@ -259,9 +249,7 @@ describe('DailyScoreHero', () => {
       });
       render(<DailyScoreHero />);
 
-      expect(
-        screen.queryByTestId('partial-data-label'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('partial-data-label')).not.toBeInTheDocument();
     });
 
     it('shows score with only one factor available', () => {
@@ -280,9 +268,7 @@ describe('DailyScoreHero', () => {
 
       expect(screen.getByTestId('score-number')).toHaveTextContent('90');
       expect(screen.getByTestId('badge-calories')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('partial-data-label'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('partial-data-label')).toBeInTheDocument();
     });
   });
 
@@ -302,9 +288,7 @@ describe('DailyScoreHero', () => {
       });
       render(<DailyScoreHero />);
 
-      expect(
-        screen.getByText('Hãy bắt đầu nào! 🚀'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Hãy bắt đầu nào! 🚀')).toBeInTheDocument();
       expect(screen.queryByTestId('score-number')).not.toBeInTheDocument();
     });
 
@@ -324,15 +308,9 @@ describe('DailyScoreHero', () => {
       setDailyScore({ isFirstTimeUser: true });
       render(<DailyScoreHero />);
 
-      expect(
-        screen.getByText('Cập nhật hồ sơ sức khỏe'),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText('Ghi nhận cân nặng'),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText('Log bữa ăn đầu tiên'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Cập nhật hồ sơ sức khỏe')).toBeInTheDocument();
+      expect(screen.getByText('Ghi nhận cân nặng')).toBeInTheDocument();
+      expect(screen.getByText('Log bữa ăn đầu tiên')).toBeInTheDocument();
     });
 
     it('shows numbered steps 1, 2, 3', () => {
@@ -350,9 +328,7 @@ describe('DailyScoreHero', () => {
       setDailyScore({ isFirstTimeUser: true });
       render(<DailyScoreHero />);
 
-      expect(
-        screen.queryByTestId('score-badges'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('score-badges')).not.toBeInTheDocument();
     });
   });
 
@@ -362,10 +338,7 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByRole('region');
-      expect(hero).toHaveAttribute(
-        'aria-label',
-        'Daily Score: 85 trên 100. Tuyệt vời!',
-      );
+      expect(hero).toHaveAttribute('aria-label', 'Daily Score: 85 trên 100. Tuyệt vời!');
     });
 
     it('has first-time accessibility label for new users', () => {
@@ -373,10 +346,7 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByRole('region');
-      expect(hero).toHaveAttribute(
-        'aria-label',
-        'Chào mừng bạn mới. Hãy bắt đầu thiết lập hồ sơ sức khỏe.',
-      );
+      expect(hero).toHaveAttribute('aria-label', 'Chào mừng bạn mới. Hãy bắt đầu thiết lập hồ sơ sức khỏe.');
     });
 
     it('icons have aria-hidden attribute', () => {
@@ -399,9 +369,7 @@ describe('DailyScoreHero', () => {
 
   describe('React.memo', () => {
     it('exports a memoized component', async () => {
-      const mod = await import(
-        '../features/dashboard/components/DailyScoreHero'
-      );
+      const mod = await import('../features/dashboard/components/DailyScoreHero');
       expect(mod.DailyScoreHero.$$typeof).toBe(Symbol.for('react.memo'));
     });
   });

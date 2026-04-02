@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import type { WeightEntry } from '../features/fitness/types';
-import type { Goal } from '../features/health-profile/types';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
-  calculateMovingAverage,
-  getEntriesInWindow,
-  evaluateAndSuggestAdjustment,
-  calculateAdherence,
   AUTO_ADJUST_CONFIG,
+  calculateAdherence,
+  calculateMovingAverage,
+  evaluateAndSuggestAdjustment,
+  getEntriesInWindow,
   useFeedbackLoop,
 } from '../features/dashboard/hooks/useFeedbackLoop';
-import { useFitnessStore } from '../store/fitnessStore';
+import type { WeightEntry } from '../features/fitness/types';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import type { Goal } from '../features/health-profile/types';
+import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('../features/health-profile/hooks/useNutritionTargets', () => ({
   useNutritionTargets: () => ({
@@ -40,10 +41,7 @@ function daysAgoDate(daysAgo: number): string {
   return d.toISOString().split('T')[0];
 }
 
-function buildEntriesAcrossWeeks(
-  currentWeekWeights: number[],
-  previousWeekWeights: number[],
-): WeightEntry[] {
+function buildEntriesAcrossWeeks(currentWeekWeights: number[], previousWeekWeights: number[]): WeightEntry[] {
   const entries: WeightEntry[] = [];
   currentWeekWeights.forEach((w, i) => {
     entries.push(makeEntry(daysAgoDate(i), w));
@@ -54,10 +52,7 @@ function buildEntriesAcrossWeeks(
   return entries;
 }
 
-function makeGoal(
-  type: 'cut' | 'bulk' | 'maintain',
-  calorieOffset = 0,
-): Goal {
+function makeGoal(type: 'cut' | 'bulk' | 'maintain', calorieOffset = 0): Goal {
   return {
     id: 'goal-1',
     type,
@@ -83,20 +78,11 @@ describe('useFeedbackLoop — pure functions', () => {
   describe('calculateMovingAverage', () => {
     it('returns null when fewer than 3 entries', () => {
       expect(calculateMovingAverage([])).toBeNull();
-      expect(
-        calculateMovingAverage([
-          makeEntry('2024-06-14', 80),
-          makeEntry('2024-06-13', 81),
-        ]),
-      ).toBeNull();
+      expect(calculateMovingAverage([makeEntry('2024-06-14', 80), makeEntry('2024-06-13', 81)])).toBeNull();
     });
 
     it('returns correct average for 3+ entries', () => {
-      const entries = [
-        makeEntry('2024-06-14', 80),
-        makeEntry('2024-06-13', 82),
-        makeEntry('2024-06-12', 81),
-      ];
+      const entries = [makeEntry('2024-06-14', 80), makeEntry('2024-06-13', 82), makeEntry('2024-06-12', 81)];
       expect(calculateMovingAverage(entries)).toBeCloseTo(81, 5);
     });
   });
@@ -112,20 +98,11 @@ describe('useFeedbackLoop — pure functions', () => {
       ];
       const result = getEntriesInWindow(entries, 0, 7);
       expect(result).toHaveLength(3);
-      expect(result.map((e) => e.date)).toEqual(
-        expect.arrayContaining([
-          '2024-06-15',
-          '2024-06-14',
-          '2024-06-10',
-        ]),
-      );
+      expect(result.map(e => e.date)).toEqual(expect.arrayContaining(['2024-06-15', '2024-06-14', '2024-06-10']));
     });
 
     it('returns empty array when no entries in range', () => {
-      const entries = [
-        makeEntry('2024-01-01', 80),
-        makeEntry('2024-01-02', 81),
-      ];
+      const entries = [makeEntry('2024-01-01', 80), makeEntry('2024-01-02', 81)];
       const result = getEntriesInWindow(entries, 0, 7);
       expect(result).toHaveLength(0);
     });
@@ -133,16 +110,8 @@ describe('useFeedbackLoop — pure functions', () => {
 
   describe('evaluateAndSuggestAdjustment', () => {
     it('reduces calories when cut + stalled', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [80, 80, 80, 80, 80],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        2000,
-        'cut',
-        2200,
-      );
+      const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 2000, 'cut', 2200);
       expect(result).not.toBeNull();
       expect(result!.newTargetCal).toBe(2000 - AUTO_ADJUST_CONFIG.calorieAdjustment);
       expect(result!.oldTargetCal).toBe(2000);
@@ -151,98 +120,47 @@ describe('useFeedbackLoop — pure functions', () => {
     });
 
     it('returns null when cut + losing weight', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [78, 78, 78, 78, 78],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        2000,
-        'cut',
-        2200,
-      );
+      const entries = buildEntriesAcrossWeeks([78, 78, 78, 78, 78], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 2000, 'cut', 2200);
       expect(result).toBeNull();
     });
 
     it('increases calories when bulk + stalled', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [80, 80, 80, 80, 80],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        3000,
-        'bulk',
-        2500,
-      );
+      const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 3000, 'bulk', 2500);
       expect(result).not.toBeNull();
       expect(result!.newTargetCal).toBe(3000 + AUTO_ADJUST_CONFIG.calorieAdjustment);
       expect(result!.reason).toContain('stalled');
     });
 
     it('returns null when bulk + gaining weight', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [82, 82, 82, 82, 82],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        3000,
-        'bulk',
-        2500,
-      );
+      const entries = buildEntriesAcrossWeeks([82, 82, 82, 82, 82], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 3000, 'bulk', 2500);
       expect(result).toBeNull();
     });
 
     it('returns null for maintain goal', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [80, 80, 80, 80, 80],
-        [80, 80, 80, 80, 80],
-      );
-      expect(
-        evaluateAndSuggestAdjustment(entries, 2000, 'maintain', 2200),
-      ).toBeNull();
+      const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
+      expect(evaluateAndSuggestAdjustment(entries, 2000, 'maintain', 2200)).toBeNull();
     });
 
     it('returns null with insufficient data', () => {
-      const fewEntries = [
-        makeEntry(daysAgoDate(0), 80),
-        makeEntry(daysAgoDate(1), 80),
-        makeEntry(daysAgoDate(2), 80),
-      ];
-      expect(
-        evaluateAndSuggestAdjustment(fewEntries, 2000, 'cut', 2200),
-      ).toBeNull();
+      const fewEntries = [makeEntry(daysAgoDate(0), 80), makeEntry(daysAgoDate(1), 80), makeEntry(daysAgoDate(2), 80)];
+      expect(evaluateAndSuggestAdjustment(fewEntries, 2000, 'cut', 2200)).toBeNull();
     });
 
     it('respects minCalories floor', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [80, 80, 80, 80, 80],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        1250,
-        'cut',
-        2200,
-      );
+      const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 1250, 'cut', 2200);
       expect(result).not.toBeNull();
       expect(result!.newTargetCal).toBe(AUTO_ADJUST_CONFIG.minCalories);
     });
 
     it('respects maxSurplus cap', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [80, 80, 80, 80, 80],
-        [80, 80, 80, 80, 80],
-      );
+      const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
       const tdee = 2500;
       const cap = tdee + AUTO_ADJUST_CONFIG.maxSurplus;
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        cap - 50,
-        'bulk',
-        tdee,
-      );
+      const result = evaluateAndSuggestAdjustment(entries, cap - 50, 'bulk', tdee);
       expect(result).not.toBeNull();
       expect(result!.newTargetCal).toBe(cap);
     });
@@ -290,31 +208,15 @@ describe('useFeedbackLoop — pure functions', () => {
 
   describe('evaluateAndSuggestAdjustment — additional branches', () => {
     it('reduces calories when cut + gaining weight', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [82, 82, 82, 82, 82],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        2000,
-        'cut',
-        2200,
-      );
+      const entries = buildEntriesAcrossWeeks([82, 82, 82, 82, 82], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 2000, 'cut', 2200);
       expect(result).not.toBeNull();
       expect(result!.reason).toContain('increasing');
     });
 
     it('increases calories when bulk + losing weight', () => {
-      const entries = buildEntriesAcrossWeeks(
-        [78, 78, 78, 78, 78],
-        [80, 80, 80, 80, 80],
-      );
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        3000,
-        'bulk',
-        2500,
-      );
+      const entries = buildEntriesAcrossWeeks([78, 78, 78, 78, 78], [80, 80, 80, 80, 80]);
+      const result = evaluateAndSuggestAdjustment(entries, 3000, 'bulk', 2500);
       expect(result).not.toBeNull();
       expect(result!.reason).toContain('decreasing');
     });
@@ -332,12 +234,7 @@ describe('useFeedbackLoop — pure functions', () => {
         makeEntry(daysAgoDate(7), 80),
         makeEntry(daysAgoDate(8), 80),
       ];
-      const result = evaluateAndSuggestAdjustment(
-        entries,
-        2000,
-        'cut',
-        2200,
-      );
+      const result = evaluateAndSuggestAdjustment(entries, 2000, 'cut', 2200);
       expect(result).toBeNull();
     });
   });
@@ -370,21 +267,14 @@ describe('useFeedbackLoop — hook', () => {
 
   it('computes movingAverage from weight entries', () => {
     useFitnessStore.setState({
-      weightEntries: [
-        makeEntry('2024-06-14', 80),
-        makeEntry('2024-06-13', 82),
-        makeEntry('2024-06-12', 81),
-      ],
+      weightEntries: [makeEntry('2024-06-14', 80), makeEntry('2024-06-13', 82), makeEntry('2024-06-12', 81)],
     });
     const { result } = renderHook(() => useFeedbackLoop());
     expect(result.current.movingAverage).toBeCloseTo(81, 5);
   });
 
   it('returns adjustment when conditions are met', () => {
-    const entries = buildEntriesAcrossWeeks(
-      [80, 80, 80, 80, 80],
-      [80, 80, 80, 80, 80],
-    );
+    const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
     useFitnessStore.setState({ weightEntries: entries });
     useHealthProfileStore.setState({
       activeGoal: makeGoal('cut', -200),
@@ -396,10 +286,7 @@ describe('useFeedbackLoop — hook', () => {
   });
 
   it('returns null adjustment with no active goal', () => {
-    const entries = buildEntriesAcrossWeeks(
-      [80, 80, 80, 80, 80],
-      [80, 80, 80, 80, 80],
-    );
+    const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
     useFitnessStore.setState({ weightEntries: entries });
     useHealthProfileStore.setState({ activeGoal: null });
 
@@ -408,10 +295,7 @@ describe('useFeedbackLoop — hook', () => {
   });
 
   it('applyAdjustment updates store and clears adjustment', () => {
-    const entries = buildEntriesAcrossWeeks(
-      [80, 80, 80, 80, 80],
-      [80, 80, 80, 80, 80],
-    );
+    const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
     useFitnessStore.setState({ weightEntries: entries });
     useHealthProfileStore.setState({
       activeGoal: makeGoal('cut', -200),
@@ -431,10 +315,7 @@ describe('useFeedbackLoop — hook', () => {
   });
 
   it('dismissAdjustment clears the adjustment', () => {
-    const entries = buildEntriesAcrossWeeks(
-      [80, 80, 80, 80, 80],
-      [80, 80, 80, 80, 80],
-    );
+    const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
     useFitnessStore.setState({ weightEntries: entries });
     useHealthProfileStore.setState({
       activeGoal: makeGoal('cut', -200),
@@ -462,10 +343,7 @@ describe('useFeedbackLoop — hook', () => {
   });
 
   it('applyAdjustment is a no-op when goal was removed', () => {
-    const entries = buildEntriesAcrossWeeks(
-      [80, 80, 80, 80, 80],
-      [80, 80, 80, 80, 80],
-    );
+    const entries = buildEntriesAcrossWeeks([80, 80, 80, 80, 80], [80, 80, 80, 80, 80]);
     useFitnessStore.setState({ weightEntries: entries });
     useHealthProfileStore.setState({
       activeGoal: makeGoal('cut', -200),

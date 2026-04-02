@@ -1,10 +1,5 @@
-import {
-  calculateStreak,
-  checkMilestones,
-  detectPRs,
-  MILESTONES,
-} from '../features/fitness/utils/gamification';
 import type { Workout, WorkoutSet } from '../features/fitness/types';
+import { calculateStreak, checkMilestones, detectPRs, MILESTONES } from '../features/fitness/utils/gamification';
 
 // ---------- helpers ----------
 
@@ -53,11 +48,7 @@ describe('calculateStreak', () => {
 
   it('counts consecutive days correctly', () => {
     // Wed 2024-01-10, workouts on Mon-Wed
-    const workouts = [
-      makeWorkout('2024-01-08'),
-      makeWorkout('2024-01-09'),
-      makeWorkout('2024-01-10'),
-    ];
+    const workouts = [makeWorkout('2024-01-08'), makeWorkout('2024-01-09'), makeWorkout('2024-01-10')];
     const result = calculateStreak(workouts, [], '2024-01-10');
     expect(result.currentStreak).toBe(3);
     expect(result.longestStreak).toBe(3);
@@ -138,11 +129,7 @@ describe('calculateStreak', () => {
     // Plan: every day [1-7]. Today: Fri 2026-03-27
     // Workouts Mon(23)–Wed(25). Thu(26) missed → grace. Fri=today(skip).
     // Backward: Fri=skip, Thu=grace(no-inc), Wed(1), Tue(2), Mon(3), Sun=break
-    const workouts = [
-      makeWorkout('2026-03-23'),
-      makeWorkout('2026-03-24'),
-      makeWorkout('2026-03-25'),
-    ];
+    const workouts = [makeWorkout('2026-03-23'), makeWorkout('2026-03-24'), makeWorkout('2026-03-25')];
     const result = calculateStreak(workouts, [1, 2, 3, 4, 5, 6, 7], '2026-03-27');
     expect(result.currentStreak).toBe(3);
   });
@@ -151,11 +138,7 @@ describe('calculateStreak', () => {
     // Plan: every day [1-7]. Today: Fri 2026-03-20
     // Workouts Mon(16), Tue(17), Thu(19). Wed(18) missed → grace.
     // Forward: Mon(1), Tue(2), Wed=grace(no-inc), Thu(3), Fri=today(skip)
-    const workouts = [
-      makeWorkout('2026-03-16'),
-      makeWorkout('2026-03-17'),
-      makeWorkout('2026-03-19'),
-    ];
+    const workouts = [makeWorkout('2026-03-16'), makeWorkout('2026-03-17'), makeWorkout('2026-03-19')];
     const result = calculateStreak(workouts, [1, 2, 3, 4, 5, 6, 7], '2026-03-20');
     expect(result.longestStreak).toBeLessThanOrEqual(3);
   });
@@ -225,13 +208,13 @@ describe('checkMilestones', () => {
 
   it('returns no achievements for 0 sessions', () => {
     const milestones = checkMilestones(0, 0);
-    const achieved = milestones.filter((m) => m.achievedDate);
+    const achieved = milestones.filter(m => m.achievedDate);
     expect(achieved).toHaveLength(0);
   });
 
   it('achieves first 2 milestones for 10 sessions', () => {
     const milestones = checkMilestones(10, 0);
-    const achieved = milestones.filter((m) => m.achievedDate);
+    const achieved = milestones.filter(m => m.achievedDate);
     expect(achieved).toHaveLength(2);
     expect(achieved[0].id).toBe('sessions-1');
     expect(achieved[1].id).toBe('sessions-10');
@@ -239,7 +222,7 @@ describe('checkMilestones', () => {
 
   it('returns progress to next milestone', () => {
     const milestones = checkMilestones(5, 0);
-    const next = milestones.find((m) => !m.achievedDate);
+    const next = milestones.find(m => !m.achievedDate);
     expect(next).toBeDefined();
     expect(next!.threshold).toBe(10);
     const progress = Math.round((5 / next!.threshold) * 100);
@@ -248,7 +231,7 @@ describe('checkMilestones', () => {
 
   it('achieves streak milestones when longestStreak qualifies', () => {
     const milestones = checkMilestones(0, 14);
-    const achieved = milestones.filter((m) => m.achievedDate);
+    const achieved = milestones.filter(m => m.achievedDate);
     expect(achieved).toHaveLength(2); // streak-7 and streak-14
     expect(achieved[0].id).toBe('streak-7');
     expect(achieved[1].id).toBe('streak-14');
@@ -268,17 +251,9 @@ describe('detectPRs', () => {
   });
 
   it('detects PR on weight increase', () => {
-    const previous = [
-      makeSet({ exerciseId: 'bench', weightKg: 75, reps: 5, id: 'old' }),
-    ];
-    const current = [
-      makeSet({ exerciseId: 'bench', weightKg: 80, reps: 5, id: 'new' }),
-    ];
-    const prs = detectPRs(
-      current,
-      previous,
-      new Map([['bench', 'Bench Press']]),
-    );
+    const previous = [makeSet({ exerciseId: 'bench', weightKg: 75, reps: 5, id: 'old' })];
+    const current = [makeSet({ exerciseId: 'bench', weightKg: 80, reps: 5, id: 'new' })];
+    const prs = detectPRs(current, previous, new Map([['bench', 'Bench Press']]));
     expect(prs).toHaveLength(1);
     expect(prs[0].exerciseName).toBe('Bench Press');
     expect(prs[0].newWeight).toBe(80);
@@ -288,37 +263,23 @@ describe('detectPRs', () => {
   });
 
   it('does not detect PR for same weight', () => {
-    const previous = [
-      makeSet({ exerciseId: 'bench', weightKg: 80, reps: 5, id: 'old' }),
-    ];
-    const current = [
-      makeSet({ exerciseId: 'bench', weightKg: 80, reps: 5, id: 'new' }),
-    ];
-    const prs = detectPRs(
-      current,
-      previous,
-      new Map([['bench', 'Bench Press']]),
-    );
+    const previous = [makeSet({ exerciseId: 'bench', weightKg: 80, reps: 5, id: 'old' })];
+    const current = [makeSet({ exerciseId: 'bench', weightKg: 80, reps: 5, id: 'new' })];
+    const prs = detectPRs(current, previous, new Map([['bench', 'Bench Press']]));
     expect(prs).toHaveLength(0);
   });
 
   it('skips sets with no reps or zero weight', () => {
-    const previous = [
-      makeSet({ exerciseId: 'bench', weightKg: 75, reps: 5 }),
-    ];
+    const previous = [makeSet({ exerciseId: 'bench', weightKg: 75, reps: 5 })];
     const noReps = [makeSet({ exerciseId: 'bench', weightKg: 80 })];
     expect(detectPRs(noReps, previous, new Map())).toHaveLength(0);
 
-    const zeroWeight = [
-      makeSet({ exerciseId: 'squat', weightKg: 0, reps: 5 }),
-    ];
+    const zeroWeight = [makeSet({ exerciseId: 'squat', weightKg: 0, reps: 5 })];
     expect(detectPRs(zeroWeight, previous, new Map())).toHaveLength(0);
   });
 
   it('deduplicates PRs per exercise', () => {
-    const previous = [
-      makeSet({ exerciseId: 'bench', weightKg: 70, reps: 5, id: 'old' }),
-    ];
+    const previous = [makeSet({ exerciseId: 'bench', weightKg: 70, reps: 5, id: 'old' })];
     const current = [
       makeSet({
         exerciseId: 'bench',
@@ -335,21 +296,13 @@ describe('detectPRs', () => {
         id: 's2',
       }),
     ];
-    const prs = detectPRs(
-      current,
-      previous,
-      new Map([['bench', 'Bench Press']]),
-    );
+    const prs = detectPRs(current, previous, new Map([['bench', 'Bench Press']]));
     expect(prs).toHaveLength(1);
   });
 
   it('falls back to exerciseId when name not in map', () => {
-    const previous = [
-      makeSet({ exerciseId: 'unknown', weightKg: 50, reps: 5, id: 'old' }),
-    ];
-    const current = [
-      makeSet({ exerciseId: 'unknown', weightKg: 60, reps: 5, id: 'new' }),
-    ];
+    const previous = [makeSet({ exerciseId: 'unknown', weightKg: 50, reps: 5, id: 'old' })];
+    const current = [makeSet({ exerciseId: 'unknown', weightKg: 60, reps: 5, id: 'new' })];
     const prs = detectPRs(current, previous, new Map());
     expect(prs).toHaveLength(1);
     expect(prs[0].exerciseName).toBe('unknown');

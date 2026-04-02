@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+
 import { useModalBackHandler } from './useModalBackHandler';
 
 /**
@@ -31,7 +32,7 @@ interface UseItemModalFlowReturn<T> {
 }
 
 export function useItemModalFlow<T extends { id: string }>(
-  options?: UseItemModalFlowOptions<T>
+  options?: UseItemModalFlowOptions<T>,
 ): UseItemModalFlowReturn<T> {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
@@ -42,34 +43,43 @@ export function useItemModalFlow<T extends { id: string }>(
   const openView = useCallback((item: T) => setViewingItem(item), []);
   const closeView = useCallback(() => setViewingItem(null), []);
 
-  const openEdit = useCallback((item?: T) => {
-    setEditingItem(item ?? null);
-    options?.onOpenEdit?.(item ?? null);
-    setIsEditOpen(true);
-  }, [options]);
+  const openEdit = useCallback(
+    (item?: T) => {
+      setEditingItem(item ?? null);
+      options?.onOpenEdit?.(item ?? null);
+      setIsEditOpen(true);
+    },
+    [options],
+  );
 
-  const openEditFromView = useCallback((item: T) => {
-    setCameFromView(true);
-    setViewingItem(null);
-    setEditingItem(item);
-    options?.onOpenEdit?.(item);
-    setIsEditOpen(true);
-  }, [options]);
+  const openEditFromView = useCallback(
+    (item: T) => {
+      setCameFromView(true);
+      setViewingItem(null);
+      setEditingItem(item);
+      options?.onOpenEdit?.(item);
+      setIsEditOpen(true);
+    },
+    [options],
+  );
 
-  const closeEdit = useCallback((hasFormChanges: boolean) => {
-    if (cameFromView && editingItem) {
-      if (hasFormChanges) {
-        setShowUnsavedDialog(true);
-        return;
+  const closeEdit = useCallback(
+    (hasFormChanges: boolean) => {
+      if (cameFromView && editingItem) {
+        if (hasFormChanges) {
+          setShowUnsavedDialog(true);
+          return;
+        }
+        setIsEditOpen(false);
+        setCameFromView(false);
+        setViewingItem(editingItem);
+      } else {
+        setIsEditOpen(false);
+        setCameFromView(false);
       }
-      setIsEditOpen(false);
-      setCameFromView(false);
-      setViewingItem(editingItem);
-    } else {
-      setIsEditOpen(false);
-      setCameFromView(false);
-    }
-  }, [cameFromView, editingItem]);
+    },
+    [cameFromView, editingItem],
+  );
 
   const discardAndBack = useCallback(() => {
     setShowUnsavedDialog(false);
@@ -86,13 +96,16 @@ export function useItemModalFlow<T extends { id: string }>(
     setViewingItem(savedItem);
   }, []);
 
-  const afterSubmit = useCallback((savedItem: T) => {
-    setIsEditOpen(false);
-    if (cameFromView) {
-      setCameFromView(false);
-      setViewingItem(savedItem);
-    }
-  }, [cameFromView]);
+  const afterSubmit = useCallback(
+    (savedItem: T) => {
+      setIsEditOpen(false);
+      if (cameFromView) {
+        setCameFromView(false);
+        setViewingItem(savedItem);
+      }
+    },
+    [cameFromView],
+  );
 
   const dismissUnsavedDialog = useCallback(() => setShowUnsavedDialog(false), []);
 
@@ -128,4 +141,3 @@ export function useItemModalFlow<T extends { id: string }>(
     dismissUnsavedDialog,
   };
 }
-

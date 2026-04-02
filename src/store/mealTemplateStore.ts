@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { DayPlan, MealTemplate } from '../types';
+
 import type { DatabaseService } from '../services/databaseService';
+import type { DayPlan, MealTemplate } from '../types';
 import { generateUUID } from '../utils/helpers';
 
 interface MealTemplateRow {
@@ -18,7 +19,7 @@ interface MealTemplateState {
   loadAll: (db: DatabaseService) => Promise<void>;
 }
 
-export const useMealTemplateStore = create<MealTemplateState>((set) => ({
+export const useMealTemplateStore = create<MealTemplateState>(set => ({
   templates: [],
   saveTemplate: (name, plan, tags) => {
     const template: MealTemplate = {
@@ -30,14 +31,16 @@ export const useMealTemplateStore = create<MealTemplateState>((set) => ({
       createdAt: new Date().toISOString(),
       ...(tags && tags.length > 0 ? { tags } : {}),
     };
-    set((state) => ({ templates: [...state.templates, template] }));
+    set(state => ({ templates: [...state.templates, template] }));
   },
-  deleteTemplate: (id) => set((state) => ({
-    templates: state.templates.filter(t => t.id !== id),
-  })),
-  renameTemplate: (id, newName) => set((state) => ({
-    templates: state.templates.map(t => t.id === id ? { ...t, name: newName } : t),
-  })),
+  deleteTemplate: id =>
+    set(state => ({
+      templates: state.templates.filter(t => t.id !== id),
+    })),
+  renameTemplate: (id, newName) =>
+    set(state => ({
+      templates: state.templates.map(t => (t.id === id ? { ...t, name: newName } : t)),
+    })),
   applyTemplate: (template, targetDate) => ({
     date: targetDate,
     breakfastDishIds: [...template.breakfastDishIds],
@@ -47,7 +50,7 @@ export const useMealTemplateStore = create<MealTemplateState>((set) => ({
   loadAll: async (db: DatabaseService) => {
     const rows = await db.query<MealTemplateRow>('SELECT * FROM meal_templates');
     if (rows.length === 0) return;
-    const templates: MealTemplate[] = rows.map((r) => {
+    const templates: MealTemplate[] = rows.map(r => {
       const data = JSON.parse(r.data) as Omit<MealTemplate, 'id' | 'name'>;
       return { id: r.id, name: r.name, ...data };
     });

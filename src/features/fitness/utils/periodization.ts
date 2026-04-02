@@ -46,25 +46,18 @@ export function getWeekRepScheme(
       return { ...GOAL_REP_SCHEMES[UNDULATING_ROTATION[index]] };
     }
     case 'block': {
-      const phaseIndex =
-        Math.floor((weekNumber - 1) / BLOCK_LENGTH) % BLOCK_PHASES.length;
+      const phaseIndex = Math.floor((weekNumber - 1) / BLOCK_LENGTH) % BLOCK_PHASES.length;
       return { ...GOAL_REP_SCHEMES[BLOCK_PHASES[phaseIndex]] };
     }
   }
 }
 
-export function getOverloadIncrement(
-  experience: TrainingExperience,
-  isUpperBody: boolean,
-): number {
+export function getOverloadIncrement(experience: TrainingExperience, isUpperBody: boolean): number {
   const rate = OVERLOAD_RATES[experience];
   return isUpperBody ? rate.upperBodyKg : rate.lowerBodyKg;
 }
 
-export function isDeloadWeek(
-  weekNumber: number,
-  planCycleWeeks: number,
-): boolean {
+export function isDeloadWeek(weekNumber: number, planCycleWeeks: number): boolean {
   if (planCycleWeeks <= 0) return false;
   return weekNumber % planCycleWeeks === 0;
 }
@@ -88,9 +81,7 @@ export function shouldAutoDeload(
   consecutiveHighWeeks = 4,
   highRpeThreshold = 8,
 ): DeloadSuggestion {
-  const recentHigh = weeklyIntensities
-    .slice(-consecutiveHighWeeks)
-    .filter((rpe) => rpe >= highRpeThreshold);
+  const recentHigh = weeklyIntensities.slice(-consecutiveHighWeeks).filter(rpe => rpe >= highRpeThreshold);
 
   if (recentHigh.length >= consecutiveHighWeeks) {
     return {
@@ -101,9 +92,6 @@ export function shouldAutoDeload(
   return { shouldDeload: false, reason: '' };
 }
 
-export function applyDeloadReduction(
-  normalVolume: number,
-  reductionPct = 0.4,
-): number {
+export function applyDeloadReduction(normalVolume: number, reductionPct = 0.4): number {
   return Math.round(normalVolume * (1 - reductionPct));
 }

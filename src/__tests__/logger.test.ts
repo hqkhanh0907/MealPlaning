@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { logger, generateTraceId } from '../utils/logger';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { generateTraceId, logger } from '../utils/logger';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -13,9 +14,7 @@ describe('logger.error', () => {
 
     expect(spy).toHaveBeenCalledOnce();
     expect(spy.mock.calls[0][0]).toBe('[AIImageAnalyzer] analyzeImage');
-    expect(spy.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ message: 'Something broke', name: 'Error' })
-    );
+    expect(spy.mock.calls[0][1]).toEqual(expect.objectContaining({ message: 'Something broke', name: 'Error' }));
   });
 
   it('should sanitize non-Error values into { raw: value }', () => {

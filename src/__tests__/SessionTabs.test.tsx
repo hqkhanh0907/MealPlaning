@@ -1,27 +1,36 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { SessionTabs } from '../features/fitness/components/SessionTabs';
 import type { TrainingPlanDay } from '../features/fitness/types';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => {
-    if (key === 'fitness.plan.sessionTab') return `Buổi ${String(opts?.order ?? '')}`;
-    if (key === 'fitness.plan.sessionTabs') return 'Buổi tập';
-    if (key === 'fitness.plan.addSession') return 'Thêm buổi tập';
-    if (key === 'fitness.plan.deleteSessionConfirm') return 'Xóa buổi tập này?';
-    if (key === 'fitness.plan.delete') return 'Xóa';
-    if (key === 'fitness.plan.cancelDelete') return 'Hủy';
-    return key;
-  } }),
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (key === 'fitness.plan.sessionTab') return `Buổi ${String(opts?.order ?? '')}`;
+      if (key === 'fitness.plan.sessionTabs') return 'Buổi tập';
+      if (key === 'fitness.plan.addSession') return 'Thêm buổi tập';
+      if (key === 'fitness.plan.deleteSessionConfirm') return 'Xóa buổi tập này?';
+      if (key === 'fitness.plan.delete') return 'Xóa';
+      if (key === 'fitness.plan.cancelDelete') return 'Hủy';
+      return key;
+    },
+  }),
 }));
 
 afterEach(cleanup);
 
 const makePlanDay = (overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay => ({
-  id: 'pd-1', planId: 'plan-1', dayOfWeek: 1, sessionOrder: 1,
-  workoutType: 'Upper Push', exercises: '[]', originalExercises: '[]',
-  isUserAssigned: false, originalDayOfWeek: 1,
+  id: 'pd-1',
+  planId: 'plan-1',
+  dayOfWeek: 1,
+  sessionOrder: 1,
+  workoutType: 'Upper Push',
+  exercises: '[]',
+  originalExercises: '[]',
+  isUserAssigned: false,
+  originalDayOfWeek: 1,
   ...overrides,
 });
 
@@ -224,7 +233,9 @@ describe('SessionTabs', () => {
       );
       const tab = screen.getAllByRole('tab')[1];
       fireEvent.pointerDown(tab);
-      act(() => { vi.advanceTimersByTime(500); });
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
       expect(screen.getByTestId('delete-session-confirm')).toBeInTheDocument();
       vi.useRealTimers();
     });
@@ -243,9 +254,13 @@ describe('SessionTabs', () => {
       );
       const tab = screen.getAllByRole('tab')[1];
       fireEvent.pointerDown(tab);
-      act(() => { vi.advanceTimersByTime(300); });
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
       fireEvent.pointerUp(tab);
-      act(() => { vi.advanceTimersByTime(300); });
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
       expect(screen.queryByTestId('delete-session-confirm')).toBeNull();
       vi.useRealTimers();
     });

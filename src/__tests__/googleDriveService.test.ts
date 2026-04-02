@@ -1,9 +1,9 @@
 import {
-  listBackups,
+  deleteBackup,
   downloadBackup,
   downloadLatestBackup,
+  listBackups,
   uploadBackup,
-  deleteBackup,
 } from '../services/googleDriveService';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
@@ -45,7 +45,7 @@ describe('googleDriveService', () => {
       expect(urlStr).toContain('spaces=appDataFolder');
       expect(urlStr).toContain('fields=files');
       expect(urlStr).toContain('orderBy=modifiedTime+desc');
-      expect(urlStr).toContain("q=name+%3D+%27meal-planner-backup.sqlite%27");
+      expect(urlStr).toContain('q=name+%3D+%27meal-planner-backup.sqlite%27');
       expect(options).toEqual({
         headers: { Authorization: `Bearer ${TOKEN}` },
       });
@@ -106,9 +106,7 @@ describe('googleDriveService', () => {
     it('throws on non-ok response', async () => {
       fetchSpy.mockResolvedValueOnce(mockResponse(null, false, 403));
 
-      await expect(downloadBackup(TOKEN, 'file-1')).rejects.toThrow(
-        'Drive download failed: 403',
-      );
+      await expect(downloadBackup(TOKEN, 'file-1')).rejects.toThrow('Drive download failed: 403');
     });
   });
 
@@ -183,9 +181,7 @@ describe('googleDriveService', () => {
         fetchSpy.mockResolvedValueOnce(mockResponse({ files: [mockFile] }));
         fetchSpy.mockResolvedValueOnce(mockResponse(null, false, 500));
 
-        await expect(uploadBackup(TOKEN, uploadData)).rejects.toThrow(
-          'Drive update failed: 500',
-        );
+        await expect(uploadBackup(TOKEN, uploadData)).rejects.toThrow('Drive update failed: 500');
       });
     });
 
@@ -219,9 +215,7 @@ describe('googleDriveService', () => {
 
         const headers = (fetchSpy.mock.calls[1][1] as RequestInit).headers as Record<string, string>;
         expect(headers.Authorization).toBe(`Bearer ${TOKEN}`);
-        expect(headers['Content-Type']).toBe(
-          'multipart/related; boundary=___meal_planner_boundary___',
-        );
+        expect(headers['Content-Type']).toBe('multipart/related; boundary=___meal_planner_boundary___');
       });
 
       it('constructs multipart body as Blob with boundary and metadata', async () => {
@@ -253,9 +247,7 @@ describe('googleDriveService', () => {
         fetchSpy.mockResolvedValueOnce(mockResponse({ files: [] }));
         fetchSpy.mockResolvedValueOnce(mockResponse(null, false, 503));
 
-        await expect(uploadBackup(TOKEN, uploadData)).rejects.toThrow(
-          'Drive upload failed: 503',
-        );
+        await expect(uploadBackup(TOKEN, uploadData)).rejects.toThrow('Drive upload failed: 503');
       });
     });
   });
@@ -287,9 +279,7 @@ describe('googleDriveService', () => {
     it('throws on non-ok non-404 response', async () => {
       fetchSpy.mockResolvedValueOnce(mockResponse(null, false, 500));
 
-      await expect(deleteBackup(TOKEN, 'file-1')).rejects.toThrow(
-        'Drive delete failed: 500',
-      );
+      await expect(deleteBackup(TOKEN, 'file-1')).rejects.toThrow('Drive delete failed: 500');
     });
   });
 });

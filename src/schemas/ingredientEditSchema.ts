@@ -8,23 +8,23 @@ export const ingredientEditSchema = z.object({
     vi: z.string().trim().min(1, { error: 'Vui lòng nhập đơn vị tính' }),
   }),
   caloriesPer100: z.preprocess(
-    (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+    val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
   ),
   proteinPer100: z.preprocess(
-    (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+    val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
   ),
   carbsPer100: z.preprocess(
-    (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+    val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
   ),
   fatPer100: z.preprocess(
-    (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+    val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
   ),
   fiberPer100: z.preprocess(
-    (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+    val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
   ),
 });

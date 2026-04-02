@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
-  determineQuickActions,
-  useQuickActions,
-  type QuickActionsInput,
   type ActionType,
+  determineQuickActions,
+  type QuickActionsInput,
+  useQuickActions,
 } from '../features/dashboard/hooks/useQuickActions';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import { useFitnessStore } from '../store/fitnessStore';
@@ -21,9 +22,7 @@ const DEFAULT_INPUT: QuickActionsInput = {
   hasTrainingPlan: true,
 };
 
-function makeInput(
-  overrides: Partial<QuickActionsInput> = {},
-): QuickActionsInput {
+function makeInput(overrides: Partial<QuickActionsInput> = {}): QuickActionsInput {
   return { ...DEFAULT_INPUT, ...overrides };
 }
 
@@ -54,9 +53,7 @@ describe('determineQuickActions', () => {
   });
 
   it('3 – rest day → [log-weight, log-meal, log-cardio]', () => {
-    const [left, center, right] = determineQuickActions(
-      makeInput({ isRestDay: true }),
-    );
+    const [left, center, right] = determineQuickActions(makeInput({ isRestDay: true }));
 
     expect(left.id).toBe('log-weight');
     expect(center.id).toBe('log-meal');
@@ -64,9 +61,7 @@ describe('determineQuickActions', () => {
   });
 
   it('4 – workout completed → [log-weight, log-meal, view-results]', () => {
-    const [left, center, right] = determineQuickActions(
-      makeInput({ workoutCompleted: true }),
-    );
+    const [left, center, right] = determineQuickActions(makeInput({ workoutCompleted: true }));
 
     expect(left.id).toBe('log-weight');
     expect(center.id).toBe('log-meal');
@@ -142,18 +137,14 @@ describe('determineQuickActions', () => {
   });
 
   it('8 – weight logged today still shows log-weight as left action', () => {
-    const [left] = determineQuickActions(
-      makeInput({ weightLoggedToday: true }),
-    );
+    const [left] = determineQuickActions(makeInput({ weightLoggedToday: true }));
     expect(left.id).toBe('log-weight');
     expect(left.icon).toBe('⚖️');
   });
 
   it('9 – no training plan + rest day → no start-workout option', () => {
-    const actions = determineQuickActions(
-      makeInput({ hasTrainingPlan: false, isRestDay: true }),
-    );
-    const ids = actions.map((a) => a.id);
+    const actions = determineQuickActions(makeInput({ hasTrainingPlan: false, isRestDay: true }));
+    const ids = actions.map(a => a.id);
     expect(ids).not.toContain('start-workout');
   });
 
@@ -202,9 +193,7 @@ describe('determineQuickActions', () => {
   });
 
   it('no training plan and not rest day → right is log-cardio', () => {
-    const [, , right] = determineQuickActions(
-      makeInput({ hasTrainingPlan: false }),
-    );
+    const [, , right] = determineQuickActions(makeInput({ hasTrainingPlan: false }));
     expect(right.id).toBe('log-cardio');
   });
 
@@ -353,12 +342,7 @@ describe('useQuickActions', () => {
     useNavigationStore.setState({ navigateTab: mockNavigateTab });
 
     const { result } = renderHook(() => useQuickActions());
-    const fitnessActions: ActionType[] = [
-      'log-weight',
-      'start-workout',
-      'log-cardio',
-      'view-results',
-    ];
+    const fitnessActions: ActionType[] = ['log-weight', 'start-workout', 'log-cardio', 'view-results'];
 
     for (const id of fitnessActions) {
       act(() => {
@@ -382,13 +366,7 @@ describe('useQuickActions', () => {
     useNavigationStore.setState({ navigateTab: mockNavigateTab });
 
     const { result } = renderHook(() => useQuickActions());
-    const mealActions: ActionType[] = [
-      'log-breakfast',
-      'log-lunch',
-      'log-dinner',
-      'log-meal',
-      'log-snack',
-    ];
+    const mealActions: ActionType[] = ['log-breakfast', 'log-lunch', 'log-dinner', 'log-meal', 'log-snack'];
 
     for (const id of mealActions) {
       act(() => {

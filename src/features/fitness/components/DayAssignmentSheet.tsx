@@ -1,6 +1,7 @@
+import { AlertTriangle, Check } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Check } from 'lucide-react';
+
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
@@ -47,10 +48,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
   useModalBackHandler(open, onClose);
 
-  const sortedDays = useMemo(
-    () => [...trainingDays].sort((a, b) => a - b),
-    [trainingDays],
-  );
+  const sortedDays = useMemo(() => [...trainingDays].sort((a, b) => a - b), [trainingDays]);
 
   const handleSelect = useCallback(
     (day: number) => {
@@ -78,18 +76,15 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
         {/* Header */}
         <div className="px-4 pb-3 text-center">
-          <h2
-            data-testid="day-assignment-title"
-            className="text-lg font-bold text-slate-800 dark:text-slate-200"
-          >
+          <h2 data-testid="day-assignment-title" className="text-lg font-bold text-slate-800 dark:text-slate-200">
             {t('fitness.scheduleEditor.selectDay')}
           </h2>
         </div>
 
         {/* Day list */}
-        <div className="px-4 pb-safe">
+        <div className="pb-safe px-4">
           <div role="radiogroup" aria-label={t('fitness.scheduleEditor.selectDay')} className="space-y-2 pb-4">
-            {sortedDays.map((day) => {
+            {sortedDays.map(day => {
               const count = existingDayCounts[day] ?? 0;
               const isFull = count >= MAX_SESSIONS_PER_DAY;
               const isCurrent = day === currentDay;
@@ -117,9 +112,9 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                     onClick={() => handleSelect(day)}
                     className={[
                       'flex w-full items-center gap-3 rounded-xl px-4 py-3',
-                      'text-left text-sm touch-manipulation',
+                      'touch-manipulation text-left text-sm',
                       'transition-colors motion-reduce:transition-none',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+                      'focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:outline-none',
                       isCurrent
                         ? 'border-2 border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30'
                         : 'border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/50',
@@ -142,12 +137,8 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
                     {/* Day info */}
                     <span className="flex-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {shortLabel}
-                      </span>
-                      <span className="ml-1 text-slate-500 dark:text-slate-400">
-                        ({fullLabel})
-                      </span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{shortLabel}</span>
+                      <span className="ml-1 text-slate-500 dark:text-slate-400">({fullLabel})</span>
                       <span className="ml-2 text-slate-400 dark:text-slate-500">
                         — {t('fitness.scheduleEditor.sessionsCount', { count })}
                       </span>

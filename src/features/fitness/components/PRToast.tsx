@@ -1,7 +1,9 @@
+import { Trophy } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trophy } from 'lucide-react';
+
 import { COLORS } from '@/constant/colors';
+
 import type { PRDetection } from '../utils/gamification';
 
 interface PRToastProps {
@@ -21,7 +23,7 @@ export const PRToast = React.memo(function PRToast({ pr, onDismiss }: PRToastPro
     <button
       type="button"
       data-testid="pr-toast"
-      className="fixed inset-x-4 top-4 z-50 cursor-pointer rounded-xl p-4 shadow-lg text-left w-auto appearance-none border-none"
+      className="fixed inset-x-4 top-4 z-50 w-auto cursor-pointer appearance-none rounded-xl border-none p-4 text-left shadow-lg"
       style={{ background: `linear-gradient(to right, ${COLORS.amber500}, ${COLORS.amber600})` }}
       onClick={onDismiss}
       aria-label={t('fitness.gamification.newPR')}

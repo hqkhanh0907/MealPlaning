@@ -1,16 +1,18 @@
-import React, { useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useCallback } from 'react';
+import type { Resolver } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+
 import { Input } from '@/components/ui/input';
-import type { MuscleGroup } from '../types';
+
+import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import {
-  customExerciseSchema,
   customExerciseDefaults,
   type CustomExerciseFormData,
+  customExerciseSchema,
 } from '../../../schemas/customExerciseSchema';
+import type { MuscleGroup } from '../types';
 
 export type { CustomExerciseFormData } from '../../../schemas/customExerciseSchema';
 
@@ -20,15 +22,7 @@ interface CustomExerciseModalProps {
   onSave: (exercise: CustomExerciseFormData) => void;
 }
 
-const MUSCLE_GROUPS: MuscleGroup[] = [
-  'chest',
-  'back',
-  'shoulders',
-  'legs',
-  'arms',
-  'core',
-  'glutes',
-];
+const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'];
 
 export function CustomExerciseModal({
   isOpen,
@@ -48,20 +42,20 @@ export function CustomExerciseModal({
     defaultValues: customExerciseDefaults,
   });
 
-  const onFormSubmit = useCallback((data: CustomExerciseFormData) => {
-    onSave(data);
-    reset(customExerciseDefaults);
-    onClose();
-  }, [onSave, reset, onClose]);
+  const onFormSubmit = useCallback(
+    (data: CustomExerciseFormData) => {
+      onSave(data);
+      reset(customExerciseDefaults);
+      onClose();
+    },
+    [onSave, reset, onClose],
+  );
 
   if (!isOpen) return null;
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div
-        className="rounded-2xl bg-white p-6 dark:bg-slate-800 w-full max-w-sm"
-        data-testid="custom-exercise-modal"
-      >
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 dark:bg-slate-800" data-testid="custom-exercise-modal">
         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
           {t('fitness.exerciseSelector.addCustom')}
         </h3>
@@ -73,17 +67,19 @@ export function CustomExerciseModal({
               data-testid="custom-exercise-name"
               className={`w-full ${errors.name ? 'border-rose-500' : ''}`}
             />
-            {errors.name && <p className="text-xs text-rose-500 mt-1" role="alert">{errors.name.message}</p>}
+            {errors.name && (
+              <p className="mt-1 text-xs text-rose-500" role="alert">
+                {errors.name.message}
+              </p>
+            )}
           </div>
           <select
             {...register('muscleGroup')}
             data-testid="custom-exercise-muscle"
             className="w-full rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
           >
-            <option value="">
-              {t('fitness.exerciseSelector.selectMuscle')}
-            </option>
-            {MUSCLE_GROUPS.map((mg) => (
+            <option value="">{t('fitness.exerciseSelector.selectMuscle')}</option>
+            {MUSCLE_GROUPS.map(mg => (
               <option key={mg} value={mg}>
                 {mg}
               </option>
@@ -94,15 +90,9 @@ export function CustomExerciseModal({
             data-testid="custom-exercise-category"
             className="w-full rounded-lg border border-slate-300 p-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
           >
-            <option value="compound">
-              {t('fitness.exerciseSelector.compoundCategory')}
-            </option>
-            <option value="isolation">
-              {t('fitness.exerciseSelector.isolationCategory')}
-            </option>
-            <option value="cardio">
-              {t('fitness.exerciseSelector.cardioCategory')}
-            </option>
+            <option value="compound">{t('fitness.exerciseSelector.compoundCategory')}</option>
+            <option value="isolation">{t('fitness.exerciseSelector.isolationCategory')}</option>
+            <option value="cardio">{t('fitness.exerciseSelector.cardioCategory')}</option>
           </select>
           <Input
             {...register('equipment')}
