@@ -500,9 +500,9 @@ describe('DishManager', () => {
   it('shows empty state action in grid view', () => {
     render(<DishManager {...defaultProps} dishes={[]} />);
     // Empty state shows add button with actionLabel; toolbar also has one.
-    // The EmptyState button has bg-emerald-500 class.
+    // The EmptyState button has bg-primary class.
     const btns = screen.getAllByText('Thêm món ăn');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
     expect(emptyBtn).toBeDefined();
     const emptyBtnEl = emptyBtn?.closest('button');
     if (emptyBtnEl) fireEvent.click(emptyBtnEl);
@@ -513,7 +513,7 @@ describe('DishManager', () => {
     render(<DishManager {...defaultProps} dishes={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const btns = screen.getAllByText('Thêm món ăn');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
     expect(emptyBtn).toBeDefined();
     const emptyBtnEl = emptyBtn?.closest('button');
     if (emptyBtnEl) fireEvent.click(emptyBtnEl);
@@ -1047,7 +1047,7 @@ describe('IngredientManager', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const btns = screen.getAllByText('Thêm nguyên liệu');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
     expect(emptyBtn).toBeDefined();
     if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
@@ -1056,7 +1056,7 @@ describe('IngredientManager', () => {
   it('shows empty state action in grid view', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     const btns = screen.getAllByText('Thêm nguyên liệu');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-emerald-500'));
+    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
     expect(emptyBtn).toBeDefined();
     if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();

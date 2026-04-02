@@ -132,25 +132,21 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.confirm.title', { name: values.name })}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.confirm.subtitle')}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.confirm.subtitle')}</p>
 
         {/* Hero Calorie */}
         <div className="mb-6 rounded-2xl bg-emerald-50 p-6 text-center dark:bg-emerald-900/20">
-          <p className="mb-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
-            {t('onboarding.confirm.dailyCaloriesLabel')}
-          </p>
-          <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-300">{estimatedTdee}</p>
-          <p className="mt-1 text-xs text-emerald-500/70">kcal / {t('onboarding.confirm.day')}</p>
-          <p className="mt-2 text-xs leading-relaxed text-emerald-600/70 dark:text-emerald-400/70">
-            {t('onboarding.confirm.dailyCaloriesDesc')}
-          </p>
+          <p className="text-primary mb-1 text-sm font-medium">{t('onboarding.confirm.dailyCaloriesLabel')}</p>
+          <p className="text-4xl font-bold text-emerald-700">{estimatedTdee}</p>
+          <p className="text-primary/70 mt-1 text-xs">kcal / {t('onboarding.confirm.day')}</p>
+          <p className="text-primary/70/70 mt-2 text-xs leading-relaxed">{t('onboarding.confirm.dailyCaloriesDesc')}</p>
         </div>
 
         {/* Summary */}
         <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
           {summaryItems.map(item => (
             <div key={item.label} className="flex items-center justify-between px-4 py-3">
-              <span className="text-sm text-slate-500 dark:text-slate-400">{item.label}</span>
+              <span className="text-muted-foreground text-sm">{item.label}</span>
               <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.value}</span>
             </div>
           ))}
@@ -160,7 +156,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-1 text-sm font-medium text-emerald-600 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-emerald-400"
+          className="text-primary focus-visible:ring-ring mt-3 flex min-h-[44px] w-full items-center justify-center gap-1 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {expanded ? t('onboarding.confirm.lessDetail') : t('onboarding.confirm.moreDetail')}
           {expanded ? (
@@ -195,14 +191,14 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>
         <Button
           onClick={handleConfirm}
           disabled={saving}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
           data-testid="health-confirm-btn"
         >
           <Check className="mr-1 h-4 w-4" aria-hidden="true" />

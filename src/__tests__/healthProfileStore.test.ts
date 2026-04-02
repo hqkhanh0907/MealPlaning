@@ -6,7 +6,7 @@ import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function createMockDb(overrides: Partial<DatabaseService> = {}): DatabaseService {
   return {
@@ -46,7 +46,7 @@ function sampleGoal(overrides: Partial<Goal> = {}): Goal {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('healthProfileStore', () => {
   beforeEach(() => {

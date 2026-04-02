@@ -90,10 +90,10 @@ export const RestTimer = React.memo(function RestTimer({
       aria-label={t('fitness.timer.rest')}
       data-testid="rest-timer-overlay"
     >
-      <div className="flex flex-col items-center rounded-2xl bg-white p-8 shadow-xl dark:bg-slate-800">
+      <div className="bg-card flex flex-col items-center rounded-2xl p-8 shadow-xl">
         <div className="mb-4 flex items-center gap-2">
-          <Timer className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('fitness.timer.rest')}</p>
+          <Timer className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+          <p className="text-muted-foreground text-sm font-medium">{t('fitness.timer.rest')}</p>
         </div>
 
         <div className="relative mb-6 flex items-center justify-center">
@@ -133,7 +133,7 @@ export const RestTimer = React.memo(function RestTimer({
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={dashoffset}
-              className="text-emerald-500"
+              className="text-primary"
               style={{
                 transform: 'rotate(-90deg)',
                 transformOrigin: 'center',

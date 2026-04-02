@@ -72,7 +72,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                 <div className="flex-shrink-0">
                   {adj.applied ? (
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                      <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                      <Check className="text-primary h-3.5 w-3.5" aria-hidden="true" />
                     </div>
                   ) : (
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
@@ -99,7 +99,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                 <div className="flex flex-shrink-0 items-center gap-1 font-mono text-xs text-slate-600 dark:text-slate-400">
                   <span>{adj.oldTargetCal}</span>
                   {adj.newTargetCal > adj.oldTargetCal ? (
-                    <TrendingUp className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+                    <TrendingUp className="text-primary h-3.5 w-3.5" aria-hidden="true" />
                   ) : (
                     <TrendingDown className="text-destructive h-3.5 w-3.5" aria-hidden="true" />
                   )}

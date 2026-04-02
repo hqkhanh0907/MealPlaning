@@ -36,18 +36,16 @@ export function CycleWeeksStep({ form, goNext, goBack }: Readonly<StepProps>) {
               aria-pressed={field.field.value === weeks}
               onClick={() => field.field.onChange(weeks)}
               className={cn(
-                'flex min-h-[56px] w-full flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'focus-visible:ring-ring flex min-h-[56px] w-full flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 field.field.value === weeks
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+                  ? 'border-primary bg-emerald-50 dark:bg-emerald-900/30'
                   : 'border-slate-200 dark:border-slate-700',
               )}
             >
               <span
                 className={cn(
                   'text-sm font-medium',
-                  field.field.value === weeks
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : 'text-slate-700 dark:text-slate-300',
+                  field.field.value === weeks ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300',
                 )}
               >
                 {weeks} {t('fitness.onboarding.weeksUnit')}

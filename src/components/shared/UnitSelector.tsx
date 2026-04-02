@@ -3,9 +3,9 @@
  * a built-in "Khác..." fallback that reveals a free-text input.
  *
  * Supports two modes:
- *   'single'   — value is a plain string (SaveAnalyzedDishModal, etc.)
- *   'bilingual'— value is {vi: string, en: string} (IngredientEditModal,
- *                DishEditModal quick-add)
+ * 'single' — value is a plain string (SaveAnalyzedDishModal, etc.)
+ * 'bilingual'— value is {vi: string, en: string} (IngredientEditModal,
+ * DishEditModal quick-add)
  *
  * Common units are presented as select <option>s. When the current value
  * is not in the list (e.g. AI-prefilled "tbsp"), the component auto-
@@ -105,7 +105,7 @@ export const UnitSelector = (props: UnitSelectorProps) => {
 
   // ── Shared classes ──────────────────────────────────────────────────────────
   const inputBase =
-    'w-full px-4 py-2.5 rounded-xl border focus:border-emerald-500 outline-none ' +
+    'w-full px-4 py-2.5 rounded-xl border focus:border-primary outline-none ' +
     'transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100 ';
   const borderClass = error ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600';
 

@@ -31,7 +31,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.health.activityLevel')}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.health.activityLevelDesc')}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.health.activityLevelDesc')}</p>
 
         <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('onboarding.health.activityLevel')}>
           {LEVELS.map(level => (
@@ -41,9 +41,9 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
               aria-pressed={field.field.value === level.value}
               onClick={() => field.field.onChange(level.value)}
               className={cn(
-                'flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'focus-visible:ring-ring flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 field.field.value === level.value
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+                  ? 'border-primary bg-emerald-50 dark:bg-emerald-900/30'
                   : 'border-slate-200 dark:border-slate-700',
               )}
             >
@@ -54,9 +54,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    field.field.value === level.value
-                      ? 'text-emerald-700 dark:text-emerald-300'
-                      : 'text-slate-700 dark:text-slate-300',
+                    field.field.value === level.value ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300',
                   )}
                 >
                   {t(`health.activityLevel.${level.value}`)}
@@ -75,13 +73,13 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>
         <Button
           onClick={goNext}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           {t('onboarding.nav.next')}
           <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />

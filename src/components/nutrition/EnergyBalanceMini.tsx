@@ -11,7 +11,7 @@ export interface EnergyBalanceMiniProps {
 
 function getNetColorClass(net: number, target: number): string {
   const diff = net - target;
-  if (Math.abs(diff) <= 100) return 'text-emerald-600 dark:text-emerald-400';
+  if (Math.abs(diff) <= 100) return 'text-primary';
   if (diff > 100) return 'text-amber-600 dark:text-amber-400';
   return 'text-slate-600 dark:text-slate-300';
 }
@@ -37,17 +37,16 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
     [onTapDetail],
   );
 
-  const baseClass =
-    'w-full bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 px-3 py-2';
+  const baseClass = 'w-full bg-card rounded-xl border border-slate-100 dark:border-slate-700 px-3 py-2';
   const interactiveClass =
-    'cursor-pointer active:bg-slate-50 dark:active:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2';
+    'cursor-pointer active:bg-slate-50 dark:active:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
   const content = (
     <div className="flex items-center justify-around">
       {/* Eaten */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
-          <UtensilsCrossed className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+          <UtensilsCrossed className="text-primary h-3.5 w-3.5" aria-hidden="true" />
           <span
             data-testid="mini-eaten"
             className="text-sm font-semibold text-slate-800 dark:text-slate-100"

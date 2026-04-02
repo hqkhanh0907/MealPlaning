@@ -36,7 +36,7 @@ const ActionButton = React.memo(function ActionButton({ action, onPress }: Actio
       <Button
         variant="default"
         onClick={handleClick}
-        className="flex h-14 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full bg-emerald-500 px-4 text-white hover:bg-emerald-600"
+        className="bg-primary text-primary-foreground hover:bg-primary flex h-14 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full px-4"
         style={{
           boxShadow: 'var(--shadow-glow)',
         }}
@@ -53,7 +53,7 @@ const ActionButton = React.memo(function ActionButton({ action, onPress }: Actio
     <Button
       variant="outline"
       onClick={handleClick}
-      className="flex h-12 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border-gray-200 bg-white px-4 text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-emerald-400"
+      className="bg-card text-primary flex h-12 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border-gray-200 px-4 dark:border-slate-600"
       aria-label={t(action.label)}
       data-testid={`quick-action-${action.id}`}
     >

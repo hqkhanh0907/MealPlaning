@@ -4,7 +4,7 @@ import type { Workout, WorkoutSet } from '../features/fitness/types';
 import { analyzePlateau } from '../features/fitness/utils/plateauAnalysis';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 let setIdCounter = 0;
@@ -38,7 +38,7 @@ function daysAgo(days: number): string {
 }
 
 /* ------------------------------------------------------------------ */
-/*  analyzePlateau                                                      */
+/* analyzePlateau */
 /* ------------------------------------------------------------------ */
 
 describe('analyzePlateau', () => {

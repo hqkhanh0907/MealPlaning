@@ -153,7 +153,7 @@ describe('ModalBackdrop', () => {
    * When IngredientEditModal (ModalBackdrop A) and UnsavedChangesDialog
    * (ModalBackdrop B) unmounted simultaneously, React could call A's
    * cleanup first (unlocking body) then B's cleanup second (re-locking
-   * body with the captured prev values).  The result: body stayed
+   * body with the captured prev values). The result: body stayed
    * position:fixed / overflow:hidden permanently, breaking scroll on
    * every page.
    *

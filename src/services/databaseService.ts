@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ */
-/*  Public interface                                                    */
+/* Public interface */
 /* ------------------------------------------------------------------ */
 export interface DatabaseService {
   initialize(): Promise<void>;
@@ -14,7 +14,7 @@ export interface DatabaseService {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Key conversion helpers                                              */
+/* Key conversion helpers */
 /* ------------------------------------------------------------------ */
 export function snakeToCamel(str: string): string {
   return str.replaceAll(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
@@ -41,13 +41,13 @@ export function typeToRow<T extends Record<string, unknown>>(obj: T): Record<str
 }
 
 /* ------------------------------------------------------------------ */
-/*  sql.js re-exports (types declared in src/sql-js.d.ts)               */
+/* sql.js re-exports (types declared in src/sql-js.d.ts) */
 /* ------------------------------------------------------------------ */
 import type { Database as SqlJsDatabase } from 'sql.js';
 import type initSqlJsType from 'sql.js';
 
 /* ------------------------------------------------------------------ */
-/*  Web implementation (sql.js WASM)                                    */
+/* Web implementation (sql.js WASM) */
 /* ------------------------------------------------------------------ */
 class WebDatabaseService implements DatabaseService {
   private db: SqlJsDatabase | null = null;
@@ -185,7 +185,7 @@ class WebDatabaseService implements DatabaseService {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Factory                                                             */
+/* Factory */
 /* ------------------------------------------------------------------ */
 export function createDatabaseService(): DatabaseService {
   // sql.js (WASM) works in both web browsers and Capacitor WebViews,

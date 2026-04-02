@@ -40,8 +40,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
 
           let stateClass: string;
           if (isSelected) {
-            stateClass =
-              'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+            stateClass = 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30';
           } else if (isDisabled) {
             stateClass = 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600';
           } else {
@@ -56,7 +55,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
               disabled={isDisabled}
               onClick={() => toggle(muscle)}
               className={cn(
-                'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'focus-visible:ring-ring min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 stateClass,
               )}
             >

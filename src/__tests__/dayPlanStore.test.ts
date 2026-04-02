@@ -4,7 +4,7 @@ import { useDayPlanStore } from '../store/dayPlanStore';
 import type { DayPlan } from '../types';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 const makePlan = (overrides: Partial<DayPlan> = {}): DayPlan => ({
   date: '2025-01-15',
@@ -20,7 +20,7 @@ function resetStore(): void {
 }
 
 /* ================================================================== */
-/*  Tests                                                               */
+/* Tests */
 /* ================================================================== */
 describe('dayPlanStore', () => {
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  setDayPlans                                                       */
+  /* setDayPlans */
   /* ---------------------------------------------------------------- */
   describe('setDayPlans', () => {
     it('sets day plans from an array', () => {
@@ -75,7 +75,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  updatePlan                                                        */
+  /* updatePlan */
   /* ---------------------------------------------------------------- */
   describe('updatePlan', () => {
     it('updates breakfast dish ids for a given date', () => {
@@ -98,7 +98,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  updateServings                                                    */
+  /* updateServings */
   /* ---------------------------------------------------------------- */
   describe('updateServings', () => {
     it('sets serving count for a dish', () => {
@@ -121,7 +121,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  isDishUsed                                                        */
+  /* isDishUsed */
   /* ---------------------------------------------------------------- */
   describe('isDishUsed', () => {
     it('returns true when dish is in breakfast', () => {
@@ -144,7 +144,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  restoreDayPlans                                                   */
+  /* restoreDayPlans */
   /* ---------------------------------------------------------------- */
   describe('restoreDayPlans', () => {
     it('restores snapshot and merges with existing plans', () => {
@@ -175,7 +175,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Data integrity                                                    */
+  /* Data integrity */
   /* ---------------------------------------------------------------- */
   describe('data integrity', () => {
     it('preserves arrays and servings object through set/get', () => {
@@ -211,7 +211,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  updateServings – date mismatch                                    */
+  /* updateServings – date mismatch */
   /* ---------------------------------------------------------------- */
   describe('updateServings – edge cases', () => {
     it('does not modify plans when date does not match', () => {
@@ -225,7 +225,7 @@ describe('dayPlanStore', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  loadAll                                                           */
+  /* loadAll */
   /* ---------------------------------------------------------------- */
   describe('loadAll', () => {
     it('loads day plans from database with servings', async () => {

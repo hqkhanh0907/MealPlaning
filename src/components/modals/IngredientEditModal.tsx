@@ -150,7 +150,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
   return (
     <>
       <ModalBackdrop onClose={handleClose} zIndex="z-60">
-        <div className="relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto overscroll-contain rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
+        <div className="bg-card relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto overscroll-contain rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
             <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
               {editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}
@@ -166,10 +166,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
           </div>
           <form onSubmit={rhfSubmit(onFormSubmit)} className="space-y-4 p-6">
             <div>
-              <label
-                htmlFor="ing-name"
-                className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
-              >
+              <label htmlFor="ing-name" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
                 {t('ingredient.ingredientName')}
               </label>
               <div className="flex gap-2">
@@ -201,10 +198,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
             </div>
 
             <div>
-              <label
-                htmlFor="ing-unit"
-                className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
-              >
+              <label htmlFor="ing-unit" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
                 {t('ingredient.unitLabel')}
               </label>
               <UnitSelector
@@ -234,7 +228,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                   <div key={field}>
                     <label
                       htmlFor={`ing-${field}`}
-                      className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                      className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase"
                     >
                       {labels[field]} / {getDisplayUnit(watchUnit, lang)}
                     </label>
@@ -264,7 +258,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
               <button
                 type="submit"
                 data-testid="btn-save-ingredient"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-lg font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 dark:shadow-emerald-900"
+                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all dark:shadow-emerald-900"
               >
                 <Save className="h-5 w-5" /> {t('ingredient.saveIngredient')}
               </button>

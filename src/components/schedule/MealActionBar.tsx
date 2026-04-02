@@ -99,7 +99,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       <button
         onClick={onOpenTypeSelection}
         data-testid="btn-plan-meal-section"
-        className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] dark:shadow-none"
+        className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
       >
         <Plus className="h-4 w-4" />
         {t('calendar.planMeal')}
@@ -139,7 +139,7 @@ export const MealActionBar = React.memo(function MealActionBar({
           {menuOpen && (
             <div
               data-testid="more-actions-menu"
-              className="absolute top-full right-0 z-50 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-200/50 dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50"
+              className="bg-card absolute top-full right-0 z-50 mt-1 min-w-[200px] rounded-xl border border-slate-200 py-1 shadow-lg shadow-slate-200/50 dark:border-slate-700 dark:shadow-slate-900/50"
             >
               {menuItems.map(item => (
                 <button

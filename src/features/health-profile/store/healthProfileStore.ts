@@ -4,7 +4,7 @@ import type { DatabaseService } from '../../../services/databaseService';
 import type { Goal, HealthProfile } from '../types';
 
 /* ------------------------------------------------------------------ */
-/*  SQLite row types (snake_case)                                      */
+/* SQLite row types (snake_case) */
 /* ------------------------------------------------------------------ */
 interface ProfileRow {
   id: string;
@@ -37,7 +37,7 @@ interface GoalRow {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Row ↔ Type conversion helpers                                      */
+/* Row ↔ Type conversion helpers */
 /* ------------------------------------------------------------------ */
 function rowToProfile(row: ProfileRow): HealthProfile {
   return {
@@ -74,7 +74,7 @@ function rowToGoal(row: GoalRow): Goal {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Store interface                                                     */
+/* Store interface */
 /* ------------------------------------------------------------------ */
 export interface HealthProfileState {
   profile: HealthProfile | null;
@@ -90,7 +90,7 @@ export interface HealthProfileState {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Store implementation                                                */
+/* Store implementation */
 /* ------------------------------------------------------------------ */
 export const useHealthProfileStore = create<HealthProfileState>(set => ({
   profile: null,

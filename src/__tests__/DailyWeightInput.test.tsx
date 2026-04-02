@@ -6,7 +6,7 @@ import type { WeightEntry } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function todayStr(): string {
   const d = new Date();
@@ -49,7 +49,7 @@ function renderWithNotification() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('DailyWeightInput', () => {
   beforeEach(() => {
@@ -355,7 +355,7 @@ describe('DailyWeightInput', () => {
     fireEvent.change(input, { target: { value: '71.0' } });
     const deltaNeg = screen.getByTestId('weight-delta');
     expect(deltaNeg).toHaveTextContent('-1');
-    expect(deltaNeg.className).toContain('text-emerald');
+    expect(deltaNeg.className).toContain('text-primary');
   });
 
   it('delta shows zero when weights are equal', () => {
@@ -531,7 +531,7 @@ describe('DailyWeightInput', () => {
 
     const trend = screen.getByTestId('trend-indicator');
     expect(trend).toHaveTextContent('↓');
-    expect(trend.className).toContain('text-emerald');
+    expect(trend.className).toContain('text-primary');
   });
 
   it('shows stable trend when moving avg equals yesterday weight', () => {
@@ -650,6 +650,6 @@ describe('DailyWeightInput', () => {
     const chip72 = screen.getByRole('button', { name: /72/ });
     fireEvent.click(chip72);
 
-    expect(chip72.className).toContain('border-emerald');
+    expect(chip72.className).toContain('border-primary');
   });
 });

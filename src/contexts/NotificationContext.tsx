@@ -46,10 +46,10 @@ const TOAST_STYLES: Record<
   success: {
     border: 'border-emerald-200 dark:border-emerald-800',
     iconBg: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-    title: 'text-emerald-800 dark:text-emerald-300',
-    message: 'text-emerald-600 dark:text-emerald-400',
+    title: 'text-emerald-800',
+    message: 'text-primary',
     icon: <CheckCircle2 className="h-5 w-5" />,
-    progressBar: 'bg-emerald-500',
+    progressBar: 'bg-primary',
   },
   error: {
     border: 'border-rose-200 dark:border-rose-800',
@@ -142,7 +142,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
   return (
     <div
       ref={containerRef}
-      className={`relative rounded-2xl border bg-white shadow-lg dark:bg-slate-800 ${styles.border} flex w-full max-w-sm items-start gap-3 px-4 py-3 text-left transition-all duration-300 ease-out ${isExiting ? 'translate-x-full opacity-0 sm:translate-x-full' : 'translate-x-0 opacity-100'} ${toast.onClick ? 'cursor-pointer hover:shadow-xl active:scale-[0.98]' : ''} `}
+      className={`bg-card relative rounded-2xl border shadow-lg ${styles.border} flex w-full max-w-sm items-start gap-3 px-4 py-3 text-left transition-all duration-300 ease-out ${isExiting ? 'translate-x-full opacity-0 sm:translate-x-full' : 'translate-x-0 opacity-100'} ${toast.onClick ? 'cursor-pointer hover:shadow-xl active:scale-[0.98]' : ''} `}
     >
       {toast.onClick && (
         <button
@@ -164,7 +164,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
               toast.action?.onClick();
               handleDismiss();
             }}
-            className="focus-visible:ring-ring mt-1.5 flex min-h-10 items-center rounded text-xs font-bold text-emerald-600 underline underline-offset-2 transition-colors hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-offset-2 active:text-emerald-800"
+            className="focus-visible:ring-ring text-primary mt-1.5 flex min-h-10 items-center rounded text-xs font-bold underline underline-offset-2 transition-colors hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-offset-2 active:text-emerald-800"
           >
             {toast.action.label}
           </button>

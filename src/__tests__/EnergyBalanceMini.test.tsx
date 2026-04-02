@@ -29,21 +29,21 @@ describe('EnergyBalanceMini', () => {
     render(<EnergyBalanceMini eaten={2050} burned={0} target={2000} />);
 
     const net = screen.getByTestId('mini-net');
-    expect(net.className).toContain('emerald');
+    expect(net.className).toContain('primary');
   });
 
   it('shows green color when net equals target exactly', () => {
     render(<EnergyBalanceMini eaten={2000} burned={0} target={2000} />);
 
     const net = screen.getByTestId('mini-net');
-    expect(net.className).toContain('emerald');
+    expect(net.className).toContain('primary');
   });
 
   it('shows green color at boundary (target + 100)', () => {
     render(<EnergyBalanceMini eaten={2100} burned={0} target={2000} />);
 
     const net = screen.getByTestId('mini-net');
-    expect(net.className).toContain('emerald');
+    expect(net.className).toContain('primary');
   });
 
   it('shows amber color when over target by more than 100kcal', () => {

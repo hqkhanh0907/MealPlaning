@@ -108,11 +108,11 @@ describe('DishEditModal', () => {
 
     // Initially inactive → click to activate
     fireEvent.click(lunchTag);
-    expect(lunchTag.className).toContain('bg-emerald-500');
+    expect(lunchTag.className).toContain('bg-primary');
 
     // Click again to deactivate
     fireEvent.click(lunchTag);
-    expect(lunchTag.className).not.toContain('bg-emerald-500');
+    expect(lunchTag.className).not.toContain('bg-primary');
   });
 
   it('shows active state on pre-selected tags for existing dish', () => {
@@ -123,9 +123,9 @@ describe('DishEditModal', () => {
     const dinnerTag = screen.getByText(/Tối/).closest('button') as HTMLElement;
     const breakfastTag = screen.getByText(/Sáng/).closest('button') as HTMLElement;
 
-    expect(lunchTag.className).toContain('bg-emerald-500');
-    expect(dinnerTag.className).toContain('bg-emerald-500');
-    expect(breakfastTag.className).not.toContain('bg-emerald-500');
+    expect(lunchTag.className).toContain('bg-primary');
+    expect(dinnerTag.className).toContain('bg-primary');
+    expect(breakfastTag.className).not.toContain('bg-primary');
   });
 
   // --- Validation Tests ---

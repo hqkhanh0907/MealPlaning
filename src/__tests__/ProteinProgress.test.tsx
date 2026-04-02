@@ -48,13 +48,13 @@ describe('ProteinProgress', () => {
   it('shows emerald bar when ≥80%', () => {
     render(<ProteinProgress current={85} target={100} />);
 
-    expect(screen.getByTestId('protein-bar').className).toContain('emerald');
+    expect(screen.getByTestId('protein-bar').className).toContain('primary');
   });
 
   it('shows emerald bar at exactly 80%', () => {
     render(<ProteinProgress current={80} target={100} />);
 
-    expect(screen.getByTestId('protein-bar').className).toContain('emerald');
+    expect(screen.getByTestId('protein-bar').className).toContain('primary');
   });
 
   it('shows amber bar when 50-79%', () => {
@@ -78,7 +78,7 @@ describe('ProteinProgress', () => {
   it('shows emerald bar at 100%', () => {
     render(<ProteinProgress current={100} target={100} />);
 
-    expect(screen.getByTestId('protein-bar').className).toContain('emerald');
+    expect(screen.getByTestId('protein-bar').className).toContain('primary');
   });
 
   // --- Suggestion text by deficit range ---

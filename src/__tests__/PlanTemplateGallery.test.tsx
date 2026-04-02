@@ -79,7 +79,7 @@ describe('TemplateMatchBadge', () => {
     render(<TemplateMatchBadge score={40} />);
     const badge = screen.getByTestId('template-match-badge');
     expect(badge.className).toContain('slate');
-    expect(badge.className).not.toContain('emerald');
+    expect(badge.className).not.toContain('primary');
     expect(badge.className).not.toContain('amber');
   });
 

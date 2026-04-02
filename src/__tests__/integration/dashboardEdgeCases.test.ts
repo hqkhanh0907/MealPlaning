@@ -3,7 +3,7 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /* ================================================================== */
-/*  i18n mock — returns key so we can assert on translation keys       */
+/* i18n mock — returns key so we can assert on translation keys */
 /* ================================================================== */
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -34,7 +34,7 @@ vi.mock('../../contexts/DatabaseContext', () => ({
 }));
 
 /* ================================================================== */
-/*  Store mocks — all empty/default by default, overridable per test   */
+/* Store mocks — all empty/default by default, overridable per test */
 /* ================================================================== */
 let mockDayPlans: unknown[] = [];
 vi.mock('../../store/dayPlanStore', () => ({
@@ -308,7 +308,7 @@ function resetAllMocks() {
 }
 
 /* ================================================================== */
-/*  Setup / Teardown                                                    */
+/* Setup / Teardown */
 /* ================================================================== */
 beforeEach(() => {
   vi.useFakeTimers();
@@ -326,8 +326,8 @@ afterEach(() => {
 });
 
 /* ================================================================== */
-/*  EDGE CASE 1: First-time user (day 0)                               */
-/*  No nutrition data, no fitness profile → empty states, no crashes    */
+/* EDGE CASE 1: First-time user (day 0) */
+/* No nutrition data, no fitness profile → empty states, no crashes */
 /* ================================================================== */
 describe('Edge Case 1: First-time user (day 0)', () => {
   it('renders DashboardTab without crashing when all stores are empty', () => {
@@ -409,8 +409,8 @@ describe('Edge Case 1: First-time user (day 0)', () => {
 });
 
 /* ================================================================== */
-/*  EDGE CASE 2: Nutrition-only user                                    */
-/*  Has meal data but no fitness profile → fitness cards show CTAs      */
+/* EDGE CASE 2: Nutrition-only user */
+/* Has meal data but no fitness profile → fitness cards show CTAs */
 /* ================================================================== */
 describe('Edge Case 2: Nutrition-only user', () => {
   beforeEach(() => {
@@ -508,8 +508,8 @@ describe('Edge Case 2: Nutrition-only user', () => {
 });
 
 /* ================================================================== */
-/*  EDGE CASE 3: Fitness-only user                                      */
-/*  Has workout data but no meal logs → nutrition cards show defaults    */
+/* EDGE CASE 3: Fitness-only user */
+/* Has workout data but no meal logs → nutrition cards show defaults */
 /* ================================================================== */
 describe('Edge Case 3: Fitness-only user', () => {
   beforeEach(() => {
@@ -657,8 +657,8 @@ describe('Edge Case 3: Fitness-only user', () => {
 });
 
 /* ================================================================== */
-/*  EDGE CASE 4: Offline mode                                          */
-/*  All local data still renders, no crashes from network absence       */
+/* EDGE CASE 4: Offline mode */
+/* All local data still renders, no crashes from network absence */
 /* ================================================================== */
 describe('Edge Case 4: Offline mode', () => {
   beforeEach(() => {
@@ -738,8 +738,8 @@ describe('Edge Case 4: Offline mode', () => {
 });
 
 /* ================================================================== */
-/*  EDGE CASE 5: Data overflow (365+ days of data)                      */
-/*  Large datasets handled without errors                               */
+/* EDGE CASE 5: Data overflow (365+ days of data) */
+/* Large datasets handled without errors */
 /* ================================================================== */
 describe('Edge Case 5: Data overflow (365+ days)', () => {
   beforeEach(() => {
@@ -898,8 +898,8 @@ describe('Edge Case 5: Data overflow (365+ days)', () => {
 });
 
 /* ================================================================== */
-/*  EDGE CASE 6: Midnight rollover                                      */
-/*  Day changes while dashboard is open → new date reads correctly      */
+/* EDGE CASE 6: Midnight rollover */
+/* Day changes while dashboard is open → new date reads correctly */
 /* ================================================================== */
 describe('Edge Case 6: Midnight rollover', () => {
   it('DashboardTab renders correctly before midnight', () => {

@@ -15,7 +15,7 @@ import { useHealthProfileStore } from '../store/healthProfileStore';
 import type { Goal, GoalType, RateOfChange } from '../types';
 
 /* ------------------------------------------------------------------ */
-/*  Schema                                                             */
+/* Schema */
 /* ------------------------------------------------------------------ */
 const goalPhaseSelectorSchema = z.object({
   goalType: z.enum(['cut', 'maintain', 'bulk']),
@@ -28,7 +28,7 @@ const goalPhaseSelectorSchema = z.object({
 type GoalPhaseSelectorFormData = z.infer<typeof goalPhaseSelectorSchema>;
 
 /* ------------------------------------------------------------------ */
-/*  Constants                                                          */
+/* Constants */
 /* ------------------------------------------------------------------ */
 const GOAL_OPTIONS: {
   type: GoalType;
@@ -52,10 +52,10 @@ const GOAL_OPTIONS: {
     type: 'maintain',
     labelKey: 'goal.maintain',
     icon: Equal,
-    color: 'text-emerald-500 dark:text-emerald-400',
+    color: 'text-primary',
     activeBg: 'bg-emerald-50 dark:bg-emerald-900/20',
-    activeBorder: 'border-emerald-500',
-    activeText: 'text-emerald-700 dark:text-emerald-300',
+    activeBorder: 'border-primary',
+    activeText: 'text-emerald-700',
   },
   {
     type: 'bulk',
@@ -75,7 +75,7 @@ const RATE_OPTIONS: { rate: RateOfChange; labelKey: string }[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function formatOffset(offset: number): string {
   if (offset > 0) return `+${offset} kcal`;
@@ -84,7 +84,7 @@ function formatOffset(offset: number): string {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Component                                                          */
+/* Component */
 /* ------------------------------------------------------------------ */
 interface GoalPhaseSelectorProps {
   embedded?: boolean;
@@ -263,7 +263,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
                 onClick={() => handleRateChange(rate)}
                 className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                   rateOfChange === rate
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20'
                     : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:text-slate-400'
                 }`}
               >

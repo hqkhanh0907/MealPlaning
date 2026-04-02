@@ -74,7 +74,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
     return (
       <div
         data-testid="macro-chart-empty"
-        className="rounded-2xl border border-slate-100 bg-white p-6 text-center text-sm text-slate-400 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
+        className="bg-card rounded-2xl border border-slate-100 p-6 text-center text-sm text-slate-400 shadow-sm dark:border-slate-700 dark:text-slate-500"
       >
         {t('macro.noData')}
       </div>
@@ -93,7 +93,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
   return (
     <div
       data-testid="macro-chart"
-      className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+      className="bg-card rounded-2xl border border-slate-100 p-6 shadow-sm dark:border-slate-700"
     >
       <h3 className="mb-4 text-sm font-bold text-slate-700 dark:text-slate-300">{t('macro.title')}</h3>
       <div className="flex items-center gap-6">
@@ -119,7 +119,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
             <div key={seg.label} className="flex items-center gap-2 text-sm">
               <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
               <span className="font-medium text-slate-700 dark:text-slate-300">{seg.label}</span>
-              <span className="ml-auto text-slate-500 dark:text-slate-400" data-testid={`macro-percent-${seg.label}`}>
+              <span className="text-muted-foreground ml-auto" data-testid={`macro-percent-${seg.label}`}>
                 {seg.percent}%
               </span>
               <span className="w-10 text-right text-xs text-slate-400 dark:text-slate-500">

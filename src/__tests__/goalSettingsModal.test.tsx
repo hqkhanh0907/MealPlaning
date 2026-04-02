@@ -187,7 +187,7 @@ describe('GoalSettingsModal', () => {
     it('keeps empty weight on blur with whitespace-only input', () => {
       renderModal();
       const input = screen.getByTestId('input-goal-weight');
-      fireEvent.change(input, { target: { value: '   ' } });
+      fireEvent.change(input, { target: { value: ' ' } });
       fireEvent.blur(input);
       expect(input).toHaveValue(null);
     });
@@ -340,13 +340,13 @@ describe('GoalSettingsModal', () => {
         />,
       );
       const balancedBtn = screen.getByTestId('btn-goal-preset-2000');
-      expect(balancedBtn.className).toContain('border-emerald-500');
+      expect(balancedBtn.className).toContain('border-primary');
     });
 
     it('does not highlight non-matching presets', () => {
       renderModal({ userProfile: { weight: 70, proteinRatio: 1.6, targetCalories: 2000 } });
       const highProteinBtn = screen.getByTestId('btn-goal-preset-2200');
-      expect(highProteinBtn.className).not.toContain('border-emerald-500');
+      expect(highProteinBtn.className).not.toContain('border-primary');
     });
   });
 

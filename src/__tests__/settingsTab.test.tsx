@@ -180,18 +180,18 @@ describe('SettingsTab', () => {
   it('highlights active system theme button', () => {
     render(<SettingsTab {...defaultProps} />);
     const sysBtn = screen.getByText('Hệ thống').closest('button');
-    expect(sysBtn?.className).toContain('border-emerald-500');
+    expect(sysBtn?.className).toContain('border-primary');
 
     const lightBtn = screen.getByText('Sáng').closest('button');
-    expect(lightBtn?.className).not.toContain('border-emerald-500');
+    expect(lightBtn?.className).not.toContain('border-primary');
   });
 
-  it('non-active theme buttons do not have border-emerald-500', () => {
+  it('non-active theme buttons do not have border-primary', () => {
     render(<SettingsTab {...defaultProps} />);
     const lightBtn = screen.getByText('Sáng').closest('button');
     const darkBtn = screen.getByText('Tối').closest('button');
-    expect(lightBtn?.className).not.toContain('border-emerald-500');
-    expect(darkBtn?.className).not.toContain('border-emerald-500');
+    expect(lightBtn?.className).not.toContain('border-primary');
+    expect(darkBtn?.className).not.toContain('border-primary');
   });
 
   it('calls setTheme with schedule when schedule button is clicked', () => {

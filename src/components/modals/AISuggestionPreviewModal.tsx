@@ -135,7 +135,7 @@ export const AISuggestionPreviewModal = ({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 bg-linear-to-r from-indigo-50 to-purple-50 px-6 py-4 dark:border-slate-700 dark:from-indigo-900/30 dark:to-purple-900/30">
           <div className="flex items-center gap-3">
@@ -144,13 +144,13 @@ export const AISuggestionPreviewModal = ({
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionTitle')}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{t('ai.suggestionDesc')}</p>
+              <p className="text-muted-foreground text-xs">{t('ai.suggestionDesc')}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="rounded-full p-2 text-slate-400 transition-all hover:bg-white/50 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="dark:text-muted-foreground rounded-full p-2 text-slate-400 transition-all hover:bg-white/50 dark:hover:bg-slate-700"
           >
             <X className="h-5 w-5" />
           </button>
@@ -166,7 +166,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <div className="text-center">
                 <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionLoading')}</p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('ai.suggestionLoadingHint')}</p>
+                <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionLoadingHint')}</p>
               </div>
               <div className="h-2 w-48 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
                 <div
@@ -185,7 +185,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <div className="text-center">
                 <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionError')}</p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{error}</p>
+                <p className="text-muted-foreground mt-1 text-sm">{error}</p>
               </div>
               <button
                 onClick={onRegenerate}
@@ -205,7 +205,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <div className="text-center">
                 <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionEmpty')}</p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('ai.suggestionEmptyHint')}</p>
+                <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionEmptyHint')}</p>
               </div>
               <button
                 onClick={onRegenerate}
@@ -270,7 +270,7 @@ export const AISuggestionPreviewModal = ({
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleMeal(type)}
-                            className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                            className="text-primary focus:ring-ring h-5 w-5 rounded border-slate-300"
                           />
                           <span
                             className={`text-sm font-bold tracking-wider uppercase ${isSelected ? colors.text : 'text-slate-500 dark:text-slate-500'}`}
@@ -300,7 +300,7 @@ export const AISuggestionPreviewModal = ({
                       <div className="mb-3 space-y-2">
                         {names.map(name => (
                           <div key={name} className="flex items-center gap-2">
-                            <ChefHat className={`h-4 w-4 ${isSelected ? 'text-emerald-500' : 'text-slate-300'}`} />
+                            <ChefHat className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-slate-300'}`} />
                             <span
                               className={`font-medium ${isSelected ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-500'}`}
                             >
@@ -336,17 +336,13 @@ export const AISuggestionPreviewModal = ({
               <div className="rounded-2xl bg-slate-100 p-4 dark:bg-slate-700">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="mb-1 text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
-                      {t('ai.totalSelected')}
-                    </p>
+                    <p className="text-muted-foreground mb-1 text-xs font-bold uppercase">{t('ai.totalSelected')}</p>
                     <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
                       {nutritionSummary.calories} kcal · {nutritionSummary.protein}g protein
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="mb-1 text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
-                      {t('ai.targetLabel')}
-                    </p>
+                    <p className="text-muted-foreground mb-1 text-xs font-bold uppercase">{t('ai.targetLabel')}</p>
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                       {targetCalories} kcal · {targetProtein}g protein
                     </p>
@@ -356,32 +352,32 @@ export const AISuggestionPreviewModal = ({
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
                     <div className="mb-1 flex justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400">{t('common.calories')}</span>
+                      <span className="text-muted-foreground">{t('common.calories')}</span>
                       <span
-                        className={`font-medium ${nutritionSummary.calories > targetCalories ? 'text-rose-600' : 'text-emerald-600'}`}
+                        className={`font-medium ${nutritionSummary.calories > targetCalories ? 'text-rose-600' : 'text-primary'}`}
                       >
                         {Math.round((nutritionSummary.calories / targetCalories) * 100)}%
                       </span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
                       <div
-                        className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                        className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-rose-500' : 'bg-primary'}`}
                         style={{ width: `${Math.min(100, (nutritionSummary.calories / targetCalories) * 100)}%` }}
                       />
                     </div>
                   </div>
                   <div>
                     <div className="mb-1 flex justify-between text-xs">
-                      <span className="text-slate-500 dark:text-slate-400">{t('common.protein')}</span>
+                      <span className="text-muted-foreground">{t('common.protein')}</span>
                       <span
-                        className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-emerald-600' : 'text-amber-600'}`}
+                        className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-primary' : 'text-amber-600'}`}
                       >
                         {Math.round((nutritionSummary.protein / targetProtein) * 100)}%
                       </span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
                       <div
-                        className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                        className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-amber-500'}`}
                         style={{ width: `${Math.min(100, (nutritionSummary.protein / targetProtein) * 100)}%` }}
                       />
                     </div>
@@ -397,7 +393,7 @@ export const AISuggestionPreviewModal = ({
           <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
             <button
               onClick={onClose}
-              className="rounded-xl px-5 py-2.5 font-medium text-slate-600 transition-all hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700"
+              className="rounded-xl px-5 py-2.5 font-medium text-slate-600 transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
             >
               {t('common.cancel')}
             </button>
@@ -412,7 +408,7 @@ export const AISuggestionPreviewModal = ({
               <button
                 onClick={() => onApply(selectedMeals)}
                 disabled={!hasAnySelected}
-                className="flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-2.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-bold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 {t('common.apply')}

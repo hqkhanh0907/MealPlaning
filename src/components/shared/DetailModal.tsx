@@ -18,7 +18,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="detail-modal"
-        className="relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
@@ -51,7 +51,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
         <div className="px-6 pb-6">
           <button
             onClick={onEdit}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 font-bold text-white transition-all hover:bg-emerald-600"
+            className="bg-primary text-primary-foreground hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 font-bold transition-all"
           >
             <Edit3 className="h-5 w-5" /> {editLabel}
           </button>

@@ -4,7 +4,7 @@ import { useIngredientStore } from '../store/ingredientStore';
 import type { Ingredient } from '../types';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function resetStore() {
   useIngredientStore.setState({ ingredients: [] });
@@ -33,7 +33,7 @@ const SAMPLE_INGREDIENT_NO_EN: Ingredient = {
 };
 
 /* ================================================================== */
-/*  Store method tests                                                  */
+/* Store method tests */
 /* ================================================================== */
 describe('ingredientStore', () => {
   beforeEach(() => {

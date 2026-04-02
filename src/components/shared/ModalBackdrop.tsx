@@ -13,7 +13,7 @@ interface ModalBackdropProps {
  * Reference-counted scroll lock depth.
  * Keeps track of how many <ModalBackdrop> instances are currently mounted.
  * We only apply the lock on the FIRST mount (depth 0 → 1) and only release
- * it on the LAST unmount (depth 1 → 0).  This prevents the "double-restore"
+ * it on the LAST unmount (depth 1 → 0). This prevents the "double-restore"
  * race condition that occurs when nested modals (e.g. IngredientEditModal +
  * UnsavedChangesDialog) unmount simultaneously within the same React commit:
  * without the counter the inner backdrop's cleanup would restore the locked
@@ -44,7 +44,7 @@ function _handleGlobalEscape(e: KeyboardEvent) {
  * ARIA roles for screen readers.
  *
  * Also locks body scroll while open to prevent background scroll
- * bleeding on mobile (swipe up/down).  Uses a reference-counted
+ * bleeding on mobile (swipe up/down). Uses a reference-counted
  * lock so that stacked modals (e.g. a confirmation dialog rendered
  * over a form modal) do not fight over the body style on unmount.
  */
@@ -55,7 +55,7 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
 
   useEffect(() => {
     // Only apply the iOS-safe position:fixed lock when this is the first
-    // (outermost) modal.  Inner modals simply increment the counter.
+    // (outermost) modal. Inner modals simply increment the counter.
     if (_scrollLockDepth === 0) {
       // iOS Safari ignores overflow:hidden on body — use position:fixed approach.
       // Capture the real scroll position BEFORE locking.

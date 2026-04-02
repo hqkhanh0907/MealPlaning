@@ -1,7 +1,7 @@
 import type { DatabaseService } from '../../../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Types                                                               */
+/* Types */
 /* ------------------------------------------------------------------ */
 export interface ExerciseSeed {
   id: string;
@@ -19,7 +19,7 @@ export interface ExerciseSeed {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Chest (ngực) — 15 exercises                                         */
+/* Chest (ngực) — 15 exercises */
 /* ------------------------------------------------------------------ */
 const CHEST: ExerciseSeed[] = [
   {
@@ -249,7 +249,7 @@ const CHEST: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Back (lưng) — 18 exercises                                          */
+/* Back (lưng) — 18 exercises */
 /* ------------------------------------------------------------------ */
 const BACK: ExerciseSeed[] = [
   {
@@ -507,7 +507,7 @@ const BACK: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Shoulders (vai) — 15 exercises                                      */
+/* Shoulders (vai) — 15 exercises */
 /* ------------------------------------------------------------------ */
 const SHOULDERS: ExerciseSeed[] = [
   {
@@ -723,7 +723,7 @@ const SHOULDERS: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Legs (chân) — 25 exercises                                          */
+/* Legs (chân) — 25 exercises */
 /* ------------------------------------------------------------------ */
 const LEGS: ExerciseSeed[] = [
   {
@@ -1093,7 +1093,7 @@ const LEGS: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Arms (tay) — 20 exercises                                           */
+/* Arms (tay) — 20 exercises */
 /* ------------------------------------------------------------------ */
 const ARMS: ExerciseSeed[] = [
   {
@@ -1379,7 +1379,7 @@ const ARMS: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Core — 15 exercises                                                  */
+/* Core — 15 exercises */
 /* ------------------------------------------------------------------ */
 const CORE: ExerciseSeed[] = [
   {
@@ -1595,7 +1595,7 @@ const CORE: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Glutes (mông) — 12 exercises                                        */
+/* Glutes (mông) — 12 exercises */
 /* ------------------------------------------------------------------ */
 const GLUTES: ExerciseSeed[] = [
   {
@@ -1769,7 +1769,7 @@ const GLUTES: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Cardio — 10 exercises                                                */
+/* Cardio — 10 exercises */
 /* ------------------------------------------------------------------ */
 const CARDIO: ExerciseSeed[] = [
   {
@@ -1915,7 +1915,7 @@ const CARDIO: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Combined exercise list                                               */
+/* Combined exercise list */
 /* ------------------------------------------------------------------ */
 export const EXERCISES: ExerciseSeed[] = [
   ...CHEST,
@@ -1929,7 +1929,7 @@ export const EXERCISES: ExerciseSeed[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Seed function                                                        */
+/* Seed function */
 /* ------------------------------------------------------------------ */
 export async function seedExercises(db: DatabaseService): Promise<number> {
   const existing = await db.query<{ count: number }>('SELECT COUNT(*) as count FROM exercises');

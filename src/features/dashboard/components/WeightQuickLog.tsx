@@ -76,7 +76,7 @@ function getTrendIndicator(
   if (movingAvg === null || yesterdayWeight === undefined) return null;
   const diff = round1(movingAvg - yesterdayWeight);
   if (diff > 0) return { symbol: '↑', color: 'text-destructive' };
-  if (diff < 0) return { symbol: '↓', color: 'text-emerald-500' };
+  if (diff < 0) return { symbol: '↓', color: 'text-primary' };
   return { symbol: '→', color: 'text-slate-400' };
 }
 
@@ -252,7 +252,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <div className="flex items-center gap-2">
-            <Scale className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+            <Scale className="text-primary h-5 w-5" aria-hidden="true" />
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
               {t('fitness.weight.quickLogTitle')}
             </h2>
@@ -328,7 +328,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
                   onClick={() => handleChipSelect(w)}
                   className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-emerald-400 bg-emerald-100 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300'
+                      ? 'dark:border-primary border-emerald-400 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40'
                       : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                   }`}
                   style={{ fontVariantNumeric: 'tabular-nums' }}

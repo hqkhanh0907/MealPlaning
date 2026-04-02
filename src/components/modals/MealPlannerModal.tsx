@@ -190,14 +190,14 @@ export const MealPlannerModal = ({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
             <h3 className="text-lg font-bold text-slate-800 sm:text-xl dark:text-slate-100">
               {t('planning.planTitle')} — {selectedDate}
             </h3>
-            <p className="text-xs text-slate-500 sm:text-sm dark:text-slate-400">{t('planning.planSubtitle')}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">{t('planning.planSubtitle')}</p>
           </div>
           <button
             onClick={onClose}
@@ -221,7 +221,7 @@ export const MealPlannerModal = ({
                   onClick={() => handleTabChange(tab.type)}
                   className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
                     isActive
-                      ? 'bg-emerald-500 font-bold text-white shadow-sm'
+                      ? 'bg-primary text-primary-foreground font-bold shadow-sm'
                       : 'bg-white font-medium text-slate-600 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                   }`}
                 >
@@ -241,7 +241,7 @@ export const MealPlannerModal = ({
                     </span>
                   )}
                   {changed && (
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-primary'}`} />
                   )}
                 </button>
               );
@@ -274,7 +274,7 @@ export const MealPlannerModal = ({
             >
               <SlidersHorizontal className="h-4 w-4" />
               {t('filter.button')}
-              {hasActiveFilters && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
+              {hasActiveFilters && <span className="bg-primary h-2 w-2 rounded-full" />}
             </button>
           </div>
         </div>
@@ -284,7 +284,7 @@ export const MealPlannerModal = ({
           {filteredDishes.length === 0 && (
             <div className="py-12 text-center">
               <ChefHat className="mx-auto mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-              <p className="font-medium text-slate-500 dark:text-slate-400">
+              <p className="text-muted-foreground font-medium">
                 {t('planning.noMatchTitle', { meal: activeTabLabel })}
               </p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">
@@ -300,8 +300,8 @@ export const MealPlannerModal = ({
                 onClick={() => toggleDish(dish.id)}
                 className={`group flex min-h-16 w-full items-center justify-between rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] sm:p-5 ${
                   isSelected
-                    ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20'
-                    : 'border-slate-100 hover:border-emerald-200 dark:border-slate-700 dark:hover:border-emerald-600'
+                    ? 'border-primary bg-emerald-50/50 dark:bg-emerald-900/20'
+                    : 'dark:hover:border-primary border-slate-100 hover:border-emerald-200 dark:border-slate-700'
                 }`}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -317,7 +317,7 @@ export const MealPlannerModal = ({
                   <div className="min-w-0">
                     <h4
                       className={`truncate text-base font-bold ${
-                        isSelected ? 'text-emerald-900 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'
+                        isSelected ? 'text-emerald-900' : 'text-slate-800 dark:text-slate-100'
                       }`}
                     >
                       {getLocalizedField(dish.name, lang)}
@@ -337,7 +337,7 @@ export const MealPlannerModal = ({
                 <div
                   className={`ml-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                     isSelected
-                      ? 'border-emerald-500 bg-emerald-500 text-white'
+                      ? 'border-primary bg-primary text-primary-foreground'
                       : 'border-slate-200 text-transparent group-hover:border-emerald-300 dark:border-slate-600'
                   }`}
                 >
@@ -349,16 +349,16 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-slate-100 bg-white px-4 py-4 sm:px-8 sm:py-5 dark:border-slate-700 dark:bg-slate-800">
+        <div className="bg-card border-t border-slate-100 px-4 py-4 sm:px-8 sm:py-5 dark:border-slate-700">
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-muted-foreground font-medium">
               {t('planning.totalDay')}:{' '}
               <span className="font-bold text-slate-800 dark:text-slate-100">
                 {totalDayDishCount} {t('common.item')}
               </span>
             </span>
             {totalDayDishCount > 0 && (
-              <span className="text-slate-500 dark:text-slate-400">
+              <span className="text-muted-foreground">
                 <Flame className="inline-block size-3.5" aria-hidden="true" /> {Math.round(totalDayNutrition.calories)}{' '}
                 kcal · <Dumbbell className="inline-block size-3.5" aria-hidden="true" />{' '}
                 {Math.round(totalDayNutrition.protein)}g Pro
@@ -370,7 +370,7 @@ export const MealPlannerModal = ({
               {remainingBudget.calories !== null && (
                 <span
                   data-testid="meal-planner-remaining-cal"
-                  className={`font-medium ${remainingBudget.calories >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                  className={`font-medium ${remainingBudget.calories >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
                 >
                   {remainingBudget.calories >= 0
                     ? t('summary.remaining', { value: remainingBudget.calories, unit: 'kcal' })
@@ -380,7 +380,7 @@ export const MealPlannerModal = ({
               {remainingBudget.protein !== null && (
                 <span
                   data-testid="meal-planner-remaining-pro"
-                  className={`font-medium ${remainingBudget.protein >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                  className={`font-medium ${remainingBudget.protein >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
                 >
                   {remainingBudget.protein >= 0
                     ? t('summary.remaining', { value: remainingBudget.protein, unit: 'g' })
@@ -405,7 +405,7 @@ export const MealPlannerModal = ({
           <button
             onClick={handleConfirm}
             data-testid="btn-confirm-plan"
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-lg font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all active:scale-[0.98]"
           >
             <CheckCircle2 className="h-5 w-5" />
             {confirmButtonLabel}

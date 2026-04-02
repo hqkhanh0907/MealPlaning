@@ -54,7 +54,7 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onEdit}
             data-testid="settings-detail-edit"
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+            className="focus-visible:ring-ring flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:outline-none dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
           >
             <Pencil className="h-3.5 w-3.5" />
             {t('settings.edit')}
@@ -68,7 +68,7 @@ export function SettingsDetailLayout({
       {/* Sticky Save/Cancel Footer — only in edit mode */}
       {isEditing && (
         <div
-          className="sticky right-0 bottom-0 left-0 -mx-4 mt-6 border-t border-slate-200 bg-white/95 px-4 py-4 backdrop-blur-sm sm:-mx-6 sm:px-6 dark:border-slate-700 dark:bg-slate-800/95"
+          className="bg-card/95 sticky right-0 bottom-0 left-0 -mx-4 mt-6 border-t border-slate-200 px-4 py-4 backdrop-blur-sm sm:-mx-6 sm:px-6 dark:border-slate-700"
           data-testid="settings-detail-footer"
         >
           <div className="flex gap-3">
@@ -87,7 +87,7 @@ export function SettingsDetailLayout({
               disabled={!hasChanges}
               className={`flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all ${
                 hasChanges
-                  ? 'bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98]'
+                  ? 'bg-primary hover:bg-primary active:scale-[0.98]'
                   : 'cursor-not-allowed bg-slate-300 dark:bg-slate-600'
               }`}
             >

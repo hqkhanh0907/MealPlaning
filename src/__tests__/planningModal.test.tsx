@@ -320,11 +320,11 @@ describe('MealPlannerModal', () => {
   it('shows active filter indicator dot on filter button', () => {
     render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
     const filterBtn = screen.getByTestId('btn-filter');
-    expect(filterBtn.querySelector('.bg-emerald-500')).toBeNull();
+    expect(filterBtn.querySelector('.bg-primary')).toBeNull();
     fireEvent.click(filterBtn);
     fireEvent.click(screen.getByText('< 500 kcal'));
     fireEvent.click(screen.getByTestId('filter-apply-btn'));
-    const dot = screen.getByTestId('btn-filter').querySelector('.bg-emerald-500');
+    const dot = screen.getByTestId('btn-filter').querySelector('.bg-primary');
     expect(dot).toBeTruthy();
   });
 
@@ -352,7 +352,7 @@ describe('MealPlannerModal', () => {
       render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
       fireEvent.click(screen.getByText('Gà nướng'));
       const calRemaining = screen.getByTestId('meal-planner-remaining-cal');
-      expect(calRemaining.className).toContain('text-emerald-600');
+      expect(calRemaining.className).toContain('text-primary');
       expect(calRemaining.textContent).toContain('Còn lại');
     });
 

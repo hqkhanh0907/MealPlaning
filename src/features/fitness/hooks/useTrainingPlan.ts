@@ -33,7 +33,7 @@ import type { GoalType } from '../utils/volumeCalculator';
 import { calculateTargetWeeklySets, distributeVolume } from '../utils/volumeCalculator';
 
 /* ------------------------------------------------------------------ */
-/*  Public types                                                        */
+/* Public types */
 /* ------------------------------------------------------------------ */
 
 export interface PlanGenerationInput {
@@ -57,7 +57,7 @@ export interface GeneratedPlan {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Internal types                                                      */
+/* Internal types */
 /* ------------------------------------------------------------------ */
 
 interface SessionTemplate {
@@ -74,7 +74,7 @@ interface CardioScheduleItem {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Constants                                                           */
+/* Constants */
 /* ------------------------------------------------------------------ */
 
 const CATEGORY_ORDER: Record<ExerciseCategory, number> = {
@@ -86,7 +86,7 @@ const CATEGORY_ORDER: Record<ExerciseCategory, number> = {
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 /* ------------------------------------------------------------------ */
-/*  Week computation                                                    */
+/* Week computation */
 /* ------------------------------------------------------------------ */
 
 export function computeCurrentWeek(startDate: string): number {
@@ -96,7 +96,7 @@ export function computeCurrentWeek(startDate: string): number {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Seed → Exercise conversion                                          */
+/* Seed → Exercise conversion */
 /* ------------------------------------------------------------------ */
 
 function seedToExercise(seed: ExerciseSeed): Exercise {
@@ -115,7 +115,7 @@ function getDefaultExercises(): Exercise[] {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 1 — Training split selection                                   */
+/* Step 1 — Training split selection */
 /* ------------------------------------------------------------------ */
 
 function determineSplit(daysPerWeek: number): {
@@ -173,7 +173,7 @@ function determineSplit(daysPerWeek: number): {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Day-of-week assignment                                              */
+/* Day-of-week assignment */
 /* ------------------------------------------------------------------ */
 
 function assignDaysOfWeek(sessionCount: number): number[] {
@@ -194,7 +194,7 @@ function assignDaysOfWeek(sessionCount: number): number[] {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 2 — Weekly volume calculation                                  */
+/* Step 2 — Weekly volume calculation */
 /* ------------------------------------------------------------------ */
 
 function calculateVolume(
@@ -219,7 +219,7 @@ function calculateVolume(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 2b — Distribute volume across sessions                         */
+/* Step 2b — Distribute volume across sessions */
 /* ------------------------------------------------------------------ */
 
 function calculateSetsPerSession(
@@ -244,7 +244,7 @@ function calculateSetsPerSession(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 3 — Exercise selection                                         */
+/* Step 3 — Exercise selection */
 /* ------------------------------------------------------------------ */
 
 function selectExercisesForMuscle(
@@ -292,7 +292,7 @@ function selectExercisesForMuscle(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 4 — Rep range assignment via periodization                     */
+/* Step 4 — Rep range assignment via periodization */
 /* ------------------------------------------------------------------ */
 
 function applyRepScheme(
@@ -312,7 +312,7 @@ function applyRepScheme(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 5 — Cardio scheduling                                          */
+/* Step 5 — Cardio scheduling */
 /* ------------------------------------------------------------------ */
 
 function mapCardioPreference(pref: CardioTypePref): {
@@ -366,7 +366,7 @@ function scheduleCardio(profile: TrainingProfile, trainingDays: number[], weight
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step 6 — Deload information                                         */
+/* Step 6 — Deload information */
 /* ------------------------------------------------------------------ */
 
 function buildDeloadNotes(profile: TrainingProfile): string | undefined {
@@ -516,7 +516,7 @@ function applySessionSplitting(days: TrainingPlanDay[], planId: string): void {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Deload helper (extracted to reduce cognitive complexity)            */
+/* Deload helper (extracted to reduce cognitive complexity) */
 /* ------------------------------------------------------------------ */
 
 function applyDeloadToDays(days: TrainingPlanDay[]): void {
@@ -532,7 +532,7 @@ function applyDeloadToDays(days: TrainingPlanDay[]): void {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main generation function (pure, exported for testing)               */
+/* Main generation function (pure, exported for testing) */
 /* ------------------------------------------------------------------ */
 
 export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan {
@@ -657,7 +657,7 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
 }
 
 /* ------------------------------------------------------------------ */
-/*  Hook                                                                */
+/* Hook */
 /* ------------------------------------------------------------------ */
 
 export function useTrainingPlan(): {

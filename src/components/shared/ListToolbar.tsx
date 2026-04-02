@@ -71,7 +71,7 @@ export const ListToolbar = ({
             aria-label={t('listToolbar.sortBy')}
             value={sortBy}
             onChange={e => onSortChange(e.target.value)}
-            className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm outline-none focus:border-emerald-500 sm:w-44 sm:flex-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="bg-card focus:border-primary min-h-11 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm outline-none sm:w-44 sm:flex-none dark:border-slate-700 dark:text-slate-200"
             {...(sortTestId ? { 'data-testid': sortTestId } : {})}
           >
             {sortOptions.map(opt => (
@@ -84,7 +84,7 @@ export const ListToolbar = ({
           <div className="flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
             <button
               onClick={() => onLayoutChange('grid')}
-              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'grid' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-500 dark:hover:bg-slate-700'}`}
+              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-card text-slate-400 hover:bg-slate-50 dark:text-slate-500 dark:hover:bg-slate-700'}`}
               title={t('listToolbar.gridView')}
               aria-label={t('listToolbar.gridView')}
               data-testid="btn-view-grid"
@@ -93,7 +93,7 @@ export const ListToolbar = ({
             </button>
             <button
               onClick={() => onLayoutChange('list')}
-              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'list' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-500 dark:hover:bg-slate-700'}`}
+              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-slate-400 hover:bg-slate-50 dark:text-slate-500 dark:hover:bg-slate-700'}`}
               title={t('listToolbar.listView')}
               aria-label={t('listToolbar.listView')}
               data-testid="btn-view-list"
@@ -105,7 +105,7 @@ export const ListToolbar = ({
           <button
             onClick={onAdd}
             aria-label={addLabel}
-            className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 font-bold whitespace-nowrap text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold whitespace-nowrap shadow-sm transition-all active:scale-[0.98]"
             {...(addTestId ? { 'data-testid': addTestId } : {})}
           >
             <Plus className="h-5 w-5" />

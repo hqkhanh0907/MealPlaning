@@ -49,13 +49,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <h3 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
             {this.props.fallbackTitle || i18n.t('errorBoundary.defaultTitle')}
           </h3>
-          <p className="mb-6 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-            {i18n.t('errorBoundary.description')}
-          </p>
+          <p className="text-muted-foreground mb-6 max-w-sm text-sm">{i18n.t('errorBoundary.description')}</p>
           <div className="flex gap-3">
             <button
               onClick={this.handleRetry}
-              className="flex min-h-11 items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
+              className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center gap-2 rounded-xl px-5 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
             >
               <RefreshCw className="h-4 w-4" />
               {i18n.t('errorBoundary.retry')}
@@ -69,10 +67,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           {this.state.error && (
             <details className="mt-6 w-full max-w-md text-left">
-              <summary className="cursor-pointer text-xs text-slate-400 hover:text-slate-500 dark:text-slate-500">
+              <summary className="hover:text-muted-foreground cursor-pointer text-xs text-slate-400 dark:text-slate-500">
                 {i18n.t('errorBoundary.errorDetails')}
               </summary>
-              <pre className="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-100 p-3 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
+              <pre className="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-100 p-3 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700">
                 {this.state.error.message}
               </pre>
             </details>

@@ -37,8 +37,8 @@ const getDayButtonClass = (
 ): string => {
   if (isSelected) {
     return variant === 'week'
-      ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900 scale-105'
-      : 'bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900 scale-105 ring-4 ring-emerald-500/20';
+      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 dark:shadow-emerald-900 scale-105'
+      : 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 dark:shadow-emerald-900 scale-105 ring-4 ring-ring/20';
   }
   if (isToday) {
     return variant === 'week'
@@ -215,16 +215,16 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   const emptyCellKeys = Array.from({ length: firstDay }, (_, i) => `empty-start-${year}-${month}-${i}`);
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+    <div className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
-          <CalendarIcon className="h-5 w-5 text-emerald-500" />
+          <CalendarIcon className="text-primary h-5 w-5" />
           <span>{viewMode === 'calendar' ? t('calendar.monthYear', { month: month + 1, year }) : weekLabel}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 text-slate-500 transition-all hover:bg-slate-100 active:bg-slate-200 sm:min-h-9 sm:min-w-9 sm:p-2 dark:text-slate-400 dark:hover:bg-slate-700 dark:active:bg-slate-600"
+            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all hover:bg-slate-100 active:bg-slate-200 sm:min-h-9 sm:min-w-9 sm:p-2 dark:hover:bg-slate-700 dark:active:bg-slate-600"
             title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
             aria-label={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
           >
@@ -241,7 +241,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
             data-testid="btn-prev-date"
             aria-label={viewMode === 'calendar' ? t('calendar.prevMonth') : t('calendar.prevWeek')}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 text-slate-500 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:text-slate-400 dark:hover:bg-slate-700 dark:active:bg-slate-600"
+            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:hover:bg-slate-700 dark:active:bg-slate-600"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -249,7 +249,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
             data-testid="btn-next-date"
             aria-label={viewMode === 'calendar' ? t('calendar.nextMonth') : t('calendar.nextWeek')}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 text-slate-500 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:text-slate-400 dark:hover:bg-slate-700 dark:active:bg-slate-600"
+            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:hover:bg-slate-700 dark:active:bg-slate-600"
           >
             <ChevronRight className="h-5 w-5" />
           </button>

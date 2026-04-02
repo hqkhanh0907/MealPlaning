@@ -164,7 +164,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
       >
         <Scale className="h-5 w-5 text-slate-400" aria-hidden={true} />
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('dashboard.weightMini.noData')}</p>
+          <p className="text-muted-foreground text-sm font-medium">{t('dashboard.weightMini.noData')}</p>
           <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.weightMini.logFirst')}</p>
         </div>
       </button>
@@ -176,8 +176,8 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
     trend.color === 'green'
       ? {
           bg: 'bg-emerald-50 dark:bg-emerald-900/15',
-          icon: 'text-emerald-600 dark:text-emerald-400',
-          text: 'text-emerald-700 dark:text-emerald-400',
+          icon: 'text-primary',
+          text: 'text-emerald-700',
           spark: COLORS.emerald500,
         }
       : {
@@ -207,9 +207,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
           data-testid="weight-value"
         >
           {latestWeight.weightKg}
-          <span className="ml-0.5 text-xs font-normal text-slate-500 dark:text-slate-400">
-            {t('dashboard.weightMini.unit')}
-          </span>
+          <span className="text-muted-foreground ml-0.5 text-xs font-normal">{t('dashboard.weightMini.unit')}</span>
         </span>
         <div className="mt-1 flex items-center gap-1" data-testid="weight-trend">
           <TrendIcon className={`h-3.5 w-3.5 ${colorClasses.icon}`} aria-hidden={true} />

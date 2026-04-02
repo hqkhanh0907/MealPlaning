@@ -6,7 +6,7 @@ import type { WeightEntry } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
-/*  Mock Capacitor (used by useModalBackHandler)                        */
+/* Mock Capacitor (used by useModalBackHandler) */
 /* ------------------------------------------------------------------ */
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: () => false },
@@ -16,7 +16,7 @@ vi.mock('@capacitor/app', () => ({
 }));
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function todayStr(): string {
   const d = new Date();
@@ -61,7 +61,7 @@ function renderSheet() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('WeightQuickLog', () => {
   beforeEach(() => {
@@ -239,8 +239,8 @@ describe('WeightQuickLog', () => {
 
     fireEvent.click(screen.getByTestId('chip-71'));
 
-    expect(screen.getByTestId('chip-71').className).toContain('border-emerald');
-    expect(screen.getByTestId('chip-72').className).not.toContain('border-emerald');
+    expect(screen.getByTestId('chip-71').className).toContain('border-primary');
+    expect(screen.getByTestId('chip-72').className).not.toContain('border-primary');
   });
 
   it('yesterday weight chip shows yesterday label', () => {
@@ -459,7 +459,7 @@ describe('WeightQuickLog', () => {
 
     const trend = screen.getByTestId('trend-indicator');
     expect(trend).toHaveTextContent('↓');
-    expect(trend.className).toContain('text-emerald');
+    expect(trend.className).toContain('text-primary');
   });
 
   it('shows stable trend when MA equals yesterday weight', () => {

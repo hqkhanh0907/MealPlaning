@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 
 /* ------------------------------------------------------------------ */
-/*  Mocks                                                              */
+/* Mocks */
 /* ------------------------------------------------------------------ */
 
 vi.mock('react-i18next', () => ({
@@ -187,13 +187,13 @@ vi.mock('../components/onboarding/WelcomeSlides', () => ({
 }));
 
 /* ------------------------------------------------------------------ */
-/*  Lazy import: UnifiedOnboarding                                     */
+/* Lazy import: UnifiedOnboarding */
 /* ------------------------------------------------------------------ */
 
 import { UnifiedOnboarding } from '../components/UnifiedOnboarding';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 /** Click a button found by data-testid, waiting for it to appear first. */
@@ -278,7 +278,7 @@ async function navigateTrainingSections() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                              */
+/* Tests */
 /* ------------------------------------------------------------------ */
 
 beforeEach(() => {

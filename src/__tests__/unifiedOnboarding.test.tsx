@@ -20,7 +20,7 @@ import { WelcomeSlides } from '../components/onboarding/WelcomeSlides';
 import { UnifiedOnboarding } from '../components/UnifiedOnboarding';
 
 /* ------------------------------------------------------------------ */
-/*  Mocks                                                              */
+/* Mocks */
 /* ------------------------------------------------------------------ */
 
 vi.mock('react-i18next', () => ({
@@ -179,7 +179,7 @@ vi.mock('motion/react', () => ({
 }));
 
 /* ------------------------------------------------------------------ */
-/*  Default form values used in tests                                  */
+/* Default form values used in tests */
 /* ------------------------------------------------------------------ */
 
 const DEFAULT_VALUES: OnboardingFormData = {
@@ -196,7 +196,7 @@ const DEFAULT_VALUES: OnboardingFormData = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 interface RenderedForm {
@@ -253,7 +253,7 @@ function renderWithForm(
 }
 
 /* ================================================================== */
-/*  1. onboardingSchema                                                */
+/* 1. onboardingSchema */
 /* ================================================================== */
 
 describe('onboardingSchema', () => {
@@ -446,7 +446,7 @@ describe('onboardingSchema', () => {
 });
 
 /* ================================================================== */
-/*  2. OnboardingProgress                                              */
+/* 2. OnboardingProgress */
 /* ================================================================== */
 
 describe('OnboardingProgress', () => {
@@ -485,7 +485,7 @@ describe('OnboardingProgress', () => {
 });
 
 /* ================================================================== */
-/*  3. OnboardingErrorBoundary                                         */
+/* 3. OnboardingErrorBoundary */
 /* ================================================================== */
 
 describe('OnboardingErrorBoundary', () => {
@@ -547,7 +547,7 @@ describe('OnboardingErrorBoundary', () => {
 });
 
 /* ================================================================== */
-/*  4. WelcomeSlides                                                   */
+/* 4. WelcomeSlides */
 /* ================================================================== */
 
 describe('WelcomeSlides', () => {
@@ -672,7 +672,7 @@ describe('WelcomeSlides', () => {
 });
 
 /* ================================================================== */
-/*  5. HealthBasicStep                                                 */
+/* 5. HealthBasicStep */
 /* ================================================================== */
 
 describe('HealthBasicStep', () => {
@@ -733,7 +733,7 @@ describe('HealthBasicStep', () => {
 });
 
 /* ================================================================== */
-/*  6. ActivityLevelStep                                               */
+/* 6. ActivityLevelStep */
 /* ================================================================== */
 
 describe('ActivityLevelStep', () => {
@@ -785,7 +785,7 @@ describe('ActivityLevelStep', () => {
 });
 
 /* ================================================================== */
-/*  7. NutritionGoalStep                                               */
+/* 7. NutritionGoalStep */
 /* ================================================================== */
 
 describe('NutritionGoalStep', () => {
@@ -839,7 +839,7 @@ describe('NutritionGoalStep', () => {
 });
 
 /* ================================================================== */
-/*  8. HealthConfirmStep                                               */
+/* 8. HealthConfirmStep */
 /* ================================================================== */
 
 describe('HealthConfirmStep', () => {
@@ -911,7 +911,7 @@ describe('HealthConfirmStep', () => {
 });
 
 /* ================================================================== */
-/*  9. TrainingCoreStep                                                */
+/* 9. TrainingCoreStep */
 /* ================================================================== */
 
 describe('TrainingCoreStep', () => {
@@ -967,7 +967,7 @@ describe('TrainingCoreStep', () => {
 });
 
 /* ================================================================== */
-/*  10. TrainingDetailSteps                                            */
+/* 10. TrainingDetailSteps */
 /* ================================================================== */
 
 describe('TrainingDetailSteps', () => {
@@ -1198,7 +1198,7 @@ describe('TrainingDetailSteps', () => {
 });
 
 /* ================================================================== */
-/*  11. PlanStrategyChoice                                             */
+/* 11. PlanStrategyChoice */
 /* ================================================================== */
 
 describe('PlanStrategyChoice', () => {
@@ -1293,7 +1293,7 @@ describe('PlanStrategyChoice', () => {
 });
 
 /* ================================================================== */
-/*  12. PlanComputingScreen                                            */
+/* 12. PlanComputingScreen */
 /* ================================================================== */
 
 describe('PlanComputingScreen', () => {
@@ -1475,7 +1475,7 @@ describe('PlanComputingScreen', () => {
 });
 
 /* ================================================================== */
-/*  13. PlanPreviewScreen                                              */
+/* 13. PlanPreviewScreen */
 /* ================================================================== */
 
 describe('PlanPreviewScreen', () => {
@@ -1603,7 +1603,7 @@ describe('PlanPreviewScreen', () => {
 });
 
 /* ================================================================== */
-/*  14. Additional coverage – HealthBasicStep field interactions        */
+/* 14. Additional coverage – HealthBasicStep field interactions */
 /* ================================================================== */
 
 describe('HealthBasicStep – field interactions', () => {
@@ -1611,14 +1611,14 @@ describe('HealthBasicStep – field interactions', () => {
     const { getByText } = renderWithForm(HealthBasicStep);
     const femaleBtn = getByText('onboarding.health.gender_female');
     fireEvent.click(femaleBtn);
-    expect(femaleBtn.className).toContain('border-emerald-500');
+    expect(femaleBtn.className).toContain('border-primary');
   });
 
   it('updates gender when clicking male button after female', () => {
     const { getByText } = renderWithForm(HealthBasicStep, {}, { gender: 'female' });
     const maleBtn = getByText('onboarding.health.gender_male');
     fireEvent.click(maleBtn);
-    expect(maleBtn.className).toContain('border-emerald-500');
+    expect(maleBtn.className).toContain('border-primary');
   });
 
   it('updates date of birth input on change', () => {
@@ -1680,7 +1680,7 @@ describe('HealthBasicStep – field interactions', () => {
 });
 
 /* ================================================================== */
-/*  15. Additional coverage – NutritionGoalStep field interactions      */
+/* 15. Additional coverage – NutritionGoalStep field interactions */
 /* ================================================================== */
 
 describe('NutritionGoalStep – field interactions', () => {
@@ -1688,11 +1688,11 @@ describe('NutritionGoalStep – field interactions', () => {
     const { getByText } = renderWithForm(NutritionGoalStep, {}, { goalType: 'cut' });
     const conservativeBtn = getByText('onboarding.goal.rate_conservative');
     fireEvent.click(conservativeBtn);
-    expect(conservativeBtn.className).toContain('border-emerald-500');
+    expect(conservativeBtn.className).toContain('border-primary');
 
     const aggressiveBtn = getByText('onboarding.goal.rate_aggressive');
     fireEvent.click(aggressiveBtn);
-    expect(aggressiveBtn.className).toContain('border-emerald-500');
+    expect(aggressiveBtn.className).toContain('border-primary');
   });
 
   it('allows typing target weight value', () => {
@@ -1728,7 +1728,7 @@ describe('NutritionGoalStep – field interactions', () => {
 });
 
 /* ================================================================== */
-/*  16. Additional coverage – TrainingCoreStep field interactions       */
+/* 16. Additional coverage – TrainingCoreStep field interactions */
 /* ================================================================== */
 
 describe('TrainingCoreStep – field interactions', () => {
@@ -1736,27 +1736,27 @@ describe('TrainingCoreStep – field interactions', () => {
     const { getByText } = renderWithForm(TrainingCoreStep);
     const intermediateBtn = getByText('fitness.onboarding.intermediate');
     fireEvent.click(intermediateBtn);
-    expect(intermediateBtn.className).toContain('border-emerald-500');
+    expect(intermediateBtn.className).toContain('border-primary');
 
     const advancedBtn = getByText('fitness.onboarding.advanced');
     fireEvent.click(advancedBtn);
-    expect(advancedBtn.className).toContain('border-emerald-500');
+    expect(advancedBtn.className).toContain('border-primary');
   });
 
   it('allows clicking each days per week button', () => {
     const { getByText } = renderWithForm(TrainingCoreStep);
     const day2Btn = getByText('2');
     fireEvent.click(day2Btn);
-    expect(day2Btn.className).toContain('border-emerald-500');
+    expect(day2Btn.className).toContain('border-primary');
 
     const day6Btn = getByText('6');
     fireEvent.click(day6Btn);
-    expect(day6Btn.className).toContain('border-emerald-500');
+    expect(day6Btn.className).toContain('border-primary');
   });
 });
 
 /* ================================================================== */
-/*  17. Additional coverage – TrainingDetailSteps sub-step interactions */
+/* 17. Additional coverage – TrainingDetailSteps sub-step interactions */
 /* ================================================================== */
 
 describe('TrainingDetailSteps – sub-step interactions', () => {
@@ -1773,11 +1773,11 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
     );
     const btn30 = getByText(/^30/);
     fireEvent.click(btn30);
-    expect(btn30.className).toContain('border-emerald-500');
+    expect(btn30.className).toContain('border-primary');
 
     const btn90 = getByText(/^90/);
     fireEvent.click(btn90);
-    expect(btn90.className).toContain('border-emerald-500');
+    expect(btn90.className).toContain('border-primary');
   });
 
   it('allows clicking each cardio sessions option', () => {
@@ -1791,11 +1791,11 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
     );
     const btn0 = getByText('0');
     fireEvent.click(btn0);
-    expect(btn0.className).toContain('border-emerald-500');
+    expect(btn0.className).toContain('border-primary');
 
     const btn3 = getByText('3');
     fireEvent.click(btn3);
-    expect(btn3.className).toContain('border-emerald-500');
+    expect(btn3.className).toContain('border-primary');
   });
 
   it('allows clicking each periodization option', () => {
@@ -1810,11 +1810,11 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
     );
     const linearBtn = getByText('fitness.onboarding.period_linear');
     fireEvent.click(linearBtn);
-    expect(linearBtn.closest('button')?.className).toContain('border-emerald-500');
+    expect(linearBtn.closest('button')?.className).toContain('border-primary');
 
     const blockBtn = getByText('fitness.onboarding.period_block');
     fireEvent.click(blockBtn);
-    expect(blockBtn.closest('button')?.className).toContain('border-emerald-500');
+    expect(blockBtn.closest('button')?.className).toContain('border-primary');
   });
 
   it('removes equipment item when toggled off', () => {
@@ -1828,15 +1828,15 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
     );
     const barbellBtn = getByText('Barbell');
     fireEvent.click(barbellBtn);
-    expect(barbellBtn.className).toContain('border-emerald-500');
+    expect(barbellBtn.className).toContain('border-primary');
     // Toggle off
     fireEvent.click(barbellBtn);
-    expect(barbellBtn.className).not.toContain('border-emerald-500');
+    expect(barbellBtn.className).not.toContain('border-primary');
   });
 });
 
 /* ================================================================== */
-/*  17b. New Training Step Components – InjuriesStep                   */
+/* 17b. New Training Step Components – InjuriesStep */
 /* ================================================================== */
 
 describe('InjuriesStep', () => {
@@ -1867,9 +1867,9 @@ describe('InjuriesStep', () => {
     );
     const shouldersBtn = screen.getByText('fitness.onboarding.injury_shoulders');
     fireEvent.click(shouldersBtn);
-    expect(shouldersBtn.className).toContain('border-emerald-500');
+    expect(shouldersBtn.className).toContain('border-primary');
     fireEvent.click(shouldersBtn);
-    expect(shouldersBtn.className).not.toContain('border-emerald-500');
+    expect(shouldersBtn.className).not.toContain('border-primary');
   });
 
   it('allows selecting multiple injuries', () => {
@@ -1883,8 +1883,8 @@ describe('InjuriesStep', () => {
     );
     fireEvent.click(screen.getByText('fitness.onboarding.injury_shoulders'));
     fireEvent.click(screen.getByText('fitness.onboarding.injury_knees'));
-    expect(screen.getByText('fitness.onboarding.injury_shoulders').className).toContain('border-emerald-500');
-    expect(screen.getByText('fitness.onboarding.injury_knees').className).toContain('border-emerald-500');
+    expect(screen.getByText('fitness.onboarding.injury_shoulders').className).toContain('border-primary');
+    expect(screen.getByText('fitness.onboarding.injury_knees').className).toContain('border-primary');
   });
 
   it('proceeds with empty injuries (no injuries is valid)', () => {
@@ -1902,7 +1902,7 @@ describe('InjuriesStep', () => {
 });
 
 /* ================================================================== */
-/*  17c. CycleWeeksStep                                                */
+/* 17c. CycleWeeksStep */
 /* ================================================================== */
 
 describe('CycleWeeksStep', () => {
@@ -1969,7 +1969,7 @@ describe('CycleWeeksStep', () => {
     );
     const btn8 = screen.getByText(new RegExp('^8\\s'));
     fireEvent.click(btn8);
-    expect(btn8.closest('button')?.className).toContain('border-emerald-500');
+    expect(btn8.closest('button')?.className).toContain('border-primary');
   });
 
   it('switches selection between options', () => {
@@ -1985,15 +1985,15 @@ describe('CycleWeeksStep', () => {
     const btn4 = screen.getByText(new RegExp('^4\\s'));
     const btn12 = screen.getByText(new RegExp('^12\\s'));
     fireEvent.click(btn4);
-    expect(btn4.closest('button')?.className).toContain('border-emerald-500');
+    expect(btn4.closest('button')?.className).toContain('border-primary');
     fireEvent.click(btn12);
-    expect(btn12.closest('button')?.className).toContain('border-emerald-500');
-    expect(btn4.closest('button')?.className).not.toContain('border-emerald-500');
+    expect(btn12.closest('button')?.className).toContain('border-primary');
+    expect(btn4.closest('button')?.className).not.toContain('border-primary');
   });
 });
 
 /* ================================================================== */
-/*  17d. PriorityMusclesStep                                           */
+/* 17d. PriorityMusclesStep */
 /* ================================================================== */
 
 describe('PriorityMusclesStep', () => {
@@ -2082,7 +2082,7 @@ describe('PriorityMusclesStep', () => {
 });
 
 /* ================================================================== */
-/*  17e. SleepHoursStep                                                */
+/* 17e. SleepHoursStep */
 /* ================================================================== */
 
 describe('SleepHoursStep', () => {
@@ -2158,7 +2158,7 @@ describe('SleepHoursStep', () => {
     );
     const btn7 = screen.getByText('7');
     fireEvent.click(btn7);
-    expect(btn7.className).toContain('border-emerald-500');
+    expect(btn7.className).toContain('border-primary');
   });
 
   it('switches warning on/off as selection changes', () => {
@@ -2179,7 +2179,7 @@ describe('SleepHoursStep', () => {
 });
 
 /* ================================================================== */
-/*  17f. Schema tightened validation for new fields                    */
+/* 17f. Schema tightened validation for new fields */
 /* ================================================================== */
 
 describe('onboardingSchema – new field validation', () => {
@@ -2275,7 +2275,7 @@ describe('HealthConfirmStep – edge cases', () => {
 });
 
 /* ================================================================== */
-/*  19. UnifiedOnboarding integration                                  */
+/* 19. UnifiedOnboarding integration */
 /* ================================================================== */
 
 describe('UnifiedOnboarding – integration', () => {
@@ -2437,7 +2437,7 @@ describe('UnifiedOnboarding – integration', () => {
 });
 
 /* ================================================================== */
-/*  20. PlanComputingScreen – no trainingProfile error branch           */
+/* 20. PlanComputingScreen – no trainingProfile error branch */
 /* ================================================================== */
 
 describe('PlanComputingScreen – trainingProfile null', () => {
@@ -2481,7 +2481,7 @@ describe('PlanComputingScreen – trainingProfile null', () => {
 });
 
 /* ================================================================== */
-/*  21. UnifiedOnboarding – renderStep defensive defaults               */
+/* 21. UnifiedOnboarding – renderStep defensive defaults */
 /* ================================================================== */
 
 describe('UnifiedOnboarding – renderStep outer default', () => {

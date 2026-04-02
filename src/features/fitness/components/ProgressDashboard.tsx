@@ -290,7 +290,7 @@ function ProgressDashboardInner() {
         <button
           type="button"
           data-testid="start-training-cta"
-          className="mt-4 rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-medium text-white active:bg-emerald-600"
+          className="bg-primary text-primary-foreground active:bg-primary mt-4 rounded-full px-6 py-2.5 text-sm font-medium"
         >
           {t('fitness.progress.startTraining')} →
         </button>
@@ -346,7 +346,7 @@ function ProgressDashboardInner() {
           {weightDelta !== 0 && (
             <span
               data-testid="weight-delta"
-              className={`text-xs font-medium ${weightDelta > 0 ? 'text-destructive' : 'text-emerald-500 dark:text-emerald-400'}`}
+              className={`text-xs font-medium ${weightDelta > 0 ? 'text-destructive' : 'text-primary'}`}
             >
               {weightDelta > 0 ? '↑' : '↓'} {Math.abs(weightDelta)}kg
             </span>
@@ -391,7 +391,7 @@ function ProgressDashboardInner() {
           aria-label={t('fitness.progress.sessions')}
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
-          <Calendar className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+          <Calendar className="text-primary h-5 w-5" aria-hidden="true" />
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{completedSessions}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.sessions')}</p>
         </button>
@@ -412,7 +412,7 @@ function ProgressDashboardInner() {
           </div>
           <div className="mt-2 h-2 w-full rounded-full bg-slate-100 dark:bg-slate-700" aria-hidden="true">
             <div
-              className="h-full rounded-full bg-emerald-500 transition-all"
+              className="bg-primary h-full rounded-full transition-all"
               style={{ width: `${cycleProgress.percentComplete}%` }}
             />
           </div>
@@ -461,7 +461,7 @@ function ProgressDashboardInner() {
           <div className="bg-card relative z-10 w-full rounded-t-2xl p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+                <BarChart3 className="text-primary h-5 w-5" aria-hidden="true" />
                 <p className="font-medium text-slate-800 dark:text-slate-100">{t(CARD_TITLE_KEYS[selectedCard])}</p>
               </div>
               <button
@@ -483,7 +483,7 @@ function ProgressDashboardInner() {
                   onClick={() => handleTimeRangeChange(range)}
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
                     timeRange === range
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                   }`}
                 >

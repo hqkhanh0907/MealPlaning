@@ -37,7 +37,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
   return (
     <div
       data-testid="energy-balance-card"
-      className="rounded-2xl border border-slate-100 bg-white p-4 shadow-md dark:border-slate-700 dark:bg-slate-800"
+      className="bg-card rounded-2xl border border-slate-100 p-4 shadow-md dark:border-slate-700"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -49,9 +49,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
         <div className="flex items-center gap-3">
           <span
             data-testid="net-calories"
-            className={`text-lg font-bold ${
-              remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-            }`}
+            className={`text-lg font-bold ${remaining >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
           >
             {netCalories} {t('nutrition.kcal')}
           </span>
@@ -76,7 +74,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
 
       {/* Collapsed summary line */}
       {collapsed && (
-        <p data-testid="collapsed-summary" className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        <p data-testid="collapsed-summary" className="text-muted-foreground mt-1 text-xs">
           {Math.round(caloriesIn)} {t('nutrition.caloriesIn')} − {Math.round(caloriesOut)} {t('nutrition.caloriesOut')}{' '}
           = {netCalories} {t('nutrition.kcal')}
         </p>
@@ -88,7 +86,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
           {/* Calorie in / out labels */}
           <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
             <span className="flex items-center gap-1">
-              <Flame className="h-3.5 w-3.5 text-emerald-500" />
+              <Flame className="text-primary h-3.5 w-3.5" />
               {t('nutrition.caloriesIn')}: <strong data-testid="calories-in">{Math.round(caloriesIn)}</strong>
             </span>
             <span className="flex items-center gap-1">
@@ -116,15 +114,13 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
                 style={{ width: `${outPct}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
+            <div className="text-muted-foreground flex justify-between text-[10px]">
               <span>
                 {t('nutrition.target')}: {targetCalories} {t('nutrition.kcal')}
               </span>
               <span
                 data-testid="remaining-display"
-                className={
-                  remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                }
+                className={remaining >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}
               >
                 {t('nutrition.remaining')}: {remaining} {t('nutrition.kcal')}
               </span>

@@ -263,7 +263,7 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       const card = screen.getByTestId('ai-insight-card');
-      expect(card.className).toContain('border-emerald-500');
+      expect(card.className).toContain('border-primary');
       expect(card.className).toContain('bg-emerald-50');
     });
   });
@@ -355,7 +355,7 @@ describe('AiInsightCard', () => {
       { color: 'dark-amber', borderClass: 'border-amber-800' },
       { color: 'amber', borderClass: 'border-amber-500' },
       { color: 'blue', borderClass: 'border-blue-500' },
-      { color: 'green', borderClass: 'border-emerald-500' },
+      { color: 'green', borderClass: 'border-primary' },
       { color: 'gray', borderClass: 'border-slate-400' },
     ];
 

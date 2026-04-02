@@ -43,14 +43,14 @@ function TemplateCard({
       type="button"
       data-testid={`template-card-${template.id}`}
       onClick={() => onApply(template)}
-      className="dark:hover:bg-slate-750 flex w-full flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800"
+      className="dark:hover:bg-slate-750 bg-card focus-visible:ring-ring flex w-full flex-col gap-2 rounded-xl border border-slate-200 p-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700"
       style={{ touchAction: 'manipulation' }}
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{template.name}</h3>
         {matchScore != null && <TemplateMatchBadge score={matchScore} />}
       </div>
-      <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{template.description}</p>
+      <p className="text-muted-foreground line-clamp-2 text-xs">{template.description}</p>
       <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
         <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700">
           {SPLIT_GROUP_LABELS[template.splitType]}
@@ -199,12 +199,12 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
   if (isLoading) {
     return (
       <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-        <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
+        <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
           <button
             type="button"
             onClick={handleBack}
             aria-label={t('common.back')}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-white active:bg-emerald-700"
+            className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
             style={{ touchAction: 'manipulation' }}
             data-testid="back-button"
           >
@@ -220,12 +220,12 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
   if (loadError || allTemplates.length === 0) {
     return (
       <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-        <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
+        <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
           <button
             type="button"
             onClick={handleBack}
             aria-label={t('common.back')}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-white active:bg-emerald-700"
+            className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
             style={{ touchAction: 'manipulation' }}
             data-testid="back-button"
           >
@@ -237,12 +237,12 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           data-testid="template-empty-state"
           className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-12 text-center"
         >
-          <p className="text-slate-500 dark:text-slate-400">{t('fitness.templateGallery.empty')}</p>
+          <p className="text-muted-foreground">{t('fitness.templateGallery.empty')}</p>
           <button
             type="button"
             onClick={loadTemplates}
             data-testid="retry-button"
-            className="flex min-h-[44px] items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+            className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring flex min-h-[44px] items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
             style={{ touchAction: 'manipulation' }}
           >
             <RotateCw className="h-4 w-4" aria-hidden="true" />
@@ -256,12 +256,12 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
+      <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
         <button
           type="button"
           onClick={handleBack}
           aria-label={t('common.back')}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-white active:bg-emerald-700"
+          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
           style={{ touchAction: 'manipulation' }}
           data-testid="back-button"
         >
@@ -275,7 +275,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
         {/* Recommended Section */}
         {recommendedTemplates.length > 0 && (
           <section data-testid="recommended-section" className="mb-6">
-            <h2 className="mb-3 text-sm font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+            <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
               {t('fitness.templateGallery.recommended')}
             </h2>
             <div className="space-y-3">
@@ -293,7 +293,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
 
         {/* All Templates grouped by split type */}
         <section data-testid="all-templates-section">
-          <h2 className="mb-3 text-sm font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+          <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
             {t('fitness.templateGallery.allTemplates')}
           </h2>
           {SPLIT_GROUP_ORDER.map(splitType => {
@@ -320,7 +320,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
             type="button"
             data-testid="save-as-template-btn"
             onClick={handleOpenSaveDialog}
-            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+            className="focus-visible:ring-ring flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:outline-none dark:border-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
             style={{ touchAction: 'manipulation' }}
           >
             <Save className="h-4 w-4" aria-hidden="true" />
@@ -350,7 +350,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           aria-modal="true"
           aria-label={t('fitness.templateGallery.saveNamePrompt')}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
+          <div className="bg-card w-full max-w-sm rounded-2xl p-6 shadow-xl">
             <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-100">
               {t('fitness.templateGallery.saveNamePrompt')}
             </h3>
@@ -360,7 +360,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
               value={saveName}
               onChange={e => setSaveName(e.target.value)}
               placeholder={t('fitness.templateGallery.saveNamePrompt')}
-              className="mb-4 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="focus:border-primary focus:ring-ring mb-4 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:ring-2 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
               autoFocus
             />
             <div className="flex gap-3">
@@ -368,7 +368,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
                 type="button"
                 data-testid="save-template-cancel"
                 onClick={handleCancelSave}
-                className="flex min-h-[44px] flex-1 items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
+                className="focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
                 style={{ touchAction: 'manipulation' }}
               >
                 {t('fitness.templateGallery.cancel')}
@@ -378,7 +378,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
                 data-testid="save-template-confirm"
                 onClick={handleConfirmSave}
                 disabled={!saveName.trim() || isSaving}
-                className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none disabled:opacity-60"
+                className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
                 style={{ touchAction: 'manipulation' }}
               >
                 {isSaving && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}

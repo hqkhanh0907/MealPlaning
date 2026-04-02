@@ -8,7 +8,7 @@ import {
 } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Mocks: allow the real WebDatabaseService to run in Node.js/jsdom   */
+/* Mocks: allow the real WebDatabaseService to run in Node.js/jsdom */
 /* ------------------------------------------------------------------ */
 const { mockIsNativePlatform } = vi.hoisted(() => ({
   mockIsNativePlatform: vi.fn(() => false),
@@ -24,7 +24,7 @@ vi.mock('sql.js', async () => {
 });
 
 /* ================================================================== */
-/*  Conversion helper tests                                            */
+/* Conversion helper tests */
 /* ================================================================== */
 describe('snakeToCamel', () => {
   it('converts snake_case keys correctly', () => {
@@ -61,7 +61,7 @@ describe('typeToRow', () => {
 });
 
 /* ================================================================== */
-/*  DatabaseService integration tests (real WebDatabaseService)        */
+/* DatabaseService integration tests (real WebDatabaseService) */
 /* ================================================================== */
 describe('DatabaseService', () => {
   let db: DatabaseService;
@@ -238,7 +238,7 @@ describe('DatabaseService', () => {
 });
 
 /* ================================================================== */
-/*  NativeDatabaseService (stub) tests                                 */
+/* NativeDatabaseService (stub) tests */
 /* ================================================================== */
 describe('NativeDatabaseService', () => {
   let nativeDb: DatabaseService;

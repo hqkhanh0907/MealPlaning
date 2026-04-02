@@ -151,13 +151,13 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
   return (
     <ModalBackdrop onClose={onClose}>
       <div
-        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl"
         data-testid="save-template-modal"
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('template.saveTitle')}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{t('template.saveSubtitle')}</p>
+            <p className="text-muted-foreground text-sm">{t('template.saveSubtitle')}</p>
           </div>
           <button
             onClick={onClose}
@@ -240,7 +240,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
                   type="button"
                   data-testid={`preset-tag-${pt}`}
                   onClick={() => addTag(pt)}
-                  className="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-500 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-emerald-900/20"
+                  className="text-muted-foreground rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:bg-slate-700 dark:hover:bg-emerald-900/20"
                 >
                   + {pt}
                 </button>
@@ -249,7 +249,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
           </div>
 
           <div>
-            <p className="mb-3 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+            <p className="text-muted-foreground mb-3 text-xs font-bold tracking-wider uppercase">
               {t('template.preview')} — {t('template.mealsCount', { count: totalDishes })}
             </p>
             <div className="space-y-2">
@@ -277,7 +277,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
           <button
             data-testid="btn-save-template"
             onClick={rhfSubmit(onFormSubmit)}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {t('template.save')}

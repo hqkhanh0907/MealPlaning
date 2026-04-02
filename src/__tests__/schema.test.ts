@@ -142,7 +142,7 @@ describe('createSchema', () => {
 });
 
 /* ================================================================== */
-/*  runSchemaMigrations tests                                          */
+/* runSchemaMigrations tests */
 /* ================================================================== */
 
 async function createV1Schema(db: DatabaseService): Promise<void> {

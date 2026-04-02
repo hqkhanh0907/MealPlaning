@@ -86,7 +86,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
   return (
     <ModalBackdrop onClose={onClose}>
       <div
-        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl"
         data-testid="template-manager-modal"
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
@@ -106,7 +106,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
           {templates.length === 0 ? (
             <div className="py-8 text-center">
               <BookTemplate className="mx-auto mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" />
-              <p className="font-medium text-slate-500 dark:text-slate-400">{t('template.empty')}</p>
+              <p className="text-muted-foreground font-medium">{t('template.empty')}</p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">{t('template.emptyHint')}</p>
             </div>
           ) : (
@@ -130,7 +130,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                     <button
                       type="button"
                       onClick={() => setFilterTag(null)}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag ? 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400' : 'bg-emerald-500 text-white'}`}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag ? 'text-muted-foreground bg-slate-100 dark:bg-slate-700' : 'bg-primary text-primary-foreground'}`}
                     >
                       {t('common.all')}
                     </button>
@@ -140,7 +140,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                         type="button"
                         data-testid={`filter-tag-${tag}`}
                         onClick={() => setFilterTag(prev => (prev === tag ? null : tag))}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag === tag ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 hover:bg-emerald-50 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-emerald-900/20'}`}
+                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-900/20'}`}
                       >
                         <Tag className="h-3 w-3" />
                         {tag}
@@ -221,7 +221,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
 
                       {/* Dish preview */}
                       {renamingId !== template.id && (
-                        <div className="mb-3 space-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        <div className="text-muted-foreground mb-3 space-y-0.5 text-xs">
                           {template.breakfastDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
                               <Sunrise className="inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
@@ -249,7 +249,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={() => onApply(template)}
                             data-testid={`btn-apply-template-${template.id}`}
-                            className="flex min-h-11 items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-emerald-600 active:scale-[0.98]"
+                            className="bg-primary text-primary-foreground hover:bg-primary flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]"
                           >
                             <Check className="h-3.5 w-3.5" />
                             {t('template.apply')}

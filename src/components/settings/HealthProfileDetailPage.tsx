@@ -80,11 +80,11 @@ function HealthProfileViewMode() {
             <span className="mt-0.5 text-base leading-none">
               {(() => {
                 const Icon = field.icon;
-                return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />;
+                return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;
               })()}
             </span>
             <div className="min-w-0">
-              <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+              <p className="text-muted-foreground text-xs">{field.label}</p>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
             </div>
           </div>
@@ -106,16 +106,16 @@ function HealthProfileViewMode() {
             {t('healthProfile.macroPreview')}
           </p>
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
-            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">{t('common.protein')}</p>
-              <p className="font-bold text-emerald-600 dark:text-emerald-400">{macros.proteinG}g</p>
+            <div className="bg-card rounded-lg p-2">
+              <p className="text-muted-foreground">{t('common.protein')}</p>
+              <p className="text-primary font-bold">{macros.proteinG}g</p>
             </div>
-            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">{t('common.fat')}</p>
+            <div className="bg-card rounded-lg p-2">
+              <p className="text-muted-foreground">{t('common.fat')}</p>
               <p className="font-bold text-amber-600 dark:text-amber-400">{macros.fatG}g</p>
             </div>
-            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">{t('common.carbs')}</p>
+            <div className="bg-card rounded-lg p-2">
+              <p className="text-muted-foreground">{t('common.carbs')}</p>
               <p className="font-bold text-blue-600 dark:text-blue-400">{macros.carbsG}g</p>
             </div>
           </div>

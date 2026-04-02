@@ -70,7 +70,7 @@ describe('SaveTemplateModal', () => {
 
   it('calls onSave with trimmed name on submit', async () => {
     render(<SaveTemplateModal {...defaultProps} />);
-    fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: '  My Template  ' } });
+    fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: ' My Template ' } });
     fireEvent.click(screen.getByTestId('btn-save-template'));
     await waitFor(() => {
       expect(defaultProps.onSave).toHaveBeenCalledWith('My Template', undefined);

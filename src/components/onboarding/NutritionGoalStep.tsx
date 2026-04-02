@@ -17,7 +17,7 @@ interface NutritionGoalStepProps {
 
 const GOALS = [
   { value: 'cut', icon: TrendingDown, color: 'text-blue-500' },
-  { value: 'maintain', icon: Minus, color: 'text-emerald-500' },
+  { value: 'maintain', icon: Minus, color: 'text-primary' },
   { value: 'bulk', icon: TrendingUp, color: 'text-orange-500' },
 ] as const;
 
@@ -64,9 +64,9 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
               aria-pressed={goalField.field.value === value}
               onClick={() => goalField.field.onChange(value)}
               className={cn(
-                'flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'focus-visible:ring-ring flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 goalField.field.value === value
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+                  ? 'border-primary bg-emerald-50 dark:bg-emerald-900/30'
                   : 'border-slate-200 dark:border-slate-700',
               )}
             >
@@ -75,9 +75,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    goalField.field.value === value
-                      ? 'text-emerald-700 dark:text-emerald-300'
-                      : 'text-slate-700 dark:text-slate-300',
+                    goalField.field.value === value ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300',
                   )}
                 >
                   {t(`onboarding.goal.type_${value}`)}
@@ -103,9 +101,9 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                     aria-pressed={rateField.field.value === rate}
                     onClick={() => rateField.field.onChange(rate)}
                     className={cn(
-                      'min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                      'focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                       rateField.field.value === rate
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                        ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
                         : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
                     )}
                   >
@@ -127,7 +125,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   inputMode="decimal"
                   aria-invalid={!!targetField.fieldState.error}
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
-                  className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
+                  className="bg-card focus-visible:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
                   value={targetField.field.value ?? ''}
                   onChange={e => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                   onBlur={targetField.field.onBlur}

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Mock store state factories                                          */
+/* Mock store state factories */
 /* ------------------------------------------------------------------ */
 const mockLoadAllIngredient = vi.fn().mockResolvedValue(undefined);
 const mockLoadAllDish = vi.fn().mockResolvedValue(undefined);
@@ -14,7 +14,7 @@ const mockLoadActiveGoal = vi.fn().mockResolvedValue(undefined);
 const mockInitializeFromSQLite = vi.fn().mockResolvedValue(undefined);
 
 /* ------------------------------------------------------------------ */
-/*  Mock all dynamically-imported store modules                         */
+/* Mock all dynamically-imported store modules */
 /* ------------------------------------------------------------------ */
 vi.mock('../store/ingredientStore', () => ({
   useIngredientStore: { getState: () => ({ loadAll: mockLoadAllIngredient }) },
@@ -46,7 +46,7 @@ vi.mock('../store/fitnessStore', () => ({
 }));
 
 /* ------------------------------------------------------------------ */
-/*  Mock DatabaseService                                                */
+/* Mock DatabaseService */
 /* ------------------------------------------------------------------ */
 function createMockDb(): DatabaseService {
   return {
@@ -63,7 +63,7 @@ function createMockDb(): DatabaseService {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('reloadAllStores', () => {
   let db: DatabaseService;

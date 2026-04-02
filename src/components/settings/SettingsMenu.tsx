@@ -72,7 +72,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       },
       {
         id: 'goal',
-        icon: <Target className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />,
+        icon: <Target className="text-primary h-5 w-5" />,
         titleKey: 'settings.goalSection',
         summary: goalSummary,
         keywords: [t('settings.goalSection'), t('goal.title'), t('goal.cut'), t('goal.bulk'), t('goal.maintain')],
@@ -141,7 +141,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               variant="ghost"
               data-testid={`settings-nav-${item.id}`}
               onClick={() => onNavigate(item.id)}
-              className="flex h-auto w-full items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-500"
+              className="bg-card flex h-auto w-full items-center gap-4 rounded-2xl border border-slate-100 p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-slate-700 dark:hover:border-slate-500"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-700/50">
                 {item.icon}
@@ -158,14 +158,14 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
 
       {/* Theme Section (inline) */}
       {visibleInlineSections.has('theme') && (
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+        <section className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/30">
               <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400" />
             </div>
             <div>
               <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.theme')}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.themeDesc')}</p>
+              <p className="text-muted-foreground text-xs">{t('settings.themeDesc')}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -178,7 +178,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
                 className={cn(
                   'flex h-auto min-h-12 flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all sm:p-4',
                   theme === value
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20'
                     : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500',
                 )}
               >
@@ -199,14 +199,14 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
 
       {/* Data Section (inline) */}
       {visibleInlineSections.has('data') && (
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+        <section className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-900/30">
               <Database className="h-5 w-5 text-violet-500 dark:text-violet-400" />
             </div>
             <div>
               <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.data')}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{t('settings.dataDesc')}</p>
+              <p className="text-muted-foreground text-xs">{t('settings.dataDesc')}</p>
             </div>
           </div>
           <DataBackup />

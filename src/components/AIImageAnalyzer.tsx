@@ -65,7 +65,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
   return (
     <div
       data-testid="ai-image-analyzer"
-      className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-700 dark:bg-slate-800"
+      className="bg-card rounded-2xl border border-slate-100 p-6 shadow-sm sm:p-8 dark:border-slate-700"
     >
       {!image && !result && (
         <div className="mb-6 flex items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6 sm:text-sm dark:text-slate-500">
@@ -98,7 +98,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
           <button
             onClick={handleAnalyze}
             disabled={!image || isAnalyzing}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-4 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 font-bold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isAnalyzing ? (
               <>

@@ -18,7 +18,7 @@ vi.mock('sql.js', async () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function setZustandItem(key: string, stateProp: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify({ state: { [stateProp]: value }, version: 0 }));
@@ -83,7 +83,7 @@ const SAMPLE_MEAL_TEMPLATE = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('migrationService', () => {
   let db: DatabaseService;
@@ -502,7 +502,7 @@ describe('migrationService', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Fitness migration tests                                             */
+/* Fitness migration tests */
 /* ------------------------------------------------------------------ */
 describe('migrateFitnessData', () => {
   let db: DatabaseService;

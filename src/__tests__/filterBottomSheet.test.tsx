@@ -22,7 +22,7 @@ describe('FilterBottomSheet', () => {
       .filter(
         b => b.textContent?.includes('Tên') || b.textContent?.includes('Calo') || b.textContent?.includes('Protein'),
       );
-    const activeChips = chips.filter(b => b.className.includes('bg-emerald-500'));
+    const activeChips = chips.filter(b => b.className.includes('bg-primary'));
     expect(activeChips).toHaveLength(1);
     expect(activeChips[0].textContent).toContain('Tên (A-Z)');
   });
@@ -31,9 +31,9 @@ describe('FilterBottomSheet', () => {
     render(<FilterBottomSheet {...defaultProps} />);
     const calDescChip = screen.getByText('Calo (Cao → Thấp)');
     fireEvent.click(calDescChip);
-    expect(calDescChip.className).toContain('bg-emerald-500');
+    expect(calDescChip.className).toContain('bg-primary');
     const nameAscChip = screen.getByText('Tên (A-Z)');
-    expect(nameAscChip.className).not.toContain('bg-emerald-500');
+    expect(nameAscChip.className).not.toContain('bg-primary');
   });
 
   it('renders quick filter tags', () => {
@@ -46,21 +46,21 @@ describe('FilterBottomSheet', () => {
   it('toggling maxCalories filter works', () => {
     render(<FilterBottomSheet {...defaultProps} />);
     const btn300 = screen.getByText('< 300 kcal');
-    expect(btn300.className).not.toContain('bg-emerald-500');
+    expect(btn300.className).not.toContain('bg-primary');
     fireEvent.click(btn300);
-    expect(btn300.className).toContain('bg-emerald-500');
+    expect(btn300.className).toContain('bg-primary');
     fireEvent.click(btn300);
-    expect(btn300.className).not.toContain('bg-emerald-500');
+    expect(btn300.className).not.toContain('bg-primary');
   });
 
   it('toggling minProtein filter works', () => {
     render(<FilterBottomSheet {...defaultProps} />);
     const btnProtein = screen.getByText('Protein cao (≥20g)');
-    expect(btnProtein.className).not.toContain('bg-emerald-500');
+    expect(btnProtein.className).not.toContain('bg-primary');
     fireEvent.click(btnProtein);
-    expect(btnProtein.className).toContain('bg-emerald-500');
+    expect(btnProtein.className).toContain('bg-primary');
     fireEvent.click(btnProtein);
-    expect(btnProtein.className).not.toContain('bg-emerald-500');
+    expect(btnProtein.className).not.toContain('bg-primary');
   });
 
   it('selecting one calorie filter deselects the other', () => {
@@ -68,24 +68,24 @@ describe('FilterBottomSheet', () => {
     const btn300 = screen.getByText('< 300 kcal');
     const btn500 = screen.getByText('< 500 kcal');
     fireEvent.click(btn300);
-    expect(btn300.className).toContain('bg-emerald-500');
+    expect(btn300.className).toContain('bg-primary');
     fireEvent.click(btn500);
-    expect(btn500.className).toContain('bg-emerald-500');
-    expect(btn300.className).not.toContain('bg-emerald-500');
+    expect(btn500.className).toContain('bg-primary');
+    expect(btn300.className).not.toContain('bg-primary');
   });
 
   it('reset button clears all filters', () => {
     render(<FilterBottomSheet {...defaultProps} config={{ sortBy: 'cal-desc', maxCalories: 300, minProtein: 20 }} />);
     const calDescChip = screen.getByText('Calo (Cao → Thấp)');
-    expect(calDescChip.className).toContain('bg-emerald-500');
+    expect(calDescChip.className).toContain('bg-primary');
 
     fireEvent.click(screen.getByTestId('filter-reset-btn'));
 
     const nameAscChip = screen.getByText('Tên (A-Z)');
-    expect(nameAscChip.className).toContain('bg-emerald-500');
-    expect(calDescChip.className).not.toContain('bg-emerald-500');
-    expect(screen.getByText('< 300 kcal').className).not.toContain('bg-emerald-500');
-    expect(screen.getByText('Protein cao (≥20g)').className).not.toContain('bg-emerald-500');
+    expect(nameAscChip.className).toContain('bg-primary');
+    expect(calDescChip.className).not.toContain('bg-primary');
+    expect(screen.getByText('< 300 kcal').className).not.toContain('bg-primary');
+    expect(screen.getByText('Protein cao (≥20g)').className).not.toContain('bg-primary');
   });
 
   it('apply button calls onChange with current config and closes', () => {

@@ -23,10 +23,7 @@ const AnalysisSkeleton = () => {
       </div>
       <div className="grid grid-cols-2 gap-4">
         {['skeleton-cal', 'skeleton-pro', 'skeleton-carb', 'skeleton-fat'].map(id => (
-          <div
-            key={id}
-            className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-600 dark:bg-slate-800"
-          >
+          <div key={id} className="bg-card rounded-xl border border-slate-100 p-4 shadow-sm dark:border-slate-600">
             <Skeleton className="mb-2 h-3 w-16" />
             <Skeleton className="h-7 w-20" />
           </div>
@@ -38,7 +35,7 @@ const AnalysisSkeleton = () => {
           {['skeleton-ing-1', 'skeleton-ing-2', 'skeleton-ing-3'].map(id => (
             <div
               key={id}
-              className="flex justify-between rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-600 dark:bg-slate-800"
+              className="bg-card flex justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-600"
             >
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-16" />
@@ -59,13 +56,11 @@ const EmptyState = () => {
   return (
     <div className="flex h-full flex-col items-center justify-center space-y-5 py-8 text-center">
       <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20">
-        <ImageIcon className="h-12 w-12 text-emerald-400/60 dark:text-emerald-500/40" />
+        <ImageIcon className="dark:text-primary/40 h-12 w-12 text-emerald-400/60" />
       </div>
       <div className="space-y-2">
         <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300">{t('ai.title')}</h4>
-        <p className="mx-auto max-w-xs text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-          {t('ai.emptyHint')}
-        </p>
+        <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">{t('ai.emptyHint')}</p>
       </div>
     </div>
   );
@@ -82,10 +77,10 @@ const NutritionCard = ({
   unit: string;
   color: string;
 }) => (
-  <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-600 dark:bg-slate-800">
-    <p className="mb-1 text-xs font-bold text-slate-500 uppercase dark:text-slate-500">{label}</p>
+  <div className="bg-card rounded-xl border border-slate-100 p-4 shadow-sm dark:border-slate-600">
+    <p className="text-muted-foreground mb-1 text-xs font-bold uppercase dark:text-slate-500">{label}</p>
     <p className={`text-2xl font-bold ${color}`}>
-      {value} <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{unit}</span>
+      {value} <span className="text-muted-foreground text-sm font-medium">{unit}</span>
     </p>
   </div>
 );
@@ -95,7 +90,7 @@ const IngredientRow = ({ ing }: { ing: AnalyzedIngredient }) => {
   return (
     <tr className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-600">
       <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{ing.name}</td>
-      <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+      <td className="px-3 py-2 text-slate-600">
         {ing.amount} {ing.unit}
       </td>
       <td className="px-3 py-2 font-medium text-orange-500">{Math.round(n.calories)}</td>
@@ -110,16 +105,18 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
   const { t } = useTranslation();
   return (
-    <div className="rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-600 dark:bg-slate-800">
+    <div className="bg-card rounded-xl border border-slate-100 p-3 dark:border-slate-600">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{ing.name}</p>
-        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <span className="text-muted-foreground text-xs font-medium">
           {ing.amount} {ing.unit}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">{t('common.calories')}</p>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase dark:text-slate-500">
+            {t('common.calories')}
+          </p>
           <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
@@ -148,7 +145,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
     <div className="space-y-6">
       <div>
         <h3 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100">{result.name}</h3>
-        <p className="leading-relaxed text-slate-600 dark:text-slate-400">{result.description}</p>
+        <p className="leading-relaxed text-slate-600">{result.description}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -179,7 +176,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
         {/* Desktop: Table view */}
         <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-100 text-xs text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
+            <thead className="bg-muted text-muted-foreground text-xs uppercase">
               <tr>
                 <th className="rounded-l-lg px-3 py-2">{t('ingredient.title')}</th>
                 <th className="px-3 py-2">{t('ingredient.quantity')}</th>

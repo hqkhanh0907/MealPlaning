@@ -9,11 +9,11 @@ import { calculateStreak } from '../utils/gamification';
 function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
   switch (status) {
     case 'completed':
-      return <CheckCircle className="h-5 w-5 text-emerald-500" aria-hidden="true" />;
+      return <CheckCircle className="text-primary h-5 w-5" aria-hidden="true" />;
     case 'rest':
       return <Moon className="h-5 w-5 text-blue-400" aria-hidden="true" />;
     case 'today':
-      return <MapPin className="h-5 w-5 text-emerald-600" aria-hidden="true" />;
+      return <MapPin className="text-primary h-5 w-5" aria-hidden="true" />;
     case 'missed':
       return <Circle className="h-5 w-5 text-red-400" aria-hidden="true" />;
     default:

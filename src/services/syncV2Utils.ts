@@ -3,7 +3,7 @@ import { typeToRow } from './databaseService';
 import { SCHEMA_TABLES } from './schema';
 
 /* ------------------------------------------------------------------ */
-/*  Types                                                               */
+/* Types */
 /* ------------------------------------------------------------------ */
 
 export interface V2ExportPayload {
@@ -46,7 +46,7 @@ const IMPORT_ORDER: readonly string[] = [
 ] as const;
 
 /* ------------------------------------------------------------------ */
-/*  Version detection                                                   */
+/* Version detection */
 /* ------------------------------------------------------------------ */
 
 export function detectVersion(data: unknown): DataVersion {
@@ -62,7 +62,7 @@ export function detectVersion(data: unknown): DataVersion {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Legacy format helpers                                               */
+/* Legacy format helpers */
 /* ------------------------------------------------------------------ */
 
 function safeJsonParse(value: unknown): unknown {
@@ -281,7 +281,7 @@ function transformLegacyToV2Tables(data: Record<string, unknown>): Record<string
 }
 
 /* ------------------------------------------------------------------ */
-/*  Export                                                               */
+/* Export */
 /* ------------------------------------------------------------------ */
 
 export async function createV2Export(
@@ -311,7 +311,7 @@ export async function createV2Export(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Import                                                               */
+/* Import */
 /* ------------------------------------------------------------------ */
 
 export async function importV2Data(db: DatabaseService, data: Record<string, unknown>): Promise<ImportResult> {

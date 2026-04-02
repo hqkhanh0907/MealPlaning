@@ -399,7 +399,7 @@ describe('TrainingPlanView', () => {
     const btn = screen.getByTestId('create-manual-plan-btn');
     expect(btn.className).toContain('min-h-[44px]');
     expect(btn.className).toContain('focus-visible:ring-2');
-    expect(btn.className).toContain('focus-visible:ring-emerald-400');
+    expect(btn.className).toContain('focus-visible:ring-ring');
   });
 
   // --- Calendar Strip ---
@@ -417,7 +417,7 @@ describe('TrainingPlanView', () => {
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     const todayPill = screen.getByTestId('day-pill-1');
     expect(todayPill).toHaveAttribute('aria-current', 'date');
-    expect(todayPill.className).toContain('ring-emerald-500');
+    expect(todayPill.className).toContain('ring-ring');
   });
 
   it('strength days show emerald color and cardio days show blue', () => {

@@ -153,7 +153,7 @@ export function ExerciseSelector({
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="exercise-selector-sheet"
-        className="relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
@@ -176,7 +176,7 @@ export function ExerciseSelector({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.exerciseSelector.search')}
-              className="w-full rounded-xl border-none bg-slate-100 py-2.5 pr-4 pl-10 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 dark:bg-slate-700 dark:text-slate-200"
+              className="focus:ring-ring w-full rounded-xl border-none bg-slate-100 py-2.5 pr-4 pl-10 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 dark:bg-slate-700 dark:text-slate-200"
             />
           </div>
         </div>
@@ -189,7 +189,7 @@ export function ExerciseSelector({
               onClick={() => handleChipClick('all')}
               className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 selectedMuscleGroup === 'all'
-                  ? 'bg-emerald-500 text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
               }`}
             >
@@ -202,7 +202,7 @@ export function ExerciseSelector({
                 onClick={() => handleChipClick(group)}
                 className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   selectedMuscleGroup === group
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -233,15 +233,15 @@ export function ExerciseSelector({
                   >
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{exercise.nameVi}</p>
                     <div className="mt-0.5 flex items-center gap-2">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-muted-foreground text-xs">
                         {t(MUSCLE_GROUP_I18N_KEYS[exercise.muscleGroup])}
                       </span>
                       <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
-                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <span className="text-primary text-xs font-medium">
                         {t(CATEGORY_I18N_KEYS[exercise.category])}
                       </span>
                       <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-muted-foreground text-xs">
                         {exercise.equipment.map(eq => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
                       </span>
                     </div>

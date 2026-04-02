@@ -75,7 +75,7 @@ describe('QuickActionsBar', () => {
   beforeEach(resetStores);
 
   /* ------------------------------------------------------------ */
-  /*  Rendering                                                    */
+  /* Rendering */
   /* ------------------------------------------------------------ */
   it('renders the quick actions bar with three buttons', () => {
     render(<QuickActionsBar />);
@@ -91,7 +91,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Context Mapping 1: Morning — nothing logged                  */
+  /* Context Mapping 1: Morning — nothing logged */
   /* ------------------------------------------------------------ */
   describe('Context: Morning (nothing logged)', () => {
     beforeEach(() => {
@@ -121,7 +121,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Context Mapping 2: After meals — breakfast+lunch logged      */
+  /* Context Mapping 2: After meals — breakfast+lunch logged */
   /* ------------------------------------------------------------ */
   describe('Context: After meals (breakfast+lunch logged)', () => {
     beforeEach(() => {
@@ -147,7 +147,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Context Mapping 3: Workout done                              */
+  /* Context Mapping 3: Workout done */
   /* ------------------------------------------------------------ */
   describe('Context: Workout done', () => {
     beforeEach(() => {
@@ -172,7 +172,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Context Mapping 4: All 3 meals logged (with training plan)   */
+  /* Context Mapping 4: All 3 meals logged (with training plan) */
   /* ------------------------------------------------------------ */
   describe('Context: All meals logged', () => {
     beforeEach(() => {
@@ -198,7 +198,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Context Mapping 5: All logged + workout done                 */
+  /* Context Mapping 5: All logged + workout done */
   /* ------------------------------------------------------------ */
   describe('Context: All logged + workout done', () => {
     beforeEach(() => {
@@ -224,14 +224,14 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Primary button always center                                 */
+  /* Primary button always center */
   /* ------------------------------------------------------------ */
   describe('Primary button styling', () => {
     it('center button has primary emerald styling', () => {
       render(<QuickActionsBar />);
       const centerButton = screen.getByTestId('quick-action-log-breakfast');
-      expect(centerButton.className).toContain('bg-emerald-500');
-      expect(centerButton.className).toContain('text-white');
+      expect(centerButton.className).toContain('bg-primary');
+      expect(centerButton.className).toContain('text-primary-foreground');
     });
 
     it('center button has shadow-glow via inline style', () => {
@@ -249,8 +249,8 @@ describe('QuickActionsBar', () => {
     it('left button has secondary styling with border', () => {
       render(<QuickActionsBar />);
       const leftButton = screen.getByTestId('quick-action-log-weight');
-      expect(leftButton.className).toContain('bg-white');
-      expect(leftButton.className).toContain('text-emerald-600');
+      expect(leftButton.className).toContain('bg-card');
+      expect(leftButton.className).toContain('text-primary');
       expect(leftButton.className).toContain('border');
       expect(leftButton.className).toContain('border-gray-200');
     });
@@ -275,7 +275,7 @@ describe('QuickActionsBar', () => {
       setWorkoutCompleted();
       const { unmount } = render(<QuickActionsBar />);
       const center1 = screen.getByTestId('quick-action-log-meal');
-      expect(center1.className).toContain('bg-emerald-500');
+      expect(center1.className).toContain('bg-primary');
       expect(center1.className).toContain('h-14');
       unmount();
 
@@ -283,13 +283,13 @@ describe('QuickActionsBar', () => {
       setMeals({ breakfast: true, lunch: true, dinner: true });
       render(<QuickActionsBar />);
       const center2 = screen.getByTestId('quick-action-view-results');
-      expect(center2.className).toContain('bg-emerald-500');
+      expect(center2.className).toContain('bg-primary');
       expect(center2.className).toContain('h-14');
     });
   });
 
   /* ------------------------------------------------------------ */
-  /*  Action handlers – navigation                                 */
+  /* Action handlers – navigation */
   /* ------------------------------------------------------------ */
   describe('Action handlers', () => {
     it('tapping left button (log-weight) navigates to fitness tab', async () => {
@@ -366,7 +366,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Each button displays translated label                        */
+  /* Each button displays translated label */
   /* ------------------------------------------------------------ */
   describe('Labels', () => {
     it('buttons show translated text for morning context', () => {
@@ -386,7 +386,7 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /*  Accessibility                                                */
+  /* Accessibility */
   /* ------------------------------------------------------------ */
   describe('Accessibility', () => {
     it('each button has an aria-label', () => {

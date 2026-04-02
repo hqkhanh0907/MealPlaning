@@ -5,7 +5,7 @@ import type { V2ExportPayload } from '../../services/syncV2Utils';
 import { buildLegacyFormat, createV2Export, detectVersion, importV2Data } from '../../services/syncV2Utils';
 
 /* ------------------------------------------------------------------ */
-/*  Mocks                                                               */
+/* Mocks */
 /* ------------------------------------------------------------------ */
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -17,14 +17,14 @@ vi.mock('sql.js', async () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function setZustandItem(key: string, stateProp: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify({ state: { [stateProp]: value }, version: 0 }));
 }
 
 /* ------------------------------------------------------------------ */
-/*  Realistic sample data fixtures                                      */
+/* Realistic sample data fixtures */
 /* ------------------------------------------------------------------ */
 const INGREDIENTS = [
   {
@@ -154,7 +154,7 @@ const MEAL_TEMPLATES = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Setup all localStorage keys with full data                          */
+/* Setup all localStorage keys with full data */
 /* ------------------------------------------------------------------ */
 function setupFullLocalStorage() {
   setZustandItem('mp-ingredients', 'ingredients', INGREDIENTS);
@@ -165,7 +165,7 @@ function setupFullLocalStorage() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('Migration Integration — Full Pipeline', () => {
   let db: DatabaseService;
@@ -178,7 +178,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario 1: Full localStorage → SQLite with realistic data       */
+  /* Scenario 1: Full localStorage → SQLite with realistic data */
   /* ================================================================ */
   describe('Scenario 1: Full localStorage → SQLite migration', () => {
     it('migrates all data types and returns correct counts', async () => {
@@ -337,7 +337,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario 2: Migration with empty/missing data                    */
+  /* Scenario 2: Migration with empty/missing data */
   /* ================================================================ */
   describe('Scenario 2: Migration with empty/missing data', () => {
     it('succeeds when all localStorage keys are missing', async () => {
@@ -397,7 +397,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario 3: Migration rollback on failure                        */
+  /* Scenario 3: Migration rollback on failure */
   /* ================================================================ */
   describe('Scenario 3: Migration rollback on failure', () => {
     it('rolls back transaction on FK violation (dish references non-existent ingredient)', async () => {
@@ -464,7 +464,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario 4: v1.x → v2.0 format upgrade via syncV2Utils           */
+  /* Scenario 4: v1.x → v2.0 format upgrade via syncV2Utils */
   /* ================================================================ */
   describe('Scenario 4: v1.x → v2.0 format upgrade', () => {
     it('detects v1.x data and auto-upgrades on import', async () => {
@@ -608,7 +608,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario 5: Data integrity after migration                       */
+  /* Scenario 5: Data integrity after migration */
   /* ================================================================ */
   describe('Scenario 5: Data integrity after migration', () => {
     it('FK constraints hold — dish_ingredients reference valid dishes and ingredients', async () => {
@@ -686,7 +686,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario 6: Idempotency                                          */
+  /* Scenario 6: Idempotency */
   /* ================================================================ */
   describe('Scenario 6: Idempotency', () => {
     it('second migration run does not duplicate data or error', async () => {
@@ -738,7 +738,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario: Round-trip migration → export → import                  */
+  /* Scenario: Round-trip migration → export → import */
   /* ================================================================ */
   describe('Round-trip: localStorage → SQLite → V2 export → import', () => {
     it('full round-trip preserves data integrity', async () => {
@@ -818,7 +818,7 @@ describe('Migration Integration — Full Pipeline', () => {
   });
 
   /* ================================================================ */
-  /*  Scenario: Schema completeness                                     */
+  /* Scenario: Schema completeness */
   /* ================================================================ */
   describe('Schema completeness', () => {
     it('all 19 SCHEMA_TABLES exist after initialization', async () => {

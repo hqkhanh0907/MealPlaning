@@ -68,7 +68,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
               <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700" aria-hidden="true">
                 <div
                   data-testid="progress-fill"
-                  className="h-full rounded-full bg-emerald-500 transition-all"
+                  className="bg-primary h-full rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -89,10 +89,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
                   {t(`fitness.gamification.${m.label}`)}
                 </span>
                 {m.achievedDate && (
-                  <span
-                    data-testid={`milestone-date-${m.id}`}
-                    className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
-                  >
+                  <span data-testid={`milestone-date-${m.id}`} className="text-primary flex items-center gap-1 text-xs">
                     <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
                     {t('fitness.gamification.achieved')} {m.achievedDate}
                   </span>

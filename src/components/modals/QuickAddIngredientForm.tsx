@@ -134,9 +134,9 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         className="absolute inset-0 cursor-default bg-black/30"
         onClick={handleCancel}
       />
-      <div className="relative max-h-[80dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-2xl bg-white p-6 shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative max-h-[80dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-2xl p-6 shadow-xl sm:max-w-md sm:rounded-2xl">
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{t('dish.quickAddTitle')}</p>
+          <p className="text-primary text-base font-bold">{t('dish.quickAddTitle')}</p>
           <button
             type="button"
             onClick={handleCancel}
@@ -147,10 +147,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
           </button>
         </div>
         <div>
-          <label
-            htmlFor="qa-name"
-            className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
-          >
+          <label htmlFor="qa-name" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
             {t('dish.quickAddName')} <span className="text-rose-500">*</span>
           </label>
           <Controller
@@ -176,10 +173,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
           {errors.qaName && <p className="mt-0.5 text-xs text-rose-500">{errors.qaName.message}</p>}
         </div>
         <div>
-          <label
-            htmlFor="qa-unit"
-            className="mb-1.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
-          >
+          <label htmlFor="qa-unit" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
             {t('dish.quickAddUnit')}
           </label>
           <Controller
@@ -202,12 +196,10 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         </div>
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
-              {t('dish.quickAddNutrition')}
-            </label>
+            <label className="text-muted-foreground text-xs font-bold uppercase">{t('dish.quickAddNutrition')}</label>
             <div className="flex items-center gap-2">
               {qaAiLoading && (
-                <span className="flex items-center gap-1 text-xs text-emerald-500">
+                <span className="text-primary flex items-center gap-1 text-xs">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   {t('dish.quickAddAiFilling')}
                 </span>
@@ -232,7 +224,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
               <div key={label}>
                 <label
                   htmlFor={`qa-${label.toLowerCase()}`}
-                  className="mb-0.5 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+                  className="text-muted-foreground mb-0.5 block text-xs font-bold uppercase"
                 >
                   {label} / {getDisplayUnit(qaUnit, lang)}
                 </label>
@@ -245,7 +237,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   min={0}
                   disabled={qaAiLoading}
                   placeholder="0"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs transition-all outline-none focus:border-emerald-500 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                  className="focus:border-primary w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                 />
               </div>
             ))}
@@ -256,7 +248,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
             type="button"
             onClick={handleCancel}
             data-testid="btn-qa-cancel"
-            className="flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600"
+            className="text-muted-foreground flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-medium transition-all hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
           >
             {t('dish.quickAddCancel')}
           </button>
@@ -264,7 +256,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
             type="button"
             onClick={handleFormSubmit}
             data-testid="btn-qa-submit"
-            className="flex flex-[2] items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-white transition-all hover:bg-emerald-600"
+            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all"
           >
             <Plus className="h-4 w-4" /> {t('dish.quickAddSubmit')}
           </button>

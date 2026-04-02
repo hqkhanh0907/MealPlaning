@@ -107,13 +107,13 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
   return (
     <ModalBackdrop onClose={onClose}>
       <div
-        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl"
         data-testid="copy-plan-modal"
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('copyPlan.title')}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-muted-foreground text-sm">
               {formatDate(sourceDate, dateLocale)} — {t('copyPlan.subtitle')}
             </p>
           </div>
@@ -130,7 +130,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
           {/* Source plan preview */}
           {sourcePreviewSections && (
             <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
-              <p className="mb-2 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+              <p className="text-muted-foreground mb-2 text-xs font-bold tracking-wider uppercase">
                 {t('copyPlan.sourcePreview')}
               </p>
               <div className="space-y-1.5">
@@ -162,20 +162,20 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             <button
               data-testid="btn-copy-tomorrow"
               onClick={handleTomorrow}
-              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all hover:border-emerald-500 hover:text-emerald-600 active:scale-[0.98] dark:border-slate-600 dark:text-slate-300 dark:hover:text-emerald-400"
+              className="hover:border-primary hover:text-primary flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all active:scale-[0.98] dark:border-slate-600 dark:text-slate-300"
             >
               {t('copyPlan.tomorrow')}
             </button>
             <button
               data-testid="btn-copy-week"
               onClick={handleWeek}
-              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all hover:border-emerald-500 hover:text-emerald-600 active:scale-[0.98] dark:border-slate-600 dark:text-slate-300 dark:hover:text-emerald-400"
+              className="hover:border-primary hover:text-primary flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all active:scale-[0.98] dark:border-slate-600 dark:text-slate-300"
             >
               {t('copyPlan.thisWeek')}
             </button>
             <button
               onClick={handleCustom}
-              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all hover:border-emerald-500 hover:text-emerald-600 active:scale-[0.98] dark:border-slate-600 dark:text-slate-300 dark:hover:text-emerald-400"
+              className="hover:border-primary hover:text-primary flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-medium text-slate-700 transition-all active:scale-[0.98] dark:border-slate-600 dark:text-slate-300"
             >
               {t('copyPlan.custom')}
             </button>
@@ -189,14 +189,14 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             <button
               data-testid="btn-mode-overwrite"
               onClick={() => setMergeMode(false)}
-              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-slate-500 dark:text-slate-400' : 'bg-white text-emerald-700 shadow-sm dark:bg-slate-600 dark:text-emerald-400'}`}
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-muted-foreground' : 'bg-white text-emerald-700 shadow-sm dark:bg-slate-600'}`}
             >
               {t('copyPlan.overwriteMode')}
             </button>
             <button
               data-testid="btn-mode-merge"
               onClick={() => setMergeMode(true)}
-              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-600' : 'text-muted-foreground'}`}
             >
               {t('copyPlan.mergeMode')}
             </button>
@@ -219,7 +219,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
           {/* Selected dates list */}
           {selectedDates.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+              <h4 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
                 {t('copyPlan.selectedDates')}
               </h4>
               <div className="space-y-1.5">
@@ -228,9 +228,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
                     key={date}
                     className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2 dark:bg-emerald-900/20"
                   >
-                    <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                      {formatDate(date, dateLocale)}
-                    </span>
+                    <span className="text-sm font-medium text-emerald-700">{formatDate(date, dateLocale)}</span>
                     <button
                       onClick={() => handleRemoveDate(date)}
                       className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-slate-400 transition-all hover:text-rose-500"
@@ -255,7 +253,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             data-testid="btn-copy-confirm"
             onClick={handleConfirm}
             disabled={selectedDates.length === 0}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Copy className="h-4 w-4" />
             {t('copyPlan.confirm')}

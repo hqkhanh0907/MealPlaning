@@ -6,7 +6,7 @@ interface TemplateMatchBadgeProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
+  if (score >= 80) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40';
   if (score >= 60) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
   return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
 }

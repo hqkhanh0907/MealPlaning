@@ -48,16 +48,16 @@ export const ManagementTab = React.memo(function ManagementTab({
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
         <div className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 shrink-0 text-emerald-500" />
+          <BookOpen className="text-primary h-6 w-6 shrink-0" />
           <h2 className="text-xl font-bold text-slate-800 sm:text-2xl dark:text-slate-100">{t('management.title')}</h2>
         </div>
-        <div className="scrollbar-hide flex w-full flex-nowrap overflow-x-auto rounded-xl bg-slate-100 p-1 sm:w-auto dark:bg-slate-800">
+        <div className="scrollbar-hide bg-muted flex w-full flex-nowrap overflow-x-auto rounded-xl p-1 sm:w-auto">
           {SUB_TABS.map(tab => (
             <button
               key={tab.key}
               data-testid={`tab-management-${tab.key}`}
               onClick={() => onSubTabChange(tab.key)}
-              className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all sm:min-h-0 sm:flex-initial sm:py-1.5 sm:text-xs ${activeSubTab === tab.key ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-400' : 'text-slate-500 active:bg-slate-200 dark:text-slate-400 dark:active:bg-slate-600'}`}
+              className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all sm:min-h-0 sm:flex-initial sm:py-1.5 sm:text-xs ${activeSubTab === tab.key ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700' : 'text-muted-foreground active:bg-slate-200 dark:active:bg-slate-600'}`}
             >
               {tab.label}
             </button>

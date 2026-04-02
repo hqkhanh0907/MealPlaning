@@ -24,7 +24,7 @@ vi.mock('sql.js', async () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 const INITIAL_STATE = {
   trainingProfile: null,
@@ -163,7 +163,7 @@ function sampleWeightEntry(overrides: Partial<WeightEntry> = {}): WeightEntry {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore', () => {
   beforeEach(() => {
@@ -644,7 +644,7 @@ describe('fitnessStore', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Dual-layer SQLite tests                                             */
+/* Dual-layer SQLite tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore dual-layer SQLite', () => {
   let db: DatabaseService;
@@ -843,7 +843,7 @@ describe('fitnessStore dual-layer SQLite', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  SQLite draft persistence tests                                      */
+/* SQLite draft persistence tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore SQLite draft persistence', () => {
   let db: DatabaseService;
@@ -988,7 +988,7 @@ describe('fitnessStore SQLite draft persistence', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Additional coverage tests                                           */
+/* Additional coverage tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – additional coverage', () => {
   beforeEach(() => {
@@ -1085,7 +1085,7 @@ describe('fitnessStore – additional coverage', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  SQLite write-through additional tests                               */
+/* SQLite write-through additional tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – SQLite write-through', () => {
   let db: DatabaseService;
@@ -1363,7 +1363,7 @@ describe('fitnessStore – SQLite write-through', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  SQLite error-path and catch-block tests                             */
+/* SQLite error-path and catch-block tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – SQLite error paths', () => {
   let db: DatabaseService;
@@ -1591,7 +1591,7 @@ describe('fitnessStore – SQLite error paths', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  removePlanDaySession – different planId/dayOfWeek days remain       */
+/* removePlanDaySession – different planId/dayOfWeek days remain */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – removePlanDaySession reorder edge case', () => {
   beforeEach(() => {
@@ -1623,7 +1623,7 @@ describe('fitnessStore – removePlanDaySession reorder edge case', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Persist migration tests                                             */
+/* Persist migration tests */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – persist migrate via rehydration', () => {
   beforeEach(() => {
@@ -1874,7 +1874,7 @@ describe('fitnessStore – changeSplitType data format', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Bug reproduction tests — FK constraints & draft planDayId           */
+/* Bug reproduction tests — FK constraints & draft planDayId */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – workout save FK constraint bugs', () => {
   let db: DatabaseService;

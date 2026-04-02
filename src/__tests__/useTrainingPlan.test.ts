@@ -6,7 +6,7 @@ import type { Exercise, MuscleGroup, SelectedExercise, TrainingProfile } from '.
 import { isBodyRegion } from '../features/fitness/types';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 function createProfile(overrides?: Partial<TrainingProfile>): TrainingProfile {
@@ -185,7 +185,7 @@ const mockDB: Exercise[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Tests — Split selection (Step 1)                                    */
+/* Tests — Split selection (Step 1) */
 /* ------------------------------------------------------------------ */
 
 describe('generateTrainingPlan', () => {
@@ -295,7 +295,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Step 2: Volume                                                    */
+  /* Step 2: Volume */
   /* ---------------------------------------------------------------- */
 
   describe('Step 2: Volume Calculation', () => {
@@ -386,7 +386,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Step 3: Exercise selection                                        */
+  /* Step 3: Exercise selection */
   /* ---------------------------------------------------------------- */
 
   describe('Step 3: Exercise Selection', () => {
@@ -500,7 +500,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Step 4: Rep scheme                                                */
+  /* Step 4: Rep scheme */
   /* ---------------------------------------------------------------- */
 
   describe('Step 4: Rep Range Assignment', () => {
@@ -674,7 +674,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  computeCurrentWeek                                                */
+  /* computeCurrentWeek */
   /* ---------------------------------------------------------------- */
 
   describe('computeCurrentWeek', () => {
@@ -694,7 +694,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Step 5: Cardio                                                    */
+  /* Step 5: Cardio */
   /* ---------------------------------------------------------------- */
 
   describe('Step 5: Cardio Integration', () => {
@@ -808,7 +808,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Step 6: Deload                                                    */
+  /* Step 6: Deload */
   /* ---------------------------------------------------------------- */
 
   describe('Step 6: Deload & Progressive Overload', () => {
@@ -862,7 +862,7 @@ describe('generateTrainingPlan', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  Edge cases                                                        */
+  /* Edge cases */
   /* ---------------------------------------------------------------- */
 
   describe('Edge Cases', () => {
@@ -1006,7 +1006,7 @@ describe('generateTrainingPlan', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Multi-session + originalExercises                                   */
+/* Multi-session + originalExercises */
 /* ------------------------------------------------------------------ */
 
 describe('generateTrainingPlan — multi-session', () => {
@@ -1138,7 +1138,7 @@ describe('generateTrainingPlan — multi-session', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Hook tests                                                          */
+/* Hook tests */
 /* ------------------------------------------------------------------ */
 
 describe('useTrainingPlan', () => {
@@ -1218,13 +1218,13 @@ describe('useTrainingPlan', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Constant for volume tests                                           */
+/* Constant for volume tests */
 /* ------------------------------------------------------------------ */
 
 const ALL_MUSCLES: MuscleGroup[] = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'];
 
 /* ------------------------------------------------------------------ */
-/*  Equipment matching & fallback edge-case tests                       */
+/* Equipment matching & fallback edge-case tests */
 /* ------------------------------------------------------------------ */
 
 describe('Equipment matching and fallback', () => {

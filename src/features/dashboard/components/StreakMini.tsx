@@ -6,11 +6,11 @@ import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateStreak } from '../../fitness/utils/gamification';
 
 const DOT_COLORS: Record<string, string> = {
-  completed: 'bg-emerald-500',
+  completed: 'bg-primary',
   rest: 'bg-blue-500',
   missed: 'border-2 border-slate-300 dark:border-slate-600 bg-transparent',
   upcoming: 'border-2 border-slate-300 dark:border-slate-600 bg-transparent',
-  today: 'border-2 border-emerald-500 bg-transparent',
+  today: 'border-2 border-primary bg-transparent',
 };
 
 interface StreakMiniProps {
@@ -54,11 +54,11 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
         aria-label={t('dashboard.streakMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none dark:bg-slate-800/50"
+        className="focus:ring-ring flex items-center gap-3 rounded-2xl bg-slate-50 p-3 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:bg-slate-800/50"
       >
         <Flame className="h-5 w-5 text-slate-400" aria-hidden={true} />
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('dashboard.streakMini.noData')}</p>
+          <p className="text-muted-foreground text-sm font-medium">{t('dashboard.streakMini.noData')}</p>
           <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.streakMini.startFirst')}</p>
         </div>
       </button>
@@ -76,7 +76,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
       })}
       onClick={handleTap}
       onKeyDown={handleKeyDown}
-      className="flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-50 p-3 transition-transform focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none active:scale-[0.98] dark:bg-slate-800/50"
+      className="focus:ring-ring flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-50 p-3 transition-transform focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] dark:bg-slate-800/50"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5" data-testid="streak-count">
@@ -91,7 +91,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
           </span>
         </div>
         <p
-          className="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
+          className="text-muted-foreground mt-0.5 text-xs"
           data-testid="streak-record"
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >

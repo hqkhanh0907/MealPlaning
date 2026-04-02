@@ -8,7 +8,7 @@ import type { PlateauResult } from '../utils/plateauAnalysis';
 import { analyzePlateau } from '../utils/plateauAnalysis';
 
 /* ------------------------------------------------------------------ */
-/*  Types                                                               */
+/* Types */
 /* ------------------------------------------------------------------ */
 
 export interface OverloadSuggestion extends SetSuggestion {
@@ -19,14 +19,14 @@ export interface OverloadSuggestion extends SetSuggestion {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Constants                                                           */
+/* Constants */
 /* ------------------------------------------------------------------ */
 
 const LOWER_BODY_MUSCLES = new Set(['legs', 'glutes']);
 const EXERCISE_MAP = new Map(EXERCISES.map(e => [e.id, e]));
 
 /* ------------------------------------------------------------------ */
-/*  Pure functions (exported for testing)                                */
+/* Pure functions (exported for testing) */
 /* ------------------------------------------------------------------ */
 
 export function isWeightSimilar(a: number, b: number, tolerance = 0.02): boolean {
@@ -158,7 +158,7 @@ export function detectChronicOvertraining(historySets: WorkoutSet[]): { level: F
 }
 
 /* ------------------------------------------------------------------ */
-/*  Hook                                                                */
+/* Hook */
 /* ------------------------------------------------------------------ */
 
 export function useProgressiveOverload(): {

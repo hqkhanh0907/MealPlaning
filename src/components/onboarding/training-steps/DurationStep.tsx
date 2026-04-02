@@ -27,9 +27,9 @@ export function DurationStep({ form, goNext, goBack }: Readonly<StepProps>) {
             aria-pressed={field.field.value === d}
             onClick={() => field.field.onChange(d)}
             className={cn(
-              'min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+              'focus-visible:ring-ring min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
               field.field.value === d
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
                 : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
             )}
           >

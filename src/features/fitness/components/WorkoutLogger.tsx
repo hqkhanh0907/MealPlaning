@@ -430,7 +430,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900" data-testid="workout-logger">
       <header
-        className="pt-safe sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
+        className="pt-safe bg-primary text-primary-foreground sticky top-0 z-10 flex items-center justify-between px-4 py-3"
         data-testid="workout-header"
       >
         <Button
@@ -459,7 +459,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       <div className="flex-1 space-y-6 overflow-y-auto p-4">
         {currentExercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center" data-testid="empty-state">
-            <p className="text-slate-500 dark:text-slate-400">{t('fitness.logger.noExercises')}</p>
+            <p className="text-muted-foreground">{t('fitness.logger.noExercises')}</p>
           </div>
         ) : (
           currentExercises.map((exercise, exerciseIndex) => {
@@ -476,10 +476,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
             const nextExercise = currentExercises[exerciseIndex + 1];
             return (
               <React.Fragment key={exercise.id}>
-                <section
-                  className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
-                  data-testid={`exercise-section-${exercise.id}`}
-                >
+                <section className="bg-card rounded-xl p-4 shadow-sm" data-testid={`exercise-section-${exercise.id}`}>
                   <h3 className="mb-3 text-base font-semibold text-slate-800 dark:text-slate-100">{exercise.nameVi}</h3>
 
                   {exerciseSets.map(set => (
@@ -494,12 +491,12 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                       <span>
                         {set.weightKg}kg × {set.reps ?? 0}
                       </span>
-                      {set.rpe !== undefined && <span className="text-xs text-emerald-600">RPE {set.rpe}</span>}
+                      {set.rpe !== undefined && <span className="text-primary text-xs">RPE {set.rpe}</span>}
                       <span className="ml-auto flex gap-1">
                         <button
                           type="button"
                           onClick={() => setEditingSet(set)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                          className="focus-visible:ring-ring inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-200"
                           aria-label={t('fitness.logger.editSet')}
                           data-testid={`edit-set-${set.id}`}
                         >
@@ -616,7 +613,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                             className={cn(
                               'h-9 w-9 rounded-full text-xs',
                               input.rpe === rpe
-                                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                ? 'bg-primary text-primary-foreground hover:bg-primary'
                                 : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
                             )}
                             data-testid={`rpe-${rpe}-${exercise.id}`}
@@ -630,7 +627,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                     <Button
                       variant="default"
                       onClick={() => handleLogSet(exercise.id)}
-                      className="w-full bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
+                      className="bg-primary text-primary-foreground hover:bg-primary w-full py-2.5"
                       data-testid={`log-set-${exercise.id}`}
                     >
                       {t('fitness.logger.logSet')}
@@ -646,7 +643,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
                       {exerciseIndex + 2}
                     </div>
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                    <span className="text-muted-foreground text-sm">
                       {t('fitness.logger.nextUp')}:{' '}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{nextExercise.nameVi}</span>
                     </span>
@@ -665,7 +662,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
         <Button
           variant="outline"
           onClick={() => setShowExerciseSelector(true)}
-          className="w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 py-3 text-slate-500 hover:border-emerald-500 hover:text-emerald-500 dark:border-slate-600 dark:text-slate-400"
+          className="text-muted-foreground hover:border-primary hover:text-primary w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 py-3 dark:border-slate-600"
           data-testid="add-exercise-button"
         >
           <Plus className="h-5 w-5" />

@@ -26,7 +26,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.preview.title', { name: values.name })}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.preview.subtitle')}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.preview.subtitle')}</p>
 
         {/* Week Overview */}
         <div className="mb-6 flex gap-1.5">
@@ -37,8 +37,8 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
                 key={day}
                 className={`flex flex-1 flex-col items-center rounded-lg py-2 text-xs font-medium ${
                   isActive
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                    : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
+                    : 'bg-muted text-slate-400 dark:text-slate-500'
                 }`}
               >
                 <span>{day}</span>
@@ -66,14 +66,14 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
 
         {/* Plan note */}
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
-          <p className="text-sm text-emerald-700 dark:text-emerald-300">{t('onboarding.preview.editNote')}</p>
+          <p className="text-sm text-emerald-700">{t('onboarding.preview.editNote')}</p>
         </div>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 flex items-center justify-center border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
         <Button
           onClick={completeOnboarding}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
           data-testid="onboarding-complete"
         >
           <Check className="mr-1 h-4 w-4" aria-hidden="true" />

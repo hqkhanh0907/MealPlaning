@@ -97,7 +97,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div
         data-testid="swap-exercise-sheet"
-        className="relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
@@ -107,16 +107,16 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
         {/* Header */}
         <div className="px-4 pb-3 text-center">
           <div className="mb-1 flex items-center justify-center gap-2">
-            <ArrowLeftRight className="h-5 w-5 text-emerald-500" />
+            <ArrowLeftRight className="text-primary h-5 w-5" />
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('fitness.swap.title')}</h2>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-muted-foreground text-sm">
             <span>{t('fitness.swap.current')}: </span>
             <span className="font-medium text-slate-700 dark:text-slate-300" data-testid="swap-current-name">
               {currentExercise.nameVi}
             </span>
           </p>
-          <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+          <p className="text-primary mt-0.5 text-xs">
             {t('fitness.swap.sameGroup')}: {t(MUSCLE_GROUP_I18N_KEYS[currentExercise.muscleGroup])}
           </p>
         </div>
@@ -132,14 +132,14 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.swap.search')}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 pl-9 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="focus-visible:ring-ring w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 pl-9 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus-visible:ring-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
             />
           </div>
         </div>
 
         {/* Section label */}
         <div className="px-4 pb-2">
-          <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             {t('fitness.swap.alternatives')} ({alternatives.length})
           </p>
         </div>
@@ -163,15 +163,15 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
                     data-testid={`swap-item-${exercise.id}`}
                     aria-label={`${t('fitness.swap.title')}: ${exercise.nameVi}`}
                     onClick={() => handleSelect(exercise)}
-                    className="min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:hover:bg-slate-700/50"
+                    className="focus-visible:ring-ring min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 dark:hover:bg-slate-700/50"
                   >
                     <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{exercise.nameVi}</p>
                     <div className="mt-0.5 flex items-center gap-2">
-                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <span className="text-primary text-xs font-medium">
                         {t(CATEGORY_I18N_KEYS[exercise.category])}
                       </span>
                       <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-muted-foreground text-xs">
                         {exercise.equipment.map(eq => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
                       </span>
                     </div>

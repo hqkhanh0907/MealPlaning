@@ -43,7 +43,7 @@ function DotIndicator({ total, current, ariaLabel }: Readonly<{ total: number; c
           aria-current={i === current ? 'step' : undefined}
           className={cn(
             'h-2 rounded-full motion-safe:transition-[width] motion-safe:duration-300',
-            i === current ? 'w-6 bg-emerald-500' : 'w-2 bg-slate-300 dark:bg-slate-600',
+            i === current ? 'bg-primary w-6' : 'w-2 bg-slate-300 dark:bg-slate-600',
           )}
         />
       ))}
@@ -65,7 +65,7 @@ export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSli
         <button
           type="button"
           onClick={handleSkip}
-          className="min-h-[44px] px-3 text-sm font-medium text-slate-400 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-500"
+          className="focus-visible:ring-ring min-h-[44px] px-3 text-sm font-medium text-slate-400 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none dark:text-slate-500"
           data-testid="onboarding-skip-btn"
         >
           {t('welcome.skip')}
@@ -77,7 +77,7 @@ export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSli
           {slide.icon}
         </div>
         <h1 className="mb-4 text-2xl font-bold text-slate-800 dark:text-slate-100">{t(slide.titleKey)}</h1>
-        <p className="max-w-sm text-base leading-relaxed text-slate-500 dark:text-slate-400">{t(slide.descKey)}</p>
+        <p className="text-muted-foreground max-w-sm text-base leading-relaxed">{t(slide.descKey)}</p>
       </div>
 
       <div className="flex items-center justify-between px-8 pb-12">
@@ -85,7 +85,7 @@ export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSli
 
         <Button
           onClick={goNext}
-          className="min-h-[44px] rounded-full bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-full px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
           data-testid="onboarding-next-btn"
         >
           {step === SLIDES.length - 1 ? (

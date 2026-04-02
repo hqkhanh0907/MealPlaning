@@ -211,7 +211,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               </button>
             </div>
           ) : (
-            <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 p-8 text-slate-500 dark:text-slate-400">
+            <div className="text-muted-foreground flex aspect-video w-full flex-col items-center justify-center gap-4 p-8">
               <div className="flex gap-4">
                 {typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getUserMedia === 'function' && (
                   <>
@@ -220,11 +220,9 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                       className="flex flex-col items-center gap-2 rounded-xl p-4 transition-all hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                     >
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 shadow-sm transition-all dark:bg-emerald-900/30">
-                        <Camera className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                        <Camera className="text-primary h-7 w-7" />
                       </div>
-                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                        {t('imageCapture.takePhoto')}
-                      </span>
+                      <span className="text-sm font-bold text-emerald-700">{t('imageCapture.takePhoto')}</span>
                     </button>
                     <div className="h-20 w-px self-center bg-slate-200 dark:bg-slate-600"></div>
                   </>
@@ -236,9 +234,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-all dark:bg-slate-700">
                     <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                   </div>
-                  <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                    {t('imageCapture.uploadImage')}
-                  </span>
+                  <span className="text-muted-foreground text-sm font-bold">{t('imageCapture.uploadImage')}</span>
                 </button>
               </div>
               <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">

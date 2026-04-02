@@ -28,7 +28,7 @@ export const Summary = React.memo(function Summary({
   const remainingProtein = Math.round(targetProtein - totalProtein);
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50">
+    <div className="bg-card rounded-2xl border border-slate-100 p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:border-slate-700 dark:shadow-slate-900/50">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 sm:p-3 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -36,7 +36,7 @@ export const Summary = React.memo(function Summary({
           </div>
           <div>
             <h2 className="text-lg font-bold text-slate-800 sm:text-xl dark:text-slate-100">{t('summary.title')}</h2>
-            <p className="text-xs text-slate-500 sm:text-sm dark:text-slate-400">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               {t('summary.goal', { cal: targetCalories, pro: targetProtein })}
             </p>
           </div>
@@ -69,7 +69,7 @@ export const Summary = React.memo(function Summary({
               >
                 {Math.round(totalCalories)}
               </span>
-              <span className="text-xs text-slate-500 sm:text-sm dark:text-slate-400"> / {targetCalories}</span>
+              <span className="text-muted-foreground text-xs sm:text-sm"> / {targetCalories}</span>
             </div>
           </div>
           <progress
@@ -81,7 +81,7 @@ export const Summary = React.memo(function Summary({
           />
           <p
             data-testid="remaining-calories"
-            className={`text-xs font-medium ${remainingCalories >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-xs font-medium ${remainingCalories >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
           >
             {remainingCalories >= 0
               ? t('summary.remaining', { value: remainingCalories, unit: 'kcal' })
@@ -100,7 +100,7 @@ export const Summary = React.memo(function Summary({
               <span className="text-xl font-bold text-slate-800 sm:text-2xl dark:text-slate-100">
                 {Math.round(totalProtein)}
               </span>
-              <span className="text-xs text-slate-500 sm:text-sm dark:text-slate-400"> / {targetProtein}g</span>
+              <span className="text-muted-foreground text-xs sm:text-sm"> / {targetProtein}g</span>
             </div>
           </div>
           <progress
@@ -112,7 +112,7 @@ export const Summary = React.memo(function Summary({
           />
           <p
             data-testid="remaining-protein"
-            className={`text-xs font-medium ${remainingProtein >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-xs font-medium ${remainingProtein >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
           >
             {remainingProtein >= 0
               ? t('summary.remaining', { value: remainingProtein, unit: 'g' })
@@ -143,13 +143,13 @@ export const Summary = React.memo(function Summary({
           </p>
         </div>
         <div className="rounded-2xl border border-emerald-100/50 bg-emerald-50 p-3 sm:p-4 dark:border-emerald-800/30 dark:bg-emerald-900/20">
-          <div className="mb-1 flex items-center gap-1.5 text-emerald-700 sm:gap-2 dark:text-emerald-400">
+          <div className="mb-1 flex items-center gap-1.5 text-emerald-700 sm:gap-2">
             <Leaf className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.fiber')}</span>
           </div>
-          <p className="text-lg font-bold text-emerald-900 sm:text-2xl dark:text-emerald-300">
+          <p className="text-lg font-bold text-emerald-900 sm:text-2xl">
             {Math.round(totalFiber)}
-            <span className="ml-1 text-xs font-normal text-emerald-700/70 sm:text-sm dark:text-emerald-500/70">g</span>
+            <span className="dark:text-primary/70 ml-1 text-xs font-normal text-emerald-700/70 sm:text-sm">g</span>
           </p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export const Summary = React.memo(function Summary({
         type="button"
         data-testid="btn-macro-details"
         onClick={() => setShowDetails(prev => !prev)}
-        className="mt-3 flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium text-slate-500 transition-all hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+        className="text-muted-foreground mt-3 flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all hover:text-slate-700 dark:hover:text-slate-300"
       >
         <span>{showDetails ? t('summary.hideDetails') : t('summary.showDetails')}</span>
         <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${showDetails ? 'rotate-180' : ''}`} />
@@ -168,7 +168,7 @@ export const Summary = React.memo(function Summary({
         <div data-testid="macro-details" className="mt-2 border-t border-slate-100 pt-3 dark:border-slate-700">
           <table className="w-full text-xs sm:text-sm">
             <thead>
-              <tr className="text-slate-500 dark:text-slate-400">
+              <tr className="text-muted-foreground">
                 <th className="pb-2 text-left font-medium">{t('summary.meal')}</th>
                 <th className="pb-2 text-right font-medium">{t('common.carbs')}</th>
                 <th className="pb-2 text-right font-medium">{t('common.fat')}</th>

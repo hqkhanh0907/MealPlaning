@@ -16,7 +16,7 @@ function getDayOfYear(): number {
 }
 
 function getBarColorClass(pct: number): string {
-  if (pct >= 80) return 'bg-emerald-500';
+  if (pct >= 80) return 'bg-primary';
   if (pct >= 50) return 'bg-amber-500';
   return 'bg-gray-400';
 }
@@ -80,7 +80,7 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
       </div>
 
       {/* Suggestion text */}
-      <p data-testid="protein-suggestion" className="text-[10px] text-slate-500 dark:text-slate-400">
+      <p data-testid="protein-suggestion" className="text-muted-foreground text-[10px]">
         {suggestion}
       </p>
     </div>

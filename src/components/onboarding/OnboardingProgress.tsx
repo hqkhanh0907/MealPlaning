@@ -52,14 +52,14 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
               })()}
             >
               <div
-                className="h-full bg-emerald-500 motion-safe:transition-[width] motion-safe:duration-300"
+                className="bg-primary h-full motion-safe:transition-[width] motion-safe:duration-300"
                 style={{ width: `${fillPercent}%` }}
               />
             </div>
           );
         })}
       </progress>
-      <p className="mt-1.5 text-center text-xs font-medium text-slate-500 dark:text-slate-400">{sectionLabel}</p>
+      <p className="text-muted-foreground mt-1.5 text-center text-xs font-medium">{sectionLabel}</p>
     </div>
   );
 });

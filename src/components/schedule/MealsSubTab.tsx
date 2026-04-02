@@ -118,9 +118,9 @@ export const MealsSubTab = React.memo(function MealsSubTab({
       {recentDishes.length > 0 && emptySlots.length > 0 && onQuickAdd && (
         <div
           data-testid="recent-dishes-section"
-          className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+          className="bg-card rounded-2xl border border-slate-100 p-3 shadow-sm dark:border-slate-700"
         >
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+          <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase">
             <Clock className="h-3.5 w-3.5" />
             {t('recentDishes.title')}
           </p>
@@ -136,9 +136,9 @@ export const MealsSubTab = React.memo(function MealsSubTab({
                       setQuickAddDishId(prev => (prev === dish.id ? null : dish.id));
                     }
                   }}
-                  className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:bg-emerald-900/20"
+                  className="dark:hover:border-primary inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-emerald-900/20"
                 >
-                  <Plus className="h-3 w-3 text-emerald-500" />
+                  <Plus className="text-primary h-3 w-3" />
                   {getLocalizedField(dish.name, lang)}
                 </button>
                 {quickAddDishId === dish.id && emptySlots.length > 1 && (
@@ -161,7 +161,7 @@ export const MealsSubTab = React.memo(function MealsSubTab({
         </div>
       )}
 
-      <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+      <div className="bg-card divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 shadow-sm dark:divide-slate-700 dark:border-slate-700">
         {MEAL_TYPES.map(type => (
           <div key={type} className="p-1">
             <MealSlot
@@ -192,7 +192,7 @@ export const MealsSubTab = React.memo(function MealsSubTab({
         </div>
       )}
       {isComplete && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <p className="font-medium">{t('recommendation.planComplete')}</p>
         </div>

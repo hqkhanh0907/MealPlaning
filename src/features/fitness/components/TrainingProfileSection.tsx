@@ -125,11 +125,11 @@ export function TrainingProfileSection() {
           <span className="mt-0.5 text-base leading-none">
             {(() => {
               const Icon = FIELD_ICON[field.key] ?? ClipboardList;
-              return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />;
+              return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;
             })()}
           </span>
           <div className="min-w-0">
-            <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+            <p className="text-muted-foreground text-xs">{field.label}</p>
             <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
           </div>
         </div>

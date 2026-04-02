@@ -49,7 +49,7 @@ function AddSessionModalInner({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative w-full rounded-t-3xl bg-white p-6 sm:mx-auto sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative w-full rounded-t-3xl p-6 sm:mx-auto sm:max-w-md sm:rounded-2xl">
         {step === 'options' && (
           <>
             <h3 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -65,12 +65,10 @@ function AddSessionModalInner({
                 onClick={handleStrengthClick}
                 className="flex items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 text-left transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40"
               >
-                <Dumbbell className="h-5 w-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                <Dumbbell className="text-primary h-5 w-5" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-                    {t('fitness.plan.strengthOption')}
-                  </p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{t('fitness.plan.strengthDesc')}</p>
+                  <p className="text-sm font-semibold text-emerald-800">{t('fitness.plan.strengthOption')}</p>
+                  <p className="text-primary text-xs">{t('fitness.plan.strengthDesc')}</p>
                 </div>
               </button>
 
@@ -135,7 +133,7 @@ function AddSessionModalInner({
                     onClick={() => toggleGroup(group)}
                     className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       isSelected
-                        ? 'bg-emerald-500 text-white dark:bg-emerald-600'
+                        ? 'bg-primary text-primary-foreground dark:bg-primary'
                         : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                     }`}
                   >
@@ -150,7 +148,7 @@ function AddSessionModalInner({
               data-testid="create-strength-session"
               disabled={selectedGroups.length === 0}
               onClick={handleCreateStrength}
-              className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+              className="bg-primary text-primary-foreground hover:bg-primary dark:bg-primary dark:hover:bg-primary/80 w-full rounded-xl py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t('fitness.plan.createSession')}
             </button>

@@ -66,7 +66,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
     <ModalBackdrop onClose={onClose}>
       <div
         data-testid="day-assignment-sheet"
-        className="relative w-full rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative w-full rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
         style={{ overscrollBehavior: 'contain' }}
       >
         {/* Drag handle */}
@@ -114,10 +114,10 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                       'flex w-full items-center gap-3 rounded-xl px-4 py-3',
                       'touch-manipulation text-left text-sm',
                       'transition-colors motion-reduce:transition-none',
-                      'focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:outline-none',
+                      'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                       isCurrent
-                        ? 'border-2 border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30'
-                        : 'border border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/50',
+                        ? 'border-primary border-2 bg-emerald-50 dark:bg-emerald-900/30'
+                        : 'bg-card border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50',
                       isFull ? 'cursor-not-allowed opacity-50' : '',
                     ]
                       .filter(Boolean)
@@ -127,9 +127,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                     <span
                       className={[
                         'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2',
-                        isCurrent
-                          ? 'border-emerald-500 bg-emerald-500 dark:border-emerald-400 dark:bg-emerald-400'
-                          : 'border-slate-300 dark:border-slate-600',
+                        isCurrent ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600',
                       ].join(' ')}
                     >
                       {isCurrent && <Check className="h-3 w-3 text-white" />}
@@ -138,7 +136,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                     {/* Day info */}
                     <span className="flex-1">
                       <span className="font-semibold text-slate-800 dark:text-slate-200">{shortLabel}</span>
-                      <span className="ml-1 text-slate-500 dark:text-slate-400">({fullLabel})</span>
+                      <span className="text-muted-foreground ml-1">({fullLabel})</span>
                       <span className="ml-2 text-slate-400 dark:text-slate-500">
                         — {t('fitness.scheduleEditor.sessionsCount', { count })}
                       </span>

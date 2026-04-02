@@ -113,7 +113,7 @@ describe('QuickAddIngredientForm', () => {
 
     it('shows error when name is only whitespace', async () => {
       renderForm();
-      fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: '   ' } });
+      fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: ' ' } });
       await act(async () => {
         fireEvent.click(screen.getByTestId('btn-qa-submit'));
       });
@@ -181,7 +181,7 @@ describe('QuickAddIngredientForm', () => {
     it('trims the name on submission', async () => {
       renderForm();
       fireEvent.change(screen.getByTestId('input-qa-name'), {
-        target: { value: '  Ức gà  ' },
+        target: { value: ' Ức gà ' },
       });
       await act(async () => {
         fireEvent.click(screen.getByTestId('btn-qa-submit'));

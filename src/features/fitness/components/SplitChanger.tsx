@@ -89,12 +89,12 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
+      <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
         <button
           type="button"
           onClick={handleBack}
           aria-label={t('common.back')}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-white active:bg-emerald-700"
+          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
           style={{ touchAction: 'manipulation' }}
           data-testid="back-button"
         >
@@ -117,7 +117,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
               key={option.value}
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
                 selectedSplit === option.value
-                  ? 'border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950'
+                  ? 'border-primary bg-emerald-50 dark:bg-emerald-950'
                   : 'bg-card border-slate-200 dark:border-slate-700'
               }`}
               style={{ touchAction: 'manipulation' }}
@@ -128,11 +128,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-slate-900 dark:text-slate-100">{t(option.labelKey)}</span>
                   {option.value === currentSplit && (
-                    <Check
-                      className="h-4 w-4 text-emerald-600 dark:text-emerald-400"
-                      aria-hidden="true"
-                      data-testid="current-split-check"
-                    />
+                    <Check className="text-primary h-4 w-4" aria-hidden="true" data-testid="current-split-check" />
                   )}
                 </div>
                 <p className="text-muted-foreground text-sm">{t(option.descKey)}</p>
@@ -176,16 +172,13 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 onClick={() => setMode('remap')}
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
                   mode === 'remap'
-                    ? 'border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950'
+                    ? 'border-primary bg-emerald-50 dark:bg-emerald-950'
                     : 'bg-card border-slate-200 dark:border-slate-700'
                 }`}
                 style={{ touchAction: 'manipulation' }}
                 data-testid="mode-remap"
               >
-                <Shuffle
-                  className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
-                  aria-hidden="true"
-                />
+                <Shuffle className="text-primary mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <span className="font-medium text-slate-900 dark:text-slate-100">
                     {t('fitness.splitChanger.remap')}
@@ -206,7 +199,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
 
             {isLoadingPreview && (
               <div className="flex items-center justify-center py-8" data-testid="preview-loading">
-                <Loader2 className="h-6 w-6 animate-spin text-emerald-600 motion-reduce:animate-none" />
+                <Loader2 className="text-primary h-6 w-6 animate-spin motion-reduce:animate-none" />
               </div>
             )}
 
@@ -243,7 +236,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                         className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-950"
                         data-testid="preview-mapped-item"
                       >
-                        <Check className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                        <Check className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
                         <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
                           {item.from.notes ?? item.from.workoutType}
                         </span>

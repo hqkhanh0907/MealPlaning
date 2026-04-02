@@ -183,12 +183,12 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   });
 
   const inputBase =
-    'w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all';
+    'w-full px-3 py-2 bg-card rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all';
 
   function inputClass(field: keyof HealthProfileFormData): string {
     const borderColor = errors[field]
       ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
-      : 'border-slate-300 dark:border-slate-600 focus:ring-emerald-500/50 focus:border-emerald-500';
+      : 'border-slate-300 dark:border-slate-600 focus:ring-ring focus:border-primary';
     return `${inputBase} border ${borderColor}`;
   }
 
@@ -275,7 +275,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
-              className={`${inputBase} border border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/50 dark:border-slate-600`}
+              className={`${inputBase} focus:border-primary focus:ring-ring border border-slate-300 dark:border-slate-600`}
             >
               {ACTIVITY_LEVELS.map(level => (
                 <option key={level} value={level}>
@@ -315,10 +315,10 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           render={({ field }) => (
             <div className="mb-2 flex gap-2" role="radiogroup" aria-label={t('healthProfile.bmr')}>
               <label
-                className={`flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
+                className={`has-[:focus-visible]:ring-ring flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
                   field.value
                     ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                    : 'bg-emerald-500 text-white'
+                    : 'bg-primary text-primary-foreground'
                 }`}
               >
                 <input
@@ -332,9 +332,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
                 {t('healthProfile.bmrAuto')}
               </label>
               <label
-                className={`flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
+                className={`has-[:focus-visible]:ring-ring flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
                   field.value
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                 }`}
               >
@@ -394,20 +394,20 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             {t('healthProfile.macroPreview')}
           </p>
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
-            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">{t('common.protein')}</p>
-              <p className="font-bold text-emerald-600 dark:text-emerald-400" data-testid="macro-protein">
+            <div className="bg-card rounded-lg p-2">
+              <p className="text-muted-foreground">{t('common.protein')}</p>
+              <p className="text-primary font-bold" data-testid="macro-protein">
                 {macros.proteinG}g
               </p>
             </div>
-            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">{t('common.fat')}</p>
+            <div className="bg-card rounded-lg p-2">
+              <p className="text-muted-foreground">{t('common.fat')}</p>
               <p className="font-bold text-amber-600 dark:text-amber-400" data-testid="macro-fat">
                 {macros.fatG}g
               </p>
             </div>
-            <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
-              <p className="text-slate-500 dark:text-slate-400">{t('common.carbs')}</p>
+            <div className="bg-card rounded-lg p-2">
+              <p className="text-muted-foreground">{t('common.carbs')}</p>
               <p className="font-bold text-blue-600 dark:text-blue-400" data-testid="macro-carbs">
                 {macros.carbsG}g
               </p>
@@ -420,7 +420,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         <button
           type="button"
           onClick={() => void handleSave()}
-          className="w-full rounded-xl bg-emerald-500 py-3 font-medium text-white shadow-sm transition-all hover:bg-emerald-600 active:scale-[0.98]"
+          className="bg-primary text-primary-foreground hover:bg-primary w-full rounded-xl py-3 font-medium shadow-sm transition-all active:scale-[0.98]"
         >
           {saved && !isDirty ? t('healthProfile.saved') : t('healthProfile.save')}
         </button>

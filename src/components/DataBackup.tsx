@@ -55,7 +55,7 @@ const HEALTH_STYLES = {
   good: {
     bg: 'bg-emerald-50 dark:bg-emerald-900/20',
     border: 'border-emerald-200 dark:border-emerald-800',
-    text: 'text-emerald-700 dark:text-emerald-400',
+    text: 'text-emerald-700',
     Icon: ShieldCheck,
   },
   warning: {

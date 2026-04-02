@@ -6,7 +6,7 @@ import { useHealthProfileStore } from '../features/health-profile/store/healthPr
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Mocks                                                              */
+/* Mocks */
 /* ------------------------------------------------------------------ */
 const mockDb: DatabaseService = {
   initialize: vi.fn(),
@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 function setupProfileWithWeight(weight: number) {
   useHealthProfileStore.setState({
@@ -53,7 +53,7 @@ function setupProfileWithWeight(weight: number) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                              */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('GoalPhaseSelector', () => {
   it('renders 3 goal type options', () => {

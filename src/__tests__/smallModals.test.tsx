@@ -327,12 +327,12 @@ describe('GoalSettingsModal', () => {
     const balancedProfile = { weight: 70, proteinRatio: 1.6, targetCalories: 2000 };
     render(<GoalSettingsModal userProfile={balancedProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     const btn = screen.getByTestId('btn-goal-preset-2000');
-    expect(btn.className).toContain('border-emerald-500');
+    expect(btn.className).toContain('border-primary');
   });
 
   it('does not highlight preset when profile does not match', () => {
     render(<GoalSettingsModal userProfile={defaultProfile} onUpdateProfile={onUpdateProfile} onClose={onClose} />);
     const btn = screen.getByTestId('btn-goal-preset-1400');
-    expect(btn.className).not.toContain('border-emerald-500');
+    expect(btn.className).not.toContain('border-primary');
   });
 });

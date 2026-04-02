@@ -67,13 +67,13 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>
         <Button
           onClick={goNext}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           {t('onboarding.nav.next')}
           <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />

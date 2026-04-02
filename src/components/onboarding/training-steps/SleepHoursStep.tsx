@@ -30,8 +30,7 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
           if (isActive && hours < LOW_SLEEP_THRESHOLD) {
             stateClass = 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
           } else if (isActive) {
-            stateClass =
-              'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+            stateClass = 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30';
           } else {
             stateClass = 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400';
           }
@@ -43,7 +42,7 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
               aria-pressed={isActive}
               onClick={() => field.field.onChange(hours)}
               className={cn(
-                'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 stateClass,
               )}
             >

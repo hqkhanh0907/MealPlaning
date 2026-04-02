@@ -87,12 +87,12 @@ describe('CardioLogger', () => {
   it('highlights selected cardio type', () => {
     render(<CardioLogger {...defaultProps} />);
     // Running is default selected
-    expect(screen.getByTestId('cardio-type-running')).toHaveClass('bg-emerald-500');
-    expect(screen.getByTestId('cardio-type-cycling')).not.toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('cardio-type-running')).toHaveClass('bg-primary');
+    expect(screen.getByTestId('cardio-type-cycling')).not.toHaveClass('bg-primary');
 
     fireEvent.click(screen.getByTestId('cardio-type-cycling'));
-    expect(screen.getByTestId('cardio-type-cycling')).toHaveClass('bg-emerald-500');
-    expect(screen.getByTestId('cardio-type-running')).not.toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('cardio-type-cycling')).toHaveClass('bg-primary');
+    expect(screen.getByTestId('cardio-type-running')).not.toHaveClass('bg-primary');
   });
 
   it('stopwatch mode: start/pause/stop buttons work', () => {
@@ -162,15 +162,15 @@ describe('CardioLogger', () => {
   it('intensity pills are selectable (low/moderate/high)', () => {
     render(<CardioLogger {...defaultProps} />);
     // Default is moderate
-    expect(screen.getByTestId('intensity-moderate')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('intensity-moderate')).toHaveClass('bg-primary');
 
     fireEvent.click(screen.getByTestId('intensity-low'));
-    expect(screen.getByTestId('intensity-low')).toHaveClass('bg-emerald-500');
-    expect(screen.getByTestId('intensity-moderate')).not.toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('intensity-low')).toHaveClass('bg-primary');
+    expect(screen.getByTestId('intensity-moderate')).not.toHaveClass('bg-primary');
 
     fireEvent.click(screen.getByTestId('intensity-high'));
-    expect(screen.getByTestId('intensity-high')).toHaveClass('bg-emerald-500');
-    expect(screen.getByTestId('intensity-low')).not.toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('intensity-high')).toHaveClass('bg-primary');
+    expect(screen.getByTestId('intensity-low')).not.toHaveClass('bg-primary');
   });
 
   it('calorie preview updates based on type and duration', () => {
@@ -270,14 +270,14 @@ describe('CardioLogger', () => {
 
   it('stopwatch mode button toggles correctly', () => {
     render(<CardioLogger {...defaultProps} />);
-    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-primary');
 
     fireEvent.click(screen.getByTestId('manual-mode-button'));
-    expect(screen.getByTestId('manual-mode-button')).toHaveClass('bg-emerald-500');
-    expect(screen.getByTestId('stopwatch-mode-button')).not.toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('manual-mode-button')).toHaveClass('bg-primary');
+    expect(screen.getByTestId('stopwatch-mode-button')).not.toHaveClass('bg-primary');
 
     fireEvent.click(screen.getByTestId('stopwatch-mode-button'));
-    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-emerald-500');
+    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-primary');
   });
 
   it('saves with distance and heart rate when provided', async () => {

@@ -13,7 +13,7 @@ vi.mock('sql.js', async () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 const INITIAL_STATE = {
   trainingProfile: null,
@@ -64,7 +64,7 @@ function samplePlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDa
 }
 
 /* ================================================================== */
-/*  Tests                                                               */
+/* Tests */
 /* ================================================================== */
 describe('fitnessStore — Schedule Editor Actions', () => {
   beforeEach(() => {
@@ -73,7 +73,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
   });
 
   /* ================================================================ */
-  /*  updateTrainingDays                                                */
+  /* updateTrainingDays */
   /* ================================================================ */
   describe('updateTrainingDays', () => {
     it('updates training and rest days for a plan', () => {
@@ -165,7 +165,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
   });
 
   /* ================================================================ */
-  /*  reassignWorkoutToDay                                              */
+  /* reassignWorkoutToDay */
   /* ================================================================ */
   describe('reassignWorkoutToDay', () => {
     it('reassigns a plan day to a new valid training day', () => {
@@ -239,7 +239,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
   });
 
   /* ================================================================ */
-  /*  autoAssignWorkouts                                                */
+  /* autoAssignWorkouts */
   /* ================================================================ */
   describe('autoAssignWorkouts', () => {
     it('distributes sessions evenly across training days', () => {
@@ -355,7 +355,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
   });
 
   /* ================================================================ */
-  /*  restoreOriginalSchedule                                           */
+  /* restoreOriginalSchedule */
   /* ================================================================ */
   describe('restoreOriginalSchedule', () => {
     it('restores day_of_week from original_day_of_week', () => {

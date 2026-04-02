@@ -2,7 +2,7 @@ import type { DayPlan, Dish, Ingredient, MealTemplate, UserProfile } from '../ty
 import type { DatabaseService } from './databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Public types                                                        */
+/* Public types */
 /* ------------------------------------------------------------------ */
 export interface MigrationResult {
   success: boolean;
@@ -24,7 +24,7 @@ export interface FitnessMigrationResult {
 }
 
 /* ------------------------------------------------------------------ */
-/*  localStorage key constants                                          */
+/* localStorage key constants */
 /* ------------------------------------------------------------------ */
 const LS_INGREDIENTS = 'mp-ingredients';
 const LS_DISHES = 'mp-dishes';
@@ -36,7 +36,7 @@ const LS_FITNESS_STORAGE = 'fitness-storage';
 const LS_FITNESS_MIGRATION_FLAG = 'fitness_migrated_to_sqlite';
 
 /* ------------------------------------------------------------------ */
-/*  Zustand persist helper                                              */
+/* Zustand persist helper */
 /* ------------------------------------------------------------------ */
 function readZustandState<T>(key: string, prop: string): T | null {
   const raw = localStorage.getItem(key);
@@ -64,7 +64,7 @@ function readZustandState<T>(key: string, prop: string): T | null {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Individual migration helpers                                        */
+/* Individual migration helpers */
 /* ------------------------------------------------------------------ */
 async function migrateIngredients(db: DatabaseService, items: Ingredient[]): Promise<number> {
   for (const ing of items) {
@@ -150,7 +150,7 @@ async function migrateMealTemplates(db: DatabaseService, items: MealTemplate[]):
 }
 
 /* ------------------------------------------------------------------ */
-/*  Public API                                                          */
+/* Public API */
 /* ------------------------------------------------------------------ */
 
 export function isMigrationCompleted(): boolean {
@@ -220,7 +220,7 @@ export async function migrateFromLocalStorage(db: DatabaseService): Promise<Migr
 }
 
 /* ------------------------------------------------------------------ */
-/*  Fitness migration                                                   */
+/* Fitness migration */
 /* ------------------------------------------------------------------ */
 
 export function isFitnessMigrationCompleted(): boolean {

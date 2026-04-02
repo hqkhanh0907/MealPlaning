@@ -27,7 +27,7 @@ function makeInput(overrides: Partial<QuickActionsInput> = {}): QuickActionsInpu
 }
 
 /* ------------------------------------------------------------------ */
-/*  determineQuickActions – pure function                              */
+/* determineQuickActions – pure function */
 /* ------------------------------------------------------------------ */
 describe('determineQuickActions', () => {
   it('1 – morning nothing logged → [log-weight, log-breakfast, start-workout]', () => {
@@ -219,7 +219,7 @@ describe('determineQuickActions', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  useQuickActions – hook                                             */
+/* useQuickActions – hook */
 /* ------------------------------------------------------------------ */
 describe('useQuickActions', () => {
   const today = new Date().toISOString().split('T')[0];

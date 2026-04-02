@@ -24,7 +24,7 @@ function FallbackUI({ onReset }: Readonly<{ onReset: () => void }>) {
         <button
           type="button"
           onClick={onReset}
-          className="min-h-[44px] w-full rounded-xl bg-emerald-500 py-3 text-base font-bold text-white transition-colors duration-200 hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] w-full rounded-xl py-3 text-base font-bold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
         >
           {t('onboarding.error.restart')}
         </button>

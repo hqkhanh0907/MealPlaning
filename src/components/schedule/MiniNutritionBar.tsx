@@ -55,7 +55,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </div>
           <p
             data-testid="mini-remaining-cal"
-            className={`text-[10px] font-medium ${remainingCal >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-[10px] font-medium ${remainingCal >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
           >
             {remainingCal >= 0
               ? t('summary.remaining', { value: remainingCal, unit: 'kcal' })
@@ -78,7 +78,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </div>
           <p
             data-testid="mini-remaining-pro"
-            className={`text-[10px] font-medium ${remainingPro >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-[10px] font-medium ${remainingPro >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
           >
             {remainingPro >= 0
               ? t('summary.remaining', { value: remainingPro, unit: 'g' })

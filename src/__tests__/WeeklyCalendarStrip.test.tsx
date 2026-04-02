@@ -63,7 +63,7 @@ describe('WeeklyCalendarStrip', () => {
   it('renders training days with emerald styling', () => {
     render(<WeeklyCalendarStrip {...defaultProps} />);
     const day1 = screen.getByTestId('calendar-day-1');
-    expect(day1.className).toContain('bg-emerald');
+    expect(day1.className).toContain('bg-primary');
     const day2 = screen.getByTestId('calendar-day-2');
     expect(day2.className).toContain('bg-slate');
   });

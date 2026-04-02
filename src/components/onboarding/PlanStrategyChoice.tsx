@@ -40,31 +40,25 @@ export function PlanStrategyChoice({
         <h2 className="mb-2 text-center text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.strategy.title', { name: values.name })}
         </h2>
-        <p className="mb-8 text-center text-sm text-slate-500 dark:text-slate-400">
-          {t('onboarding.strategy.subtitle')}
-        </p>
+        <p className="text-muted-foreground mb-8 text-center text-sm">{t('onboarding.strategy.subtitle')}</p>
 
         <div className="w-full max-w-sm space-y-4">
           <button
             type="button"
             onClick={handleAuto}
             className={cn(
-              'flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-left transition-colors',
-              'focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:outline-none',
+              'border-primary flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 bg-emerald-50 px-5 py-4 text-left transition-colors',
+              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               'dark:bg-emerald-900/20',
             )}
             data-testid="strategy-auto"
           >
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
-              <Sparkles className="h-6 w-6 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <Sparkles className="text-primary h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                {t('onboarding.strategy.auto')}
-              </p>
-              <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">
-                {t('onboarding.strategy.autoDesc')}
-              </p>
+              <p className="text-sm font-bold text-emerald-700">{t('onboarding.strategy.auto')}</p>
+              <p className="text-primary/70/70 text-xs">{t('onboarding.strategy.autoDesc')}</p>
             </div>
           </button>
 
@@ -73,17 +67,17 @@ export function PlanStrategyChoice({
             onClick={handleManual}
             className={cn(
               'flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 border-slate-200 px-5 py-4 text-left transition-colors',
-              'focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:outline-none',
+              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               'hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600',
             )}
             data-testid="strategy-manual"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-              <PenLine className="h-6 w-6 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+            <div className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+              <PenLine className="text-muted-foreground h-6 w-6" aria-hidden="true" />
             </div>
             <div>
               <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('onboarding.strategy.manual')}</p>
-              <p className="text-xs text-slate-500/70 dark:text-slate-400/70">{t('onboarding.strategy.manualDesc')}</p>
+              <p className="text-muted-foreground/70 text-xs">{t('onboarding.strategy.manualDesc')}</p>
             </div>
           </button>
         </div>
@@ -93,7 +87,7 @@ export function PlanStrategyChoice({
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>

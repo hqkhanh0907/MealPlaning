@@ -146,7 +146,7 @@ describe('StreakMini', () => {
 
     const dot = screen.getByTestId('dot-1');
     expect(dot).toHaveAttribute('data-status', 'completed');
-    expect(dot.className).toContain('emerald');
+    expect(dot.className).toContain('primary');
   });
 
   it('rest day dot has blue color when plan exists', () => {
@@ -186,7 +186,7 @@ describe('StreakMini', () => {
 
     const dot3 = screen.getByTestId('dot-3');
     expect(dot3).toHaveAttribute('data-status', 'today');
-    expect(dot3.className).toContain('emerald');
+    expect(dot3.className).toContain('primary');
   });
 
   it('future dot has gray outline', () => {

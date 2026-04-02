@@ -14,7 +14,7 @@ import type { TrainingProfile, WorkoutSet } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 let setIdCounter = 0;
@@ -53,7 +53,7 @@ function createProfile(overrides?: Partial<TrainingProfile>): TrainingProfile {
 }
 
 /* ------------------------------------------------------------------ */
-/*  isLowerBodyExercise                                                 */
+/* isLowerBodyExercise */
 /* ------------------------------------------------------------------ */
 
 describe('isLowerBodyExercise', () => {
@@ -75,7 +75,7 @@ describe('isLowerBodyExercise', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  suggestNextSet (pure function)                                      */
+/* suggestNextSet (pure function) */
 /* ------------------------------------------------------------------ */
 
 describe('suggestNextSet', () => {
@@ -161,7 +161,7 @@ describe('suggestNextSet', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  isWeightSimilar                                                     */
+/* isWeightSimilar */
 /* ------------------------------------------------------------------ */
 
 describe('isWeightSimilar', () => {
@@ -204,7 +204,7 @@ describe('isWeightSimilar', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  detectPlateau                                                       */
+/* detectPlateau */
 /* ------------------------------------------------------------------ */
 
 describe('detectPlateau', () => {
@@ -280,7 +280,7 @@ describe('detectPlateau', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  detectAcuteFatigue                                                   */
+/* detectAcuteFatigue */
 /* ------------------------------------------------------------------ */
 
 describe('detectAcuteFatigue', () => {
@@ -349,7 +349,7 @@ describe('detectAcuteFatigue', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  detectChronicOvertraining                                            */
+/* detectChronicOvertraining */
 /* ------------------------------------------------------------------ */
 
 describe('detectChronicOvertraining', () => {
@@ -433,7 +433,7 @@ describe('detectChronicOvertraining', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  useProgressiveOverload hook                                         */
+/* useProgressiveOverload hook */
 /* ------------------------------------------------------------------ */
 
 describe('useProgressiveOverload hook', () => {

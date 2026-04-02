@@ -21,7 +21,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-70">
-      <div className="relative w-full overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative w-full overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl">
         <div className="p-6 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-500 dark:bg-amber-900/30">
             <Save className="h-8 w-8" />
@@ -31,7 +31,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
           <div className="flex flex-col gap-2">
             <button
               onClick={onSave}
-              className="min-h-12 w-full rounded-xl bg-emerald-500 py-3 font-bold text-white transition-all hover:bg-emerald-600 active:scale-[0.98]"
+              className="bg-primary text-primary-foreground hover:bg-primary min-h-12 w-full rounded-xl py-3 font-bold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.saveAndBack')}
             </button>
@@ -44,7 +44,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
             </button>
             <button
               onClick={onCancel}
-              className="min-h-12 w-full rounded-xl py-3 font-bold text-slate-500 transition-all hover:bg-slate-100 active:scale-[0.98] dark:text-slate-400 dark:hover:bg-slate-700"
+              className="text-muted-foreground min-h-12 w-full rounded-xl py-3 font-bold transition-all hover:bg-slate-100 active:scale-[0.98] dark:hover:bg-slate-700"
             >
               {t('unsavedChanges.stayEditing')}
             </button>

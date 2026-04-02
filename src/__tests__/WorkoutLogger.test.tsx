@@ -395,10 +395,10 @@ describe('WorkoutLogger', () => {
 
     const rpe8 = screen.getByTestId('rpe-8-bench-press');
     fireEvent.click(rpe8);
-    expect(rpe8).toHaveClass('bg-emerald-500');
+    expect(rpe8).toHaveClass('bg-primary');
 
     fireEvent.click(rpe8);
-    expect(rpe8).not.toHaveClass('bg-emerald-500');
+    expect(rpe8).not.toHaveClass('bg-primary');
   });
 
   it('adjusts weight with ±0.5kg buttons', () => {
@@ -993,7 +993,7 @@ describe('WorkoutLogger', () => {
   });
 
   /* ================================================================
-   *  TC_SET_01 – TC_SET_06: Set Edit / Delete
+   * TC_SET_01 – TC_SET_06: Set Edit / Delete
    * ================================================================ */
 
   /** Helper: log a set and dismiss the rest timer so subsequent interactions work. */
@@ -1163,7 +1163,7 @@ describe('WorkoutLogger', () => {
   });
 
   /* ================================================================
-   *  TC_DRAFT_01 – TC_DRAFT_03: Stale Draft / planDayId
+   * TC_DRAFT_01 – TC_DRAFT_03: Stale Draft / planDayId
    * ================================================================ */
 
   /* TC_DRAFT_01: Draft with different planDayId is ignored */
@@ -1295,7 +1295,7 @@ describe('WorkoutLogger', () => {
   });
 
   /* ------------------------------------------------------------------ */
-  /* BUG FIX TESTS: Reps stepper buttons                                */
+  /* BUG FIX TESTS: Reps stepper buttons */
   /* ------------------------------------------------------------------ */
   it('renders reps +/- stepper buttons for each exercise', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
@@ -1336,7 +1336,7 @@ describe('WorkoutLogger', () => {
   });
 
   /* ------------------------------------------------------------------ */
-  /* BUG FIX TESTS: Save workout error handling                          */
+  /* BUG FIX TESTS: Save workout error handling */
   /* ------------------------------------------------------------------ */
   it('shows error notification when save fails', async () => {
     mockSaveWorkoutAtomic.mockRejectedValueOnce(new Error('DB error'));

@@ -22,7 +22,7 @@ export const EmptyState = ({
   const { t } = useTranslation();
   return (
     <div
-      className={`rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center sm:p-12 dark:border-slate-700 dark:bg-slate-800 ${className}`}
+      className={`bg-card rounded-2xl border border-dashed border-slate-200 p-8 text-center sm:p-12 dark:border-slate-700 ${className}`}
     >
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30">
         {icon}
@@ -32,13 +32,13 @@ export const EmptyState = ({
           ? t('emptyState.notFound', { entity: entityName })
           : t('emptyState.noItems', { entity: entityName })}
       </h3>
-      <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-muted-foreground mb-4 text-sm">
         {searchQuery ? t('emptyState.searchHint') : t('emptyState.createHint', { entity: entityName })}
       </p>
       {!searchQuery && actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98]"
+          className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
         >
           <Plus className="h-5 w-5" /> {actionLabel}
         </button>

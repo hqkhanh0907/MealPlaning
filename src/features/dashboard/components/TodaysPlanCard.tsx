@@ -24,7 +24,7 @@ const MEAL_LOG_KEYS: Record<string, string> = {
   dinner: 'dashboard.todaysPlan.logDinner',
 };
 
-const CARD_CLASS = 'bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4';
+const CARD_CLASS = 'bg-card rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4';
 
 function SessionInfo({
   totalSessions,
@@ -47,7 +47,7 @@ function SessionInfo({
       : t('dashboard.todaysPlan.sessionsToday', { count: totalSessions });
 
   return (
-    <p data-testid="session-info" className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+    <p data-testid="session-info" className="text-muted-foreground mt-0.5 text-xs">
       {text}
     </p>
   );
@@ -83,7 +83,7 @@ function MealsSection({
           total: totalMealsPlanned,
         })}
         {hasReachedTarget && (
-          <span className="ml-1 inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+          <span className="text-primary ml-1 inline-flex items-center gap-1">
             <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
             {t('dashboard.todaysPlan.mealsReachedTarget')}
           </span>
@@ -164,7 +164,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                 </p>
               )}
               {data.exerciseCount != null && (
-                <p data-testid="exercise-count" className="text-xs text-slate-500 dark:text-slate-400">
+                <p data-testid="exercise-count" className="text-muted-foreground text-xs">
                   {t('dashboard.todaysPlan.exercisesCount', {
                     count: data.exerciseCount,
                   })}
@@ -202,8 +202,8 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="partial-progress-section">
             <div className="mb-2 flex items-center gap-1.5">
-              <RotateCw className="h-4 w-4 text-emerald-500" aria-hidden="true" />
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <RotateCw className="text-primary h-4 w-4" aria-hidden="true" />
+              <span className="text-primary text-xs font-medium">
                 {t('dashboard.todaysPlan.sessionProgress', {
                   completed: data.completedSessions,
                   total: data.totalSessions,
@@ -221,7 +221,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               size="sm"
               onClick={handleStartWorkout}
               data-testid="continue-session-cta"
-              className="mt-2 gap-1 bg-emerald-600 text-white hover:bg-emerald-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/80 mt-2 gap-1"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t('dashboard.todaysPlan.continueSession')}
@@ -242,10 +242,8 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="workout-summary">
             <div className="mb-2 flex items-center gap-1.5">
-              <CheckCircle className="h-4 w-4 text-emerald-500" aria-hidden="true" />
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                {t('dashboard.todaysPlan.completed')}
-              </span>
+              <CheckCircle className="text-primary h-4 w-4" aria-hidden="true" />
+              <span className="text-primary text-xs font-medium">{t('dashboard.todaysPlan.completed')}</span>
             </div>
             {data.completedWorkout && (
               <>
@@ -309,7 +307,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   })}
                 </p>
               ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('dashboard.todaysPlan.tomorrowRest')}</p>
+                <p className="text-muted-foreground text-sm">{t('dashboard.todaysPlan.tomorrowRest')}</p>
               )}
             </div>
           </div>
@@ -346,7 +344,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
       </h3>
       <div data-testid="no-plan-section" className="flex flex-col items-center py-4">
         <Dumbbell className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
-        <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">{t('dashboard.todaysPlan.noPlan')}</p>
+        <p className="text-muted-foreground mb-3 text-sm">{t('dashboard.todaysPlan.noPlan')}</p>
         <Button
           size="sm"
           onClick={handleCreatePlan}

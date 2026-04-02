@@ -60,7 +60,7 @@ export const ConfirmationModal = ({
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-70">
-      <div className="relative w-full overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative w-full overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl">
         <div className="p-6 text-center">
           <div
             className={`h-16 w-16 ${styles.iconBg} ${styles.iconText} mx-auto mb-4 flex items-center justify-center rounded-full`}

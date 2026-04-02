@@ -103,9 +103,9 @@ export type FitnessOnboardingFormData = z.infer<typeof fitnessOnboardingSchema>;
 // ── Step-specific sub-schemas for wizard validation ─────────────────
 //
 // Step visibility depends on experience level:
-//   Steps 0–4, 8: always visible
-//   Steps 5–7: visible when experience >= 'intermediate'
-//   Step 9: visible only when experience === 'advanced'
+// Steps 0–4, 8: always visible
+// Steps 5–7: visible when experience >= 'intermediate'
+// Step 9: visible only when experience === 'advanced'
 
 export const onboardingStepSchemas = {
   /** Step 0 – core: goal + experience + days per week */

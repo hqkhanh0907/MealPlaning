@@ -9,7 +9,7 @@ import {
 } from '../features/fitness/utils/activityMultiplier';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 let idCounter = 0;
@@ -57,7 +57,7 @@ function createWorkoutsWithSets(count: number): { workouts: Workout[]; sets: Wor
 }
 
 /* ------------------------------------------------------------------ */
-/*  analyzeActivityLevel                                                */
+/* analyzeActivityLevel */
 /* ------------------------------------------------------------------ */
 
 describe('analyzeActivityLevel', () => {
@@ -146,7 +146,7 @@ describe('analyzeActivityLevel', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  mapToActivityLevel                                                  */
+/* mapToActivityLevel */
 /* ------------------------------------------------------------------ */
 
 describe('mapToActivityLevel', () => {
@@ -184,7 +184,7 @@ describe('mapToActivityLevel', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  calculateExerciseAdjustment                                         */
+/* calculateExerciseAdjustment */
 /* ------------------------------------------------------------------ */
 
 describe('calculateExerciseAdjustment', () => {
@@ -224,7 +224,7 @@ describe('calculateExerciseAdjustment', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  getConfidence                                                       */
+/* getConfidence */
 /* ------------------------------------------------------------------ */
 
 describe('getConfidence', () => {

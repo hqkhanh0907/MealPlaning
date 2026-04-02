@@ -3,7 +3,7 @@ import { EXERCISES, seedExercises } from '../features/fitness/data/exerciseDatab
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Mock DatabaseService                                                 */
+/* Mock DatabaseService */
 /* ------------------------------------------------------------------ */
 function createMockDb(): DatabaseService & { rows: Record<string, unknown>[] } {
   const rows: Record<string, unknown>[] = [];
@@ -24,7 +24,7 @@ function createMockDb(): DatabaseService & { rows: Record<string, unknown>[] } {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Valid values from schema                                             */
+/* Valid values from schema */
 /* ------------------------------------------------------------------ */
 const VALID_MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes', 'cardio'] as const;
 
@@ -32,11 +32,11 @@ const VALID_CATEGORIES = ['compound', 'secondary', 'isolation'] as const;
 const VALID_EXERCISE_TYPES = ['strength', 'cardio'] as const;
 
 /* ================================================================== */
-/*  Tests                                                                */
+/* Tests */
 /* ================================================================== */
 describe('exerciseDatabase', () => {
   /* ---------------------------------------------------------------- */
-  /*  Data integrity                                                    */
+  /* Data integrity */
   /* ---------------------------------------------------------------- */
   it('contains between 130 and 170 exercises', () => {
     expect(EXERCISES.length).toBeGreaterThanOrEqual(130);
@@ -102,7 +102,7 @@ describe('exerciseDatabase', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  seedExercises                                                      */
+  /* seedExercises */
   /* ---------------------------------------------------------------- */
   it('inserts all exercises into DB', async () => {
     const db = createMockDb();

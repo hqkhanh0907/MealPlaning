@@ -117,7 +117,7 @@ describe('normalizeUnit', () => {
   });
 
   it('should trim whitespace', () => {
-    expect(normalizeUnit('  g  ')).toBe('g');
+    expect(normalizeUnit(' g ')).toBe('g');
   });
 });
 

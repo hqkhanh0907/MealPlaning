@@ -37,8 +37,8 @@ function isProfileConfigured(profile: HealthProfile | null): boolean {
  * Computes personalised nutrition targets.
  *
  * Priority:
- *  1. If the user has customised their HealthProfile → full engine calculation
- *  2. Otherwise → fall back to the default healthProfile values
+ * 1. If the user has customised their HealthProfile → full engine calculation
+ * 2. Otherwise → fall back to the default healthProfile values
  */
 export function useNutritionTargets(): NutritionTargets {
   const healthProfile = useHealthProfileStore(s => s.profile);

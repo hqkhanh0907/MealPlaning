@@ -470,8 +470,8 @@ describe('ProgressDashboard', () => {
   it('shows plateau insight when exercise shows no strength improvement', () => {
     // analyzePlateau requires 6+ sets for an exercise with no max-weight increase
     // across the most recent 9 sets (sorted by updatedAt desc):
-    //   maxRecent = max(topWeights[0:3]), maxPrevious = max(topWeights[3:9])
-    //   strengthPlateau = maxRecent <= maxPrevious
+    // maxRecent = max(topWeights[0:3]), maxPrevious = max(topWeights[3:9])
+    // strengthPlateau = maxRecent <= maxPrevious
     const plateauSets = Array.from({ length: 9 }, (_, i) => ({
       id: `ps${i}`,
       workoutId: 'w1',

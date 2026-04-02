@@ -69,7 +69,7 @@ function ExerciseGroupDetail({
           {EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}
         </span>
         {exerciseVolume > 0 && (
-          <span className="text-xs text-emerald-600 dark:text-emerald-400">
+          <span className="text-primary text-xs">
             {t('fitness.history.volume')}: {exerciseVolume} kg
           </span>
         )}
@@ -229,7 +229,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
             aria-label={label}
             className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
               filter === key
-                ? 'bg-emerald-500 text-white'
+                ? 'bg-primary text-primary-foreground'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
             }`}
           >
@@ -297,7 +297,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         {volume > 0 && (
                           <span
                             data-testid={`workout-volume-${workout.id}`}
-                            className="text-sm font-medium text-emerald-600 dark:text-emerald-400"
+                            className="text-primary text-sm font-medium"
                           >
                             {volume} kg
                           </span>

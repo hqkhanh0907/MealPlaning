@@ -107,11 +107,11 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('clearPlan.title')}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{t('clearPlan.subtitle')}</p>
+            <p className="text-muted-foreground text-sm">{t('clearPlan.subtitle')}</p>
           </div>
           <button
             onClick={onClose}
@@ -168,7 +168,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   >
                     {label}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{desc}</p>
+                  <p className="text-muted-foreground text-sm">{desc}</p>
                   {count > 0 && mealCount > 0 && (
                     <p className="mt-0.5 text-xs text-rose-500 dark:text-rose-400">
                       {t('clearPlan.totalMeals', { count: mealCount })}

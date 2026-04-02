@@ -175,7 +175,7 @@ function mkHealthProfile(overrides: Partial<HealthProfile> = {}): HealthProfile 
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  1. NUTRITION → DASHBOARD  (§6.1 Feedback Loop)
+// 1. NUTRITION → DASHBOARD (§6.1 Feedback Loop)
 // ═══════════════════════════════════════════════════════════════════════
 describe('Cross-Feature: Nutrition → Dashboard', () => {
   it('meal nutrition flows into daily score calorie factor', () => {
@@ -281,7 +281,7 @@ describe('Cross-Feature: Nutrition → Dashboard', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-//  2. FITNESS → DASHBOARD  (§6.2)
+// 2. FITNESS → DASHBOARD (§6.2)
 // ═══════════════════════════════════════════════════════════════════════
 describe('Cross-Feature: Fitness → Dashboard', () => {
   it('workout logged today → TodaysPlanCard shows training-completed', () => {
@@ -384,7 +384,7 @@ describe('Cross-Feature: Fitness → Dashboard', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-//  3. NUTRITION ↔ FITNESS  (TDEE Adjustment)
+// 3. NUTRITION ↔ FITNESS (TDEE Adjustment)
 // ═══════════════════════════════════════════════════════════════════════
 describe('Cross-Feature: Nutrition ↔ Fitness (TDEE)', () => {
   it('activity level from fitness profile affects BMR/TDEE', () => {
@@ -466,7 +466,7 @@ describe('Cross-Feature: Nutrition ↔ Fitness (TDEE)', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-//  4. HEALTH PROFILE → ALL FEATURES
+// 4. HEALTH PROFILE → ALL FEATURES
 // ═══════════════════════════════════════════════════════════════════════
 describe('Cross-Feature: Health Profile → All Features', () => {
   it('profile weight change → recalculates TDEE and macro targets', () => {
@@ -552,7 +552,7 @@ describe('Cross-Feature: Health Profile → All Features', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-//  5. NAVIGATION INTEGRATION
+// 5. NAVIGATION INTEGRATION
 // ═══════════════════════════════════════════════════════════════════════
 describe('Cross-Feature: Navigation Integration', () => {
   beforeEach(() => {
@@ -641,7 +641,7 @@ describe('Cross-Feature: Navigation Integration', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-//  6. INSIGHT ENGINE ← MULTI-FEATURE DATA
+// 6. INSIGHT ENGINE ← MULTI-FEATURE DATA
 // ═══════════════════════════════════════════════════════════════════════
 describe('Cross-Feature: Insight Engine ← Multi-Feature Data', () => {
   it('auto-adjustment from nutrition engine → P1 alert insight', () => {

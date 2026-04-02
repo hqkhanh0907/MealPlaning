@@ -3,7 +3,7 @@ import type { ImportResult, V2ExportPayload } from '../services/syncV2Utils';
 import { buildLegacyFormat, createV2Export, detectVersion, importV2Data } from '../services/syncV2Utils';
 
 /* ------------------------------------------------------------------ */
-/*  All 16 schema table names                                           */
+/* All 16 schema table names */
 /* ------------------------------------------------------------------ */
 const ALL_TABLES = [
   'ingredients',
@@ -25,7 +25,7 @@ const ALL_TABLES = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Mock DatabaseService                                                */
+/* Mock DatabaseService */
 /* ------------------------------------------------------------------ */
 
 interface MockDb extends DatabaseService {
@@ -96,7 +96,7 @@ function createMockDb(tables: Record<string, unknown[]> = {}, opts?: { executeEr
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 
 describe('syncV2Utils', () => {

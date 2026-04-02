@@ -10,7 +10,7 @@ import {
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Mock DatabaseContext for hook tests                                 */
+/* Mock DatabaseContext for hook tests */
 /* ------------------------------------------------------------------ */
 let mockSettingsStore: Record<string, string> = {};
 

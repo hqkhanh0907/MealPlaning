@@ -123,14 +123,14 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
             <button
               type="button"
               onClick={handleRetry}
-              className="min-h-[44px] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-emerald-500 dark:hover:bg-emerald-600"
+              className="bg-primary text-primary-foreground hover:bg-primary/80 focus-visible:ring-ring dark:bg-primary dark:hover:bg-primary min-h-[44px] rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {t('onboarding.computing.retry')}
             </button>
             <button
               type="button"
               onClick={() => goBackRef.current()}
-              className="min-h-[44px] rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="focus-visible:ring-ring min-h-[44px] rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {t('onboarding.computing.returnToStrategy')}
             </button>
@@ -151,15 +151,13 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
         animate={reducedMotion ? undefined : { rotate: 360 }}
         transition={reducedMotion ? undefined : { duration: 2, repeat: Infinity, ease: 'linear' }}
       >
-        <div className="h-16 w-16 rounded-full border-4 border-emerald-200 border-t-emerald-500 dark:border-emerald-800 dark:border-t-emerald-400" />
+        <div className="border-t-primary h-16 w-16 rounded-full border-4 border-emerald-200 dark:border-emerald-800 dark:border-t-emerald-400" />
       </motion.div>
 
       <h2 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
         {t('onboarding.computing.title', { name: form.getValues().name })}
       </h2>
-      <p className="mb-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        {t('onboarding.computing.subtitle')}
-      </p>
+      <p className="text-muted-foreground mb-8 text-center text-sm">{t('onboarding.computing.subtitle')}</p>
 
       {/* (b7-aria-live) accessible steps region */}
       <output className="block w-full max-w-xs space-y-3" aria-live="polite">
@@ -175,9 +173,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
             className="flex items-center gap-3"
           >
             <div
-              className={`h-2 w-2 rounded-full ${
-                i <= activeStep ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
-              }`}
+              className={`h-2 w-2 rounded-full ${i <= activeStep ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}
             />
             <span
               className={`text-sm ${
@@ -193,7 +189,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
                 initial={{ opacity: 0 }}
                 animate={{ opacity: [0, 1, 0] }}
                 transition={{ repeat: Infinity, duration: 1 }}
-                className="text-xs text-emerald-500"
+                className="text-primary text-xs"
               >
                 •••
               </motion.span>

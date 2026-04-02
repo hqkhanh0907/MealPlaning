@@ -158,7 +158,7 @@ describe('TemplateManager', () => {
     fireEvent.click(screen.getByTestId('btn-rename-template-tpl-1'));
     const input = screen.getByTestId('template-rename-input');
 
-    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.change(input, { target: { value: ' ' } });
     fireEvent.click(screen.getByTestId('template-rename-confirm'));
 
     expect(defaultProps.onRename).not.toHaveBeenCalled();

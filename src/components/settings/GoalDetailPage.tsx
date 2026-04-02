@@ -16,7 +16,7 @@ const GOAL_ICON: Record<string, typeof TrendingDown> = {
 
 const GOAL_COLOR: Record<string, string> = {
   cut: 'text-amber-600 dark:text-amber-400',
-  maintain: 'text-emerald-600 dark:text-emerald-400',
+  maintain: 'text-primary',
   bulk: 'text-blue-600 dark:text-blue-400',
 };
 
@@ -71,7 +71,7 @@ function GoalViewMode() {
         <GoalIcon className={`h-8 w-8 ${goalColor}`} />
         <div>
           <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t(`goal.${activeGoal.type}`)}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-muted-foreground text-xs">
             {activeGoal.startDate ? new Date(activeGoal.startDate).toLocaleDateString('vi-VN') : ''}
           </p>
         </div>
@@ -84,11 +84,11 @@ function GoalViewMode() {
             <span className="mt-0.5 text-base leading-none">
               {(() => {
                 const Icon = field.icon;
-                return <Icon className="size-5 text-slate-500 dark:text-slate-400" aria-hidden="true" />;
+                return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;
               })()}
             </span>
             <div className="min-w-0">
-              <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+              <p className="text-muted-foreground text-xs">{field.label}</p>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
             </div>
           </div>
@@ -119,7 +119,7 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   return (
     <SettingsDetailLayout
       title={t('settings.goalSection')}
-      icon={<Target className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />}
+      icon={<Target className="text-primary h-5 w-5" />}
       isEditing={isEditing}
       hasChanges={isEditing}
       onBack={onBack}

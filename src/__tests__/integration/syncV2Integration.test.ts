@@ -3,7 +3,7 @@ import type { ImportResult, V2ExportPayload } from '../../services/syncV2Utils';
 import { buildLegacyFormat, createV2Export, detectVersion, importV2Data } from '../../services/syncV2Utils';
 
 /* ------------------------------------------------------------------ */
-/*  All 16 schema table names                                           */
+/* All 16 schema table names */
 /* ------------------------------------------------------------------ */
 const ALL_TABLES = [
   'ingredients',
@@ -25,7 +25,7 @@ const ALL_TABLES = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Realistic seed data for all 16 tables                               */
+/* Realistic seed data for all 16 tables */
 /* ------------------------------------------------------------------ */
 function buildFullSeedData(): Record<string, unknown[]> {
   return {
@@ -330,7 +330,7 @@ function buildFullSeedData(): Record<string, unknown[]> {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mock DatabaseService (same pattern as unit tests)                    */
+/* Mock DatabaseService (same pattern as unit tests) */
 /* ------------------------------------------------------------------ */
 
 interface MockDb extends DatabaseService {
@@ -401,12 +401,12 @@ function createMockDb(tables: Record<string, unknown[]> = {}, opts?: { executeEr
 }
 
 /* ================================================================== */
-/*  Integration Tests                                                   */
+/* Integration Tests */
 /* ================================================================== */
 
 describe('syncV2 Integration', () => {
   /* ---------------------------------------------------------------- */
-  /*  1. Round-trip: export → import → export → compare                 */
+  /* 1. Round-trip: export → import → export → compare */
   /* ---------------------------------------------------------------- */
 
   describe('round-trip: export → import → export → compare', () => {
@@ -489,7 +489,7 @@ describe('syncV2 Integration', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  2. Import with all 16 tables populated                            */
+  /* 2. Import with all 16 tables populated */
   /* ---------------------------------------------------------------- */
 
   describe('import with all 16 tables populated', () => {
@@ -581,7 +581,7 @@ describe('syncV2 Integration', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  3. Import with empty tables                                       */
+  /* 3. Import with empty tables */
   /* ---------------------------------------------------------------- */
 
   describe('import with empty tables', () => {
@@ -671,7 +671,7 @@ describe('syncV2 Integration', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  4. Import with FK violations — rollback                           */
+  /* 4. Import with FK violations — rollback */
   /* ---------------------------------------------------------------- */
 
   describe('import with FK violations — transaction rollback', () => {
@@ -807,7 +807,7 @@ describe('syncV2 Integration', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  5. v1.x detection + auto-upgrade                                  */
+  /* 5. v1.x detection + auto-upgrade */
   /* ---------------------------------------------------------------- */
 
   describe('v1.x detection + auto-upgrade', () => {
@@ -967,7 +967,7 @@ describe('syncV2 Integration', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  6. _legacyFormat backward compatibility                           */
+  /* 6. _legacyFormat backward compatibility */
   /* ---------------------------------------------------------------- */
 
   describe('_legacyFormat backward compatibility', () => {
@@ -1115,7 +1115,7 @@ describe('syncV2 Integration', () => {
   });
 
   /* ---------------------------------------------------------------- */
-  /*  7. Version detection edge cases                                   */
+  /* 7. Version detection edge cases */
   /* ---------------------------------------------------------------- */
 
   describe('version detection edge cases', () => {

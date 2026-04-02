@@ -111,9 +111,9 @@ function SessionTabsInner({
                 onPointerUp={handlePointerUpOrLeave}
                 onPointerLeave={handlePointerUpOrLeave}
                 onContextMenu={handleContextMenu}
-                className={`flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
+                className={`focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
                   isActive
-                    ? 'bg-emerald-500 text-white dark:bg-emerald-600'
+                    ? 'bg-primary text-primary-foreground dark:bg-primary'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -148,7 +148,7 @@ function SessionTabsInner({
           disabled={isMaxReached}
           onClick={onAddSession}
           aria-label={t('fitness.plan.addSession')}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-3 text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-700"
+          className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-3 text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-700"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -168,7 +168,7 @@ function SessionTabsInner({
             type="button"
             onClick={handleConfirmDelete}
             aria-label={t('fitness.plan.deleteSession')}
-            className="ml-auto min-h-[44px] min-w-[44px] rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+            className="focus-visible:ring-ring ml-auto min-h-[44px] min-w-[44px] rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:outline-none"
           >
             <Trash2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
             {t('fitness.plan.delete')}
@@ -179,7 +179,7 @@ function SessionTabsInner({
             onClick={handleCancelDelete}
             autoFocus
             aria-label={t('fitness.plan.cancelDelete')}
-            className="min-h-[44px] min-w-[44px] rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-300 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500"
+            className="focus-visible:ring-ring min-h-[44px] min-w-[44px] rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-300 focus-visible:ring-2 focus-visible:outline-none dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500"
           >
             {t('fitness.plan.cancelDelete')}
           </button>

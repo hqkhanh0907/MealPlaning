@@ -246,7 +246,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
           min={3}
           max={12}
           step={0.5}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 transition-colors outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+          className="bg-card focus:border-primary focus:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 transition-colors outline-none focus:ring-1 dark:border-slate-600 dark:text-slate-200"
           data-testid="sleep-hours-input"
           {...register('avgSleepHours', { valueAsNumber: true })}
         />

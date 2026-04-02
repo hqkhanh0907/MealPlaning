@@ -123,7 +123,7 @@ export const SetEditor = React.memo(function SetEditor({
     <ModalBackdrop onClose={onCancel} zIndex="z-50">
       <dialog
         open
-        className="relative w-full max-w-md rounded-t-2xl bg-white p-6 shadow-xl sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative w-full max-w-md rounded-t-2xl p-6 shadow-xl sm:rounded-2xl"
         aria-modal="true"
         aria-label={t('fitness.editor.title')}
         data-testid="set-editor"
@@ -143,7 +143,7 @@ export const SetEditor = React.memo(function SetEditor({
 
         {/* Weight section */}
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">
+          <label className="text-muted-foreground mb-2 block text-xs font-medium">
             {t('fitness.editor.weight')} ({t('fitness.editor.kg')})
           </label>
           <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export const SetEditor = React.memo(function SetEditor({
         {/* Recent weight chips */}
         {recentWeights.length > 0 && (
           <div className="mb-4" data-testid="recent-weights-section">
-            <span className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-muted-foreground mb-2 block text-xs font-medium">
               {t('fitness.editor.recentWeights')}
             </span>
             <div className="flex flex-wrap gap-2">
@@ -203,9 +203,7 @@ export const SetEditor = React.memo(function SetEditor({
 
         {/* Reps section */}
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">
-            {t('fitness.editor.reps')}
-          </label>
+          <label className="text-muted-foreground mb-2 block text-xs font-medium">{t('fitness.editor.reps')}</label>
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
@@ -240,9 +238,7 @@ export const SetEditor = React.memo(function SetEditor({
 
         {/* RPE selector */}
         <div className="mb-6">
-          <label className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">
-            {t('fitness.editor.rpe')}
-          </label>
+          <label className="text-muted-foreground mb-2 block text-xs font-medium">{t('fitness.editor.rpe')}</label>
           <fieldset
             className="m-0 flex gap-2 border-0 p-0"
             aria-label={t('fitness.editor.rpe')}

@@ -172,13 +172,13 @@ const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', '
 const GroceryEmptyState = ({ t }: { t: (key: string) => string }) => (
   <div
     data-testid="grocery-empty-state"
-    className="rounded-2xl border border-slate-200 bg-white p-8 text-center sm:p-12 dark:border-slate-700 dark:bg-slate-800"
+    className="bg-card rounded-2xl border border-slate-200 p-8 text-center sm:p-12 dark:border-slate-700"
   >
     <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30">
       <ShoppingCart className="h-10 w-10 text-emerald-300" aria-hidden="true" />
     </div>
     <h3 className="mb-2 text-lg font-bold text-slate-700 dark:text-slate-200">{t('grocery.emptyTitle')}</h3>
-    <p className="mx-auto mb-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">{t('grocery.emptyDescription')}</p>
+    <p className="text-muted-foreground mx-auto mb-2 max-w-sm text-sm">{t('grocery.emptyDescription')}</p>
     <p className="mx-auto mb-6 max-w-sm text-xs text-slate-500 dark:text-slate-500">{t('grocery.emptyAutoHint')}</p>
     <button
       type="button"
@@ -321,7 +321,7 @@ export const GroceryList = React.memo(function GroceryList({
               >
                 <div
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${
-                    isChecked ? 'border-emerald-500 bg-emerald-500' : 'border-slate-300 dark:border-slate-600'
+                    isChecked ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'
                   }`}
                 >
                   {isChecked && <Check className="h-3.5 w-3.5 text-white" />}
@@ -335,7 +335,7 @@ export const GroceryList = React.memo(function GroceryList({
                 </span>
                 <span
                   className={`shrink-0 text-sm font-medium transition-all ${
-                    isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'
+                    isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-muted-foreground'
                   }`}
                 >
                   {Math.round(item.amount)} {item.unit}
@@ -345,7 +345,7 @@ export const GroceryList = React.memo(function GroceryList({
                 <button
                   data-testid={`grocery-expand-${item.id}`}
                   onClick={() => toggleExpand(item.id)}
-                  className="focus-visible:ring-ring mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors hover:text-emerald-600 focus-visible:ring-2 focus-visible:ring-offset-2 dark:hover:text-emerald-400"
+                  className="focus-visible:ring-ring hover:text-primary mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
                   title={t('grocery.usedIn')}
                   aria-label={`${t('grocery.usedIn')} ${item.name}`}
                 >
@@ -359,10 +359,7 @@ export const GroceryList = React.memo(function GroceryList({
                   {t('grocery.usedIn')}
                 </span>
                 {item.usedInDishes.map(d => (
-                  <div
-                    key={d.dishId}
-                    className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400"
-                  >
+                  <div key={d.dishId} className="text-muted-foreground flex items-center justify-between text-xs">
                     <span className="font-medium">{d.dishName}</span>
                     <span>
                       {Math.round(d.amount)} {item.unit}
@@ -417,7 +414,7 @@ export const GroceryList = React.memo(function GroceryList({
   return (
     <div className="space-y-4">
       {/* Scope Tabs */}
-      <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+      <div className="scrollbar-hide bg-muted flex items-center gap-2 overflow-x-auto rounded-xl p-1">
         {SCOPE_KEYS.map(key => (
           <button
             key={key}
@@ -428,8 +425,8 @@ export const GroceryList = React.memo(function GroceryList({
             data-testid={`tab-grocery-${key}`}
             className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all ${
               scope === key
-                ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-400'
-                : 'text-slate-500 active:bg-slate-200 dark:text-slate-400 dark:active:bg-slate-600'
+                ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700'
+                : 'text-muted-foreground active:bg-slate-200 dark:active:bg-slate-600'
             }`}
           >
             {t(getScopeLabelKey(key))}
@@ -440,17 +437,17 @@ export const GroceryList = React.memo(function GroceryList({
       {groceryItems.length === 0 ? (
         <GroceryEmptyState t={t} />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm dark:border-emerald-800 dark:bg-slate-800">
+        <div className="bg-card overflow-hidden rounded-2xl border border-emerald-200 shadow-sm dark:border-emerald-800">
           {/* Header with counter and actions */}
           <div className="flex items-center justify-between border-b border-emerald-100 bg-emerald-50 px-4 py-3 sm:px-6 sm:py-4 dark:border-emerald-800 dark:bg-emerald-900/30">
             <div className="flex items-center gap-3">
-              <ShoppingCart className="h-5 w-5 text-emerald-700 sm:h-6 sm:w-6 dark:text-emerald-400" />
+              <ShoppingCart className="h-5 w-5 text-emerald-700 sm:h-6 sm:w-6" />
               <div>
                 <h3 className="text-base font-bold text-emerald-900 sm:text-lg dark:text-emerald-200">
                   {groceryItems.length} {t('grocery.ingredientCount')}
                 </h3>
                 {checkedCount > 0 && (
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                  <p className="text-xs font-medium text-emerald-700">
                     {t('grocery.boughtCount', { count: checkedCount, total: groceryItems.length })}
                   </p>
                 )}
@@ -485,8 +482,8 @@ export const GroceryList = React.memo(function GroceryList({
               data-testid="btn-group-aisle"
               className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 groupByAisle
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                  : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40'
+                  : 'text-muted-foreground bg-slate-100 dark:bg-slate-700'
               }`}
             >
               {t('grocery.groupByAisle')}
@@ -494,7 +491,7 @@ export const GroceryList = React.memo(function GroceryList({
             {checkedCount > 0 && (
               <div className="ml-3 h-1.5 flex-1 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/30">
                 <div
-                  className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                  className="bg-primary h-full rounded-full transition-all duration-300"
                   style={{ width: `${(checkedCount / groceryItems.length) * 100}%` }}
                 />
               </div>
@@ -514,7 +511,7 @@ export const GroceryList = React.memo(function GroceryList({
                           return <Icon className="size-4" aria-hidden="true" />;
                         })()}
                       </span>
-                      <span className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                      <span className="text-muted-foreground text-xs font-bold tracking-wide uppercase">
                         {t(AISLE_LABEL_KEYS[group.category])}
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-500">({group.items.length})</span>
@@ -534,7 +531,7 @@ export const GroceryList = React.memo(function GroceryList({
               data-testid="grocery-all-bought"
               className="border-t border-emerald-100 bg-emerald-50 px-4 py-4 text-center sm:px-6 dark:border-emerald-800 dark:bg-emerald-900/30"
             >
-              <div className="flex items-center justify-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
+              <div className="flex items-center justify-center gap-2 font-bold text-emerald-800">
                 <CheckCircle2 className="h-5 w-5" />
                 <span>{t('grocery.allBought')}</span>
               </div>

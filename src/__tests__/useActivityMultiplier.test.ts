@@ -8,7 +8,7 @@ import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 
 let idCounter = 0;
@@ -45,7 +45,7 @@ function createSet(overrides?: Partial<WorkoutSet>): WorkoutSet {
 }
 
 /* ------------------------------------------------------------------ */
-/*  useActivityMultiplier hook                                          */
+/* useActivityMultiplier hook */
 /* ------------------------------------------------------------------ */
 
 describe('useActivityMultiplier', () => {

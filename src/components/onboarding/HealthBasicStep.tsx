@@ -47,7 +47,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               autoComplete="name"
               aria-invalid={!!nameField.fieldState.error}
               aria-describedby={nameField.fieldState.error ? 'ob-name-error' : undefined}
-              className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
+              className="bg-card focus-visible:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
               value={nameField.field.value}
               onChange={nameField.field.onChange}
               onBlur={nameField.field.onBlur}
@@ -71,9 +71,9 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                   type="button"
                   aria-pressed={genderField.field.value === g}
                   onClick={() => genderField.field.onChange(g)}
-                  className={`min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
+                  className={`focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${
                     genderField.field.value === g
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
                       : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400'
                   }`}
                 >
@@ -94,7 +94,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               type="date"
               aria-invalid={!!dobField.fieldState.error}
               aria-describedby={dobField.fieldState.error ? 'ob-dob-error' : undefined}
-              className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
+              className="bg-card focus-visible:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
               value={dobField.field.value}
               onChange={dobField.field.onChange}
               onBlur={dobField.field.onBlur}
@@ -120,7 +120,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 placeholder="170"
                 aria-invalid={!!heightField.fieldState.error}
                 aria-describedby={heightField.fieldState.error ? 'ob-height-error' : undefined}
-                className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
+                className="bg-card focus-visible:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
                 value={heightField.field.value ?? ''}
                 onChange={e => heightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={heightField.field.onBlur}
@@ -151,7 +151,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 placeholder="70"
                 aria-invalid={!!weightField.fieldState.error}
                 aria-describedby={weightField.fieldState.error ? 'ob-weight-error' : undefined}
-                className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
+                className="bg-card focus-visible:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
                 value={weightField.field.value ?? ''}
                 onChange={e => weightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={weightField.field.onBlur}

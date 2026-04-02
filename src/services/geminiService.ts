@@ -209,7 +209,7 @@ export async function suggestMealPlan(
   const ai = getAI();
 
   // #9 Smart dish sampling — pick up to MAX_PER_SLOT dishes per meal slot (shuffled
-  //     for variety), then deduplicate. Keeps prompt lean even with 1000+ dish libraries.
+  // for variety), then deduplicate. Keeps prompt lean even with 1000+ dish libraries.
   const MAX_PER_SLOT = 20;
   const shuffle = <T>(arr: T[]): T[] => {
     const result = [...arr];
@@ -307,11 +307,11 @@ export async function suggestMealPlan(
 /**
  * Analyze a food image to extract dish name, ingredients, and nutritional data.
  * @param base64Image - Base64-encoded image data (no data: prefix)
- * @param mimeType    - Image MIME type (e.g., 'image/jpeg', 'image/png')
- * @param signal      - Optional AbortSignal to cancel the request (#6)
+ * @param mimeType - Image MIME type (e.g., 'image/jpeg', 'image/png')
+ * @param signal - Optional AbortSignal to cancel the request (#6)
  * @returns Analyzed dish with name, description, total nutrition, and per-ingredient breakdown
  * @throws {DOMException} If the request was aborted (name === 'AbortError')
- * @throws {Error}        If AI response fails validation
+ * @throws {Error} If AI response fails validation
  */
 export async function analyzeDishImage(
   base64Image: string,
@@ -351,7 +351,7 @@ export async function analyzeDishImage(
       + calories (kcal)
       + protein (g)
       + fat (g)
-      + carbs (g)   ← tên field là "carbs", KHÔNG phải "carbohydrates"
+      + carbs (g) ← tên field là "carbs", KHÔNG phải "carbohydrates"
 
     ====================================================
     BƯỚC 3 — PHÂN TÍCH TỪNG NGUYÊN LIỆU
@@ -364,7 +364,7 @@ export async function analyzeDishImage(
     - nutritionPerStandardUnit: dinh dưỡng chuẩn hóa ← tên field CHÍNH XÁC
       + Nếu unit là g/kg/ml/l → giá trị cho 100g hoặc 100ml
       + Nếu unit là cái/quả/lát/... → giá trị cho 1 đơn vị
-      + calories, protein, fat, carbs, fiber  ← "carbs" KHÔNG phải "carbohydrates"
+      + calories, protein, fat, carbs, fiber ← "carbs" KHÔNG phải "carbohydrates"
 
     ====================================================
     QUY TẮC BẮT BUỘC
@@ -466,11 +466,11 @@ export async function analyzeDishImage(
  * Look up nutritional information for an ingredient using Gemini AI + Google Search.
  * Results are cached for 1 hour per (name, unit) pair (#11).
  * @param ingredientName - Name of the ingredient (e.g., "Ức gà")
- * @param unit           - Measurement unit (e.g., "g", "ml", "quả")
- * @param signal         - Optional AbortSignal to cancel the request (#6)
+ * @param unit - Measurement unit (e.g., "g", "ml", "quả")
+ * @param signal - Optional AbortSignal to cancel the request (#6)
  * @returns Nutritional data (calories, protein, carbs, fat, fiber) and confirmed unit
  * @throws {DOMException} If the request was aborted (name === 'AbortError')
- * @throws {Error}        If AI response fails validation or times out
+ * @throws {Error} If AI response fails validation or times out
  */
 export async function suggestIngredientInfo(
   ingredientName: string,
@@ -560,7 +560,7 @@ export async function suggestIngredientInfo(
 /**
  * Suggest ingredients for a dish based on its name using Gemini AI.
  * @param dishName - Name of the dish (e.g., "Phở bò")
- * @param signal   - Optional AbortSignal to cancel the request
+ * @param signal - Optional AbortSignal to cancel the request
  * @returns Array of suggested ingredients with amounts and nutritional data
  * @throws {DOMException} If the request was aborted (name === 'AbortError')
  * @throws {Error} If AI response fails validation or times out

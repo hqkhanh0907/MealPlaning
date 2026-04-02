@@ -227,12 +227,12 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="pt-safe flex items-center gap-2 border-b border-slate-200 bg-emerald-600 px-4 py-3 dark:border-slate-700">
+      <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
         <button
           type="button"
           onClick={handleBack}
           aria-label={t('common.back')}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-white active:bg-emerald-700"
+          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -248,7 +248,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
           type="button"
           onClick={handleRestore}
           aria-label={t('fitness.plan.restore')}
-          className="flex h-11 items-center gap-1 rounded-lg px-3 text-sm text-white active:bg-emerald-700"
+          className="text-primary-foreground active:bg-primary/80 flex h-11 items-center gap-1 rounded-lg px-3 text-sm"
         >
           <RotateCcw className="h-4 w-4" />
           <span className="hidden sm:inline">{t('fitness.plan.restore')}</span>
@@ -289,7 +289,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                       aria-expanded={isExpanded}
                       aria-controls={isExpanded ? `exercise-params-${index}` : undefined}
                       aria-label={`${t('fitness.plan.editParams')} ${item.exercise.nameVi}`}
-                      className="min-w-0 flex-1 rounded-lg text-left focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+                      className="focus-visible:ring-ring min-w-0 flex-1 rounded-lg text-left focus-visible:ring-2 focus-visible:outline-none"
                     >
                       <p
                         data-testid="exercise-name"
@@ -310,7 +310,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleOpenSwap(index)}
                         aria-label={`${t('fitness.swap.title')} ${item.exercise.nameVi}`}
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:bg-emerald-50 dark:text-emerald-400 dark:active:bg-emerald-900/20"
+                        className="text-primary focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none active:bg-emerald-50 dark:text-emerald-400 dark:active:bg-emerald-900/20"
                         data-testid={`swap-exercise-${index}`}
                       >
                         <ArrowLeftRight className="h-4 w-4" />
@@ -320,7 +320,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         onClick={() => handleMoveUp(index)}
                         aria-label={`Move up ${item.exercise.nameVi}`}
                         disabled={index === 0}
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700"
+                        className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700"
                       >
                         <ChevronUp className="h-4 w-4" />
                       </button>
@@ -329,7 +329,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         onClick={() => handleMoveDown(index)}
                         aria-label={`Move down ${item.exercise.nameVi}`}
                         disabled={index === localExercises.length - 1}
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700"
+                        className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700"
                       >
                         <ChevronDown className="h-4 w-4" />
                       </button>
@@ -337,7 +337,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleRemove(index)}
                         aria-label={`Remove ${item.exercise.nameVi}`}
-                        className="text-destructive active:bg-destructive/10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+                        className="text-destructive active:bg-destructive/10 focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -402,7 +402,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
         <button
           type="button"
           onClick={handleOpenSelector}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-sm font-medium text-white active:bg-emerald-700"
+          className="bg-primary text-primary-foreground active:bg-primary/80 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium"
         >
           <Plus className="h-5 w-5" />
           {t('fitness.plan.addExercise')}
@@ -454,7 +454,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
           <button
             type="button"
             onClick={handleUndo}
-            className="min-h-[44px] min-w-[44px] text-sm font-medium text-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+            className="focus-visible:ring-ring min-h-[44px] min-w-[44px] text-sm font-medium text-emerald-400 focus-visible:ring-2 focus-visible:outline-none"
           >
             {t('fitness.plan.undo')}
           </button>
@@ -509,7 +509,7 @@ const StepperField = memo(function StepperField({
           onClick={onDecrement}
           disabled={value <= min}
           aria-label={`Decrease ${label}`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700"
+          className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700"
         >
           <Minus className="h-3.5 w-3.5" />
         </button>
@@ -522,7 +522,7 @@ const StepperField = memo(function StepperField({
           onClick={onIncrement}
           disabled={value >= max}
           aria-label={`Increase ${label}`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700"
+          className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700"
         >
           <Plus className="h-3.5 w-3.5" />
         </button>

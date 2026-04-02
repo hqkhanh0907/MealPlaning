@@ -104,7 +104,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                     data-testid={`btn-goal-preset-${preset.calories}`}
                     className={`flex items-center gap-2 rounded-xl border-2 p-3 text-left transition-all ${
                       isActive
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                        ? 'border-primary bg-emerald-50 dark:bg-emerald-900/20'
                         : 'border-slate-200 hover:border-emerald-300 dark:border-slate-600 dark:hover:border-emerald-700'
                     }`}
                   >
@@ -113,7 +113,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                     </span>
                     <div>
                       <p
-                        className={`text-sm font-bold ${isActive ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}
+                        className={`text-sm font-bold ${isActive ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300'}`}
                       >
                         {t(preset.labelKey)}
                       </p>
@@ -301,7 +301,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
           <button
             onClick={onClose}
             data-testid="btn-goal-done"
-            className="mt-2 min-h-12 w-full rounded-xl bg-emerald-500 py-3 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:bg-emerald-700"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary active:bg-primary/80 mt-2 min-h-12 w-full rounded-xl py-3 font-bold shadow-sm transition-all"
           >
             {t('common.done')}
           </button>

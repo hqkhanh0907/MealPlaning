@@ -36,7 +36,7 @@ describe('parseNumericInput', () => {
   });
 
   it('returns fallback for whitespace-only string', () => {
-    expect(parseNumericInput('   ')).toBe(0);
+    expect(parseNumericInput(' ')).toBe(0);
   });
 
   it('parses integer correctly', () => {

@@ -117,7 +117,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900" data-testid="cardio-logger">
       {/* Header */}
       <header
-        className="pt-safe sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
+        className="pt-safe bg-primary text-primary-foreground sticky top-0 z-10 flex items-center justify-between px-4 py-3"
         data-testid="cardio-header"
       >
         <Button
@@ -159,7 +159,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 className={cn(
                   'min-h-11 shrink-0 rounded-full px-4',
                   selectedType === type
-                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary'
                     : 'bg-card border-transparent text-slate-600 dark:text-slate-300',
                 )}
                 data-testid={`cardio-type-${type}`}
@@ -183,7 +183,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               className={cn(
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                  ? 'bg-primary text-primary-foreground hover:bg-primary'
                   : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
               )}
               data-testid="stopwatch-mode-button"
@@ -197,7 +197,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
                   ? 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                  : 'bg-emerald-500 text-white hover:bg-emerald-600',
+                  : 'bg-primary text-primary-foreground hover:bg-primary',
               )}
               data-testid="manual-mode-button"
             >
@@ -227,7 +227,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   <Button
                     variant="default"
                     onClick={handleStartStopwatch}
-                    className="flex-1 bg-emerald-500 py-2.5 text-white hover:bg-emerald-600"
+                    className="bg-primary text-primary-foreground hover:bg-primary flex-1 py-2.5"
                     data-testid="start-button"
                   >
                     {t('fitness.cardio.start')}
@@ -355,7 +355,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 className={cn(
                   'min-h-11 flex-1 rounded-lg',
                   intensity === value
-                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary'
                     : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
                 )}
                 data-testid={`intensity-${value}`}
@@ -369,10 +369,8 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         {/* Calorie Preview */}
         <section className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20" data-testid="calorie-preview">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-              {t('fitness.cardio.calories')}
-            </span>
-            <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" data-testid="calorie-value">
+            <span className="text-sm font-semibold text-emerald-700">{t('fitness.cardio.calories')}</span>
+            <span className="text-primary text-2xl font-bold" data-testid="calorie-value">
               {estimatedCalories}
             </span>
           </div>
@@ -384,7 +382,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         <Button
           variant="default"
           onClick={handleSave}
-          className="w-full rounded-xl bg-emerald-500 py-3 text-white hover:bg-emerald-600"
+          className="bg-primary text-primary-foreground hover:bg-primary w-full rounded-xl py-3"
           data-testid="save-button"
         >
           {t('fitness.cardio.save')}

@@ -7,7 +7,7 @@ import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
-/*  Mock DatabaseContext                                                */
+/* Mock DatabaseContext */
 /* ------------------------------------------------------------------ */
 const mockDb: DatabaseService = {
   initialize: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock('../contexts/DatabaseContext', () => ({
 }));
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/* Helpers */
 /* ------------------------------------------------------------------ */
 let mockSaveProfile: ReturnType<typeof vi.fn>;
 
@@ -46,7 +46,7 @@ function resetStore(overrides: Partial<HealthProfileState> = {}) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tests                                                               */
+/* Tests */
 /* ------------------------------------------------------------------ */
 describe('HealthProfileForm', () => {
   beforeEach(() => {
@@ -252,7 +252,7 @@ describe('HealthProfileForm', () => {
   });
 
   /* ------------------------------------------------------------------ */
-  /*  Goal-aware weight warning tests                                    */
+  /* Goal-aware weight warning tests */
   /* ------------------------------------------------------------------ */
 
   it('shows warning when weight drops below cut goal target', () => {

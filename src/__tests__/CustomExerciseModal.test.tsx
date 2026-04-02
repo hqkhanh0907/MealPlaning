@@ -51,7 +51,7 @@ describe('CustomExerciseModal', () => {
     const onClose = vi.fn();
     render(<CustomExerciseModal isOpen onClose={onClose} onSave={onSave} />);
     fireEvent.change(screen.getByTestId('custom-exercise-name'), {
-      target: { value: '  Hip Thrust  ' },
+      target: { value: ' Hip Thrust ' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
     await waitFor(() => {
@@ -64,7 +64,7 @@ describe('CustomExerciseModal', () => {
     const onSave = vi.fn();
     render(<CustomExerciseModal isOpen onClose={vi.fn()} onSave={onSave} />);
     fireEvent.change(screen.getByTestId('custom-exercise-name'), {
-      target: { value: '   ' },
+      target: { value: ' ' },
     });
     fireEvent.click(screen.getByTestId('save-custom-exercise'));
     await waitFor(() => {

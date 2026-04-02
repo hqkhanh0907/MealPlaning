@@ -427,7 +427,7 @@ export default function App() {
       <Suspense
         fallback={
           <div className="flex h-dvh items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
+            <div className="border-t-primary h-8 w-8 animate-spin rounded-full border-4 border-emerald-200" />
           </div>
         }
       >
@@ -440,7 +440,7 @@ export default function App() {
     <div className="min-h-dvh bg-slate-50 font-sans text-slate-900 transition-colors selection:bg-emerald-200 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-emerald-800">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+        className="focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium"
       >
         Skip to main content
       </a>
@@ -450,7 +450,7 @@ export default function App() {
       >
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2 sm:px-6 sm:py-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="rounded-xl bg-emerald-500 p-1.5 text-white shadow-sm sm:p-2" aria-hidden="true">
+            <div className="bg-primary text-primary-foreground rounded-xl p-1.5 shadow-sm sm:p-2" aria-hidden="true">
               <Utensils className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div>
@@ -465,7 +465,7 @@ export default function App() {
                   month: 'numeric',
                 })}
               </p>
-              <p className="hidden text-xs font-medium text-slate-500 sm:block dark:text-slate-400">
+              <p className="text-muted-foreground hidden text-xs font-medium sm:block">
                 {t('header.subtitle', { weight: healthProfile?.weightKg ?? 0 })}
               </p>
             </div>
@@ -477,7 +477,7 @@ export default function App() {
               aria-label="Cài đặt"
               data-testid="btn-open-settings"
               onClick={handleOpenSettings}
-              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="text-muted-foreground rounded-lg p-2 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <SlidersHorizontal className="h-5 w-5" />
             </button>
@@ -562,7 +562,7 @@ export default function App() {
               <div className="space-y-8">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
                   <div className="flex items-center gap-3">
-                    <Bot className="h-6 w-6 text-emerald-500" />
+                    <Bot className="text-primary h-6 w-6" />
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('ai.title')}</h2>
                   </div>
                 </div>
@@ -721,7 +721,7 @@ export default function App() {
                 aria-label={t('common.back')}
                 data-testid="btn-close-settings"
                 onClick={popPage}
-                className="-ml-2 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                className="text-muted-foreground -ml-2 rounded-lg p-2 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>

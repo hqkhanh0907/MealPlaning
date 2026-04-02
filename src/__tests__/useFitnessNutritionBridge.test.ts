@@ -90,7 +90,7 @@ describe('deriveInsight', () => {
 });
 
 /* ================================================================== */
-/*  useFitnessNutritionBridge hook tests                                */
+/* useFitnessNutritionBridge hook tests */
 /* ================================================================== */
 
 function formatDate(date: Date): string {

@@ -98,10 +98,10 @@ export const CalendarTab = React.memo(function CalendarTab({
       <section className="space-y-4">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-            <CalendarDays className="h-6 w-6 text-emerald-500" />
+            <CalendarDays className="text-primary h-6 w-6" />
             <h2>{t('calendar.selectDate')}</h2>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-slate-500 sm:rounded-full sm:py-1.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+          <div className="bg-card text-muted-foreground rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-medium sm:rounded-full sm:py-1.5 dark:border-slate-700">
             <span className="sm:hidden">
               {parseLocalDate(selectedDate).toLocaleDateString(dateLocale, {
                 weekday: 'short',
@@ -130,7 +130,7 @@ export const CalendarTab = React.memo(function CalendarTab({
       {/* Mobile: Sub-tabs */}
       {!isDesktop && (
         <>
-          <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800" data-testid="schedule-subtabs">
+          <div className="bg-muted flex rounded-xl p-1" data-testid="schedule-subtabs">
             {SUB_TABS.map(({ key, label, icon }) => (
               <button
                 key={key}
@@ -139,8 +139,8 @@ export const CalendarTab = React.memo(function CalendarTab({
                 data-testid={`subtab-${key}`}
                 className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
                   activeSubTab === key
-                    ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-400'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                    ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700'
+                    : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
               >
                 {icon}
@@ -225,7 +225,7 @@ export const CalendarTab = React.memo(function CalendarTab({
         <ModalBackdrop onClose={handleCloseGrocery} zIndex="z-50">
           <div
             data-testid="grocery-modal"
-            className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl dark:bg-slate-800"
+            className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl"
           >
             <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>

@@ -130,7 +130,7 @@ export const IngredientManager = ({
     const usedIn = getDishesUsingIngredient(ingId);
     if (!usedIn.length) return null;
     return (
-      <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+      <div className="text-muted-foreground mb-3 text-xs">
         <span className="font-medium">{t('ingredient.usedIn')} </span>
         <span className="text-slate-600 dark:text-slate-300">
           {usedIn.length <= 2 ? usedIn.join(', ') : `${usedIn.slice(0, 2).join(', ')} +${usedIn.length - 2}`}
@@ -166,24 +166,22 @@ export const IngredientManager = ({
           {list.filteredItems.map(ing => (
             <div
               key={ing.id}
-              className="group relative flex w-full flex-col rounded-2xl border border-slate-100 bg-white p-5 text-left shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+              className="group bg-card relative flex w-full flex-col rounded-2xl border border-slate-100 p-5 text-left shadow-sm transition-all hover:shadow-md dark:border-slate-700"
             >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                  <div className="text-primary flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/30">
                     <Apple className="h-5 w-5" />
                   </div>
                   <div>
                     <button
                       type="button"
                       onClick={() => modal.openView(ing)}
-                      className="cursor-pointer rounded text-left text-lg font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-slate-100"
+                      className="focus-visible:ring-ring cursor-pointer rounded text-left text-lg font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-slate-100"
                     >
                       {getLocalizedField(ing.name, lang)}
                     </button>
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      {getDisplayUnit(ing.unit, lang)}
-                    </p>
+                    <p className="text-muted-foreground text-xs font-medium">{getDisplayUnit(ing.unit, lang)}</p>
                   </div>
                 </div>
               </div>
@@ -212,7 +210,7 @@ export const IngredientManager = ({
                 <button
                   data-testid={`btn-edit-ingredient-${ing.id}`}
                   onClick={() => modal.openEdit(ing)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold text-slate-500 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-400 dark:hover:bg-emerald-900/30"
+                  className="text-muted-foreground flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30"
                 >
                   <Edit3 className="h-4 w-4" /> {t('common.edit')}
                 </button>
@@ -220,7 +218,7 @@ export const IngredientManager = ({
                   data-testid={`btn-delete-ingredient-${ing.id}`}
                   onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                   aria-disabled={isUsed(ing.id)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(ing.id) ? 'text-slate-400 opacity-40 dark:text-slate-500' : 'text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-900/30'}`}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(ing.id) ? 'dark:text-muted-foreground text-slate-400 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                 >
                   <Trash2 className="h-4 w-4" /> {t('common.delete')}
                 </button>
@@ -242,27 +240,27 @@ export const IngredientManager = ({
 
       {/* List View */}
       {list.viewLayout === 'list' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="bg-card overflow-hidden rounded-2xl border border-slate-100 shadow-sm dark:border-slate-700">
           <div className="hidden overflow-x-auto sm:block">
             <table className="w-full">
               <thead className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-700">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                  <th className="text-muted-foreground px-4 py-3 text-left text-xs font-bold uppercase">
                     {t('ingredient.title')}
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
                     {t('common.calories')}
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
                     {t('common.protein')}
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
                     {t('common.carbs')}
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
                     {t('common.fat')}
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
                     {t('common.actions')}
                   </th>
                 </tr>
@@ -272,18 +270,18 @@ export const IngredientManager = ({
                   <tr key={ing.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-700">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                        <div className="text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
                           <Apple className="h-4 w-4" />
                         </div>
                         <div>
                           <button
                             type="button"
                             onClick={() => modal.openView(ing)}
-                            className="cursor-pointer text-left font-bold text-slate-800 transition-colors hover:text-emerald-600 dark:text-slate-100"
+                            className="hover:text-primary cursor-pointer text-left font-bold text-slate-800 transition-colors dark:text-slate-100"
                           >
                             {getLocalizedField(ing.name, lang)}
                           </button>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{getDisplayUnit(ing.unit, lang)}</p>
+                          <p className="text-muted-foreground text-xs">{getDisplayUnit(ing.unit, lang)}</p>
                         </div>
                       </div>
                     </td>
@@ -332,18 +330,18 @@ export const IngredientManager = ({
                 className="relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors active:bg-slate-50 dark:active:bg-slate-700"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                  <div className="text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/30">
                     <Apple className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <button
                       type="button"
                       onClick={() => modal.openView(ing)}
-                      className="cursor-pointer truncate rounded text-left font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-slate-100"
+                      className="focus-visible:ring-ring cursor-pointer truncate rounded text-left font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 dark:text-slate-100"
                     >
                       {getLocalizedField(ing.name, lang)}
                     </button>
-                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
                       <span>{ing.caloriesPer100} kcal</span>
                       <span className="text-blue-600 dark:text-blue-400">{ing.proteinPer100}g Pro</span>
                     </div>
@@ -396,16 +394,14 @@ export const IngredientManager = ({
               onEdit={() => modal.openEditFromView(ing)}
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30">
+                <div className="text-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30">
                   <Apple className="h-7 w-7" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                     {getLocalizedField(ing.name, lang)}
                   </h3>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {getDisplayUnit(ing.unit, lang)}
-                  </p>
+                  <p className="text-muted-foreground text-sm font-medium">{getDisplayUnit(ing.unit, lang)}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -448,9 +444,7 @@ export const IngredientManager = ({
               </div>
               {usedIn.length > 0 && (
                 <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
-                  <p className="mb-2 text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
-                    {t('ingredient.usedIn')}
-                  </p>
+                  <p className="text-muted-foreground mb-2 text-xs font-bold uppercase">{t('ingredient.usedIn')}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {usedIn.map(n => (
                       <span

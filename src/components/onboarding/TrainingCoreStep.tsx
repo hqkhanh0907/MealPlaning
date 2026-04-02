@@ -34,7 +34,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('fitness.onboarding.step1Title')}
         </h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('fitness.onboarding.step1Desc')}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t('fitness.onboarding.step1Desc')}</p>
 
         {/* Training Goal */}
         <div className="mb-6">
@@ -49,9 +49,9 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 aria-pressed={goalField.field.value === goal}
                 onClick={() => goalField.field.onChange(goal)}
                 className={cn(
-                  'min-h-[44px] rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                  'focus-visible:ring-ring min-h-[44px] rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   goalField.field.value === goal
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
                     : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
                 )}
               >
@@ -74,9 +74,9 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 aria-pressed={expField.field.value === level}
                 onClick={() => expField.field.onChange(level)}
                 className={cn(
-                  'min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                  'focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   expField.field.value === level
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
                     : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
                 )}
               >
@@ -99,9 +99,9 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 aria-pressed={daysField.field.value === d}
                 onClick={() => daysField.field.onChange(d)}
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none',
+                  'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   daysField.field.value === d
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
                     : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
                 )}
               >
@@ -117,13 +117,13 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>
         <Button
           onClick={handleNext}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           {t('onboarding.nav.next')}
           <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />

@@ -77,7 +77,7 @@ const slideVariants = {
 function StepFallback() {
   return (
     <div className="flex h-full items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
+      <div className="border-t-primary h-8 w-8 animate-spin rounded-full border-4 border-emerald-200" />
     </div>
   );
 }

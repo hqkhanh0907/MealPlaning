@@ -131,7 +131,7 @@ export const GoogleDriveSync = () => {
       return <AlertCircle className="text-destructive h-4 w-4" />;
     }
     if (lastSyncAt) {
-      return <CheckCircle className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />;
+      return <CheckCircle className="text-primary h-4 w-4" />;
     }
     return null;
   }, [syncStatus, lastSyncAt]);
@@ -153,7 +153,7 @@ export const GoogleDriveSync = () => {
           </div>
           <div>
             <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('cloudSync.title')}</h3>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t('cloudSync.description')}</p>
+            <p className="text-muted-foreground mt-0.5 text-xs">{t('cloudSync.description')}</p>
           </div>
         </div>
         <button
@@ -203,7 +203,7 @@ export const GoogleDriveSync = () => {
           <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('cloudSync.title')}</h3>
           <div className="mt-1 flex items-center gap-2">
             {user.photoUrl && <img src={user.photoUrl} alt="" className="h-5 w-5 rounded-full" />}
-            <span className="truncate text-xs text-slate-500 dark:text-slate-400">{user.email}</span>
+            <span className="text-muted-foreground truncate text-xs">{user.email}</span>
           </div>
         </div>
       </div>
@@ -235,7 +235,7 @@ export const GoogleDriveSync = () => {
       </div>
 
       {(formattedSyncTime || syncStatus === 'error') && (
-        <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="text-muted-foreground mt-3 flex items-center gap-2 text-xs">
           {statusIcon}
           {syncStatus === 'error' ? (
             <span className="text-destructive">{t('cloudSync.syncError')}</span>
@@ -250,7 +250,7 @@ export const GoogleDriveSync = () => {
       <button
         data-testid="btn-google-sign-out"
         onClick={handleSignOut}
-        className="hover:text-destructive mt-3 flex w-full items-center justify-center gap-2 px-4 py-2 text-xs font-medium text-slate-500 transition-colors dark:text-slate-400"
+        className="hover:text-destructive text-muted-foreground mt-3 flex w-full items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors"
       >
         <LogOut className="h-3.5 w-3.5" />
         {t('cloudSync.signOut')}

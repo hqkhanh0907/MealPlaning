@@ -61,7 +61,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="filter-bottom-sheet"
-        className="relative max-h-[70dvh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative max-h-[70dvh] w-full overflow-y-auto rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl"
       >
         <div className="space-y-5 px-5 pt-5 pb-4">
           {/* Sort section */}
@@ -77,7 +77,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                     onClick={() => handleSortChange(opt.value)}
                     className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-emerald-500 text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                     }`}
                   >
@@ -97,7 +97,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                 onClick={() => toggleMaxCalories(300)}
                 className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.maxCalories === 300
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -108,7 +108,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                 onClick={() => toggleMaxCalories(500)}
                 className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.maxCalories === 500
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -119,7 +119,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                 onClick={() => toggleMinProtein(20)}
                 className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.minProtein === 20
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -142,7 +142,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
               type="button"
               data-testid="filter-apply-btn"
               onClick={handleApply}
-              className="min-h-11 flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-600 active:scale-[0.98]"
+              className="bg-primary text-primary-foreground hover:bg-primary min-h-11 flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]"
             >
               {t('filter.apply')}
             </button>

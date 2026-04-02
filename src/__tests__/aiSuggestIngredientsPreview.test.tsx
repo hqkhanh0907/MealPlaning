@@ -88,13 +88,13 @@ describe('AISuggestIngredientsPreview', () => {
     );
     const checkbox0 = screen.getByTestId('ai-suggest-checkbox-0');
     // Initially checked (emerald bg)
-    expect(checkbox0.className).toContain('bg-emerald-500');
+    expect(checkbox0.className).toContain('bg-primary');
     // Click to uncheck
     fireEvent.click(checkbox0);
-    expect(checkbox0.className).not.toContain('bg-emerald-500');
+    expect(checkbox0.className).not.toContain('bg-primary');
     // Click again to re-check
     fireEvent.click(checkbox0);
-    expect(checkbox0.className).toContain('bg-emerald-500');
+    expect(checkbox0.className).toContain('bg-primary');
   });
 
   it('allows editing amount for an item', () => {
