@@ -18,7 +18,7 @@ export const FormField = React.memo(function FormField({
 }: FormFieldProps) {
   return (
     <div className={className ?? 'mb-4'}>
-      <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className="text-foreground-secondary mb-1 block text-sm font-medium">
         {label}
         {required && <span className="ml-0.5 text-rose-500">*</span>}
       </label>

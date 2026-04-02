@@ -37,8 +37,8 @@ function RadioPillsInner<T extends FieldValues>({
                 data-testid={testIdPrefix ? `${testIdPrefix}-${option.value}` : undefined}
                 className={
                   isActive
-                    ? 'bg-primary text-primary-foreground has-[:focus-visible]:ring-ring dark:bg-primary min-h-[44px] cursor-pointer rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none'
-                    : 'has-[:focus-visible]:ring-ring min-h-[44px] cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                    ? 'bg-primary text-primary-foreground has-[:focus-visible]:ring-ring dark:bg-primary flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none'
+                    : 'has-[:focus-visible]:ring-ring bg-muted text-foreground-secondary flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none dark:hover:bg-slate-600'
                 }
               >
                 <input
