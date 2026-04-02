@@ -728,6 +728,7 @@
           💾 Chain 3: Lưu &amp; Hoàn thành <span class="badge">Save</span>
         </button>
         <button class="tab-btn" onclick="showChain(3, this)">🏃 Chain 4: Cardio <span class="badge">Alt</span></button>
+        <button class="tab-btn" onclick="showChain(4, this)"><span class="badge">5</span> Plan Regeneration</button>
       </div>
     </div>
 
@@ -1431,6 +1432,170 @@
           <div class="end-marker">⬛ END — Cardio flow hoàn tất</div>
         </div>
       </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!--        CHAIN 5: PLAN REGENERATION            -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="chain-panel" id="chain-4">
+        <div class="chain-title">🔄 Chain 5: Plan Regeneration — Tạo Lại Kế Hoạch</div>
+        <div class="chain-desc">Luồng tạo lại kế hoạch tập luyện — xác nhận → generate → switch active plan</div>
+
+        <div class="epc-flow">
+          <!-- START EVENT -->
+          <div class="epc-node">
+            <div class="event-shape event-start">
+              User đang xem kế hoạch tập luyện
+              <div class="epc-tooltip">TrainingPlanView đang active, plan hiện tại đang hiển thị</div>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- Show button -->
+          <div class="epc-node">
+            <div class="function-shape">Hiển thị nút "Tạo lại kế hoạch" (RefreshCw icon)</div>
+            <div class="side-badges">
+              <span class="org-badge">TrainingPlanView</span>
+              <span class="info-badge">activePlan exists, button always visible</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape">User nhấn "Tạo lại kế hoạch"</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- Confirmation modal -->
+          <div class="epc-node">
+            <div class="function-shape" style="border-color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.25)">
+              Hiển thị modal xác nhận (variant: warning)
+            </div>
+            <div class="side-badges">
+              <span class="org-badge">ConfirmationModal</span>
+              <span class="info-badge">"Tạo lại kế hoạch tập luyện? Kế hoạch hiện tại sẽ bị thay thế."</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- XOR: Confirm or Cancel? -->
+          <div class="epc-node">
+            <div class="connector-circle connector-xor">×</div>
+            <div class="connector-label">Confirm or Cancel?</div>
+          </div>
+
+          <!-- Branch container -->
+          <div class="h-line-container"><div class="h-line"></div></div>
+
+          <div class="branch-container">
+            <!-- Cancel branch -->
+            <div class="branch">
+              <div class="branch-label no">CANCEL</div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape" style="min-width: 200px">Modal đóng, không thay đổi</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="end-marker">⬛ END</div>
+            </div>
+
+            <!-- Confirm branch -->
+            <div class="branch">
+              <div class="branch-label yes">CONFIRM</div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape" style="min-width: 200px">User xác nhận tạo lại</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Continue from confirm branch -->
+          <div class="arrow-down"></div>
+
+          <!-- generatePlan -->
+          <div class="epc-node">
+            <div class="function-shape">generatePlan({ trainingProfile, healthProfile })</div>
+            <div class="side-badges">
+              <span class="org-badge">useTrainingPlan hook</span>
+              <span class="info-badge">Input: trainingProfile + healthProfile → Output: { plan: planB, days }</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- addTrainingPlan -->
+          <div class="epc-node">
+            <div class="function-shape">addTrainingPlan(planB)</div>
+            <div class="side-badges">
+              <span class="org-badge">fitnessStore</span>
+              <span class="info-badge">Append planB vào trainingPlans array → INSERT INTO training_plans</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- addPlanDays -->
+          <div class="epc-node">
+            <div class="function-shape">addPlanDays(planB.days)</div>
+            <div class="side-badges">
+              <span class="org-badge">fitnessStore</span>
+              <span class="info-badge">Append days mới → INSERT INTO training_plan_days</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- setActivePlan - THE FIX -->
+          <div class="epc-node">
+            <div
+              class="function-shape"
+              style="
+                border-color: #f59e0b;
+                box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
+                background: linear-gradient(135deg, #15803d, #a16207);
+              "
+            >
+              setActivePlan(planB.id) — THE FIX
+            </div>
+            <div class="side-badges">
+              <span class="org-badge">fitnessStore</span>
+              <span class="info-badge"
+                >planB.status → 'active' · planA.status → 'paused' · UPDATE training_plans SET status</span
+              >
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape" style="background: #15803d">Plan mới đã active — planB is now the active plan</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- Success toast -->
+          <div class="epc-node">
+            <div class="function-shape">Show success toast</div>
+            <div class="side-badges">
+              <span class="org-badge">NotificationContext</span>
+              <span class="info-badge">"Kế hoạch tập luyện đã được tạo thành công!"</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- Re-render -->
+          <div class="epc-node">
+            <div class="function-shape">Re-render TrainingPlanView with new activePlan</div>
+            <div class="side-badges">
+              <span class="org-badge">TrainingPlanView</span>
+              <span class="info-badge"
+                >activePlan = trainingPlans.find(p → p.status === 'active') → returns planB ✅</span
+              >
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape">User thấy kế hoạch mới trên UI</div>
+          </div>
+          <div class="arrow-down short"></div>
+          <div class="end-marker">⬛ END — Plan regeneration hoàn tất</div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══════ FOOTER ═══════ -->
@@ -1464,7 +1629,7 @@
 
       // Keyboard navigation
       document.addEventListener('keydown', e => {
-        if (e.key >= '1' && e.key <= '4') {
+        if (e.key >= '1' && e.key <= '5') {
           const idx = parseInt(e.key) - 1;
           const btns = document.querySelectorAll('.tab-btn');
           if (btns[idx]) showChain(idx, btns[idx]);

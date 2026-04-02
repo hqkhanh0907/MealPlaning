@@ -831,6 +831,9 @@
       <button class="nav-btn" onclick="scrollToFlow('flow7')" data-flow="flow7">
         <span class="nav-num">7</span>Progress &amp; Analytics
       </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow8')" data-flow="flow8">
+        <span class="nav-num">8</span>Plan Regeneration
+      </button>
     </nav>
 
     <!-- ═══════════════════════════════════════════ MAIN ═══════════════════════════════════════════ -->
@@ -2104,6 +2107,189 @@
             <div class="node node-end">
               <div class="node-box">
                 <div class="node-text">■ END — Dashboard luôn hiển thị dữ liệu realtime</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 8: PLAN REGENERATION                                                               ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow8">
+        <div class="section-header">
+          <div class="section-num" style="background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff">8</div>
+          <div>
+            <div class="section-title">Plan Regeneration — Tạo Lại Kế Hoạch Tập Luyện</div>
+            <div class="section-desc">Tạo lại kế hoạch · Tạo chu kỳ mới · Tạo mới toàn bộ (SplitChanger)</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ TrainingPlanView — Kế hoạch đang active</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Decision: Entry point -->
+            <div class="node node-decision">
+              <div class="node-box">
+                <div class="node-text">◇ Entry Point?</div>
+              </div>
+              <div class="branch-container">
+                <div class="branch-option">
+                  <span class="branch-label">Entry 1: "Tạo lại kế hoạch" (always visible)</span>
+                </div>
+                <div class="branch-option">
+                  <span class="branch-label">Entry 2: "Tạo chu kỳ mới" (plan expired)</span>
+                </div>
+                <div class="branch-option">
+                  <span class="branch-label">Entry 3: "Tạo mới toàn bộ" (SplitChanger)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Entry 1 & 2: Full regeneration flow -->
+            <div class="action-panel" style="border-left: 4px solid #f59e0b">
+              <div class="action-panel-title">
+                🔄 Entry 1 &amp; 2: Full Plan Regeneration (Tạo lại / Tạo chu kỳ mới)
+              </div>
+              <div class="action-grid">
+                <div class="action-card" style="border-top: 3px solid #f59e0b">
+                  <div class="action-card-title">🖱️ Step 1: User Click</div>
+                  <div class="action-card-body">
+                    <strong>Entry 1:</strong> Nhấn nút "Tạo lại kế hoạch" (RefreshCw icon)<br />
+                    → Luôn hiển thị trong <code>TrainingPlanView</code><br />
+                    <strong>Entry 2:</strong> Nhấn "Tạo chu kỳ mới" khi plan hết hạn<br />
+                    → Hiển thị khi plan expired
+                  </div>
+                </div>
+
+                <div class="action-card" style="border-top: 3px solid #f59e0b">
+                  <div class="action-card-title">⚠️ Step 2: Confirmation Modal (Entry 1 only)</div>
+                  <div class="action-card-body">
+                    <code>ConfirmationModal</code> variant: <strong>warning</strong><br />
+                    Message: "Tạo lại kế hoạch tập luyện?<br />Kế hoạch hiện tại sẽ bị thay thế."<br />
+                    → Confirm hoặc Cancel<br />
+                    <em>Entry 2 bỏ qua bước này (no modal)</em>
+                  </div>
+                </div>
+
+                <div class="action-card" style="border-top: 3px solid #f59e0b">
+                  <div class="action-card-title">⚙️ Step 3: generatePlan()</div>
+                  <div class="action-card-body">
+                    <code>FitnessTab.handleGeneratePlan()</code><br />
+                    Input: <code>{ trainingProfile, healthProfile }</code><br />
+                    Output: <code>{ plan: planB, days }</code><br />
+                    Tính volume, periodization, seed exercises
+                  </div>
+                </div>
+
+                <div class="action-card" style="border-top: 3px solid #f59e0b">
+                  <div class="action-card-title">📥 Step 4: addTrainingPlan(planB)</div>
+                  <div class="action-card-body">
+                    Append <code>planB</code> vào <code>trainingPlans</code> array<br />
+                    <code>INSERT INTO training_plans</code><br />
+                    Plan mới chưa active tại bước này
+                  </div>
+                </div>
+
+                <div class="action-card" style="border-top: 3px solid #f59e0b">
+                  <div class="action-card-title">📅 Step 5: addPlanDays(days)</div>
+                  <div class="action-card-body">
+                    Append days mới vào <code>trainingPlanDays</code><br />
+                    <code>INSERT INTO training_plan_days</code><br />
+                    Mỗi day có exercises đã seed
+                  </div>
+                </div>
+
+                <div class="action-card" style="border-top: 3px solid #f59e0b">
+                  <div class="action-card-title">🔑 Step 6: setActivePlan(planB.id) — THE FIX</div>
+                  <div class="action-card-body">
+                    <code>planB.status = 'active'</code> ✅<br />
+                    <code>planA.status = 'paused'</code> (old plan)<br />
+                    <code>UPDATE training_plans SET status</code><br />
+                    <strong>Đây là bước quan trọng đã được fix!</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process">
+              <div class="node-box">
+                <div class="node-text">✅ notify.success("Kế hoạch tập luyện đã được tạo thành công!")</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process">
+              <div class="node-box">
+                <div class="node-text">🔄 TrainingPlanView re-renders — activePlan = planB (new plan)</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Entry 3: Different flow -->
+            <div class="action-panel" style="border-left: 4px solid #64748b">
+              <div class="action-panel-title">🔃 Entry 3: "Tạo mới toàn bộ" (SplitChanger — Different Flow)</div>
+              <div class="action-grid">
+                <div class="action-card">
+                  <div class="action-card-title">⚠️ Khác biệt</div>
+                  <div class="action-card-body">
+                    Làm việc trong <strong>cùng plan hiện tại</strong><br />
+                    KHÔNG tạo plan mới, KHÔNG thay đổi status<br />
+                    Xóa days cũ → Tạo days trống mới<br />
+                    <code>changeSplitType(planId, split, 'regenerate')</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Post-conditions -->
+            <div class="node node-storage">
+              <div class="node-box">
+                <div class="node-text">💾 Post-conditions: New plan active · Old plan paused · Old data preserved</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END — User thấy kế hoạch mới trên UI</div>
               </div>
             </div>
           </div>

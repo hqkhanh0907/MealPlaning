@@ -982,6 +982,40 @@
           layer: 'action',
           desc: 'Hiển thị confirmation dialog → removePlanDaySession()',
         },
+        {
+          id: 'act-regenerate',
+          x: 10,
+          y: 890,
+          w: 160,
+          h: 36,
+          label: '🔄 Tạo lại kế hoạch',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Nút luôn hiển thị trong TrainingPlanView. Click → ConfirmationModal (warning) → onGeneratePlan(). Tạo plan mới, plan cũ paused.',
+        },
+        {
+          id: 'act-newcycle',
+          x: 180,
+          y: 890,
+          w: 150,
+          h: 36,
+          label: '🔁 Tạo chu kỳ mới',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Hiển thị khi plan expired. Click → onGeneratePlan() trực tiếp (no modal). Same flow as "Tạo lại kế hoạch" nhưng không cần xác nhận.',
+        },
+        {
+          id: 'modal-regenerate-confirm',
+          x: 370,
+          y: 890,
+          w: 190,
+          h: 40,
+          label: 'ConfirmationModal',
+          sublabel: 'variant: warning',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Modal xác nhận: "Tạo lại kế hoạch tập luyện? Kế hoạch hiện tại sẽ bị thay thế." Variant warning (amber). Confirm → generatePlan(). Cancel → close.',
+        },
 
         // ─── Sub-tab: Tiến độ ───
         {
@@ -1644,6 +1678,17 @@
           label: 'open modal',
         },
         { from: 'act-delsess', to: 'modal-confirm', color: 'var(--accent-orange)', type: 'modal', label: 'confirm' },
+
+        // Plan Regeneration actions
+        { from: 'plan-action', to: 'act-regenerate', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-newcycle', color: 'var(--accent-orange)', type: 'action' },
+        {
+          from: 'act-regenerate',
+          to: 'modal-regenerate-confirm',
+          color: 'var(--accent-orange)',
+          type: 'modal',
+          label: 'confirm',
+        },
 
         // Page stack
         { from: 'page-stack', to: 'page-workout-logger', color: 'var(--accent-purple)', type: 'child' },
