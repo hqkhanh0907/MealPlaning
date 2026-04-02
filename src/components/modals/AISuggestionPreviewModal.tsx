@@ -135,7 +135,7 @@ export const AISuggestionPreviewModal = ({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl dark:bg-slate-800">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 bg-linear-to-r from-indigo-50 to-purple-50 px-6 py-4 dark:border-slate-700 dark:from-indigo-900/30 dark:to-purple-900/30">
           <div className="flex items-center gap-3">

@@ -86,7 +86,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
   return (
     <ModalBackdrop onClose={onClose}>
       <div
-        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-3xl dark:bg-slate-800"
+        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl dark:bg-slate-800"
         data-testid="template-manager-modal"
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">

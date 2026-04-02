@@ -97,7 +97,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div
         data-testid="swap-exercise-sheet"
-        className="relative flex max-h-[85vh] w-full flex-col rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        className="relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
@@ -124,7 +124,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
         {/* Search bar */}
         <div className="px-4 pb-3">
           <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
             <input
               type="text"
               data-testid="swap-search-input"

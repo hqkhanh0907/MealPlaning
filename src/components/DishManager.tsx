@@ -746,7 +746,7 @@ export const DishManager = ({
                   data-testid="compare-backdrop"
                 />
               </div>
-              <div className="relative z-10 max-h-[80vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-2xl dark:bg-slate-800">
+              <div className="relative z-10 max-h-[80dvh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-2xl dark:bg-slate-800">
                 <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
                   <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
                     <GitCompareArrows className="h-5 w-5 text-blue-500" />

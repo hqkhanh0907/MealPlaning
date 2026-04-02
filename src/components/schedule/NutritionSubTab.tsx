@@ -52,7 +52,7 @@ const RecommendationPanel = ({
   };
 
   return (
-    <div className="flex flex-col rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div className="mb-4 flex items-center gap-2 font-bold text-indigo-600 dark:text-indigo-400">
         <Info className="h-5 w-5" />
         <h3>{t('recommendation.title')}</h3>

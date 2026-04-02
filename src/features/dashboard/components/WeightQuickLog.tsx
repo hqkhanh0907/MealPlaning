@@ -246,7 +246,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
       <dialog
         open
         data-testid="weight-quick-log"
-        className="relative w-full rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        className="relative w-full rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
         aria-label={t('fitness.weight.quickLogTitle')}
       >
         {/* Header */}

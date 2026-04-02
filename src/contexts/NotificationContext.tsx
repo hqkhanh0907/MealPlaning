@@ -238,7 +238,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       {/* Toast Container — top on mobile, bottom-right on desktop */}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed top-[env(safe-area-inset-top)] right-0 left-0 z-9999 flex flex-col gap-2 p-3 sm:top-auto sm:right-6 sm:bottom-6 sm:left-auto sm:p-0"
+        className="pointer-events-none fixed top-[env(safe-area-inset-top)] right-0 left-0 z-[80] flex flex-col gap-2 p-3 sm:top-auto sm:right-6 sm:bottom-6 sm:left-auto sm:p-0"
       >
         {toasts.map(toast => (
           <div key={toast.id} className="pointer-events-auto">

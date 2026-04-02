@@ -28,7 +28,7 @@ export const Summary = React.memo(function Summary({
   const remainingProtein = Math.round(targetProtein - totalProtein);
 
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50">
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 sm:p-3 dark:bg-indigo-900/30 dark:text-indigo-400">

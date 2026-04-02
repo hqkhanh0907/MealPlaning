@@ -64,7 +64,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-80">
-      <div className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">

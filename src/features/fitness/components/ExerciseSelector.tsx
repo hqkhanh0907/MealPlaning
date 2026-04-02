@@ -153,7 +153,7 @@ export function ExerciseSelector({
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="exercise-selector-sheet"
-        className="relative flex max-h-[85vh] w-full flex-col rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        className="relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
@@ -168,13 +168,14 @@ export function ExerciseSelector({
         {/* Search bar */}
         <div className="px-4 pb-3">
           <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
             <input
               type="text"
               data-testid="exercise-search-input"
               placeholder={t('fitness.exerciseSelector.search')}
               value={searchQuery}
               onChange={handleSearchChange}
+              aria-label={t('fitness.exerciseSelector.search')}
               className="w-full rounded-xl border-none bg-slate-100 py-2.5 pr-4 pl-10 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 dark:bg-slate-700 dark:text-slate-200"
             />
           </div>

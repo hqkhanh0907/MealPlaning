@@ -134,7 +134,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         className="absolute inset-0 cursor-default bg-black/30"
         onClick={handleCancel}
       />
-      <div className="relative max-h-[80dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-3xl bg-white p-6 shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative max-h-[80dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-2xl bg-white p-6 shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
         <div className="flex items-center justify-between">
           <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{t('dish.quickAddTitle')}</p>
           <button

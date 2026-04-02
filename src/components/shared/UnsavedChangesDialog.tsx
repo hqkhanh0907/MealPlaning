@@ -21,7 +21,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-70">
-      <div className="relative w-full overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative w-full overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl dark:bg-slate-800">
         <div className="p-6 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-500 dark:bg-amber-900/30">
             <Save className="h-8 w-8" />

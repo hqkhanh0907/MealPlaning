@@ -226,7 +226,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       {!embedded && <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('goal.title')}</h3>}
 
       {/* Phase Cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {GOAL_OPTIONS.map(({ type, labelKey, icon: Icon, color, activeBg, activeBorder, activeText }) => {
           const isActive = goalType === type;
           return (
@@ -254,7 +254,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('goal.rateOfChange')}
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {RATE_OPTIONS.map(({ rate, labelKey }) => (
               <button
                 key={rate}

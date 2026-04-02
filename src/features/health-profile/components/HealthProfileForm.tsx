@@ -393,7 +393,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             {t('healthProfile.macroPreview')}
           </p>
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
             <div className="rounded-lg bg-white p-2 dark:bg-slate-800">
               <p className="text-slate-500 dark:text-slate-400">{t('common.protein')}</p>
               <p className="font-bold text-emerald-600 dark:text-emerald-400" data-testid="macro-protein">

@@ -190,7 +190,7 @@ export const MealPlannerModal = ({
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <div className="relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl dark:bg-slate-800">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-8 sm:py-6 dark:border-slate-700">
           <div>

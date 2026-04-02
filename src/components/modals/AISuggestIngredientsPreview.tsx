@@ -85,7 +85,7 @@ export const AISuggestIngredientsPreview = ({
   if (suggestions.length === 0) {
     return (
       <ModalBackdrop onClose={onClose} zIndex="z-70">
-        <div className="relative w-full rounded-t-3xl bg-white p-6 shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-3xl dark:bg-slate-800">
+        <div className="relative w-full rounded-t-2xl bg-white p-6 shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl dark:bg-slate-800">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">
               ✨ {t('dish.aiSuggestTitle', { name: dishName })}
@@ -117,7 +117,7 @@ export const AISuggestIngredientsPreview = ({
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-70">
-      <div className="relative flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-2xl dark:bg-slate-800">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
           <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">
             ✨ {t('dish.aiSuggestTitle', { name: dishName })}

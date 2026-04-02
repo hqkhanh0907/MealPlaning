@@ -61,7 +61,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="filter-bottom-sheet"
-        className="relative max-h-[70dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        className="relative max-h-[70dvh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
       >
         <div className="space-y-5 px-5 pt-5 pb-4">
           {/* Sort section */}

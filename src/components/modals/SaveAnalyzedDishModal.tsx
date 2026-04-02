@@ -141,7 +141,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-70">
-      <div className="relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-3xl dark:bg-slate-800">
+      <div className="relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-2xl dark:bg-slate-800">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
           <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.title')}</h4>
           <button

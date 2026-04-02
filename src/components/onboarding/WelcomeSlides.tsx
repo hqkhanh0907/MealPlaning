@@ -73,7 +73,7 @@ export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSli
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-        <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+        <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
           {slide.icon}
         </div>
         <h1 className="mb-4 text-2xl font-bold text-slate-800 dark:text-slate-100">{t(slide.titleKey)}</h1>

@@ -18,7 +18,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
     <ModalBackdrop onClose={onClose} zIndex="z-60">
       <div
         data-testid="detail-modal"
-        className="relative max-h-[90vh] w-full overflow-hidden overflow-y-auto rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        className="relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">

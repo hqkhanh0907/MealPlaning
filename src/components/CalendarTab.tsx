@@ -225,7 +225,7 @@ export const CalendarTab = React.memo(function CalendarTab({
         <ModalBackdrop onClose={handleCloseGrocery} zIndex="z-50">
           <div
             data-testid="grocery-modal"
-            className="relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-3xl dark:bg-slate-800"
+            className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl dark:bg-slate-800"
           >
             <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>

@@ -144,7 +144,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   // Empty state: no active plan
   if (!plan) {
     return (
-      <div className="flex h-full min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
+      <div className="flex h-full min-h-dvh flex-col bg-slate-50 dark:bg-slate-950">
         <header className="sticky top-0 z-10 flex items-center gap-3 bg-emerald-600 px-4 py-3 text-white shadow-md dark:bg-emerald-700">
           <button
             type="button"
@@ -179,7 +179,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   }
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-full min-h-dvh flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-emerald-600 px-4 py-3 text-white shadow-md dark:bg-emerald-700">
         <button

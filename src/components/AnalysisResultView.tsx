@@ -58,7 +58,7 @@ const EmptyState = () => {
   const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-center space-y-5 py-8 text-center">
-      <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20">
+      <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20">
         <ImageIcon className="h-12 w-12 text-emerald-400/60 dark:text-emerald-500/40" />
       </div>
       <div className="space-y-2">
@@ -117,7 +117,7 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
           {ing.amount} {ing.unit}
         </span>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="text-center">
           <p className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">{t('common.calories')}</p>
           <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>

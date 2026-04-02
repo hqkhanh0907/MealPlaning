@@ -150,7 +150,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
   return (
     <>
       <ModalBackdrop onClose={handleClose} zIndex="z-60">
-        <div className="relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto overscroll-contain rounded-t-3xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-3xl dark:bg-slate-800">
+        <div className="relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto overscroll-contain rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
             <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
               {editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}

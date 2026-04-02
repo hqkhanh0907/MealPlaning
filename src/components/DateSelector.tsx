@@ -215,7 +215,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   const emptyCellKeys = Array.from({ length: firstDay }, (_, i) => `empty-start-${year}-${month}-${i}`);
 
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
           <CalendarIcon className="h-5 w-5 text-emerald-500" />

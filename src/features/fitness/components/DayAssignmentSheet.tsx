@@ -66,7 +66,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
     <ModalBackdrop onClose={onClose}>
       <div
         data-testid="day-assignment-sheet"
-        className="relative w-full rounded-t-3xl bg-white shadow-xl sm:max-w-md sm:rounded-3xl dark:bg-slate-800"
+        className="relative w-full rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
         style={{ overscrollBehavior: 'contain' }}
       >
         {/* Drag handle */}

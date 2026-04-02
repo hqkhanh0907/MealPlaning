@@ -49,7 +49,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
         </div>
 
         {/* Stats */}
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{daysPerWeek}</p>
             <p className="text-[10px] text-slate-500">{t('onboarding.preview.workoutDays', { count: daysPerWeek })}</p>
