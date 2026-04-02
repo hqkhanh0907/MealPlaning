@@ -103,10 +103,10 @@ describe('AutoAdjustBanner', () => {
     expect(screen.getByTestId('auto-adjust-banner')).toHaveAttribute('role', 'alert');
   });
 
-  it('has dark amber background style', () => {
+  it('has dark amber background class', () => {
     render(<AutoAdjustBanner adjustment={makeAdjustment()} onApply={vi.fn()} onDismiss={vi.fn()} />);
     const banner = screen.getByTestId('auto-adjust-banner');
-    expect(banner.style.backgroundColor).toBe('rgb(146, 64, 14)');
+    expect(banner.className).toContain('bg-amber-800');
   });
 
   it('does not auto-dismiss — persists on render', () => {

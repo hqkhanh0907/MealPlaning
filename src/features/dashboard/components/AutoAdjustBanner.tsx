@@ -56,8 +56,7 @@ export const AutoAdjustBanner = React.memo(function AutoAdjustBanner({
       data-testid="auto-adjust-banner"
       role="alert"
       aria-label={t('adjustBanner.ariaLabel')}
-      className="rounded-lg bg-amber-950 p-4"
-      style={{ backgroundColor: '#92400e' }}
+      className="rounded-lg bg-amber-800 p-4 dark:bg-amber-900"
     >
       <div className="flex items-start gap-3">
         <div className="mt-0.5 flex-shrink-0">

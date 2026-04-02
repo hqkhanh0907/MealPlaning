@@ -16,7 +16,7 @@ export const PlanGeneratedCard = () => {
   return (
     <div
       data-testid="plan-generated-card"
-      className="relative mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-5 text-white"
+      className="relative mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 text-white"
     >
       <button
         data-testid="dismiss-celebration"
