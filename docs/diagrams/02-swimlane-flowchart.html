@@ -1,0 +1,1457 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sơ Đồ Làn Bơi - Fitness/Workout Feature</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #0f172a;
+        color: #f1f5f9;
+        min-height: 100vh;
+      }
+
+      /* ── Header ── */
+      .hdr {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border-bottom: 1px solid #334155;
+        padding: 18px 24px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .hdr-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .hdr h1 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hdr h1 .ic {
+        -webkit-text-fill-color: initial;
+        font-size: 1.35rem;
+      }
+      .sub {
+        color: #94a3b8;
+        font-size: 0.78rem;
+      }
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .leg {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.73rem;
+        color: #94a3b8;
+      }
+      .leg .d {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+      }
+
+      /* ── Tabs ── */
+      .tabs {
+        display: flex;
+        gap: 2px;
+      }
+      .tab {
+        padding: 8px 14px;
+        border: none;
+        background: 0;
+        color: #64748b;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        border-radius: 6px 6px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .tab:hover {
+        color: #94a3b8;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .tab.on {
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .tab[data-f='a'].on {
+        border-bottom-color: #3b82f6;
+      }
+      .tab[data-f='b'].on {
+        border-bottom-color: #22c55e;
+      }
+      .tab[data-f='c'].on {
+        border-bottom-color: #eab308;
+      }
+      .tab[data-f='d'].on {
+        border-bottom-color: #a855f7;
+      }
+      .bg {
+        font-size: 0.58rem;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .tab[data-f='a'] .bg {
+        background: #3b82f6;
+      }
+      .tab[data-f='b'] .bg {
+        background: #22c55e;
+      }
+      .tab[data-f='c'] .bg {
+        background: #eab308;
+        color: #1a1a00;
+      }
+      .tab[data-f='d'] .bg {
+        background: #a855f7;
+      }
+
+      /* ── Content ── */
+      .ct {
+        padding: 18px 24px 40px;
+        overflow-x: auto;
+      }
+      .pn {
+        display: none;
+        animation: fi 0.3s ease;
+      }
+      .pn.on {
+        display: block;
+      }
+      @keyframes fi {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── Flow desc ── */
+      .fd {
+        padding: 12px 16px;
+        border-radius: 9px;
+        margin-bottom: 18px;
+        font-size: 0.82rem;
+        line-height: 1.5;
+        color: #94a3b8;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        border: 1px solid;
+      }
+      .fd strong {
+        color: #f1f5f9;
+      }
+      .fd .di {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+      .fa {
+        background: rgba(59, 130, 246, 0.07);
+        border-color: rgba(59, 130, 246, 0.2);
+      }
+      .fb {
+        background: rgba(34, 197, 94, 0.07);
+        border-color: rgba(34, 197, 94, 0.2);
+      }
+      .fc {
+        background: rgba(234, 179, 8, 0.07);
+        border-color: rgba(234, 179, 8, 0.2);
+      }
+      .ff {
+        background: rgba(168, 85, 247, 0.07);
+        border-color: rgba(168, 85, 247, 0.2);
+      }
+
+      /* ── Swimlane table ── */
+      .sw {
+        min-width: 920px;
+      }
+      .st {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 6px 0;
+        table-layout: fixed;
+      }
+      .st col {
+        width: 25%;
+      }
+
+      /* Lane headers */
+      .st thead th {
+        padding: 10px 8px;
+        border-radius: 9px 9px 0 0;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.82rem;
+        border: 1px solid;
+        border-bottom: 3px solid;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        line-height: 1.3;
+      }
+      .st thead th .li {
+        display: block;
+        font-size: 1.3rem;
+        margin-bottom: 1px;
+      }
+      .st thead th .ls {
+        display: block;
+        font-size: 0.64rem;
+        font-weight: 500;
+        opacity: 0.75;
+        margin-top: 1px;
+      }
+      th.h1 {
+        background: rgba(76, 175, 80, 0.12);
+        color: #4caf50;
+        border-color: rgba(76, 175, 80, 0.25);
+        border-bottom-color: #4caf50;
+      }
+      th.h2 {
+        background: rgba(33, 150, 243, 0.12);
+        color: #2196f3;
+        border-color: rgba(33, 150, 243, 0.25);
+        border-bottom-color: #2196f3;
+      }
+      th.h3 {
+        background: rgba(156, 39, 176, 0.12);
+        color: #9c27b0;
+        border-color: rgba(156, 39, 176, 0.25);
+        border-bottom-color: #9c27b0;
+      }
+      th.h4 {
+        background: rgba(255, 152, 0, 0.12);
+        color: #ff9800;
+        border-color: rgba(255, 152, 0, 0.25);
+        border-bottom-color: #ff9800;
+      }
+
+      /* Lane cells */
+      .st tbody td {
+        vertical-align: top;
+        padding: 3px 4px;
+        border-left: 1px solid rgba(255, 255, 255, 0.03);
+        border-right: 1px solid rgba(255, 255, 255, 0.03);
+        background: rgba(0, 0, 0, 0.08);
+      }
+      .st tbody tr:last-child td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 0 0 8px 8px;
+        padding-bottom: 10px;
+      }
+      .st tbody tr:first-child td {
+        padding-top: 10px;
+      }
+
+      /* ── Step nodes ── */
+      .nd {
+        padding: 9px 11px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        line-height: 1.4;
+        margin: 2px 0;
+        border: 1px solid;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        cursor: default;
+      }
+      .nd:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 18px rgba(0, 0, 0, 0.35);
+      }
+      .nd .sn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 19px;
+        height: 19px;
+        border-radius: 50%;
+        font-size: 0.63rem;
+        font-weight: 800;
+        margin-right: 5px;
+        color: #fff;
+        vertical-align: middle;
+      }
+      .nd .sl {
+        font-weight: 600;
+        color: #f1f5f9;
+      }
+      .nd .sd {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.71rem;
+        color: #94a3b8;
+        line-height: 1.35;
+      }
+      .nd code {
+        font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+        font-size: 0.68rem;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1px 4px;
+        border-radius: 3px;
+        color: #e2e8f0;
+      }
+
+      /* Node lane colors */
+      .n1 {
+        background: rgba(76, 175, 80, 0.08);
+        border-color: rgba(76, 175, 80, 0.22);
+      }
+      .n1 .sn {
+        background: #4caf50;
+      }
+      .n1:hover {
+        box-shadow:
+          0 0 14px rgba(76, 175, 80, 0.1),
+          0 5px 18px rgba(0, 0, 0, 0.35);
+      }
+      .n2 {
+        background: rgba(33, 150, 243, 0.08);
+        border-color: rgba(33, 150, 243, 0.22);
+      }
+      .n2 .sn {
+        background: #2196f3;
+      }
+      .n2:hover {
+        box-shadow:
+          0 0 14px rgba(33, 150, 243, 0.1),
+          0 5px 18px rgba(0, 0, 0, 0.35);
+      }
+      .n3 {
+        background: rgba(156, 39, 176, 0.08);
+        border-color: rgba(156, 39, 176, 0.22);
+      }
+      .n3 .sn {
+        background: #9c27b0;
+      }
+      .n3:hover {
+        box-shadow:
+          0 0 14px rgba(156, 39, 176, 0.1),
+          0 5px 18px rgba(0, 0, 0, 0.35);
+      }
+      .n4 {
+        background: rgba(255, 152, 0, 0.08);
+        border-color: rgba(255, 152, 0, 0.22);
+      }
+      .n4 .sn {
+        background: #ff9800;
+      }
+      .n4:hover {
+        box-shadow:
+          0 0 14px rgba(255, 152, 0, 0.1),
+          0 5px 18px rgba(0, 0, 0, 0.35);
+      }
+
+      /* Special node shapes */
+      .nd.sta {
+        border-radius: 16px;
+        text-align: center;
+      }
+      .nd.end {
+        border-radius: 16px;
+        text-align: center;
+        border-width: 2px;
+        border-style: double;
+      }
+      .nd.dec {
+        border-left: 3px solid;
+      }
+      .n1.dec {
+        border-left-color: #4caf50;
+      }
+      .n3.dec {
+        border-left-color: #9c27b0;
+      }
+      .nd.tx {
+        border-style: dashed;
+      }
+
+      /* Pulse on start */
+      @keyframes pu {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 0 5px rgba(76, 175, 80, 0);
+        }
+      }
+      .nd.sta {
+        animation: pu 2.5s ease infinite;
+      }
+
+      /* Transaction bracket */
+      .txb {
+        border: 1px dashed rgba(255, 152, 0, 0.3);
+        border-radius: 6px;
+        padding: 5px 3px;
+        position: relative;
+        margin: 2px 0;
+      }
+      .txb::before {
+        content: 'TRANSACTION';
+        position: absolute;
+        top: -7px;
+        left: 7px;
+        font-size: 0.52rem;
+        font-weight: 800;
+        color: #ff9800;
+        background: #0f172a;
+        padding: 0 4px;
+        letter-spacing: 0.7px;
+      }
+      .txb .nd {
+        margin: 2px 0;
+      }
+
+      /* Arrows */
+      .ar {
+        text-align: center;
+        padding: 1px 0;
+        height: 18px;
+        line-height: 18px;
+        font-size: 0.72rem;
+        color: #64748b;
+        opacity: 0.45;
+      }
+      .al {
+        font-size: 0.6rem;
+        font-style: italic;
+        margin-left: 2px;
+      }
+
+      /* Section divider - uses all 4 cells properly */
+      .sec {
+        padding: 6px 6px 2px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+      }
+
+      /* Empty */
+      .em {
+        min-height: 4px;
+      }
+
+      /* ── Footer ── */
+      .ft {
+        text-align: center;
+        padding: 20px;
+        color: #64748b;
+        font-size: 0.7rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        margin-top: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .hdr {
+          padding: 10px 10px 0;
+        }
+        .ct {
+          padding: 10px;
+        }
+        .hdr h1 {
+          font-size: 1rem;
+        }
+        .tab {
+          padding: 6px 8px;
+          font-size: 0.72rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hdr">
+      <div class="hdr-top">
+        <div>
+          <h1><span class="ic">🏊</span> Sơ Đồ Làn Bơi — Fitness/Workout Feature</h1>
+          <div class="sub">MealPlaning App · React 19 + Vite 6 + Capacitor 8 · Kiến trúc 4 tầng</div>
+        </div>
+        <div class="legend">
+          <div class="leg">
+            <div class="d" style="background: #4caf50"></div>
+            User Actions
+          </div>
+          <div class="leg">
+            <div class="d" style="background: #2196f3"></div>
+            React Components
+          </div>
+          <div class="leg">
+            <div class="d" style="background: #9c27b0"></div>
+            Zustand Store
+          </div>
+          <div class="leg">
+            <div class="d" style="background: #ff9800"></div>
+            SQLite (sql.js)
+          </div>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab on" data-f="a" onclick="sw('a')"><span class="bg">A</span> Workout Logging</button>
+        <button class="tab" data-f="b" onclick="sw('b')"><span class="bg">B</span> Plan Creation</button>
+        <button class="tab" data-f="c" onclick="sw('c')"><span class="bg">C</span> Weight Tracking</button>
+        <button class="tab" data-f="d" onclick="sw('d')"><span class="bg">D</span> Split Type Change</button>
+      </div>
+    </div>
+
+    <div class="ct">
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!--              FLOW A: WORKOUT LOGGING                  -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <div class="pn on" id="pa">
+        <div class="fd fa">
+          <span class="di">🏋️</span>
+          <div>
+            <strong>Flow A — Workout Logging:</strong> Luồng chính của module Fitness. Người dùng bắt đầu buổi tập, nhập
+            thông số từng set (weight/reps/RPE), hệ thống lưu draft tự động, sau đó hoàn thành buổi tập với atomic
+            transaction và phát hiện PR (Personal Record).
+          </div>
+        </div>
+
+        <div class="sw">
+          <table class="st">
+            <colgroup>
+              <col />
+              <col />
+              <col />
+              <col />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="h1"><span class="li">👤</span>User Actions<span class="ls">Thao tác người dùng</span></th>
+                <th class="h2">
+                  <span class="li">🖥️</span>React Components<span class="ls">Giao diện & xử lý sự kiện</span>
+                </th>
+                <th class="h3">
+                  <span class="li">🧠</span>Zustand Store<span class="ls">State & business logic</span>
+                </th>
+                <th class="h4">
+                  <span class="li">💾</span>SQLite Database<span class="ls">Persistence (sql.js WASM)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="nd n1 sta">
+                    <span class="sn">1</span><span class="sl">Click "Bắt đầu tập"</span
+                    ><span class="sd">Từ <code>TrainingPlanView</code>, chọn buổi tập hôm nay</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">tap event</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">2</span><span class="sl">pushPage(WorkoutLogger)</span
+                    ><span class="sd">Mở full-screen workout logger, ẩn bottom nav</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><div class="ar">↓</div></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">3</span><span class="sl">loadWorkoutDraft()</span
+                    ><span class="sd">Khôi phục draft nếu tồn tại (resume sau crash)</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">query</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n4">
+                    <span class="sn">4</span><span class="sl">SELECT workout_drafts</span
+                    ><span class="sd">Truy vấn draft đã lưu từ SQLite</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Section divider -->
+              <tr>
+                <td><div class="sec" style="color: #3b82f6">⟳ Vòng lặp — Mỗi set</div></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="nd n1 dec">
+                    <span class="sn">5</span><span class="sl">Nhập Weight / Reps / RPE</span
+                    ><span class="sd">Điền thông số cho từng set. Có thể chỉnh sửa set trước.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">input</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">6</span><span class="sl">SetEditor renders</span
+                    ><span class="sd">Form input + validate real-time. <code>RestTimer</code> countdown giữa set.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">onChange</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">7</span><span class="sl">updateWorkoutDraft()</span
+                    ><span class="sd">Cập nhật draft trong store. Auto-save → crash-safe.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">persist</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n4">
+                    <span class="sn">8</span><span class="sl">UPDATE workout_drafts</span
+                    ><span class="sd">Lưu draft vào DB sau mỗi thay đổi</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Section divider -->
+              <tr>
+                <td><div class="sec" style="color: #3b82f6">✅ Hoàn thành buổi tập</div></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="nd n1">
+                    <span class="sn">9</span><span class="sl">Click "Hoàn thành"</span
+                    ><span class="sd">Kết thúc buổi tập, lưu vĩnh viễn</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">tap</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">10</span><span class="sl">WorkoutSummaryCard</span
+                    ><span class="sd">Tổng kết: volume, số set, thời gian</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">confirm</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">11</span><span class="sl">saveWorkoutAtomic()</span
+                    ><span class="sd">Lưu workout + sets trong 1 transaction. Detect PRs.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">atomic write</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="txb">
+                    <div class="nd n4 tx"><span class="sn">12</span><span class="sl">BEGIN TRANSACTION</span></div>
+                    <div class="nd n4">
+                      <span class="sn">13</span><span class="sl">INSERT workouts</span
+                      ><span class="sd">Metadata buổi tập</span>
+                    </div>
+                    <div class="nd n4">
+                      <span class="sn">14</span><span class="sl">INSERT workout_sets</span
+                      ><span class="sd">Batch insert tất cả sets</span>
+                    </div>
+                    <div class="nd n4">
+                      <span class="sn">15</span><span class="sl">DELETE workout_drafts</span
+                      ><span class="sd">Xóa draft sau khi lưu</span>
+                    </div>
+                    <div class="nd n4 tx"><span class="sn">16</span><span class="sl">COMMIT</span></div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">result</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">17</span><span class="sl">clearDraft() → detect PRs</span
+                    ><span class="sd">Xóa draft. So sánh lịch sử → phát hiện Personal Records.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">notify</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">18</span><span class="sl">PRToast → popPage()</span
+                    ><span class="sd">🎉 Toast nếu có PR. Đóng WorkoutLogger → TrainingPlanView.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="nd n1 end"><span class="sn">✓</span><span class="sl">Xem kết quả tập</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!--              FLOW B: PLAN CREATION                    -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <div class="pn" id="pb">
+        <div class="fd fb">
+          <span class="di">📋</span>
+          <div>
+            <strong>Flow B — Auto-generate Training Plan:</strong> Người dùng chọn "Tạo kế hoạch tự động". Hệ thống tính
+            volume, áp dụng periodization, tạo plan + days, seed exercises nếu cần.
+          </div>
+        </div>
+
+        <div class="sw">
+          <table class="st">
+            <colgroup>
+              <col />
+              <col />
+              <col />
+              <col />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="h1"><span class="li">👤</span>User Actions<span class="ls">Thao tác người dùng</span></th>
+                <th class="h2">
+                  <span class="li">🖥️</span>React Components<span class="ls">Giao diện & xử lý sự kiện</span>
+                </th>
+                <th class="h3">
+                  <span class="li">🧠</span>Zustand Store<span class="ls">State & business logic</span>
+                </th>
+                <th class="h4">
+                  <span class="li">💾</span>SQLite Database<span class="ls">Persistence (sql.js WASM)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="nd n1 sta">
+                    <span class="sn">1</span><span class="sl">Click "Tạo kế hoạch tự động"</span
+                    ><span class="sd">Từ <code>FitnessTab</code>, bấm nút generate plan</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">tap</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">2</span><span class="sl">handleGeneratePlan()</span
+                    ><span class="sd">Gọi generate. Hiển thị loading spinner.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><div class="ar">↓</div></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">3</span><span class="sl">generatePlan()</span
+                    ><span class="sd"
+                      ><code>volumeCalculator</code> tính volume. <code>periodization</code> phân bổ theo tuần.</span
+                    >
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">computed</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">4</span><span class="sl">addTrainingPlan()</span
+                    ><span class="sd">Tạo plan mới trong store</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td><div class="ar">↓</div></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">5</span><span class="sl">addPlanDays()</span
+                    ><span class="sd">Thêm ngày tập + bài tập mỗi ngày</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">persist</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="txb">
+                    <div class="nd n4">
+                      <span class="sn">6</span><span class="sl">INSERT training_plans</span
+                      ><span class="sd">Lưu plan metadata</span>
+                    </div>
+                    <div class="nd n4">
+                      <span class="sn">7</span><span class="sl">INSERT training_plan_days</span
+                      ><span class="sd">Batch insert ngày + bài tập</span>
+                    </div>
+                    <div class="nd n4">
+                      <span class="sn">8</span><span class="sl">Seed exercises (if needed)</span
+                      ><span class="sd">INSERT exercises nếu DB trống</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">re-render</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">9</span><span class="sl">TrainingPlanView + Toast</span
+                    ><span class="sd">Render kế hoạch mới. Success toast xác nhận.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="nd n1 end"><span class="sn">✓</span><span class="sl">Xem kế hoạch tập</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!--              FLOW C: WEIGHT TRACKING                  -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <div class="pn" id="pc">
+        <div class="fd fc">
+          <span class="di">⚖️</span>
+          <div>
+            <strong>Flow C — Weight Tracking:</strong> Nhập cân nặng hàng ngày, xem xu hướng 7 ngày (moving average),
+            chỉ số trend (↑↓→). Hỗ trợ quick-chip và undo.
+          </div>
+        </div>
+
+        <div class="sw">
+          <table class="st">
+            <colgroup>
+              <col />
+              <col />
+              <col />
+              <col />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="h1"><span class="li">👤</span>User Actions<span class="ls">Thao tác người dùng</span></th>
+                <th class="h2">
+                  <span class="li">🖥️</span>React Components<span class="ls">Giao diện & xử lý sự kiện</span>
+                </th>
+                <th class="h3">
+                  <span class="li">🧠</span>Zustand Store<span class="ls">State & business logic</span>
+                </th>
+                <th class="h4">
+                  <span class="li">💾</span>SQLite Database<span class="ls">Persistence (sql.js WASM)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="nd n1 sta">
+                    <span class="sn">1</span><span class="sl">Nhập cân nặng</span
+                    ><span class="sd">Gõ số kg vào input hoặc tap recent chip</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">input</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">2</span><span class="sl">DailyWeightInput</span
+                    ><span class="sd"><code>parseNumericInput()</code> validate và chuyển đổi</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><div class="ar">↓</div></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3 dec">
+                    <span class="sn">3</span><span class="sl">addWeightEntry() / updateWeightEntry()</span
+                    ><span class="sd">Ngày đã có → update. Chưa có → add mới.</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">persist</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n4">
+                    <span class="sn">4</span><span class="sl">INSERT … ON CONFLICT(date)</span
+                    ><span class="sd"
+                      ><code>INSERT weight_log ON CONFLICT(date)</code> hoặc
+                      <code>UPDATE weight_log SET weight_kg</code></span
+                    >
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">recalculate</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">5</span><span class="sl">Recalculate trends</span
+                    ><span class="sd">Tính <code>movingAverage7d</code>, trend direction (↑↓→)</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">re-render</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">6</span><span class="sl">Trend indicator + Undo</span
+                    ><span class="sd">Hiển thị trend (↑↓→), moving average, Undo 30s</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="nd n1 end"><span class="sn">✓</span><span class="sl">Xem xu hướng cân nặng</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!--              FLOW D: SPLIT TYPE CHANGE                -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <div class="pn" id="pd">
+        <div class="fd ff">
+          <span class="di">🔄</span>
+          <div>
+            <strong>Flow D — Split Type Change:</strong> Đổi kiểu chia buổi tập (PPL, Upper/Lower…). Hỗ trợ 2 mode:
+            regenerate (tạo mới) hoặc remap (giữ bài tập, chuyển sang split mới).
+          </div>
+        </div>
+
+        <div class="sw">
+          <table class="st">
+            <colgroup>
+              <col />
+              <col />
+              <col />
+              <col />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="h1"><span class="li">👤</span>User Actions<span class="ls">Thao tác người dùng</span></th>
+                <th class="h2">
+                  <span class="li">🖥️</span>React Components<span class="ls">Giao diện & xử lý sự kiện</span>
+                </th>
+                <th class="h3">
+                  <span class="li">🧠</span>Zustand Store<span class="ls">State & business logic</span>
+                </th>
+                <th class="h4">
+                  <span class="li">💾</span>SQLite Database<span class="ls">Persistence (sql.js WASM)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="nd n1 sta">
+                    <span class="sn">1</span><span class="sl">Click "Đổi Split"</span
+                    ><span class="sd">Từ <code>TrainingPlanView</code>, mở split changer</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">tap</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">2</span><span class="sl">pushPage(SplitChanger)</span
+                    ><span class="sd">Mở full-screen split selection</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td><div class="ar">↓</div></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="nd n1 dec">
+                    <span class="sn">3</span><span class="sl">Chọn split mới + mode</span
+                    ><span class="sd"
+                      >PPL, Upper/Lower, Full Body… Mode: <strong>Regenerate</strong> / <strong>Remap</strong></span
+                    >
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">select</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">4</span><span class="sl">previewSplitChange()</span
+                    ><span class="sd">Tính preview: mapped, suggested, unmapped</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">query</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n4">
+                    <span class="sn">5</span><span class="sl">SELECT training_plan_days</span
+                    ><span class="sd">Lấy plan days hiện tại để tính mapping</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">render</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">6</span><span class="sl">SplitChangeConfirm</span
+                    ><span class="sd">✅ mapped · 💡 suggested · ⚠️ unmapped exercises</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td><div class="ar">↓</div></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="nd n1">
+                    <span class="sn">7</span><span class="sl">Xác nhận thay đổi</span
+                    ><span class="sd">Review preview → bấm Confirm</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="ar">↓ <span class="al">confirm</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n3">
+                    <span class="sn">8</span><span class="sl">changeSplitType(planId, newSplit, mode)</span
+                    ><span class="sd">Thực hiện đổi split theo mode đã chọn</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="ar">↓ <span class="al">persist</span></div>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="txb">
+                    <div class="nd n4 tx">
+                      <span class="sn">9</span><span class="sl">DELETE old days</span
+                      ><span class="sd">(regenerate) Xóa plan days cũ</span>
+                    </div>
+                    <div class="nd n4">
+                      <span class="sn">10</span><span class="sl">INSERT new days</span
+                      ><span class="sd">Tạo plan days mới (hoặc remap)</span>
+                    </div>
+                    <div class="nd n4">
+                      <span class="sn">11</span><span class="sl">UPDATE training_plans</span
+                      ><span class="sd"><code>SET split_type = newSplit</code></span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <div class="ar">↑ <span class="al">popPage</span></div>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td><div class="em"></div></td>
+                <td>
+                  <div class="nd n2">
+                    <span class="sn">12</span><span class="sl">popPage() → re-render</span
+                    ><span class="sd">Đóng SplitChanger, re-render với split mới</span>
+                  </div>
+                </td>
+                <td><div class="em"></div></td>
+                <td><div class="em"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="nd n1 end"><span class="sn">✓</span><span class="sl">Xem plan với split mới</span></div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="ft">
+      MealPlaning App · Fitness/Workout Swimlane Flowchart<br />
+      React 19 + Vite 6 + Zustand + sql.js WASM + Capacitor 8
+    </div>
+
+    <script>
+      function sw(f) {
+        document.querySelectorAll('.pn').forEach(function (p) {
+          p.classList.remove('on');
+        });
+        document.querySelectorAll('.tab').forEach(function (t) {
+          t.classList.remove('on');
+        });
+        var p = document.getElementById('p' + f);
+        if (p) p.classList.add('on');
+        var t = document.querySelector('.tab[data-f="' + f + '"]');
+        if (t) t.classList.add('on');
+      }
+      document.addEventListener('keydown', function (e) {
+        var fs = ['a', 'b', 'c', 'd'],
+          c = document.querySelector('.tab.on');
+        if (!c) return;
+        var i = fs.indexOf(c.getAttribute('data-f'));
+        if (e.key === 'ArrowRight' && i < 3) sw(fs[i + 1]);
+        else if (e.key === 'ArrowLeft' && i > 0) sw(fs[i - 1]);
+        else if (e.key >= '1' && e.key <= '4') sw(fs[parseInt(e.key) - 1]);
+      });
+    </script>
+  </body>
+</html>
