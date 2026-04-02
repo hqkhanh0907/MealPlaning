@@ -3,24 +3,26 @@ import { useCallback, useState } from 'react';
 import { generateUUID } from '@/utils/helpers';
 
 import { ALL_MUSCLES, LEG_MUSCLES, LOWER_MUSCLES, PULL_MUSCLES, PUSH_MUSCLES, UPPER_MUSCLES } from '../constants';
-import type { ExerciseSeed } from '../data/exerciseDatabase';
-import { EXERCISES as EXERCISE_SEEDS } from '../data/exerciseDatabase';
 import type {
-  BodyRegion,
   CardioIntensity,
   CardioType,
   CardioTypePref,
-  EquipmentType,
   Exercise,
-  ExerciseCategory,
   MuscleGroup,
   SelectedExercise,
   TrainingPlan,
   TrainingPlanDay,
   TrainingProfile,
 } from '../types';
-import { isBodyRegion, normalizeSplitType } from '../types';
+import { normalizeSplitType } from '../types';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
+import {
+  applyRepScheme,
+  calculateSetsPerSession,
+  calculateVolume,
+  getDefaultExercises,
+  selectExercisesForMuscle,
+} from '../utils/exerciseSelector';
 import type { DeloadSuggestion } from '../utils/periodization';
 import {
   applyDeloadReduction,
@@ -29,8 +31,6 @@ import {
   isDeloadWeek,
   shouldAutoDeload,
 } from '../utils/periodization';
-import type { GoalType } from '../utils/volumeCalculator';
-import { calculateTargetWeeklySets, distributeVolume } from '../utils/volumeCalculator';
 
 /* ------------------------------------------------------------------ */
 /* Public types */
@@ -77,12 +77,6 @@ interface CardioScheduleItem {
 /* Constants */
 /* ------------------------------------------------------------------ */
 
-const CATEGORY_ORDER: Record<ExerciseCategory, number> = {
-  compound: 0,
-  secondary: 1,
-  isolation: 2,
-};
-
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 /* ------------------------------------------------------------------ */
@@ -93,25 +87,6 @@ export function computeCurrentWeek(startDate: string): number {
   const elapsed = Date.now() - new Date(startDate).getTime();
   if (elapsed < 0) return 1;
   return Math.floor(elapsed / MS_PER_WEEK) + 1;
-}
-
-/* ------------------------------------------------------------------ */
-/* Seed → Exercise conversion */
-/* ------------------------------------------------------------------ */
-
-function seedToExercise(seed: ExerciseSeed): Exercise {
-  return {
-    ...seed,
-    muscleGroup: seed.muscleGroup as MuscleGroup,
-    secondaryMuscles: seed.secondaryMuscles as MuscleGroup[],
-    equipment: seed.equipment as EquipmentType[],
-    contraindicated: seed.contraindicated.filter(isBodyRegion),
-    updatedAt: '',
-  };
-}
-
-function getDefaultExercises(): Exercise[] {
-  return EXERCISE_SEEDS.map(seedToExercise);
 }
 
 /* ------------------------------------------------------------------ */
@@ -191,124 +166,6 @@ function assignDaysOfWeek(sessionCount: number): number[] {
     default:
       return Array.from({ length: Math.min(sessionCount, 7) }, (_, i) => i + 1);
   }
-}
-
-/* ------------------------------------------------------------------ */
-/* Step 2 — Weekly volume calculation */
-/* ------------------------------------------------------------------ */
-
-function calculateVolume(
-  profile: TrainingProfile,
-  healthProfile?: PlanGenerationInput['healthProfile'],
-): Record<MuscleGroup, number> {
-  const goalType: GoalType = healthProfile?.goalType ?? 'maintain';
-  const age = healthProfile?.age ?? 30;
-
-  const result = {} as Record<MuscleGroup, number>;
-  for (const muscle of ALL_MUSCLES) {
-    result[muscle] = calculateTargetWeeklySets(
-      muscle,
-      profile.trainingExperience,
-      goalType,
-      age,
-      profile.avgSleepHours,
-      profile.priorityMuscles,
-    );
-  }
-  return result;
-}
-
-/* ------------------------------------------------------------------ */
-/* Step 2b — Distribute volume across sessions */
-/* ------------------------------------------------------------------ */
-
-function calculateSetsPerSession(
-  weeklyVolume: Record<MuscleGroup, number>,
-  sessions: SessionTemplate[],
-): Record<MuscleGroup, number>[] {
-  const muscleFrequency = {} as Record<MuscleGroup, number>;
-  for (const session of sessions) {
-    for (const muscle of session.muscleGroups) {
-      muscleFrequency[muscle] = (muscleFrequency[muscle] ?? 0) + 1;
-    }
-  }
-
-  return sessions.map(session => {
-    const sets = {} as Record<MuscleGroup, number>;
-    for (const muscle of session.muscleGroups) {
-      const freq = muscleFrequency[muscle];
-      sets[muscle] = Math.max(1, Math.round(weeklyVolume[muscle] / freq));
-    }
-    return sets;
-  });
-}
-
-/* ------------------------------------------------------------------ */
-/* Step 3 — Exercise selection */
-/* ------------------------------------------------------------------ */
-
-function selectExercisesForMuscle(
-  muscleGroup: MuscleGroup,
-  setsNeeded: number,
-  availableEquipment: EquipmentType[],
-  injuries: BodyRegion[],
-  exerciseDB: Exercise[],
-): SelectedExercise[] {
-  const eligible = exerciseDB.filter(
-    ex =>
-      ex.muscleGroup === muscleGroup &&
-      ex.exerciseType === 'strength' &&
-      ex.equipment.some(eq => availableEquipment.includes(eq)) &&
-      !ex.contraindicated.some(ci => injuries.includes(ci)),
-  );
-
-  // Fallback: if no exercises match, try bodyweight exercises for this muscle group
-  let pool = eligible;
-  if (pool.length === 0 && !availableEquipment.includes('bodyweight')) {
-    pool = exerciseDB.filter(
-      ex =>
-        ex.muscleGroup === muscleGroup &&
-        ex.exerciseType === 'strength' &&
-        ex.equipment.includes('bodyweight') &&
-        !ex.contraindicated.some(ci => injuries.includes(ci)),
-    );
-  }
-
-  if (pool.length === 0) return [];
-
-  const sorted = [...pool].sort((a, b) => CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category]);
-
-  const maxExercises = Math.min(sorted.length, Math.max(1, Math.ceil(setsNeeded / 3)));
-  const selected = sorted.slice(0, maxExercises);
-  const distribution = distributeVolume(selected.length, setsNeeded);
-
-  return selected.map((ex, i) => ({
-    exercise: ex,
-    sets: distribution[i],
-    repsMin: ex.defaultRepsMin,
-    repsMax: ex.defaultRepsMax,
-    restSeconds: 90,
-  }));
-}
-
-/* ------------------------------------------------------------------ */
-/* Step 4 — Rep range assignment via periodization */
-/* ------------------------------------------------------------------ */
-
-function applyRepScheme(
-  exercises: SelectedExercise[],
-  profile: TrainingProfile,
-  sessionIndex: number,
-  weekNumber: number,
-): SelectedExercise[] {
-  const scheme = getWeekRepScheme(profile.periodizationModel, profile.trainingGoal, weekNumber, sessionIndex + 1);
-
-  return exercises.map(ex => ({
-    ...ex,
-    repsMin: scheme.repsMin,
-    repsMax: scheme.repsMax,
-    restSeconds: scheme.restSeconds,
-  }));
 }
 
 /* ------------------------------------------------------------------ */
@@ -594,7 +451,7 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
       dayOfWeek,
       sessionOrder: 1,
       workoutType: session.name,
-      muscleGroups: session.muscleGroups.join(','),
+      muscleGroups: JSON.stringify(session.muscleGroups),
       exercises: exercisesJson,
       originalExercises: exercisesJson,
       notes: deloadNote,

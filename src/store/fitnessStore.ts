@@ -21,6 +21,12 @@ import type {
   WorkoutSet,
 } from '../features/fitness/types';
 import { safeParseJsonArray } from '../features/fitness/types';
+import {
+  calculateSetsPerSession,
+  calculateVolume,
+  generateExercisesForDay,
+  getDefaultExercises,
+} from '../features/fitness/utils/exerciseSelector';
 import { remapExercisesToNewSplit } from '../features/fitness/utils/splitRemapper';
 import { computeMatchScore } from '../features/fitness/utils/templateMatcher';
 import type { DatabaseService } from '../services/databaseService';
@@ -41,7 +47,7 @@ function scoreDaySlot(
     const diff = Math.abs(a.dayOfWeek - td);
     if (diff !== 1 && diff !== 6) return false;
     const existingDay = sortedPlanDays.find(d => d.id === a.id);
-    const existingMuscle = (existingDay?.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+    const existingMuscle = safeParseJsonArray<string>(existingDay?.muscleGroups)[0]?.toLowerCase() ?? '';
     return existingMuscle === primaryMuscle && primaryMuscle !== '';
   });
 
@@ -662,8 +668,8 @@ export const useFitnessStore = create<FitnessState>()(
         if (sortedTrainingDays.length === 0) return;
 
         const sortedPlanDays = [...planDays].sort((a, b) => {
-          const primaryA = (a.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
-          const primaryB = (b.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+          const primaryA = safeParseJsonArray<string>(a.muscleGroups)[0]?.toLowerCase() ?? '';
+          const primaryB = safeParseJsonArray<string>(b.muscleGroups)[0]?.toLowerCase() ?? '';
           if (primaryA < primaryB) return -1;
           if (primaryA > primaryB) return 1;
           return 0;
@@ -676,7 +682,7 @@ export const useFitnessStore = create<FitnessState>()(
         }
 
         for (const pd of sortedPlanDays) {
-          const primaryMuscle = (pd.muscleGroups ?? '').split(',')[0].trim().toLowerCase();
+          const primaryMuscle = safeParseJsonArray<string>(pd.muscleGroups)[0]?.toLowerCase() ?? '';
 
           let bestDay = sortedTrainingDays[0];
           let bestScore = -Infinity;
@@ -845,19 +851,45 @@ export const useFitnessStore = create<FitnessState>()(
         if (mode === 'regenerate') {
           const daysPerWeek = plan.trainingDays.length;
           const preview = remapExercisesToNewSplit([], newSplit, daysPerWeek);
-          const newDays: TrainingPlanDay[] = preview.suggested.map((s, i) => ({
-            id: generateUUID(),
-            planId,
-            dayOfWeek: plan.trainingDays[i] ?? i,
-            sessionOrder: 1,
-            workoutType: s.day,
-            muscleGroups: s.muscleGroups.join(','),
-            exercises: '[]',
-            originalExercises: '[]',
-            isUserAssigned: false,
-            originalDayOfWeek: plan.trainingDays[i] ?? i,
-            notes: s.day,
-          }));
+          const { trainingProfile } = get();
+
+          // Build per-session volume distribution when profile is available
+          let sessionVolumes: Record<MuscleGroup, number>[] | null = null;
+          let exerciseDB: Exercise[] | undefined;
+          if (trainingProfile) {
+            const weeklyVolume = calculateVolume(trainingProfile);
+            const sessions = preview.suggested.map(s => ({ muscleGroups: s.muscleGroups }));
+            sessionVolumes = calculateSetsPerSession(weeklyVolume, sessions);
+            exerciseDB = getDefaultExercises();
+          }
+
+          const newDays: TrainingPlanDay[] = preview.suggested.map((s, i) => {
+            let exercisesJson = '[]';
+            if (trainingProfile && sessionVolumes) {
+              const exercises = generateExercisesForDay(
+                s.muscleGroups,
+                sessionVolumes[i],
+                trainingProfile,
+                i,
+                exerciseDB,
+              );
+              exercisesJson = JSON.stringify(exercises);
+            }
+
+            return {
+              id: generateUUID(),
+              planId,
+              dayOfWeek: plan.trainingDays[i] ?? i,
+              sessionOrder: 1,
+              workoutType: s.day,
+              muscleGroups: JSON.stringify(s.muscleGroups),
+              exercises: exercisesJson,
+              originalExercises: exercisesJson,
+              isUserAssigned: false,
+              originalDayOfWeek: plan.trainingDays[i] ?? i,
+              notes: s.day,
+            };
+          });
 
           set(state => ({
             trainingPlans: state.trainingPlans.map(p =>
@@ -903,23 +935,49 @@ export const useFitnessStore = create<FitnessState>()(
           const updatedDays: TrainingPlanDay[] = preview.mapped.map(m => ({
             ...m.from,
             workoutType: m.toDay,
-            muscleGroups: m.toMuscleGroups.join(','),
+            muscleGroups: JSON.stringify(m.toMuscleGroups),
             notes: m.toDay,
           }));
 
-          const newSuggestedDays: TrainingPlanDay[] = preview.suggested.map((s, i) => ({
-            id: generateUUID(),
-            planId,
-            dayOfWeek: plan.trainingDays[updatedDays.length + i] ?? updatedDays.length + i,
-            sessionOrder: 1,
-            workoutType: s.day,
-            muscleGroups: s.muscleGroups.join(','),
-            exercises: '[]',
-            originalExercises: '[]',
-            isUserAssigned: false,
-            originalDayOfWeek: plan.trainingDays[updatedDays.length + i] ?? updatedDays.length + i,
-            notes: s.day,
-          }));
+          const { trainingProfile } = get();
+
+          // Build per-session volume for suggested (new) days
+          let suggestedVolumes: Record<MuscleGroup, number>[] | null = null;
+          let exerciseDB: Exercise[] | undefined;
+          if (trainingProfile && preview.suggested.length > 0) {
+            const weeklyVolume = calculateVolume(trainingProfile);
+            const sessions = preview.suggested.map(s => ({ muscleGroups: s.muscleGroups }));
+            suggestedVolumes = calculateSetsPerSession(weeklyVolume, sessions);
+            exerciseDB = getDefaultExercises();
+          }
+
+          const newSuggestedDays: TrainingPlanDay[] = preview.suggested.map((s, i) => {
+            let exercisesJson = '[]';
+            if (trainingProfile && suggestedVolumes) {
+              const exercises = generateExercisesForDay(
+                s.muscleGroups,
+                suggestedVolumes[i],
+                trainingProfile,
+                updatedDays.length + i,
+                exerciseDB,
+              );
+              exercisesJson = JSON.stringify(exercises);
+            }
+
+            return {
+              id: generateUUID(),
+              planId,
+              dayOfWeek: plan.trainingDays[updatedDays.length + i] ?? updatedDays.length + i,
+              sessionOrder: 1,
+              workoutType: s.day,
+              muscleGroups: JSON.stringify(s.muscleGroups),
+              exercises: exercisesJson,
+              originalExercises: exercisesJson,
+              isUserAssigned: false,
+              originalDayOfWeek: plan.trainingDays[updatedDays.length + i] ?? updatedDays.length + i,
+              notes: s.day,
+            };
+          });
 
           const allNewDays = [...updatedDays, ...newSuggestedDays];
 
