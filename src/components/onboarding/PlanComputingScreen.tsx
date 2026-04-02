@@ -127,7 +127,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
             <button
               type="button"
               onClick={() => goBackRef.current()}
-              className="focus-visible:ring-ring min-h-[44px] rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="focus-visible:ring-ring border-border text-foreground hover:bg-accent min-h-[44px] rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {t('onboarding.computing.returnToStrategy')}
             </button>
@@ -145,10 +145,10 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
         animate={reducedMotion ? undefined : { rotate: 360 }}
         transition={reducedMotion ? undefined : { duration: 2, repeat: Infinity, ease: 'linear' }}
       >
-        <div className="border-t-primary h-16 w-16 rounded-full border-4 border-emerald-200 dark:border-emerald-800 dark:border-t-emerald-400" />
+        <div className="border-t-primary border-primary/20 h-16 w-16 rounded-full border-4" />
       </motion.div>
 
-      <h2 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
+      <h2 className="text-foreground mb-2 text-lg font-bold">
         {t('onboarding.computing.title', { name: form.getValues().name })}
       </h2>
       <p className="text-muted-foreground mb-8 text-center text-sm">{t('onboarding.computing.subtitle')}</p>
@@ -171,9 +171,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
             />
             <span
               className={`text-sm ${
-                i <= activeStep
-                  ? 'font-medium text-slate-700 dark:text-slate-300'
-                  : 'text-slate-400 dark:text-slate-600'
+                i <= activeStep ? 'text-foreground font-medium' : 'text-muted-foreground dark:text-slate-600'
               }`}
             >
               {t(`onboarding.computing.step_${step.key}`)}

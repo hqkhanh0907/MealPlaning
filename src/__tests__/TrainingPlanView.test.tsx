@@ -424,7 +424,7 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     const pushDay = screen.getByTestId('day-pill-1');
-    expect(pushDay.className).toContain('bg-emerald-100');
+    expect(pushDay.className).toContain('bg-primary/10');
     const cardioDay = screen.getByTestId('day-pill-6');
     expect(cardioDay.className).toContain('bg-blue-100');
   });
@@ -433,14 +433,14 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     const restDay = screen.getByTestId('day-pill-2');
-    expect(restDay.className).toContain('bg-slate-100');
+    expect(restDay.className).toContain('bg-muted');
   });
 
   it('selected non-today day shows slate ring', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     fireEvent.click(screen.getByTestId('day-pill-3'));
-    expect(screen.getByTestId('day-pill-3').className).toContain('ring-slate-400');
+    expect(screen.getByTestId('day-pill-3').className).toContain('ring-ring');
   });
 
   // --- Workout Card ---

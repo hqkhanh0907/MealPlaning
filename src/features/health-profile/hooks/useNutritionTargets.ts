@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { calculateBMR, calculateMacros, calculateTarget, calculateTDEE } from '../../../services/nutritionEngine';
 import { useHealthProfileStore } from '../store/healthProfileStore';
 import type { HealthProfile } from '../types';
-import { DEFAULT_HEALTH_PROFILE } from '../types';
+import { DEFAULT_HEALTH_PROFILE, getAge } from '../types';
 
 export interface NutritionTargets {
   targetCalories: number;
@@ -21,6 +21,7 @@ export interface NutritionTargets {
  */
 function isProfileConfigured(profile: HealthProfile | null): boolean {
   if (!profile) return false;
+  if (profile.dateOfBirth != null) return true;
   return (
     profile.gender !== DEFAULT_HEALTH_PROFILE.gender ||
     profile.age !== DEFAULT_HEALTH_PROFILE.age ||
@@ -67,7 +68,7 @@ export function useNutritionTargets(): NutritionTargets {
     const bmr = calculateBMR(
       healthProfile.weightKg,
       healthProfile.heightCm,
-      healthProfile.age,
+      getAge(healthProfile),
       healthProfile.gender,
       healthProfile.bmrOverride,
     );

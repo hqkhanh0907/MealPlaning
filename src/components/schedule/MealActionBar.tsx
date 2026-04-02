@@ -134,7 +134,7 @@ export const MealActionBar = React.memo(function MealActionBar({
           <button
             onClick={() => setMenuOpen(prev => !prev)}
             data-testid="btn-more-actions"
-            className="hover:text-foreground-secondary flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 text-slate-400 transition-all hover:bg-slate-100 active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:active:bg-slate-600"
+            className="hover:text-foreground-secondary text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 transition-all dark:active:bg-slate-600"
             aria-label={t('calendar.moreActions')}
             title={t('calendar.moreActions')}
           >
@@ -143,7 +143,7 @@ export const MealActionBar = React.memo(function MealActionBar({
           {menuOpen && (
             <div
               data-testid="more-actions-menu"
-              className="bg-card border-border absolute top-full right-0 z-50 mt-1 min-w-[200px] rounded-xl border py-1 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50"
+              className="bg-card border-border absolute top-full right-0 z-50 mt-1 max-w-[calc(100vw-2rem)] min-w-[200px] rounded-xl border py-1 shadow-lg shadow-black/5 dark:shadow-black/10"
             >
               {menuItems.map(item => (
                 <button

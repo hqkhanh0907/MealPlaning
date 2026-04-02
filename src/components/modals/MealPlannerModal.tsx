@@ -194,7 +194,7 @@ export const MealPlannerModal = ({
         {/* Header */}
         <div className="border-border-subtle flex items-center justify-between border-b px-4 py-4 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 sm:text-xl dark:text-slate-100">
+            <h3 className="text-foreground text-lg font-bold sm:text-xl">
               {t('planning.planTitle')} — {selectedDate}
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm">{t('planning.planSubtitle')}</p>
@@ -202,14 +202,14 @@ export const MealPlannerModal = ({
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="border-border-subtle border-b bg-slate-50 px-4 pt-3 pb-3 sm:px-8 dark:bg-slate-800/50">
+        <div className="border-border-subtle bg-muted border-b px-4 pt-3 pb-3 sm:px-8">
           <div className="flex gap-2">
             {MEAL_TABS.map(tab => {
               const isActive = activeTab === tab.type;
@@ -222,7 +222,7 @@ export const MealPlannerModal = ({
                   className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
                     isActive
                       ? 'bg-primary text-primary-foreground font-bold shadow-sm'
-                      : 'bg-card text-foreground-secondary font-medium hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600'
+                      : 'bg-card text-foreground-secondary hover:bg-accent font-medium'
                   }`}
                 >
                   <span>
@@ -232,14 +232,14 @@ export const MealPlannerModal = ({
                   {count > 0 && (
                     <span
                       className={`min-w-5 rounded-full px-1.5 py-0.5 text-center text-xs ${
-                        isActive ? 'bg-white/20 text-white' : 'text-foreground-secondary bg-slate-100 dark:bg-slate-600'
+                        isActive ? 'bg-card/20 text-white' : 'text-foreground-secondary bg-muted dark:bg-slate-600'
                       }`}
                     >
                       {count}
                     </span>
                   )}
                   {changed && (
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? 'bg-white' : 'bg-primary'}`} />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? 'bg-card' : 'bg-primary'}`} />
                   )}
                 </button>
               );
@@ -248,10 +248,10 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Search + Sort */}
-        <div className="border-border-subtle sticky top-0 z-10 border-b bg-slate-50 px-4 py-3 sm:px-8 dark:bg-slate-800/50">
+        <div className="border-border-subtle bg-muted sticky top-0 z-10 border-b px-4 py-3 sm:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="relative flex-1">
-              <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
               <Input
                 type="text"
                 id="meal-planner-search"
@@ -268,7 +268,7 @@ export const MealPlannerModal = ({
             <button
               onClick={() => setIsFilterOpen(true)}
               data-testid="btn-filter"
-              className="border-border bg-card flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-emerald-400 dark:bg-slate-700 dark:text-slate-200"
+              className="border-border bg-card text-foreground hover:border-primary flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm transition-all"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {t('filter.button')}
@@ -299,25 +299,19 @@ export const MealPlannerModal = ({
                 className={`group flex min-h-16 w-full items-center justify-between rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] sm:p-5 ${
                   isSelected
                     ? 'border-primary bg-primary-subtle/50'
-                    : 'dark:hover:border-primary border-border-subtle hover:border-emerald-200'
+                    : 'dark:hover:border-primary border-border-subtle hover:border-primary/30'
                 }`}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                      isSelected
-                        ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'text-muted-foreground bg-slate-50 dark:bg-slate-700'
+                      isSelected ? 'bg-primary/10 text-primary' : 'text-muted-foreground bg-muted'
                     }`}
                   >
                     <ChefHat className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <h4
-                      className={`truncate text-base font-bold ${
-                        isSelected ? 'text-emerald-900' : 'text-slate-800 dark:text-slate-100'
-                      }`}
-                    >
+                    <h4 className={`truncate text-base font-bold ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                       {getLocalizedField(dish.name, lang)}
                     </h4>
                     <div className="mt-1 flex gap-2">
@@ -336,7 +330,7 @@ export const MealPlannerModal = ({
                   className={`ml-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                     isSelected
                       ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border text-transparent group-hover:border-emerald-300'
+                      : 'border-border group-hover:border-primary/30 text-transparent'
                   }`}
                 >
                   <CheckCircle2 className="h-4 w-4" />
@@ -351,7 +345,7 @@ export const MealPlannerModal = ({
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-muted-foreground font-medium">
               {t('planning.totalDay')}:{' '}
-              <span className="font-bold text-slate-800 dark:text-slate-100">
+              <span className="text-foreground font-bold">
                 {totalDayDishCount} {t('common.item')}
               </span>
             </span>

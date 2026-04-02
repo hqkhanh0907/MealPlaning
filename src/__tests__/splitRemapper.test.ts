@@ -135,4 +135,65 @@ describe('remapExercisesToNewSplit', () => {
     expect(result.mapped).toHaveLength(1);
     expect(result.mapped[0].from.id).toBe('day-original');
   });
+
+  describe('muscleGroups format handling', () => {
+    it('correctly parses JSON-format muscleGroups', () => {
+      const days = [makePlanDay({ muscleGroups: JSON.stringify(['chest', 'shoulders']) })];
+      const result = remapExercisesToNewSplit(days, 'ppl', 3);
+      expect(result.mapped).toHaveLength(1);
+      expect(result.mapped[0].toDay).toBe('Push');
+    });
+
+    it('correctly parses legacy comma-separated muscleGroups via fallback', () => {
+      const days = [makePlanDay({ muscleGroups: 'chest,shoulders' })];
+      const result = remapExercisesToNewSplit(days, 'ppl', 3);
+      expect(result.mapped).toHaveLength(1);
+      expect(result.mapped[0].toDay).toBe('Push');
+    });
+
+    it('handles null muscleGroups — day goes to unmapped', () => {
+      const days = [makePlanDay({ muscleGroups: undefined })];
+      const result = remapExercisesToNewSplit(days, 'ppl', 3);
+      expect(result.unmapped).toHaveLength(1);
+      expect(result.mapped).toHaveLength(0);
+    });
+
+    it('round-trip: JSON.stringify then remap correctly parses', () => {
+      const groups = ['chest', 'shoulders'];
+      const day = makePlanDay({ muscleGroups: JSON.stringify(groups) });
+      const result = remapExercisesToNewSplit([day], 'ppl', 3);
+      expect(result.mapped).not.toHaveLength(0);
+      expect(result.mapped[0].toDay).toBe('Push');
+    });
+
+    it('mapped result is NOT empty for days with valid JSON muscleGroups', () => {
+      const days = [
+        makePlanDay({ id: 'd1', muscleGroups: JSON.stringify(['chest', 'shoulders']) }),
+        makePlanDay({ id: 'd2', muscleGroups: JSON.stringify(['back']), dayOfWeek: 2 }),
+        makePlanDay({ id: 'd3', muscleGroups: JSON.stringify(['legs', 'glutes']), dayOfWeek: 3 }),
+      ];
+      const result = remapExercisesToNewSplit(days, 'ppl', 3);
+      expect(result.mapped.length).toBe(3);
+      expect(result.mapped.map(m => m.toDay).sort()).toEqual(['Legs', 'Pull', 'Push']);
+    });
+
+    it('preserves exercises from source days in mapped results', () => {
+      const exercises = JSON.stringify([{ exercise: { id: 'ex-1' }, sets: 3, repsMin: 8, repsMax: 12 }]);
+      const days = [makePlanDay({ muscleGroups: JSON.stringify(['chest']), exercises })];
+      const result = remapExercisesToNewSplit(days, 'ppl', 3);
+      expect(result.mapped).toHaveLength(1);
+      expect(result.mapped[0].from.exercises).toBe(exercises);
+    });
+
+    it('handles mixed JSON and legacy formats across multiple days', () => {
+      const days = [
+        makePlanDay({ id: 'd1', muscleGroups: '["chest","shoulders"]' }),
+        makePlanDay({ id: 'd2', muscleGroups: 'back', dayOfWeek: 2 }),
+        makePlanDay({ id: 'd3', muscleGroups: '["legs","glutes"]', dayOfWeek: 3 }),
+      ];
+      const result = remapExercisesToNewSplit(days, 'ppl', 3);
+      expect(result.mapped).toHaveLength(3);
+      expect(result.unmapped).toHaveLength(0);
+    });
+  });
 });

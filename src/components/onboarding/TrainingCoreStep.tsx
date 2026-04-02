@@ -31,16 +31,12 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
   return (
     <div className="flex flex-1 flex-col" data-testid="training-core-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('fitness.onboarding.step1Title')}
-        </h2>
+        <h2 className="text-foreground mb-1 text-xl font-bold">{t('fitness.onboarding.step1Title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('fitness.onboarding.step1Desc')}</p>
 
         {/* Training Goal */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('fitness.onboarding.goal')}
-          </label>
+          <label className="text-foreground mb-2 block text-sm font-medium">{t('fitness.onboarding.goal')}</label>
           <fieldset className="m-0 grid grid-cols-2 gap-2 border-0 p-0" aria-label={t('fitness.onboarding.goal')}>
             {TRAINING_GOALS.map(goal => (
               <button
@@ -63,9 +59,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
 
         {/* Experience Level */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('fitness.onboarding.experience')}
-          </label>
+          <label className="text-foreground mb-2 block text-sm font-medium">{t('fitness.onboarding.experience')}</label>
           <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('fitness.onboarding.experience')}>
             {EXPERIENCE_LEVELS.map(level => (
               <button
@@ -88,7 +82,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
 
         {/* Days Per Week */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          <label className="text-foreground mb-2 block text-sm font-medium">
             {t('fitness.onboarding.daysPerWeek')}
           </label>
           <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('fitness.onboarding.daysPerWeek')}>
@@ -109,11 +103,11 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
               </button>
             ))}
           </fieldset>
-          <p className="mt-1 text-xs text-slate-400">{t('fitness.onboarding.daysPerWeekUnit')}</p>
+          <p className="text-muted-foreground mt-1 text-xs">{t('fitness.onboarding.daysPerWeekUnit')}</p>
         </div>
       </div>
 
-      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="border-border bg-card/95 fixed inset-x-0 bottom-0 flex items-center justify-between border-t p-4 backdrop-blur-sm">
         <button
           type="button"
           onClick={goBack}

@@ -222,6 +222,22 @@ input[type='number'] {
   --shadow-glow: 0 2px 6px oklch(0.765 0.177 163.22 / 0.3);
 }
 
+/* Loading bar animation for AI suggestion preview */
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.animate-loading-bar {
+  animation: loading-bar 1.5s ease-in-out infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

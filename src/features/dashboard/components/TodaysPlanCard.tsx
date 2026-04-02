@@ -75,7 +75,7 @@ function MealsSection({
         <UtensilsCrossed className="h-4 w-4 text-orange-500" aria-hidden="true" />
         <span className="text-foreground-secondary text-xs font-medium">{t('dashboard.todaysPlan.meals')}</span>
       </div>
-      <div data-testid="meals-progress" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+      <div data-testid="meals-progress" className="text-foreground text-sm font-semibold">
         {t('dashboard.todaysPlan.mealsProgress', {
           logged: mealsLogged,
           total: totalMealsPlanned,
@@ -145,9 +145,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     return (
       <>
         <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-            {t('dashboard.todaysPlan.title')}
-          </h3>
+          <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="workout-section">
               <div className="mb-2 flex items-center gap-1.5">
@@ -157,7 +155,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                 </span>
               </div>
               {data.workoutType && (
-                <p data-testid="workout-name" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <p data-testid="workout-name" className="text-foreground text-sm font-semibold">
                   {translateWorkoutType(t, data.workoutType)}
                 </p>
               )}
@@ -194,9 +192,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   if (data.state === 'training-partial') {
     return (
       <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-          {t('dashboard.todaysPlan.title')}
-        </h3>
+        <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="partial-progress-section">
             <div className="mb-2 flex items-center gap-1.5">
@@ -209,7 +205,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               </span>
             </div>
             {data.nextUncompletedSession && (
-              <p data-testid="next-session-name" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              <p data-testid="next-session-name" className="text-foreground text-sm font-semibold">
                 {t('dashboard.todaysPlan.nextSession', {
                   name: translateWorkoutType(t, data.nextUncompletedSession.workoutType),
                 })}
@@ -234,9 +230,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   if (data.state === 'training-completed') {
     return (
       <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-          {t('dashboard.todaysPlan.title')}
-        </h3>
+        <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
         <div className="grid grid-cols-2 gap-4">
           <div data-testid="workout-summary">
             <div className="mb-2 flex items-center gap-1.5">
@@ -245,12 +239,12 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
             </div>
             {data.completedWorkout && (
               <>
-                <p data-testid="workout-duration" className="text-sm text-slate-700 dark:text-slate-200">
+                <p data-testid="workout-duration" className="text-foreground text-sm">
                   {t('dashboard.todaysPlan.duration', {
                     minutes: data.completedWorkout.durationMin,
                   })}
                 </p>
-                <p data-testid="workout-sets" className="text-sm text-slate-700 dark:text-slate-200">
+                <p data-testid="workout-sets" className="text-foreground text-sm">
                   {t('dashboard.todaysPlan.setsCount', {
                     count: data.completedWorkout.totalSets,
                   })}
@@ -278,18 +272,16 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     return (
       <>
         <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-            {t('dashboard.todaysPlan.restDayTitle')}
-          </h3>
+          <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.restDayTitle')}</h3>
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="recovery-tips">
-              <p className="text-sm text-slate-700 dark:text-slate-200">
+              <p className="text-foreground text-sm">
                 <span aria-hidden="true">
                   <Footprints className="mr-1 inline-block size-4" />
                 </span>
                 {t('dashboard.todaysPlan.recoveryTip1')}
               </p>
-              <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
+              <p className="text-foreground mt-1 text-sm">
                 <span aria-hidden="true">
                   <Droplets className="mr-1 inline-block size-4" />
                 </span>
@@ -298,7 +290,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
             </div>
             <div data-testid="tomorrow-preview">
               {data.tomorrowWorkoutType ? (
-                <p className="text-sm text-slate-700 dark:text-slate-200">
+                <p className="text-foreground text-sm">
                   {t('dashboard.todaysPlan.tomorrowPreview', {
                     name: translateWorkoutType(t, data.tomorrowWorkoutType),
                     count: data.tomorrowExerciseCount ?? 0,
@@ -315,7 +307,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               size="sm"
               onClick={handleLogWeight}
               data-testid="log-weight-chip"
-              className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              className="bg-muted text-foreground hover:bg-accent rounded-full border-transparent"
             >
               {t('dashboard.todaysPlan.logWeight')}
             </Button>
@@ -324,7 +316,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               size="sm"
               onClick={handleLogCardio}
               data-testid="log-cardio-chip"
-              className="rounded-full border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+              className="bg-muted text-foreground hover:bg-accent rounded-full border-transparent"
             >
               {t('dashboard.todaysPlan.logCardio')}
             </Button>
@@ -337,9 +329,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
 
   return (
     <div data-testid="todays-plan-card" className={CARD_CLASS}>
-      <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-        {t('dashboard.todaysPlan.title')}
-      </h3>
+      <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
       <div data-testid="no-plan-section" className="flex flex-col items-center py-4">
         <Dumbbell className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
         <p className="text-muted-foreground mb-3 text-sm">{t('dashboard.todaysPlan.noPlan')}</p>

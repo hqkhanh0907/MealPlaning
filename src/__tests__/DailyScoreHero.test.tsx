@@ -61,8 +61,8 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByTestId('daily-score-hero');
-      expect(hero.className).toContain('from-emerald-500');
-      expect(hero.className).toContain('to-emerald-600');
+      expect(hero.className).toContain('from-primary/90');
+      expect(hero.className).toContain('to-primary');
     });
 
     it('renders amber gradient for score 50-79', () => {

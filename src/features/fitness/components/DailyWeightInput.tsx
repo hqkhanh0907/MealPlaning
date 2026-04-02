@@ -72,7 +72,7 @@ function getTrendIndicator(
   const diff = round1(movingAvg - yesterdayWeight);
   if (diff > 0) return { symbol: '↑', color: 'text-destructive' };
   if (diff < 0) return { symbol: '↓', color: 'text-primary' };
-  return { symbol: '→', color: 'text-slate-400 dark:text-slate-500' };
+  return { symbol: '→', color: 'text-muted-foreground' };
 }
 
 function DailyWeightInputInner(): React.JSX.Element {
@@ -221,9 +221,7 @@ function DailyWeightInputInner(): React.JSX.Element {
     });
   }, [todayEntry, numericValue, today, updateWeightEntry, addWeightEntry, removeWeightEntry, notify, t]);
 
-  const barClass = isSaved
-    ? 'border-emerald-400 bg-primary-subtle dark:bg-emerald-950/30 dark:border-primary'
-    : 'border-slate-300 bg-card dark:border-slate-600';
+  const barClass = isSaved ? 'border-primary bg-primary-subtle dark:border-primary' : 'border-border bg-card';
 
   return (
     <div
@@ -232,16 +230,14 @@ function DailyWeightInputInner(): React.JSX.Element {
     >
       <div className="flex items-center gap-2">
         <Scale className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-          {t('fitness.weight.todayWeight')}
-        </span>
+        <span className="text-foreground text-sm font-medium">{t('fitness.weight.todayWeight')}</span>
 
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
             aria-label={t('common.decrease')}
             onClick={handleDecrement}
-            className="text-foreground-secondary flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 transition-colors hover:bg-slate-200 active:scale-95 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-foreground-secondary bg-muted hover:bg-accent flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95"
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -256,7 +252,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             value={displayValue}
             onChange={handleInputChange}
             onBlur={handleInputBlur}
-            className="w-16 text-center text-lg font-bold text-slate-800 tabular-nums"
+            className="text-foreground w-16 text-center text-lg font-bold tabular-nums"
           />
 
           <span className="text-muted-foreground text-xs">{t('fitness.weight.kg')}</span>
@@ -265,7 +261,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             type="button"
             aria-label={t('common.increase')}
             onClick={handleIncrement}
-            className="text-foreground-secondary flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 transition-colors hover:bg-slate-200 active:scale-95 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-foreground-secondary bg-muted hover:bg-accent flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -277,9 +273,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             disabled={!isValid}
             onClick={handleSave}
             className={`ml-1 flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95 disabled:opacity-50 ${
-              isSaved
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-400 dark:hover:bg-emerald-800/50'
+              isSaved ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary hover:bg-primary/20'
             }`}
           >
             <Check className="h-4 w-4" />
@@ -297,8 +291,8 @@ function DailyWeightInputInner(): React.JSX.Element {
               onClick={() => handleChipSelect(w)}
               className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                 numericValue === w
-                  ? 'dark:border-primary text-primary-emphasis border-emerald-400 bg-emerald-100 dark:bg-emerald-900/40'
-                  : 'border-border text-foreground-secondary bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600'
+                  ? 'dark:border-primary text-primary-emphasis border-primary bg-primary/10'
+                  : 'border-border text-foreground-secondary bg-muted hover:bg-accent'
               } tabular-nums`}
             >
               {w}
@@ -317,7 +311,7 @@ function DailyWeightInputInner(): React.JSX.Element {
                 className={`ml-1 font-medium ${(() => {
                   if (delta < 0) return 'text-primary';
                   if (delta > 0) return 'text-destructive';
-                  return 'text-slate-400 dark:text-slate-500';
+                  return 'text-muted-foreground';
                 })()}`}
               >
                 ({delta > 0 ? '+' : ''}

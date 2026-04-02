@@ -68,9 +68,9 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
       className="bg-card border-border-subtle rounded-2xl border p-6 shadow-sm sm:p-8"
     >
       {!image && !result && (
-        <div className="mb-6 flex items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6 sm:text-sm dark:text-slate-500">
+        <div className="text-muted-foreground mb-6 flex items-center justify-center gap-4 text-xs sm:gap-6 sm:text-sm">
           <div className="flex items-center gap-1.5">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <span className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
               1
             </span>
             <span>{t('ai.step1')}</span>
@@ -114,7 +114,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
           </button>
         </div>
 
-        <div className="border-border-subtle rounded-2xl border bg-slate-50 p-6 dark:bg-slate-700">
+        <div className="border-border-subtle bg-muted rounded-2xl border p-6">
           <AnalysisResultView
             result={result}
             isAnalyzing={isAnalyzing}

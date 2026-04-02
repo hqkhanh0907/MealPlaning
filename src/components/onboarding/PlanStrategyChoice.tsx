@@ -37,7 +37,7 @@ export function PlanStrategyChoice({
   return (
     <div className="flex flex-1 flex-col" data-testid="plan-strategy-choice">
       <div className="flex flex-1 flex-col items-center justify-center px-6">
-        <h2 className="mb-2 text-center text-xl font-bold text-slate-800 dark:text-slate-100">
+        <h2 className="text-foreground mb-2 text-center text-xl font-bold">
           {t('onboarding.strategy.title', { name: values.name })}
         </h2>
         <p className="text-muted-foreground mb-8 text-center text-sm">{t('onboarding.strategy.subtitle')}</p>
@@ -49,11 +49,10 @@ export function PlanStrategyChoice({
             className={cn(
               'border-primary bg-primary-subtle flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 px-5 py-4 text-left transition-colors',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              'dark:bg-emerald-900/20',
             )}
             data-testid="strategy-auto"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+            <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
               <Sparkles className="text-primary h-6 w-6" aria-hidden="true" />
             </div>
             <div>
@@ -68,7 +67,7 @@ export function PlanStrategyChoice({
             className={cn(
               'border-border flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 px-5 py-4 text-left transition-colors',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              'hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600',
+              'hover:border-border dark:hover:border-border',
             )}
             data-testid="strategy-manual"
           >
@@ -76,7 +75,7 @@ export function PlanStrategyChoice({
               <PenLine className="text-muted-foreground h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('onboarding.strategy.manual')}</p>
+              <p className="text-foreground text-sm font-bold">{t('onboarding.strategy.manual')}</p>
               <p className="text-muted-foreground/70 text-xs">{t('onboarding.strategy.manualDesc')}</p>
             </div>
           </button>

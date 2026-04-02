@@ -9,7 +9,7 @@ import { calculateStreak } from '../../fitness/utils/gamification';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 import type { HealthProfile } from '../../health-profile/types';
-import { DEFAULT_HEALTH_PROFILE } from '../../health-profile/types';
+import { DEFAULT_HEALTH_PROFILE, getAge } from '../../health-profile/types';
 import type { ScoreColor } from '../types';
 import { calculateDailyScore } from '../utils/scoreCalculator';
 
@@ -42,10 +42,11 @@ function getGreeting(hour: number): string {
 
 function isDefaultProfile(profile: HealthProfile | null): boolean {
   if (!profile) return true;
+  if (profile.dateOfBirth != null) return false;
   return (
     profile.id === DEFAULT_HEALTH_PROFILE.id &&
     profile.gender === DEFAULT_HEALTH_PROFILE.gender &&
-    profile.age === DEFAULT_HEALTH_PROFILE.age &&
+    getAge(profile) === DEFAULT_HEALTH_PROFILE.age &&
     profile.heightCm === DEFAULT_HEALTH_PROFILE.heightCm &&
     profile.weightKg === DEFAULT_HEALTH_PROFILE.weightKg &&
     profile.activityLevel === DEFAULT_HEALTH_PROFILE.activityLevel

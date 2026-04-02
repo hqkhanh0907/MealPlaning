@@ -172,15 +172,15 @@ const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', '
 const GroceryEmptyState = ({ t }: { t: (key: string) => string }) => (
   <div data-testid="grocery-empty-state" className="bg-card border-border rounded-2xl border p-8 text-center sm:p-12">
     <div className="bg-primary-subtle mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full">
-      <ShoppingCart className="h-10 w-10 text-emerald-300" aria-hidden="true" />
+      <ShoppingCart className="text-primary/40 h-10 w-10" aria-hidden="true" />
     </div>
-    <h3 className="mb-2 text-lg font-bold text-slate-700 dark:text-slate-200">{t('grocery.emptyTitle')}</h3>
+    <h3 className="text-foreground mb-2 text-lg font-bold">{t('grocery.emptyTitle')}</h3>
     <p className="text-muted-foreground mx-auto mb-2 max-w-sm text-sm">{t('grocery.emptyDescription')}</p>
     <p className="text-muted-foreground mx-auto mb-6 max-w-sm text-xs">{t('grocery.emptyAutoHint')}</p>
     <button
       type="button"
       aria-label={t('grocery.emptyAction')}
-      className="bg-primary-subtle text-primary-emphasis inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+      className="bg-primary-subtle text-primary-emphasis hover:bg-primary/10 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all"
     >
       <CalendarDays className="h-4 w-4" aria-hidden="true" />
       {t('grocery.emptyAction')}
@@ -304,11 +304,7 @@ export const GroceryList = React.memo(function GroceryList({
       const hasDishes = item.usedInDishes.length > 0;
       return (
         <li key={item.id}>
-          <div
-            className={`rounded-xl transition-all ${
-              isChecked ? 'bg-primary-subtle/50' : 'hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
+          <div className={`rounded-xl transition-all ${isChecked ? 'bg-primary-subtle/50' : 'hover:bg-accent'}`}>
             <div className="flex items-center">
               <button
                 data-testid={`grocery-item-${item.id}`}
@@ -318,14 +314,14 @@ export const GroceryList = React.memo(function GroceryList({
               >
                 <div
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${
-                    isChecked ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'
+                    isChecked ? 'border-primary bg-primary' : 'border-border'
                   }`}
                 >
                   {isChecked && <Check className="h-3.5 w-3.5 text-white" />}
                 </div>
                 <span
                   className={`flex-1 text-left text-sm font-medium transition-all sm:text-base ${
-                    isChecked ? 'text-slate-400 line-through dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
+                    isChecked ? 'text-muted-foreground line-through' : 'text-foreground'
                   }`}
                 >
                   {item.name}
@@ -342,7 +338,7 @@ export const GroceryList = React.memo(function GroceryList({
                 <button
                   data-testid={`grocery-expand-${item.id}`}
                   onClick={() => toggleExpand(item.id)}
-                  className="focus-visible:ring-ring hover:text-primary mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring hover:text-primary text-muted-foreground mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
                   title={t('grocery.usedIn')}
                   aria-label={`${t('grocery.usedIn')} ${item.name}`}
                 >
@@ -422,8 +418,8 @@ export const GroceryList = React.memo(function GroceryList({
             data-testid={`tab-grocery-${key}`}
             className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all ${
               scope === key
-                ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700'
-                : 'text-muted-foreground active:bg-slate-200 dark:active:bg-slate-600'
+                ? 'text-primary-emphasis bg-card shadow-sm'
+                : 'text-muted-foreground active:bg-muted dark:active:bg-slate-600'
             }`}
           >
             {t(getScopeLabelKey(key))}
@@ -434,13 +430,13 @@ export const GroceryList = React.memo(function GroceryList({
       {groceryItems.length === 0 ? (
         <GroceryEmptyState t={t} />
       ) : (
-        <div className="bg-card overflow-hidden rounded-2xl border border-emerald-200 shadow-sm dark:border-emerald-800">
+        <div className="bg-card border-primary/20 overflow-hidden rounded-2xl border shadow-sm">
           {/* Header with counter and actions */}
-          <div className="bg-primary-subtle flex items-center justify-between border-b border-emerald-100 px-4 py-3 sm:px-6 sm:py-4 dark:border-emerald-800">
+          <div className="bg-primary-subtle border-primary/10 flex items-center justify-between border-b px-4 py-3 sm:px-6 sm:py-4">
             <div className="flex items-center gap-3">
               <ShoppingCart className="text-primary-emphasis h-5 w-5 sm:h-6 sm:w-6" />
               <div>
-                <h3 className="text-base font-bold text-emerald-900 sm:text-lg dark:text-emerald-200">
+                <h3 className="text-primary text-base font-bold sm:text-lg">
                   {groceryItems.length} {t('grocery.ingredientCount')}
                 </h3>
                 {checkedCount > 0 && (
@@ -454,7 +450,7 @@ export const GroceryList = React.memo(function GroceryList({
               <button
                 onClick={handleCopyList}
                 data-testid="btn-grocery-copy"
-                className="text-primary-emphasis flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 transition-all hover:bg-emerald-100 active:bg-emerald-200 dark:hover:bg-emerald-900/50"
+                className="text-primary-emphasis hover:bg-primary/10 active:bg-primary/20 flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 transition-all"
                 title={t('common.copy')}
                 aria-label={t('common.copy')}
               >
@@ -462,7 +458,7 @@ export const GroceryList = React.memo(function GroceryList({
               </button>
               <button
                 onClick={handleShare}
-                className="text-primary-emphasis flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 transition-all hover:bg-emerald-100 active:bg-emerald-200 dark:hover:bg-emerald-900/50"
+                className="text-primary-emphasis hover:bg-primary/10 active:bg-primary/20 flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 transition-all"
                 title={t('common.share')}
                 aria-label={t('common.share')}
               >
@@ -478,15 +474,13 @@ export const GroceryList = React.memo(function GroceryList({
               onClick={() => setGroupByAisle(g => !g)}
               data-testid="btn-group-aisle"
               className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                groupByAisle
-                  ? 'text-primary-emphasis bg-emerald-100 dark:bg-emerald-900/40'
-                  : 'text-muted-foreground bg-slate-100 dark:bg-slate-700'
+                groupByAisle ? 'text-primary-emphasis bg-primary/10' : 'text-muted-foreground bg-muted'
               }`}
             >
               {t('grocery.groupByAisle')}
             </button>
             {checkedCount > 0 && (
-              <div className="ml-3 h-1.5 flex-1 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <div className="bg-primary/10 ml-3 h-1.5 flex-1 overflow-hidden rounded-full">
                 <div
                   className="bg-primary h-full rounded-full transition-all duration-300"
                   style={{ width: `${(checkedCount / groceryItems.length) * 100}%` }}
@@ -511,7 +505,7 @@ export const GroceryList = React.memo(function GroceryList({
                       <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                         {t(AISLE_LABEL_KEYS[group.category])}
                       </span>
-                      <span className="text-muted-foreground text-[10px]">({group.items.length})</span>
+                      <span className="text-muted-foreground text-xs">({group.items.length})</span>
                     </div>
                     <ul className="space-y-1">{group.items.map(item => renderGroceryItem(item))}</ul>
                   </div>
@@ -526,9 +520,9 @@ export const GroceryList = React.memo(function GroceryList({
           {checkedCount === groceryItems.length && groceryItems.length > 0 && (
             <div
               data-testid="grocery-all-bought"
-              className="bg-primary-subtle border-t border-emerald-100 px-4 py-4 text-center sm:px-6 dark:border-emerald-800"
+              className="bg-primary-subtle border-primary/10 border-t px-4 py-4 text-center sm:px-6"
             >
-              <div className="flex items-center justify-center gap-2 font-bold text-emerald-800">
+              <div className="text-primary flex items-center justify-center gap-2 font-bold">
                 <CheckCircle2 className="h-5 w-5" />
                 <span>{t('grocery.allBought')}</span>
               </div>

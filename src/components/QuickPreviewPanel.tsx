@@ -58,7 +58,7 @@ export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
       data-testid="quick-preview-panel"
       className="bg-card border-border-subtle space-y-3 rounded-2xl border p-4 shadow-sm sm:p-6"
     >
-      <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{t('quickPreview.title')}</h3>
+      <h3 className="text-foreground text-base font-semibold">{t('quickPreview.title')}</h3>
 
       <div className="space-y-2">
         {MEAL_SLOTS.map(({ type, icon, key }) => (
@@ -81,7 +81,7 @@ export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
         <button
           type="button"
           onClick={onPlanAll}
-          className="bg-primary-subtle text-primary-emphasis flex min-h-11 w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-colors hover:bg-emerald-100 active:scale-[0.98] dark:hover:bg-emerald-900/50"
+          className="bg-primary-subtle text-primary-emphasis hover:bg-primary/10 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-colors active:scale-[0.98]"
         >
           <Plus className="h-4 w-4" />
           {t('quickPreview.planAll')}
@@ -141,13 +141,13 @@ const MealRow = React.memo(function MealRow({
   return (
     <div
       data-testid={TEST_ID_MAP[type]}
-      className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-700/50 dark:hover:bg-slate-700"
+      className="bg-muted hover:bg-accent flex items-center gap-3 rounded-xl p-3 transition-colors"
     >
       <MealIcon className="size-5 shrink-0" aria-hidden="true" />
 
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
+          <span className="text-foreground text-sm font-medium">{label}</span>
           <span className="text-muted-foreground truncate text-xs">
             {hasDishes ? dishSummary : t('quickPreview.empty')}
           </span>
@@ -156,7 +156,7 @@ const MealRow = React.memo(function MealRow({
         {hasDishes && (
           <div className="flex gap-2">
             <div
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600"
+              className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full dark:bg-slate-600"
               title={`${nutrition.calories.toFixed(0)} kcal`}
             >
               <div
@@ -166,7 +166,7 @@ const MealRow = React.memo(function MealRow({
               />
             </div>
             <div
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600"
+              className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full dark:bg-slate-600"
               title={`${nutrition.protein.toFixed(1)}g protein`}
             >
               <div
@@ -182,7 +182,7 @@ const MealRow = React.memo(function MealRow({
       <button
         type="button"
         onClick={() => onPlanMeal(type)}
-        className="hover:bg-primary-subtle flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-emerald-600 transition-colors active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+        className="hover:bg-primary-subtle text-primary flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium transition-colors active:scale-[0.98]"
         aria-label={hasDishes ? t('quickPreview.edit') : t('quickPreview.add')}
       >
         {hasDishes ? (

@@ -40,13 +40,13 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
       <p className="mb-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">{t('schedule.quickNutrition')}</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+          <div className="text-foreground flex items-center gap-1.5">
             <Flame className="h-3.5 w-3.5 text-orange-500" />
             <span className="text-xs font-medium">
               {totalCal}/{targetCalories} kcal
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+          <div className="bg-muted h-1.5 overflow-hidden rounded-full dark:bg-slate-600">
             <div
               className="h-full rounded-full bg-orange-400 transition-all"
               style={{ width: `${calPct}%` }}
@@ -63,13 +63,13 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </p>
         </div>
         <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+          <div className="text-foreground flex items-center gap-1.5">
             <Beef className="h-3.5 w-3.5 text-blue-500" />
             <span className="text-xs font-medium">
               {totalPro}/{targetProtein}g Pro
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+          <div className="bg-muted h-1.5 overflow-hidden rounded-full dark:bg-slate-600">
             <div
               className="h-full rounded-full bg-blue-400 transition-all"
               style={{ width: `${proPct}%` }}

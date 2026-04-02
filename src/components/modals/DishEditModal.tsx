@@ -326,14 +326,14 @@ export const DishEditModal = ({
       <ModalBackdrop onClose={handleClose} zIndex="z-60">
         <div className="bg-card relative flex h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
           <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-            <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            <h4 className="text-foreground text-lg font-bold">
               {editingItem ? t('dish.editExisting') : t('dish.createNew')}
             </h4>
             <button
               onClick={handleClose}
               data-testid="btn-close-dish"
               aria-label={t('common.closeDialog')}
-              className="dark:text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+              className="dark:text-muted-foreground text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2"
             >
               <X className="h-5 w-5" />
             </button>
@@ -407,7 +407,7 @@ export const DishEditModal = ({
                       type="button"
                       onClick={() => handleTagToggle(type, isActive)}
                       data-testid={`tag-${type}`}
-                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground-secondary bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600'}`}
+                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground-secondary bg-muted hover:bg-accent active:bg-slate-300'}`}
                     >
                       <TagIcon className="size-4" aria-hidden="true" /> {label}
                     </button>
@@ -444,7 +444,7 @@ export const DishEditModal = ({
                   onChange={e => setValue('notes', e.target.value, { shouldDirty: true })}
                   placeholder={t('dish.notesPlaceholder')}
                   rows={2}
-                  className="focus:border-primary border-border bg-card w-full resize-none rounded-xl border px-3 py-2 text-sm transition-all outline-none dark:bg-slate-700 dark:text-slate-100"
+                  className="focus:border-primary border-border bg-card w-full resize-none rounded-xl border px-3 py-2 text-sm transition-all outline-none"
                 />
               </div>
             </div>
@@ -457,7 +457,7 @@ export const DishEditModal = ({
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                     <Input
                       id="dish-ingredient-search"
                       autoComplete="off"
@@ -476,12 +476,12 @@ export const DishEditModal = ({
                     title={t('dish.quickAddTitle')}
                     aria-label={t('dish.quickAddTitle')}
                     data-testid="btn-quick-add-ingredient"
-                    className={`flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all ${showQuickAdd ? 'bg-primary text-primary-foreground' : 'text-primary hover:bg-primary-subtle bg-slate-100 dark:bg-slate-700 dark:hover:bg-emerald-900/30'}`}
+                    className={`flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all ${showQuickAdd ? 'bg-primary text-primary-foreground' : 'text-primary hover:bg-primary-subtle bg-muted'}`}
                   >
                     <Plus className="h-5 w-5" />
                   </button>
                 </div>
-                <div className="border-border max-h-60 divide-y divide-slate-100 overflow-y-auto rounded-xl border dark:divide-slate-700">
+                <div className="border-border divide-border max-h-60 divide-y overflow-y-auto rounded-xl border">
                   {(() => {
                     const { available, recentlyUsed, rest } = filteredIngredients;
                     if (available.length === 0)
@@ -498,12 +498,10 @@ export const DishEditModal = ({
                         data-testid={`btn-add-ing-${ing.id}`}
                         type="button"
                         onClick={() => handleAddIngredient(ing.id)}
-                        className="group hover:bg-primary-subtle flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-all dark:hover:bg-emerald-900/30"
+                        className="group hover:bg-primary-subtle flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-all"
                       >
                         <div className="min-w-0 flex-1">
-                          <span className="font-medium text-slate-700 dark:text-slate-300">
-                            {getLocalizedField(ing.name, lang)}
-                          </span>
+                          <span className="text-foreground font-medium">{getLocalizedField(ing.name, lang)}</span>
                           <span className="text-muted-foreground ml-2 text-xs">
                             {Math.round(ing.caloriesPer100)}cal · {Math.round(ing.proteinPer100)}g pro
                           </span>
@@ -520,14 +518,14 @@ export const DishEditModal = ({
                               className="flex items-center gap-1.5 bg-amber-50/50 px-4 py-2 dark:bg-amber-900/10"
                             >
                               <Clock className="h-3 w-3 text-amber-500" aria-hidden="true" />
-                              <span className="text-[10px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
+                              <span className="text-xs font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
                                 {t('dish.recentlyUsed')}
                               </span>
                             </div>
                             {recentlyUsed.map(renderIngButton)}
                             {rest.length > 0 && (
-                              <div className="bg-slate-50 px-4 py-2 dark:bg-slate-700/50">
-                                <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                              <div className="bg-muted px-4 py-2">
+                                <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                                   {t('dish.allIngredients')}
                                 </span>
                               </div>
@@ -559,12 +557,10 @@ export const DishEditModal = ({
                     return (
                       <div
                         key={field.id}
-                        className="border-border flex items-center justify-between rounded-xl border bg-slate-50 p-3 dark:bg-slate-700/50"
+                        className="border-border bg-muted flex items-center justify-between rounded-xl border p-3"
                       >
                         <div className="flex-1">
-                          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                            {getLocalizedField(ing.name, lang)}
-                          </p>
+                          <p className="text-foreground text-sm font-bold">{getLocalizedField(ing.name, lang)}</p>
                           <div className="mt-1.5 flex items-center gap-1.5">
                             <button
                               type="button"
@@ -574,7 +570,7 @@ export const DishEditModal = ({
                                 setValue(`ingredients.${index}.amount`, a, { shouldDirty: true });
                               }}
                               aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`}
-                              className="text-foreground-secondary flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg bg-slate-100 transition-all hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500"
+                              className="text-foreground-secondary bg-muted hover:bg-accent flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg transition-all active:bg-slate-300 dark:bg-slate-600"
                             >
                               <Minus className="h-4 w-4" />
                             </button>
@@ -584,7 +580,7 @@ export const DishEditModal = ({
                               inputMode="numeric"
                               testId={`input-dish-amount-${field.ingredientId}`}
                               ariaLabel={getLocalizedField(ing.name, lang)}
-                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-border'} focus:border-primary bg-card transition-all outline-none dark:bg-slate-700 dark:text-slate-100`}
+                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-border'} focus:border-primary bg-card transition-all outline-none`}
                             />
                             <button
                               type="button"
@@ -594,7 +590,7 @@ export const DishEditModal = ({
                                 setValue(`ingredients.${index}.amount`, a, { shouldDirty: true });
                               }}
                               aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`}
-                              className="text-foreground-secondary flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg bg-slate-100 transition-all hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500"
+                              className="text-foreground-secondary bg-muted hover:bg-accent flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg transition-all active:bg-slate-300 dark:bg-slate-600"
                             >
                               <Plus className="h-4 w-4" />
                             </button>
@@ -663,15 +659,12 @@ export const DishEditModal = ({
                 { cal: 0, prot: 0, carbs: 0, fat: 0 },
               );
               return (
-                <div className="border-border-subtle flex items-center justify-around gap-3 border-t bg-slate-50 px-6 py-3 text-center dark:bg-slate-700/50">
+                <div className="border-border-subtle bg-muted flex items-center justify-around gap-3 border-t px-6 py-3 text-center">
                   <div>
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Flame className="size-3.5" aria-hidden="true" /> KCal
                     </p>
-                    <p
-                      data-testid="dish-total-calories"
-                      className="text-sm font-bold text-slate-700 dark:text-slate-200"
-                    >
+                    <p data-testid="dish-total-calories" className="text-foreground text-sm font-bold">
                       {Math.round(totals.cal)}
                     </p>
                   </div>
@@ -679,19 +672,19 @@ export const DishEditModal = ({
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Dumbbell className="size-3.5" aria-hidden="true" /> Protein
                     </p>
-                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p>
+                    <p className="text-foreground text-sm font-bold">{Math.round(totals.prot)}g</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Wheat className="size-3.5" aria-hidden="true" /> Carbs
                     </p>
-                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p>
+                    <p className="text-foreground text-sm font-bold">{Math.round(totals.carbs)}g</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Droplets className="size-3.5" aria-hidden="true" /> Fat
                     </p>
-                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p>
+                    <p className="text-foreground text-sm font-bold">{Math.round(totals.fat)}g</p>
                   </div>
                 </div>
               );
@@ -701,7 +694,7 @@ export const DishEditModal = ({
               type="button"
               onClick={handleFormSubmit}
               data-testid="btn-save-dish"
-              className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all dark:shadow-emerald-900"
+              className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all"
             >
               <Save className="h-5 w-5" aria-hidden="true" /> {t('dish.saveDish')}
             </button>

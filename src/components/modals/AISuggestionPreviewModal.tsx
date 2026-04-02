@@ -143,14 +143,14 @@ export const AISuggestionPreviewModal = ({
               <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionTitle')}</h3>
+              <h3 className="text-foreground text-lg font-bold">{t('ai.suggestionTitle')}</h3>
               <p className="text-muted-foreground text-xs">{t('ai.suggestionDesc')}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="dark:text-muted-foreground rounded-full p-2 text-slate-400 transition-all hover:bg-white/50 dark:hover:bg-slate-700"
+            className="dark:text-muted-foreground text-muted-foreground hover:bg-card/50 rounded-full p-2 transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -162,17 +162,14 @@ export const AISuggestionPreviewModal = ({
           {isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-16">
               <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <Sparkles className="h-8 w-8 animate-bounce text-indigo-600" />
+                <Sparkles className="h-8 w-8 text-indigo-600" />
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionLoading')}</p>
+                <p className="text-foreground text-lg font-bold">{t('ai.suggestionLoading')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionLoadingHint')}</p>
               </div>
-              <div className="h-2 w-48 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-                <div
-                  className="h-full animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-indigo-500"
-                  style={{ width: '60%', animation: 'loading 1.5s ease-in-out infinite' }}
-                />
+              <div className="bg-muted h-2 w-48 overflow-hidden rounded-full">
+                <div className="animate-loading-bar h-full w-3/5 rounded-full bg-indigo-500" />
               </div>
             </div>
           )}
@@ -184,7 +181,7 @@ export const AISuggestionPreviewModal = ({
                 <AlertCircle className="h-8 w-8 text-rose-600 dark:text-rose-400" />
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionError')}</p>
+                <p className="text-foreground text-lg font-bold">{t('ai.suggestionError')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{error}</p>
               </div>
               <button
@@ -204,7 +201,7 @@ export const AISuggestionPreviewModal = ({
                 <ChefHat className="h-8 w-8 text-amber-600 dark:text-amber-400" />
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionEmpty')}</p>
+                <p className="text-foreground text-lg font-bold">{t('ai.suggestionEmpty')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionEmptyHint')}</p>
               </div>
               <button
@@ -228,7 +225,9 @@ export const AISuggestionPreviewModal = ({
                       <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
                     </div>
                     <div>
-                      <p className="mb-1 text-sm font-bold text-indigo-800 dark:text-indigo-300">{t('ai.reasoning')}</p>
+                      <p className="mb-1 text-sm font-semibold text-indigo-800 dark:text-indigo-300">
+                        {t('ai.reasoning')}
+                      </p>
                       <p className="text-sm leading-relaxed text-indigo-700 dark:text-indigo-400">
                         {suggestion.reasoning}
                       </p>
@@ -257,9 +256,7 @@ export const AISuggestionPreviewModal = ({
                   <div
                     key={type}
                     className={`rounded-2xl border-2 transition-all ${
-                      isSelected
-                        ? `${colors.bg} ${colors.border}`
-                        : 'border-border bg-slate-50 opacity-60 dark:bg-slate-700'
+                      isSelected ? `${colors.bg} ${colors.border}` : 'border-border bg-muted opacity-60'
                     }`}
                   >
                     <div className="p-4">
@@ -270,7 +267,7 @@ export const AISuggestionPreviewModal = ({
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleMeal(type)}
-                            className="text-primary focus:ring-ring h-5 w-5 rounded border-slate-300"
+                            className="text-primary focus:ring-ring border-border h-5 w-5 rounded"
                           />
                           <span
                             className={`text-sm font-bold tracking-wider uppercase ${isSelected ? colors.text : 'text-muted-foreground'}`}
@@ -287,7 +284,7 @@ export const AISuggestionPreviewModal = ({
                           disabled={!isSelected}
                           className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                             isSelected
-                              ? 'text-foreground-secondary hover:bg-white/50 hover:text-slate-800 dark:hover:bg-slate-600 dark:hover:text-slate-100'
+                              ? 'text-foreground-secondary hover:bg-card/50 hover:text-foreground dark:hover:text-slate-100'
                               : 'cursor-not-allowed text-slate-300 dark:text-slate-600'
                           }`}
                         >
@@ -301,9 +298,7 @@ export const AISuggestionPreviewModal = ({
                         {names.map(name => (
                           <div key={name} className="flex items-center gap-2">
                             <ChefHat className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-slate-300'}`} />
-                            <span
-                              className={`font-medium ${isSelected ? 'text-slate-800 dark:text-slate-200' : 'text-muted-foreground'}`}
-                            >
+                            <span className={`font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                               {name}
                             </span>
                           </div>
@@ -311,17 +306,13 @@ export const AISuggestionPreviewModal = ({
                       </div>
 
                       {/* Nutrition summary */}
-                      <div
-                        className={`border-t pt-3 ${isSelected ? 'border-border/50 dark:border-slate-600/50' : 'border-border'}`}
-                      >
+                      <div className={`border-t pt-3 ${isSelected ? 'border-border/50' : 'border-border'}`}>
                         <div className="flex gap-4 text-sm">
-                          <span
-                            className={`font-bold ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-muted-foreground'}`}
-                          >
+                          <span className={`font-semibold ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                             {nutrition.calories} kcal
                           </span>
                           <span
-                            className={`font-bold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+                            className={`font-semibold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
                           >
                             {nutrition.protein}g protein
                           </span>
@@ -333,13 +324,13 @@ export const AISuggestionPreviewModal = ({
               })}
 
               {/* Total Summary */}
-              <div className="rounded-2xl bg-slate-100 p-4 dark:bg-slate-700">
+              <div className="bg-muted rounded-2xl p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
                       {t('ai.totalSelected')}
                     </p>
-                    <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                    <p className="text-foreground text-lg font-bold">
                       {nutritionSummary.calories} kcal · {nutritionSummary.protein}g protein
                     </p>
                   </div>
@@ -361,7 +352,7 @@ export const AISuggestionPreviewModal = ({
                         {Math.round((nutritionSummary.calories / targetCalories) * 100)}%
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                    <div className="bg-muted h-2 overflow-hidden rounded-full dark:bg-slate-600">
                       <div
                         className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-rose-500' : 'bg-primary'}`}
                         style={{ width: `${Math.min(100, (nutritionSummary.calories / targetCalories) * 100)}%` }}
@@ -377,7 +368,7 @@ export const AISuggestionPreviewModal = ({
                         {Math.round((nutritionSummary.protein / targetProtein) * 100)}%
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                    <div className="bg-muted h-2 overflow-hidden rounded-full dark:bg-slate-600">
                       <div
                         className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-amber-500'}`}
                         style={{ width: `${Math.min(100, (nutritionSummary.protein / targetProtein) * 100)}%` }}
@@ -392,10 +383,10 @@ export const AISuggestionPreviewModal = ({
 
         {/* Footer */}
         {!isLoading && !error && hasAnySuggestion && (
-          <div className="border-border-subtle flex items-center justify-between gap-3 border-t bg-slate-50 px-6 py-4 dark:bg-slate-800/50">
+          <div className="border-border-subtle bg-muted flex items-center justify-between gap-3 border-t px-6 py-4">
             <button
               onClick={onClose}
-              className="text-foreground-secondary rounded-xl px-5 py-2.5 font-medium transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
+              className="text-foreground-secondary hover:bg-accent rounded-xl px-5 py-2.5 font-medium transition-all"
             >
               {t('common.cancel')}
             </button>
@@ -419,14 +410,6 @@ export const AISuggestionPreviewModal = ({
           </div>
         )}
       </div>
-
-      <style>{`
-        @keyframes loading {
-          0% { transform: translateX(-100%); }
-          50% { transform: translateX(0%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </ModalBackdrop>
   );
 };

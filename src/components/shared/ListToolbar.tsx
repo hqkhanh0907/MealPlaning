@@ -49,7 +49,7 @@ export const ListToolbar = ({
     <>
       <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           <Input
             type="text"
             id={searchTestId || 'list-search'}
@@ -71,7 +71,7 @@ export const ListToolbar = ({
             aria-label={t('listToolbar.sortBy')}
             value={sortBy}
             onChange={e => onSortChange(e.target.value)}
-            className="bg-card focus:border-primary border-border min-h-11 flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm outline-none sm:w-44 sm:flex-none dark:text-slate-200"
+            className="bg-card focus:border-primary border-border text-foreground min-h-11 flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium shadow-sm outline-none sm:w-44 sm:flex-none"
             {...(sortTestId ? { 'data-testid': sortTestId } : {})}
           >
             {sortOptions.map(opt => (
@@ -84,7 +84,7 @@ export const ListToolbar = ({
           <div className="border-border flex overflow-hidden rounded-xl border">
             <button
               onClick={() => onLayoutChange('grid')}
-              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-card text-slate-400 hover:bg-slate-50 dark:text-slate-500 dark:hover:bg-slate-700'}`}
+              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-accent'}`}
               title={t('listToolbar.gridView')}
               aria-label={t('listToolbar.gridView')}
               data-testid="btn-view-grid"
@@ -93,7 +93,7 @@ export const ListToolbar = ({
             </button>
             <button
               onClick={() => onLayoutChange('list')}
-              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-slate-400 hover:bg-slate-50 dark:text-slate-500 dark:hover:bg-slate-700'}`}
+              className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-accent'}`}
               title={t('listToolbar.listView')}
               aria-label={t('listToolbar.listView')}
               data-testid="btn-view-list"

@@ -91,12 +91,12 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
       >
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('template.title')}</h3>
+            <h3 className="text-foreground text-xl font-bold">{t('template.title')}</h3>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
           >
             <X className="h-6 w-6" />
           </button>
@@ -114,7 +114,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
               {/* Search + Tag Filter */}
               <div className="space-y-2">
                 <div className="relative">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                   <Input
                     data-testid="input-template-search"
                     type="text"
@@ -122,7 +122,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder={t('template.searchPlaceholder')}
                     aria-label={t('template.searchPlaceholder')}
-                    className="w-full pr-4 pl-9 text-slate-800"
+                    className="text-foreground w-full pr-4 pl-9"
                   />
                 </div>
                 {allTags.length > 0 && (
@@ -130,7 +130,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                     <button
                       type="button"
                       onClick={() => setFilterTag(null)}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag ? 'text-muted-foreground bg-slate-100 dark:bg-slate-700' : 'bg-primary text-primary-foreground'}`}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag ? 'text-muted-foreground bg-muted' : 'bg-primary text-primary-foreground'}`}
                     >
                       {t('common.all')}
                     </button>
@@ -140,7 +140,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                         type="button"
                         data-testid={`filter-tag-${tag}`}
                         onClick={() => setFilterTag(prev => (prev === tag ? null : tag))}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-primary-subtle bg-slate-100 dark:bg-slate-700 dark:hover:bg-emerald-900/20'}`}
+                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-primary-subtle bg-muted'}`}
                       >
                         <Tag className="h-3 w-3" />
                         {tag}
@@ -159,7 +159,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                   {filteredTemplates.map(template => (
                     <div
                       key={template.id}
-                      className="border-border-subtle rounded-2xl border bg-slate-50 p-4 dark:bg-slate-700/50"
+                      className="border-border-subtle bg-muted rounded-2xl border p-4"
                       data-testid={`template-item-${template.id}`}
                     >
                       {renamingId === template.id ? (
@@ -175,7 +175,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                                 cancelRename();
                               }
                             }}
-                            className="flex-1 border-emerald-300 text-slate-800"
+                            className="text-foreground border-primary/30 flex-1"
                             data-testid="template-rename-input"
                             aria-label={t('template.rename')}
                             autoFocus
@@ -183,7 +183,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={confirmRename}
                             aria-label={t('common.confirm')}
-                            className="hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-emerald-600 transition-all dark:hover:bg-emerald-900/30"
+                            className="hover:bg-primary-subtle text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
                             data-testid="template-rename-confirm"
                           >
                             <Check className="h-4 w-4" />
@@ -191,14 +191,14 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={cancelRename}
                             aria-label={t('common.cancel')}
-                            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-100 dark:hover:bg-slate-600"
+                            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
                           >
                             <X className="h-4 w-4" />
                           </button>
                         </div>
                       ) : (
                         <div className="mb-3">
-                          <h4 className="font-bold text-slate-800 dark:text-slate-100">{template.name}</h4>
+                          <h4 className="text-foreground font-bold">{template.name}</h4>
                           <p className="text-muted-foreground mt-0.5 text-xs">
                             {t('template.dishes', { count: getDishCount(template) })} · {t('template.created')}{' '}
                             {new Date(template.createdAt).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
@@ -208,7 +208,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                               {template.tags.map(tag => (
                                 <span
                                   key={tag}
-                                  className="inline-flex items-center gap-0.5 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                  className="bg-primary/10 text-primary inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium"
                                 >
                                   <Tag className="h-2.5 w-2.5" />
                                   {tag}
@@ -257,7 +257,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={() => startRename(template)}
                             data-testid={`btn-rename-template-${template.id}`}
-                            className="text-foreground-secondary flex min-h-11 items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-2 text-sm font-medium transition-all hover:bg-slate-300 active:scale-[0.98] dark:bg-slate-600 dark:hover:bg-slate-500"
+                            className="text-foreground-secondary bg-muted hover:bg-accent flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] dark:bg-slate-600"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                             {t('template.rename')}

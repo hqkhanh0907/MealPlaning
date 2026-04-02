@@ -26,7 +26,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-500 dark:bg-amber-900/30">
             <Save className="h-8 w-8" />
           </div>
-          <h4 className="mb-2 text-xl font-bold text-slate-800 dark:text-slate-100">{t('unsavedChanges.title')}</h4>
+          <h4 className="text-foreground mb-2 text-xl font-bold">{t('unsavedChanges.title')}</h4>
           <p className="text-foreground-secondary mb-6">{t('unsavedChanges.description')}</p>
           <div className="flex flex-col gap-2">
             <button
@@ -44,7 +44,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
             </button>
             <button
               onClick={onCancel}
-              className="text-muted-foreground min-h-12 w-full rounded-xl py-3 font-bold transition-all hover:bg-slate-100 active:scale-[0.98] dark:hover:bg-slate-700"
+              className="text-muted-foreground hover:bg-accent min-h-12 w-full rounded-xl py-3 font-bold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.stayEditing')}
             </button>

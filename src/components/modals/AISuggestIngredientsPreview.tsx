@@ -95,18 +95,18 @@ export const AISuggestIngredientsPreview = ({
               onClick={onClose}
               data-testid="btn-ai-suggest-close"
               aria-label={t('common.closeDialog')}
-              className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+              className="text-muted-foreground hover:bg-accent rounded-full p-2"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
-          <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500" data-testid="ai-suggest-empty">
+          <p className="text-muted-foreground py-8 text-center text-sm" data-testid="ai-suggest-empty">
             {t('dish.aiSuggestEmpty')}
           </p>
           <button
             type="button"
             onClick={onClose}
-            className="text-muted-foreground w-full rounded-xl bg-slate-100 py-2.5 text-sm font-medium transition-all hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-muted-foreground bg-muted hover:bg-accent w-full rounded-xl py-2.5 text-sm font-medium transition-all"
           >
             {t('dish.aiSuggestCancel')}
           </button>
@@ -127,7 +127,7 @@ export const AISuggestIngredientsPreview = ({
             onClick={onClose}
             data-testid="btn-ai-suggest-close"
             aria-label={t('common.closeDialog')}
-            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent rounded-full p-2"
           >
             <X className="h-5 w-5" />
           </button>
@@ -136,7 +136,7 @@ export const AISuggestIngredientsPreview = ({
           {items.map((item, index) => (
             <div
               key={keys[index]}
-              className="border-border rounded-xl border bg-slate-50 p-3 dark:bg-slate-700/50"
+              className="border-border bg-muted rounded-xl border p-3"
               data-testid={`ai-suggest-item-${index}`}
             >
               <div className="flex items-center gap-3">
@@ -145,18 +145,16 @@ export const AISuggestIngredientsPreview = ({
                   onClick={() => handleToggle(index)}
                   data-testid={`ai-suggest-checkbox-${index}`}
                   aria-label={`${item.checked ? t('common.deselect') : t('common.select')} ${item.suggestion.name}`}
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${item.checked ? 'border-primary bg-primary text-primary-foreground' : 'border-slate-300 dark:border-slate-500'}`}
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${item.checked ? 'border-primary bg-primary text-primary-foreground' : 'border-border'}`}
                 >
                   {item.checked && <Check className="h-4 w-4" />}
                 </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">
-                      {item.suggestion.name}
-                    </span>
+                    <span className="text-foreground truncate text-sm font-medium">{item.suggestion.name}</span>
                     {item.matchedIngredient ? (
                       <span
-                        className="text-primary-emphasis shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium dark:bg-emerald-900/40"
+                        className="text-primary-emphasis bg-primary/10 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
                         data-testid={`ai-suggest-badge-existing-${index}`}
                       >
                         {t('dish.aiSuggestExisting')}
@@ -170,7 +168,7 @@ export const AISuggestIngredientsPreview = ({
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+                  <p className="text-muted-foreground mt-0.5 text-xs">
                     {Math.round(item.suggestion.calories)}cal · {Math.round(item.suggestion.protein)}g pro ·{' '}
                     {Math.round(item.suggestion.carbs)}g carb · {Math.round(item.suggestion.fat)}g fat
                   </p>
@@ -187,7 +185,7 @@ export const AISuggestIngredientsPreview = ({
                     aria-label={`${t('ingredient.quantity')} ${item.suggestion.name}`}
                     className="w-16 text-center"
                   />
-                  <span className="text-xs text-slate-400 dark:text-slate-500">{item.suggestion.unit}</span>
+                  <span className="text-muted-foreground text-xs">{item.suggestion.unit}</span>
                 </div>
               </div>
             </div>
@@ -198,7 +196,7 @@ export const AISuggestIngredientsPreview = ({
             type="button"
             onClick={onClose}
             data-testid="btn-ai-suggest-cancel"
-            className="text-muted-foreground flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-medium transition-all hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-muted-foreground bg-muted hover:bg-accent flex-1 rounded-xl py-2.5 text-sm font-medium transition-all"
           >
             {t('dish.aiSuggestCancel')}
           </button>

@@ -16,11 +16,11 @@ export function StepLayout({ title, subtitle, goNext, goBack, children }: Readon
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h2>
+        <h2 className="text-foreground mb-1 text-xl font-bold">{title}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{subtitle}</p>
         {children}
       </div>
-      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="border-border bg-card/95 fixed inset-x-0 bottom-0 flex items-center justify-between border-t p-4 backdrop-blur-sm">
         <button
           type="button"
           onClick={goBack}

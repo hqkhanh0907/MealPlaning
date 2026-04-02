@@ -25,7 +25,7 @@ interface DateSelectorProps {
 // Helper to get meal indicator dot class without nested ternary
 const getMealDotClass = (hasMeal: boolean, isSelected: boolean, activeColor: string): string => {
   if (!hasMeal) return 'bg-transparent';
-  return isSelected ? 'bg-white' : activeColor;
+  return isSelected ? 'bg-card' : activeColor;
 };
 
 // Helper to get day button style class without nested ternary
@@ -37,13 +37,13 @@ const getDayButtonClass = (
 ): string => {
   if (isSelected) {
     return variant === 'week'
-      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 dark:shadow-emerald-900 scale-105'
-      : 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 dark:shadow-emerald-900 scale-105 ring-4 ring-ring/20';
+      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 scale-105'
+      : 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 scale-105 ring-4 ring-ring/20';
   }
   if (isToday) {
     return variant === 'week'
-      ? 'bg-primary-subtle text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700'
-      : 'bg-primary-subtle text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50';
+      ? 'bg-primary-subtle text-primary border border-primary/20'
+      : 'bg-primary-subtle text-primary border border-primary/20 hover:bg-primary/10';
   }
   if (isSunday) {
     return variant === 'week'
@@ -51,15 +51,15 @@ const getDayButtonClass = (
       : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 border border-transparent hover:border-rose-200 dark:hover:border-rose-700';
   }
   return variant === 'week'
-    ? 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 active:bg-slate-200'
-    : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent hover:border-border dark:hover:border-slate-600';
+    ? 'bg-muted text-foreground hover:bg-accent active:bg-muted'
+    : 'bg-muted text-foreground hover:bg-accent border border-transparent hover:border-border dark:hover:border-border';
 };
 
 // Helper to get week day label color class
 const getWeekDayLabelClass = (isSelected: boolean, isSunday: boolean): string => {
   if (isSelected) return 'text-white/80';
   if (isSunday) return 'text-rose-400';
-  return 'text-slate-400 dark:text-slate-500';
+  return 'text-muted-foreground';
 };
 
 // Get Monday of the week containing the given date
@@ -217,14 +217,14 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   return (
     <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
-        <div className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
+        <div className="text-foreground flex items-center gap-2 text-lg font-bold">
           <CalendarIcon className="text-primary h-5 w-5" />
           <span>{viewMode === 'calendar' ? t('calendar.monthYear', { month: month + 1, year }) : weekLabel}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
-            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all hover:bg-slate-100 active:bg-slate-200 sm:min-h-9 sm:min-w-9 sm:p-2 dark:hover:bg-slate-700 dark:active:bg-slate-600"
+            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:min-h-9 sm:min-w-9 sm:p-2 dark:active:bg-slate-600"
             title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
             aria-label={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
           >
@@ -233,7 +233,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
           <button
             onClick={goToToday}
             data-testid="btn-today"
-            className="bg-primary-subtle mr-1 flex min-h-11 items-center rounded-xl px-3 py-1.5 text-sm font-bold text-emerald-600 transition-all hover:bg-emerald-100 active:bg-emerald-200 sm:mr-2 sm:min-h-9 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+            className="bg-primary-subtle text-primary hover:bg-primary/10 active:bg-primary/20 mr-1 flex min-h-11 items-center rounded-xl px-3 py-1.5 text-sm font-bold transition-all sm:mr-2 sm:min-h-9"
           >
             {t('calendar.today')}
           </button>
@@ -241,7 +241,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
             data-testid="btn-prev-date"
             aria-label={viewMode === 'calendar' ? t('calendar.prevMonth') : t('calendar.prevWeek')}
-            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:hover:bg-slate-700 dark:active:bg-slate-600"
+            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:p-2 dark:active:bg-slate-600"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -249,7 +249,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
             data-testid="btn-next-date"
             aria-label={viewMode === 'calendar' ? t('calendar.nextMonth') : t('calendar.nextWeek')}
-            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all hover:bg-slate-100 active:bg-slate-200 sm:p-2 dark:hover:bg-slate-700 dark:active:bg-slate-600"
+            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:p-2 dark:active:bg-slate-600"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -287,7 +287,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                 }}
                 className={`flex min-h-18 flex-col items-center justify-center rounded-2xl px-1 py-2.5 transition-all ${getDayButtonClass(isSelected, isToday, 'week', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
               >
-                <span className={`text-[10px] font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>
+                <span className={`text-xs font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>
                   {dayLabel}
                 </span>
                 <span className="text-lg font-bold">{date.getDate()}</span>
@@ -313,7 +313,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             {weekDays.map((day, idx) => (
               <div
                 key={day}
-                className={`py-2 text-center text-xs font-bold uppercase ${idx === 6 ? 'text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}
+                className={`py-2 text-center text-xs font-bold uppercase ${idx === 6 ? 'text-rose-400' : 'text-muted-foreground'}`}
               >
                 {day}
               </div>
@@ -372,7 +372,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
               );
             })}
           </div>
-          <div className="mt-4 flex flex-col items-start justify-between gap-2 text-xs font-medium text-slate-400 sm:flex-row sm:items-center sm:gap-0 dark:text-slate-500">
+          <div className="text-muted-foreground mt-4 flex flex-col items-start justify-between gap-2 text-xs font-medium sm:flex-row sm:items-center sm:gap-0">
             {(() => {
               if (hintDismissed) return <span />;
               const selectedPlan = dayPlans.find(p => p.date === selectedDate);
@@ -406,7 +406,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
       )}
 
       {viewMode === 'week' && (
-        <div className="mt-3 flex items-center justify-between text-xs font-medium text-slate-400 dark:text-slate-500">
+        <div className="text-muted-foreground mt-3 flex items-center justify-between text-xs font-medium">
           {!hintDismissed && <span>{t('calendar.swipeHint')}</span>}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">

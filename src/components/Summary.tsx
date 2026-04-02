@@ -28,14 +28,14 @@ export const Summary = React.memo(function Summary({
   const remainingProtein = Math.round(targetProtein - totalProtein);
 
   return (
-    <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:shadow-slate-900/50">
+    <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-xl shadow-black/5 sm:p-6 md:p-8 dark:shadow-black/10">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 sm:p-3 dark:bg-indigo-900/30 dark:text-indigo-400">
             <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-800 sm:text-xl dark:text-slate-100">{t('summary.title')}</h2>
+            <h2 className="text-foreground text-lg font-bold sm:text-xl">{t('summary.title')}</h2>
             <p className="text-muted-foreground text-xs sm:text-sm">
               {t('summary.goal', { cal: targetCalories, pro: targetProtein })}
             </p>
@@ -46,7 +46,7 @@ export const Summary = React.memo(function Summary({
             onClick={onEditGoals}
             aria-label={t('summary.editGoal')}
             data-testid="btn-edit-goals"
-            className="hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2 text-slate-400 transition-all hover:text-emerald-600 sm:min-h-9 sm:min-w-9 dark:text-slate-500 dark:hover:bg-emerald-900/30"
+            className="hover:bg-primary-subtle text-muted-foreground hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2 transition-all sm:min-h-9 sm:min-w-9"
             title={t('summary.editGoal')}
           >
             <Edit3 className="h-5 w-5" />
@@ -58,15 +58,12 @@ export const Summary = React.memo(function Summary({
         {/* Calories Progress */}
         <div className="min-w-[200px] flex-1 space-y-2">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-center gap-1.5 font-medium text-slate-700 sm:gap-2 dark:text-slate-300">
+            <div className="text-foreground flex items-center gap-1.5 font-medium sm:gap-2">
               <Flame className="h-4 w-4 text-orange-500 sm:h-5 sm:w-5" />{' '}
               <span className="text-sm sm:text-base">{t('common.calories')}</span>
             </div>
             <div className="text-left sm:text-right">
-              <span
-                data-testid="summary-total-calories"
-                className="text-xl font-bold text-slate-800 sm:text-2xl dark:text-slate-100"
-              >
+              <span data-testid="summary-total-calories" className="text-foreground text-xl font-bold sm:text-2xl">
                 {Math.round(totalCalories)}
               </span>
               <span className="text-muted-foreground text-xs sm:text-sm"> / {targetCalories}</span>
@@ -74,7 +71,7 @@ export const Summary = React.memo(function Summary({
           </div>
           <progress
             data-testid="progress-calories"
-            className={`h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-slate-100 dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 ${totalCalories > targetCalories ? '[&::-moz-progress-bar]:bg-rose-500 [&::-webkit-progress-value]:bg-rose-500' : '[&::-moz-progress-bar]:bg-orange-500 [&::-webkit-progress-value]:bg-orange-500'}`}
+            className={`[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 ${totalCalories > targetCalories ? '[&::-moz-progress-bar]:bg-rose-500 [&::-webkit-progress-value]:bg-rose-500' : '[&::-moz-progress-bar]:bg-orange-500 [&::-webkit-progress-value]:bg-orange-500'}`}
             aria-label={t('common.calories')}
             value={Math.round(totalCalories)}
             max={targetCalories}
@@ -92,20 +89,18 @@ export const Summary = React.memo(function Summary({
         {/* Protein Progress */}
         <div className="min-w-[200px] flex-1 space-y-2">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-center gap-1.5 font-medium text-slate-700 sm:gap-2 dark:text-slate-300">
+            <div className="text-foreground flex items-center gap-1.5 font-medium sm:gap-2">
               <Beef className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />{' '}
               <span className="text-sm sm:text-base">{t('common.protein')}</span>
             </div>
             <div className="text-left sm:text-right">
-              <span className="text-xl font-bold text-slate-800 sm:text-2xl dark:text-slate-100">
-                {Math.round(totalProtein)}
-              </span>
+              <span className="text-foreground text-xl font-bold sm:text-2xl">{Math.round(totalProtein)}</span>
               <span className="text-muted-foreground text-xs sm:text-sm"> / {targetProtein}g</span>
             </div>
           </div>
           <progress
             data-testid="progress-protein"
-            className="h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-blue-500 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-slate-100 dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500"
+            className="[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-blue-500 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500"
             aria-label={t('common.protein')}
             value={Math.round(totalProtein)}
             max={targetProtein}
@@ -142,12 +137,12 @@ export const Summary = React.memo(function Summary({
             <span className="ml-1 text-xs font-normal text-rose-700/70 sm:text-sm dark:text-rose-500/70">g</span>
           </p>
         </div>
-        <div className="bg-primary-subtle rounded-2xl border border-emerald-100/50 p-3 sm:p-4 dark:border-emerald-800/30">
+        <div className="bg-primary-subtle border-primary/10 rounded-2xl border p-3 sm:p-4">
           <div className="text-primary-emphasis mb-1 flex items-center gap-1.5 sm:gap-2">
             <Leaf className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.fiber')}</span>
           </div>
-          <p className="text-lg font-bold text-emerald-900 sm:text-2xl">
+          <p className="text-primary text-lg font-bold sm:text-2xl">
             {Math.round(totalFiber)}
             <span className="dark:text-primary/70 text-primary-emphasis/70 ml-1 text-xs font-normal sm:text-sm">g</span>
           </p>
@@ -158,7 +153,7 @@ export const Summary = React.memo(function Summary({
         type="button"
         data-testid="btn-macro-details"
         onClick={() => setShowDetails(prev => !prev)}
-        className="text-muted-foreground mt-3 flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all hover:text-slate-700 dark:hover:text-slate-300"
+        className="text-muted-foreground hover:text-foreground mt-3 flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all"
       >
         <span>{showDetails ? t('summary.hideDetails') : t('summary.showDetails')}</span>
         <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${showDetails ? 'rotate-180' : ''}`} />
@@ -175,7 +170,7 @@ export const Summary = React.memo(function Summary({
                 <th className="pb-2 text-right font-medium">{t('common.fiber')}</th>
               </tr>
             </thead>
-            <tbody className="text-slate-700 dark:text-slate-300">
+            <tbody className="text-foreground">
               <tr>
                 <td className="py-1">{t('meal.breakfast')}</td>
                 <td className="py-1 text-right">{Math.round(dayNutrition.breakfast.carbs)}g</td>

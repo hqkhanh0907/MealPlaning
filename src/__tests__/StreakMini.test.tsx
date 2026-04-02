@@ -175,7 +175,7 @@ describe('StreakMini', () => {
     // Tue (day 2) — no plan, no workout, past → missed
     const dot2 = screen.getByTestId('dot-2');
     expect(dot2).toHaveAttribute('data-status', 'missed');
-    expect(dot2.className).toContain('slate');
+    expect(dot2.className).toContain('border-border');
   });
 
   it('today dot has emerald ring', () => {
@@ -197,7 +197,7 @@ describe('StreakMini', () => {
     // Thu (day 4) is upcoming
     const dot4 = screen.getByTestId('dot-4');
     expect(dot4).toHaveAttribute('data-status', 'upcoming');
-    expect(dot4.className).toContain('slate');
+    expect(dot4.className).toContain('border-border');
   });
 
   // ===== Streak Calculation =====

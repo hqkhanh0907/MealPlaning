@@ -25,7 +25,7 @@ export const EmptyState = ({
       <div className="bg-primary-subtle mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
         {icon}
       </div>
-      <h3 className="mb-2 text-lg font-bold text-slate-700 dark:text-slate-200">
+      <h3 className="text-foreground mb-2 text-lg font-bold">
         {searchQuery
           ? t('emptyState.notFound', { entity: entityName })
           : t('emptyState.noItems', { entity: entityName })}

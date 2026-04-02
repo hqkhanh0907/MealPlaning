@@ -60,17 +60,14 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
       </progress>
       {/* Header: label + number */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t('nutrition.protein')}</span>
-        <span
-          data-testid="protein-display"
-          className="text-xs font-semibold text-slate-800 tabular-nums dark:text-slate-100"
-        >
+        <span className="text-foreground text-xs font-medium">{t('nutrition.protein')}</span>
+        <span data-testid="protein-display" className="text-foreground text-xs font-semibold tabular-nums">
           {roundedCurrent}g / {roundedTarget}g
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+      <div className="bg-muted h-2 overflow-hidden rounded-full">
         <div
           data-testid="protein-bar"
           className={`h-full rounded-full transition-all ${barColorClass}`}

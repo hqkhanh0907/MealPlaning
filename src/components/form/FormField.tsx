@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import type { FieldError } from 'react-hook-form';
 
 interface FormFieldProps {
@@ -16,6 +16,19 @@ export const FormField = React.memo(function FormField({
   className,
   required,
 }: FormFieldProps) {
+  const fieldId = useId();
+  const errorId = `${fieldId}-error`;
+
+  const enhancedChildren = React.Children.map(children, child => {
+    if (!React.isValidElement(child)) return child;
+
+    const extraProps: Record<string, unknown> = {};
+    if (required) extraProps['aria-required'] = true;
+    if (error?.message) extraProps['aria-describedby'] = errorId;
+
+    return React.cloneElement(child as React.ReactElement<Record<string, unknown>>, extraProps);
+  });
+
   return (
     <div className={className ?? 'mb-4'}>
       <label className="text-foreground-secondary mb-1 block text-sm font-medium">
@@ -23,10 +36,10 @@ export const FormField = React.memo(function FormField({
         {required && <span className="ml-0.5 text-rose-500">*</span>}
       </label>
 
-      {children}
+      {enhancedChildren}
 
       {error?.message && (
-        <p className="mt-1 text-xs text-rose-500 dark:text-rose-400" role="alert">
+        <p id={errorId} className="mt-1 text-xs text-rose-500 dark:text-rose-400" role="alert">
           {error.message}
         </p>
       )}

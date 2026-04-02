@@ -21,23 +21,23 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
       <div className="bg-card w-full max-w-sm rounded-2xl p-5 shadow-xl">
         <div className="mb-4 flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
-          <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('syncConflict.title')}</h3>
+          <h3 className="text-foreground font-bold">{t('syncConflict.title')}</h3>
         </div>
 
         <p className="text-foreground-secondary mb-4 text-sm">{t('syncConflict.description')}</p>
 
         <div className="mb-5 space-y-2">
-          <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-700">
+          <div className="bg-muted flex items-center gap-2 rounded-xl p-3">
             <Monitor className="h-4 w-4 shrink-0 text-blue-500" />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t('syncConflict.localData')}</p>
+              <p className="text-foreground text-xs font-semibold">{t('syncConflict.localData')}</p>
               <p className="text-muted-foreground truncate text-xs">{formatTime(localTime)}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-700">
+          <div className="bg-muted flex items-center gap-2 rounded-xl p-3">
             <Cloud className="text-primary h-4 w-4 shrink-0" />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{t('syncConflict.cloudData')}</p>
+              <p className="text-foreground text-xs font-semibold">{t('syncConflict.cloudData')}</p>
               <p className="text-muted-foreground truncate text-xs">{formatTime(remoteTime)}</p>
             </div>
           </div>
@@ -61,7 +61,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
           <button
             data-testid="btn-cancel-sync"
             onClick={onClose}
-            className="text-muted-foreground w-full px-4 py-2.5 text-sm font-medium transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+            className="text-muted-foreground hover:text-foreground w-full px-4 py-2.5 text-sm font-medium transition-colors dark:hover:text-slate-200"
           >
             {t('common.cancel')}
           </button>

@@ -32,18 +32,16 @@ export function QuickConfirmCard({
       </div>
       <div className="mt-2 flex items-end justify-between">
         <div>
-          <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          <p className="text-foreground text-2xl font-bold">
             {suggestion.weight}kg × {suggestion.reps}
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {SOURCE_LABELS[suggestion.source] ?? suggestion.source}
-          </p>
+          <p className="text-muted-foreground text-xs">{SOURCE_LABELS[suggestion.source] ?? suggestion.source}</p>
         </div>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={onCustomize}
-            className="rounded-lg border p-2 text-slate-400 dark:text-slate-500"
+            className="text-muted-foreground rounded-lg border p-2"
             data-testid="customize-button"
           >
             <Pencil className="h-5 w-5" />

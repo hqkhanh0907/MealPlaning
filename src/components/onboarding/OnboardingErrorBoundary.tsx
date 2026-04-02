@@ -2,6 +2,8 @@ import { AlertTriangle } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { logger } from '@/utils/logger';
+
 interface Props {
   children: React.ReactNode;
   onReset: () => void;
@@ -20,7 +22,7 @@ function FallbackUI({ onReset }: Readonly<{ onReset: () => void }>) {
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
           <AlertTriangle aria-hidden="true" className="h-8 w-8 text-amber-500 dark:text-amber-400" />
         </div>
-        <h2 className="mb-6 text-lg font-bold text-slate-800 dark:text-slate-100">{t('onboarding.error.title')}</h2>
+        <h2 className="text-foreground mb-6 text-lg font-bold">{t('onboarding.error.title')}</h2>
         <button
           type="button"
           onClick={onReset}
@@ -43,8 +45,8 @@ export class OnboardingErrorBoundary extends React.Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[OnboardingErrorBoundary]', error, errorInfo);
+  componentDidCatch(error: Error, _errorInfo: React.ErrorInfo) {
+    logger.error({ component: 'OnboardingErrorBoundary', action: 'componentDidCatch' }, error);
   }
 
   private readonly handleReset = () => {

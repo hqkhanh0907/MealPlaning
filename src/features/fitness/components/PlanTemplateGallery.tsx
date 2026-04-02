@@ -43,22 +43,20 @@ function TemplateCard({
       type="button"
       data-testid={`template-card-${template.id}`}
       onClick={() => onApply(template)}
-      className="dark:hover:bg-slate-750 bg-card focus-visible:ring-ring border-border flex w-full touch-manipulation flex-col gap-2 rounded-xl border p-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none"
+      className="bg-card focus-visible:ring-ring border-border hover:bg-accent flex w-full touch-manipulation flex-col gap-2 rounded-xl border p-4 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{template.name}</h3>
+        <h3 className="text-foreground text-sm font-semibold">{template.name}</h3>
         {matchScore != null && <TemplateMatchBadge score={matchScore} />}
       </div>
       <p className="text-muted-foreground line-clamp-2 text-xs">{template.description}</p>
       <div className="text-foreground-secondary flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700">
-          {SPLIT_GROUP_LABELS[template.splitType]}
-        </span>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 tabular-nums dark:bg-slate-700">
+        <span className="bg-muted rounded-full px-2 py-0.5">{SPLIT_GROUP_LABELS[template.splitType]}</span>
+        <span className="bg-muted rounded-full px-2 py-0.5 tabular-nums">
           {t('fitness.templateGallery.daysPerWeek', { count: template.daysPerWeek })}
         </span>
         {template.equipmentRequired.map(eq => (
-          <span key={eq} className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700">
+          <span key={eq} className="bg-muted rounded-full px-2 py-0.5">
             {EQUIPMENT_DISPLAY[eq] ?? eq}
           </span>
         ))}
@@ -293,9 +291,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
             if (!templates || templates.length === 0) return null;
             return (
               <div key={splitType} className="mb-4" data-testid={`split-group-${splitType}`}>
-                <h3 className="mb-2 text-xs font-medium text-slate-400 dark:text-slate-500">
-                  {SPLIT_GROUP_LABELS[splitType]}
-                </h3>
+                <h3 className="text-muted-foreground mb-2 text-xs font-medium">{SPLIT_GROUP_LABELS[splitType]}</h3>
                 <div className="space-y-3">
                   {templates.map(tpl => (
                     <TemplateCard key={tpl.id} template={tpl} onApply={handleApplyRequest} />
@@ -312,7 +308,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
             type="button"
             data-testid="save-as-template-btn"
             onClick={handleOpenSaveDialog}
-            className="focus-visible:ring-ring bg-primary-subtle text-primary-emphasis flex min-h-[44px] w-full touch-manipulation items-center justify-center gap-2 rounded-xl border border-emerald-300 px-4 py-3 text-sm font-medium transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:outline-none dark:border-emerald-700 dark:hover:bg-emerald-900/40"
+            className="focus-visible:ring-ring bg-primary-subtle text-primary-emphasis border-primary/30 hover:bg-primary/10 flex min-h-[44px] w-full touch-manipulation items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Save className="h-4 w-4" aria-hidden="true" />
             {t('fitness.templateGallery.saveCurrent')}
@@ -342,7 +338,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           aria-label={t('fitness.templateGallery.saveNamePrompt')}
         >
           <div className="bg-card w-full max-w-sm rounded-2xl p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <h3 className="text-foreground mb-4 text-lg font-semibold">
               {t('fitness.templateGallery.saveNamePrompt')}
             </h3>
             <input
@@ -351,7 +347,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
               value={saveName}
               onChange={e => setSaveName(e.target.value)}
               placeholder={t('fitness.templateGallery.saveNamePrompt')}
-              className="focus:border-primary focus:ring-ring bg-card mb-4 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 focus:ring-2 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="focus:border-primary focus:ring-ring bg-card border-border text-foreground mb-4 w-full rounded-lg border px-3 py-2.5 text-sm focus:ring-2 focus:outline-none"
               autoFocus
             />
             <div className="flex gap-3">
@@ -359,7 +355,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
                 type="button"
                 data-testid="save-template-cancel"
                 onClick={handleCancelSave}
-                className="focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] flex-1 touch-manipulation items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700"
+                className="focus-visible:ring-ring border-border text-foreground-secondary hover:bg-accent flex min-h-[44px] flex-1 touch-manipulation items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 {t('fitness.templateGallery.cancel')}
               </button>

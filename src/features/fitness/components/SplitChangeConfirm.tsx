@@ -48,8 +48,7 @@ export function SplitChangeConfirm({
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="rounded-t-2xl"
-        style={{ overscrollBehavior: 'contain' }}
+        className="overscroll-contain rounded-t-2xl"
         data-testid="split-change-confirm-sheet"
       >
         <SheetHeader>
@@ -71,7 +70,7 @@ export function SplitChangeConfirm({
         {/* Remap preview summary */}
         {!isRegenerate && (
           <div className="flex flex-wrap gap-2 px-4 text-sm tabular-nums" data-testid="confirm-remap-summary">
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+            <span className="bg-primary/10 text-primary rounded-full px-3 py-1">
               {String(preview.mapped.length)} {t('fitness.splitChanger.mapped')}
             </span>
             <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800 dark:bg-amber-900 dark:text-amber-200">

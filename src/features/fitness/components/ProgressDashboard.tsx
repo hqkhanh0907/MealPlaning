@@ -36,7 +36,7 @@ function SimpleBarChart({ data }: Readonly<{ data: number[] }>) {
         <div
           key={`item-${String(idx)}`}
           data-testid="chart-bar"
-          className="flex-1 rounded-t bg-emerald-400"
+          className="bg-primary flex-1 rounded-t"
           style={{
             height: `${(val / maxVal) * 100}%`,
             minHeight: val > 0 ? '4px' : '2px',
@@ -279,14 +279,14 @@ function ProgressDashboardInner() {
     return (
       <div data-testid="progress-empty-state" className="flex flex-col items-center px-4 py-12">
         <div className="w-full space-y-4 opacity-30">
-          <div className="h-24 rounded-2xl bg-slate-200 dark:bg-slate-700" />
+          <div className="bg-muted h-24 rounded-2xl" />
           <div className="flex gap-3">
-            <div className="h-20 flex-1 rounded-xl bg-slate-200 dark:bg-slate-700" />
-            <div className="h-20 flex-1 rounded-xl bg-slate-200 dark:bg-slate-700" />
+            <div className="bg-muted h-20 flex-1 rounded-xl" />
+            <div className="bg-muted h-20 flex-1 rounded-xl" />
           </div>
-          <div className="h-8 rounded-lg bg-slate-200 dark:bg-slate-700" />
+          <div className="bg-muted h-8 rounded-lg" />
         </div>
-        <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">{t('fitness.progress.noData')}</p>
+        <p className="text-muted-foreground mt-6 text-sm">{t('fitness.progress.noData')}</p>
         <button
           type="button"
           data-testid="start-training-cta"
@@ -304,7 +304,7 @@ function ProgressDashboardInner() {
     <div data-testid="progress-dashboard" className="space-y-4 pb-4">
       <div
         data-testid="hero-metric-card"
-        className="rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 text-white shadow-lg"
+        className="from-primary/90 to-primary rounded-2xl bg-gradient-to-br p-5 text-white shadow-lg"
       >
         <p className="text-sm font-medium opacity-80">{t('fitness.progress.volumeThisWeek')}</p>
         <div className="mt-1 flex items-baseline gap-2">
@@ -320,7 +320,7 @@ function ProgressDashboardInner() {
           {sparklineData.map((val, idx) => (
             <div
               key={`item-${String(idx)}`}
-              className="flex-1 rounded-sm bg-white/30"
+              className="bg-card/30 flex-1 rounded-sm"
               style={{
                 height: `${(val / maxSparkline) * 100}%`,
                 minHeight: '2px',
@@ -339,9 +339,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Scale className="h-5 w-5 text-blue-500" aria-hidden="true" />
-          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-            {latestWeight ? `${latestWeight.weightKg}kg` : '—'}
-          </p>
+          <p className="text-foreground mt-2 text-xl font-bold">{latestWeight ? `${latestWeight.weightKg}kg` : '—'}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.weight')}</p>
           {weightDelta !== 0 && (
             <span
@@ -352,7 +350,7 @@ function ProgressDashboardInner() {
             </span>
           )}
           {weightDelta === 0 && latestWeight && (
-            <span data-testid="weight-stable" className="text-xs font-medium text-slate-400 dark:text-slate-500">
+            <span data-testid="weight-stable" className="text-muted-foreground text-xs font-medium">
               →
             </span>
           )}
@@ -366,9 +364,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Dumbbell className="h-5 w-5 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
-          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-            {best1RM > 0 ? `${best1RM}kg` : '—'}
-          </p>
+          <p className="text-foreground mt-2 text-xl font-bold">{best1RM > 0 ? `${best1RM}kg` : '—'}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.estimated1rm')}</p>
         </button>
 
@@ -380,7 +376,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Target className="h-5 w-5 text-amber-500" aria-hidden="true" />
-          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{adherencePercent}%</p>
+          <p className="text-foreground mt-2 text-xl font-bold">{adherencePercent}%</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.adherence')}</p>
         </button>
 
@@ -392,7 +388,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Calendar className="text-primary h-5 w-5" aria-hidden="true" />
-          <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{completedSessions}</p>
+          <p className="text-foreground mt-2 text-xl font-bold">{completedSessions}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.sessions')}</p>
         </button>
       </div>
@@ -400,9 +396,7 @@ function ProgressDashboardInner() {
       {cycleProgress && (
         <div data-testid="cycle-progress" className="bg-card rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              {t('fitness.progress.cycleProgress')}
-            </p>
+            <p className="text-foreground text-sm font-medium">{t('fitness.progress.cycleProgress')}</p>
             <p className="text-muted-foreground text-xs">
               {t('fitness.progress.weekOf', {
                 current: cycleProgress.currentWeek,
@@ -410,7 +404,7 @@ function ProgressDashboardInner() {
               })}
             </p>
           </div>
-          <div className="mt-2 h-2 w-full rounded-full bg-slate-100 dark:bg-slate-700" aria-hidden="true">
+          <div className="bg-muted mt-2 h-2 w-full rounded-full" aria-hidden="true">
             <div
               className="bg-primary h-full rounded-full transition-all"
               style={{ width: `${cycleProgress.percentComplete}%` }}
@@ -427,7 +421,7 @@ function ProgressDashboardInner() {
 
       {visibleInsights.length > 0 && (
         <div data-testid="insights-section" className="space-y-2">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('fitness.progress.insights')}</p>
+          <p className="text-foreground text-sm font-medium">{t('fitness.progress.insights')}</p>
           {visibleInsights.map(insight => (
             <div
               key={insight.id}
@@ -439,7 +433,7 @@ function ProgressDashboardInner() {
                 type="button"
                 data-testid={`dismiss-${insight.id}`}
                 onClick={() => handleDismiss(insight.id)}
-                className="ml-2 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+                className="text-muted-foreground hover:bg-accent ml-2 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-full p-1"
                 aria-label={t('fitness.progress.dismiss')}
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -462,14 +456,14 @@ function ProgressDashboardInner() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="text-primary h-5 w-5" aria-hidden="true" />
-                <p className="font-medium text-slate-800 dark:text-slate-100">{t(CARD_TITLE_KEYS[selectedCard])}</p>
+                <p className="text-foreground font-medium">{t(CARD_TITLE_KEYS[selectedCard])}</p>
               </div>
               <button
                 type="button"
                 data-testid="close-bottom-sheet"
                 onClick={handleCloseSheet}
                 aria-label={t('fitness.progress.dismiss')}
-                className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+                className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-1"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -482,9 +476,7 @@ function ProgressDashboardInner() {
                   data-testid={`time-range-${range}`}
                   onClick={() => handleTimeRangeChange(range)}
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    timeRange === range
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
+                    timeRange === range ? 'bg-primary text-primary-foreground' : 'text-foreground-secondary bg-muted'
                   }`}
                 >
                   {range}

@@ -369,7 +369,7 @@ describe('DailyWeightInput', () => {
 
     const delta = screen.getByTestId('weight-delta');
     expect(delta).toHaveTextContent('(0)');
-    expect(delta.className).toContain('text-slate');
+    expect(delta.className).toContain('text-muted-foreground');
   });
 
   it('delta is null when input is zero', () => {
@@ -546,7 +546,7 @@ describe('DailyWeightInput', () => {
 
     const trend = screen.getByTestId('trend-indicator');
     expect(trend).toHaveTextContent('→');
-    expect(trend.className).toContain('text-slate');
+    expect(trend.className).toContain('text-muted-foreground');
   });
 
   it('no trend indicator without yesterday entry', () => {

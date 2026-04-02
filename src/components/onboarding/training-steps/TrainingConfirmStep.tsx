@@ -14,10 +14,8 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
   return (
     <div className="flex flex-1 flex-col" data-testid="training-confirm-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="mb-6 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.confirm.trainingTitle')}
-        </h2>
-        <div className="border-border divide-y divide-slate-100 rounded-xl border dark:divide-slate-800">
+        <h2 className="text-foreground mb-6 text-xl font-bold">{t('onboarding.confirm.trainingTitle')}</h2>
+        <div className="border-border divide-border divide-y rounded-xl border">
           <SummaryRow label={t('fitness.onboarding.goal')} value={t(`fitness.onboarding.${values.trainingGoal}`)} />
           <SummaryRow label={t('fitness.onboarding.experience')} value={t(`fitness.onboarding.${values.experience}`)} />
           <SummaryRow label={t('fitness.onboarding.daysPerWeek')} value={`${values.daysPerWeek}`} />
@@ -63,7 +61,7 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
         </div>
       </div>
 
-      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="border-border bg-card/95 fixed inset-x-0 bottom-0 flex items-center justify-between border-t p-4 backdrop-blur-sm">
         <button
           type="button"
           onClick={goBack}

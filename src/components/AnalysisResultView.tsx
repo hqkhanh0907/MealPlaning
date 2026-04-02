@@ -52,11 +52,11 @@ const EmptyState = () => {
   const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-center space-y-5 py-8 text-center">
-      <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20">
-        <ImageIcon className="dark:text-primary/40 h-12 w-12 text-emerald-400/60" />
+      <div className="from-primary/10 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br to-indigo-50 dark:to-indigo-900/20">
+        <ImageIcon className="dark:text-primary/40 text-primary/40 h-12 w-12" />
       </div>
       <div className="space-y-2">
-        <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300">{t('ai.title')}</h4>
+        <h4 className="text-foreground text-lg font-bold">{t('ai.title')}</h4>
         <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">{t('ai.emptyHint')}</p>
       </div>
     </div>
@@ -75,7 +75,7 @@ const NutritionCard = ({
   color: string;
 }) => (
   <div className="bg-card border-border-subtle rounded-xl border p-4 shadow-sm">
-    <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase dark:text-slate-500">{label}</p>
+    <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">{label}</p>
     <p className={`text-2xl font-bold ${color}`}>
       {value} <span className="text-muted-foreground text-sm font-medium">{unit}</span>
     </p>
@@ -85,8 +85,8 @@ const NutritionCard = ({
 const IngredientRow = ({ ing }: { ing: AnalyzedIngredient }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
   return (
-    <tr className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-600">
-      <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{ing.name}</td>
+    <tr className="hover:bg-accent transition-colors">
+      <td className="text-foreground px-3 py-2 font-medium">{ing.name}</td>
       <td className="text-foreground-secondary px-3 py-2">
         {ing.amount} {ing.unit}
       </td>
@@ -104,29 +104,27 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
   return (
     <div className="bg-card border-border-subtle rounded-xl border p-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{ing.name}</p>
+        <p className="text-foreground text-sm font-semibold">{ing.name}</p>
         <span className="text-muted-foreground text-xs font-medium">
           {ing.amount} {ing.unit}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="text-center">
-          <p className="text-muted-foreground text-[10px] font-bold uppercase dark:text-slate-500">
-            {t('common.calories')}
-          </p>
-          <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>
+          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.calories')}</p>
+          <p className="text-sm font-semibold text-orange-500">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
-          <p className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.protein')}</p>
-          <p className="text-sm font-bold text-blue-500">{Math.round(n.protein)}g</p>
+          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.protein')}</p>
+          <p className="text-sm font-semibold text-blue-500">{Math.round(n.protein)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.carbs')}</p>
-          <p className="text-sm font-bold text-amber-500">{Math.round(n.carbs)}g</p>
+          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.carbs')}</p>
+          <p className="text-sm font-semibold text-amber-500">{Math.round(n.carbs)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.fat')}</p>
-          <p className="text-sm font-bold text-rose-500">{Math.round(n.fat)}g</p>
+          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.fat')}</p>
+          <p className="text-sm font-semibold text-rose-500">{Math.round(n.fat)}g</p>
         </div>
       </div>
     </div>
@@ -141,7 +139,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100">{result.name}</h3>
+        <h3 className="text-foreground mb-2 text-2xl font-bold">{result.name}</h3>
         <p className="text-foreground-secondary leading-relaxed">{result.description}</p>
       </div>
 
@@ -168,7 +166,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
       </div>
 
       <div>
-        <h4 className="mb-3 font-bold text-slate-800 dark:text-slate-100">{t('ai.ingredientDetail')}</h4>
+        <h4 className="text-foreground mb-3 font-bold">{t('ai.ingredientDetail')}</h4>
 
         {/* Desktop: Table view */}
         <div className="hidden overflow-x-auto sm:block">
@@ -183,7 +181,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
                 <th className="rounded-r-lg px-3 py-2">{t('common.fat')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-600">
+            <tbody className="divide-border divide-y">
               {result.ingredients.map((ing, idx) => (
                 <IngredientRow key={`desktop-${ing.name}-${idx}`} ing={ing} />
               ))}

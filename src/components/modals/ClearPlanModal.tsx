@@ -110,13 +110,13 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
       <div className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('clearPlan.title')}</h3>
+            <h3 className="text-foreground text-xl font-bold">{t('clearPlan.title')}</h3>
             <p className="text-muted-foreground text-sm">{t('clearPlan.subtitle')}</p>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-all"
           >
             <X className="h-6 w-6" />
           </button>
@@ -133,7 +133,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-bold transition-all ${
                   selectedMeals.has(type)
                     ? 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
-                    : 'border-border text-slate-400 dark:text-slate-500'
+                    : 'border-border text-muted-foreground'
                 }`}
               >
                 {t(labelKey)}
@@ -149,7 +149,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 disabled={count === 0}
                 className={`group flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 p-4 transition-all ${
                   count === 0
-                    ? 'cursor-not-allowed border-slate-50 bg-slate-50 opacity-50 dark:border-slate-700 dark:bg-slate-800'
+                    ? 'border-border bg-muted cursor-not-allowed opacity-50'
                     : 'border-border-subtle hover:border-rose-500 hover:bg-rose-50 active:scale-[0.98] dark:hover:bg-rose-900/20'
                 }`}
               >
@@ -157,14 +157,14 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   className={`flex h-12 w-12 items-center justify-center rounded-xl transition-transform ${
                     count > 0
                       ? 'bg-rose-100 text-rose-600 group-hover:scale-110 dark:bg-rose-900/30 dark:text-rose-400'
-                      : 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
+                      : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   <CalendarDays className="h-6 w-6" />
                 </div>
                 <div className="flex-1 text-left">
                   <p
-                    className={`text-lg font-bold ${count > 0 ? 'text-slate-800 group-hover:text-rose-700 dark:text-slate-100 dark:group-hover:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}
+                    className={`text-lg font-bold ${count > 0 ? 'text-foreground group-hover:text-rose-700 dark:group-hover:text-rose-400' : 'text-muted-foreground'}`}
                   >
                     {label}
                   </p>
@@ -185,7 +185,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 <button
                   data-testid={`btn-expand-${scope}`}
                   onClick={() => setExpandedScope(prev => (prev === scope ? null : scope))}
-                  className="hover:text-foreground-secondary mt-1.5 ml-4 flex items-center gap-1 text-xs text-slate-400 transition-colors dark:hover:text-slate-300"
+                  className="hover:text-foreground-secondary text-muted-foreground mt-1.5 ml-4 flex items-center gap-1 text-xs transition-colors"
                 >
                   {expandedScope === scope ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                   {t('clearPlan.affectedDates')}

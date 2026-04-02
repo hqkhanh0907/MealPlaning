@@ -152,7 +152,7 @@ export const GoogleDriveSync = () => {
             <Cloud className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('cloudSync.title')}</h3>
+            <h3 className="text-foreground font-bold">{t('cloudSync.title')}</h3>
             <p className="text-muted-foreground mt-0.5 text-xs">{t('cloudSync.description')}</p>
           </div>
         </div>
@@ -160,7 +160,7 @@ export const GoogleDriveSync = () => {
           data-testid="btn-google-sign-in"
           onClick={handleSignIn}
           disabled={authLoading}
-          className="border-border bg-card flex w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-blue-400 disabled:opacity-50 dark:bg-slate-700 dark:text-slate-200 dark:hover:border-blue-500"
+          className="border-border bg-card text-foreground flex w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-semibold transition-all hover:border-blue-400 disabled:opacity-50 dark:hover:border-blue-500"
         >
           {authLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -200,7 +200,7 @@ export const GoogleDriveSync = () => {
           <Cloud className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('cloudSync.title')}</h3>
+          <h3 className="text-foreground font-bold">{t('cloudSync.title')}</h3>
           <div className="mt-1 flex items-center gap-2">
             {user.photoUrl && <img src={user.photoUrl} alt="" className="h-5 w-5 rounded-full" />}
             <span className="text-muted-foreground truncate text-xs">{user.email}</span>

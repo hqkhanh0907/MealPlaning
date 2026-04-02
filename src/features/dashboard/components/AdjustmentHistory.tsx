@@ -50,9 +50,9 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
         type="button"
         onClick={toggleCollapsed}
         aria-expanded={!collapsed}
-        className="flex w-full items-center justify-between bg-slate-50 px-4 py-3 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+        className="bg-muted hover:bg-accent flex w-full items-center justify-between px-4 py-3 transition-colors"
       >
-        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('adjustmentHistory.title')}</span>
+        <span className="text-foreground text-sm font-semibold">{t('adjustmentHistory.title')}</span>
         {collapsed ? (
           <ChevronDown className="text-muted-foreground h-4 w-4" aria-hidden="true" />
         ) : (
@@ -61,7 +61,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
       </button>
 
       {!collapsed && (
-        <div data-testid="adjustment-history-list" className="divide-y divide-slate-200 dark:divide-slate-700">
+        <div data-testid="adjustment-history-list" className="divide-border divide-y">
           {sorted.length === 0 ? (
             <p data-testid="adjustment-history-empty" className="text-muted-foreground px-4 py-3 text-xs">
               {t('adjustmentHistory.noData')}
@@ -71,24 +71,22 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
               <div key={adj.id} data-testid={`adjustment-row-${adj.id}`} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-shrink-0">
                   {adj.applied ? (
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                    <div className="bg-primary/10 flex h-6 w-6 items-center justify-center rounded-full">
                       <Check className="text-primary h-3.5 w-3.5" aria-hidden="true" />
                     </div>
                   ) : (
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
-                      <X className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                    <div className="bg-muted flex h-6 w-6 items-center justify-center rounded-full">
+                      <X className="text-muted-foreground h-3.5 w-3.5" aria-hidden="true" />
                     </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {formatDate(adj.date)}
-                    </span>
+                    <span className="text-foreground text-xs font-medium">{formatDate(adj.date)}</span>
                     <span
                       data-testid={`trigger-badge-${adj.id}`}
-                      className="text-muted-foreground rounded bg-slate-100 px-1.5 py-0.5 text-[10px] dark:bg-slate-700"
+                      className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-xs"
                     >
                       {adj.triggerType === 'auto' ? t('adjustmentHistory.auto') : t('adjustmentHistory.manual')}
                     </span>
@@ -109,10 +107,8 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                 <div className="flex-shrink-0">
                   <span
                     data-testid={`status-label-${adj.id}`}
-                    className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
-                      adj.applied
-                        ? 'text-primary-emphasis bg-emerald-100 dark:bg-emerald-900/30'
-                        : 'text-muted-foreground bg-slate-100 dark:bg-slate-700'
+                    className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+                      adj.applied ? 'text-primary-emphasis bg-primary/10' : 'text-muted-foreground bg-muted'
                     }`}
                   >
                     {adj.applied ? t('adjustmentHistory.applied') : t('adjustmentHistory.declined')}

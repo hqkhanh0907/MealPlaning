@@ -51,6 +51,7 @@ export function calculateTargetWeeklySets(
   age: number,
   avgSleepHours?: number,
   priorityMuscles?: MuscleGroup[],
+  sessionDurationMin?: number,
 ): number {
   let adjusted = VOLUME_TABLE[experience][muscle];
 
@@ -59,10 +60,17 @@ export function calculateTargetWeeklySets(
   if (age > 40) adjusted *= 0.9;
   if (avgSleepHours != null && avgSleepHours < 7) adjusted *= 0.9;
 
-  if (priorityMuscles?.includes(muscle)) {
-    return Math.min(Math.round(adjusted), MAV_TABLE[muscle]);
+  // Duration multiplier: baseline 60min = 1.0, smooth interpolation clamped [0.5, 1.3]
+  if (sessionDurationMin != null) {
+    const durationMultiplier = Math.max(0.5, Math.min(1.3, 0.3 + (sessionDurationMin / 60) * 0.7));
+    adjusted *= durationMultiplier;
   }
-  return Math.max(Math.round(adjusted), MEV_TABLE[muscle]);
+
+  const mev = MEV_TABLE[muscle];
+  if (priorityMuscles?.includes(muscle)) {
+    return Math.max(Math.min(Math.round(adjusted), MAV_TABLE[muscle]), mev);
+  }
+  return Math.max(Math.round(adjusted), mev);
 }
 
 /** Distribute total sets across exercises, giving remainder to the first exercise */

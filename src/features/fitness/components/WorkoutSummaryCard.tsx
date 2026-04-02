@@ -38,7 +38,7 @@ export function WorkoutSummaryCard({
             data-testid="pr-celebration"
           >
             <Trophy className="mx-auto mb-1 h-8 w-8" aria-hidden="true" />
-            <p className="text-center text-sm font-bold">
+            <p className="text-center text-sm font-semibold">
               {t('fitness.summary.newPR', { count: personalRecords.length })}
             </p>
             {personalRecords.map(pr => (
@@ -50,17 +50,17 @@ export function WorkoutSummaryCard({
         )}
         <h2 className="mb-6 text-2xl font-bold">{t('fitness.summary.title')}</h2>
         <div className="w-full max-w-sm space-y-3">
-          <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+          <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
             <Clock className="h-5 w-5 text-blue-500" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.duration')}</span>
             <span className="ml-auto font-semibold">{formatElapsed(durationSeconds)}</span>
           </div>
-          <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-            <Dumbbell className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+          <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
+            <Dumbbell className="text-primary h-5 w-5" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.totalVolume')}</span>
             <span className="ml-auto font-semibold">{totalVolume.toLocaleString()} kg</span>
           </div>
-          <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+          <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
             <Flame className="h-5 w-5 text-orange-500" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.setsCompleted')}</span>
             <span className="ml-auto font-semibold">{setsCompleted}</span>

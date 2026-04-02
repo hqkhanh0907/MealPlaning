@@ -207,7 +207,7 @@ export const DishManager = ({
   );
 
   // --- Render helpers ---
-  const emptyIcon = <ChefHat className="h-8 w-8 text-emerald-300" />;
+  const emptyIcon = <ChefHat className="text-primary/40 h-8 w-8" />;
 
   return (
     <div data-testid="dish-manager" className="space-y-6">
@@ -231,7 +231,7 @@ export const DishManager = ({
           <button
             onClick={() => setFilterTag(null)}
             data-testid="btn-filter-all-dishes"
-            className={`min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${filterTag ? 'bg-muted text-muted-foreground hover:bg-slate-200 dark:hover:bg-slate-700' : 'bg-primary text-primary-foreground'}`}
+            className={`min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${filterTag ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground'}`}
           >
             {t('common.all')} ({dishes.length})
           </button>
@@ -242,7 +242,7 @@ export const DishManager = ({
                 key={type}
                 onClick={() => setFilterTag(filterTag === type ? null : type)}
                 data-testid={`btn-filter-${type}`}
-                className={`inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                className={`inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
               >
                 <TagIcon className="size-3.5" aria-hidden="true" /> {label} ({count})
               </button>
@@ -278,7 +278,7 @@ export const DishManager = ({
                       <button
                         type="button"
                         onClick={() => modal.openView(dish)}
-                        className="focus-visible:ring-ring cursor-pointer rounded text-left text-lg font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-slate-100"
+                        className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                       >
                         {getLocalizedField(dish.name, lang)}
                       </button>
@@ -292,7 +292,7 @@ export const DishManager = ({
                             return (
                               <span
                                 key={tag}
-                                className="text-muted-foreground inline-flex items-center gap-0.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold dark:bg-slate-700"
+                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold"
                               >
                                 {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
                                 {tagLabels[tag]}
@@ -318,17 +318,17 @@ export const DishManager = ({
                 )}
                 <div className="mb-4 grid grid-cols-2 gap-2">
                   <div className="bg-primary-subtle flex items-center justify-between rounded-lg p-2">
-                    <span className="text-primary text-[10px] font-bold uppercase">{t('common.calories')}</span>
+                    <span className="text-primary text-xs font-bold uppercase">{t('common.calories')}</span>
                     <span className="text-primary-emphasis text-sm font-bold">{Math.round(nutrition.calories)}</span>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-                    <span className="text-[10px] font-bold text-blue-400 uppercase">{t('common.protein')}</span>
+                    <span className="text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</span>
                     <span className="text-sm font-bold text-blue-700 dark:text-blue-400">
                       {Math.round(nutrition.protein)}g
                     </span>
                   </div>
                 </div>
-                <div className="relative z-10 mt-auto flex items-center gap-4 border-t border-slate-50 pt-4 dark:border-slate-700">
+                <div className="border-border relative z-10 mt-auto flex items-center gap-4 border-t pt-4">
                   <button
                     data-testid={`btn-clone-dish-${dish.id}`}
                     onClick={() => handleClone(dish)}
@@ -339,7 +339,7 @@ export const DishManager = ({
                   <button
                     data-testid={`btn-edit-dish-${dish.id}`}
                     onClick={() => modal.openEdit(dish)}
-                    className="text-muted-foreground hover:bg-primary-subtle flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                    className="text-muted-foreground hover:bg-primary-subtle hover:text-primary flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all"
                   >
                     <Edit3 className="h-4 w-4" /> {t('common.edit')}
                   </button>
@@ -347,7 +347,7 @@ export const DishManager = ({
                     data-testid={`btn-delete-dish-${dish.id}`}
                     onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                     aria-disabled={isUsed(dish.id)}
-                    className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(dish.id) ? 'dark:text-muted-foreground text-slate-400 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                    className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                   >
                     <Trash2 className="h-4 w-4" /> {t('common.delete')}
                   </button>
@@ -373,7 +373,7 @@ export const DishManager = ({
         <div className="bg-card border-border-subtle overflow-hidden rounded-2xl border shadow-sm">
           <div className="hidden overflow-x-auto sm:block">
             <table className="w-full">
-              <thead className="border-border-subtle border-b bg-slate-50 dark:bg-slate-700">
+              <thead className="border-border-subtle bg-muted border-b">
                 <tr>
                   <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold uppercase">
                     {t('dish.title')}
@@ -392,13 +392,13 @@ export const DishManager = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+              <tbody className="divide-border divide-y">
                 {list.filteredItems.map(dish => {
                   const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
                   return (
                     <tr
                       key={dish.id}
-                      className={`transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                      className={`transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-accent'}`}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -408,7 +408,7 @@ export const DishManager = ({
                             className={`flex h-6 min-h-11 w-6 min-w-11 shrink-0 items-center justify-center rounded border-2 transition-all ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
                             aria-label={t('dish.compare')}
                           >
-                            <GitCompareArrows className="h-3 w-3" />
+                            <GitCompareArrows className="h-4 w-4" />
                           </button>
                           <div className="text-primary bg-primary-subtle flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                             <ChefHat className="h-4 w-4" />
@@ -417,7 +417,7 @@ export const DishManager = ({
                             <button
                               type="button"
                               onClick={() => modal.openView(dish)}
-                              className="hover:text-primary cursor-pointer text-left font-bold text-slate-800 transition-colors dark:text-slate-100"
+                              className="hover:text-primary text-foreground cursor-pointer text-left font-bold transition-colors"
                             >
                               {getLocalizedField(dish.name, lang)}
                             </button>
@@ -434,7 +434,7 @@ export const DishManager = ({
                             return (
                               <span
                                 key={tag}
-                                className="text-muted-foreground inline-flex items-center gap-0.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold dark:bg-slate-600"
+                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold dark:bg-slate-600"
                               >
                                 {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
                                 {tagLabels[tag]}
@@ -444,9 +444,7 @@ export const DishManager = ({
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="font-bold text-slate-700 dark:text-slate-300">
-                          {Math.round(nutrition.calories)}
-                        </span>
+                        <span className="text-foreground font-bold">{Math.round(nutrition.calories)}</span>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className="font-bold text-blue-600 dark:text-blue-400">
@@ -459,7 +457,7 @@ export const DishManager = ({
                             data-testid={`btn-clone-dish-${dish.id}`}
                             onClick={() => handleClone(dish)}
                             aria-label={`${t('common.clone')} ${getLocalizedField(dish.name, lang)}`}
-                            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-600 dark:text-slate-500 dark:hover:bg-blue-900/30"
+                            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
                           >
                             <Copy className="h-4 w-4" />
                           </button>
@@ -467,7 +465,7 @@ export const DishManager = ({
                             data-testid={`btn-edit-dish-${dish.id}`}
                             onClick={() => modal.openEdit(dish)}
                             aria-label={`${t('common.edit')} ${getLocalizedField(dish.name, lang)}`}
-                            className="hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-slate-400 transition-all hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/30"
+                            className="hover:bg-primary-subtle text-muted-foreground hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
                           >
                             <Edit3 className="h-4 w-4" />
                           </button>
@@ -476,7 +474,7 @@ export const DishManager = ({
                             onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                             aria-disabled={isUsed(dish.id)}
                             aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                            className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all ${isUsed(dish.id) ? 'text-slate-300 opacity-40 dark:text-slate-500' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-500 dark:hover:bg-rose-900/30'}`}
+                            className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all ${isUsed(dish.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -489,13 +487,13 @@ export const DishManager = ({
             </table>
           </div>
           {/* Mobile List */}
-          <div className="divide-y divide-slate-100 sm:hidden dark:divide-slate-700">
+          <div className="divide-border divide-y sm:hidden">
             {list.filteredItems.map(dish => {
               const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
               return (
                 <div
                   key={dish.id}
-                  className={`relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'active:bg-slate-50 dark:active:bg-slate-700'}`}
+                  className={`relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'active:bg-muted dark:active:bg-slate-700'}`}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <button
@@ -513,7 +511,7 @@ export const DishManager = ({
                       <button
                         type="button"
                         onClick={() => modal.openView(dish)}
-                        className="focus-visible:ring-ring cursor-pointer truncate rounded text-left font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 dark:text-slate-100"
+                        className="focus-visible:ring-ring text-foreground cursor-pointer truncate rounded text-left font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2"
                       >
                         {getLocalizedField(dish.name, lang)}
                       </button>
@@ -528,7 +526,7 @@ export const DishManager = ({
                       data-testid={`btn-clone-dish-${dish.id}`}
                       onClick={() => handleClone(dish)}
                       aria-label={`${t('common.clone')} ${getLocalizedField(dish.name, lang)}`}
-                      className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-600 dark:text-slate-500 dark:hover:bg-blue-900/30"
+                      className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
                     >
                       <Copy className="h-4 w-4" />
                     </button>
@@ -536,7 +534,7 @@ export const DishManager = ({
                       data-testid={`btn-edit-dish-${dish.id}`}
                       onClick={() => modal.openEdit(dish)}
                       aria-label={`${t('common.edit')} ${getLocalizedField(dish.name, lang)}`}
-                      className="hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-slate-400 transition-all hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/30"
+                      className="hover:bg-primary-subtle text-muted-foreground hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
@@ -545,7 +543,7 @@ export const DishManager = ({
                       onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                       aria-disabled={isUsed(dish.id)}
                       aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all ${isUsed(dish.id) ? 'text-slate-300 opacity-40 dark:text-slate-500' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-500 dark:hover:bg-rose-900/30'}`}
+                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all ${isUsed(dish.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -583,9 +581,7 @@ export const DishManager = ({
                   <ChefHat className="h-7 w-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    {getLocalizedField(dish.name, lang)}
-                  </h3>
+                  <h3 className="text-foreground text-xl font-bold">{getLocalizedField(dish.name, lang)}</h3>
                   <p className="text-muted-foreground text-sm font-medium">
                     {dish.ingredients.length} {t('dish.ingredients')}
                   </p>
@@ -596,7 +592,7 @@ export const DishManager = ({
                         return (
                           <span
                             key={tag}
-                            className="bg-primary-subtle inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                            className="bg-primary-subtle text-primary inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-bold"
                           >
                             {TagIcon && <TagIcon className="size-3.5" aria-hidden="true" />}
                             {tagLabels[tag]}
@@ -609,27 +605,27 @@ export const DishManager = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-primary-subtle rounded-xl p-3.5">
-                  <p className="text-primary mb-1 text-[10px] font-bold uppercase">{t('common.calories')}</p>
+                  <p className="text-primary mb-1 text-xs font-bold uppercase">{t('common.calories')}</p>
                   <p className="text-primary-emphasis text-xl font-bold">
                     {Math.round(nutrition.calories)} <span className="text-primary text-xs font-medium">kcal</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
-                  <p className="mb-1 text-[10px] font-bold text-blue-400 uppercase">{t('common.protein')}</p>
+                  <p className="mb-1 text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</p>
                   <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
                     {Math.round(nutrition.protein)}
                     <span className="text-xs font-medium text-blue-400">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
-                  <p className="mb-1 text-[10px] font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
+                  <p className="mb-1 text-xs font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
                   <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
                     {Math.round(nutrition.carbs)}
                     <span className="text-xs font-medium text-amber-400">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
-                  <p className="mb-1 text-[10px] font-bold text-rose-400 uppercase">{t('common.fat')}</p>
+                  <p className="mb-1 text-xs font-bold text-rose-400 uppercase">{t('common.fat')}</p>
                   <p className="text-xl font-bold text-rose-700 dark:text-rose-400">
                     {Math.round(nutrition.fat)}
                     <span className="text-xs font-medium text-rose-400">g</span>
@@ -645,13 +641,13 @@ export const DishManager = ({
                     return (
                       <div
                         key={si.ingredientId}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-700/50"
+                        className="bg-muted flex items-center justify-between rounded-xl px-4 py-3"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="text-primary border-border-subtle bg-card flex h-8 w-8 items-center justify-center rounded-lg border dark:border-slate-500 dark:bg-slate-600">
+                          <div className="text-primary border-border-subtle bg-card flex h-8 w-8 items-center justify-center rounded-lg border dark:bg-slate-600">
                             <Apple className="h-4 w-4" />
                           </div>
-                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                          <span className="text-foreground text-sm font-medium">
                             {getLocalizedField(ing.name, lang)}
                           </span>
                         </div>
@@ -686,9 +682,7 @@ export const DishManager = ({
         message={
           <p>
             {t('dish.confirmDeleteMsg')}{' '}
-            <span className="font-bold text-slate-800 dark:text-slate-100">
-              &quot;{deleteConfirmation.dishName}&quot;
-            </span>
+            <span className="text-foreground font-bold">&quot;{deleteConfirmation.dishName}&quot;</span>
             ?<br />
             {t('common.cannotUndo')}
           </p>
@@ -716,11 +710,11 @@ export const DishManager = ({
           const compareDishes = dishes.filter(d => compareIds.has(d.id));
           const NUTRITION_KEYS = ['calories', 'protein', 'carbs', 'fat', 'fiber'] as const;
           const NUTRITION_COLORS: Record<string, string> = {
-            calories: 'text-slate-700 dark:text-slate-300',
+            calories: 'text-foreground',
             protein: 'text-blue-600 dark:text-blue-400',
             carbs: 'text-amber-600 dark:text-amber-400',
             fat: 'text-rose-600 dark:text-rose-400',
-            fiber: 'text-emerald-600 dark:text-emerald-400',
+            fiber: 'text-primary',
           };
           return (
             <dialog
@@ -740,13 +734,13 @@ export const DishManager = ({
               </div>
               <div className="bg-card relative z-10 max-h-[80dvh] w-full overflow-y-auto rounded-t-2xl shadow-2xl sm:max-w-2xl sm:rounded-2xl">
                 <div className="bg-card border-border-subtle sticky top-0 z-10 flex items-center justify-between border-b p-4">
-                  <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
+                  <h3 className="text-foreground flex items-center gap-2 text-lg font-bold">
                     <GitCompareArrows className="h-5 w-5 text-blue-500" />
                     {t('dish.compareNutrition')}
                   </h3>
                   <button
                     onClick={() => setShowCompare(false)}
-                    className="hover:text-foreground-secondary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-slate-400 transition-all dark:text-slate-500 dark:hover:text-slate-300"
+                    className="hover:text-foreground-secondary text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
                     aria-label={t('common.close')}
                   >
                     <X className="h-5 w-5" />
@@ -760,10 +754,7 @@ export const DishManager = ({
                           &nbsp;
                         </th>
                         {compareDishes.map(d => (
-                          <th
-                            key={d.id}
-                            className="px-2 py-2 text-center text-sm font-bold text-slate-800 dark:text-slate-100"
-                          >
+                          <th key={d.id} className="text-foreground px-2 py-2 text-center text-sm font-bold">
                             {getLocalizedField(d.name, lang)}
                           </th>
                         ))}
@@ -777,7 +768,7 @@ export const DishManager = ({
                         });
                         const best = key === 'calories' ? Math.min(...values) : Math.max(...values);
                         return (
-                          <tr key={key} className="border-t border-slate-50 dark:border-slate-700">
+                          <tr key={key} className="border-border border-t">
                             <td className="text-muted-foreground px-2 py-2.5 text-xs font-semibold uppercase">
                               {t(`common.${key}`)}
                             </td>

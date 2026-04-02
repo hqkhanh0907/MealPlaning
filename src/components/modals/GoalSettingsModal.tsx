@@ -70,12 +70,12 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
             <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
               <Target className="h-5 w-5" />
             </div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('goalSettings.title')}</h3>
+            <h3 className="text-foreground text-lg font-bold">{t('goalSettings.title')}</h3>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -86,9 +86,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
           <div>
             <div className="mb-3 flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                {t('goalSettings.presets')}
-              </span>
+              <span className="text-foreground text-sm font-semibold">{t('goalSettings.presets')}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {GOAL_PRESETS.map(preset => {
@@ -105,21 +103,17 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                     }}
                     data-testid={`btn-goal-preset-${preset.calories}`}
                     className={`flex items-center gap-2 rounded-xl border-2 p-3 text-left transition-all ${
-                      isActive
-                        ? 'border-primary bg-primary-subtle'
-                        : 'border-border hover:border-emerald-300 dark:hover:border-emerald-700'
+                      isActive ? 'border-primary bg-primary-subtle' : 'border-border hover:border-ring/30'
                     }`}
                   >
                     <span className="text-lg">
                       <preset.icon className="size-5" aria-hidden="true" />
                     </span>
                     <div>
-                      <p
-                        className={`text-sm font-bold ${isActive ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300'}`}
-                      >
+                      <p className={`text-sm font-bold ${isActive ? 'text-primary-emphasis' : 'text-foreground'}`}>
                         {t(preset.labelKey)}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">
+                      <p className="text-muted-foreground text-xs">
                         {preset.calories} kcal · {preset.proteinRatio}g/kg
                       </p>
                     </div>
@@ -129,10 +123,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
             </div>
           </div>
           <div>
-            <label
-              htmlFor="goal-weight"
-              className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="goal-weight" className="text-foreground mb-2 block text-sm font-semibold">
               {t('goalSettings.weight')}
             </label>
             <div className="relative">
@@ -166,11 +157,9 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                 }}
                 data-testid="input-goal-weight"
                 aria-invalid={!!fieldErrors.weight}
-                className={`w-full pr-12 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.weight ? 'border-destructive focus:ring-destructive' : ''}`}
+                className={`text-foreground w-full pr-12 pl-4 text-lg font-bold ${fieldErrors.weight ? 'border-destructive focus:ring-destructive' : ''}`}
               />
-              <span className="absolute top-1/2 right-4 -translate-y-1/2 font-medium text-slate-400 dark:text-slate-500">
-                kg
-              </span>
+              <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 font-medium">kg</span>
             </div>
             {fieldErrors.weight && (
               <p data-testid="error-goal-weight" className="text-destructive mt-1 text-xs">
@@ -181,7 +170,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label htmlFor="goal-protein" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="goal-protein" className="text-foreground block text-sm font-semibold">
                 {t('goalSettings.proteinGoal')}
               </label>
               <span className="rounded bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -223,9 +212,9 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                   }}
                   data-testid="input-goal-protein"
                   aria-invalid={!!fieldErrors.proteinRatio}
-                  className={`w-full pr-16 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.proteinRatio ? 'border-destructive focus:ring-destructive' : ''}`}
+                  className={`text-foreground w-full pr-16 pl-4 text-lg font-bold ${fieldErrors.proteinRatio ? 'border-destructive focus:ring-destructive' : ''}`}
                 />
-                <span className="absolute top-1/2 right-4 -translate-y-1/2 font-medium text-slate-400 dark:text-slate-500">
+                <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 font-medium">
                   {t('goalSettings.perKg')}
                 </span>
               </div>
@@ -243,7 +232,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                       setProteinStr(String(ratio));
                     }}
                     data-testid={`btn-preset-${ratio}`}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${userProfile.proteinRatio === ratio ? 'border-blue-500 bg-blue-500 text-white' : 'text-muted-foreground border-border bg-card hover:border-blue-300 dark:bg-slate-700'}`}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${userProfile.proteinRatio === ratio ? 'border-blue-500 bg-blue-500 text-white' : 'text-muted-foreground border-border bg-card hover:border-blue-300'}`}
                   >
                     {ratio}g
                   </button>
@@ -254,10 +243,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
           </div>
 
           <div>
-            <label
-              htmlFor="goal-calories"
-              className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="goal-calories" className="text-foreground mb-2 block text-sm font-semibold">
               {t('goalSettings.caloriesGoal')}
             </label>
             <div className="relative">
@@ -291,11 +277,9 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                 }}
                 data-testid="input-goal-calories"
                 aria-invalid={!!fieldErrors.targetCalories}
-                className={`w-full pr-16 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.targetCalories ? 'border-destructive focus:ring-destructive' : ''}`}
+                className={`text-foreground w-full pr-16 pl-4 text-lg font-bold ${fieldErrors.targetCalories ? 'border-destructive focus:ring-destructive' : ''}`}
               />
-              <span className="absolute top-1/2 right-4 -translate-y-1/2 font-medium text-slate-400 dark:text-slate-500">
-                kcal
-              </span>
+              <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 font-medium">kcal</span>
             </div>
             {fieldErrors.targetCalories && (
               <p data-testid="error-goal-calories" className="text-destructive mt-1 text-xs">
@@ -304,7 +288,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
             )}
           </div>
 
-          <p className="text-center text-xs text-slate-400 dark:text-slate-500">{t('goalSettings.autoSaveHint')}</p>
+          <p className="text-muted-foreground text-center text-xs">{t('goalSettings.autoSaveHint')}</p>
 
           <button
             onClick={onClose}

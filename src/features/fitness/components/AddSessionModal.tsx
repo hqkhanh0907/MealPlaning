@@ -52,9 +52,7 @@ function AddSessionModalInner({
       <div className="bg-card relative w-full rounded-t-3xl p-6 sm:mx-auto sm:max-w-md sm:rounded-2xl">
         {step === 'options' && (
           <>
-            <h3 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
-              {t('fitness.plan.addSession')}
-            </h3>
+            <h3 className="text-foreground mb-4 text-lg font-bold">{t('fitness.plan.addSession')}</h3>
             {isMaxReached && (
               <p className="mb-3 text-sm text-amber-600 dark:text-amber-400">{t('fitness.plan.maxSessions')}</p>
             )}
@@ -63,11 +61,11 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={handleStrengthClick}
-                className="bg-primary-subtle flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-emerald-900/40"
+                className="bg-primary-subtle hover:bg-primary/10 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Dumbbell className="text-primary h-5 w-5" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">{t('fitness.plan.strengthOption')}</p>
+                  <p className="text-primary text-sm font-semibold">{t('fitness.plan.strengthOption')}</p>
                   <p className="text-primary text-xs">{t('fitness.plan.strengthDesc')}</p>
                 </div>
               </button>
@@ -112,13 +110,11 @@ function AddSessionModalInner({
                 type="button"
                 onClick={handleBack}
                 aria-label={t('common.back')}
-                className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="hover:bg-accent flex h-11 w-11 items-center justify-center rounded-full"
               >
                 <ChevronLeft className="text-foreground-secondary h-5 w-5" />
               </button>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                {t('fitness.plan.selectMuscleGroups')}
-              </h3>
+              <h3 className="text-foreground text-lg font-bold">{t('fitness.plan.selectMuscleGroups')}</h3>
             </div>
 
             <div className="mb-6 flex flex-wrap gap-2">
@@ -134,7 +130,7 @@ function AddSessionModalInner({
                     className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       isSelected
                         ? 'bg-primary text-primary-foreground dark:bg-primary'
-                        : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
+                        : 'text-foreground-secondary bg-muted'
                     }`}
                   >
                     {group}

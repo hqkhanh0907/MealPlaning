@@ -6,8 +6,18 @@ const ACTIVITY_LEVEL_VALUES = ['sedentary', 'light', 'moderate', 'active', 'extr
 
 export const healthProfileSchema = z
   .object({
+    name: z.string().min(1, { error: 'Vui lòng nhập tên' }).max(50, { error: 'Tên tối đa 50 ký tự' }),
+    dateOfBirth: z
+      .string()
+      .min(1, { error: 'Vui lòng nhập ngày sinh' })
+      .refine(
+        v => {
+          const d = new Date(v);
+          return !Number.isNaN(d.getTime()) && d < new Date();
+        },
+        { error: 'Ngày sinh không hợp lệ' },
+      ),
     gender: z.enum(GENDER_VALUES),
-    age: z.coerce.number().min(10, { error: 'Tuổi tối thiểu là 10' }).max(100, { error: 'Tuổi tối đa là 100' }),
     heightCm: z.coerce
       .number()
       .min(100, { error: 'Chiều cao tối thiểu là 100 cm' })
@@ -38,8 +48,9 @@ export const healthProfileSchema = z
 export type HealthProfileFormData = z.infer<typeof healthProfileSchema>;
 
 export const healthProfileDefaults: HealthProfileFormData = {
+  name: '',
+  dateOfBirth: '',
   gender: 'male',
-  age: 30,
   heightCm: 170,
   weightKg: 70,
   activityLevel: 'moderate',

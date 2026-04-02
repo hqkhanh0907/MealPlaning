@@ -44,9 +44,9 @@ const TOAST_STYLES: Record<
   { border: string; iconBg: string; title: string; message: string; icon: React.ReactNode; progressBar: string }
 > = {
   success: {
-    border: 'border-emerald-200 dark:border-emerald-800',
-    iconBg: 'bg-primary-subtle text-emerald-600 dark:text-emerald-400',
-    title: 'text-emerald-800',
+    border: 'border-primary/20',
+    iconBg: 'bg-primary-subtle text-primary',
+    title: 'text-primary',
     message: 'text-primary',
     icon: <CheckCircle2 className="h-5 w-5" />,
     progressBar: 'bg-primary',
@@ -164,7 +164,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
               toast.action?.onClick();
               handleDismiss();
             }}
-            className="focus-visible:ring-ring text-primary hover:text-primary-emphasis mt-1.5 flex min-h-10 items-center rounded text-xs font-bold underline underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 active:text-emerald-800"
+            className="focus-visible:ring-ring text-primary hover:text-primary-emphasis active:text-primary mt-1.5 flex min-h-10 items-center rounded text-xs font-bold underline underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {toast.action.label}
           </button>
@@ -176,7 +176,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
           e.stopPropagation();
           handleDismiss();
         }}
-        className="focus-visible:ring-ring relative z-10 flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-slate-500 dark:hover:bg-slate-700"
+        className="focus-visible:ring-ring text-muted-foreground hover:bg-accent relative z-10 flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg p-2 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
       >
         <X className="h-4 w-4" />
       </button>

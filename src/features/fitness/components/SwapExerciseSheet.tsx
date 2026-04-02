@@ -108,11 +108,11 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
         <div className="px-4 pb-3 text-center">
           <div className="mb-1 flex items-center justify-center gap-2">
             <ArrowLeftRight className="text-primary h-5 w-5" />
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('fitness.swap.title')}</h2>
+            <h2 className="text-foreground text-lg font-bold">{t('fitness.swap.title')}</h2>
           </div>
           <p className="text-muted-foreground text-sm">
             <span>{t('fitness.swap.current')}: </span>
-            <span className="font-medium text-slate-700 dark:text-slate-300" data-testid="swap-current-name">
+            <span className="text-foreground font-medium" data-testid="swap-current-name">
               {currentExercise.nameVi}
             </span>
           </p>
@@ -125,7 +125,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
         <div className="px-4 pb-3">
           <div className="relative">
             <Search
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
               aria-hidden="true"
             />
             <input
@@ -135,7 +135,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.swap.search')}
-              className="focus-visible:ring-ring border-border bg-card w-full rounded-lg border px-3 py-2.5 pl-9 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus-visible:ring-2 dark:bg-slate-700 dark:text-slate-200"
+              className="focus-visible:ring-ring border-border bg-card text-foreground placeholder:text-muted-foreground w-full rounded-lg border px-3 py-2.5 pl-9 text-sm outline-none focus-visible:ring-2"
             />
           </div>
         </div>
@@ -152,13 +152,13 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
           {alternatives.length === 0 ? (
             <div
               data-testid="swap-empty-state"
-              className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500"
+              className="text-muted-foreground flex flex-col items-center justify-center py-12"
             >
               <ArrowLeftRight className="mb-2 h-8 w-8 opacity-40" />
               <p className="text-sm">{t('fitness.swap.noAlternatives')}</p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+            <ul className="divide-border divide-y">
               {alternatives.map(exercise => (
                 <li key={exercise.id}>
                   <button
@@ -166,9 +166,9 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
                     data-testid={`swap-item-${exercise.id}`}
                     aria-label={`${t('fitness.swap.title')}: ${exercise.nameVi}`}
                     onClick={() => handleSelect(exercise)}
-                    className="focus-visible:ring-ring min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 dark:hover:bg-slate-700/50"
+                    className="focus-visible:ring-ring hover:bg-accent focus-visible:ring-offset-2/50 min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors focus-visible:ring-2"
                   >
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{exercise.nameVi}</p>
+                    <p className="text-foreground text-sm font-medium">{exercise.nameVi}</p>
                     <div className="mt-0.5 flex items-center gap-2">
                       <span className="text-primary text-xs font-medium">
                         {t(CATEGORY_I18N_KEYS[exercise.category])}

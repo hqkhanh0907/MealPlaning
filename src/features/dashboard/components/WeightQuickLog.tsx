@@ -77,7 +77,7 @@ function getTrendIndicator(
   const diff = round1(movingAvg - yesterdayWeight);
   if (diff > 0) return { symbol: '↑', color: 'text-destructive' };
   if (diff < 0) return { symbol: '↓', color: 'text-primary' };
-  return { symbol: '→', color: 'text-slate-400 dark:text-slate-500' };
+  return { symbol: '→', color: 'text-muted-foreground' };
 }
 
 interface WeightQuickLogProps {
@@ -253,16 +253,14 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <div className="flex items-center gap-2">
             <Scale className="text-primary h-5 w-5" aria-hidden="true" />
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-              {t('fitness.weight.quickLogTitle')}
-            </h2>
+            <h2 className="text-foreground text-lg font-bold">{t('fitness.weight.quickLogTitle')}</h2>
           </div>
           <button
             type="button"
             data-testid="close-btn"
             aria-label={t('common.close')}
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 active:scale-95 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent flex h-11 w-11 items-center justify-center rounded-full transition-colors active:scale-95"
           >
             <X className="h-5 w-5" />
           </button>
@@ -271,13 +269,10 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         {/* Weight Display */}
         <div className="flex flex-col items-center py-6">
           <div className="flex items-baseline gap-1.5">
-            <span
-              data-testid="weight-display"
-              className="text-4xl font-bold text-slate-800 tabular-nums dark:text-slate-100"
-            >
+            <span data-testid="weight-display" className="text-foreground text-4xl font-bold tabular-nums">
               {inputValue > 0 ? inputValue : '—'}
             </span>
-            <span className="text-lg text-slate-400 dark:text-slate-500">{t('fitness.weight.kg')}</span>
+            <span className="text-muted-foreground text-lg">{t('fitness.weight.kg')}</span>
           </div>
         </div>
 
@@ -292,7 +287,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             onPointerDown={decrementLongPress.onPointerDown}
             onPointerUp={decrementLongPress.onPointerUp}
             onPointerLeave={decrementLongPress.onPointerLeave}
-            className="text-foreground-secondary flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-foreground-secondary bg-muted hover:bg-accent flex h-12 w-12 items-center justify-center rounded-full transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Minus className="h-5 w-5" />
           </button>
@@ -306,7 +301,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             onPointerDown={incrementLongPress.onPointerDown}
             onPointerUp={incrementLongPress.onPointerUp}
             onPointerLeave={incrementLongPress.onPointerLeave}
-            className="text-foreground-secondary flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-foreground-secondary bg-muted hover:bg-accent flex h-12 w-12 items-center justify-center rounded-full transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="h-5 w-5" />
           </button>
@@ -327,15 +322,13 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
                   onClick={() => handleChipSelect(w)}
                   className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'dark:border-primary text-primary-emphasis border-emerald-400 bg-emerald-100 dark:bg-emerald-900/40'
-                      : 'border-border text-foreground-secondary bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600'
+                      ? 'dark:border-primary text-primary-emphasis border-primary bg-primary/10'
+                      : 'border-border text-foreground-secondary bg-muted hover:bg-accent'
                   } tabular-nums`}
                 >
                   {w}
                   {isYesterdayWeight && (
-                    <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
-                      ({t('fitness.weight.yesterday')})
-                    </span>
+                    <span className="text-muted-foreground ml-1 text-xs">({t('fitness.weight.yesterday')})</span>
                   )}
                 </button>
               );

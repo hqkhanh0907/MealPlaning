@@ -22,13 +22,13 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
       >
         {/* Header */}
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-          <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h4>
+          <h4 className="text-foreground text-lg font-bold">{title}</h4>
           <div className="flex items-center gap-1">
             <button
               onClick={onEdit}
               data-testid="btn-detail-edit"
               aria-label={t('common.edit')}
-              className="hover:bg-primary-subtle rounded-full p-2 text-slate-400 transition-all hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+              className="hover:bg-primary-subtle text-muted-foreground hover:text-primary rounded-full p-2 transition-all"
               title={t('common.edit')}
             >
               <Edit3 className="h-5 w-5" />
@@ -37,7 +37,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
               onClick={onClose}
               data-testid="btn-detail-close"
               aria-label={t('common.closeDialog')}
-              className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="text-muted-foreground hover:bg-accent rounded-full p-2"
             >
               <X className="h-5 w-5" />
             </button>

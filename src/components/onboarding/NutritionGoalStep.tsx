@@ -52,7 +52,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
   return (
     <div className="flex flex-1 flex-col" data-testid="nutrition-goal-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{t('onboarding.goal.title')}</h2>
+        <h2 className="text-foreground mb-1 text-xl font-bold">{t('onboarding.goal.title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.goal.subtitle')}</p>
 
         {/* Goal Type */}
@@ -73,12 +73,12 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    goalField.field.value === value ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300',
+                    goalField.field.value === value ? 'text-primary-emphasis' : 'text-foreground',
                   )}
                 >
                   {t(`onboarding.goal.type_${value}`)}
                 </p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">{t(`onboarding.goal.type_${value}_desc`)}</p>
+                <p className="text-muted-foreground text-xs">{t(`onboarding.goal.type_${value}_desc`)}</p>
               </div>
             </button>
           ))}
@@ -88,9 +88,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
         {showConditional && (
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t('onboarding.goal.rate')}
-              </label>
+              <label className="text-foreground mb-2 block text-sm font-medium">{t('onboarding.goal.rate')}</label>
               <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('onboarding.goal.rate')}>
                 {RATES.map(rate => (
                   <button
@@ -112,7 +110,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
             </div>
 
             <div>
-              <label htmlFor="ob-target" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label htmlFor="ob-target" className="text-foreground mb-1 block text-sm font-medium">
                 {t('onboarding.goal.targetWeight')}
               </label>
               <div className="relative">
@@ -123,14 +121,12 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   inputMode="decimal"
                   aria-invalid={!!targetField.fieldState.error}
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
-                  className="bg-card focus-visible:ring-ring border-border w-full rounded-xl border px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:text-slate-100"
+                  className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 pr-12 text-base focus-visible:ring-2 focus-visible:outline-none"
                   value={targetField.field.value ?? ''}
                   onChange={e => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                   onBlur={targetField.field.onBlur}
                 />
-                <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400 dark:text-slate-500">
-                  kg
-                </span>
+                <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">kg</span>
               </div>
               {targetField.fieldState.error && (
                 <p id="ob-target-error" role="alert" className="text-destructive mt-1 text-xs">
@@ -142,7 +138,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
         )}
       </div>
 
-      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="border-border bg-card/95 fixed inset-x-0 bottom-0 flex items-center justify-between border-t p-4 backdrop-blur-sm">
         <button
           type="button"
           onClick={goBack}

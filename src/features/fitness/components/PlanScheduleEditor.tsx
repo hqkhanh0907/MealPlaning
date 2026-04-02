@@ -144,8 +144,8 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   // Empty state: no active plan
   if (!plan) {
     return (
-      <div className="flex h-full min-h-dvh flex-col bg-slate-50 dark:bg-slate-950">
-        <header className="bg-primary text-primary-foreground sticky top-0 z-10 flex items-center gap-3 px-4 py-3 shadow-md dark:bg-emerald-700">
+      <div className="bg-muted dark:bg-background flex h-full min-h-dvh flex-col">
+        <header className="bg-primary text-primary-foreground sticky top-0 z-10 flex items-center gap-3 px-4 py-3 shadow-md">
           <button
             type="button"
             data-testid="back-button"
@@ -167,7 +167,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           <button
             type="button"
             data-testid="create-plan-cta"
-            className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring dark:bg-primary touch-manipulation rounded-xl px-6 py-3 text-sm font-semibold shadow-md transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:hover:bg-emerald-400"
+            className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring dark:bg-primary touch-manipulation rounded-xl px-6 py-3 text-sm font-semibold shadow-md transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
           >
             {t('fitness.scheduleEditor.emptyPlanCta')}
           </button>
@@ -177,9 +177,9 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   }
 
   return (
-    <div className="flex h-full min-h-dvh flex-col bg-slate-50 dark:bg-slate-950">
+    <div className="bg-muted dark:bg-background flex h-full min-h-dvh flex-col">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground sticky top-0 z-10 flex items-center gap-3 px-4 py-3 shadow-md dark:bg-emerald-700">
+      <header className="bg-primary text-primary-foreground sticky top-0 z-10 flex items-center gap-3 px-4 py-3 shadow-md">
         <button
           type="button"
           data-testid="back-button"
@@ -193,13 +193,10 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
       </header>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-28">
+      <div className="flex-1 overflow-y-auto px-4 pb-24">
         {/* Step 1: Day Selection */}
         <section className="mt-4" aria-labelledby="step-days-heading">
-          <h2
-            id="step-days-heading"
-            className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"
-          >
+          <h2 id="step-days-heading" className="text-foreground mb-3 flex items-center gap-2 text-sm font-semibold">
             <CalendarDays className="text-primary h-4 w-4" />
             {t('fitness.scheduleEditor.stepDays')}
           </h2>
@@ -212,7 +209,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
         <section className="mt-6" aria-labelledby="step-assignment-heading">
           <h2
             id="step-assignment-heading"
-            className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"
+            className="text-foreground mb-3 flex items-center gap-2 text-sm font-semibold"
           >
             <Dumbbell className="text-primary h-4 w-4" />
             {t('fitness.scheduleEditor.stepAssignment')}
@@ -224,7 +221,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
               type="button"
               data-testid="auto-assign-button"
               onClick={handleAutoAssign}
-              className="focus-visible:ring-ring flex touch-manipulation items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+              className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent flex touch-manipulation items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
             >
               <Wand2 className="h-3.5 w-3.5" />
               {t('fitness.scheduleEditor.autoAssign')}
@@ -233,7 +230,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
               type="button"
               data-testid="restore-button"
               onClick={handleRestore}
-              className="focus-visible:ring-ring flex touch-manipulation items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+              className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent flex touch-manipulation items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               {t('fitness.scheduleEditor.restoreOriginal')}
@@ -262,7 +259,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
       </div>
 
       {/* Sticky footer: Save button */}
-      <div className="pb-safe border-border fixed inset-x-0 bottom-0 z-10 border-t bg-white/95 px-4 py-3 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="pb-safe border-border bg-card/95 fixed inset-x-0 bottom-0 z-10 border-t px-4 py-3 backdrop-blur-sm">
         <button
           type="button"
           data-testid="save-button"
@@ -273,8 +270,8 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
             'touch-manipulation transition-colors motion-reduce:transition-none',
             'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
             hasChanges
-              ? 'bg-primary text-primary-foreground hover:bg-primary dark:bg-primary dark:hover:bg-emerald-400'
-              : 'cursor-not-allowed bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500',
+              ? 'bg-primary text-primary-foreground hover:bg-primary dark:bg-primary'
+              : 'bg-muted text-muted-foreground cursor-not-allowed',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -303,7 +300,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           aria-labelledby={confirmDialogTitleId}
         >
           <div className="bg-card w-full max-w-sm rounded-2xl p-6 shadow-xl">
-            <p id={confirmDialogTitleId} className="mb-6 text-center text-sm text-slate-700 dark:text-slate-300">
+            <p id={confirmDialogTitleId} className="text-foreground mb-6 text-center text-sm">
               {t('fitness.scheduleEditor.unsavedWarning')}
             </p>
             <div className="flex gap-3">
@@ -311,7 +308,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
                 type="button"
                 data-testid="cancel-discard"
                 onClick={handleCancelDiscard}
-                className="bg-card focus-visible:ring-ring border-border flex-1 touch-manipulation rounded-xl border px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:text-slate-300 dark:hover:bg-slate-700"
+                className="bg-card focus-visible:ring-ring border-border text-foreground hover:bg-accent flex-1 touch-manipulation rounded-xl border px-4 py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
               >
                 {t('common.cancel')}
               </button>

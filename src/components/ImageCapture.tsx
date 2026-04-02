@@ -155,7 +155,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               <p className="mb-6 font-medium text-white">{cameraError}</p>
               <button
                 onClick={stopCamera}
-                className="rounded-xl bg-white px-6 py-2 font-bold text-slate-900 transition-all hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100"
+                className="bg-card text-foreground hover:bg-accent rounded-xl px-6 py-2 font-bold transition-all"
               >
                 {t('imageCapture.closeCamera')}
               </button>
@@ -170,21 +170,21 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                 <button
                   onClick={stopCamera}
                   aria-label={t('imageCapture.closeCamera')}
-                  className="focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white/20 p-3 text-white backdrop-blur transition-all hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring bg-card/20 hover:bg-card/30 flex min-h-12 min-w-12 items-center justify-center rounded-full p-3 text-white backdrop-blur transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
                   <X className="h-6 w-6" />
                 </button>
                 <button
                   onClick={capturePhoto}
                   aria-label={t('imageCapture.takePhoto')}
-                  className="focus-visible:ring-ring hover:bg-primary-subtle flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white p-5 text-emerald-600 shadow-2xl transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring hover:bg-primary-subtle bg-card text-primary flex min-h-12 min-w-12 items-center justify-center rounded-full p-5 shadow-2xl transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
                   <Camera className="h-9 w-9" />
                 </button>
                 <button
                   onClick={switchCamera}
                   aria-label={t('imageCapture.switchCamera')}
-                  className="focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white/20 p-3 text-white backdrop-blur transition-all hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring bg-card/20 hover:bg-card/30 flex min-h-12 min-w-12 items-center justify-center rounded-full p-3 text-white backdrop-blur transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
                   <RotateCcw className="h-6 w-6" />
                 </button>
@@ -195,9 +195,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
       ) : (
         <div
           className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-all ${
-            image
-              ? 'border-emerald-200 dark:border-emerald-700'
-              : 'border-border hover:bg-primary-subtle hover:border-emerald-400 dark:hover:bg-emerald-900/20'
+            image ? 'border-primary/20' : 'border-border hover:bg-primary-subtle hover:border-primary'
           }`}
         >
           {image ? (
@@ -205,7 +203,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               <img src={image} alt={t('imageCapture.uploadedDishAlt')} className="h-full w-full object-cover" />
               <button
                 onClick={onClear}
-                className="bg-card/90 absolute top-4 right-4 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition-all hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
+                className="bg-card/90 text-foreground hover:bg-card absolute top-4 right-4 rounded-xl px-4 py-2 text-sm font-bold shadow-sm backdrop-blur transition-all"
               >
                 {t('imageCapture.chooseAnother')}
               </button>
@@ -217,27 +215,27 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                   <>
                     <button
                       onClick={() => startCamera()}
-                      className="hover:bg-primary-subtle flex flex-col items-center gap-2 rounded-xl p-4 transition-all dark:hover:bg-emerald-900/20"
+                      className="hover:bg-primary-subtle flex flex-col items-center gap-2 rounded-xl p-4 transition-all"
                     >
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 shadow-sm transition-all dark:bg-emerald-900/30">
+                      <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full shadow-sm transition-all">
                         <Camera className="text-primary h-7 w-7" />
                       </div>
                       <span className="text-primary-emphasis text-sm font-bold">{t('imageCapture.takePhoto')}</span>
                     </button>
-                    <div className="h-20 w-px self-center bg-slate-200 dark:bg-slate-600"></div>
+                    <div className="bg-muted h-20 w-px self-center dark:bg-slate-600"></div>
                   </>
                 )}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center gap-2 rounded-xl p-4 transition-all hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="hover:bg-accent flex flex-col items-center gap-2 rounded-xl p-4 transition-all"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-all dark:bg-slate-700">
-                    <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                  <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full transition-all">
+                    <Upload className="text-muted-foreground h-6 w-6" />
                   </div>
                   <span className="text-muted-foreground text-sm font-bold">{t('imageCapture.uploadImage')}</span>
                 </button>
               </div>
-              <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
+              <p className="text-muted-foreground mt-2 text-center text-xs">
                 <span className="hidden sm:inline">
                   {t('imageCapture.pasteHint')}
                   <br />

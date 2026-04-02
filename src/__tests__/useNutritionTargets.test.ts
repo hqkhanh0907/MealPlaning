@@ -184,4 +184,85 @@ describe('useNutritionTargets', () => {
     // With bodyFatPct=0.15, LBM = 80*(1-0.15) = 68kg, protein = 68*2 = 136g
     expect(result.current.targetProtein).toBe(136);
   });
+
+  it('uses computed age from dateOfBirth via getAge()', () => {
+    // Stored age=25, but DOB yields age=30 → hook should use computed 30
+    const dob = new Date();
+    dob.setFullYear(dob.getFullYear() - 30);
+    dob.setMonth(dob.getMonth() - 1);
+    const dobStr = dob.toISOString().slice(0, 10);
+
+    const profileWithDob: HealthProfile = {
+      id: 'custom',
+      name: 'Test',
+      gender: 'male',
+      age: 25, // stale stored age
+      dateOfBirth: dobStr, // yields age 30
+      heightCm: 180,
+      weightKg: 80,
+      activityLevel: 'active',
+      proteinRatio: 2.2,
+      fatPct: 0.25,
+      targetCalories: 0,
+      updatedAt: new Date().toISOString(),
+    };
+    useHealthProfileStore.setState({ profile: profileWithDob });
+
+    const { result } = renderHook(() => useNutritionTargets());
+
+    // BMR should use computed age 30 (from DOB), NOT stored age 25
+    const expectedBMR = calculateBMR(80, 180, 30, 'male');
+    const expectedTDEE = calculateTDEE(expectedBMR, 'active');
+
+    expect(result.current.bmr).toBe(expectedBMR);
+    expect(result.current.tdee).toBe(expectedTDEE);
+
+    // Verify it's NOT using stale stored age 25
+    const wrongBMR = calculateBMR(80, 180, 25, 'male');
+    expect(result.current.bmr).not.toBe(wrongBMR);
+  });
+
+  it('falls back to stored age when dateOfBirth is null', () => {
+    const profileNoDob: HealthProfile = {
+      id: 'custom',
+      name: 'Test',
+      gender: 'male',
+      age: 28,
+      dateOfBirth: null,
+      heightCm: 180,
+      weightKg: 80,
+      activityLevel: 'active',
+      proteinRatio: 2.2,
+      fatPct: 0.25,
+      targetCalories: 0,
+      updatedAt: new Date().toISOString(),
+    };
+    useHealthProfileStore.setState({ profile: profileNoDob });
+
+    const { result } = renderHook(() => useNutritionTargets());
+
+    // Should use stored age 28 as fallback
+    const expectedBMR = calculateBMR(80, 180, 28, 'male');
+    expect(result.current.bmr).toBe(expectedBMR);
+  });
+
+  it('isProfileConfigured returns true when only dateOfBirth differs from default', () => {
+    // Profile matches all defaults EXCEPT dateOfBirth is set → should be configured
+    const dob = new Date();
+    dob.setFullYear(dob.getFullYear() - 30);
+    dob.setMonth(dob.getMonth() - 1);
+
+    const profileWithOnlyDob: HealthProfile = {
+      ...DEFAULT_HEALTH_PROFILE,
+      dateOfBirth: dob.toISOString().slice(0, 10),
+    };
+    useHealthProfileStore.setState({ profile: profileWithOnlyDob });
+
+    const { result } = renderHook(() => useNutritionTargets());
+
+    // Should compute full BMR (not fall back to defaults)
+    const expectedBMR = calculateBMR(70, 170, 30, 'male');
+    expect(result.current.bmr).toBe(expectedBMR);
+    expect(result.current.bmr).toBeGreaterThan(0);
+  });
 });

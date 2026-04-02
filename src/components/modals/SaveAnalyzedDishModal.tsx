@@ -143,11 +143,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div className="bg-card relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-          <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.title')}</h4>
+          <h4 className="text-foreground text-lg font-bold">{t('saveAnalyzed.title')}</h4>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="dark:text-muted-foreground rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="dark:text-muted-foreground text-muted-foreground hover:bg-accent rounded-full p-2"
           >
             <X className="h-5 w-5" />
           </button>
@@ -157,8 +157,8 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
           {/* Dish Info */}
           <div className="space-y-4">
             <div className="border-border-subtle flex items-center justify-between border-b pb-2">
-              <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.dishInfo')}</h5>
-              <label className="-mr-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 transition-colors active:bg-slate-100 dark:active:bg-slate-700">
+              <h5 className="text-foreground font-bold">{t('saveAnalyzed.dishInfo')}</h5>
+              <label className="active:bg-muted -mr-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 transition-colors dark:active:bg-slate-700">
                 <Controller
                   name="saveDish"
                   control={control}
@@ -167,7 +167,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                       type="checkbox"
                       checked={field.value}
                       onChange={e => field.onChange(e.target.checked)}
-                      className="text-primary focus:ring-ring h-5 w-5 rounded border-slate-300"
+                      className="text-primary focus:ring-ring border-border h-5 w-5 rounded"
                     />
                   )}
                 />
@@ -215,7 +215,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        className="focus:border-primary border-border bg-card w-full rounded-xl border px-4 py-2.5 text-base transition-all outline-none sm:text-sm dark:bg-slate-700 dark:text-slate-100"
+                        className="focus:border-primary border-border bg-card w-full rounded-xl border px-4 py-2.5 text-base transition-all outline-none sm:text-sm"
                         rows={2}
                       />
                     )}
@@ -243,7 +243,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                               className={`min-h-11 flex-1 rounded-xl py-2.5 text-sm font-bold transition-all ${
                                 isActive
                                   ? 'bg-primary text-primary-foreground shadow-sm'
-                                  : 'text-muted-foreground bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600'
+                                  : 'text-muted-foreground bg-muted hover:bg-accent active:bg-slate-300'
                               }`}
                             >
                               <opt.icon className="inline-block size-4" aria-hidden="true" /> {opt.label}
@@ -262,7 +262,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
           {/* Ingredients List */}
           <div className="space-y-4">
             <div className="border-border-subtle flex items-center justify-between border-b pb-2">
-              <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.ingredientDetail')}</h5>
+              <h5 className="text-foreground font-bold">{t('saveAnalyzed.ingredientDetail')}</h5>
               <button
                 onClick={toggleAllIngredients}
                 className="text-primary hover:text-primary-emphasis text-sm font-medium transition-colors"
@@ -275,17 +275,17 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
               {fields.map((field, idx) => (
                 <div
                   key={field.id}
-                  className={`rounded-xl border p-4 transition-all ${selectedIngredients[idx] ? 'border-border bg-slate-50 dark:bg-slate-700/50' : 'bg-card border-border-subtle opacity-60'}`}
+                  className={`rounded-xl border p-4 transition-all ${selectedIngredients[idx] ? 'border-border bg-muted' : 'bg-card border-border-subtle opacity-60'}`}
                 >
                   <div className="mb-3 flex items-start justify-between">
-                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-1 transition-colors active:bg-slate-100 dark:active:bg-slate-700">
+                    <label className="active:bg-muted flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-1 transition-colors dark:active:bg-slate-700">
                       <input
                         type="checkbox"
                         checked={selectedIngredients[idx]}
                         onChange={() => toggleIngredientSelection(idx)}
-                        className="text-primary focus:ring-ring h-5 w-5 rounded border-slate-300"
+                        className="text-primary focus:ring-ring border-border h-5 w-5 rounded"
                       />
-                      <span className="text-muted-foreground text-xs font-semibold uppercase dark:text-slate-500">
+                      <span className="text-muted-foreground text-xs font-semibold uppercase">
                         {t('saveAnalyzed.ingredientNum', { num: idx + 1 })}
                       </span>
                     </label>
@@ -341,7 +341,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                         inputMode="numeric"
                         min={0}
                         testId={`ai-ing-amount-${idx}`}
-                        className="focus:border-primary border-border bg-card w-full rounded-lg border px-3 py-2 text-sm outline-none dark:bg-slate-700 dark:text-slate-100"
+                        className="focus:border-primary border-border bg-card w-full rounded-lg border px-3 py-2 text-sm outline-none"
                       />
                     </div>
                     <div className="md:col-span-1">
@@ -383,7 +383,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-cal-${idx}`}
-                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm"
                         />
                       </div>
                       <div>
@@ -396,7 +396,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-pro-${idx}`}
-                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm"
                         />
                       </div>
                       <div>
@@ -409,7 +409,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-carbs-${idx}`}
-                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm"
                         />
                       </div>
                       <div>
@@ -422,7 +422,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-fat-${idx}`}
-                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm"
                         />
                       </div>
                       <div>
@@ -435,7 +435,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-fiber-${idx}`}
-                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm"
                         />
                       </div>
                     </div>
@@ -446,10 +446,10 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
           </div>
         </div>
 
-        <div className="pb-safe border-border-subtle flex shrink-0 justify-end gap-3 border-t bg-slate-50 p-4 sm:p-6 dark:bg-slate-800/50">
+        <div className="pb-safe border-border-subtle bg-muted flex shrink-0 justify-end gap-3 border-t p-4 sm:p-6">
           <button
             onClick={onClose}
-            className="text-foreground-secondary min-h-12 rounded-xl px-5 py-3 font-bold transition-all hover:bg-slate-200 active:bg-slate-300 dark:hover:bg-slate-700"
+            className="text-foreground-secondary hover:bg-accent min-h-12 rounded-xl px-5 py-3 font-bold transition-all active:bg-slate-300"
           >
             {t('saveAnalyzed.cancelSave')}
           </button>

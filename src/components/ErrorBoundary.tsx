@@ -46,7 +46,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
             <AlertTriangle className="h-8 w-8 text-amber-500 dark:text-amber-400" />
           </div>
-          <h3 className="mb-2 text-lg font-bold text-slate-800 dark:text-slate-100">
+          <h3 className="text-foreground mb-2 text-lg font-bold">
             {this.props.fallbackTitle || i18n.t('errorBoundary.defaultTitle')}
           </h3>
           <p className="text-muted-foreground mb-6 max-w-sm text-sm">{i18n.t('errorBoundary.description')}</p>
@@ -60,17 +60,17 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </button>
             <button
               onClick={() => globalThis.location.reload()}
-              className="text-foreground-secondary min-h-11 rounded-xl bg-slate-100 px-5 py-2.5 font-bold transition-all hover:bg-slate-200 active:scale-[0.98] dark:bg-slate-700 dark:hover:bg-slate-600"
+              className="text-foreground-secondary bg-muted hover:bg-accent min-h-11 rounded-xl px-5 py-2.5 font-bold transition-all active:scale-[0.98]"
             >
               {i18n.t('errorBoundary.reload')}
             </button>
           </div>
           {this.state.error && (
             <details className="mt-6 w-full max-w-md text-left">
-              <summary className="hover:text-muted-foreground cursor-pointer text-xs text-slate-400 dark:text-slate-500">
+              <summary className="hover:text-muted-foreground text-muted-foreground cursor-pointer text-xs">
                 {i18n.t('errorBoundary.errorDetails')}
               </summary>
-              <pre className="border-border text-foreground-secondary mt-2 overflow-x-auto rounded-xl border bg-slate-100 p-3 text-xs dark:bg-slate-700">
+              <pre className="border-border text-foreground-secondary bg-muted mt-2 overflow-x-auto rounded-xl border p-3 text-xs">
                 {this.state.error.message}
               </pre>
             </details>

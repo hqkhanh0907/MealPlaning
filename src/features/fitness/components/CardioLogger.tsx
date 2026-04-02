@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { generateUUID } from '@/utils/helpers';
+import { logger } from '@/utils/logger';
 
 import { useNotification } from '../../../contexts/NotificationContext';
 import {
@@ -100,7 +101,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
       try {
         await saveWorkoutAtomic(workout, sets);
       } catch (error) {
-        console.error('[CardioLogger] Save failed:', error);
+        logger.error({ component: 'CardioLogger', action: 'save' }, error);
         notify.error(t('fitness.logger.saveFailed'));
         return;
       }
@@ -114,7 +115,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
   }, [handleSubmit, onFormSubmit]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900" data-testid="cardio-logger">
+    <div className="bg-muted fixed inset-0 z-50 flex flex-col" data-testid="cardio-logger">
       {/* Header */}
       <header
         className="pt-safe bg-primary text-primary-foreground sticky top-0 z-10 flex items-center justify-between px-4 py-3"
@@ -124,7 +125,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="gap-1 text-white hover:bg-white/20 hover:text-white"
+          className="hover:bg-card/20 gap-1 text-white hover:text-white"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -137,7 +138,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           variant="ghost"
           size="sm"
           onClick={handleSave}
-          className="gap-1 text-white hover:bg-white/20 hover:text-white"
+          className="hover:bg-card/20 gap-1 text-white hover:text-white"
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>
@@ -182,7 +183,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
                   ? 'bg-primary text-primary-foreground hover:bg-primary'
-                  : 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700',
+                  : 'text-foreground-secondary bg-muted border-transparent',
               )}
               data-testid="stopwatch-mode-button"
             >
@@ -194,7 +195,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               className={cn(
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
-                  ? 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700'
+                  ? 'text-foreground-secondary bg-muted border-transparent'
                   : 'bg-primary text-primary-foreground hover:bg-primary',
               )}
               data-testid="manual-mode-button"
@@ -206,7 +207,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           {isStopwatchMode ? (
             <div data-testid="stopwatch-panel">
               <p
-                className="mb-3 text-center font-mono text-3xl font-bold text-slate-800 dark:text-slate-100"
+                className="text-foreground mb-3 text-center font-mono text-3xl font-bold"
                 data-testid="stopwatch-display"
               >
                 {formatElapsed(stopwatch.elapsed)}
@@ -216,7 +217,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   <Button
                     variant="default"
                     onClick={handlePauseStopwatch}
-                    className="flex-1 bg-amber-500 py-2.5 text-white hover:bg-amber-600"
+                    className="flex-1 bg-amber-500 py-2.5 text-amber-950 hover:bg-amber-600"
                     data-testid="pause-button"
                   >
                     {t('fitness.cardio.pause')}
@@ -256,7 +257,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                         field.onChange(val === '' ? undefined : parseNumericInput(val));
                       }}
                       onBlur={field.onBlur}
-                      className="w-full text-center text-lg font-semibold text-slate-800"
+                      className="text-foreground w-full text-center text-lg font-semibold"
                       data-testid="manual-duration-input"
                       min={0}
                     />
@@ -289,7 +290,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                       field.onChange(val === '' ? undefined : parseNumericInput(val));
                     }}
                     onBlur={field.onBlur}
-                    className="w-full text-center text-lg font-semibold text-slate-800"
+                    className="text-foreground w-full text-center text-lg font-semibold"
                     data-testid="distance-input"
                     min={0}
                     step={0.1}
@@ -321,7 +322,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                     field.onChange(val === '' ? undefined : parseNumericInput(val));
                   }}
                   onBlur={field.onBlur}
-                  className="w-full text-center text-lg font-semibold text-slate-800"
+                  className="text-foreground w-full text-center text-lg font-semibold"
                   data-testid="heart-rate-input"
                   min={0}
                 />
@@ -348,7 +349,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   'min-h-11 flex-1 rounded-lg',
                   intensity === value
                     ? 'bg-primary text-primary-foreground hover:bg-primary'
-                    : 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700',
+                    : 'text-foreground-secondary bg-muted border-transparent',
                 )}
                 data-testid={`intensity-${value}`}
               >

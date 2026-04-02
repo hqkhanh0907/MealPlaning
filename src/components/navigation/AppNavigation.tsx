@@ -71,15 +71,15 @@ export const BottomNavBar = ({
               aria-label={label}
               data-testid={`nav-${tab}`}
               onClick={() => onTabChange(tab)}
-              className={`relative flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-2.5 transition-all ${activeTab === tab ? 'text-primary-emphasis' : 'active:text-foreground-secondary text-slate-400 dark:text-slate-500'}`}
+              className={`relative flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-2.5 transition-all ${activeTab === tab ? 'text-primary-emphasis' : 'active:text-foreground-secondary text-muted-foreground'}`}
             >
               <div className="relative">
                 {mobileIcon}
                 {tab === 'ai-analysis' && showAIBadge && (
-                  <div className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-rose-500 dark:border-slate-900" />
+                  <div className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-rose-500" />
                 )}
               </div>
-              <span className="mt-0.5 max-w-[60px] truncate text-[10px] leading-tight font-medium">{label}</span>
+              <span className="mt-0.5 max-w-[60px] truncate text-xs leading-normal font-medium">{label}</span>
               {activeTab === tab && <div className="bg-primary absolute -bottom-0.5 h-0.5 w-5 rounded-full" />}
             </button>
           );
@@ -100,7 +100,7 @@ export const DesktopNav = ({ activeTab, onTabChange }: { activeTab: MainTab; onT
           role="tab"
           aria-selected={activeTab === tab}
           onClick={() => onTabChange(tab)}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700' : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground dark:hover:text-slate-200'}`}
         >
           {desktopIcon}
           <span>{t(labelKey)}</span>
@@ -114,8 +114,8 @@ export const TabLoadingFallback = () => {
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-center py-20">
-      <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
-        <div className="border-t-primary h-8 w-8 animate-spin rounded-full border-3 border-emerald-200 dark:border-emerald-800" />
+      <div className="text-muted-foreground flex flex-col items-center gap-3">
+        <div className="border-t-primary border-primary/20 h-8 w-8 animate-spin rounded-full border-3" />
         <p className="text-sm font-medium">{t('common.loading')}</p>
       </div>
     </div>

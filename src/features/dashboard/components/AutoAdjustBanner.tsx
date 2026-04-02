@@ -74,7 +74,7 @@ export const AutoAdjustBanner = React.memo(function AutoAdjustBanner({
               data-testid="banner-apply-btn"
               type="button"
               onClick={handleApply}
-              className="rounded bg-white px-3 py-1.5 text-xs font-semibold text-amber-950 transition-colors hover:bg-white/90"
+              className="bg-card hover:bg-card/90 rounded px-3 py-1.5 text-xs font-semibold text-amber-950 transition-colors"
             >
               {t('adjustBanner.apply')}
             </button>

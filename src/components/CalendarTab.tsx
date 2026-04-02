@@ -97,7 +97,7 @@ export const CalendarTab = React.memo(function CalendarTab({
       {/* Date Selection */}
       <section className="space-y-4">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-2 text-xl font-bold text-slate-800 dark:text-slate-100">
+          <div className="text-foreground flex items-center gap-2 text-xl font-bold">
             <CalendarDays className="text-primary h-6 w-6" />
             <h2>{t('calendar.selectDate')}</h2>
           </div>
@@ -139,8 +139,8 @@ export const CalendarTab = React.memo(function CalendarTab({
                 data-testid={`subtab-${key}`}
                 className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
                   activeSubTab === key
-                    ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700'
-                    : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300'
+                    ? 'text-primary-emphasis bg-card shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {icon}
@@ -228,12 +228,12 @@ export const CalendarTab = React.memo(function CalendarTab({
             className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl"
           >
             <div className="border-border flex items-center justify-between border-b px-4 py-3">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>
+              <h2 className="text-foreground text-lg font-bold">{t('grocery.title')}</h2>
               <button
                 type="button"
                 onClick={handleCloseGrocery}
                 data-testid="btn-close-grocery"
-                className="hover:text-foreground-secondary rounded-xl p-2 text-slate-400 transition-all hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                className="hover:text-foreground-secondary text-muted-foreground hover:bg-accent rounded-xl p-2 transition-all"
                 aria-label={t('common.close')}
               >
                 <X className="h-5 w-5" />

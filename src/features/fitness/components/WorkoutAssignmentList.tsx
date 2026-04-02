@@ -68,7 +68,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
     return (
       <div
         data-testid="workout-assignment-empty"
-        className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500"
+        className="text-muted-foreground flex flex-col items-center justify-center py-12"
       >
         <Dumbbell className="mb-2 h-8 w-8 opacity-40" />
         <p className="text-sm">{t('fitness.scheduleEditor.noWorkouts')}</p>
@@ -86,7 +86,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
         >
           {/* Drag handle */}
           <div
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center text-slate-400 dark:text-slate-500"
+            className="text-muted-foreground flex h-11 w-11 flex-shrink-0 items-center justify-center"
             aria-hidden="true"
           >
             <GripVertical className="h-5 w-5" />
@@ -94,7 +94,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
 
           {/* Workout info */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{day.workoutType}</p>
+            <p className="text-foreground truncate text-sm font-semibold">{day.workoutType}</p>
             {day.muscleGroups && (
               <p className="text-muted-foreground truncate text-xs">
                 {safeParseJsonArray<string>(day.muscleGroups).join(', ')}
@@ -108,7 +108,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
             data-testid={`reassign-btn-${day.id}`}
             aria-label={`${t('fitness.scheduleEditor.reassignDay')}: ${day.workoutType}`}
             onClick={() => handleReassign(day.id)}
-            className="focus-visible:ring-ring text-primary-emphasis min-h-11 flex-shrink-0 touch-manipulation rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold transition-colors hover:bg-emerald-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:bg-emerald-900/40 dark:hover:bg-emerald-900/60"
+            className="focus-visible:ring-ring text-primary-emphasis bg-primary/10 hover:bg-primary/20 min-h-11 flex-shrink-0 touch-manipulation rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
           >
             {getDayLabel(day.dayOfWeek)}
           </button>
@@ -121,7 +121,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
               aria-label={t('fitness.scheduleEditor.moveUp')}
               disabled={index === 0}
               onClick={() => handleMoveUp(index)}
-              className="focus-visible:ring-ring flex h-7 min-h-11 w-7 min-w-11 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="focus-visible:ring-ring text-muted-foreground hover:bg-accent flex h-7 min-h-11 w-7 min-w-11 touch-manipulation items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
             >
               <ChevronUp className="h-4 w-4" />
             </button>
@@ -131,7 +131,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
               aria-label={t('fitness.scheduleEditor.moveDown')}
               disabled={index === planDays.length - 1}
               onClick={() => handleMoveDown(index)}
-              className="focus-visible:ring-ring flex h-7 min-h-11 w-7 min-w-11 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="focus-visible:ring-ring text-muted-foreground hover:bg-accent flex h-7 min-h-11 w-7 min-w-11 touch-manipulation items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
             >
               <ChevronDown className="h-4 w-4" />
             </button>

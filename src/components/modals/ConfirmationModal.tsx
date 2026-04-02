@@ -67,13 +67,13 @@ export const ConfirmationModal = ({
           >
             {icon || defaultIcon}
           </div>
-          <h4 className="mb-2 text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h4>
+          <h4 className="text-foreground mb-2 text-xl font-bold">{title}</h4>
           <div className="text-foreground-secondary mb-6">{message}</div>
           <div className="flex gap-3">
             <button
               data-testid="btn-cancel-action"
               onClick={onCancel}
-              className="text-foreground-secondary min-h-12 flex-1 rounded-xl py-3 font-bold transition-all hover:bg-slate-100 active:bg-slate-200 dark:hover:bg-slate-700"
+              className="text-foreground-secondary hover:bg-accent active:bg-muted min-h-12 flex-1 rounded-xl py-3 font-bold transition-all"
             >
               {cancelLabel ?? t('common.cancel')}
             </button>

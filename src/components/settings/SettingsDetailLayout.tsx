@@ -36,14 +36,14 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onBack}
             data-testid="settings-detail-back"
-            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="hover:bg-accent flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
             aria-label={t('settings.back')}
           >
             <ChevronLeft className="text-foreground-secondary h-5 w-5" />
           </button>
           <div className="flex items-center gap-2.5">
             {icon}
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            <h3 className="text-foreground text-lg font-bold">
               {isEditing ? `${t('settings.edit')} ${title}` : title}
             </h3>
           </div>
@@ -54,7 +54,7 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onEdit}
             data-testid="settings-detail-edit"
-            className="focus-visible:ring-ring bg-primary-subtle flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:outline-none dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+            className="focus-visible:ring-ring bg-primary-subtle text-primary hover:bg-primary/10 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Pencil className="h-3.5 w-3.5" />
             {t('settings.edit')}
@@ -76,7 +76,7 @@ export function SettingsDetailLayout({
               type="button"
               onClick={onCancel}
               data-testid="settings-detail-cancel"
-              className="flex-1 rounded-xl bg-slate-100 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+              className="bg-muted text-foreground hover:bg-accent flex-1 rounded-xl py-3 text-sm font-medium transition-colors"
             >
               {t('settings.cancel')}
             </button>

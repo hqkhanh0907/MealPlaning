@@ -16,7 +16,7 @@ interface RecommendationPanelProps {
 }
 
 const TIP_STYLES: Record<NutritionTip['type'], string> = {
-  success: 'bg-primary-subtle border-emerald-100 dark:border-emerald-800 text-emerald-800',
+  success: 'bg-primary-subtle border-primary/10 text-primary',
   warning: 'bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800 text-amber-800 dark:text-amber-300',
   info: 'bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-300',
 };
@@ -52,7 +52,7 @@ const RecommendationPanel = ({
 
   return (
     <div className="bg-card border-border-subtle flex flex-col rounded-2xl border p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-2 font-bold text-indigo-600 dark:text-indigo-400">
+      <div className="mb-4 flex items-center gap-2 font-semibold text-indigo-600 dark:text-indigo-400">
         <Info className="h-5 w-5" aria-hidden="true" />
         <h3>{t('recommendation.title')}</h3>
       </div>
@@ -88,7 +88,7 @@ const RecommendationPanel = ({
             type="button"
             onClick={onSwitchToMeals}
             data-testid="btn-switch-to-meals"
-            className="bg-primary-subtle text-primary-emphasis flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 p-3 text-sm font-medium transition-all hover:bg-emerald-100 active:scale-[0.98] dark:border-emerald-800 dark:hover:bg-emerald-900/50"
+            className="bg-primary-subtle text-primary-emphasis border-primary/20 hover:bg-primary/10 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all active:scale-[0.98]"
           >
             <UtensilsCrossed className="h-4 w-4" aria-hidden="true" />
             {t('schedule.switchToMeals')}

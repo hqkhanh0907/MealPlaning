@@ -115,16 +115,14 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
             <label
               key={option.value}
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
-                selectedSplit === option.value
-                  ? 'border-primary bg-primary-subtle dark:bg-emerald-950'
-                  : 'bg-card border-border'
+                selectedSplit === option.value ? 'border-primary bg-primary-subtle' : 'bg-card border-border'
               } touch-manipulation`}
               data-testid={`split-option-${option.value}`}
             >
               <RadioGroupItem value={option.value} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-slate-900 dark:text-slate-100">{t(option.labelKey)}</span>
+                  <span className="text-foreground font-medium">{t(option.labelKey)}</span>
                   {option.value === currentSplit && (
                     <Check className="text-primary h-4 w-4" aria-hidden="true" data-testid="current-split-check" />
                   )}
@@ -138,9 +136,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
         {/* Mode selector — only shown when a different split is selected */}
         {isDifferentSplit && (
           <div className="mt-6" data-testid="mode-selector">
-            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {t('fitness.splitChanger.modeTitle')}
-            </h2>
+            <h2 className="text-foreground mb-3 text-sm font-semibold">{t('fitness.splitChanger.modeTitle')}</h2>
             <div className="space-y-3">
               <button
                 type="button"
@@ -154,9 +150,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
               >
                 <RefreshCw className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    {t('fitness.splitChanger.regenerate')}
-                  </span>
+                  <span className="text-foreground font-medium">{t('fitness.splitChanger.regenerate')}</span>
                   <p className="mt-1 flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     {t('fitness.splitChanger.regenerateWarning')}
@@ -168,15 +162,13 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 type="button"
                 onClick={() => setMode('remap')}
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
-                  mode === 'remap' ? 'border-primary bg-primary-subtle dark:bg-emerald-950' : 'bg-card border-border'
+                  mode === 'remap' ? 'border-primary bg-primary-subtle' : 'bg-card border-border'
                 } touch-manipulation`}
                 data-testid="mode-remap"
               >
                 <Shuffle className="text-primary mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    {t('fitness.splitChanger.remap')}
-                  </span>
+                  <span className="text-foreground font-medium">{t('fitness.splitChanger.remap')}</span>
                   <p className="text-muted-foreground mt-1 text-sm">{t('fitness.splitChanger.remapDesc')}</p>
                 </div>
               </button>
@@ -187,9 +179,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
         {/* Preview panel */}
         {isDifferentSplit && mode === 'remap' && (
           <div className="mt-6" data-testid="preview-panel">
-            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {t('fitness.splitChanger.preview')}
-            </h2>
+            <h2 className="text-foreground mb-3 text-sm font-semibold">{t('fitness.splitChanger.preview')}</h2>
 
             {isLoadingPreview && (
               <div className="flex items-center justify-center py-8" data-testid="preview-loading">
@@ -210,7 +200,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
               <div className="space-y-3">
                 {/* Summary counts */}
                 <div className="flex gap-3 text-sm tabular-nums" data-testid="preview-summary">
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                  <span className="bg-primary/10 text-primary rounded-full px-3 py-1">
                     {String(preview.mapped.length)} {t('fitness.splitChanger.mapped')}
                   </span>
                   <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
@@ -227,11 +217,11 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                     {preview.mapped.map(item => (
                       <div
                         key={item.from.id}
-                        className="bg-primary-subtle flex items-center gap-2 rounded-lg px-3 py-2 dark:bg-emerald-950"
+                        className="bg-primary-subtle flex items-center gap-2 rounded-lg px-3 py-2"
                         data-testid="preview-mapped-item"
                       >
                         <Check className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
+                        <span className="text-foreground min-w-0 flex-1 truncate text-sm">
                           {item.from.notes ?? item.from.workoutType}
                         </span>
                         <span className="text-muted-foreground text-xs">→ {item.toDay}</span>
@@ -250,9 +240,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                         data-testid="preview-suggested-item"
                       >
                         <Lightbulb className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
-                          {item.day}
-                        </span>
+                        <span className="text-foreground min-w-0 flex-1 truncate text-sm">{item.day}</span>
                         <span className="text-muted-foreground text-xs">{item.reason}</span>
                       </div>
                     ))}
@@ -269,7 +257,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                         data-testid="preview-unmapped-item"
                       >
                         <CircleAlert className="text-destructive h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
+                        <span className="text-foreground min-w-0 flex-1 truncate text-sm">
                           {item.notes ?? item.workoutType}
                         </span>
                       </div>

@@ -161,7 +161,7 @@ export function ExerciseSelector({
         </div>
 
         {/* Title */}
-        <h2 className="px-4 pb-2 text-center text-lg font-bold text-slate-800 dark:text-slate-200">
+        <h2 className="text-foreground px-4 pb-2 text-center text-lg font-bold">
           {t('fitness.exerciseSelector.title')}
         </h2>
 
@@ -169,7 +169,7 @@ export function ExerciseSelector({
         <div className="px-4 pb-3">
           <div className="relative">
             <Search
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
               aria-hidden="true"
             />
             <input
@@ -179,7 +179,7 @@ export function ExerciseSelector({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.exerciseSelector.search')}
-              className="focus:ring-ring w-full rounded-xl border-none bg-slate-100 py-2.5 pr-4 pl-10 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 dark:bg-slate-700 dark:text-slate-200 dark:placeholder:text-slate-500"
+              className="focus:ring-ring bg-muted text-foreground placeholder:text-muted-foreground w-full rounded-xl border-none py-2.5 pr-4 pl-10 text-sm outline-none focus:ring-2"
             />
           </div>
         </div>
@@ -193,7 +193,7 @@ export function ExerciseSelector({
               className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 selectedMuscleGroup === 'all'
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
+                  : 'text-foreground-secondary bg-muted'
               }`}
             >
               {t('fitness.exerciseSelector.all')}
@@ -206,7 +206,7 @@ export function ExerciseSelector({
                 className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   selectedMuscleGroup === group
                     ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
+                    : 'text-foreground-secondary bg-muted'
                 }`}
               >
                 {t(MUSCLE_GROUP_I18N_KEYS[group])}
@@ -220,21 +220,21 @@ export function ExerciseSelector({
           {filteredExercises.length === 0 ? (
             <div
               data-testid="exercise-empty-state"
-              className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500"
+              className="text-muted-foreground flex flex-col items-center justify-center py-12"
             >
               <p className="text-sm">{t('fitness.exerciseSelector.noResults')}</p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+            <ul className="divide-border divide-y">
               {filteredExercises.map(exercise => (
                 <li key={exercise.id}>
                   <button
                     type="button"
                     data-testid={`exercise-item-${exercise.id}`}
                     onClick={() => handleSelect(exercise)}
-                    className="focus-visible:ring-ring w-full rounded-lg px-2 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 dark:hover:bg-slate-700/50"
+                    className="focus-visible:ring-ring hover:bg-accent focus-visible:ring-offset-2/50 w-full rounded-lg px-2 py-3 text-left transition-colors focus-visible:ring-2"
                   >
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{exercise.nameVi}</p>
+                    <p className="text-foreground text-sm font-medium">{exercise.nameVi}</p>
                     <div className="mt-0.5 flex items-center gap-2">
                       <span className="text-muted-foreground text-xs">
                         {t(MUSCLE_GROUP_I18N_KEYS[exercise.muscleGroup])}
@@ -260,7 +260,7 @@ export function ExerciseSelector({
           <button
             type="button"
             onClick={openCustomModal}
-            className="focus-visible:ring-ring flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 py-3 text-sm text-slate-400 focus-visible:ring-2 focus-visible:ring-offset-2 dark:border-slate-600 dark:text-slate-500"
+            className="focus-visible:ring-ring border-border text-muted-foreground flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed py-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2"
             data-testid="add-custom-exercise"
           >
             <Plus className="h-4 w-4" />

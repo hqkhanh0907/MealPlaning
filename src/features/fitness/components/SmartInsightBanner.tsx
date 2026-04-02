@@ -6,7 +6,7 @@ import type { FitnessNutritionInsight } from '../hooks/useFitnessNutritionBridge
 const COLOR_MAP: Record<FitnessNutritionInsight['severity'], string> = {
   info: 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',
   warning: 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300',
-  success: 'bg-primary-subtle border-emerald-200 text-primary-emphasis dark:border-emerald-800',
+  success: 'bg-primary-subtle border-primary/20 text-primary-emphasis',
 };
 
 const ICON_MAP: Record<FitnessNutritionInsight['severity'], typeof Info> = {

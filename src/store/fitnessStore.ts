@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { generateUUID } from '@/utils/helpers';
+import { logger } from '@/utils/logger';
 
 import { BUILTIN_TEMPLATES } from '../features/fitness/data/builtinTemplates';
 import { EXERCISES } from '../features/fitness/data/exerciseDatabase';
@@ -197,7 +198,7 @@ export const useFitnessStore = create<FitnessState>()(
                 ],
               )
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite addPlanDays write failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'addPlanDays' }, error);
               });
           }
         }
@@ -215,7 +216,7 @@ export const useFitnessStore = create<FitnessState>()(
           _db
             .execute('UPDATE training_plan_days SET exercises = ? WHERE id = ?', [JSON.stringify(exercises), dayId])
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite updatePlanDayExercises failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'updatePlanDayExercises' }, error);
             });
         }
       },
@@ -230,7 +231,7 @@ export const useFitnessStore = create<FitnessState>()(
           _db
             .execute('UPDATE training_plan_days SET exercises = original_exercises WHERE id = ?', [dayId])
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite restorePlanDayOriginal failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'restorePlanDayOriginal' }, error);
             });
         }
       },
@@ -264,7 +265,7 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             )
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite addPlanDaySession failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'addPlanDaySession' }, error);
             });
         }
       },
@@ -287,7 +288,7 @@ export const useFitnessStore = create<FitnessState>()(
 
         if (_db) {
           _db.execute('DELETE FROM training_plan_days WHERE id = ?', [dayId]).catch((error: unknown) => {
-            console.error('[fitnessStore] SQLite removePlanDaySession delete failed:', error);
+            logger.error({ component: 'fitnessStore', action: 'removePlanDaySession.delete' }, error);
           });
           const remaining = get()
             .trainingPlanDays.filter(d => d.planId === dayToRemove.planId && d.dayOfWeek === dayToRemove.dayOfWeek)
@@ -296,7 +297,7 @@ export const useFitnessStore = create<FitnessState>()(
             _db
               .execute('UPDATE training_plan_days SET session_order = ? WHERE id = ?', [d.sessionOrder, d.id])
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite removePlanDaySession reorder failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'removePlanDaySession.reorder' }, error);
               });
           }
         }
@@ -321,7 +322,7 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             )
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite write failed for workout:', error);
+              logger.error({ component: 'fitnessStore', action: 'SQLite write failed for workout' }, error);
             });
         }
       },
@@ -341,7 +342,7 @@ export const useFitnessStore = create<FitnessState>()(
             await _db.execute('DELETE FROM workout_sets WHERE workout_id = ?', [id]);
             await _db.execute('DELETE FROM workouts WHERE id = ?', [id]);
           } catch (error: unknown) {
-            console.error('[fitnessStore] SQLite delete failed for workout:', error);
+            logger.error({ component: 'fitnessStore', action: 'SQLite delete failed for workout' }, error);
           }
         }
       },
@@ -375,7 +376,7 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             )
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite write failed for workoutSet:', error);
+              logger.error({ component: 'fitnessStore', action: 'SQLite write failed for workoutSet' }, error);
             });
         }
       },
@@ -512,7 +513,7 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             )
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite write failed for workout draft:', error);
+              logger.error({ component: 'fitnessStore', action: 'SQLite write failed for workout draft' }, error);
             });
         }
       },
@@ -521,7 +522,7 @@ export const useFitnessStore = create<FitnessState>()(
         set({ workoutDraft: null });
         if (_db) {
           _db.execute(`DELETE FROM workout_drafts WHERE id = 'current'`).catch((error: unknown) => {
-            console.error('[fitnessStore] SQLite delete failed for workout draft:', error);
+            logger.error({ component: 'fitnessStore', action: 'SQLite delete failed for workout draft' }, error);
           });
         }
       },
@@ -542,7 +543,7 @@ export const useFitnessStore = create<FitnessState>()(
             });
           }
         } catch (error) {
-          console.warn('[fitnessStore] Failed to load workout draft from SQLite:', error);
+          logger.warn({ component: 'fitnessStore', action: 'loadWorkoutDraft' }, String(error));
         }
       },
 
@@ -602,7 +603,7 @@ export const useFitnessStore = create<FitnessState>()(
               planId,
             ])
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite updateTrainingDays plan update failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'updateTrainingDays.planUpdate' }, error);
             });
           for (const session of reassignedSessions) {
             _db
@@ -611,7 +612,7 @@ export const useFitnessStore = create<FitnessState>()(
                 session.id,
               ])
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite updateTrainingDays reassign failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'updateTrainingDays.reassign' }, error);
               });
           }
         }
@@ -656,7 +657,7 @@ export const useFitnessStore = create<FitnessState>()(
               dayId,
             ])
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite reassignWorkoutToDay failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'reassignWorkoutToDay.sqlite' }, error);
             });
         }
       },
@@ -726,7 +727,7 @@ export const useFitnessStore = create<FitnessState>()(
                 a.id,
               ])
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite autoAssignWorkouts failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'autoAssignWorkouts.sqlite' }, error);
               });
           }
         }
@@ -772,7 +773,7 @@ export const useFitnessStore = create<FitnessState>()(
               planId,
             ])
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite restoreOriginalSchedule plan update failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'restoreOriginalSchedule.planUpdate' }, error);
             });
           for (const d of restoredDays) {
             _db
@@ -781,7 +782,7 @@ export const useFitnessStore = create<FitnessState>()(
                 d.id,
               ])
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite restoreOriginalSchedule day update failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'restoreOriginalSchedule.dayUpdate' }, error);
               });
           }
         }
@@ -844,7 +845,7 @@ export const useFitnessStore = create<FitnessState>()(
 
           set({ sqliteReady: true });
         } catch (error) {
-          console.warn('[fitnessStore] SQLite load failed:', error);
+          logger.warn({ component: 'fitnessStore', action: 'initializeFromSQLite' }, String(error));
         }
       },
 
@@ -909,10 +910,10 @@ export const useFitnessStore = create<FitnessState>()(
             _db
               .execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [newSplit, now, planId])
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite changeSplitType plan update failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'changeSplitType.planUpdate' }, error);
               });
             _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite changeSplitType delete old days failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'changeSplitType.deleteOldDays' }, error);
             });
             for (const day of newDays) {
               _db
@@ -932,7 +933,7 @@ export const useFitnessStore = create<FitnessState>()(
                   ],
                 )
                 .catch((error: unknown) => {
-                  console.error('[fitnessStore] SQLite changeSplitType insert day failed:', error);
+                  logger.error({ component: 'fitnessStore', action: 'changeSplitType.insertDay' }, error);
                 });
             }
           }
@@ -999,10 +1000,10 @@ export const useFitnessStore = create<FitnessState>()(
             _db
               .execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [newSplit, now, planId])
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite changeSplitType remap plan update failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'changeSplitType.remapPlanUpdate' }, error);
               });
             _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite changeSplitType remap delete old days failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'changeSplitType.remapDeleteOldDays' }, error);
             });
             for (const day of allNewDays) {
               _db
@@ -1022,7 +1023,7 @@ export const useFitnessStore = create<FitnessState>()(
                   ],
                 )
                 .catch((error: unknown) => {
-                  console.error('[fitnessStore] SQLite changeSplitType remap insert day failed:', error);
+                  logger.error({ component: 'fitnessStore', action: 'changeSplitType.remapInsertDay' }, error);
                 });
             }
           }
@@ -1049,7 +1050,7 @@ export const useFitnessStore = create<FitnessState>()(
               rows.push(...result);
             })
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite getTemplates query failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'getTemplates.query' }, error);
             });
 
           const userTemplates: PlanTemplate[] = rows.map(row => ({
@@ -1072,7 +1073,7 @@ export const useFitnessStore = create<FitnessState>()(
 
           return [...builtins, ...userTemplates];
         } catch (error: unknown) {
-          console.error('[fitnessStore] getTemplates failed:', error);
+          logger.error({ component: 'fitnessStore', action: 'getTemplates' }, error);
           return builtins;
         }
       },
@@ -1137,10 +1138,10 @@ export const useFitnessStore = create<FitnessState>()(
               [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
             )
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite applyTemplate plan update failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'applyTemplate.planUpdate' }, error);
             });
           _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
-            console.error('[fitnessStore] SQLite applyTemplate delete old days failed:', error);
+            logger.error({ component: 'fitnessStore', action: 'applyTemplate.deleteOldDays' }, error);
           });
           for (const day of newDays) {
             _db
@@ -1160,7 +1161,7 @@ export const useFitnessStore = create<FitnessState>()(
                 ],
               )
               .catch((error: unknown) => {
-                console.error('[fitnessStore] SQLite applyTemplate insert day failed:', error);
+                logger.error({ component: 'fitnessStore', action: 'applyTemplate.insertDay' }, error);
               });
           }
         }
@@ -1220,7 +1221,7 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             )
             .catch((error: unknown) => {
-              console.error('[fitnessStore] SQLite saveCurrentAsTemplate failed:', error);
+              logger.error({ component: 'fitnessStore', action: 'saveCurrentAsTemplate' }, error);
             });
         }
 

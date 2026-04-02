@@ -65,7 +65,7 @@ describe('WeeklyCalendarStrip', () => {
     const day1 = screen.getByTestId('calendar-day-1');
     expect(day1.className).toContain('bg-primary');
     const day2 = screen.getByTestId('calendar-day-2');
-    expect(day2.className).toContain('bg-slate');
+    expect(day2.className).toContain('bg-muted');
   });
 
   it('renders today highlight with blue ring', () => {
@@ -161,7 +161,7 @@ describe('WeeklyCalendarStrip', () => {
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(7);
     for (const btn of buttons) {
-      expect(btn.className).toContain('bg-slate');
+      expect(btn.className).toContain('bg-muted');
     }
   });
 

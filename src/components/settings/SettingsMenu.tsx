@@ -120,7 +120,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
     <div className="space-y-6 sm:space-y-8">
       {/* Search */}
       <div className="relative">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           type="text"
           data-testid="settings-search"
@@ -128,7 +128,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={t('settings.searchPlaceholder')}
           aria-label={t('settings.searchPlaceholder')}
-          className="w-full pr-4 pl-10 text-slate-800"
+          className="text-foreground w-full pr-4 pl-10"
         />
       </div>
 
@@ -141,16 +141,14 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               variant="ghost"
               data-testid={`settings-nav-${item.id}`}
               onClick={() => onNavigate(item.id)}
-              className="bg-card border-border-subtle flex h-auto w-full items-center gap-4 rounded-2xl border p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:hover:border-slate-500"
+              className="bg-card border-border-subtle hover:border-border dark:hover:border-border flex h-auto w-full items-center gap-4 rounded-2xl border p-4 shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-700/50">
-                {item.icon}
-              </div>
+              <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">{item.icon}</div>
               <div className="min-w-0 flex-1 text-left">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t(item.titleKey)}</p>
+                <p className="text-foreground text-sm font-semibold">{t(item.titleKey)}</p>
                 <p className="text-foreground-secondary truncate text-xs">{item.summary}</p>
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
+              <ChevronRight className="text-muted-foreground h-4 w-4 shrink-0" />
             </Button>
           ))}
         </div>
@@ -164,7 +162,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.theme')}</h3>
+              <h3 className="text-foreground font-bold">{t('settings.theme')}</h3>
               <p className="text-muted-foreground text-xs">{t('settings.themeDesc')}</p>
             </div>
           </div>
@@ -179,7 +177,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
                   'flex h-auto min-h-12 flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all sm:p-4',
                   theme === value
                     ? 'border-primary bg-primary-subtle text-primary-emphasis'
-                    : 'border-border text-slate-700 hover:border-slate-300 dark:text-slate-300 dark:hover:border-slate-500',
+                    : 'border-border text-foreground hover:border-border dark:hover:border-border',
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -205,7 +203,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               <Database className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.data')}</h3>
+              <h3 className="text-foreground font-bold">{t('settings.data')}</h3>
               <p className="text-muted-foreground text-xs">{t('settings.dataDesc')}</p>
             </div>
           </div>

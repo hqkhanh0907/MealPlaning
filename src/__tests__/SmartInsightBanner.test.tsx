@@ -78,7 +78,7 @@ describe('SmartInsightBanner', () => {
       />,
     );
     const banner = screen.getByTestId('smart-insight-banner');
-    expect(banner.className).toContain('border-emerald-200');
+    expect(banner.className).toContain('border-primary/20');
     expect(screen.getByTestId('icon-success')).toBeInTheDocument();
   });
 

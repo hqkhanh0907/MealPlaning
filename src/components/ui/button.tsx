@@ -20,11 +20,10 @@ const buttonVariants = cva(
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
         link: 'text-primary underline-offset-4 hover:underline',
-        success:
-          'bg-emerald-600 text-white shadow-xs hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600',
+        success: 'bg-primary text-white shadow-xs hover:bg-primary/90',
         warning:
-          'bg-amber-500 text-white shadow-xs hover:bg-amber-600 dark:bg-amber-400 dark:text-slate-900 dark:hover:bg-amber-500',
-        ai: 'bg-indigo-500 text-white shadow-xs hover:bg-indigo-600 dark:bg-indigo-400 dark:text-slate-900 dark:hover:bg-indigo-500',
+          'bg-amber-500 text-amber-950 shadow-xs hover:bg-amber-600 dark:bg-amber-400 dark:text-background dark:hover:bg-amber-500',
+        ai: 'bg-indigo-500 text-white shadow-xs hover:bg-indigo-600 dark:bg-indigo-400 dark:text-background dark:hover:bg-indigo-500',
       },
       size: {
         default: 'h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { type HealthProfileFormData, healthProfileSchema } from '../../../schema
 import { calculateBMR, calculateMacros, calculateTDEE } from '../../../services/nutritionEngine';
 import { useHealthProfileStore } from '../store/healthProfileStore';
 import type { ActivityLevel, HealthProfile } from '../types';
+import { getAge } from '../types';
 
 const ACTIVITY_LEVELS: ActivityLevel[] = ['sedentary', 'light', 'moderate', 'active', 'extra_active'];
 
@@ -23,6 +24,17 @@ const ACTIVITY_LEVEL_I18N: Record<ActivityLevel, string> = {
   active: 'healthProfile.active',
   extra_active: 'healthProfile.extraActive',
 };
+
+function computeAgeFromDob(dob: string): number {
+  if (!dob) return 0;
+  const d = new Date(dob);
+  if (Number.isNaN(d.getTime())) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  const m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return age;
+}
 
 interface HealthProfileFormProps {
   embedded?: boolean;
@@ -48,8 +60,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
     defaultValues:
       blankDefaults || !profile
         ? {
+            name: '',
+            dateOfBirth: '',
             gender: 'male' as const,
-            age: '' as unknown as number,
             heightCm: '' as unknown as number,
             weightKg: '' as unknown as number,
             activityLevel: 'moderate' as const,
@@ -59,8 +72,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             proteinRatio: '' as unknown as number,
           }
         : {
+            name: profile.name,
+            dateOfBirth: profile.dateOfBirth ?? '',
             gender: profile.gender,
-            age: profile.age,
             heightCm: profile.heightCm,
             weightKg: profile.weightKg,
             activityLevel: profile.activityLevel,
@@ -72,10 +86,32 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   });
 
   const [saved, setSaved] = useState(false);
+  const isDirtyRef = useRef(false);
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  }, [isDirty]);
+
+  // Sync form when profile changes in store (e.g., loaded async)
+  useEffect(() => {
+    if (profile && !blankDefaults && !isDirtyRef.current) {
+      reset({
+        name: profile.name,
+        dateOfBirth: profile.dateOfBirth ?? '',
+        gender: profile.gender,
+        heightCm: profile.heightCm,
+        weightKg: profile.weightKg,
+        activityLevel: profile.activityLevel,
+        bodyFatPct: profile.bodyFatPct,
+        bmrOverrideEnabled: profile.bmrOverride != null,
+        bmrOverride: profile.bmrOverride,
+        proteinRatio: profile.proteinRatio,
+      });
+    }
+  }, [profile, blankDefaults, reset]);
 
   const [
     watchedGender,
-    watchedAge,
+    watchedDateOfBirth,
     watchedHeightCm,
     watchedWeightKg,
     watchedActivityLevel,
@@ -87,7 +123,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
     control,
     name: [
       'gender',
-      'age',
+      'dateOfBirth',
       'heightCm',
       'weightKg',
       'activityLevel',
@@ -97,6 +133,8 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       'proteinRatio',
     ],
   });
+
+  const watchedAge = useMemo(() => computeAgeFromDob(watchedDateOfBirth), [watchedDateOfBirth]);
 
   const bmr = useMemo(() => {
     if (watchedBmrOverrideEnabled && watchedBmrOverride) return watchedBmrOverride;
@@ -148,10 +186,13 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         targetCalories: 1500,
         updatedAt: new Date().toISOString(),
       };
+      const computedAge = getAge({ dateOfBirth: data.dateOfBirth, age: base.age } as HealthProfile);
       const profileToSave: HealthProfile = {
         ...base,
+        name: data.name,
+        dateOfBirth: data.dateOfBirth,
+        age: computedAge,
         gender: data.gender,
-        age: data.age,
         heightCm: data.heightCm,
         weightKg: data.weightKg,
         activityLevel: data.activityLevel,
@@ -183,26 +224,43 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   });
 
   const inputBase =
-    'w-full px-3 py-2 bg-card rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all';
+    'w-full px-3 py-2 bg-card rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 transition-all';
 
   function inputClass(field: keyof HealthProfileFormData): string {
     const borderColor = errors[field]
       ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
-      : 'border-slate-300 dark:border-slate-600 focus:ring-ring focus:border-primary';
+      : 'border-border focus:ring-ring focus:border-primary';
     return `${inputBase} border ${borderColor}`;
   }
 
   return (
     <div className="space-y-6" data-testid="health-profile-form">
-      {!embedded && (
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('healthProfile.title')}</h3>
-      )}
+      {!embedded && <h3 className="text-foreground text-xl font-bold">{t('healthProfile.title')}</h3>}
+
+      {/* Name */}
+      <FormField label={t('healthProfile.name')} error={errors.name} className="">
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <input
+              id="hp-name"
+              type="text"
+              data-testid="hp-name"
+              aria-label={t('healthProfile.name')}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              maxLength={50}
+              className={inputClass('name')}
+            />
+          )}
+        />
+      </FormField>
 
       {/* Gender Toggle */}
       <fieldset>
-        <legend className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-          {t('healthProfile.gender')}
-        </legend>
+        <legend className="text-foreground mb-2 block text-sm font-medium">{t('healthProfile.gender')}</legend>
         <RadioPills<HealthProfileFormData>
           name="gender"
           control={control}
@@ -214,16 +272,29 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         />
       </fieldset>
 
-      {/* Age */}
-      <FormField label={t('healthProfile.age')} error={errors.age} className="">
-        <StringNumberController<HealthProfileFormData>
-          name="age"
+      {/* Date of Birth + Computed Age */}
+      <FormField label={t('healthProfile.dateOfBirth')} error={errors.dateOfBirth} className="">
+        <Controller
+          name="dateOfBirth"
           control={control}
-          testId="hp-age"
-          ariaLabel={t('healthProfile.age')}
-          inputMode="numeric"
-          className={inputClass('age')}
+          render={({ field }) => (
+            <input
+              id="hp-dob"
+              type="date"
+              data-testid="hp-dob"
+              aria-label={t('healthProfile.dateOfBirth')}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              className={inputClass('dateOfBirth')}
+            />
+          )}
         />
+        {watchedAge > 0 && (
+          <p className="text-muted-foreground dark:text-muted-foreground mt-1 text-xs" data-testid="hp-computed-age">
+            {t('healthProfile.age')}: {watchedAge}
+          </p>
+        )}
       </FormField>
 
       {/* Height */}
@@ -263,7 +334,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
       {/* Activity Level */}
       <div>
-        <label htmlFor="hp-activity" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label htmlFor="hp-activity" className="text-foreground mb-1 block text-sm font-medium">
           {t('healthProfile.activityLevel')}
         </label>
         <Controller
@@ -275,7 +346,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
-              className={`${inputBase} focus:border-primary focus:ring-ring border border-slate-300 dark:border-slate-600`}
+              className={`${inputBase} focus:border-primary focus:ring-ring border-border border`}
             >
               {ACTIVITY_LEVELS.map(level => (
                 <option key={level} value={level}>
@@ -289,11 +360,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
       {/* Body Fat % */}
       <div>
-        <label htmlFor="hp-bodyfat" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label htmlFor="hp-bodyfat" className="text-foreground mb-1 block text-sm font-medium">
           {t('healthProfile.bodyFat')}
-          <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
-            ({t('healthProfile.bodyFatOptional')})
-          </span>
+          <span className="text-muted-foreground ml-1 text-xs">({t('healthProfile.bodyFatOptional')})</span>
         </label>
         <StringNumberController<HealthProfileFormData>
           name="bodyFatPct"
@@ -308,9 +377,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
       {/* BMR Override */}
       <fieldset>
-        <legend className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-          {t('healthProfile.bmr')}
-        </legend>
+        <legend className="text-foreground mb-2 block text-sm font-medium">{t('healthProfile.bmr')}</legend>
         <Controller
           name="bmrOverrideEnabled"
           control={control}
@@ -318,9 +385,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             <div className="mb-2 flex gap-2" role="radiogroup" aria-label={t('healthProfile.bmr')}>
               <label
                 className={`has-[:focus-visible]:ring-ring flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
-                  field.value
-                    ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                    : 'bg-primary text-primary-foreground'
+                  field.value ? 'bg-muted text-foreground hover:bg-accent' : 'bg-primary text-primary-foreground'
                 }`}
               >
                 <input
@@ -335,9 +400,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               </label>
               <label
                 className={`has-[:focus-visible]:ring-ring flex-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:outline-none ${
-                  field.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                  field.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground hover:bg-accent'
                 }`}
               >
                 <input
@@ -381,36 +444,34 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200" data-testid="bmr-value">
+          <span className="text-foreground font-semibold" data-testid="bmr-value">
             {bmr} kcal
           </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200" data-testid="tdee-value">
+          <span className="text-foreground font-semibold" data-testid="tdee-value">
             {tdee} kcal
           </span>
         </div>
-        <div className="border-t border-emerald-200 pt-2 dark:border-emerald-800">
-          <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('healthProfile.macroPreview')}
-          </p>
+        <div className="border-primary/20 border-t pt-2">
+          <p className="text-foreground mb-2 text-sm font-medium">{t('healthProfile.macroPreview')}</p>
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.protein')}</p>
-              <p className="text-primary font-bold" data-testid="macro-protein">
+              <p className="text-primary font-semibold" data-testid="macro-protein">
                 {macros.proteinG}g
               </p>
             </div>
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.fat')}</p>
-              <p className="font-bold text-amber-600 dark:text-amber-400" data-testid="macro-fat">
+              <p className="font-semibold text-amber-600 dark:text-amber-400" data-testid="macro-fat">
                 {macros.fatG}g
               </p>
             </div>
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
-              <p className="font-bold text-blue-600 dark:text-blue-400" data-testid="macro-carbs">
+              <p className="font-semibold text-blue-600 dark:text-blue-400" data-testid="macro-carbs">
                 {macros.carbsG}g
               </p>
             </div>

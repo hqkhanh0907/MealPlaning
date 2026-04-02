@@ -16,20 +16,20 @@ export const PlanGeneratedCard = () => {
   return (
     <div
       data-testid="plan-generated-card"
-      className="relative mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 text-white"
+      className="from-primary/90 to-primary relative mb-4 rounded-2xl bg-gradient-to-br p-5 text-white"
     >
       <button
         data-testid="dismiss-celebration"
         type="button"
         onClick={dismissPlanCelebration}
-        className="absolute top-3 right-3 rounded-full p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+        className="hover:bg-card/20 absolute top-3 right-3 rounded-full p-1 text-white/70 transition-colors hover:text-white"
         aria-label={t('common.close')}
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>
 
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+        <div className="bg-card/20 flex h-12 w-12 items-center justify-center rounded-full">
           <PartyPopper className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>

@@ -40,7 +40,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Flame className="h-5 w-5 text-orange-500" />
-          <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t('nutrition.netCalories')}</span>
+          <span className="text-foreground text-sm font-semibold">{t('nutrition.netCalories')}</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -57,7 +57,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
               onClick={toggleCollapse}
               data-testid="collapse-toggle"
               aria-label={collapsed ? 'Expand' : 'Collapse'}
-              className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
+              className="hover:bg-accent rounded-lg p-1.5 transition-colors"
             >
               {collapsed ? (
                 <ChevronDown className="text-muted-foreground h-4 w-4" />
@@ -94,14 +94,11 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
 
           {/* Combined progress bar */}
           <div className="space-y-1">
-            <div
-              data-testid="calorie-progress-bar"
-              className="relative h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"
-            >
+            <div data-testid="calorie-progress-bar" className="bg-muted relative h-3 overflow-hidden rounded-full">
               {/* Food (green) */}
               <div
                 data-testid="bar-food"
-                className="absolute inset-y-0 left-0 rounded-full bg-emerald-400 transition-all"
+                className="bg-primary absolute inset-y-0 left-0 rounded-full transition-all"
                 style={{ width: `${inPct}%` }}
               />
               {/* Exercise (blue) overlay from left */}
@@ -136,7 +133,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
                 {t('nutrition.grams')}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="bg-muted h-2 overflow-hidden rounded-full">
               <div
                 data-testid="protein-bar"
                 className="h-full rounded-full bg-indigo-400 transition-all"

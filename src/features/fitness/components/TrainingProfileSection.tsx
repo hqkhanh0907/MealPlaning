@@ -46,11 +46,11 @@ export function TrainingProfileSection() {
 
   if (!trainingProfile) {
     return (
-      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
-        <Info className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500" />
+      <div className="bg-muted flex items-center gap-3 rounded-xl p-4">
+        <Info className="text-muted-foreground h-5 w-5 shrink-0" />
         <div>
           <p className="text-foreground-secondary text-sm font-medium">{t('settings.notConfigured')}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">{t('settings.notConfiguredDesc')}</p>
+          <p className="text-muted-foreground text-xs">{t('settings.notConfiguredDesc')}</p>
         </div>
       </div>
     );
@@ -137,7 +137,7 @@ export function TrainingProfileSection() {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {fields.map(field => (
-        <div key={field.key} className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
+        <div key={field.key} className="bg-muted flex items-start gap-2.5 rounded-xl p-3">
           <span className="mt-0.5 text-base leading-none">
             {(() => {
               const Icon = FIELD_ICON[field.key] ?? ClipboardList;
@@ -146,7 +146,7 @@ export function TrainingProfileSection() {
           </span>
           <div className="min-w-0">
             <p className="text-muted-foreground text-xs">{field.label}</p>
-            <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
+            <p className="text-foreground truncate text-sm font-medium">{field.value}</p>
           </div>
         </div>
       ))}

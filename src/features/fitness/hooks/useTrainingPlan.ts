@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { generateUUID } from '@/utils/helpers';
+import { logger } from '@/utils/logger';
 
 import { ALL_MUSCLES, LEG_MUSCLES, LOWER_MUSCLES, PULL_MUSCLES, PUSH_MUSCLES, UPPER_MUSCLES } from '../constants';
 import type {
@@ -533,7 +534,7 @@ export function useTrainingPlan(): {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setGenerationError(message);
-      console.error('[useTrainingPlan] Generation failed:', err);
+      logger.error({ component: 'useTrainingPlan', action: 'generate' }, err);
       return null;
     } finally {
       setIsGenerating(false);

@@ -8,8 +8,8 @@ import { calculateStreak } from '../../fitness/utils/gamification';
 const DOT_COLORS: Record<string, string> = {
   completed: 'bg-primary',
   rest: 'bg-blue-500',
-  missed: 'border-2 border-slate-300 dark:border-slate-600 bg-transparent',
-  upcoming: 'border-2 border-slate-300 dark:border-slate-600 bg-transparent',
+  missed: 'border-2 border-border bg-transparent',
+  upcoming: 'border-2 border-border bg-transparent',
   today: 'border-2 border-primary bg-transparent',
 };
 
@@ -54,12 +54,12 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
         aria-label={t('dashboard.streakMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="focus:ring-ring flex items-center gap-3 rounded-2xl bg-slate-50 p-3 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:bg-slate-800/50"
+        className="focus:ring-ring bg-muted flex items-center gap-3 rounded-2xl p-3 focus:ring-2 focus:ring-offset-2 focus:outline-none"
       >
-        <Flame className="h-5 w-5 text-slate-400" aria-hidden={true} />
+        <Flame className="text-muted-foreground h-5 w-5" aria-hidden={true} />
         <div>
           <p className="text-muted-foreground text-sm font-medium">{t('dashboard.streakMini.noData')}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.streakMini.startFirst')}</p>
+          <p className="text-muted-foreground text-xs">{t('dashboard.streakMini.startFirst')}</p>
         </div>
       </button>
     );
@@ -76,12 +76,12 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
       })}
       onClick={handleTap}
       onKeyDown={handleKeyDown}
-      className="focus:ring-ring flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-50 p-3 transition-transform focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98] dark:bg-slate-800/50"
+      className="focus:ring-ring bg-muted flex cursor-pointer items-center gap-3 rounded-2xl p-3 transition-transform focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98]"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5" data-testid="streak-count">
           <Flame className="h-4 w-4 text-orange-500" aria-hidden={true} />
-          <span className="text-base font-bold text-slate-800 tabular-nums dark:text-slate-200">
+          <span className="text-foreground text-base font-bold tabular-nums">
             {t('dashboard.streakMini.days', {
               count: streakInfo.currentStreak,
             })}

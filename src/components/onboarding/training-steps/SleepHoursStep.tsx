@@ -51,7 +51,7 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
           );
         })}
       </fieldset>
-      <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{t('fitness.onboarding.hoursUnit')}</p>
+      <p className="text-muted-foreground mt-2 text-xs">{t('fitness.onboarding.hoursUnit')}</p>
       {showWarning && (
         <output className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden="true" />

@@ -138,7 +138,7 @@ function PageStackOverlay({
 
   return (
     <div
-      className="pt-safe fixed inset-0 z-50 overflow-y-auto bg-slate-50 dark:bg-slate-950"
+      className="pt-safe bg-muted dark:bg-background fixed inset-0 z-50 overflow-y-auto"
       data-testid={`page-overlay-${page.id}`}
     >
       <Suspense fallback={<TabLoadingFallback />}>{content}</Suspense>
@@ -440,7 +440,7 @@ export default function App() {
       <Suspense
         fallback={
           <div className="flex h-dvh items-center justify-center">
-            <div className="border-t-primary h-8 w-8 animate-spin rounded-full border-4 border-emerald-200" />
+            <div className="border-t-primary border-primary/20 h-8 w-8 animate-spin rounded-full border-4" />
           </div>
         }
       >
@@ -450,7 +450,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh bg-slate-50 font-sans text-slate-900 transition-colors selection:bg-emerald-200 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-emerald-800">
+    <div className="bg-muted text-foreground selection:bg-primary/20 dark:bg-background min-h-dvh font-sans transition-colors">
       <a
         href="#main-content"
         className="focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium"
@@ -464,11 +464,11 @@ export default function App() {
               <Utensils className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight text-slate-800 sm:text-xl dark:text-slate-100">
+              <h1 className="text-foreground text-lg font-bold tracking-tight sm:text-xl">
                 <span className="sm:hidden">{getTabLabels(t)[activeMainTab]}</span>
                 <span className="hidden sm:inline">Smart Meal Planner</span>
               </h1>
-              <p className="text-[11px] font-medium text-slate-400 sm:hidden dark:text-slate-500">
+              <p className="text-muted-foreground text-[11px] font-medium sm:hidden">
                 {parseLocalDate(selectedDate).toLocaleDateString('vi-VN', {
                   weekday: 'short',
                   day: 'numeric',
@@ -487,7 +487,7 @@ export default function App() {
               aria-label="Cài đặt"
               data-testid="btn-open-settings"
               onClick={handleOpenSettings}
-              className="text-muted-foreground rounded-lg p-2 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-lg p-2 transition-colors"
             >
               <SlidersHorizontal className="h-5 w-5" />
             </button>
@@ -495,7 +495,7 @@ export default function App() {
         </div>
       </header>
 
-      <main id="main-content" className="mx-auto max-w-5xl px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8">
+      <main id="main-content" className="mx-auto max-w-5xl px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-8">
         <div
           className={activeMainTab === 'calendar' ? 'animate-fade-in block' : 'hidden'}
           role="tabpanel"
@@ -573,7 +573,7 @@ export default function App() {
                 <div className="border-border flex items-center justify-between border-b pb-4">
                   <div className="flex items-center gap-3">
                     <Bot className="text-primary h-6 w-6" />
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('ai.title')}</h2>
+                    <h2 className="text-foreground text-2xl font-bold">{t('ai.title')}</h2>
                   </div>
                 </div>
                 <AIImageAnalyzer onAnalysisComplete={handleAnalysisComplete} onSave={handleSaveAnalyzedDish} />
@@ -720,10 +720,7 @@ export default function App() {
       <BottomNavBar activeTab={activeMainTab} onTabChange={handleTabChange} showAIBadge={hasNewAIResult} />
 
       {isSettingsOpen && (
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-50 dark:bg-slate-950"
-          data-testid="settings-overlay"
-        >
+        <div className="bg-muted dark:bg-background fixed inset-0 z-50 overflow-y-auto" data-testid="settings-overlay">
           <div className="pt-safe border-border bg-card sticky top-0 z-10 border-b">
             <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2 sm:px-6 sm:py-4">
               <button
@@ -731,11 +728,11 @@ export default function App() {
                 aria-label={t('common.back')}
                 data-testid="btn-close-settings"
                 onClick={popPage}
-                className="text-muted-foreground -ml-2 rounded-lg p-2 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground -ml-2 rounded-lg p-2 transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('nav.settings')}</h2>
+              <h2 className="text-foreground text-lg font-bold">{t('nav.settings')}</h2>
             </div>
           </div>
           <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">

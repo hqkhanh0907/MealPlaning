@@ -33,9 +33,7 @@ export const SubTabBar = React.memo(function SubTabBar({
             onClick={() => onTabChange(id)}
             data-testid={`subtab-${id}`}
             className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all md:flex-initial ${
-              isActive
-                ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700'
-                : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300'
+              isActive ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {Icon && <Icon className="h-4 w-4" />}

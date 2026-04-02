@@ -3,7 +3,6 @@ import { Activity, BarChart3, Beef, Calendar, CalendarDays, Heart, Ruler, Scale,
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DatabaseProvider } from '../../contexts/DatabaseContext';
 import { HealthProfileForm } from '../../features/health-profile/components/HealthProfileForm';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { getAge } from '../../features/health-profile/types';
@@ -76,7 +75,7 @@ function HealthProfileViewMode() {
       {/* Profile Fields */}
       <div className="grid grid-cols-2 gap-3">
         {fields.map(field => (
-          <div key={field.label} className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
+          <div key={field.label} className="bg-muted flex items-start gap-2.5 rounded-xl p-3">
             <span className="mt-0.5 text-base leading-none">
               {(() => {
                 const Icon = field.icon;
@@ -85,7 +84,7 @@ function HealthProfileViewMode() {
             </span>
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">{field.label}</p>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
+              <p className="text-foreground text-sm font-medium">{field.value}</p>
             </div>
           </div>
         ))}
@@ -95,28 +94,26 @@ function HealthProfileViewMode() {
       <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200">{bmr} kcal</span>
+          <span className="text-foreground font-semibold">{bmr} kcal</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200">{tdee} kcal</span>
+          <span className="text-foreground font-semibold">{tdee} kcal</span>
         </div>
-        <div className="border-t border-emerald-200 pt-2 dark:border-emerald-800">
-          <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('healthProfile.macroPreview')}
-          </p>
+        <div className="border-primary/20 border-t pt-2">
+          <p className="text-foreground mb-2 text-sm font-medium">{t('healthProfile.macroPreview')}</p>
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.protein')}</p>
-              <p className="text-primary font-bold">{macros.proteinG}g</p>
+              <p className="text-primary font-semibold">{macros.proteinG}g</p>
             </div>
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.fat')}</p>
-              <p className="font-bold text-amber-600 dark:text-amber-400">{macros.fatG}g</p>
+              <p className="font-semibold text-amber-600 dark:text-amber-400">{macros.fatG}g</p>
             </div>
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
-              <p className="font-bold text-blue-600 dark:text-blue-400">{macros.carbsG}g</p>
+              <p className="font-semibold text-blue-600 dark:text-blue-400">{macros.carbsG}g</p>
             </div>
           </div>
         </div>
@@ -154,13 +151,7 @@ function HealthProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => void 
       onSave={() => void handleSave()}
       onCancel={handleCancel}
     >
-      {isEditing ? (
-        <DatabaseProvider>
-          <HealthProfileForm embedded saveRef={saveRef} />
-        </DatabaseProvider>
-      ) : (
-        <HealthProfileViewMode />
-      )}
+      {isEditing ? <HealthProfileForm embedded saveRef={saveRef} /> : <HealthProfileViewMode />}
     </SettingsDetailLayout>
   );
 }

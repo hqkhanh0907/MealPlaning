@@ -104,7 +104,7 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
           y={cy - 4}
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-slate-800 text-lg font-bold dark:fill-slate-100"
+          className="fill-foreground text-lg font-bold"
           style={{ fontSize: size * 0.15 }}
           data-testid="donut-total-cal"
         >
@@ -115,7 +115,7 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
           y={cy + size * 0.1}
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-slate-500 dark:fill-slate-400"
+          className="fill-muted-foreground"
           style={{ fontSize: size * 0.09 }}
         >
           {t('nutrition.kcal')}

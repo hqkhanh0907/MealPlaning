@@ -28,9 +28,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
   return (
     <div className="flex flex-1 flex-col" data-testid="activity-level-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
-          {t('onboarding.health.activityLevel')}
-        </h2>
+        <h2 className="text-foreground mb-1 text-xl font-bold">{t('onboarding.health.activityLevel')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.health.activityLevelDesc')}</p>
 
         <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('onboarding.health.activityLevel')}>
@@ -52,22 +50,20 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    field.field.value === level.value ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300',
+                    field.field.value === level.value ? 'text-primary-emphasis' : 'text-foreground',
                   )}
                 >
                   {t(`health.activityLevel.${level.value}`)}
                 </p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
-                  {t(`onboarding.health.activity_${level.value}_desc`)}
-                </p>
+                <p className="text-muted-foreground text-xs">{t(`onboarding.health.activity_${level.value}_desc`)}</p>
               </div>
-              <span className="shrink-0 font-mono text-xs text-slate-400">×{level.multiplier}</span>
+              <span className="text-muted-foreground shrink-0 font-mono text-xs">×{level.multiplier}</span>
             </button>
           ))}
         </fieldset>
       </div>
 
-      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="border-border bg-card/95 fixed inset-x-0 bottom-0 flex items-center justify-between border-t p-4 backdrop-blur-sm">
         <button
           type="button"
           onClick={goBack}

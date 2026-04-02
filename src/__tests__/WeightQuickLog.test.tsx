@@ -474,7 +474,7 @@ describe('WeightQuickLog', () => {
 
     const trend = screen.getByTestId('trend-indicator');
     expect(trend).toHaveTextContent('→');
-    expect(trend.className).toContain('text-slate');
+    expect(trend.className).toContain('text-muted-foreground');
   });
 
   it('no trend indicator without yesterday entry', () => {

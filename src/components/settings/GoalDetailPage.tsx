@@ -3,7 +3,6 @@ import { Equal, Flame, Scale, Target, TrendingDown, TrendingUp, Zap } from 'luci
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DatabaseProvider } from '../../contexts/DatabaseContext';
 import { GoalPhaseSelector } from '../../features/health-profile/components/GoalPhaseSelector';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
@@ -56,7 +55,7 @@ function GoalViewMode() {
       <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="goal-view-empty">
         <Target className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
         <p className="text-foreground-secondary text-sm font-medium">{t('settings.goalNotSet')}</p>
-        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{t('settings.goalDesc')}</p>
+        <p className="text-muted-foreground mt-1 text-xs">{t('settings.goalDesc')}</p>
       </div>
     );
   }
@@ -67,10 +66,10 @@ function GoalViewMode() {
   return (
     <div className="space-y-6" data-testid="goal-view">
       {/* Goal Type Badge */}
-      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
+      <div className="bg-muted flex items-center gap-3 rounded-xl p-4">
         <GoalIcon className={`h-8 w-8 ${goalColor}`} />
         <div>
-          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{t(`goal.${activeGoal.type}`)}</p>
+          <p className="text-foreground text-lg font-bold">{t(`goal.${activeGoal.type}`)}</p>
           <p className="text-muted-foreground text-xs">
             {activeGoal.startDate ? new Date(activeGoal.startDate).toLocaleDateString('vi-VN') : ''}
           </p>
@@ -80,7 +79,7 @@ function GoalViewMode() {
       {/* Goal Fields */}
       <div className="grid grid-cols-2 gap-3">
         {fields.map(field => (
-          <div key={field.label} className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3 dark:bg-slate-700/50">
+          <div key={field.label} className="bg-muted flex items-start gap-2.5 rounded-xl p-3">
             <span className="mt-0.5 text-base leading-none">
               {(() => {
                 const Icon = field.icon;
@@ -89,7 +88,7 @@ function GoalViewMode() {
             </span>
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">{field.label}</p>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{field.value}</p>
+              <p className="text-foreground text-sm font-medium">{field.value}</p>
             </div>
           </div>
         ))}
@@ -127,13 +126,7 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
       onSave={() => void handleSave()}
       onCancel={handleCancel}
     >
-      {isEditing ? (
-        <DatabaseProvider>
-          <GoalPhaseSelector embedded saveRef={saveRef} />
-        </DatabaseProvider>
-      ) : (
-        <GoalViewMode />
-      )}
+      {isEditing ? <GoalPhaseSelector embedded saveRef={saveRef} /> : <GoalViewMode />}
     </SettingsDetailLayout>
   );
 }

@@ -76,7 +76,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
         {/* Header */}
         <div className="px-4 pb-3 text-center">
-          <h2 data-testid="day-assignment-title" className="text-lg font-bold text-slate-800 dark:text-slate-200">
+          <h2 data-testid="day-assignment-title" className="text-foreground text-lg font-bold">
             {t('fitness.scheduleEditor.selectDay')}
           </h2>
         </div>
@@ -117,7 +117,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                       'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                       isCurrent
                         ? 'border-primary bg-primary-subtle border-2'
-                        : 'bg-card border-border border hover:bg-slate-50 dark:hover:bg-slate-700/50',
+                        : 'bg-card border-border hover:bg-accent border',
                       isFull ? 'cursor-not-allowed opacity-50' : '',
                     ]
                       .filter(Boolean)
@@ -127,7 +127,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                     <span
                       className={[
                         'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2',
-                        isCurrent ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600',
+                        isCurrent ? 'border-primary bg-primary' : 'border-border',
                       ].join(' ')}
                     >
                       {isCurrent && <Check className="h-3 w-3 text-white" />}
@@ -135,9 +135,9 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
                     {/* Day info */}
                     <span className="flex-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{shortLabel}</span>
+                      <span className="text-foreground font-semibold">{shortLabel}</span>
                       <span className="text-muted-foreground ml-1">({fullLabel})</span>
-                      <span className="ml-2 text-slate-400 dark:text-slate-500">
+                      <span className="text-muted-foreground ml-2">
                         — {t('fitness.scheduleEditor.sessionsCount', { count })}
                       </span>
                     </span>

@@ -141,7 +141,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
             type="button"
             onClick={handleCancel}
             aria-label={t('common.closeDialog')}
-            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent rounded-full p-2"
           >
             <X className="h-5 w-5" />
           </button>
@@ -239,7 +239,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   min={0}
                   disabled={qaAiLoading}
                   placeholder="0"
-                  className="focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 dark:bg-slate-700 dark:text-slate-100"
+                  className="focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50"
                 />
               </div>
             ))}
@@ -250,7 +250,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
             type="button"
             onClick={handleCancel}
             data-testid="btn-qa-cancel"
-            className="text-muted-foreground flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-medium transition-all hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-muted-foreground bg-muted hover:bg-accent flex-1 rounded-xl py-2.5 text-sm font-medium transition-all"
           >
             {t('dish.quickAddCancel')}
           </button>

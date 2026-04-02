@@ -49,7 +49,7 @@ export const ManagementTab = React.memo(function ManagementTab({
       <div className="border-border flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <BookOpen className="text-primary h-6 w-6 shrink-0" />
-          <h2 className="text-xl font-bold text-slate-800 sm:text-2xl dark:text-slate-100">{t('management.title')}</h2>
+          <h2 className="text-foreground text-xl font-bold sm:text-2xl">{t('management.title')}</h2>
         </div>
         <div className="scrollbar-hide bg-muted flex w-full flex-nowrap overflow-x-auto rounded-xl p-1 sm:w-auto">
           {SUB_TABS.map(tab => (
@@ -57,7 +57,7 @@ export const ManagementTab = React.memo(function ManagementTab({
               key={tab.key}
               data-testid={`tab-management-${tab.key}`}
               onClick={() => onSubTabChange(tab.key)}
-              className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all sm:min-h-0 sm:flex-initial sm:py-1.5 sm:text-xs ${activeSubTab === tab.key ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700' : 'text-muted-foreground active:bg-slate-200 dark:active:bg-slate-600'}`}
+              className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all sm:min-h-0 sm:flex-initial sm:py-1.5 sm:text-xs ${activeSubTab === tab.key ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground active:bg-muted dark:active:bg-slate-600'}`}
             >
               {tab.label}
             </button>

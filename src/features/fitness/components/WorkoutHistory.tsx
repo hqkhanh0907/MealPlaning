@@ -65,9 +65,7 @@ function ExerciseGroupDetail({
   return (
     <div data-testid={`exercise-group-${exerciseId}`} className="py-2">
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-          {EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}
-        </span>
+        <span className="text-foreground text-sm font-medium">{EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}</span>
         {exerciseVolume > 0 && (
           <span className="text-primary text-xs">
             {t('fitness.history.volume')}: {exerciseVolume} kg
@@ -76,11 +74,7 @@ function ExerciseGroupDetail({
       </div>
       <div className="flex flex-wrap gap-2">
         {sets.map(set => (
-          <span
-            key={set.id}
-            data-testid={`set-detail-${set.id}`}
-            className="rounded bg-slate-50 px-2 py-1 text-xs dark:bg-slate-700"
-          >
+          <span key={set.id} data-testid={`set-detail-${set.id}`} className="bg-muted rounded px-2 py-1 text-xs">
             {set.weightKg > 0 && (
               <>
                 {set.weightKg}kg × {set.reps ?? 0}
@@ -228,9 +222,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
             aria-pressed={filter === key}
             aria-label={label}
             className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
-              filter === key
-                ? 'bg-primary text-primary-foreground'
-                : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
+              filter === key ? 'bg-primary text-primary-foreground' : 'text-foreground-secondary bg-muted'
             }`}
           >
             {label}
@@ -268,10 +260,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                       className="focus-visible:ring-ring flex w-full items-center justify-between rounded-xl px-4 py-3 text-left focus-visible:ring-2 focus-visible:ring-offset-2"
                     >
                       <div className="flex flex-col gap-1">
-                        <span
-                          data-testid={`workout-name-${workout.id}`}
-                          className="font-medium text-slate-800 dark:text-slate-100"
-                        >
+                        <span data-testid={`workout-name-${workout.id}`} className="text-foreground font-medium">
                           {workout.name}
                         </span>
                         <span data-testid={`workout-date-${workout.id}`} className="text-muted-foreground text-sm">
@@ -303,9 +292,9 @@ function WorkoutHistoryInner(): React.JSX.Element {
                           </span>
                         )}
                         {isExpanded ? (
-                          <ChevronUp className="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                          <ChevronUp className="text-muted-foreground h-4 w-4" aria-hidden="true" />
                         ) : (
-                          <ChevronDown className="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                          <ChevronDown className="text-muted-foreground h-4 w-4" aria-hidden="true" />
                         )}
                       </div>
                     </button>
@@ -321,7 +310,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
 
                         <div
                           data-testid={`workout-meta-${workout.id}`}
-                          className="text-muted-foreground mt-2 flex items-center gap-4 border-t border-slate-50 pt-2 text-xs dark:border-slate-700"
+                          className="text-muted-foreground border-border mt-2 flex items-center gap-4 border-t pt-2 text-xs"
                         >
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" aria-hidden="true" />
@@ -339,17 +328,14 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         {workout.notes && (
                           <div
                             data-testid={`workout-notes-${workout.id}`}
-                            className="mt-2 flex items-start gap-2 border-t border-slate-50 pt-2 dark:border-slate-700"
+                            className="border-border mt-2 flex items-start gap-2 border-t pt-2"
                           >
-                            <StickyNote
-                              className="mt-0.5 h-3 w-3 shrink-0 text-slate-400 dark:text-slate-500"
-                              aria-hidden="true"
-                            />
+                            <StickyNote className="text-muted-foreground mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                             <p className="text-muted-foreground text-xs">{workout.notes}</p>
                           </div>
                         )}
 
-                        <div className="mt-2 flex justify-end border-t border-slate-50 pt-2 dark:border-slate-700">
+                        <div className="border-border mt-2 flex justify-end border-t pt-2">
                           <button
                             type="button"
                             data-testid={`delete-workout-${workout.id}`}

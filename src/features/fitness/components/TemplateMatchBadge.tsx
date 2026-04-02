@@ -6,9 +6,9 @@ interface TemplateMatchBadgeProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'bg-emerald-100 text-primary-emphasis dark:bg-emerald-900/40';
+  if (score >= 80) return 'bg-primary/10 text-primary-emphasis';
   if (score >= 60) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
-  return 'bg-slate-100 text-foreground-secondary dark:bg-slate-700';
+  return 'bg-muted text-foreground-secondary';
 }
 
 function TemplateMatchBadgeInner({ score }: Readonly<TemplateMatchBadgeProps>): React.JSX.Element {

@@ -30,7 +30,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
       goNext={goNext}
       goBack={goBack}
     >
-      <p className="mb-3 text-xs font-medium text-slate-400 dark:text-slate-500">
+      <p className="text-muted-foreground mb-3 text-xs font-medium">
         {t('fitness.onboarding.maxItems', { count: MAX_PRIORITY_MUSCLES })} ({selected.length}/{MAX_PRIORITY_MUSCLES})
       </p>
       <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0" aria-label={t('fitness.onboarding.priorityMuscles')}>
@@ -42,8 +42,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
           if (isSelected) {
             stateClass = 'border-primary bg-primary-subtle text-primary-emphasis';
           } else if (isDisabled) {
-            stateClass =
-              'cursor-not-allowed border-border-subtle text-slate-300 dark:border-slate-800 dark:text-slate-600';
+            stateClass = 'cursor-not-allowed border-border-subtle text-slate-300 dark:text-slate-600';
           } else {
             stateClass = 'border-border text-foreground-secondary';
           }

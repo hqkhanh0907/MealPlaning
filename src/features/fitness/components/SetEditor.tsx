@@ -129,12 +129,13 @@ export const SetEditor = React.memo(function SetEditor({
         data-testid="set-editor"
       >
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{t('fitness.editor.title')}</h3>
+          <h3 className="text-foreground text-lg font-semibold">{t('fitness.editor.title')}</h3>
           <Button
             variant="ghost"
             size="icon"
             onClick={onCancel}
             className="h-8 w-8 rounded-full"
+            aria-label={t('common.close')}
             data-testid="editor-close-button"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -152,6 +153,7 @@ export const SetEditor = React.memo(function SetEditor({
               size="icon"
               onClick={handleWeightDecrement}
               className="h-11 w-11 shrink-0"
+              aria-label={`${t('common.decrease')} ${t('fitness.editor.weight')}`}
               data-testid="weight-minus-button"
             >
               <Minus className="h-5 w-5" aria-hidden="true" />
@@ -163,7 +165,7 @@ export const SetEditor = React.memo(function SetEditor({
               onBlur={handleWeightBlur}
               min={MIN_WEIGHT_KG}
               step={WEIGHT_INCREMENT}
-              className="w-full text-center font-semibold text-slate-800 tabular-nums"
+              className="text-foreground w-full text-center font-semibold tabular-nums"
               data-testid="weight-input"
             />
             <Button
@@ -171,6 +173,7 @@ export const SetEditor = React.memo(function SetEditor({
               size="icon"
               onClick={handleWeightIncrement}
               className="h-11 w-11 shrink-0"
+              aria-label={`${t('common.increase')} ${t('fitness.editor.weight')}`}
               data-testid="weight-plus-button"
             >
               <Plus className="h-5 w-5" aria-hidden="true" />
@@ -210,6 +213,7 @@ export const SetEditor = React.memo(function SetEditor({
               size="icon"
               onClick={handleRepsDecrement}
               className="h-11 w-11 shrink-0"
+              aria-label={`${t('common.decrease')} ${t('fitness.editor.reps')}`}
               data-testid="reps-minus-button"
             >
               <Minus className="h-5 w-5" aria-hidden="true" />
@@ -221,7 +225,7 @@ export const SetEditor = React.memo(function SetEditor({
               onBlur={handleRepsBlur}
               min={MIN_REPS}
               step={REPS_INCREMENT}
-              className="w-full text-center font-semibold text-slate-800 tabular-nums"
+              className="text-foreground w-full text-center font-semibold tabular-nums"
               data-testid="reps-input"
             />
             <Button
@@ -229,6 +233,7 @@ export const SetEditor = React.memo(function SetEditor({
               size="icon"
               onClick={handleRepsIncrement}
               className="h-11 w-11 shrink-0"
+              aria-label={`${t('common.increase')} ${t('fitness.editor.reps')}`}
               data-testid="reps-plus-button"
             >
               <Plus className="h-5 w-5" aria-hidden="true" />

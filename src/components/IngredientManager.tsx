@@ -140,7 +140,7 @@ export const IngredientManager = ({
   };
 
   // --- Render ---
-  const emptyIcon = <Apple className="h-8 w-8 text-emerald-300" />;
+  const emptyIcon = <Apple className="text-primary/40 h-8 w-8" />;
 
   return (
     <div className="space-y-6">
@@ -177,7 +177,7 @@ export const IngredientManager = ({
                     <button
                       type="button"
                       onClick={() => modal.openView(ing)}
-                      className="focus-visible:ring-ring cursor-pointer rounded text-left text-lg font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-slate-100"
+                      className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                     >
                       {getLocalizedField(ing.name, lang)}
                     </button>
@@ -186,29 +186,29 @@ export const IngredientManager = ({
                 </div>
               </div>
               <div className="mb-3 grid grid-cols-2 gap-2">
-                <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2 dark:bg-slate-700/50">
-                  <span className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.calories')}</span>
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span>
+                <div className="bg-muted flex items-center justify-between rounded-lg p-2">
+                  <span className="text-muted-foreground text-xs font-bold uppercase">{t('common.calories')}</span>
+                  <span className="text-foreground text-sm font-bold">{ing.caloriesPer100}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-                  <span className="text-[10px] font-bold text-blue-400 uppercase">{t('common.protein')}</span>
+                  <span className="text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</span>
                   <span className="text-sm font-bold text-blue-700 dark:text-blue-400">{ing.proteinPer100}g</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase">{t('common.carbs')}</span>
+                  <span className="text-xs font-bold text-amber-400 uppercase">{t('common.carbs')}</span>
                   <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{ing.carbsPer100}g</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-rose-50 p-2 dark:bg-rose-900/30">
-                  <span className="text-[10px] font-bold text-rose-400 uppercase">{t('common.fat')}</span>
+                  <span className="text-xs font-bold text-rose-400 uppercase">{t('common.fat')}</span>
                   <span className="text-sm font-bold text-rose-700 dark:text-rose-400">{ing.fatPer100}g</span>
                 </div>
               </div>
               {renderUsedInDishes(ing.id)}
-              <div className="relative z-10 mt-auto flex items-center gap-4 border-t border-slate-50 pt-4 dark:border-slate-700">
+              <div className="border-border relative z-10 mt-auto flex items-center gap-4 border-t pt-4">
                 <button
                   data-testid={`btn-edit-ingredient-${ing.id}`}
                   onClick={() => modal.openEdit(ing)}
-                  className="text-muted-foreground hover:bg-primary-subtle flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                  className="text-muted-foreground hover:bg-primary-subtle hover:text-primary flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all"
                 >
                   <Edit3 className="h-4 w-4" /> {t('common.edit')}
                 </button>
@@ -216,7 +216,7 @@ export const IngredientManager = ({
                   data-testid={`btn-delete-ingredient-${ing.id}`}
                   onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                   aria-disabled={isUsed(ing.id)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(ing.id) ? 'dark:text-muted-foreground text-slate-400 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                 >
                   <Trash2 className="h-4 w-4" /> {t('common.delete')}
                 </button>
@@ -241,7 +241,7 @@ export const IngredientManager = ({
         <div className="bg-card border-border-subtle overflow-hidden rounded-2xl border shadow-sm">
           <div className="hidden overflow-x-auto sm:block">
             <table className="w-full">
-              <thead className="border-border-subtle border-b bg-slate-50 dark:bg-slate-700">
+              <thead className="border-border-subtle bg-muted border-b">
                 <tr>
                   <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold uppercase">
                     {t('ingredient.title')}
@@ -263,9 +263,9 @@ export const IngredientManager = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+              <tbody className="divide-border divide-y">
                 {list.filteredItems.map(ing => (
-                  <tr key={ing.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-700">
+                  <tr key={ing.id} className="hover:bg-accent transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="text-primary bg-primary-subtle flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
@@ -275,7 +275,7 @@ export const IngredientManager = ({
                           <button
                             type="button"
                             onClick={() => modal.openView(ing)}
-                            className="hover:text-primary cursor-pointer text-left font-bold text-slate-800 transition-colors dark:text-slate-100"
+                            className="hover:text-primary text-foreground cursor-pointer text-left font-bold transition-colors"
                           >
                             {getLocalizedField(ing.name, lang)}
                           </button>
@@ -284,7 +284,7 @@ export const IngredientManager = ({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span>
+                      <span className="text-foreground font-bold">{ing.caloriesPer100}</span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span className="font-bold text-blue-600 dark:text-blue-400">{ing.proteinPer100}g</span>
@@ -301,7 +301,7 @@ export const IngredientManager = ({
                           data-testid={`btn-edit-ingredient-${ing.id}`}
                           onClick={() => modal.openEdit(ing)}
                           aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
-                          className="hover:bg-primary-subtle rounded-lg p-2 text-slate-400 transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                          className="hover:bg-primary-subtle text-muted-foreground hover:text-primary rounded-lg p-2 transition-all"
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
@@ -310,7 +310,7 @@ export const IngredientManager = ({
                           onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                           aria-disabled={isUsed(ing.id)}
                           aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                          className={`rounded-lg p-2 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40 dark:text-slate-500' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                          className={`rounded-lg p-2 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -321,11 +321,11 @@ export const IngredientManager = ({
               </tbody>
             </table>
           </div>
-          <div className="divide-y divide-slate-100 sm:hidden dark:divide-slate-700">
+          <div className="divide-border divide-y sm:hidden">
             {list.filteredItems.map(ing => (
               <div
                 key={ing.id}
-                className="relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors active:bg-slate-50 dark:active:bg-slate-700"
+                className="active:bg-muted relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors dark:active:bg-slate-700"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="text-primary bg-primary-subtle flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -335,7 +335,7 @@ export const IngredientManager = ({
                     <button
                       type="button"
                       onClick={() => modal.openView(ing)}
-                      className="focus-visible:ring-ring cursor-pointer truncate rounded text-left font-bold text-slate-800 after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 dark:text-slate-100"
+                      className="focus-visible:ring-ring text-foreground cursor-pointer truncate rounded text-left font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2"
                     >
                       {getLocalizedField(ing.name, lang)}
                     </button>
@@ -350,7 +350,7 @@ export const IngredientManager = ({
                     data-testid={`btn-edit-ingredient-${ing.id}`}
                     onClick={() => modal.openEdit(ing)}
                     aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
-                    className="hover:bg-primary-subtle rounded-lg p-2.5 text-slate-400 transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                    className="hover:bg-primary-subtle text-muted-foreground hover:text-primary rounded-lg p-2.5 transition-all"
                   >
                     <Edit3 className="h-4 w-4" />
                   </button>
@@ -359,7 +359,7 @@ export const IngredientManager = ({
                     onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                     aria-disabled={isUsed(ing.id)}
                     aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                    className={`rounded-lg p-2.5 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40 dark:text-slate-500' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                    className={`rounded-lg p-2.5 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -396,35 +396,33 @@ export const IngredientManager = ({
                   <Apple className="h-7 w-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    {getLocalizedField(ing.name, lang)}
-                  </h3>
+                  <h3 className="text-foreground text-xl font-bold">{getLocalizedField(ing.name, lang)}</h3>
                   <p className="text-muted-foreground text-sm font-medium">{getDisplayUnit(ing.unit, lang)}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-700/50">
-                  <p className="text-muted-foreground mb-1 text-[10px] font-bold uppercase">{t('common.calories')}</p>
-                  <p className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                <div className="bg-muted rounded-xl p-3.5">
+                  <p className="text-muted-foreground mb-1 text-xs font-bold uppercase">{t('common.calories')}</p>
+                  <p className="text-foreground text-xl font-bold">
                     {ing.caloriesPer100} <span className="text-muted-foreground text-xs font-medium">kcal</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
-                  <p className="mb-1 text-[10px] font-bold text-blue-400 uppercase">{t('common.protein')}</p>
+                  <p className="mb-1 text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</p>
                   <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
                     {ing.proteinPer100}
                     <span className="text-xs font-medium text-blue-400">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
-                  <p className="mb-1 text-[10px] font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
+                  <p className="mb-1 text-xs font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
                   <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
                     {ing.carbsPer100}
                     <span className="text-xs font-medium text-amber-400">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
-                  <p className="mb-1 text-[10px] font-bold text-rose-400 uppercase">{t('common.fat')}</p>
+                  <p className="mb-1 text-xs font-bold text-rose-400 uppercase">{t('common.fat')}</p>
                   <p className="text-xl font-bold text-rose-700 dark:text-rose-400">
                     {ing.fatPer100}
                     <span className="text-xs font-medium text-rose-400">g</span>
@@ -432,20 +430,20 @@ export const IngredientManager = ({
                 </div>
               </div>
               <div className="bg-primary-subtle rounded-xl p-3.5">
-                <p className="mb-1 text-[10px] font-bold text-emerald-400 uppercase">{t('common.fiber')}</p>
+                <p className="text-primary mb-1 text-xs font-bold uppercase">{t('common.fiber')}</p>
                 <p className="text-primary-emphasis text-xl font-bold">
                   {ing.fiberPer100}
-                  <span className="text-xs font-medium text-emerald-400">g</span>
+                  <span className="text-primary text-xs font-medium">g</span>
                 </p>
               </div>
               {usedIn.length > 0 && (
-                <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
+                <div className="bg-muted rounded-xl p-4">
                   <p className="text-muted-foreground mb-2 text-xs font-semibold uppercase">{t('ingredient.usedIn')}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {usedIn.map(n => (
                       <span
                         key={n}
-                        className="border-border bg-card text-foreground-secondary rounded-lg border px-2.5 py-1 text-xs font-medium dark:bg-slate-700"
+                        className="border-border bg-card text-foreground-secondary rounded-lg border px-2.5 py-1 text-xs font-medium"
                       >
                         {n}
                       </span>
@@ -473,10 +471,7 @@ export const IngredientManager = ({
         message={
           <p>
             {t('ingredient.confirmDeleteMsg')}{' '}
-            <span className="font-bold text-slate-800 dark:text-slate-100">
-              &quot;{deleteConfirmation.ingredientName}&quot;
-            </span>
-            ?
+            <span className="text-foreground font-bold">&quot;{deleteConfirmation.ingredientName}&quot;</span>?
           </p>
         }
         confirmLabel={t('common.deleteNow')}

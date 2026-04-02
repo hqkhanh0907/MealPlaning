@@ -43,14 +43,12 @@ export function PeriodizationStep({ form, goNext, goBack }: Readonly<StepProps>)
               <span
                 className={cn(
                   'text-sm font-medium',
-                  field.field.value === opt ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300',
+                  field.field.value === opt ? 'text-primary-emphasis' : 'text-foreground',
                 )}
               >
                 {t(`fitness.onboarding.period_${opt}`)}
               </span>
-              <span className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                {t(`fitness.onboarding.period_${opt}_desc`)}
-              </span>
+              <span className="text-muted-foreground mt-1 text-xs">{t(`fitness.onboarding.period_${opt}_desc`)}</span>
             </button>
           </Fragment>
         ))}

@@ -298,8 +298,8 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       const card = screen.getByTestId('ai-insight-card');
-      expect(card.className).toContain('border-slate-400');
-      expect(card.className).toContain('bg-slate-50');
+      expect(card.className).toContain('border-border');
+      expect(card.className).toContain('bg-muted');
     });
 
     it('does not show action button when no actionLabel', () => {
@@ -356,7 +356,7 @@ describe('AiInsightCard', () => {
       { color: 'amber', borderClass: 'border-amber-500' },
       { color: 'blue', borderClass: 'border-blue-500' },
       { color: 'green', borderClass: 'border-primary' },
-      { color: 'gray', borderClass: 'border-slate-400' },
+      { color: 'gray', borderClass: 'border-border' },
     ];
 
     it.each(colorCases)('applies $borderClass for $color color', ({ color, borderClass }) => {

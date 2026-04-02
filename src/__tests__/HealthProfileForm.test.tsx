@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { HealthProfileForm } from '../features/health-profile/components/HealthProfileForm';
 import type { HealthProfileState } from '../features/health-profile/store/healthProfileStore';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import type { HealthProfile } from '../features/health-profile/types';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import type { DatabaseService } from '../services/databaseService';
 
@@ -28,16 +29,32 @@ vi.mock('../contexts/DatabaseContext', () => ({
 /* ------------------------------------------------------------------ */
 /* Helpers */
 /* ------------------------------------------------------------------ */
+
+/** Generate a YYYY-MM-DD date string that yields exactly `targetAge` today. */
+function dobForAge(targetAge: number): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - targetAge);
+  d.setMonth(d.getMonth() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+const DOB_AGE_30 = dobForAge(30);
+
+/** Profile with valid name + DOB (DOB-first architecture). */
+const VALID_PROFILE: HealthProfile = {
+  ...DEFAULT_HEALTH_PROFILE,
+  name: 'Nguyễn Văn A',
+  dateOfBirth: DOB_AGE_30,
+  age: 30,
+};
+
 let mockSaveProfile: ReturnType<typeof vi.fn>;
 
 function resetStore(overrides: Partial<HealthProfileState> = {}) {
   mockSaveProfile = vi.fn().mockResolvedValue(undefined);
-  const typedMock = mockSaveProfile as unknown as (
-    db: DatabaseService,
-    profile: import('../features/health-profile/types').HealthProfile,
-  ) => Promise<void>;
+  const typedMock = mockSaveProfile as unknown as (db: DatabaseService, profile: HealthProfile) => Promise<void>;
   useHealthProfileStore.setState({
-    profile: { ...DEFAULT_HEALTH_PROFILE },
+    profile: { ...VALID_PROFILE },
     activeGoal: null,
     loading: false,
     saveProfile: typedMock,
@@ -57,8 +74,9 @@ describe('HealthProfileForm', () => {
     render(<HealthProfileForm />);
 
     expect(screen.getByText('Hồ sơ sức khỏe')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tên')).toBeInTheDocument();
     expect(screen.getByText('Giới tính')).toBeInTheDocument();
-    expect(screen.getByLabelText('Tuổi')).toBeInTheDocument();
+    expect(screen.getByLabelText('Ngày sinh')).toBeInTheDocument();
     expect(screen.getByLabelText('Chiều cao (cm)')).toBeInTheDocument();
     expect(screen.getByLabelText('Cân nặng (kg)')).toBeInTheDocument();
     expect(screen.getByLabelText('Mức độ vận động')).toBeInTheDocument();
@@ -68,11 +86,17 @@ describe('HealthProfileForm', () => {
     expect(screen.getByRole('button', { name: 'Lưu' })).toBeInTheDocument();
   });
 
+  it('does not render age as an input field', () => {
+    render(<HealthProfileForm />);
+
+    expect(screen.queryByTestId('hp-age')).not.toBeInTheDocument();
+  });
+
   it('populates with current profile data', () => {
     render(<HealthProfileForm />);
 
-    // StringNumberController uses type="text" so values are strings
-    expect(screen.getByLabelText('Tuổi')).toHaveValue('30');
+    expect(screen.getByLabelText('Tên')).toHaveValue('Nguyễn Văn A');
+    expect(screen.getByLabelText('Ngày sinh')).toHaveValue(DOB_AGE_30);
     expect(screen.getByLabelText('Chiều cao (cm)')).toHaveValue('170');
     expect(screen.getByLabelText('Cân nặng (kg)')).toHaveValue('70');
     expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toHaveValue('2');
@@ -82,6 +106,22 @@ describe('HealthProfileForm', () => {
 
     const activitySelect = screen.getByLabelText('Mức độ vận động');
     expect(activitySelect).toHaveValue('moderate');
+  });
+
+  it('shows computed age from date of birth', () => {
+    render(<HealthProfileForm />);
+
+    const computedAge = screen.getByTestId('hp-computed-age');
+    expect(computedAge).toHaveTextContent('Tuổi: 30');
+  });
+
+  it('updates computed age when DOB changes', () => {
+    render(<HealthProfileForm />);
+
+    const dobInput = screen.getByLabelText('Ngày sinh');
+    fireEvent.change(dobInput, { target: { value: dobForAge(25) } });
+
+    expect(screen.getByTestId('hp-computed-age')).toHaveTextContent('Tuổi: 25');
   });
 
   it('gender toggle works', () => {
@@ -112,7 +152,7 @@ describe('HealthProfileForm', () => {
   it('BMR auto-calculates when fields change', () => {
     render(<HealthProfileForm />);
 
-    // Default: male, 30y, 170cm, 70kg → BMR = 10*70+6.25*170-5*30+5 = 1618
+    // Default: male, 30y (from DOB), 170cm, 70kg → BMR = 10*70+6.25*170-5*30+5 = 1618
     expect(screen.getByTestId('bmr-value')).toHaveTextContent('1618');
 
     // Change weight to 80 → BMR = 10*80+6.25*170-5*30+5 = 1718
@@ -122,7 +162,20 @@ describe('HealthProfileForm', () => {
     expect(screen.getByTestId('bmr-value')).toHaveTextContent('1718');
   });
 
-  it('save button calls saveProfile', async () => {
+  it('BMR recalculates when DOB changes', () => {
+    render(<HealthProfileForm />);
+
+    // Default BMR with age 30: 1618
+    expect(screen.getByTestId('bmr-value')).toHaveTextContent('1618');
+
+    // Change DOB to age 25 → BMR = 10*70+6.25*170-5*25+5 = 1643
+    fireEvent.change(screen.getByLabelText('Ngày sinh'), {
+      target: { value: dobForAge(25) },
+    });
+    expect(screen.getByTestId('bmr-value')).toHaveTextContent('1643');
+  });
+
+  it('save button calls saveProfile with name, DOB and computed age', async () => {
     render(<HealthProfileForm />);
 
     await act(async () => {
@@ -137,8 +190,10 @@ describe('HealthProfileForm', () => {
       mockDb,
       expect.objectContaining({
         id: 'default',
-        gender: 'male',
+        name: 'Nguyễn Văn A',
+        dateOfBirth: DOB_AGE_30,
         age: 30,
+        gender: 'male',
         heightCm: 170,
         weightKg: 70,
         activityLevel: 'moderate',
@@ -147,11 +202,47 @@ describe('HealthProfileForm', () => {
     );
   });
 
-  it('validation rejects age < 10', async () => {
+  it('validation rejects empty name', async () => {
+    resetStore({ profile: { ...VALID_PROFILE, name: '' } });
     render(<HealthProfileForm />);
 
-    fireEvent.change(screen.getByLabelText('Tuổi'), {
-      target: { value: '5' },
+    expect(screen.getByLabelText('Tên')).toHaveValue('');
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Tên').className).toContain('border-red');
+    });
+
+    expect(mockSaveProfile).not.toHaveBeenCalled();
+  });
+
+  it('validation rejects empty date of birth', async () => {
+    resetStore({ profile: { ...VALID_PROFILE, dateOfBirth: null } });
+    render(<HealthProfileForm />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Ngày sinh').className).toContain('border-red');
+    });
+
+    expect(mockSaveProfile).not.toHaveBeenCalled();
+  });
+
+  it('validation rejects future date of birth', async () => {
+    render(<HealthProfileForm />);
+
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 1);
+    const futureDateStr = futureDate.toISOString().slice(0, 10);
+
+    fireEvent.change(screen.getByLabelText('Ngày sinh'), {
+      target: { value: futureDateStr },
     });
 
     await act(async () => {
@@ -159,7 +250,7 @@ describe('HealthProfileForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Tuổi').className).toContain('border-red');
+      expect(screen.getByLabelText('Ngày sinh').className).toContain('border-red');
     });
 
     expect(mockSaveProfile).not.toHaveBeenCalled();
@@ -191,7 +282,7 @@ describe('HealthProfileForm', () => {
     expect(autoBtn).toHaveAttribute('aria-checked', 'true');
     expect(customBtn).toHaveAttribute('aria-checked', 'false');
 
-    // Default auto BMR: 1618
+    // Default auto BMR with age 30 from DOB: 1618
     expect(screen.getByTestId('bmr-value')).toHaveTextContent('1618');
 
     // Switch to custom
@@ -251,13 +342,39 @@ describe('HealthProfileForm', () => {
     expect(screen.queryByTestId('bmr-override-input')).not.toBeInTheDocument();
   });
 
+  it('hides computed age when DOB is empty (legacy user)', () => {
+    resetStore({ profile: { ...VALID_PROFILE, dateOfBirth: null } });
+    render(<HealthProfileForm />);
+
+    expect(screen.queryByTestId('hp-computed-age')).not.toBeInTheDocument();
+  });
+
+  it('syncs form when profile changes in store and form is not dirty', async () => {
+    const { rerender } = render(<HealthProfileForm />);
+
+    expect(screen.getByLabelText('Tên')).toHaveValue('Nguyễn Văn A');
+
+    // Simulate store update (e.g., async DB load)
+    act(() => {
+      useHealthProfileStore.setState({
+        profile: { ...VALID_PROFILE, name: 'Trần Văn B' },
+      });
+    });
+
+    rerender(<HealthProfileForm />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Tên')).toHaveValue('Trần Văn B');
+    });
+  });
+
   /* ------------------------------------------------------------------ */
   /* Goal-aware weight warning tests */
   /* ------------------------------------------------------------------ */
 
   it('shows warning when weight drops below cut goal target', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 },
+      profile: { ...VALID_PROFILE, weightKg: 80 },
       activeGoal: {
         id: 'goal-1',
         type: 'cut',
@@ -280,7 +397,7 @@ describe('HealthProfileForm', () => {
 
   it('shows warning when weight equals cut goal target', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 },
+      profile: { ...VALID_PROFILE, weightKg: 80 },
       activeGoal: {
         id: 'goal-1',
         type: 'cut',
@@ -303,7 +420,7 @@ describe('HealthProfileForm', () => {
 
   it('no warning when weight is above cut goal target', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 },
+      profile: { ...VALID_PROFILE, weightKg: 80 },
       activeGoal: {
         id: 'goal-1',
         type: 'cut',
@@ -326,7 +443,7 @@ describe('HealthProfileForm', () => {
 
   it('shows warning when weight rises above bulk goal target', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      profile: { ...VALID_PROFILE, weightKg: 70 },
       activeGoal: {
         id: 'goal-1',
         type: 'bulk',
@@ -349,7 +466,7 @@ describe('HealthProfileForm', () => {
 
   it('shows warning when weight equals bulk goal target', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      profile: { ...VALID_PROFILE, weightKg: 70 },
       activeGoal: {
         id: 'goal-1',
         type: 'bulk',
@@ -372,7 +489,7 @@ describe('HealthProfileForm', () => {
 
   it('no warning for maintain goal regardless of weight', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      profile: { ...VALID_PROFILE, weightKg: 70 },
       activeGoal: {
         id: 'goal-1',
         type: 'maintain',
@@ -394,7 +511,7 @@ describe('HealthProfileForm', () => {
 
   it('no warning when no active goal exists', () => {
     resetStore({
-      profile: { ...DEFAULT_HEALTH_PROFILE, weightKg: 70 },
+      profile: { ...VALID_PROFILE, weightKg: 70 },
       activeGoal: null,
     });
     render(<HealthProfileForm />);

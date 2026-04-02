@@ -269,7 +269,7 @@ describe('DataBackup', () => {
       render(<DataBackup />);
       await waitFor(() => {
         const health = screen.getByTestId('backup-health');
-        expect(health.className).toContain('emerald');
+        expect(health.className).toContain('primary');
       });
     });
 
@@ -307,7 +307,7 @@ describe('DataBackup', () => {
       render(<DataBackup />);
       await waitFor(() => {
         const health = screen.getByTestId('backup-health');
-        expect(health.className).toContain('emerald');
+        expect(health.className).toContain('primary');
       });
     });
 

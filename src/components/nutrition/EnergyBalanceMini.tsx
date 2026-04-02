@@ -39,7 +39,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
 
   const baseClass = 'w-full bg-card rounded-xl border border-border-subtle px-3 py-2';
   const interactiveClass =
-    'cursor-pointer active:bg-slate-50 dark:active:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
+    'cursor-pointer active:bg-muted dark:active:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
   const content = (
     <div className="flex items-center justify-around">
@@ -47,33 +47,27 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
           <UtensilsCrossed className="text-primary h-3.5 w-3.5" aria-hidden="true" />
-          <span
-            data-testid="mini-eaten"
-            className="text-sm font-semibold text-slate-800 tabular-nums dark:text-slate-100"
-          >
+          <span data-testid="mini-eaten" className="text-foreground text-sm font-semibold tabular-nums">
             {Math.round(eaten)}
           </span>
         </div>
-        <span className="text-xs text-slate-400 dark:text-slate-500">{t('nutrition.caloriesIn')}</span>
+        <span className="text-muted-foreground text-xs">{t('nutrition.caloriesIn')}</span>
       </div>
 
-      <span className="text-sm text-slate-400 dark:text-slate-500">−</span>
+      <span className="text-muted-foreground text-sm">−</span>
 
       {/* Burned */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
           <Flame className="h-3.5 w-3.5 text-orange-500" aria-hidden="true" />
-          <span
-            data-testid="mini-burned"
-            className="text-sm font-semibold text-slate-800 tabular-nums dark:text-slate-100"
-          >
+          <span data-testid="mini-burned" className="text-foreground text-sm font-semibold tabular-nums">
             {Math.round(burned)}
           </span>
         </div>
-        <span className="text-xs text-slate-400">{t('nutrition.caloriesOut')}</span>
+        <span className="text-muted-foreground text-xs">{t('nutrition.caloriesOut')}</span>
       </div>
 
-      <span className="text-sm text-slate-400">=</span>
+      <span className="text-muted-foreground text-sm">=</span>
 
       {/* Net */}
       <div className="flex flex-col items-center gap-0.5">
@@ -83,7 +77,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
             {net}
           </span>
         </div>
-        <span className="text-xs text-slate-400">{t('nutrition.netCalories')}</span>
+        <span className="text-muted-foreground text-xs">{t('nutrition.netCalories')}</span>
       </div>
     </div>
   );

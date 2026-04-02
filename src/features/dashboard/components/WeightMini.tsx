@@ -160,12 +160,12 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
         aria-label={t('dashboard.weightMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/50"
+        className="bg-muted flex items-center gap-3 rounded-2xl p-3"
       >
-        <Scale className="h-5 w-5 text-slate-400 dark:text-slate-500" aria-hidden={true} />
+        <Scale className="text-muted-foreground h-5 w-5" aria-hidden={true} />
         <div>
           <p className="text-muted-foreground text-sm font-medium">{t('dashboard.weightMini.noData')}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.weightMini.logFirst')}</p>
+          <p className="text-muted-foreground text-xs">{t('dashboard.weightMini.logFirst')}</p>
         </div>
       </button>
     );
@@ -201,10 +201,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
       className={`flex items-center gap-3 rounded-2xl ${colorClasses.bg} cursor-pointer p-3 transition-transform active:scale-[0.98]`}
     >
       <div className="min-w-0 flex-1">
-        <span
-          className="text-base font-bold text-slate-800 tabular-nums dark:text-slate-200"
-          data-testid="weight-value"
-        >
+        <span className="text-foreground text-base font-bold tabular-nums" data-testid="weight-value">
           {latestWeight.weightKg}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">{t('dashboard.weightMini.unit')}</span>
         </span>

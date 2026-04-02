@@ -102,7 +102,7 @@ function StringNumberControllerInner<T extends FieldValues>({
   return (
     <>
       {label && (
-        <label htmlFor={testId ?? name} className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label htmlFor={testId ?? name} className="text-foreground mb-1 block text-sm font-medium">
           {label}
         </label>
       )}
@@ -119,7 +119,7 @@ function StringNumberControllerInner<T extends FieldValues>({
         step={step}
         disabled={disabled}
         aria-label={ariaLabel ?? label}
-        className={className ?? 'min-h-[44px] w-full text-slate-800'}
+        className={className ?? 'text-foreground min-h-[44px] w-full'}
       />
     </>
   );

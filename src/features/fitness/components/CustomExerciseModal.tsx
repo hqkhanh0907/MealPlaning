@@ -56,15 +56,10 @@ export function CustomExerciseModal({
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card w-full max-w-sm rounded-2xl p-6" data-testid="custom-exercise-modal">
-        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-          {t('fitness.exerciseSelector.addCustom')}
-        </h3>
+        <h3 className="text-foreground text-lg font-bold">{t('fitness.exerciseSelector.addCustom')}</h3>
         <form onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-3">
           <div>
-            <label
-              htmlFor="custom-exercise-name"
-              className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="custom-exercise-name" className="text-foreground mb-1 block text-sm font-medium">
               {t('fitness.exerciseSelector.customName')}
             </label>
             <Input
@@ -81,17 +76,14 @@ export function CustomExerciseModal({
             )}
           </div>
           <div>
-            <label
-              htmlFor="custom-exercise-muscle"
-              className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="custom-exercise-muscle" className="text-foreground mb-1 block text-sm font-medium">
               {t('fitness.exerciseSelector.selectMuscle')}
             </label>
             <select
               {...register('muscleGroup')}
               id="custom-exercise-muscle"
               data-testid="custom-exercise-muscle"
-              className="w-full rounded-lg border border-slate-300 p-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="border-border focus-visible:ring-ring w-full rounded-lg border p-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
             >
               <option value="">{t('fitness.exerciseSelector.selectMuscle')}</option>
               {MUSCLE_GROUPS.map(mg => (
@@ -102,17 +94,14 @@ export function CustomExerciseModal({
             </select>
           </div>
           <div>
-            <label
-              htmlFor="custom-exercise-category"
-              className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="custom-exercise-category" className="text-foreground mb-1 block text-sm font-medium">
               {t('fitness.exerciseSelector.compoundCategory')}
             </label>
             <select
               {...register('category')}
               id="custom-exercise-category"
               data-testid="custom-exercise-category"
-              className="w-full rounded-lg border border-slate-300 p-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="border-border focus-visible:ring-ring w-full rounded-lg border p-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
             >
               <option value="compound">{t('fitness.exerciseSelector.compoundCategory')}</option>
               <option value="isolation">{t('fitness.exerciseSelector.isolationCategory')}</option>
@@ -120,10 +109,7 @@ export function CustomExerciseModal({
             </select>
           </div>
           <div>
-            <label
-              htmlFor="custom-exercise-equipment"
-              className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="custom-exercise-equipment" className="text-foreground mb-1 block text-sm font-medium">
               {t('fitness.exerciseSelector.equipment')}
             </label>
             <Input
@@ -138,13 +124,13 @@ export function CustomExerciseModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-foreground-secondary flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-slate-300 py-2 text-sm transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:border-slate-600 dark:hover:bg-slate-700"
+              className="text-foreground-secondary border-border hover:bg-accent focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center rounded-lg border py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {t('common.cancel')}
             </button>
             <button
               type="submit"
-              className="flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-blue-600 py-2 text-sm text-white transition-colors hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none disabled:opacity-50"
+              className="focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-blue-600 py-2 text-sm text-white transition-colors hover:bg-blue-700 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
               data-testid="save-custom-exercise"
             >
               {t('common.save')}

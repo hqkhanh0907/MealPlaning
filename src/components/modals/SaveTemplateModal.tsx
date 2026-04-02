@@ -156,13 +156,13 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
       >
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('template.saveTitle')}</h3>
+            <h3 className="text-foreground text-xl font-bold">{t('template.saveTitle')}</h3>
             <p className="text-muted-foreground text-sm">{t('template.saveSubtitle')}</p>
           </div>
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-slate-400 transition-all hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
+            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
           >
             <X className="h-6 w-6" />
           </button>
@@ -170,10 +170,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
 
         <div className="space-y-5 overflow-y-auto p-6 sm:p-8">
           <div>
-            <label
-              htmlFor="template-name"
-              className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300"
-            >
+            <label htmlFor="template-name" className="text-foreground mb-2 block text-sm font-semibold">
               {t('template.saveName')}
             </label>
             <Input
@@ -185,7 +182,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
               maxLength={MAX_NAME_LENGTH}
               placeholder={t('template.namePlaceholder')}
               autoFocus
-              className={`min-h-12 w-full border-2 text-slate-800 ${showNameError ? 'border-rose-300' : ''}`}
+              className={`text-foreground min-h-12 w-full border-2 ${showNameError ? 'border-rose-300' : ''}`}
             />
             <div className="mt-1.5 flex items-center justify-between">
               {showNameError ? (
@@ -195,7 +192,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
               ) : (
                 <span />
               )}
-              <span className="text-xs text-slate-400 dark:text-slate-500">
+              <span className="text-muted-foreground text-xs">
                 {watchName.length}/{MAX_NAME_LENGTH}
               </span>
             </div>
@@ -203,14 +200,12 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
 
           {/* Template Tags */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {t('template.tags')}
-            </label>
+            <label className="text-foreground mb-2 block text-sm font-semibold">{t('template.tags')}</label>
             <div className="mb-2 flex flex-wrap gap-1.5">
               {watchTags.map(tag => (
                 <span
                   key={tag}
-                  className="text-primary-emphasis inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-medium dark:bg-emerald-900/30"
+                  className="text-primary-emphasis bg-primary/10 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
                 >
                   <Tag className="h-3 w-3" />
                   {tag}
@@ -234,7 +229,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
               onKeyDown={handleTagKeyDown}
               placeholder={t('template.tagPlaceholder')}
               aria-label={t('template.tags')}
-              className="w-full text-slate-800"
+              className="text-foreground w-full"
             />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {PRESET_TAGS.filter(pt => !watchTags.includes(pt)).map(pt => (
@@ -243,7 +238,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
                   type="button"
                   data-testid={`preset-tag-${pt}`}
                   onClick={() => addTag(pt)}
-                  className="text-muted-foreground hover:bg-primary-subtle rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium transition-all hover:text-emerald-600 dark:bg-slate-700 dark:hover:bg-emerald-900/20"
+                  className="text-muted-foreground hover:bg-primary-subtle bg-muted hover:text-primary rounded-md px-2 py-1 text-xs font-medium transition-all"
                 >
                   + {pt}
                 </button>

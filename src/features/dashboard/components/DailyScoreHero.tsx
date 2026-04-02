@@ -6,7 +6,7 @@ import { useDailyScore } from '../hooks/useDailyScore';
 import type { ScoreColor } from '../types';
 
 const GRADIENT_MAP: Record<ScoreColor, string> = {
-  emerald: 'from-emerald-500 to-emerald-600',
+  emerald: 'from-primary/90 to-primary',
   amber: 'from-amber-500 to-amber-600',
   slate: 'from-slate-500 to-slate-600',
 };
@@ -70,7 +70,7 @@ function DailyScoreHeroInner(): React.ReactElement {
         <ul className="space-y-2">
           {CHECKLIST_KEYS.map((key, idx) => (
             <li key={key} className={`flex items-center gap-2 text-sm ${textColors.secondary}`}>
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-medium">
+              <span className="bg-card/20 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-medium">
                 {idx + 1}
               </span>
               {t(key)}
@@ -107,7 +107,7 @@ function DailyScoreHeroInner(): React.ReactElement {
           {activeBadges.map(badge => (
             <div
               key={badge.key}
-              className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1"
+              className="bg-card/20 flex items-center gap-1 rounded-full px-2.5 py-1"
               data-testid={`badge-${badge.key}`}
             >
               <badge.Icon className={`h-4 w-4 ${textColors.primary}`} aria-hidden="true" />

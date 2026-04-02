@@ -223,7 +223,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
-      {!embedded && <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('goal.title')}</h3>}
+      {!embedded && <h3 className="text-foreground text-lg font-bold">{t('goal.title')}</h3>}
 
       {/* Phase Cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -238,7 +238,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
               className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all ${
                 isActive
                   ? `${activeBorder} ${activeBg} ${activeText}`
-                  : 'border-border text-slate-700 hover:border-slate-300 dark:text-slate-300 dark:hover:border-slate-500'
+                  : 'border-border text-foreground hover:border-border dark:hover:border-border'
               }`}
             >
               <Icon className={`h-6 w-6 ${isActive ? color : ''}`} />
@@ -251,9 +251,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       {/* Rate of Change Selector */}
       {showRateSelector && (
         <div data-testid="rate-selector">
-          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('goal.rateOfChange')}
-          </label>
+          <label className="text-foreground mb-2 block text-sm font-medium">{t('goal.rateOfChange')}</label>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {RATE_OPTIONS.map(({ rate, labelKey }) => (
               <button
@@ -264,7 +262,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
                 className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                   rateOfChange === rate
                     ? 'border-primary bg-primary-subtle text-primary-emphasis'
-                    : 'border-border text-foreground-secondary hover:border-slate-300'
+                    : 'border-border text-foreground-secondary hover:border-border'
                 }`}
               >
                 {t(labelKey)}
@@ -277,7 +275,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       {/* Target Weight — hidden for maintain */}
       {showTargetWeight && (
         <div>
-          <label htmlFor="target-weight" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          <label htmlFor="target-weight" className="text-foreground mb-1 block text-sm font-medium">
             {t('goal.targetWeight')}
           </label>
           <Input
@@ -291,7 +289,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             placeholder={t('goal.targetWeightOptional')}
             aria-invalid={!!targetWeightError}
             aria-describedby={targetWeightError ? 'target-weight-error' : undefined}
-            className="w-full text-slate-800"
+            className="text-foreground w-full"
           />
           {targetWeightError && (
             <p id="target-weight-error" role="alert" className="text-destructive mt-1 text-xs">
@@ -302,10 +300,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       )}
 
       {/* Calorie Offset Display */}
-      <div className="space-y-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
+      <div className="bg-muted space-y-3 rounded-xl p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('goal.calorieOffset')}</span>
-          <span data-testid="calorie-offset-display" className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <span className="text-foreground text-sm font-medium">{t('goal.calorieOffset')}</span>
+          <span data-testid="calorie-offset-display" className="text-foreground text-lg font-bold">
             {formatOffset(effectiveOffset)}
           </span>
         </div>
@@ -326,7 +324,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             }`}
           >
             <span
-              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              className={`bg-card absolute top-0.5 left-0.5 h-4 w-4 rounded-full shadow transition-transform ${
                 manualOverrideField.field.value ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
@@ -341,7 +339,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             data-testid="custom-offset-input"
             value={customOffsetField.field.value}
             onChange={handleCustomOffsetChange}
-            className="w-full text-slate-800"
+            className="text-foreground w-full"
           />
         )}
       </div>

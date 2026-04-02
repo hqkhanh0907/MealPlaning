@@ -10,6 +10,7 @@ import { getAge, type HealthProfile } from '@/features/health-profile/types';
 import { validateTargetWeight } from '@/schemas/goalValidation';
 import { getCalorieOffset } from '@/services/nutritionEngine';
 import { useAppOnboardingStore } from '@/store/appOnboardingStore';
+import { logger } from '@/utils/logger';
 
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
@@ -111,7 +112,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
       setOnboardingSection(3);
       goNext();
     } catch (error) {
-      console.error('Failed to save onboarding data:', error);
+      logger.error({ component: 'HealthConfirmStep', action: 'saveOnboarding' }, error);
     } finally {
       setSaving(false);
     }
@@ -129,7 +130,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
   return (
     <div className="flex flex-1 flex-col" data-testid="health-confirm-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">
+        <h2 className="text-foreground mb-1 text-xl font-bold">
           {t('onboarding.confirm.title', { name: values.name })}
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.confirm.subtitle')}</p>
@@ -143,11 +144,11 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         </div>
 
         {/* Summary */}
-        <div className="border-border divide-y divide-slate-100 rounded-xl border dark:divide-slate-800">
+        <div className="border-border divide-border divide-y rounded-xl border">
           {summaryItems.map(item => (
             <div key={item.label} className="flex items-center justify-between px-4 py-3">
               <span className="text-muted-foreground text-sm">{item.label}</span>
-              <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.value}</span>
+              <span className="text-foreground text-sm font-medium">{item.value}</span>
             </div>
           ))}
         </div>
@@ -187,7 +188,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         )}
       </div>
 
-      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
+      <div className="border-border bg-card/95 fixed inset-x-0 bottom-0 flex items-center justify-between border-t p-4 backdrop-blur-sm">
         <button
           type="button"
           onClick={goBack}

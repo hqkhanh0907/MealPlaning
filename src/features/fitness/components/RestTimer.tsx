@@ -142,10 +142,7 @@ export const RestTimer = React.memo(function RestTimer({
               data-testid="progress-circle"
             />
           </svg>
-          <span
-            className="absolute text-2xl font-bold text-slate-800 tabular-nums dark:text-slate-100"
-            data-testid="timer-display"
-          >
+          <span className="text-foreground absolute text-2xl font-bold tabular-nums" data-testid="timer-display">
             {formatTime(remaining)}
           </span>
         </div>
