@@ -720,7 +720,7 @@ export const DishManager = ({
             protein: 'text-blue-600 dark:text-blue-400',
             carbs: 'text-amber-600 dark:text-amber-400',
             fat: 'text-rose-600 dark:text-rose-400',
-            fiber: 'text-green-600 dark:text-green-400',
+            fiber: 'text-emerald-600 dark:text-emerald-400',
           };
           return (
             <dialog

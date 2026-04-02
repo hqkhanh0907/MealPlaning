@@ -56,7 +56,7 @@ export function WorkoutSummaryCard({
             <span className="ml-auto font-semibold">{formatElapsed(durationSeconds)}</span>
           </div>
           <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-            <Dumbbell className="h-5 w-5 text-green-500" aria-hidden="true" />
+            <Dumbbell className="h-5 w-5 text-emerald-500" aria-hidden="true" />
             <span className="text-slate-500">{t('fitness.logger.totalVolume')}</span>
             <span className="ml-auto font-semibold">{totalVolume.toLocaleString()} kg</span>
           </div>

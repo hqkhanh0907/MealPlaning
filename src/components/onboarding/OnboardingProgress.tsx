@@ -44,7 +44,7 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
           return (
             <div
               key={sectionIndex}
-              className="flex-1 overflow-hidden bg-gray-200 dark:bg-slate-700"
+              className="bg-muted flex-1 overflow-hidden"
               style={(() => {
                 if (i === 0) return { borderRadius: '2px 0 0 2px' };
                 if (i === totalSections - 1) return { borderRadius: '0 2px 2px 0' };

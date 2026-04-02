@@ -17,7 +17,7 @@ function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
     case 'missed':
       return <Circle className="h-5 w-5 text-red-400" aria-hidden="true" />;
     default:
-      return <Circle className="h-5 w-5 text-zinc-300 dark:text-zinc-600" aria-hidden="true" />;
+      return <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600" aria-hidden="true" />;
   }
 }
 
@@ -36,13 +36,13 @@ export const StreakCounter = React.memo(function StreakCounter() {
   const streakInfo = useMemo(() => calculateStreak(workouts, planDays), [workouts, planDays]);
 
   return (
-    <div data-testid="streak-counter" className="rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-800">
+    <div data-testid="streak-counter" className="bg-card rounded-xl p-4 shadow-sm">
       <div className="flex items-center gap-2">
         <Flame className="size-6 text-orange-500" aria-hidden="true" />
-        <span data-testid="streak-count" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+        <span data-testid="streak-count" className="text-foreground text-xl font-bold">
           {streakInfo.currentStreak}
         </span>
-        <span className="text-zinc-600 dark:text-zinc-400">{t('fitness.gamification.streak')}</span>
+        <span className="text-muted-foreground">{t('fitness.gamification.streak')}</span>
       </div>
 
       {streakInfo.streakAtRisk && (
@@ -51,14 +51,14 @@ export const StreakCounter = React.memo(function StreakCounter() {
         </p>
       )}
 
-      <p data-testid="streak-record" className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+      <p data-testid="streak-record" className="text-muted-foreground mt-1 text-sm">
         {t('fitness.gamification.longestStreak')}: {streakInfo.longestStreak}
       </p>
 
       <div data-testid="week-dots" className="mt-3 flex justify-between">
         {streakInfo.weekDots.map((dot, i) => (
           <div key={DAY_LABELS[i]} data-testid={`dot-${dot.status}`} className="flex flex-col items-center gap-1">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">{DAY_LABELS[i]}</span>
+            <span className="text-muted-foreground text-xs">{DAY_LABELS[i]}</span>
             <DotIcon status={dot.status} />
           </div>
         ))}

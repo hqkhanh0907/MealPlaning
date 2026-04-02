@@ -201,8 +201,8 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       {visibleInlineSections.has('data') && (
         <section className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-900/30">
-              <Database className="h-5 w-5 text-violet-500 dark:text-violet-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/30">
+              <Database className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
             </div>
             <div>
               <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('settings.data')}</h3>

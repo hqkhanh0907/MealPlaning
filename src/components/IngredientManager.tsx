@@ -435,11 +435,11 @@ export const IngredientManager = ({
                   </p>
                 </div>
               </div>
-              <div className="rounded-xl bg-green-50 p-3.5 dark:bg-green-900/30">
-                <p className="mb-1 text-[10px] font-bold text-green-400 uppercase">{t('common.fiber')}</p>
-                <p className="text-xl font-bold text-green-700 dark:text-green-400">
+              <div className="rounded-xl bg-emerald-50 p-3.5 dark:bg-emerald-900/30">
+                <p className="mb-1 text-[10px] font-bold text-emerald-400 uppercase">{t('common.fiber')}</p>
+                <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
                   {ing.fiberPer100}
-                  <span className="text-xs font-medium text-green-400">g</span>
+                  <span className="text-xs font-medium text-emerald-400">g</span>
                 </p>
               </div>
               {usedIn.length > 0 && (

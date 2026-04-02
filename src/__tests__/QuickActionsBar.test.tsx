@@ -252,7 +252,7 @@ describe('QuickActionsBar', () => {
       expect(leftButton.className).toContain('bg-card');
       expect(leftButton.className).toContain('text-primary');
       expect(leftButton.className).toContain('border');
-      expect(leftButton.className).toContain('border-gray-200');
+      expect(leftButton.className).toContain('border-border');
     });
 
     it('secondary button height is 48px', () => {

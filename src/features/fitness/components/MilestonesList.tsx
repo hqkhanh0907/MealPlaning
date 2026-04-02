@@ -38,11 +38,11 @@ export const MilestonesList = React.memo(function MilestonesList() {
         data-testid="milestones-toggle"
         onClick={() => setIsExpanded(v => !v)}
         aria-expanded={isExpanded}
-        className="flex w-full items-center justify-between rounded-lg bg-white px-4 py-3 text-left font-semibold text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+        className="bg-card text-foreground flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-semibold shadow-sm"
       >
         <span>{t('fitness.gamification.milestones')}</span>
         <ChevronDown
-          className={`h-5 w-5 text-zinc-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`text-muted-foreground h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
@@ -50,8 +50,8 @@ export const MilestonesList = React.memo(function MilestonesList() {
       {isExpanded && (
         <div data-testid="milestones-content" className="mt-2 space-y-3">
           {nextMilestone && (
-            <div className="rounded-lg bg-white p-3 shadow-sm dark:bg-zinc-800">
-              <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="bg-card rounded-lg p-3 shadow-sm">
+              <p className="text-muted-foreground mb-2 text-sm">
                 {t('fitness.gamification.nextMilestone')}: {nextMilestone.emoji}{' '}
                 {t(`fitness.gamification.${nextMilestone.label}`)}
               </p>
@@ -65,7 +65,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
                 aria-valuemax={100}
                 aria-label={t('fitness.gamification.nextMilestone')}
               />
-              <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700" aria-hidden="true">
+              <div className="bg-muted h-2 overflow-hidden rounded-full" aria-hidden="true">
                 <div
                   data-testid="progress-fill"
                   className="bg-primary h-full rounded-full transition-all"
@@ -81,13 +81,11 @@ export const MilestonesList = React.memo(function MilestonesList() {
                 key={m.id}
                 data-testid={`milestone-${m.id}`}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
-                  m.achievedDate ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-zinc-50 opacity-50 dark:bg-zinc-800/50'
+                  m.achievedDate ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-muted/50 opacity-50'
                 }`}
               >
                 <span className="text-xl">{m.emoji}</span>
-                <span className="flex-1 text-sm text-zinc-800 dark:text-zinc-200">
-                  {t(`fitness.gamification.${m.label}`)}
-                </span>
+                <span className="text-foreground flex-1 text-sm">{t(`fitness.gamification.${m.label}`)}</span>
                 {m.achievedDate && (
                   <span data-testid={`milestone-date-${m.id}`} className="text-primary flex items-center gap-1 text-xs">
                     <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />

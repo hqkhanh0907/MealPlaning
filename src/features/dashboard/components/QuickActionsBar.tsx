@@ -53,7 +53,7 @@ const ActionButton = React.memo(function ActionButton({ action, onPress }: Actio
     <Button
       variant="outline"
       onClick={handleClick}
-      className="bg-card text-primary flex h-12 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full border-gray-200 px-4 dark:border-slate-600"
+      className="bg-card text-primary border-border flex h-12 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full px-4"
       aria-label={t(action.label)}
       data-testid={`quick-action-${action.id}`}
     >
