@@ -135,15 +135,15 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.confirm.subtitle')}</p>
 
         {/* Hero Calorie */}
-        <div className="mb-6 rounded-2xl bg-emerald-50 p-6 text-center dark:bg-emerald-900/20">
+        <div className="bg-primary-subtle mb-6 rounded-2xl p-6 text-center">
           <p className="text-primary mb-1 text-sm font-medium">{t('onboarding.confirm.dailyCaloriesLabel')}</p>
-          <p className="text-4xl font-bold text-emerald-700">{estimatedTdee}</p>
+          <p className="text-primary-emphasis text-4xl font-bold">{estimatedTdee}</p>
           <p className="text-primary/70 mt-1 text-xs">kcal / {t('onboarding.confirm.day')}</p>
           <p className="text-primary/70/70 mt-2 text-xs leading-relaxed">{t('onboarding.confirm.dailyCaloriesDesc')}</p>
         </div>
 
         {/* Summary */}
-        <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
+        <div className="border-border divide-y divide-slate-100 rounded-xl border dark:divide-slate-800">
           {summaryItems.map(item => (
             <div key={item.label} className="flex items-center justify-between px-4 py-3">
               <span className="text-muted-foreground text-sm">{item.label}</span>
@@ -166,7 +166,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
           )}
         </button>
         {expanded && (
-          <div className="mt-2 rounded-xl border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
+          <div className="border-border text-foreground-secondary mt-2 rounded-xl border p-4 text-sm">
             <p>
               {t('onboarding.confirm.activityLevel')}: {t(`health.activityLevel.${values.activityLevel}`)}
             </p>
@@ -187,7 +187,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           onClick={goBack}

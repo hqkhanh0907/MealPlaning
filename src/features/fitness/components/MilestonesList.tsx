@@ -81,7 +81,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
                 key={m.id}
                 data-testid={`milestone-${m.id}`}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
-                  m.achievedDate ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-muted/50 opacity-50'
+                  m.achievedDate ? 'bg-primary-subtle' : 'bg-muted/50 opacity-50'
                 }`}
               >
                 <span className="text-xl">{m.emoji}</span>

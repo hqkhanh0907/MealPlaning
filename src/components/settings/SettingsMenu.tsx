@@ -141,14 +141,14 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               variant="ghost"
               data-testid={`settings-nav-${item.id}`}
               onClick={() => onNavigate(item.id)}
-              className="bg-card flex h-auto w-full items-center gap-4 rounded-2xl border border-slate-100 p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-slate-700 dark:hover:border-slate-500"
+              className="bg-card border-border-subtle flex h-auto w-full items-center gap-4 rounded-2xl border p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:hover:border-slate-500"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-700/50">
                 {item.icon}
               </div>
               <div className="min-w-0 flex-1 text-left">
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{t(item.titleKey)}</p>
-                <p className="truncate text-xs text-slate-600 dark:text-slate-400">{item.summary}</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t(item.titleKey)}</p>
+                <p className="text-foreground-secondary truncate text-xs">{item.summary}</p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
             </Button>
@@ -158,7 +158,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
 
       {/* Theme Section (inline) */}
       {visibleInlineSections.has('theme') && (
-        <section className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
+        <section className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/30">
               <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400" />
@@ -178,12 +178,12 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
                 className={cn(
                   'flex h-auto min-h-12 flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all sm:p-4',
                   theme === value
-                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20'
-                    : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500',
+                    ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                    : 'border-border text-slate-700 hover:border-slate-300 dark:text-slate-300 dark:hover:border-slate-500',
                 )}
               >
                 <Icon className="h-5 w-5" />
-                <span className="text-sm font-bold">{t(labelKey)}</span>
+                <span className="text-sm font-semibold">{t(labelKey)}</span>
               </Button>
             ))}
           </div>
@@ -199,7 +199,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
 
       {/* Data Section (inline) */}
       {visibleInlineSections.has('data') && (
-        <section className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
+        <section className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/30">
               <Database className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />

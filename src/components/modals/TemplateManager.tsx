@@ -89,7 +89,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
         className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl"
         data-testid="template-manager-modal"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('template.title')}</h3>
           </div>
@@ -107,7 +107,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
             <div className="py-8 text-center">
               <BookTemplate className="mx-auto mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" />
               <p className="text-muted-foreground font-medium">{t('template.empty')}</p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">{t('template.emptyHint')}</p>
+              <p className="text-muted-foreground mt-1 text-sm">{t('template.emptyHint')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -140,7 +140,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                         type="button"
                         data-testid={`filter-tag-${tag}`}
                         onClick={() => setFilterTag(prev => (prev === tag ? null : tag))}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-900/20'}`}
+                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${filterTag === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-primary-subtle bg-slate-100 dark:bg-slate-700 dark:hover:bg-emerald-900/20'}`}
                       >
                         <Tag className="h-3 w-3" />
                         {tag}
@@ -152,14 +152,14 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
 
               {filteredTemplates.length === 0 ? (
                 <div className="py-6 text-center">
-                  <p className="text-sm text-slate-500 dark:text-slate-500">{t('template.noResults')}</p>
+                  <p className="text-muted-foreground text-sm">{t('template.noResults')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {filteredTemplates.map(template => (
                     <div
                       key={template.id}
-                      className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-600 dark:bg-slate-700/50"
+                      className="border-border-subtle rounded-2xl border bg-slate-50 p-4 dark:bg-slate-700/50"
                       data-testid={`template-item-${template.id}`}
                     >
                       {renamingId === template.id ? (
@@ -183,7 +183,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={confirmRename}
                             aria-label={t('common.confirm')}
-                            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-emerald-600 transition-all hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
+                            className="hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-emerald-600 transition-all dark:hover:bg-emerald-900/30"
                             data-testid="template-rename-confirm"
                           >
                             <Check className="h-4 w-4" />
@@ -199,7 +199,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                       ) : (
                         <div className="mb-3">
                           <h4 className="font-bold text-slate-800 dark:text-slate-100">{template.name}</h4>
-                          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
+                          <p className="text-muted-foreground mt-0.5 text-xs">
                             {t('template.dishes', { count: getDishCount(template) })} · {t('template.created')}{' '}
                             {new Date(template.createdAt).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
                           </p>
@@ -257,7 +257,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={() => startRename(template)}
                             data-testid={`btn-rename-template-${template.id}`}
-                            className="flex min-h-11 items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-300 active:scale-[0.98] dark:bg-slate-600 dark:text-slate-300 dark:hover:bg-slate-500"
+                            className="text-foreground-secondary flex min-h-11 items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-2 text-sm font-medium transition-all hover:bg-slate-300 active:scale-[0.98] dark:bg-slate-600 dark:hover:bg-slate-500"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                             {t('template.rename')}

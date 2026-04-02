@@ -40,11 +40,12 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
 
           let stateClass: string;
           if (isSelected) {
-            stateClass = 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30';
+            stateClass = 'border-primary bg-primary-subtle text-primary-emphasis';
           } else if (isDisabled) {
-            stateClass = 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600';
+            stateClass =
+              'cursor-not-allowed border-border-subtle text-slate-300 dark:border-slate-800 dark:text-slate-600';
           } else {
-            stateClass = 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400';
+            stateClass = 'border-border text-foreground-secondary';
           }
 
           return (

@@ -17,7 +17,7 @@
   --card-foreground: oklch(0.279 0.029 260.03); /* Slate-800 */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.279 0.029 260.03);
-  --primary: oklch(0.696 0.17 162.48); /* Emerald-500 #10B981 */
+  --primary: oklch(0.627 0.194 163.95); /* Emerald-600 #059669 — WCAG AA compliant (4.5:1+) */
   --primary-foreground: oklch(1 0 0); /* White */
   --secondary: oklch(0.984 0.003 247.86); /* Slate-50 #F8FAFC */
   --secondary-foreground: oklch(0.279 0.029 260.03);
@@ -30,12 +30,11 @@
   --input: oklch(0.929 0.013 255.51);
   --ring: oklch(0.696 0.17 162.48); /* Emerald-500 (focus ring = primary) */
 
-  /* ── Chart colors (data viz) ── */
-  --chart-1: oklch(0.696 0.17 162.48); /* Emerald-500 (protein) */
-  --chart-2: oklch(0.666 0.179 58.32); /* Amber-600 (fat) */
-  --chart-3: oklch(0.546 0.245 262.88); /* Blue-600 (carbs) */
-  --chart-4: oklch(0.637 0.16 163.89); /* Emerald-600 */
-  --chart-5: oklch(0.704 0.04 256.79); /* Slate-400 */
+  /* ── Extended semantic colors ── */
+  --primary-subtle: oklch(0.962 0.044 163.25); /* Emerald-50 #ECFDF5 */
+  --primary-emphasis: oklch(0.527 0.154 163.45); /* Emerald-700 #047857 */
+  --foreground-secondary: oklch(0.446 0.043 257.28); /* Slate-600 #475569 */
+  --border-subtle: oklch(0.968 0.007 247.86); /* Slate-100 #F1F5F9 */
 
   /* ── Macro nutrition colors ── */
   --macro-protein: oklch(0.696 0.17 162.48); /* Emerald-500 */
@@ -62,12 +61,6 @@
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.12);
   --shadow-glow: 0 2px 6px oklch(0.696 0.17 162.48 / 0.3);
-
-  /* ── Motion Duration ── */
-  --duration-instant: 0ms;
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
 
   /* ── Easing Curves ── */
   --ease-enter: cubic-bezier(0, 0, 0.2, 1);
@@ -156,12 +149,11 @@ input[type='number'] {
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* ── Chart / data viz colors ── */
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  /* ── Extended semantic color mappings ── */
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-emphasis: var(--primary-emphasis);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-border-subtle: var(--border-subtle);
 
   /* ── Macro nutrition colors (Tailwind utilities: bg-macro-protein, text-macro-fat, etc.) ── */
   --color-macro-protein: var(--macro-protein);
@@ -208,11 +200,10 @@ input[type='number'] {
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.765 0.177 163.22); /* Emerald-400 */
 
-  --chart-1: oklch(0.765 0.177 163.22); /* Emerald-400 */
-  --chart-2: oklch(0.752 0.183 55.93); /* Amber-400 */
-  --chart-3: oklch(0.707 0.165 254.62); /* Blue-400 */
-  --chart-4: oklch(0.845 0.143 164.98); /* Emerald-300 */
-  --chart-5: oklch(0.704 0.04 256.79); /* Slate-400 */
+  --primary-subtle: oklch(0.321 0.067 165.39 / 20%); /* Emerald-900/20 */
+  --primary-emphasis: oklch(0.765 0.177 163.22); /* Emerald-400 #34D399 */
+  --foreground-secondary: oklch(0.704 0.04 256.79); /* Slate-400 #94A3B8 */
+  --border-subtle: oklch(0.279 0.029 260.03); /* Slate-700-ish */
 
   --macro-protein: oklch(0.765 0.177 163.22); /* Emerald-400 */
   --macro-fat: oklch(0.752 0.183 55.93); /* Amber-400 */

@@ -65,9 +65,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
               onClick={() => goalField.field.onChange(value)}
               className={cn(
                 'focus-visible:ring-ring flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                goalField.field.value === value
-                  ? 'border-primary bg-emerald-50 dark:bg-emerald-900/30'
-                  : 'border-slate-200 dark:border-slate-700',
+                goalField.field.value === value ? 'border-primary bg-primary-subtle' : 'border-border',
               )}
             >
               <Icon className={cn('h-5 w-5 shrink-0', color)} aria-hidden="true" />
@@ -75,7 +73,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    goalField.field.value === value ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300',
+                    goalField.field.value === value ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300',
                   )}
                 >
                   {t(`onboarding.goal.type_${value}`)}
@@ -103,8 +101,8 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                     className={cn(
                       'focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                       rateField.field.value === rate
-                        ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                        : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                        ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                        : 'border-border text-foreground-secondary',
                     )}
                   >
                     {t(`onboarding.goal.rate_${rate}`)}
@@ -125,12 +123,14 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   inputMode="decimal"
                   aria-invalid={!!targetField.fieldState.error}
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
-                  className="bg-card focus-visible:ring-ring w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
+                  className="bg-card focus-visible:ring-ring border-border w-full rounded-xl border px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:outline-none dark:text-slate-100"
                   value={targetField.field.value ?? ''}
                   onChange={e => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                   onBlur={targetField.field.onBlur}
                 />
-                <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">kg</span>
+                <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400 dark:text-slate-500">
+                  kg
+                </span>
               </div>
               {targetField.fieldState.error && (
                 <p id="ob-target-error" role="alert" className="text-destructive mt-1 text-xs">
@@ -142,7 +142,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           onClick={goBack}

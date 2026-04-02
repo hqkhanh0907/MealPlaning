@@ -36,9 +36,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
               <div
                 key={day}
                 className={`flex flex-1 flex-col items-center rounded-lg py-2 text-xs font-medium ${
-                  isActive
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                    : 'bg-muted text-slate-400 dark:text-slate-500'
+                  isActive ? 'bg-primary-subtle text-primary-emphasis' : 'bg-muted text-slate-400 dark:text-slate-500'
                 }`}
               >
                 <span>{day}</span>
@@ -52,25 +50,29 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{daysPerWeek}</p>
-            <p className="text-[10px] text-slate-500">{t('onboarding.preview.workoutDays', { count: daysPerWeek })}</p>
+            <p className="text-muted-foreground text-xs">
+              {t('onboarding.preview.workoutDays', { count: daysPerWeek })}
+            </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{restDays.length}</p>
-            <p className="text-[10px] text-slate-500">{t('onboarding.preview.restDays', { count: restDays.length })}</p>
+            <p className="text-muted-foreground text-xs">
+              {t('onboarding.preview.restDays', { count: restDays.length })}
+            </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-3 text-center dark:bg-slate-800">
             <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{values.sessionDuration ?? 60}</p>
-            <p className="text-[10px] text-slate-500">{t('onboarding.preview.minutesPerSession')}</p>
+            <p className="text-muted-foreground text-xs">{t('onboarding.preview.minutesPerSession')}</p>
           </div>
         </div>
 
         {/* Plan note */}
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
-          <p className="text-sm text-emerald-700">{t('onboarding.preview.editNote')}</p>
+        <div className="bg-primary-subtle rounded-xl border border-emerald-200 p-4 dark:border-emerald-800">
+          <p className="text-primary-emphasis text-sm">{t('onboarding.preview.editNote')}</p>
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-center border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-center border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <Button
           onClick={completeOnboarding}
           className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"

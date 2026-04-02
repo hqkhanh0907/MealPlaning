@@ -57,7 +57,7 @@ describe('EnergyBalanceMini', () => {
     render(<EnergyBalanceMini eaten={500} burned={0} target={2000} />);
 
     const net = screen.getByTestId('mini-net');
-    expect(net.className).toContain('slate');
+    expect(net.className).toContain('foreground-secondary');
   });
 
   it('calls onTapDetail when clicked', () => {
@@ -114,15 +114,9 @@ describe('EnergyBalanceMini', () => {
   it('uses tabular-nums for number displays', () => {
     render(<EnergyBalanceMini {...baseProps} />);
 
-    expect(screen.getByTestId('mini-eaten')).toHaveStyle({
-      fontVariantNumeric: 'tabular-nums',
-    });
-    expect(screen.getByTestId('mini-burned')).toHaveStyle({
-      fontVariantNumeric: 'tabular-nums',
-    });
-    expect(screen.getByTestId('mini-net')).toHaveStyle({
-      fontVariantNumeric: 'tabular-nums',
-    });
+    expect(screen.getByTestId('mini-eaten').className).toContain('tabular-nums');
+    expect(screen.getByTestId('mini-burned').className).toContain('tabular-nums');
+    expect(screen.getByTestId('mini-net').className).toContain('tabular-nums');
   });
 
   it('handles zero eaten and burned', () => {

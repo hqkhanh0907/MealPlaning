@@ -138,7 +138,7 @@ export function CustomExerciseModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-slate-300 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="text-foreground-secondary flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-slate-300 py-2 text-sm transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:border-slate-600 dark:hover:bg-slate-700"
             >
               {t('common.cancel')}
             </button>

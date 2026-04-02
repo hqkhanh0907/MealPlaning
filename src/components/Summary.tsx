@@ -28,7 +28,7 @@ export const Summary = React.memo(function Summary({
   const remainingProtein = Math.round(targetProtein - totalProtein);
 
   return (
-    <div className="bg-card rounded-2xl border border-slate-100 p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:border-slate-700 dark:shadow-slate-900/50">
+    <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-xl shadow-slate-200/50 sm:p-6 md:p-8 dark:shadow-slate-900/50">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 sm:p-3 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -46,7 +46,7 @@ export const Summary = React.memo(function Summary({
             onClick={onEditGoals}
             aria-label={t('summary.editGoal')}
             data-testid="btn-edit-goals"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2 text-slate-400 transition-all hover:bg-emerald-50 hover:text-emerald-600 sm:min-h-9 sm:min-w-9 dark:hover:bg-emerald-900/30"
+            className="hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2 text-slate-400 transition-all hover:text-emerald-600 sm:min-h-9 sm:min-w-9 dark:text-slate-500 dark:hover:bg-emerald-900/30"
             title={t('summary.editGoal')}
           >
             <Edit3 className="h-5 w-5" />
@@ -121,7 +121,7 @@ export const Summary = React.memo(function Summary({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <div className="rounded-2xl border border-amber-100/50 bg-amber-50 p-3 sm:p-4 dark:border-amber-800/30 dark:bg-amber-900/20">
           <div className="mb-1 flex items-center gap-1.5 text-amber-700 sm:gap-2 dark:text-amber-400">
             <Wheat className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -142,14 +142,14 @@ export const Summary = React.memo(function Summary({
             <span className="ml-1 text-xs font-normal text-rose-700/70 sm:text-sm dark:text-rose-500/70">g</span>
           </p>
         </div>
-        <div className="rounded-2xl border border-emerald-100/50 bg-emerald-50 p-3 sm:p-4 dark:border-emerald-800/30 dark:bg-emerald-900/20">
-          <div className="mb-1 flex items-center gap-1.5 text-emerald-700 sm:gap-2">
+        <div className="bg-primary-subtle rounded-2xl border border-emerald-100/50 p-3 sm:p-4 dark:border-emerald-800/30">
+          <div className="text-primary-emphasis mb-1 flex items-center gap-1.5 sm:gap-2">
             <Leaf className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.fiber')}</span>
           </div>
           <p className="text-lg font-bold text-emerald-900 sm:text-2xl">
             {Math.round(totalFiber)}
-            <span className="dark:text-primary/70 ml-1 text-xs font-normal text-emerald-700/70 sm:text-sm">g</span>
+            <span className="dark:text-primary/70 text-primary-emphasis/70 ml-1 text-xs font-normal sm:text-sm">g</span>
           </p>
         </div>
       </div>
@@ -165,7 +165,7 @@ export const Summary = React.memo(function Summary({
       </button>
 
       {showDetails && (
-        <div data-testid="macro-details" className="mt-2 border-t border-slate-100 pt-3 dark:border-slate-700">
+        <div data-testid="macro-details" className="border-border-subtle mt-2 border-t pt-3">
           <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="text-muted-foreground">
@@ -194,7 +194,7 @@ export const Summary = React.memo(function Summary({
                 <td className="py-1 text-right">{Math.round(dayNutrition.dinner.fat)}g</td>
                 <td className="py-1 text-right">{Math.round(dayNutrition.dinner.fiber)}g</td>
               </tr>
-              <tr className="border-t border-slate-200 font-bold dark:border-slate-600">
+              <tr className="border-border border-t font-bold">
                 <td className="pt-2">{t('summary.total')}</td>
                 <td className="pt-2 text-right">{Math.round(totalCarbs)}g</td>
                 <td className="pt-2 text-right">{Math.round(totalFat)}g</td>

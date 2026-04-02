@@ -63,8 +63,7 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
         <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t('nutrition.protein')}</span>
         <span
           data-testid="protein-display"
-          className="text-xs font-semibold text-slate-800 dark:text-slate-100"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
+          className="text-xs font-semibold text-slate-800 tabular-nums dark:text-slate-100"
         >
           {roundedCurrent}g / {roundedTarget}g
         </span>
@@ -80,7 +79,7 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
       </div>
 
       {/* Suggestion text */}
-      <p data-testid="protein-suggestion" className="text-muted-foreground text-[10px]">
+      <p data-testid="protein-suggestion" className="text-muted-foreground text-xs">
         {suggestion}
       </p>
     </div>

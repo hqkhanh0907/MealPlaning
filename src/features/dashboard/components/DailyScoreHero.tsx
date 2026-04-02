@@ -11,6 +11,12 @@ const GRADIENT_MAP: Record<ScoreColor, string> = {
   slate: 'from-slate-500 to-slate-600',
 };
 
+const TEXT_COLOR_MAP: Record<ScoreColor, { primary: string; secondary: string; muted: string }> = {
+  emerald: { primary: 'text-white', secondary: 'text-white/90', muted: 'text-white/60' },
+  amber: { primary: 'text-amber-950', secondary: 'text-amber-950/90', muted: 'text-amber-950/60' },
+  slate: { primary: 'text-white', secondary: 'text-white/90', muted: 'text-white/60' },
+};
+
 const FACTOR_CONFIG = [
   { key: 'calories' as const, icon: UtensilsCrossed },
   { key: 'protein' as const, icon: Beef },
@@ -36,6 +42,7 @@ function DailyScoreHeroInner(): React.ReactElement {
   const { totalScore, factors, color, greeting, isFirstTimeUser } = useDailyScore();
 
   const gradient = isFirstTimeUser ? GRADIENT_MAP.slate : GRADIENT_MAP[color];
+  const textColors = isFirstTimeUser ? TEXT_COLOR_MAP.slate : TEXT_COLOR_MAP[color];
 
   const activeBadges = useMemo(
     () =>
@@ -58,11 +65,11 @@ function DailyScoreHeroInner(): React.ReactElement {
         aria-label={t('dashboard.hero.firstTime.a11y')}
         data-testid="daily-score-hero"
       >
-        <p className="mb-1 text-sm text-white/90">{greeting}</p>
-        <h2 className="mb-4 text-xl font-bold text-white">{t('dashboard.hero.firstTime.title')}</h2>
+        <p className={`mb-1 text-sm ${textColors.secondary}`}>{greeting}</p>
+        <h2 className={`mb-4 text-xl font-bold ${textColors.primary}`}>{t('dashboard.hero.firstTime.title')}</h2>
         <ul className="space-y-2">
           {CHECKLIST_KEYS.map((key, idx) => (
-            <li key={key} className="flex items-center gap-2 text-sm text-white/90">
+            <li key={key} className={`flex items-center gap-2 text-sm ${textColors.secondary}`}>
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-medium">
                 {idx + 1}
               </span>
@@ -83,19 +90,15 @@ function DailyScoreHeroInner(): React.ReactElement {
       })}
       data-testid="daily-score-hero"
     >
-      <p className="mb-1 text-sm text-white/90">{greeting}</p>
+      <p className={`mb-1 text-sm ${textColors.secondary}`}>{greeting}</p>
       <div className="mb-1 flex items-baseline gap-2">
-        <span
-          className="text-2xl font-bold text-white"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-          data-testid="score-number"
-        >
+        <span className={`text-2xl font-bold tabular-nums ${textColors.primary}`} data-testid="score-number">
           {totalScore}
         </span>
-        <span className="text-sm font-medium text-white/80">{scoreLabel}</span>
+        <span className={`text-sm font-medium ${textColors.muted}`}>{scoreLabel}</span>
       </div>
       {isPartialData && (
-        <p className="mb-3 text-xs text-white/60" data-testid="partial-data-label">
+        <p className={`mb-3 text-xs ${textColors.muted}`} data-testid="partial-data-label">
           ({t('dashboard.hero.partialData')})
         </p>
       )}
@@ -107,10 +110,8 @@ function DailyScoreHeroInner(): React.ReactElement {
               className="flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1"
               data-testid={`badge-${badge.key}`}
             >
-              <badge.Icon size={16} className="text-white" aria-hidden="true" />
-              <span className="text-xs font-medium text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {badge.score}
-              </span>
+              <badge.Icon className={`h-4 w-4 ${textColors.primary}`} aria-hidden="true" />
+              <span className={`text-xs font-medium tabular-nums ${textColors.primary}`}>{badge.score}</span>
             </div>
           ))}
         </div>

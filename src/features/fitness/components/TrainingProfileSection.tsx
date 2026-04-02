@@ -39,9 +39,9 @@ export function TrainingProfileSection() {
   if (!trainingProfile) {
     return (
       <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
-        <Info className="h-5 w-5 shrink-0 text-slate-400" />
+        <Info className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500" />
         <div>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{t('settings.notConfigured')}</p>
+          <p className="text-foreground-secondary text-sm font-medium">{t('settings.notConfigured')}</p>
           <p className="text-xs text-slate-400 dark:text-slate-500">{t('settings.notConfiguredDesc')}</p>
         </div>
       </div>

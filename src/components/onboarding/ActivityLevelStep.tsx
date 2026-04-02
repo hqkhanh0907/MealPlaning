@@ -42,9 +42,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
               onClick={() => field.field.onChange(level.value)}
               className={cn(
                 'focus-visible:ring-ring flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                field.field.value === level.value
-                  ? 'border-primary bg-emerald-50 dark:bg-emerald-900/30'
-                  : 'border-slate-200 dark:border-slate-700',
+                field.field.value === level.value ? 'border-primary bg-primary-subtle' : 'border-border',
               )}
             >
               <span className="text-2xl" aria-hidden="true">
@@ -54,7 +52,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    field.field.value === level.value ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300',
+                    field.field.value === level.value ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300',
                   )}
                 >
                   {t(`health.activityLevel.${level.value}`)}
@@ -69,7 +67,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
         </fieldset>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           onClick={goBack}

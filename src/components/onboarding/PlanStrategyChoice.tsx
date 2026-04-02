@@ -47,7 +47,7 @@ export function PlanStrategyChoice({
             type="button"
             onClick={handleAuto}
             className={cn(
-              'border-primary flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 bg-emerald-50 px-5 py-4 text-left transition-colors',
+              'border-primary bg-primary-subtle flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 px-5 py-4 text-left transition-colors',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               'dark:bg-emerald-900/20',
             )}
@@ -57,7 +57,7 @@ export function PlanStrategyChoice({
               <Sparkles className="text-primary h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold text-emerald-700">{t('onboarding.strategy.auto')}</p>
+              <p className="text-primary-emphasis text-sm font-bold">{t('onboarding.strategy.auto')}</p>
               <p className="text-primary/70/70 text-xs">{t('onboarding.strategy.autoDesc')}</p>
             </div>
           </button>
@@ -66,7 +66,7 @@ export function PlanStrategyChoice({
             type="button"
             onClick={handleManual}
             className={cn(
-              'flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 border-slate-200 px-5 py-4 text-left transition-colors',
+              'border-border flex min-h-[72px] w-full items-center gap-4 rounded-2xl border-2 px-5 py-4 text-left transition-colors',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               'hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600',
             )}

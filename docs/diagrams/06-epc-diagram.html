@@ -1,0 +1,1476 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sơ Đồ EPC - Fitness Workout Logging</title>
+    <style>
+      :root {
+        --bg-primary: #0f1117;
+        --bg-secondary: #1a1d27;
+        --bg-tertiary: #242836;
+        --bg-card: #1e2230;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa0b0;
+        --text-muted: #6b7280;
+        --border: #2d3348;
+        --accent: #6366f1;
+        --accent-glow: rgba(99, 102, 241, 0.25);
+
+        --event-bg: #be185d;
+        --event-border: #ec4899;
+        --event-text: #fce7f3;
+        --event-glow: rgba(236, 72, 153, 0.2);
+
+        --function-bg: #15803d;
+        --function-border: #22c55e;
+        --function-text: #dcfce7;
+        --function-glow: rgba(34, 197, 94, 0.18);
+
+        --xor-bg: #c2410c;
+        --xor-border: #f97316;
+        --xor-text: #fff;
+
+        --and-bg: #1d4ed8;
+        --and-border: #3b82f6;
+        --and-text: #fff;
+
+        --or-bg: #7c3aed;
+        --or-border: #a78bfa;
+        --or-text: #fff;
+
+        --org-bg: #a16207;
+        --org-border: #eab308;
+        --org-text: #fef9c3;
+
+        --info-bg: #374151;
+        --info-border: #6b7280;
+        --info-text: #d1d5db;
+
+        --loop-border: #06b6d4;
+        --loop-bg: rgba(6, 182, 212, 0.06);
+
+        --arrow-color: #64748b;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* ── Header ─────────────────────────────────── */
+      .header {
+        background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+        border-bottom: 1px solid var(--border);
+        padding: 28px 40px 20px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .header h1 {
+        font-size: 26px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ec4899, #6366f1, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
+      }
+      .header p {
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin-top: 4px;
+      }
+
+      /* ── Tabs ────────────────────────────────────── */
+      .tabs {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        padding: 8px 20px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .tab-btn:hover {
+        border-color: var(--accent);
+        color: var(--text-primary);
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        box-shadow: 0 0 16px var(--accent-glow);
+      }
+      .tab-btn .badge {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+        padding: 1px 7px;
+        font-size: 11px;
+      }
+
+      /* ── Content area ───────────────────────────── */
+      .content {
+        padding: 30px 20px 80px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .chain-panel {
+        display: none;
+      }
+      .chain-panel.active {
+        display: block;
+        animation: fadeSlide 0.35s ease;
+      }
+      @keyframes fadeSlide {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── Legend ──────────────────────────────────── */
+      .legend-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 16px;
+        border-radius: 8px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 13px;
+        margin-bottom: 20px;
+        transition: all 0.2s;
+      }
+      .legend-toggle:hover {
+        border-color: var(--accent);
+        color: var(--text-primary);
+      }
+      .legend-box {
+        display: none;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+      }
+      .legend-box.open {
+        display: block;
+        animation: fadeSlide 0.3s ease;
+      }
+      .legend-box h3 {
+        font-size: 15px;
+        margin-bottom: 14px;
+        color: var(--text-primary);
+      }
+      .legend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12.5px;
+        color: var(--text-secondary);
+      }
+      .legend-symbol {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Mini legend shapes */
+      .lg-event {
+        width: 44px;
+        height: 26px;
+        background: var(--event-bg);
+        border: 2px solid var(--event-border);
+        clip-path: polygon(18% 0%, 82% 0%, 100% 50%, 82% 100%, 18% 100%, 0% 50%);
+      }
+      .lg-function {
+        width: 44px;
+        height: 22px;
+        background: var(--function-bg);
+        border: 2px solid var(--function-border);
+        border-radius: 6px;
+      }
+      .lg-connector {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        color: #fff;
+      }
+      .lg-xor {
+        background: var(--xor-bg);
+        border: 2px solid var(--xor-border);
+      }
+      .lg-and {
+        background: var(--and-bg);
+        border: 2px solid var(--and-border);
+      }
+      .lg-or {
+        background: var(--or-bg);
+        border: 2px solid var(--or-border);
+      }
+      .lg-org {
+        width: 10px;
+        height: 28px;
+        background: var(--org-bg);
+        border: 2px solid var(--org-border);
+        border-radius: 3px;
+      }
+      .lg-info {
+        width: 44px;
+        height: 20px;
+        background: var(--info-bg);
+        border: 1px dashed var(--info-border);
+        border-radius: 4px;
+      }
+      .lg-loop {
+        width: 44px;
+        height: 24px;
+        border: 2px dashed var(--loop-border);
+        border-radius: 6px;
+        background: var(--loop-bg);
+      }
+      .lg-arrow {
+        width: 40px;
+        height: 2px;
+        background: var(--arrow-color);
+        position: relative;
+      }
+      .lg-arrow::after {
+        content: '';
+        position: absolute;
+        right: -1px;
+        top: -4px;
+        border: 5px solid transparent;
+        border-left: 7px solid var(--arrow-color);
+      }
+
+      /* ── EPC Flow canvas ────────────────────────── */
+      .epc-flow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        position: relative;
+      }
+
+      /* ── Nodes ──────────────────────────────────── */
+      .epc-node {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+      }
+
+      /* Arrow connector between nodes */
+      .arrow-down {
+        width: 2px;
+        height: 28px;
+        background: var(--arrow-color);
+        position: relative;
+        z-index: 1;
+      }
+      .arrow-down::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: -4px;
+        border: 5px solid transparent;
+        border-top: 7px solid var(--arrow-color);
+      }
+      .arrow-down.long {
+        height: 40px;
+      }
+      .arrow-down.short {
+        height: 18px;
+      }
+
+      /* Event hexagon */
+      .event-shape {
+        position: relative;
+        min-width: 280px;
+        max-width: 420px;
+        padding: 12px 28px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--event-text);
+        background: var(--event-bg);
+        clip-path: polygon(10% 0%, 90% 0%, 100% 50%, 90% 100%, 10% 100%, 0% 50%);
+        transition: all 0.25s;
+        cursor: default;
+      }
+      .event-shape:hover {
+        filter: brightness(1.15);
+        box-shadow: 0 0 20px var(--event-glow);
+      }
+
+      /* Function rounded rect */
+      .function-shape {
+        position: relative;
+        min-width: 280px;
+        max-width: 480px;
+        padding: 12px 22px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--function-text);
+        background: var(--function-bg);
+        border: 2px solid var(--function-border);
+        border-radius: 12px;
+        transition: all 0.25s;
+        cursor: default;
+      }
+      .function-shape:hover {
+        filter: brightness(1.12);
+        box-shadow: 0 0 18px var(--function-glow);
+      }
+
+      /* Connector circles */
+      .connector-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 18px;
+        color: #fff;
+        transition: all 0.25s;
+        cursor: default;
+        position: relative;
+      }
+      .connector-circle:hover {
+        transform: scale(1.1);
+      }
+      .connector-xor {
+        background: var(--xor-bg);
+        border: 2.5px solid var(--xor-border);
+      }
+      .connector-and {
+        background: var(--and-bg);
+        border: 2.5px solid var(--and-border);
+      }
+      .connector-or {
+        background: var(--or-bg);
+        border: 2.5px solid var(--or-border);
+      }
+      .connector-label {
+        position: absolute;
+        top: -18px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── Side badges (org + info) ───────────────── */
+      .side-badges {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .org-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: rgba(161, 98, 7, 0.22);
+        border: 1px solid var(--org-border);
+        border-radius: 4px;
+        font-size: 11px;
+        color: var(--org-text);
+        font-weight: 500;
+      }
+      .org-badge::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 14px;
+        background: var(--org-border);
+        border-radius: 2px;
+      }
+      .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: rgba(55, 65, 81, 0.5);
+        border: 1px dashed var(--info-border);
+        border-radius: 4px;
+        font-size: 11px;
+        color: var(--info-text);
+        max-width: 380px;
+      }
+      .info-badge::before {
+        content: '📄';
+        font-size: 10px;
+      }
+
+      /* ── Branch container ───────────────────────── */
+      .branch-container {
+        display: flex;
+        gap: 32px;
+        justify-content: center;
+        align-items: flex-start;
+        position: relative;
+        margin: 0 auto;
+        padding: 0 10px;
+      }
+      .branch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        min-width: 200px;
+        position: relative;
+      }
+      .branch-label {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 10px;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .branch-label.yes {
+        background: rgba(34, 197, 94, 0.18);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+      .branch-label.no {
+        background: rgba(239, 68, 68, 0.18);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+      .branch-label.strength {
+        background: rgba(99, 102, 241, 0.18);
+        color: #818cf8;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+      }
+      .branch-label.cardio {
+        background: rgba(245, 158, 11, 0.18);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      /* ── Horizontal connector lines for branches ── */
+      .h-line-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 24px;
+        position: relative;
+      }
+      .h-line {
+        height: 2px;
+        background: var(--arrow-color);
+        flex: 1;
+        max-width: 300px;
+      }
+
+      /* ── Loop marker ────────────────────────────── */
+      .loop-marker {
+        border: 2px dashed var(--loop-border);
+        border-radius: 12px;
+        background: var(--loop-bg);
+        padding: 20px 16px;
+        margin: 4px 0;
+        position: relative;
+        width: 100%;
+        max-width: 700px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .loop-label {
+        position: absolute;
+        top: -11px;
+        left: 20px;
+        background: var(--bg-primary);
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--loop-border);
+        border: 1px solid var(--loop-border);
+        border-radius: 6px;
+        letter-spacing: 0.3px;
+      }
+      .loop-label-bottom {
+        position: absolute;
+        bottom: -11px;
+        right: 20px;
+        background: var(--bg-primary);
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--loop-border);
+        border: 1px solid var(--loop-border);
+        border-radius: 6px;
+      }
+
+      /* ── Back-arrow (loops) ─────────────────────── */
+      .back-arrow-label {
+        font-size: 11px;
+        color: var(--loop-border);
+        font-style: italic;
+        margin-top: 2px;
+      }
+
+      /* ── Sections ───────────────────────────────── */
+      .chain-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text-primary);
+      }
+      .chain-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+      }
+
+      /* ── End marker ─────────────────────────────── */
+      .end-marker {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 24px;
+        background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      /* ── Responsive ─────────────────────────────── */
+      @media (max-width: 760px) {
+        .header {
+          padding: 18px 16px 14px;
+        }
+        .header h1 {
+          font-size: 20px;
+        }
+        .tabs {
+          gap: 4px;
+        }
+        .tab-btn {
+          padding: 6px 12px;
+          font-size: 12px;
+        }
+        .content {
+          padding: 18px 8px 60px;
+        }
+        .event-shape,
+        .function-shape {
+          min-width: 200px;
+          font-size: 12px;
+          padding: 10px 16px;
+        }
+        .branch-container {
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .branch {
+          min-width: 160px;
+        }
+        .loop-marker {
+          padding: 14px 8px;
+          max-width: 100%;
+        }
+        .legend-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Transaction block ──────────────────────── */
+      .transaction-block {
+        border: 2px solid #3b82f6;
+        border-radius: 10px;
+        background: rgba(29, 78, 216, 0.08);
+        padding: 16px 12px;
+        margin: 4px 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .transaction-label {
+        position: absolute;
+        top: -11px;
+        left: 16px;
+        background: var(--bg-primary);
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #3b82f6;
+        border: 1px solid #3b82f6;
+        border-radius: 6px;
+        letter-spacing: 0.3px;
+      }
+
+      /* ── Tooltip ────────────────────────────────── */
+      .epc-tooltip {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        z-index: 50;
+        pointer-events: none;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      }
+      .epc-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: var(--bg-tertiary);
+      }
+      .event-shape:hover .epc-tooltip,
+      .function-shape:hover .epc-tooltip,
+      .connector-circle:hover .epc-tooltip {
+        display: block;
+      }
+
+      /* pulse for start event */
+      @keyframes pulseGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 var(--event-glow);
+        }
+        50% {
+          box-shadow: 0 0 18px 6px var(--event-glow);
+        }
+      }
+      .event-start {
+        animation: pulseGlow 2.5s infinite;
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════ HEADER ═══════ -->
+    <div class="header">
+      <h1>📊 Sơ Đồ EPC — Fitness Workout Logging</h1>
+      <p>Event-driven Process Chain · MealPlaning App · React 19 + SQLite + Capacitor</p>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showChain(0, this)">
+          🚀 Chain 1: Bắt đầu <span class="badge">Start</span>
+        </button>
+        <button class="tab-btn" onclick="showChain(1, this)">
+          💪 Chain 2: Strength <span class="badge">Main</span>
+        </button>
+        <button class="tab-btn" onclick="showChain(2, this)">
+          💾 Chain 3: Lưu &amp; Hoàn thành <span class="badge">Save</span>
+        </button>
+        <button class="tab-btn" onclick="showChain(3, this)">🏃 Chain 4: Cardio <span class="badge">Alt</span></button>
+      </div>
+    </div>
+
+    <!-- ═══════ CONTENT ═══════ -->
+    <div class="content">
+      <!-- Legend toggle -->
+      <button class="legend-toggle" onclick="toggleLegend()">
+        <span id="legend-icon">▶</span> Chú giải ký hiệu EPC (Legend)
+      </button>
+
+      <div class="legend-box" id="legend-box">
+        <h3>📘 Ký hiệu EPC — Event-driven Process Chain</h3>
+        <div class="legend-grid">
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-event"></div></div>
+            <span><strong>Event</strong> — Sự kiện / Trạng thái kích hoạt</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-function"></div></div>
+            <span><strong>Function</strong> — Hoạt động / Xử lý nghiệp vụ</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-connector lg-xor">×</div></div>
+            <span><strong>XOR</strong> — Rẽ nhánh loại trừ (chọn 1)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-connector lg-and">∧</div></div>
+            <span><strong>AND</strong> — Thực hiện song song (tất cả)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-connector lg-or">∨</div></div>
+            <span><strong>OR</strong> — Rẽ nhánh không loại trừ (≥1)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-org"></div></div>
+            <span><strong>Org Unit</strong> — Thành phần chịu trách nhiệm</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-info"></div></div>
+            <span><strong>Info Object</strong> — Dữ liệu đầu vào / đầu ra</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-loop"></div></div>
+            <span><strong>Loop</strong> — Vòng lặp xử lý</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-symbol"><div class="lg-arrow"></div></div>
+            <span><strong>Control Flow</strong> — Luồng điều khiển</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!--            CHAIN 1: START WORKOUT           -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="chain-panel active" id="chain-0">
+        <div class="chain-title">🚀 Chain 1: Bắt đầu Workout</div>
+        <div class="chain-desc">Luồng khởi tạo từ TrainingPlanView đến mở WorkoutLogger hoặc CardioLogger</div>
+
+        <div class="epc-flow">
+          <!-- E1 -->
+          <div class="epc-node">
+            <div class="event-shape event-start">
+              User ở trang Kế hoạch<br />(TrainingPlanView active)
+              <div class="epc-tooltip">Trigger: User chuyển sang tab Fitness → sub-tab "Kế hoạch"</div>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- F1 -->
+          <div class="epc-node">
+            <div class="function-shape">
+              Hiển thị danh sách bài tập hôm nay
+              <div class="epc-tooltip">Render exercises từ trainingPlanDays JSON</div>
+            </div>
+            <div class="side-badges">
+              <span class="org-badge">TrainingPlanView</span>
+              <span class="info-badge">trainingPlanDays (exercises JSON)</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- E2 -->
+          <div class="epc-node">
+            <div class="event-shape">User nhấn "Bắt đầu tập"</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- XOR Split -->
+          <div class="epc-node">
+            <div class="connector-circle connector-xor">
+              ×
+              <div class="connector-label">XOR Split</div>
+              <div class="epc-tooltip">Loại bài tập? → Strength hoặc Cardio</div>
+            </div>
+          </div>
+          <div class="arrow-down short"></div>
+
+          <!-- Branches -->
+          <div class="h-line-container">
+            <div class="h-line"></div>
+          </div>
+
+          <div class="branch-container">
+            <!-- Left: Strength -->
+            <div class="branch">
+              <span class="branch-label strength">💪 Strength</span>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="function-shape">Mở WorkoutLogger</div>
+                <div class="side-badges">
+                  <span class="org-badge">PageStackOverlay</span>
+                  <span class="info-badge">planDay, exerciseList</span>
+                </div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape">WorkoutLogger đã mở</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="end-marker">→ Chain 2: Strength</div>
+            </div>
+
+            <!-- Right: Cardio -->
+            <div class="branch">
+              <span class="branch-label cardio">🏃 Cardio</span>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="function-shape">Mở CardioLogger</div>
+                <div class="side-badges">
+                  <span class="org-badge">PageStackOverlay</span>
+                  <span class="info-badge">planDay, cardioType</span>
+                </div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape">CardioLogger đã mở</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="end-marker">→ Chain 4: Cardio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!--        CHAIN 2: STRENGTH EXECUTION          -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="chain-panel" id="chain-1">
+        <div class="chain-title">💪 Chain 2: Strength Workout Execution</div>
+        <div class="chain-desc">Luồng thực hiện bài tập sức mạnh — từ load plan đến hoàn thành tất cả exercises</div>
+
+        <div class="epc-flow">
+          <!-- E: WorkoutLogger opened -->
+          <div class="epc-node">
+            <div class="event-shape event-start">
+              WorkoutLogger đã mở
+              <div class="epc-tooltip">Tiếp nối từ Chain 1 (Strength branch)</div>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- F: loadExercisesFromPlan -->
+          <div class="epc-node">
+            <div class="function-shape">loadExercisesFromPlan()</div>
+            <div class="side-badges">
+              <span class="org-badge">WorkoutLogger component</span>
+              <span class="info-badge">planDay.exercises (JSON parsed)</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- F: loadWorkoutDraft -->
+          <div class="epc-node">
+            <div class="function-shape">loadWorkoutDraft()</div>
+            <div class="side-badges">
+              <span class="org-badge">fitnessStore</span>
+              <span class="info-badge">workout_drafts table (if exists)</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- XOR: Draft? -->
+          <div class="epc-node">
+            <div class="connector-circle connector-xor">
+              ×
+              <div class="connector-label">XOR</div>
+              <div class="epc-tooltip">Có draft cũ hay không?</div>
+            </div>
+          </div>
+          <div class="arrow-down short"></div>
+          <div class="h-line-container"><div class="h-line"></div></div>
+
+          <div class="branch-container">
+            <div class="branch">
+              <span class="branch-label yes">✓ CÓ DRAFT</span>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape" style="min-width: 200px">Draft đã khôi phục</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="function-shape" style="min-width: 200px">Hiển thị progress trước đó</div>
+              </div>
+            </div>
+            <div class="branch">
+              <span class="branch-label no">✗ KHÔNG</span>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape" style="min-width: 200px">Bắt đầu workout mới</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="function-shape" style="min-width: 200px">Khởi tạo draft rỗng</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- XOR Join -->
+          <div class="h-line-container"><div class="h-line"></div></div>
+          <div class="arrow-down short"></div>
+          <div class="epc-node">
+            <div class="connector-circle connector-xor">
+              ×
+              <div class="connector-label">XOR Join</div>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- E: User sẵn sàng -->
+          <div class="epc-node">
+            <div class="event-shape">User sẵn sàng tập</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- ═══ EXERCISE LOOP ═══ -->
+          <div class="loop-marker">
+            <span class="loop-label">🔄 LOOP: For each exercise</span>
+            <span class="loop-label-bottom">END LOOP: Exercises</span>
+
+            <!-- F: Progressive Overload -->
+            <div class="epc-node">
+              <div class="function-shape">Tải gợi ý Progressive Overload</div>
+              <div class="side-badges">
+                <span class="org-badge">useProgressiveOverload</span>
+                <span class="info-badge">Last 3 workouts, RPE history</span>
+              </div>
+            </div>
+            <div class="arrow-down"></div>
+
+            <div class="epc-node">
+              <div class="event-shape">Gợi ý hiển thị (weight, reps)</div>
+            </div>
+            <div class="arrow-down"></div>
+
+            <!-- ═══ SET LOOP (nested) ═══ -->
+            <div class="loop-marker" style="max-width: 620px">
+              <span class="loop-label">🔄 LOOP: For each set</span>
+              <span class="loop-label-bottom">END LOOP: Sets</span>
+
+              <div class="epc-node">
+                <div class="function-shape">User nhập dữ liệu set</div>
+                <div class="side-badges">
+                  <span class="org-badge">SetEditor</span>
+                  <span class="info-badge">weight_kg, reps, rpe (1-10)</span>
+                </div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <div class="epc-node">
+                <div class="function-shape">Auto-save draft</div>
+                <div class="side-badges">
+                  <span class="org-badge">fitnessStore.updateWorkoutDraft()</span>
+                  <span class="info-badge">exercises_json, sets_json, start_time → workout_drafts</span>
+                </div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <div class="epc-node">
+                <div class="event-shape">Set hoàn thành</div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <!-- XOR: More sets? -->
+              <div class="epc-node">
+                <div class="connector-circle connector-xor">
+                  ×
+                  <div class="connector-label">XOR</div>
+                  <div class="epc-tooltip">Còn set tiếp không?</div>
+                </div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="h-line-container"><div class="h-line"></div></div>
+
+              <div class="branch-container">
+                <div class="branch">
+                  <span class="branch-label yes">✓ CÒN SET</span>
+                  <div class="arrow-down short"></div>
+                  <div class="epc-node">
+                    <div class="function-shape" style="min-width: 180px">Bật RestTimer</div>
+                    <div class="side-badges">
+                      <span class="org-badge">RestTimer</span>
+                      <span class="info-badge">rest_seconds</span>
+                    </div>
+                  </div>
+                  <div class="arrow-down short"></div>
+                  <div class="epc-node">
+                    <div class="event-shape" style="min-width: 180px">Hết thời gian nghỉ</div>
+                  </div>
+                  <div class="arrow-down short"></div>
+                  <div class="back-arrow-label">↩ Quay lại nhập set</div>
+                </div>
+                <div class="branch">
+                  <span class="branch-label no">✗ HẾT SET</span>
+                  <div class="arrow-down short"></div>
+                  <div class="epc-node">
+                    <div class="event-shape" style="min-width: 180px">Hết set cho bài tập này</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End set loop -->
+
+            <div class="arrow-down"></div>
+
+            <!-- XOR: More exercises? -->
+            <div class="epc-node">
+              <div class="connector-circle connector-xor">
+                ×
+                <div class="connector-label">XOR</div>
+                <div class="epc-tooltip">Thêm bài tập hay đã xong?</div>
+              </div>
+            </div>
+            <div class="arrow-down short"></div>
+            <div class="h-line-container"><div class="h-line"></div></div>
+
+            <div class="branch-container">
+              <div class="branch">
+                <span class="branch-label yes">✓ THÊM BÀI TẬP</span>
+                <div class="arrow-down short"></div>
+                <div class="epc-node">
+                  <div class="function-shape" style="min-width: 200px">Mở ExerciseSelector</div>
+                  <div class="side-badges">
+                    <span class="org-badge">ExerciseSelector modal</span>
+                    <span class="info-badge">exerciseDatabase (200+ exercises)</span>
+                  </div>
+                </div>
+                <div class="arrow-down short"></div>
+                <div class="epc-node">
+                  <div class="event-shape" style="min-width: 200px">Bài tập mới đã chọn</div>
+                </div>
+                <div class="arrow-down short"></div>
+                <div class="back-arrow-label">↩ Tiếp tục vòng lặp</div>
+              </div>
+              <div class="branch">
+                <span class="branch-label no">✗ ĐÃ XONG</span>
+                <div class="arrow-down short"></div>
+                <div class="epc-node">
+                  <div class="event-shape" style="min-width: 200px">Tất cả bài tập hoàn thành</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- End exercise loop -->
+
+          <div class="arrow-down"></div>
+          <div class="end-marker">→ Chain 3: Lưu &amp; Hoàn thành</div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!--     CHAIN 3: COMPLETION & SAVE              -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="chain-panel" id="chain-2">
+        <div class="chain-title">💾 Chain 3: Workout Completion &amp; Save</div>
+        <div class="chain-desc">Validation → Atomic save (transaction) → PR detection → Summary → Navigate back</div>
+
+        <div class="epc-flow">
+          <!-- E: User presses complete -->
+          <div class="epc-node">
+            <div class="event-shape event-start">
+              User nhấn "Hoàn thành"
+              <div class="epc-tooltip">Kích hoạt quá trình lưu workout</div>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- F: Validate -->
+          <div class="epc-node">
+            <div class="function-shape">Validate form data</div>
+            <div class="side-badges">
+              <span class="org-badge">workoutLoggerSchema (Zod)</span>
+              <span class="info-badge">All sets {weight, reps, rpe}</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- XOR: Valid? -->
+          <div class="epc-node">
+            <div class="connector-circle connector-xor">
+              ×
+              <div class="connector-label">XOR</div>
+              <div class="epc-tooltip">Validation passed?</div>
+            </div>
+          </div>
+          <div class="arrow-down short"></div>
+          <div class="h-line-container"><div class="h-line"></div></div>
+
+          <div class="branch-container">
+            <!-- Fail branch -->
+            <div class="branch">
+              <span class="branch-label no">✗ VALIDATION LỖI</span>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape" style="min-width: 200px">Lỗi validation</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="function-shape" style="min-width: 200px">Hiển thị lỗi inline</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="back-arrow-label">↩ Quay lại nhập liệu</div>
+            </div>
+
+            <!-- Pass branch -->
+            <div class="branch" style="min-width: 320px">
+              <span class="branch-label yes">✓ DATA HỢP LỆ</span>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="event-shape" style="min-width: 220px">Data hợp lệ</div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <!-- AND Split -->
+              <div class="epc-node">
+                <div class="connector-circle connector-and">
+                  ∧
+                  <div class="connector-label">AND Split</div>
+                  <div class="epc-tooltip">Thực hiện song song: Save + PR Detection</div>
+                </div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="h-line-container"><div class="h-line"></div></div>
+
+              <div class="branch-container">
+                <!-- Left: Save atomic -->
+                <div class="branch" style="min-width: 280px">
+                  <span class="branch-label strength">💾 SAVE</span>
+                  <div class="arrow-down short"></div>
+
+                  <!-- Transaction block -->
+                  <div class="transaction-block">
+                    <span class="transaction-label">🔒 BEGIN TRANSACTION</span>
+
+                    <div class="epc-node">
+                      <div class="function-shape" style="min-width: 240px">Verify planDayId exists</div>
+                      <div class="side-badges">
+                        <span class="info-badge">SELECT training_plan_days WHERE id = ?</span>
+                      </div>
+                    </div>
+                    <div class="arrow-down short"></div>
+
+                    <div class="epc-node">
+                      <div class="function-shape" style="min-width: 240px">Seed exercises if needed</div>
+                      <div class="side-badges">
+                        <span class="info-badge">INSERT OR IGNORE INTO exercises</span>
+                      </div>
+                    </div>
+                    <div class="arrow-down short"></div>
+
+                    <div class="epc-node">
+                      <div class="function-shape" style="min-width: 240px">Insert workout record</div>
+                      <div class="side-badges">
+                        <span class="info-badge">INSERT INTO workouts (id, date, name, plan_day_id, duration_min)</span>
+                      </div>
+                    </div>
+                    <div class="arrow-down short"></div>
+
+                    <div class="epc-node">
+                      <div class="function-shape" style="min-width: 240px">Insert all workout sets (batch)</div>
+                      <div class="side-badges">
+                        <span class="info-badge"
+                          >INSERT INTO workout_sets (workout_id, exercise_id, set_number, weight_kg, reps, rpe)</span
+                        >
+                      </div>
+                    </div>
+                    <div class="arrow-down short"></div>
+
+                    <div class="epc-node">
+                      <div class="function-shape" style="min-width: 240px">COMMIT transaction</div>
+                    </div>
+                  </div>
+                  <!-- End transaction -->
+
+                  <div class="arrow-down short"></div>
+                  <div class="epc-node">
+                    <div class="event-shape" style="min-width: 220px">Workout saved to SQLite</div>
+                  </div>
+                </div>
+
+                <!-- Right: PR Detection -->
+                <div class="branch" style="min-width: 250px">
+                  <span class="branch-label cardio">🏆 PR CHECK</span>
+                  <div class="arrow-down short"></div>
+
+                  <div class="epc-node">
+                    <div class="function-shape" style="min-width: 220px">Detect Personal Records</div>
+                    <div class="side-badges">
+                      <span class="org-badge">gamification utils</span>
+                      <span class="info-badge">current weight×reps vs historical max</span>
+                    </div>
+                  </div>
+                  <div class="arrow-down"></div>
+
+                  <!-- XOR: PR? -->
+                  <div class="epc-node">
+                    <div class="connector-circle connector-xor">
+                      ×
+                      <div class="connector-label">XOR</div>
+                    </div>
+                  </div>
+                  <div class="arrow-down short"></div>
+                  <div class="h-line-container"><div class="h-line" style="max-width: 180px"></div></div>
+
+                  <div class="branch-container" style="gap: 16px">
+                    <div class="branch" style="min-width: 120px">
+                      <span class="branch-label yes">🏆 PR!</span>
+                      <div class="arrow-down short"></div>
+                      <div class="epc-node">
+                        <div class="event-shape" style="min-width: 120px; font-size: 12px">PR detected!</div>
+                      </div>
+                      <div class="arrow-down short"></div>
+                      <div class="epc-node">
+                        <div class="function-shape" style="min-width: 120px; font-size: 12px">Show PRToast</div>
+                        <div class="side-badges">
+                          <span class="org-badge">PRToast</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="branch" style="min-width: 100px">
+                      <span class="branch-label no">No PR</span>
+                      <div class="arrow-down short"></div>
+                      <div class="epc-node">
+                        <div class="event-shape" style="min-width: 100px; font-size: 12px">No PR</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AND Join -->
+              <div class="h-line-container"><div class="h-line"></div></div>
+              <div class="arrow-down short"></div>
+              <div class="epc-node">
+                <div class="connector-circle connector-and">
+                  ∧
+                  <div class="connector-label">AND Join</div>
+                </div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <!-- Clear draft -->
+              <div class="epc-node">
+                <div class="function-shape">Clear workout draft</div>
+                <div class="side-badges">
+                  <span class="org-badge">fitnessStore.clearWorkoutDraft()</span>
+                  <span class="info-badge">DELETE FROM workout_drafts WHERE id = 'current'</span>
+                </div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <!-- Show summary -->
+              <div class="epc-node">
+                <div class="function-shape">Show WorkoutSummaryCard</div>
+                <div class="side-badges">
+                  <span class="org-badge">WorkoutSummaryCard</span>
+                  <span class="info-badge">Total volume, duration, exercises, PRs</span>
+                </div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <div class="epc-node">
+                <div class="event-shape">User reviews summary</div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <!-- popPage -->
+              <div class="epc-node">
+                <div class="function-shape">popPage()</div>
+                <div class="side-badges">
+                  <span class="org-badge">useNavigationStore</span>
+                </div>
+              </div>
+              <div class="arrow-down"></div>
+
+              <div class="epc-node">
+                <div class="event-shape">Quay về TrainingPlanView</div>
+              </div>
+              <div class="arrow-down short"></div>
+              <div class="end-marker">⬛ END — Workout flow hoàn tất</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!--        CHAIN 4: CARDIO LOGGING              -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="chain-panel" id="chain-3">
+        <div class="chain-title">🏃 Chain 4: Cardio Logging</div>
+        <div class="chain-desc">Luồng ghi nhận buổi tập cardio — chọn loại, đếm giờ, lưu kết quả</div>
+
+        <div class="epc-flow">
+          <div class="epc-node">
+            <div class="event-shape event-start">
+              CardioLogger đã mở
+              <div class="epc-tooltip">Tiếp nối từ Chain 1 (Cardio branch)</div>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="function-shape">Chọn loại cardio</div>
+            <div class="side-badges">
+              <span class="org-badge">CardioLogger component</span>
+              <span class="info-badge">running | cycling | swimming | hiit | walking | elliptical | rowing</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="function-shape">Bắt đầu đếm giờ</div>
+            <div class="side-badges">
+              <span class="org-badge">useTimer hook (stopwatch)</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape">Đang tập cardio</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <!-- Timer loop -->
+          <div class="loop-marker" style="max-width: 500px">
+            <span class="loop-label">🔄 LOOP: Pause / Resume timer</span>
+            <span class="loop-label-bottom">END LOOP</span>
+
+            <div class="epc-node">
+              <div class="function-shape" style="min-width: 240px">Nhập thông số</div>
+              <div class="side-badges">
+                <span class="info-badge"
+                  >distance_km (required cho running/cycling/swimming), intensity, avg_heart_rate</span
+                >
+              </div>
+            </div>
+            <div class="arrow-down"></div>
+
+            <div class="epc-node">
+              <div class="function-shape" style="min-width: 240px">Ước tính calories</div>
+              <div class="side-badges">
+                <span class="org-badge">cardioEstimator util</span>
+                <span class="info-badge">calories = (MET × weight_kg × duration_min) / 60</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape">User nhấn "Hoàn thành"</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="function-shape">saveWorkoutAtomic(workout, [cardioSet])</div>
+            <div class="side-badges">
+              <span class="org-badge">fitnessStore</span>
+              <span class="info-badge">INSERT INTO workouts + workout_sets (1 set with cardio data)</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape">Cardio session saved</div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="function-shape">popPage()</div>
+            <div class="side-badges">
+              <span class="org-badge">useNavigationStore</span>
+            </div>
+          </div>
+          <div class="arrow-down"></div>
+
+          <div class="epc-node">
+            <div class="event-shape">Quay về TrainingPlanView</div>
+          </div>
+          <div class="arrow-down short"></div>
+          <div class="end-marker">⬛ END — Cardio flow hoàn tất</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ FOOTER ═══════ -->
+    <div
+      style="
+        text-align: center;
+        padding: 20px;
+        border-top: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 12px;
+      "
+    >
+      EPC Diagram · MealPlaning Fitness Feature · Generated for project documentation
+    </div>
+
+    <script>
+      function showChain(index, btn) {
+        document.querySelectorAll('.chain-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('chain-' + index).classList.add('active');
+        btn.classList.add('active');
+        window.scrollTo({ top: document.querySelector('.content').offsetTop - 10, behavior: 'smooth' });
+      }
+
+      function toggleLegend() {
+        const box = document.getElementById('legend-box');
+        const icon = document.getElementById('legend-icon');
+        box.classList.toggle('open');
+        icon.textContent = box.classList.contains('open') ? '▼' : '▶';
+      }
+
+      // Keyboard navigation
+      document.addEventListener('keydown', e => {
+        if (e.key >= '1' && e.key <= '4') {
+          const idx = parseInt(e.key) - 1;
+          const btns = document.querySelectorAll('.tab-btn');
+          if (btns[idx]) showChain(idx, btns[idx]);
+        }
+        if (e.key === 'l' || e.key === 'L') toggleLegend();
+      });
+    </script>
+  </body>
+</html>

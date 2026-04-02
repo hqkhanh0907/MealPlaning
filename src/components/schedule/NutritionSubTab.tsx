@@ -16,7 +16,7 @@ interface RecommendationPanelProps {
 }
 
 const TIP_STYLES: Record<NutritionTip['type'], string> = {
-  success: 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-800 text-emerald-800',
+  success: 'bg-primary-subtle border-emerald-100 dark:border-emerald-800 text-emerald-800',
   warning: 'bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800 text-amber-800 dark:text-amber-300',
   info: 'bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-300',
 };
@@ -51,12 +51,12 @@ const RecommendationPanel = ({
   };
 
   return (
-    <div className="bg-card flex flex-col rounded-2xl border border-slate-100 p-6 shadow-sm dark:border-slate-700">
+    <div className="bg-card border-border-subtle flex flex-col rounded-2xl border p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2 font-bold text-indigo-600 dark:text-indigo-400">
-        <Info className="h-5 w-5" />
+        <Info className="h-5 w-5" aria-hidden="true" />
         <h3>{t('recommendation.title')}</h3>
       </div>
-      <div className="flex-1 space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+      <div className="text-foreground-secondary flex-1 space-y-3 text-sm leading-relaxed">
         <p className="text-muted-foreground">
           {t('recommendation.goal')} <strong>{weight}kg</strong> · <strong>{targetCalories} kcal</strong> ·{' '}
           <strong>{targetProtein}g protein</strong>
@@ -73,13 +73,13 @@ const RecommendationPanel = ({
 
         {isComplete && (
           <div className="text-primary flex items-center gap-2 pt-1 font-medium">
-            <CheckCircle2 className="h-4 w-4" />
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             {t('recommendation.planComplete')}
           </div>
         )}
         {!isComplete && hasAnyPlan && (
           <div className="flex items-center gap-2 pt-1 font-medium text-amber-600 dark:text-amber-400">
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
             {t('recommendation.missing')} {getMissingSlots()}
           </div>
         )}
@@ -88,9 +88,9 @@ const RecommendationPanel = ({
             type="button"
             onClick={onSwitchToMeals}
             data-testid="btn-switch-to-meals"
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700 transition-all hover:bg-emerald-100 active:scale-[0.98] dark:border-emerald-800 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50"
+            className="bg-primary-subtle text-primary-emphasis flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 p-3 text-sm font-medium transition-all hover:bg-emerald-100 active:scale-[0.98] dark:border-emerald-800 dark:hover:bg-emerald-900/50"
           >
-            <UtensilsCrossed className="h-4 w-4" />
+            <UtensilsCrossed className="h-4 w-4" aria-hidden="true" />
             {t('schedule.switchToMeals')}
           </button>
         )}

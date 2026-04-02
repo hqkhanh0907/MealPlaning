@@ -66,7 +66,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
         <div className="space-y-5 px-5 pt-5 pb-4">
           {/* Sort section */}
           <div>
-            <h4 className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{t('filter.sortTitle')}</h4>
+            <h4 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{t('filter.sortTitle')}</h4>
             <div className="flex flex-wrap gap-2">
               {SORT_OPTIONS.map(opt => {
                 const isActive = draft.sortBy === opt.value;
@@ -78,7 +78,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                     className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                        : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
                     }`}
                   >
                     {t(opt.labelKey)}
@@ -90,7 +90,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
 
           {/* Quick filter section */}
           <div>
-            <h4 className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{t('filter.filterTitle')}</h4>
+            <h4 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{t('filter.filterTitle')}</h4>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -98,7 +98,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                 className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.maxCalories === 300
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                    : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
                 }`}
               >
                 {t('filter.lessThan300')}
@@ -109,7 +109,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                 className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.maxCalories === 500
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                    : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
                 }`}
               >
                 {t('filter.lessThan500')}
@@ -120,7 +120,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
                 className={`min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   draft.minProtein === 20
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                    : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
                 }`}
               >
                 {t('filter.highProtein')}
@@ -134,7 +134,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
               type="button"
               data-testid="filter-reset-btn"
               onClick={handleReset}
-              className="min-h-11 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="border-border text-foreground-secondary min-h-11 flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               {t('filter.reset')}
             </button>

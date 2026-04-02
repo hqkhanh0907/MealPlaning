@@ -1,0 +1,2523 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sơ Đồ Luồng Dữ Liệu (DFD) - Fitness Feature</title>
+    <style>
+      :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --accent-blue: #3b82f6;
+        --accent-blue-dark: #1e40af;
+        --accent-green: #22c55e;
+        --accent-green-dark: #15803d;
+        --accent-purple: #a855f7;
+        --accent-orange: #f97316;
+        --accent-cyan: #06b6d4;
+        --accent-red: #ef4444;
+        --border-color: #475569;
+        --entity-bg: #1e3a5f;
+        --entity-border: #3b82f6;
+        --process-start: #2563eb;
+        --process-end: #1d4ed8;
+        --store-bg: #14532d;
+        --store-border: #22c55e;
+        --flow-color: #64748b;
+        --tooltip-bg: #1e293b;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+        border-bottom: 1px solid var(--border-color);
+        padding: 24px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .header-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+      }
+
+      .header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #60a5fa, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header .subtitle {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* Tabs */
+      .tab-bar {
+        display: flex;
+        gap: 4px;
+        background: var(--bg-tertiary);
+        border-radius: 10px;
+        padding: 4px;
+      }
+
+      .tab-btn {
+        padding: 10px 24px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.25s ease;
+        white-space: nowrap;
+      }
+
+      .tab-btn:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .tab-btn.active {
+        background: var(--accent-blue);
+        color: white;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+      }
+
+      /* Canvas Container */
+      .canvas-container {
+        position: relative;
+        width: 100%;
+        overflow: auto;
+        padding: 40px;
+        min-height: calc(100vh - 200px);
+      }
+
+      .diagram-view {
+        display: none;
+        position: relative;
+      }
+
+      .diagram-view.active {
+        display: block;
+      }
+
+      /* SVG Canvas */
+      svg.dfd-canvas {
+        display: block;
+        margin: 0 auto;
+      }
+
+      /* DFD Notation Styles */
+
+      /* External Entity */
+      .entity-rect {
+        fill: var(--entity-bg);
+        stroke: var(--entity-border);
+        stroke-width: 2;
+        rx: 6;
+        filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.2));
+        transition: all 0.3s ease;
+      }
+      .entity-rect:hover {
+        stroke-width: 3;
+        filter: drop-shadow(0 6px 20px rgba(59, 130, 246, 0.4));
+      }
+
+      .entity-label {
+        fill: #93c5fd;
+        font-size: 15px;
+        font-weight: 700;
+        text-anchor: middle;
+        dominant-baseline: central;
+        pointer-events: none;
+      }
+
+      .entity-icon {
+        fill: #60a5fa;
+        font-size: 22px;
+        text-anchor: middle;
+        dominant-baseline: central;
+        pointer-events: none;
+      }
+
+      /* Process */
+      .process-circle {
+        stroke-width: 2;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .process-circle:hover {
+        stroke-width: 3;
+        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+      }
+
+      .process-id {
+        fill: rgba(255, 255, 255, 0.6);
+        font-size: 11px;
+        font-weight: 700;
+        text-anchor: middle;
+        pointer-events: none;
+      }
+
+      .process-label {
+        fill: white;
+        font-size: 12px;
+        font-weight: 600;
+        text-anchor: middle;
+        pointer-events: none;
+      }
+
+      /* Data Store */
+      .store-bg {
+        fill: var(--store-bg);
+        stroke: var(--store-border);
+        stroke-width: 1.5;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .store-bg:hover {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3));
+      }
+
+      .store-line-top,
+      .store-line-bottom {
+        stroke: var(--store-border);
+        stroke-width: 2;
+        pointer-events: none;
+      }
+
+      .store-id {
+        fill: #86efac;
+        font-size: 11px;
+        font-weight: 700;
+        text-anchor: middle;
+        pointer-events: none;
+      }
+
+      .store-label {
+        fill: #bbf7d0;
+        font-size: 11px;
+        font-weight: 600;
+        text-anchor: middle;
+        pointer-events: none;
+      }
+
+      /* Data Flow Arrows */
+      .flow-line {
+        stroke: var(--flow-color);
+        stroke-width: 1.8;
+        fill: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .flow-line:hover {
+        stroke: #94a3b8;
+        stroke-width: 2.5;
+      }
+
+      .flow-line.highlighted {
+        stroke: var(--accent-cyan);
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.5));
+      }
+
+      .flow-label {
+        fill: var(--text-secondary);
+        font-size: 10px;
+        font-weight: 500;
+        pointer-events: none;
+      }
+
+      .flow-label.highlighted {
+        fill: var(--accent-cyan);
+        font-weight: 700;
+      }
+
+      .arrow-head {
+        fill: var(--flow-color);
+      }
+
+      .arrow-head.highlighted {
+        fill: var(--accent-cyan);
+      }
+
+      /* Tooltip */
+      .tooltip {
+        position: fixed;
+        background: var(--tooltip-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 13px;
+        color: var(--text-primary);
+        max-width: 360px;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(8px);
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        z-index: 1000;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(12px);
+      }
+
+      .tooltip.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .tooltip-title {
+        font-weight: 700;
+        color: var(--accent-cyan);
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .tooltip-fields {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .tooltip-fields code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 11px;
+        color: #a5f3fc;
+      }
+
+      /* Legend */
+      .legend {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px 28px;
+        margin: 0 auto 30px;
+        max-width: 900px;
+      }
+
+      .legend h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .legend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 14px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .legend-symbol {
+        flex-shrink: 0;
+      }
+
+      .legend-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .legend-text strong {
+        color: var(--text-primary);
+        display: block;
+        font-size: 13px;
+        margin-bottom: 1px;
+      }
+
+      .legend-text span {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      /* Context diagram styling */
+      .context-flow-group {
+        cursor: pointer;
+      }
+      .context-flow-group:hover .ctx-flow-line {
+        stroke: var(--accent-cyan);
+        stroke-width: 3;
+      }
+      .context-flow-group:hover .ctx-flow-label {
+        fill: var(--accent-cyan);
+      }
+
+      /* Info panel */
+      .info-panel {
+        position: fixed;
+        right: -420px;
+        top: 80px;
+        width: 400px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 14px 0 0 14px;
+        padding: 24px;
+        z-index: 200;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .info-panel.open {
+        right: 0;
+      }
+
+      .info-panel-close {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 22px;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+      }
+
+      .info-panel-close:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+      }
+
+      .info-panel h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--accent-blue);
+      }
+
+      .info-panel .info-type {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+      }
+
+      .info-section {
+        margin-bottom: 16px;
+      }
+
+      .info-section h4 {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .info-section p,
+      .info-section li {
+        font-size: 13px;
+        color: var(--text-primary);
+        line-height: 1.7;
+      }
+
+      .info-section ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .info-section ul li::before {
+        content: '→ ';
+        color: var(--accent-cyan);
+        font-weight: 700;
+      }
+
+      .info-section code {
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 12px;
+        color: #a5f3fc;
+      }
+
+      .field-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 6px;
+      }
+
+      .field-tag {
+        background: rgba(34, 197, 94, 0.15);
+        color: #86efac;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+      }
+
+      /* Zoom controls */
+      .zoom-controls {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        z-index: 150;
+      }
+
+      .zoom-btn {
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .zoom-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--accent-blue);
+      }
+
+      /* Animations */
+      @keyframes flowPulse {
+        0%,
+        100% {
+          stroke-dashoffset: 0;
+        }
+        50% {
+          stroke-dashoffset: 20;
+        }
+      }
+
+      .animated-flow {
+        stroke-dasharray: 8 4;
+        animation: flowPulse 2s linear infinite;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeInUp 0.5s ease both;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--border-color);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="header-icon">🏋️</div>
+        <div>
+          <h1>Sơ Đồ Luồng Dữ Liệu (DFD) — Fitness Feature</h1>
+          <div class="subtitle">MealPlaning App · React 19 + Zustand + SQLite (sql.js WASM)</div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('level0')">Level 0 — Ngữ cảnh</button>
+        <button class="tab-btn" onclick="switchTab('level1')">Level 1 — Chi tiết</button>
+      </div>
+    </header>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+      <button class="info-panel-close" onclick="closeInfoPanel()">✕</button>
+      <div id="infoPanelContent"></div>
+    </div>
+
+    <!-- ===================== LEVEL 0 ===================== -->
+    <div class="canvas-container">
+      <div class="diagram-view active" id="view-level0">
+        <div class="legend fade-in">
+          <h3>📘 Chú giải ký hiệu DFD</h3>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <svg class="legend-symbol" width="50" height="32">
+                <rect x="2" y="2" width="46" height="28" rx="4" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2" />
+              </svg>
+              <div class="legend-text"><strong>Thực thể ngoài</strong><span>External Entity</span></div>
+            </div>
+            <div class="legend-item">
+              <svg class="legend-symbol" width="50" height="36">
+                <ellipse cx="25" cy="18" rx="22" ry="16" fill="url(#lgProcGrad)" stroke="#60a5fa" stroke-width="2" />
+                <defs>
+                  <linearGradient id="lgProcGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#2563eb" />
+                    <stop offset="100%" stop-color="#1d4ed8" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="legend-text"><strong>Tiến trình</strong><span>Process (P#)</span></div>
+            </div>
+            <div class="legend-item">
+              <svg class="legend-symbol" width="56" height="30">
+                <rect x="2" y="2" width="52" height="26" fill="#14532d" stroke="none" rx="2" />
+                <line x1="2" y1="2" x2="54" y2="2" stroke="#22c55e" stroke-width="2" />
+                <line x1="2" y1="28" x2="54" y2="28" stroke="#22c55e" stroke-width="2" />
+              </svg>
+              <div class="legend-text"><strong>Kho dữ liệu</strong><span>Data Store (D#)</span></div>
+            </div>
+            <div class="legend-item">
+              <svg class="legend-symbol" width="56" height="20">
+                <defs>
+                  <marker id="lgArrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8" />
+                  </marker>
+                </defs>
+                <line x1="4" y1="10" x2="46" y2="10" stroke="#94a3b8" stroke-width="2" marker-end="url(#lgArrow)" />
+              </svg>
+              <div class="legend-text"><strong>Luồng dữ liệu</strong><span>Data Flow</span></div>
+            </div>
+          </div>
+        </div>
+
+        <svg class="dfd-canvas" width="1100" height="620" viewBox="0 0 1100 620" id="svgLevel0">
+          <defs>
+            <linearGradient id="procGrad0" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2563eb" />
+              <stop offset="100%" stop-color="#7c3aed" />
+            </linearGradient>
+            <filter id="glow0">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <marker id="arrowCtx" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+              <path d="M0,0 L10,3.5 L0,7 Z" fill="#64748b" />
+            </marker>
+            <marker id="arrowCtxH" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+              <path d="M0,0 L10,3.5 L0,7 Z" fill="#06b6d4" />
+            </marker>
+            <radialGradient id="systemGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(37,99,235,0.15)" />
+              <stop offset="100%" stop-color="rgba(37,99,235,0)" />
+            </radialGradient>
+          </defs>
+
+          <!-- Background glow for central system -->
+          <ellipse cx="550" cy="310" rx="180" ry="160" fill="url(#systemGlow)" />
+
+          <!-- Central Process: Fitness System -->
+          <ellipse
+            cx="550"
+            cy="310"
+            rx="140"
+            ry="110"
+            fill="url(#procGrad0)"
+            stroke="#60a5fa"
+            stroke-width="3"
+            filter="url(#glow0)"
+            class="process-circle"
+            onclick="showContextInfo()"
+          />
+          <text x="550" y="285" class="process-label" font-size="11" fill="rgba(255,255,255,0.6)">{ Hệ thống }</text>
+          <text x="550" y="310" class="process-label" font-size="18" fill="white" font-weight="800">
+            Fitness System
+          </text>
+          <text x="550" y="335" class="process-label" font-size="11" fill="rgba(255,255,255,0.5)">
+            9 Processes · 9 Data Stores
+          </text>
+
+          <!-- User Entity (Left) -->
+          <g class="fade-in" style="animation-delay: 0.1s">
+            <rect x="30" y="260" width="160" height="100" class="entity-rect" />
+            <text x="110" y="295" class="entity-icon">👤</text>
+            <text x="110" y="325" class="entity-label">Người dùng</text>
+            <text x="110" y="342" fill="#64748b" font-size="11" text-anchor="middle">User</text>
+          </g>
+
+          <!-- Nutrition Module Entity (Right) -->
+          <g class="fade-in" style="animation-delay: 0.2s">
+            <rect x="910" y="260" width="160" height="100" class="entity-rect" style="stroke: #a855f7" />
+            <text x="990" y="295" class="entity-icon" style="fill: #c084fc">🥗</text>
+            <text x="990" y="325" class="entity-label" style="fill: #d8b4fe">Module Dinh dưỡng</text>
+            <text x="990" y="342" fill="#64748b" font-size="11" text-anchor="middle">Nutrition Module</text>
+          </g>
+
+          <!-- INPUT Flows (User → System) -->
+          <g
+            class="context-flow-group"
+            onmouseenter="
+              showTooltip(
+                event,
+                'Dữ liệu đầu vào từ người dùng',
+                '• Hồ sơ tập luyện (mục tiêu, kinh nghiệm, thiết bị)\n• Dữ liệu bài tập (set: cân nặng, reps, RPE)\n• Dữ liệu cardio (loại, thời gian, cường độ)\n• Cân nặng hàng ngày\n• Lựa chọn kế hoạch & mẫu',
+              )
+            "
+            onmouseleave="hideTooltip()"
+          >
+            <path
+              d="M190,285 C300,285 300,260 410,270"
+              stroke="#64748b"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowCtx)"
+              class="ctx-flow-line"
+            />
+            <rect x="230" y="237" width="140" height="22" rx="4" fill="var(--bg-primary)" opacity="0.9" />
+            <text x="300" y="252" class="flow-label ctx-flow-label" font-size="11" text-anchor="middle">
+              profile_data
+            </text>
+          </g>
+          <g
+            class="context-flow-group"
+            onmouseenter="
+              showTooltip(
+                event,
+                'Dữ liệu tập luyện',
+                '• Bài tập: weight_kg, reps, rpe, rest_seconds\n• Cardio: duration_min, distance_km, avg_heart_rate\n• Cân nặng: weight_kg hàng ngày',
+              )
+            "
+            onmouseleave="hideTooltip()"
+          >
+            <path
+              d="M190,300 C300,300 300,300 410,305"
+              stroke="#64748b"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowCtx)"
+              class="ctx-flow-line"
+            />
+            <rect x="235" y="280" width="130" height="22" rx="4" fill="var(--bg-primary)" opacity="0.9" />
+            <text x="300" y="295" class="flow-label ctx-flow-label" font-size="11" text-anchor="middle">
+              workout_data
+            </text>
+          </g>
+          <g
+            class="context-flow-group"
+            onmouseenter="
+              showTooltip(
+                event,
+                'Tuỳ chọn kế hoạch',
+                '• Loại chia nhóm cơ (split_type)\n• Lựa chọn mẫu (template)\n• Chỉnh sửa kế hoạch',
+              )
+            "
+            onmouseleave="hideTooltip()"
+          >
+            <path
+              d="M190,330 C300,340 300,340 410,340"
+              stroke="#64748b"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowCtx)"
+              class="ctx-flow-line"
+            />
+            <rect x="225" y="327" width="145" height="22" rx="4" fill="var(--bg-primary)" opacity="0.9" />
+            <text x="298" y="342" class="flow-label ctx-flow-label" font-size="11" text-anchor="middle">
+              plan_preferences
+            </text>
+          </g>
+
+          <!-- OUTPUT Flows (System → User) -->
+          <g
+            class="context-flow-group"
+            onmouseenter="
+              showTooltip(
+                event,
+                'Kế hoạch tập luyện',
+                '• Kế hoạch với bài tập chi tiết\n• Gợi ý progressive overload\n• Cảnh báo plateau & khuyến nghị',
+              )
+            "
+            onmouseleave="hideTooltip()"
+          >
+            <path
+              d="M410,350 C300,370 300,380 190,390"
+              stroke="#22c55e"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowCtx)"
+              class="ctx-flow-line"
+              style="stroke: #22c55e"
+            />
+            <rect x="225" y="370" width="145" height="22" rx="4" fill="var(--bg-primary)" opacity="0.9" />
+            <text x="298" y="385" class="flow-label ctx-flow-label" font-size="11" text-anchor="middle" fill="#86efac">
+              training_plan
+            </text>
+          </g>
+          <g
+            class="context-flow-group"
+            onmouseenter="
+              showTooltip(
+                event,
+                'Phân tích tiến độ',
+                '• Xu hướng 1RM (Epley formula)\n• Tỷ lệ tuân thủ kế hoạch (%)\n• Chuỗi ngày liên tiếp (streaks)\n• Phát hiện PR mới\n• Ước tính calo tiêu thụ',
+              )
+            "
+            onmouseleave="hideTooltip()"
+          >
+            <path
+              d="M410,360 C290,400 300,410 190,430"
+              stroke="#22c55e"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowCtx)"
+              class="ctx-flow-line"
+              style="stroke: #22c55e"
+            />
+            <rect x="225" y="410" width="145" height="22" rx="4" fill="var(--bg-primary)" opacity="0.9" />
+            <text x="298" y="425" class="flow-label ctx-flow-label" font-size="11" text-anchor="middle" fill="#86efac">
+              progress_analytics
+            </text>
+          </g>
+
+          <!-- System → Nutrition Module -->
+          <g
+            class="context-flow-group"
+            onmouseenter="
+              showTooltip(
+                event,
+                'Điều chỉnh dinh dưỡng',
+                '• Hệ số hoạt động (activity multiplier)\n• Điều chỉnh mục tiêu calo\n• Khuyến nghị dinh dưỡng theo lịch tập',
+              )
+            "
+            onmouseleave="hideTooltip()"
+          >
+            <path
+              d="M690,305 C790,305 800,305 910,310"
+              stroke="#a855f7"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowCtx)"
+              class="ctx-flow-line animated-flow"
+              style="stroke: #a855f7"
+            />
+            <rect x="740" y="282" width="130" height="22" rx="4" fill="var(--bg-primary)" opacity="0.9" />
+            <text x="805" y="297" class="flow-label ctx-flow-label" font-size="11" text-anchor="middle" fill="#d8b4fe">
+              calorie_adjustment
+            </text>
+          </g>
+
+          <!-- Summary boxes -->
+          <g class="fade-in" style="animation-delay: 0.4s">
+            <rect
+              x="60"
+              y="480"
+              width="420"
+              height="120"
+              rx="10"
+              fill="var(--bg-secondary)"
+              stroke="var(--border-color)"
+              stroke-width="1"
+            />
+            <text x="80" y="505" fill="#60a5fa" font-size="14" font-weight="700">📥 Dữ liệu đầu vào (Inputs)</text>
+            <text x="80" y="528" fill="var(--text-secondary)" font-size="12">
+              • Hồ sơ tập luyện (mục tiêu, kinh nghiệm, thiết bị, chấn thương)
+            </text>
+            <text x="80" y="546" fill="var(--text-secondary)" font-size="12">
+              • Dữ liệu bài tập (sets: cân nặng, reps, RPE)
+            </text>
+            <text x="80" y="564" fill="var(--text-secondary)" font-size="12">
+              • Cardio (loại, thời gian, khoảng cách, cường độ, HR)
+            </text>
+            <text x="80" y="582" fill="var(--text-secondary)" font-size="12">
+              • Cân nặng hàng ngày · Lựa chọn kế hoạch &amp; mẫu
+            </text>
+          </g>
+          <g class="fade-in" style="animation-delay: 0.5s">
+            <rect
+              x="520"
+              y="480"
+              width="520"
+              height="120"
+              rx="10"
+              fill="var(--bg-secondary)"
+              stroke="var(--border-color)"
+              stroke-width="1"
+            />
+            <text x="540" y="505" fill="#86efac" font-size="14" font-weight="700">📤 Dữ liệu đầu ra (Outputs)</text>
+            <text x="540" y="528" fill="var(--text-secondary)" font-size="12">
+              • Kế hoạch tập luyện với bài tập chi tiết · Gợi ý progressive overload
+            </text>
+            <text x="540" y="546" fill="var(--text-secondary)" font-size="12">
+              • Tóm tắt buổi tập với phát hiện PR · Phân tích tiến độ (1RM, adherence)
+            </text>
+            <text x="540" y="564" fill="var(--text-secondary)" font-size="12">
+              • Ước tính calo tiêu thụ · Cảnh báo plateau &amp; khuyến nghị
+            </text>
+            <text x="540" y="582" fill="var(--text-secondary)" font-size="12">
+              • Điều chỉnh dinh dưỡng (calorie_adjustment → Nutrition Module)
+            </text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- ===================== LEVEL 1 ===================== -->
+      <div class="diagram-view" id="view-level1">
+        <div class="legend fade-in">
+          <h3>📘 Chú giải ký hiệu DFD — Level 1</h3>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <svg class="legend-symbol" width="50" height="32">
+                <rect x="2" y="2" width="46" height="28" rx="4" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2" />
+              </svg>
+              <div class="legend-text"><strong>Thực thể ngoài</strong><span>External Entity</span></div>
+            </div>
+            <div class="legend-item">
+              <svg class="legend-symbol" width="50" height="36">
+                <ellipse cx="25" cy="18" rx="22" ry="16" fill="url(#lgProcGrad)" stroke="#60a5fa" stroke-width="2" />
+              </svg>
+              <div class="legend-text"><strong>Tiến trình (P1–P9)</strong><span>Process</span></div>
+            </div>
+            <div class="legend-item">
+              <svg class="legend-symbol" width="56" height="30">
+                <rect x="2" y="2" width="52" height="26" fill="#14532d" stroke="none" rx="2" />
+                <line x1="2" y1="2" x2="54" y2="2" stroke="#22c55e" stroke-width="2" />
+                <line x1="2" y1="28" x2="54" y2="28" stroke="#22c55e" stroke-width="2" />
+              </svg>
+              <div class="legend-text"><strong>Kho dữ liệu (D1–D9)</strong><span>Data Store</span></div>
+            </div>
+            <div class="legend-item">
+              <svg class="legend-symbol" width="56" height="20">
+                <line x1="4" y1="10" x2="46" y2="10" stroke="#94a3b8" stroke-width="2" marker-end="url(#lgArrow)" />
+              </svg>
+              <div class="legend-text">
+                <strong>Luồng dữ liệu</strong><span>Click process / store xem chi tiết</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <svg class="dfd-canvas" width="1600" height="1320" viewBox="0 0 1600 1320" id="svgLevel1">
+          <defs>
+            <linearGradient id="procGrad1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2563eb" />
+              <stop offset="100%" stop-color="#1d4ed8" />
+            </linearGradient>
+            <linearGradient id="procGrad1b" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#7c3aed" />
+              <stop offset="100%" stop-color="#6d28d9" />
+            </linearGradient>
+            <filter id="glow1">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter id="glowGreen">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <marker
+              id="arrowL1"
+              markerWidth="8"
+              markerHeight="6"
+              refX="8"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L8,3 L0,6 Z" class="arrow-head" />
+            </marker>
+            <marker
+              id="arrowL1H"
+              markerWidth="8"
+              markerHeight="6"
+              refX="8"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L8,3 L0,6 Z" fill="#06b6d4" />
+            </marker>
+            <marker
+              id="arrowGreen"
+              markerWidth="8"
+              markerHeight="6"
+              refX="8"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L8,3 L0,6 Z" fill="#22c55e" />
+            </marker>
+            <marker
+              id="arrowPurple"
+              markerWidth="8"
+              markerHeight="6"
+              refX="8"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L8,3 L0,6 Z" fill="#a855f7" />
+            </marker>
+          </defs>
+
+          <!-- ========== EXTERNAL ENTITIES ========== -->
+          <!-- User (top-left) -->
+          <g class="fade-in" style="animation-delay: 0.05s">
+            <rect x="20" y="400" width="140" height="90" class="entity-rect" />
+            <text x="90" y="435" class="entity-icon">👤</text>
+            <text x="90" y="462" class="entity-label" font-size="14">Người dùng</text>
+            <text x="90" y="478" fill="#64748b" font-size="10" text-anchor="middle">User</text>
+          </g>
+
+          <!-- Nutrition Module (far right) -->
+          <g class="fade-in" style="animation-delay: 0.1s">
+            <rect x="1420" y="580" width="150" height="90" class="entity-rect" style="stroke: #a855f7" />
+            <text x="1495" y="615" class="entity-icon" style="fill: #c084fc">🥗</text>
+            <text x="1495" y="640" class="entity-label" font-size="12" style="fill: #d8b4fe">Nutrition Module</text>
+            <text x="1495" y="656" fill="#64748b" font-size="10" text-anchor="middle">External</text>
+          </g>
+
+          <!-- ========== PROCESSES ========== -->
+          <!-- P1: Profile Manager (top-left area) -->
+          <g onclick="showProcessInfo('P1')" style="cursor: pointer">
+            <ellipse
+              cx="330"
+              cy="220"
+              rx="70"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="330" y="207" class="process-id">P1</text>
+            <text x="330" y="224" class="process-label">Profile</text>
+            <text x="330" y="240" class="process-label">Manager</text>
+          </g>
+
+          <!-- P2: Plan Generator (mid-top) -->
+          <g onclick="showProcessInfo('P2')" style="cursor: pointer">
+            <ellipse
+              cx="660"
+              cy="220"
+              rx="75"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="660" y="207" class="process-id">P2</text>
+            <text x="660" y="224" class="process-label">Plan</text>
+            <text x="660" y="240" class="process-label">Generator</text>
+          </g>
+
+          <!-- P3: Workout Logger (center) -->
+          <g onclick="showProcessInfo('P3')" style="cursor: pointer">
+            <ellipse
+              cx="530"
+              cy="530"
+              rx="75"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="530" y="517" class="process-id">P3</text>
+            <text x="530" y="534" class="process-label">Workout</text>
+            <text x="530" y="550" class="process-label">Logger</text>
+          </g>
+
+          <!-- P4: Cardio Logger (left-center) -->
+          <g onclick="showProcessInfo('P4')" style="cursor: pointer">
+            <ellipse
+              cx="300"
+              cy="680"
+              rx="70"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="300" y="667" class="process-id">P4</text>
+            <text x="300" y="684" class="process-label">Cardio</text>
+            <text x="300" y="700" class="process-label">Logger</text>
+          </g>
+
+          <!-- P5: Weight Tracker (bottom-left) -->
+          <g onclick="showProcessInfo('P5')" style="cursor: pointer">
+            <ellipse
+              cx="280"
+              cy="920"
+              rx="70"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="280" y="907" class="process-id">P5</text>
+            <text x="280" y="924" class="process-label">Weight</text>
+            <text x="280" y="940" class="process-label">Tracker</text>
+          </g>
+
+          <!-- P6: Progress Calculator (center-right) -->
+          <g onclick="showProcessInfo('P6')" style="cursor: pointer">
+            <ellipse
+              cx="870"
+              cy="780"
+              rx="80"
+              ry="55"
+              fill="url(#procGrad1)"
+              stroke="#f97316"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="870" y="767" class="process-id" fill="rgba(255,255,255,0.6)">P6</text>
+            <text x="870" y="784" class="process-label">Progress</text>
+            <text x="870" y="800" class="process-label">Calculator</text>
+          </g>
+
+          <!-- P7: Nutrition Bridge (far right) -->
+          <g onclick="showProcessInfo('P7')" style="cursor: pointer">
+            <ellipse
+              cx="1200"
+              cy="630"
+              rx="75"
+              ry="50"
+              fill="url(#procGrad1b)"
+              stroke="#a855f7"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="1200" y="617" class="process-id">P7</text>
+            <text x="1200" y="634" class="process-label">Nutrition</text>
+            <text x="1200" y="650" class="process-label">Bridge</text>
+          </g>
+
+          <!-- P8: Plan Manager (top-right area) -->
+          <g onclick="showProcessInfo('P8')" style="cursor: pointer">
+            <ellipse
+              cx="980"
+              cy="340"
+              rx="72"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="980" y="327" class="process-id">P8</text>
+            <text x="980" y="344" class="process-label">Plan</text>
+            <text x="980" y="360" class="process-label">Manager</text>
+          </g>
+
+          <!-- P9: Template System (top far right) -->
+          <g onclick="showProcessInfo('P9')" style="cursor: pointer">
+            <ellipse
+              cx="1200"
+              cy="220"
+              rx="72"
+              ry="50"
+              fill="url(#procGrad1)"
+              stroke="#60a5fa"
+              stroke-width="2"
+              filter="url(#glow1)"
+              class="process-circle"
+            />
+            <text x="1200" y="207" class="process-id">P9</text>
+            <text x="1200" y="224" class="process-label">Template</text>
+            <text x="1200" y="240" class="process-label">System</text>
+          </g>
+
+          <!-- ========== DATA STORES ========== -->
+          <!-- D1: training_profile -->
+          <g onclick="showStoreInfo('D1')" style="cursor: pointer">
+            <rect x="400" y="100" width="170" height="36" class="store-bg" rx="2" />
+            <line x1="400" y1="100" x2="570" y2="100" class="store-line-top" />
+            <line x1="400" y1="136" x2="570" y2="136" class="store-line-bottom" />
+            <text x="420" y="122" class="store-id">D1</text>
+            <text x="490" y="122" class="store-label">training_profile</text>
+          </g>
+
+          <!-- D2: training_plans -->
+          <g onclick="showStoreInfo('D2')" style="cursor: pointer">
+            <rect x="780" y="100" width="170" height="36" class="store-bg" rx="2" />
+            <line x1="780" y1="100" x2="950" y2="100" class="store-line-top" />
+            <line x1="780" y1="136" x2="950" y2="136" class="store-line-bottom" />
+            <text x="800" y="122" class="store-id">D2</text>
+            <text x="875" y="122" class="store-label">training_plans</text>
+          </g>
+
+          <!-- D3: training_plan_days -->
+          <g onclick="showStoreInfo('D3')" style="cursor: pointer">
+            <rect x="780" y="390" width="180" height="36" class="store-bg" rx="2" />
+            <line x1="780" y1="390" x2="960" y2="390" class="store-line-top" />
+            <line x1="780" y1="426" x2="960" y2="426" class="store-line-bottom" />
+            <text x="800" y="412" class="store-id">D3</text>
+            <text x="888" y="412" class="store-label">training_plan_days</text>
+          </g>
+
+          <!-- D4: workouts -->
+          <g onclick="showStoreInfo('D4')" style="cursor: pointer">
+            <rect x="600" y="680" width="150" height="36" class="store-bg" rx="2" />
+            <line x1="600" y1="680" x2="750" y2="680" class="store-line-top" />
+            <line x1="600" y1="716" x2="750" y2="716" class="store-line-bottom" />
+            <text x="618" y="702" class="store-id">D4</text>
+            <text x="683" y="702" class="store-label">workouts</text>
+          </g>
+
+          <!-- D5: workout_sets -->
+          <g onclick="showStoreInfo('D5')" style="cursor: pointer">
+            <rect x="600" y="760" width="150" height="36" class="store-bg" rx="2" />
+            <line x1="600" y1="760" x2="750" y2="760" class="store-line-top" />
+            <line x1="600" y1="796" x2="750" y2="796" class="store-line-bottom" />
+            <text x="618" y="782" class="store-id">D5</text>
+            <text x="688" y="782" class="store-label">workout_sets</text>
+          </g>
+
+          <!-- D6: weight_log -->
+          <g onclick="showStoreInfo('D6')" style="cursor: pointer">
+            <rect x="430" y="920" width="150" height="36" class="store-bg" rx="2" />
+            <line x1="430" y1="920" x2="580" y2="920" class="store-line-top" />
+            <line x1="430" y1="956" x2="580" y2="956" class="store-line-bottom" />
+            <text x="448" y="942" class="store-id">D6</text>
+            <text x="515" y="942" class="store-label">weight_log</text>
+          </g>
+
+          <!-- D7: exercises -->
+          <g onclick="showStoreInfo('D7')" style="cursor: pointer">
+            <rect x="400" y="340" width="150" height="36" class="store-bg" rx="2" />
+            <line x1="400" y1="340" x2="550" y2="340" class="store-line-top" />
+            <line x1="400" y1="376" x2="550" y2="376" class="store-line-bottom" />
+            <text x="418" y="362" class="store-id">D7</text>
+            <text x="488" y="362" class="store-label">exercises</text>
+          </g>
+
+          <!-- D8: plan_templates -->
+          <g onclick="showStoreInfo('D8')" style="cursor: pointer">
+            <rect x="1080" y="100" width="170" height="36" class="store-bg" rx="2" />
+            <line x1="1080" y1="100" x2="1250" y2="100" class="store-line-top" />
+            <line x1="1080" y1="136" x2="1250" y2="136" class="store-line-bottom" />
+            <text x="1098" y="122" class="store-id">D8</text>
+            <text x="1173" y="122" class="store-label">plan_templates</text>
+          </g>
+
+          <!-- D9: workout_drafts -->
+          <g onclick="showStoreInfo('D9')" style="cursor: pointer">
+            <rect
+              x="280"
+              y="530"
+              width="160"
+              height="36"
+              class="store-bg"
+              rx="2"
+              style="fill: #1c2333; stroke: #f59e0b"
+            />
+            <line x1="280" y1="530" x2="440" y2="530" style="stroke: #f59e0b" stroke-width="2" />
+            <line x1="280" y1="566" x2="440" y2="566" style="stroke: #f59e0b" stroke-width="2" />
+            <text x="298" y="552" class="store-id" style="fill: #fcd34d">D9</text>
+            <text x="373" y="552" class="store-label" style="fill: #fde68a">workout_drafts</text>
+          </g>
+
+          <!-- ========== DATA FLOWS ========== -->
+
+          <!-- User → P1: profile_data -->
+          <g
+            class="flow-group"
+            data-flow="user-p1"
+            onmouseenter="
+              highlightFlow(this, 'Hồ sơ tập luyện', 'goal, experience, equipment,\ninjuries, known_1rm, days_per_week')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M160,420 L200,320 L260,230"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="175" y="330" class="flow-label" transform="rotate(-50,175,330)" font-size="10">profile_data</text>
+          </g>
+
+          <!-- P1 → D1: save_profile -->
+          <g
+            class="flow-group"
+            data-flow="p1-d1"
+            onmouseenter="highlightFlow(this, 'Lưu hồ sơ', 'TrainingProfile → training_profile table')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path d="M370,185 L440,140" stroke="#22c55e" stroke-width="1.8" fill="none" marker-end="url(#arrowGreen)" />
+            <text x="390" y="165" class="flow-label" font-size="10" fill="#86efac">save_profile</text>
+          </g>
+
+          <!-- D1 → P2: read_profile -->
+          <g
+            class="flow-group"
+            data-flow="d1-p2"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Đọc hồ sơ',
+                'TrainingProfile: experience, goal,\navailable_equipment, periodization_model',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M570,118 L600,145 L620,180"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="580" y="155" class="flow-label" font-size="10">read_profile</text>
+          </g>
+
+          <!-- D7 → P2: available_exercises -->
+          <g
+            class="flow-group"
+            data-flow="d7-p2"
+            onmouseenter="
+              highlightFlow(this, 'Bài tập khả dụng', 'exercises filtered by equipment,\nmuscle_group, exercise_type')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M520,340 L580,290 L620,260"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="548" y="305" class="flow-label" font-size="10">exercises</text>
+          </g>
+
+          <!-- D8 → P2: template_configs -->
+          <g
+            class="flow-group"
+            data-flow="d8-p2"
+            onmouseenter="highlightFlow(this, 'Cấu hình mẫu', 'split_type, day_configs(JSON),\nequipment_required')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M1080,130 L900,180 L735,215"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="890" y="170" class="flow-label" font-size="10">template_configs</text>
+          </g>
+
+          <!-- P2 → D2: save_plan -->
+          <g
+            class="flow-group"
+            data-flow="p2-d2"
+            onmouseenter="
+              highlightFlow(this, 'Lưu kế hoạch', 'TrainingPlan: name, split_type,\nduration_weeks, status')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M720,195 L790,160 L830,140"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="755" y="165" class="flow-label" font-size="10" fill="#86efac">save_plan</text>
+          </g>
+
+          <!-- P2 → D3: save_plan_days -->
+          <g
+            class="flow-group"
+            data-flow="p2-d3"
+            onmouseenter="
+              highlightFlow(this, 'Lưu ngày tập', 'TrainingPlanDay[]: exercises(JSON),\nmuscle_groups, workout_type')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M710,260 L780,330 L820,390"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="750" y="320" class="flow-label" font-size="10" fill="#86efac">save_plan_days</text>
+          </g>
+
+          <!-- D3 → P3: plan_day_exercises -->
+          <g
+            class="flow-group"
+            data-flow="d3-p3"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Bài tập theo ngày',
+                'exercises(JSON): id, sets, reps,\nweight_suggestion, rest_seconds',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M780,420 L680,470 L600,510"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="700" y="460" class="flow-label" font-size="10">plan_day_exercises</text>
+          </g>
+
+          <!-- User → P3: set_data -->
+          <g
+            class="flow-group"
+            data-flow="user-p3"
+            onmouseenter="
+              highlightFlow(this, 'Dữ liệu bài tập', 'weight_kg, reps, rpe(1-10),\nrest_seconds, set_number')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M160,445 L300,490 L460,520"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="290" y="478" class="flow-label" font-size="10">set_data</text>
+          </g>
+
+          <!-- P3 → D4: save_workout -->
+          <g
+            class="flow-group"
+            data-flow="p3-d4"
+            onmouseenter="highlightFlow(this, 'Lưu buổi tập', 'workout: date, name, plan_day_id,\nduration_min, notes')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M570,570 L610,630 L630,680"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="590" y="630" class="flow-label" font-size="10" fill="#86efac">save_workout</text>
+          </g>
+
+          <!-- P3 → D5: save_sets -->
+          <g
+            class="flow-group"
+            data-flow="p3-d5"
+            onmouseenter="
+              highlightFlow(this, 'Lưu sets', 'workout_set: exercise_id, set_number,\nreps, weight_kg, rpe')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M590,565 L630,680 L640,760"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="625" y="720" class="flow-label" font-size="10" fill="#86efac">save_sets</text>
+          </g>
+
+          <!-- P3 → D9: auto_save_draft -->
+          <g
+            class="flow-group"
+            data-flow="p3-d9"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Tự động lưu nháp',
+                'workout_draft: exercises_json,\nsets_json, start_time, plan_day_id',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M460,540 L440,545"
+              stroke="#f59e0b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+              style="stroke: #f59e0b"
+            />
+            <text x="430" y="520" class="flow-label" font-size="10" fill="#fcd34d">auto_save</text>
+          </g>
+
+          <!-- P3 → User: PR_notification -->
+          <g
+            class="flow-group"
+            data-flow="p3-user"
+            onmouseenter="
+              highlightFlow(this, 'Thông báo PR mới', 'Phát hiện kỷ lục cá nhân mới\n(Personal Record) cho bài tập')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M460,545 L250,490 L150,465"
+              stroke="#f97316"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line animated-flow"
+              style="stroke: #f97316"
+            />
+            <text x="290" y="512" class="flow-label" font-size="10" fill="#fb923c">PR_notification ⚡</text>
+          </g>
+
+          <!-- User → P4: cardio_data -->
+          <g
+            class="flow-group"
+            data-flow="user-p4"
+            onmouseenter="
+              highlightFlow(this, 'Dữ liệu cardio', 'type, duration_min, distance_km,\nintensity, avg_heart_rate')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M130,490 L200,580 L240,650"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="155" y="575" class="flow-label" font-size="10">cardio_data</text>
+          </g>
+
+          <!-- P4 → D4: save_cardio_workout -->
+          <g
+            class="flow-group"
+            data-flow="p4-d4"
+            onmouseenter="highlightFlow(this, 'Lưu buổi cardio', 'workout: date, name(cardio type),\nduration_min')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M370,690 L500,695 L600,698"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="470" y="686" class="flow-label" font-size="10" fill="#86efac">save_cardio</text>
+          </g>
+
+          <!-- P4 → D5: save_cardio_set -->
+          <g
+            class="flow-group"
+            data-flow="p4-d5"
+            onmouseenter="
+              highlightFlow(this, 'Lưu cardio set', 'duration_min, distance_km,\navg_heart_rate, estimated_calories')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M360,720 L500,750 L600,770"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="460" y="740" class="flow-label" font-size="10" fill="#86efac">save_cardio_set</text>
+          </g>
+
+          <!-- User → P5: weight_measurement -->
+          <g
+            class="flow-group"
+            data-flow="user-p5"
+            onmouseenter="highlightFlow(this, 'Cân nặng hàng ngày', 'weight_kg, date, notes (optional)')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M100,490 L150,680 L220,880"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="125" y="710" class="flow-label" font-size="10" transform="rotate(75,125,710)">
+              weight_measurement
+            </text>
+          </g>
+
+          <!-- P5 → D6: save_weight -->
+          <g
+            class="flow-group"
+            data-flow="p5-d6"
+            onmouseenter="highlightFlow(this, 'Lưu cân nặng', 'weight_log: date(UNIQUE), weight_kg, notes')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path d="M350,930 L430,935" stroke="#22c55e" stroke-width="1.8" fill="none" marker-end="url(#arrowGreen)" />
+            <text x="380" y="925" class="flow-label" font-size="10" fill="#86efac">save_weight</text>
+          </g>
+
+          <!-- P5 → User: weight_trend -->
+          <g
+            class="flow-group"
+            data-flow="p5-user"
+            onmouseenter="
+              highlightFlow(this, 'Xu hướng cân nặng', '7-day moving average, trend (↑↓→),\nweight change delta')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M215,905 L140,800 L80,490"
+              stroke="#f97316"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+              style="stroke: #22c55e"
+            />
+            <text x="100" y="810" class="flow-label" font-size="10" fill="#86efac" transform="rotate(-72,100,810)">
+              weight_trend
+            </text>
+          </g>
+
+          <!-- D4+D5+D6 → P6: historical_data -->
+          <g
+            class="flow-group"
+            data-flow="stores-p6"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Dữ liệu lịch sử',
+                'Tổng hợp từ D4 (workouts), D5 (sets),\nD6 (weight_log) để tính toán progress',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M750,700 L810,740 L830,760"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="780" y="730" class="flow-label" font-size="10">D4+D5 data</text>
+          </g>
+          <g
+            class="flow-group"
+            data-flow="d6-p6"
+            onmouseenter="highlightFlow(this, 'Dữ liệu cân nặng', 'weight_log history for trend analysis')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M580,950 L720,900 L820,830"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="700" y="895" class="flow-label" font-size="10">D6 weight_log</text>
+          </g>
+
+          <!-- P6 → User: progress_metrics -->
+          <g
+            class="flow-group"
+            data-flow="p6-user"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Số liệu tiến độ',
+                '1RM trends (Epley), weekly volume,\nadherence %, streaks, milestones,\nplateau detection, PR history',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M790,790 L500,860 L200,890 L100,490"
+              stroke="#f97316"
+              stroke-width="2"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line animated-flow"
+              style="stroke: #f97316"
+            />
+            <text x="420" y="855" class="flow-label" font-size="10" fill="#fb923c">progress_metrics 📊</text>
+          </g>
+
+          <!-- P3+P4 → P7: calorie_burn -->
+          <g
+            class="flow-group"
+            data-flow="p3p4-p7"
+            onmouseenter="highlightFlow(this, 'Calo tiêu thụ', 'Tổng calo tiêu thụ từ\nworkout sets + cardio sessions')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M600,550 L900,590 L1130,620"
+              stroke="#a855f7"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowPurple)"
+              class="flow-line"
+            />
+            <text x="880" y="580" class="flow-label" font-size="10" fill="#d8b4fe">calorie_burn</text>
+          </g>
+
+          <!-- P6 → P7: fitness_metrics -->
+          <g
+            class="flow-group"
+            data-flow="p6-p7"
+            onmouseenter="
+              highlightFlow(this, 'Chỉ số fitness', 'activity_level, training_frequency,\ntraining_intensity')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M940,760 L1060,710 L1140,660"
+              stroke="#a855f7"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowPurple)"
+              class="flow-line"
+            />
+            <text x="1020" y="720" class="flow-label" font-size="10" fill="#d8b4fe">fitness_metrics</text>
+          </g>
+
+          <!-- P7 → Nutrition Module: calorie_adjustment -->
+          <g
+            class="flow-group"
+            data-flow="p7-nutrition"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Điều chỉnh dinh dưỡng',
+                'activity_multiplier, daily_calorie_burn,\nrecovery_nutrition_needs',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M1275,630 L1350,630 L1420,630"
+              stroke="#a855f7"
+              stroke-width="2.5"
+              fill="none"
+              marker-end="url(#arrowPurple)"
+              class="flow-line animated-flow"
+            />
+            <text x="1340" y="618" class="flow-label" font-size="10" fill="#d8b4fe">calorie_adjustment</text>
+          </g>
+
+          <!-- User → P8: plan_modifications -->
+          <g
+            class="flow-group"
+            data-flow="user-p8"
+            onmouseenter="
+              highlightFlow(this, 'Chỉnh sửa kế hoạch', 'Reassign days, change split,\nadd/remove sessions')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M155,410 L500,350 L910,340"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="520" y="345" class="flow-label" font-size="10">plan_modifications</text>
+          </g>
+
+          <!-- D2+D3 → P8: current_plan_data -->
+          <g
+            class="flow-group"
+            data-flow="d2d3-p8"
+            onmouseenter="
+              highlightFlow(
+                this,
+                'Dữ liệu kế hoạch hiện tại',
+                'training_plan + training_plan_days\nfor the active plan',
+              )
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M950,135 L970,280 L975,290"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="965" y="200" class="flow-label" font-size="10">D2 plan</text>
+          </g>
+          <g
+            class="flow-group"
+            data-flow="d3-p8"
+            onmouseenter="highlightFlow(this, 'Ngày tập hiện tại', 'training_plan_days for active plan')"
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M960,408 L970,390 L978,375"
+              stroke="#64748b"
+              stroke-width="1.5"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="985" y="400" class="flow-label" font-size="9">D3</text>
+          </g>
+
+          <!-- P8 → D2+D3: updated_plan -->
+          <g
+            class="flow-group"
+            data-flow="p8-d2d3"
+            onmouseenter="
+              highlightFlow(this, 'Cập nhật kế hoạch', 'Modified plan structure,\nreassigned days, updated sessions')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M1020,300 L1000,200 L945,140"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="1020" y="230" class="flow-label" font-size="10" fill="#86efac">update</text>
+          </g>
+
+          <!-- D8 → P9: templates -->
+          <g
+            class="flow-group"
+            data-flow="d8-p9"
+            onmouseenter="
+              highlightFlow(this, 'Mẫu kế hoạch', 'plan_templates: name, split_type,\nday_configs, popularity_score')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M1165,136 L1190,170"
+              stroke="#64748b"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="1155" y="163" class="flow-label" font-size="10">templates</text>
+          </g>
+
+          <!-- P9 → D8: new_template -->
+          <g
+            class="flow-group"
+            data-flow="p9-d8"
+            onmouseenter="
+              highlightFlow(this, 'Lưu mẫu mới', 'Lưu kế hoạch hiện tại thành mẫu\nvới day_configs và metadata')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M1220,170 L1200,140"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="1230" y="163" class="flow-label" font-size="10" fill="#86efac">save</text>
+          </g>
+
+          <!-- P9 → D3: applied_template_days -->
+          <g
+            class="flow-group"
+            data-flow="p9-d3"
+            onmouseenter="
+              highlightFlow(this, 'Áp dụng mẫu', 'Tạo training_plan_days từ mẫu\nvới exercises(JSON) đầy đủ')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M1140,255 L1020,350 L960,400"
+              stroke="#22c55e"
+              stroke-width="1.8"
+              fill="none"
+              marker-end="url(#arrowGreen)"
+            />
+            <text x="1060" y="320" class="flow-label" font-size="10" fill="#86efac">applied_template</text>
+          </g>
+
+          <!-- User → P9: save_as_template -->
+          <g
+            class="flow-group"
+            data-flow="user-p9"
+            onmouseenter="
+              highlightFlow(this, 'Lưu làm mẫu', 'Người dùng chọn lưu kế hoạch\nhiện tại thành template mới')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M155,405 L600,250 L1130,220"
+              stroke="#64748b"
+              stroke-width="1.5"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+              stroke-dasharray="6 3"
+            />
+            <text x="620" y="240" class="flow-label" font-size="10">save_as_template</text>
+          </g>
+
+          <!-- D7 → P3: exercises lookup -->
+          <g
+            class="flow-group"
+            data-flow="d7-p3"
+            onmouseenter="
+              highlightFlow(this, 'Tra cứu bài tập', 'exercise details: name_vi, muscle_group,\ncategory, equipment')
+            "
+            onmouseleave="unhighlightFlow(this)"
+          >
+            <path
+              d="M475,376 L490,440 L510,480"
+              stroke="#64748b"
+              stroke-width="1.5"
+              fill="none"
+              marker-end="url(#arrowL1)"
+              class="flow-line"
+            />
+            <text x="478" y="430" class="flow-label" font-size="9">exercises</text>
+          </g>
+
+          <!-- ========== PROCESS DETAIL BOXES ========== -->
+          <!-- P6 computed note -->
+          <g class="fade-in" style="animation-delay: 0.6s">
+            <rect
+              x="930"
+              y="860"
+              width="260"
+              height="70"
+              rx="8"
+              fill="rgba(249,115,22,0.08)"
+              stroke="rgba(249,115,22,0.3)"
+              stroke-width="1"
+            />
+            <text x="948" y="882" fill="#fb923c" font-size="11" font-weight="700">
+              ⚡ P6 — Tính toán thời gian thực
+            </text>
+            <text x="948" y="900" fill="var(--text-secondary)" font-size="10">
+              • 1RM Epley = weight × (1 + reps/30)
+            </text>
+            <text x="948" y="916" fill="var(--text-secondary)" font-size="10">
+              • Không lưu trực tiếp (computed on-the-fly)
+            </text>
+          </g>
+
+          <!-- P7 Bridge note -->
+          <g class="fade-in" style="animation-delay: 0.7s">
+            <rect
+              x="1100"
+              y="700"
+              width="260"
+              height="55"
+              rx="8"
+              fill="rgba(168,85,247,0.08)"
+              stroke="rgba(168,85,247,0.3)"
+              stroke-width="1"
+            />
+            <text x="1118" y="722" fill="#c084fc" font-size="11" font-weight="700">
+              🔗 P7 — Cầu nối Fitness ↔ Dinh dưỡng
+            </text>
+            <text x="1118" y="740" fill="var(--text-secondary)" font-size="10">• TDEE = BMR × activity_multiplier</text>
+          </g>
+
+          <!-- D9 Draft note -->
+          <g class="fade-in" style="animation-delay: 0.5s">
+            <rect
+              x="200"
+              y="580"
+              width="230"
+              height="50"
+              rx="8"
+              fill="rgba(245,158,11,0.08)"
+              stroke="rgba(245,158,11,0.3)"
+              stroke-width="1"
+            />
+            <text x="218" y="600" fill="#fcd34d" font-size="11" font-weight="700">💾 D9 — Auto-save (singleton)</text>
+            <text x="218" y="616" fill="var(--text-secondary)" font-size="10">id='current', overwrite mỗi 30s</text>
+          </g>
+
+          <!-- ========== SUMMARY STATS ========== -->
+          <g class="fade-in" style="animation-delay: 0.8s">
+            <rect
+              x="40"
+              y="1050"
+              width="1520"
+              height="250"
+              rx="14"
+              fill="var(--bg-secondary)"
+              stroke="var(--border-color)"
+              stroke-width="1"
+            />
+            <text x="80" y="1085" fill="var(--text-primary)" font-size="17" font-weight="800">
+              📋 Tổng quan Kiến trúc Dữ liệu — Fitness Feature
+            </text>
+
+            <!-- Col 1 -->
+            <text x="80" y="1120" fill="#60a5fa" font-size="13" font-weight="700">Tiến trình (9)</text>
+            <text x="80" y="1140" fill="var(--text-secondary)" font-size="11">P1 Profile Manager</text>
+            <text x="80" y="1157" fill="var(--text-secondary)" font-size="11">P2 Plan Generator</text>
+            <text x="80" y="1174" fill="var(--text-secondary)" font-size="11">P3 Workout Logger</text>
+            <text x="80" y="1191" fill="var(--text-secondary)" font-size="11">P4 Cardio Logger</text>
+            <text x="80" y="1208" fill="var(--text-secondary)" font-size="11">P5 Weight Tracker</text>
+            <text x="80" y="1225" fill="var(--text-secondary)" font-size="11">P6 Progress Calculator</text>
+            <text x="80" y="1242" fill="var(--text-secondary)" font-size="11">P7 Nutrition Bridge</text>
+            <text x="80" y="1259" fill="var(--text-secondary)" font-size="11">P8 Plan Manager</text>
+            <text x="80" y="1276" fill="var(--text-secondary)" font-size="11">P9 Template System</text>
+
+            <!-- Col 2 -->
+            <text x="380" y="1120" fill="#86efac" font-size="13" font-weight="700">Kho dữ liệu (9)</text>
+            <text x="380" y="1140" fill="var(--text-secondary)" font-size="11">D1 training_profile</text>
+            <text x="380" y="1157" fill="var(--text-secondary)" font-size="11">D2 training_plans</text>
+            <text x="380" y="1174" fill="var(--text-secondary)" font-size="11">D3 training_plan_days</text>
+            <text x="380" y="1191" fill="var(--text-secondary)" font-size="11">D4 workouts</text>
+            <text x="380" y="1208" fill="var(--text-secondary)" font-size="11">D5 workout_sets</text>
+            <text x="380" y="1225" fill="var(--text-secondary)" font-size="11">D6 weight_log</text>
+            <text x="380" y="1242" fill="var(--text-secondary)" font-size="11">D7 exercises</text>
+            <text x="380" y="1259" fill="var(--text-secondary)" font-size="11">D8 plan_templates</text>
+            <text x="380" y="1276" fill="var(--text-secondary)" font-size="11">D9 workout_drafts</text>
+
+            <!-- Col 3 -->
+            <text x="680" y="1120" fill="#94a3b8" font-size="13" font-weight="700">Luồng dữ liệu chính</text>
+            <text x="680" y="1140" fill="var(--text-secondary)" font-size="11">
+              → User inputs: profile, sets, cardio, weight, plan choices
+            </text>
+            <text x="680" y="1157" fill="var(--text-secondary)" font-size="11">
+              ← User outputs: plan, progress, PR alerts, weight trends
+            </text>
+            <text x="680" y="1174" fill="var(--text-secondary)" font-size="11">
+              ↔ Internal: profile → plan → workouts → progress
+            </text>
+            <text x="680" y="1191" fill="var(--text-secondary)" font-size="11">
+              ⇢ External: calorie_adjustment → Nutrition Module
+            </text>
+
+            <text x="680" y="1225" fill="#f97316" font-size="13" font-weight="700">Công nghệ</text>
+            <text x="680" y="1245" fill="var(--text-secondary)" font-size="11">
+              • State: Zustand (fitnessStore) — in-memory + persist
+            </text>
+            <text x="680" y="1262" fill="var(--text-secondary)" font-size="11">
+              • DB: SQLite (sql.js WASM) — schema v4, snake_case columns
+            </text>
+            <text x="680" y="1279" fill="var(--text-secondary)" font-size="11">
+              • Sync: useAutoSync hook, optimistic updates
+            </text>
+
+            <!-- Col 4 -->
+            <text x="1100" y="1120" fill="#a855f7" font-size="13" font-weight="700">Persistence Pattern</text>
+            <text x="1100" y="1145" fill="var(--text-secondary)" font-size="11">┌─────────────────────────────┐</text>
+            <text x="1100" y="1163" fill="var(--text-secondary)" font-size="11">│ User Action │</text>
+            <text x="1100" y="1181" fill="var(--text-secondary)" font-size="11">│ ↓ optimistic update │</text>
+            <text x="1100" y="1199" fill="var(--text-secondary)" font-size="11">│ Zustand Store (in-memory) │</text>
+            <text x="1100" y="1217" fill="var(--text-secondary)" font-size="11">│ ↓ useAutoSync │</text>
+            <text x="1100" y="1235" fill="var(--text-secondary)" font-size="11">│ SQLite (sql.js WASM) │</text>
+            <text x="1100" y="1253" fill="var(--text-secondary)" font-size="11">│ ↓ exportBinary() │</text>
+            <text x="1100" y="1271" fill="var(--text-secondary)" font-size="11">│ IndexedDB / File System │</text>
+            <text x="1100" y="1289" fill="var(--text-secondary)" font-size="11">└─────────────────────────────┘</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoom(0.1)" title="Phóng to">＋</button>
+      <button class="zoom-btn" onclick="zoom(-0.1)" title="Thu nhỏ">−</button>
+      <button class="zoom-btn" onclick="resetZoom()" title="Đặt lại">⟲</button>
+    </div>
+
+    <script>
+      // ==================== TAB SWITCHING ====================
+      function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.diagram-view').forEach(v => v.classList.remove('active'));
+
+        if (tab === 'level0') {
+          document.querySelectorAll('.tab-btn')[0].classList.add('active');
+          document.getElementById('view-level0').classList.add('active');
+        } else {
+          document.querySelectorAll('.tab-btn')[1].classList.add('active');
+          document.getElementById('view-level1').classList.add('active');
+        }
+        closeInfoPanel();
+        currentScale = 1;
+        document.querySelectorAll('.dfd-canvas').forEach(s => (s.style.transform = ''));
+      }
+
+      // ==================== TOOLTIP ====================
+      const tooltip = document.getElementById('tooltip');
+
+      function showTooltip(event, title, fields) {
+        tooltip.innerHTML =
+          '<div class="tooltip-title">' +
+          title +
+          '</div>' +
+          '<div class="tooltip-fields">' +
+          fields
+            .split('\n')
+            .map(f => f.replace(/`([^`]+)`/g, '<code>$1</code>'))
+            .join('<br>') +
+          '</div>';
+        tooltip.classList.add('visible');
+        positionTooltip(event);
+      }
+
+      function hideTooltip() {
+        tooltip.classList.remove('visible');
+      }
+
+      function positionTooltip(event) {
+        const x = event.clientX + 16;
+        const y = event.clientY + 16;
+        const rect = tooltip.getBoundingClientRect();
+        const maxX = window.innerWidth - 380;
+        const maxY = window.innerHeight - 200;
+        tooltip.style.left = Math.min(x, maxX) + 'px';
+        tooltip.style.top = Math.min(y, maxY) + 'px';
+      }
+
+      document.addEventListener('mousemove', function (e) {
+        if (tooltip.classList.contains('visible')) {
+          positionTooltip(e);
+        }
+      });
+
+      // ==================== FLOW HIGHLIGHTING ====================
+      function highlightFlow(el, title, details) {
+        const lines = el.querySelectorAll('.flow-line, path, line');
+        lines.forEach(l => {
+          l.setAttribute('data-orig-stroke', l.getAttribute('stroke'));
+          l.setAttribute('stroke', '#06b6d4');
+          l.setAttribute('stroke-width', '3');
+        });
+        showTooltip(event, title, details);
+      }
+
+      function unhighlightFlow(el) {
+        const lines = el.querySelectorAll('.flow-line, path, line');
+        lines.forEach(l => {
+          const orig = l.getAttribute('data-orig-stroke');
+          if (orig) l.setAttribute('stroke', orig);
+          l.setAttribute('stroke-width', '1.8');
+        });
+        hideTooltip();
+      }
+
+      // ==================== INFO PANEL ====================
+      const infoPanel = document.getElementById('infoPanel');
+      const infoPanelContent = document.getElementById('infoPanelContent');
+
+      function closeInfoPanel() {
+        infoPanel.classList.remove('open');
+      }
+
+      function showContextInfo() {
+        infoPanelContent.innerHTML =
+          '<h3>Fitness System</h3>' +
+          '<div class="info-type">Hệ thống tổng quan — Level 0</div>' +
+          '<div class="info-section"><h4>Mô tả</h4><p>Hệ thống Fitness quản lý toàn bộ quy trình lập kế hoạch tập luyện, ghi nhận bài tập, theo dõi tiến độ và tích hợp dinh dưỡng.</p></div>' +
+          '<div class="info-section"><h4>Thành phần</h4><ul>' +
+          '<li>9 Tiến trình (P1–P9)</li>' +
+          '<li>9 Kho dữ liệu (D1–D9)</li>' +
+          '<li>2 Thực thể ngoài (User, Nutrition Module)</li>' +
+          '</ul></div>' +
+          '<div class="info-section"><h4>Công nghệ</h4><ul>' +
+          '<li>State: <code>Zustand fitnessStore</code></li>' +
+          '<li>DB: <code>SQLite (sql.js WASM)</code></li>' +
+          '<li>Sync: <code>useAutoSync</code> hook</li>' +
+          '</ul></div>';
+        infoPanel.classList.add('open');
+      }
+
+      const processData = {
+        P1: {
+          name: 'Profile Manager',
+          desc: 'Quản lý hồ sơ tập luyện người dùng, bao gồm mục tiêu, kinh nghiệm, thiết bị có sẵn, và các hạn chế về chấn thương.',
+          inputs: ['User profile data (goal, experience, equipment, injuries, 1RM)'],
+          outputs: ['TrainingProfile object → D1'],
+          logic: 'Validate input → Create/update TrainingProfile → Persist to SQLite',
+        },
+        P2: {
+          name: 'Plan Generator',
+          desc: 'Tạo kế hoạch tập luyện tự động dựa trên hồ sơ người dùng. Chọn split type, phân bổ bài tập theo nhóm cơ, áp dụng periodization.',
+          inputs: ['TrainingProfile từ D1', 'Exercises từ D7', 'Templates từ D8'],
+          outputs: ['TrainingPlan → D2', 'TrainingPlanDay[] → D3'],
+          logic:
+            'Determine split → Create sessions → Select exercises (filter by equipment) → Apply periodization → Calculate volume',
+        },
+        P3: {
+          name: 'Workout Logger',
+          desc: 'Ghi nhận dữ liệu bài tập theo thời gian thực. Hỗ trợ auto-save draft, phát hiện PR, validate dữ liệu đầu vào.',
+          inputs: ['User set_data (weight, reps, RPE)', 'Plan day exercises từ D3'],
+          outputs: ['Workout → D4', 'WorkoutSets → D5', 'Draft → D9', 'PR notification → User'],
+          logic: 'Validate → Save atomic → Detect PRs (compare max weight×reps) → Auto-save draft every 30s',
+        },
+        P4: {
+          name: 'Cardio Logger',
+          desc: 'Ghi nhận phiên cardio và ước tính calo tiêu thụ dựa trên công thức MET.',
+          inputs: ['Cardio session data (type, duration, distance, intensity, HR)'],
+          outputs: ['Workout → D4', 'CardioSet → D5 (with estimated_calories)'],
+          logic: 'Calculate calories = MET × weight_kg × duration_hours → Save workout + set',
+        },
+        P5: {
+          name: 'Weight Tracker',
+          desc: 'Theo dõi cân nặng hàng ngày, tính trung bình trượt 7 ngày, phát hiện xu hướng.',
+          inputs: ['Daily weight measurement (weight_kg)'],
+          outputs: ['Weight entry → D6', 'Weight trend (↑↓→) → User'],
+          logic: 'Save daily weight → Calculate 7-day moving average → Determine trend direction',
+        },
+        P6: {
+          name: 'Progress Calculator',
+          desc: 'Tính toán các chỉ số tiến độ theo thời gian thực (computed on-the-fly, không lưu trực tiếp).',
+          inputs: ['Historical data từ D4 + D5 + D6'],
+          outputs: ['Progress metrics → User (1RM trends, adherence %, streaks, milestones, plateau detection)'],
+          logic:
+            '1RM Epley = weight × (1 + reps/30) → Weekly volume → Adherence % → Streak calculation → Plateau detection',
+        },
+        P7: {
+          name: 'Nutrition Bridge',
+          desc: 'Cầu nối giữa module Fitness và module Dinh dưỡng. Tính hệ số hoạt động và điều chỉnh mục tiêu calo.',
+          inputs: ['Calorie burn từ P3/P4', 'Fitness metrics từ P6'],
+          outputs: ['Calorie adjustment → Nutrition Module'],
+          logic: 'TDEE = BMR × activity_multiplier → Adjust calorie targets → Send to Nutrition module',
+        },
+        P8: {
+          name: 'Plan Manager',
+          desc: 'Quản lý chỉnh sửa kế hoạch tập luyện: thay đổi ngày, đổi split, thêm/bớt buổi tập.',
+          inputs: ['User plan modifications', 'Current plan data từ D2 + D3'],
+          outputs: ['Updated plan → D2 + D3'],
+          logic: 'Reassign days → Change split type → Apply templates → Add/remove sessions → Validate constraints',
+        },
+        P9: {
+          name: 'Template System',
+          desc: 'Quản lý mẫu kế hoạch: chấm điểm templates, áp dụng vào plan, lưu plan hiện tại thành template.',
+          inputs: ['Template selection từ User', 'Templates từ D8'],
+          outputs: ['Applied template → D3', 'New template → D8'],
+          logic: 'Score templates → Apply to plan days → Save current plan as template with metadata',
+        },
+      };
+
+      function showProcessInfo(id) {
+        const p = processData[id];
+        if (!p) return;
+
+        infoPanelContent.innerHTML =
+          '<h3>' +
+          id +
+          ': ' +
+          p.name +
+          '</h3>' +
+          '<div class="info-type">Tiến trình (Process)</div>' +
+          '<div class="info-section"><h4>Mô tả</h4><p>' +
+          p.desc +
+          '</p></div>' +
+          '<div class="info-section"><h4>Đầu vào (Input)</h4><ul>' +
+          p.inputs.map(i => '<li>' + i + '</li>').join('') +
+          '</ul></div>' +
+          '<div class="info-section"><h4>Đầu ra (Output)</h4><ul>' +
+          p.outputs.map(o => '<li>' + o + '</li>').join('') +
+          '</ul></div>' +
+          '<div class="info-section"><h4>Logic xử lý</h4><p>' +
+          p.logic +
+          '</p></div>';
+        infoPanel.classList.add('open');
+      }
+
+      const storeData = {
+        D1: {
+          name: 'training_profile',
+          type: 'SQLite Table',
+          fields: [
+            'experience',
+            'days_per_week',
+            'session_duration_min',
+            'training_goal',
+            'available_equipment (JSON)',
+            'injury_restrictions (JSON)',
+            'periodization_model',
+            'plan_cycle_weeks',
+            'priority_muscles (JSON)',
+            'cardio_sessions_week',
+            'known_1rm (JSON)',
+            'avg_sleep_hours',
+          ],
+        },
+        D2: {
+          name: 'training_plans',
+          type: 'SQLite Table',
+          fields: [
+            'id',
+            'name',
+            'status (active|completed|paused)',
+            'split_type',
+            'duration_weeks',
+            'current_week',
+            'start_date',
+            'end_date',
+            'training_days (JSON)',
+            'rest_days (JSON)',
+            'template_id',
+          ],
+        },
+        D3: {
+          name: 'training_plan_days',
+          type: 'SQLite Table',
+          fields: [
+            'id',
+            'plan_id (FK)',
+            'day_of_week (1-7)',
+            'session_order (1-3)',
+            'workout_type',
+            'muscle_groups',
+            'exercises (JSON)',
+            'original_exercises (JSON)',
+            'is_user_assigned',
+            'notes',
+          ],
+          constraints: ['UNIQUE(plan_id, day_of_week, session_order)'],
+        },
+        D4: {
+          name: 'workouts',
+          type: 'SQLite Table',
+          fields: ['id', 'date', 'name', 'plan_day_id (FK)', 'duration_min', 'notes'],
+        },
+        D5: {
+          name: 'workout_sets',
+          type: 'SQLite Table',
+          fields: [
+            'id',
+            'workout_id (FK)',
+            'exercise_id (FK)',
+            'set_number',
+            'reps',
+            'weight_kg',
+            'rpe (1-10)',
+            'rest_seconds',
+            'duration_min',
+            'distance_km',
+            'avg_heart_rate',
+            'intensity',
+            'estimated_calories',
+          ],
+          constraints: ['UNIQUE(workout_id, exercise_id, set_number)'],
+        },
+        D6: { name: 'weight_log', type: 'SQLite Table', fields: ['id', 'date (UNIQUE)', 'weight_kg', 'notes'] },
+        D7: {
+          name: 'exercises',
+          type: 'SQLite Table (seed + custom)',
+          fields: [
+            'id',
+            'name_vi',
+            'name_en',
+            'muscle_group',
+            'secondary_muscles (JSON)',
+            'category',
+            'equipment (JSON)',
+            'exercise_type',
+            'is_custom',
+          ],
+        },
+        D8: {
+          name: 'plan_templates',
+          type: 'SQLite Table',
+          fields: [
+            'id',
+            'name',
+            'split_type',
+            'days_per_week',
+            'experience_level',
+            'training_goal',
+            'equipment_required (JSON)',
+            'day_configs (JSON)',
+            'popularity_score',
+            'is_builtin',
+          ],
+        },
+        D9: {
+          name: 'workout_drafts',
+          type: 'SQLite Table (singleton)',
+          fields: ["id ('current')", 'exercises_json', 'sets_json', 'start_time', 'plan_day_id'],
+        },
+      };
+
+      function showStoreInfo(id) {
+        const s = storeData[id];
+        if (!s) return;
+
+        let html =
+          '<h3>' +
+          id +
+          ': ' +
+          s.name +
+          '</h3>' +
+          '<div class="info-type">Kho dữ liệu — ' +
+          s.type +
+          '</div>' +
+          '<div class="info-section"><h4>Các trường (Fields)</h4><div class="field-list">' +
+          s.fields.map(f => '<span class="field-tag">' + f + '</span>').join('') +
+          '</div></div>';
+
+        if (s.constraints) {
+          html +=
+            '<div class="info-section"><h4>Ràng buộc (Constraints)</h4><ul>' +
+            s.constraints.map(c => '<li><code>' + c + '</code></li>').join('') +
+            '</ul></div>';
+        }
+
+        infoPanelContent.innerHTML = html;
+        infoPanel.classList.add('open');
+      }
+
+      // ==================== ZOOM ====================
+      let currentScale = 1;
+
+      function zoom(delta) {
+        currentScale = Math.max(0.4, Math.min(2, currentScale + delta));
+        const activeView = document.querySelector('.diagram-view.active');
+        if (activeView) {
+          const svg = activeView.querySelector('.dfd-canvas');
+          if (svg) {
+            svg.style.transform = 'scale(' + currentScale + ')';
+            svg.style.transformOrigin = 'top center';
+          }
+        }
+      }
+
+      function resetZoom() {
+        currentScale = 1;
+        document.querySelectorAll('.dfd-canvas').forEach(s => {
+          s.style.transform = '';
+        });
+      }
+
+      // Close panel on Escape
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeInfoPanel();
+      });
+
+      // Close panel clicking outside
+      document.addEventListener('click', function (e) {
+        if (
+          infoPanel.classList.contains('open') &&
+          !infoPanel.contains(e.target) &&
+          !e.target.closest('.process-circle') &&
+          !e.target.closest('.store-bg')
+        ) {
+          closeInfoPanel();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -147,7 +147,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
           </button>
         </div>
         <div>
-          <label htmlFor="qa-name" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
+          <label htmlFor="qa-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
             {t('dish.quickAddName')} <span className="text-rose-500">*</span>
           </label>
           <Controller
@@ -173,7 +173,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
           {errors.qaName && <p className="mt-0.5 text-xs text-rose-500">{errors.qaName.message}</p>}
         </div>
         <div>
-          <label htmlFor="qa-unit" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
+          <label htmlFor="qa-unit" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
             {t('dish.quickAddUnit')}
           </label>
           <Controller
@@ -196,7 +196,9 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         </div>
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-muted-foreground text-xs font-bold uppercase">{t('dish.quickAddNutrition')}</label>
+            <label className="text-muted-foreground text-xs font-semibold uppercase">
+              {t('dish.quickAddNutrition')}
+            </label>
             <div className="flex items-center gap-2">
               {qaAiLoading && (
                 <span className="text-primary flex items-center gap-1 text-xs">
@@ -212,7 +214,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   data-testid="btn-qa-ai-fill"
                   title={t('dish.quickAddAiFillButton')}
                   aria-label={t('dish.quickAddAiFillButton')}
-                  className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                  className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                 </button>
@@ -224,7 +226,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
               <div key={label}>
                 <label
                   htmlFor={`qa-${label.toLowerCase()}`}
-                  className="text-muted-foreground mb-0.5 block text-xs font-bold uppercase"
+                  className="text-muted-foreground mb-0.5 block text-xs font-semibold uppercase"
                 >
                   {label} / {getDisplayUnit(qaUnit, lang)}
                 </label>
@@ -237,7 +239,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   min={0}
                   disabled={qaAiLoading}
                   placeholder="0"
-                  className="focus:border-primary w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                  className="focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 dark:bg-slate-700 dark:text-slate-100"
                 />
               </div>
             ))}

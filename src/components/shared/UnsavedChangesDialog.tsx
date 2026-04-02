@@ -27,7 +27,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
             <Save className="h-8 w-8" />
           </div>
           <h4 className="mb-2 text-xl font-bold text-slate-800 dark:text-slate-100">{t('unsavedChanges.title')}</h4>
-          <p className="mb-6 text-slate-600 dark:text-slate-400">{t('unsavedChanges.description')}</p>
+          <p className="text-foreground-secondary mb-6">{t('unsavedChanges.description')}</p>
           <div className="flex flex-col gap-2">
             <button
               onClick={onSave}

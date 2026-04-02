@@ -109,8 +109,8 @@ describe('StreakMini', () => {
     const count = screen.getByTestId('streak-count');
     expect(count).toBeInTheDocument();
     expect(count).toHaveTextContent('3 ngày');
-    const bold = count.querySelector('[style]');
-    expect(bold).toHaveStyle({ fontVariantNumeric: 'tabular-nums' });
+    const bold = count.querySelector('.tabular-nums');
+    expect(bold).not.toBeNull();
   });
 
   it('shows personal record', () => {
@@ -121,7 +121,7 @@ describe('StreakMini', () => {
     const record = screen.getByTestId('streak-record');
     expect(record).toBeInTheDocument();
     expect(record).toHaveTextContent('Kỷ lục: 3 ngày');
-    expect(record).toHaveStyle({ fontVariantNumeric: 'tabular-nums' });
+    expect(record.className).toContain('tabular-nums');
   });
 
   // ===== Week Dots =====

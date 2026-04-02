@@ -28,13 +28,13 @@ export function WorkoutSummaryCard({
       role="dialog"
       aria-modal="true"
       aria-label={t('fitness.summary.title')}
-      className="pt-safe pb-safe fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900"
+      className="pt-safe pb-safe bg-card fixed inset-0 z-50 flex flex-col"
       data-testid="workout-summary-card"
     >
       <div className="flex flex-1 flex-col items-center justify-center p-6">
         {hasPR && (
           <div
-            className="mb-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 px-6 py-3 text-white shadow-lg"
+            className="mb-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 px-6 py-3 text-amber-950 shadow-lg"
             data-testid="pr-celebration"
           >
             <Trophy className="mx-auto mb-1 h-8 w-8" aria-hidden="true" />
@@ -42,7 +42,7 @@ export function WorkoutSummaryCard({
               {t('fitness.summary.newPR', { count: personalRecords.length })}
             </p>
             {personalRecords.map(pr => (
-              <p key={`${pr.exerciseName}-${pr.weight}`} className="text-center text-xs">
+              <p key={`${pr.exerciseName}-${pr.weight}`} className="truncate text-center text-xs">
                 {pr.exerciseName}: {pr.weight}kg
               </p>
             ))}
@@ -52,17 +52,17 @@ export function WorkoutSummaryCard({
         <div className="w-full max-w-sm space-y-3">
           <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
             <Clock className="h-5 w-5 text-blue-500" aria-hidden="true" />
-            <span className="text-slate-500">{t('fitness.logger.duration')}</span>
+            <span className="text-muted-foreground">{t('fitness.logger.duration')}</span>
             <span className="ml-auto font-semibold">{formatElapsed(durationSeconds)}</span>
           </div>
           <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
             <Dumbbell className="h-5 w-5 text-emerald-500" aria-hidden="true" />
-            <span className="text-slate-500">{t('fitness.logger.totalVolume')}</span>
+            <span className="text-muted-foreground">{t('fitness.logger.totalVolume')}</span>
             <span className="ml-auto font-semibold">{totalVolume.toLocaleString()} kg</span>
           </div>
           <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
             <Flame className="h-5 w-5 text-orange-500" aria-hidden="true" />
-            <span className="text-slate-500">{t('fitness.logger.setsCompleted')}</span>
+            <span className="text-muted-foreground">{t('fitness.logger.setsCompleted')}</span>
             <span className="ml-auto font-semibold">{setsCompleted}</span>
           </div>
         </div>

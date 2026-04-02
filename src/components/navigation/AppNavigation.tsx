@@ -57,7 +57,7 @@ export const BottomNavBar = ({
   const { t } = useTranslation();
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white sm:hidden dark:border-slate-700 dark:bg-slate-900"
+      className="border-border bg-card fixed inset-x-0 bottom-0 z-30 border-t sm:hidden"
       aria-label={t('nav.mainNav')}
     >
       <div className="flex items-center justify-around px-2 py-1" role="tablist">
@@ -71,7 +71,7 @@ export const BottomNavBar = ({
               aria-label={label}
               data-testid={`nav-${tab}`}
               onClick={() => onTabChange(tab)}
-              className={`relative flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-2.5 transition-all ${activeTab === tab ? 'text-emerald-700' : 'text-slate-400 active:text-slate-600 dark:text-slate-500'}`}
+              className={`relative flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-2.5 transition-all ${activeTab === tab ? 'text-primary-emphasis' : 'active:text-foreground-secondary text-slate-400 dark:text-slate-500'}`}
             >
               <div className="relative">
                 {mobileIcon}
@@ -100,7 +100,7 @@ export const DesktopNav = ({ activeTab, onTabChange }: { activeTab: MainTab; onT
           role="tab"
           aria-selected={activeTab === tab}
           onClick={() => onTabChange(tab)}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700' : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700' : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-200'}`}
         >
           {desktopIcon}
           <span>{t(labelKey)}</span>

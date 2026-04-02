@@ -21,14 +21,14 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
         className="bg-card relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
           <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h4>
           <div className="flex items-center gap-1">
             <button
               onClick={onEdit}
               data-testid="btn-detail-edit"
               aria-label={t('common.edit')}
-              className="rounded-full p-2 text-slate-400 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+              className="hover:bg-primary-subtle rounded-full p-2 text-slate-400 transition-all hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
               title={t('common.edit')}
             >
               <Edit3 className="h-5 w-5" />

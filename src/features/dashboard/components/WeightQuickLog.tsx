@@ -77,7 +77,7 @@ function getTrendIndicator(
   const diff = round1(movingAvg - yesterdayWeight);
   if (diff > 0) return { symbol: '↑', color: 'text-destructive' };
   if (diff < 0) return { symbol: '↓', color: 'text-primary' };
-  return { symbol: '→', color: 'text-slate-400' };
+  return { symbol: '→', color: 'text-slate-400 dark:text-slate-500' };
 }
 
 interface WeightQuickLogProps {
@@ -273,8 +273,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
           <div className="flex items-baseline gap-1.5">
             <span
               data-testid="weight-display"
-              className="text-4xl font-bold text-slate-800 dark:text-slate-100"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
+              className="text-4xl font-bold text-slate-800 tabular-nums dark:text-slate-100"
             >
               {inputValue > 0 ? inputValue : '—'}
             </span>
@@ -293,7 +292,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             onPointerDown={decrementLongPress.onPointerDown}
             onPointerUp={decrementLongPress.onPointerUp}
             onPointerLeave={decrementLongPress.onPointerLeave}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+            className="text-foreground-secondary flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
           >
             <Minus className="h-5 w-5" />
           </button>
@@ -307,7 +306,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             onPointerDown={incrementLongPress.onPointerDown}
             onPointerUp={incrementLongPress.onPointerUp}
             onPointerLeave={incrementLongPress.onPointerLeave}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+            className="text-foreground-secondary flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
           >
             <Plus className="h-5 w-5" />
           </button>
@@ -328,10 +327,9 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
                   onClick={() => handleChipSelect(w)}
                   className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'dark:border-primary border-emerald-400 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                  }`}
-                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                      ? 'dark:border-primary text-primary-emphasis border-emerald-400 bg-emerald-100 dark:bg-emerald-900/40'
+                      : 'border-border text-foreground-secondary bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600'
+                  } tabular-nums`}
                 >
                   {w}
                   {isYesterdayWeight && (
@@ -348,8 +346,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         {/* Info Row */}
         <div
           data-testid="info-row"
-          className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 px-6 pb-4 text-sm"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
+          className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 px-6 pb-4 text-sm tabular-nums"
         >
           {yesterdayEntry && (
             <span data-testid="yesterday-info">

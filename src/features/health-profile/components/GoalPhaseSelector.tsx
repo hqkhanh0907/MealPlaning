@@ -53,9 +53,9 @@ const GOAL_OPTIONS: {
     labelKey: 'goal.maintain',
     icon: Equal,
     color: 'text-primary',
-    activeBg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    activeBg: 'bg-primary-subtle',
     activeBorder: 'border-primary',
-    activeText: 'text-emerald-700',
+    activeText: 'text-primary-emphasis',
   },
   {
     type: 'bulk',
@@ -238,7 +238,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
               className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all ${
                 isActive
                   ? `${activeBorder} ${activeBg} ${activeText}`
-                  : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500'
+                  : 'border-border text-slate-700 hover:border-slate-300 dark:text-slate-300 dark:hover:border-slate-500'
               }`}
             >
               <Icon className={`h-6 w-6 ${isActive ? color : ''}`} />
@@ -263,8 +263,8 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
                 onClick={() => handleRateChange(rate)}
                 className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                   rateOfChange === rate
-                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:text-slate-400'
+                    ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                    : 'border-border text-foreground-secondary hover:border-slate-300'
                 }`}
               >
                 {t(labelKey)}

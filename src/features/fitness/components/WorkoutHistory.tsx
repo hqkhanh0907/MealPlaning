@@ -200,7 +200,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
         <p data-testid="empty-title" className="text-muted-foreground mb-1 font-medium">
           {t('fitness.history.noHistory')}
         </p>
-        <p data-testid="empty-subtitle" className="mb-6 text-sm text-slate-500 dark:text-slate-500">
+        <p data-testid="empty-subtitle" className="text-muted-foreground mb-6 text-sm">
           {t('fitness.history.emptySubtitle')}
         </p>
         <div
@@ -230,7 +230,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
             className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
               filter === key
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
             }`}
           >
             {label}
@@ -243,7 +243,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
           <div key={weekKey} data-testid={`week-group-${weekKey}`}>
             <h3
               data-testid={`week-header-${weekKey}`}
-              className="mb-2 px-1 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
+              className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase"
             >
               {t('fitness.history.weekOf', { date: weekLabel })}
             </h3>
@@ -257,7 +257,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                   <div
                     key={workout.id}
                     data-testid={`workout-card-${workout.id}`}
-                    className="bg-card overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-700"
+                    className="bg-card border-border overflow-hidden rounded-xl border shadow-sm"
                   >
                     <button
                       data-testid={`workout-toggle-${workout.id}`}
@@ -282,7 +282,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         {exerciseCount > 0 && (
                           <span
                             data-testid={`workout-exercises-${workout.id}`}
-                            className="text-xs text-slate-500 dark:text-slate-500"
+                            className="text-muted-foreground text-xs"
                           >
                             {t('fitness.history.exerciseCount', {
                               count: exerciseCount,
@@ -303,9 +303,9 @@ function WorkoutHistoryInner(): React.JSX.Element {
                           </span>
                         )}
                         {isExpanded ? (
-                          <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                          <ChevronUp className="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
                         ) : (
-                          <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                          <ChevronDown className="h-4 w-4 text-slate-400 dark:text-slate-500" aria-hidden="true" />
                         )}
                       </div>
                     </button>
@@ -313,7 +313,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                     {isExpanded && (
                       <div
                         data-testid={`workout-detail-${workout.id}`}
-                        className="border-t border-slate-100 px-4 pb-3 dark:border-slate-700"
+                        className="border-border-subtle border-t px-4 pb-3"
                       >
                         {Object.entries(groupSetsByExercise(workout.id)).map(([exerciseId, sets]) => (
                           <ExerciseGroupDetail key={exerciseId} exerciseId={exerciseId} sets={sets} t={t} />
@@ -321,7 +321,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
 
                         <div
                           data-testid={`workout-meta-${workout.id}`}
-                          className="mt-2 flex items-center gap-4 border-t border-slate-50 pt-2 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-500"
+                          className="text-muted-foreground mt-2 flex items-center gap-4 border-t border-slate-50 pt-2 text-xs dark:border-slate-700"
                         >
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" aria-hidden="true" />
@@ -341,7 +341,10 @@ function WorkoutHistoryInner(): React.JSX.Element {
                             data-testid={`workout-notes-${workout.id}`}
                             className="mt-2 flex items-start gap-2 border-t border-slate-50 pt-2 dark:border-slate-700"
                           >
-                            <StickyNote className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
+                            <StickyNote
+                              className="mt-0.5 h-3 w-3 shrink-0 text-slate-400 dark:text-slate-500"
+                              aria-hidden="true"
+                            />
                             <p className="text-muted-foreground text-xs">{workout.notes}</p>
                           </div>
                         )}

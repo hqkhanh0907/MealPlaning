@@ -118,10 +118,10 @@ export const MealsSubTab = React.memo(function MealsSubTab({
       {recentDishes.length > 0 && emptySlots.length > 0 && onQuickAdd && (
         <div
           data-testid="recent-dishes-section"
-          className="bg-card rounded-2xl border border-slate-100 p-3 shadow-sm dark:border-slate-700"
+          className="bg-card border-border-subtle rounded-2xl border p-3 shadow-sm"
         >
-          <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase">
-            <Clock className="h-3.5 w-3.5" />
+          <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase">
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
             {t('recentDishes.title')}
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -136,19 +136,19 @@ export const MealsSubTab = React.memo(function MealsSubTab({
                       setQuickAddDishId(prev => (prev === dish.id ? null : dish.id));
                     }
                   }}
-                  className="dark:hover:border-primary inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-emerald-900/20"
+                  className="dark:hover:border-primary border-border hover:bg-primary-subtle inline-flex min-h-11 items-center gap-1 rounded-lg border bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-emerald-900/20"
                 >
                   <Plus className="text-primary h-3 w-3" />
                   {getLocalizedField(dish.name, lang)}
                 </button>
                 {quickAddDishId === dish.id && emptySlots.length > 1 && (
-                  <div className="absolute top-full left-0 z-20 mt-1 min-w-28 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-600 dark:bg-slate-700">
+                  <div className="border-border bg-card absolute top-full left-0 z-20 mt-1 min-w-28 rounded-xl border py-1 shadow-lg dark:bg-slate-700">
                     {emptySlots.map(type => (
                       <button
                         key={type}
                         data-testid={`btn-quick-add-${type}-${dish.id}`}
                         onClick={() => handleQuickAdd(type, dish.id)}
-                        className="flex min-h-11 w-full items-center px-3 py-2 text-left text-xs font-medium text-slate-700 transition-colors hover:bg-emerald-50 dark:text-slate-300 dark:hover:bg-emerald-900/20"
+                        className="hover:bg-primary-subtle flex min-h-11 w-full items-center px-3 py-2 text-left text-xs font-medium text-slate-700 transition-colors dark:text-slate-300 dark:hover:bg-emerald-900/20"
                       >
                         {mealTypeLabels[type]}
                       </button>
@@ -161,7 +161,7 @@ export const MealsSubTab = React.memo(function MealsSubTab({
         </div>
       )}
 
-      <div className="bg-card divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 shadow-sm dark:divide-slate-700 dark:border-slate-700">
+      <div className="bg-card border-border-subtle divide-y divide-slate-100 overflow-hidden rounded-2xl border shadow-sm dark:divide-slate-700">
         {MEAL_TYPES.map(type => (
           <div key={type} className="p-1">
             <MealSlot
@@ -192,7 +192,7 @@ export const MealsSubTab = React.memo(function MealsSubTab({
         </div>
       )}
       {isComplete && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20">
+        <div className="bg-primary-subtle text-primary-emphasis flex items-center gap-2 rounded-xl border border-emerald-100 p-3 text-sm dark:border-emerald-800/30">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <p className="font-medium">{t('recommendation.planComplete')}</p>
         </div>

@@ -1,0 +1,2225 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sơ Đồ Quy Trình - Fitness/Workout Feature</title>
+    <style>
+      :root {
+        --bg-primary: #0f1117;
+        --bg-secondary: #161b22;
+        --bg-card: #1c2130;
+        --bg-hover: #252d3d;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --text-muted: #6e7681;
+        --border: #30363d;
+        --accent-blue: #58a6ff;
+        --accent-green: #3fb950;
+        --accent-red: #f85149;
+        --accent-orange: #d29922;
+        --accent-purple: #bc8cff;
+        --accent-cyan: #39d2c0;
+        --accent-pink: #f778ba;
+        --accent-yellow: #e3b341;
+        --start-gradient: linear-gradient(135deg, #238636, #2ea043);
+        --end-gradient: linear-gradient(135deg, #da3633, #f85149);
+        --process-gradient: linear-gradient(135deg, #1f6feb, #58a6ff);
+        --decision-gradient: linear-gradient(135deg, #9e6a03, #d29922);
+        --sub-gradient: linear-gradient(135deg, #8957e5, #bc8cff);
+        --io-gradient: linear-gradient(135deg, #1a7f5a, #39d2c0);
+        --storage-gradient: linear-gradient(135deg, #6e40c9, #a371f7);
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        --shadow-glow-blue: 0 0 20px rgba(88, 166, 255, 0.15);
+        --shadow-glow-green: 0 0 20px rgba(63, 185, 80, 0.15);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Header */
+      .page-header {
+        background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1c2130 100%);
+        border-bottom: 1px solid var(--border);
+        padding: 32px 0 24px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+      }
+      .header-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .header-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--process-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: var(--shadow-glow-blue);
+      }
+      .header-title h1 {
+        font-size: 22px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #58a6ff, #bc8cff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .header-title .subtitle {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+      .header-meta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .meta-badge {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .meta-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      /* Navigation */
+      .flow-nav {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px 32px;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+      }
+      .flow-nav::-webkit-scrollbar {
+        height: 4px;
+      }
+      .flow-nav::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .flow-nav::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+      .nav-btn {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+        border-color: var(--accent-blue);
+      }
+      .nav-btn.active {
+        background: rgba(88, 166, 255, 0.1);
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+      }
+      .nav-btn .nav-num {
+        background: var(--bg-secondary);
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .nav-btn.active .nav-num {
+        background: var(--accent-blue);
+        color: var(--bg-primary);
+      }
+
+      /* Main content */
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 32px 64px;
+      }
+
+      /* Flow Section */
+      .flow-section {
+        margin-top: 32px;
+        scroll-margin-top: 120px;
+      }
+      .flow-section.hidden {
+        display: none;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .section-num {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .section-title {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .section-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* Flowchart Canvas */
+      .flowchart {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 40px 24px;
+        overflow-x: auto;
+        position: relative;
+      }
+      .flowchart-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: fit-content;
+        gap: 0;
+      }
+
+      /* Node base styles */
+      .node {
+        position: relative;
+        text-align: center;
+        transition: all 0.25s ease;
+        cursor: default;
+        z-index: 2;
+      }
+      .node:hover {
+        transform: translateY(-2px);
+      }
+      .node:hover .node-box {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+
+      .node-box {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.5;
+        box-shadow: var(--shadow);
+        border: 1px solid transparent;
+        position: relative;
+        min-width: 200px;
+        max-width: 360px;
+      }
+      .node-box .node-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.7;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      .node-box .node-text {
+        font-weight: 600;
+      }
+      .node-box .node-detail {
+        font-size: 11px;
+        opacity: 0.8;
+        margin-top: 4px;
+        font-weight: 400;
+      }
+
+      /* Node types */
+      .node-start .node-box {
+        background: var(--start-gradient);
+        border-radius: 25px;
+        color: #fff;
+        border-color: rgba(46, 160, 67, 0.4);
+      }
+      .node-end .node-box {
+        background: var(--end-gradient);
+        border-radius: 25px;
+        color: #fff;
+        border-color: rgba(248, 81, 73, 0.4);
+      }
+      .node-process .node-box {
+        background: linear-gradient(135deg, rgba(31, 111, 235, 0.15), rgba(88, 166, 255, 0.08));
+        border-color: rgba(88, 166, 255, 0.3);
+        color: var(--text-primary);
+      }
+      .node-decision .node-box {
+        background: linear-gradient(135deg, rgba(158, 106, 3, 0.2), rgba(210, 153, 34, 0.1));
+        border-color: rgba(210, 153, 34, 0.4);
+        color: var(--text-primary);
+        transform: rotate(0deg);
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        padding: 32px 40px;
+        min-width: 220px;
+      }
+      .node-decision-rect .node-box {
+        background: linear-gradient(135deg, rgba(158, 106, 3, 0.2), rgba(210, 153, 34, 0.1));
+        border-color: rgba(210, 153, 34, 0.4);
+        color: var(--text-primary);
+        border-radius: 10px;
+        border-left: 4px solid var(--accent-orange);
+      }
+      .node-subprocess .node-box {
+        background: linear-gradient(135deg, rgba(137, 87, 229, 0.15), rgba(188, 140, 255, 0.08));
+        border-color: rgba(188, 140, 255, 0.3);
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-purple);
+      }
+      .node-io .node-box {
+        background: linear-gradient(135deg, rgba(57, 210, 192, 0.12), rgba(57, 210, 192, 0.05));
+        border-color: rgba(57, 210, 192, 0.3);
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-cyan);
+        transform: skewX(-4deg);
+      }
+      .node-io .node-box > * {
+        transform: skewX(4deg);
+      }
+      .node-storage .node-box {
+        background: linear-gradient(135deg, rgba(110, 64, 201, 0.15), rgba(163, 113, 247, 0.08));
+        border-color: rgba(163, 113, 247, 0.3);
+        color: var(--text-primary);
+        border-radius: 4px 4px 20px 20px;
+      }
+      .node-conditional .node-box {
+        background: linear-gradient(135deg, rgba(247, 120, 186, 0.12), rgba(247, 120, 186, 0.05));
+        border-color: rgba(247, 120, 186, 0.3);
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-pink);
+        border-style: dashed;
+        border-left-style: solid;
+      }
+      .node-action .node-box {
+        background: linear-gradient(135deg, rgba(63, 185, 80, 0.12), rgba(63, 185, 80, 0.05));
+        border-color: rgba(63, 185, 80, 0.3);
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-green);
+      }
+      .node-loop .node-box {
+        background: linear-gradient(135deg, rgba(227, 179, 65, 0.12), rgba(227, 179, 65, 0.05));
+        border-color: rgba(227, 179, 65, 0.3);
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-yellow);
+        border-right: 4px solid var(--accent-yellow);
+      }
+
+      /* Connector arrows */
+      .connector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+      .connector-line {
+        width: 2px;
+        height: 28px;
+        background: linear-gradient(to bottom, var(--border), var(--text-muted));
+      }
+      .connector-arrow {
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid var(--text-muted);
+      }
+      .connector-label {
+        position: absolute;
+        right: -80px;
+        top: 6px;
+        font-size: 11px;
+        color: var(--text-muted);
+        background: var(--bg-secondary);
+        padding: 2px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        border: 1px solid var(--border);
+      }
+      .connector-label.left {
+        right: auto;
+        left: -80px;
+      }
+
+      /* Branch container */
+      .branch-container {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        justify-content: center;
+        margin: 0;
+        width: 100%;
+      }
+      .branch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        flex: 1;
+        max-width: 400px;
+        min-width: 260px;
+      }
+      .branch-label {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .branch-label.auto {
+        background: rgba(88, 166, 255, 0.15);
+        color: var(--accent-blue);
+        border: 1px solid rgba(88, 166, 255, 0.3);
+      }
+      .branch-label.manual {
+        background: rgba(188, 140, 255, 0.15);
+        color: var(--accent-purple);
+        border: 1px solid rgba(188, 140, 255, 0.3);
+      }
+      .branch-label.yes {
+        background: rgba(63, 185, 80, 0.15);
+        color: var(--accent-green);
+        border: 1px solid rgba(63, 185, 80, 0.3);
+      }
+      .branch-label.no {
+        background: rgba(248, 81, 73, 0.15);
+        color: var(--accent-red);
+        border: 1px solid rgba(248, 81, 73, 0.3);
+      }
+
+      /* Merge point */
+      .merge-point {
+        width: 16px;
+        height: 16px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        border: 2px solid var(--bg-secondary);
+        z-index: 3;
+      }
+      .merge-bar {
+        height: 2px;
+        background: var(--border);
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Step group inside flow */
+      .step-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* Horizontal group */
+      .h-group {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .h-group .node {
+        flex: 1;
+        min-width: 180px;
+        max-width: 300px;
+      }
+
+      /* Multi-action panel */
+      .action-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        width: 100%;
+        max-width: 900px;
+      }
+      .action-panel-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent-blue);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .action-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        transition: all 0.2s ease;
+        cursor: default;
+      }
+      .action-card:hover {
+        border-color: var(--accent-blue);
+        background: var(--bg-hover);
+        transform: translateY(-1px);
+      }
+      .action-card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .action-card-body {
+        font-size: 11px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+      .action-card-body code {
+        background: rgba(88, 166, 255, 0.1);
+        color: var(--accent-blue);
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-size: 10.5px;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+      }
+
+      /* Legend */
+      .legend {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin-top: 48px;
+      }
+      .legend-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .legend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+      }
+      .legend-shape {
+        width: 36px;
+        height: 24px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+      .legend-shape.start {
+        background: var(--start-gradient);
+        border-radius: 12px;
+      }
+      .legend-shape.end {
+        background: var(--end-gradient);
+        border-radius: 12px;
+      }
+      .legend-shape.process {
+        background: linear-gradient(135deg, rgba(31, 111, 235, 0.4), rgba(88, 166, 255, 0.2));
+        border: 1px solid rgba(88, 166, 255, 0.4);
+      }
+      .legend-shape.decision {
+        background: linear-gradient(135deg, rgba(158, 106, 3, 0.4), rgba(210, 153, 34, 0.2));
+        border: 1px solid rgba(210, 153, 34, 0.5);
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        width: 32px;
+        height: 32px;
+      }
+      .legend-shape.subprocess {
+        background: linear-gradient(135deg, rgba(137, 87, 229, 0.4), rgba(188, 140, 255, 0.2));
+        border: 1px solid rgba(188, 140, 255, 0.4);
+        border-left: 3px solid var(--accent-purple);
+      }
+      .legend-shape.io {
+        background: linear-gradient(135deg, rgba(57, 210, 192, 0.3), rgba(57, 210, 192, 0.1));
+        border: 1px solid rgba(57, 210, 192, 0.4);
+        transform: skewX(-6deg);
+        border-left: 3px solid var(--accent-cyan);
+      }
+      .legend-shape.conditional {
+        background: linear-gradient(135deg, rgba(247, 120, 186, 0.3), rgba(247, 120, 186, 0.1));
+        border: 1px dashed rgba(247, 120, 186, 0.4);
+        border-left: 3px solid var(--accent-pink);
+        border-left-style: solid;
+      }
+      .legend-shape.storage {
+        background: linear-gradient(135deg, rgba(110, 64, 201, 0.4), rgba(163, 113, 247, 0.2));
+        border: 1px solid rgba(163, 113, 247, 0.4);
+        border-radius: 3px 3px 12px 12px;
+      }
+      .legend-shape.loop {
+        background: linear-gradient(135deg, rgba(227, 179, 65, 0.3), rgba(227, 179, 65, 0.1));
+        border: 1px solid rgba(227, 179, 65, 0.4);
+        border-left: 3px solid var(--accent-yellow);
+        border-right: 3px solid var(--accent-yellow);
+      }
+      .legend-shape.action {
+        background: linear-gradient(135deg, rgba(63, 185, 80, 0.3), rgba(63, 185, 80, 0.1));
+        border: 1px solid rgba(63, 185, 80, 0.4);
+        border-left: 3px solid var(--accent-green);
+      }
+      .legend-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+      .legend-text strong {
+        color: var(--text-primary);
+        display: block;
+        font-size: 12px;
+      }
+
+      /* Tooltip */
+      .tooltip {
+        position: relative;
+      }
+      .tooltip .tip-content {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1c2130;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        min-width: 220px;
+        max-width: 320px;
+        z-index: 50;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        transition: all 0.2s ease;
+        pointer-events: none;
+        text-align: left;
+        line-height: 1.5;
+      }
+      .tooltip:hover .tip-content {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      /* View mode toggle */
+      .view-toggle {
+        display: flex;
+        gap: 4px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 3px;
+      }
+      .view-toggle button {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .view-toggle button.active {
+        background: var(--accent-blue);
+        color: #fff;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .header-inner {
+          padding: 0 16px;
+        }
+        .flow-nav {
+          padding: 16px;
+        }
+        .main-content {
+          padding: 0 16px 48px;
+        }
+        .branch-container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .branch {
+          max-width: 100%;
+          min-width: auto;
+          width: 100%;
+        }
+        .action-grid {
+          grid-template-columns: 1fr;
+        }
+        .node-box {
+          min-width: 160px;
+          max-width: 100%;
+        }
+        .h-group {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .flow-section {
+        animation: fadeInUp 0.4s ease;
+      }
+
+      /* Scrollbar */
+      .flowchart::-webkit-scrollbar {
+        height: 6px;
+      }
+      .flowchart::-webkit-scrollbar-track {
+        background: var(--bg-card);
+        border-radius: 3px;
+      }
+      .flowchart::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+
+      /* Print */
+      @media print {
+        .page-header {
+          position: relative;
+        }
+        .flow-nav {
+          display: none;
+        }
+        .flow-section {
+          display: block !important;
+          page-break-inside: avoid;
+        }
+        body {
+          background: #fff;
+          color: #000;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════════════════════════════════ HEADER ═══════════════════════════════════════════ -->
+    <header class="page-header">
+      <div class="header-inner">
+        <div class="header-title">
+          <div class="header-icon">🏋️</div>
+          <div>
+            <h1>Sơ Đồ Quy Trình — Fitness / Workout Feature</h1>
+            <div class="subtitle">MealPlaning App · React 19 + Vite 6 + Capacitor 8 · Offline-first SQLite</div>
+          </div>
+        </div>
+        <div class="header-meta">
+          <span class="meta-badge"><span class="dot" style="background: var(--accent-green)"></span> ~80 files</span>
+          <span class="meta-badge"
+            ><span class="dot" style="background: var(--accent-blue)"></span> 1178-line store</span
+          >
+          <span class="meta-badge"
+            ><span class="dot" style="background: var(--accent-purple)"></span> 11 SQLite tables</span
+          >
+          <span class="meta-badge"
+            ><span class="dot" style="background: var(--accent-orange)"></span> 200+ exercises</span
+          >
+          <div class="view-toggle">
+            <button class="active" onclick="showMode('all')">Tất cả</button>
+            <button onclick="showMode('single')">Từng flow</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════ NAV ═══════════════════════════════════════════ -->
+    <nav class="flow-nav" id="flowNav">
+      <button class="nav-btn active" onclick="scrollToFlow('flow1')" data-flow="flow1">
+        <span class="nav-num">1</span>Onboarding
+      </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow2')" data-flow="flow2">
+        <span class="nav-num">2</span>Tạo Kế Hoạch
+      </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow3')" data-flow="flow3">
+        <span class="nav-num">3</span>Workout Execution
+      </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow4')" data-flow="flow4">
+        <span class="nav-num">4</span>Cardio Logging
+      </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow5')" data-flow="flow5">
+        <span class="nav-num">5</span>Plan Management
+      </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow6')" data-flow="flow6">
+        <span class="nav-num">6</span>Weight Tracking
+      </button>
+      <button class="nav-btn" onclick="scrollToFlow('flow7')" data-flow="flow7">
+        <span class="nav-num">7</span>Progress &amp; Analytics
+      </button>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════ MAIN ═══════════════════════════════════════════ -->
+    <main class="main-content">
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 1: ONBOARDING                                                                     ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow1">
+        <div class="section-header">
+          <div class="section-num" style="background: var(--start-gradient); color: #fff">1</div>
+          <div>
+            <div class="section-title">Onboarding — Thiết Lập Hồ Sơ Tập Luyện</div>
+            <div class="section-desc">9 bước có điều kiện · TrainingProfile → isOnboarded = true</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start tooltip">
+              <div class="node-box">
+                <div class="node-text">▶ START</div>
+                <div class="node-detail">Người dùng mở Fitness Tab lần đầu</div>
+              </div>
+              <div class="tip-content">
+                Kiểm tra <code>isOnboarded</code> trong fitnessStore. Nếu false → hiển thị Onboarding wizard.
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process tooltip">
+              <div class="node-box">
+                <div class="node-label">Step 0</div>
+                <div class="node-text">🎯 Mục tiêu / Kinh nghiệm / Ngày/tuần</div>
+                <div class="node-detail">Goal · Experience Level · Days Per Week</div>
+              </div>
+              <div class="tip-content">
+                <strong>Goal:</strong> build_muscle | lose_fat | strength | endurance | general<br />
+                <strong>Experience:</strong> beginner | intermediate | advanced<br />
+                <strong>Days/week:</strong> 2–6
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process tooltip">
+              <div class="node-box">
+                <div class="node-label">Step 1</div>
+                <div class="node-text">⏱️ Thời lượng mỗi buổi tập</div>
+                <div class="node-detail">Session Duration (phút)</div>
+              </div>
+              <div class="tip-content">Chọn thời gian cho mỗi buổi tập: 30 / 45 / 60 / 75 / 90 phút</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-io tooltip">
+              <div class="node-box">
+                <div class="node-label">Step 2</div>
+                <div class="node-text">🏗️ Thiết bị có sẵn</div>
+                <div class="node-detail">Equipment — Multi-select</div>
+              </div>
+              <div class="tip-content">
+                barbell, dumbbell, cables, machines, bodyweight, resistance_bands, kettlebell, pull_up_bar
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-io tooltip">
+              <div class="node-box">
+                <div class="node-label">Step 3</div>
+                <div class="node-text">🩹 Chấn thương / Hạn chế</div>
+                <div class="node-detail">Injuries — Multi-select</div>
+              </div>
+              <div class="tip-content">shoulder, lower_back, knee, wrist, neck, hip, elbow, ankle, none</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process tooltip">
+              <div class="node-box">
+                <div class="node-label">Step 4</div>
+                <div class="node-text">🏃 Số buổi Cardio / tuần</div>
+                <div class="node-detail">Cardio Sessions Per Week</div>
+              </div>
+              <div class="tip-content">0–7 buổi cardio mỗi tuần, ảnh hưởng đến cấu trúc training plan</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Decision: Intermediate+ ? -->
+            <div class="node node-decision-rect tooltip">
+              <div class="node-box">
+                <div class="node-label">⟁ Điều kiện</div>
+                <div class="node-text">Experience ≥ intermediate?</div>
+              </div>
+              <div class="tip-content">Steps 5, 6, 7 chỉ hiển thị cho intermediate hoặc advanced</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="branch-container">
+              <div class="branch">
+                <span class="branch-label yes">✓ CÓ (intermediate+)</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-conditional tooltip">
+                  <div class="node-box">
+                    <div class="node-label">Step 5 — Conditional</div>
+                    <div class="node-text">📊 Periodization</div>
+                    <div class="node-detail">linear | undulating | block</div>
+                  </div>
+                  <div class="tip-content">
+                    <strong>linear:</strong> Tăng dần đều<br /><strong>undulating:</strong> Xoay vòng
+                    volume/intensity<br /><strong>block:</strong> Phases theo chu kỳ
+                  </div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-conditional tooltip">
+                  <div class="node-box">
+                    <div class="node-label">Step 6 — Conditional</div>
+                    <div class="node-text">🔄 Cycle Weeks</div>
+                    <div class="node-detail">Số tuần mỗi chu kỳ</div>
+                  </div>
+                  <div class="tip-content">Thường 4–12 tuần, quyết định khi nào deload / chuyển phase</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-conditional tooltip">
+                  <div class="node-box">
+                    <div class="node-label">Step 7 — Conditional</div>
+                    <div class="node-text">💪 Nhóm cơ ưu tiên (max 3)</div>
+                    <div class="node-detail">Priority Muscles</div>
+                  </div>
+                  <div class="tip-content">
+                    Chọn tối đa 3 nhóm cơ cần tập trung phát triển: chest, back, shoulders, legs, arms, core...
+                  </div>
+                </div>
+              </div>
+              <div class="branch">
+                <span class="branch-label no">✗ KHÔNG (beginner)</span>
+                <div class="connector">
+                  <div class="connector-line" style="height: 60px"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-process">
+                  <div class="node-box" style="opacity: 0.6; border-style: dashed">
+                    <div class="node-text">⏭️ Bỏ qua Steps 5–7</div>
+                    <div class="node-detail">Dùng defaults: linear, 4 weeks</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+            <div class="merge-bar"></div>
+            <div class="connector">
+              <div class="connector-line" style="height: 12px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-io tooltip">
+              <div class="node-box">
+                <div class="node-label">Step 8</div>
+                <div class="node-text">🏋️ Known 1RM</div>
+                <div class="node-detail">Squat · Bench Press · Deadlift · OHP</div>
+              </div>
+              <div class="tip-content">
+                Nhập 1 Rep Max đã biết cho 4 bài tập chính. Dùng để tính progressive overload.
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Decision: Advanced only -->
+            <div class="node node-decision-rect tooltip">
+              <div class="node-box">
+                <div class="node-label">⟁ Điều kiện</div>
+                <div class="node-text">Experience = advanced?</div>
+              </div>
+              <div class="tip-content">Step 9 chỉ hiển thị cho advanced users</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="branch-container">
+              <div class="branch">
+                <span class="branch-label yes">✓ ADVANCED</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-conditional tooltip">
+                  <div class="node-box">
+                    <div class="node-label">Step 9 — Conditional</div>
+                    <div class="node-text">😴 Giờ ngủ trung bình</div>
+                    <div class="node-detail">Sleep Hours (ảnh hưởng recovery)</div>
+                  </div>
+                  <div class="tip-content">Dùng để điều chỉnh volume & intensity dựa trên khả năng hồi phục</div>
+                </div>
+              </div>
+              <div class="branch">
+                <span class="branch-label no">✗ KHÁC</span>
+                <div class="connector">
+                  <div class="connector-line" style="height: 40px"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-process">
+                  <div class="node-box" style="opacity: 0.6; border-style: dashed">
+                    <div class="node-text">⏭️ Bỏ qua Step 9</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+            <div class="merge-bar"></div>
+            <div class="connector">
+              <div class="connector-line" style="height: 12px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-storage tooltip">
+              <div class="node-box">
+                <div class="node-text">💾 Save TrainingProfile</div>
+                <div class="node-detail">SQLite: training_profiles table</div>
+              </div>
+              <div class="tip-content">Lưu toàn bộ cấu hình vào SQLite → cập nhật fitnessStore.trainingProfile</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action tooltip">
+              <div class="node-box">
+                <div class="node-text">✅ isOnboarded = true</div>
+                <div class="node-detail">Chuyển sang FitnessTab chính</div>
+              </div>
+              <div class="tip-content">setTrainingProfile(profile) → isOnboarded computed from profile existence</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END ONBOARDING</div>
+                <div class="node-detail">→ Tiếp tục Flow 2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 2: TRAINING PLAN CREATION                                                         ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow2">
+        <div class="section-header">
+          <div class="section-num" style="background: var(--process-gradient); color: #fff">2</div>
+          <div>
+            <div class="section-title">Tạo Kế Hoạch Tập Luyện — Training Plan Creation</div>
+            <div class="section-desc">Auto-generate hoặc Manual · Split logic · Periodization</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ FitnessTab — Sau Onboarding</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-decision-rect tooltip">
+              <div class="node-box">
+                <div class="node-label">⟁ Quyết định</div>
+                <div class="node-text">Chọn chiến lược tạo plan?</div>
+              </div>
+              <div class="tip-content">Người dùng chọn giữa AUTO (hệ thống tự tạo) hoặc MANUAL (tự thiết kế)</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="branch-container">
+              <!-- AUTO Branch -->
+              <div class="branch">
+                <span class="branch-label auto">⚡ AUTO GENERATE</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-subprocess tooltip">
+                  <div class="node-box">
+                    <div class="node-text">useTrainingPlan.generatePlan()</div>
+                  </div>
+                  <div class="tip-content">Hook chính xử lý toàn bộ logic auto-generation</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-process tooltip">
+                  <div class="node-box">
+                    <div class="node-text">📐 Xác định Split</div>
+                    <div class="node-detail">2–3d→full_body · 4d→upper_lower · 5–6d→ppl</div>
+                  </div>
+                  <div class="tip-content">Dựa trên daysPerWeek trong TrainingProfile để chọn split phù hợp</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-process">
+                  <div class="node-box">
+                    <div class="node-text">📝 Tạo Session Templates</div>
+                    <div class="node-detail">Theo split type + goal</div>
+                  </div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-subprocess tooltip">
+                  <div class="node-box">
+                    <div class="node-text">🔍 Lọc &amp; Chọn bài tập</div>
+                    <div class="node-detail">Filter: equipment, experience, injuries</div>
+                  </div>
+                  <div class="tip-content">
+                    Từ 200+ exercises → lọc theo thiết bị có sẵn, kinh nghiệm, chấn thương → chọn phù hợp
+                  </div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-process tooltip">
+                  <div class="node-box">
+                    <div class="node-text">📅 Phân bổ ngày tập</div>
+                    <div class="node-detail">Tránh cùng nhóm cơ liên tiếp</div>
+                  </div>
+                  <div class="tip-content">Thuật toán đảm bảo không lặp nhóm cơ chính ở ngày liền kề</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-process">
+                  <div class="node-box">
+                    <div class="node-text">📊 Áp dụng Periodization</div>
+                    <div class="node-detail">linear / undulating / block</div>
+                  </div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-storage tooltip">
+                  <div class="node-box">
+                    <div class="node-text">💾 addTrainingPlan() + addPlanDays()</div>
+                    <div class="node-detail">SQLite INSERT → training_plans + plan_days</div>
+                  </div>
+                  <div class="tip-content">Transaction: INSERT plan → INSERT plan_days → UPDATE store</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-action">
+                  <div class="node-box">
+                    <div class="node-text">🎉 Success Toast</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MANUAL Branch -->
+              <div class="branch">
+                <span class="branch-label manual">✋ MANUAL</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-subprocess tooltip">
+                  <div class="node-box">
+                    <div class="node-text">handleCreateManualPlan()</div>
+                  </div>
+                  <div class="tip-content">Tạo plan rỗng 1 tuần cho user tự thiết kế</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-process">
+                  <div class="node-box">
+                    <div class="node-text">📅 Tạo plan 1 tuần (trống)</div>
+                    <div class="node-detail">7 ngày, chưa có bài tập</div>
+                  </div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-action tooltip">
+                  <div class="node-box">
+                    <div class="node-text">📝 Mở PlanDayEditor</div>
+                    <div class="node-detail">cho ngày hôm nay</div>
+                  </div>
+                  <div class="tip-content">pushPage('PlanDayEditor') cho ngày hiện tại → user tự thêm exercises</div>
+                </div>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+
+                <div class="node node-storage">
+                  <div class="node-box">
+                    <div class="node-text">💾 SQLite INSERT</div>
+                    <div class="node-detail">Lưu khi user save</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+            <div class="merge-bar"></div>
+            <div class="connector">
+              <div class="connector-line" style="height: 12px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END — Hiển thị TrainingPlanView</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 3: WORKOUT EXECUTION                                                              ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow3">
+        <div class="section-header">
+          <div class="section-num" style="background: linear-gradient(135deg, #da3633, #f85149); color: #fff">3</div>
+          <div>
+            <div class="section-title">Workout Execution — Thực Hiện Buổi Tập (Strength)</div>
+            <div class="section-desc">WorkoutLogger · Progressive Overload · PR Detection · Atomic Save</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ TrainingPlanView → "Bắt đầu tập"</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action tooltip">
+              <div class="node-box">
+                <div class="node-text">📱 pushPage(WorkoutLogger)</div>
+                <div class="node-detail">Full-screen overlay, ẩn bottom nav</div>
+              </div>
+              <div class="tip-content">Sử dụng navigation store pushPage() → PageStackOverlay render WorkoutLogger</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-subprocess tooltip">
+              <div class="node-box">
+                <div class="node-text">📋 loadExercisesFromPlan()</div>
+                <div class="node-detail">Load bài tập từ plan day hiện tại</div>
+              </div>
+              <div class="tip-content">Query plan_day_exercises → map to exercise details → populate logger form</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-subprocess tooltip">
+              <div class="node-box">
+                <div class="node-text">📈 useProgressiveOverload</div>
+                <div class="node-detail">Gợi ý trọng lượng &amp; số reps</div>
+              </div>
+              <div class="tip-content">
+                Dựa trên history workout trước → suggest weight/reps tăng dần theo periodization
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Exercise Loop -->
+            <div class="node node-loop tooltip">
+              <div class="node-box">
+                <div class="node-text">🔄 FOR EACH — Bài tập (Exercise)</div>
+                <div class="node-detail">Lặp qua từng bài trong buổi tập</div>
+              </div>
+              <div class="tip-content">Mỗi bài tập có nhiều sets → user nhập kết quả từng set</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <!-- Set Loop -->
+            <div class="node node-loop">
+              <div class="node-box">
+                <div class="node-text">🔁 FOR EACH — Set</div>
+                <div class="node-detail">Nhập dữ liệu cho từng set</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="h-group">
+              <div class="node node-io">
+                <div class="node-box">
+                  <div class="node-text">⚖️ Weight (kg)</div>
+                </div>
+              </div>
+              <div class="node node-io">
+                <div class="node-box">
+                  <div class="node-text">🔢 Reps</div>
+                </div>
+              </div>
+              <div class="node node-io">
+                <div class="node-box">
+                  <div class="node-text">💪 RPE (1–10)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process tooltip">
+              <div class="node-box">
+                <div class="node-text">⏱️ RestTimer giữa các sets</div>
+                <div class="node-detail">Đếm ngược thời gian nghỉ</div>
+              </div>
+              <div class="tip-content">Timer tự động chạy sau mỗi set, có thể skip hoặc adjust</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-storage tooltip">
+              <div class="node-box">
+                <div class="node-text">💾 Auto-save → workoutDraft</div>
+                <div class="node-detail">Lưu tạm để không mất dữ liệu</div>
+              </div>
+              <div class="tip-content">Mỗi thay đổi được auto-save vào draft, phòng trường hợp app crash</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-subprocess tooltip">
+              <div class="node-box">
+                <div class="node-text">✅ Validate — workoutLoggerSchema (Zod)</div>
+                <div class="node-detail">Kiểm tra dữ liệu hợp lệ</div>
+              </div>
+              <div class="tip-content">
+                Zod schema validate: weight > 0, reps > 0, RPE 1-10, ít nhất 1 set per exercise
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-storage tooltip">
+              <div class="node-box">
+                <div class="node-label">🔒 TRANSACTION</div>
+                <div class="node-text">saveWorkoutAtomic(workout, sets)</div>
+                <div class="node-detail">SQLite Transaction: verify → seed → INSERT</div>
+              </div>
+              <div class="tip-content">
+                1. Verify planDayId exists<br />
+                2. Seed exercises if needed<br />
+                3. INSERT workout record<br />
+                4. INSERT all sets (batch)<br />
+                All-or-nothing transaction
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-decision-rect tooltip">
+              <div class="node-box">
+                <div class="node-label">⟁ Kiểm tra</div>
+                <div class="node-text">Phát hiện Personal Record (PR)?</div>
+              </div>
+              <div class="tip-content">So sánh weight × reps với history → nếu cao nhất → PR!</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="branch-container">
+              <div class="branch" style="max-width: 250px">
+                <span class="branch-label yes">🏆 PR MỚI!</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-action">
+                  <div class="node-box">
+                    <div class="node-text">🎊 Hiển thị PRToast</div>
+                    <div class="node-detail">Animation chúc mừng</div>
+                  </div>
+                </div>
+              </div>
+              <div class="branch" style="max-width: 250px">
+                <span class="branch-label no">Không có PR</span>
+                <div class="connector">
+                  <div class="connector-line" style="height: 40px"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-process">
+                  <div class="node-box" style="opacity: 0.6">
+                    <div class="node-text">→ Tiếp tục</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 16px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+            <div class="merge-bar"></div>
+            <div class="connector">
+              <div class="connector-line" style="height: 12px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action tooltip">
+              <div class="node-box">
+                <div class="node-text">🧹 clearWorkoutDraft()</div>
+                <div class="node-detail">Xóa draft đã lưu</div>
+              </div>
+              <div class="tip-content">Draft không còn cần thiết sau khi save thành công → clear</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action">
+              <div class="node-box">
+                <div class="node-text">⬅️ popPage()</div>
+                <div class="node-detail">Quay lại TrainingPlanView</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END WORKOUT</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 4: CARDIO LOGGING                                                                 ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow4">
+        <div class="section-header">
+          <div class="section-num" style="background: var(--io-gradient); color: #fff">4</div>
+          <div>
+            <div class="section-title">Cardio Logging — Ghi Nhận Buổi Cardio</div>
+            <div class="section-desc">CardioLogger · Stopwatch · Calorie Estimation (MET formula)</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ TrainingPlanView → "Bắt đầu Cardio"</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action">
+              <div class="node-box">
+                <div class="node-text">📱 pushPage(CardioLogger)</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-io tooltip">
+              <div class="node-box">
+                <div class="node-text">🏃 Chọn loại Cardio</div>
+                <div class="node-detail">running · cycling · swimming · hiit · walking · elliptical · rowing</div>
+              </div>
+              <div class="tip-content">7 loại cardio, mỗi loại có MET value khác nhau dùng cho tính calories</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action tooltip">
+              <div class="node-box">
+                <div class="node-text">⏱️ Bắt đầu Stopwatch Timer</div>
+                <div class="node-detail">Đếm thời gian thực</div>
+              </div>
+              <div class="tip-content">Timer chạy real-time, hỗ trợ Pause / Resume</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="h-group">
+              <div class="node node-io tooltip">
+                <div class="node-box">
+                  <div class="node-text">📏 Distance</div>
+                  <div class="node-detail">running / cycling / swimming only</div>
+                </div>
+                <div class="tip-content">Chỉ hiển thị cho cardio types có distance tracking</div>
+              </div>
+              <div class="node node-io">
+                <div class="node-box">
+                  <div class="node-text">🔥 Intensity</div>
+                  <div class="node-detail">low / moderate / high</div>
+                </div>
+              </div>
+              <div class="node node-io">
+                <div class="node-box">
+                  <div class="node-text">❤️ Avg Heart Rate</div>
+                  <div class="node-detail">BPM (optional)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process">
+              <div class="node-box">
+                <div class="node-text">⏯️ Pause / Resume Timer</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-subprocess tooltip">
+              <div class="node-box">
+                <div class="node-text">🔢 cardioEstimator — Tính Calories</div>
+                <div class="node-detail">calories = (MET × weight_kg × duration_min) / 60</div>
+              </div>
+              <div class="tip-content">
+                MET values: running=9.8, cycling=7.5, swimming=8.0, hiit=10.0, walking=3.8, elliptical=5.0, rowing=7.0.
+                Adjusted by intensity.
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-storage tooltip">
+              <div class="node-box">
+                <div class="node-label">🔒 TRANSACTION</div>
+                <div class="node-text">saveWorkoutAtomic(workout, [cardioSet])</div>
+                <div class="node-detail">SQLite Transaction</div>
+              </div>
+              <div class="tip-content">
+                Cùng saveWorkoutAtomic như strength, nhưng với 1 cardio set thay vì nhiều strength sets
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action">
+              <div class="node-box">
+                <div class="node-text">⬅️ popPage()</div>
+                <div class="node-detail">Quay lại TrainingPlanView</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END CARDIO</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 5: PLAN MANAGEMENT                                                                ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow5">
+        <div class="section-header">
+          <div class="section-num" style="background: var(--sub-gradient); color: #fff">5</div>
+          <div>
+            <div class="section-title">Plan Management — Quản Lý Kế Hoạch</div>
+            <div class="section-desc">Edit Schedule · Change Split · Templates · Day Editor</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ TrainingPlanView — Các tùy chọn quản lý</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="action-panel">
+              <div class="action-panel-title">⚙️ Các thao tác quản lý Plan</div>
+              <div class="action-grid">
+                <div class="action-card">
+                  <div class="action-card-title">📅 Edit Schedule</div>
+                  <div class="action-card-body">
+                    Mở <code>PlanScheduleEditor</code><br />
+                    <strong>Manual:</strong> <code>reassignWorkoutToDay()</code> — max 3 sessions/day<br />
+                    <strong>Auto:</strong> <code>autoAssignWorkouts()</code> — tránh cùng nhóm cơ liên tiếp
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">🔄 Change Split</div>
+                  <div class="action-card-body">
+                    Mở <code>SplitChanger</code><br />
+                    <code>previewSplitChange()</code> → hiển thị mapped / suggested / unmapped<br />
+                    <code>changeSplitType()</code> — mode: <code>'regenerate'</code> hoặc <code>'remap'</code>
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">📋 Apply Template</div>
+                  <div class="action-card-body">
+                    Mở <code>PlanTemplateGallery</code><br />
+                    <code>getRecommendedTemplates()</code> → scored by <code>computeMatchScore()</code><br />
+                    <code>applyTemplate()</code> → thay thế tất cả days
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">📝 Edit Day</div>
+                  <div class="action-card-body">
+                    Mở <code>PlanDayEditor</code><br />
+                    Add / Remove / Swap exercises<br />
+                    <code>updatePlanDayExercises()</code><br />
+                    <code>restorePlanDayOriginal()</code> — khôi phục bản gốc
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">➕ Add Session</div>
+                  <div class="action-card-body">
+                    Mở <code>AddSessionModal</code><br />
+                    Giới hạn tối đa 3 sessions/day<br />
+                    Chọn type: strength hoặc cardio
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">🗑️ Delete Session</div>
+                  <div class="action-card-body">
+                    <code>removePlanDaySession()</code><br />
+                    Tự động reorder các sessions còn lại<br />
+                    Confirmation dialog trước khi xóa
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-storage">
+              <div class="node-box">
+                <div class="node-text">💾 SQLite UPDATE plan_days / plan_day_exercises</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END — Refresh TrainingPlanView</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 6: WEIGHT TRACKING                                                                ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow6">
+        <div class="section-header">
+          <div class="section-num" style="background: linear-gradient(135deg, #1a7f5a, #39d2c0); color: #fff">6</div>
+          <div>
+            <div class="section-title">Weight Tracking — Theo Dõi Cân Nặng</div>
+            <div class="section-desc">DailyWeightInput · 7-day MA · Trend · NutritionBridge</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ ProgressDashboard → DailyWeightInput</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-io tooltip">
+              <div class="node-box">
+                <div class="node-text">⚖️ Nhập cân nặng</div>
+                <div class="node-detail">Hoặc quick-select từ 5 giá trị gần nhất</div>
+              </div>
+              <div class="tip-content">Input number trực tiếp hoặc chọn nhanh từ 5 entries gần đây nhất</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-decision-rect tooltip">
+              <div class="node-box">
+                <div class="node-label">⟁ Kiểm tra</div>
+                <div class="node-text">Ngày này đã có entry chưa?</div>
+              </div>
+              <div class="tip-content">Check weight_entries table for existing entry on selected date</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="branch-container">
+              <div class="branch" style="max-width: 280px">
+                <span class="branch-label yes">Ngày mới</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-storage">
+                  <div class="node-box">
+                    <div class="node-text">💾 addWeightEntry()</div>
+                    <div class="node-detail">INSERT vào weight_entries</div>
+                  </div>
+                </div>
+              </div>
+              <div class="branch" style="max-width: 280px">
+                <span class="branch-label no">Đã có entry</span>
+                <div class="connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
+                </div>
+                <div class="node node-storage">
+                  <div class="node-box">
+                    <div class="node-text">💾 updateWeightEntry()</div>
+                    <div class="node-detail">UPDATE entry hiện tại</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 16px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+            <div class="merge-bar"></div>
+            <div class="connector">
+              <div class="connector-line" style="height: 12px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-subprocess tooltip">
+              <div class="node-box">
+                <div class="node-text">📊 Tính 7-day Moving Average</div>
+                <div class="node-detail">Trung bình trượt 7 ngày</div>
+              </div>
+              <div class="tip-content">Lấy 7 entries gần nhất → tính average → smooth out daily fluctuations</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-process tooltip">
+              <div class="node-box">
+                <div class="node-text">📈 Hiển thị Trend Indicator</div>
+                <div class="node-detail">↑ Tăng · ↓ Giảm · → Ổn định</div>
+              </div>
+              <div class="tip-content">So sánh MA hiện tại với MA tuần trước → ↑↓→</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-action">
+              <div class="node-box">
+                <div class="node-text">↩️ Undo Option</div>
+                <div class="node-detail">removeWeightEntry() — Xóa entry vừa nhập</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-subprocess tooltip">
+              <div class="node-box">
+                <div class="node-text">🔗 Integrate NutritionBridge</div>
+                <div class="node-detail">Đồng bộ với module dinh dưỡng</div>
+              </div>
+              <div class="tip-content">Cân nặng được chia sẻ với NutritionBridge để tính TDEE, macros, v.v.</div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END WEIGHT TRACKING</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════════════════════════════════════════════════════╗ -->
+      <!-- ║  FLOW 7: PROGRESS & ANALYTICS                                                           ║ -->
+      <!-- ╚══════════════════════════════════════════════════════════════════════════════════════════╝ -->
+      <section class="flow-section" id="flow7">
+        <div class="section-header">
+          <div class="section-num" style="background: var(--decision-gradient); color: #fff">7</div>
+          <div>
+            <div class="section-title">Progress &amp; Analytics — Thống Kê &amp; Phân Tích</div>
+            <div class="section-desc">Weight Trends · 1RM Estimation · Adherence · Milestones · Streaks</div>
+          </div>
+        </div>
+
+        <div class="flowchart">
+          <div class="flowchart-inner">
+            <div class="node node-start">
+              <div class="node-box">
+                <div class="node-text">▶ ProgressDashboard</div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="action-panel">
+              <div class="action-panel-title">📊 Các module thống kê</div>
+              <div class="action-grid">
+                <div class="action-card">
+                  <div class="action-card-title">📈 Weight Trends</div>
+                  <div class="action-card-body">
+                    Biểu đồ cân nặng theo thời gian<br />
+                    Filters: <code>1W</code> · <code>1M</code> · <code>3M</code> · <code>All</code><br />
+                    Hiển thị actual weight + 7-day MA
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">🏋️ 1RM Estimation</div>
+                  <div class="action-card-body">
+                    Công thức <strong>Epley</strong>:<br />
+                    <code>1RM = weight × (1 + reps/30)</code><br />
+                    Tracking cho Squat, Bench, Deadlift, OHP
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">✅ Adherence Rate</div>
+                  <div class="action-card-body">
+                    Tỷ lệ tuân thủ kế hoạch tập<br />
+                    <code>completed / planned × 100%</code><br />
+                    Theo tuần / tháng
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">📋 Session Count</div>
+                  <div class="action-card-body">
+                    Tổng số buổi tập đã hoàn thành<br />
+                    Phân loại: Strength vs Cardio<br />
+                    Thống kê theo tuần / tháng
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">🏆 MilestonesList</div>
+                  <div class="action-card-body">
+                    Danh sách thành tích:<br />
+                    Personal Records (PRs)<br />
+                    Streak milestones (7, 30, 100 ngày)
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-card-title">🔥 StreakCounter</div>
+                  <div class="action-card-body">
+                    Số ngày tập liên tiếp<br />
+                    Tính từ ngày gần nhất có workout<br />
+                    Reset khi nghỉ quá 1 ngày
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector">
+              <div class="connector-line" style="height: 20px"></div>
+              <div class="connector-arrow"></div>
+            </div>
+
+            <div class="node node-end">
+              <div class="node-box">
+                <div class="node-text">■ END — Dashboard luôn hiển thị dữ liệu realtime</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════ LEGEND ═══════════════════════════════════════════ -->
+      <div class="legend">
+        <div class="legend-title">📐 Chú Giải Ký Hiệu (Legend)</div>
+        <div class="legend-grid">
+          <div class="legend-item">
+            <div class="legend-shape start"></div>
+            <div class="legend-text"><strong>Start / End</strong>Bắt đầu / Kết thúc</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape process"></div>
+            <div class="legend-text"><strong>Process</strong>Xử lý / Thao tác</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape decision"></div>
+            <div class="legend-text"><strong>Decision</strong>Quyết định / Điều kiện</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape subprocess"></div>
+            <div class="legend-text"><strong>Sub-process</strong>Hàm / Hook xử lý</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape io"></div>
+            <div class="legend-text"><strong>Input / Output</strong>Nhập / Xuất dữ liệu</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape storage"></div>
+            <div class="legend-text"><strong>Storage</strong>Lưu trữ SQLite / DB</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape conditional"></div>
+            <div class="legend-text"><strong>Conditional Step</strong>Bước có điều kiện</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape loop"></div>
+            <div class="legend-text"><strong>Loop</strong>Vòng lặp</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-shape action"></div>
+            <div class="legend-text"><strong>Action</strong>Hành động / Navigation</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 48px 0 16px; color: var(--text-muted); font-size: 12px">
+        MealPlaning Project · Fitness/Workout Feature · Process Flowchart v1.0<br />
+        Generated for project documentation · React 19 + Vite 6 + Capacitor 8
+      </div>
+    </main>
+
+    <script>
+      // View mode: 'all' shows all flows, 'single' shows one at a time
+      let currentMode = 'all';
+      let currentFlow = 'flow1';
+
+      function showMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.view-toggle button').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (mode === 'all') {
+          document.querySelectorAll('.flow-section').forEach(s => s.classList.remove('hidden'));
+        } else {
+          showSingleFlow(currentFlow);
+        }
+      }
+
+      function showSingleFlow(flowId) {
+        if (currentMode === 'single') {
+          document.querySelectorAll('.flow-section').forEach(s => {
+            s.classList.toggle('hidden', s.id !== flowId);
+          });
+        }
+      }
+
+      function scrollToFlow(flowId) {
+        currentFlow = flowId;
+
+        // Update nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.flow === flowId);
+        });
+
+        if (currentMode === 'single') {
+          showSingleFlow(flowId);
+        }
+
+        const el = document.getElementById(flowId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      // Scroll spy for nav
+      const observer = new IntersectionObserver(
+        entries => {
+          if (currentMode !== 'all') return;
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.flow === id);
+              });
+              currentFlow = id;
+            }
+          });
+        },
+        { threshold: 0.3, rootMargin: '-100px 0px -50% 0px' },
+      );
+
+      document.querySelectorAll('.flow-section').forEach(s => observer.observe(s));
+    </script>
+  </body>
+</html>

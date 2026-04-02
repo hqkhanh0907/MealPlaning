@@ -13,7 +13,7 @@ function getNetColorClass(net: number, target: number): string {
   const diff = net - target;
   if (Math.abs(diff) <= 100) return 'text-primary';
   if (diff > 100) return 'text-amber-600 dark:text-amber-400';
-  return 'text-slate-600 dark:text-slate-300';
+  return 'text-foreground-secondary';
 }
 
 export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
@@ -37,7 +37,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
     [onTapDetail],
   );
 
-  const baseClass = 'w-full bg-card rounded-xl border border-slate-100 dark:border-slate-700 px-3 py-2';
+  const baseClass = 'w-full bg-card rounded-xl border border-border-subtle px-3 py-2';
   const interactiveClass =
     'cursor-pointer active:bg-slate-50 dark:active:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
@@ -49,16 +49,15 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
           <UtensilsCrossed className="text-primary h-3.5 w-3.5" aria-hidden="true" />
           <span
             data-testid="mini-eaten"
-            className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-            style={{ fontVariantNumeric: 'tabular-nums' }}
+            className="text-sm font-semibold text-slate-800 tabular-nums dark:text-slate-100"
           >
             {Math.round(eaten)}
           </span>
         </div>
-        <span className="text-[10px] text-slate-400">{t('nutrition.caloriesIn')}</span>
+        <span className="text-xs text-slate-400 dark:text-slate-500">{t('nutrition.caloriesIn')}</span>
       </div>
 
-      <span className="text-sm text-slate-400">−</span>
+      <span className="text-sm text-slate-400 dark:text-slate-500">−</span>
 
       {/* Burned */}
       <div className="flex flex-col items-center gap-0.5">
@@ -66,13 +65,12 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
           <Flame className="h-3.5 w-3.5 text-orange-500" aria-hidden="true" />
           <span
             data-testid="mini-burned"
-            className="text-sm font-semibold text-slate-800 dark:text-slate-100"
-            style={{ fontVariantNumeric: 'tabular-nums' }}
+            className="text-sm font-semibold text-slate-800 tabular-nums dark:text-slate-100"
           >
             {Math.round(burned)}
           </span>
         </div>
-        <span className="text-[10px] text-slate-400">{t('nutrition.caloriesOut')}</span>
+        <span className="text-xs text-slate-400">{t('nutrition.caloriesOut')}</span>
       </div>
 
       <span className="text-sm text-slate-400">=</span>
@@ -80,16 +78,12 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       {/* Net */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
-          <Target className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
-          <span
-            data-testid="mini-net"
-            className={`text-sm font-bold ${netColorClass}`}
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
+          <Target className="text-muted-foreground h-3.5 w-3.5" aria-hidden="true" />
+          <span data-testid="mini-net" className={`text-sm font-bold tabular-nums ${netColorClass}`}>
             {net}
           </span>
         </div>
-        <span className="text-[10px] text-slate-400">{t('nutrition.netCalories')}</span>
+        <span className="text-xs text-slate-400">{t('nutrition.netCalories')}</span>
       </div>
     </div>
   );

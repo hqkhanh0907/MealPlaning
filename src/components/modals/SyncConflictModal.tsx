@@ -24,7 +24,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
           <h3 className="font-bold text-slate-800 dark:text-slate-100">{t('syncConflict.title')}</h3>
         </div>
 
-        <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">{t('syncConflict.description')}</p>
+        <p className="text-foreground-secondary mb-4 text-sm">{t('syncConflict.description')}</p>
 
         <div className="mb-5 space-y-2">
           <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-700">

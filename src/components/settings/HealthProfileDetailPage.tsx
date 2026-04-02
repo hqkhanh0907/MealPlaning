@@ -92,13 +92,13 @@ function HealthProfileViewMode() {
       </div>
 
       {/* Computed Values */}
-      <div className="space-y-3 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20">
+      <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-600 dark:text-slate-400">{t('healthProfile.bmr')}</span>
+          <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
           <span className="font-semibold text-slate-800 dark:text-slate-200">{bmr} kcal</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-600 dark:text-slate-400">{t('healthProfile.tdee')}</span>
+          <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
           <span className="font-semibold text-slate-800 dark:text-slate-200">{tdee} kcal</span>
         </div>
         <div className="border-t border-emerald-200 pt-2 dark:border-emerald-800">

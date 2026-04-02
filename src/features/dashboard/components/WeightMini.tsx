@@ -162,7 +162,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
         onKeyDown={handleKeyDown}
         className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/50"
       >
-        <Scale className="h-5 w-5 text-slate-400" aria-hidden={true} />
+        <Scale className="h-5 w-5 text-slate-400 dark:text-slate-500" aria-hidden={true} />
         <div>
           <p className="text-muted-foreground text-sm font-medium">{t('dashboard.weightMini.noData')}</p>
           <p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.weightMini.logFirst')}</p>
@@ -175,9 +175,9 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
   const colorClasses =
     trend.color === 'green'
       ? {
-          bg: 'bg-emerald-50 dark:bg-emerald-900/15',
+          bg: 'bg-primary-subtle',
           icon: 'text-primary',
-          text: 'text-emerald-700',
+          text: 'text-primary-emphasis',
           spark: COLORS.emerald500,
         }
       : {
@@ -202,8 +202,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
     >
       <div className="min-w-0 flex-1">
         <span
-          className="text-base font-bold text-slate-800 dark:text-slate-200"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
+          className="text-base font-bold text-slate-800 tabular-nums dark:text-slate-200"
           data-testid="weight-value"
         >
           {latestWeight.weightKg}

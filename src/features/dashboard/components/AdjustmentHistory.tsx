@@ -43,7 +43,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
     <div
       data-testid="adjustment-history"
       aria-label={t('adjustmentHistory.ariaLabel')}
-      className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700"
+      className="border-border overflow-hidden rounded-lg border"
     >
       <button
         data-testid="adjustment-history-toggle"
@@ -96,7 +96,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                   <p className="text-muted-foreground mt-0.5 truncate text-xs">{adj.reason}</p>
                 </div>
 
-                <div className="flex flex-shrink-0 items-center gap-1 font-mono text-xs text-slate-600 dark:text-slate-400">
+                <div className="text-foreground-secondary flex flex-shrink-0 items-center gap-1 font-mono text-xs">
                   <span>{adj.oldTargetCal}</span>
                   {adj.newTargetCal > adj.oldTargetCal ? (
                     <TrendingUp className="text-primary h-3.5 w-3.5" aria-hidden="true" />
@@ -111,7 +111,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                     data-testid={`status-label-${adj.id}`}
                     className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
                       adj.applied
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                        ? 'text-primary-emphasis bg-emerald-100 dark:bg-emerald-900/30'
                         : 'text-muted-foreground bg-slate-100 dark:bg-slate-700'
                     }`}
                   >

@@ -1,0 +1,1932 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sơ Đồ Hệ Thống - Fitness Feature Architecture</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --bg-card: #161b22;
+        --bg-hover: #1c2333;
+        --border: #30363d;
+        --text: #e6edf3;
+        --text-muted: #8b949e;
+        --text-dim: #6e7681;
+        --layer1: #2196f3;
+        --layer1-bg: rgba(33, 150, 243, 0.08);
+        --layer1-border: rgba(33, 150, 243, 0.3);
+        --layer2: #9c27b0;
+        --layer2-bg: rgba(156, 39, 176, 0.08);
+        --layer2-border: rgba(156, 39, 176, 0.3);
+        --layer3: #4caf50;
+        --layer3-bg: rgba(76, 175, 80, 0.08);
+        --layer3-border: rgba(76, 175, 80, 0.3);
+        --layer4: #ff9800;
+        --layer4-bg: rgba(255, 152, 0, 0.08);
+        --layer4-border: rgba(255, 152, 0, 0.3);
+        --layer5: #009688;
+        --layer5-bg: rgba(0, 150, 136, 0.08);
+        --layer5-border: rgba(0, 150, 136, 0.3);
+        --cross: #6e7681;
+        --glow-spread: 20px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* ── Header ── */
+      .header {
+        text-align: center;
+        padding: 40px 20px 20px;
+        position: relative;
+      }
+      .header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border), transparent);
+      }
+      .header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--layer1), var(--layer2), var(--layer5));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+      .header .subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 400;
+      }
+      .header .tech-badge {
+        display: inline-flex;
+        gap: 8px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .header .tech-badge span {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.3px;
+      }
+
+      /* ── Main Container ── */
+      .diagram-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px 60px;
+        position: relative;
+      }
+
+      /* ── SVG Connectors ── */
+      .connector-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .connector-line {
+        stroke-width: 2;
+        fill: none;
+        opacity: 0.5;
+        transition: opacity 0.3s;
+      }
+      .connector-line.active {
+        opacity: 1;
+        stroke-width: 2.5;
+      }
+      .connector-label {
+        font-size: 10px;
+        fill: var(--text-muted);
+        text-anchor: middle;
+        pointer-events: none;
+      }
+      .connector-label-bg {
+        fill: var(--bg);
+        rx: 4;
+        ry: 4;
+      }
+
+      /* ── Layer ── */
+      .layer {
+        position: relative;
+        z-index: 2;
+        margin-bottom: 6px;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+      }
+      .layer:hover {
+        transform: translateY(-1px);
+      }
+
+      .layer-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 24px;
+        user-select: none;
+        position: relative;
+      }
+      .layer-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 15px;
+        flex-shrink: 0;
+        position: relative;
+      }
+      .layer-number::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 13px;
+        opacity: 0.15;
+      }
+      .layer-title-group {
+        flex: 1;
+      }
+      .layer-title {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+      }
+      .layer-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .layer-toggle {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s;
+        flex-shrink: 0;
+      }
+      .layer-toggle svg {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .layer.expanded .layer-toggle svg {
+        transform: rotate(180deg);
+      }
+
+      .layer-count {
+        font-size: 11px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      /* ── Layer Content ── */
+      .layer-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0 24px;
+      }
+      .layer.expanded .layer-content {
+        max-height: 2000px;
+        padding: 0 24px 20px;
+      }
+
+      .component-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .component-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        padding: 12px 14px;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+      }
+      .component-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        border-radius: 3px 0 0 3px;
+        opacity: 0.6;
+        transition: opacity 0.25s;
+      }
+      .component-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-1px);
+      }
+      .component-card:hover::before {
+        opacity: 1;
+      }
+      .component-card .card-name {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .component-card .card-name .card-icon {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+      .component-card .card-detail {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .component-card .card-tag {
+        display: inline-block;
+        font-size: 10px;
+        padding: 1px 7px;
+        border-radius: 6px;
+        margin-top: 6px;
+        font-weight: 500;
+      }
+
+      /* ── Subsection inside layer ── */
+      .subsection {
+        margin-top: 14px;
+      }
+      .subsection-title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 8px;
+        padding-left: 2px;
+        opacity: 0.7;
+      }
+
+      /* ── Layer-specific colors ── */
+      .layer-1 {
+        background: var(--layer1-bg);
+        border: 1px solid var(--layer1-border);
+      }
+      .layer-1 .layer-number {
+        background: var(--layer1);
+        color: #fff;
+      }
+      .layer-1 .layer-number::after {
+        background: var(--layer1);
+      }
+      .layer-1 .layer-title {
+        color: var(--layer1);
+      }
+      .layer-1 .layer-count {
+        background: rgba(33, 150, 243, 0.15);
+        color: var(--layer1);
+      }
+      .layer-1 .layer-toggle {
+        background: rgba(33, 150, 243, 0.1);
+        color: var(--layer1);
+      }
+      .layer-1 .component-card::before {
+        background: var(--layer1);
+      }
+      .layer-1 .card-tag {
+        background: rgba(33, 150, 243, 0.12);
+        color: var(--layer1);
+      }
+      .layer-1 .subsection-title {
+        color: var(--layer1);
+      }
+
+      .layer-2 {
+        background: var(--layer2-bg);
+        border: 1px solid var(--layer2-border);
+      }
+      .layer-2 .layer-number {
+        background: var(--layer2);
+        color: #fff;
+      }
+      .layer-2 .layer-number::after {
+        background: var(--layer2);
+      }
+      .layer-2 .layer-title {
+        color: var(--layer2);
+      }
+      .layer-2 .layer-count {
+        background: rgba(156, 39, 176, 0.15);
+        color: var(--layer2);
+      }
+      .layer-2 .layer-toggle {
+        background: rgba(156, 39, 176, 0.1);
+        color: var(--layer2);
+      }
+      .layer-2 .component-card::before {
+        background: var(--layer2);
+      }
+      .layer-2 .card-tag {
+        background: rgba(156, 39, 176, 0.12);
+        color: var(--layer2);
+      }
+      .layer-2 .subsection-title {
+        color: var(--layer2);
+      }
+
+      .layer-3 {
+        background: var(--layer3-bg);
+        border: 1px solid var(--layer3-border);
+      }
+      .layer-3 .layer-number {
+        background: var(--layer3);
+        color: #fff;
+      }
+      .layer-3 .layer-number::after {
+        background: var(--layer3);
+      }
+      .layer-3 .layer-title {
+        color: var(--layer3);
+      }
+      .layer-3 .layer-count {
+        background: rgba(76, 175, 80, 0.15);
+        color: var(--layer3);
+      }
+      .layer-3 .layer-toggle {
+        background: rgba(76, 175, 80, 0.1);
+        color: var(--layer3);
+      }
+      .layer-3 .component-card::before {
+        background: var(--layer3);
+      }
+      .layer-3 .card-tag {
+        background: rgba(76, 175, 80, 0.12);
+        color: var(--layer3);
+      }
+      .layer-3 .subsection-title {
+        color: var(--layer3);
+      }
+
+      .layer-4 {
+        background: var(--layer4-bg);
+        border: 1px solid var(--layer4-border);
+      }
+      .layer-4 .layer-number {
+        background: var(--layer4);
+        color: #fff;
+      }
+      .layer-4 .layer-number::after {
+        background: var(--layer4);
+      }
+      .layer-4 .layer-title {
+        color: var(--layer4);
+      }
+      .layer-4 .layer-count {
+        background: rgba(255, 152, 0, 0.15);
+        color: var(--layer4);
+      }
+      .layer-4 .layer-toggle {
+        background: rgba(255, 152, 0, 0.1);
+        color: var(--layer4);
+      }
+      .layer-4 .component-card::before {
+        background: var(--layer4);
+      }
+      .layer-4 .card-tag {
+        background: rgba(255, 152, 0, 0.12);
+        color: var(--layer4);
+      }
+      .layer-4 .subsection-title {
+        color: var(--layer4);
+      }
+
+      .layer-5 {
+        background: var(--layer5-bg);
+        border: 1px solid var(--layer5-border);
+      }
+      .layer-5 .layer-number {
+        background: var(--layer5);
+        color: #fff;
+      }
+      .layer-5 .layer-number::after {
+        background: var(--layer5);
+      }
+      .layer-5 .layer-title {
+        color: var(--layer5);
+      }
+      .layer-5 .layer-count {
+        background: rgba(0, 150, 136, 0.15);
+        color: var(--layer5);
+      }
+      .layer-5 .layer-toggle {
+        background: rgba(0, 150, 136, 0.1);
+        color: var(--layer5);
+      }
+      .layer-5 .component-card::before {
+        background: var(--layer5);
+      }
+      .layer-5 .card-tag {
+        background: rgba(0, 150, 136, 0.12);
+        color: var(--layer5);
+      }
+      .layer-5 .subsection-title {
+        color: var(--layer5);
+      }
+
+      /* ── Arrow connectors between layers ── */
+      .arrow-connector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        position: relative;
+        z-index: 2;
+      }
+      .arrow-connector .arrow-line {
+        width: 2px;
+        height: 100%;
+        position: relative;
+      }
+      .arrow-connector .arrow-line::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top-width: 8px;
+        border-top-style: solid;
+      }
+      .arrow-connector .arrow-label {
+        position: absolute;
+        font-size: 10px;
+        color: var(--text-dim);
+        background: var(--bg);
+        padding: 2px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        white-space: nowrap;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .arrow-12 .arrow-line {
+        background: linear-gradient(to bottom, var(--layer1), var(--layer2));
+      }
+      .arrow-12 .arrow-line::after {
+        border-top-color: var(--layer2);
+      }
+      .arrow-23 .arrow-line {
+        background: linear-gradient(to bottom, var(--layer2), var(--layer3));
+      }
+      .arrow-23 .arrow-line::after {
+        border-top-color: var(--layer3);
+      }
+      .arrow-34 .arrow-line {
+        background: linear-gradient(to bottom, var(--layer3), var(--layer4));
+      }
+      .arrow-34 .arrow-line::after {
+        border-top-color: var(--layer4);
+      }
+      .arrow-45 .arrow-line {
+        background: linear-gradient(to bottom, var(--layer4), var(--layer5));
+      }
+      .arrow-45 .arrow-line::after {
+        border-top-color: var(--layer5);
+      }
+
+      /* ── Data Flow Section ── */
+      .data-flow-section {
+        margin-top: 40px;
+        position: relative;
+        z-index: 2;
+      }
+      .data-flow-section h2 {
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 24px;
+        color: var(--text);
+      }
+      .flow-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 16px;
+      }
+      .flow-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .flow-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 14px 14px 0 0;
+      }
+      .flow-card.flow-input::before {
+        background: linear-gradient(90deg, var(--layer1), var(--layer2));
+      }
+      .flow-card.flow-boot::before {
+        background: linear-gradient(90deg, var(--layer3), var(--layer2));
+      }
+      .flow-card.flow-export::before {
+        background: linear-gradient(90deg, var(--layer3), var(--layer4));
+      }
+      .flow-card h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .flow-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .flow-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 8px 0;
+        position: relative;
+      }
+      .flow-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 13px;
+        top: 30px;
+        bottom: -2px;
+        width: 1px;
+        background: var(--border);
+      }
+      .flow-step .step-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+        color: #fff;
+        position: relative;
+        z-index: 1;
+      }
+      .flow-step .step-text {
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--text-muted);
+        padding-top: 3px;
+      }
+      .flow-step .step-text strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* ── Cross-Module Section ── */
+      .cross-module-section {
+        margin-top: 40px;
+        position: relative;
+        z-index: 2;
+      }
+      .cross-module-section h2 {
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 24px;
+        color: var(--text);
+      }
+      .cross-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 14px;
+      }
+      .cross-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+      }
+      .cross-card:hover {
+        border-color: var(--cross);
+        transform: translateY(-2px);
+      }
+      .cross-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--cross) 0,
+          var(--cross) 6px,
+          transparent 6px,
+          transparent 12px
+        );
+      }
+      .cross-card h4 {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .cross-card ul {
+        list-style: none;
+        padding: 0;
+      }
+      .cross-card li {
+        font-size: 12px;
+        color: var(--text-muted);
+        padding: 3px 0;
+        padding-left: 16px;
+        position: relative;
+      }
+      .cross-card li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: var(--cross);
+        font-size: 11px;
+      }
+
+      /* ── Legend ── */
+      .legend {
+        margin-top: 40px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px 24px;
+        position: relative;
+        z-index: 2;
+      }
+      .legend h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 14px;
+        color: var(--text-muted);
+      }
+      .legend-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .legend-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+      .legend-line {
+        width: 24px;
+        height: 2px;
+        flex-shrink: 0;
+        border-radius: 1px;
+      }
+      .legend-line.dashed {
+        background: repeating-linear-gradient(
+          90deg,
+          var(--cross) 0,
+          var(--cross) 4px,
+          transparent 4px,
+          transparent 8px
+        );
+      }
+
+      /* ── Footer ── */
+      .footer {
+        text-align: center;
+        padding: 30px 20px;
+        color: var(--text-dim);
+        font-size: 11px;
+        position: relative;
+        z-index: 2;
+      }
+
+      /* ── Tooltip ── */
+      .tooltip {
+        position: fixed;
+        z-index: 1000;
+        background: #1c2333;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        max-width: 280px;
+        font-size: 12px;
+        color: var(--text);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(4px);
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+      .tooltip.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .tooltip .tip-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 13px;
+      }
+      .tooltip .tip-desc {
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      /* ── Expand all / collapse all ── */
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+      }
+      .ctrl-btn {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .ctrl-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text);
+        border-color: var(--text-dim);
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 20px;
+        }
+        .component-grid {
+          grid-template-columns: 1fr;
+        }
+        .flow-container {
+          grid-template-columns: 1fr;
+        }
+        .cross-grid {
+          grid-template-columns: 1fr;
+        }
+        .layer-header {
+          padding: 12px 16px;
+        }
+        .layer-content {
+          padding: 0 16px;
+        }
+        .layer.expanded .layer-content {
+          padding: 0 16px 16px;
+        }
+      }
+
+      /* ── Animations ── */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .layer {
+        animation: fadeInUp 0.5s ease both;
+      }
+      .layer:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .layer:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .layer:nth-child(3) {
+        animation-delay: 0.15s;
+      }
+      .layer:nth-child(4) {
+        animation-delay: 0.2s;
+      }
+      .layer:nth-child(5) {
+        animation-delay: 0.25s;
+      }
+      .arrow-connector {
+        animation: fadeInUp 0.4s ease both;
+      }
+
+      /* ── Pulse dot for active layer ── */
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 currentColor;
+        }
+        50% {
+          box-shadow: 0 0 0 6px transparent;
+        }
+      }
+      .layer-number {
+        animation: pulse 3s ease infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip">
+      <div class="tip-title" id="tip-title"></div>
+      <div class="tip-desc" id="tip-desc"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <h1>Sơ Đồ Hệ Thống — Fitness Feature Architecture</h1>
+      <p class="subtitle">
+        Kiến trúc phân tầng cho module Fitness / Workout — Ứng dụng Kế Hoạch Dinh Dưỡng &amp; Tập Luyện
+      </p>
+      <div class="tech-badge">
+        <span>React 19</span>
+        <span>Vite 6</span>
+        <span>Zustand</span>
+        <span>sql.js (WASM SQLite)</span>
+        <span>Capacitor 8</span>
+        <span>TypeScript</span>
+        <span>Tailwind CSS v4</span>
+        <span>Android</span>
+      </div>
+    </header>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container" id="diagram">
+      <!-- Controls -->
+      <div class="controls">
+        <button class="ctrl-btn" onclick="expandAll()">▼ Mở rộng tất cả</button>
+        <button class="ctrl-btn" onclick="collapseAll()">▲ Thu gọn tất cả</button>
+      </div>
+
+      <!-- ═══════ LAYER 1: Presentation ═══════ -->
+      <div class="layer layer-1" id="layer1" onclick="toggleLayer(this)">
+        <div class="layer-header">
+          <div class="layer-number">1</div>
+          <div class="layer-title-group">
+            <div class="layer-title">Presentation Layer</div>
+            <div class="layer-desc">React 19 UI Components · Forms · Hooks</div>
+          </div>
+          <span class="layer-count">34 components</span>
+          <div class="layer-toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+        <div class="layer-content">
+          <!-- Fitness Components -->
+          <div class="subsection">
+            <div class="subsection-title">Fitness Components</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="FitnessTab"
+                data-desc="Điểm vào chính của module Fitness. Quản lý sub-tabs: Tập luyện, Kế hoạch, Lịch sử, Tiến trình."
+              >
+                <div class="card-name"><span class="card-icon">📱</span> FitnessTab</div>
+                <div class="card-detail">Entry point — quản lý sub-tabs</div>
+                <span class="card-tag">entry</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="TrainingPlanView"
+                data-desc="Hiển thị kế hoạch tập theo tuần. Cho phép xem/sửa lịch, chọn template, đổi split type."
+              >
+                <div class="card-name"><span class="card-icon">📋</span> TrainingPlanView</div>
+                <div class="card-detail">Kế hoạch tập tuần + quản lý split</div>
+                <span class="card-tag">plan</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="WorkoutLogger"
+                data-desc="Form ghi nhận bài tập sức mạnh. Quản lý sets, reps, weight với progressive overload suggestions."
+              >
+                <div class="card-name"><span class="card-icon">🏋️</span> WorkoutLogger</div>
+                <div class="card-detail">Ghi nhận bài tập sức mạnh (sets/reps/weight)</div>
+                <span class="card-tag">logger</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="CardioLogger"
+                data-desc="Form ghi nhận bài tập cardio. Tính calories burn theo MET, hỗ trợ 7 loại cardio."
+              >
+                <div class="card-name"><span class="card-icon">🏃</span> CardioLogger</div>
+                <div class="card-detail">Ghi nhận cardio + MET calories</div>
+                <span class="card-tag">logger</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="ProgressDashboard"
+                data-desc="Tổng hợp tiến trình: biểu đồ volume, cân nặng, streak, PR badges. Tích hợp recharts."
+              >
+                <div class="card-name"><span class="card-icon">📊</span> ProgressDashboard</div>
+                <div class="card-detail">Biểu đồ tiến trình + thống kê</div>
+                <span class="card-tag">analytics</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="WorkoutHistory"
+                data-desc="Danh sách lịch sử tập. Nhóm theo ngày, xem chi tiết từng workout, so sánh volume qua thời gian."
+              >
+                <div class="card-name"><span class="card-icon">📅</span> WorkoutHistory</div>
+                <div class="card-detail">Lịch sử tập theo ngày</div>
+                <span class="card-tag">history</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="PlanDayEditor"
+                data-desc="Chỉnh sửa bài tập trong 1 ngày. Drag-drop sắp xếp, thêm/bớt exercise, set rest day."
+              >
+                <div class="card-name"><span class="card-icon">✏️</span> PlanDayEditor</div>
+                <div class="card-detail">Sửa bài tập theo ngày</div>
+                <span class="card-tag">editor</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="PlanScheduleEditor"
+                data-desc="Sửa lịch tập tuần. Gán ngày tập/nghỉ, thiết lập session_order cho ngày tập đôi."
+              >
+                <div class="card-name"><span class="card-icon">📆</span> PlanScheduleEditor</div>
+                <div class="card-detail">Lịch tập tuần + session order</div>
+                <span class="card-tag">editor</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="SplitChanger"
+                data-desc="Đổi kiểu chia nhóm cơ (PPL, Upper/Lower, Full Body, Bro Split). Tự động remap exercises."
+              >
+                <div class="card-name"><span class="card-icon">🔄</span> SplitChanger</div>
+                <div class="card-detail">Đổi split type (PPL/UL/FB)</div>
+                <span class="card-tag">plan</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="PlanTemplateGallery"
+                data-desc="Thư viện template. Hiển thị match score, preview bài tập, apply template vào plan hiện tại."
+              >
+                <div class="card-name"><span class="card-icon">🗂️</span> PlanTemplateGallery</div>
+                <div class="card-detail">Template gallery + match score</div>
+                <span class="card-tag">plan</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="DailyWeightInput"
+                data-desc="Widget ghi cân nặng hàng ngày. Hiển thị trend 7 ngày, UNIQUE constraint per date."
+              >
+                <div class="card-name"><span class="card-icon">⚖️</span> DailyWeightInput</div>
+                <div class="card-detail">Ghi cân nặng + trend</div>
+                <span class="card-tag">widget</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="StreakCounter"
+                data-desc="Hiển thị chuỗi tập liên tiếp. Tính từ workout dates, animation khi đạt milestones."
+              >
+                <div class="card-name"><span class="card-icon">🔥</span> StreakCounter</div>
+                <div class="card-detail">Chuỗi tập liên tiếp + milestones</div>
+                <span class="card-tag">gamification</span>
+              </div>
+            </div>
+          </div>
+          <!-- Forms -->
+          <div class="subsection">
+            <div class="subsection-title">Form Validation (React Hook Form + Zod)</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="fitnessOnboarding Schema"
+                data-desc="Zod schema cho onboarding. Validation: experience level, goals, available days, equipment."
+              >
+                <div class="card-name"><span class="card-icon">📝</span> fitnessOnboarding</div>
+                <div class="card-detail">Schema onboarding profile</div>
+                <span class="card-tag">schema</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="workoutLogger Schema"
+                data-desc="Zod schema cho workout logging. z.preprocess() cho numeric coercion. Validates sets/reps/weight."
+              >
+                <div class="card-name"><span class="card-icon">📝</span> workoutLogger</div>
+                <div class="card-detail">Schema log bài tập + preprocess</div>
+                <span class="card-tag">schema</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="cardioLogger Schema"
+                data-desc="Zod schema cho cardio. Validates duration, distance, cardio type. MET lookup per type."
+              >
+                <div class="card-name"><span class="card-icon">📝</span> cardioLogger</div>
+                <div class="card-detail">Schema cardio + MET validation</div>
+                <span class="card-tag">schema</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="customExercise Schema"
+                data-desc="Zod schema cho bài tập tùy chỉnh. Localized name (vi required, en optional), muscle groups."
+              >
+                <div class="card-name"><span class="card-icon">📝</span> customExercise</div>
+                <div class="card-detail">Schema bài tập tùy chỉnh</div>
+                <span class="card-tag">schema</span>
+              </div>
+            </div>
+          </div>
+          <!-- Hooks -->
+          <div class="subsection">
+            <div class="subsection-title">Custom Hooks</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="useTrainingPlan"
+                data-desc="Thuật toán tạo kế hoạch tập. Input: profile → Output: plan days + exercises. Dựa trên volume landmarks."
+              >
+                <div class="card-name"><span class="card-icon">⚙️</span> useTrainingPlan</div>
+                <div class="card-detail">Thuật toán tạo kế hoạch tập</div>
+                <span class="card-tag">algorithm</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="useProgressiveOverload"
+                data-desc="Gợi ý tăng tải. Phân tích workout history, đề xuất weight/rep increment theo experience level."
+              >
+                <div class="card-name"><span class="card-icon">📈</span> useProgressiveOverload</div>
+                <div class="card-detail">Gợi ý tăng tải theo lịch sử</div>
+                <span class="card-tag">algorithm</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="useFitnessNutritionBridge"
+                data-desc="Cầu nối Fitness↔Nutrition. Chuyển calorie burn → daily targets, activity multiplier → BMR."
+              >
+                <div class="card-name"><span class="card-icon">🔗</span> useFitnessNutritionBridge</div>
+                <div class="card-detail">Cầu nối Fitness ↔ Nutrition</div>
+                <span class="card-tag">integration</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="useTimer"
+                data-desc="Timer đa chức năng: countdown nghỉ giữa set, stopwatch cho workout duration. requestAnimationFrame based."
+              >
+                <div class="card-name"><span class="card-icon">⏱️</span> useTimer</div>
+                <div class="card-detail">Countdown / stopwatch</div>
+                <span class="card-tag">utility</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow 1→2 -->
+      <div class="arrow-connector arrow-12">
+        <div class="arrow-line"></div>
+        <span class="arrow-label">dispatch Actions · read State</span>
+      </div>
+
+      <!-- ═══════ LAYER 2: State Management ═══════ -->
+      <div class="layer layer-2" id="layer2" onclick="toggleLayer(this)">
+        <div class="layer-header">
+          <div class="layer-number">2</div>
+          <div class="layer-title-group">
+            <div class="layer-title">State Management Layer</div>
+            <div class="layer-desc">Zustand Store · 124 Actions · Persist Middleware</div>
+          </div>
+          <span class="layer-count">124 actions</span>
+          <div class="layer-toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+        <div class="layer-content">
+          <div class="subsection">
+            <div class="subsection-title">fitnessStore.ts (1178 dòng)</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="Training State"
+                data-desc="trainingProfile, trainingPlans[], trainingPlanDays[], planStrategy ('auto'|'manual'|null). Core planning data."
+              >
+                <div class="card-name"><span class="card-icon">🗄️</span> Training State</div>
+                <div class="card-detail">profile · plans · planDays · planStrategy</div>
+                <span class="card-tag">state</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Workout State"
+                data-desc="workouts[], workoutSets[], workoutMode ('strength'|'cardio'), workoutDraft (auto-save). In-memory first, synced to DB."
+              >
+                <div class="card-name"><span class="card-icon">🗄️</span> Workout State</div>
+                <div class="card-detail">workouts · sets · mode · draft</div>
+                <span class="card-tag">state</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Body State"
+                data-desc="weightEntries[], isOnboarded, sqliteReady. Weight log with UNIQUE date constraint."
+              >
+                <div class="card-name"><span class="card-icon">🗄️</span> Body / Onboarding</div>
+                <div class="card-detail">weightEntries · isOnboarded · sqliteReady</div>
+                <span class="card-tag">state</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="CRUD Actions"
+                data-desc="add/update/delete cho tất cả entities. Dual-write: cập nhật in-memory ngay (optimistic) + ghi SQLite (non-blocking)."
+              >
+                <div class="card-name"><span class="card-icon">⚡</span> CRUD Actions</div>
+                <div class="card-detail">Dual-write: memory + SQLite</div>
+                <span class="card-tag">124 actions</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="saveWorkoutAtomic"
+                data-desc="Lưu workout atomic trong SQLite transaction. Rollback nếu bất kỳ set nào fail. Đảm bảo data integrity."
+              >
+                <div class="card-name"><span class="card-icon">🔒</span> saveWorkoutAtomic</div>
+                <div class="card-detail">Transactional save (rollback on error)</div>
+                <span class="card-tag">atomic</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Template Actions"
+                data-desc="applyTemplate, saveCurrentAsTemplate, getRecommendedTemplates. Template scoring dựa trên computeMatchScore."
+              >
+                <div class="card-name"><span class="card-icon">📦</span> Template Actions</div>
+                <div class="card-detail">apply · save · recommend templates</div>
+                <span class="card-tag">template</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Persist Middleware</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="Persist Config"
+                data-desc="Storage key: 'fitness-storage', version 2. Migration v1→v2: adds planStrategy field. JSON serialization."
+              >
+                <div class="card-name"><span class="card-icon">💾</span> Persist Middleware</div>
+                <div class="card-detail">key: fitness-storage · v2 · migration v1→v2</div>
+                <span class="card-tag">middleware</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Navigation Store"
+                data-desc="useNavigationStore: activeTab, pageStack (max 2), pushPage/popPage, scrollPositions. Memory only (không persist)."
+              >
+                <div class="card-name"><span class="card-icon">🧭</span> Navigation Store</div>
+                <div class="card-detail">tabs · pageStack · scroll positions</div>
+                <span class="card-tag">memory-only</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow 2→3 -->
+      <div class="arrow-connector arrow-23">
+        <div class="arrow-line"></div>
+        <span class="arrow-label">execute() · query&lt;T&gt;() · transaction()</span>
+      </div>
+
+      <!-- ═══════ LAYER 3: Persistence ═══════ -->
+      <div class="layer layer-3" id="layer3" onclick="toggleLayer(this)">
+        <div class="layer-header">
+          <div class="layer-number">3</div>
+          <div class="layer-title-group">
+            <div class="layer-title">Persistence Layer</div>
+            <div class="layer-desc">sql.js WASM SQLite · Schema v5 · 11 Tables</div>
+          </div>
+          <span class="layer-count">11 tables</span>
+          <div class="layer-toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+        <div class="layer-content">
+          <div class="subsection">
+            <div class="subsection-title">DatabaseService Interface</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="execute()"
+                data-desc="Thực thi SQL write (INSERT/UPDATE/DELETE). Nhận sql string + params array. Throws on constraint violation."
+              >
+                <div class="card-name"><span class="card-icon">▶️</span> execute(sql, params)</div>
+                <div class="card-detail">SQL write operations</div>
+                <span class="card-tag">write</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="query<T>()"
+                data-desc="Thực thi SQL read. Generic type T, auto-converts snake_case → camelCase via rowToType<T>()."
+              >
+                <div class="card-name"><span class="card-icon">🔍</span> query&lt;T&gt;(sql, params)</div>
+                <div class="card-detail">SQL read + auto camelCase</div>
+                <span class="card-tag">read</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="transaction()"
+                data-desc="Wrap nhiều operations trong SAVEPOINT. Auto-rollback on error. Dùng cho saveWorkoutAtomic()."
+              >
+                <div class="card-name"><span class="card-icon">🔒</span> transaction(callback)</div>
+                <div class="card-detail">SAVEPOINT + auto-rollback</div>
+                <span class="card-tag">atomic</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Export/Import"
+                data-desc="exportBinary() → Uint8Array (full DB dump). importBinary() to restore. Dùng cho backup/share qua Capacitor Filesystem."
+              >
+                <div class="card-name"><span class="card-icon">📤</span> export / import Binary</div>
+                <div class="card-detail">DB snapshot → Uint8Array</div>
+                <span class="card-tag">backup</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Fitness Tables (11)</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="training_profile"
+                data-desc="1 row per user. experience_level, goals, available_days, equipment, split_type. Created during onboarding."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> training_profile</div>
+                <div class="card-detail">User fitness profile (1 row)</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="training_plans"
+                data-desc="Chứa plan metadata: name, split_type, is_active. Mỗi user có thể nhiều plans, chỉ 1 active."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> training_plans</div>
+                <div class="card-detail">Plan metadata + active flag</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="training_plan_days"
+                data-desc="UNIQUE(plan_id, day_of_week, session_order). Chứa exercises JSON, muscle groups, is_rest_day."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> training_plan_days</div>
+                <div class="card-detail">UNIQUE(plan_id, day, session_order)</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="workouts"
+                data-desc="Mỗi workout session: date, duration, plan_day_id (nullable), notes. INDEX on date for fast lookup."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> workouts</div>
+                <div class="card-detail">Sessions · INDEX(date)</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="workout_sets"
+                data-desc="UNIQUE(workout_id, exercise_id, set_number). weight_kg, reps, is_warmup. INDEX(workout_id, exercise_id)."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> workout_sets</div>
+                <div class="card-detail">Sets · UNIQUE constraint</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="weight_log"
+                data-desc="UNIQUE(date). weight_kg, notes. Dùng cho trend chart + cardio calorie estimation."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> weight_log</div>
+                <div class="card-detail">UNIQUE(date) · daily weight</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="exercises"
+                data-desc="200+ seeded exercises + custom. name_vi, name_en, muscle_group, equipment, is_compound, met_value."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> exercises</div>
+                <div class="card-detail">200+ seeded + custom · localized</div>
+                <span class="card-tag">table</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="plan_templates"
+                data-desc="Saved plan templates. JSON structure, difficulty rating. Dùng cho PlanTemplateGallery + match scoring."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> plan_templates</div>
+                <div class="card-detail">Saved templates + scoring</div>
+                <span class="card-tag">table · v4</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="workout_drafts"
+                data-desc="Auto-save drafts. exercises JSON, sets JSON, elapsed_seconds, plan_day_id. Khôi phục nếu app crash."
+              >
+                <div class="card-name"><span class="card-icon">🗃️</span> workout_drafts</div>
+                <div class="card-detail">Auto-save · crash recovery</div>
+                <span class="card-tag">table · v5</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Schema Migrations</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="Migrations v1→v5"
+                data-desc="v2: session_order + original_exercises. v3: is_user_assigned. v4: plan_templates. v5: workout_drafts. PRAGMA user_version tracking."
+              >
+                <div class="card-name"><span class="card-icon">🔧</span> Migrations v1 → v5</div>
+                <div class="card-detail">Incremental schema evolution</div>
+                <span class="card-tag">migration</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Column Convention"
+                data-desc="DB: snake_case → TS: camelCase. Converters: snakeToCamel(), camelToSnake(), rowToType<T>(), typeToRow<T>()."
+              >
+                <div class="card-name"><span class="card-icon">🔤</span> Naming Convention</div>
+                <div class="card-detail">snake_case ↔ camelCase converters</div>
+                <span class="card-tag">convention</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow 3→4 -->
+      <div class="arrow-connector arrow-34">
+        <div class="arrow-line"></div>
+        <span class="arrow-label">exportBinary() · Filesystem · Lifecycle</span>
+      </div>
+
+      <!-- ═══════ LAYER 4: Platform ═══════ -->
+      <div class="layer layer-4" id="layer4" onclick="toggleLayer(this)">
+        <div class="layer-header">
+          <div class="layer-number">4</div>
+          <div class="layer-title-group">
+            <div class="layer-title">Platform Layer</div>
+            <div class="layer-desc">Capacitor 8 · Android WebView · Build Pipeline</div>
+          </div>
+          <span class="layer-count">4 plugins</span>
+          <div class="layer-toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+        <div class="layer-content">
+          <div class="subsection">
+            <div class="subsection-title">Capacitor Plugins</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="@capacitor/core"
+                data-desc="Web → Native bridge. JS API gọi native code qua message passing. Đồng bộ lifecycle events."
+              >
+                <div class="card-name"><span class="card-icon">🔌</span> @capacitor/core</div>
+                <div class="card-detail">Web ↔ Native bridge</div>
+                <span class="card-tag">bridge</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="@capacitor/filesystem"
+                data-desc="Đọc/ghi file trên device. Dùng cho DB export/import, backup sharing. Hỗ trợ binary data."
+              >
+                <div class="card-name"><span class="card-icon">📁</span> @capacitor/filesystem</div>
+                <div class="card-detail">DB export/import · backup</div>
+                <span class="card-tag">plugin</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="@capacitor/app"
+                data-desc="App lifecycle events: pause, resume, backButton. Auto-save draft khi app đi background."
+              >
+                <div class="card-name"><span class="card-icon">📲</span> @capacitor/app</div>
+                <div class="card-detail">Lifecycle: pause/resume/back</div>
+                <span class="card-tag">plugin</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="@capacitor/haptics"
+                data-desc="Haptic feedback cho UI actions: PR toast, streak milestones, save confirmation."
+              >
+                <div class="card-name"><span class="card-icon">📳</span> @capacitor/haptics</div>
+                <div class="card-detail">Haptic feedback cho UI</div>
+                <span class="card-tag">plugin</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Build Pipeline</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="Vite Build"
+                data-desc="npm run build → Vite production build → dist/. Tree-shaking, code splitting, WASM bundle."
+              >
+                <div class="card-name"><span class="card-icon">⚡</span> Vite Build → dist/</div>
+                <div class="card-detail">Production build + tree-shaking</div>
+                <span class="card-tag">build</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="Cap Sync"
+                data-desc="npx cap sync: copy dist/ → android/app/src/main/assets/. Sync plugins + config."
+              >
+                <div class="card-name"><span class="card-icon">🔄</span> cap sync → android/</div>
+                <div class="card-detail">Copy web assets to Android project</div>
+                <span class="card-tag">sync</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="APK Build"
+                data-desc="Android Studio / Gradle build → APK. WebView renders React app. WASM support cho sql.js."
+              >
+                <div class="card-name"><span class="card-icon">📱</span> Android → APK</div>
+                <div class="card-detail">Gradle build · WebView + WASM</div>
+                <span class="card-tag">output</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow 4→5 -->
+      <div class="arrow-connector arrow-45">
+        <div class="arrow-line"></div>
+        <span class="arrow-label">Utility functions · Algorithms · Calculations</span>
+      </div>
+
+      <!-- ═══════ LAYER 5: Utilities ═══════ -->
+      <div class="layer layer-5" id="layer5" onclick="toggleLayer(this)">
+        <div class="layer-header">
+          <div class="layer-number">5</div>
+          <div class="layer-title-group">
+            <div class="layer-title">Utility &amp; Algorithm Layer</div>
+            <div class="layer-desc">15 Pure-Function Modules · Calculations · Gamification</div>
+          </div>
+          <span class="layer-count">15 modules</span>
+          <div class="layer-toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+        <div class="layer-content">
+          <div class="subsection">
+            <div class="subsection-title">Training Science</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="volumeCalculator"
+                data-desc="Tính MEV (Minimum Effective Volume), MAV, MRV per muscle group. Dựa trên research-backed thresholds."
+              >
+                <div class="card-name"><span class="card-icon">📐</span> volumeCalculator</div>
+                <div class="card-detail">MEV / MAV / MRV per muscle</div>
+                <span class="card-tag">science</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="periodization"
+                data-desc="Linear, undulating, block periodization schemes. Deload detection (mỗi 4-6 tuần). Auto-adjust intensity."
+              >
+                <div class="card-name"><span class="card-icon">📊</span> periodization</div>
+                <div class="card-detail">Linear · undulating · block · deload</div>
+                <span class="card-tag">science</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="plateauAnalysis"
+                data-desc="Phát hiện plateau: 2+ tuần cùng weight hoặc estimated 1RM không tăng. Đề xuất deload hoặc variation."
+              >
+                <div class="card-name"><span class="card-icon">📉</span> plateauAnalysis</div>
+                <div class="card-detail">Phát hiện plateau · đề xuất giải pháp</div>
+                <span class="card-tag">analysis</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="progressiveOverload"
+                data-desc="Weight/rep increment suggestions theo experience level. Beginner: +2.5kg, Intermediate: +1.25kg, Advanced: micro-loading."
+              >
+                <div class="card-name"><span class="card-icon">📈</span> progressiveOverload</div>
+                <div class="card-detail">Weight/rep increment by level</div>
+                <span class="card-tag">algorithm</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="trainingMetrics"
+                data-desc="Volume (sets × reps × weight), intensity (%1RM), density (volume / time). Per-session + per-week."
+              >
+                <div class="card-name"><span class="card-icon">📏</span> trainingMetrics</div>
+                <div class="card-detail">Volume · intensity · density</div>
+                <span class="card-tag">metrics</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Cardio &amp; Nutrition</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="cardioEstimator"
+                data-desc="MET-based calorie burn cho 7 cardio types: running, cycling, swimming, HIIT, walking, rowing, jump rope."
+              >
+                <div class="card-name"><span class="card-icon">🏃</span> cardioEstimator</div>
+                <div class="card-detail">MET × weight × duration · 7 types</div>
+                <span class="card-tag">calculator</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="activityMultiplier"
+                data-desc="Maps training frequency + intensity → TDEE activity multiplier (1.2 – 1.9). Feeds vào BMR calculation."
+              >
+                <div class="card-name"><span class="card-icon">✖️</span> activityMultiplier</div>
+                <div class="card-detail">Training → TDEE multiplier</div>
+                <span class="card-tag">calculator</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Plan Management</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="templateMatcher"
+                data-desc="Score templates against user profile. computeMatchScore() xét: split match, equipment overlap, experience fit."
+              >
+                <div class="card-name"><span class="card-icon">🎯</span> templateMatcher</div>
+                <div class="card-detail">computeMatchScore() · profile fit</div>
+                <span class="card-tag">matching</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="splitRemapper"
+                data-desc="Map exercises khi chuyển split. PPL→Upper/Lower: remap chest/shoulder/tri → Upper day."
+              >
+                <div class="card-name"><span class="card-icon">🔀</span> splitRemapper</div>
+                <div class="card-detail">Exercise remapping between splits</div>
+                <span class="card-tag">mapper</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="getSmartDefaults"
+                data-desc="Profile → sensible defaults. Experience: beginner → 3 days, fewer sets. Advanced → 5-6 days, higher volume."
+              >
+                <div class="card-name"><span class="card-icon">🧠</span> getSmartDefaults</div>
+                <div class="card-detail">Profile → default config</div>
+                <span class="card-tag">defaults</span>
+              </div>
+            </div>
+          </div>
+          <div class="subsection">
+            <div class="subsection-title">Gamification &amp; Helpers</div>
+            <div class="component-grid">
+              <div
+                class="component-card"
+                data-tip="gamification"
+                data-desc="PR detection (personal records), streak tracking (consecutive workout days), milestone badges."
+              >
+                <div class="card-name"><span class="card-icon">🏆</span> gamification</div>
+                <div class="card-detail">PR · streaks · milestones</div>
+                <span class="card-tag">engagement</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="dateUtils"
+                data-desc="Week start/end calculations, date formatting, workout date grouping. Locale-aware (vi-VN)."
+              >
+                <div class="card-name"><span class="card-icon">📅</span> dateUtils</div>
+                <div class="card-detail">Week calc · date format · grouping</div>
+                <span class="card-tag">helper</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="timeFormat"
+                data-desc="Seconds → HH:MM:SS hiển thị. Dùng cho workout duration, rest timer countdown."
+              >
+                <div class="card-name"><span class="card-icon">⏰</span> timeFormat</div>
+                <div class="card-detail">Seconds → HH:MM:SS</div>
+                <span class="card-tag">helper</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="parseNumericInput"
+                data-desc="Input string → number with validation. Handles comma decimal, negative check, range clamping."
+              >
+                <div class="card-name"><span class="card-icon">🔢</span> parseNumericInput</div>
+                <div class="card-detail">String → number + validation</div>
+                <span class="card-tag">helper</span>
+              </div>
+              <div
+                class="component-card"
+                data-tip="safeJsonParse"
+                data-desc="Wrapper quanh JSON.parse với try-catch. Trả về default value nếu parse fail. Dùng cho DB JSON fields."
+              >
+                <div class="card-name"><span class="card-icon">🛡️</span> safeJsonParse</div>
+                <div class="card-detail">Safe JSON.parse + fallback</div>
+                <span class="card-tag">helper</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ DATA FLOW ═══════ -->
+      <div class="data-flow-section">
+        <h2>⟳ Luồng Dữ Liệu Chính</h2>
+        <div class="flow-container">
+          <!-- User Input Flow -->
+          <div class="flow-card flow-input">
+            <h3><span style="font-size: 18px">📥</span> Luồng Nhập Liệu (User Input)</h3>
+            <div class="flow-steps">
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer1)">1</div>
+                <div class="step-text"><strong>User Input</strong> — Người dùng nhập dữ liệu qua React Components</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer1)">2</div>
+                <div class="step-text">
+                  <strong>Form Validation</strong> — React Hook Form + Zod kiểm tra dữ liệu (z.preprocess cho numeric)
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer2)">3</div>
+                <div class="step-text"><strong>Store Action</strong> — Dispatch action tới Zustand store</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer2)">4</div>
+                <div class="step-text"><strong>Optimistic Update</strong> — Cập nhật state in-memory ngay lập tức</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer3)">5</div>
+                <div class="step-text"><strong>SQLite Write</strong> — Ghi xuống SQLite (non-blocking, background)</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer1)">6</div>
+                <div class="step-text"><strong>Re-render</strong> — React 19 concurrent re-render UI mới</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Boot Flow -->
+          <div class="flow-card flow-boot">
+            <h3><span style="font-size: 18px">🚀</span> Luồng Khởi Động (App Launch)</h3>
+            <div class="flow-steps">
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer4)">1</div>
+                <div class="step-text"><strong>Load WASM</strong> — Tải sql.js WebAssembly binary</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer3)">2</div>
+                <div class="step-text"><strong>Open DB</strong> — Mở hoặc tạo SQLite database</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer3)">3</div>
+                <div class="step-text"><strong>Migrations</strong> — Chạy migrations v1→v5 (PRAGMA user_version)</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer2)">4</div>
+                <div class="step-text"><strong>Hydrate</strong> — loadAll(db) nạp data từ SQLite → Zustand store</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer2)">5</div>
+                <div class="step-text"><strong>Restore Persist</strong> — Middleware restore từ localStorage</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer1)">6</div>
+                <div class="step-text"><strong>Render</strong> — Hiển thị UI với full data</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Export Flow -->
+          <div class="flow-card flow-export">
+            <h3><span style="font-size: 18px">📤</span> Luồng Xuất / Sao Lưu (Export)</h3>
+            <div class="flow-steps">
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer3)">1</div>
+                <div class="step-text"><strong>Export Binary</strong> — SQLite.exportBinary() → Uint8Array</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer4)">2</div>
+                <div class="step-text"><strong>Filesystem Write</strong> — Capacitor ghi file lên device storage</div>
+              </div>
+              <div class="flow-step">
+                <div class="step-dot" style="background: var(--layer4)">3</div>
+                <div class="step-text"><strong>Share / Download</strong> — Chia sẻ qua Android Share API</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ CROSS-MODULE INTEGRATION ═══════ -->
+      <div class="cross-module-section">
+        <h2>⇄ Tích Hợp Liên Module</h2>
+        <div class="cross-grid">
+          <div class="cross-card">
+            <h4><span style="font-size: 16px">🔗</span> Fitness → Nutrition</h4>
+            <ul>
+              <li>Calorie burn từ workout → điều chỉnh daily calorie targets</li>
+              <li>Activity multiplier → tính toán BMR / TDEE chính xác</li>
+              <li>Thay đổi cân nặng → cập nhật macro targets</li>
+              <li>Training intensity → đề xuất dinh dưỡng phục hồi</li>
+            </ul>
+          </div>
+          <div class="cross-card">
+            <h4><span style="font-size: 16px">📊</span> Fitness → Dashboard</h4>
+            <ul>
+              <li>Trạng thái workout hôm nay (đã tập / chưa tập)</li>
+              <li>Quick action buttons (bắt đầu tập)</li>
+              <li>Streak display (chuỗi tập liên tiếp)</li>
+              <li>Weight mini widget (cân nặng hôm nay)</li>
+            </ul>
+          </div>
+          <div class="cross-card">
+            <h4><span style="font-size: 16px">👤</span> Fitness → Health Profile</h4>
+            <ul>
+              <li>Cân nặng user → ước lượng calories cardio (MET × kg)</li>
+              <li>Tuổi user → khuyến nghị phục hồi phù hợp</li>
+              <li>BMI tracking → điều chỉnh training recommendations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ LEGEND ═══════ -->
+      <div class="legend">
+        <h3>📖 Chú Giải (Legend)</h3>
+        <div class="legend-grid">
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--layer1)"></div>
+            Layer 1 — Presentation (React UI)
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--layer2)"></div>
+            Layer 2 — State Management (Zustand)
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--layer3)"></div>
+            Layer 3 — Persistence (SQLite WASM)
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--layer4)"></div>
+            Layer 4 — Platform (Capacitor)
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--layer5)"></div>
+            Layer 5 — Utilities &amp; Algorithms
+          </div>
+          <div class="legend-item">
+            <div class="legend-line dashed"></div>
+            Cross-module integration
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--bg-card); border: 1px solid var(--border)"></div>
+            Component / Module card
+          </div>
+          <div class="legend-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" style="flex-shrink: 0">
+              <path d="M8 2 L8 14" stroke="var(--layer2)" stroke-width="2" />
+              <path d="M4 10 L8 14 L12 10" stroke="var(--layer2)" stroke-width="2" fill="none" />
+            </svg>
+            Data flow direction
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      MealPlaning — Fitness Feature System Architecture · React 19 + Vite 6 + Capacitor 8 · Offline-first
+      Vietnamese-language App<br />
+      Generated for documentation purposes · Click layers to expand/collapse details
+    </div>
+
+    <script>
+      // ── Layer toggle ──
+      function toggleLayer(el) {
+        el.classList.toggle('expanded');
+      }
+
+      function expandAll() {
+        document.querySelectorAll('.layer').forEach(l => l.classList.add('expanded'));
+      }
+      function collapseAll() {
+        document.querySelectorAll('.layer').forEach(l => l.classList.remove('expanded'));
+      }
+
+      // ── Tooltip ──
+      const tooltip = document.getElementById('tooltip');
+      const tipTitle = document.getElementById('tip-title');
+      const tipDesc = document.getElementById('tip-desc');
+
+      document.querySelectorAll('.component-card[data-tip]').forEach(card => {
+        card.addEventListener('mouseenter', e => {
+          e.stopPropagation();
+          tipTitle.textContent = card.dataset.tip;
+          tipDesc.textContent = card.dataset.desc;
+          tooltip.classList.add('visible');
+          positionTooltip(e);
+        });
+        card.addEventListener('mousemove', e => {
+          e.stopPropagation();
+          positionTooltip(e);
+        });
+        card.addEventListener('mouseleave', () => {
+          tooltip.classList.remove('visible');
+        });
+        // Prevent card click from toggling the layer
+        card.addEventListener('click', e => e.stopPropagation());
+      });
+
+      function positionTooltip(e) {
+        let x = e.clientX + 14;
+        let y = e.clientY + 14;
+        const tw = 280;
+        const th = tooltip.offsetHeight || 80;
+        if (x + tw > window.innerWidth - 10) x = e.clientX - tw - 10;
+        if (y + th > window.innerHeight - 10) y = e.clientY - th - 10;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+      }
+
+      // ── Start with first layer expanded ──
+      document.getElementById('layer1').classList.add('expanded');
+    </script>
+  </body>
+</html>

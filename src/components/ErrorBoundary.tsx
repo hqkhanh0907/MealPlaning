@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </button>
             <button
               onClick={() => globalThis.location.reload()}
-              className="min-h-11 rounded-xl bg-slate-100 px-5 py-2.5 font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-[0.98] dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+              className="text-foreground-secondary min-h-11 rounded-xl bg-slate-100 px-5 py-2.5 font-bold transition-all hover:bg-slate-200 active:scale-[0.98] dark:bg-slate-700 dark:hover:bg-slate-600"
             >
               {i18n.t('errorBoundary.reload')}
             </button>
@@ -70,7 +70,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <summary className="hover:text-muted-foreground cursor-pointer text-xs text-slate-400 dark:text-slate-500">
                 {i18n.t('errorBoundary.errorDetails')}
               </summary>
-              <pre className="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-100 p-3 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700">
+              <pre className="border-border text-foreground-secondary mt-2 overflow-x-auto rounded-xl border bg-slate-100 p-3 text-xs dark:bg-slate-700">
                 {this.state.error.message}
               </pre>
             </details>

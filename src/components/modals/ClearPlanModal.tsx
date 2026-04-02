@@ -108,7 +108,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('clearPlan.title')}</h3>
             <p className="text-muted-foreground text-sm">{t('clearPlan.subtitle')}</p>
@@ -133,7 +133,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-bold transition-all ${
                   selectedMeals.has(type)
                     ? 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
-                    : 'border-slate-200 text-slate-400 dark:border-slate-600 dark:text-slate-500'
+                    : 'border-border text-slate-400 dark:text-slate-500'
                 }`}
               >
                 {t(labelKey)}
@@ -150,7 +150,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 className={`group flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 p-4 transition-all ${
                   count === 0
                     ? 'cursor-not-allowed border-slate-50 bg-slate-50 opacity-50 dark:border-slate-700 dark:bg-slate-800'
-                    : 'border-slate-100 hover:border-rose-500 hover:bg-rose-50 active:scale-[0.98] dark:border-slate-700 dark:hover:bg-rose-900/20'
+                    : 'border-border-subtle hover:border-rose-500 hover:bg-rose-50 active:scale-[0.98] dark:hover:bg-rose-900/20'
                 }`}
               >
                 <div
@@ -185,7 +185,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 <button
                   data-testid={`btn-expand-${scope}`}
                   onClick={() => setExpandedScope(prev => (prev === scope ? null : scope))}
-                  className="mt-1.5 ml-4 flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
+                  className="hover:text-foreground-secondary mt-1.5 ml-4 flex items-center gap-1 text-xs text-slate-400 transition-colors dark:hover:text-slate-300"
                 >
                   {expandedScope === scope ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                   {t('clearPlan.affectedDates')}

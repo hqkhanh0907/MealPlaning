@@ -1,0 +1,2337 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sơ Đồ Quy Trình Công Việc - Fitness Navigation Flow</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --surface2: #242836;
+        --border: #2e3345;
+        --text: #e2e8f0;
+        --text-dim: #8892a8;
+        --accent-blue: #3b82f6;
+        --accent-green: #22c55e;
+        --accent-purple: #a855f7;
+        --accent-orange: #f97316;
+        --accent-gray: #64748b;
+        --accent-cyan: #06b6d4;
+        --accent-red: #ef4444;
+        --glow-blue: rgba(59, 130, 246, 0.25);
+        --glow-green: rgba(34, 197, 94, 0.25);
+        --glow-purple: rgba(168, 85, 247, 0.25);
+        --glow-orange: rgba(249, 115, 22, 0.25);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      /* ── Header ── */
+      #header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: linear-gradient(180deg, var(--surface) 0%, rgba(26, 29, 39, 0.95) 100%);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #header h1 {
+        font-size: 16px;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      #header .subtitle {
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-top: 2px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .controls button {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .controls button:hover {
+        border-color: var(--accent-blue);
+        background: rgba(59, 130, 246, 0.1);
+      }
+      .controls button.active {
+        border-color: var(--accent-blue);
+        background: rgba(59, 130, 246, 0.15);
+      }
+      #zoom-display {
+        font-size: 11px;
+        color: var(--text-dim);
+        min-width: 42px;
+        text-align: center;
+      }
+
+      /* ── Legend ── */
+      #legend {
+        position: fixed;
+        bottom: 16px;
+        left: 16px;
+        z-index: 100;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 11px;
+        line-height: 1.8;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        max-width: 260px;
+        transition:
+          transform 0.3s,
+          opacity 0.3s;
+      }
+      #legend.collapsed {
+        transform: translateY(calc(100% - 36px));
+        opacity: 0.85;
+      }
+      #legend h3 {
+        font-size: 12px;
+        margin-bottom: 6px;
+        color: var(--text);
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #legend h3::after {
+        content: '▼';
+        font-size: 8px;
+        transition: transform 0.3s;
+      }
+      #legend.collapsed h3::after {
+        transform: rotate(-90deg);
+      }
+      .legend-body {
+        overflow: hidden;
+        transition: max-height 0.3s;
+        max-height: 500px;
+      }
+      #legend.collapsed .legend-body {
+        max-height: 0;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .legend-swatch {
+        width: 20px;
+        height: 14px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+      .legend-swatch.dashed {
+        border: 2px dashed var(--accent-orange);
+        background: transparent;
+      }
+      .legend-arrow {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .legend-arrow span {
+        font-size: 14px;
+      }
+
+      /* ── Minimap ── */
+      #minimap {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 100;
+        width: 180px;
+        height: 120px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+      #minimap canvas {
+        width: 100%;
+        height: 100%;
+      }
+      #minimap-viewport {
+        position: absolute;
+        border: 1.5px solid var(--accent-blue);
+        background: rgba(59, 130, 246, 0.08);
+        pointer-events: none;
+      }
+
+      /* ── Canvas ── */
+      #canvas-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        cursor: grab;
+        padding-top: 56px;
+      }
+      #canvas-container.dragging {
+        cursor: grabbing;
+      }
+      #canvas {
+        position: absolute;
+        transform-origin: 0 0;
+        will-change: transform;
+      }
+
+      /* ── Nodes ── */
+      .node {
+        position: absolute;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 12px;
+        cursor: pointer;
+        transition:
+          box-shadow 0.25s,
+          border-color 0.25s,
+          transform 0.15s;
+        user-select: none;
+        min-width: 140px;
+        text-align: center;
+        z-index: 2;
+      }
+      .node:hover {
+        transform: scale(1.04);
+        z-index: 10;
+      }
+      .node.highlighted {
+        z-index: 20;
+        animation: pulse-glow 1.5s ease-in-out infinite;
+      }
+      .node.dimmed {
+        opacity: 0.2;
+        transition: opacity 0.4s;
+      }
+      .node .label {
+        font-weight: 600;
+        line-height: 1.3;
+      }
+      .node .sublabel {
+        font-size: 10px;
+        opacity: 0.7;
+        margin-top: 2px;
+        font-weight: 400;
+      }
+      .node .icon {
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+
+      /* Shapes */
+      .node.rounded-rect {
+        border-radius: 12px;
+      }
+      .node.rect {
+        border-radius: 4px;
+      }
+      .node.diamond {
+        border-radius: 4px;
+        transform: rotate(0deg);
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        padding: 20px 26px;
+        min-width: 100px;
+      }
+      .node.diamond:hover {
+        transform: rotate(0deg) scale(1.06);
+      }
+      .node.circle {
+        border-radius: 50%;
+        min-width: 56px;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .node.dashed {
+        border-style: dashed !important;
+        border-width: 2px;
+      }
+      .node.pill {
+        border-radius: 50px;
+        padding: 8px 18px;
+      }
+
+      /* Color Layers */
+      .node.layer-shell {
+        background: linear-gradient(135deg, #374151, #1f2937);
+        border: 1.5px solid #4b5563;
+        color: #d1d5db;
+      }
+      .node.layer-shell:hover {
+        box-shadow: 0 0 20px rgba(100, 116, 139, 0.3);
+      }
+      .node.layer-shell.highlighted {
+        box-shadow: 0 0 28px rgba(100, 116, 139, 0.5);
+        border-color: #94a3b8;
+      }
+
+      .node.layer-fitness {
+        background: linear-gradient(135deg, #1e3a5f, #1e293b);
+        border: 1.5px solid var(--accent-blue);
+      }
+      .node.layer-fitness:hover {
+        box-shadow: 0 0 20px var(--glow-blue);
+      }
+      .node.layer-fitness.highlighted {
+        box-shadow: 0 0 28px var(--glow-blue);
+        border-color: #60a5fa;
+      }
+
+      .node.layer-subtab {
+        background: linear-gradient(135deg, #14532d, #1a2e1a);
+        border: 1.5px solid var(--accent-green);
+      }
+      .node.layer-subtab:hover {
+        box-shadow: 0 0 20px var(--glow-green);
+      }
+      .node.layer-subtab.highlighted {
+        box-shadow: 0 0 28px var(--glow-green);
+        border-color: #4ade80;
+      }
+
+      .node.layer-page {
+        background: linear-gradient(135deg, #3b1f6e, #2d1854);
+        border: 1.5px solid var(--accent-purple);
+      }
+      .node.layer-page:hover {
+        box-shadow: 0 0 20px var(--glow-purple);
+      }
+      .node.layer-page.highlighted {
+        box-shadow: 0 0 28px var(--glow-purple);
+        border-color: #c084fc;
+      }
+
+      .node.layer-modal {
+        background: rgba(30, 25, 20, 0.85);
+        border: 2px dashed var(--accent-orange);
+      }
+      .node.layer-modal:hover {
+        box-shadow: 0 0 20px var(--glow-orange);
+      }
+      .node.layer-modal.highlighted {
+        box-shadow: 0 0 28px var(--glow-orange);
+        border-color: #fb923c;
+      }
+
+      .node.layer-component {
+        background: linear-gradient(135deg, var(--surface2), var(--surface));
+        border: 1px solid var(--border);
+      }
+      .node.layer-component:hover {
+        box-shadow: 0 0 14px rgba(100, 116, 139, 0.2);
+      }
+      .node.layer-component.highlighted {
+        box-shadow: 0 0 20px rgba(100, 116, 139, 0.35);
+        border-color: #94a3b8;
+      }
+
+      .node.layer-entry {
+        background: linear-gradient(135deg, #065f46, #064e3b);
+        border: 2px solid var(--accent-green);
+      }
+
+      .node.layer-action {
+        background: linear-gradient(135deg, #7c2d12, #451a03);
+        border: 1.5px solid var(--accent-orange);
+      }
+      .node.layer-action:hover {
+        box-shadow: 0 0 16px var(--glow-orange);
+      }
+
+      /* ── Tooltip ── */
+      #tooltip {
+        position: fixed;
+        z-index: 200;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 11px;
+        line-height: 1.6;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        max-width: 280px;
+      }
+      #tooltip.visible {
+        opacity: 1;
+      }
+      #tooltip .tt-title {
+        font-weight: 700;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+      #tooltip .tt-type {
+        color: var(--text-dim);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      #tooltip .tt-desc {
+        margin-top: 4px;
+        color: var(--text-dim);
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          filter: brightness(1);
+        }
+        50% {
+          filter: brightness(1.15);
+        }
+      }
+
+      /* ── SVG Arrows ── */
+      #arrows-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: visible;
+      }
+      #arrows-svg path {
+        fill: none;
+        stroke-width: 1.5;
+        transition:
+          stroke-opacity 0.4s,
+          stroke-width 0.3s;
+      }
+      #arrows-svg path.dimmed {
+        stroke-opacity: 0.08;
+      }
+      #arrows-svg path.highlighted {
+        stroke-width: 2.5;
+        stroke-opacity: 1;
+      }
+      #arrows-svg marker path {
+        transition: none;
+      }
+
+      /* ── Search ── */
+      #search-box {
+        position: fixed;
+        top: 56px;
+        right: 16px;
+        z-index: 100;
+        display: none;
+      }
+      #search-box.open {
+        display: block;
+      }
+      #search-input {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        width: 240px;
+        outline: none;
+      }
+      #search-input:focus {
+        border-color: var(--accent-blue);
+      }
+      #search-results {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-top: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      #search-results .sr-item {
+        padding: 6px 14px;
+        cursor: pointer;
+        font-size: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      #search-results .sr-item:hover {
+        background: rgba(59, 130, 246, 0.1);
+      }
+      #search-results .sr-item:last-child {
+        border-bottom: none;
+      }
+
+      /* ── Info Panel ── */
+      #info-panel {
+        position: fixed;
+        top: 56px;
+        right: -340px;
+        z-index: 90;
+        width: 320px;
+        height: calc(100vh - 56px);
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        padding: 20px;
+        overflow-y: auto;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+      }
+      #info-panel.open {
+        right: 0;
+      }
+      #info-panel h2 {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+      #info-panel .ip-type {
+        font-size: 10px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 12px;
+      }
+      #info-panel .ip-section {
+        margin-bottom: 14px;
+      }
+      #info-panel .ip-section h4 {
+        font-size: 11px;
+        color: var(--accent-blue);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      #info-panel .ip-section p,
+      #info-panel .ip-section li {
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.6;
+      }
+      #info-panel .ip-section ul {
+        padding-left: 16px;
+      }
+      #info-panel .ip-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px;
+      }
+      #info-panel .ip-close:hover {
+        color: var(--text);
+      }
+      .ip-connections {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+      }
+      .ip-conn-tag {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .ip-conn-tag:hover {
+        border-color: var(--accent-blue);
+        background: rgba(59, 130, 246, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div id="header">
+      <div>
+        <h1>📐 Sơ Đồ Quy Trình Công Việc — Fitness Navigation Flow</h1>
+        <div class="subtitle">MealPlaning App · React 19 + Vite + Capacitor · Stack-based Navigation</div>
+      </div>
+      <div class="controls">
+        <button onclick="zoomBy(-0.15)" title="Thu nhỏ">−</button>
+        <span id="zoom-display">100%</span>
+        <button onclick="zoomBy(0.15)" title="Phóng to">+</button>
+        <button onclick="resetView()" title="Đặt lại">⌂</button>
+        <button onclick="fitAll()" title="Vừa khung">⊞</button>
+        <button id="btn-search" onclick="toggleSearch()" title="Tìm kiếm">🔍</button>
+        <button id="btn-layers" onclick="cycleLayerFilter()" title="Lọc lớp">◉</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div id="search-box">
+      <input id="search-input" placeholder="Tìm component..." oninput="onSearch(this.value)" />
+      <div id="search-results"></div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip">
+      <div class="tt-type"></div>
+      <div class="tt-title"></div>
+      <div class="tt-desc"></div>
+    </div>
+
+    <!-- Info Panel -->
+    <div id="info-panel">
+      <button class="ip-close" onclick="closeInfoPanel()">✕</button>
+      <h2 id="ip-title"></h2>
+      <div class="ip-type" id="ip-type"></div>
+      <div id="ip-body"></div>
+    </div>
+
+    <!-- Legend -->
+    <div id="legend">
+      <h3 onclick="this.parentElement.classList.toggle('collapsed')">Chú giải</h3>
+      <div class="legend-body">
+        <div class="legend-item">
+          <div
+            class="legend-swatch"
+            style="background: linear-gradient(135deg, #374151, #1f2937); border: 1px solid #4b5563"
+          ></div>
+          App Shell (Gray)
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-swatch"
+            style="background: linear-gradient(135deg, #1e3a5f, #1e293b); border: 1px solid var(--accent-blue)"
+          ></div>
+          Fitness Tab (Blue)
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-swatch"
+            style="background: linear-gradient(135deg, #14532d, #1a2e1a); border: 1px solid var(--accent-green)"
+          ></div>
+          Sub-tabs (Green)
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-swatch"
+            style="background: linear-gradient(135deg, #3b1f6e, #2d1854); border: 1px solid var(--accent-purple)"
+          ></div>
+          Page Stack (Purple)
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch dashed"></div>
+          Modals / Sheets (Orange)
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background: var(--surface2); border: 1px solid var(--border)"></div>
+          Components (Gray)
+        </div>
+        <div style="margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px">
+          <div class="legend-arrow"><span style="color: var(--accent-blue)">→</span> pushPage() điều hướng</div>
+          <div class="legend-arrow"><span style="color: var(--accent-green)">→</span> Render inline (con)</div>
+          <div class="legend-arrow"><span style="color: var(--accent-orange)">⇢</span> Mở Modal/Sheet</div>
+          <div class="legend-arrow"><span style="color: var(--accent-purple)">→</span> Luồng dữ liệu</div>
+        </div>
+        <div style="margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; color: var(--text-dim)">
+          💡 Click node → xem chi tiết<br />
+          🖱️ Kéo thả để di chuyển<br />
+          🔍 Cuộn để zoom
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimap -->
+    <div id="minimap">
+      <canvas id="minimap-canvas"></canvas>
+      <div id="minimap-viewport"></div>
+    </div>
+
+    <!-- Canvas -->
+    <div id="canvas-container">
+      <div id="canvas">
+        <svg id="arrows-svg"></svg>
+      </div>
+    </div>
+
+    <script>
+      // ════════════════════════════════════════════
+      // DATA MODEL
+      // ════════════════════════════════════════════
+      const NODES = [
+        // ─── App Shell ───
+        {
+          id: 'app',
+          x: 700,
+          y: 20,
+          w: 180,
+          h: 50,
+          label: 'App.tsx',
+          sublabel: 'Bottom Navigation · 5 Tabs',
+          shape: 'rounded-rect',
+          layer: 'shell',
+          icon: '📱',
+          desc: 'Root component. Renders BottomNav with 5 tabs: calendar, library, ai-analysis, fitness, dashboard. PageStackOverlay cho full-screen pages.',
+        },
+        {
+          id: 'tab-calendar',
+          x: 180,
+          y: 110,
+          w: 120,
+          h: 40,
+          label: '📅 Calendar',
+          shape: 'pill',
+          layer: 'shell',
+          desc: 'Tab Lịch ăn - Quản lý bữa ăn theo ngày',
+        },
+        {
+          id: 'tab-library',
+          x: 340,
+          y: 110,
+          w: 120,
+          h: 40,
+          label: '📚 Library',
+          shape: 'pill',
+          layer: 'shell',
+          desc: 'Tab Thư viện - Kho món ăn & nguyên liệu',
+        },
+        {
+          id: 'tab-ai',
+          x: 500,
+          y: 110,
+          w: 140,
+          h: 40,
+          label: '🤖 AI Analysis',
+          shape: 'pill',
+          layer: 'shell',
+          desc: 'Tab Phân tích AI - Chụp ảnh phân tích dinh dưỡng',
+        },
+        {
+          id: 'tab-fitness',
+          x: 680,
+          y: 110,
+          w: 140,
+          h: 46,
+          label: '💪 Fitness',
+          sublabel: '← FEATURE NÀY',
+          shape: 'pill',
+          layer: 'fitness',
+          desc: 'Tab Fitness - Tập luyện, kế hoạch, tiến độ',
+        },
+        {
+          id: 'tab-dashboard',
+          x: 860,
+          y: 110,
+          w: 140,
+          h: 40,
+          label: '📊 Dashboard',
+          shape: 'pill',
+          layer: 'shell',
+          desc: 'Tab Tổng quan - Thống kê dinh dưỡng + tập luyện',
+        },
+
+        // ─── Fitness Tab Container ───
+        {
+          id: 'fitness-tab',
+          x: 540,
+          y: 200,
+          w: 220,
+          h: 54,
+          label: 'FitnessTab',
+          sublabel: 'activeTab: "fitness" · useNavigationStore',
+          shape: 'rounded-rect',
+          layer: 'fitness',
+          icon: '',
+          desc: 'Container chính cho Fitness. Chứa SmartInsightBanner, PlanGeneratedCard, và 3 sub-tabs. Dùng inline rendering, KHÔNG dùng pushPage cho sub-tabs.',
+        },
+        {
+          id: 'insight-banner',
+          x: 250,
+          y: 210,
+          w: 200,
+          h: 42,
+          label: 'SmartInsightBanner',
+          sublabel: 'Nutrition-Fitness insights',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Banner hiển thị insights tích hợp dinh dưỡng-tập luyện. Tính toán từ dữ liệu dayPlan + fitnessStore.',
+        },
+        {
+          id: 'plan-card',
+          x: 820,
+          y: 210,
+          w: 190,
+          h: 42,
+          label: 'PlanGeneratedCard',
+          sublabel: 'Plan status + quick actions',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Card hiển thị trạng thái kế hoạch tập luyện hiện tại và các nút hành động nhanh.',
+        },
+
+        // ─── Decision: Sub-tab ───
+        {
+          id: 'subtab-decision',
+          x: 610,
+          y: 300,
+          w: 80,
+          h: 80,
+          label: 'Sub-tab?',
+          shape: 'diamond',
+          layer: 'fitness',
+          desc: 'Điểm quyết định: Người dùng chọn 1 trong 3 sub-tabs. Render inline trong FitnessTab.',
+        },
+
+        // ─── Sub-tab: Kế hoạch ───
+        {
+          id: 'tab-plan',
+          x: 180,
+          y: 410,
+          w: 180,
+          h: 50,
+          label: '📋 Kế hoạch (Plan)',
+          sublabel: 'ClipboardList icon',
+          shape: 'rounded-rect',
+          layer: 'subtab',
+          desc: 'Sub-tab Kế hoạch tập luyện. Hiển thị TrainingPlanView với lịch tuần và bài tập theo ngày.',
+        },
+        {
+          id: 'training-plan-view',
+          x: 100,
+          y: 500,
+          w: 190,
+          h: 44,
+          label: 'TrainingPlanView',
+          sublabel: 'Main plan display',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'View chính hiển thị kế hoạch tập. Chứa WeeklyCalendarStrip, SessionTabs, WorkoutAssignmentList.',
+        },
+        {
+          id: 'weekly-strip',
+          x: 10,
+          y: 580,
+          w: 170,
+          h: 38,
+          label: 'WeeklyCalendarStrip',
+          sublabel: 'Week view + markers',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Thanh lịch tuần hiển thị 7 ngày với markers cho ngày có buổi tập.',
+        },
+        {
+          id: 'session-tabs',
+          x: 200,
+          y: 580,
+          w: 160,
+          h: 38,
+          label: 'SessionTabs',
+          sublabel: 'Max 3 sessions/day',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Tabs cho nhiều buổi tập cùng ngày. Tối đa 3 buổi/ngày.',
+        },
+        {
+          id: 'workout-assign',
+          x: 380,
+          y: 580,
+          w: 190,
+          h: 38,
+          label: 'WorkoutAssignmentList',
+          sublabel: 'Exercises for day',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Danh sách bài tập được gán cho ngày đã chọn trong kế hoạch.',
+        },
+
+        // Plan Controls Decision
+        {
+          id: 'plan-action',
+          x: 140,
+          y: 670,
+          w: 80,
+          h: 80,
+          label: 'Hành động?',
+          shape: 'diamond',
+          layer: 'subtab',
+          desc: 'Điểm quyết định: Chọn hành động từ kế hoạch. Mỗi nút dẫn đến full-screen page hoặc modal.',
+        },
+
+        // Action buttons
+        {
+          id: 'act-workout',
+          x: 10,
+          y: 790,
+          w: 130,
+          h: 36,
+          label: '▶ Bắt đầu tập',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở WorkoutLogger qua pushPage()',
+        },
+        {
+          id: 'act-cardio',
+          x: 150,
+          y: 790,
+          w: 110,
+          h: 36,
+          label: '🏃 Cardio',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở CardioLogger qua pushPage()',
+        },
+        {
+          id: 'act-schedule',
+          x: 270,
+          y: 790,
+          w: 110,
+          h: 36,
+          label: '📅 Sửa lịch',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở PlanScheduleEditor qua pushPage()',
+        },
+        {
+          id: 'act-split',
+          x: 390,
+          y: 790,
+          w: 110,
+          h: 36,
+          label: '🔄 Đổi Split',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở SplitChanger qua pushPage()',
+        },
+        {
+          id: 'act-template',
+          x: 10,
+          y: 840,
+          w: 100,
+          h: 36,
+          label: '📋 Mẫu',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở PlanTemplateGallery qua pushPage()',
+        },
+        {
+          id: 'act-editday',
+          x: 120,
+          y: 840,
+          w: 110,
+          h: 36,
+          label: '✏ Sửa ngày',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở PlanDayEditor qua pushPage()',
+        },
+        {
+          id: 'act-addsess',
+          x: 240,
+          y: 840,
+          w: 120,
+          h: 36,
+          label: '➕ Thêm buổi',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Mở AddSessionModal (max 3/ngày)',
+        },
+        {
+          id: 'act-delsess',
+          x: 370,
+          y: 840,
+          w: 120,
+          h: 36,
+          label: '🗑 Xóa buổi',
+          shape: 'pill',
+          layer: 'action',
+          desc: 'Hiển thị confirmation dialog → removePlanDaySession()',
+        },
+
+        // ─── Sub-tab: Tiến độ ───
+        {
+          id: 'tab-progress',
+          x: 560,
+          y: 410,
+          w: 180,
+          h: 50,
+          label: '📊 Tiến độ (Progress)',
+          sublabel: 'BarChart3 icon',
+          shape: 'rounded-rect',
+          layer: 'subtab',
+          desc: 'Sub-tab Tiến độ. Hiển thị ProgressDashboard với các metric cards, milestones, streak.',
+        },
+        {
+          id: 'progress-dashboard',
+          x: 530,
+          y: 500,
+          w: 180,
+          h: 44,
+          label: 'ProgressDashboard',
+          sublabel: 'Metrics & stats',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Dashboard tiến độ tập luyện. Hiển thị cân nặng, 1RM, adherence, sessions, milestones.',
+        },
+        {
+          id: 'weight-card',
+          x: 480,
+          y: 580,
+          w: 130,
+          h: 36,
+          label: 'Weight Card',
+          sublabel: 'Latest + trend',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Card hiển thị cân nặng mới nhất và xu hướng',
+        },
+        {
+          id: 'rm-card',
+          x: 620,
+          y: 580,
+          w: 110,
+          h: 36,
+          label: '1RM Card',
+          sublabel: 'Estimated max',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Card hiển thị 1RM ước tính',
+        },
+        {
+          id: 'adherence-card',
+          x: 480,
+          y: 626,
+          w: 130,
+          h: 36,
+          label: 'Adherence Card',
+          sublabel: '% completed',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Card hiển thị tỷ lệ hoàn thành buổi tập',
+        },
+        {
+          id: 'sessions-card',
+          x: 620,
+          y: 626,
+          w: 120,
+          h: 36,
+          label: 'Sessions Card',
+          sublabel: 'Week/month count',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Card đếm số buổi tập trong tuần/tháng',
+        },
+        {
+          id: 'daily-weight',
+          x: 480,
+          y: 672,
+          w: 140,
+          h: 36,
+          label: 'DailyWeightInput',
+          sublabel: 'Quick log widget',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Widget nhập cân nặng nhanh hàng ngày',
+        },
+        {
+          id: 'milestones',
+          x: 630,
+          y: 672,
+          w: 130,
+          h: 36,
+          label: 'MilestonesList',
+          sublabel: 'PRs, achievements',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Danh sách cột mốc: kỷ lục cá nhân, thành tích',
+        },
+        {
+          id: 'streak',
+          x: 545,
+          y: 718,
+          w: 140,
+          h: 36,
+          label: 'StreakCounter',
+          sublabel: 'Consecutive days',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Đếm số ngày tập liên tiếp',
+        },
+
+        // ─── Sub-tab: Lịch sử ───
+        {
+          id: 'tab-history',
+          x: 860,
+          y: 410,
+          w: 180,
+          h: 50,
+          label: '📜 Lịch sử (History)',
+          sublabel: 'History icon',
+          shape: 'rounded-rect',
+          layer: 'subtab',
+          desc: 'Sub-tab Lịch sử. Hiển thị WorkoutHistory với bộ lọc ngày và danh sách buổi tập.',
+        },
+        {
+          id: 'workout-history',
+          x: 840,
+          y: 500,
+          w: 180,
+          h: 44,
+          label: 'WorkoutHistory',
+          sublabel: 'Past workouts',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Hiển thị lịch sử tập luyện. Có bộ lọc theo khoảng thời gian và expandable cards.',
+        },
+        {
+          id: 'date-filter',
+          x: 790,
+          y: 575,
+          w: 130,
+          h: 36,
+          label: 'Date Filter',
+          sublabel: 'Range selector',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Bộ lọc khoảng thời gian cho lịch sử tập',
+        },
+        {
+          id: 'workout-list',
+          x: 935,
+          y: 575,
+          w: 140,
+          h: 36,
+          label: 'Workout List',
+          sublabel: 'Expandable cards',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Danh sách buổi tập dạng cards mở rộng với chi tiết sets',
+        },
+        {
+          id: 'delete-workout',
+          x: 870,
+          y: 628,
+          w: 140,
+          h: 36,
+          label: 'Delete Workout',
+          sublabel: 'Xóa buổi tập',
+          shape: 'rect',
+          layer: 'action',
+          desc: 'Xóa buổi tập từ lịch sử (có confirmation dialog)',
+        },
+
+        // ─── Page Stack Header ───
+        {
+          id: 'page-stack',
+          x: 560,
+          y: 940,
+          w: 200,
+          h: 50,
+          label: 'PageStackOverlay',
+          sublabel: 'pushPage() · Max depth 2 · Hides BottomNav',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Overlay hiển thị full-screen pages. Max stack depth 2. Ẩn BottomNav khi active. Quản lý bởi useNavigationStore.',
+        },
+
+        // ─── Full-Screen Pages ───
+        {
+          id: 'page-workout-logger',
+          x: 30,
+          y: 1060,
+          w: 190,
+          h: 52,
+          label: 'WorkoutLogger',
+          sublabel: 'Strength training logging',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Ghi nhận buổi tập gym (strength training). Từ kế hoạch ngày, ghi sets/reps/weight cho từng bài tập. Có RestTimer và PRToast.',
+        },
+        {
+          id: 'wl-exercises',
+          x: 10,
+          y: 1140,
+          w: 130,
+          h: 32,
+          label: 'Exercise List',
+          sublabel: 'From plan day',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Danh sách bài tập từ kế hoạch ngày',
+        },
+        {
+          id: 'wl-seteditor',
+          x: 150,
+          y: 1140,
+          w: 130,
+          h: 32,
+          label: 'SetEditor',
+          sublabel: 'Per exercise/set',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Editor cho từng set: weight, reps, RIR',
+        },
+        {
+          id: 'wl-selector',
+          x: 10,
+          y: 1182,
+          w: 140,
+          h: 32,
+          label: 'ExerciseSelector',
+          sublabel: 'Add more exercises',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Modal chọn thêm bài tập vào buổi tập',
+        },
+        {
+          id: 'wl-timer',
+          x: 160,
+          y: 1182,
+          w: 120,
+          h: 32,
+          label: 'RestTimer',
+          sublabel: 'Set countdown',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Đồng hồ đếm ngược nghỉ giữa sets',
+        },
+        {
+          id: 'wl-summary',
+          x: 10,
+          y: 1224,
+          w: 150,
+          h: 32,
+          label: 'WorkoutSummary',
+          sublabel: 'Post-workout card',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Card tổng kết sau buổi tập',
+        },
+        {
+          id: 'wl-pr',
+          x: 170,
+          y: 1224,
+          w: 110,
+          h: 32,
+          label: 'PRToast',
+          sublabel: 'Record notification',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Toast thông báo kỷ lục cá nhân mới',
+        },
+
+        {
+          id: 'page-cardio',
+          x: 260,
+          y: 1060,
+          w: 170,
+          h: 52,
+          label: 'CardioLogger',
+          sublabel: 'Cardio session logging',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Ghi nhận buổi cardio. Chọn loại (7 types), bấm giờ, chọn cường độ. Hiển thị calories ước tính.',
+        },
+        {
+          id: 'cl-type',
+          x: 250,
+          y: 1140,
+          w: 120,
+          h: 32,
+          label: 'Type Selector',
+          sublabel: '7 cardio types',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Chọn loại cardio: chạy, đạp xe, bơi, etc.',
+        },
+        {
+          id: 'cl-timer',
+          x: 380,
+          y: 1140,
+          w: 110,
+          h: 32,
+          label: 'Stopwatch',
+          sublabel: 'Timer',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Đồng hồ bấm giờ cho buổi cardio',
+        },
+        {
+          id: 'cl-intensity',
+          x: 250,
+          y: 1182,
+          w: 130,
+          h: 32,
+          label: 'Intensity',
+          sublabel: 'Low/Mod/High',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Chọn mức cường độ: thấp/trung bình/cao',
+        },
+        {
+          id: 'cl-calories',
+          x: 390,
+          y: 1182,
+          w: 120,
+          h: 32,
+          label: 'Calories Est.',
+          sublabel: 'Display',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Hiển thị calories ước tính dựa trên loại, thời gian, cường độ',
+        },
+
+        {
+          id: 'page-day-editor',
+          x: 470,
+          y: 1060,
+          w: 180,
+          h: 52,
+          label: 'PlanDayEditor',
+          sublabel: 'Customize day exercises',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Chỉnh sửa bài tập cho ngày cụ thể. Kéo thả sắp xếp lại, đổi bài tập, chỉnh rep range.',
+        },
+        {
+          id: 'de-list',
+          x: 460,
+          y: 1140,
+          w: 130,
+          h: 32,
+          label: 'Exercise List',
+          sublabel: 'Drag to reorder',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Danh sách bài tập, kéo thả để sắp xếp lại',
+        },
+        {
+          id: 'de-swap',
+          x: 600,
+          y: 1140,
+          w: 140,
+          h: 32,
+          label: 'SwapExercise',
+          sublabel: 'Bottom sheet',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Bottom sheet chọn bài tập thay thế',
+        },
+        {
+          id: 'de-reps',
+          x: 460,
+          y: 1182,
+          w: 130,
+          h: 32,
+          label: 'Reps Editor',
+          sublabel: 'Range editor',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Chỉnh sửa khoảng reps cho bài tập',
+        },
+        {
+          id: 'de-restore',
+          x: 600,
+          y: 1182,
+          w: 130,
+          h: 32,
+          label: 'Restore Original',
+          sublabel: 'Reset button',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Khôi phục bài tập về mặc định của kế hoạch',
+        },
+
+        {
+          id: 'page-schedule',
+          x: 690,
+          y: 1060,
+          w: 190,
+          h: 52,
+          label: 'PlanScheduleEditor',
+          sublabel: 'Weekly schedule management',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Quản lý lịch tập tuần. Gán/chuyển buổi tập giữa các ngày. Có auto-assign.',
+        },
+        {
+          id: 'se-calendar',
+          x: 680,
+          y: 1140,
+          w: 140,
+          h: 32,
+          label: 'WeeklyStrip',
+          sublabel: '7-day view',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Thanh lịch 7 ngày trong editor',
+        },
+        {
+          id: 'se-assign',
+          x: 830,
+          y: 1140,
+          w: 150,
+          h: 32,
+          label: 'DayAssignment',
+          sublabel: 'Bottom sheet',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Bottom sheet gán lại buổi tập cho ngày khác',
+        },
+        {
+          id: 'se-auto',
+          x: 730,
+          y: 1182,
+          w: 130,
+          h: 32,
+          label: 'Auto-Assign',
+          sublabel: 'Button',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Tự động phân bổ buổi tập vào các ngày trong tuần',
+        },
+
+        {
+          id: 'page-split',
+          x: 920,
+          y: 1060,
+          w: 170,
+          h: 52,
+          label: 'SplitChanger',
+          sublabel: 'Change training split',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Thay đổi split tập: Full Body, Upper/Lower, PPL, Bro Split. Có 2 chế độ: tạo mới hoặc remap.',
+        },
+        {
+          id: 'sp-radio',
+          x: 900,
+          y: 1140,
+          w: 140,
+          h: 32,
+          label: 'Split Type Radio',
+          sublabel: '4 split options',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Radio chọn split: full_body, upper_lower, ppl, bro_split',
+        },
+        {
+          id: 'sp-mode',
+          x: 1050,
+          y: 1140,
+          w: 130,
+          h: 32,
+          label: 'Mode Toggle',
+          sublabel: 'Regenerate/Remap',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Toggle: tạo mới toàn bộ hay remap bài tập hiện có',
+        },
+        {
+          id: 'sp-confirm',
+          x: 920,
+          y: 1182,
+          w: 160,
+          h: 32,
+          label: 'SplitChangeConfirm',
+          sublabel: 'Preview panel',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Panel preview thay đổi trước khi xác nhận',
+        },
+        {
+          id: 'sp-btn',
+          x: 1090,
+          y: 1182,
+          w: 100,
+          h: 32,
+          label: 'Confirm',
+          sublabel: 'Apply',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Nút xác nhận áp dụng split mới',
+        },
+
+        {
+          id: 'page-template',
+          x: 1130,
+          y: 1060,
+          w: 190,
+          h: 52,
+          label: 'PlanTemplateGallery',
+          sublabel: 'Browse & apply templates',
+          shape: 'rounded-rect',
+          layer: 'page',
+          desc: 'Duyệt và áp dụng template kế hoạch tập. Hiển thị compatibility score. Lưu kế hoạch hiện tại làm template.',
+        },
+        {
+          id: 'tpl-cards',
+          x: 1120,
+          y: 1140,
+          w: 150,
+          h: 32,
+          label: 'Template Cards',
+          sublabel: 'MatchBadge score',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Cards template với badge hiển thị điểm tương thích',
+        },
+        {
+          id: 'tpl-apply',
+          x: 1280,
+          y: 1140,
+          w: 110,
+          h: 32,
+          label: 'Apply Button',
+          sublabel: 'Per template',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Nút áp dụng template cho kế hoạch hiện tại',
+        },
+        {
+          id: 'tpl-save',
+          x: 1170,
+          y: 1182,
+          w: 170,
+          h: 32,
+          label: 'Save as Template',
+          sublabel: 'Save current plan',
+          shape: 'rect',
+          layer: 'component',
+          desc: 'Lưu kế hoạch tập hiện tại thành template mới',
+        },
+
+        // ─── Modals ───
+        {
+          id: 'modal-addsession',
+          x: 280,
+          y: 920,
+          w: 180,
+          h: 44,
+          label: 'AddSessionModal',
+          sublabel: 'Add session (max 3/day)',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Modal thêm buổi tập vào ngày. Kiểm tra giới hạn max 3 buổi/ngày.',
+        },
+        {
+          id: 'modal-deload',
+          x: 90,
+          y: 920,
+          w: 160,
+          h: 44,
+          label: 'DeloadModal',
+          sublabel: 'Plan deload week',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Modal lên kế hoạch tuần deload (giảm tải).',
+        },
+        {
+          id: 'modal-custom-ex',
+          x: 820,
+          y: 920,
+          w: 180,
+          h: 44,
+          label: 'CustomExerciseModal',
+          sublabel: 'Create user exercise',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Modal tạo bài tập tùy chỉnh do người dùng định nghĩa.',
+        },
+        {
+          id: 'modal-confirm',
+          x: 1040,
+          y: 920,
+          w: 170,
+          h: 44,
+          label: 'Confirmation Dialogs',
+          sublabel: 'Delete workout/session',
+          shape: 'rect',
+          layer: 'modal',
+          desc: 'Các dialog xác nhận: xóa buổi tập, xóa session, các hành động destructive.',
+        },
+      ];
+
+      const EDGES = [
+        // App → tabs
+        { from: 'app', to: 'tab-calendar', color: '#4b5563', type: 'child' },
+        { from: 'app', to: 'tab-library', color: '#4b5563', type: 'child' },
+        { from: 'app', to: 'tab-ai', color: '#4b5563', type: 'child' },
+        { from: 'app', to: 'tab-fitness', color: 'var(--accent-blue)', type: 'child' },
+        { from: 'app', to: 'tab-dashboard', color: '#4b5563', type: 'child' },
+
+        // Fitness tab → container
+        { from: 'tab-fitness', to: 'fitness-tab', color: 'var(--accent-blue)', type: 'child' },
+        { from: 'fitness-tab', to: 'insight-banner', color: 'var(--accent-cyan)', type: 'child' },
+        { from: 'fitness-tab', to: 'plan-card', color: 'var(--accent-cyan)', type: 'child' },
+        { from: 'fitness-tab', to: 'subtab-decision', color: 'var(--accent-blue)', type: 'child' },
+
+        // Sub-tab decision
+        { from: 'subtab-decision', to: 'tab-plan', color: 'var(--accent-green)', type: 'child', label: '📋' },
+        { from: 'subtab-decision', to: 'tab-progress', color: 'var(--accent-green)', type: 'child', label: '📊' },
+        { from: 'subtab-decision', to: 'tab-history', color: 'var(--accent-green)', type: 'child', label: '📜' },
+
+        // Plan sub-tab
+        { from: 'tab-plan', to: 'training-plan-view', color: 'var(--accent-green)', type: 'child' },
+        { from: 'training-plan-view', to: 'weekly-strip', color: '#6b7280', type: 'child' },
+        { from: 'training-plan-view', to: 'session-tabs', color: '#6b7280', type: 'child' },
+        { from: 'training-plan-view', to: 'workout-assign', color: '#6b7280', type: 'child' },
+        { from: 'training-plan-view', to: 'plan-action', color: 'var(--accent-green)', type: 'child' },
+
+        // Plan actions
+        { from: 'plan-action', to: 'act-workout', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-cardio', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-schedule', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-split', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-template', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-editday', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-addsess', color: 'var(--accent-orange)', type: 'action' },
+        { from: 'plan-action', to: 'act-delsess', color: 'var(--accent-orange)', type: 'action' },
+
+        // Actions → Pages (pushPage)
+        {
+          from: 'act-workout',
+          to: 'page-workout-logger',
+          color: 'var(--accent-purple)',
+          type: 'push',
+          label: 'pushPage',
+        },
+        { from: 'act-cardio', to: 'page-cardio', color: 'var(--accent-purple)', type: 'push', label: 'pushPage' },
+        { from: 'act-schedule', to: 'page-schedule', color: 'var(--accent-purple)', type: 'push', label: 'pushPage' },
+        { from: 'act-split', to: 'page-split', color: 'var(--accent-purple)', type: 'push', label: 'pushPage' },
+        { from: 'act-template', to: 'page-template', color: 'var(--accent-purple)', type: 'push', label: 'pushPage' },
+        { from: 'act-editday', to: 'page-day-editor', color: 'var(--accent-purple)', type: 'push', label: 'pushPage' },
+        {
+          from: 'act-addsess',
+          to: 'modal-addsession',
+          color: 'var(--accent-orange)',
+          type: 'modal',
+          label: 'open modal',
+        },
+        { from: 'act-delsess', to: 'modal-confirm', color: 'var(--accent-orange)', type: 'modal', label: 'confirm' },
+
+        // Page stack
+        { from: 'page-stack', to: 'page-workout-logger', color: 'var(--accent-purple)', type: 'child' },
+        { from: 'page-stack', to: 'page-cardio', color: 'var(--accent-purple)', type: 'child' },
+        { from: 'page-stack', to: 'page-day-editor', color: 'var(--accent-purple)', type: 'child' },
+        { from: 'page-stack', to: 'page-schedule', color: 'var(--accent-purple)', type: 'child' },
+        { from: 'page-stack', to: 'page-split', color: 'var(--accent-purple)', type: 'child' },
+        { from: 'page-stack', to: 'page-template', color: 'var(--accent-purple)', type: 'child' },
+
+        // WorkoutLogger children
+        { from: 'page-workout-logger', to: 'wl-exercises', color: '#6b7280', type: 'child' },
+        { from: 'page-workout-logger', to: 'wl-seteditor', color: '#6b7280', type: 'child' },
+        { from: 'page-workout-logger', to: 'wl-selector', color: 'var(--accent-orange)', type: 'modal' },
+        { from: 'page-workout-logger', to: 'wl-timer', color: '#6b7280', type: 'child' },
+        { from: 'page-workout-logger', to: 'wl-summary', color: '#6b7280', type: 'child' },
+        { from: 'page-workout-logger', to: 'wl-pr', color: '#6b7280', type: 'child' },
+
+        // CardioLogger children
+        { from: 'page-cardio', to: 'cl-type', color: '#6b7280', type: 'child' },
+        { from: 'page-cardio', to: 'cl-timer', color: '#6b7280', type: 'child' },
+        { from: 'page-cardio', to: 'cl-intensity', color: '#6b7280', type: 'child' },
+        { from: 'page-cardio', to: 'cl-calories', color: '#6b7280', type: 'child' },
+
+        // PlanDayEditor children
+        { from: 'page-day-editor', to: 'de-list', color: '#6b7280', type: 'child' },
+        { from: 'page-day-editor', to: 'de-swap', color: 'var(--accent-orange)', type: 'modal' },
+        { from: 'page-day-editor', to: 'de-reps', color: '#6b7280', type: 'child' },
+        { from: 'page-day-editor', to: 'de-restore', color: '#6b7280', type: 'child' },
+
+        // PlanScheduleEditor children
+        { from: 'page-schedule', to: 'se-calendar', color: '#6b7280', type: 'child' },
+        { from: 'page-schedule', to: 'se-assign', color: 'var(--accent-orange)', type: 'modal' },
+        { from: 'page-schedule', to: 'se-auto', color: '#6b7280', type: 'child' },
+
+        // SplitChanger children
+        { from: 'page-split', to: 'sp-radio', color: '#6b7280', type: 'child' },
+        { from: 'page-split', to: 'sp-mode', color: '#6b7280', type: 'child' },
+        { from: 'page-split', to: 'sp-confirm', color: '#6b7280', type: 'child' },
+        { from: 'page-split', to: 'sp-btn', color: '#6b7280', type: 'child' },
+
+        // PlanTemplateGallery children
+        { from: 'page-template', to: 'tpl-cards', color: '#6b7280', type: 'child' },
+        { from: 'page-template', to: 'tpl-apply', color: '#6b7280', type: 'child' },
+        { from: 'page-template', to: 'tpl-save', color: '#6b7280', type: 'child' },
+
+        // Progress sub-tab
+        { from: 'tab-progress', to: 'progress-dashboard', color: 'var(--accent-green)', type: 'child' },
+        { from: 'progress-dashboard', to: 'weight-card', color: '#6b7280', type: 'child' },
+        { from: 'progress-dashboard', to: 'rm-card', color: '#6b7280', type: 'child' },
+        { from: 'progress-dashboard', to: 'adherence-card', color: '#6b7280', type: 'child' },
+        { from: 'progress-dashboard', to: 'sessions-card', color: '#6b7280', type: 'child' },
+        { from: 'progress-dashboard', to: 'daily-weight', color: '#6b7280', type: 'child' },
+        { from: 'progress-dashboard', to: 'milestones', color: '#6b7280', type: 'child' },
+        { from: 'progress-dashboard', to: 'streak', color: '#6b7280', type: 'child' },
+
+        // History sub-tab
+        { from: 'tab-history', to: 'workout-history', color: 'var(--accent-green)', type: 'child' },
+        { from: 'workout-history', to: 'date-filter', color: '#6b7280', type: 'child' },
+        { from: 'workout-history', to: 'workout-list', color: '#6b7280', type: 'child' },
+        { from: 'workout-history', to: 'delete-workout', color: 'var(--accent-red)', type: 'action' },
+      ];
+
+      // ════════════════════════════════════════════
+      // STATE
+      // ════════════════════════════════════════════
+      let scale = 0.85,
+        panX = 0,
+        panY = 0;
+      let isDragging = false,
+        dragStart = { x: 0, y: 0 },
+        panStart = { x: 0, y: 0 };
+      let selectedNode = null;
+      let activeLayerFilter = null;
+      const layerOrder = [null, 'shell', 'fitness', 'subtab', 'page', 'modal', 'component'];
+      let layerIdx = 0;
+
+      const nodeMap = {};
+      NODES.forEach(n => (nodeMap[n.id] = n));
+
+      // ════════════════════════════════════════════
+      // RENDER NODES
+      // ════════════════════════════════════════════
+      const canvas = document.getElementById('canvas');
+      const container = document.getElementById('canvas-container');
+
+      function renderNodes() {
+        NODES.forEach(n => {
+          const el = document.createElement('div');
+          el.className = `node ${n.shape === 'rounded-rect' ? 'rounded-rect' : n.shape} layer-${n.layer}`;
+          if (n.layer === 'modal') el.classList.add('dashed');
+          el.id = `node-${n.id}`;
+          el.style.left = n.x + 'px';
+          el.style.top = n.y + 'px';
+          if (n.shape !== 'diamond' && n.shape !== 'circle') {
+            el.style.width = n.w + 'px';
+            el.style.minHeight = n.h + 'px';
+          }
+          if (n.shape === 'diamond') {
+            el.style.width = n.w + 'px';
+            el.style.height = n.h + 'px';
+          }
+          if (n.shape === 'circle') {
+            el.style.width = n.w + 'px';
+            el.style.height = n.h + 'px';
+          }
+          let html = '';
+          if (n.icon) html += `<div class="icon">${n.icon}</div>`;
+          html += `<div class="label">${n.label}</div>`;
+          if (n.sublabel) html += `<div class="sublabel">${n.sublabel}</div>`;
+          el.innerHTML = html;
+
+          el.addEventListener('click', e => {
+            e.stopPropagation();
+            selectNode(n.id);
+          });
+          el.addEventListener('mouseenter', e => showTooltip(e, n));
+          el.addEventListener('mouseleave', hideTooltip);
+
+          canvas.appendChild(el);
+        });
+      }
+
+      // ════════════════════════════════════════════
+      // RENDER EDGES (SVG)
+      // ════════════════════════════════════════════
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.getElementById('arrows-svg');
+
+      function getNodeCenter(n) {
+        return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
+      }
+
+      function getNodePort(n, side) {
+        const cx = n.x + n.w / 2,
+          cy = n.y + n.h / 2;
+        switch (side) {
+          case 'top':
+            return { x: cx, y: n.y };
+          case 'bottom':
+            return { x: cx, y: n.y + n.h };
+          case 'left':
+            return { x: n.x, y: cy };
+          case 'right':
+            return { x: n.x + n.w, y: cy };
+        }
+      }
+
+      function bestPorts(from, to) {
+        const fc = getNodeCenter(from),
+          tc = getNodeCenter(to);
+        const dx = tc.x - fc.x,
+          dy = tc.y - fc.y;
+        let fromSide, toSide;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          fromSide = dy > 0 ? 'bottom' : 'top';
+          toSide = dy > 0 ? 'top' : 'bottom';
+        } else {
+          fromSide = dx > 0 ? 'right' : 'left';
+          toSide = dx > 0 ? 'left' : 'right';
+        }
+        return { start: getNodePort(from, fromSide), end: getNodePort(to, toSide), fromSide, toSide };
+      }
+
+      function renderEdges() {
+        // Clear existing
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+        // Defs for arrowheads
+        const defs = document.createElementNS(svgNS, 'defs');
+        const colors = new Set(EDGES.map(e => e.color));
+        colors.forEach(c => {
+          const marker = document.createElementNS(svgNS, 'marker');
+          const cid = c.replace(/[^a-zA-Z0-9]/g, '');
+          marker.setAttribute('id', `arrow-${cid}`);
+          marker.setAttribute('viewBox', '0 0 10 6');
+          marker.setAttribute('refX', '10');
+          marker.setAttribute('refY', '3');
+          marker.setAttribute('markerWidth', '8');
+          marker.setAttribute('markerHeight', '6');
+          marker.setAttribute('orient', 'auto-start-reverse');
+          const p = document.createElementNS(svgNS, 'path');
+          p.setAttribute('d', 'M0,0 L10,3 L0,6 Z');
+          p.setAttribute('fill', c);
+          marker.appendChild(p);
+          defs.appendChild(marker);
+        });
+        svg.appendChild(defs);
+
+        // Size SVG
+        let maxX = 0,
+          maxY = 0;
+        NODES.forEach(n => {
+          maxX = Math.max(maxX, n.x + n.w + 50);
+          maxY = Math.max(maxY, n.y + n.h + 50);
+        });
+        svg.setAttribute('width', maxX);
+        svg.setAttribute('height', maxY);
+
+        EDGES.forEach((e, i) => {
+          const fromN = nodeMap[e.from],
+            toN = nodeMap[e.to];
+          if (!fromN || !toN) return;
+
+          const { start, end, fromSide, toSide } = bestPorts(fromN, toN);
+          const dx = end.x - start.x,
+            dy = end.y - start.y;
+
+          let d;
+          const offset = Math.min(Math.abs(dy), Math.abs(dx), 40);
+          if (fromSide === 'bottom' && toSide === 'top') {
+            const midY = start.y + dy / 2;
+            d = `M${start.x},${start.y} C${start.x},${midY} ${end.x},${midY} ${end.x},${end.y}`;
+          } else if (fromSide === 'right' && toSide === 'left') {
+            const midX = start.x + dx / 2;
+            d = `M${start.x},${start.y} C${midX},${start.y} ${midX},${end.y} ${end.x},${end.y}`;
+          } else if (fromSide === 'left' && toSide === 'right') {
+            const midX = start.x + dx / 2;
+            d = `M${start.x},${start.y} C${midX},${start.y} ${midX},${end.y} ${end.x},${end.y}`;
+          } else {
+            const midY = start.y + dy / 2;
+            d = `M${start.x},${start.y} C${start.x},${midY} ${end.x},${midY} ${end.x},${end.y}`;
+          }
+
+          const path = document.createElementNS(svgNS, 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('stroke', e.color);
+          path.setAttribute('stroke-opacity', '0.5');
+          const cid = e.color.replace(/[^a-zA-Z0-9]/g, '');
+          path.setAttribute('marker-end', `url(#arrow-${cid})`);
+          if (e.type === 'modal') path.setAttribute('stroke-dasharray', '6,4');
+          path.dataset.from = e.from;
+          path.dataset.to = e.to;
+          path.dataset.idx = i;
+          svg.appendChild(path);
+        });
+      }
+
+      // ════════════════════════════════════════════
+      // INTERACTION: Select & Highlight
+      // ════════════════════════════════════════════
+      function getConnectedNodes(nodeId) {
+        const connected = new Set([nodeId]);
+        EDGES.forEach(e => {
+          if (e.from === nodeId) connected.add(e.to);
+          if (e.to === nodeId) connected.add(e.from);
+        });
+        return connected;
+      }
+
+      function selectNode(nodeId) {
+        if (selectedNode === nodeId) {
+          clearSelection();
+          return;
+        }
+        selectedNode = nodeId;
+        const connected = getConnectedNodes(nodeId);
+
+        // Nodes
+        document.querySelectorAll('.node').forEach(el => {
+          const id = el.id.replace('node-', '');
+          el.classList.toggle('highlighted', connected.has(id));
+          el.classList.toggle('dimmed', !connected.has(id));
+        });
+
+        // Edges
+        svg.querySelectorAll('path[data-from]').forEach(p => {
+          const isConn = p.dataset.from === nodeId || p.dataset.to === nodeId;
+          p.classList.toggle('highlighted', isConn);
+          p.classList.toggle('dimmed', !isConn);
+        });
+
+        openInfoPanel(nodeId);
+      }
+
+      function clearSelection() {
+        selectedNode = null;
+        document.querySelectorAll('.node').forEach(el => {
+          el.classList.remove('highlighted', 'dimmed');
+        });
+        svg.querySelectorAll('path[data-from]').forEach(p => {
+          p.classList.remove('highlighted', 'dimmed');
+        });
+        closeInfoPanel();
+      }
+
+      // ════════════════════════════════════════════
+      // INFO PANEL
+      // ════════════════════════════════════════════
+      function openInfoPanel(nodeId) {
+        const n = nodeMap[nodeId];
+        if (!n) return;
+        document.getElementById('ip-title').textContent = n.label.replace(/^[^\w\s]/u, '').trim();
+        document.getElementById('ip-type').textContent = `Layer: ${n.layer} · Shape: ${n.shape}`;
+
+        const connected = getConnectedNodes(nodeId);
+        connected.delete(nodeId);
+
+        let body = '';
+        if (n.desc) body += `<div class="ip-section"><h4>Mô tả</h4><p>${n.desc}</p></div>`;
+        if (n.sublabel) body += `<div class="ip-section"><h4>Chi tiết</h4><p>${n.sublabel}</p></div>`;
+
+        // Incoming
+        const incoming = EDGES.filter(e => e.to === nodeId);
+        if (incoming.length) {
+          body += `<div class="ip-section"><h4>Nhận từ (${incoming.length})</h4><div class="ip-connections">`;
+          incoming.forEach(e => {
+            const fn = nodeMap[e.from];
+            body += `<span class="ip-conn-tag" onclick="selectNode('${e.from}')">${fn ? fn.label.replace(/^[^\w\s]/u, '').trim() : e.from}${e.label ? ' · ' + e.label : ''}</span>`;
+          });
+          body += '</div></div>';
+        }
+
+        // Outgoing
+        const outgoing = EDGES.filter(e => e.from === nodeId);
+        if (outgoing.length) {
+          body += `<div class="ip-section"><h4>Đi đến (${outgoing.length})</h4><div class="ip-connections">`;
+          outgoing.forEach(e => {
+            const tn = nodeMap[e.to];
+            body += `<span class="ip-conn-tag" onclick="selectNode('${e.to}')">${tn ? tn.label.replace(/^[^\w\s]/u, '').trim() : e.to}${e.label ? ' · ' + e.label : ''}</span>`;
+          });
+          body += '</div></div>';
+        }
+
+        document.getElementById('ip-body').innerHTML = body;
+        document.getElementById('info-panel').classList.add('open');
+      }
+
+      function closeInfoPanel() {
+        document.getElementById('info-panel').classList.remove('open');
+      }
+
+      // ════════════════════════════════════════════
+      // TOOLTIP
+      // ════════════════════════════════════════════
+      const tooltip = document.getElementById('tooltip');
+
+      function showTooltip(ev, node) {
+        tooltip.querySelector('.tt-title').textContent = node.label;
+        tooltip.querySelector('.tt-type').textContent = node.layer + ' · ' + node.shape;
+        tooltip.querySelector('.tt-desc').textContent = node.desc || '';
+        tooltip.classList.add('visible');
+        positionTooltip(ev);
+      }
+
+      function positionTooltip(ev) {
+        const pad = 14;
+        let x = ev.clientX + pad,
+          y = ev.clientY + pad;
+        const r = tooltip.getBoundingClientRect();
+        if (x + r.width > window.innerWidth) x = ev.clientX - r.width - pad;
+        if (y + r.height > window.innerHeight) y = ev.clientY - r.height - pad;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+      }
+
+      function hideTooltip() {
+        tooltip.classList.remove('visible');
+      }
+
+      document.addEventListener('mousemove', e => {
+        if (tooltip.classList.contains('visible')) positionTooltip(e);
+      });
+
+      // ════════════════════════════════════════════
+      // PAN & ZOOM
+      // ════════════════════════════════════════════
+      function applyTransform() {
+        canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        document.getElementById('zoom-display').textContent = Math.round(scale * 100) + '%';
+        updateMinimap();
+      }
+
+      container.addEventListener('mousedown', e => {
+        if (e.target === container || e.target === canvas || e.target === svg) {
+          isDragging = true;
+          container.classList.add('dragging');
+          dragStart = { x: e.clientX, y: e.clientY };
+          panStart = { x: panX, y: panY };
+          clearSelection();
+        }
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        panX = panStart.x + (e.clientX - dragStart.x);
+        panY = panStart.y + (e.clientY - dragStart.y);
+        applyTransform();
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        container.classList.remove('dragging');
+      });
+
+      container.addEventListener(
+        'wheel',
+        e => {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? -0.08 : 0.08;
+          const newScale = Math.max(0.2, Math.min(3, scale + delta));
+
+          const rect = container.getBoundingClientRect();
+          const mx = e.clientX - rect.left;
+          const my = e.clientY - rect.top;
+
+          panX = mx - (mx - panX) * (newScale / scale);
+          panY = my - (my - panY) * (newScale / scale);
+          scale = newScale;
+          applyTransform();
+        },
+        { passive: false },
+      );
+
+      function zoomBy(d) {
+        const newScale = Math.max(0.2, Math.min(3, scale + d));
+        const cx = container.clientWidth / 2,
+          cy = container.clientHeight / 2;
+        panX = cx - (cx - panX) * (newScale / scale);
+        panY = cy - (cy - panY) * (newScale / scale);
+        scale = newScale;
+        applyTransform();
+      }
+
+      function resetView() {
+        scale = 0.85;
+        panX = 50;
+        panY = 60;
+        applyTransform();
+      }
+
+      function fitAll() {
+        let minX = Infinity,
+          minY = Infinity,
+          maxX = -Infinity,
+          maxY = -Infinity;
+        NODES.forEach(n => {
+          minX = Math.min(minX, n.x);
+          minY = Math.min(minY, n.y);
+          maxX = Math.max(maxX, n.x + n.w);
+          maxY = Math.max(maxY, n.y + n.h);
+        });
+        const cw = container.clientWidth - 40,
+          ch = container.clientHeight - 80;
+        const bw = maxX - minX + 60,
+          bh = maxY - minY + 60;
+        scale = Math.min(cw / bw, ch / bh, 1.5);
+        panX = (cw - bw * scale) / 2 - minX * scale + 20;
+        panY = (ch - bh * scale) / 2 - minY * scale + 60;
+        applyTransform();
+      }
+
+      // ════════════════════════════════════════════
+      // MINIMAP
+      // ════════════════════════════════════════════
+      const minimapCanvas = document.getElementById('minimap-canvas');
+      const minimapCtx = minimapCanvas.getContext('2d');
+      const minimapViewport = document.getElementById('minimap-viewport');
+
+      function updateMinimap() {
+        const mmW = 180,
+          mmH = 120;
+        minimapCanvas.width = mmW * 2;
+        minimapCanvas.height = mmH * 2;
+        minimapCanvas.style.width = mmW + 'px';
+        minimapCanvas.style.height = mmH + 'px';
+        minimapCtx.scale(2, 2);
+
+        let minX = Infinity,
+          minY = Infinity,
+          maxX = -Infinity,
+          maxY = -Infinity;
+        NODES.forEach(n => {
+          minX = Math.min(minX, n.x);
+          minY = Math.min(minY, n.y);
+          maxX = Math.max(maxX, n.x + n.w);
+          maxY = Math.max(maxY, n.y + n.h);
+        });
+        const pad = 20;
+        minX -= pad;
+        minY -= pad;
+        maxX += pad;
+        maxY += pad;
+        const bw = maxX - minX,
+          bh = maxY - minY;
+        const s = Math.min(mmW / bw, mmH / bh);
+        const ox = (mmW - bw * s) / 2,
+          oy = (mmH - bh * s) / 2;
+
+        minimapCtx.clearRect(0, 0, mmW, mmH);
+
+        const layerColors = {
+          shell: '#4b5563',
+          fitness: '#3b82f6',
+          subtab: '#22c55e',
+          page: '#a855f7',
+          modal: '#f97316',
+          component: '#64748b',
+          action: '#f97316',
+          entry: '#22c55e',
+        };
+
+        NODES.forEach(n => {
+          const nx = ox + (n.x - minX) * s,
+            ny = oy + (n.y - minY) * s;
+          const nw = n.w * s,
+            nh = n.h * s;
+          minimapCtx.fillStyle = layerColors[n.layer] || '#64748b';
+          minimapCtx.globalAlpha = 0.6;
+          minimapCtx.fillRect(nx, ny, Math.max(nw, 2), Math.max(nh, 2));
+        });
+        minimapCtx.globalAlpha = 1;
+
+        // Viewport rectangle
+        const vx = ox + (-panX / scale - minX) * s;
+        const vy = oy + (-panY / scale + 56 / scale - minY) * s;
+        const vw = (container.clientWidth / scale) * s;
+        const vh = (container.clientHeight / scale) * s;
+        minimapViewport.style.left = Math.max(0, vx) + 'px';
+        minimapViewport.style.top = Math.max(0, vy) + 'px';
+        minimapViewport.style.width = Math.min(vw, mmW) + 'px';
+        minimapViewport.style.height = Math.min(vh, mmH) + 'px';
+      }
+
+      // ════════════════════════════════════════════
+      // SEARCH
+      // ════════════════════════════════════════════
+      function toggleSearch() {
+        const box = document.getElementById('search-box');
+        box.classList.toggle('open');
+        if (box.classList.contains('open')) {
+          document.getElementById('search-input').focus();
+        }
+      }
+
+      function onSearch(q) {
+        const results = document.getElementById('search-results');
+        results.innerHTML = '';
+        if (!q.trim()) return;
+        const lower = q.toLowerCase();
+        const matches = NODES.filter(
+          n =>
+            n.label.toLowerCase().includes(lower) ||
+            (n.sublabel || '').toLowerCase().includes(lower) ||
+            (n.desc || '').toLowerCase().includes(lower),
+        );
+        matches.slice(0, 10).forEach(n => {
+          const div = document.createElement('div');
+          div.className = 'sr-item';
+          div.textContent = n.label + (n.sublabel ? ' · ' + n.sublabel : '');
+          div.onclick = () => {
+            selectNode(n.id);
+            panToNode(n);
+            document.getElementById('search-box').classList.remove('open');
+          };
+          results.appendChild(div);
+        });
+      }
+
+      function panToNode(n) {
+        const cx = container.clientWidth / 2,
+          cy = container.clientHeight / 2;
+        panX = cx - (n.x + n.w / 2) * scale;
+        panY = cy - (n.y + n.h / 2) * scale;
+        applyTransform();
+      }
+
+      // ════════════════════════════════════════════
+      // LAYER FILTER
+      // ════════════════════════════════════════════
+      function cycleLayerFilter() {
+        layerIdx = (layerIdx + 1) % layerOrder.length;
+        activeLayerFilter = layerOrder[layerIdx];
+        const btn = document.getElementById('btn-layers');
+        if (!activeLayerFilter) {
+          btn.classList.remove('active');
+          btn.title = 'Lọc lớp: Tất cả';
+        } else {
+          btn.classList.add('active');
+          btn.title = `Lọc lớp: ${activeLayerFilter}`;
+        }
+
+        document.querySelectorAll('.node').forEach(el => {
+          const id = el.id.replace('node-', '');
+          const n = nodeMap[id];
+          if (!activeLayerFilter || n.layer === activeLayerFilter) {
+            el.classList.remove('dimmed');
+          } else {
+            el.classList.add('dimmed');
+          }
+        });
+
+        svg.querySelectorAll('path[data-from]').forEach(p => {
+          const fn = nodeMap[p.dataset.from],
+            tn = nodeMap[p.dataset.to];
+          if (!activeLayerFilter || (fn && fn.layer === activeLayerFilter) || (tn && tn.layer === activeLayerFilter)) {
+            p.classList.remove('dimmed');
+          } else {
+            p.classList.add('dimmed');
+          }
+        });
+      }
+
+      // ════════════════════════════════════════════
+      // KEYBOARD
+      // ════════════════════════════════════════════
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          clearSelection();
+          document.getElementById('search-box').classList.remove('open');
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+          e.preventDefault();
+          toggleSearch();
+        }
+        if (e.key === '0' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          resetView();
+        }
+      });
+
+      // ════════════════════════════════════════════
+      // TOUCH SUPPORT
+      // ════════════════════════════════════════════
+      let lastTouchDist = 0;
+      let lastTouchCenter = null;
+
+      container.addEventListener(
+        'touchstart',
+        e => {
+          if (e.touches.length === 1) {
+            isDragging = true;
+            dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            panStart = { x: panX, y: panY };
+          } else if (e.touches.length === 2) {
+            isDragging = false;
+            const dx = e.touches[1].clientX - e.touches[0].clientX;
+            const dy = e.touches[1].clientY - e.touches[0].clientY;
+            lastTouchDist = Math.hypot(dx, dy);
+            lastTouchCenter = {
+              x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+              y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+            };
+          }
+        },
+        { passive: true },
+      );
+
+      container.addEventListener(
+        'touchmove',
+        e => {
+          e.preventDefault();
+          if (e.touches.length === 1 && isDragging) {
+            panX = panStart.x + (e.touches[0].clientX - dragStart.x);
+            panY = panStart.y + (e.touches[0].clientY - dragStart.y);
+            applyTransform();
+          } else if (e.touches.length === 2) {
+            const dx = e.touches[1].clientX - e.touches[0].clientX;
+            const dy = e.touches[1].clientY - e.touches[0].clientY;
+            const dist = Math.hypot(dx, dy);
+            if (lastTouchDist > 0) {
+              const newScale = Math.max(0.2, Math.min(3, scale * (dist / lastTouchDist)));
+              const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+              const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+              const rect = container.getBoundingClientRect();
+              const mx = cx - rect.left,
+                my = cy - rect.top;
+              panX = mx - (mx - panX) * (newScale / scale);
+              panY = my - (my - panY) * (newScale / scale);
+              scale = newScale;
+              applyTransform();
+            }
+            lastTouchDist = dist;
+          }
+        },
+        { passive: false },
+      );
+
+      container.addEventListener('touchend', () => {
+        isDragging = false;
+        lastTouchDist = 0;
+      });
+
+      // ════════════════════════════════════════════
+      // INIT
+      // ════════════════════════════════════════════
+      renderNodes();
+      renderEdges();
+      resetView();
+    </script>
+  </body>
+</html>

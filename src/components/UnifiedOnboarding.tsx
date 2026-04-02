@@ -277,7 +277,7 @@ export function UnifiedOnboarding() {
 
   return (
     <OnboardingErrorBoundary onReset={handleReset}>
-      <div className="flex h-dvh flex-col bg-white dark:bg-slate-950">
+      <div className="bg-card flex h-dvh flex-col">
         {location.section !== 6 && (
           <div className="pt-safe shrink-0 px-4">
             <div className="pt-2">

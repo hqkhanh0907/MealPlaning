@@ -333,7 +333,7 @@ function TrainingPlanViewInner({
             type="button"
             onClick={onGeneratePlan}
             disabled={isGenerating}
-            className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring flex min-h-[44px] items-center gap-1 rounded-xl px-6 py-3 font-semibold transition-[colors,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-95 disabled:opacity-60 motion-reduce:transform-none"
+            className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring flex min-h-[44px] items-center gap-1 rounded-xl px-6 py-3 font-semibold transition-[colors,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-95 disabled:opacity-50 motion-reduce:transform-none"
           >
             {isGenerating ? (
               <>
@@ -378,7 +378,7 @@ function TrainingPlanViewInner({
           if (planDay) {
             colorClass = isCardio
               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50';
+              : 'bg-emerald-100 text-primary-emphasis dark:bg-emerald-900/50';
           }
 
           let ringClass: string;
@@ -420,8 +420,7 @@ function TrainingPlanViewInner({
             })
           }
           aria-label={t('fitness.planActions.editSchedule')}
-          className="bg-card focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
-          style={{ touchAction: 'manipulation' }}
+          className="bg-card focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700"
         >
           <CalendarCog className="h-4 w-4" aria-hidden="true" />
           {t('fitness.planActions.editSchedule')}
@@ -437,8 +436,7 @@ function TrainingPlanViewInner({
             })
           }
           aria-label={t('fitness.planActions.changeSplit')}
-          className="bg-card focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
-          style={{ touchAction: 'manipulation' }}
+          className="bg-card focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700"
         >
           <ArrowRightLeft className="h-4 w-4" aria-hidden="true" />
           {t('fitness.planActions.changeSplit')}
@@ -454,8 +452,7 @@ function TrainingPlanViewInner({
             })
           }
           aria-label={t('fitness.planActions.templates')}
-          className="bg-card focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
-          style={{ touchAction: 'manipulation' }}
+          className="bg-card focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700"
         >
           <BookOpen className="h-4 w-4" aria-hidden="true" />
           {t('fitness.planActions.templates')}
@@ -469,7 +466,7 @@ function TrainingPlanViewInner({
           role="menu"
           tabIndex={-1}
           aria-label={t('fitness.plan.dayContextMenu')}
-          className="bg-card fixed z-50 min-w-[180px] rounded-xl border border-slate-200 py-1 shadow-lg dark:border-slate-700"
+          className="bg-card border-border fixed z-50 min-w-[180px] rounded-xl border py-1 shadow-lg"
           style={{
             left: Math.min(dayContextMenu.x, window.innerWidth - 200),
             top: Math.min(dayContextMenu.y, window.innerHeight - 100),
@@ -507,9 +504,9 @@ function TrainingPlanViewInner({
       {!coachingDismissed && (
         <output
           data-testid="plan-coaching-hint"
-          className="block flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20"
+          className="bg-primary-subtle block flex items-center gap-3 rounded-xl border border-emerald-200 p-3 dark:border-emerald-800"
         >
-          <span className="flex-1 text-sm text-emerald-700">{t('fitness.plan.coachingHint')}</span>
+          <span className="text-primary-emphasis flex-1 text-sm">{t('fitness.plan.coachingHint')}</span>
           <button
             type="button"
             onClick={handleDismissCoaching}
@@ -526,17 +523,14 @@ function TrainingPlanViewInner({
         type="button"
         onClick={() => setShowRegenerateConfirm(true)}
         disabled={isGenerating}
-        className="bg-card focus-visible:ring-ring flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
+        className="bg-card focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:bg-slate-700"
       >
         <RefreshCw className={`h-4 w-4${isGenerating ? 'animate-spin' : ''}`} aria-hidden="true" />
         {t('fitness.plan.regenerate')}
       </button>
 
       {viewedPlanDay ? (
-        <div
-          data-testid="today-workout-card"
-          className="bg-card rounded-2xl border border-slate-200 p-5 dark:border-slate-700"
-        >
+        <div data-testid="today-workout-card" className="bg-card border-border rounded-2xl border p-5">
           {viewedDaySessions.length >= 1 && (
             <SessionTabs
               sessions={viewedDaySessions}
@@ -597,7 +591,7 @@ function TrainingPlanViewInner({
                 }
                 className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2.5 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700"
               >
-                <Pencil className="h-4 w-4 text-slate-500" aria-hidden="true" />
+                <Pencil className="text-muted-foreground h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -615,10 +609,7 @@ function TrainingPlanViewInner({
                 .join(', ')}
             </p>
           )}
-          <div
-            data-testid="workout-stats"
-            className="mt-2 flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"
-          >
+          <div data-testid="workout-stats" className="text-foreground-secondary mt-2 flex items-center gap-3 text-sm">
             <span>
               {viewedExercises.length} {t('fitness.plan.exercises')}
             </span>
@@ -641,7 +632,7 @@ function TrainingPlanViewInner({
                     {displayedExercises.map(ex => (
                       <li
                         key={ex.exercise.id}
-                        className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300"
+                        className="text-foreground-secondary flex items-center justify-between text-sm"
                       >
                         <span>{ex.exercise.nameVi}</span>
                         <span className="text-xs text-slate-400 dark:text-slate-500">
@@ -656,7 +647,7 @@ function TrainingPlanViewInner({
                       type="button"
                       data-testid="exercise-collapse-toggle"
                       onClick={() => setExercisesExpanded(prev => !prev)}
-                      className="text-primary focus-visible:ring-ring mt-1.5 text-sm font-medium transition-colors hover:text-emerald-700 focus-visible:ring-2 focus-visible:outline-none"
+                      className="text-primary focus-visible:ring-ring hover:text-primary-emphasis mt-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
                       aria-label={
                         exercisesExpanded
                           ? t('fitness.plan.showLess')
@@ -685,7 +676,7 @@ function TrainingPlanViewInner({
           )}
 
           {/* Day actions - visible alternative to context menu */}
-          <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
+          <div className="border-border-subtle mt-3 flex gap-2 border-t pt-3">
             <button
               data-testid="day-convert-rest-btn"
               type="button"

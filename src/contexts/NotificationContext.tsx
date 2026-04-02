@@ -45,7 +45,7 @@ const TOAST_STYLES: Record<
 > = {
   success: {
     border: 'border-emerald-200 dark:border-emerald-800',
-    iconBg: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+    iconBg: 'bg-primary-subtle text-emerald-600 dark:text-emerald-400',
     title: 'text-emerald-800',
     message: 'text-primary',
     icon: <CheckCircle2 className="h-5 w-5" />,
@@ -164,7 +164,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
               toast.action?.onClick();
               handleDismiss();
             }}
-            className="focus-visible:ring-ring text-primary mt-1.5 flex min-h-10 items-center rounded text-xs font-bold underline underline-offset-2 transition-colors hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-offset-2 active:text-emerald-800"
+            className="focus-visible:ring-ring text-primary hover:text-primary-emphasis mt-1.5 flex min-h-10 items-center rounded text-xs font-bold underline underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 active:text-emerald-800"
           >
             {toast.action.label}
           </button>

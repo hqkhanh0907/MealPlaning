@@ -225,9 +225,9 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
   );
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-slate-900">
+    <div className="bg-card flex h-full flex-col">
       {/* Header */}
-      <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+      <div className="pt-safe bg-primary border-border flex items-center gap-2 border-b px-4 py-3">
         <button
           type="button"
           onClick={handleBack}
@@ -257,7 +257,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
         <button
           type="button"
           onClick={handleSave}
-          className="flex h-11 items-center gap-1 rounded-lg bg-white px-4 text-sm font-medium text-emerald-700 active:bg-emerald-50"
+          className="text-primary-emphasis active:bg-primary-subtle flex h-11 items-center gap-1 rounded-lg bg-white px-4 text-sm font-medium dark:bg-slate-700"
         >
           <Save className="h-4 w-4" />
           {t('fitness.plan.save')}
@@ -278,7 +278,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
               return (
                 <li
                   key={`${item.exercise.id}-${index}`}
-                  className={`rounded-xl border border-slate-200 bg-slate-50 transition-opacity dark:border-slate-700 dark:bg-slate-800${isPendingRemoval ? 'pointer-events-none opacity-0' : ''}`}
+                  className={`border-border rounded-xl border bg-slate-50 transition-opacity dark:bg-slate-800${isPendingRemoval ? 'pointer-events-none opacity-0' : ''}`}
                 >
                   <div className="flex items-center gap-2 p-3">
                     <GripVertical className="h-5 w-5 shrink-0 text-slate-300 dark:text-slate-600" aria-hidden="true" />
@@ -310,7 +310,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleOpenSwap(index)}
                         aria-label={`${t('fitness.swap.title')} ${item.exercise.nameVi}`}
-                        className="text-primary focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none active:bg-emerald-50 dark:text-emerald-400 dark:active:bg-emerald-900/20"
+                        className="text-primary focus-visible:ring-ring active:bg-primary-subtle flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none dark:text-emerald-400 dark:active:bg-emerald-900/20"
                         data-testid={`swap-exercise-${index}`}
                       >
                         <ArrowLeftRight className="h-4 w-4" />
@@ -320,7 +320,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         onClick={() => handleMoveUp(index)}
                         aria-label={`Move up ${item.exercise.nameVi}`}
                         disabled={index === 0}
-                        className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700"
+                        className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-50 dark:text-slate-500 dark:enabled:active:bg-slate-700"
                       >
                         <ChevronUp className="h-4 w-4" />
                       </button>
@@ -329,7 +329,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         onClick={() => handleMoveDown(index)}
                         aria-label={`Move down ${item.exercise.nameVi}`}
                         disabled={index === localExercises.length - 1}
-                        className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-30 dark:text-slate-500 dark:enabled:active:bg-slate-700"
+                        className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-200 disabled:opacity-50 dark:text-slate-500 dark:enabled:active:bg-slate-700"
                       >
                         <ChevronDown className="h-4 w-4" />
                       </button>
@@ -345,10 +345,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                   </div>
 
                   {isExpanded && (
-                    <div
-                      data-testid={`exercise-params-${index}`}
-                      className="border-t border-slate-200 px-4 py-3 dark:border-slate-700"
-                    >
+                    <div data-testid={`exercise-params-${index}`} className="border-border border-t px-4 py-3">
                       <div className="grid grid-cols-2 gap-3">
                         <StepperField
                           label={t('fitness.plan.setsLabel')}
@@ -398,13 +395,13 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
       </div>
 
       {/* Sticky add button */}
-      <div className="pb-safe sticky bottom-0 border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <div className="pb-safe border-border bg-card sticky bottom-0 border-t p-4">
         <button
           type="button"
           onClick={handleOpenSelector}
           className="bg-primary text-primary-foreground active:bg-primary/80 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium"
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-5 w-5" aria-hidden="true" />
           {t('fitness.plan.addExercise')}
         </button>
       </div>
@@ -426,7 +423,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                 type="button"
                 onClick={handleCancelDiscard}
                 autoFocus
-                className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-200 text-sm font-medium text-slate-700 active:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:active:bg-slate-700"
+                className="border-border flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-medium text-slate-700 active:bg-slate-100 dark:text-slate-300 dark:active:bg-slate-700"
               >
                 {t('common.cancel')}
               </button>
@@ -509,7 +506,7 @@ const StepperField = memo(function StepperField({
           onClick={onDecrement}
           disabled={value <= min}
           aria-label={`Decrease ${label}`}
-          className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700"
+          className="focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-50 dark:enabled:active:bg-slate-700"
         >
           <Minus className="h-3.5 w-3.5" />
         </button>
@@ -522,7 +519,7 @@ const StepperField = memo(function StepperField({
           onClick={onIncrement}
           disabled={value >= max}
           aria-label={`Increase ${label}`}
-          className="focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-600 focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-30 dark:border-slate-600 dark:text-slate-400 dark:enabled:active:bg-slate-700"
+          className="focus-visible:ring-ring border-border text-foreground-secondary flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border focus-visible:ring-2 focus-visible:outline-none enabled:active:bg-slate-100 disabled:opacity-50 dark:enabled:active:bg-slate-700"
         >
           <Plus className="h-3.5 w-3.5" />
         </button>

@@ -192,7 +192,7 @@ export const MealPlannerModal = ({
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-8 sm:py-6 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-4 py-4 sm:px-8 sm:py-6">
           <div>
             <h3 className="text-lg font-bold text-slate-800 sm:text-xl dark:text-slate-100">
               {t('planning.planTitle')} — {selectedDate}
@@ -209,7 +209,7 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-slate-100 bg-slate-50 px-4 pt-3 pb-3 sm:px-8 dark:border-slate-700 dark:bg-slate-800/50">
+        <div className="border-border-subtle border-b bg-slate-50 px-4 pt-3 pb-3 sm:px-8 dark:bg-slate-800/50">
           <div className="flex gap-2">
             {MEAL_TABS.map(tab => {
               const isActive = activeTab === tab.type;
@@ -222,7 +222,7 @@ export const MealPlannerModal = ({
                   className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
                     isActive
                       ? 'bg-primary text-primary-foreground font-bold shadow-sm'
-                      : 'bg-white font-medium text-slate-600 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                      : 'bg-card text-foreground-secondary font-medium hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600'
                   }`}
                 >
                   <span>
@@ -232,9 +232,7 @@ export const MealPlannerModal = ({
                   {count > 0 && (
                     <span
                       className={`min-w-5 rounded-full px-1.5 py-0.5 text-center text-xs ${
-                        isActive
-                          ? 'bg-white/20 text-white'
-                          : 'bg-slate-100 text-slate-600 dark:bg-slate-600 dark:text-slate-300'
+                        isActive ? 'bg-white/20 text-white' : 'text-foreground-secondary bg-slate-100 dark:bg-slate-600'
                       }`}
                     >
                       {count}
@@ -250,7 +248,7 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Search + Sort */}
-        <div className="sticky top-0 z-10 border-b border-slate-100 bg-slate-50 px-4 py-3 sm:px-8 dark:border-slate-700 dark:bg-slate-800/50">
+        <div className="border-border-subtle sticky top-0 z-10 border-b bg-slate-50 px-4 py-3 sm:px-8 dark:bg-slate-800/50">
           <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -270,7 +268,7 @@ export const MealPlannerModal = ({
             <button
               onClick={() => setIsFilterOpen(true)}
               data-testid="btn-filter"
-              className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-emerald-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="border-border bg-card flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-emerald-400 dark:bg-slate-700 dark:text-slate-200"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {t('filter.button')}
@@ -287,7 +285,7 @@ export const MealPlannerModal = ({
               <p className="text-muted-foreground font-medium">
                 {t('planning.noMatchTitle', { meal: activeTabLabel })}
               </p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {t('planning.noMatchHint', { meal: activeTabLabel })}
               </p>
             </div>
@@ -300,8 +298,8 @@ export const MealPlannerModal = ({
                 onClick={() => toggleDish(dish.id)}
                 className={`group flex min-h-16 w-full items-center justify-between rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] sm:p-5 ${
                   isSelected
-                    ? 'border-primary bg-emerald-50/50 dark:bg-emerald-900/20'
-                    : 'dark:hover:border-primary border-slate-100 hover:border-emerald-200 dark:border-slate-700'
+                    ? 'border-primary bg-primary-subtle/50'
+                    : 'dark:hover:border-primary border-border-subtle hover:border-emerald-200'
                 }`}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -309,7 +307,7 @@ export const MealPlannerModal = ({
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                       isSelected
                         ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'bg-slate-50 text-slate-500 dark:bg-slate-700 dark:text-slate-500'
+                        : 'text-muted-foreground bg-slate-50 dark:bg-slate-700'
                     }`}
                   >
                     <ChefHat className="h-5 w-5" />
@@ -338,7 +336,7 @@ export const MealPlannerModal = ({
                   className={`ml-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                     isSelected
                       ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-slate-200 text-transparent group-hover:border-emerald-300 dark:border-slate-600'
+                      : 'border-border text-transparent group-hover:border-emerald-300'
                   }`}
                 >
                   <CheckCircle2 className="h-4 w-4" />
@@ -349,7 +347,7 @@ export const MealPlannerModal = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-card border-t border-slate-100 px-4 py-4 sm:px-8 sm:py-5 dark:border-slate-700">
+        <div className="bg-card border-border-subtle border-t px-4 py-4 sm:px-8 sm:py-5">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-muted-foreground font-medium">
               {t('planning.totalDay')}:{' '}
@@ -390,14 +388,14 @@ export const MealPlannerModal = ({
             </div>
           )}
           <div className="mb-3 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-500">
+            <span className="text-muted-foreground">
               {activeTabLabel}:{' '}
-              <span className="font-semibold text-slate-600 dark:text-slate-300">
+              <span className="text-foreground-secondary font-semibold">
                 {selections[activeTab].size} {t('common.item')}
               </span>
             </span>
             {selections[activeTab].size > 0 && (
-              <span className="text-slate-500 dark:text-slate-500">
+              <span className="text-muted-foreground">
                 {Math.round(activeTabNutrition.calories)} kcal · {Math.round(activeTabNutrition.protein)}g Pro
               </span>
             )}
@@ -407,7 +405,7 @@ export const MealPlannerModal = ({
             data-testid="btn-confirm-plan"
             className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all active:scale-[0.98]"
           >
-            <CheckCircle2 className="h-5 w-5" />
+            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
             {confirmButtonLabel}
           </button>
         </div>

@@ -142,7 +142,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div className="bg-card relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
           <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.title')}</h4>
           <button
             onClick={onClose}
@@ -156,7 +156,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
         <div className="flex-1 space-y-8 overflow-y-auto overscroll-contain p-6">
           {/* Dish Info */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-700">
+            <div className="border-border-subtle flex items-center justify-between border-b pb-2">
               <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.dishInfo')}</h5>
               <label className="-mr-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 transition-colors active:bg-slate-100 dark:active:bg-slate-700">
                 <Controller
@@ -171,7 +171,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                     />
                   )}
                 />
-                <span className="text-sm font-medium text-slate-600">{t('saveAnalyzed.saveDish')}</span>
+                <span className="text-foreground-secondary text-sm font-medium">{t('saveAnalyzed.saveDish')}</span>
               </label>
             </div>
 
@@ -180,7 +180,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                 <div>
                   <label
                     htmlFor="ai-dish-name"
-                    className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase"
+                    className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase"
                   >
                     {t('saveAnalyzed.dishName')}
                   </label>
@@ -202,7 +202,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                 <div>
                   <label
                     htmlFor="ai-dish-desc"
-                    className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase"
+                    className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase"
                   >
                     {t('saveAnalyzed.description')}
                   </label>
@@ -215,14 +215,14 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        className="focus:border-primary w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-base transition-all outline-none sm:text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                        className="focus:border-primary border-border bg-card w-full rounded-xl border px-4 py-2.5 text-base transition-all outline-none sm:text-sm dark:bg-slate-700 dark:text-slate-100"
                         rows={2}
                       />
                     )}
                   />
                 </div>
                 <div>
-                  <span className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
+                  <span className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
                     {t('saveAnalyzed.suitableFor')} <span className="text-rose-500">*</span>
                   </span>
                   <Controller
@@ -261,11 +261,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
 
           {/* Ingredients List */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-700">
+            <div className="border-border-subtle flex items-center justify-between border-b pb-2">
               <h5 className="font-bold text-slate-800 dark:text-slate-100">{t('saveAnalyzed.ingredientDetail')}</h5>
               <button
                 onClick={toggleAllIngredients}
-                className="text-primary text-sm font-medium transition-colors hover:text-emerald-700"
+                className="text-primary hover:text-primary-emphasis text-sm font-medium transition-colors"
               >
                 {selectedIngredients.every(Boolean) ? t('common.deselectAll') : t('common.selectAll')}
               </button>
@@ -275,7 +275,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
               {fields.map((field, idx) => (
                 <div
                   key={field.id}
-                  className={`rounded-xl border p-4 transition-all ${selectedIngredients[idx] ? 'border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50' : 'bg-card border-slate-100 opacity-60 dark:border-slate-700'}`}
+                  className={`rounded-xl border p-4 transition-all ${selectedIngredients[idx] ? 'border-border bg-slate-50 dark:bg-slate-700/50' : 'bg-card border-border-subtle opacity-60'}`}
                 >
                   <div className="mb-3 flex items-start justify-between">
                     <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-1 transition-colors active:bg-slate-100 dark:active:bg-slate-700">
@@ -285,7 +285,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                         onChange={() => toggleIngredientSelection(idx)}
                         className="text-primary focus:ring-ring h-5 w-5 rounded border-slate-300"
                       />
-                      <span className="text-muted-foreground text-xs font-bold uppercase dark:text-slate-500">
+                      <span className="text-muted-foreground text-xs font-semibold uppercase dark:text-slate-500">
                         {t('saveAnalyzed.ingredientNum', { num: idx + 1 })}
                       </span>
                     </label>
@@ -309,7 +309,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                     <div className="md:col-span-1">
                       <label
                         htmlFor={`ai-ing-name-${idx}`}
-                        className="text-muted-foreground mb-1 block text-xs font-bold uppercase"
+                        className="text-muted-foreground mb-1 block text-xs font-semibold uppercase"
                       >
                         {t('common.name')}
                       </label>
@@ -331,7 +331,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                     <div className="md:col-span-1">
                       <label
                         htmlFor={`ai-ing-amount-${idx}`}
-                        className="text-muted-foreground mb-1 block text-xs font-bold uppercase"
+                        className="text-muted-foreground mb-1 block text-xs font-semibold uppercase"
                       >
                         {t('ingredient.quantity')}
                       </label>
@@ -341,13 +341,13 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                         inputMode="numeric"
                         min={0}
                         testId={`ai-ing-amount-${idx}`}
-                        className="focus:border-primary w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                        className="focus:border-primary border-border bg-card w-full rounded-lg border px-3 py-2 text-sm outline-none dark:bg-slate-700 dark:text-slate-100"
                       />
                     </div>
                     <div className="md:col-span-1">
                       <label
                         htmlFor={`ai-ing-unit-${idx}`}
-                        className="text-muted-foreground mb-1 block text-xs font-bold uppercase"
+                        className="text-muted-foreground mb-1 block text-xs font-semibold uppercase"
                       >
                         {t('common.unit')}
                       </label>
@@ -367,17 +367,14 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                   </div>
 
                   <div
-                    className={`bg-card mt-3 rounded-lg border border-slate-100 p-3 dark:border-slate-600 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}
+                    className={`bg-card border-border-subtle mt-3 rounded-lg border p-3 ${!selectedIngredients[idx] && 'pointer-events-none opacity-50'}`}
                   >
-                    <p className="text-muted-foreground mb-2 text-xs font-bold uppercase">
+                    <p className="text-muted-foreground mb-2 text-xs font-semibold uppercase">
                       {t('saveAnalyzed.nutritionLabel')} / {getDisplayUnit(watchedIngredients[idx]?.unit ?? 'g')}
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                       <div>
-                        <label
-                          htmlFor={`ai-ing-cal-${idx}`}
-                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
-                        >
+                        <label htmlFor={`ai-ing-cal-${idx}`} className="text-muted-foreground mb-0.5 block text-xs">
                           {t('common.calories')}
                         </label>
                         <StringNumberController
@@ -386,14 +383,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-cal-${idx}`}
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor={`ai-ing-pro-${idx}`}
-                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
-                        >
+                        <label htmlFor={`ai-ing-pro-${idx}`} className="text-muted-foreground mb-0.5 block text-xs">
                           Protein
                         </label>
                         <StringNumberController
@@ -402,14 +396,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-pro-${idx}`}
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor={`ai-ing-carbs-${idx}`}
-                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
-                        >
+                        <label htmlFor={`ai-ing-carbs-${idx}`} className="text-muted-foreground mb-0.5 block text-xs">
                           Carbs
                         </label>
                         <StringNumberController
@@ -418,14 +409,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-carbs-${idx}`}
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor={`ai-ing-fat-${idx}`}
-                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
-                        >
+                        <label htmlFor={`ai-ing-fat-${idx}`} className="text-muted-foreground mb-0.5 block text-xs">
                           Fat
                         </label>
                         <StringNumberController
@@ -434,14 +422,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-fat-${idx}`}
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor={`ai-ing-fiber-${idx}`}
-                          className="mb-0.5 block text-[10px] text-slate-500 dark:text-slate-500"
-                        >
+                        <label htmlFor={`ai-ing-fiber-${idx}`} className="text-muted-foreground mb-0.5 block text-xs">
                           Fiber
                         </label>
                         <StringNumberController
@@ -450,7 +435,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                           inputMode="numeric"
                           min={0}
                           testId={`ai-ing-fiber-${idx}`}
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                          className="border-border bg-card w-full rounded border px-2 py-1.5 text-sm dark:bg-slate-700 dark:text-slate-100"
                         />
                       </div>
                     </div>
@@ -461,10 +446,10 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
           </div>
         </div>
 
-        <div className="pb-safe flex shrink-0 justify-end gap-3 border-t border-slate-100 bg-slate-50 p-4 sm:p-6 dark:border-slate-700 dark:bg-slate-800/50">
+        <div className="pb-safe border-border-subtle flex shrink-0 justify-end gap-3 border-t bg-slate-50 p-4 sm:p-6 dark:bg-slate-800/50">
           <button
             onClick={onClose}
-            className="min-h-12 rounded-xl px-5 py-3 font-bold text-slate-600 transition-all hover:bg-slate-200 active:bg-slate-300 dark:hover:bg-slate-700"
+            className="text-foreground-secondary min-h-12 rounded-xl px-5 py-3 font-bold transition-all hover:bg-slate-200 active:bg-slate-300 dark:hover:bg-slate-700"
           >
             {t('saveAnalyzed.cancelSave')}
           </button>
@@ -473,7 +458,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
             data-testid="btn-confirm-save-analyzed"
             className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary active:bg-primary/80 flex min-h-12 items-center gap-2 rounded-xl px-6 py-3 font-bold shadow-sm transition-all"
           >
-            <Save className="h-5 w-5" />
+            <Save className="h-5 w-5" aria-hidden="true" />
             {t('saveAnalyzed.confirmSave')}
           </button>
         </div>

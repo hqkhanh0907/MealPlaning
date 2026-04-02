@@ -34,7 +34,7 @@ export const SubTabBar = React.memo(function SubTabBar({
             data-testid={`subtab-${id}`}
             className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all md:flex-initial ${
               isActive
-                ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700'
+                ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700'
                 : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >

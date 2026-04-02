@@ -155,7 +155,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               <p className="mb-6 font-medium text-white">{cameraError}</p>
               <button
                 onClick={stopCamera}
-                className="rounded-xl bg-white px-6 py-2 font-bold text-slate-900 transition-all hover:bg-slate-100"
+                className="rounded-xl bg-white px-6 py-2 font-bold text-slate-900 transition-all hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-100"
               >
                 {t('imageCapture.closeCamera')}
               </button>
@@ -177,7 +177,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                 <button
                   onClick={capturePhoto}
                   aria-label={t('imageCapture.takePhoto')}
-                  className="focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white p-5 text-emerald-600 shadow-2xl transition-all hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="focus-visible:ring-ring hover:bg-primary-subtle flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white p-5 text-emerald-600 shadow-2xl transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
                   <Camera className="h-9 w-9" />
                 </button>
@@ -197,7 +197,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
           className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-all ${
             image
               ? 'border-emerald-200 dark:border-emerald-700'
-              : 'border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-600 dark:hover:bg-emerald-900/20'
+              : 'border-border hover:bg-primary-subtle hover:border-emerald-400 dark:hover:bg-emerald-900/20'
           }`}
         >
           {image ? (
@@ -217,12 +217,12 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                   <>
                     <button
                       onClick={() => startCamera()}
-                      className="flex flex-col items-center gap-2 rounded-xl p-4 transition-all hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                      className="hover:bg-primary-subtle flex flex-col items-center gap-2 rounded-xl p-4 transition-all dark:hover:bg-emerald-900/20"
                     >
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 shadow-sm transition-all dark:bg-emerald-900/30">
                         <Camera className="text-primary h-7 w-7" />
                       </div>
-                      <span className="text-sm font-bold text-emerald-700">{t('imageCapture.takePhoto')}</span>
+                      <span className="text-primary-emphasis text-sm font-bold">{t('imageCapture.takePhoto')}</span>
                     </button>
                     <div className="h-20 w-px self-center bg-slate-200 dark:bg-slate-600"></div>
                   </>

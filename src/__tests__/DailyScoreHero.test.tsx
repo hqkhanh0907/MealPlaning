@@ -111,7 +111,7 @@ describe('DailyScoreHero', () => {
 
       const scoreEl = screen.getByTestId('score-number');
       expect(scoreEl).toHaveTextContent('92');
-      expect(scoreEl.style.fontVariantNumeric).toBe('tabular-nums');
+      expect(scoreEl.className).toContain('tabular-nums');
     });
 
     it('shows "Tuyệt vời!" label for score >= 80', () => {

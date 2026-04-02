@@ -40,8 +40,8 @@ export function EquipmentStep({ form, goNext, goBack }: Readonly<StepProps>) {
             className={cn(
               'focus-visible:ring-ring min-h-[44px] rounded-xl border-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
               (selected as string[]).includes(eq)
-                ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                : 'border-border text-foreground-secondary',
             )}
           >
             {EQUIPMENT_DISPLAY[eq] ?? eq}

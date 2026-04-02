@@ -97,7 +97,7 @@ describe('TemplateMatchBadge', () => {
   it('uses tabular-nums font variant', () => {
     render(<TemplateMatchBadge score={50} />);
     const badge = screen.getByTestId('template-match-badge');
-    expect(badge.style.fontVariantNumeric).toBe('tabular-nums');
+    expect(badge.className).toContain('tabular-nums');
   });
 });
 

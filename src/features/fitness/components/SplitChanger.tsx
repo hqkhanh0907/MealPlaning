@@ -87,15 +87,14 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
   }, []);
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-slate-900">
+    <div className="bg-card flex h-full flex-col">
       {/* Header */}
-      <div className="pt-safe bg-primary flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+      <div className="pt-safe bg-primary border-border flex items-center gap-2 border-b px-4 py-3">
         <button
           type="button"
           onClick={handleBack}
           aria-label={t('common.back')}
-          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
-          style={{ touchAction: 'manipulation' }}
+          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 touch-manipulation items-center justify-center rounded-lg"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -117,10 +116,9 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
               key={option.value}
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
                 selectedSplit === option.value
-                  ? 'border-primary bg-emerald-50 dark:bg-emerald-950'
-                  : 'bg-card border-slate-200 dark:border-slate-700'
-              }`}
-              style={{ touchAction: 'manipulation' }}
+                  ? 'border-primary bg-primary-subtle dark:bg-emerald-950'
+                  : 'bg-card border-border'
+              } touch-manipulation`}
               data-testid={`split-option-${option.value}`}
             >
               <RadioGroupItem value={option.value} />
@@ -150,9 +148,8 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
                   mode === 'regenerate'
                     ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950'
-                    : 'bg-card border-slate-200 dark:border-slate-700'
-                }`}
-                style={{ touchAction: 'manipulation' }}
+                    : 'bg-card border-border'
+                } touch-manipulation`}
                 data-testid="mode-regenerate"
               >
                 <RefreshCw className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
@@ -171,11 +168,8 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 type="button"
                 onClick={() => setMode('remap')}
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
-                  mode === 'remap'
-                    ? 'border-primary bg-emerald-50 dark:bg-emerald-950'
-                    : 'bg-card border-slate-200 dark:border-slate-700'
-                }`}
-                style={{ touchAction: 'manipulation' }}
+                  mode === 'remap' ? 'border-primary bg-primary-subtle dark:bg-emerald-950' : 'bg-card border-border'
+                } touch-manipulation`}
                 data-testid="mode-remap"
               >
                 <Shuffle className="text-primary mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
@@ -233,14 +227,14 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                     {preview.mapped.map(item => (
                       <div
                         key={item.from.id}
-                        className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-950"
+                        className="bg-primary-subtle flex items-center gap-2 rounded-lg px-3 py-2 dark:bg-emerald-950"
                         data-testid="preview-mapped-item"
                       >
                         <Check className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
                         <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
                           {item.from.notes ?? item.from.workoutType}
                         </span>
-                        <span className="text-xs text-slate-500">→ {item.toDay}</span>
+                        <span className="text-muted-foreground text-xs">→ {item.toDay}</span>
                       </div>
                     ))}
                   </div>
@@ -259,7 +253,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                         <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
                           {item.day}
                         </span>
-                        <span className="text-xs text-slate-500">{item.reason}</span>
+                        <span className="text-muted-foreground text-xs">{item.reason}</span>
                       </div>
                     ))}
                   </div>
@@ -289,12 +283,11 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
       </div>
 
       {/* Bottom action bar */}
-      <div className="pb-safe border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+      <div className="pb-safe border-border bg-card border-t px-4 py-3">
         <Button
           onClick={handleApply}
           disabled={!isDifferentSplit || isApplying}
-          className="w-full"
-          style={{ touchAction: 'manipulation' }}
+          className="w-full touch-manipulation"
           data-testid="apply-button"
         >
           {t('fitness.splitChanger.apply')}

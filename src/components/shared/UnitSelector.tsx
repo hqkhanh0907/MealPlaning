@@ -106,8 +106,8 @@ export const UnitSelector = (props: UnitSelectorProps) => {
   // ── Shared classes ──────────────────────────────────────────────────────────
   const inputBase =
     'w-full px-4 py-2.5 rounded-xl border focus:border-primary outline-none ' +
-    'transition-all text-base sm:text-sm bg-white dark:bg-slate-700 dark:text-slate-100 ';
-  const borderClass = error ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600';
+    'transition-all text-base sm:text-sm bg-card dark:bg-slate-700 dark:text-slate-100 ';
+  const borderClass = error ? 'border-rose-500' : 'border-border';
 
   const testId = props['data-testid'];
 

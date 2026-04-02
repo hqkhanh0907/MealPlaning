@@ -21,10 +21,8 @@ export const EmptyState = ({
 }: EmptyStateProps) => {
   const { t } = useTranslation();
   return (
-    <div
-      className={`bg-card rounded-2xl border border-dashed border-slate-200 p-8 text-center sm:p-12 dark:border-slate-700 ${className}`}
-    >
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30">
+    <div className={`bg-card border-border rounded-2xl border border-dashed p-8 text-center sm:p-12 ${className}`}>
+      <div className="bg-primary-subtle mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
         {icon}
       </div>
       <h3 className="mb-2 text-lg font-bold text-slate-700 dark:text-slate-200">
@@ -40,7 +38,7 @@ export const EmptyState = ({
           onClick={onAction}
           className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
         >
-          <Plus className="h-5 w-5" /> {actionLabel}
+          <Plus className="h-5 w-5" aria-hidden="true" /> {actionLabel}
         </button>
       )}
     </div>

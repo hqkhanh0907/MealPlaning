@@ -26,7 +26,7 @@ export function QuickConfirmCard({
       className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
       data-testid="quick-confirm-card"
     >
-      <div className="flex items-center gap-2 text-sm text-slate-500">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <Dumbbell className="h-4 w-4" />
         <span>{exerciseName}</span>
       </div>
@@ -35,13 +35,15 @@ export function QuickConfirmCard({
           <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">
             {suggestion.weight}kg × {suggestion.reps}
           </p>
-          <p className="text-xs text-slate-400">{SOURCE_LABELS[suggestion.source] ?? suggestion.source}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            {SOURCE_LABELS[suggestion.source] ?? suggestion.source}
+          </p>
         </div>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={onCustomize}
-            className="rounded-lg border p-2 text-slate-400"
+            className="rounded-lg border p-2 text-slate-400 dark:text-slate-500"
             data-testid="customize-button"
           >
             <Pencil className="h-5 w-5" />

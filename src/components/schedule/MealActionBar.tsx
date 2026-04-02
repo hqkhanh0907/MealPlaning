@@ -56,7 +56,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (!allEmpty && onOpenClearPlan) {
     menuItems.push({
       key: 'clear',
-      icon: <Trash2 className="h-4 w-4" />,
+      icon: <Trash2 className="h-4 w-4" aria-hidden="true" />,
       label: t('calendar.clearPlan'),
       onClick: onOpenClearPlan,
       className: 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30',
@@ -66,7 +66,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (!allEmpty && onCopyPlan) {
     menuItems.push({
       key: 'copy',
-      icon: <Copy className="h-4 w-4" />,
+      icon: <Copy className="h-4 w-4" aria-hidden="true" />,
       label: t('template.copyPlan'),
       onClick: onCopyPlan,
       className: 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30',
@@ -76,7 +76,7 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (!allEmpty && onSaveTemplate) {
     menuItems.push({
       key: 'save',
-      icon: <Save className="h-4 w-4" />,
+      icon: <Save className="h-4 w-4" aria-hidden="true" />,
       label: t('template.saveAs'),
       onClick: onSaveTemplate,
       className: 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30',
@@ -86,10 +86,10 @@ export const MealActionBar = React.memo(function MealActionBar({
   if (onOpenTemplateManager) {
     menuItems.push({
       key: 'template',
-      icon: <BookTemplate className="h-4 w-4" />,
+      icon: <BookTemplate className="h-4 w-4" aria-hidden="true" />,
       label: t('template.manageTemplates'),
       onClick: onOpenTemplateManager,
-      className: 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30',
+      className: 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30',
       testId: 'btn-template-manager',
     });
   }
@@ -101,7 +101,7 @@ export const MealActionBar = React.memo(function MealActionBar({
         data-testid="btn-plan-meal-section"
         className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-4 w-4" aria-hidden="true" />
         {t('calendar.planMeal')}
       </button>
       <button
@@ -110,7 +110,11 @@ export const MealActionBar = React.memo(function MealActionBar({
         data-testid="btn-ai-suggest"
         className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-medium text-indigo-600 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
       >
-        {isSuggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        {isSuggesting ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
+        )}
         <span className="hidden sm:inline">{t('calendar.aiSuggest')}</span>
         <span className="sm:hidden">AI</span>
       </button>
@@ -120,7 +124,7 @@ export const MealActionBar = React.memo(function MealActionBar({
           data-testid="btn-open-grocery"
           className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 font-medium text-amber-600 transition-all hover:bg-amber-100 active:scale-[0.98] dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50"
         >
-          <ShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-4 w-4" aria-hidden="true" />
           <span className="hidden sm:inline">{t('grocery.title')}</span>
           <span className="sm:hidden">{t('grocery.titleShort')}</span>
         </button>
@@ -130,7 +134,7 @@ export const MealActionBar = React.memo(function MealActionBar({
           <button
             onClick={() => setMenuOpen(prev => !prev)}
             data-testid="btn-more-actions"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:active:bg-slate-600"
+            className="hover:text-foreground-secondary flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 text-slate-400 transition-all hover:bg-slate-100 active:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:active:bg-slate-600"
             aria-label={t('calendar.moreActions')}
             title={t('calendar.moreActions')}
           >
@@ -139,7 +143,7 @@ export const MealActionBar = React.memo(function MealActionBar({
           {menuOpen && (
             <div
               data-testid="more-actions-menu"
-              className="bg-card absolute top-full right-0 z-50 mt-1 min-w-[200px] rounded-xl border border-slate-200 py-1 shadow-lg shadow-slate-200/50 dark:border-slate-700 dark:shadow-slate-900/50"
+              className="bg-card border-border absolute top-full right-0 z-50 mt-1 min-w-[200px] rounded-xl border py-1 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50"
             >
               {menuItems.map(item => (
                 <button

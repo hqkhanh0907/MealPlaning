@@ -163,9 +163,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center"
         >
           <CalendarDays className="h-16 w-16 text-slate-300 dark:text-slate-600" />
-          <p className="text-lg font-semibold text-slate-600 dark:text-slate-400">
-            {t('fitness.scheduleEditor.emptyPlan')}
-          </p>
+          <p className="text-foreground-secondary text-lg font-semibold">{t('fitness.scheduleEditor.emptyPlan')}</p>
           <button
             type="button"
             data-testid="create-plan-cta"
@@ -205,7 +203,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
             <CalendarDays className="text-primary h-4 w-4" />
             {t('fitness.scheduleEditor.stepDays')}
           </h2>
-          <div className="bg-card rounded-xl border border-slate-200 p-3 shadow-sm dark:border-slate-700">
+          <div className="bg-card border-border rounded-xl border p-3 shadow-sm">
             <WeeklyCalendarStrip trainingDays={localTrainingDays} onDayToggle={handleDayToggle} interactive />
           </div>
         </section>
@@ -264,7 +262,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
       </div>
 
       {/* Sticky footer: Save button */}
-      <div className="pb-safe fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="pb-safe border-border fixed inset-x-0 bottom-0 z-10 border-t bg-white/95 px-4 py-3 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           data-testid="save-button"
@@ -313,7 +311,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
                 type="button"
                 data-testid="cancel-discard"
                 onClick={handleCancelDiscard}
-                className="bg-card focus-visible:ring-ring flex-1 touch-manipulation rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="bg-card focus-visible:ring-ring border-border flex-1 touch-manipulation rounded-xl border px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 {t('common.cancel')}
               </button>

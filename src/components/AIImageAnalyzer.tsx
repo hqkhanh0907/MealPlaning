@@ -65,7 +65,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
   return (
     <div
       data-testid="ai-image-analyzer"
-      className="bg-card rounded-2xl border border-slate-100 p-6 shadow-sm sm:p-8 dark:border-slate-700"
+      className="bg-card border-border-subtle rounded-2xl border p-6 shadow-sm sm:p-8"
     >
       {!image && !result && (
         <div className="mb-6 flex items-center justify-center gap-4 text-xs text-slate-400 sm:gap-6 sm:text-sm dark:text-slate-500">
@@ -102,19 +102,19 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
           >
             {isAnalyzing ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
                 {t('ai.analyzing')}
               </>
             ) : (
               <>
-                <Sparkles className="h-5 w-5" />
+                <Sparkles className="h-5 w-5" aria-hidden="true" />
                 {t('ai.analyzeDish')}
               </>
             )}
           </button>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 dark:border-slate-600 dark:bg-slate-700">
+        <div className="border-border-subtle rounded-2xl border bg-slate-50 p-6 dark:bg-slate-700">
           <AnalysisResultView
             result={result}
             isAnalyzing={isAnalyzing}

@@ -37,15 +37,13 @@ export function PeriodizationStep({ form, goNext, goBack }: Readonly<StepProps>)
               onClick={() => field.field.onChange(opt)}
               className={cn(
                 'focus-visible:ring-ring flex min-h-[56px] w-full flex-col items-start rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                field.field.value === opt
-                  ? 'border-primary bg-emerald-50 dark:bg-emerald-900/30'
-                  : 'border-slate-200 dark:border-slate-700',
+                field.field.value === opt ? 'border-primary bg-primary-subtle' : 'border-border',
               )}
             >
               <span
                 className={cn(
                   'text-sm font-medium',
-                  field.field.value === opt ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300',
+                  field.field.value === opt ? 'text-primary-emphasis' : 'text-slate-700 dark:text-slate-300',
                 )}
               >
                 {t(`fitness.onboarding.period_${opt}`)}

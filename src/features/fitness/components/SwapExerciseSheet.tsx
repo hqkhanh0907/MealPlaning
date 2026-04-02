@@ -124,7 +124,10 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
         {/* Search bar */}
         <div className="px-4 pb-3">
           <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <Search
+              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              aria-hidden="true"
+            />
             <input
               type="text"
               data-testid="swap-search-input"
@@ -132,7 +135,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.swap.search')}
-              className="focus-visible:ring-ring w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 pl-9 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus-visible:ring-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+              className="focus-visible:ring-ring border-border bg-card w-full rounded-lg border px-3 py-2.5 pl-9 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus-visible:ring-2 dark:bg-slate-700 dark:text-slate-200"
             />
           </div>
         </div>
@@ -149,7 +152,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
           {alternatives.length === 0 ? (
             <div
               data-testid="swap-empty-state"
-              className="flex flex-col items-center justify-center py-12 text-slate-400"
+              className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500"
             >
               <ArrowLeftRight className="mb-2 h-8 w-8 opacity-40" />
               <p className="text-sm">{t('fitness.swap.noAlternatives')}</p>

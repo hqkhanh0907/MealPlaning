@@ -23,7 +23,7 @@ const AnalysisSkeleton = () => {
       </div>
       <div className="grid grid-cols-2 gap-4">
         {['skeleton-cal', 'skeleton-pro', 'skeleton-carb', 'skeleton-fat'].map(id => (
-          <div key={id} className="bg-card rounded-xl border border-slate-100 p-4 shadow-sm dark:border-slate-600">
+          <div key={id} className="bg-card border-border-subtle rounded-xl border p-4 shadow-sm">
             <Skeleton className="mb-2 h-3 w-16" />
             <Skeleton className="h-7 w-20" />
           </div>
@@ -33,17 +33,14 @@ const AnalysisSkeleton = () => {
         <Skeleton className="mb-3 h-5 w-48" />
         <div className="space-y-2">
           {['skeleton-ing-1', 'skeleton-ing-2', 'skeleton-ing-3'].map(id => (
-            <div
-              key={id}
-              className="bg-card flex justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-600"
-            >
+            <div key={id} className="bg-card border-border-subtle flex justify-between rounded-xl border p-3">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-16" />
             </div>
           ))}
         </div>
       </div>
-      <div className="text-center text-sm font-medium text-slate-500">
+      <div className="text-muted-foreground text-center text-sm font-medium">
         <Loader2 className="mr-2 inline h-5 w-5 animate-spin" />
         {t('ai.loadingHint')}
       </div>
@@ -77,8 +74,8 @@ const NutritionCard = ({
   unit: string;
   color: string;
 }) => (
-  <div className="bg-card rounded-xl border border-slate-100 p-4 shadow-sm dark:border-slate-600">
-    <p className="text-muted-foreground mb-1 text-xs font-bold uppercase dark:text-slate-500">{label}</p>
+  <div className="bg-card border-border-subtle rounded-xl border p-4 shadow-sm">
+    <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase dark:text-slate-500">{label}</p>
     <p className={`text-2xl font-bold ${color}`}>
       {value} <span className="text-muted-foreground text-sm font-medium">{unit}</span>
     </p>
@@ -90,7 +87,7 @@ const IngredientRow = ({ ing }: { ing: AnalyzedIngredient }) => {
   return (
     <tr className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-600">
       <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">{ing.name}</td>
-      <td className="px-3 py-2 text-slate-600">
+      <td className="text-foreground-secondary px-3 py-2">
         {ing.amount} {ing.unit}
       </td>
       <td className="px-3 py-2 font-medium text-orange-500">{Math.round(n.calories)}</td>
@@ -105,7 +102,7 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
   const { t } = useTranslation();
   return (
-    <div className="bg-card rounded-xl border border-slate-100 p-3 dark:border-slate-600">
+    <div className="bg-card border-border-subtle rounded-xl border p-3">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{ing.name}</p>
         <span className="text-muted-foreground text-xs font-medium">
@@ -120,15 +117,15 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
           <p className="text-sm font-bold text-orange-500">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">{t('common.protein')}</p>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.protein')}</p>
           <p className="text-sm font-bold text-blue-500">{Math.round(n.protein)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">{t('common.carbs')}</p>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.carbs')}</p>
           <p className="text-sm font-bold text-amber-500">{Math.round(n.carbs)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">{t('common.fat')}</p>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.fat')}</p>
           <p className="text-sm font-bold text-rose-500">{Math.round(n.fat)}g</p>
         </div>
       </div>
@@ -145,7 +142,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
     <div className="space-y-6">
       <div>
         <h3 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100">{result.name}</h3>
-        <p className="leading-relaxed text-slate-600">{result.description}</p>
+        <p className="text-foreground-secondary leading-relaxed">{result.description}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -212,7 +209,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
           onClick={onOpenSaveModal}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-bold text-white transition-all hover:bg-indigo-700"
         >
-          <Save className="h-5 w-5" />
+          <Save className="h-5 w-5" aria-hidden="true" />
           {t('ai.saveToLibrary')}
         </button>
       )}

@@ -237,14 +237,14 @@ describe('CopyPlanModal', () => {
   it('overwrite mode is active by default', () => {
     renderModal();
     const overwriteBtn = screen.getByTestId('btn-mode-overwrite');
-    expect(overwriteBtn.className).toContain('text-emerald-700');
+    expect(overwriteBtn.className).toContain('text-primary-emphasis');
   });
 
   it('clicking merge mode activates it', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('btn-mode-merge'));
     const mergeBtn = screen.getByTestId('btn-mode-merge');
-    expect(mergeBtn.className).toContain('text-emerald-700');
+    expect(mergeBtn.className).toContain('text-primary-emphasis');
   });
 
   it('switching back to overwrite deactivates merge', () => {
@@ -252,7 +252,7 @@ describe('CopyPlanModal', () => {
     fireEvent.click(screen.getByTestId('btn-mode-merge'));
     fireEvent.click(screen.getByTestId('btn-mode-overwrite'));
     const overwriteBtn = screen.getByTestId('btn-mode-overwrite');
-    expect(overwriteBtn.className).toContain('text-emerald-700');
+    expect(overwriteBtn.className).toContain('text-primary-emphasis');
   });
 
   it('calls onCopy with mergeMode true when merge selected', () => {

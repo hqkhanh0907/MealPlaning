@@ -24,7 +24,7 @@ const MEAL_LOG_KEYS: Record<string, string> = {
   dinner: 'dashboard.todaysPlan.logDinner',
 };
 
-const CARD_CLASS = 'bg-card rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4';
+const CARD_CLASS = 'bg-card rounded-2xl shadow-md border border-border-subtle p-4';
 
 function SessionInfo({
   totalSessions,
@@ -73,9 +73,7 @@ function MealsSection({
     <div data-testid="meals-section">
       <div className="mb-2 flex items-center gap-1.5">
         <UtensilsCrossed className="h-4 w-4 text-orange-500" aria-hidden="true" />
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-          {t('dashboard.todaysPlan.meals')}
-        </span>
+        <span className="text-foreground-secondary text-xs font-medium">{t('dashboard.todaysPlan.meals')}</span>
       </div>
       <div data-testid="meals-progress" className="text-sm font-semibold text-slate-800 dark:text-slate-100">
         {t('dashboard.todaysPlan.mealsProgress', {
@@ -154,7 +152,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
             <div data-testid="workout-section">
               <div className="mb-2 flex items-center gap-1.5">
                 <Dumbbell className="h-4 w-4 text-blue-500" aria-hidden="true" />
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                <span className="text-foreground-secondary text-xs font-medium">
                   {t('dashboard.todaysPlan.workout')}
                 </span>
               </div>
@@ -355,7 +353,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
-      <div className="mt-1 border-t border-slate-100 pt-3 dark:border-slate-700">
+      <div className="border-border-subtle mt-1 border-t pt-3">
         <MealsSection {...mealsProps} />
       </div>
     </div>

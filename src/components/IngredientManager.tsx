@@ -132,7 +132,7 @@ export const IngredientManager = ({
     return (
       <div className="text-muted-foreground mb-3 text-xs">
         <span className="font-medium">{t('ingredient.usedIn')} </span>
-        <span className="text-slate-600 dark:text-slate-300">
+        <span className="text-foreground-secondary">
           {usedIn.length <= 2 ? usedIn.join(', ') : `${usedIn.slice(0, 2).join(', ')} +${usedIn.length - 2}`}
         </span>
       </div>
@@ -166,11 +166,11 @@ export const IngredientManager = ({
           {list.filteredItems.map(ing => (
             <div
               key={ing.id}
-              className="group bg-card relative flex w-full flex-col rounded-2xl border border-slate-100 p-5 text-left shadow-sm transition-all hover:shadow-md dark:border-slate-700"
+              className="group bg-card border-border-subtle relative flex w-full flex-col rounded-2xl border p-5 text-left shadow-sm transition-all hover:shadow-md"
             >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="text-primary flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/30">
+                  <div className="text-primary bg-primary-subtle flex h-10 w-10 items-center justify-center rounded-xl">
                     <Apple className="h-5 w-5" />
                   </div>
                   <div>
@@ -187,9 +187,7 @@ export const IngredientManager = ({
               </div>
               <div className="mb-3 grid grid-cols-2 gap-2">
                 <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2 dark:bg-slate-700/50">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">
-                    {t('common.calories')}
-                  </span>
+                  <span className="text-muted-foreground text-[10px] font-bold uppercase">{t('common.calories')}</span>
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{ing.caloriesPer100}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
@@ -210,7 +208,7 @@ export const IngredientManager = ({
                 <button
                   data-testid={`btn-edit-ingredient-${ing.id}`}
                   onClick={() => modal.openEdit(ing)}
-                  className="text-muted-foreground flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                  className="text-muted-foreground hover:bg-primary-subtle flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
                 >
                   <Edit3 className="h-4 w-4" /> {t('common.edit')}
                 </button>
@@ -240,27 +238,27 @@ export const IngredientManager = ({
 
       {/* List View */}
       {list.viewLayout === 'list' && (
-        <div className="bg-card overflow-hidden rounded-2xl border border-slate-100 shadow-sm dark:border-slate-700">
+        <div className="bg-card border-border-subtle overflow-hidden rounded-2xl border shadow-sm">
           <div className="hidden overflow-x-auto sm:block">
             <table className="w-full">
-              <thead className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-700">
+              <thead className="border-border-subtle border-b bg-slate-50 dark:bg-slate-700">
                 <tr>
-                  <th className="text-muted-foreground px-4 py-3 text-left text-xs font-bold uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold uppercase">
                     {t('ingredient.title')}
                   </th>
-                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-semibold uppercase">
                     {t('common.calories')}
                   </th>
-                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-semibold uppercase">
                     {t('common.protein')}
                   </th>
-                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-semibold uppercase">
                     {t('common.carbs')}
                   </th>
-                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-semibold uppercase">
                     {t('common.fat')}
                   </th>
-                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-bold uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-semibold uppercase">
                     {t('common.actions')}
                   </th>
                 </tr>
@@ -270,7 +268,7 @@ export const IngredientManager = ({
                   <tr key={ing.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-700">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+                        <div className="text-primary bg-primary-subtle flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Apple className="h-4 w-4" />
                         </div>
                         <div>
@@ -303,7 +301,7 @@ export const IngredientManager = ({
                           data-testid={`btn-edit-ingredient-${ing.id}`}
                           onClick={() => modal.openEdit(ing)}
                           aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
-                          className="rounded-lg p-2 text-slate-400 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                          className="hover:bg-primary-subtle rounded-lg p-2 text-slate-400 transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
@@ -330,7 +328,7 @@ export const IngredientManager = ({
                 className="relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors active:bg-slate-50 dark:active:bg-slate-700"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/30">
+                  <div className="text-primary bg-primary-subtle flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                     <Apple className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -352,7 +350,7 @@ export const IngredientManager = ({
                     data-testid={`btn-edit-ingredient-${ing.id}`}
                     onClick={() => modal.openEdit(ing)}
                     aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
-                    className="rounded-lg p-2.5 text-slate-400 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30"
+                    className="hover:bg-primary-subtle rounded-lg p-2.5 text-slate-400 transition-all hover:text-emerald-600 dark:hover:bg-emerald-900/30"
                   >
                     <Edit3 className="h-4 w-4" />
                   </button>
@@ -394,7 +392,7 @@ export const IngredientManager = ({
               onEdit={() => modal.openEditFromView(ing)}
             >
               <div className="flex items-center gap-4">
-                <div className="text-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30">
+                <div className="text-primary bg-primary-subtle flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl">
                   <Apple className="h-7 w-7" />
                 </div>
                 <div>
@@ -406,11 +404,9 @@ export const IngredientManager = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-700/50">
-                  <p className="mb-1 text-[10px] font-bold text-slate-500 uppercase dark:text-slate-500">
-                    {t('common.calories')}
-                  </p>
+                  <p className="text-muted-foreground mb-1 text-[10px] font-bold uppercase">{t('common.calories')}</p>
                   <p className="text-xl font-bold text-slate-700 dark:text-slate-300">
-                    {ing.caloriesPer100} <span className="text-xs font-medium text-slate-500">kcal</span>
+                    {ing.caloriesPer100} <span className="text-muted-foreground text-xs font-medium">kcal</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
@@ -435,21 +431,21 @@ export const IngredientManager = ({
                   </p>
                 </div>
               </div>
-              <div className="rounded-xl bg-emerald-50 p-3.5 dark:bg-emerald-900/30">
+              <div className="bg-primary-subtle rounded-xl p-3.5">
                 <p className="mb-1 text-[10px] font-bold text-emerald-400 uppercase">{t('common.fiber')}</p>
-                <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                <p className="text-primary-emphasis text-xl font-bold">
                   {ing.fiberPer100}
                   <span className="text-xs font-medium text-emerald-400">g</span>
                 </p>
               </div>
               {usedIn.length > 0 && (
                 <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-700/50">
-                  <p className="text-muted-foreground mb-2 text-xs font-bold uppercase">{t('ingredient.usedIn')}</p>
+                  <p className="text-muted-foreground mb-2 text-xs font-semibold uppercase">{t('ingredient.usedIn')}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {usedIn.map(n => (
                       <span
                         key={n}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                        className="border-border bg-card text-foreground-secondary rounded-lg border px-2.5 py-1 text-xs font-medium dark:bg-slate-700"
                       >
                         {n}
                       </span>

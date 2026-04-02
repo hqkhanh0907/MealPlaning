@@ -27,8 +27,8 @@ export function CardioStep({ form, goNext, goBack }: Readonly<StepProps>) {
             className={cn(
               'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
               field.field.value === n
-                ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                : 'border-border text-foreground-secondary',
             )}
           >
             {n}

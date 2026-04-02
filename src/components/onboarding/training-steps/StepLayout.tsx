@@ -20,7 +20,7 @@ export function StepLayout({ title, subtitle, goNext, goBack, children }: Readon
         <p className="text-muted-foreground mb-6 text-sm">{subtitle}</p>
         {children}
       </div>
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           onClick={goBack}

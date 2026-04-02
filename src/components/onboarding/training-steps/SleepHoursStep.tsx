@@ -30,9 +30,9 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
           if (isActive && hours < LOW_SLEEP_THRESHOLD) {
             stateClass = 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
           } else if (isActive) {
-            stateClass = 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30';
+            stateClass = 'border-primary bg-primary-subtle text-primary-emphasis';
           } else {
-            stateClass = 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400';
+            stateClass = 'border-border text-foreground-secondary';
           }
 
           return (

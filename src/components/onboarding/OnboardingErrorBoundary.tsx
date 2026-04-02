@@ -15,7 +15,7 @@ function FallbackUI({ onReset }: Readonly<{ onReset: () => void }>) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-6 dark:bg-slate-900">
+    <div className="bg-card flex min-h-dvh flex-col items-center justify-center px-6">
       <div className="flex w-full max-w-sm flex-col items-center text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
           <AlertTriangle aria-hidden="true" className="h-8 w-8 text-amber-500 dark:text-amber-400" />

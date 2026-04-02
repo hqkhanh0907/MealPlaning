@@ -56,7 +56,7 @@ export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
   return (
     <section
       data-testid="quick-preview-panel"
-      className="bg-card space-y-3 rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700"
+      className="bg-card border-border-subtle space-y-3 rounded-2xl border p-4 shadow-sm sm:p-6"
     >
       <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{t('quickPreview.title')}</h3>
 
@@ -81,7 +81,7 @@ export const QuickPreviewPanel = React.memo(function QuickPreviewPanel({
         <button
           type="button"
           onClick={onPlanAll}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 active:scale-[0.98] dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50"
+          className="bg-primary-subtle text-primary-emphasis flex min-h-11 w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-colors hover:bg-emerald-100 active:scale-[0.98] dark:hover:bg-emerald-900/50"
         >
           <Plus className="h-4 w-4" />
           {t('quickPreview.planAll')}
@@ -182,7 +182,7 @@ const MealRow = React.memo(function MealRow({
       <button
         type="button"
         onClick={() => onPlanMeal(type)}
-        className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+        className="hover:bg-primary-subtle flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-emerald-600 transition-colors active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-900/30"
         aria-label={hasDishes ? t('quickPreview.edit') : t('quickPreview.add')}
       >
         {hasDishes ? (

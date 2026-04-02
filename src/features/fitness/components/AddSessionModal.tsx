@@ -63,7 +63,7 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={handleStrengthClick}
-                className="flex items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 text-left transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40"
+                className="bg-primary-subtle flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-emerald-900/40"
               >
                 <Dumbbell className="text-primary h-5 w-5" aria-hidden="true" />
                 <div>
@@ -76,7 +76,7 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={onSelectCardio}
-                className="flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3 text-left transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
+                className="flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3 text-left transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
               >
                 <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                 <div>
@@ -91,7 +91,7 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={onSelectFreestyle}
-                className="flex items-center gap-3 rounded-xl bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-amber-900/20 dark:hover:bg-amber-900/40"
+                className="flex items-center gap-3 rounded-xl bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-amber-900/20 dark:hover:bg-amber-900/40"
               >
                 <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                 <div>
@@ -114,7 +114,7 @@ function AddSessionModalInner({
                 aria-label={t('common.back')}
                 className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
               >
-                <ChevronLeft className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                <ChevronLeft className="text-foreground-secondary h-5 w-5" />
               </button>
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {t('fitness.plan.selectMuscleGroups')}
@@ -134,7 +134,7 @@ function AddSessionModalInner({
                     className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       isSelected
                         ? 'bg-primary text-primary-foreground dark:bg-primary'
-                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                        : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
                     }`}
                   >
                     {group}
@@ -148,7 +148,7 @@ function AddSessionModalInner({
               data-testid="create-strength-session"
               disabled={selectedGroups.length === 0}
               onClick={handleCreateStrength}
-              className="bg-primary text-primary-foreground hover:bg-primary dark:bg-primary dark:hover:bg-primary/80 w-full rounded-xl py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              className="bg-primary text-primary-foreground hover:bg-primary dark:bg-primary dark:hover:bg-primary/80 w-full rounded-xl py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t('fitness.plan.createSession')}
             </button>

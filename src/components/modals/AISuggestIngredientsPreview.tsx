@@ -106,7 +106,7 @@ export const AISuggestIngredientsPreview = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-xl bg-slate-100 py-2.5 text-sm font-medium text-slate-500 transition-all hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="text-muted-foreground w-full rounded-xl bg-slate-100 py-2.5 text-sm font-medium transition-all hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"
           >
             {t('dish.aiSuggestCancel')}
           </button>
@@ -118,7 +118,7 @@ export const AISuggestIngredientsPreview = ({
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div className="bg-card relative flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
           <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">
             ✨ {t('dish.aiSuggestTitle', { name: dishName })}
           </p>
@@ -136,7 +136,7 @@ export const AISuggestIngredientsPreview = ({
           {items.map((item, index) => (
             <div
               key={keys[index]}
-              className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-700/50"
+              className="border-border rounded-xl border bg-slate-50 p-3 dark:bg-slate-700/50"
               data-testid={`ai-suggest-item-${index}`}
             >
               <div className="flex items-center gap-3">
@@ -156,7 +156,7 @@ export const AISuggestIngredientsPreview = ({
                     </span>
                     {item.matchedIngredient ? (
                       <span
-                        className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                        className="text-primary-emphasis shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium dark:bg-emerald-900/40"
                         data-testid={`ai-suggest-badge-existing-${index}`}
                       >
                         {t('dish.aiSuggestExisting')}
@@ -193,7 +193,7 @@ export const AISuggestIngredientsPreview = ({
             </div>
           ))}
         </div>
-        <div className="flex gap-2 border-t border-slate-100 p-4 dark:border-slate-700">
+        <div className="border-border-subtle flex gap-2 border-t p-4">
           <button
             type="button"
             onClick={onClose}
@@ -207,7 +207,7 @@ export const AISuggestIngredientsPreview = ({
             onClick={handleConfirm}
             disabled={selectedCount === 0}
             data-testid="btn-ai-suggest-confirm"
-            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-40"
+            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check className="h-4 w-4" /> {t('dish.aiSuggestConfirm', { count: selectedCount })}
           </button>

@@ -76,7 +76,7 @@ export const MealSlot = React.memo(function MealSlot({
           type="button"
           onClick={onEdit}
           aria-label={t('quickPreview.add')}
-          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+          className="hover:bg-primary-subtle flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-emerald-600 transition-colors active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-900/30"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">{t('quickPreview.add')}</span>
@@ -88,18 +88,18 @@ export const MealSlot = React.memo(function MealSlot({
   return (
     <div
       data-testid={TEST_ID_MAP[type]}
-      className="bg-card rounded-xl border border-slate-100 p-4 shadow-sm transition-all hover:shadow-md dark:border-slate-700"
+      className="bg-card border-border-subtle rounded-xl border p-4 shadow-sm transition-all hover:shadow-md"
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MealIcon className="size-5 shrink-0" aria-hidden="true" />
-          <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">{label}</span>
+          <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">{label}</span>
         </div>
         <button
           type="button"
           onClick={onEdit}
           aria-label={`${t('common.edit')} ${label}`}
-          className="hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-slate-400 transition-all hover:bg-emerald-50 sm:min-h-9 sm:min-w-9 dark:hover:bg-emerald-900/30"
+          className="hover:text-primary hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-slate-400 transition-all sm:min-h-9 sm:min-w-9 dark:text-slate-500 dark:hover:bg-emerald-900/30"
         >
           <Edit3 className="h-4 w-4" />
         </button>
@@ -122,13 +122,13 @@ export const MealSlot = React.memo(function MealSlot({
                     onClick={() => handleServingChange(d.id, -1)}
                     disabled={s <= 1}
                     aria-label={`${t('common.decrease')} ${getLocalizedField(d.name, lang)}`}
-                    className="hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-emerald-50 active:scale-[0.98] disabled:opacity-30 dark:hover:bg-emerald-900/30"
+                    className="hover:text-primary text-muted-foreground hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all active:scale-[0.98] disabled:opacity-50 dark:hover:bg-emerald-900/30"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                   <span
                     data-testid={`serving-count-${d.id}`}
-                    className="text-muted-foreground min-w-[18px] text-center text-[10px] font-bold"
+                    className="text-muted-foreground min-w-[18px] text-center text-xs font-bold"
                   >
                     {s}x
                   </span>
@@ -138,7 +138,7 @@ export const MealSlot = React.memo(function MealSlot({
                     onClick={() => handleServingChange(d.id, 1)}
                     disabled={s >= 10}
                     aria-label={`${t('common.increase')} ${getLocalizedField(d.name, lang)}`}
-                    className="hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-emerald-50 active:scale-[0.98] disabled:opacity-30 dark:hover:bg-emerald-900/30"
+                    className="hover:text-primary text-muted-foreground hover:bg-primary-subtle flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all active:scale-[0.98] disabled:opacity-50 dark:hover:bg-emerald-900/30"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -153,7 +153,7 @@ export const MealSlot = React.memo(function MealSlot({
       </div>
 
       <div className="flex flex-wrap gap-2 border-t border-slate-50 pt-2 dark:border-slate-700">
-        <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600 uppercase dark:bg-emerald-900/30 dark:text-emerald-400">
+        <span className="bg-primary-subtle rounded px-2 py-0.5 text-[10px] font-bold text-emerald-600 uppercase dark:text-emerald-400">
           {Math.round(slot.calories)} kcal
         </span>
         <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600 uppercase dark:bg-blue-900/30 dark:text-blue-400">

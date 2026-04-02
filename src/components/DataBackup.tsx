@@ -53,9 +53,9 @@ const exportFileName = () => `meal-planner-backup-${new Date().toISOString().spl
 
 const HEALTH_STYLES = {
   good: {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    bg: 'bg-primary-subtle',
     border: 'border-emerald-200 dark:border-emerald-800',
-    text: 'text-emerald-700',
+    text: 'text-primary-emphasis',
     Icon: ShieldCheck,
   },
   warning: {
@@ -195,7 +195,7 @@ export const DataBackup = () => {
           onClick={handleExport}
           disabled={isExporting}
           data-testid="btn-export"
-          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 font-bold text-emerald-700 transition-all hover:bg-emerald-100 active:scale-[0.98] disabled:opacity-50 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+          className="bg-primary-subtle text-primary-emphasis flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold transition-all hover:bg-emerald-100 active:scale-[0.98] disabled:opacity-50 dark:hover:bg-emerald-900/50"
         >
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {t('backup.export')}

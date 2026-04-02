@@ -137,10 +137,10 @@ export const AISuggestionPreviewModal = ({
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-linear-to-r from-indigo-50 to-purple-50 px-6 py-4 dark:border-slate-700 dark:from-indigo-900/30 dark:to-purple-900/30">
+        <div className="border-border-subtle flex items-center justify-between border-b bg-linear-to-r from-indigo-50 to-indigo-50 px-6 py-4 dark:from-indigo-900/30 dark:to-indigo-900/30">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/50">
-              <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('ai.suggestionTitle')}</h3>
@@ -222,10 +222,10 @@ export const AISuggestionPreviewModal = ({
             <>
               {/* Reasoning Card */}
               {suggestion.reasoning && (
-                <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50 to-purple-50 p-4 dark:border-indigo-800 dark:from-indigo-900/20 dark:to-purple-900/20">
+                <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50 to-indigo-50 p-4 dark:border-indigo-800 dark:from-indigo-900/20 dark:to-indigo-900/20">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/50">
-                      <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="mb-1 text-sm font-bold text-indigo-800 dark:text-indigo-300">{t('ai.reasoning')}</p>
@@ -259,7 +259,7 @@ export const AISuggestionPreviewModal = ({
                     className={`rounded-2xl border-2 transition-all ${
                       isSelected
                         ? `${colors.bg} ${colors.border}`
-                        : 'border-slate-200 bg-slate-50 opacity-60 dark:border-slate-600 dark:bg-slate-700'
+                        : 'border-border bg-slate-50 opacity-60 dark:bg-slate-700'
                     }`}
                   >
                     <div className="p-4">
@@ -273,7 +273,7 @@ export const AISuggestionPreviewModal = ({
                             className="text-primary focus:ring-ring h-5 w-5 rounded border-slate-300"
                           />
                           <span
-                            className={`text-sm font-bold tracking-wider uppercase ${isSelected ? colors.text : 'text-slate-500 dark:text-slate-500'}`}
+                            className={`text-sm font-bold tracking-wider uppercase ${isSelected ? colors.text : 'text-muted-foreground'}`}
                           >
                             {(() => {
                               const Icon = MEAL_TYPE_ICONS[type];
@@ -287,7 +287,7 @@ export const AISuggestionPreviewModal = ({
                           disabled={!isSelected}
                           className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                             isSelected
-                              ? 'text-slate-600 hover:bg-white/50 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100'
+                              ? 'text-foreground-secondary hover:bg-white/50 hover:text-slate-800 dark:hover:bg-slate-600 dark:hover:text-slate-100'
                               : 'cursor-not-allowed text-slate-300 dark:text-slate-600'
                           }`}
                         >
@@ -302,7 +302,7 @@ export const AISuggestionPreviewModal = ({
                           <div key={name} className="flex items-center gap-2">
                             <ChefHat className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-slate-300'}`} />
                             <span
-                              className={`font-medium ${isSelected ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-500'}`}
+                              className={`font-medium ${isSelected ? 'text-slate-800 dark:text-slate-200' : 'text-muted-foreground'}`}
                             >
                               {name}
                             </span>
@@ -312,16 +312,16 @@ export const AISuggestionPreviewModal = ({
 
                       {/* Nutrition summary */}
                       <div
-                        className={`border-t pt-3 ${isSelected ? 'border-slate-200/50 dark:border-slate-600/50' : 'border-slate-200 dark:border-slate-600'}`}
+                        className={`border-t pt-3 ${isSelected ? 'border-border/50 dark:border-slate-600/50' : 'border-border'}`}
                       >
                         <div className="flex gap-4 text-sm">
                           <span
-                            className={`font-bold ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-slate-500 dark:text-slate-500'}`}
+                            className={`font-bold ${isSelected ? 'text-slate-700 dark:text-slate-300' : 'text-muted-foreground'}`}
                           >
                             {nutrition.calories} kcal
                           </span>
                           <span
-                            className={`font-bold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-500'}`}
+                            className={`font-bold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
                           >
                             {nutrition.protein}g protein
                           </span>
@@ -336,14 +336,16 @@ export const AISuggestionPreviewModal = ({
               <div className="rounded-2xl bg-slate-100 p-4 dark:bg-slate-700">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground mb-1 text-xs font-bold uppercase">{t('ai.totalSelected')}</p>
+                    <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
+                      {t('ai.totalSelected')}
+                    </p>
                     <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
                       {nutritionSummary.calories} kcal · {nutritionSummary.protein}g protein
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-muted-foreground mb-1 text-xs font-bold uppercase">{t('ai.targetLabel')}</p>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">{t('ai.targetLabel')}</p>
+                    <p className="text-foreground-secondary text-sm font-medium">
                       {targetCalories} kcal · {targetProtein}g protein
                     </p>
                   </div>
@@ -390,10 +392,10 @@ export const AISuggestionPreviewModal = ({
 
         {/* Footer */}
         {!isLoading && !error && hasAnySuggestion && (
-          <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+          <div className="border-border-subtle flex items-center justify-between gap-3 border-t bg-slate-50 px-6 py-4 dark:bg-slate-800/50">
             <button
               onClick={onClose}
-              className="rounded-xl px-5 py-2.5 font-medium text-slate-600 transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
+              className="text-foreground-secondary rounded-xl px-5 py-2.5 font-medium transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
             >
               {t('common.cancel')}
             </button>
@@ -410,7 +412,7 @@ export const AISuggestionPreviewModal = ({
                 disabled={!hasAnySelected}
                 className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-bold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <CheckCircle2 className="h-4 w-4" />
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 {t('common.apply')}
               </button>
             </div>

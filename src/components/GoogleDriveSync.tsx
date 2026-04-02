@@ -145,7 +145,7 @@ export const GoogleDriveSync = () => {
     return (
       <div
         data-testid="cloud-sync-signed-out"
-        className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-5 dark:border-slate-700"
+        className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-5"
       >
         <div className="mb-4 flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30">
@@ -160,7 +160,7 @@ export const GoogleDriveSync = () => {
           data-testid="btn-google-sign-in"
           onClick={handleSignIn}
           disabled={authLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-blue-400 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:border-blue-500"
+          className="border-border bg-card flex w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-blue-400 disabled:opacity-50 dark:bg-slate-700 dark:text-slate-200 dark:hover:border-blue-500"
         >
           {authLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -193,7 +193,7 @@ export const GoogleDriveSync = () => {
   return (
     <div
       data-testid="cloud-sync-signed-in"
-      className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-5 dark:border-slate-700"
+      className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-5"
     >
       <div className="mb-4 flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30">

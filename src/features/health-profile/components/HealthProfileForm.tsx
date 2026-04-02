@@ -291,7 +291,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       <div>
         <label htmlFor="hp-bodyfat" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
           {t('healthProfile.bodyFat')}
-          <span className="ml-1 text-xs text-slate-400">({t('healthProfile.bodyFatOptional')})</span>
+          <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
+            ({t('healthProfile.bodyFatOptional')})
+          </span>
         </label>
         <StringNumberController<HealthProfileFormData>
           name="bodyFatPct"
@@ -376,15 +378,15 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </FormField>
 
       {/* Computed Values */}
-      <div className="space-y-3 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20">
+      <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-600 dark:text-slate-400">{t('healthProfile.bmr')}</span>
+          <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
           <span className="font-semibold text-slate-800 dark:text-slate-200" data-testid="bmr-value">
             {bmr} kcal
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-slate-600 dark:text-slate-400">{t('healthProfile.tdee')}</span>
+          <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
           <span className="font-semibold text-slate-800 dark:text-slate-200" data-testid="tdee-value">
             {tdee} kcal
           </span>

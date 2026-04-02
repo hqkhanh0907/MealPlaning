@@ -154,7 +154,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
         className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl"
         data-testid="save-template-modal"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 sm:px-8 sm:py-6 dark:border-slate-700">
+        <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('template.saveTitle')}</h3>
             <p className="text-muted-foreground text-sm">{t('template.saveSubtitle')}</p>
@@ -170,7 +170,10 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
 
         <div className="space-y-5 overflow-y-auto p-6 sm:p-8">
           <div>
-            <label htmlFor="template-name" className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor="template-name"
+              className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300"
+            >
               {t('template.saveName')}
             </label>
             <Input
@@ -200,14 +203,14 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
 
           {/* Template Tags */}
           <div>
-            <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
               {t('template.tags')}
             </label>
             <div className="mb-2 flex flex-wrap gap-1.5">
               {watchTags.map(tag => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  className="text-primary-emphasis inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-medium dark:bg-emerald-900/30"
                 >
                   <Tag className="h-3 w-3" />
                   {tag}
@@ -240,7 +243,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
                   type="button"
                   data-testid={`preset-tag-${pt}`}
                   onClick={() => addTag(pt)}
-                  className="text-muted-foreground rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:bg-slate-700 dark:hover:bg-emerald-900/20"
+                  className="text-muted-foreground hover:bg-primary-subtle rounded-md bg-slate-100 px-2 py-1 text-[10px] font-medium transition-all hover:text-emerald-600 dark:bg-slate-700 dark:hover:bg-emerald-900/20"
                 >
                   + {pt}
                 </button>
@@ -249,13 +252,13 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
           </div>
 
           <div>
-            <p className="text-muted-foreground mb-3 text-xs font-bold tracking-wider uppercase">
+            <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
               {t('template.preview')} — {t('template.mealsCount', { count: totalDishes })}
             </p>
             <div className="space-y-2">
               {mealSections.map(({ key, label, items, color }) => (
                 <div key={key} className={`rounded-xl px-4 py-3 ${color}`}>
-                  <p className="mb-1 text-xs font-bold uppercase">{label}</p>
+                  <p className="mb-1 text-xs font-semibold uppercase">{label}</p>
                   {items.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {items.map(item => (
@@ -273,7 +276,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
           </div>
         </div>
 
-        <div className="border-t border-slate-100 px-6 py-4 sm:px-8 dark:border-slate-700">
+        <div className="border-border-subtle border-t px-6 py-4 sm:px-8">
           <button
             data-testid="btn-save-template"
             onClick={rhfSubmit(onFormSubmit)}

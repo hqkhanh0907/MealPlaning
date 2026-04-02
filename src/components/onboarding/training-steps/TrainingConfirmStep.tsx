@@ -17,7 +17,7 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
         <h2 className="mb-6 text-xl font-bold text-slate-800 dark:text-slate-100">
           {t('onboarding.confirm.trainingTitle')}
         </h2>
-        <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
+        <div className="border-border divide-y divide-slate-100 rounded-xl border dark:divide-slate-800">
           <SummaryRow label={t('fitness.onboarding.goal')} value={t(`fitness.onboarding.${values.trainingGoal}`)} />
           <SummaryRow label={t('fitness.onboarding.experience')} value={t(`fitness.onboarding.${values.experience}`)} />
           <SummaryRow label={t('fitness.onboarding.daysPerWeek')} value={`${values.daysPerWeek}`} />
@@ -63,7 +63,7 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           onClick={goBack}

@@ -524,7 +524,7 @@ describe('WeightQuickLog', () => {
     renderSheet();
 
     const display = screen.getByTestId('weight-display');
-    expect(display.style.fontVariantNumeric).toBe('tabular-nums');
+    expect(display.className).toContain('tabular-nums');
   });
 
   it('info row uses tabular-nums', () => {
@@ -532,7 +532,7 @@ describe('WeightQuickLog', () => {
     renderSheet();
 
     const infoRow = screen.getByTestId('info-row');
-    expect(infoRow.style.fontVariantNumeric).toBe('tabular-nums');
+    expect(infoRow.className).toContain('tabular-nums');
   });
 
   /* ---- Long press acceleration ---- */

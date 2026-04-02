@@ -51,8 +51,8 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 className={cn(
                   'focus-visible:ring-ring min-h-[44px] rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   goalField.field.value === goal
-                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                    : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                    ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                    : 'border-border text-foreground-secondary',
                 )}
               >
                 {t(`fitness.onboarding.${goal}`)}
@@ -76,8 +76,8 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 className={cn(
                   'focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   expField.field.value === level
-                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                    : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                    ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                    : 'border-border text-foreground-secondary',
                 )}
               >
                 {t(`fitness.onboarding.${level}`)}
@@ -101,8 +101,8 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 className={cn(
                   'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   daysField.field.value === d
-                    ? 'border-primary bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30'
-                    : 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400',
+                    ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                    : 'border-border text-foreground-secondary',
                 )}
               >
                 {d}
@@ -113,7 +113,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <div className="border-border fixed inset-x-0 bottom-0 flex items-center justify-between border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95">
         <button
           type="button"
           onClick={goBack}

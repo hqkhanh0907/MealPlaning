@@ -82,7 +82,7 @@ describe('WeightMini', () => {
 
     const value = screen.getByTestId('weight-value');
     expect(value).toHaveTextContent('70.5');
-    expect(value).toHaveStyle({ fontVariantNumeric: 'tabular-nums' });
+    expect(value.className).toContain('tabular-nums');
   });
 
   it('shows unit label kg', () => {
@@ -103,7 +103,7 @@ describe('WeightMini', () => {
     const trendEl = screen.getByTestId('weight-trend');
     expect(trendEl).toHaveTextContent('Đúng tiến độ');
     const mini = screen.getByTestId('weight-mini');
-    expect(mini.className).toContain('emerald');
+    expect(mini.className).toContain('primary-subtle');
   });
 
   it('Cut + Gaining → amber, TrendingUp, "Cần điều chỉnh"', () => {
@@ -126,7 +126,7 @@ describe('WeightMini', () => {
     const trendEl = screen.getByTestId('weight-trend');
     expect(trendEl).toHaveTextContent('Đúng tiến độ');
     const mini = screen.getByTestId('weight-mini');
-    expect(mini.className).toContain('emerald');
+    expect(mini.className).toContain('primary-subtle');
   });
 
   it('Bulk + Gaining fast (>0.5kg/wk) → amber, "Tăng nhanh"', () => {
@@ -150,7 +150,7 @@ describe('WeightMini', () => {
     const trendEl = screen.getByTestId('weight-trend');
     expect(trendEl).toHaveTextContent('Ổn định');
     const mini = screen.getByTestId('weight-mini');
-    expect(mini.className).toContain('emerald');
+    expect(mini.className).toContain('primary-subtle');
   });
 
   // ===== Sparkline =====

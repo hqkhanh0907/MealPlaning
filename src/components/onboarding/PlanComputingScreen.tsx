@@ -113,10 +113,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
 
   if (error) {
     return (
-      <div
-        className="flex flex-1 flex-col items-center justify-center bg-white px-8 dark:bg-slate-950"
-        data-testid="plan-computing"
-      >
+      <div className="bg-card flex flex-1 flex-col items-center justify-center px-8" data-testid="plan-computing">
         <div className="w-full max-w-xs rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
           <p className="mb-4 text-sm font-medium text-red-700 dark:text-red-300">{t('onboarding.computing.error')}</p>
           <div className="flex flex-col gap-3">
@@ -141,10 +138,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
   }
 
   return (
-    <div
-      className="flex flex-1 flex-col items-center justify-center bg-white px-8 dark:bg-slate-950"
-      data-testid="plan-computing"
-    >
+    <div className="bg-card flex flex-1 flex-col items-center justify-center px-8" data-testid="plan-computing">
       {/* Spinner */}
       <motion.div
         className="mb-8 flex h-20 w-20 items-center justify-center"

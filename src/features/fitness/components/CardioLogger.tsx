@@ -127,7 +127,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           className="gap-1 text-white hover:bg-white/20 hover:text-white"
           data-testid="back-button"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           <span>{t('common.back')}</span>
         </Button>
         <span className="font-mono text-lg font-semibold tabular-nums" data-testid="elapsed-timer">
@@ -141,14 +141,14 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" aria-hidden="true" />
         </Button>
       </header>
 
       <div className="flex-1 space-y-6 overflow-y-auto p-4">
         {/* Cardio Type Selector */}
         <section>
-          <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('fitness.cardio.type')}</h3>
+          <h3 className="text-foreground-secondary mb-2 text-sm font-semibold">{t('fitness.cardio.type')}</h3>
           <div className="flex gap-2 overflow-x-auto pb-2" data-testid="cardio-type-selector">
             {CARDIO_TYPES.map(({ type, icon: Icon, i18nKey }) => (
               <Button
@@ -160,7 +160,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   'min-h-11 shrink-0 rounded-full px-4',
                   selectedType === type
                     ? 'bg-primary text-primary-foreground hover:bg-primary'
-                    : 'bg-card border-transparent text-slate-600 dark:text-slate-300',
+                    : 'bg-card text-foreground-secondary border-transparent',
                 )}
                 data-testid={`cardio-type-${type}`}
               >
@@ -173,9 +173,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
         {/* Timer Mode Toggle */}
         <section className="bg-card rounded-xl p-4 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            {t('fitness.cardio.duration')}
-          </h3>
+          <h3 className="text-foreground-secondary mb-3 text-sm font-semibold">{t('fitness.cardio.duration')}</h3>
           <div className="mb-3 flex gap-2">
             <Button
               variant={isStopwatchMode ? 'default' : 'outline'}
@@ -184,7 +182,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
                   ? 'bg-primary text-primary-foreground hover:bg-primary'
-                  : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                  : 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700',
               )}
               data-testid="stopwatch-mode-button"
             >
@@ -196,7 +194,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               className={cn(
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
-                  ? 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                  ? 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700'
                   : 'bg-primary text-primary-foreground hover:bg-primary',
               )}
               data-testid="manual-mode-button"
@@ -277,9 +275,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         {/* Distance (conditional) */}
         {showDistance && (
           <section className="bg-card rounded-xl p-4 shadow-sm" data-testid="distance-section">
-            <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
-              {t('fitness.cardio.distance')}
-            </h3>
+            <h3 className="text-foreground-secondary mb-2 text-sm font-semibold">{t('fitness.cardio.distance')}</h3>
             <Controller
               name="distanceKm"
               control={control}
@@ -311,9 +307,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
         {/* Heart Rate */}
         <section className="bg-card rounded-xl p-4 shadow-sm">
-          <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            {t('fitness.cardio.heartRate')}
-          </h3>
+          <h3 className="text-foreground-secondary mb-2 text-sm font-semibold">{t('fitness.cardio.heartRate')}</h3>
           <Controller
             name="avgHeartRate"
             control={control}
@@ -343,9 +337,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
         {/* Intensity */}
         <section className="bg-card rounded-xl p-4 shadow-sm">
-          <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            {t('fitness.cardio.intensity')}
-          </h3>
+          <h3 className="text-foreground-secondary mb-2 text-sm font-semibold">{t('fitness.cardio.intensity')}</h3>
           <div className="flex gap-2" data-testid="intensity-selector">
             {INTENSITY_OPTIONS.map(({ value, i18nKey }) => (
               <Button
@@ -356,7 +348,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   'min-h-11 flex-1 rounded-lg',
                   intensity === value
                     ? 'bg-primary text-primary-foreground hover:bg-primary'
-                    : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                    : 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700',
                 )}
                 data-testid={`intensity-${value}`}
               >
@@ -367,9 +359,9 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         </section>
 
         {/* Calorie Preview */}
-        <section className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20" data-testid="calorie-preview">
+        <section className="bg-primary-subtle rounded-xl p-4" data-testid="calorie-preview">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-emerald-700">{t('fitness.cardio.calories')}</span>
+            <span className="text-primary-emphasis text-sm font-semibold">{t('fitness.cardio.calories')}</span>
             <span className="text-primary text-2xl font-bold" data-testid="calorie-value">
               {estimatedCalories}
             </span>
@@ -378,7 +370,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
       </div>
 
       {/* Save Button */}
-      <div className="pb-safe bg-card border-t border-slate-200 p-4 dark:border-slate-700">
+      <div className="pb-safe bg-card border-border border-t p-4">
         <Button
           variant="default"
           onClick={handleSave}

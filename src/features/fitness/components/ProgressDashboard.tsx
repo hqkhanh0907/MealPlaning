@@ -352,7 +352,7 @@ function ProgressDashboardInner() {
             </span>
           )}
           {weightDelta === 0 && latestWeight && (
-            <span data-testid="weight-stable" className="text-xs font-medium text-slate-400">
+            <span data-testid="weight-stable" className="text-xs font-medium text-slate-400 dark:text-slate-500">
               →
             </span>
           )}
@@ -434,12 +434,12 @@ function ProgressDashboardInner() {
               data-testid={`insight-${insight.id}`}
               className="bg-card flex items-center justify-between rounded-lg p-3 shadow-sm"
             >
-              <p className="text-sm text-slate-600 dark:text-slate-300">{insight.text}</p>
+              <p className="text-foreground-secondary text-sm">{insight.text}</p>
               <button
                 type="button"
                 data-testid={`dismiss-${insight.id}`}
                 onClick={() => handleDismiss(insight.id)}
-                className="ml-2 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="ml-2 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
                 aria-label={t('fitness.progress.dismiss')}
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -469,7 +469,7 @@ function ProgressDashboardInner() {
                 data-testid="close-bottom-sheet"
                 onClick={handleCloseSheet}
                 aria-label={t('fitness.progress.dismiss')}
-                className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-700"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -484,7 +484,7 @@ function ProgressDashboardInner() {
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
                     timeRange === range
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                      : 'text-foreground-secondary bg-slate-100 dark:bg-slate-700'
                   }`}
                 >
                   {range}

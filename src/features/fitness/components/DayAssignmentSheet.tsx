@@ -116,8 +116,8 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                       'transition-colors motion-reduce:transition-none',
                       'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                       isCurrent
-                        ? 'border-primary border-2 bg-emerald-50 dark:bg-emerald-900/30'
-                        : 'bg-card border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50',
+                        ? 'border-primary bg-primary-subtle border-2'
+                        : 'bg-card border-border border hover:bg-slate-50 dark:hover:bg-slate-700/50',
                       isFull ? 'cursor-not-allowed opacity-50' : '',
                     ]
                       .filter(Boolean)

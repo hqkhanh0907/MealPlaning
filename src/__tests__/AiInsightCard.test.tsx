@@ -264,7 +264,7 @@ describe('AiInsightCard', () => {
       render(<AiInsightCard />);
       const card = screen.getByTestId('ai-insight-card');
       expect(card.className).toContain('border-primary');
-      expect(card.className).toContain('bg-emerald-50');
+      expect(card.className).toContain('bg-primary-subtle');
     });
   });
 

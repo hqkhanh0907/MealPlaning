@@ -173,20 +173,33 @@ export default function App() {
     return true;
   });
 
-  // Read state from Zustand stores
-  const { ingredients, setIngredients, addIngredient, updateIngredient } = useIngredientStore();
-  const { dishes, setDishes, addDish, updateDish, deleteDish, isIngredientUsed } = useDishStore();
-  const { dayPlans, setDayPlans, isDishUsed, restoreDayPlans } = useDayPlanStore();
+  // Read state from Zustand stores — use individual selectors to avoid cascade re-renders
+  const ingredients = useIngredientStore(s => s.ingredients);
+  const setIngredients = useIngredientStore(s => s.setIngredients);
+  const addIngredient = useIngredientStore(s => s.addIngredient);
+  const updateIngredient = useIngredientStore(s => s.updateIngredient);
+  const dishes = useDishStore(s => s.dishes);
+  const setDishes = useDishStore(s => s.setDishes);
+  const addDish = useDishStore(s => s.addDish);
+  const updateDish = useDishStore(s => s.updateDish);
+  const deleteDish = useDishStore(s => s.deleteDish);
+  const isIngredientUsed = useDishStore(s => s.isIngredientUsed);
+  const dayPlans = useDayPlanStore(s => s.dayPlans);
+  const setDayPlans = useDayPlanStore(s => s.setDayPlans);
+  const isDishUsed = useDayPlanStore(s => s.isDishUsed);
+  const restoreDayPlans = useDayPlanStore(s => s.restoreDayPlans);
   const healthProfile = useHealthProfileStore(s => s.profile);
-  const { templates, saveTemplate, deleteTemplate, renameTemplate, applyTemplate } = useMealTemplateStore();
-  const {
-    hasNewAIResult,
-    setHasNewAIResult,
-    activeManagementSubTab,
-    setActiveManagementSubTab,
-    selectedDate,
-    setSelectedDate,
-  } = useUIStore();
+  const templates = useMealTemplateStore(s => s.templates);
+  const saveTemplate = useMealTemplateStore(s => s.saveTemplate);
+  const deleteTemplate = useMealTemplateStore(s => s.deleteTemplate);
+  const renameTemplate = useMealTemplateStore(s => s.renameTemplate);
+  const applyTemplate = useMealTemplateStore(s => s.applyTemplate);
+  const hasNewAIResult = useUIStore(s => s.hasNewAIResult);
+  const setHasNewAIResult = useUIStore(s => s.setHasNewAIResult);
+  const activeManagementSubTab = useUIStore(s => s.activeManagementSubTab);
+  const setActiveManagementSubTab = useUIStore(s => s.setActiveManagementSubTab);
+  const selectedDate = useUIStore(s => s.selectedDate);
+  const setSelectedDate = useUIStore(s => s.setSelectedDate);
   const activeMainTab = useNavigationStore(s => s.activeTab);
   const navigateTab = useNavigationStore(s => s.navigateTab);
   const pageStack = useNavigationStore(s => s.pageStack);
@@ -444,10 +457,7 @@ export default function App() {
       >
         Skip to main content
       </a>
-      <header
-        className="pt-safe sticky top-0 z-20 border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
-        role="banner"
-      >
+      <header className="pt-safe border-border bg-card sticky top-0 z-20 border-b" role="banner">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2 sm:px-6 sm:py-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="bg-primary text-primary-foreground rounded-xl p-1.5 shadow-sm sm:p-2" aria-hidden="true">
@@ -560,7 +570,7 @@ export default function App() {
           <ErrorBoundary fallbackTitle={t('errorBoundary.aiTab')}>
             <Suspense fallback={<TabLoadingFallback />}>
               <div className="space-y-8">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+                <div className="border-border flex items-center justify-between border-b pb-4">
                   <div className="flex items-center gap-3">
                     <Bot className="text-primary h-6 w-6" />
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('ai.title')}</h2>
@@ -714,7 +724,7 @@ export default function App() {
           className="fixed inset-0 z-50 overflow-y-auto bg-slate-50 dark:bg-slate-950"
           data-testid="settings-overlay"
         >
-          <div className="pt-safe sticky top-0 z-10 border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+          <div className="pt-safe border-border bg-card sticky top-0 z-10 border-b">
             <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2 sm:px-6 sm:py-4">
               <button
                 type="button"

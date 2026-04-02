@@ -101,7 +101,7 @@ export const CalendarTab = React.memo(function CalendarTab({
             <CalendarDays className="text-primary h-6 w-6" />
             <h2>{t('calendar.selectDate')}</h2>
           </div>
-          <div className="bg-card text-muted-foreground rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-medium sm:rounded-full sm:py-1.5 dark:border-slate-700">
+          <div className="bg-card text-muted-foreground border-border rounded-xl border px-4 py-2.5 text-center text-sm font-medium sm:rounded-full sm:py-1.5">
             <span className="sm:hidden">
               {parseLocalDate(selectedDate).toLocaleDateString(dateLocale, {
                 weekday: 'short',
@@ -139,7 +139,7 @@ export const CalendarTab = React.memo(function CalendarTab({
                 data-testid={`subtab-${key}`}
                 className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
                   activeSubTab === key
-                    ? 'bg-white text-emerald-700 shadow-sm dark:bg-slate-700'
+                    ? 'text-primary-emphasis bg-white shadow-sm dark:bg-slate-700'
                     : 'text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
               >
@@ -227,13 +227,13 @@ export const CalendarTab = React.memo(function CalendarTab({
             data-testid="grocery-modal"
             className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl"
           >
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+            <div className="border-border flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('grocery.title')}</h2>
               <button
                 type="button"
                 onClick={handleCloseGrocery}
                 data-testid="btn-close-grocery"
-                className="rounded-xl p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                className="hover:text-foreground-secondary rounded-xl p-2 text-slate-400 transition-all hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-slate-300"
                 aria-label={t('common.close')}
               >
                 <X className="h-5 w-5" />

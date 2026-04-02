@@ -194,7 +194,7 @@ describe('ClearPlanModal', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('meal-toggle-breakfast'));
     const breakfastBtn = screen.getByTestId('meal-toggle-breakfast');
-    expect(breakfastBtn.className).toContain('border-slate-200');
+    expect(breakfastBtn.className).toContain('border-border');
     expect(breakfastBtn.className).not.toContain('border-rose-500');
   });
 

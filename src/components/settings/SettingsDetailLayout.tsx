@@ -30,7 +30,7 @@ export function SettingsDetailLayout({
   return (
     <div className="flex min-h-full flex-col" data-testid="settings-detail-layout">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between gap-3 border-b border-slate-200 pb-4 dark:border-slate-700">
+      <div className="border-border mb-6 flex items-center justify-between gap-3 border-b pb-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -39,7 +39,7 @@ export function SettingsDetailLayout({
             className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label={t('settings.back')}
           >
-            <ChevronLeft className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+            <ChevronLeft className="text-foreground-secondary h-5 w-5" />
           </button>
           <div className="flex items-center gap-2.5">
             {icon}
@@ -54,7 +54,7 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onEdit}
             data-testid="settings-detail-edit"
-            className="focus-visible:ring-ring flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:outline-none dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+            className="focus-visible:ring-ring bg-primary-subtle flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 focus-visible:ring-2 focus-visible:outline-none dark:text-emerald-400 dark:hover:bg-emerald-900/30"
           >
             <Pencil className="h-3.5 w-3.5" />
             {t('settings.edit')}
@@ -68,7 +68,7 @@ export function SettingsDetailLayout({
       {/* Sticky Save/Cancel Footer — only in edit mode */}
       {isEditing && (
         <div
-          className="bg-card/95 sticky right-0 bottom-0 left-0 -mx-4 mt-6 border-t border-slate-200 px-4 py-4 backdrop-blur-sm sm:-mx-6 sm:px-6 dark:border-slate-700"
+          className="bg-card/95 border-border sticky right-0 bottom-0 left-0 -mx-4 mt-6 border-t px-4 py-4 backdrop-blur-sm sm:-mx-6 sm:px-6"
           data-testid="settings-detail-footer"
         >
           <div className="flex gap-3">

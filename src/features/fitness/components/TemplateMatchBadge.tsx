@@ -6,9 +6,9 @@ interface TemplateMatchBadgeProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40';
+  if (score >= 80) return 'bg-emerald-100 text-primary-emphasis dark:bg-emerald-900/40';
   if (score >= 60) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
-  return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
+  return 'bg-slate-100 text-foreground-secondary dark:bg-slate-700';
 }
 
 function TemplateMatchBadgeInner({ score }: Readonly<TemplateMatchBadgeProps>): React.JSX.Element {
@@ -19,8 +19,7 @@ function TemplateMatchBadgeInner({ score }: Readonly<TemplateMatchBadgeProps>): 
     <span
       data-testid="template-match-badge"
       aria-label={t('fitness.templateGallery.matchScore', { score: String(clamped) })}
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${getScoreColor(clamped)}`}
-      style={{ fontVariantNumeric: 'tabular-nums' }}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${getScoreColor(clamped)}`}
     >
       {String(clamped)}%
     </span>

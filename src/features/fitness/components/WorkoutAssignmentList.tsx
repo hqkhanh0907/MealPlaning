@@ -81,7 +81,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
         <li
           key={day.id}
           data-testid={`workout-item-${day.id}`}
-          className="bg-card flex items-center gap-2 rounded-xl border border-slate-200 p-3 shadow-sm dark:border-slate-700"
+          className="bg-card border-border flex items-center gap-2 rounded-xl border p-3 shadow-sm"
         >
           {/* Drag handle */}
           <div
@@ -103,7 +103,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
             data-testid={`reassign-btn-${day.id}`}
             aria-label={`${t('fitness.scheduleEditor.reassignDay')}: ${day.workoutType}`}
             onClick={() => handleReassign(day.id)}
-            className="focus-visible:ring-ring flex-shrink-0 touch-manipulation rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:bg-emerald-900/40 dark:hover:bg-emerald-900/60"
+            className="focus-visible:ring-ring text-primary-emphasis min-h-11 flex-shrink-0 touch-manipulation rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-semibold transition-colors hover:bg-emerald-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:bg-emerald-900/40 dark:hover:bg-emerald-900/60"
           >
             {getDayLabel(day.dayOfWeek)}
           </button>
@@ -116,7 +116,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
               aria-label={t('fitness.scheduleEditor.moveUp')}
               disabled={index === 0}
               onClick={() => handleMoveUp(index)}
-              className="focus-visible:ring-ring flex h-7 w-7 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="focus-visible:ring-ring flex h-7 min-h-11 w-7 min-w-11 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-700"
             >
               <ChevronUp className="h-4 w-4" />
             </button>
@@ -126,7 +126,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
               aria-label={t('fitness.scheduleEditor.moveDown')}
               disabled={index === planDays.length - 1}
               onClick={() => handleMoveDown(index)}
-              className="focus-visible:ring-ring flex h-7 w-7 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-700"
+              className="focus-visible:ring-ring flex h-7 min-h-11 w-7 min-w-11 touch-manipulation items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:text-slate-500 dark:hover:bg-slate-700"
             >
               <ChevronDown className="h-4 w-4" />
             </button>

@@ -35,10 +35,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
   }, []);
 
   return (
-    <div
-      data-testid="energy-balance-card"
-      className="bg-card rounded-2xl border border-slate-100 p-4 shadow-md dark:border-slate-700"
-    >
+    <div data-testid="energy-balance-card" className="bg-card border-border-subtle rounded-2xl border p-4 shadow-md">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -63,9 +60,9 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
               className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               {collapsed ? (
-                <ChevronDown className="h-4 w-4 text-slate-500" />
+                <ChevronDown className="text-muted-foreground h-4 w-4" />
               ) : (
-                <ChevronUp className="h-4 w-4 text-slate-500" />
+                <ChevronUp className="text-muted-foreground h-4 w-4" />
               )}
             </button>
           )}
@@ -84,7 +81,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
       {!collapsed && (
         <div className="mt-4 space-y-4">
           {/* Calorie in / out labels */}
-          <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
+          <div className="text-foreground-secondary flex justify-between text-xs">
             <span className="flex items-center gap-1">
               <Flame className="text-primary h-3.5 w-3.5" />
               {t('nutrition.caloriesIn')}: <strong data-testid="calories-in">{Math.round(caloriesIn)}</strong>
@@ -114,7 +111,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
                 style={{ width: `${outPct}%` }}
               />
             </div>
-            <div className="text-muted-foreground flex justify-between text-[10px]">
+            <div className="text-muted-foreground flex justify-between text-xs">
               <span>
                 {t('nutrition.target')}: {targetCalories} {t('nutrition.kcal')}
               </span>
@@ -129,9 +126,9 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
 
           {/* Protein progress */}
           <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
+            <div className="text-foreground-secondary flex items-center justify-between text-xs">
               <span className="flex items-center gap-1">
-                <Beef className="h-3.5 w-3.5 text-purple-500" />
+                <Beef className="h-3.5 w-3.5 text-indigo-500" aria-hidden="true" />
                 {t('nutrition.protein')}
               </span>
               <span data-testid="protein-display">
@@ -142,7 +139,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
             <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
               <div
                 data-testid="protein-bar"
-                className="h-full rounded-full bg-purple-400 transition-all"
+                className="h-full rounded-full bg-indigo-400 transition-all"
                 style={{ width: `${proPct}%` }}
               />
             </div>

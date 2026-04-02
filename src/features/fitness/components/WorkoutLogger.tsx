@@ -410,7 +410,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
               value={freestyleName}
               onChange={e => setFreestyleName(e.target.value)}
               placeholder={t('fitness.plan.freestyleDefault')}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="border-border mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:bg-slate-700 dark:text-slate-100"
               data-testid="freestyle-name-input"
             />
           </div>
@@ -440,7 +440,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
           className="gap-1 text-white hover:bg-white/20 hover:text-white"
           data-testid="back-button"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           <span>{t('fitness.logger.back')}</span>
         </Button>
         <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} isRunning={timerRunning} />
@@ -452,7 +452,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" aria-hidden="true" />
         </Button>
       </header>
 
@@ -477,12 +477,14 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
             return (
               <React.Fragment key={exercise.id}>
                 <section className="bg-card rounded-xl p-4 shadow-sm" data-testid={`exercise-section-${exercise.id}`}>
-                  <h3 className="mb-3 text-base font-semibold text-slate-800 dark:text-slate-100">{exercise.nameVi}</h3>
+                  <h3 className="mb-3 truncate text-base font-semibold text-slate-800 dark:text-slate-100">
+                    {exercise.nameVi}
+                  </h3>
 
                   {exerciseSets.map(set => (
                     <div
                       key={set.id}
-                      className="flex items-center gap-3 py-2 text-sm text-slate-600 dark:text-slate-300"
+                      className="text-foreground-secondary flex items-center gap-3 py-2 text-sm"
                       data-testid={`logged-set-${set.id}`}
                     >
                       <span className="font-medium">
@@ -496,7 +498,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                         <button
                           type="button"
                           onClick={() => setEditingSet(set)}
-                          className="focus-visible:ring-ring inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                          className="focus-visible:ring-ring hover:text-foreground-secondary inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-200"
                           aria-label={t('fitness.logger.editSet')}
                           data-testid={`edit-set-${set.id}`}
                         >
@@ -505,7 +507,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                         <button
                           type="button"
                           onClick={() => handleDeleteSet(set.id)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
                           aria-label={t('fitness.logger.deleteSet')}
                           data-testid={`delete-set-${set.id}`}
                         >
@@ -521,11 +523,11 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                   />
 
                   <div
-                    className="mt-3 space-y-3 border-t border-slate-100 pt-3 dark:border-slate-700"
+                    className="border-border-subtle mt-3 space-y-3 border-t pt-3"
                     data-testid={`set-editor-${exercise.id}`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-slate-500">{t('fitness.logger.weight')}</span>
+                      <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.weight')}</span>
                       <Button
                         variant="secondary"
                         size="icon"
@@ -565,7 +567,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-slate-500">{t('fitness.logger.reps')}</span>
+                      <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.reps')}</span>
                       <Button
                         variant="secondary"
                         size="icon"
@@ -602,7 +604,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-slate-500">{t('fitness.logger.rpe')}</span>
+                      <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.rpe')}</span>
                       <div className="flex gap-1" data-testid={`rpe-selector-${exercise.id}`}>
                         {RPE_OPTIONS.map(rpe => (
                           <Button
@@ -614,7 +616,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                               'h-9 w-9 rounded-full text-xs',
                               input.rpe === rpe
                                 ? 'bg-primary text-primary-foreground hover:bg-primary'
-                                : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                                : 'text-foreground-secondary border-transparent bg-slate-100 dark:bg-slate-700',
                             )}
                             data-testid={`rpe-${rpe}-${exercise.id}`}
                           >
@@ -656,7 +658,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       </div>
 
       <div
-        className="pb-safe sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95"
+        className="pb-safe border-border-subtle sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur-sm dark:bg-slate-900/95"
         data-testid="add-exercise-container"
       >
         <Button
@@ -665,7 +667,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
           className="text-muted-foreground hover:border-primary hover:text-primary w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 py-3 dark:border-slate-600"
           data-testid="add-exercise-button"
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-5 w-5" aria-hidden="true" />
           {t('fitness.logger.addExercise')}
         </Button>
       </div>

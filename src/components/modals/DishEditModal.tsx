@@ -121,6 +121,21 @@ export const DishEditModal = ({
     return freq;
   }, [allDishes]);
 
+  // Memoize ingredient picker data to avoid recalculating on every render
+  const selectedIngredientIds = useMemo(() => new Set(fields.map(f => f.ingredientId)), [fields]);
+  const filteredIngredients = useMemo(() => {
+    const available = allIngredients
+      .filter(ing => !selectedIngredientIds.has(ing.id))
+      .filter(ing => getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()));
+    const recentlyUsed = available
+      .filter(ing => ingredientFrequency.has(ing.id))
+      .sort((a, b) => (ingredientFrequency.get(b.id) ?? 0) - (ingredientFrequency.get(a.id) ?? 0))
+      .slice(0, 10);
+    const recentIds = new Set(recentlyUsed.map(ing => ing.id));
+    const rest = available.filter(ing => !recentIds.has(ing.id));
+    return { available, recentlyUsed, rest };
+  }, [allIngredients, selectedIngredientIds, ingredientSearch, lang, ingredientFrequency]);
+
   // Clear ingredient amount errors reactively when display value becomes valid
   useEffect(() => {
     const ingErrors = errors.ingredients;
@@ -310,7 +325,7 @@ export const DishEditModal = ({
     <>
       <ModalBackdrop onClose={handleClose} zIndex="z-60">
         <div className="bg-card relative flex h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+          <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
             <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
               {editingItem ? t('dish.editExisting') : t('dish.createNew')}
             </h4>
@@ -325,7 +340,7 @@ export const DishEditModal = ({
           </div>
           <div className="flex-1 space-y-6 overflow-y-auto overscroll-contain p-6">
             <div>
-              <label htmlFor="dish-name" className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">
+              <label htmlFor="dish-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
                 {t('dish.dishName')}
               </label>
               <div className="flex items-center gap-2">
@@ -359,7 +374,7 @@ export const DishEditModal = ({
                     title={t('dish.aiSuggestButton')}
                     aria-label={t('dish.aiSuggestButton')}
                     data-testid="btn-ai-suggest"
-                    className="flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                    className="flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
                   >
                     <Sparkles className="h-5 w-5" />
                   </button>
@@ -379,7 +394,7 @@ export const DishEditModal = ({
             </div>
             <div>
               <p
-                className={`mb-1.5 block text-xs font-bold uppercase ${errors.tags ? 'text-rose-500' : 'text-muted-foreground'}`}
+                className={`mb-1.5 block text-xs font-semibold uppercase ${errors.tags ? 'text-rose-500' : 'text-muted-foreground'}`}
               >
                 {t('dish.suitableFor')} <span className="text-rose-500">*</span>
               </p>
@@ -392,7 +407,7 @@ export const DishEditModal = ({
                       type="button"
                       onClick={() => handleTagToggle(type, isActive)}
                       data-testid={`tag-${type}`}
-                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600'}`}
+                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground-secondary bg-slate-100 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600'}`}
                     >
                       <TagIcon className="size-4" aria-hidden="true" /> {label}
                     </button>
@@ -405,7 +420,7 @@ export const DishEditModal = ({
             {/* Rating & Notes */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">{t('dish.rating')}</p>
+                <p className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">{t('dish.rating')}</p>
                 <div className="flex gap-1" data-testid="dish-rating">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
@@ -422,14 +437,14 @@ export const DishEditModal = ({
                 </div>
               </div>
               <div>
-                <p className="text-muted-foreground mb-1.5 block text-xs font-bold uppercase">{t('dish.notes')}</p>
+                <p className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">{t('dish.notes')}</p>
                 <textarea
                   data-testid="dish-notes"
                   value={watchedNotes ?? ''}
                   onChange={e => setValue('notes', e.target.value, { shouldDirty: true })}
                   placeholder={t('dish.notesPlaceholder')}
                   rows={2}
-                  className="focus:border-primary w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition-all outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                  className="focus:border-primary border-border bg-card w-full resize-none rounded-xl border px-3 py-2 text-sm transition-all outline-none dark:bg-slate-700 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -437,7 +452,9 @@ export const DishEditModal = ({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Ingredient Selector */}
               <div className="space-y-3">
-                <p className="text-muted-foreground block text-xs font-bold uppercase">{t('dish.selectIngredients')}</p>
+                <p className="text-muted-foreground block text-xs font-semibold uppercase">
+                  {t('dish.selectIngredients')}
+                </p>
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -459,46 +476,35 @@ export const DishEditModal = ({
                     title={t('dish.quickAddTitle')}
                     aria-label={t('dish.quickAddTitle')}
                     data-testid="btn-quick-add-ingredient"
-                    className={`flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all ${showQuickAdd ? 'bg-primary text-primary-foreground' : 'text-primary bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-900/30'}`}
+                    className={`flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all ${showQuickAdd ? 'bg-primary text-primary-foreground' : 'text-primary hover:bg-primary-subtle bg-slate-100 dark:bg-slate-700 dark:hover:bg-emerald-900/30'}`}
                   >
                     <Plus className="h-5 w-5" />
                   </button>
                 </div>
-                <div className="max-h-60 divide-y divide-slate-100 overflow-y-auto rounded-xl border border-slate-200 dark:divide-slate-700 dark:border-slate-600">
+                <div className="border-border max-h-60 divide-y divide-slate-100 overflow-y-auto rounded-xl border dark:divide-slate-700">
                   {(() => {
-                    const pickerSelectedIds = new Set(fields.map(f => f.ingredientId));
-                    const available = allIngredients
-                      .filter(ing => !pickerSelectedIds.has(ing.id))
-                      .filter(ing =>
-                        getLocalizedField(ing.name, lang).toLowerCase().includes(ingredientSearch.toLowerCase()),
-                      );
+                    const { available, recentlyUsed, rest } = filteredIngredients;
                     if (available.length === 0)
                       return (
-                        <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-500">
-                          {pickerSelectedIds.size === allIngredients.length
+                        <div className="text-muted-foreground px-4 py-6 text-center text-sm">
+                          {selectedIngredientIds.size === allIngredients.length
                             ? t('dish.allIngredientsSelected')
                             : t('dish.noIngredientFound')}
                         </div>
                       );
-                    const recentlyUsed = available
-                      .filter(ing => ingredientFrequency.has(ing.id))
-                      .sort((a, b) => (ingredientFrequency.get(b.id) ?? 0) - (ingredientFrequency.get(a.id) ?? 0))
-                      .slice(0, 10);
-                    const recentIds = new Set(recentlyUsed.map(ing => ing.id));
-                    const rest = available.filter(ing => !recentIds.has(ing.id));
                     const renderIngButton = (ing: Ingredient) => (
                       <button
                         key={ing.id}
                         data-testid={`btn-add-ing-${ing.id}`}
                         type="button"
                         onClick={() => handleAddIngredient(ing.id)}
-                        className="group flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-all hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
+                        className="group hover:bg-primary-subtle flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-all dark:hover:bg-emerald-900/30"
                       >
                         <div className="min-w-0 flex-1">
                           <span className="font-medium text-slate-700 dark:text-slate-300">
                             {getLocalizedField(ing.name, lang)}
                           </span>
-                          <span className="ml-2 text-xs text-slate-500 dark:text-slate-500">
+                          <span className="text-muted-foreground ml-2 text-xs">
                             {Math.round(ing.caloriesPer100)}cal · {Math.round(ing.proteinPer100)}g pro
                           </span>
                         </div>
@@ -513,7 +519,7 @@ export const DishEditModal = ({
                               data-testid="recently-used-header"
                               className="flex items-center gap-1.5 bg-amber-50/50 px-4 py-2 dark:bg-amber-900/10"
                             >
-                              <Clock className="h-3 w-3 text-amber-500" />
+                              <Clock className="h-3 w-3 text-amber-500" aria-hidden="true" />
                               <span className="text-[10px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
                                 {t('dish.recentlyUsed')}
                               </span>
@@ -521,7 +527,7 @@ export const DishEditModal = ({
                             {recentlyUsed.map(renderIngButton)}
                             {rest.length > 0 && (
                               <div className="bg-slate-50 px-4 py-2 dark:bg-slate-700/50">
-                                <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-500">
+                                <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
                                   {t('dish.allIngredients')}
                                 </span>
                               </div>
@@ -540,7 +546,7 @@ export const DishEditModal = ({
               </div>
               {/* Selected Ingredients */}
               <div className="space-y-3">
-                <p className="text-muted-foreground block text-xs font-bold uppercase">
+                <p className="text-muted-foreground block text-xs font-semibold uppercase">
                   {t('dish.selectedIngredients')}
                 </p>
                 <div className="space-y-2">
@@ -553,7 +559,7 @@ export const DishEditModal = ({
                     return (
                       <div
                         key={field.id}
-                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-700/50"
+                        className="border-border flex items-center justify-between rounded-xl border bg-slate-50 p-3 dark:bg-slate-700/50"
                       >
                         <div className="flex-1">
                           <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
@@ -568,7 +574,7 @@ export const DishEditModal = ({
                                 setValue(`ingredients.${index}.amount`, a, { shouldDirty: true });
                               }}
                               aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`}
-                              className="flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-600 dark:text-slate-300 dark:hover:bg-slate-500"
+                              className="text-foreground-secondary flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg bg-slate-100 transition-all hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500"
                             >
                               <Minus className="h-4 w-4" />
                             </button>
@@ -578,7 +584,7 @@ export const DishEditModal = ({
                               inputMode="numeric"
                               testId={`input-dish-amount-${field.ingredientId}`}
                               ariaLabel={getLocalizedField(ing.name, lang)}
-                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-slate-200 dark:border-slate-600'} focus:border-primary bg-white transition-all outline-none dark:bg-slate-700 dark:text-slate-100`}
+                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-border'} focus:border-primary bg-card transition-all outline-none dark:bg-slate-700 dark:text-slate-100`}
                             />
                             <button
                               type="button"
@@ -588,7 +594,7 @@ export const DishEditModal = ({
                                 setValue(`ingredients.${index}.amount`, a, { shouldDirty: true });
                               }}
                               aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`}
-                              className="flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-600 dark:text-slate-300 dark:hover:bg-slate-500"
+                              className="text-foreground-secondary flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg bg-slate-100 transition-all hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500"
                             >
                               <Plus className="h-4 w-4" />
                             </button>
@@ -596,7 +602,7 @@ export const DishEditModal = ({
                               {getLocalizedField(ing.unit, lang)}
                             </span>
                           </div>
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">
+                          <p className="text-muted-foreground mt-1 text-xs">
                             {Math.round((ing.caloriesPer100 * safeAmount) / 100)}cal ·{' '}
                             {Math.round((ing.proteinPer100 * safeAmount) / 100)}g pro ·{' '}
                             {Math.round((ing.carbsPer100 * safeAmount) / 100)}g carb ·{' '}
@@ -624,7 +630,7 @@ export const DishEditModal = ({
                   })}
                   {fields.length === 0 && (
                     <div>
-                      <p className="rounded-xl border-2 border-dashed border-slate-200 py-8 text-center text-sm text-slate-500 dark:border-slate-600 dark:text-slate-500">
+                      <p className="border-border text-muted-foreground rounded-xl border-2 border-dashed py-8 text-center text-sm">
                         {t('dish.noIngredientSelected')}
                       </p>
                       {errors.ingredients?.message && (
@@ -657,9 +663,9 @@ export const DishEditModal = ({
                 { cal: 0, prot: 0, carbs: 0, fat: 0 },
               );
               return (
-                <div className="flex items-center justify-around gap-3 border-t border-slate-100 bg-slate-50 px-6 py-3 text-center dark:border-slate-700 dark:bg-slate-700/50">
+                <div className="border-border-subtle flex items-center justify-around gap-3 border-t bg-slate-50 px-6 py-3 text-center dark:bg-slate-700/50">
                   <div>
-                    <p className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-500">
+                    <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Flame className="size-3.5" aria-hidden="true" /> KCal
                     </p>
                     <p
@@ -670,19 +676,19 @@ export const DishEditModal = ({
                     </p>
                   </div>
                   <div>
-                    <p className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-500">
+                    <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Dumbbell className="size-3.5" aria-hidden="true" /> Protein
                     </p>
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.prot)}g</p>
                   </div>
                   <div>
-                    <p className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-500">
+                    <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Wheat className="size-3.5" aria-hidden="true" /> Carbs
                     </p>
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.carbs)}g</p>
                   </div>
                   <div>
-                    <p className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-500">
+                    <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                       <Droplets className="size-3.5" aria-hidden="true" /> Fat
                     </p>
                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{Math.round(totals.fat)}g</p>
@@ -690,14 +696,14 @@ export const DishEditModal = ({
                 </div>
               );
             })()}
-          <div className="border-t border-slate-100 p-6 dark:border-slate-700">
+          <div className="border-border-subtle border-t p-6">
             <button
               type="button"
               onClick={handleFormSubmit}
               data-testid="btn-save-dish"
               className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all dark:shadow-emerald-900"
             >
-              <Save className="h-5 w-5" /> {t('dish.saveDish')}
+              <Save className="h-5 w-5" aria-hidden="true" /> {t('dish.saveDish')}
             </button>
           </div>
         </div>

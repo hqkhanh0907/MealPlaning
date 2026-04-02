@@ -235,9 +235,9 @@ describe('CopyPlanModal', () => {
     const overwriteBtn = screen.getByTestId('btn-mode-overwrite');
 
     fireEvent.click(mergeBtn);
-    expect(mergeBtn.className).toContain('text-emerald-700');
+    expect(mergeBtn.className).toContain('text-primary-emphasis');
 
     fireEvent.click(overwriteBtn);
-    expect(overwriteBtn.className).toContain('text-emerald-700');
+    expect(overwriteBtn.className).toContain('text-primary-emphasis');
   });
 });

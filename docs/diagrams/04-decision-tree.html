@@ -1,0 +1,1319 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cây Quyết Định - Fitness Business Logic</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #0f172a;
+        --bg2: #1e293b;
+        --bg3: #334155;
+        --t1: #f1f5f9;
+        --t2: #94a3b8;
+        --t3: #64748b;
+        --blue: #3b82f6;
+        --cyan: #06b6d4;
+        --green: #10b981;
+        --yellow: #f59e0b;
+        --orange: #f97316;
+        --red: #ef4444;
+        --purple: #8b5cf6;
+        --line: rgba(100, 116, 139, 0.5);
+        --lw: 2px;
+        --gap: 22px;
+      }
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--t1);
+        min-height: 100vh;
+      }
+
+      .hdr {
+        background: linear-gradient(135deg, var(--bg2), var(--bg));
+        border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 18px 20px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+      }
+      .hdr h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--cyan), var(--blue), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hdr .sub {
+        color: var(--t2);
+        font-size: 0.82rem;
+        margin-top: 2px;
+      }
+
+      .tabs {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        padding: 12px 16px 0;
+        background: var(--bg);
+        position: sticky;
+        top: 72px;
+        z-index: 99;
+        flex-wrap: wrap;
+      }
+      .tab {
+        padding: 8px 16px;
+        border: 1px solid var(--bg3);
+        background: var(--bg2);
+        color: var(--t2);
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        white-space: nowrap;
+      }
+      .tab:hover {
+        background: var(--bg3);
+        color: var(--t1);
+        transform: translateY(-2px);
+      }
+      .tab.on {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(6, 182, 212, 0.08));
+        color: var(--cyan);
+        border-color: var(--blue);
+        border-bottom-color: var(--bg);
+      }
+      .tab .n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--bg3);
+        font-size: 0.65rem;
+        margin-right: 4px;
+      }
+      .tab.on .n {
+        background: var(--blue);
+        color: #fff;
+      }
+
+      .pan {
+        display: none;
+        padding: 16px 20px;
+        animation: fi 0.35s ease;
+      }
+      .pan.on {
+        display: block;
+      }
+      @keyframes fi {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .ttl {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--cyan);
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .desc {
+        color: var(--t2);
+        font-size: 0.82rem;
+        margin-bottom: 16px;
+        line-height: 1.5;
+        max-width: 660px;
+      }
+
+      .leg {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+        background: var(--bg2);
+        border-radius: 8px;
+        border: 1px solid var(--bg3);
+        margin-bottom: 14px;
+      }
+      .leg-t {
+        width: 100%;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--t1);
+        margin-bottom: 2px;
+      }
+      .leg-i {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.72rem;
+        color: var(--t2);
+      }
+      .leg-s {
+        width: 22px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+
+      .ctrl {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        padding: 4px 10px;
+        background: var(--bg3);
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        color: var(--t2);
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: all 0.2s ease;
+      }
+      .btn:hover {
+        background: rgba(59, 130, 246, 0.2);
+        color: var(--blue);
+      }
+
+      .sw {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 8px 0 24px;
+      }
+      .sw::-webkit-scrollbar {
+        height: 6px;
+      }
+      .sw::-webkit-scrollbar-track {
+        background: var(--bg2);
+        border-radius: 3px;
+      }
+      .sw::-webkit-scrollbar-thumb {
+        background: var(--bg3);
+        border-radius: 3px;
+      }
+
+      .zi {
+        transform-origin: top center;
+        transition: transform 0.3s ease;
+        display: inline-block;
+        min-width: 100%;
+      }
+
+      /* ===== CSS ORG-CHART TREE ===== */
+      .tree,
+      .tree ul,
+      .tree li {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .tree {
+        display: flex;
+        justify-content: center;
+      }
+      .tree ul {
+        display: flex;
+        justify-content: center;
+        padding-top: var(--gap);
+        position: relative;
+      }
+      .tree ul::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: var(--lw);
+        height: var(--gap);
+        background: var(--line);
+      }
+      .tree li {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        padding: var(--gap) 4px 0;
+      }
+      .tree li::before,
+      .tree li::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        width: 50%;
+        height: var(--gap);
+        border-top: var(--lw) solid var(--line);
+      }
+      .tree li::before {
+        right: 50%;
+        border-right: var(--lw) solid var(--line);
+      }
+      .tree li::after {
+        left: 50%;
+      }
+      .tree li:first-child::before {
+        border: 0;
+        border-right: var(--lw) solid var(--line);
+      }
+      .tree li:last-child::after {
+        border: 0;
+      }
+      .tree li:last-child::before {
+        border-top: var(--lw) solid var(--line);
+        border-right: var(--lw) solid var(--line);
+        border-radius: 0 5px 0 0;
+      }
+      .tree li:first-child:last-child::before {
+        border-top: 0;
+      }
+      .tree li:first-child:last-child::after {
+        border: 0;
+      }
+      .tree > li {
+        padding-top: 0;
+      }
+      .tree > li::before,
+      .tree > li::after {
+        display: none;
+      }
+
+      /* NODE */
+      .nd {
+        position: relative;
+        min-width: 100px;
+        max-width: 175px;
+        padding: 8px 11px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.3;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+        z-index: 2;
+        white-space: normal;
+      }
+      .nd:hover {
+        transform: scale(1.08);
+        z-index: 10;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+      .nd small {
+        font-weight: 500;
+        opacity: 0.85;
+        font-size: 0.65rem;
+      }
+
+      .nd.rt {
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        font-size: 0.82rem;
+        min-width: 160px;
+        padding: 12px 16px;
+      }
+      .nd.dc {
+        background: linear-gradient(135deg, #92400e, #f59e0b);
+        border-color: rgba(245, 158, 11, 0.4);
+      }
+      .nd.ac {
+        background: linear-gradient(135deg, #065f46, #10b981);
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+      .nd.gd {
+        background: linear-gradient(135deg, #047857, #34d399);
+        border-color: rgba(52, 211, 153, 0.4);
+      }
+      .nd.wr {
+        background: linear-gradient(135deg, #991b1b, #ef4444);
+        border-color: rgba(239, 68, 68, 0.4);
+      }
+      .nd.if {
+        background: linear-gradient(135deg, #1e3a5f, #06b6d4);
+        border-color: rgba(6, 182, 212, 0.3);
+      }
+      .nd.pr {
+        background: linear-gradient(135deg, #5b21b6, #8b5cf6);
+        border-color: rgba(139, 92, 246, 0.4);
+      }
+
+      .nd .tp {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #111827;
+        border: 1px solid var(--bg3);
+        border-radius: 8px;
+        padding: 8px 12px;
+        min-width: 180px;
+        max-width: 260px;
+        z-index: 200;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        font-weight: 400;
+        font-size: 0.7rem;
+        color: var(--t2);
+        text-align: left;
+        line-height: 1.5;
+        white-space: normal;
+      }
+      .nd .tp::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: #111827;
+      }
+      .nd:hover .tp {
+        display: block;
+      }
+
+      .bl {
+        position: absolute;
+        top: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.58rem;
+        font-weight: 700;
+        color: var(--yellow);
+        white-space: nowrap;
+        z-index: 3;
+        background: var(--bg);
+        padding: 0 4px;
+        border-radius: 3px;
+      }
+
+      .tree li.coll > ul {
+        display: none;
+      }
+      .tree li.coll > .nd::after {
+        content: '▾ ...';
+        position: absolute;
+        bottom: -7px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.55rem;
+        color: var(--yellow);
+        background: var(--bg);
+        padding: 0 6px;
+        border-radius: 6px;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        white-space: nowrap;
+      }
+
+      /* Table */
+      .mt {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 660px;
+        margin: 14px auto;
+        font-size: 0.8rem;
+      }
+      .mt th,
+      .mt td {
+        padding: 8px 12px;
+        border: 1px solid var(--bg3);
+        text-align: center;
+      }
+      .mt th {
+        background: linear-gradient(135deg, #1e3a5f, #1e293b);
+        color: var(--cyan);
+        font-weight: 700;
+        font-size: 0.73rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .mt td {
+        background: var(--bg2);
+        color: var(--t1);
+      }
+      .mt tr:hover td {
+        background: rgba(59, 130, 246, 0.08);
+      }
+
+      .fb {
+        background: var(--bg2);
+        border: 1px solid var(--blue);
+        border-radius: 10px;
+        padding: 16px;
+        margin: 14px 0;
+        max-width: 660px;
+      }
+      .fb .fm {
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        color: var(--cyan);
+        text-align: center;
+        padding: 8px;
+        background: rgba(6, 182, 212, 0.06);
+        border-radius: 5px;
+        margin: 6px 0;
+      }
+      .fb .ex {
+        color: var(--t2);
+        font-size: 0.8rem;
+        text-align: center;
+        margin-top: 4px;
+      }
+      .fb .ex strong {
+        color: var(--green);
+      }
+
+      @media (max-width: 768px) {
+        .tabs {
+          gap: 3px;
+        }
+        .tab {
+          font-size: 0.7rem;
+          padding: 6px 8px;
+        }
+        .nd {
+          min-width: 70px;
+          max-width: 120px;
+          font-size: 0.62rem;
+          padding: 6px 7px;
+        }
+        .hdr h1 {
+          font-size: 1.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hdr">
+      <h1>🌳 Cây Quyết Định — Fitness Business Logic</h1>
+      <p class="sub">MealPlaning App · React 19 + Vite · Offline-first Mobile · 4 Decision Trees</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab on" onclick="st(0)"><span class="n">1</span>Split Type</button>
+      <button class="tab" onclick="st(1)"><span class="n">2</span>Progressive Overload</button>
+      <button class="tab" onclick="st(2)"><span class="n">3</span>Plateau Detection</button>
+      <button class="tab" onclick="st(3)"><span class="n">4</span>Cardio Calories</button>
+    </nav>
+
+    <!-- ====== TREE 1: SPLIT TYPE ====== -->
+    <div class="pan on" id="p0">
+      <div class="ttl">🏋️ Tree 1: Split Type Selection Algorithm</div>
+      <div class="desc">
+        Thuật toán tự động chọn kiểu chia ngày tập (training split) dựa trên <code>daysPerWeek</code> từ profile người
+        dùng.
+      </div>
+
+      <div class="leg">
+        <div class="leg-t">📋 Chú thích</div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e40af, #3b82f6)"></div>
+          Root
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #92400e, #f59e0b)"></div>
+          Decision
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #065f46, #10b981)"></div>
+          Action
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #047857, #34d399)"></div>
+          Kết quả tốt
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e3a5f, #06b6d4)"></div>
+          Thông tin
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #991b1b, #ef4444)"></div>
+          Cảnh báo
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <button class="btn" onclick="zm('z1', -1)">➖ Thu nhỏ</button>
+        <button class="btn" onclick="zm('z1', 0)">🔄 Reset</button>
+        <button class="btn" onclick="zm('z1', 1)">➕ Phóng to</button>
+        <button class="btn" onclick="ta('p0')">🔀 Thu gọn / Mở rộng</button>
+      </div>
+
+      <div class="sw" id="sw1">
+        <div class="zi" id="z1" data-z="1">
+          <ul class="tree">
+            <li>
+              <div class="nd rt" onclick="tg(this)">
+                🏋️ Bao nhiêu ngày tập/tuần?
+                <div class="tp">
+                  <b>Input:</b> daysPerWeek từ profile<br /><b>Logic:</b> Kiểm tra số ngày tập để chọn training split
+                  tối ưu
+                </div>
+              </div>
+              <ul>
+                <li>
+                  <span class="bl">2-3 ngày</span>
+                  <div class="nd dc" onclick="tg(this)">
+                    2-3 ngày/tuần
+                    <div class="tp">Người mới hoặc ít thời gian → Tập toàn thân</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="nd ac" onclick="tg(this)">
+                        💪 full_body<br /><small>Toàn thân</small>
+                        <div class="tp">
+                          <b>Split:</b> Full Body<br />Mỗi buổi tất cả nhóm cơ chính. Compound movements.
+                        </div>
+                      </div>
+                      <ul>
+                        <li><div class="nd gd">Squat</div></li>
+                        <li><div class="nd gd">Deadlift</div></li>
+                        <li><div class="nd gd">Bench Press</div></li>
+                        <li><div class="nd gd">Rows</div></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="bl">4 ngày</span>
+                  <div class="nd dc" onclick="tg(this)">
+                    4 ngày/tuần
+                    <div class="tp">Trung bình → Upper/Lower body</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="nd ac" onclick="tg(this)">
+                        🔄 upper_lower<br /><small>Trên / Dưới</small>
+                        <div class="tp"><b>Split:</b> Upper/Lower<br />Day 1,3: Upper<br />Day 2,4: Lower</div>
+                      </div>
+                      <ul>
+                        <li>
+                          <div class="nd if">
+                            Day 1,3: Upper<br /><small>Chest, Back,<br />Shoulders, Arms</small>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="nd if">
+                            Day 2,4: Lower<br /><small>Quads, Hams,<br />Glutes, Calves</small>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="bl">5 ngày</span>
+                  <div class="nd dc" onclick="tg(this)">
+                    5 ngày/tuần
+                    <div class="tp">Nâng cao → Push/Pull/Legs</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="nd ac" onclick="tg(this)">
+                        🎯 ppl<br /><small>Push/Pull/Legs</small>
+                        <div class="tp"><b>Split:</b> PPL<br />Day 1,4: Push<br />Day 2,5: Pull<br />Day 3: Legs</div>
+                      </div>
+                      <ul>
+                        <li>
+                          <div class="nd if">
+                            Day 1,4: Push<br /><small>Chest, Shoulders,<br />Triceps</small>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="nd if">
+                            Day 2,5: Pull<br /><small>Back, Biceps,<br />Rear Delts</small>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="nd if">
+                            Day 3: Legs<br /><small>Quads, Hams,<br />Glutes, Calves</small>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="bl">6 ngày</span>
+                  <div class="nd dc" onclick="tg(this)">
+                    6 ngày/tuần
+                    <div class="tp">Chuyên nghiệp → PPL×2</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="nd ac" onclick="tg(this)">
+                        🔥 ppl×2<br /><small>PPL Repeated</small>
+                        <div class="tp"><b>Split:</b> PPL×2<br />Mỗi pattern 2 lần/tuần. Volume cao.</div>
+                      </div>
+                      <ul>
+                        <li>
+                          <div class="nd gd">Mỗi session ×2/tuần<br /><small>Higher frequency</small></div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TREE 2: PROGRESSIVE OVERLOAD ====== -->
+    <div class="pan" id="p1">
+      <div class="ttl">📈 Tree 2: Progressive Overload Suggestion</div>
+      <div class="desc">
+        Thuật toán đề xuất tăng tải trọng dựa trên lịch sử 3 buổi tập, chỉ số RPE và mệt mỏi tích lũy.
+      </div>
+
+      <div class="leg">
+        <div class="leg-t">📋 Chú thích</div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e40af, #3b82f6)"></div>
+          Root
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #92400e, #f59e0b)"></div>
+          Decision
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #047857, #34d399)"></div>
+          Tăng tải
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #065f46, #10b981)"></div>
+          Action
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #5b21b6, #8b5cf6)"></div>
+          Duy trì
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #991b1b, #ef4444)"></div>
+          Deload/Warning
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <button class="btn" onclick="zm('z2', -1)">➖</button>
+        <button class="btn" onclick="zm('z2', 0)">🔄</button>
+        <button class="btn" onclick="zm('z2', 1)">➕</button>
+        <button class="btn" onclick="ta('p1')">🔀 Thu gọn / Mở rộng</button>
+      </div>
+
+      <div class="sw" id="sw2">
+        <div class="zi" id="z2" data-z="1">
+          <ul class="tree">
+            <li>
+              <div class="nd rt" onclick="tg(this)">📊 Kiểm tra lịch sử tập<br /><small>Last 3 workouts</small></div>
+              <ul>
+                <li>
+                  <span class="bl">❌ Không có</span>
+                  <div class="nd dc" onclick="tg(this)">
+                    Has history?<br />NO
+                    <div class="tp">Chưa có dữ liệu → Dùng mặc định từ exerciseDatabase</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="nd gd">🟢 Beginner<br /><small>Bodyweight/light</small></div>
+                    </li>
+                    <li>
+                      <div class="nd if">🔵 Inter/Adv<br /><small>1RM × %</small></div>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="bl">✅ Có</span>
+                  <div class="nd dc" onclick="tg(this)">
+                    Has history?<br />YES
+                    <div class="tp">Phân tích hiệu suất 3 buổi gần nhất</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="nd dc" onclick="tg(this)">
+                        📋 RPE Pattern
+                        <div class="tp"><b>RPE:</b> Rate of Perceived Exertion (1-10)</div>
+                      </div>
+                      <ul>
+                        <li>
+                          <span class="bl">RPE ≤ 7</span>
+                          <div class="nd gd" onclick="tg(this)">😊 Easy<br /><small>↑ Weight</small></div>
+                          <ul>
+                            <li>
+                              <div class="nd gd">Beginner<br /><small>+2.5 kg</small></div>
+                            </li>
+                            <li>
+                              <div class="nd gd">
+                                Inter<br /><small>+5kg up<br />+2.5kg iso</small>
+                              </div>
+                            </li>
+                            <li>
+                              <div class="nd gd">Advanced<br /><small>+1-2.5kg</small></div>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <span class="bl">RPE 8-9</span>
+                          <div class="nd ac" onclick="tg(this)">💪 Moderate<br /><small>↑ Reps</small></div>
+                          <ul>
+                            <li>
+                              <div class="nd gd">reps &lt; max<br /><small>+1-2 reps</small></div>
+                            </li>
+                            <li>
+                              <div class="nd ac">
+                                reps ≥ max<br /><small>↑ wt, reset</small>
+                                <div class="tp">Đạt max reps → Tăng tải, reset về repsMin</div>
+                              </div>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <span class="bl">RPE ≥ 10</span>
+                          <div class="nd wr" onclick="tg(this)">
+                            🔴 Max Effort
+                            <div class="tp">Check fatigue level</div>
+                          </div>
+                          <ul>
+                            <li>
+                              <div class="nd pr">1 session<br /><small>Maintain</small></div>
+                            </li>
+                            <li>
+                              <div class="nd wr">2+ sessions<br /><small>⚠️ Deload</small></div>
+                            </li>
+                            <li>
+                              <div class="nd wr">Perf ↓<br /><small>🚨 Overtrain</small></div>
+                            </li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <div class="nd dc" onclick="tg(this)">
+                        🔋 Fatigue
+                        <div class="tp">Mệt mỏi tích lũy qua các tuần</div>
+                      </div>
+                      <ul>
+                        <li>
+                          <div class="nd gd">Low<br /><small>✅ Normal</small></div>
+                        </li>
+                        <li>
+                          <div class="nd ac">Moderate<br /><small>📉 -10% vol</small></div>
+                        </li>
+                        <li>
+                          <div class="nd wr">
+                            High<br /><small>🛑 Deload<br />-40-50%</small>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TREE 3: PLATEAU ====== -->
+    <div class="pan" id="p2">
+      <div class="ttl">🔍 Tree 3: Plateau Detection &amp; Response</div>
+      <div class="desc">Phát hiện và xử lý bế tắc: sức mạnh (strength), volume, và cân nặng (body weight).</div>
+
+      <div class="leg">
+        <div class="leg-t">📋 Chú thích</div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e40af, #3b82f6)"></div>
+          Root
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #92400e, #f59e0b)"></div>
+          Decision
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #065f46, #10b981)"></div>
+          Giải pháp
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #047857, #34d399)"></div>
+          OK
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #991b1b, #ef4444)"></div>
+          Plateau!
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e3a5f, #06b6d4)"></div>
+          Info
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <button class="btn" onclick="zm('z3', -1)">➖</button>
+        <button class="btn" onclick="zm('z3', 0)">🔄</button>
+        <button class="btn" onclick="zm('z3', 1)">➕</button>
+        <button class="btn" onclick="ta('p2')">🔀 Thu gọn / Mở rộng</button>
+      </div>
+
+      <div class="sw" id="sw3">
+        <div class="zi" id="z3" data-z="1">
+          <ul class="tree">
+            <li>
+              <div class="nd rt" onclick="tg(this)">🔍 Phân tích xu hướng<br /><small>Performance trends</small></div>
+              <ul>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">1RM unchanged<br />3+ sessions?</div>
+                  <ul>
+                    <li>
+                      <span class="bl">YES ⚠️</span>
+                      <div class="nd wr" onclick="tg(this)">⚠️ Strength<br />Plateau!</div>
+                      <ul>
+                        <li>
+                          <div class="nd ac">
+                            🔄 Exercise<br />Variation
+                            <div class="tp"><b>SwapExerciseSheet</b><br />Bài tập thay thế cùng nhóm cơ</div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="nd ac">
+                            🔢 Rep Range<br />Change
+                            <div class="tp">Hypertrophy(8-12) ↔ Strength(3-5) ↔ Endurance(15-20)</div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="nd ac">
+                            😌 Deload<br />Week
+                            <div class="tp">-40-50% volume, 1 tuần</div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="nd ac">
+                            🔀 Split<br />Change
+                            <div class="tp">Thử split khác</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <span class="bl">NO ✅</span>
+                      <div class="nd dc" onclick="tg(this)">Check Volume<br />&amp; Weight</div>
+                      <ul>
+                        <li>
+                          <div class="nd dc" onclick="tg(this)">Vol unchanged<br />3+ weeks?</div>
+                          <ul>
+                            <li>
+                              <span class="bl">YES</span>
+                              <div class="nd wr" onclick="tg(this)">⚠️ Volume<br />Plateau</div>
+                              <ul>
+                                <li><div class="nd ac">↑ Sets</div></li>
+                                <li><div class="nd ac">Add session</div></li>
+                                <li><div class="nd ac">New template</div></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <span class="bl">NO</span>
+                              <div class="nd gd">✅ No Plateau<br /><small>Continue!</small></div>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <div class="nd dc" onclick="tg(this)">Body weight<br />unchanged 2+wk?</div>
+                          <ul>
+                            <li>
+                              <span class="bl">Gain</span>
+                              <div class="nd if">↑ Calories<br /><small>NutritionBridge</small></div>
+                            </li>
+                            <li>
+                              <span class="bl">Lose</span>
+                              <div class="nd if">↑ Cardio<br />↓ Calories</div>
+                            </li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TREE 4: CARDIO ====== -->
+    <div class="pan" id="p3">
+      <div class="ttl">🏃 Tree 4: Cardio Calorie Estimation</div>
+      <div class="desc">Tính calo tiêu thụ dựa trên loại cardio, cường độ, cân nặng và thời gian. Hệ số MET.</div>
+
+      <div class="leg">
+        <div class="leg-t">📋 Chú thích</div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e40af, #3b82f6)"></div>
+          Root
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #92400e, #f59e0b)"></div>
+          Cardio type
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #1e3a5f, #06b6d4)"></div>
+          MET value
+        </div>
+        <div class="leg-i">
+          <div class="leg-s" style="background: linear-gradient(135deg, #065f46, #10b981)"></div>
+          Intensity
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <button class="btn" onclick="zm('z4', -1)">➖</button>
+        <button class="btn" onclick="zm('z4', 0)">🔄</button>
+        <button class="btn" onclick="zm('z4', 1)">➕</button>
+        <button class="btn" onclick="ta('p3')">🔀 Thu gọn / Mở rộng</button>
+      </div>
+
+      <div class="sw" id="sw4">
+        <div class="zi" id="z4" data-z="1">
+          <ul class="tree">
+            <li>
+              <div class="nd rt" onclick="tg(this)">🏃 Loại cardio nào?</div>
+              <ul>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">🏃 Running</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 8.0</div></li>
+                    <li><div class="nd if">Vig: 11.0</div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">🚴 Cycling</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 6.8</div></li>
+                    <li><div class="nd if">Vig: 10.0</div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">🏊 Swimming</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 6.0</div></li>
+                    <li><div class="nd if">Vig: 9.8</div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">⚡ HIIT</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 8.0</div></li>
+                    <li><div class="nd if">Vig: 12.0</div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">🚶 Walking</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 3.5</div></li>
+                    <li><div class="nd if">Brisk: 5.0</div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">🏋️ Elliptical</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 5.0</div></li>
+                    <li><div class="nd if">Vig: 8.0</div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="nd dc" onclick="tg(this)">🚣 Rowing</div>
+                  <ul>
+                    <li><div class="nd if">Mod: 7.0</div></li>
+                    <li><div class="nd if">Vig: 12.0</div></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px">
+        <div class="ttl">⚡ Intensity Factor</div>
+        <div class="sw">
+          <div class="zi" id="z4b" data-z="1">
+            <ul class="tree">
+              <li>
+                <div class="nd rt">⚡ Intensity</div>
+                <ul>
+                  <li>
+                    <span class="bl">Low</span>
+                    <div class="nd ac">Low<br /><small>MET × 0.8</small></div>
+                  </li>
+                  <li>
+                    <span class="bl">Moderate</span>
+                    <div class="nd gd">Moderate<br /><small>MET × 1.0</small></div>
+                  </li>
+                  <li>
+                    <span class="bl">High</span>
+                    <div class="nd wr">High<br /><small>MET × 1.2</small></div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="color: var(--cyan); margin: 18px 0 8px; font-size: 0.9rem">📊 Bảng tra cứu MET</h3>
+        <table class="mt">
+          <thead>
+            <tr>
+              <th>Cardio</th>
+              <th>Moderate</th>
+              <th>Vigorous</th>
+              <th>70kg, 30min</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🏃 Running</td>
+              <td>8.0</td>
+              <td>11.0</td>
+              <td style="color: #10b981; font-weight: 700">280 kcal</td>
+            </tr>
+            <tr>
+              <td>🚴 Cycling</td>
+              <td>6.8</td>
+              <td>10.0</td>
+              <td style="color: #10b981; font-weight: 700">238 kcal</td>
+            </tr>
+            <tr>
+              <td>🏊 Swimming</td>
+              <td>6.0</td>
+              <td>9.8</td>
+              <td style="color: #10b981; font-weight: 700">210 kcal</td>
+            </tr>
+            <tr>
+              <td>⚡ HIIT</td>
+              <td>8.0</td>
+              <td>12.0</td>
+              <td style="color: #10b981; font-weight: 700">280 kcal</td>
+            </tr>
+            <tr>
+              <td>🚶 Walking</td>
+              <td>3.5</td>
+              <td>5.0</td>
+              <td style="color: #10b981; font-weight: 700">123 kcal</td>
+            </tr>
+            <tr>
+              <td>��️ Elliptical</td>
+              <td>5.0</td>
+              <td>8.0</td>
+              <td style="color: #10b981; font-weight: 700">175 kcal</td>
+            </tr>
+            <tr>
+              <td>🚣 Rowing</td>
+              <td>7.0</td>
+              <td>12.0</td>
+              <td style="color: #10b981; font-weight: 700">245 kcal</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="fb">
+          <h3 style="color: var(--cyan); font-size: 0.88rem; margin-bottom: 5px">📐 Công thức</h3>
+          <div class="fm">Calories = (MET × weight_kg × duration_min) / 60</div>
+          <div class="ex">
+            <strong>VD:</strong> Running mod, 70kg, 30min = (8.0 × 70 × 30) / 60 = <strong>280 kcal</strong>
+          </div>
+        </div>
+
+        <div class="fb" style="border-color: var(--green)">
+          <h3 style="color: var(--green); font-size: 0.88rem; margin-bottom: 8px">🧮 Tính nhanh Calories</h3>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end">
+            <label style="flex: 1; min-width: 100px">
+              <span style="font-size: 0.72rem; color: var(--t2); display: block; margin-bottom: 2px">Loại cardio</span>
+              <select
+                id="cT"
+                onchange="cc()"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  background: var(--bg);
+                  color: var(--t1);
+                  border: 1px solid var(--bg3);
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                "
+              >
+                <option value="8.0">🏃 Running (8.0)</option>
+                <option value="6.8">🚴 Cycling (6.8)</option>
+                <option value="6.0">🏊 Swimming (6.0)</option>
+                <option value="8.0">⚡ HIIT (8.0)</option>
+                <option value="3.5">🚶 Walking (3.5)</option>
+                <option value="5.0">🏋️ Elliptical (5.0)</option>
+                <option value="7.0">🚣 Rowing (7.0)</option>
+              </select>
+            </label>
+            <label style="flex: 1; min-width: 80px">
+              <span style="font-size: 0.72rem; color: var(--t2); display: block; margin-bottom: 2px">Cường độ</span>
+              <select
+                id="cI"
+                onchange="cc()"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  background: var(--bg);
+                  color: var(--t1);
+                  border: 1px solid var(--bg3);
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                "
+              >
+                <option value="0.8">Low (×0.8)</option>
+                <option value="1.0" selected>Moderate</option>
+                <option value="1.2">High (×1.2)</option>
+              </select>
+            </label>
+            <label style="flex: 1; min-width: 65px">
+              <span style="font-size: 0.72rem; color: var(--t2); display: block; margin-bottom: 2px">Kg</span>
+              <input
+                id="cW"
+                type="number"
+                value="70"
+                min="30"
+                max="200"
+                oninput="cc()"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  background: var(--bg);
+                  color: var(--t1);
+                  border: 1px solid var(--bg3);
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                "
+              />
+            </label>
+            <label style="flex: 1; min-width: 65px">
+              <span style="font-size: 0.72rem; color: var(--t2); display: block; margin-bottom: 2px">Phút</span>
+              <input
+                id="cD"
+                type="number"
+                value="30"
+                min="1"
+                max="300"
+                oninput="cc()"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  background: var(--bg);
+                  color: var(--t1);
+                  border: 1px solid var(--bg3);
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                "
+              />
+            </label>
+          </div>
+          <div
+            id="cR"
+            style="margin-top: 12px; text-align: center; font-size: 1.4rem; font-weight: 800; color: var(--green)"
+          >
+            280 kcal
+          </div>
+          <div id="cF" style="text-align: center; font-size: 0.72rem; color: var(--t3); margin-top: 2px">
+            (8.0 × 1.0 × 70 × 30) / 60 = 280
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function st(i) {
+        document.querySelectorAll('.tab').forEach(function (b, j) {
+          b.classList.toggle('on', j === i);
+        });
+        document.querySelectorAll('.pan').forEach(function (p, j) {
+          p.classList.toggle('on', j === i);
+        });
+        setTimeout(centerScrolls, 100);
+      }
+      function tg(el) {
+        var li = el.closest('li');
+        if (li && li.querySelector('ul')) li.classList.toggle('coll');
+      }
+      function ta(pid) {
+        var p = document.getElementById(pid);
+        if (!p) return;
+        var items = p.querySelectorAll('.tree li');
+        var open = false;
+        items.forEach(function (li) {
+          if (li.querySelector('ul') && !li.classList.contains('coll')) open = true;
+        });
+        items.forEach(function (li) {
+          if (li.querySelector('ul')) {
+            open ? li.classList.add('coll') : li.classList.remove('coll');
+          }
+        });
+      }
+      function zm(id, d) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var z = parseFloat(el.dataset.z) || 1;
+        if (d === 0) z = 1;
+        else if (d > 0) z = Math.min(z + 0.1, 2);
+        else z = Math.max(z - 0.1, 0.3);
+        el.dataset.z = z;
+        el.style.transform = 'scale(' + z + ')';
+        setTimeout(function () {
+          centerScroll(el.closest('.sw'));
+        }, 50);
+      }
+      function cc() {
+        var m = parseFloat(document.getElementById('cT').value);
+        var i = parseFloat(document.getElementById('cI').value);
+        var w = parseFloat(document.getElementById('cW').value) || 70;
+        var d = parseFloat(document.getElementById('cD').value) || 30;
+        var c = (m * i * w * d) / 60;
+        document.getElementById('cR').textContent = Math.round(c) + ' kcal';
+        document.getElementById('cF').textContent =
+          '(' + m + ' × ' + i + ' × ' + w + ' × ' + d + ') / 60 = ' + Math.round(c);
+      }
+      function centerScroll(sw) {
+        if (!sw) return;
+        var inner = sw.querySelector('.zi');
+        if (inner && inner.scrollWidth > sw.clientWidth) {
+          sw.scrollLeft = (inner.scrollWidth - sw.clientWidth) / 2;
+        }
+      }
+      function centerScrolls() {
+        document.querySelectorAll('.sw').forEach(centerScroll);
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        cc();
+        setTimeout(centerScrolls, 200);
+      });
+    </script>
+  </body>
+</html>

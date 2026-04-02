@@ -71,7 +71,7 @@ export const ListToolbar = ({
             aria-label={t('listToolbar.sortBy')}
             value={sortBy}
             onChange={e => onSortChange(e.target.value)}
-            className="bg-card focus:border-primary min-h-11 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm outline-none sm:w-44 sm:flex-none dark:border-slate-700 dark:text-slate-200"
+            className="bg-card focus:border-primary border-border min-h-11 flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm outline-none sm:w-44 sm:flex-none dark:text-slate-200"
             {...(sortTestId ? { 'data-testid': sortTestId } : {})}
           >
             {sortOptions.map(opt => (
@@ -81,7 +81,7 @@ export const ListToolbar = ({
             ))}
           </select>
           {/* Layout Switcher */}
-          <div className="flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="border-border flex overflow-hidden rounded-xl border">
             <button
               onClick={() => onLayoutChange('grid')}
               className={`flex min-h-11 min-w-11 items-center justify-center p-2.5 transition-all ${viewLayout === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-card text-slate-400 hover:bg-slate-50 dark:text-slate-500 dark:hover:bg-slate-700'}`}

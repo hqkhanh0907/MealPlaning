@@ -186,9 +186,7 @@ describe('ProteinProgress', () => {
   it('uses tabular-nums for number display', () => {
     render(<ProteinProgress current={142} target={166} />);
 
-    expect(screen.getByTestId('protein-display')).toHaveStyle({
-      fontVariantNumeric: 'tabular-nums',
-    });
+    expect(screen.getByTestId('protein-display').className).toContain('tabular-nums');
   });
 
   // --- Protein label ---

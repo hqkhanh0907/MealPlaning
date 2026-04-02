@@ -42,8 +42,8 @@ const getDayButtonClass = (
   }
   if (isToday) {
     return variant === 'week'
-      ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700'
-      : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50';
+      ? 'bg-primary-subtle text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700'
+      : 'bg-primary-subtle text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50';
   }
   if (isSunday) {
     return variant === 'week'
@@ -52,7 +52,7 @@ const getDayButtonClass = (
   }
   return variant === 'week'
     ? 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 active:bg-slate-200'
-    : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent hover:border-slate-200 dark:hover:border-slate-600';
+    : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent hover:border-border dark:hover:border-slate-600';
 };
 
 // Helper to get week day label color class
@@ -215,7 +215,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   const emptyCellKeys = Array.from({ length: firstDay }, (_, i) => `empty-start-${year}-${month}-${i}`);
 
   return (
-    <div className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-6 dark:border-slate-700">
+    <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
           <CalendarIcon className="text-primary h-5 w-5" />
@@ -233,7 +233,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
           <button
             onClick={goToToday}
             data-testid="btn-today"
-            className="mr-1 flex min-h-11 items-center rounded-xl bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-600 transition-all hover:bg-emerald-100 active:bg-emerald-200 sm:mr-2 sm:min-h-9 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+            className="bg-primary-subtle mr-1 flex min-h-11 items-center rounded-xl px-3 py-1.5 text-sm font-bold text-emerald-600 transition-all hover:bg-emerald-100 active:bg-emerald-200 sm:mr-2 sm:min-h-9 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
           >
             {t('calendar.today')}
           </button>

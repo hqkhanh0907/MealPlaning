@@ -18,8 +18,8 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
     <ModalBackdrop onClose={onAccept}>
       <div className="bg-card rounded-2xl p-6" data-testid="deload-modal">
         <h3 className="text-lg font-bold text-amber-600">🔄 {t('fitness.deload.title')}</h3>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('fitness.deload.explanation')}</p>
-        <p className="mt-1 text-xs text-slate-400">{reason}</p>
+        <p className="text-foreground-secondary mt-2 text-sm">{t('fitness.deload.explanation')}</p>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{reason}</p>
         <div className="mt-4 flex gap-3">
           <button
             type="button"
@@ -32,7 +32,7 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
           <button
             type="button"
             onClick={onOverride}
-            className="flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-slate-300 py-2.5 font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="text-foreground-secondary flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-slate-300 py-2.5 font-medium transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:border-slate-600 dark:hover:bg-slate-700"
             data-testid="deload-override"
           >
             {t('fitness.deload.override')}
