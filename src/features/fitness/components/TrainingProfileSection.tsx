@@ -13,7 +13,10 @@ import {
   Timer,
   TrendingUp,
 } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { getActiveSteps } from '@/components/onboarding/trainingStepConfig';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EQUIPMENT_DISPLAY } from '../constants';
@@ -35,6 +38,11 @@ const FIELD_ICON: Record<string, LucideIcon> = {
 export function TrainingProfileSection() {
   const { t } = useTranslation();
   const trainingProfile = useFitnessStore(s => s.trainingProfile);
+
+  const visibleStepIds = useMemo(
+    () => new Set(getActiveSteps(trainingProfile?.trainingExperience ?? 'beginner').map(s => s.id)),
+    [trainingProfile?.trainingExperience],
+  );
 
   if (!trainingProfile) {
     return (
@@ -88,17 +96,25 @@ export function TrainingProfileSection() {
       label: t('fitness.onboarding.cardioSessions'),
       value: `${trainingProfile.cardioSessionsWeek} ${t('fitness.onboarding.sessionsUnit')}`,
     },
-    {
-      key: 'periodizationModel',
-      label: t('fitness.onboarding.periodization'),
-      value: t(`fitness.onboarding.period_${trainingProfile.periodizationModel}`),
-    },
-    {
-      key: 'planCycleWeeks',
-      label: t('fitness.onboarding.cycleWeeks'),
-      value: `${trainingProfile.planCycleWeeks} ${t('fitness.onboarding.weeksUnit')}`,
-    },
-    ...(trainingProfile.priorityMuscles.length > 0
+    ...(visibleStepIds.has('periodization')
+      ? [
+          {
+            key: 'periodizationModel',
+            label: t('fitness.onboarding.periodization'),
+            value: t(`fitness.onboarding.period_${trainingProfile.periodizationModel}`),
+          },
+        ]
+      : []),
+    ...(visibleStepIds.has('cycleWeeks')
+      ? [
+          {
+            key: 'planCycleWeeks',
+            label: t('fitness.onboarding.cycleWeeks'),
+            value: `${trainingProfile.planCycleWeeks} ${t('fitness.onboarding.weeksUnit')}`,
+          },
+        ]
+      : []),
+    ...(visibleStepIds.has('priorityMuscles') && trainingProfile.priorityMuscles.length > 0
       ? [
           {
             key: 'priorityMuscles',
@@ -107,7 +123,7 @@ export function TrainingProfileSection() {
           },
         ]
       : []),
-    ...(trainingProfile.avgSleepHours
+    ...(visibleStepIds.has('sleepHours') && trainingProfile.avgSleepHours
       ? [
           {
             key: 'avgSleepHours',

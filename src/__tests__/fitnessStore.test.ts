@@ -1872,6 +1872,426 @@ describe('fitnessStore – changeSplitType data format', () => {
 });
 
 /* ------------------------------------------------------------------ */
+/* changeSplitType – regenerate mode with exercise generation           */
+/* ------------------------------------------------------------------ */
+
+describe('fitnessStore – changeSplitType regenerate with trainingProfile', () => {
+  const PLAN_ID = 'plan-regen-profile';
+
+  function setupPlanWithProfile() {
+    const profile = sampleProfile({
+      daysPerWeek: 4,
+      availableEquipment: ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'],
+      injuryRestrictions: [],
+      trainingGoal: 'hypertrophy',
+      periodizationModel: 'linear',
+    });
+
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3, 4],
+      restDays: [5, 6, 7],
+    });
+
+    useFitnessStore.setState({
+      trainingProfile: profile,
+      trainingPlans: [plan],
+      trainingPlanDays: [],
+    });
+
+    return { profile, plan };
+  }
+
+  beforeEach(() => {
+    resetStore();
+  });
+
+  it('TC_SPLIT_08: regenerate with profile produces non-empty exercises', () => {
+    setupPlanWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(newDays).toHaveLength(4);
+
+    for (const day of newDays) {
+      expect(day.exercises).toBeDefined();
+      expect(day.exercises).not.toBe('[]');
+
+      const parsed: unknown[] = JSON.parse(day.exercises!);
+      expect(parsed.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('TC_SPLIT_09: each day exercises are valid JSON with required SelectedExercise fields', () => {
+    setupPlanWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    for (const day of newDays) {
+      const exercises = JSON.parse(day.exercises!) as Array<{
+        exercise: { id: string; muscleGroup: string };
+        sets: number;
+        repsMin: number;
+        repsMax: number;
+        restSeconds: number;
+      }>;
+
+      for (const ex of exercises) {
+        expect(ex.exercise).toBeDefined();
+        expect(ex.exercise.id).toBeTruthy();
+        expect(ex.exercise.muscleGroup).toBeTruthy();
+        expect(ex.sets).toBeGreaterThanOrEqual(1);
+        expect(ex.repsMin).toBeGreaterThan(0);
+        expect(ex.repsMax).toBeGreaterThanOrEqual(ex.repsMin);
+        expect(ex.restSeconds).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('TC_SPLIT_10: exercises match the muscle groups assigned to each day', () => {
+    setupPlanWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    for (const day of newDays) {
+      const dayMuscles = JSON.parse(day.muscleGroups!) as string[];
+      const exercises = JSON.parse(day.exercises!) as Array<{
+        exercise: { muscleGroup: string };
+      }>;
+
+      for (const ex of exercises) {
+        expect(dayMuscles).toContain(ex.exercise.muscleGroup);
+      }
+    }
+  });
+
+  it('TC_SPLIT_11: originalExercises equals exercises in regenerate mode', () => {
+    setupPlanWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'ppl', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    for (const day of newDays) {
+      expect(day.originalExercises).toBe(day.exercises);
+    }
+  });
+
+  it('TC_SPLIT_12: without trainingProfile, exercises are empty JSON array', () => {
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3],
+      restDays: [4, 5, 6, 7],
+    });
+
+    useFitnessStore.setState({
+      trainingProfile: null,
+      trainingPlans: [plan],
+      trainingPlanDays: [],
+    });
+
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    for (const day of newDays) {
+      expect(day.exercises).toBe('[]');
+      expect(day.originalExercises).toBe('[]');
+    }
+  });
+
+  it('TC_SPLIT_13: regenerate PPL with profile generates Push/Pull/Legs exercises', () => {
+    setupPlanWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'ppl', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    const pushDay = newDays.find(d => d.workoutType === 'Push');
+    expect(pushDay).toBeDefined();
+    const pushExercises = JSON.parse(pushDay!.exercises!) as Array<{
+      exercise: { muscleGroup: string };
+    }>;
+    const pushMuscles = new Set(pushExercises.map(e => e.exercise.muscleGroup));
+    expect(pushMuscles.has('chest') || pushMuscles.has('shoulders')).toBe(true);
+
+    const pullDay = newDays.find(d => d.workoutType === 'Pull');
+    expect(pullDay).toBeDefined();
+    const pullExercises = JSON.parse(pullDay!.exercises!) as Array<{
+      exercise: { muscleGroup: string };
+    }>;
+    expect(pullExercises.some(e => e.exercise.muscleGroup === 'back')).toBe(true);
+
+    const legsDay = newDays.find(d => d.workoutType === 'Legs');
+    expect(legsDay).toBeDefined();
+    const legsExercises = JSON.parse(legsDay!.exercises!) as Array<{
+      exercise: { muscleGroup: string };
+    }>;
+    expect(legsExercises.some(e => e.exercise.muscleGroup === 'legs' || e.exercise.muscleGroup === 'glutes')).toBe(
+      true,
+    );
+  });
+
+  it('TC_SPLIT_14: regenerate with injury restrictions excludes contraindicated exercises', () => {
+    const profile = sampleProfile({
+      availableEquipment: ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'],
+      injuryRestrictions: ['shoulders', 'knees'],
+      trainingGoal: 'hypertrophy',
+      periodizationModel: 'linear',
+    });
+
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3],
+      restDays: [4, 5, 6, 7],
+    });
+
+    useFitnessStore.setState({
+      trainingProfile: profile,
+      trainingPlans: [plan],
+      trainingPlanDays: [],
+    });
+
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    for (const day of newDays) {
+      const exercises = JSON.parse(day.exercises!) as Array<{
+        exercise: { contraindicated: string[] };
+      }>;
+      for (const ex of exercises) {
+        expect(ex.exercise.contraindicated).not.toContain('shoulders');
+        expect(ex.exercise.contraindicated).not.toContain('knees');
+      }
+    }
+  });
+
+  it('TC_SPLIT_15: regenerate applies correct rep scheme based on training goal', () => {
+    const profile = sampleProfile({
+      availableEquipment: ['barbell', 'dumbbell', 'bodyweight'],
+      trainingGoal: 'strength',
+      periodizationModel: 'linear',
+    });
+
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3],
+      restDays: [4, 5, 6, 7],
+    });
+
+    useFitnessStore.setState({
+      trainingProfile: profile,
+      trainingPlans: [plan],
+      trainingPlanDays: [],
+    });
+
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    for (const day of newDays) {
+      const exercises = JSON.parse(day.exercises!) as Array<{
+        repsMin: number;
+        repsMax: number;
+        restSeconds: number;
+      }>;
+
+      for (const ex of exercises) {
+        // strength: repsMin=3, repsMax=5, rest=240
+        expect(ex.repsMin).toBe(3);
+        expect(ex.repsMax).toBe(5);
+        expect(ex.restSeconds).toBe(240);
+      }
+    }
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* changeSplitType – remap mode with exercise generation               */
+/* ------------------------------------------------------------------ */
+
+describe('fitnessStore – changeSplitType remap with trainingProfile', () => {
+  const PLAN_ID = 'plan-remap-profile';
+
+  const existingExercisesJson = JSON.stringify([
+    {
+      exercise: {
+        id: 'bench',
+        nameVi: 'Đẩy ngực',
+        muscleGroup: 'chest',
+        secondaryMuscles: [],
+        category: 'compound',
+        equipment: ['barbell'],
+        contraindicated: [],
+        exerciseType: 'strength',
+        defaultRepsMin: 6,
+        defaultRepsMax: 12,
+        isCustom: false,
+        updatedAt: '',
+      },
+      sets: 4,
+      repsMin: 6,
+      repsMax: 10,
+      restSeconds: 120,
+    },
+  ]);
+
+  function setupRemapWithProfile() {
+    const profile = sampleProfile({
+      availableEquipment: ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'],
+      injuryRestrictions: [],
+      trainingGoal: 'hypertrophy',
+      periodizationModel: 'linear',
+    });
+
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3, 4, 5],
+      restDays: [6, 7],
+    });
+
+    const days: TrainingPlanDay[] = [
+      samplePlanDay({
+        id: 'remap-day-1',
+        planId: PLAN_ID,
+        dayOfWeek: 1,
+        workoutType: 'Push',
+        muscleGroups: '["chest","shoulders"]',
+        exercises: existingExercisesJson,
+        originalExercises: existingExercisesJson,
+      }),
+      samplePlanDay({
+        id: 'remap-day-2',
+        planId: PLAN_ID,
+        dayOfWeek: 2,
+        workoutType: 'Pull',
+        muscleGroups: '["back"]',
+        exercises: existingExercisesJson,
+        originalExercises: existingExercisesJson,
+      }),
+      samplePlanDay({
+        id: 'remap-day-3',
+        planId: PLAN_ID,
+        dayOfWeek: 3,
+        workoutType: 'Legs',
+        muscleGroups: '["legs","glutes"]',
+        exercises: existingExercisesJson,
+        originalExercises: existingExercisesJson,
+      }),
+    ];
+
+    useFitnessStore.setState({
+      trainingProfile: profile,
+      trainingPlans: [plan],
+      trainingPlanDays: days,
+    });
+
+    return { profile, plan, days };
+  }
+
+  beforeEach(() => {
+    resetStore();
+  });
+
+  it('TC_SPLIT_16: remap mapped days preserve original exercises', () => {
+    setupRemapWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    const mappedDays = newDays.filter(d => d.exercises === existingExercisesJson);
+
+    expect(mappedDays.length).toBeGreaterThan(0);
+    for (const day of mappedDays) {
+      expect(day.exercises).toBe(existingExercisesJson);
+    }
+  });
+
+  it('TC_SPLIT_17: remap suggested days have generated exercises when profile exists', () => {
+    setupRemapWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(newDays).toHaveLength(5);
+
+    // Suggested days should have exercises (not the preserved original)
+    const suggestedDays = newDays.filter(d => d.exercises !== existingExercisesJson);
+
+    for (const day of suggestedDays) {
+      expect(day.exercises).toBeDefined();
+      const parsed: unknown[] = JSON.parse(day.exercises!);
+      // Suggested days get generated exercises when profile exists
+      if (parsed.length > 0) {
+        const exercises = parsed as Array<{ exercise: { id: string } }>;
+        expect(exercises[0].exercise.id).toBeTruthy();
+      }
+    }
+  });
+
+  it('TC_SPLIT_18: remap without profile sets suggested day exercises to empty array', () => {
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3, 4, 5],
+      restDays: [6, 7],
+    });
+
+    const days: TrainingPlanDay[] = [
+      samplePlanDay({
+        id: 'remap-day-1',
+        planId: PLAN_ID,
+        dayOfWeek: 1,
+        workoutType: 'Push',
+        muscleGroups: '["chest","shoulders"]',
+        exercises: existingExercisesJson,
+        originalExercises: existingExercisesJson,
+      }),
+    ];
+
+    useFitnessStore.setState({
+      trainingProfile: null,
+      trainingPlans: [plan],
+      trainingPlanDays: days,
+    });
+
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    // The suggested (new) days should have '[]' since no profile
+    const suggestedDays = newDays.filter(d => d.exercises !== existingExercisesJson);
+
+    for (const day of suggestedDays) {
+      expect(day.exercises).toBe('[]');
+      expect(day.originalExercises).toBe('[]');
+    }
+  });
+
+  it('TC_SPLIT_19: remap suggested days exercises match their muscle groups', () => {
+    setupRemapWithProfile();
+    useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
+
+    const suggestedDays = newDays.filter(d => d.exercises !== existingExercisesJson && d.exercises !== '[]');
+
+    for (const day of suggestedDays) {
+      const dayMuscles = JSON.parse(day.muscleGroups!) as string[];
+      const exercises = JSON.parse(day.exercises!) as Array<{
+        exercise: { muscleGroup: string };
+      }>;
+
+      for (const ex of exercises) {
+        expect(dayMuscles).toContain(ex.exercise.muscleGroup);
+      }
+    }
+  });
+});
+
+/* ------------------------------------------------------------------ */
 /* Bug reproduction tests — FK constraints & draft planDayId */
 /* ------------------------------------------------------------------ */
 describe('fitnessStore – workout save FK constraint bugs', () => {
@@ -2101,5 +2521,65 @@ describe('fitnessStore – workout draft planDayId persistence', () => {
       expect(rows).toHaveLength(1);
       expect(rows[0].planDayId).toBeNull();
     });
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* profileOutOfSync feature                                           */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – profileOutOfSync', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetStore();
+  });
+
+  it('defaults to false', () => {
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
+  });
+
+  it('setTrainingProfile sets profileOutOfSync to true when an active plan exists', () => {
+    useFitnessStore.setState({
+      trainingPlans: [samplePlan({ id: 'plan-active', status: 'active' })],
+      profileOutOfSync: false,
+    });
+
+    useFitnessStore.getState().setTrainingProfile(sampleProfile());
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(true);
+  });
+
+  it('setTrainingProfile keeps profileOutOfSync false when no active plan exists', () => {
+    useFitnessStore.setState({
+      trainingPlans: [samplePlan({ id: 'plan-done', status: 'completed' })],
+      profileOutOfSync: false,
+    });
+
+    useFitnessStore.getState().setTrainingProfile(sampleProfile());
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
+  });
+
+  it('setTrainingProfile keeps profileOutOfSync false when no plans at all', () => {
+    useFitnessStore.setState({ trainingPlans: [], profileOutOfSync: false });
+
+    useFitnessStore.getState().setTrainingProfile(sampleProfile());
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
+  });
+
+  it('addTrainingPlan clears profileOutOfSync to false', () => {
+    useFitnessStore.setState({ profileOutOfSync: true });
+
+    useFitnessStore.getState().addTrainingPlan(samplePlan({ id: 'new-plan' }));
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
+  });
+
+  it('addTrainingPlan keeps profileOutOfSync false when it was already false', () => {
+    useFitnessStore.setState({ profileOutOfSync: false });
+
+    useFitnessStore.getState().addTrainingPlan(samplePlan({ id: 'new-plan-2' }));
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
   });
 });

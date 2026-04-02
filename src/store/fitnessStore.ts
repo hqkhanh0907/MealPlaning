@@ -83,6 +83,7 @@ export interface FitnessState {
   planStrategy: 'auto' | 'manual' | null;
   sqliteReady: boolean;
   showPlanCelebration: boolean;
+  profileOutOfSync: boolean;
 
   setPlanStrategy: (strategy: 'auto' | 'manual' | null) => void;
   clearTrainingPlans: () => void;
@@ -144,14 +145,20 @@ export const useFitnessStore = create<FitnessState>()(
       planStrategy: null,
       sqliteReady: false,
       showPlanCelebration: false,
+      profileOutOfSync: false,
 
       setPlanStrategy: strategy => set({ planStrategy: strategy }),
 
       clearTrainingPlans: () => set({ trainingPlans: [], trainingPlanDays: [] }),
 
-      setTrainingProfile: profile => set({ trainingProfile: profile }),
+      setTrainingProfile: profile =>
+        set(state => ({
+          trainingProfile: profile,
+          profileOutOfSync: state.trainingPlans.some(p => p.status === 'active'),
+        })),
 
-      addTrainingPlan: plan => set(state => ({ trainingPlans: [...state.trainingPlans, plan] })),
+      addTrainingPlan: plan =>
+        set(state => ({ trainingPlans: [...state.trainingPlans, plan], profileOutOfSync: false })),
 
       updateTrainingPlan: (id, updates) =>
         set(state => ({

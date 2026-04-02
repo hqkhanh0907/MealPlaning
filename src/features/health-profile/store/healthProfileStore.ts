@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import type { DatabaseService } from '../../../services/databaseService';
+import { useFitnessStore } from '../../../store/fitnessStore';
 import type { Goal, HealthProfile } from '../types';
 
 /* ------------------------------------------------------------------ */
@@ -136,6 +137,12 @@ export const useHealthProfileStore = create<HealthProfileState>(set => ({
     );
 
     set({ profile: saved });
+
+    // Mark training plan out of sync when plan-relevant health data changes
+    const fitnessState = useFitnessStore.getState();
+    if (fitnessState.trainingPlans.some(p => p.status === 'active')) {
+      useFitnessStore.setState({ profileOutOfSync: true });
+    }
   },
 
   loadActiveGoal: async (db: DatabaseService) => {

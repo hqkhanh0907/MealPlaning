@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { Info } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import type { FieldError, Resolver } from 'react-hook-form';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { getActiveSteps } from '@/components/onboarding/trainingStepConfig';
 import { generateUUID } from '@/utils/helpers';
 
 import { ChipSelect } from '../../../components/form/ChipSelect';
@@ -25,6 +27,7 @@ import type {
   TrainingGoal,
   TrainingProfile,
 } from '../types';
+import { getSmartDefaults } from '../utils/getSmartDefaults';
 
 const GOALS: TrainingGoal[] = ['strength', 'hypertrophy', 'endurance', 'general'];
 const EXPERIENCES: TrainingExperience[] = ['beginner', 'intermediate', 'advanced'];
@@ -86,24 +89,41 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
       : trainingProfileDefaults,
   });
 
+  const watchedExperience = useWatch({ control, name: 'trainingExperience' });
+
+  const visibleStepIds = useMemo(
+    () => new Set(getActiveSteps(watchedExperience ?? 'beginner').map(s => s.id)),
+    [watchedExperience],
+  );
+
+  const showPeriodization = visibleStepIds.has('periodization');
+  const showCycleWeeks = visibleStepIds.has('cycleWeeks');
+  const showPriorityMuscles = visibleStepIds.has('priorityMuscles');
+  const showSleepHours = visibleStepIds.has('sleepHours');
+  const hasHiddenFields = !showPeriodization || !showCycleWeeks || !showPriorityMuscles || !showSleepHours;
+
   function onSubmit(data: TrainingProfileFormData): boolean {
-    // Coerce string RadioPills values to numbers for TrainingProfile interface
+    const experience = data.trainingExperience;
+    const activeStepIds = new Set(getActiveSteps(experience).map(s => s.id));
+    const smart = getSmartDefaults(data.trainingGoal, experience, Number(data.daysPerWeek));
+
     const updatedProfile: TrainingProfile = {
       id: trainingProfile?.id ?? generateUUID(),
       trainingGoal: data.trainingGoal,
-      trainingExperience: data.trainingExperience,
+      trainingExperience: experience,
       daysPerWeek: Number(data.daysPerWeek),
       sessionDurationMin: Number(data.sessionDurationMin),
       availableEquipment: data.availableEquipment,
       injuryRestrictions: data.injuryRestrictions,
       cardioSessionsWeek: Number(data.cardioSessionsWeek),
-      periodizationModel: data.periodizationModel,
-      planCycleWeeks: Number(data.planCycleWeeks),
-      priorityMuscles: data.priorityMuscles,
-      avgSleepHours: data.avgSleepHours,
-      // Preserve fields not in this form
-      cardioTypePref: trainingProfile?.cardioTypePref ?? 'mixed',
-      cardioDurationMin: trainingProfile?.cardioDurationMin ?? 20,
+      // Use smart defaults for hidden fields, user values for visible ones
+      periodizationModel: activeStepIds.has('periodization') ? data.periodizationModel : smart.periodizationModel,
+      planCycleWeeks: activeStepIds.has('cycleWeeks') ? Number(data.planCycleWeeks) : smart.planCycleWeeks,
+      priorityMuscles: activeStepIds.has('priorityMuscles') ? data.priorityMuscles : smart.priorityMuscles,
+      avgSleepHours: activeStepIds.has('sleepHours') ? data.avgSleepHours : undefined,
+      // Preserve fields not in this form; fall back to smart defaults
+      cardioTypePref: trainingProfile?.cardioTypePref ?? smart.cardioTypePref,
+      cardioDurationMin: trainingProfile?.cardioDurationMin ?? smart.cardioDurationMin,
       known1rm: trainingProfile?.known1rm,
       updatedAt: new Date().toISOString(),
     };
@@ -200,57 +220,75 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         />
       </FormField>
 
-      <FormField label={t('fitness.onboarding.periodization')} error={errors.periodizationModel}>
-        <RadioPills<TrainingProfileFormData>
-          name="periodizationModel"
-          control={control}
-          options={PERIODIZATION_OPTIONS.map(p => ({
-            value: p,
-            label: t(`fitness.onboarding.period_${p}`),
-          }))}
-          testIdPrefix="periodization"
-        />
-      </FormField>
+      {showPeriodization && (
+        <FormField label={t('fitness.onboarding.periodization')} error={errors.periodizationModel}>
+          <RadioPills<TrainingProfileFormData>
+            name="periodizationModel"
+            control={control}
+            options={PERIODIZATION_OPTIONS.map(p => ({
+              value: p,
+              label: t(`fitness.onboarding.period_${p}`),
+            }))}
+            testIdPrefix="periodization"
+          />
+        </FormField>
+      )}
 
-      <FormField label={t('fitness.onboarding.cycleWeeks')} error={errors.planCycleWeeks}>
-        <RadioPills<TrainingProfileFormData>
-          name="planCycleWeeks"
-          control={control}
-          options={CYCLE_WEEKS_OPTIONS.map(w => ({
-            value: String(w),
-            label: `${w} ${t('fitness.onboarding.weeksUnit')}`,
-          }))}
-          testIdPrefix="cycle-weeks"
-        />
-      </FormField>
+      {showCycleWeeks && (
+        <FormField label={t('fitness.onboarding.cycleWeeks')} error={errors.planCycleWeeks}>
+          <RadioPills<TrainingProfileFormData>
+            name="planCycleWeeks"
+            control={control}
+            options={CYCLE_WEEKS_OPTIONS.map(w => ({
+              value: String(w),
+              label: `${w} ${t('fitness.onboarding.weeksUnit')}`,
+            }))}
+            testIdPrefix="cycle-weeks"
+          />
+        </FormField>
+      )}
 
-      <FormField
-        label={`${t('fitness.onboarding.priorityMuscles')} (${t('fitness.onboarding.maxItems', { count: MAX_PRIORITY_MUSCLES })})`}
-        error={errors.priorityMuscles as FieldError | undefined}
-      >
-        <ChipSelect<TrainingProfileFormData>
-          name="priorityMuscles"
-          control={control}
-          options={MUSCLE_OPTIONS.map(m => ({
-            value: m,
-            label: t(`fitness.onboarding.muscle_${m}`),
-          }))}
-          maxItems={MAX_PRIORITY_MUSCLES}
-          testIdPrefix="priority-muscles"
-        />
-      </FormField>
+      {showPriorityMuscles && (
+        <FormField
+          label={`${t('fitness.onboarding.priorityMuscles')} (${t('fitness.onboarding.maxItems', { count: MAX_PRIORITY_MUSCLES })})`}
+          error={errors.priorityMuscles as FieldError | undefined}
+        >
+          <ChipSelect<TrainingProfileFormData>
+            name="priorityMuscles"
+            control={control}
+            options={MUSCLE_OPTIONS.map(m => ({
+              value: m,
+              label: t(`fitness.onboarding.muscle_${m}`),
+            }))}
+            maxItems={MAX_PRIORITY_MUSCLES}
+            testIdPrefix="priority-muscles"
+          />
+        </FormField>
+      )}
 
-      <FormField label={t('fitness.onboarding.sleepHours')} error={errors.avgSleepHours}>
-        <input
-          type="number"
-          min={3}
-          max={12}
-          step={0.5}
-          className="bg-card focus:border-primary focus:ring-ring border-border w-full rounded-xl border px-4 py-3 text-sm text-slate-800 transition-colors outline-none focus:ring-1 dark:text-slate-200"
-          data-testid="sleep-hours-input"
-          {...register('avgSleepHours', { valueAsNumber: true })}
-        />
-      </FormField>
+      {showSleepHours && (
+        <FormField label={t('fitness.onboarding.sleepHours')} error={errors.avgSleepHours}>
+          <input
+            type="number"
+            min={3}
+            max={12}
+            step={0.5}
+            className="bg-card focus:border-primary focus:ring-ring border-border w-full rounded-xl border px-4 py-3 text-sm text-slate-800 transition-colors outline-none focus:ring-1 dark:text-slate-200"
+            data-testid="sleep-hours-input"
+            {...register('avgSleepHours', { valueAsNumber: true })}
+          />
+        </FormField>
+      )}
+
+      {hasHiddenFields && (
+        <div
+          className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-300"
+          data-testid="smart-defaults-banner"
+        >
+          <Info className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{t('fitness.onboarding.smartDefaultsApplied')}</span>
+        </div>
+      )}
     </div>
   );
 }

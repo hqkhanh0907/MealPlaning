@@ -4,6 +4,7 @@ import { type HealthProfileState, useHealthProfileStore } from '../features/heal
 import type { Goal } from '../features/health-profile/types';
 import { DEFAULT_HEALTH_PROFILE } from '../features/health-profile/types';
 import type { DatabaseService } from '../services/databaseService';
+import { useFitnessStore } from '../store/fitnessStore';
 
 /* ------------------------------------------------------------------ */
 /* Helpers */
@@ -247,5 +248,82 @@ describe('healthProfileStore', () => {
     const [, insertParams] = calls[1] as [string, unknown[]];
     expect(insertParams[7]).toBe(1);
     expect(typeof insertParams[7]).toBe('number');
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Cross-store: saveProfile → fitnessStore.profileOutOfSync           */
+/* ------------------------------------------------------------------ */
+describe('healthProfileStore – profileOutOfSync cross-store sync', () => {
+  beforeEach(() => {
+    resetStore();
+    useFitnessStore.setState({ trainingPlans: [], profileOutOfSync: false });
+  });
+
+  it('saveProfile sets fitnessStore.profileOutOfSync when active plan exists', async () => {
+    useFitnessStore.setState({
+      trainingPlans: [
+        {
+          id: 'plan-1',
+          name: 'PPL',
+          status: 'active' as const,
+          splitType: 'ppl',
+          durationWeeks: 8,
+          currentWeek: 1,
+          startDate: '2025-06-01',
+          trainingDays: [1, 3, 5],
+          restDays: [2, 4, 6, 7],
+          createdAt: '2025-06-01T00:00:00.000Z',
+          updatedAt: '2025-06-01T00:00:00.000Z',
+        },
+      ],
+      profileOutOfSync: false,
+    });
+
+    const db = createMockDb();
+    const profile = { ...DEFAULT_HEALTH_PROFILE, weightKg: 75 };
+
+    await useHealthProfileStore.getState().saveProfile(db, profile);
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(true);
+  });
+
+  it('saveProfile does NOT set profileOutOfSync when no active plan', async () => {
+    useFitnessStore.setState({
+      trainingPlans: [
+        {
+          id: 'plan-done',
+          name: 'Old',
+          status: 'completed' as const,
+          splitType: 'ppl',
+          durationWeeks: 8,
+          currentWeek: 8,
+          startDate: '2025-01-01',
+          trainingDays: [1, 3, 5],
+          restDays: [2, 4, 6, 7],
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
+      profileOutOfSync: false,
+    });
+
+    const db = createMockDb();
+    const profile = { ...DEFAULT_HEALTH_PROFILE, weightKg: 80 };
+
+    await useHealthProfileStore.getState().saveProfile(db, profile);
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
+  });
+
+  it('saveProfile does NOT set profileOutOfSync when no plans at all', async () => {
+    useFitnessStore.setState({ trainingPlans: [], profileOutOfSync: false });
+
+    const db = createMockDb();
+    const profile = { ...DEFAULT_HEALTH_PROFILE, weightKg: 65 };
+
+    await useHealthProfileStore.getState().saveProfile(db, profile);
+
+    expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
   });
 });

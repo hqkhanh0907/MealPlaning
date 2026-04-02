@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardList, History } from 'lucide-react';
+import { AlertTriangle, BarChart3, ClipboardList, History } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,8 +24,10 @@ const FitnessTabInner = () => {
   const { insight } = useFitnessNutritionBridge();
   const trainingProfile = useFitnessStore(s => s.trainingProfile);
   const planStrategy = useFitnessStore(s => s.planStrategy);
+  const profileOutOfSync = useFitnessStore(s => s.profileOutOfSync);
   const addTrainingPlan = useFitnessStore(s => s.addTrainingPlan);
   const addPlanDays = useFitnessStore(s => s.addPlanDays);
+  const setActivePlan = useFitnessStore(s => s.setActivePlan);
   const pushPage = useNavigationStore(s => s.pushPage);
   const healthProfileWeight = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
   const healthProfileAge = useHealthProfileStore(s => s.profile?.age ?? 30);
@@ -54,12 +56,23 @@ const FitnessTabInner = () => {
     if (result) {
       addTrainingPlan(result.plan);
       addPlanDays(result.days);
+      setActivePlan(result.plan.id);
       notify.success(t('fitness.plan.planCreated'));
     } else {
       notify.error(t('fitness.plan.planError'));
     }
     setActiveSubTab('plan');
-  }, [trainingProfile, generatePlan, healthProfileWeight, healthProfileAge, addTrainingPlan, addPlanDays, notify, t]);
+  }, [
+    trainingProfile,
+    generatePlan,
+    healthProfileWeight,
+    healthProfileAge,
+    addTrainingPlan,
+    addPlanDays,
+    setActivePlan,
+    notify,
+    t,
+  ]);
 
   const handleCreateManualPlan = useCallback(() => {
     const now = new Date();
@@ -82,6 +95,7 @@ const FitnessTabInner = () => {
       restDays: [1, 2, 3, 4, 5, 6, 7],
     };
     addTrainingPlan(plan);
+    setActivePlan(plan.id);
 
     const days = Array.from({ length: 7 }, (_, i) => ({
       id: `${planId}-d${i + 1}`,
@@ -108,7 +122,7 @@ const FitnessTabInner = () => {
 
     notify.success(t('fitness.plan.planCreated'));
     setActiveSubTab('plan');
-  }, [addTrainingPlan, addPlanDays, pushPage, notify, t]);
+  }, [addTrainingPlan, addPlanDays, setActivePlan, pushPage, notify, t]);
 
   return (
     <div className="flex h-full flex-col" data-testid="fitness-tab">
@@ -117,6 +131,26 @@ const FitnessTabInner = () => {
       </div>
 
       {insight && <SmartInsightBanner insight={insight} />}
+
+      {profileOutOfSync && activeSubTab === 'plan' && (
+        <div
+          className="mx-4 mt-2 flex items-center gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+          data-testid="profile-out-of-sync-banner"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <div className="flex-1">
+            <span>{t('fitness.plan.profileOutOfSync')}</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleGeneratePlan}
+            className="text-primary text-xs font-semibold whitespace-nowrap underline"
+            data-testid="regenerate-plan-btn"
+          >
+            {t('fitness.plan.regeneratePlan')}
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         {activeSubTab === 'plan' && (

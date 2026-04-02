@@ -708,7 +708,8 @@
       "priorityMusclesDesc": "Chọn tối đa 3 nhóm cơ bạn muốn tập trung phát triển",
       "sleepHoursDesc": "Giờ ngủ trung bình mỗi đêm ảnh hưởng đến khối lượng tập",
       "sleepWarning": "Ngủ dưới 7 giờ sẽ giảm 10% khối lượng tập để bảo vệ phục hồi",
-      "hoursUnit": "giờ"
+      "hoursUnit": "giờ",
+      "smartDefaultsApplied": "Một số cài đặt nâng cao được tự động tối ưu cho trình độ của bạn"
     },
     "deload": {
       "title": "Đề xuất giảm tải",
@@ -887,7 +888,9 @@
       "coachingHint": "Chạm ✏ để chỉnh bài tập • Chạm ngày để xem buổi tập",
       "dayContextMenu": "Tùy chọn ngày tập",
       "addWorkout": "Thêm buổi tập",
-      "sessionTabs": "Danh sách buổi tập"
+      "sessionTabs": "Danh sách buổi tập",
+      "profileOutOfSync": "Hồ sơ tập luyện đã thay đổi. Kế hoạch hiện tại có thể không còn phù hợp.",
+      "regeneratePlan": "Tạo lại"
     },
     "workout": {
       "tab": "Buổi tập"

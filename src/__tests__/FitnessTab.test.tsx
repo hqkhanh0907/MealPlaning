@@ -112,8 +112,10 @@ vi.mock('../contexts/NotificationContext', () => ({
 interface MockFitnessState {
   trainingProfile: unknown;
   planStrategy: 'auto' | 'manual' | null;
+  profileOutOfSync: boolean;
   addTrainingPlan: Mock;
   addPlanDays: Mock;
+  setActivePlan: Mock;
 }
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
@@ -125,10 +127,12 @@ describe('FitnessTab', () => {
   describe('when user is onboarded', () => {
     const mockAddTrainingPlan = vi.fn();
     const mockAddPlanDays = vi.fn();
+    const mockSetActivePlan = vi.fn();
 
     beforeEach(() => {
       mockAddTrainingPlan.mockClear();
       mockAddPlanDays.mockClear();
+      mockSetActivePlan.mockClear();
       mockGeneratePlan.mockClear();
       mockNotifySuccess.mockClear();
       mockNotifyError.mockClear();
@@ -142,8 +146,10 @@ describe('FitnessTab', () => {
         selector({
           trainingProfile: null,
           planStrategy: null,
+          profileOutOfSync: false,
           addTrainingPlan: mockAddTrainingPlan,
           addPlanDays: mockAddPlanDays,
+          setActivePlan: mockSetActivePlan,
         }),
       );
     });
@@ -243,14 +249,17 @@ describe('FitnessTab', () => {
   describe('handleGeneratePlan', () => {
     const localAddTrainingPlan = vi.fn();
     const localAddPlanDays = vi.fn();
+    const localSetActivePlan = vi.fn();
 
     function setupStore(overrides: Partial<MockFitnessState> = {}) {
       mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
         selector({
           trainingProfile: null,
           planStrategy: 'auto',
+          profileOutOfSync: false,
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
+          setActivePlan: localSetActivePlan,
           ...overrides,
         }),
       );
@@ -262,6 +271,7 @@ describe('FitnessTab', () => {
     beforeEach(() => {
       localAddTrainingPlan.mockClear();
       localAddPlanDays.mockClear();
+      localSetActivePlan.mockClear();
       mockGeneratePlan.mockReset();
       mockNotifySuccess.mockClear();
       mockNotifyError.mockClear();
@@ -293,7 +303,18 @@ describe('FitnessTab', () => {
       });
       expect(localAddTrainingPlan).toHaveBeenCalledWith(mockPlan);
       expect(localAddPlanDays).toHaveBeenCalledWith(mockDays);
+      expect(localSetActivePlan).toHaveBeenCalledWith('plan-1');
       expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
+    });
+
+    it('does not call setActivePlan when generatePlan returns null', () => {
+      mockGeneratePlan.mockReturnValue(null);
+      setupStore({ trainingProfile: { level: 'beginner', goal: 'strength' } });
+
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+
+      expect(localSetActivePlan).not.toHaveBeenCalled();
     });
 
     it('shows error notification when generatePlan returns null', () => {
@@ -347,14 +368,17 @@ describe('FitnessTab', () => {
   describe('handleCreateManualPlan', () => {
     const localAddTrainingPlan = vi.fn();
     const localAddPlanDays = vi.fn();
+    const localSetActivePlan = vi.fn();
 
     function setupStore(overrides: Partial<MockFitnessState> = {}) {
       mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
         selector({
           trainingProfile: null,
           planStrategy: 'manual',
+          profileOutOfSync: false,
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
+          setActivePlan: localSetActivePlan,
           ...overrides,
         }),
       );
@@ -366,6 +390,7 @@ describe('FitnessTab', () => {
     beforeEach(() => {
       localAddTrainingPlan.mockClear();
       localAddPlanDays.mockClear();
+      localSetActivePlan.mockClear();
       mockGeneratePlan.mockClear();
       mockNotifySuccess.mockClear();
       mockNotifyError.mockClear();
@@ -431,6 +456,7 @@ describe('FitnessTab', () => {
         component: 'PlanDayEditor',
         props: { planDay: addedDays[expectedDow - 1] },
       });
+      expect(localSetActivePlan).toHaveBeenCalledWith(expectedPlanId);
       expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
     });
 
@@ -486,8 +512,10 @@ describe('FitnessTab', () => {
         selector({
           trainingProfile: null,
           planStrategy: null,
+          profileOutOfSync: false,
           addTrainingPlan: vi.fn(),
           addPlanDays: vi.fn(),
+          setActivePlan: vi.fn(),
         }),
       );
     });
@@ -502,6 +530,95 @@ describe('FitnessTab', () => {
       mockInsightRef.current = null;
       render(<FitnessTab />);
       expect(screen.queryByTestId('smart-insight-banner')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('profileOutOfSync banner', () => {
+    const localAddTrainingPlan = vi.fn();
+    const localAddPlanDays = vi.fn();
+    const localSetActivePlan = vi.fn();
+
+    function setupStore(overrides: Partial<MockFitnessState> = {}) {
+      mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
+        selector({
+          trainingProfile: { level: 'beginner', goal: 'strength' },
+          planStrategy: 'auto',
+          profileOutOfSync: false,
+          addTrainingPlan: localAddTrainingPlan,
+          addPlanDays: localAddPlanDays,
+          setActivePlan: localSetActivePlan,
+          ...overrides,
+        }),
+      );
+      mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
+        selector({ pushPage: mockPushPage }),
+      );
+    }
+
+    beforeEach(() => {
+      localAddTrainingPlan.mockClear();
+      localAddPlanDays.mockClear();
+      localSetActivePlan.mockClear();
+      mockGeneratePlan.mockClear();
+      mockNotifySuccess.mockClear();
+      mockNotifyError.mockClear();
+      mockPushPage.mockClear();
+      mockInsightRef.current = null;
+      mockHealthProfileRef.current = { age: 25, weightKg: 83 };
+    });
+
+    it('shows banner when profileOutOfSync is true and on plan tab', () => {
+      setupStore({ profileOutOfSync: true });
+      render(<FitnessTab />);
+
+      expect(screen.getByTestId('profile-out-of-sync-banner')).toBeInTheDocument();
+      expect(screen.getByTestId('regenerate-plan-btn')).toBeInTheDocument();
+      expect(screen.getByText('fitness.plan.profileOutOfSync')).toBeInTheDocument();
+      expect(screen.getByText('fitness.plan.regeneratePlan')).toBeInTheDocument();
+    });
+
+    it('does NOT show banner when profileOutOfSync is false', () => {
+      setupStore({ profileOutOfSync: false });
+      render(<FitnessTab />);
+
+      expect(screen.queryByTestId('profile-out-of-sync-banner')).not.toBeInTheDocument();
+    });
+
+    it('does NOT show banner when on history tab', () => {
+      setupStore({ profileOutOfSync: true });
+      render(<FitnessTab />);
+
+      fireEvent.click(screen.getByTestId('subtab-history'));
+
+      expect(screen.queryByTestId('profile-out-of-sync-banner')).not.toBeInTheDocument();
+    });
+
+    it('does NOT show banner when on progress tab', () => {
+      setupStore({ profileOutOfSync: true });
+      render(<FitnessTab />);
+
+      fireEvent.click(screen.getByTestId('subtab-progress'));
+
+      expect(screen.queryByTestId('profile-out-of-sync-banner')).not.toBeInTheDocument();
+    });
+
+    it('clicking "Tạo lại" calls generatePlan and addTrainingPlan', () => {
+      const mockPlan = { id: 'regen-1', name: 'Regenerated' };
+      const mockDays = [{ id: 'rd-1', planId: 'regen-1' }];
+      mockGeneratePlan.mockReturnValue({ plan: mockPlan, days: mockDays });
+      setupStore({ profileOutOfSync: true });
+
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+
+      expect(mockGeneratePlan).toHaveBeenCalledWith({
+        trainingProfile: { level: 'beginner', goal: 'strength' },
+        healthProfile: { age: 25, weightKg: 83 },
+      });
+      expect(localAddTrainingPlan).toHaveBeenCalledWith(mockPlan);
+      expect(localAddPlanDays).toHaveBeenCalledWith(mockDays);
+      expect(localSetActivePlan).toHaveBeenCalledWith('regen-1');
+      expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
     });
   });
 

@@ -30,6 +30,18 @@ function buildProfile(overrides: Partial<TrainingProfile> = {}): TrainingProfile
   };
 }
 
+/** Seed store with an advanced profile so ALL form fields are visible. */
+function seedAdvancedProfile(overrides: Partial<TrainingProfile> = {}): void {
+  useFitnessStore.setState({ trainingProfile: buildProfile(overrides) });
+}
+
+/** Seed store with an intermediate profile (periodization, cycleWeeks, muscles visible; sleepHours hidden). */
+function seedIntermediateProfile(overrides: Partial<TrainingProfile> = {}): void {
+  useFitnessStore.setState({
+    trainingProfile: buildProfile({ trainingExperience: 'intermediate', ...overrides }),
+  });
+}
+
 afterEach(() => {
   cleanup();
   // Reset zustand store to initial state between tests
@@ -44,10 +56,22 @@ describe('TrainingProfileForm – rendering', () => {
     expect(screen.getByTestId('training-profile-form')).toBeInTheDocument();
   });
 
-  it('renders all form section labels', () => {
+  it('renders beginner-visible form section labels', () => {
     render(<TrainingProfileForm />);
 
-    // Section labels (Vietnamese from i18n)
+    expect(screen.getByText('Mục tiêu tập luyện')).toBeInTheDocument();
+    expect(screen.getByText('Trình độ')).toBeInTheDocument();
+    expect(screen.getByText('Số ngày tập/tuần')).toBeInTheDocument();
+    expect(screen.getByText('Thời lượng buổi tập (phút)')).toBeInTheDocument();
+    expect(screen.getByText('Thiết bị tập')).toBeInTheDocument();
+    expect(screen.getByText('Vùng chấn thương')).toBeInTheDocument();
+    expect(screen.getByText('Số buổi cardio/tuần')).toBeInTheDocument();
+  });
+
+  it('renders all form section labels when experience is advanced', () => {
+    seedAdvancedProfile();
+    render(<TrainingProfileForm />);
+
     expect(screen.getByText('Mục tiêu tập luyện')).toBeInTheDocument();
     expect(screen.getByText('Trình độ')).toBeInTheDocument();
     expect(screen.getByText('Số ngày tập/tuần')).toBeInTheDocument();
@@ -60,7 +84,16 @@ describe('TrainingProfileForm – rendering', () => {
     expect(screen.getByText('Giờ ngủ trung bình')).toBeInTheDocument();
   });
 
+  it('hides advanced labels for beginner experience', () => {
+    render(<TrainingProfileForm />);
+
+    expect(screen.queryByText('Mô hình phân kỳ')).not.toBeInTheDocument();
+    expect(screen.queryByText('Số tuần một chu kỳ')).not.toBeInTheDocument();
+    expect(screen.queryByText('Giờ ngủ trung bình')).not.toBeInTheDocument();
+  });
+
   it('renders priority muscles label with max-items count', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     expect(screen.getByText(/Nhóm cơ ưu tiên.*tối đa 3/)).toBeInTheDocument();
   });
@@ -115,28 +148,32 @@ describe('TrainingProfileForm – rendering', () => {
     });
   });
 
-  it('renders periodization options', () => {
+  it('renders periodization options when experience is intermediate+', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     ['linear', 'undulating', 'block'].forEach(p => {
       expect(screen.getByTestId(`periodization-${p}`)).toBeInTheDocument();
     });
   });
 
-  it('renders cycle weeks options', () => {
+  it('renders cycle weeks options when experience is intermediate+', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     [4, 6, 8, 12].forEach(w => {
       expect(screen.getByTestId(`cycle-weeks-${w}`)).toBeInTheDocument();
     });
   });
 
-  it('renders priority muscles chip options', () => {
+  it('renders priority muscles chip options when experience is intermediate+', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
       expect(screen.getByTestId(`priority-muscles-${m}`)).toBeInTheDocument();
     });
   });
 
-  it('renders sleep hours input', () => {
+  it('renders sleep hours input when experience is advanced', () => {
+    seedAdvancedProfile();
     render(<TrainingProfileForm />);
     const input = screen.getByTestId('sleep-hours-input');
     expect(input).toBeInTheDocument();
@@ -191,25 +228,29 @@ describe('TrainingProfileForm – default values (no store profile)', () => {
     expect(screen.getByTestId('cardio-2')).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('selects linear periodization by default', () => {
+  it('selects linear periodization by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
+    fireEvent.click(screen.getByTestId('experience-advanced'));
     expect(screen.getByTestId('periodization-linear')).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('selects 8 week cycle by default', () => {
+  it('selects 8 week cycle by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
+    fireEvent.click(screen.getByTestId('experience-advanced'));
     expect(screen.getByTestId('cycle-weeks-8')).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('has no priority muscles selected by default', () => {
+  it('has no priority muscles selected by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
+    fireEvent.click(screen.getByTestId('experience-advanced'));
     ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
       expect(screen.getByTestId(`priority-muscles-${m}`)).toHaveAttribute('aria-checked', 'false');
     });
   });
 
-  it('has empty sleep hours input by default', () => {
+  it('has empty sleep hours input by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
+    fireEvent.click(screen.getByTestId('experience-advanced'));
     expect(screen.getByTestId('sleep-hours-input')).toHaveValue(null);
   });
 });
@@ -339,6 +380,7 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
   });
 
   it('changes periodization model', async () => {
+    seedIntermediateProfile({ periodizationModel: 'linear' });
     render(<TrainingProfileForm />);
     fireEvent.click(screen.getByTestId('periodization-undulating'));
 
@@ -349,6 +391,7 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
   });
 
   it('changes plan cycle weeks', async () => {
+    seedIntermediateProfile({ planCycleWeeks: 8 });
     render(<TrainingProfileForm />);
     fireEvent.click(screen.getByTestId('cycle-weeks-4'));
 
@@ -390,6 +433,7 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
   });
 
   it('allows selecting multiple priority muscles up to max 3', async () => {
+    seedIntermediateProfile({ priorityMuscles: [] });
     render(<TrainingProfileForm />);
 
     fireEvent.click(screen.getByTestId('priority-muscles-chest'));
@@ -404,6 +448,7 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
   });
 
   it('blocks 4th priority muscle selection (max 3)', async () => {
+    seedIntermediateProfile({ priorityMuscles: [] });
     render(<TrainingProfileForm />);
 
     fireEvent.click(screen.getByTestId('priority-muscles-chest'));
@@ -422,6 +467,7 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
   });
 
   it('allows deselecting a muscle after hitting max and selecting a new one', async () => {
+    seedIntermediateProfile({ priorityMuscles: [] });
     render(<TrainingProfileForm />);
 
     fireEvent.click(screen.getByTestId('priority-muscles-chest'));
@@ -450,6 +496,7 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
 
 describe('TrainingProfileForm – sleep hours input', () => {
   it('accepts a valid number', () => {
+    seedAdvancedProfile();
     render(<TrainingProfileForm />);
     const input = screen.getByTestId('sleep-hours-input');
     fireEvent.change(input, { target: { value: '8' } });
@@ -457,6 +504,7 @@ describe('TrainingProfileForm – sleep hours input', () => {
   });
 
   it('accepts decimal values', () => {
+    seedAdvancedProfile();
     render(<TrainingProfileForm />);
     const input = screen.getByTestId('sleep-hours-input');
     fireEvent.change(input, { target: { value: '7.5' } });
@@ -524,6 +572,13 @@ describe('TrainingProfileForm – embedded mode & saveRef', () => {
   });
 
   it('saveRef.current() coerces string RadioPills values to numbers', async () => {
+    seedIntermediateProfile({
+      daysPerWeek: 3,
+      sessionDurationMin: 60,
+      cardioSessionsWeek: 2,
+      planCycleWeeks: 8,
+    });
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -557,6 +612,8 @@ describe('TrainingProfileForm – embedded mode & saveRef', () => {
   });
 
   it('saveRef.current() saves sleep hours as number', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -572,6 +629,11 @@ describe('TrainingProfileForm – embedded mode & saveRef', () => {
   });
 
   it('saveRef.current() saves equipment and muscle arrays', async () => {
+    seedIntermediateProfile({
+      availableEquipment: ['bodyweight', 'dumbbell'],
+      priorityMuscles: [],
+    });
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -673,6 +735,8 @@ describe('TrainingProfileForm – embedded mode & saveRef', () => {
 
 describe('TrainingProfileForm – validation via saveRef', () => {
   it('saveRef.current() returns false when sleep hours is out of range (too low)', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -693,6 +757,8 @@ describe('TrainingProfileForm – validation via saveRef', () => {
   });
 
   it('saveRef.current() returns false when sleep hours is too high', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -712,6 +778,8 @@ describe('TrainingProfileForm – validation via saveRef', () => {
   });
 
   it('displays Vietnamese error message for sleep hours below minimum', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -729,6 +797,8 @@ describe('TrainingProfileForm – validation via saveRef', () => {
   });
 
   it('displays Vietnamese error message for sleep hours above maximum', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -761,6 +831,8 @@ describe('TrainingProfileForm – validation via saveRef', () => {
   });
 
   it('succeeds with sleep hours at minimum boundary (3)', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -775,6 +847,8 @@ describe('TrainingProfileForm – validation via saveRef', () => {
   });
 
   it('succeeds with sleep hours at maximum boundary (12)', async () => {
+    seedAdvancedProfile();
+
     const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
       (() => Promise<boolean>) | null
     >;
@@ -802,8 +876,8 @@ describe('TrainingProfileForm – full save flow', () => {
 
     // Goal
     fireEvent.click(screen.getByTestId('goal-endurance'));
-    // Experience
-    fireEvent.click(screen.getByTestId('experience-intermediate'));
+    // Experience — advanced to reveal all fields including sleep hours
+    fireEvent.click(screen.getByTestId('experience-advanced'));
     // Days
     fireEvent.click(screen.getByTestId('days-4'));
     // Duration
@@ -839,7 +913,7 @@ describe('TrainingProfileForm – full save flow', () => {
     const stored = useFitnessStore.getState().trainingProfile;
     expect(stored).not.toBeNull();
     expect(stored!.trainingGoal).toBe('endurance');
-    expect(stored!.trainingExperience).toBe('intermediate');
+    expect(stored!.trainingExperience).toBe('advanced');
     expect(stored!.daysPerWeek).toBe(4);
     expect(stored!.sessionDurationMin).toBe(45);
     expect(stored!.availableEquipment).toEqual(['machine', 'cable']);
@@ -860,10 +934,46 @@ describe('TrainingProfileForm – full save flow', () => {
     render(<TrainingProfileForm embedded saveRef={saveRef} />);
     await saveRef.current!();
 
+    // beginner + hypertrophy defaults: cardioTypePref='liss', cardioDurationMin=20
     const stored = useFitnessStore.getState().trainingProfile;
-    expect(stored!.cardioTypePref).toBe('mixed');
+    expect(stored!.cardioTypePref).toBe('liss');
     expect(stored!.cardioDurationMin).toBe(20);
     expect(stored!.known1rm).toBeUndefined();
+  });
+
+  it('applies smart defaults for hidden fields when saving as beginner', async () => {
+    const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
+      (() => Promise<boolean>) | null
+    >;
+    saveRef.current = null;
+
+    render(<TrainingProfileForm embedded saveRef={saveRef} />);
+    await saveRef.current!();
+
+    // beginner + hypertrophy smart defaults for hidden fields
+    const stored = useFitnessStore.getState().trainingProfile;
+    expect(stored!.periodizationModel).toBe('linear');
+    expect(stored!.planCycleWeeks).toBe(8);
+    expect(stored!.priorityMuscles).toEqual(['chest', 'back', 'shoulders']);
+    expect(stored!.avgSleepHours).toBeUndefined();
+  });
+
+  it('uses form values for all fields when saving as advanced', async () => {
+    seedAdvancedProfile();
+
+    const saveRef = createRef<(() => Promise<boolean>) | null>() as React.MutableRefObject<
+      (() => Promise<boolean>) | null
+    >;
+    saveRef.current = null;
+
+    render(<TrainingProfileForm embedded saveRef={saveRef} />);
+    await saveRef.current!();
+
+    const stored = useFitnessStore.getState().trainingProfile;
+    expect(stored!.periodizationModel).toBe('block');
+    expect(stored!.planCycleWeeks).toBe(12);
+    expect(stored!.priorityMuscles).toEqual(['chest', 'back']);
+    expect(stored!.avgSleepHours).toBe(7);
   });
 });
 
@@ -911,6 +1021,7 @@ describe('TrainingProfileForm – i18n option labels', () => {
   });
 
   it('renders Vietnamese periodization labels', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     expect(screen.getByText('Tuyến tính')).toBeInTheDocument();
     expect(screen.getByText('Dao động')).toBeInTheDocument();
@@ -918,6 +1029,7 @@ describe('TrainingProfileForm – i18n option labels', () => {
   });
 
   it('renders Vietnamese muscle labels', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     expect(screen.getByText('Ngực')).toBeInTheDocument();
     expect(screen.getByText('Lưng')).toBeInTheDocument();
@@ -936,6 +1048,7 @@ describe('TrainingProfileForm – i18n option labels', () => {
   });
 
   it('renders cycle weeks labels with "tuần" unit', () => {
+    seedIntermediateProfile();
     render(<TrainingProfileForm />);
     expect(screen.getByText('4 tuần')).toBeInTheDocument();
     expect(screen.getByText('6 tuần')).toBeInTheDocument();
@@ -947,24 +1060,104 @@ describe('TrainingProfileForm – i18n option labels', () => {
 // ---------- 12. Radiogroup/group accessibility roles ----------
 
 describe('TrainingProfileForm – accessibility roles', () => {
-  it('renders groups for all fieldset-based fields', () => {
+  it('renders groups for beginner fieldset-based fields', () => {
+    render(<TrainingProfileForm />);
+    const groups = screen.getAllByRole('group');
+    // RadioPills fieldsets (5: goal, exp, days, duration, cardio) + ChipSelect fieldsets (2: equipment, injuries) = 7
+    expect(groups.length).toBe(7);
+  });
+
+  it('renders groups for all fieldset-based fields when advanced', () => {
+    seedAdvancedProfile();
     render(<TrainingProfileForm />);
     const groups = screen.getAllByRole('group');
     // RadioPills fieldsets (7) + ChipSelect fieldsets (3) = 10
     expect(groups.length).toBe(10);
   });
 
-  it('RadioPills options have role=radio', () => {
+  it('RadioPills options have role=radio (beginner)', () => {
+    render(<TrainingProfileForm />);
+    const radios = screen.getAllByRole('radio');
+    // goals(4) + exp(3) + days(5) + duration(4) + cardio(6) = 22
+    expect(radios.length).toBe(22);
+  });
+
+  it('RadioPills options have role=radio (advanced)', () => {
+    seedAdvancedProfile();
     render(<TrainingProfileForm />);
     const radios = screen.getAllByRole('radio');
     // goals(4) + exp(3) + days(5) + duration(4) + cardio(6) + periodization(3) + cycleWeeks(4) = 29
     expect(radios.length).toBe(29);
   });
 
-  it('ChipSelect options have role=checkbox', () => {
+  it('ChipSelect options have role=checkbox (beginner)', () => {
+    render(<TrainingProfileForm />);
+    const checkboxes = screen.getAllByRole('checkbox');
+    // equipment(7) + injuries(6) = 13
+    expect(checkboxes.length).toBe(13);
+  });
+
+  it('ChipSelect options have role=checkbox (advanced)', () => {
+    seedAdvancedProfile();
     render(<TrainingProfileForm />);
     const checkboxes = screen.getAllByRole('checkbox');
     // equipment(7) + injuries(6) + muscles(7) = 20
     expect(checkboxes.length).toBe(20);
+  });
+});
+
+// ---------- 13. Dynamic field visibility & smart defaults banner ----------
+
+describe('TrainingProfileForm – dynamic field visibility', () => {
+  it('shows smart defaults banner when experience is beginner', () => {
+    render(<TrainingProfileForm />);
+    expect(screen.getByTestId('smart-defaults-banner')).toBeInTheDocument();
+    expect(screen.getByText('Một số cài đặt nâng cao được tự động tối ưu cho trình độ của bạn')).toBeInTheDocument();
+  });
+
+  it('does not show smart defaults banner when experience is advanced', () => {
+    seedAdvancedProfile();
+    render(<TrainingProfileForm />);
+    expect(screen.queryByTestId('smart-defaults-banner')).not.toBeInTheDocument();
+  });
+
+  it('hides advanced fields when switching from advanced to beginner', async () => {
+    seedAdvancedProfile();
+    render(<TrainingProfileForm />);
+
+    // Fields initially visible for advanced
+    expect(screen.getByTestId('periodization-linear')).toBeInTheDocument();
+    expect(screen.getByTestId('sleep-hours-input')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('experience-beginner'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('periodization-linear')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cycle-weeks-8')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('priority-muscles-chest')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sleep-hours-input')).not.toBeInTheDocument();
+    });
+  });
+
+  it('reveals intermediate fields when switching from beginner to intermediate', async () => {
+    render(<TrainingProfileForm />);
+
+    expect(screen.queryByTestId('periodization-linear')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('experience-intermediate'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('periodization-linear')).toBeInTheDocument();
+      expect(screen.getByTestId('cycle-weeks-8')).toBeInTheDocument();
+      expect(screen.getByTestId('priority-muscles-chest')).toBeInTheDocument();
+      // Sleep hours still hidden for intermediate
+      expect(screen.queryByTestId('sleep-hours-input')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows smart defaults banner for intermediate (sleep hours still hidden)', () => {
+    seedIntermediateProfile();
+    render(<TrainingProfileForm />);
+    expect(screen.getByTestId('smart-defaults-banner')).toBeInTheDocument();
   });
 });
