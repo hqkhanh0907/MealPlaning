@@ -70,7 +70,7 @@ function getTrendIndicator(
 ): { symbol: string; color: string } | null {
   if (movingAvg === null || yesterdayWeight === undefined) return null;
   const diff = round1(movingAvg - yesterdayWeight);
-  if (diff > 0) return { symbol: '↑', color: 'text-red-500' };
+  if (diff > 0) return { symbol: '↑', color: 'text-destructive' };
   if (diff < 0) return { symbol: '↓', color: 'text-emerald-500' };
   return { symbol: '→', color: 'text-slate-400' };
 }
@@ -223,7 +223,7 @@ function DailyWeightInputInner(): React.JSX.Element {
 
   const barClass = isSaved
     ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-600'
-    : 'border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-600';
+    : 'border-slate-300 bg-card dark:border-slate-600';
 
   return (
     <div
@@ -260,7 +260,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             className="w-16 text-center text-lg font-bold text-slate-800"
           />
 
-          <span className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.weight.kg')}</span>
+          <span className="text-muted-foreground text-xs">{t('fitness.weight.kg')}</span>
 
           <button
             type="button"
@@ -309,7 +309,7 @@ function DailyWeightInputInner(): React.JSX.Element {
         </div>
       )}
 
-      <div className="ml-6 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+      <div className="text-muted-foreground ml-6 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
         {yesterdayEntry && (
           <span data-testid="yesterday-info">
             {t('fitness.weight.yesterday')}: {yesterdayEntry.weightKg} {t('fitness.weight.kg')}
@@ -318,7 +318,7 @@ function DailyWeightInputInner(): React.JSX.Element {
                 data-testid="weight-delta"
                 className={`ml-1 font-medium ${(() => {
                   if (delta < 0) return 'text-emerald-600 dark:text-emerald-400';
-                  if (delta > 0) return 'text-red-500 dark:text-red-400';
+                  if (delta > 0) return 'text-destructive';
                   return 'text-slate-400';
                 })()}`}
               >

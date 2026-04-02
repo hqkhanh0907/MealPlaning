@@ -350,7 +350,7 @@ describe('DailyWeightInput', () => {
 
     const delta = screen.getByTestId('weight-delta');
     expect(delta).toHaveTextContent('+1');
-    expect(delta.className).toContain('text-red');
+    expect(delta.className).toContain('text-destructive');
 
     fireEvent.change(input, { target: { value: '71.0' } });
     const deltaNeg = screen.getByTestId('weight-delta');
@@ -516,7 +516,7 @@ describe('DailyWeightInput', () => {
 
     const trend = screen.getByTestId('trend-indicator');
     expect(trend).toHaveTextContent('↑');
-    expect(trend.className).toContain('text-red');
+    expect(trend.className).toContain('text-destructive');
   });
 
   it('shows downward trend when moving avg < yesterday weight', () => {

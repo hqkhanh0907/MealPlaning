@@ -53,7 +53,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
     <div className="flex flex-1 flex-col" data-testid="nutrition-goal-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{t('onboarding.goal.title')}</h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.goal.subtitle')}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.goal.subtitle')}</p>
 
         {/* Goal Type */}
         <fieldset className="m-0 mb-6 space-y-3 border-0 p-0" aria-label={t('onboarding.goal.title')}>
@@ -127,7 +127,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   inputMode="decimal"
                   aria-invalid={!!targetField.fieldState.error}
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
                   value={targetField.field.value ?? ''}
                   onChange={e => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                   onBlur={targetField.field.onBlur}
@@ -135,7 +135,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                 <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">kg</span>
               </div>
               {targetField.fieldState.error && (
-                <p id="ob-target-error" role="alert" className="mt-1 text-xs text-red-500">
+                <p id="ob-target-error" role="alert" className="text-destructive mt-1 text-xs">
                   {t(targetField.fieldState.error.message ?? 'onboarding.validation.required')}
                 </p>
               )}
@@ -148,13 +148,13 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>
         <Button
           onClick={handleNext}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           {t('onboarding.nav.next')}
           <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />

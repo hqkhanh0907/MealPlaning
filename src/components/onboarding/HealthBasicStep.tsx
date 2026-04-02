@@ -32,7 +32,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
     <div className="flex flex-1 flex-col" data-testid="health-basic-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-slate-100">{t('onboarding.health.title')}</h2>
-        <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('onboarding.health.subtitle')}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.health.subtitle')}</p>
 
         <div className="space-y-4">
           {/* Name */}
@@ -47,13 +47,13 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               autoComplete="name"
               aria-invalid={!!nameField.fieldState.error}
               aria-describedby={nameField.fieldState.error ? 'ob-name-error' : undefined}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
               value={nameField.field.value}
               onChange={nameField.field.onChange}
               onBlur={nameField.field.onBlur}
             />
             {nameField.fieldState.error && (
-              <p id="ob-name-error" role="alert" className="mt-1 text-xs text-red-500">
+              <p id="ob-name-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.required')}
               </p>
             )}
@@ -94,13 +94,13 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               type="date"
               aria-invalid={!!dobField.fieldState.error}
               aria-describedby={dobField.fieldState.error ? 'ob-dob-error' : undefined}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
               value={dobField.field.value}
               onChange={dobField.field.onChange}
               onBlur={dobField.field.onBlur}
             />
             {dobField.fieldState.error && (
-              <p id="ob-dob-error" role="alert" className="mt-1 text-xs text-red-500">
+              <p id="ob-dob-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.required')}
               </p>
             )}
@@ -120,7 +120,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 placeholder="170"
                 aria-invalid={!!heightField.fieldState.error}
                 aria-describedby={heightField.fieldState.error ? 'ob-height-error' : undefined}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
                 value={heightField.field.value ?? ''}
                 onChange={e => heightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={heightField.field.onBlur}
@@ -131,7 +131,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               <p className="mt-1 text-xs text-amber-500">{t('onboarding.validation.heightHint')}</p>
             )}
             {heightField.fieldState.error && (
-              <p id="ob-height-error" role="alert" className="mt-1 text-xs text-red-500">
+              <p id="ob-height-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.heightRange')}
               </p>
             )}
@@ -151,7 +151,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 placeholder="70"
                 aria-invalid={!!weightField.fieldState.error}
                 aria-describedby={weightField.fieldState.error ? 'ob-weight-error' : undefined}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="bg-card w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-base text-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-100"
                 value={weightField.field.value ?? ''}
                 onChange={e => weightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={weightField.field.onBlur}
@@ -159,7 +159,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm text-slate-400">kg</span>
             </div>
             {weightField.fieldState.error && (
-              <p id="ob-weight-error" role="alert" className="mt-1 text-xs text-red-500">
+              <p id="ob-weight-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.weightRange')}
               </p>
             )}
@@ -172,13 +172,13 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
         <button
           type="button"
           onClick={goBack}
-          className="min-h-[44px] px-4 py-2 text-sm font-medium text-slate-500 focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none dark:text-slate-400"
+          className="text-muted-foreground focus-visible:ring-ring min-h-[44px] px-4 py-2 text-sm font-medium focus-visible:rounded-lg focus-visible:ring-2 focus-visible:outline-none"
         >
           {t('onboarding.nav.back')}
         </button>
         <Button
           onClick={handleNext}
-          className="min-h-[44px] rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring min-h-[44px] rounded-xl px-6 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2"
           data-testid="health-basic-next"
         >
           {t('onboarding.nav.next')}

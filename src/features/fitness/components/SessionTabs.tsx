@@ -161,7 +161,7 @@ function SessionTabsInner({
           aria-label={t('fitness.plan.deleteSessionConfirm')}
           className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20"
         >
-          <Trash2 className="h-4 w-4 shrink-0 text-red-500" aria-hidden="true" />
+          <Trash2 className="text-destructive h-4 w-4 shrink-0" aria-hidden="true" />
           <span className="text-sm text-red-700 dark:text-red-300">{t('fitness.plan.deleteSessionConfirm')}</span>
           <button
             data-testid="confirm-delete-session"

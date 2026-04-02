@@ -149,7 +149,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
         >
           {cameraError ? (
             <div className="max-w-xs p-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 text-red-500">
+              <div className="bg-destructive/20 text-destructive mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
                 <X className="h-6 w-6" />
               </div>
               <p className="mb-6 font-medium text-white">{cameraError}</p>
@@ -205,7 +205,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               <img src={image} alt={t('imageCapture.uploadedDishAlt')} className="h-full w-full object-cover" />
               <button
                 onClick={onClear}
-                className="absolute top-4 right-4 rounded-xl bg-white/90 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition-all hover:bg-white dark:bg-slate-800/90 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="bg-card/90 absolute top-4 right-4 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition-all hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 {t('imageCapture.chooseAnother')}
               </button>

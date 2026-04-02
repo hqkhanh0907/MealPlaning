@@ -54,16 +54,16 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
       >
         <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('adjustmentHistory.title')}</span>
         {collapsed ? (
-          <ChevronDown className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+          <ChevronDown className="text-muted-foreground h-4 w-4" aria-hidden="true" />
         ) : (
-          <ChevronUp className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+          <ChevronUp className="text-muted-foreground h-4 w-4" aria-hidden="true" />
         )}
       </button>
 
       {!collapsed && (
         <div data-testid="adjustment-history-list" className="divide-y divide-slate-200 dark:divide-slate-700">
           {sorted.length === 0 ? (
-            <p data-testid="adjustment-history-empty" className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+            <p data-testid="adjustment-history-empty" className="text-muted-foreground px-4 py-3 text-xs">
               {t('adjustmentHistory.noData')}
             </p>
           ) : (
@@ -88,12 +88,12 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                     </span>
                     <span
                       data-testid={`trigger-badge-${adj.id}`}
-                      className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+                      className="text-muted-foreground rounded bg-slate-100 px-1.5 py-0.5 text-[10px] dark:bg-slate-700"
                     >
                       {adj.triggerType === 'auto' ? t('adjustmentHistory.auto') : t('adjustmentHistory.manual')}
                     </span>
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{adj.reason}</p>
+                  <p className="text-muted-foreground mt-0.5 truncate text-xs">{adj.reason}</p>
                 </div>
 
                 <div className="flex flex-shrink-0 items-center gap-1 font-mono text-xs text-slate-600 dark:text-slate-400">
@@ -101,7 +101,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                   {adj.newTargetCal > adj.oldTargetCal ? (
                     <TrendingUp className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
                   ) : (
-                    <TrendingDown className="h-3.5 w-3.5 text-red-500" aria-hidden="true" />
+                    <TrendingDown className="text-destructive h-3.5 w-3.5" aria-hidden="true" />
                   )}
                   <span>{adj.newTargetCal}</span>
                 </div>
@@ -112,7 +112,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
                     className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
                       adj.applied
                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                        : 'text-muted-foreground bg-slate-100 dark:bg-slate-700'
                     }`}
                   >
                     {adj.applied ? t('adjustmentHistory.applied') : t('adjustmentHistory.declined')}

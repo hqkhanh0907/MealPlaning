@@ -160,7 +160,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   'min-h-11 shrink-0 rounded-full px-4',
                   selectedType === type
                     ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    : 'border-transparent bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+                    : 'bg-card border-transparent text-slate-600 dark:text-slate-300',
                 )}
                 data-testid={`cardio-type-${type}`}
               >
@@ -172,7 +172,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         </section>
 
         {/* Timer Mode Toggle */}
-        <section className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
+        <section className="bg-card rounded-xl p-4 shadow-sm">
           <h3 className="mb-3 text-sm font-semibold text-slate-600 dark:text-slate-300">
             {t('fitness.cardio.duration')}
           </h3>
@@ -236,7 +236,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 <Button
                   variant="destructive"
                   onClick={handleStopStopwatch}
-                  className="flex-1 bg-red-500 py-2.5 text-white hover:bg-red-600"
+                  className="bg-destructive hover:bg-destructive/90 flex-1 py-2.5 text-white"
                   data-testid="stop-button"
                 >
                   {t('fitness.cardio.stop')}
@@ -276,7 +276,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
         {/* Distance (conditional) */}
         {showDistance && (
-          <section className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800" data-testid="distance-section">
+          <section className="bg-card rounded-xl p-4 shadow-sm" data-testid="distance-section">
             <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
               {t('fitness.cardio.distance')}
             </h3>
@@ -310,7 +310,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         )}
 
         {/* Heart Rate */}
-        <section className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
+        <section className="bg-card rounded-xl p-4 shadow-sm">
           <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
             {t('fitness.cardio.heartRate')}
           </h3>
@@ -342,7 +342,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         </section>
 
         {/* Intensity */}
-        <section className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
+        <section className="bg-card rounded-xl p-4 shadow-sm">
           <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
             {t('fitness.cardio.intensity')}
           </h3>
@@ -380,7 +380,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
       </div>
 
       {/* Save Button */}
-      <div className="pb-safe border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+      <div className="pb-safe bg-card border-t border-slate-200 p-4 dark:border-slate-700">
         <Button
           variant="default"
           onClick={handleSave}

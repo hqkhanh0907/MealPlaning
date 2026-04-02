@@ -336,17 +336,17 @@ function ProgressDashboardInner() {
           data-testid="metric-card-weight"
           onClick={() => handleCardClick('weight')}
           aria-label={t('fitness.progress.weight')}
-          className="min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl bg-white p-4 text-left shadow-sm active:scale-95 dark:bg-slate-800"
+          className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Scale className="h-5 w-5 text-blue-500" aria-hidden="true" />
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
             {latestWeight ? `${latestWeight.weightKg}kg` : '—'}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.weight')}</p>
+          <p className="text-muted-foreground text-xs">{t('fitness.progress.weight')}</p>
           {weightDelta !== 0 && (
             <span
               data-testid="weight-delta"
-              className={`text-xs font-medium ${weightDelta > 0 ? 'text-red-500' : 'text-green-500'}`}
+              className={`text-xs font-medium ${weightDelta > 0 ? 'text-destructive' : 'text-emerald-500 dark:text-emerald-400'}`}
             >
               {weightDelta > 0 ? '↑' : '↓'} {Math.abs(weightDelta)}kg
             </span>
@@ -363,13 +363,13 @@ function ProgressDashboardInner() {
           data-testid="metric-card-1rm"
           onClick={() => handleCardClick('1rm')}
           aria-label={t('fitness.progress.estimated1rm')}
-          className="min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl bg-white p-4 text-left shadow-sm active:scale-95 dark:bg-slate-800"
+          className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
-          <Dumbbell className="h-5 w-5 text-purple-500" aria-hidden="true" />
+          <Dumbbell className="h-5 w-5 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">
             {best1RM > 0 ? `${best1RM}kg` : '—'}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.estimated1rm')}</p>
+          <p className="text-muted-foreground text-xs">{t('fitness.progress.estimated1rm')}</p>
         </button>
 
         <button
@@ -377,11 +377,11 @@ function ProgressDashboardInner() {
           data-testid="metric-card-adherence"
           onClick={() => handleCardClick('adherence')}
           aria-label={t('fitness.progress.adherence')}
-          className="min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl bg-white p-4 text-left shadow-sm active:scale-95 dark:bg-slate-800"
+          className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Target className="h-5 w-5 text-amber-500" aria-hidden="true" />
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{adherencePercent}%</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.adherence')}</p>
+          <p className="text-muted-foreground text-xs">{t('fitness.progress.adherence')}</p>
         </button>
 
         <button
@@ -389,21 +389,21 @@ function ProgressDashboardInner() {
           data-testid="metric-card-sessions"
           onClick={() => handleCardClick('sessions')}
           aria-label={t('fitness.progress.sessions')}
-          className="min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl bg-white p-4 text-left shadow-sm active:scale-95 dark:bg-slate-800"
+          className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Calendar className="h-5 w-5 text-emerald-500" aria-hidden="true" />
           <p className="mt-2 text-xl font-bold text-slate-800 dark:text-slate-100">{completedSessions}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fitness.progress.sessions')}</p>
+          <p className="text-muted-foreground text-xs">{t('fitness.progress.sessions')}</p>
         </button>
       </div>
 
       {cycleProgress && (
-        <div data-testid="cycle-progress" className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800">
+        <div data-testid="cycle-progress" className="bg-card rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
               {t('fitness.progress.cycleProgress')}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-muted-foreground text-xs">
               {t('fitness.progress.weekOf', {
                 current: cycleProgress.currentWeek,
                 total: cycleProgress.totalWeeks,
@@ -432,14 +432,14 @@ function ProgressDashboardInner() {
             <div
               key={insight.id}
               data-testid={`insight-${insight.id}`}
-              className="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm dark:bg-slate-800"
+              className="bg-card flex items-center justify-between rounded-lg p-3 shadow-sm"
             >
               <p className="text-sm text-slate-600 dark:text-slate-300">{insight.text}</p>
               <button
                 type="button"
                 data-testid={`dismiss-${insight.id}`}
                 onClick={() => handleDismiss(insight.id)}
-                className="ml-2 flex-shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="ml-2 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                 aria-label={t('fitness.progress.dismiss')}
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -458,7 +458,7 @@ function ProgressDashboardInner() {
             onClick={handleCloseSheet}
             aria-label={t('fitness.progress.dismiss')}
           />
-          <div className="relative z-10 w-full rounded-t-2xl bg-white p-5 dark:bg-slate-800">
+          <div className="bg-card relative z-10 w-full rounded-t-2xl p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-emerald-500" aria-hidden="true" />
@@ -469,7 +469,7 @@ function ProgressDashboardInner() {
                 data-testid="close-bottom-sheet"
                 onClick={handleCloseSheet}
                 aria-label={t('fitness.progress.dismiss')}
-                className="rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>

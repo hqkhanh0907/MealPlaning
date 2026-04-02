@@ -444,7 +444,7 @@ describe('WeightQuickLog', () => {
 
     const trend = screen.getByTestId('trend-indicator');
     expect(trend).toHaveTextContent('↑');
-    expect(trend.className).toContain('text-red');
+    expect(trend.className).toContain('text-destructive');
   });
 
   it('shows downward trend when MA < yesterday weight', () => {

@@ -128,10 +128,10 @@ export const GoogleDriveSync = () => {
       return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
     }
     if (syncStatus === 'error') {
-      return <AlertCircle className="h-4 w-4 text-red-500" />;
+      return <AlertCircle className="text-destructive h-4 w-4" />;
     }
     if (lastSyncAt) {
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
+      return <CheckCircle className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />;
     }
     return null;
   }, [syncStatus, lastSyncAt]);
@@ -145,7 +145,7 @@ export const GoogleDriveSync = () => {
     return (
       <div
         data-testid="cloud-sync-signed-out"
-        className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-700 dark:bg-slate-800"
+        className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-5 dark:border-slate-700"
       >
         <div className="mb-4 flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30">
@@ -193,7 +193,7 @@ export const GoogleDriveSync = () => {
   return (
     <div
       data-testid="cloud-sync-signed-in"
-      className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-700 dark:bg-slate-800"
+      className="bg-card rounded-2xl border border-slate-100 p-4 shadow-sm sm:p-5 dark:border-slate-700"
     >
       <div className="mb-4 flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30">
@@ -223,7 +223,7 @@ export const GoogleDriveSync = () => {
           data-testid="btn-download-drive"
           onClick={handleDownload}
           disabled={isSyncing}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-50"
         >
           {syncStatus === 'downloading' ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -238,7 +238,7 @@ export const GoogleDriveSync = () => {
         <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           {statusIcon}
           {syncStatus === 'error' ? (
-            <span className="text-red-500">{t('cloudSync.syncError')}</span>
+            <span className="text-destructive">{t('cloudSync.syncError')}</span>
           ) : (
             <span>
               {t('cloudSync.lastSync')}: {formattedSyncTime}
@@ -250,7 +250,7 @@ export const GoogleDriveSync = () => {
       <button
         data-testid="btn-google-sign-out"
         onClick={handleSignOut}
-        className="mt-3 flex w-full items-center justify-center gap-2 px-4 py-2 text-xs font-medium text-slate-500 transition-colors hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400"
+        className="hover:text-destructive mt-3 flex w-full items-center justify-center gap-2 px-4 py-2 text-xs font-medium text-slate-500 transition-colors dark:text-slate-400"
       >
         <LogOut className="h-3.5 w-3.5" />
         {t('cloudSync.signOut')}

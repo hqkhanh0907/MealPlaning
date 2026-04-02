@@ -75,7 +75,7 @@ function getTrendIndicator(
 ): { symbol: string; color: string } | null {
   if (movingAvg === null || yesterdayWeight === undefined) return null;
   const diff = round1(movingAvg - yesterdayWeight);
-  if (diff > 0) return { symbol: '↑', color: 'text-red-500' };
+  if (diff > 0) return { symbol: '↑', color: 'text-destructive' };
   if (diff < 0) return { symbol: '↓', color: 'text-emerald-500' };
   return { symbol: '→', color: 'text-slate-400' };
 }
@@ -246,7 +246,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
       <dialog
         open
         data-testid="weight-quick-log"
-        className="relative w-full rounded-t-2xl bg-white shadow-xl sm:max-w-md sm:rounded-2xl dark:bg-slate-800"
+        className="bg-card relative w-full rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
         aria-label={t('fitness.weight.quickLogTitle')}
       >
         {/* Header */}
@@ -348,7 +348,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         {/* Info Row */}
         <div
           data-testid="info-row"
-          className="flex flex-wrap items-center gap-x-4 gap-y-1 px-6 pb-4 text-sm text-slate-500 dark:text-slate-400"
+          className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 px-6 pb-4 text-sm"
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {yesterdayEntry && (
@@ -379,7 +379,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             data-testid="save-btn"
             disabled={!isValid}
             onClick={handleSave}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 font-bold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-none"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary/90 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-bold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t('common.save')}
           </button>

@@ -298,7 +298,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                       >
                         {item.exercise.nameVi}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-muted-foreground text-xs">
                         {item.sets} {t('fitness.plan.setsLabel')} &times; {item.repsMin}-{item.repsMax}{' '}
                         {t('fitness.plan.repsLabel')}
                         &middot; {item.restSeconds}s
@@ -337,7 +337,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleRemove(index)}
                         aria-label={`Remove ${item.exercise.nameVi}`}
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-red-400 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none active:bg-red-50 dark:text-red-500 dark:active:bg-red-900/20"
+                        className="text-destructive active:bg-destructive/10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -417,7 +417,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
           aria-modal="true"
           aria-labelledby={confirmDialogTitleId}
         >
-          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
+          <div className="bg-card mx-4 w-full max-w-sm rounded-2xl p-6 shadow-xl">
             <p id={confirmDialogTitleId} className="mb-6 text-sm text-slate-700 dark:text-slate-300">
               {t('fitness.plan.unsavedChanges')}
             </p>
@@ -433,7 +433,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
               <button
                 type="button"
                 onClick={handleConfirmDiscard}
-                className="flex h-11 flex-1 items-center justify-center rounded-xl bg-red-500 text-sm font-medium text-white active:bg-red-600"
+                className="bg-destructive active:bg-destructive/90 flex h-11 flex-1 items-center justify-center rounded-xl text-sm font-medium text-white"
               >
                 {t('common.confirm')}
               </button>
@@ -502,7 +502,7 @@ const StepperField = memo(function StepperField({
 }: StepperFieldProps) {
   return (
     <fieldset aria-label={label} className="m-0 flex flex-col items-center gap-1 border-0 p-0" data-testid={testId}>
-      <span className="text-xs text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="text-muted-foreground text-xs">{label}</span>
       <div className="flex items-center gap-2">
         <button
           type="button"

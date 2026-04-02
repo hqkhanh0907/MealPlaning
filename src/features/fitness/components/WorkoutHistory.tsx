@@ -197,7 +197,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
     return (
       <div data-testid="workout-history-empty" className="flex flex-col items-center justify-center py-16 text-center">
         <ClipboardList className="mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
-        <p data-testid="empty-title" className="mb-1 font-medium text-slate-500 dark:text-slate-400">
+        <p data-testid="empty-title" className="text-muted-foreground mb-1 font-medium">
           {t('fitness.history.noHistory')}
         </p>
         <p data-testid="empty-subtitle" className="mb-6 text-sm text-slate-500 dark:text-slate-500">
@@ -257,7 +257,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                   <div
                     key={workout.id}
                     data-testid={`workout-card-${workout.id}`}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                    className="bg-card overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-700"
                   >
                     <button
                       data-testid={`workout-toggle-${workout.id}`}
@@ -274,10 +274,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                         >
                           {workout.name}
                         </span>
-                        <span
-                          data-testid={`workout-date-${workout.id}`}
-                          className="text-sm text-slate-500 dark:text-slate-400"
-                        >
+                        <span data-testid={`workout-date-${workout.id}`} className="text-muted-foreground text-sm">
                           {getRelativeDate(workout.date, t)}
                         </span>
                       </div>
@@ -293,7 +290,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                           </span>
                         )}
                         {(workout.durationMin ?? 0) > 0 && (
-                          <span className="text-sm text-slate-500 dark:text-slate-400">
+                          <span className="text-muted-foreground text-sm">
                             {workout.durationMin} {t('fitness.history.minutes')}
                           </span>
                         )}
@@ -345,7 +342,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                             className="mt-2 flex items-start gap-2 border-t border-slate-50 pt-2 dark:border-slate-700"
                           >
                             <StickyNote className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{workout.notes}</p>
+                            <p className="text-muted-foreground text-xs">{workout.notes}</p>
                           </div>
                         )}
 
@@ -354,7 +351,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                             type="button"
                             data-testid={`delete-workout-${workout.id}`}
                             onClick={() => setDeleteTargetId(workout.id)}
-                            className="focus-visible:ring-ring flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-red-500 transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-offset-2 dark:text-red-400 dark:hover:bg-red-950/30"
+                            className="focus-visible:ring-ring text-destructive hover:bg-destructive/10 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
                             aria-label={t('fitness.deleteWorkout.title')}
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

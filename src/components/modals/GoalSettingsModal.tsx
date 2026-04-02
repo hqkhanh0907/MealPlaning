@@ -64,7 +64,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-80">
-      <div className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl dark:bg-slate-800">
+      <div className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -117,7 +117,7 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                       >
                         {t(preset.labelKey)}
                       </p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                      <p className="text-xs text-slate-400 dark:text-slate-500">
                         {preset.calories} kcal · {preset.proteinRatio}g/kg
                       </p>
                     </div>
@@ -161,14 +161,14 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                 }}
                 data-testid="input-goal-weight"
                 aria-invalid={!!fieldErrors.weight}
-                className={`w-full pr-12 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.weight ? 'border-red-400 focus:ring-red-400' : ''}`}
+                className={`w-full pr-12 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.weight ? 'border-destructive focus:ring-destructive' : ''}`}
               />
               <span className="absolute top-1/2 right-4 -translate-y-1/2 font-medium text-slate-400 dark:text-slate-500">
                 kg
               </span>
             </div>
             {fieldErrors.weight && (
-              <p data-testid="error-goal-weight" className="mt-1 text-xs text-red-500">
+              <p data-testid="error-goal-weight" className="text-destructive mt-1 text-xs">
                 {fieldErrors.weight}
               </p>
             )}
@@ -218,14 +218,14 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                   }}
                   data-testid="input-goal-protein"
                   aria-invalid={!!fieldErrors.proteinRatio}
-                  className={`w-full pr-16 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.proteinRatio ? 'border-red-400 focus:ring-red-400' : ''}`}
+                  className={`w-full pr-16 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.proteinRatio ? 'border-destructive focus:ring-destructive' : ''}`}
                 />
                 <span className="absolute top-1/2 right-4 -translate-y-1/2 font-medium text-slate-400 dark:text-slate-500">
                   {t('goalSettings.perKg')}
                 </span>
               </div>
               {fieldErrors.proteinRatio && (
-                <p data-testid="error-goal-protein" className="mt-1 text-xs text-red-500">
+                <p data-testid="error-goal-protein" className="text-destructive mt-1 text-xs">
                   {fieldErrors.proteinRatio}
                 </p>
               )}
@@ -238,15 +238,13 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                       setProteinStr(String(ratio));
                     }}
                     data-testid={`btn-preset-${ratio}`}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${userProfile.proteinRatio === ratio ? 'border-blue-500 bg-blue-500 text-white' : 'border-slate-200 bg-white text-slate-500 hover:border-blue-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400'}`}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${userProfile.proteinRatio === ratio ? 'border-blue-500 bg-blue-500 text-white' : 'text-muted-foreground border-slate-200 bg-white hover:border-blue-300 dark:border-slate-600 dark:bg-slate-700'}`}
                   >
                     {ratio}g
                   </button>
                 ))}
               </div>
-              <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                {t('goalSettings.recommendation')}
-              </p>
+              <p className="text-muted-foreground text-xs leading-relaxed">{t('goalSettings.recommendation')}</p>
             </div>
           </div>
 
@@ -285,14 +283,14 @@ export const GoalSettingsModal = ({ userProfile, onUpdateProfile, onClose }: Goa
                 }}
                 data-testid="input-goal-calories"
                 aria-invalid={!!fieldErrors.targetCalories}
-                className={`w-full pr-16 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.targetCalories ? 'border-red-400 focus:ring-red-400' : ''}`}
+                className={`w-full pr-16 pl-4 text-lg font-bold text-slate-800 ${fieldErrors.targetCalories ? 'border-destructive focus:ring-destructive' : ''}`}
               />
               <span className="absolute top-1/2 right-4 -translate-y-1/2 font-medium text-slate-400 dark:text-slate-500">
                 kcal
               </span>
             </div>
             {fieldErrors.targetCalories && (
-              <p data-testid="error-goal-calories" className="mt-1 text-xs text-red-500">
+              <p data-testid="error-goal-calories" className="text-destructive mt-1 text-xs">
                 {fieldErrors.targetCalories}
               </p>
             )}

@@ -294,7 +294,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             className="w-full text-slate-800"
           />
           {targetWeightError && (
-            <p id="target-weight-error" role="alert" className="mt-1 text-xs text-red-500">
+            <p id="target-weight-error" role="alert" className="text-destructive mt-1 text-xs">
               {t(targetWeightError.message ?? 'onboarding.validation.required')}
             </p>
           )}
@@ -312,7 +312,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
         {/* Manual Override Toggle */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-muted-foreground text-xs">
             {manualOverrideField.field.value ? t('goal.calorieOffsetCustom') : t('goal.calorieOffsetAuto')}
           </span>
           <button
@@ -322,7 +322,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             role="switch"
             aria-checked={manualOverrideField.field.value}
             className={`relative h-5 w-10 rounded-full transition-colors ${
-              manualOverrideField.field.value ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+              manualOverrideField.field.value ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'
             }`}
           >
             <span
@@ -351,7 +351,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
           type="button"
           data-testid="save-goal-button"
           onClick={() => void handleSave()}
-          className="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white transition-all hover:bg-emerald-700 active:bg-emerald-800"
+          className="bg-primary text-primary-foreground hover:bg-primary/80 active:bg-primary/70 w-full rounded-xl py-3 font-bold transition-all"
         >
           {t('goal.save')}
         </button>

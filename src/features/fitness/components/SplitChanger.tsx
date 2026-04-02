@@ -118,7 +118,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
                 selectedSplit === option.value
                   ? 'border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950'
-                  : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'
+                  : 'bg-card border-slate-200 dark:border-slate-700'
               }`}
               style={{ touchAction: 'manipulation' }}
               data-testid={`split-option-${option.value}`}
@@ -135,7 +135,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                     />
                   )}
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t(option.descKey)}</p>
+                <p className="text-muted-foreground text-sm">{t(option.descKey)}</p>
               </div>
             </label>
           ))}
@@ -154,7 +154,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
                   mode === 'regenerate'
                     ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950'
-                    : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'
+                    : 'bg-card border-slate-200 dark:border-slate-700'
                 }`}
                 style={{ touchAction: 'manipulation' }}
                 data-testid="mode-regenerate"
@@ -177,7 +177,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
                   mode === 'remap'
                     ? 'border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950'
-                    : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'
+                    : 'bg-card border-slate-200 dark:border-slate-700'
                 }`}
                 style={{ touchAction: 'manipulation' }}
                 data-testid="mode-remap"
@@ -190,9 +190,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                   <span className="font-medium text-slate-900 dark:text-slate-100">
                     {t('fitness.splitChanger.remap')}
                   </span>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {t('fitness.splitChanger.remapDesc')}
-                  </p>
+                  <p className="text-muted-foreground mt-1 text-sm">{t('fitness.splitChanger.remapDesc')}</p>
                 </div>
               </button>
             </div>
@@ -283,7 +281,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                         className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-950"
                         data-testid="preview-unmapped-item"
                       >
-                        <CircleAlert className="h-4 w-4 shrink-0 text-red-600" aria-hidden="true" />
+                        <CircleAlert className="text-destructive h-4 w-4 shrink-0" aria-hidden="true" />
                         <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
                           {item.notes ?? item.workoutType}
                         </span>
