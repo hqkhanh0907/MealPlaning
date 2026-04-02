@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { CardioLogger } from '../features/fitness/components/CardioLogger';
-import { useFitnessStore } from '../store/fitnessStore';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
@@ -14,10 +15,18 @@ vi.mock('../features/health-profile/store/healthProfileStore', () => ({
 }));
 
 vi.mock('../features/fitness/utils/cardioEstimator', () => ({
-  estimateCardioBurn: vi.fn(
-    (_type: string, durationMin: number, _intensity: string, weightKg: number) =>
-      Math.round(durationMin * 8 * weightKg / 60),
+  estimateCardioBurn: vi.fn((_type: string, durationMin: number, _intensity: string, weightKg: number) =>
+    Math.round((durationMin * 8 * weightKg) / 60),
   ),
+}));
+
+const mockNotifyError = vi.fn();
+vi.mock('../contexts/NotificationContext', () => ({
+  useNotification: () => ({
+    success: vi.fn(),
+    error: mockNotifyError,
+    info: vi.fn(),
+  }),
 }));
 
 const mockSaveWorkoutAtomic = vi.fn().mockResolvedValue(undefined);
@@ -27,18 +36,17 @@ afterEach(cleanup);
 describe('CardioLogger', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: Record<string, unknown>) => unknown) =>
-        selector({
-          saveWorkoutAtomic: mockSaveWorkoutAtomic,
-        }),
+    (useFitnessStore as unknown as Mock).mockImplementation((selector: (s: Record<string, unknown>) => unknown) =>
+      selector({
+        saveWorkoutAtomic: mockSaveWorkoutAtomic,
+      }),
     );
     (useHealthProfileStore as unknown as Mock).mockImplementation(
-      (selector: (s: { profile: { weightKg: number } }) => unknown) =>
-        selector({ profile: { weightKg: 70 } }),
+      (selector: (s: { profile: { weightKg: number } }) => unknown) => selector({ profile: { weightKg: 70 } }),
     );
     mockSaveWorkoutAtomic.mockReset();
     mockSaveWorkoutAtomic.mockResolvedValue(undefined);
+    mockNotifyError.mockReset();
   });
 
   afterEach(() => {
@@ -363,5 +371,62 @@ describe('CardioLogger', () => {
         estimatedCalories: undefined,
       }),
     );
+  });
+
+  it('shows error notification and does not call onComplete when save fails', async () => {
+    mockSaveWorkoutAtomic.mockRejectedValueOnce(new Error('FK constraint'));
+    const onComplete = vi.fn();
+    render(<CardioLogger {...defaultProps} onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '20' },
+    });
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
+
+    await vi.waitFor(() => {
+      expect(mockNotifyError).toHaveBeenCalledTimes(1);
+    });
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('save passes correct exerciseId for HIIT (should be hiit-training)', async () => {
+    render(<CardioLogger {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('cardio-type-hiit'));
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '20' },
+    });
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
+
+    const [, sets] = mockSaveWorkoutAtomic.mock.calls[0];
+    expect(sets[0].exerciseId).toBe('hiit-training');
+  });
+
+  it('save passes correct exerciseId for rowing (should be rowing-machine)', async () => {
+    render(<CardioLogger {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('cardio-type-rowing'));
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    fireEvent.change(screen.getByTestId('manual-duration-input'), {
+      target: { value: '15' },
+    });
+    fireEvent.click(screen.getByTestId('save-button'));
+
+    await vi.waitFor(() => {
+      expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    });
+
+    const [, sets] = mockSaveWorkoutAtomic.mock.calls[0];
+    expect(sets[0].exerciseId).toBe('rowing-machine');
   });
 });

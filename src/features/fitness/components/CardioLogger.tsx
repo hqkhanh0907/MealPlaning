@@ -1,26 +1,29 @@
-import React, { useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useForm, useWatch, Controller } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, X } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
+import type { Resolver } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { generateUUID } from '@/utils/helpers';
+
+import { useNotification } from '../../../contexts/NotificationContext';
+import {
+  cardioLoggerDefaults,
+  type CardioLoggerFormData,
+  cardioLoggerSchema,
+} from '../../../schemas/cardioLoggerSchema';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
+import { CARDIO_TYPE_TO_EXERCISE_ID, CARDIO_TYPES, DISTANCE_CARDIO_TYPES, INTENSITY_OPTIONS } from '../constants';
+import { useTimer } from '../hooks/useTimer';
+import type { Workout } from '../types';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
 import { parseNumericInput } from '../utils/parseNumericInput';
 import { formatElapsed } from '../utils/timeFormat';
-import type { Workout } from '../types';
-import { CARDIO_TYPES, DISTANCE_CARDIO_TYPES, INTENSITY_OPTIONS } from '../constants';
-import { useTimer } from '../hooks/useTimer';
-import { generateUUID } from '@/utils/helpers';
-import {
-  cardioLoggerSchema,
-  cardioLoggerDefaults,
-  type CardioLoggerFormData,
-} from '../../../schemas/cardioLoggerSchema';
 
 interface CardioLoggerProps {
   onComplete: () => void;
@@ -29,8 +32,9 @@ interface CardioLoggerProps {
 
 export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>): React.JSX.Element {
   const { t } = useTranslation();
-  const saveWorkoutAtomic = useFitnessStore((s) => s.saveWorkoutAtomic);
-  const weightKg = useHealthProfileStore((s) => s.profile.weightKg);
+  const notify = useNotification();
+  const saveWorkoutAtomic = useFitnessStore(s => s.saveWorkoutAtomic);
+  const weightKg = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
 
   const { control, handleSubmit, setValue } = useForm<CardioLoggerFormData>({
     resolver: zodResolver(cardioLoggerSchema) as unknown as Resolver<CardioLoggerFormData>,
@@ -58,10 +62,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
     return estimateCardioBurn(selectedType, durationMin, intensity, weightKg);
   }, [selectedType, durationMin, intensity, weightKg]);
 
-  const showDistance = useMemo(
-    () => DISTANCE_CARDIO_TYPES.includes(selectedType),
-    [selectedType],
-  );
+  const showDistance = useMemo(() => DISTANCE_CARDIO_TYPES.includes(selectedType), [selectedType]);
 
   const handleStartStopwatch = stopwatch.start;
   const handlePauseStopwatch = stopwatch.stop;
@@ -69,11 +70,10 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
   const onFormSubmit = useCallback(
     async (data: CardioLoggerFormData) => {
-      const effectiveDuration = data.isStopwatchMode
-        ? Math.floor(stopwatch.elapsed / 60)
-        : (data.manualDuration ?? 0);
+      const effectiveDuration = data.isStopwatchMode ? Math.floor(stopwatch.elapsed / 60) : (data.manualDuration ?? 0);
       const now = new Date().toISOString();
       const workoutId = generateUUID();
+      const exerciseId = CARDIO_TYPE_TO_EXERCISE_ID[data.selectedType];
       const workout: Workout = {
         id: workoutId,
         date: now.split('T')[0],
@@ -86,7 +86,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         {
           id: generateUUID(),
           workoutId,
-          exerciseId: data.selectedType,
+          exerciseId,
           setNumber: 1,
           weightKg: 0,
           durationMin: effectiveDuration > 0 ? effectiveDuration : undefined,
@@ -101,11 +101,12 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         await saveWorkoutAtomic(workout, sets);
       } catch (error) {
         console.error('[CardioLogger] Save failed:', error);
+        notify.error(t('fitness.logger.saveFailed'));
         return;
       }
       onComplete();
     },
-    [t, stopwatch.elapsed, saveWorkoutAtomic, estimatedCalories, onComplete],
+    [t, stopwatch.elapsed, saveWorkoutAtomic, estimatedCalories, onComplete, notify],
   );
 
   const handleSave = useCallback(() => {
@@ -113,13 +114,10 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
   }, [handleSubmit, onFormSubmit]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900"
-      data-testid="cardio-logger"
-    >
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-900" data-testid="cardio-logger">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 pt-safe text-white"
+        className="pt-safe sticky top-0 z-10 flex items-center justify-between bg-emerald-600 px-4 py-3 text-white"
         data-testid="cardio-header"
       >
         <Button
@@ -132,10 +130,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           <ArrowLeft className="h-5 w-5" />
           <span>{t('common.back')}</span>
         </Button>
-        <span
-          className="font-mono text-lg font-semibold tabular-nums"
-          data-testid="elapsed-timer"
-        >
+        <span className="font-mono text-lg font-semibold tabular-nums" data-testid="elapsed-timer">
           {formatElapsed(headerTimer.elapsed)}
         </span>
         <Button
@@ -153,13 +148,8 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
       <div className="flex-1 space-y-6 overflow-y-auto p-4">
         {/* Cardio Type Selector */}
         <section>
-          <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            {t('fitness.cardio.type')}
-          </h3>
-          <div
-            className="flex gap-2 overflow-x-auto pb-2"
-            data-testid="cardio-type-selector"
-          >
+          <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('fitness.cardio.type')}</h3>
+          <div className="flex gap-2 overflow-x-auto pb-2" data-testid="cardio-type-selector">
             {CARDIO_TYPES.map(({ type, icon: Icon, i18nKey }) => (
               <Button
                 key={type}
@@ -167,10 +157,10 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 size="default"
                 onClick={() => setValue('selectedType', type)}
                 className={cn(
-                  'shrink-0 rounded-full px-4 min-h-11',
+                  'min-h-11 shrink-0 rounded-full px-4',
                   selectedType === type
                     ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    : 'bg-white text-slate-600 border-transparent dark:bg-slate-800 dark:text-slate-300'
+                    : 'border-transparent bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-300',
                 )}
                 data-testid={`cardio-type-${type}`}
               >
@@ -194,7 +184,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
                   ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                  : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+                  : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
               )}
               data-testid="stopwatch-mode-button"
             >
@@ -206,8 +196,8 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               className={cn(
                 'flex-1 rounded-lg py-2',
                 isStopwatchMode
-                  ? 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
-                  : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                  ? 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                  : 'bg-emerald-500 text-white hover:bg-emerald-600',
               )}
               data-testid="manual-mode-button"
             >
@@ -263,7 +253,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                     <Input
                       type="number"
                       value={field.value ?? ''}
-                      onChange={(e) => {
+                      onChange={e => {
                         const val = e.target.value;
                         field.onChange(val === '' ? undefined : parseNumericInput(val));
                       }}
@@ -286,10 +276,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
         {/* Distance (conditional) */}
         {showDistance && (
-          <section
-            className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800"
-            data-testid="distance-section"
-          >
+          <section className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800" data-testid="distance-section">
             <h3 className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
               {t('fitness.cardio.distance')}
             </h3>
@@ -301,7 +288,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   <Input
                     type="number"
                     value={field.value ?? ''}
-                    onChange={(e) => {
+                    onChange={e => {
                       const val = e.target.value;
                       field.onChange(val === '' ? undefined : parseNumericInput(val));
                     }}
@@ -335,7 +322,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 <Input
                   type="number"
                   value={field.value ?? ''}
-                  onChange={(e) => {
+                  onChange={e => {
                     const val = e.target.value;
                     field.onChange(val === '' ? undefined : parseNumericInput(val));
                   }}
@@ -366,10 +353,10 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 variant={intensity === value ? 'default' : 'outline'}
                 onClick={() => setValue('intensity', value)}
                 className={cn(
-                  'flex-1 rounded-lg min-h-11',
+                  'min-h-11 flex-1 rounded-lg',
                   intensity === value
                     ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    : 'bg-slate-100 text-slate-600 border-transparent dark:bg-slate-700 dark:text-slate-300'
+                    : 'border-transparent bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
                 )}
                 data-testid={`intensity-${value}`}
               >
@@ -380,18 +367,12 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         </section>
 
         {/* Calorie Preview */}
-        <section
-          className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20"
-          data-testid="calorie-preview"
-        >
+        <section className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/20" data-testid="calorie-preview">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
               {t('fitness.cardio.calories')}
             </span>
-            <span
-              className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"
-              data-testid="calorie-value"
-            >
+            <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" data-testid="calorie-value">
               {estimatedCalories}
             </span>
           </div>
@@ -399,7 +380,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
       </div>
 
       {/* Save Button */}
-      <div className="border-t border-slate-200 bg-white p-4 pb-safe dark:border-slate-700 dark:bg-slate-800">
+      <div className="pb-safe border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
         <Button
           variant="default"
           onClick={handleSave}

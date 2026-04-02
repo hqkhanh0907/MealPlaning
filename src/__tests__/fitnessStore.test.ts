@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useFitnessStore } from '../store/fitnessStore';
-import { createDatabaseService, type DatabaseService } from '../services/databaseService';
-import { createSchema } from '../services/schema';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import type {
-  TrainingProfile,
+  Exercise,
   TrainingPlan,
   TrainingPlanDay,
+  TrainingProfile,
+  WeightEntry,
   Workout,
   WorkoutSet,
-  WeightEntry,
-  Exercise,
 } from '../features/fitness/types';
+import { createDatabaseService, type DatabaseService } from '../services/databaseService';
+import { createSchema } from '../services/schema';
+import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -87,8 +88,36 @@ function samplePlanDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDa
     sessionOrder: 1,
     workoutType: 'push',
     muscleGroups: 'chest,shoulders',
-    exercises: JSON.stringify([{ exercise: { id: 'bench', name: 'Bench Press', primaryMuscle: 'chest', equipment: 'barbell', category: 'compound' }, sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120 }]),
-    originalExercises: JSON.stringify([{ exercise: { id: 'bench', name: 'Bench Press', primaryMuscle: 'chest', equipment: 'barbell', category: 'compound' }, sets: 4, repsMin: 6, repsMax: 10, restSeconds: 120 }]),
+    exercises: JSON.stringify([
+      {
+        exercise: {
+          id: 'bench',
+          name: 'Bench Press',
+          primaryMuscle: 'chest',
+          equipment: 'barbell',
+          category: 'compound',
+        },
+        sets: 4,
+        repsMin: 6,
+        repsMax: 10,
+        restSeconds: 120,
+      },
+    ]),
+    originalExercises: JSON.stringify([
+      {
+        exercise: {
+          id: 'bench',
+          name: 'Bench Press',
+          primaryMuscle: 'chest',
+          equipment: 'barbell',
+          category: 'compound',
+        },
+        sets: 4,
+        repsMin: 6,
+        repsMax: 10,
+        restSeconds: 120,
+      },
+    ]),
     isUserAssigned: false,
     originalDayOfWeek: 1,
     ...overrides,
@@ -183,9 +212,9 @@ describe('fitnessStore', () => {
     useFitnessStore.getState().setActivePlan('plan-b');
 
     const plans = useFitnessStore.getState().trainingPlans;
-    expect(plans.find((p) => p.id === 'plan-a')!.status).toBe('paused');
-    expect(plans.find((p) => p.id === 'plan-b')!.status).toBe('active');
-    expect(plans.find((p) => p.id === 'plan-c')!.status).toBe('completed');
+    expect(plans.find(p => p.id === 'plan-a')!.status).toBe('paused');
+    expect(plans.find(p => p.id === 'plan-b')!.status).toBe('active');
+    expect(plans.find(p => p.id === 'plan-c')!.status).toBe('completed');
   });
 
   /* ---------- updateTrainingPlan ---------- */
@@ -510,7 +539,15 @@ describe('fitnessStore', () => {
       const day = samplePlanDay();
       useFitnessStore.setState({ trainingPlanDays: [day] });
 
-      const newExercises = [{ exercise: { id: 'ohp', name: 'OHP', primaryMuscle: 'shoulders', equipment: 'barbell', category: 'compound' }, sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90 }];
+      const newExercises = [
+        {
+          exercise: { id: 'ohp', name: 'OHP', primaryMuscle: 'shoulders', equipment: 'barbell', category: 'compound' },
+          sets: 3,
+          repsMin: 8,
+          repsMax: 12,
+          restSeconds: 90,
+        },
+      ];
       useFitnessStore.getState().updatePlanDayExercises('day-1', newExercises as never[]);
 
       const updated = useFitnessStore.getState().trainingPlanDays[0];
@@ -571,9 +608,14 @@ describe('fitnessStore', () => {
       });
 
       useFitnessStore.getState().addPlanDaySession('plan-1', 1, {
-        planId: 'plan-1', dayOfWeek: 1, sessionOrder: 4,
-        workoutType: 'Extra', exercises: '[]', originalExercises: '[]',
-        isUserAssigned: false, originalDayOfWeek: 1,
+        planId: 'plan-1',
+        dayOfWeek: 1,
+        sessionOrder: 4,
+        workoutType: 'Extra',
+        exercises: '[]',
+        originalExercises: '[]',
+        isUserAssigned: false,
+        originalDayOfWeek: 1,
       });
 
       expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(3);
@@ -722,12 +764,9 @@ describe('fitnessStore dual-layer SQLite', () => {
 
     expect(result.current.workouts).toContainEqual(workout);
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM workouts WHERE id = ?',
-      ['wt-1'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['wt-1']);
     expect(rows).toHaveLength(1);
     expect(rows[0].name).toBe('Write-Through Test');
   });
@@ -752,12 +791,9 @@ describe('fitnessStore dual-layer SQLite', () => {
 
     expect(result.current.workoutSets).toContainEqual(workoutSet);
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM workout_sets WHERE id = ?',
-      ['wt-s1'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workout_sets WHERE id = ?', ['wt-s1']);
     expect(rows).toHaveLength(1);
     expect(rows[0].workoutId).toBe('wt-w1');
     await db.execute('PRAGMA foreign_keys = ON');
@@ -774,7 +810,7 @@ describe('fitnessStore dual-layer SQLite', () => {
       result.current.addWorkout(workout);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     resetStore();
 
@@ -783,8 +819,8 @@ describe('fitnessStore dual-layer SQLite', () => {
     });
 
     const loaded = useFitnessStore.getState().workouts;
-    expect(loaded.find((w) => w.id === 'raw-1')).toBeDefined();
-    expect(loaded.find((w) => w.id === 'raw-1')?.name).toBe('Round-Trip Test');
+    expect(loaded.find(w => w.id === 'raw-1')).toBeDefined();
+    expect(loaded.find(w => w.id === 'raw-1')?.name).toBe('Round-Trip Test');
   });
 
   it('initializeFromSQLite survives query failure gracefully', async () => {
@@ -860,11 +896,9 @@ describe('fitnessStore SQLite draft persistence', () => {
       });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      `SELECT * FROM workout_drafts WHERE id = 'current'`,
-    );
+    const rows = await db.query<Record<string, unknown>>(`SELECT * FROM workout_drafts WHERE id = 'current'`);
     expect(rows).toHaveLength(1);
     expect(JSON.parse(rows[0].exercisesJson as string)).toHaveLength(1);
     expect(JSON.parse(rows[0].setsJson as string)).toHaveLength(1);
@@ -884,17 +918,15 @@ describe('fitnessStore SQLite draft persistence', () => {
       });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     act(() => {
       result.current.clearWorkoutDraft();
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      `SELECT * FROM workout_drafts WHERE id = 'current'`,
-    );
+    const rows = await db.query<Record<string, unknown>>(`SELECT * FROM workout_drafts WHERE id = 'current'`);
     expect(rows).toHaveLength(0);
     expect(result.current.workoutDraft).toBeNull();
   });
@@ -913,7 +945,7 @@ describe('fitnessStore SQLite draft persistence', () => {
       });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     // Simulate app refresh: clear Zustand state
     act(() => useFitnessStore.setState({ workoutDraft: null }));
@@ -1018,14 +1050,9 @@ describe('fitnessStore – additional coverage', () => {
         isOnboarded: true,
       };
 
-      localStorage.setItem(
-        'fitness-storage',
-        JSON.stringify({ state: oldState, version: 1 }),
-      );
+      localStorage.setItem('fitness-storage', JSON.stringify({ state: oldState, version: 1 }));
 
-      const migrated = JSON.parse(
-        localStorage.getItem('fitness-storage') ?? '{}',
-      );
+      const migrated = JSON.parse(localStorage.getItem('fitness-storage') ?? '{}');
 
       const migrateV2 = (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>;
@@ -1072,7 +1099,16 @@ describe('fitnessStore – SQLite write-through', () => {
     await db.execute(
       `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      ['plan-1', 'Test Plan', 'active', 'push-pull-legs', 8, '2025-06-01', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+      [
+        'plan-1',
+        'Test Plan',
+        'active',
+        'push-pull-legs',
+        8,
+        '2025-06-01',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
     );
   });
 
@@ -1087,12 +1123,11 @@ describe('fitnessStore – SQLite write-through', () => {
       result.current.addPlanDays([day]);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM training_plan_days WHERE id = ?',
-      ['sqlite-day-1'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE id = ?', [
+      'sqlite-day-1',
+    ]);
     expect(rows).toHaveLength(1);
   });
 
@@ -1106,19 +1141,26 @@ describe('fitnessStore – SQLite write-through', () => {
     act(() => {
       result.current.addPlanDays([day]);
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const newExercises = [{ exercise: { id: 'squat', name: 'Squat', primaryMuscle: 'legs', equipment: 'barbell', category: 'compound' }, sets: 5, repsMin: 5, repsMax: 5, restSeconds: 180 }];
+    const newExercises = [
+      {
+        exercise: { id: 'squat', name: 'Squat', primaryMuscle: 'legs', equipment: 'barbell', category: 'compound' },
+        sets: 5,
+        repsMin: 5,
+        repsMax: 5,
+        restSeconds: 180,
+      },
+    ];
     act(() => {
       result.current.updatePlanDayExercises('sqlite-day-upd', newExercises as never[]);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT exercises FROM training_plan_days WHERE id = ?',
-      ['sqlite-day-upd'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT exercises FROM training_plan_days WHERE id = ?', [
+      'sqlite-day-upd',
+    ]);
     expect(rows).toHaveLength(1);
     expect(JSON.parse(rows[0].exercises as string)).toEqual(newExercises);
   });
@@ -1133,17 +1175,16 @@ describe('fitnessStore – SQLite write-through', () => {
     act(() => {
       result.current.addPlanDays([day]);
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     act(() => {
       result.current.restorePlanDayOriginal('sqlite-day-restore');
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT exercises FROM training_plan_days WHERE id = ?',
-      ['sqlite-day-restore'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT exercises FROM training_plan_days WHERE id = ?', [
+      'sqlite-day-restore',
+    ]);
     expect(rows).toHaveLength(1);
   });
 
@@ -1166,7 +1207,7 @@ describe('fitnessStore – SQLite write-through', () => {
         originalDayOfWeek: 3,
       });
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     const rows = await db.query<Record<string, unknown>>(
       'SELECT * FROM training_plan_days WHERE plan_id = ? AND day_of_week = ?',
@@ -1187,17 +1228,14 @@ describe('fitnessStore – SQLite write-through', () => {
     act(() => {
       result.current.addPlanDays([day1, day2, day3]);
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     act(() => {
       result.current.removePlanDaySession('rm-day-1');
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM training_plan_days WHERE id = ?',
-      ['rm-day-1'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE id = ?', ['rm-day-1']);
     expect(rows).toHaveLength(0);
 
     expect(result.current.trainingPlanDays).toHaveLength(2);
@@ -1215,16 +1253,13 @@ describe('fitnessStore – SQLite write-through', () => {
     act(() => {
       result.current.addWorkout(workout);
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     await act(async () => {
       await result.current.deleteWorkout('del-w1');
     });
 
-    const rows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM workouts WHERE id = ?',
-      ['del-w1'],
-    );
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['del-w1']);
     expect(rows).toHaveLength(0);
   });
 
@@ -1250,16 +1285,12 @@ describe('fitnessStore – SQLite write-through', () => {
     expect(result.current.workouts).toContainEqual(workout);
     expect(result.current.workoutSets).toContainEqual(sets[0]);
 
-    const workoutRows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM workouts WHERE id = ?',
-      ['atomic-w1'],
-    );
+    const workoutRows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['atomic-w1']);
     expect(workoutRows).toHaveLength(1);
 
-    const setRows = await db.query<Record<string, unknown>>(
-      'SELECT * FROM workout_sets WHERE workout_id = ?',
-      ['atomic-w1'],
-    );
+    const setRows = await db.query<Record<string, unknown>>('SELECT * FROM workout_sets WHERE workout_id = ?', [
+      'atomic-w1',
+    ]);
     expect(setRows).toHaveLength(1);
   });
 
@@ -1370,11 +1401,8 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.addPlanDays([samplePlanDay()]);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('addPlanDays'),
-      expect.anything(),
-    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('addPlanDays'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1390,11 +1418,8 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.updatePlanDayExercises('day-1', []);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('updatePlanDayExercises'),
-      expect.anything(),
-    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('updatePlanDayExercises'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1410,11 +1435,8 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.restorePlanDayOriginal('day-1');
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('restorePlanDayOriginal'),
-      expect.anything(),
-    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('restorePlanDayOriginal'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1438,11 +1460,8 @@ describe('fitnessStore – SQLite error paths', () => {
       });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('addPlanDaySession'),
-      expect.anything(),
-    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('addPlanDaySession'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1463,11 +1482,8 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.removePlanDaySession('err-d1');
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('removePlanDaySession'),
-      expect.anything(),
-    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('removePlanDaySession'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1482,7 +1498,7 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.addWorkout(sampleWorkout());
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('SQLite write failed for workout'),
       expect.anything(),
@@ -1523,7 +1539,7 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.addWorkoutSet(sampleWorkoutSet());
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('SQLite write failed for workoutSet'),
       expect.anything(),
@@ -1546,7 +1562,7 @@ describe('fitnessStore – SQLite error paths', () => {
       });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('SQLite write failed for workout draft'),
       expect.anything(),
@@ -1565,7 +1581,7 @@ describe('fitnessStore – SQLite error paths', () => {
       result.current.clearWorkoutDraft();
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('SQLite delete failed for workout draft'),
       expect.anything(),
@@ -1597,11 +1613,11 @@ describe('fitnessStore – removePlanDaySession reorder edge case', () => {
     const days = useFitnessStore.getState().trainingPlanDays;
     expect(days).toHaveLength(2);
 
-    const otherDay = days.find((d) => d.id === 'rd-other');
+    const otherDay = days.find(d => d.id === 'rd-other');
     expect(otherDay?.sessionOrder).toBe(1);
     expect(otherDay?.planId).toBe('plan-2');
 
-    const reorderedDay = days.find((d) => d.id === 'rd-2');
+    const reorderedDay = days.find(d => d.id === 'rd-2');
     expect(reorderedDay?.sessionOrder).toBe(1);
   });
 });
@@ -1630,10 +1646,7 @@ describe('fitnessStore – persist migrate via rehydration', () => {
       showPlanCelebration: false,
     };
 
-    localStorage.setItem(
-      'fitness-storage',
-      JSON.stringify({ state: v1State, version: 1 }),
-    );
+    localStorage.setItem('fitness-storage', JSON.stringify({ state: v1State, version: 1 }));
 
     useFitnessStore.persist.rehydrate();
 
@@ -1658,10 +1671,7 @@ describe('fitnessStore – persist migrate via rehydration', () => {
       showPlanCelebration: false,
     };
 
-    localStorage.setItem(
-      'fitness-storage',
-      JSON.stringify({ state: v2State, version: 2 }),
-    );
+    localStorage.setItem('fitness-storage', JSON.stringify({ state: v2State, version: 2 }));
 
     useFitnessStore.persist.rehydrate();
 
@@ -1860,5 +1870,238 @@ describe('fitnessStore – changeSplitType data format', () => {
 
     const types = newDays.map(d => d.workoutType);
     expect(types).toEqual(['Chest', 'Back', 'Shoulders', 'Legs', 'Arms']);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Bug reproduction tests — FK constraints & draft planDayId           */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – workout save FK constraint bugs', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+  });
+
+  it('saveWorkoutAtomic fails with FK violation when exerciseId mismatches EXERCISES (e.g. hiit vs hiit-training)', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const exercisesBefore = await db.query<Record<string, unknown>>("SELECT id FROM exercises WHERE id = 'hiit'");
+    expect(exercisesBefore).toHaveLength(0);
+
+    const workout = sampleWorkout({ id: 'cardio-fk-w1' });
+    const sets = [
+      sampleWorkoutSet({
+        id: 'cardio-fk-s1',
+        workoutId: 'cardio-fk-w1',
+        exerciseId: 'hiit',
+        setNumber: 1,
+        weightKg: 0,
+      }),
+    ];
+
+    let error: Error | null = null;
+    try {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    } catch (e) {
+      error = e as Error;
+    }
+
+    expect(error).not.toBeNull();
+    expect(error!.message).toContain('FOREIGN KEY constraint failed');
+  });
+
+  it('saveWorkoutAtomic fails with FK violation when exerciseId is rowing (should be rowing-machine)', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({ id: 'cardio-fk-w2' });
+    const sets = [
+      sampleWorkoutSet({
+        id: 'cardio-fk-s2',
+        workoutId: 'cardio-fk-w2',
+        exerciseId: 'rowing',
+        setNumber: 1,
+        weightKg: 0,
+      }),
+    ];
+
+    let error: Error | null = null;
+    try {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    } catch (e) {
+      error = e as Error;
+    }
+
+    expect(error).not.toBeNull();
+    expect(error!.message).toContain('FOREIGN KEY constraint failed');
+  });
+
+  it('saveWorkoutAtomic succeeds with valid cardio exerciseIds (running, cycling, swimming, walking, elliptical)', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const validCardioIds = ['running', 'cycling', 'swimming', 'walking', 'elliptical'];
+    for (const exerciseId of validCardioIds) {
+      const workout = sampleWorkout({ id: `cardio-valid-${exerciseId}` });
+      const sets = [
+        sampleWorkoutSet({
+          id: `cardio-valid-s-${exerciseId}`,
+          workoutId: `cardio-valid-${exerciseId}`,
+          exerciseId,
+          setNumber: 1,
+          weightKg: 0,
+        }),
+      ];
+
+      await act(async () => {
+        await result.current.saveWorkoutAtomic(workout, sets);
+      });
+    }
+
+    expect(result.current.workouts).toHaveLength(validCardioIds.length);
+  });
+
+  it('saveWorkoutAtomic gracefully handles stale planDayId by falling back to null', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({
+      id: 'stale-planday-w1',
+      planDayId: 'non-existent-plan-day-id',
+    });
+    const sets = [
+      sampleWorkoutSet({
+        id: 'stale-planday-s1',
+        workoutId: 'stale-planday-w1',
+        exerciseId: 'barbell-bench-press',
+        setNumber: 1,
+      }),
+    ];
+
+    await act(async () => {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    });
+
+    expect(result.current.workouts).toContainEqual(expect.objectContaining({ id: 'stale-planday-w1' }));
+
+    const workoutRow = await db.queryOne<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', [
+      'stale-planday-w1',
+    ]);
+    expect(workoutRow).not.toBeNull();
+    expect(workoutRow!.planDayId).toBeNull();
+  });
+
+  it('saveWorkoutAtomic succeeds when planDayId is null/undefined', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const workout = sampleWorkout({
+      id: 'null-planday-w1',
+      planDayId: undefined,
+    });
+    const sets = [
+      sampleWorkoutSet({
+        id: 'null-planday-s1',
+        workoutId: 'null-planday-w1',
+        exerciseId: 'barbell-bench-press',
+        setNumber: 1,
+      }),
+    ];
+
+    await act(async () => {
+      await result.current.saveWorkoutAtomic(workout, sets);
+    });
+
+    expect(result.current.workouts).toContainEqual(expect.objectContaining({ id: 'null-planday-w1' }));
+  });
+});
+
+describe('fitnessStore – workout draft planDayId persistence', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+  });
+
+  it('setWorkoutDraft persists planDayId to SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.setWorkoutDraft({
+        exercises: [],
+        sets: [],
+        elapsedSeconds: 60,
+        planDayId: 'test-plan-day-123',
+      });
+    });
+
+    await vi.waitFor(async () => {
+      const rows = await db.query<Record<string, unknown>>(`SELECT * FROM workout_drafts WHERE id = 'current'`);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].planDayId).toBe('test-plan-day-123');
+    });
+  });
+
+  it('loadWorkoutDraft restores planDayId from SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.execute(
+      `INSERT INTO workout_drafts (id, exercises_json, sets_json, start_time, plan_day_id, updated_at)
+       VALUES ('current', '[]', '[]', '2025-01-01T00:00:00Z', 'restored-plan-day-456', '2025-01-01T00:00:00Z')`,
+    );
+
+    await act(async () => {
+      await result.current.loadWorkoutDraft();
+    });
+
+    expect(result.current.workoutDraft).not.toBeNull();
+    expect(result.current.workoutDraft!.planDayId).toBe('restored-plan-day-456');
+  });
+
+  it('setWorkoutDraft without planDayId stores null in SQLite', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.setWorkoutDraft({
+        exercises: [],
+        sets: [],
+        elapsedSeconds: 30,
+      });
+    });
+
+    await vi.waitFor(async () => {
+      const rows = await db.query<Record<string, unknown>>(`SELECT * FROM workout_drafts WHERE id = 'current'`);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].planDayId).toBeNull();
+    });
   });
 });

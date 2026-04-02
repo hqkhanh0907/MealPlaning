@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
-import { PersonStanding, Bike, Waves, Zap, Footprints, Dumbbell, Ship } from 'lucide-react';
-import type { MuscleGroup, CardioType, CardioIntensity } from './types';
+import { Bike, Dumbbell, Footprints, PersonStanding, Ship, Waves, Zap } from 'lucide-react';
+
+import type { CardioIntensity, CardioType, MuscleGroup } from './types';
 
 // Day labels (Monday-first, Vietnamese)
 export const DAY_LABELS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'] as const;
@@ -53,6 +54,17 @@ export const CARDIO_TYPES: { type: CardioType; icon: LucideIcon; i18nKey: string
   { type: 'rowing', icon: Ship, i18nKey: 'fitness.cardio.rowing' },
 ];
 export const DISTANCE_CARDIO_TYPES: CardioType[] = ['running', 'cycling', 'swimming'];
+
+// Maps CardioType to exercise database ID (where they differ)
+export const CARDIO_TYPE_TO_EXERCISE_ID: Record<CardioType, string> = {
+  running: 'running',
+  cycling: 'cycling',
+  swimming: 'swimming',
+  hiit: 'hiit-training',
+  walking: 'walking',
+  elliptical: 'elliptical',
+  rowing: 'rowing-machine',
+};
 
 export const INTENSITY_OPTIONS: { value: CardioIntensity; i18nKey: string }[] = [
   { value: 'low', i18nKey: 'fitness.cardio.low' },
