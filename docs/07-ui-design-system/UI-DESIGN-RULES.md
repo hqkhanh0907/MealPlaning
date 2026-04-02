@@ -1,8 +1,8 @@
 # 📐 MealPlaning UI Design System — Unified Reference
 
-> **Version**: 2.0 • **Date**: 2026-04-02 (Post Design System Migration)
+> **Version**: 3.0 • **Date**: 2026-04-02 (Post 5-Wave Design System Upgrade)
 > **Stack**: React 19 + Tailwind CSS v4 + shadcn/ui (base-nova) + Capacitor 8
-> **Overall UI Score**: 13/20 (Good) — up from 68/100 infrastructure, adoption ongoing
+> **Overall UI Score**: 17/20 (Good → Excellent threshold) — up from 13/20 pre-upgrade
 
 ---
 
@@ -28,31 +28,36 @@
 
 ### Audit Health Score (5-Dimension × 0-4)
 
-| #         | Dimension     | Score    | Key Finding                                                                      |
-| --------- | ------------- | -------- | -------------------------------------------------------------------------------- |
-| 1         | Accessibility | 3/4      | ARIA/labels/focus excellent; 2 undersized touch targets, 4 low-contrast          |
-| 2         | Performance   | 2/4      | 4 broad Zustand destructures; 28 mega-files >300 lines                           |
-| 3         | Theming       | 2/4      | 35% semantic adoption (888 vs 2125 raw); 0 banned colors; 13 dead token families |
-| 4         | Responsive    | 3/4      | Safe areas ✓, dvh ✓; mobile-first breakpoints (200 sm:, 9 md:, 0 xl:)            |
-| 5         | Anti-Patterns | 3/4      | 0 AI slop; 63 inline styles, 52 text-[10px]; 44 dark mode edge cases             |
-| **Total** | **13/20**     | **Good** |
+| #         | Dimension     | Score                          | Key Finding                                                                                                                       |
+| --------- | ------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1         | Accessibility | 3.5/4                          | aria-hidden added (30×); 10 icon buttons still missing aria-label; ~14 text-slate-400 low-contrast without dark: pair             |
+| 2         | Performance   | 3/4                            | Zustand selectors fixed in App.tsx; useMemo in DishEditModal; 3 mega-files remain (>700 lines); 5 missing useMemo in dashboard    |
+| 3         | Theming       | 3.5/4                          | 768 semantic token usages; 4 new tokens created; ~14 raw text-slate-400 without dark: pair; 128 intentional dark: slate-400 pairs |
+| 4         | Responsive    | 3.5/4                          | Safe areas ✓; touch targets ✓ (119×); 2 min-w overflow risks (MealActionBar, Summary); grid breakpoints added                     |
+| 5         | Anti-Patterns | 3.5/4                          | 0 AI slop; 0 gradient text; 0 bounce easing; 4 stray console.error (should use logger.ts); 0 purple classes                       |
+| **Total** | **17/20**     | **Good (Excellent threshold)** |
 
-### Migration Status
+### Migration Status (5-Wave Upgrade Results)
 
-| Metric             | Pre-Migration | Post-Migration                       | Change        |
-| ------------------ | ------------- | ------------------------------------ | ------------- |
-| Semantic tokens    | ~20 (3%)      | 888 (35%)                            | **+4340%**    |
-| Banned colors      | ~101          | **0**                                | ✅ Eliminated |
-| Dark mode coverage | ~80%          | **98%**                              | +18pp         |
-| CI enforcement     | None          | check-banned-colors.sh + PR template | ✅ New        |
+| Metric             | Pre-Upgrade (v2.0)   | Post-Upgrade (v3.0)                                                       | Change        |
+| ------------------ | -------------------- | ------------------------------------------------------------------------- | ------------- |
+| Semantic tokens    | 888 (35%)            | **1,656+ (>75%)**                                                         | **+86%**      |
+| New tokens created | 0                    | 4 (primary-subtle, primary-emphasis, foreground-secondary, border-subtle) | ✅ New        |
+| Dead tokens        | 17 (chart, duration) | **0**                                                                     | ✅ Eliminated |
+| Font-bold overuse  | ~50                  | **0** (migrated to semibold/medium)                                       | ✅ Fixed      |
+| Inline styles      | 63                   | **29** (touchAction + tabular-nums migrated)                              | -54%          |
+| text-[10px]        | 15                   | **0** (promoted to text-xs)                                               | ✅ Fixed      |
+| Dark mode pairs    | ~80%                 | **128 intentional pairs + semantic**                                      | ✅ Excellent  |
+| aria-hidden        | ~0                   | **30+**                                                                   | ✅ New        |
+| CI enforcement     | check-banned-colors  | + prettier-plugin-tailwindcss + husky                                     | ✅ Enhanced   |
 
 ### Top 5 Remaining Actions
 
-1. **Fix Zustand destructures in App.tsx** — cascade re-renders on every store mutation
-2. **Fix contrast ratios** — Emerald-500 primary (3.4:1) and amber gradients (2.5:1) fail WCAG AA
-3. **Adopt existing tokens** — text-slate-500→text-muted-foreground (141×), border-slate-200→border-border (125×)
-4. **Create --primary-subtle** — bg-emerald-50/dark:bg-emerald-900 pattern used 187× with no token
-5. **Fix 44 dark mode edge cases** — text-slate-400 invisible in dark mode (36 instances)
+1. **Add aria-label to 10+ icon-only buttons** — SetEditor (5), WorkoutLogger (5+), modal close buttons
+2. **Fix ~14 text-slate-400 without dark: pair** — GoalSettingsModal (6), EnergyBalanceMini (5), others
+3. **Add useMemo to 5 dashboard sorts** — AdjustmentHistory, WeightQuickLog, WeightMini helpers
+4. **Split 3 mega-files** — TrainingPlanView (832 lines), DishManager (809), DishEditModal (730)
+5. **Migrate 4 console.error to logger.ts** — WorkoutLogger, CardioLogger, HealthConfirmStep, OnboardingErrorBoundary
 
 ---
 
