@@ -80,7 +80,11 @@ export function safeParseJsonArray<T>(json: string | null | undefined, fallback:
     const parsed: unknown = JSON.parse(json);
     return Array.isArray(parsed) ? (parsed as T[]) : fallback;
   } catch {
-    return fallback;
+    // Fallback: handle legacy comma-separated format (e.g. "chest,shoulders")
+    return json
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean) as T[];
   }
 }
 

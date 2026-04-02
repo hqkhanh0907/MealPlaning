@@ -38,7 +38,7 @@ function sampleDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay {
     dayOfWeek: 1,
     sessionOrder: 1,
     workoutType: 'Push',
-    muscleGroups: 'chest,shoulders',
+    muscleGroups: '["chest","shoulders"]',
     isUserAssigned: false,
     originalDayOfWeek: 1,
     ...overrides,
@@ -47,9 +47,15 @@ function sampleDay(overrides: Partial<TrainingPlanDay> = {}): TrainingPlanDay {
 
 const defaultProps: WorkoutAssignmentListProps = {
   planDays: [
-    sampleDay({ id: 'day-1', dayOfWeek: 1, workoutType: 'Push', muscleGroups: 'chest,shoulders' }),
-    sampleDay({ id: 'day-2', dayOfWeek: 3, workoutType: 'Pull', muscleGroups: 'back,biceps', sessionOrder: 2 }),
-    sampleDay({ id: 'day-3', dayOfWeek: 5, workoutType: 'Legs', muscleGroups: 'quads,hamstrings', sessionOrder: 3 }),
+    sampleDay({ id: 'day-1', dayOfWeek: 1, workoutType: 'Push', muscleGroups: '["chest","shoulders"]' }),
+    sampleDay({ id: 'day-2', dayOfWeek: 3, workoutType: 'Pull', muscleGroups: '["back","biceps"]', sessionOrder: 2 }),
+    sampleDay({
+      id: 'day-3',
+      dayOfWeek: 5,
+      workoutType: 'Legs',
+      muscleGroups: '["quads","hamstrings"]',
+      sessionOrder: 3,
+    }),
   ],
   trainingDays: [1, 3, 5],
 };
@@ -65,9 +71,9 @@ describe('WorkoutAssignmentList', () => {
   it('displays workout type and muscle groups', () => {
     render(<WorkoutAssignmentList {...defaultProps} />);
     expect(screen.getByText('Push')).toBeInTheDocument();
-    expect(screen.getByText('chest,shoulders')).toBeInTheDocument();
+    expect(screen.getByText('chest, shoulders')).toBeInTheDocument();
     expect(screen.getByText('Pull')).toBeInTheDocument();
-    expect(screen.getByText('back,biceps')).toBeInTheDocument();
+    expect(screen.getByText('back, biceps')).toBeInTheDocument();
   });
 
   it('displays day badges with correct labels', () => {

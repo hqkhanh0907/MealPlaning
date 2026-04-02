@@ -28,6 +28,7 @@ import { useNavigationStore } from '../../../store/navigationStore';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { DAY_LABELS } from '../constants';
 import type { SelectedExercise, TrainingPlanDay } from '../types';
+import { safeParseJsonArray } from '../types';
 import { safeJsonParse } from '../utils/safeJsonParse';
 import { translateWorkoutType } from '../utils/translateWorkoutType';
 import { AddSessionModal } from './AddSessionModal';
@@ -598,13 +599,7 @@ function TrainingPlanViewInner({
 
           {viewedPlanDay.muscleGroups && (
             <p className="text-muted-foreground text-sm">
-              {(viewedPlanDay.muscleGroups.startsWith('[')
-                ? safeJsonParse<string[]>(viewedPlanDay.muscleGroups, [])
-                : viewedPlanDay.muscleGroups
-                    .split(',')
-                    .map(g => g.trim())
-                    .filter(Boolean)
-              )
+              {safeParseJsonArray<string>(viewedPlanDay.muscleGroups)
                 .map(g => t(`fitness.onboarding.muscle_${g}`, g))
                 .join(', ')}
             </p>
@@ -762,7 +757,7 @@ function TrainingPlanViewInner({
               dayOfWeek: addSessionDow,
               sessionOrder: existingSessions.length + 1,
               workoutType: 'Strength',
-              muscleGroups: groups.join(','),
+              muscleGroups: JSON.stringify(groups),
               exercises: '[]',
               originalExercises: '[]',
               isUserAssigned: true,

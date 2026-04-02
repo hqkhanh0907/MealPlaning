@@ -246,8 +246,8 @@ describe('generateTrainingPlan', () => {
       });
       const upper = result.days.find(d => d.workoutType === 'Upper A');
       const lower = result.days.find(d => d.workoutType === 'Lower A');
-      expect(upper?.muscleGroups).toBe('chest,back,shoulders,arms');
-      expect(lower?.muscleGroups).toBe('legs,glutes,core');
+      expect(upper?.muscleGroups).toBe('["chest","back","shoulders","arms"]');
+      expect(lower?.muscleGroups).toBe('["legs","glutes","core"]');
     });
 
     it('generates Push/Pull/Legs split for 5 days', () => {

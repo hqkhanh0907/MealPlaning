@@ -1267,7 +1267,7 @@ describe('TrainingPlanView', () => {
           dayOfWeek: 2,
           sessionOrder: 1,
           workoutType: 'Strength',
-          muscleGroups: 'chest,back',
+          muscleGroups: '["chest","back"]',
           exercises: '[]',
           originalExercises: '[]',
         }),

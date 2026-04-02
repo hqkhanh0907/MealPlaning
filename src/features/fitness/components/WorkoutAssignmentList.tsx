@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { TrainingPlanDay } from '../types';
+import { safeParseJsonArray } from '../types';
 
 export interface WorkoutAssignmentListProps {
   planDays: TrainingPlanDay[];
@@ -94,7 +95,11 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
           {/* Workout info */}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{day.workoutType}</p>
-            {day.muscleGroups && <p className="text-muted-foreground truncate text-xs">{day.muscleGroups}</p>}
+            {day.muscleGroups && (
+              <p className="text-muted-foreground truncate text-xs">
+                {safeParseJsonArray<string>(day.muscleGroups).join(', ')}
+              </p>
+            )}
           </div>
 
           {/* Day badge — tap to reassign */}

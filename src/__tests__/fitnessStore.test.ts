@@ -1778,17 +1778,16 @@ describe('fitnessStore – changeSplitType data format', () => {
     }
   });
 
-  it('TC_SPLIT_02: regenerate mode produces muscleGroups as comma-separated', () => {
+  it('TC_SPLIT_02: regenerate mode produces muscleGroups as JSON array', () => {
     setupPplPlan();
     useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
 
     const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
     for (const day of newDays) {
       expect(day.muscleGroups).toBeDefined();
-      expect(day.muscleGroups).not.toMatch(/^\[/);
-      expect(day.muscleGroups).not.toMatch(/"/);
+      expect(day.muscleGroups).toMatch(/^\[/);
 
-      const groups = day.muscleGroups!.split(',');
+      const groups = JSON.parse(day.muscleGroups!) as string[];
       expect(groups.length).toBeGreaterThan(0);
       for (const g of groups) {
         expect(g).toMatch(/^[a-z]+$/);
@@ -1796,10 +1795,10 @@ describe('fitnessStore – changeSplitType data format', () => {
     }
 
     const upperDay = newDays.find(d => d.workoutType === 'Upper')!;
-    expect(upperDay.muscleGroups).toBe('chest,back,shoulders,arms');
+    expect(upperDay.muscleGroups).toBe('["chest","back","shoulders","arms"]');
 
     const lowerDay = newDays.find(d => d.workoutType === 'Lower')!;
-    expect(lowerDay.muscleGroups).toBe('legs,glutes,core');
+    expect(lowerDay.muscleGroups).toBe('["legs","glutes","core"]');
   });
 
   it('TC_SPLIT_03: remap mode produces workoutType = toDay for mapped days', () => {
@@ -1819,17 +1818,16 @@ describe('fitnessStore – changeSplitType data format', () => {
     expect(types).toContain('Lower');
   });
 
-  it('TC_SPLIT_04: remap mode produces muscleGroups as comma-separated', () => {
+  it('TC_SPLIT_04: remap mode produces muscleGroups as JSON array', () => {
     setupPplPlan();
     useFitnessStore.getState().changeSplitType(PLAN_ID, 'upper_lower', 'remap');
 
     const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID);
     for (const day of newDays) {
       expect(day.muscleGroups).toBeDefined();
-      expect(day.muscleGroups).not.toMatch(/^\[/);
-      expect(day.muscleGroups).not.toMatch(/"/);
+      expect(day.muscleGroups).toMatch(/^\[/);
 
-      const groups = day.muscleGroups!.split(',');
+      const groups = JSON.parse(day.muscleGroups!) as string[];
       expect(groups.length).toBeGreaterThan(0);
       for (const g of groups) {
         expect(g).toMatch(/^[a-z]+$/);
