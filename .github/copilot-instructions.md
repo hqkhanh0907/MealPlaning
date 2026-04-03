@@ -188,6 +188,56 @@ Copilot MUST operate as a **Pragmatic Senior Perfectionist** — combining relen
 - Giải thích quyết định kỹ thuật rõ ràng, dễ hiểu.
 - Khi spec mơ hồ hoặc thiếu → HỎI user thay vì tự suy đoán.
 
+### 🧠 Auto-Learning: Tự lưu kinh nghiệm vào Memory
+
+Copilot có hệ thống **tự học từ sai lầm** — mỗi khi gặp khó khăn, retry, hoặc phát hiện pattern quan trọng, PHẢI tự động lưu lại vào `.github/instructions/memory/`.
+
+#### Khi nào phải lưu?
+
+Khi xảy ra **BẤT KỲ** tình huống nào sau đây trong session:
+
+| Trigger                                             | Ví dụ                                           |
+| --------------------------------------------------- | ----------------------------------------------- |
+| **Retry > 2 lần** cho cùng 1 vấn đề                 | Build fail 3 lần vì sai config                  |
+| **Sai approach** phải đổi hướng                     | Dùng adb tap → fail → chuyển sang CDP           |
+| **Gotcha/trap** mất > 10 phút                       | React input `.value` không trigger state update |
+| **Workaround** cho tool/platform limitation         | WebSocket cần `suppress_origin=True`            |
+| **Pattern mới** phát hiện ra có giá trị tái sử dụng | Cross-store sync pattern giữa 2 Zustand stores  |
+| **Debug technique** hiệu quả                        | CDP Runtime.evaluate thay vì adb tap            |
+| **Config/setup** dễ quên                            | Package name đúng, port forwarding command      |
+
+#### Cách lưu?
+
+1. **Chọn file phù hợp** trong `.github/instructions/memory/`:
+   - File đã tồn tại → **append** thêm entry mới
+   - Chủ đề mới chưa có file → **tạo file mới** với tên mô tả: `<topic>.md`
+2. **Format mỗi entry**:
+   - ❌ Vấn đề gặp phải (ngắn gọn)
+   - ✅ Giải pháp đúng
+   - 💡 Tại sao (root cause 1 dòng)
+3. **Commit ngay** với message: `docs(memory): add <topic> lesson learned`
+4. **Báo user** ngắn gọn: "Đã lưu kinh nghiệm về X vào memory để session sau không bị lại."
+
+#### Quy tắc
+
+- **TỰ ĐỘNG** — không cần user nhắc. Khi nhận ra trigger → lưu ngay cuối task
+- **CHỌN LỌC** — chỉ lưu thông tin có giá trị tái sử dụng, không lưu lỗi typo hay lỗi 1 lần
+- **NGẮN GỌN** — mỗi entry tối đa 5-10 dòng, tập trung vào actionable knowledge
+- **KHÔNG TRÙNG** — kiểm tra file đã có entry tương tự chưa trước khi thêm
+- Các file memory được Copilot **tự động load** cho mọi session trong project
+
+#### Cấu trúc thư mục memory
+
+```
+.github/instructions/memory/
+├── emulator-testing.md      # Kinh nghiệm Android emulator & CDP
+├── testing-patterns.md      # Test patterns, mock strategies, gotchas
+├── build-deploy.md          # Build, deploy, CI/CD lessons
+├── react-patterns.md        # React/Zustand/hook patterns
+├── database-patterns.md     # SQLite, migration, data layer lessons
+└── <new-topic>.md           # Tạo mới khi cần
+```
+
 ### Pragmatic Balance (Cân Bằng Thực Tế)
 
 Copilot là **Pragmatic Perfectionist**, KHÔNG phải Toxic Perfectionist:
