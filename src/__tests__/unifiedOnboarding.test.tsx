@@ -497,9 +497,7 @@ describe('OnboardingProgress', () => {
   });
 
   it('fills segment to 100% on the last step of a multi-step section (fence-post)', () => {
-    const { container } = render(
-      <OnboardingProgress currentSection={2} totalSections={5} stepInSection={3} totalStepsInSection={4} />,
-    );
+    render(<OnboardingProgress currentSection={2} totalSections={5} stepInSection={3} totalStepsInSection={4} />);
     const progressBar = screen.getByRole('progressbar');
     // Section 2 is the 2nd segment (index 1); last step: 3/(4-1) = 100%
     const activeSegment = progressBar.children[1] as HTMLElement;
@@ -508,9 +506,7 @@ describe('OnboardingProgress', () => {
   });
 
   it('fills single-step section to 100% immediately when active', () => {
-    const { container } = render(
-      <OnboardingProgress currentSection={3} totalSections={7} stepInSection={0} totalStepsInSection={1} />,
-    );
+    render(<OnboardingProgress currentSection={3} totalSections={7} stepInSection={0} totalStepsInSection={1} />);
     const progressBar = screen.getByRole('progressbar');
     // Section 3 (index 2): single-step guard → 100%
     const activeSegment = progressBar.children[2] as HTMLElement;

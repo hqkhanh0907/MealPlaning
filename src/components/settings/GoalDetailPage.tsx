@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Equal, Flame, Scale, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import { Flame, Minus, Scale, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ import { SettingsDetailLayout } from './SettingsDetailLayout';
 
 const GOAL_ICON: Record<string, typeof TrendingDown> = {
   cut: TrendingDown,
-  maintain: Equal,
+  maintain: Minus,
   bulk: TrendingUp,
 };
 
@@ -60,7 +60,7 @@ function GoalViewMode() {
     );
   }
 
-  const GoalIcon = GOAL_ICON[activeGoal.type] ?? Equal;
+  const GoalIcon = GOAL_ICON[activeGoal.type] ?? Minus;
   const goalColor = GOAL_COLOR[activeGoal.type] ?? '';
 
   return (

@@ -63,12 +63,12 @@ export function SettingsDetailLayout({
       </div>
 
       {/* Content */}
-      <div className="flex-1">{children}</div>
+      <div className={isEditing ? 'flex-1 pb-24' : 'flex-1'}>{children}</div>
 
-      {/* Sticky Save/Cancel Footer — only in edit mode */}
+      {/* Fixed Save/Cancel Footer — only in edit mode */}
       {isEditing && (
         <div
-          className="bg-card/95 border-border sticky right-0 bottom-0 left-0 -mx-4 mt-6 border-t px-4 py-4 backdrop-blur-sm sm:-mx-6 sm:px-6"
+          className="bg-card/95 border-border fixed inset-x-0 bottom-0 z-40 border-t px-4 py-4 backdrop-blur-sm"
           data-testid="settings-detail-footer"
         >
           <div className="flex gap-3">
