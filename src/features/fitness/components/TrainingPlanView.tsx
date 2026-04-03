@@ -22,6 +22,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { ConfirmationModal } from '../../../components/modals/ConfirmationModal';
 import { EnergyBalanceCard } from '../../../components/nutrition/EnergyBalanceCard';
+import { useTodayCaloriesOut } from '../../../hooks/useTodayCaloriesOut';
 import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
@@ -29,6 +30,7 @@ import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTarg
 import { DAY_LABELS } from '../constants';
 import type { SelectedExercise, TrainingPlanDay } from '../types';
 import { safeParseJsonArray } from '../types';
+import { estimateDuration } from '../utils/durationEstimator';
 import { safeJsonParse } from '../utils/safeJsonParse';
 import { translateWorkoutType } from '../utils/translateWorkoutType';
 import { AddSessionModal } from './AddSessionModal';
@@ -48,18 +50,6 @@ interface TrainingPlanViewProps {
 function parseExercises(exercises?: string): SelectedExercise[] {
   if (!exercises) return [];
   return safeJsonParse<SelectedExercise[]>(exercises, []);
-}
-
-function estimateDuration(exercises: SelectedExercise[]): number {
-  if (exercises.length === 0) return 0;
-  const WARM_UP_MIN = 5;
-  const SET_DURATION_SEC = 40;
-  const SETUP_SEC = 30;
-  const totalSeconds = exercises.reduce(
-    (sum, ex) => sum + ex.sets * (SET_DURATION_SEC + ex.restSeconds) + SETUP_SEC,
-    0,
-  );
-  return Math.round(totalSeconds / 60) + WARM_UP_MIN;
 }
 
 function getTodayDow(): number {
@@ -87,12 +77,10 @@ function TrainingPlanViewInner({
   isGenerating = false,
 }: Readonly<TrainingPlanViewProps>): React.JSX.Element {
   const { t } = useTranslation();
-  const { trainingPlans, trainingPlanDays, workouts, workoutSets } = useFitnessStore(
+  const { trainingPlans, trainingPlanDays } = useFitnessStore(
     useShallow(s => ({
       trainingPlans: s.trainingPlans,
       trainingPlanDays: s.trainingPlanDays,
-      workouts: s.workouts,
-      workoutSets: s.workoutSets,
     })),
   );
   const pushPage = useNavigationStore(s => s.pushPage);
@@ -116,19 +104,7 @@ function TrainingPlanViewInner({
   const [exercisesExpanded, setExercisesExpanded] = useState(false);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  const todayCaloriesOut = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const todayWorkoutIds = new Set(workouts.filter(w => w.date === todayStr).map(w => w.id));
-    if (todayWorkoutIds.size === 0) return 0;
-    const cardioCalories = workoutSets
-      .filter(s => todayWorkoutIds.has(s.workoutId) && s.estimatedCalories)
-      .reduce((sum, s) => sum + (s.estimatedCalories ?? 0), 0);
-    const strengthSets = workoutSets.filter(
-      s => todayWorkoutIds.has(s.workoutId) && !s.estimatedCalories && s.weightKg > 0,
-    );
-    const strengthCalories = strengthSets.length * 8;
-    return Math.round(cardioCalories + strengthCalories);
-  }, [workouts, workoutSets]);
+  const todayCaloriesOut = useTodayCaloriesOut();
 
   const activePlan = useMemo(() => trainingPlans.find(p => p.status === 'active'), [trainingPlans]);
 

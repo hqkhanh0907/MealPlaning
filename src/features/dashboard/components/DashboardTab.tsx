@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
 import { EnergyBalanceMini } from '../../../components/nutrition/EnergyBalanceMini';
+import { useTodayCaloriesOut } from '../../../hooks/useTodayCaloriesOut';
 import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { useFeedbackLoop } from '../hooks/useFeedbackLoop';
@@ -43,6 +44,7 @@ function DashboardTabInner(): React.ReactElement {
   const { adjustment, applyAdjustment, dismissAdjustment } = useFeedbackLoop();
   const { targetCalories, targetProtein } = useNutritionTargets();
   const { eaten, protein } = useTodayNutrition();
+  const todayCaloriesOut = useTodayCaloriesOut();
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -85,7 +87,7 @@ function DashboardTabInner(): React.ReactElement {
           data-testid="dashboard-tier-2"
           style={staggerStyle(STAGGER_DELAYS.tier2)}
         >
-          <EnergyBalanceMini eaten={eaten} burned={0} target={targetCalories} />
+          <EnergyBalanceMini eaten={eaten} burned={todayCaloriesOut} target={targetCalories} />
           <ProteinProgress current={protein} target={targetProtein} />
         </div>
       </ErrorBoundary>

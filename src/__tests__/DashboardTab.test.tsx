@@ -27,6 +27,11 @@ vi.mock('../store/ingredientStore', () => ({
 const mockApply = vi.fn();
 const mockDismiss = vi.fn();
 let mockAdjustment: unknown = null;
+let mockTodayCaloriesOut = 0;
+
+vi.mock('../hooks/useTodayCaloriesOut', () => ({
+  useTodayCaloriesOut: () => mockTodayCaloriesOut,
+}));
 
 vi.mock('../features/dashboard/hooks/useFeedbackLoop', () => ({
   useFeedbackLoop: () => ({
@@ -65,7 +70,12 @@ vi.mock('../features/dashboard/components/DailyScoreHero', () => ({
 
 vi.mock('../components/nutrition/EnergyBalanceMini', () => ({
   EnergyBalanceMini: (props: { eaten: number; burned: number; target: number }) => (
-    <div data-testid="energy-balance-mini" data-eaten={props.eaten} data-target={props.target}>
+    <div
+      data-testid="energy-balance-mini"
+      data-eaten={props.eaten}
+      data-burned={props.burned}
+      data-target={props.target}
+    >
       EnergyBalanceMini
     </div>
   ),
@@ -178,6 +188,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
   mockAdjustment = null;
+  mockTodayCaloriesOut = 0;
   capturedWeightMiniOnTap = undefined;
   capturedWeightQuickLogOnClose = undefined;
   Object.defineProperty(globalThis, 'matchMedia', {
@@ -459,6 +470,20 @@ describe('DashboardTab', () => {
       renderDashboard();
       const eb = screen.getByTestId('energy-balance-mini');
       expect(eb.getAttribute('data-target')).toBe('2000');
+    });
+
+    it('passes burned calories from useTodayCaloriesOut to EnergyBalanceMini', () => {
+      mockTodayCaloriesOut = 350;
+      renderDashboard();
+      const eb = screen.getByTestId('energy-balance-mini');
+      expect(eb.getAttribute('data-burned')).toBe('350');
+    });
+
+    it('passes zero burned when no workouts today', () => {
+      mockTodayCaloriesOut = 0;
+      renderDashboard();
+      const eb = screen.getByTestId('energy-balance-mini');
+      expect(eb.getAttribute('data-burned')).toBe('0');
     });
 
     it('passes nutrition data to ProteinProgress', () => {
