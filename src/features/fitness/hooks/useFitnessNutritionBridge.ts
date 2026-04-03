@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 
 import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import i18n from '../../../i18n';
-import { calculateBMR, calculateTDEE } from '../../../services/nutritionEngine';
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
 
 export interface FitnessNutritionInsight {
@@ -86,6 +86,7 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
   const workouts = useFitnessStore(s => s.workouts);
   const healthProfile = useHealthProfileStore(s => s.profile);
   const { eaten, protein } = useTodayNutrition();
+  const { targetCalories, targetProtein } = useNutritionTargets();
 
   return useMemo(() => {
     const today = toDateString(new Date());
@@ -99,19 +100,8 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
       return { insight: null, todayCalorieBudget: 0, isTrainingDay, weeklyTrainingLoad };
     }
 
-    const bmr = calculateBMR(
-      healthProfile.weightKg,
-      healthProfile.heightCm,
-      healthProfile.age,
-      healthProfile.gender,
-      healthProfile.bmrOverride,
-    );
-    const tdee = calculateTDEE(bmr, healthProfile.activityLevel);
-    const todayCalorieBudget = tdee;
-
+    const todayCalorieBudget = targetCalories;
     const todayCaloriesConsumed = eaten;
-
-    const proteinTarget = healthProfile.weightKg * 1.6;
     const todayProteinConsumed = protein;
 
     const insight = deriveInsight(
@@ -120,9 +110,9 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
       todayCalorieBudget,
       todayCaloriesConsumed,
       todayProteinConsumed,
-      proteinTarget,
+      targetProtein,
     );
 
     return { insight, todayCalorieBudget, isTrainingDay, weeklyTrainingLoad };
-  }, [workouts, healthProfile, eaten, protein]);
+  }, [workouts, healthProfile, eaten, protein, targetCalories, targetProtein]);
 }

@@ -32,6 +32,15 @@ describe('calculateBMR', () => {
     expect(calculateBMR(80, 180, 30, 'male', 0)).toBe(1780);
   });
 
+  it('calculates normally when bmrOverride is undefined', () => {
+    expect(calculateBMR(80, 180, 30, 'male', undefined)).toBe(1780);
+  });
+
+  it('ignores negative bmrOverride', () => {
+    // Negative BMR is physiologically impossible, should recalculate
+    expect(calculateBMR(80, 180, 30, 'male', -100)).toBe(1780);
+  });
+
   it('handles very light weight', () => {
     // 10*40 + 6.25*150 - 5*20 + 5 = 400 + 937.5 - 100 + 5 = 1242.5 → 1243
     expect(calculateBMR(40, 150, 20, 'male')).toBe(1243);

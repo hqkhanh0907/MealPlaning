@@ -4,6 +4,7 @@ import type { Mock } from 'vitest';
 import type { FitnessNutritionInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
 import { deriveInsight } from '../features/fitness/hooks/useFitnessNutritionBridge';
 import { useFitnessNutritionBridge } from '../features/fitness/hooks/useFitnessNutritionBridge';
+import { useNutritionTargets } from '../features/health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import * as todayNutrition from '../hooks/useTodayNutrition';
 import { useFitnessStore } from '../store/fitnessStore';
@@ -20,9 +21,15 @@ vi.mock('../hooks/useTodayNutrition', () => ({
   useTodayNutrition: vi.fn(() => ({ eaten: 0, protein: 0 })),
 }));
 
-vi.mock('../services/nutritionEngine', () => ({
-  calculateBMR: vi.fn(() => 1800),
-  calculateTDEE: vi.fn(() => 2500),
+vi.mock('../features/health-profile/hooks/useNutritionTargets', () => ({
+  useNutritionTargets: vi.fn(() => ({
+    targetCalories: 2500,
+    targetProtein: 140,
+    targetFat: 69,
+    targetCarbs: 309,
+    bmr: 1800,
+    tdee: 2500,
+  })),
 }));
 
 describe('deriveInsight', () => {
@@ -215,5 +222,42 @@ describe('useFitnessNutritionBridge hook', () => {
     const { result } = renderHook(() => useFitnessNutritionBridge());
     expect(result.current.insight).not.toBeNull();
     expect(result.current.insight?.type).toBe('deficit-on-training');
+  });
+
+  it('uses goal-adjusted target calories as budget', () => {
+    vi.mocked(useNutritionTargets).mockReturnValue({
+      targetCalories: 1950,
+      targetProtein: 140,
+      targetFat: 54,
+      targetCarbs: 244,
+      bmr: 1800,
+      tdee: 2500,
+    });
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.todayCalorieBudget).toBe(1950);
+  });
+
+  it('uses correct protein target from useNutritionTargets', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) => selector({ workouts: [{ date: today }] }),
+    );
+    vi.mocked(useNutritionTargets).mockReturnValue({
+      targetCalories: 2500,
+      targetProtein: 175,
+      targetFat: 69,
+      targetCarbs: 309,
+      bmr: 1800,
+      tdee: 2500,
+    });
+    vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
+      eaten: 2200,
+      protein: 80,
+    });
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.insight).not.toBeNull();
+    expect(result.current.insight?.type).toBe('protein-low');
   });
 });

@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import { useTodayCaloriesOut } from '../hooks/useTodayCaloriesOut';
 import { useFitnessStore } from '../store/fitnessStore';
 
@@ -8,6 +9,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date('2025-01-06T12:00:00'));
   useFitnessStore.setState({ workouts: [], workoutSets: [] });
+  useHealthProfileStore.setState({ profile: { weightKg: 70 } as never });
 });
 
 afterEach(() => {
@@ -285,5 +287,102 @@ describe('useTodayCaloriesOut', () => {
     });
     const { result } = renderHook(() => useTodayCaloriesOut());
     expect(result.current).toBe(101);
+  });
+
+  it('uses MET-based calculation when workout has durationMin', () => {
+    useHealthProfileStore.setState({ profile: { weightKg: 80 } as never });
+    useFitnessStore.setState({
+      workouts: [
+        {
+          id: 'w1',
+          date: '2025-01-06',
+          name: 'Strength',
+          durationMin: 60,
+          createdAt: '2025-01-06',
+          updatedAt: '2025-01-06',
+        },
+      ],
+      workoutSets: [
+        {
+          id: 's1',
+          workoutId: 'w1',
+          exerciseId: 'e1',
+          setNumber: 1,
+          weightKg: 50,
+          estimatedCalories: undefined,
+          updatedAt: '2025-01-06',
+        },
+      ],
+    });
+    const { result } = renderHook(() => useTodayCaloriesOut());
+    // MET calculation: Math.round((5 * 80 * 60) / 60) = 400
+    expect(result.current).toBe(400);
+  });
+
+  it('falls back to flat rate when workout has no durationMin', () => {
+    useHealthProfileStore.setState({ profile: { weightKg: 80 } as never });
+    useFitnessStore.setState({
+      workouts: [
+        {
+          id: 'w1',
+          date: '2025-01-06',
+          name: 'Strength',
+          createdAt: '2025-01-06',
+          updatedAt: '2025-01-06',
+        },
+      ],
+      workoutSets: [
+        {
+          id: 's1',
+          workoutId: 'w1',
+          exerciseId: 'e1',
+          setNumber: 1,
+          weightKg: 50,
+          estimatedCalories: undefined,
+          updatedAt: '2025-01-06',
+        },
+        {
+          id: 's2',
+          workoutId: 'w1',
+          exerciseId: 'e1',
+          setNumber: 2,
+          weightKg: 60,
+          estimatedCalories: undefined,
+          updatedAt: '2025-01-06',
+        },
+      ],
+    });
+    const { result } = renderHook(() => useTodayCaloriesOut());
+    expect(result.current).toBe(16); // 2 sets × 8 cal
+  });
+
+  it('uses default weight when profile is null', () => {
+    useHealthProfileStore.setState({ profile: null });
+    useFitnessStore.setState({
+      workouts: [
+        {
+          id: 'w1',
+          date: '2025-01-06',
+          name: 'Strength',
+          durationMin: 60,
+          createdAt: '2025-01-06',
+          updatedAt: '2025-01-06',
+        },
+      ],
+      workoutSets: [
+        {
+          id: 's1',
+          workoutId: 'w1',
+          exerciseId: 'e1',
+          setNumber: 1,
+          weightKg: 50,
+          estimatedCalories: undefined,
+          updatedAt: '2025-01-06',
+        },
+      ],
+    });
+    const { result } = renderHook(() => useTodayCaloriesOut());
+    // MET: Math.round((5 * 70 * 60) / 60) = 350
+    expect(result.current).toBe(350);
   });
 });

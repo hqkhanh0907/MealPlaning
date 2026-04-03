@@ -33,7 +33,7 @@ export function calculateBMR(
   gender: Gender,
   bmrOverride?: number,
 ): number {
-  if (bmrOverride) return bmrOverride;
+  if (bmrOverride != null && bmrOverride > 0) return bmrOverride;
   const s = gender === 'male' ? 5 : -161;
   return Math.round(10 * weightKg + 6.25 * heightCm - 5 * age + s);
 }
