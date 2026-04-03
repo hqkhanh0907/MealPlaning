@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 
 import { GoalPhaseSelector } from '../features/health-profile/components/GoalPhaseSelector';
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
+import type { Goal } from '../features/health-profile/types';
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
@@ -27,7 +28,7 @@ vi.mock('../contexts/DatabaseContext', () => ({
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  useHealthProfileStore.setState({ activeGoal: null });
+  useHealthProfileStore.setState({ activeGoal: null, profile: null });
 });
 
 /* ------------------------------------------------------------------ */
@@ -52,20 +53,39 @@ function setupProfileWithWeight(weight: number) {
   });
 }
 
+function createGoal(overrides: Partial<Goal> = {}): Goal {
+  return {
+    id: 'goal-123',
+    type: 'cut',
+    rateOfChange: 'moderate',
+    targetWeightKg: 70,
+    calorieOffset: -550,
+    startDate: '2024-01-01T00:00:00.000Z',
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    ...overrides,
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /* Tests */
 /* ------------------------------------------------------------------ */
 describe('GoalPhaseSelector', () => {
-  it('renders 3 goal type options', () => {
+  it('renders 3 goal type options with description text', () => {
     render(<GoalPhaseSelector />);
 
     expect(screen.getByTestId('goal-type-cut')).toBeInTheDocument();
     expect(screen.getByTestId('goal-type-maintain')).toBeInTheDocument();
     expect(screen.getByTestId('goal-type-bulk')).toBeInTheDocument();
 
+    // Uses onboarding translation keys — includes descriptions
     expect(screen.getByText('Giảm cân')).toBeInTheDocument();
     expect(screen.getByText('Duy trì')).toBeInTheDocument();
-    expect(screen.getByText('Tăng cân')).toBeInTheDocument();
+    expect(screen.getByText('Tăng cơ')).toBeInTheDocument();
+    expect(screen.getByText('Giảm mỡ, giữ cơ')).toBeInTheDocument();
+    expect(screen.getByText('Giữ nguyên cân nặng')).toBeInTheDocument();
+    expect(screen.getByText('Tăng cân, xây cơ')).toBeInTheDocument();
   });
 
   it('selecting Cut shows rate selector', async () => {
@@ -248,7 +268,7 @@ describe('GoalPhaseSelector', () => {
     expect(activeGoal!.type).toBe('bulk');
   });
 
-  // --- New validation tests ---
+  // --- Validation tests ---
 
   it('blocks save when cut target weight >= current weight', async () => {
     const user = userEvent.setup();
@@ -260,7 +280,6 @@ describe('GoalPhaseSelector', () => {
     await user.type(input, '85');
     await user.click(screen.getByTestId('save-goal-button'));
 
-    // Should show error and NOT save
     expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu giảm cân phải nhỏ hơn cân nặng hiện tại');
     expect(useHealthProfileStore.getState().activeGoal).toBeNull();
   });
@@ -359,5 +378,150 @@ describe('GoalPhaseSelector', () => {
     const { activeGoal } = useHealthProfileStore.getState();
     expect(activeGoal).not.toBeNull();
     expect(activeGoal!.type).toBe('maintain');
+  });
+
+  // --- Data loading tests (NEW — unified schema) ---
+
+  it('loads activeGoal from store into form', () => {
+    const goal = createGoal({ type: 'cut', rateOfChange: 'aggressive', targetWeightKg: 65 });
+    useHealthProfileStore.setState({ activeGoal: goal });
+
+    render(<GoalPhaseSelector />);
+
+    // Cut should be active (aria-pressed)
+    expect(screen.getByTestId('goal-type-cut')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('goal-type-maintain')).toHaveAttribute('aria-pressed', 'false');
+
+    // Rate selector should show aggressive active
+    expect(screen.getByTestId('rate-aggressive')).toHaveAttribute('aria-pressed', 'true');
+
+    // Target weight should be pre-filled
+    expect(screen.getByTestId('target-weight-input')).toHaveValue(65);
+  });
+
+  it('preserves goal ID on save instead of generating new UUID', async () => {
+    const user = userEvent.setup();
+    // calorieOffset=550 matches bulk+moderate auto-offset, so no manual override
+    const goal = createGoal({
+      id: 'existing-goal-id',
+      type: 'bulk',
+      rateOfChange: 'moderate',
+      calorieOffset: 550,
+      targetWeightKg: 80,
+    });
+    useHealthProfileStore.setState({ activeGoal: goal });
+
+    render(<GoalPhaseSelector />);
+
+    // Change rate and save
+    await user.click(screen.getByTestId('rate-conservative'));
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const saved = useHealthProfileStore.getState().activeGoal;
+    expect(saved).not.toBeNull();
+    expect(saved!.id).toBe('existing-goal-id');
+    expect(saved!.rateOfChange).toBe('conservative');
+  });
+
+  it('preserves startDate and createdAt from existing goal on save', async () => {
+    const user = userEvent.setup();
+    const goal = createGoal({
+      startDate: '2023-06-15T00:00:00.000Z',
+      createdAt: '2023-06-15T00:00:00.000Z',
+    });
+    useHealthProfileStore.setState({ activeGoal: goal });
+
+    render(<GoalPhaseSelector />);
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const saved = useHealthProfileStore.getState().activeGoal;
+    expect(saved!.startDate).toBe('2023-06-15T00:00:00.000Z');
+    expect(saved!.createdAt).toBe('2023-06-15T00:00:00.000Z');
+  });
+
+  it('detects manualOverride when activeGoal has custom offset', () => {
+    // Standard cut+moderate = -550, but goal has -400 → manual override
+    const goal = createGoal({ type: 'cut', rateOfChange: 'moderate', calorieOffset: -400 });
+    useHealthProfileStore.setState({ activeGoal: goal });
+
+    render(<GoalPhaseSelector />);
+
+    // Manual override toggle should be checked
+    const toggle = screen.getByTestId('manual-override-toggle');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+
+    // Custom offset input should be visible with -400
+    expect(screen.getByTestId('custom-offset-input')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-offset-input')).toHaveValue('-400');
+    expect(screen.getByTestId('calorie-offset-display')).toHaveTextContent('-400 kcal');
+  });
+
+  it('does not show manualOverride when offset matches auto-calculated', () => {
+    // Standard cut+moderate = -550, goal also has -550 → no manual override
+    const goal = createGoal({ type: 'cut', rateOfChange: 'moderate', calorieOffset: -550 });
+    useHealthProfileStore.setState({ activeGoal: goal });
+
+    render(<GoalPhaseSelector />);
+
+    const toggle = screen.getByTestId('manual-override-toggle');
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(screen.queryByTestId('custom-offset-input')).not.toBeInTheDocument();
+  });
+
+  it('generates new UUID when no activeGoal exists', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    const saved = useHealthProfileStore.getState().activeGoal;
+    expect(saved).not.toBeNull();
+    expect(saved!.id).toBeTruthy();
+    expect(saved!.id).not.toBe('goal-123');
+  });
+
+  it('clears target weight to undefined when input is emptied', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+
+    // Type then clear
+    await user.type(input, '70');
+    await user.clear(input);
+
+    // Save — targetWeightKg should be undefined (not 0 or NaN)
+    await user.click(screen.getByTestId('save-goal-button'));
+    const saved = useHealthProfileStore.getState().activeGoal;
+    expect(saved).not.toBeNull();
+    expect(saved!.targetWeightKg).toBeUndefined();
+  });
+
+  it('blocks save when target weight is below minimum (30kg)', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '25');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(useHealthProfileStore.getState().activeGoal).toBeNull();
+  });
+
+  it('blocks save when target weight is above maximum (300kg)', async () => {
+    const user = userEvent.setup();
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '350');
+    await user.click(screen.getByTestId('save-goal-button'));
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(useHealthProfileStore.getState().activeGoal).toBeNull();
   });
 });

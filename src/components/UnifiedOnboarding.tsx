@@ -284,7 +284,7 @@ export function UnifiedOnboarding() {
               <OnboardingProgress
                 currentSection={!isAutoPath && location.section === 7 ? 6 : location.section}
                 totalSections={totalSections}
-                stepInSection={location.step}
+                stepInSection={Math.min(location.step, sectionSteps[location.section] - 1)}
                 totalStepsInSection={sectionSteps[location.section]}
               />
             </div>

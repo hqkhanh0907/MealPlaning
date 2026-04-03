@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/lib/utils';
+
 interface OnboardingProgressProps {
   currentSection: number;
   totalSections: number;
@@ -22,28 +24,28 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
 }: OnboardingProgressProps) {
   const { t } = useTranslation();
 
-  const overallProgress = Math.min(
-    100,
-    Math.round(
-      ((currentSection - 1 + (totalStepsInSection > 0 ? stepInSection / totalStepsInSection : 0)) / totalSections) *
-        100,
-    ),
-  );
-
   const sectionLabel = t(`onboarding.progress.section${currentSection}`);
 
   const segments = useMemo(() => {
     return Array.from({ length: totalSections }, (_, i) => {
       const sectionIndex = i + 1;
       let fillPercent = 0;
+      const isActive = sectionIndex === currentSection;
+
       if (sectionIndex < currentSection) {
         fillPercent = 100;
-      } else if (sectionIndex === currentSection && totalStepsInSection > 0) {
-        fillPercent = (stepInSection / totalStepsInSection) * 100;
+      } else if (isActive) {
+        fillPercent = totalStepsInSection <= 1 ? 100 : (stepInSection / (totalStepsInSection - 1)) * 100;
       }
-      return { sectionIndex, fillPercent };
+
+      return { sectionIndex, fillPercent, isActive };
     });
   }, [totalSections, currentSection, stepInSection, totalStepsInSection]);
+
+  const overallProgress = Math.min(
+    100,
+    Math.round(segments.reduce((sum, s) => sum + s.fillPercent, 0) / totalSections),
+  );
 
   return (
     <div className="w-full px-4 py-2">
@@ -55,10 +57,10 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
         aria-label={sectionLabel}
         className="flex h-1 w-full gap-[1px] overflow-hidden rounded-sm"
       >
-        {segments.map(({ sectionIndex, fillPercent }, i) => (
+        {segments.map(({ sectionIndex, fillPercent, isActive }, i) => (
           <div
             key={sectionIndex}
-            className="bg-muted flex-1 overflow-hidden"
+            className={cn('flex-1 overflow-hidden', isActive ? 'bg-primary/15' : 'bg-muted')}
             style={getSegmentRadius(i, totalSections)}
           >
             <div

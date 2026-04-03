@@ -461,8 +461,8 @@ describe('OnboardingProgress', () => {
   it('computes overall progress correctly', () => {
     render(<OnboardingProgress currentSection={3} totalSections={5} stepInSection={2} totalStepsInSection={4} />);
     const progress = screen.getByRole('progressbar');
-    // (3-1 + 2/4) / 5 * 100 = 50
-    expect(progress).toHaveAttribute('aria-valuenow', '50');
+    // fence-post: segments [100, 100, 2/(4-1)*100=66.67, 0, 0] → sum=266.67, /5 = 53.33 → round = 53
+    expect(progress).toHaveAttribute('aria-valuenow', '53');
   });
 
   it('shows 0% at the very beginning', () => {
@@ -492,8 +492,55 @@ describe('OnboardingProgress', () => {
   it('handles manual path where section 7 is remapped to section 6 of 6 total', () => {
     render(<OnboardingProgress currentSection={6} totalSections={6} stepInSection={0} totalStepsInSection={1} />);
     const progress = screen.getByRole('progressbar');
-    // (6-1 + 0/1) / 6 * 100 = 83
-    expect(progress).toHaveAttribute('aria-valuenow', '83');
+    // single-step guard: segments [100,100,100,100,100,100] → sum=600, /6 = 100
+    expect(progress).toHaveAttribute('aria-valuenow', '100');
+  });
+
+  it('fills segment to 100% on the last step of a multi-step section (fence-post)', () => {
+    const { container } = render(
+      <OnboardingProgress currentSection={2} totalSections={5} stepInSection={3} totalStepsInSection={4} />,
+    );
+    const progressBar = screen.getByRole('progressbar');
+    // Section 2 is the 2nd segment (index 1); last step: 3/(4-1) = 100%
+    const activeSegment = progressBar.children[1] as HTMLElement;
+    const fill = activeSegment.firstElementChild as HTMLElement;
+    expect(fill.style.width).toBe('100%');
+  });
+
+  it('fills single-step section to 100% immediately when active', () => {
+    const { container } = render(
+      <OnboardingProgress currentSection={3} totalSections={7} stepInSection={0} totalStepsInSection={1} />,
+    );
+    const progressBar = screen.getByRole('progressbar');
+    // Section 3 (index 2): single-step guard → 100%
+    const activeSegment = progressBar.children[2] as HTMLElement;
+    const fill = activeSegment.firstElementChild as HTMLElement;
+    expect(fill.style.width).toBe('100%');
+  });
+
+  it('reaches 100% ARIA progress at the last section', () => {
+    render(<OnboardingProgress currentSection={7} totalSections={7} stepInSection={0} totalStepsInSection={1} />);
+    const progress = screen.getByRole('progressbar');
+    // All past (100*6) + active single-step (100) = 700, /7 = 100
+    expect(progress).toHaveAttribute('aria-valuenow', '100');
+  });
+
+  it('applies active tint class to the current section segment', () => {
+    render(<OnboardingProgress currentSection={3} totalSections={5} stepInSection={0} totalStepsInSection={4} />);
+    const progressBar = screen.getByRole('progressbar');
+
+    const pastSegment = progressBar.children[0] as HTMLElement;
+    const activeSegment = progressBar.children[2] as HTMLElement;
+    const futureSegment = progressBar.children[3] as HTMLElement;
+
+    expect(activeSegment.className).toContain('bg-primary/15');
+    expect(activeSegment.className).not.toContain('bg-muted');
+
+    expect(pastSegment.className).toContain('bg-muted');
+    expect(pastSegment.className).not.toContain('bg-primary/15');
+
+    expect(futureSegment.className).toContain('bg-muted');
+    expect(futureSegment.className).not.toContain('bg-primary/15');
   });
 });
 

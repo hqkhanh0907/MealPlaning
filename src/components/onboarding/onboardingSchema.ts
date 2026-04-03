@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { validateTargetWeight } from '@/schemas/goalValidation';
+import { goalOnboardingFields, validateTargetWeight } from '@/schemas/goalValidation';
 
 export const onboardingSchema = z
   .object({
@@ -23,10 +23,8 @@ export const onboardingSchema = z
     // Section 2b: Activity Level
     activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'extra_active']),
 
-    // Section 2c: Nutrition Goal
-    goalType: z.enum(['cut', 'maintain', 'bulk']),
-    rateOfChange: z.enum(['conservative', 'moderate', 'aggressive']).optional(),
-    targetWeightKg: z.number().min(30).max(300).optional(),
+    // Section 2c: Nutrition Goal (shared with settings via goalValidation)
+    ...goalOnboardingFields.shape,
 
     // Section 2d: Advanced (optional)
     bodyFatPct: z.number().min(3).max(60).optional(),

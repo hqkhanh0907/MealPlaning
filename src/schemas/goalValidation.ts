@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import type { GoalType } from '@/features/health-profile/types';
+import type { Goal, GoalType } from '@/features/health-profile/types';
+import { getCalorieOffset } from '@/services/nutritionEngine';
 
 export const GOAL_TYPE_VALUES = ['cut', 'maintain', 'bulk'] as const;
 export const RATE_OF_CHANGE_VALUES = ['conservative', 'moderate', 'aggressive'] as const;
@@ -8,11 +9,6 @@ export const RATE_OF_CHANGE_VALUES = ['conservative', 'moderate', 'aggressive'] 
 /**
  * Validate target weight against current weight based on goal direction.
  * Returns an i18n error key if invalid, or null if valid.
- *
- * Rules:
- * - maintain: target weight is not applicable (should be hidden)
- * - cut: target weight must be strictly less than current weight
- * - bulk: target weight must be strictly greater than current weight
  */
 export function validateTargetWeight(
   goalType: GoalType,
@@ -31,9 +27,62 @@ export function validateTargetWeight(
   return null;
 }
 
+/* ------------------------------------------------------------------ */
+/* ONE schema — single source of truth for all goal forms             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Complete goal form schema used by BOTH onboarding and settings.
+ * - Core fields: goalType, rateOfChange, targetWeightKg (number types matching DB)
+ * - Settings-only fields: manualOverride, customOffset (optional, ignored by onboarding)
+ */
+export const goalFormSchema = z.object({
+  goalType: z.enum(GOAL_TYPE_VALUES),
+  rateOfChange: z.enum(RATE_OF_CHANGE_VALUES).optional(),
+  targetWeightKg: z.number().min(30).max(300).optional(),
+  manualOverride: z.boolean(),
+  customOffset: z.string().optional(),
+});
+
+export type GoalFormData = z.infer<typeof goalFormSchema>;
+
+/** Sub-schema for onboarding — only core goal fields via .pick() */
+export const goalOnboardingFields = goalFormSchema.pick({
+  goalType: true,
+  rateOfChange: true,
+  targetWeightKg: true,
+});
+
+/**
+ * Generate form default values from an existing Goal (loaded from DB/store).
+ * Returns hardcoded defaults when no active goal exists.
+ */
+export function goalFormDefaults(activeGoal: Goal | null): GoalFormData {
+  if (!activeGoal) {
+    return {
+      goalType: 'maintain',
+      rateOfChange: 'moderate',
+      targetWeightKg: undefined,
+      manualOverride: false,
+      customOffset: undefined,
+    };
+  }
+
+  const autoOffset = getCalorieOffset(activeGoal.type, activeGoal.rateOfChange);
+  const isManual = activeGoal.calorieOffset !== autoOffset;
+
+  return {
+    goalType: activeGoal.type,
+    rateOfChange: activeGoal.rateOfChange,
+    targetWeightKg: activeGoal.targetWeightKg,
+    manualOverride: isManual,
+    customOffset: isManual ? String(activeGoal.calorieOffset) : undefined,
+  };
+}
+
 /**
  * Build a Zod schema for goal fields with current-weight-aware cross-field validation.
- * Used by both onboarding and settings goal forms.
+ * @deprecated Use goalFormSchema directly + manual validateTargetWeight() calls
  */
 export function createGoalFieldsSchema(getCurrentWeight: () => number | undefined) {
   return z

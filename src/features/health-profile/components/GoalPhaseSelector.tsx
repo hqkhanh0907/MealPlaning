@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Equal, TrendingDown, TrendingUp } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useController, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 
-import { Input } from '@/components/ui/input';
-import { validateTargetWeight } from '@/schemas/goalValidation';
+import { cn } from '@/lib/utils';
+import { type GoalFormData, goalFormDefaults, goalFormSchema, validateTargetWeight } from '@/schemas/goalValidation';
 import { generateUUID } from '@/utils/helpers';
 
 import { useDatabase } from '../../../contexts/DatabaseContext';
@@ -15,67 +14,22 @@ import { useHealthProfileStore } from '../store/healthProfileStore';
 import type { Goal, GoalType, RateOfChange } from '../types';
 
 /* ------------------------------------------------------------------ */
-/* Schema */
+/* Constants — unified with onboarding (NutritionGoalStep)            */
 /* ------------------------------------------------------------------ */
-const goalPhaseSelectorSchema = z.object({
-  goalType: z.enum(['cut', 'maintain', 'bulk']),
-  rateOfChange: z.enum(['conservative', 'moderate', 'aggressive']),
-  targetWeight: z.string(),
-  manualOverride: z.boolean(),
-  customOffset: z.string(),
-});
-
-type GoalPhaseSelectorFormData = z.infer<typeof goalPhaseSelectorSchema>;
-
-/* ------------------------------------------------------------------ */
-/* Constants */
-/* ------------------------------------------------------------------ */
-const GOAL_OPTIONS: {
-  type: GoalType;
-  labelKey: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: string;
-  activeBg: string;
-  activeBorder: string;
-  activeText: string;
-}[] = [
-  {
-    type: 'cut',
-    labelKey: 'goal.cut',
-    icon: TrendingDown,
-    color: 'text-amber-500 dark:text-amber-400',
-    activeBg: 'bg-amber-50 dark:bg-amber-900/20',
-    activeBorder: 'border-amber-500',
-    activeText: 'text-amber-700 dark:text-amber-300',
-  },
-  {
-    type: 'maintain',
-    labelKey: 'goal.maintain',
-    icon: Equal,
-    color: 'text-primary',
-    activeBg: 'bg-primary-subtle',
-    activeBorder: 'border-primary',
-    activeText: 'text-primary-emphasis',
-  },
-  {
-    type: 'bulk',
-    labelKey: 'goal.bulk',
-    icon: TrendingUp,
-    color: 'text-blue-500 dark:text-blue-400',
-    activeBg: 'bg-blue-50 dark:bg-blue-900/20',
-    activeBorder: 'border-blue-500',
-    activeText: 'text-blue-700 dark:text-blue-300',
-  },
-];
+const GOAL_OPTIONS = [
+  { type: 'cut' as const, icon: TrendingDown, color: 'text-blue-500' },
+  { type: 'maintain' as const, icon: Minus, color: 'text-primary' },
+  { type: 'bulk' as const, icon: TrendingUp, color: 'text-orange-500' },
+] as const;
 
 const RATE_OPTIONS: { rate: RateOfChange; labelKey: string }[] = [
-  { rate: 'conservative', labelKey: 'goal.conservative' },
-  { rate: 'moderate', labelKey: 'goal.moderate' },
-  { rate: 'aggressive', labelKey: 'goal.aggressive' },
+  { rate: 'conservative', labelKey: 'onboarding.goal.rate_conservative' },
+  { rate: 'moderate', labelKey: 'onboarding.goal.rate_moderate' },
+  { rate: 'aggressive', labelKey: 'onboarding.goal.rate_aggressive' },
 ];
 
 /* ------------------------------------------------------------------ */
-/* Helpers */
+/* Helpers                                                            */
 /* ------------------------------------------------------------------ */
 function formatOffset(offset: number): string {
   if (offset > 0) return `+${offset} kcal`;
@@ -84,7 +38,7 @@ function formatOffset(offset: number): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* Component */
+/* Component                                                          */
 /* ------------------------------------------------------------------ */
 interface GoalPhaseSelectorProps {
   embedded?: boolean;
@@ -96,27 +50,31 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
   const db = useDatabase();
   const saveGoal = useHealthProfileStore(s => s.saveGoal);
   const currentWeight = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
+  const activeGoal = useHealthProfileStore(s => s.activeGoal);
 
-  const form = useForm<GoalPhaseSelectorFormData>({
-    resolver: zodResolver(goalPhaseSelectorSchema),
-    defaultValues: {
-      goalType: 'maintain',
-      rateOfChange: 'moderate',
-      targetWeight: '',
-      manualOverride: false,
-      customOffset: '',
-    },
+  const isDirtyRef = useRef(false);
+
+  const form = useForm<GoalFormData>({
+    resolver: zodResolver(goalFormSchema),
+    defaultValues: goalFormDefaults(activeGoal),
     mode: 'onChange',
   });
 
+  // Sync form when activeGoal changes externally (not from user edits)
+  useEffect(() => {
+    if (!isDirtyRef.current) {
+      form.reset(goalFormDefaults(activeGoal));
+    }
+  }, [activeGoal, form]);
+
   const goalTypeField = useController({ control: form.control, name: 'goalType' });
   const rateField = useController({ control: form.control, name: 'rateOfChange' });
-  const targetWeightField = useController({ control: form.control, name: 'targetWeight' });
+  const targetWeightField = useController({ control: form.control, name: 'targetWeightKg' });
   const manualOverrideField = useController({ control: form.control, name: 'manualOverride' });
   const customOffsetField = useController({ control: form.control, name: 'customOffset' });
 
   const goalType = goalTypeField.field.value as GoalType;
-  const rateOfChange = rateField.field.value as RateOfChange;
+  const rateOfChange = (rateField.field.value ?? 'moderate') as RateOfChange;
 
   const autoOffset = useMemo(() => getCalorieOffset(goalType, rateOfChange), [goalType, rateOfChange]);
 
@@ -127,9 +85,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
   const handleGoalTypeChange = useCallback(
     (type: GoalType) => {
       goalTypeField.field.onChange(type);
+      isDirtyRef.current = true;
       if (type === 'maintain') {
-        targetWeightField.field.onChange('');
-        form.clearErrors('targetWeight');
+        targetWeightField.field.onChange(undefined);
+        form.clearErrors('targetWeightKg');
       }
     },
     [goalTypeField.field, targetWeightField.field, form],
@@ -138,6 +97,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
   const handleRateChange = useCallback(
     (rate: RateOfChange) => {
       rateField.field.onChange(rate);
+      isDirtyRef.current = true;
     },
     [rateField.field],
   );
@@ -145,11 +105,16 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
   const handleTargetWeightChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
-      const isValidDecimal = val === '' || (!Number.isNaN(Number(val)) && !val.includes(' ') && !val.includes('-'));
-      if (isValidDecimal) {
-        targetWeightField.field.onChange(val);
-        form.clearErrors('targetWeight');
+      if (val === '') {
+        targetWeightField.field.onChange(undefined);
+      } else {
+        const num = Number(val);
+        if (!Number.isNaN(num)) {
+          targetWeightField.field.onChange(num);
+        }
       }
+      form.clearErrors('targetWeightKg');
+      isDirtyRef.current = true;
     },
     [targetWeightField.field, form],
   );
@@ -160,6 +125,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       if (val === '' || val === '-' || /^-?\d*$/.test(val)) {
         customOffsetField.field.onChange(val);
       }
+      isDirtyRef.current = true;
     },
     [customOffsetField.field],
   );
@@ -170,46 +136,45 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
     if (next) {
       customOffsetField.field.onChange(String(autoOffset));
     }
+    isDirtyRef.current = true;
   }, [manualOverrideField.field, customOffsetField.field, autoOffset]);
 
   const handleSave = useCallback(async (): Promise<boolean> => {
     const values = form.getValues();
-    const parsedTarget = values.targetWeight ? Number(values.targetWeight) : undefined;
 
-    // Validate target weight vs current weight for cut/bulk
-    if (values.goalType !== 'maintain' && parsedTarget != null && currentWeight != null) {
-      const error = validateTargetWeight(values.goalType as GoalType, currentWeight, parsedTarget);
+    if (values.goalType !== 'maintain' && values.targetWeightKg != null && currentWeight != null) {
+      const error = validateTargetWeight(values.goalType as GoalType, currentWeight, values.targetWeightKg);
       if (error) {
-        form.setError('targetWeight', { message: error });
+        form.setError('targetWeightKg', { message: error });
         return false;
       }
     }
 
-    // Validate target weight range
-    if (parsedTarget != null && (parsedTarget < 30 || parsedTarget > 300)) {
-      form.setError('targetWeight', { message: 'onboarding.validation.targetWeightRange' });
+    if (values.targetWeightKg != null && (values.targetWeightKg < 30 || values.targetWeightKg > 300)) {
+      form.setError('targetWeightKg', { message: 'onboarding.validation.targetWeightRange' });
       return false;
     }
 
     try {
       const now = new Date().toISOString();
       const goal: Goal = {
-        id: generateUUID(),
+        id: activeGoal?.id ?? generateUUID(),
         type: values.goalType as GoalType,
-        rateOfChange: values.rateOfChange as RateOfChange,
-        targetWeightKg: parsedTarget,
+        rateOfChange: (values.rateOfChange ?? 'moderate') as RateOfChange,
+        targetWeightKg: values.targetWeightKg,
         calorieOffset: effectiveOffset,
-        startDate: now,
+        startDate: activeGoal?.startDate ?? now,
         isActive: true,
-        createdAt: now,
+        createdAt: activeGoal?.createdAt ?? now,
         updatedAt: now,
       };
       await saveGoal(db, goal);
+      isDirtyRef.current = false;
       return true;
     } catch {
       return false;
     }
-  }, [db, form, currentWeight, effectiveOffset, saveGoal]);
+  }, [db, form, currentWeight, effectiveOffset, saveGoal, activeGoal]);
 
   useEffect(() => {
     if (saveRef) {
@@ -219,78 +184,88 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
   const showRateSelector = goalType !== 'maintain';
   const showTargetWeight = goalType !== 'maintain';
-  const targetWeightError = form.formState.errors.targetWeight;
+  const targetWeightError = form.formState.errors.targetWeightKg;
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
       {!embedded && <h3 className="text-foreground text-lg font-bold">{t('goal.title')}</h3>}
 
-      {/* Phase Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {GOAL_OPTIONS.map(({ type, labelKey, icon: Icon, color, activeBg, activeBorder, activeText }) => {
+      {/* Goal Type — full-width horizontal buttons (unified with onboarding) */}
+      <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('goal.title')}>
+        {GOAL_OPTIONS.map(({ type, icon: Icon, color }) => {
           const isActive = goalType === type;
           return (
             <button
               key={type}
               type="button"
               data-testid={`goal-type-${type}`}
+              aria-pressed={isActive}
               onClick={() => handleGoalTypeChange(type)}
-              className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all ${
-                isActive
-                  ? `${activeBorder} ${activeBg} ${activeText}`
-                  : 'border-border text-foreground hover:border-border dark:hover:border-border'
-              }`}
+              className={cn(
+                'focus-visible:ring-ring flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                isActive ? 'border-primary bg-primary-subtle' : 'border-border',
+              )}
             >
-              <Icon className={`h-6 w-6 ${isActive ? color : ''}`} />
-              <span className="text-sm font-bold">{t(labelKey)}</span>
+              <Icon className={cn('h-5 w-5 shrink-0', color)} aria-hidden="true" />
+              <div>
+                <p className={cn('text-sm font-medium', isActive ? 'text-primary-emphasis' : 'text-foreground')}>
+                  {t(`onboarding.goal.type_${type}`)}
+                </p>
+                <p className="text-muted-foreground text-xs">{t(`onboarding.goal.type_${type}_desc`)}</p>
+              </div>
             </button>
           );
         })}
-      </div>
+      </fieldset>
 
-      {/* Rate of Change Selector */}
+      {/* Rate of Change — horizontal pill buttons (unified with onboarding) */}
       {showRateSelector && (
         <div data-testid="rate-selector">
           <label className="text-foreground mb-2 block text-sm font-medium">{t('goal.rateOfChange')}</label>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('goal.rateOfChange')}>
             {RATE_OPTIONS.map(({ rate, labelKey }) => (
               <button
                 key={rate}
                 type="button"
                 data-testid={`rate-${rate}`}
+                aria-pressed={rateOfChange === rate}
                 onClick={() => handleRateChange(rate)}
-                className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
+                className={cn(
+                  'focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   rateOfChange === rate
                     ? 'border-primary bg-primary-subtle text-primary-emphasis'
-                    : 'border-border text-foreground-secondary hover:border-border'
-                }`}
+                    : 'border-border text-foreground-secondary',
+                )}
               >
                 {t(labelKey)}
               </button>
             ))}
-          </div>
+          </fieldset>
         </div>
       )}
 
-      {/* Target Weight — hidden for maintain */}
+      {/* Target Weight — number input with "kg" suffix (unified with onboarding) */}
       {showTargetWeight && (
         <div>
           <label htmlFor="target-weight" className="text-foreground mb-1 block text-sm font-medium">
             {t('goal.targetWeight')}
           </label>
-          <Input
-            id="target-weight"
-            type="text"
-            inputMode="decimal"
-            data-testid="target-weight-input"
-            value={targetWeightField.field.value}
-            onChange={handleTargetWeightChange}
-            onBlur={targetWeightField.field.onBlur}
-            placeholder={t('goal.targetWeightOptional')}
-            aria-invalid={!!targetWeightError}
-            aria-describedby={targetWeightError ? 'target-weight-error' : undefined}
-            className="text-foreground w-full"
-          />
+          <div className="relative">
+            <input
+              id="target-weight"
+              type="number"
+              inputMode="decimal"
+              data-testid="target-weight-input"
+              value={targetWeightField.field.value ?? ''}
+              onChange={handleTargetWeightChange}
+              onBlur={targetWeightField.field.onBlur}
+              placeholder={t('goal.targetWeightOptional')}
+              aria-invalid={!!targetWeightError}
+              aria-describedby={targetWeightError ? 'target-weight-error' : undefined}
+              className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 pr-12 text-base focus-visible:ring-2 focus-visible:outline-none"
+            />
+            <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">kg</span>
+          </div>
           {targetWeightError && (
             <p id="target-weight-error" role="alert" className="text-destructive mt-1 text-xs">
               {t(targetWeightError.message ?? 'onboarding.validation.required')}
@@ -299,7 +274,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
         </div>
       )}
 
-      {/* Calorie Offset Display */}
+      {/* Calorie Offset Display (settings-only advanced feature) */}
       <div className="bg-muted space-y-3 rounded-xl p-4">
         <div className="flex items-center justify-between">
           <span className="text-foreground text-sm font-medium">{t('goal.calorieOffset')}</span>
@@ -319,27 +294,29 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
             onClick={handleToggleOverride}
             role="switch"
             aria-checked={manualOverrideField.field.value}
-            className={`relative h-5 w-10 rounded-full transition-colors ${
-              manualOverrideField.field.value ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'
-            }`}
+            className={cn(
+              'relative h-5 w-10 rounded-full transition-colors',
+              manualOverrideField.field.value ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600',
+            )}
           >
             <span
-              className={`bg-card absolute top-0.5 left-0.5 h-4 w-4 rounded-full shadow transition-transform ${
-                manualOverrideField.field.value ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className={cn(
+                'bg-card absolute top-0.5 left-0.5 h-4 w-4 rounded-full shadow transition-transform',
+                manualOverrideField.field.value ? 'translate-x-5' : 'translate-x-0',
+              )}
             />
           </button>
         </div>
 
-        {/* Custom Offset Input */}
+        {/* Custom Offset Input (text for negative number support) */}
         {manualOverrideField.field.value && (
-          <Input
+          <input
             type="text"
             inputMode="numeric"
             data-testid="custom-offset-input"
-            value={customOffsetField.field.value}
+            value={customOffsetField.field.value ?? ''}
             onChange={handleCustomOffsetChange}
-            className="text-foreground w-full"
+            className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 text-base focus-visible:ring-2 focus-visible:outline-none"
           />
         )}
       </div>
