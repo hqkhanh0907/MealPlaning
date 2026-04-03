@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { GoalPhaseSelector } from '../features/health-profile/components/GoalPhaseSelector';
@@ -383,6 +383,79 @@ describe('GoalPhaseSelector', () => {
     const { activeGoal } = useHealthProfileStore.getState();
     expect(activeGoal).not.toBeNull();
     expect(activeGoal!.type).toBe('maintain');
+  });
+
+  // --- Live direction validation tests ---
+
+  it('shows error immediately when switching cut→bulk with invalid weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Enter valid weight for cut (75 < 80)
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.type(screen.getByTestId('target-weight-input'), '75');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    // Switch to bulk — 75 is now invalid (75 <= 80), error should show IMMEDIATELY
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu tăng cơ phải lớn hơn cân nặng hiện tại');
+    });
+  });
+
+  it('shows error immediately when switching bulk→cut with invalid weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Enter valid weight for bulk (85 > 80)
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    await user.type(screen.getByTestId('target-weight-input'), '85');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    // Switch to cut — 85 is now invalid (85 >= 80), error should show IMMEDIATELY
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu giảm cân phải nhỏ hơn cân nặng hiện tại');
+    });
+  });
+
+  it('shows error immediately when typing invalid weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+
+    // Type invalid weight for cut (85 >= 80) — error should appear without clicking Save
+    await user.type(input, '85');
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu giảm cân phải nhỏ hơn cân nặng hiện tại');
+    });
+  });
+
+  it('clears error when switching back to valid goal type', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Cut + 75 → valid
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.type(screen.getByTestId('target-weight-input'), '75');
+
+    // Switch to bulk → error (75 <= 80)
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+
+    // Switch back to cut → error should clear (75 < 80 = valid)
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
   });
 
   // --- New tests: store integration ---

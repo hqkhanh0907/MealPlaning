@@ -1,3 +1,4 @@
+import type { Resolver } from 'react-hook-form';
 import { z } from 'zod';
 
 import type { Goal, GoalType } from '@/features/health-profile/types';
@@ -45,6 +46,32 @@ export const goalFormSchema = z.object({
 });
 
 export type GoalFormData = z.infer<typeof goalFormSchema>;
+
+/**
+ * Custom RHF resolver that wraps zodResolver(goalFormSchema) and adds
+ * cross-field direction validation (cut→target<current, bulk→target>current).
+ *
+ * This runs INSIDE RHF's validation cycle, so it doesn't get overwritten
+ * by zodResolver's async error clearing (the root cause of the timing bug
+ * when using manual form.setError + zodResolver mode:'onChange').
+ */
+export function goalFormResolver(currentWeight: number): Resolver<GoalFormData> {
+  return async (values, _ctx, options) => {
+    const { zodResolver } = await import('@hookform/resolvers/zod');
+    const base = await zodResolver(goalFormSchema)(values, _ctx, options);
+
+    // Add direction validation on top of Zod schema validation
+    if (values.goalType !== 'maintain' && values.targetWeightKg != null) {
+      const error = validateTargetWeight(values.goalType, currentWeight, values.targetWeightKg);
+      if (error) {
+        const existing = (base.errors.targetWeightKg as Record<string, unknown>) ?? {};
+        base.errors.targetWeightKg = { ...existing, message: error, type: 'custom' };
+      }
+    }
+
+    return base;
+  };
+}
 
 /** Sub-schema for onboarding — only core goal fields via .pick() */
 export const goalOnboardingFields = goalFormSchema.pick({

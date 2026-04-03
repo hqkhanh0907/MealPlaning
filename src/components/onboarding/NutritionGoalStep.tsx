@@ -1,4 +1,5 @@
 import { ChevronRight, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { useCallback } from 'react';
 import { useController, type UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +32,17 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
 
   const showConditional = goalField.field.value !== 'maintain';
 
+  const handleGoalTypeChange = useCallback(
+    (value: string) => {
+      goalField.field.onChange(value);
+      if (value !== 'maintain' && targetField.field.value != null) {
+        // Re-validate target weight with new goal direction
+        void form.trigger('targetWeightKg');
+      }
+    },
+    [goalField.field, targetField.field.value, form],
+  );
+
   const handleNext = async () => {
     const valid = await form.trigger([...STEP_FIELDS['2c']], { shouldFocus: true });
     if (!valid) return;
@@ -62,7 +74,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
               key={value}
               type="button"
               aria-pressed={goalField.field.value === value}
-              onClick={() => goalField.field.onChange(value)}
+              onClick={() => handleGoalTypeChange(value)}
               className={cn(
                 'focus-visible:ring-ring flex min-h-[56px] w-full items-center gap-4 rounded-xl border-2 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 goalField.field.value === value ? 'border-primary bg-primary-subtle' : 'border-border',

@@ -1,11 +1,10 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useController, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
-import { type GoalFormData, goalFormDefaults, goalFormSchema, validateTargetWeight } from '@/schemas/goalValidation';
+import { type GoalFormData, goalFormDefaults, goalFormResolver, validateTargetWeight } from '@/schemas/goalValidation';
 import { generateUUID } from '@/utils/helpers';
 
 import { useDatabase } from '../../../contexts/DatabaseContext';
@@ -72,8 +71,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
   const isDirtyRef = useRef(false);
 
+  const resolver = useMemo(() => goalFormResolver(currentWeight), [currentWeight]);
+
   const form = useForm<GoalFormData>({
-    resolver: zodResolver(goalFormSchema),
+    resolver,
     defaultValues: goalFormDefaults(activeGoal),
     mode: 'onChange',
   });
@@ -107,6 +108,9 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       if (type === 'maintain') {
         targetWeightField.field.onChange(undefined);
         form.clearErrors('targetWeightKg');
+      } else if (targetWeightField.field.value != null) {
+        // Re-validate target weight with new goal direction via custom resolver
+        void form.trigger('targetWeightKg');
       }
     },
     [goalTypeField.field, targetWeightField.field, form],
@@ -131,10 +135,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
           targetWeightField.field.onChange(num);
         }
       }
-      form.clearErrors('targetWeightKg');
+      // Direction validation handled by custom resolver via mode:'onChange'
       isDirtyRef.current = true;
     },
-    [targetWeightField.field, form],
+    [targetWeightField.field],
   );
 
   const handleCustomOffsetChange = useCallback(
