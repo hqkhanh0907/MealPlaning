@@ -10,7 +10,7 @@ const INJURY_REGIONS = ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'h
 
 export function InjuriesStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
-  const field = useController({ control: form.control, name: 'injuries' });
+  const field = useController({ control: form.control, name: 'injuryRestrictions' });
   const selected = (field.field.value ?? []) as string[];
 
   const toggle = (item: string) => {

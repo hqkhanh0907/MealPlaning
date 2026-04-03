@@ -35,24 +35,23 @@ export const onboardingSchema = z
 
     // Section 3: Training Core
     trainingGoal: z.enum(['strength', 'hypertrophy', 'endurance', 'general']),
-    experience: z.enum(['beginner', 'intermediate', 'advanced']),
+    trainingExperience: z.enum(['beginner', 'intermediate', 'advanced']),
     daysPerWeek: z.number().min(2).max(6),
 
     // Section 4: Training Details
-    sessionDuration: z.number().optional(),
-    equipment: z
+    sessionDurationMin: z.number().optional(),
+    availableEquipment: z
       .array(z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'bands', 'kettlebell']))
       .optional(),
-    injuries: z.array(z.enum(['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'])).optional(),
-    cardioSessions: z.number().optional(),
-    periodization: z.enum(['linear', 'undulating', 'block']).optional(),
-    cycleWeeks: z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(12)]).optional(),
+    injuryRestrictions: z.array(z.enum(['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'])).optional(),
+    cardioSessionsWeek: z.number().optional(),
+    periodizationModel: z.enum(['linear', 'undulating', 'block']).optional(),
+    planCycleWeeks: z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(12)]).optional(),
     priorityMuscles: z
       .array(z.enum(['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes']))
       .max(3)
       .optional(),
-    known1rm: z.record(z.string(), z.number()).optional(),
-    sleepHours: z.number().min(3).max(12).optional(),
+    avgSleepHours: z.number().min(3).max(12).optional(),
   })
   .superRefine((data, ctx) => {
     // Cross-field: goal direction must match target weight (shared validation)
@@ -86,14 +85,13 @@ export const STEP_FIELDS = {
   '2b': ['activityLevel'] as const,
   '2c': ['goalType', 'rateOfChange', 'targetWeightKg'] as const,
   '2d': ['bodyFatPct', 'bmrOverride', 'proteinRatio'] as const,
-  '3': ['trainingGoal', 'experience', 'daysPerWeek'] as const,
-  '4-sessionDuration': ['sessionDuration'] as const,
-  '4-equipment': ['equipment'] as const,
-  '4-injuries': ['injuries'] as const,
-  '4-cardio': ['cardioSessions'] as const,
-  '4-periodization': ['periodization'] as const,
-  '4-cycleWeeks': ['cycleWeeks'] as const,
+  '3': ['trainingGoal', 'trainingExperience', 'daysPerWeek'] as const,
+  '4-sessionDuration': ['sessionDurationMin'] as const,
+  '4-equipment': ['availableEquipment'] as const,
+  '4-injuries': ['injuryRestrictions'] as const,
+  '4-cardio': ['cardioSessionsWeek'] as const,
+  '4-periodization': ['periodizationModel'] as const,
+  '4-cycleWeeks': ['planCycleWeeks'] as const,
   '4-priorityMuscles': ['priorityMuscles'] as const,
-  '4-known1rm': ['known1rm'] as const,
-  '4-sleepHours': ['sleepHours'] as const,
+  '4-sleepHours': ['avgSleepHours'] as const,
 } as const;

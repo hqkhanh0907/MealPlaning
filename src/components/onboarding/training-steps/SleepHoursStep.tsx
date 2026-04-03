@@ -12,7 +12,7 @@ const LOW_SLEEP_THRESHOLD = 7;
 
 export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
-  const field = useController({ control: form.control, name: 'sleepHours' });
+  const field = useController({ control: form.control, name: 'avgSleepHours' });
   const showWarning = field.field.value != null && field.field.value < LOW_SLEEP_THRESHOLD;
 
   return (

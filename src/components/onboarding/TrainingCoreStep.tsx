@@ -20,7 +20,7 @@ const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCoreStepProps>) {
   const { t } = useTranslation();
   const goalField = useController({ control: form.control, name: 'trainingGoal' });
-  const expField = useController({ control: form.control, name: 'experience' });
+  const expField = useController({ control: form.control, name: 'trainingExperience' });
   const daysField = useController({ control: form.control, name: 'daysPerWeek' });
 
   const handleNext = async () => {

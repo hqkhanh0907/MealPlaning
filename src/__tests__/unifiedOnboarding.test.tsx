@@ -191,7 +191,7 @@ const DEFAULT_VALUES: OnboardingFormData = {
   activityLevel: 'moderate',
   goalType: 'maintain',
   trainingGoal: 'hypertrophy',
-  experience: 'beginner',
+  trainingExperience: 'beginner',
   daysPerWeek: 4,
 };
 
@@ -440,7 +440,7 @@ describe('onboardingSchema', () => {
     expect(STEP_FIELDS['2a']).toContain('heightCm');
     expect(STEP_FIELDS['2a']).toContain('weightKg');
     expect(STEP_FIELDS['3']).toContain('trainingGoal');
-    expect(STEP_FIELDS['3']).toContain('experience');
+    expect(STEP_FIELDS['3']).toContain('trainingExperience');
     expect(STEP_FIELDS['3']).toContain('daysPerWeek');
   });
 });
@@ -481,6 +481,19 @@ describe('OnboardingProgress', () => {
   it('renders section label text', () => {
     render(<OnboardingProgress currentSection={2} totalSections={5} stepInSection={1} totalStepsInSection={3} />);
     expect(screen.getByText('onboarding.progress.section2')).toBeInTheDocument();
+  });
+
+  it('clamps overallProgress to 100 when currentSection exceeds totalSections', () => {
+    render(<OnboardingProgress currentSection={7} totalSections={6} stepInSection={0} totalStepsInSection={1} />);
+    const progress = screen.getByRole('progressbar');
+    expect(progress).toHaveAttribute('aria-valuenow', '100');
+  });
+
+  it('handles manual path where section 7 is remapped to section 6 of 6 total', () => {
+    render(<OnboardingProgress currentSection={6} totalSections={6} stepInSection={0} totalStepsInSection={1} />);
+    const progress = screen.getByRole('progressbar');
+    // (6-1 + 0/1) / 6 * 100 = 83
+    expect(progress).toHaveAttribute('aria-valuenow', '83');
   });
 });
 
@@ -1054,7 +1067,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection },
-      { experience: 'beginner' },
+      { trainingExperience: 'beginner' },
     );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
     expect(screen.getByText('onboarding.confirm.trainingTitle')).toBeInTheDocument();
@@ -1068,7 +1081,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.periodization')).toBeInTheDocument();
     expect(screen.getByText('fitness.onboarding.period_linear')).toBeInTheDocument();
@@ -1084,7 +1097,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.period_linear_desc')).toBeInTheDocument();
     expect(screen.getByText('fitness.onboarding.period_undulating_desc')).toBeInTheDocument();
@@ -1099,7 +1112,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
   });
@@ -1121,7 +1134,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: beginnerCount - 1, setOnboardingSection },
-      { experience: 'beginner' },
+      { trainingExperience: 'beginner' },
     );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
     u1();
@@ -1134,7 +1147,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: intermediateCount - 1, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByTestId('training-confirm-step')).toBeInTheDocument();
   });
@@ -1147,7 +1160,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection },
-      { experience: 'beginner', daysPerWeek: 4, trainingGoal: 'hypertrophy' },
+      { trainingExperience: 'beginner', daysPerWeek: 4, trainingGoal: 'hypertrophy' },
     );
     expect(screen.getByText('fitness.onboarding.hypertrophy')).toBeInTheDocument();
     expect(screen.getByText('fitness.onboarding.beginner')).toBeInTheDocument();
@@ -1189,7 +1202,7 @@ describe('TrainingDetailSteps', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection: mockSetSection },
-      { experience: 'beginner' },
+      { trainingExperience: 'beginner' },
     );
     fireEvent.click(screen.getByText('onboarding.nav.next'));
     expect(mockSetSection).toHaveBeenCalledWith(5);
@@ -1582,7 +1595,7 @@ describe('PlanPreviewScreen', () => {
         goBack: () => void;
       }>,
       { completeOnboarding },
-      { sessionDuration: 45, daysPerWeek: 4 },
+      { sessionDurationMin: 45, daysPerWeek: 4 },
     );
     expect(screen.getByText('45')).toBeInTheDocument();
   });
@@ -1806,7 +1819,7 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
         goBack: () => void;
       }>,
       { step: 4, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     const linearBtn = getByText('fitness.onboarding.period_linear');
     fireEvent.click(linearBtn);
@@ -1915,7 +1928,7 @@ describe('CycleWeeksStep', () => {
         goBack: () => void;
       }>,
       { step: 5, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.cycleWeeks')).toBeInTheDocument();
     [4, 6, 8, 12].forEach(w => {
@@ -1931,7 +1944,7 @@ describe('CycleWeeksStep', () => {
         goBack: () => void;
       }>,
       { step: 5, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.cycleWeeks4Desc')).toBeInTheDocument();
     expect(screen.getByText('fitness.onboarding.cycleWeeks6Desc')).toBeInTheDocument();
@@ -1947,7 +1960,7 @@ describe('CycleWeeksStep', () => {
         goBack: () => void;
       }>,
       { step: 5, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     const buttons = screen.getAllByRole('radio');
     buttons.forEach(btn => {
@@ -1965,7 +1978,7 @@ describe('CycleWeeksStep', () => {
         goBack: () => void;
       }>,
       { step: 5, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     const btn8 = screen.getByText(new RegExp('^8\\s'));
     fireEvent.click(btn8);
@@ -1980,7 +1993,7 @@ describe('CycleWeeksStep', () => {
         goBack: () => void;
       }>,
       { step: 5, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     const btn4 = screen.getByText(new RegExp('^4\\s'));
     const btn12 = screen.getByText(new RegExp('^12\\s'));
@@ -2006,7 +2019,7 @@ describe('PriorityMusclesStep', () => {
         goBack: () => void;
       }>,
       { step: 6, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByText('fitness.onboarding.priorityMuscles')).toBeInTheDocument();
     ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
@@ -2022,7 +2035,7 @@ describe('PriorityMusclesStep', () => {
         goBack: () => void;
       }>,
       { step: 6, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     expect(screen.getByText(/0\/3/)).toBeInTheDocument();
   });
@@ -2035,7 +2048,7 @@ describe('PriorityMusclesStep', () => {
         goBack: () => void;
       }>,
       { step: 6, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     fireEvent.click(screen.getByText('fitness.onboarding.muscle_chest'));
     fireEvent.click(screen.getByText('fitness.onboarding.muscle_back'));
@@ -2054,7 +2067,7 @@ describe('PriorityMusclesStep', () => {
         goBack: () => void;
       }>,
       { step: 6, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     fireEvent.click(screen.getByText('fitness.onboarding.muscle_chest'));
     fireEvent.click(screen.getByText('fitness.onboarding.muscle_back'));
@@ -2074,7 +2087,7 @@ describe('PriorityMusclesStep', () => {
         goBack: () => void;
       }>,
       { step: 6, setOnboardingSection },
-      { experience: 'intermediate' },
+      { trainingExperience: 'intermediate' },
     );
     fireEvent.click(screen.getByText('onboarding.nav.next'));
     expect(goNext).toHaveBeenCalledTimes(1);
@@ -2095,7 +2108,7 @@ describe('SleepHoursStep', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'advanced' },
+      { trainingExperience: 'advanced' },
     );
     expect(screen.getByText('fitness.onboarding.sleepHours')).toBeInTheDocument();
     [4, 5, 6, 7, 8, 9, 10].forEach(h => {
@@ -2111,7 +2124,7 @@ describe('SleepHoursStep', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'advanced' },
+      { trainingExperience: 'advanced' },
     );
     fireEvent.click(screen.getByText('5'));
     expect(screen.getByText('fitness.onboarding.sleepWarning')).toBeInTheDocument();
@@ -2125,7 +2138,7 @@ describe('SleepHoursStep', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'advanced' },
+      { trainingExperience: 'advanced' },
     );
     fireEvent.click(screen.getByText('8'));
     expect(screen.queryByText('fitness.onboarding.sleepWarning')).not.toBeInTheDocument();
@@ -2139,7 +2152,7 @@ describe('SleepHoursStep', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'advanced' },
+      { trainingExperience: 'advanced' },
     );
     const btn6 = screen.getByText('6');
     fireEvent.click(btn6);
@@ -2154,7 +2167,7 @@ describe('SleepHoursStep', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'advanced' },
+      { trainingExperience: 'advanced' },
     );
     const btn7 = screen.getByText('7');
     fireEvent.click(btn7);
@@ -2169,7 +2182,7 @@ describe('SleepHoursStep', () => {
         goBack: () => void;
       }>,
       { step: 7, setOnboardingSection },
-      { experience: 'advanced' },
+      { trainingExperience: 'advanced' },
     );
     fireEvent.click(screen.getByText('5'));
     expect(screen.getByText('fitness.onboarding.sleepWarning')).toBeInTheDocument();
@@ -2183,15 +2196,15 @@ describe('SleepHoursStep', () => {
 /* ================================================================== */
 
 describe('onboardingSchema – new field validation', () => {
-  it('accepts valid cycleWeeks values (4, 6, 8, 12)', () => {
+  it('accepts valid planCycleWeeks values (4, 6, 8, 12)', () => {
     [4, 6, 8, 12].forEach(w => {
-      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, cycleWeeks: w });
+      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, planCycleWeeks: w });
       expect(result.success).toBe(true);
     });
   });
 
-  it('rejects invalid cycleWeeks value', () => {
-    const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, cycleWeeks: 5 });
+  it('rejects invalid planCycleWeeks value', () => {
+    const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, planCycleWeeks: 5 });
     expect(result.success).toBe(false);
   });
 
@@ -2211,24 +2224,24 @@ describe('onboardingSchema – new field validation', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts valid sleepHours range', () => {
+  it('accepts valid avgSleepHours range', () => {
     [3, 7, 12].forEach(h => {
-      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: h });
+      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, avgSleepHours: h });
       expect(result.success).toBe(true);
     });
   });
 
-  it('rejects sleepHours out of range', () => {
-    const too_low = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: 2 });
+  it('rejects avgSleepHours out of range', () => {
+    const too_low = onboardingSchema.safeParse({ ...DEFAULT_VALUES, avgSleepHours: 2 });
     expect(too_low.success).toBe(false);
-    const too_high = onboardingSchema.safeParse({ ...DEFAULT_VALUES, sleepHours: 13 });
+    const too_high = onboardingSchema.safeParse({ ...DEFAULT_VALUES, avgSleepHours: 13 });
     expect(too_high.success).toBe(false);
   });
 
   it('accepts valid injury regions', () => {
     const result = onboardingSchema.safeParse({
       ...DEFAULT_VALUES,
-      injuries: ['shoulders', 'knees'],
+      injuryRestrictions: ['shoulders', 'knees'],
     });
     expect(result.success).toBe(true);
   });
@@ -2236,20 +2249,20 @@ describe('onboardingSchema – new field validation', () => {
   it('rejects invalid injury region', () => {
     const result = onboardingSchema.safeParse({
       ...DEFAULT_VALUES,
-      injuries: ['invalid_region'],
+      injuryRestrictions: ['invalid_region'],
     });
     expect(result.success).toBe(false);
   });
 
-  it('accepts valid periodization values', () => {
+  it('accepts valid periodizationModel values', () => {
     ['linear', 'undulating', 'block'].forEach(p => {
-      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodization: p });
+      const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodizationModel: p });
       expect(result.success).toBe(true);
     });
   });
 
-  it('rejects invalid periodization value', () => {
-    const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodization: 'custom' });
+  it('rejects invalid periodizationModel value', () => {
+    const result = onboardingSchema.safeParse({ ...DEFAULT_VALUES, periodizationModel: 'custom' });
     expect(result.success).toBe(false);
   });
 });

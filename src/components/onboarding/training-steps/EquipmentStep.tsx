@@ -11,7 +11,7 @@ const EQUIPMENT_OPTIONS = ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweigh
 
 export function EquipmentStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
-  const field = useController({ control: form.control, name: 'equipment' });
+  const field = useController({ control: form.control, name: 'availableEquipment' });
   const selected = field.field.value ?? [];
 
   const toggle = (item: string) => {

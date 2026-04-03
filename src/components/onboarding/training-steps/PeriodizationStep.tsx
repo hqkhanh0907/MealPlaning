@@ -11,7 +11,7 @@ const PERIODIZATION_OPTIONS = ['linear', 'undulating', 'block'] as const;
 
 export function PeriodizationStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
-  const field = useController({ control: form.control, name: 'periodization' });
+  const field = useController({ control: form.control, name: 'periodizationModel' });
 
   return (
     <StepLayout

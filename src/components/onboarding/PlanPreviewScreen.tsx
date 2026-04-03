@@ -61,7 +61,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
             </p>
           </div>
           <div className="bg-muted rounded-xl p-3 text-center">
-            <p className="text-foreground text-lg font-bold">{values.sessionDuration ?? 60}</p>
+            <p className="text-foreground text-lg font-bold">{values.sessionDurationMin ?? 60}</p>
             <p className="text-muted-foreground text-xs">{t('onboarding.preview.minutesPerSession')}</p>
           </div>
         </div>

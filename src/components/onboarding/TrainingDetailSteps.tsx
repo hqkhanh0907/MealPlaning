@@ -55,32 +55,32 @@ export function TrainingDetailSteps({
   goBack,
   setOnboardingSection,
 }: Readonly<TrainingDetailStepsProps>) {
-  const experience = useWatch({ control: form.control, name: 'experience' }) as TrainingExperience;
+  const experience = useWatch({ control: form.control, name: 'trainingExperience' }) as TrainingExperience;
   const setTrainingProfile = useFitnessStore(s => s.setTrainingProfile);
 
   const handleConfirmTraining = () => {
     const values = form.getValues();
     const smart = getSmartDefaults(
       values.trainingGoal as TrainingGoal,
-      values.experience as TrainingExperience,
+      values.trainingExperience as TrainingExperience,
       values.daysPerWeek,
     );
 
     setTrainingProfile({
       id: generateUUID(),
       trainingGoal: values.trainingGoal as TrainingGoal,
-      trainingExperience: values.experience as TrainingExperience,
+      trainingExperience: values.trainingExperience as TrainingExperience,
       daysPerWeek: values.daysPerWeek,
-      sessionDurationMin: values.sessionDuration ?? smart.sessionDurationMin,
-      availableEquipment: (values.equipment ?? []) as EquipmentType[],
-      cardioSessionsWeek: values.cardioSessions ?? smart.cardioSessionsWeek,
-      periodizationModel: values.periodization ?? smart.periodizationModel,
-      injuryRestrictions: (values.injuries ?? []) as BodyRegion[],
-      planCycleWeeks: values.cycleWeeks ?? smart.planCycleWeeks,
+      sessionDurationMin: values.sessionDurationMin ?? smart.sessionDurationMin,
+      availableEquipment: (values.availableEquipment ?? []) as EquipmentType[],
+      cardioSessionsWeek: values.cardioSessionsWeek ?? smart.cardioSessionsWeek,
+      periodizationModel: values.periodizationModel ?? smart.periodizationModel,
+      injuryRestrictions: (values.injuryRestrictions ?? []) as BodyRegion[],
+      planCycleWeeks: values.planCycleWeeks ?? smart.planCycleWeeks,
       priorityMuscles: (values.priorityMuscles ?? []) as MuscleGroup[],
       cardioTypePref: smart.cardioTypePref,
       cardioDurationMin: smart.cardioDurationMin,
-      avgSleepHours: values.sleepHours,
+      avgSleepHours: values.avgSleepHours,
       updatedAt: new Date().toISOString(),
     });
     setOnboardingSection(5);

@@ -113,17 +113,17 @@ export function UnifiedOnboarding() {
       rateOfChange: 'moderate',
       targetWeightKg: undefined,
       trainingGoal: 'hypertrophy',
-      experience: 'beginner',
+      trainingExperience: 'beginner',
       daysPerWeek: 4,
-      injuries: [],
+      injuryRestrictions: [],
       priorityMuscles: [],
     },
   });
 
   const isAutoPath = useFitnessStore(s => s.planStrategy === 'auto');
-  const totalSections = isAutoPath ? 7 : 5;
+  const totalSections = isAutoPath ? 7 : 6;
 
-  const watchedExperience = useWatch({ control: form.control, name: 'experience' });
+  const watchedExperience = useWatch({ control: form.control, name: 'trainingExperience' });
 
   const sectionSteps = useMemo(() => {
     return {
@@ -282,7 +282,7 @@ export function UnifiedOnboarding() {
           <div className="pt-safe shrink-0 px-4">
             <div className="pt-2">
               <OnboardingProgress
-                currentSection={location.section}
+                currentSection={!isAutoPath && location.section === 7 ? 6 : location.section}
                 totalSections={totalSections}
                 stepInSection={location.step}
                 totalStepsInSection={sectionSteps[location.section]}

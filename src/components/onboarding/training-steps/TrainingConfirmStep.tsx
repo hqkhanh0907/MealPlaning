@@ -9,7 +9,7 @@ import type { StepProps } from './types';
 export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps>) {
   const { t } = useTranslation();
   const values = form.getValues();
-  const experience = values.experience;
+  const experience = values.trainingExperience;
 
   return (
     <div className="flex flex-1 flex-col" data-testid="training-confirm-step">
@@ -17,33 +17,36 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
         <h2 className="text-foreground mb-6 text-xl font-bold">{t('onboarding.confirm.trainingTitle')}</h2>
         <div className="border-border divide-border divide-y rounded-xl border">
           <SummaryRow label={t('fitness.onboarding.goal')} value={t(`fitness.onboarding.${values.trainingGoal}`)} />
-          <SummaryRow label={t('fitness.onboarding.experience')} value={t(`fitness.onboarding.${values.experience}`)} />
+          <SummaryRow
+            label={t('fitness.onboarding.experience')}
+            value={t(`fitness.onboarding.${values.trainingExperience}`)}
+          />
           <SummaryRow label={t('fitness.onboarding.daysPerWeek')} value={`${values.daysPerWeek}`} />
-          {values.sessionDuration && (
+          {values.sessionDurationMin && (
             <SummaryRow
               label={t('fitness.onboarding.sessionDuration')}
-              value={`${values.sessionDuration} ${t('fitness.onboarding.minutes')}`}
+              value={`${values.sessionDurationMin} ${t('fitness.onboarding.minutes')}`}
             />
           )}
-          {values.cardioSessions != null && (
-            <SummaryRow label={t('fitness.onboarding.cardioSessions')} value={`${values.cardioSessions}`} />
+          {values.cardioSessionsWeek != null && (
+            <SummaryRow label={t('fitness.onboarding.cardioSessions')} value={`${values.cardioSessionsWeek}`} />
           )}
-          {(values.injuries ?? []).length > 0 && (
+          {(values.injuryRestrictions ?? []).length > 0 && (
             <SummaryRow
               label={t('fitness.onboarding.injuries')}
-              value={(values.injuries ?? []).map(inj => t(`fitness.onboarding.injury_${inj}`)).join(', ')}
+              value={(values.injuryRestrictions ?? []).map(inj => t(`fitness.onboarding.injury_${inj}`)).join(', ')}
             />
           )}
-          {experience !== 'beginner' && values.periodization && (
+          {experience !== 'beginner' && values.periodizationModel && (
             <SummaryRow
               label={t('fitness.onboarding.periodization')}
-              value={t(`fitness.onboarding.period_${values.periodization}`)}
+              value={t(`fitness.onboarding.period_${values.periodizationModel}`)}
             />
           )}
-          {experience !== 'beginner' && values.cycleWeeks && (
+          {experience !== 'beginner' && values.planCycleWeeks && (
             <SummaryRow
               label={t('fitness.onboarding.cycleWeeks')}
-              value={`${values.cycleWeeks} ${t('fitness.onboarding.weeksUnit')}`}
+              value={`${values.planCycleWeeks} ${t('fitness.onboarding.weeksUnit')}`}
             />
           )}
           {experience !== 'beginner' && (values.priorityMuscles ?? []).length > 0 && (
@@ -52,10 +55,10 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
               value={(values.priorityMuscles ?? []).map(m => t(`fitness.onboarding.muscle_${m}`)).join(', ')}
             />
           )}
-          {experience === 'advanced' && values.sleepHours != null && (
+          {experience === 'advanced' && values.avgSleepHours != null && (
             <SummaryRow
               label={t('fitness.onboarding.sleepHours')}
-              value={`${values.sleepHours} ${t('fitness.onboarding.hoursUnit')}`}
+              value={`${values.avgSleepHours} ${t('fitness.onboarding.hoursUnit')}`}
             />
           )}
         </div>
