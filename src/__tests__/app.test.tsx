@@ -412,12 +412,12 @@ describe('App', () => {
     expect(screen.getByText('Hôm nay')).toBeInTheDocument();
   });
 
-  it('opens goal settings modal', async () => {
+  it('opens goal detail page via pushPage', async () => {
     render(<App />);
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
     const editGoalsBtn = screen.getByLabelText('Chỉnh sửa mục tiêu dinh dưỡng');
     fireEvent.click(editGoalsBtn);
-    await waitFor(() => expect(screen.getByText('Mục tiêu dinh dưỡng')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Mục tiêu cân nặng')).toBeInTheDocument());
   });
 
   it('navigates to AI analysis tab and renders AIImageAnalyzer', async () => {

@@ -42,9 +42,7 @@ const MealPlannerModal = React.lazy(() =>
 const ClearPlanModal = React.lazy(() =>
   import('./components/modals/ClearPlanModal').then(m => ({ default: m.ClearPlanModal })),
 );
-const GoalSettingsModal = React.lazy(() =>
-  import('./components/modals/GoalSettingsModal').then(m => ({ default: m.GoalSettingsModal })),
-);
+const GoalDetailPage = React.lazy(() => import('./components/settings/GoalDetailPage'));
 const AISuggestionPreviewModal = React.lazy(() =>
   import('./components/modals/AISuggestionPreviewModal').then(m => ({ default: m.AISuggestionPreviewModal })),
 );
@@ -65,6 +63,7 @@ import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navig
 import { getTabLabels } from './components/navigation/types';
 import { useNotification } from './contexts/NotificationContext';
 import { UNDO_TOAST_DURATION_MS } from './data/constants';
+import { useNutritionTargets } from './features/health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from './features/health-profile/store/healthProfileStore';
 import { useAISuggestion } from './hooks/useAISuggestion';
 import { useAppBackHandler } from './hooks/useAppBackHandler';
@@ -75,6 +74,7 @@ import { useModalManager } from './hooks/useModalManager';
 import { usePageStackBackHandler } from './hooks/usePageStackBackHandler';
 import { usePrefetchAfterIdle } from './hooks/usePrefetchAfterIdle';
 import { useTabHistoryBackHandler } from './hooks/useTabHistoryBackHandler';
+import { useTodayCaloriesOut } from './hooks/useTodayCaloriesOut';
 import { processAnalyzedDish, removeIngredientFromDishes } from './services/dataService';
 import { clearPlansByScope, createEmptyDayPlan, updateDayPlanSlot } from './services/planService';
 import { useAppOnboardingStore } from './store/appOnboardingStore';
@@ -128,6 +128,8 @@ function PageStackOverlay({
         );
       case 'PlanTemplateGallery':
         return <PlanTemplateGallery planId={props.planId as string} />;
+      case 'GoalDetailPage':
+        return <GoalDetailPage onBack={onBack} />;
       default:
         return null;
     }
@@ -189,6 +191,7 @@ export default function App() {
   const isDishUsed = useDayPlanStore(s => s.isDishUsed);
   const restoreDayPlans = useDayPlanStore(s => s.restoreDayPlans);
   const healthProfile = useHealthProfileStore(s => s.profile);
+  const todayCaloriesOut = useTodayCaloriesOut();
   const templates = useMealTemplateStore(s => s.templates);
   const saveTemplate = useMealTemplateStore(s => s.saveTemplate);
   const deleteTemplate = useMealTemplateStore(s => s.deleteTemplate);
@@ -259,12 +262,13 @@ export default function App() {
     };
   }, [currentPlan, dishes, ingredients]);
 
-  const targetProtein = Math.round((healthProfile?.weightKg ?? 0) * (healthProfile?.proteinRatio ?? 0));
+  const { targetCalories: computedTargetCalories, targetProtein: computedTargetProtein } = useNutritionTargets();
+  const targetProtein = computedTargetProtein;
 
   const aiSuggestion = useAISuggestion({
     dishes,
     ingredients,
-    targetCalories: healthProfile?.targetCalories ?? 0,
+    targetCalories: computedTargetCalories,
     targetProtein,
     selectedDate,
     setDayPlans,
@@ -383,7 +387,6 @@ export default function App() {
     modals.openMealPlanner(emptySlots[0] ?? 'breakfast');
   }, [modals, currentPlan]);
   const openClearPlan = useCallback(() => modals.openClearPlan(), [modals]);
-  const openGoalModal = useCallback(() => modals.openGoalModal(), [modals]);
   const openCopyPlan = useCallback(() => modals.openCopyPlanModal(), [modals]);
   const openTemplateManager = useCallback(() => modals.openTemplateManager(), [modals]);
 
@@ -513,13 +516,13 @@ export default function App() {
               currentPlan={currentPlan}
               dayNutrition={dayNutrition}
               userWeight={healthProfile?.weightKg ?? 0}
-              targetCalories={healthProfile?.targetCalories ?? 0}
+              targetCalories={computedTargetCalories}
               targetProtein={targetProtein}
               isSuggesting={aiSuggestion.isLoading}
               servings={currentPlan.servings}
               onOpenTypeSelection={openTypeSelection}
               onOpenClearPlan={openClearPlan}
-              onOpenGoalModal={openGoalModal}
+              onOpenGoalModal={() => pushPage({ id: 'goal-detail', component: 'GoalDetailPage' })}
               onPlanMeal={handlePlanMeal}
               onSuggestMealPlan={aiSuggestion.startSuggestion}
               onCopyPlan={openCopyPlan}
@@ -527,6 +530,7 @@ export default function App() {
               onOpenTemplateManager={openTemplateManager}
               onQuickAdd={handleQuickAdd}
               onUpdateServings={handleUpdateServings}
+              caloriesOut={todayCaloriesOut}
             />
           </ErrorBoundary>
         </div>
@@ -599,7 +603,7 @@ export default function App() {
             currentPlan={currentPlan}
             selectedDate={selectedDate}
             initialTab={modals.planningType}
-            targetCalories={healthProfile?.targetCalories ?? 0}
+            targetCalories={computedTargetCalories}
             targetProtein={targetProtein}
             onConfirm={changes => {
               for (const [type, dishIds] of Object.entries(changes)) {
@@ -636,24 +640,6 @@ export default function App() {
             onClose={modals.closeClearPlan}
           />
         )}
-        {modals.isGoalModalOpen && (
-          <GoalSettingsModal
-            userProfile={{
-              weight: healthProfile?.weightKg ?? 0,
-              proteinRatio: healthProfile?.proteinRatio ?? 0,
-              targetCalories: healthProfile?.targetCalories ?? 0,
-            }}
-            onUpdateProfile={p =>
-              useHealthProfileStore.setState(s => ({
-                profile: s.profile
-                  ? { ...s.profile, weightKg: p.weight, proteinRatio: p.proteinRatio, targetCalories: p.targetCalories }
-                  : s.profile,
-              }))
-            }
-            onClose={modals.closeGoalModal}
-          />
-        )}
-
         {modals.isCopyPlanOpen && (
           <CopyPlanModal
             sourceDate={selectedDate}
@@ -706,7 +692,7 @@ export default function App() {
           suggestion={aiSuggestion.suggestion}
           dishes={dishes}
           ingredients={ingredients}
-          targetCalories={healthProfile?.targetCalories ?? 0}
+          targetCalories={computedTargetCalories}
           targetProtein={targetProtein}
           isLoading={aiSuggestion.isLoading}
           error={aiSuggestion.error}

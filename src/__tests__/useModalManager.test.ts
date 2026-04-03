@@ -9,7 +9,6 @@ describe('useModalManager', () => {
 
     expect(result.current.isMealPlannerOpen).toBe(false);
     expect(result.current.isClearPlanModalOpen).toBe(false);
-    expect(result.current.isGoalModalOpen).toBe(false);
     expect(result.current.isCopyPlanOpen).toBe(false);
     expect(result.current.isTemplateManagerOpen).toBe(false);
     expect(result.current.planningType).toBeNull();
@@ -36,16 +35,6 @@ describe('useModalManager', () => {
     expect(result.current.isClearPlanModalOpen).toBe(false);
   });
 
-  it('should open and close goal modal', () => {
-    const { result } = renderHook(() => useModalManager());
-
-    act(() => result.current.openGoalModal());
-    expect(result.current.isGoalModalOpen).toBe(true);
-
-    act(() => result.current.closeGoalModal());
-    expect(result.current.isGoalModalOpen).toBe(false);
-  });
-
   it('should open and close copy plan modal', () => {
     const { result } = renderHook(() => useModalManager());
 
@@ -69,13 +58,8 @@ describe('useModalManager', () => {
   it('should only allow one modal open at a time', () => {
     const { result } = renderHook(() => useModalManager());
 
-    act(() => result.current.openGoalModal());
-    expect(result.current.isGoalModalOpen).toBe(true);
-
     act(() => result.current.openClearPlan());
-    expect(result.current.isGoalModalOpen).toBe(false);
     expect(result.current.isClearPlanModalOpen).toBe(true);
-    expect(result.current.isMealPlannerOpen).toBe(false);
 
     act(() => result.current.openMealPlanner('breakfast'));
     expect(result.current.isClearPlanModalOpen).toBe(false);
@@ -89,11 +73,11 @@ describe('useModalManager', () => {
   it('copy plan modal closes other modals', () => {
     const { result } = renderHook(() => useModalManager());
 
-    act(() => result.current.openGoalModal());
-    expect(result.current.isGoalModalOpen).toBe(true);
+    act(() => result.current.openClearPlan());
+    expect(result.current.isClearPlanModalOpen).toBe(true);
 
     act(() => result.current.openCopyPlanModal());
-    expect(result.current.isGoalModalOpen).toBe(false);
+    expect(result.current.isClearPlanModalOpen).toBe(false);
     expect(result.current.isCopyPlanOpen).toBe(true);
   });
 
