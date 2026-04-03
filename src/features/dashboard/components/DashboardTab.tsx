@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
 import { EnergyBalanceMini } from '../../../components/nutrition/EnergyBalanceMini';
+import { EnergyDetailSheet } from '../../../components/nutrition/EnergyDetailSheet';
 import { useTodayCaloriesOut } from '../../../hooks/useTodayCaloriesOut';
 import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
@@ -39,6 +40,7 @@ function DashboardTabInner(): React.ReactElement {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const [weightQuickLogOpen, setWeightQuickLogOpen] = useState(false);
+  const [energyDetailOpen, setEnergyDetailOpen] = useState(false);
   const [lowerTiersVisible, setLowerTiersVisible] = useState(false);
 
   const { adjustment, applyAdjustment, dismissAdjustment } = useFeedbackLoop();
@@ -59,6 +61,14 @@ function DashboardTabInner(): React.ReactElement {
 
   const handleCloseWeightLog = useCallback(() => {
     setWeightQuickLogOpen(false);
+  }, []);
+
+  const handleOpenEnergyDetail = useCallback(() => {
+    setEnergyDetailOpen(true);
+  }, []);
+
+  const handleCloseEnergyDetail = useCallback(() => {
+    setEnergyDetailOpen(false);
   }, []);
 
   const staggerStyle = useCallback(
@@ -87,7 +97,12 @@ function DashboardTabInner(): React.ReactElement {
           data-testid="dashboard-tier-2"
           style={staggerStyle(STAGGER_DELAYS.tier2)}
         >
-          <EnergyBalanceMini eaten={eaten} burned={todayCaloriesOut} target={targetCalories} />
+          <EnergyBalanceMini
+            eaten={eaten}
+            burned={todayCaloriesOut}
+            target={targetCalories}
+            onTapDetail={handleOpenEnergyDetail}
+          />
           <ProteinProgress current={protein} target={targetProtein} />
         </div>
       </ErrorBoundary>
@@ -132,6 +147,9 @@ function DashboardTabInner(): React.ReactElement {
 
       {/* WeightQuickLog bottom sheet */}
       {weightQuickLogOpen && <WeightQuickLog onClose={handleCloseWeightLog} />}
+
+      {/* EnergyDetailSheet bottom sheet */}
+      {energyDetailOpen && <EnergyDetailSheet onClose={handleCloseEnergyDetail} />}
     </div>
   );
 }

@@ -1531,5 +1531,15 @@
       "active": "Hoạt động tích cực",
       "extra_active": "Hoạt động rất cao"
     }
+  },
+  "energyDetail": {
+    "title": "Chi tiết năng lượng",
+    "target": "Mục tiêu",
+    "macroBreakdown": "Phân bổ macro",
+    "caloriesIn": "Nạp vào",
+    "caloriesOut": "Tiêu hao",
+    "netCalories": "Calo ròng",
+    "remaining": "Còn lại",
+    "perMeal": "Theo bữa ăn"
   }
 }

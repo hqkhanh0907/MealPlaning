@@ -68,17 +68,22 @@ vi.mock('../features/dashboard/components/DailyScoreHero', () => ({
   DailyScoreHero: () => <div data-testid="daily-score-hero">DailyScoreHero</div>,
 }));
 
+let capturedEnergyBalanceMiniOnTapDetail: (() => void) | undefined;
 vi.mock('../components/nutrition/EnergyBalanceMini', () => ({
-  EnergyBalanceMini: (props: { eaten: number; burned: number; target: number }) => (
-    <div
-      data-testid="energy-balance-mini"
-      data-eaten={props.eaten}
-      data-burned={props.burned}
-      data-target={props.target}
-    >
-      EnergyBalanceMini
-    </div>
-  ),
+  EnergyBalanceMini: (props: { eaten: number; burned: number; target: number; onTapDetail?: () => void }) => {
+    capturedEnergyBalanceMiniOnTapDetail = props.onTapDetail;
+    return (
+      <div
+        data-testid="energy-balance-mini"
+        data-eaten={props.eaten}
+        data-burned={props.burned}
+        data-target={props.target}
+        onClick={props.onTapDetail}
+      >
+        EnergyBalanceMini
+      </div>
+    );
+  },
 }));
 
 vi.mock('../features/dashboard/components/ProteinProgress', () => ({
@@ -115,6 +120,20 @@ vi.mock('../features/dashboard/components/AiInsightCard', () => ({
 
 vi.mock('../features/dashboard/components/QuickActionsBar', () => ({
   QuickActionsBar: () => <div data-testid="quick-actions-bar">QuickActionsBar</div>,
+}));
+
+let capturedEnergyDetailSheetOnClose: (() => void) | undefined;
+vi.mock('../components/nutrition/EnergyDetailSheet', () => ({
+  EnergyDetailSheet: ({ onClose }: { onClose: () => void }) => {
+    capturedEnergyDetailSheetOnClose = onClose;
+    return (
+      <div data-testid="energy-detail-sheet">
+        <button data-testid="close-energy-detail" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    );
+  },
 }));
 
 let capturedWeightQuickLogOnClose: (() => void) | undefined;
@@ -191,6 +210,8 @@ beforeEach(() => {
   mockTodayCaloriesOut = 0;
   capturedWeightMiniOnTap = undefined;
   capturedWeightQuickLogOnClose = undefined;
+  capturedEnergyBalanceMiniOnTapDetail = undefined;
+  capturedEnergyDetailSheetOnClose = undefined;
   Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,
     value: createMatchMediaMock(false),
@@ -378,6 +399,47 @@ describe('DashboardTab', () => {
         fireEvent.click(screen.getByTestId('weight-mini'));
       });
       expect(capturedWeightQuickLogOnClose).toBeTypeOf('function');
+    });
+  });
+
+  describe('EnergyDetailSheet bottom sheet', () => {
+    it('does not show EnergyDetailSheet by default', () => {
+      renderDashboard();
+      expect(screen.queryByTestId('energy-detail-sheet')).not.toBeInTheDocument();
+    });
+
+    it('passes onTapDetail callback to EnergyBalanceMini', () => {
+      renderDashboard();
+      expect(capturedEnergyBalanceMiniOnTapDetail).toBeTypeOf('function');
+    });
+
+    it('opens EnergyDetailSheet when EnergyBalanceMini tap detail is triggered', () => {
+      renderDashboard();
+      act(() => {
+        fireEvent.click(screen.getByTestId('energy-balance-mini'));
+      });
+      expect(screen.getByTestId('energy-detail-sheet')).toBeInTheDocument();
+    });
+
+    it('closes EnergyDetailSheet when onClose is called', () => {
+      renderDashboard();
+      act(() => {
+        fireEvent.click(screen.getByTestId('energy-balance-mini'));
+      });
+      expect(screen.getByTestId('energy-detail-sheet')).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('close-energy-detail'));
+      });
+      expect(screen.queryByTestId('energy-detail-sheet')).not.toBeInTheDocument();
+    });
+
+    it('passes onClose callback to EnergyDetailSheet', () => {
+      renderDashboard();
+      act(() => {
+        fireEvent.click(screen.getByTestId('energy-balance-mini'));
+      });
+      expect(capturedEnergyDetailSheetOnClose).toBeTypeOf('function');
     });
   });
 

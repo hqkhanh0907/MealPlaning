@@ -8,6 +8,19 @@ import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
 import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
 import type { DayNutritionSummary, Dish, SlotInfo } from '../types';
 
+vi.mock('@/components/nutrition/EnergyBalanceCard', () => ({
+  EnergyBalanceCard: (props: Record<string, unknown>) => (
+    <div
+      data-testid="energy-balance-card"
+      data-calories-in={props.caloriesIn}
+      data-calories-out={props.caloriesOut}
+      data-target={props.targetCalories}
+      data-protein-current={props.proteinCurrent}
+      data-protein-target={props.proteinTarget}
+    />
+  ),
+}));
+
 const makeSlot = (dishIds: string[], cal = 0, pro = 0): SlotInfo => ({
   dishIds,
   calories: cal,
@@ -723,6 +736,33 @@ describe('NutritionSubTab', () => {
   it('renders macro chart empty state when no nutrition data', () => {
     render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
     expect(screen.getByTestId('macro-chart-empty')).toBeInTheDocument();
+  });
+
+  it('does not render EnergyBalanceCard when caloriesOut is undefined', () => {
+    render(<NutritionSubTab {...baseProps} />);
+    expect(screen.queryByTestId('energy-balance-card')).not.toBeInTheDocument();
+  });
+
+  it('renders EnergyBalanceCard when caloriesOut is provided', () => {
+    render(<NutritionSubTab {...baseProps} caloriesOut={350} />);
+    const card = screen.getByTestId('energy-balance-card');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveAttribute('data-calories-in', '1500');
+    expect(card).toHaveAttribute('data-calories-out', '350');
+    expect(card).toHaveAttribute('data-target', '2000');
+    expect(card).toHaveAttribute('data-protein-current', '75');
+    expect(card).toHaveAttribute('data-protein-target', '140');
+  });
+
+  it('renders EnergyBalanceCard before Summary', () => {
+    render(<NutritionSubTab {...baseProps} caloriesOut={350} />);
+    const container = screen.getByTestId('nutrition-subtab');
+    const energyCard = screen.getByTestId('energy-balance-card');
+    const summaryCalories = screen.getByTestId('summary-total-calories');
+    const children = Array.from(container.children);
+    const energyIndex = children.findIndex(child => child.contains(energyCard));
+    const summaryIndex = children.findIndex(child => child.contains(summaryCalories));
+    expect(energyIndex).toBeLessThan(summaryIndex);
   });
 });
 

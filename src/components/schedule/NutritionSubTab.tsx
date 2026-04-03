@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DayNutritionSummary } from '../../types';
 import { getDynamicTips, NutritionTip } from '../../utils/tips';
+import { EnergyBalanceCard } from '../nutrition/EnergyBalanceCard';
 import { Summary } from '../Summary';
 import { MacroChart } from './MacroChart';
 
@@ -106,6 +107,7 @@ export interface NutritionSubTabProps {
   userWeight: number;
   onEditGoals: () => void;
   onSwitchToMeals?: () => void;
+  caloriesOut?: number;
 }
 
 export const NutritionSubTab = React.memo(function NutritionSubTab({
@@ -115,9 +117,23 @@ export const NutritionSubTab = React.memo(function NutritionSubTab({
   userWeight,
   onEditGoals,
   onSwitchToMeals,
+  caloriesOut,
 }: NutritionSubTabProps) {
+  const totalCalories = dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories;
+  const totalProtein = dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein;
+
   return (
     <div data-testid="nutrition-subtab" className="space-y-6">
+      {caloriesOut != null && (
+        <EnergyBalanceCard
+          caloriesIn={totalCalories}
+          caloriesOut={caloriesOut}
+          targetCalories={targetCalories}
+          proteinCurrent={totalProtein}
+          proteinTarget={targetProtein}
+          isCollapsible
+        />
+      )}
       <Summary
         dayNutrition={dayNutrition}
         targetCalories={targetCalories}

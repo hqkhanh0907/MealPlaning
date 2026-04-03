@@ -36,6 +36,7 @@ export interface CalendarTabProps {
   onOpenTemplateManager?: () => void;
   onQuickAdd?: (type: MealType, dishId: string) => void;
   onUpdateServings?: (dishId: string, servings: number) => void;
+  caloriesOut?: number;
 }
 
 export const CalendarTab = React.memo(function CalendarTab({
@@ -61,6 +62,7 @@ export const CalendarTab = React.memo(function CalendarTab({
   onOpenTemplateManager,
   onQuickAdd,
   onUpdateServings,
+  caloriesOut,
 }: CalendarTabProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
@@ -179,6 +181,7 @@ export const CalendarTab = React.memo(function CalendarTab({
               userWeight={userWeight}
               onEditGoals={onOpenGoalModal}
               onSwitchToMeals={() => setActiveSubTab('meals')}
+              caloriesOut={caloriesOut}
             />
           )}
         </>
@@ -216,6 +219,7 @@ export const CalendarTab = React.memo(function CalendarTab({
               targetProtein={targetProtein}
               userWeight={userWeight}
               onEditGoals={onOpenGoalModal}
+              caloriesOut={caloriesOut}
             />
           </div>
         </div>
