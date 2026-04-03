@@ -1,10 +1,16 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useController, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
-import { type GoalFormData, goalFormDefaults, goalFormResolver, validateTargetWeight } from '@/schemas/goalValidation';
+import {
+  createGoalValidationSchema,
+  type GoalFormData,
+  goalFormDefaults,
+  validateTargetWeight,
+} from '@/schemas/goalValidation';
 import { generateUUID } from '@/utils/helpers';
 
 import { useDatabase } from '../../../contexts/DatabaseContext';
@@ -16,33 +22,15 @@ import type { Goal, GoalType, RateOfChange } from '../types';
 /* Constants                                                           */
 /* ------------------------------------------------------------------ */
 const GOAL_OPTIONS = [
-  {
-    type: 'cut' as const,
-    icon: TrendingDown,
-    color: 'text-blue-500',
-    labelKey: 'onboarding.goal.type_cut',
-    descKey: 'onboarding.goal.type_cut_desc',
-  },
-  {
-    type: 'maintain' as const,
-    icon: Minus,
-    color: 'text-primary',
-    labelKey: 'onboarding.goal.type_maintain',
-    descKey: 'onboarding.goal.type_maintain_desc',
-  },
-  {
-    type: 'bulk' as const,
-    icon: TrendingUp,
-    color: 'text-orange-500',
-    labelKey: 'onboarding.goal.type_bulk',
-    descKey: 'onboarding.goal.type_bulk_desc',
-  },
+  { type: 'cut' as const, icon: TrendingDown, color: 'text-blue-500' },
+  { type: 'maintain' as const, icon: Minus, color: 'text-primary' },
+  { type: 'bulk' as const, icon: TrendingUp, color: 'text-orange-500' },
 ] as const;
 
 const RATE_OPTIONS = [
-  { rate: 'conservative' as const, labelKey: 'onboarding.goal.rate_conservative' },
-  { rate: 'moderate' as const, labelKey: 'onboarding.goal.rate_moderate' },
-  { rate: 'aggressive' as const, labelKey: 'onboarding.goal.rate_aggressive' },
+  { rate: 'conservative' as const, labelKey: 'goal.rate_conservative' },
+  { rate: 'moderate' as const, labelKey: 'goal.rate_moderate' },
+  { rate: 'aggressive' as const, labelKey: 'goal.rate_aggressive' },
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -60,9 +48,10 @@ function formatOffset(offset: number): string {
 interface GoalPhaseSelectorProps {
   embedded?: boolean;
   saveRef?: React.RefObject<(() => Promise<boolean>) | null>;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
-export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps = {}) => {
+export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalPhaseSelectorProps = {}) => {
   const { t } = useTranslation();
   const db = useDatabase();
   const saveGoal = useHealthProfileStore(s => s.saveGoal);
@@ -71,10 +60,10 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
   const isDirtyRef = useRef(false);
 
-  const resolver = useMemo(() => goalFormResolver(currentWeight), [currentWeight]);
+  const schema = useMemo(() => createGoalValidationSchema(currentWeight), [currentWeight]);
 
   const form = useForm<GoalFormData>({
-    resolver,
+    resolver: zodResolver(schema),
     defaultValues: goalFormDefaults(activeGoal),
     mode: 'onChange',
   });
@@ -85,6 +74,12 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       form.reset(goalFormDefaults(activeGoal));
     }
   }, [activeGoal, form]);
+
+  // Notify parent of validity changes
+  const isValid = form.formState.isValid;
+  useEffect(() => {
+    onValidityChange?.(isValid);
+  }, [isValid, onValidityChange]);
 
   const goalTypeField = useController({ control: form.control, name: 'goalType' });
   const rateField = useController({ control: form.control, name: 'rateOfChange' });
@@ -101,6 +96,23 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
     ? Math.round(Number(customOffsetField.field.value) || 0)
     : autoOffset;
 
+  // Live cross-field validation: checks targetWeight vs currentWeight based on goalType
+  const checkDirectionError = useCallback(
+    (type: GoalType, weight: number | undefined) => {
+      if (type === 'maintain' || weight == null) {
+        form.clearErrors('targetWeightKg');
+        return;
+      }
+      const error = validateTargetWeight(type, currentWeight, weight);
+      if (error) {
+        form.setError('targetWeightKg', { message: error });
+      } else {
+        form.clearErrors('targetWeightKg');
+      }
+    },
+    [form, currentWeight],
+  );
+
   const handleGoalTypeChange = useCallback(
     (type: GoalType) => {
       goalTypeField.field.onChange(type);
@@ -108,12 +120,11 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       if (type === 'maintain') {
         targetWeightField.field.onChange(undefined);
         form.clearErrors('targetWeightKg');
-      } else if (targetWeightField.field.value != null) {
-        // Re-validate target weight with new goal direction via custom resolver
-        void form.trigger('targetWeightKg');
+      } else {
+        checkDirectionError(type, targetWeightField.field.value);
       }
     },
-    [goalTypeField.field, targetWeightField.field, form],
+    [goalTypeField.field, targetWeightField.field, form, checkDirectionError],
   );
 
   const handleRateChange = useCallback(
@@ -127,18 +138,20 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
   const handleTargetWeightChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
+      let newWeight: number | undefined;
       if (val === '') {
         targetWeightField.field.onChange(undefined);
       } else {
         const num = Number(val);
         if (!Number.isNaN(num)) {
           targetWeightField.field.onChange(num);
+          newWeight = num;
         }
       }
-      // Direction validation handled by custom resolver via mode:'onChange'
+      checkDirectionError(goalType, newWeight);
       isDirtyRef.current = true;
     },
-    [targetWeightField.field],
+    [targetWeightField.field, checkDirectionError, goalType],
   );
 
   const handleCustomOffsetChange = useCallback(
@@ -147,10 +160,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       if (val === '' || val === '-') {
         customOffsetField.field.onChange(undefined);
       } else {
-        const num = Number(val);
-        if (!Number.isNaN(num)) {
-          customOffsetField.field.onChange(num);
-        }
+        customOffsetField.field.onChange(val);
       }
       isDirtyRef.current = true;
     },
@@ -161,22 +171,17 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
     const next = !manualOverrideField.field.value;
     manualOverrideField.field.onChange(next);
     if (next) {
-      customOffsetField.field.onChange(autoOffset);
+      customOffsetField.field.onChange(String(autoOffset));
     }
     isDirtyRef.current = true;
   }, [manualOverrideField.field, customOffsetField.field, autoOffset]);
 
   const handleSave = useCallback(async (): Promise<boolean> => {
-    const values = form.getValues();
+    // Trigger full form validation (schema superRefine handles cross-field checks)
+    const valid = await form.trigger();
+    if (!valid) return false;
 
-    // Validate target weight vs current weight for cut/bulk
-    if (values.goalType !== 'maintain' && values.targetWeightKg != null && currentWeight != null) {
-      const error = validateTargetWeight(values.goalType as GoalType, currentWeight, values.targetWeightKg);
-      if (error) {
-        form.setError('targetWeightKg', { message: error });
-        return false;
-      }
-    }
+    const values = form.getValues();
 
     try {
       const now = new Date().toISOString();
@@ -197,7 +202,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
     } catch {
       return false;
     }
-  }, [db, form, currentWeight, effectiveOffset, saveGoal, activeGoal]);
+  }, [db, form, effectiveOffset, saveGoal, activeGoal]);
 
   useEffect(() => {
     if (saveRef) {
@@ -215,7 +220,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
 
       {/* Goal Type Buttons — unified with onboarding NutritionGoalStep */}
       <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('goal.title')}>
-        {GOAL_OPTIONS.map(({ type, icon: Icon, color, labelKey, descKey }) => {
+        {GOAL_OPTIONS.map(({ type, icon: Icon, color }) => {
           const isActive = goalType === type;
           return (
             <button
@@ -232,9 +237,9 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
               <Icon className={cn('h-5 w-5 shrink-0', color)} aria-hidden="true" />
               <div>
                 <p className={cn('text-sm font-medium', isActive ? 'text-primary-emphasis' : 'text-foreground')}>
-                  {t(labelKey)}
+                  {t(`goal.type_${type}`)}
                 </p>
-                <p className="text-muted-foreground text-xs">{t(descKey)}</p>
+                <p className="text-muted-foreground text-xs">{t(`goal.type_${type}_desc`)}</p>
               </div>
             </button>
           );
@@ -244,8 +249,8 @@ export const GoalPhaseSelector = ({ embedded, saveRef }: GoalPhaseSelectorProps 
       {/* Rate of Change Selector */}
       {showRateSelector && (
         <div data-testid="rate-selector">
-          <label className="text-foreground mb-2 block text-sm font-medium">{t('goal.rateOfChange')}</label>
-          <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('goal.rateOfChange')}>
+          <label className="text-foreground mb-2 block text-sm font-medium">{t('goal.rate')}</label>
+          <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('goal.rate')}>
             {RATE_OPTIONS.map(({ rate, labelKey }) => (
               <button
                 key={rate}

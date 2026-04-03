@@ -550,4 +550,83 @@ describe('GoalPhaseSelector', () => {
     expect(screen.getByTestId('manual-override-toggle')).toHaveAttribute('aria-checked', 'false');
     expect(screen.queryByTestId('custom-offset-input')).not.toBeInTheDocument();
   });
+
+  // --- Live direction validation tests ---
+
+  it('shows error immediately when switching cut→bulk with invalid weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Set up: cut goal with target 75 (valid for cut)
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '75');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    // Switch to bulk → 75 < 80 → should show error IMMEDIATELY (no save click)
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu tăng cơ phải lớn hơn cân nặng hiện tại');
+  });
+
+  it('shows error immediately when switching bulk→cut with invalid weight', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Set up: bulk goal with target 85 (valid for bulk)
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '85');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    // Switch to cut → 85 >= 80 → should show error IMMEDIATELY
+    await user.click(screen.getByTestId('goal-type-cut'));
+    expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu giảm cân phải nhỏ hơn cân nặng hiện tại');
+  });
+
+  it('clears error when switching back to valid goal type', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // cut+75 (valid), then bulk (error), then back to cut (clears error)
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.type(screen.getByTestId('target-weight-input'), '75');
+    await user.click(screen.getByTestId('goal-type-bulk'));
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('goal-type-cut'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('shows error immediately when typing invalid weight for current goal', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    render(<GoalPhaseSelector />);
+
+    // Select cut, type 85 → should error IMMEDIATELY (no save click needed)
+    await user.click(screen.getByTestId('goal-type-cut'));
+    const input = screen.getByTestId('target-weight-input');
+    await user.type(input, '85');
+    expect(screen.getByRole('alert')).toHaveTextContent('Mục tiêu giảm cân phải nhỏ hơn cân nặng hiện tại');
+  });
+
+  it('notifies parent of form validity changes', async () => {
+    const user = userEvent.setup();
+    setupProfileWithWeight(80);
+    const onValidityChange = vi.fn();
+    render(<GoalPhaseSelector onValidityChange={onValidityChange} />);
+
+    // Switch to cut and type invalid weight → direction error should appear
+    await user.click(screen.getByTestId('goal-type-cut'));
+    await user.type(screen.getByTestId('target-weight-input'), '85');
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    // Switch to maintain → error clears, form is valid
+    await user.click(screen.getByTestId('goal-type-maintain'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    // After switching to maintain and clearing errors, onValidityChange should eventually be called with true
+    expect(onValidityChange).toHaveBeenCalledWith(true);
+  });
 });

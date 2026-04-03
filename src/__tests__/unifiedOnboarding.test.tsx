@@ -848,34 +848,34 @@ describe('NutritionGoalStep', () => {
   it('renders all 3 goal type options', () => {
     renderWithForm(NutritionGoalStep);
     expect(screen.getByTestId('nutrition-goal-step')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.goal.type_cut')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.goal.type_maintain')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.goal.type_bulk')).toBeInTheDocument();
+    expect(screen.getByText('goal.type_cut')).toBeInTheDocument();
+    expect(screen.getByText('goal.type_maintain')).toBeInTheDocument();
+    expect(screen.getByText('goal.type_bulk')).toBeInTheDocument();
   });
 
   it('does not show rate/target fields when maintain is selected', () => {
     renderWithForm(NutritionGoalStep, {}, { goalType: 'maintain' });
-    expect(screen.queryByText('onboarding.goal.rate')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('onboarding.goal.targetWeight')).not.toBeInTheDocument();
+    expect(screen.queryByText('goal.rate')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('goal.targetWeight')).not.toBeInTheDocument();
   });
 
   it('shows rate/target fields when cut is selected', () => {
     renderWithForm(NutritionGoalStep, {}, { goalType: 'cut' });
-    expect(screen.getByText('onboarding.goal.rate')).toBeInTheDocument();
-    expect(screen.getByLabelText('onboarding.goal.targetWeight')).toBeInTheDocument();
+    expect(screen.getByText('goal.rate')).toBeInTheDocument();
+    expect(screen.getByLabelText('goal.targetWeight')).toBeInTheDocument();
   });
 
   it('shows rate/target fields when bulk is selected', () => {
     renderWithForm(NutritionGoalStep, {}, { goalType: 'bulk' });
-    expect(screen.getByText('onboarding.goal.rate')).toBeInTheDocument();
-    expect(screen.getByLabelText('onboarding.goal.targetWeight')).toBeInTheDocument();
+    expect(screen.getByText('goal.rate')).toBeInTheDocument();
+    expect(screen.getByLabelText('goal.targetWeight')).toBeInTheDocument();
   });
 
   it('renders all 3 rate options when not maintain', () => {
     renderWithForm(NutritionGoalStep, {}, { goalType: 'cut' });
-    expect(screen.getByText('onboarding.goal.rate_conservative')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.goal.rate_moderate')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.goal.rate_aggressive')).toBeInTheDocument();
+    expect(screen.getByText('goal.rate_conservative')).toBeInTheDocument();
+    expect(screen.getByText('goal.rate_moderate')).toBeInTheDocument();
+    expect(screen.getByText('goal.rate_aggressive')).toBeInTheDocument();
   });
 
   it('calls goBack on back button click', () => {
@@ -886,11 +886,11 @@ describe('NutritionGoalStep', () => {
 
   it('shows conditional fields when switching from maintain to cut', () => {
     renderWithForm(NutritionGoalStep, {}, { goalType: 'maintain' });
-    expect(screen.queryByText('onboarding.goal.rate')).not.toBeInTheDocument();
+    expect(screen.queryByText('goal.rate')).not.toBeInTheDocument();
 
-    const cutButton = screen.getByText('onboarding.goal.type_cut').closest('button');
+    const cutButton = screen.getByText('goal.type_cut').closest('button');
     if (cutButton) fireEvent.click(cutButton);
-    expect(screen.getByText('onboarding.goal.rate')).toBeInTheDocument();
+    expect(screen.getByText('goal.rate')).toBeInTheDocument();
   });
 });
 
@@ -1742,11 +1742,11 @@ describe('HealthBasicStep – field interactions', () => {
 describe('NutritionGoalStep – field interactions', () => {
   it('allows selecting each rate option when goal is cut', () => {
     const { getByText } = renderWithForm(NutritionGoalStep, {}, { goalType: 'cut' });
-    const conservativeBtn = getByText('onboarding.goal.rate_conservative');
+    const conservativeBtn = getByText('goal.rate_conservative');
     fireEvent.click(conservativeBtn);
     expect(conservativeBtn.className).toContain('border-primary');
 
-    const aggressiveBtn = getByText('onboarding.goal.rate_aggressive');
+    const aggressiveBtn = getByText('goal.rate_aggressive');
     fireEvent.click(aggressiveBtn);
     expect(aggressiveBtn.className).toContain('border-primary');
   });

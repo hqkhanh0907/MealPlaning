@@ -14,9 +14,9 @@ const GOAL_ICON: Record<string, typeof TrendingDown> = {
 };
 
 const GOAL_COLOR: Record<string, string> = {
-  cut: 'text-amber-600 dark:text-amber-400',
+  cut: 'text-blue-600 dark:text-blue-400',
   maintain: 'text-primary',
-  bulk: 'text-blue-600 dark:text-blue-400',
+  bulk: 'text-orange-600 dark:text-orange-400',
 };
 
 function GoalViewMode() {
@@ -100,6 +100,7 @@ function GoalViewMode() {
 function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(true);
   const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
   const handleSave = async () => {
@@ -113,6 +114,7 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
 
   const handleCancel = () => {
     setIsEditing(false);
+    setIsFormValid(true);
   };
 
   return (
@@ -120,13 +122,17 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
       title={t('settings.goalSection')}
       icon={<Target className="text-primary h-5 w-5" />}
       isEditing={isEditing}
-      hasChanges={isEditing}
+      hasChanges={isEditing && isFormValid}
       onBack={onBack}
       onEdit={() => setIsEditing(true)}
       onSave={() => void handleSave()}
       onCancel={handleCancel}
     >
-      {isEditing ? <GoalPhaseSelector embedded saveRef={saveRef} /> : <GoalViewMode />}
+      {isEditing ? (
+        <GoalPhaseSelector embedded saveRef={saveRef} onValidityChange={setIsFormValid} />
+      ) : (
+        <GoalViewMode />
+      )}
     </SettingsDetailLayout>
   );
 }

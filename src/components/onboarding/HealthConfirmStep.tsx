@@ -172,15 +172,15 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
               {t('onboarding.confirm.activityLevel')}: {t(`health.activityLevel.${values.activityLevel}`)}
             </p>
             <p>
-              {t('onboarding.confirm.goalLabel')}: {t(`onboarding.goal.type_${values.goalType}`)}
+              {t('onboarding.confirm.goalLabel')}: {t(`goal.type_${values.goalType}`)}
             </p>
             {values.goalType !== 'maintain' && (
               <>
                 <p>
-                  {t('onboarding.goal.rate')}: {t(`onboarding.goal.rate_${values.rateOfChange ?? 'moderate'}`)}
+                  {t('goal.rate')}: {t(`goal.rate_${values.rateOfChange ?? 'moderate'}`)}
                 </p>
                 <p>
-                  {t('onboarding.goal.targetWeight')}: {values.targetWeightKg ?? values.weightKg} kg
+                  {t('goal.targetWeight')}: {values.targetWeightKg ?? values.weightKg} kg
                 </p>
               </>
             )}

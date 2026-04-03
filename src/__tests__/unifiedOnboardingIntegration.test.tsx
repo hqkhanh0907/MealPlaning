@@ -245,7 +245,7 @@ async function navigateHealthSection() {
   await screen.findByTestId('activity-level-step');
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
-  await screen.findByText('onboarding.goal.title');
+  await screen.findByText('goal.title');
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
   await screen.findByTestId('health-confirm-step');

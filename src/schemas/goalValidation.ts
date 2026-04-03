@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { Goal, GoalType } from '@/features/health-profile/types';
 import { getCalorieOffset } from '@/services/nutritionEngine';
 
+export type { GoalType } from '@/features/health-profile/types';
 export const GOAL_TYPE_VALUES = ['cut', 'maintain', 'bulk'] as const;
 export const RATE_OF_CHANGE_VALUES = ['conservative', 'moderate', 'aggressive'] as const;
 
@@ -109,7 +110,7 @@ export function goalFormDefaults(activeGoal: Goal | null): GoalFormData {
 
 /**
  * Build a Zod schema for goal fields with current-weight-aware cross-field validation.
- * @deprecated Use goalFormSchema directly + manual validateTargetWeight() calls
+ * @deprecated Use createGoalValidationSchema() instead
  */
 export function createGoalFieldsSchema(getCurrentWeight: () => number | undefined) {
   return z
@@ -131,4 +132,20 @@ export function createGoalFieldsSchema(getCurrentWeight: () => number | undefine
         }
       }
     });
+}
+
+/**
+ * Create a goal form schema with live cross-field validation.
+ * Used by BOTH onboarding and settings for identical validation behavior.
+ * The schema validates targetWeight against currentWeight based on goalType.
+ */
+export function createGoalValidationSchema(currentWeight: number | undefined) {
+  return goalFormSchema.superRefine((data, ctx) => {
+    if (data.goalType !== 'maintain' && data.targetWeightKg != null && currentWeight != null) {
+      const error = validateTargetWeight(data.goalType, currentWeight, data.targetWeightKg);
+      if (error) {
+        ctx.addIssue({ code: 'custom', path: ['targetWeightKg'], message: error });
+      }
+    }
+  });
 }

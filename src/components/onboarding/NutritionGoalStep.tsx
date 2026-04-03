@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { validateTargetWeight } from '@/schemas/goalValidation';
+import { type GoalType, validateTargetWeight } from '@/schemas/goalValidation';
 
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
@@ -32,15 +32,44 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
 
   const showConditional = goalField.field.value !== 'maintain';
 
+  // Live cross-field validation for goal direction
+  const checkDirectionError = useCallback(
+    (type: string, weight: number | undefined) => {
+      if (type === 'maintain' || weight == null) {
+        form.clearErrors('targetWeightKg');
+        return;
+      }
+      const cw = form.getValues().weightKg;
+      const error = validateTargetWeight(type as GoalType, cw, weight);
+      if (error) {
+        form.setError('targetWeightKg', { message: error });
+      } else {
+        form.clearErrors('targetWeightKg');
+      }
+    },
+    [form],
+  );
+
   const handleGoalTypeChange = useCallback(
     (value: string) => {
       goalField.field.onChange(value);
-      if (value !== 'maintain' && targetField.field.value != null) {
-        // Re-validate target weight with new goal direction
-        void form.trigger('targetWeightKg');
+      if (value === 'maintain') {
+        targetField.field.onChange(undefined);
+        form.clearErrors('targetWeightKg');
+      } else {
+        checkDirectionError(value, targetField.field.value);
       }
     },
-    [goalField.field, targetField.field.value, form],
+    [goalField.field, targetField.field, form, checkDirectionError],
+  );
+
+  const handleTargetWeightChange = useCallback(
+    (rawValue: string) => {
+      const w = rawValue ? Number(rawValue) : undefined;
+      targetField.field.onChange(w);
+      checkDirectionError(goalField.field.value, w);
+    },
+    [targetField.field, goalField.field, checkDirectionError],
   );
 
   const handleNext = async () => {
@@ -64,11 +93,11 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
   return (
     <div className="flex flex-1 flex-col" data-testid="nutrition-goal-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">{t('onboarding.goal.title')}</h2>
-        <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.goal.subtitle')}</p>
+        <h2 className="text-foreground mb-1 text-xl font-bold">{t('goal.title')}</h2>
+        <p className="text-muted-foreground mb-6 text-sm">{t('goal.subtitle')}</p>
 
         {/* Goal Type */}
-        <fieldset className="m-0 mb-6 space-y-3 border-0 p-0" aria-label={t('onboarding.goal.title')}>
+        <fieldset className="m-0 mb-6 space-y-3 border-0 p-0" aria-label={t('goal.title')}>
           {GOALS.map(({ value, icon: Icon, color }) => (
             <button
               key={value}
@@ -88,9 +117,9 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                     goalField.field.value === value ? 'text-primary-emphasis' : 'text-foreground',
                   )}
                 >
-                  {t(`onboarding.goal.type_${value}`)}
+                  {t(`goal.type_${value}`)}
                 </p>
-                <p className="text-muted-foreground text-xs">{t(`onboarding.goal.type_${value}_desc`)}</p>
+                <p className="text-muted-foreground text-xs">{t(`goal.type_${value}_desc`)}</p>
               </div>
             </button>
           ))}
@@ -100,8 +129,8 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
         {showConditional && (
           <div className="space-y-4">
             <div>
-              <label className="text-foreground mb-2 block text-sm font-medium">{t('onboarding.goal.rate')}</label>
-              <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('onboarding.goal.rate')}>
+              <label className="text-foreground mb-2 block text-sm font-medium">{t('goal.rate')}</label>
+              <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('goal.rate')}>
                 {RATES.map(rate => (
                   <button
                     key={rate}
@@ -115,7 +144,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                         : 'border-border text-foreground-secondary',
                     )}
                   >
-                    {t(`onboarding.goal.rate_${rate}`)}
+                    {t(`goal.rate_${rate}`)}
                   </button>
                 ))}
               </fieldset>
@@ -123,7 +152,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
 
             <div>
               <label htmlFor="ob-target" className="text-foreground mb-1 block text-sm font-medium">
-                {t('onboarding.goal.targetWeight')}
+                {t('goal.targetWeight')}
               </label>
               <div className="relative">
                 <input
@@ -135,7 +164,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
                   className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 pr-12 text-base focus-visible:ring-2 focus-visible:outline-none"
                   value={targetField.field.value ?? ''}
-                  onChange={e => targetField.field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={e => handleTargetWeightChange(e.target.value)}
                   onBlur={targetField.field.onBlur}
                 />
                 <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">kg</span>
