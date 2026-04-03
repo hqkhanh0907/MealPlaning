@@ -892,6 +892,16 @@
       "profileOutOfSync": "Hồ sơ tập luyện đã thay đổi. Kế hoạch hiện tại có thể không còn phù hợp.",
       "regeneratePlan": "Tạo lại"
     },
+    "profile": {
+      "field": {
+        "trainingGoal": "Mục tiêu",
+        "trainingExperience": "Kinh nghiệm",
+        "daysPerWeek": "Số ngày/tuần",
+        "sessionDurationMin": "Thời lượng buổi tập",
+        "periodizationModel": "Mô hình phân kỳ",
+        "planCycleWeeks": "Chu kỳ kế hoạch"
+      }
+    },
     "workout": {
       "tab": "Buổi tập"
     },

@@ -2582,4 +2582,54 @@ describe('fitnessStore – profileOutOfSync', () => {
 
     expect(useFitnessStore.getState().profileOutOfSync).toBe(false);
   });
+
+  it('setTrainingProfile populates profileChangedFields with changed keys', () => {
+    const original = sampleProfile({ daysPerWeek: 4, sessionDurationMin: 60 });
+    useFitnessStore.setState({
+      trainingProfile: original,
+      trainingPlans: [samplePlan({ id: 'plan-active', status: 'active' })],
+      profileOutOfSync: false,
+      profileChangedFields: [],
+    });
+
+    const updated = sampleProfile({ daysPerWeek: 3, sessionDurationMin: 45 });
+    useFitnessStore.getState().setTrainingProfile(updated);
+
+    expect(useFitnessStore.getState().profileChangedFields).toContain('daysPerWeek');
+    expect(useFitnessStore.getState().profileChangedFields).toContain('sessionDurationMin');
+  });
+
+  it('setTrainingProfile sets profileChangedFields empty when no fields changed', () => {
+    const original = sampleProfile({ daysPerWeek: 4 });
+    useFitnessStore.setState({
+      trainingProfile: original,
+      trainingPlans: [samplePlan({ id: 'plan-active', status: 'active' })],
+      profileOutOfSync: false,
+      profileChangedFields: [],
+    });
+
+    useFitnessStore.getState().setTrainingProfile(sampleProfile({ daysPerWeek: 4 }));
+
+    expect(useFitnessStore.getState().profileChangedFields).toEqual([]);
+  });
+
+  it('setTrainingProfile clears profileChangedFields when no active plan', () => {
+    useFitnessStore.setState({
+      trainingProfile: sampleProfile({ daysPerWeek: 4 }),
+      trainingPlans: [],
+      profileChangedFields: ['daysPerWeek'],
+    });
+
+    useFitnessStore.getState().setTrainingProfile(sampleProfile({ daysPerWeek: 3 }));
+
+    expect(useFitnessStore.getState().profileChangedFields).toEqual([]);
+  });
+
+  it('addTrainingPlan clears profileChangedFields', () => {
+    useFitnessStore.setState({ profileOutOfSync: true, profileChangedFields: ['daysPerWeek'] });
+
+    useFitnessStore.getState().addTrainingPlan(samplePlan({ id: 'new-plan-3' }));
+
+    expect(useFitnessStore.getState().profileChangedFields).toEqual([]);
+  });
 });

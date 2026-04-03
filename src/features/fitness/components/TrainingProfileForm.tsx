@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Info } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import type { FieldError, Resolver } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -66,23 +66,19 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
     reset,
     formState: { errors },
   } = useForm<TrainingProfileFormData>({
-    resolver: zodResolver(trainingProfileSchema) as unknown as Resolver<TrainingProfileFormData>,
+    resolver: zodResolver(trainingProfileSchema),
     mode: 'onBlur',
     defaultValues: trainingProfile
       ? {
           trainingGoal: trainingProfile.trainingGoal,
           trainingExperience: trainingProfile.trainingExperience,
-          daysPerWeek: String(trainingProfile.daysPerWeek) as TrainingProfileFormData['daysPerWeek'],
-          sessionDurationMin: String(
-            trainingProfile.sessionDurationMin,
-          ) as TrainingProfileFormData['sessionDurationMin'],
+          daysPerWeek: trainingProfile.daysPerWeek,
+          sessionDurationMin: trainingProfile.sessionDurationMin,
           availableEquipment: trainingProfile.availableEquipment,
           injuryRestrictions: trainingProfile.injuryRestrictions,
-          cardioSessionsWeek: String(
-            trainingProfile.cardioSessionsWeek,
-          ) as TrainingProfileFormData['cardioSessionsWeek'],
+          cardioSessionsWeek: trainingProfile.cardioSessionsWeek,
           periodizationModel: trainingProfile.periodizationModel,
-          planCycleWeeks: String(trainingProfile.planCycleWeeks) as TrainingProfileFormData['planCycleWeeks'],
+          planCycleWeeks: trainingProfile.planCycleWeeks,
           priorityMuscles: trainingProfile.priorityMuscles,
           avgSleepHours: trainingProfile.avgSleepHours,
         }
@@ -105,20 +101,20 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
   function onSubmit(data: TrainingProfileFormData): boolean {
     const experience = data.trainingExperience;
     const activeStepIds = new Set(getActiveSteps(experience).map(s => s.id));
-    const smart = getSmartDefaults(data.trainingGoal, experience, Number(data.daysPerWeek));
+    const smart = getSmartDefaults(data.trainingGoal, experience, data.daysPerWeek);
 
     const updatedProfile: TrainingProfile = {
       id: trainingProfile?.id ?? generateUUID(),
       trainingGoal: data.trainingGoal,
       trainingExperience: experience,
-      daysPerWeek: Number(data.daysPerWeek),
-      sessionDurationMin: Number(data.sessionDurationMin),
+      daysPerWeek: data.daysPerWeek,
+      sessionDurationMin: data.sessionDurationMin,
       availableEquipment: data.availableEquipment,
       injuryRestrictions: data.injuryRestrictions,
-      cardioSessionsWeek: Number(data.cardioSessionsWeek),
+      cardioSessionsWeek: data.cardioSessionsWeek,
       // Use smart defaults for hidden fields, user values for visible ones
       periodizationModel: activeStepIds.has('periodization') ? data.periodizationModel : smart.periodizationModel,
-      planCycleWeeks: activeStepIds.has('cycleWeeks') ? Number(data.planCycleWeeks) : smart.planCycleWeeks,
+      planCycleWeeks: activeStepIds.has('cycleWeeks') ? data.planCycleWeeks : smart.planCycleWeeks,
       priorityMuscles: activeStepIds.has('priorityMuscles') ? data.priorityMuscles : smart.priorityMuscles,
       avgSleepHours: activeStepIds.has('sleepHours') ? data.avgSleepHours : undefined,
       // Preserve fields not in this form; fall back to smart defaults
@@ -170,7 +166,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="daysPerWeek"
           control={control}
-          options={DAYS_OPTIONS.map(d => ({ value: String(d), label: `${d}` }))}
+          options={DAYS_OPTIONS.map(d => ({ value: d, label: `${d}` }))}
           testIdPrefix="days"
         />
       </FormField>
@@ -180,7 +176,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
           name="sessionDurationMin"
           control={control}
           options={SESSION_DURATIONS.map(d => ({
-            value: String(d),
+            value: d,
             label: `${d} ${t('fitness.onboarding.minutesUnit')}`,
           }))}
           testIdPrefix="duration"
@@ -215,7 +211,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
         <RadioPills<TrainingProfileFormData>
           name="cardioSessionsWeek"
           control={control}
-          options={CARDIO_OPTIONS.map(c => ({ value: String(c), label: `${c}` }))}
+          options={CARDIO_OPTIONS.map(c => ({ value: c, label: `${c}` }))}
           testIdPrefix="cardio"
         />
       </FormField>
@@ -240,7 +236,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
             name="planCycleWeeks"
             control={control}
             options={CYCLE_WEEKS_OPTIONS.map(w => ({
-              value: String(w),
+              value: w,
               label: `${w} ${t('fitness.onboarding.weeksUnit')}`,
             }))}
             testIdPrefix="cycle-weeks"

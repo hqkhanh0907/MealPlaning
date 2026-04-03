@@ -17,6 +17,7 @@ import type {
 } from '../types';
 import { normalizeSplitType } from '../types';
 import { estimateCardioBurn } from '../utils/cardioEstimator';
+import { estimateDuration, trimToFitDuration } from '../utils/durationEstimator';
 import {
   applyRepScheme,
   calculateSetsPerSession,
@@ -473,8 +474,20 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
     assignSingleSessionCardio(cardioSchedule, days, planId);
   }
 
-  // Step 5b: Session duration splitting
-  if (trainingProfile.sessionDurationMin <= 45 && trainingProfile.daysPerWeek >= 5) {
+  // Step 5b: Duration constraint — trim exercises that exceed sessionDurationMin
+  for (const day of days) {
+    if (!day.exercises) continue;
+    const parsed = JSON.parse(day.exercises) as SelectedExercise[];
+    if (estimateDuration(parsed) > trainingProfile.sessionDurationMin) {
+      const trimmed = trimToFitDuration(parsed, trainingProfile.sessionDurationMin);
+      const trimmedJson = JSON.stringify(trimmed);
+      day.exercises = trimmedJson;
+      day.originalExercises = trimmedJson;
+    }
+  }
+
+  // Step 5c: Session splitting for short sessions
+  if (trainingProfile.sessionDurationMin <= 45) {
     applySessionSplitting(days, planId);
   }
 

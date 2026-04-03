@@ -54,7 +54,7 @@ export function SettingsDetailLayout({
             type="button"
             onClick={onEdit}
             data-testid="settings-detail-edit"
-            className="focus-visible:ring-ring bg-primary-subtle text-primary hover:bg-primary/10 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring bg-primary-subtle text-primary hover:bg-primary/10 flex min-h-[44px] items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Pencil className="h-3.5 w-3.5" />
             {t('settings.edit')}

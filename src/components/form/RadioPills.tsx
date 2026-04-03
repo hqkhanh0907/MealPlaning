@@ -2,7 +2,7 @@ import React from 'react';
 import { type Control, Controller, type FieldValues, type Path } from 'react-hook-form';
 
 interface PillOption {
-  value: string;
+  value: string | number;
   label: string;
 }
 
@@ -33,7 +33,6 @@ function RadioPillsInner<T extends FieldValues>({
             return (
               <label
                 key={option.value}
-                aria-checked={isActive}
                 data-testid={testIdPrefix ? `${testIdPrefix}-${option.value}` : undefined}
                 className={
                   isActive

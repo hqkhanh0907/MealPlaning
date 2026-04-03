@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { type Control, Controller, type FieldValues, type Path } from 'react-hook-form';
 
 interface ChipOption {
-  value: string;
+  value: string | number;
   label: string;
 }
 
@@ -26,7 +26,7 @@ function ChipSelectInner<T extends FieldValues>({
   testIdPrefix,
 }: Readonly<ChipSelectProps<T>>) {
   const toggleValue = useCallback(
-    (current: string[], value: string): string[] => {
+    (current: (string | number)[], value: string | number): (string | number)[] => {
       const isSelected = current.includes(value);
 
       if (isSelected) {
@@ -45,7 +45,7 @@ function ChipSelectInner<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field }) => {
-        const selected: string[] = Array.isArray(field.value) ? (field.value as string[]) : [];
+        const selected: (string | number)[] = Array.isArray(field.value) ? (field.value as (string | number)[]) : [];
 
         return (
           <fieldset className={[className ?? 'flex flex-wrap gap-2', 'm-0 border-0 p-0'].join(' ')} aria-label={name}>
@@ -55,7 +55,6 @@ function ChipSelectInner<T extends FieldValues>({
               return (
                 <label
                   key={option.value}
-                  aria-checked={isActive}
                   data-testid={testIdPrefix ? `${testIdPrefix}-${option.value}` : undefined}
                   className={
                     isActive

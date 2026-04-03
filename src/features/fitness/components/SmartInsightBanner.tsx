@@ -28,19 +28,21 @@ export function SmartInsightBanner({
 
   return (
     <div
-      className={`mx-4 flex items-start gap-3 rounded-xl border p-3 ${COLOR_MAP[insight.severity]}`}
+      className={`mb-3 flex items-start gap-3 rounded-xl border p-3 ${COLOR_MAP[insight.severity]}`}
       data-testid="smart-insight-banner"
       role="alert"
+      aria-live="polite"
+      aria-atomic="true"
     >
-      <Icon className="mt-0.5 h-5 w-5 flex-shrink-0" />
-      <div className="flex-1">
+      <Icon className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">{insight.title}</p>
         <p className="text-xs opacity-80">{insight.message}</p>
       </div>
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        className="opacity-50 hover:opacity-100"
+        className="-m-1 flex h-8 w-8 items-center justify-center rounded-md opacity-50 hover:opacity-100"
         data-testid="dismiss-insight"
         aria-label="Dismiss"
       >

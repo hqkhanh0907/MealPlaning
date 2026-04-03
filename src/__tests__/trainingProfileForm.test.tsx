@@ -189,62 +189,65 @@ describe('TrainingProfileForm – rendering', () => {
 describe('TrainingProfileForm – default values (no store profile)', () => {
   it('selects hypertrophy as default goal', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('goal-hypertrophy')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('goal-strength')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('goal-hypertrophy').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('goal-strength').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('selects beginner as default experience', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('experience-beginner')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('experience-beginner').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('selects 3 days per week by default', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('days-3')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('days-5')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('days-3').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('days-5').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('selects 60 min session duration by default', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('duration-60')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('duration-60').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('selects bodyweight and dumbbell equipment by default', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('equipment-bodyweight')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('equipment-dumbbell')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('equipment-barbell')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('equipment-bodyweight').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('equipment-dumbbell').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('equipment-barbell').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('has no injury restrictions by default', () => {
     render(<TrainingProfileForm />);
     ['shoulders', 'lower_back', 'knees', 'wrists', 'neck', 'hips'].forEach(inj => {
-      expect(screen.getByTestId(`injury-${inj}`)).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId(`injury-${inj}`).querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
   it('selects 2 cardio sessions by default', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('cardio-2')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('cardio-2').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('selects linear periodization by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
     fireEvent.click(screen.getByTestId('experience-advanced'));
-    expect(screen.getByTestId('periodization-linear')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('periodization-linear').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('selects 8 week cycle by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
     fireEvent.click(screen.getByTestId('experience-advanced'));
-    expect(screen.getByTestId('cycle-weeks-8')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('cycle-weeks-8').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('has no priority muscles selected by default (visible after switching to advanced)', () => {
     render(<TrainingProfileForm />);
     fireEvent.click(screen.getByTestId('experience-advanced'));
     ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'].forEach(m => {
-      expect(screen.getByTestId(`priority-muscles-${m}`)).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId(`priority-muscles-${m}`).querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
     });
   });
 
@@ -264,58 +267,58 @@ describe('TrainingProfileForm – pre-fill from store profile', () => {
 
   it('pre-fills training goal from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('goal-strength')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('goal-hypertrophy')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('goal-strength').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('goal-hypertrophy').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('pre-fills experience from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('experience-advanced')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('experience-advanced').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('pre-fills days per week from store (numeric → string)', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('days-5')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('days-5').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('pre-fills session duration from store (numeric → string)', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('duration-90')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('duration-90').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('pre-fills equipment from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('equipment-barbell')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('equipment-cable')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('equipment-dumbbell')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('equipment-barbell').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('equipment-cable').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('equipment-dumbbell').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('pre-fills injury restrictions from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('injury-knees')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('injury-shoulders')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('injury-knees').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('injury-shoulders').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('pre-fills cardio sessions from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('cardio-1')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('cardio-1').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('pre-fills periodization model from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('periodization-block')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('periodization-block').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('pre-fills cycle weeks from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('cycle-weeks-12')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('cycle-weeks-12').querySelector('input')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('pre-fills priority muscles from store', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('priority-muscles-chest')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('priority-muscles-back')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('priority-muscles-legs')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('priority-muscles-chest').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('priority-muscles-back').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('priority-muscles-legs').querySelector('input')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('pre-fills sleep hours from store', () => {
@@ -329,13 +332,13 @@ describe('TrainingProfileForm – pre-fill from store profile', () => {
 describe('TrainingProfileForm – RadioPills interactions', () => {
   it('changes training goal when a different pill is clicked', async () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByTestId('goal-hypertrophy')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('goal-hypertrophy').querySelector('input')).toHaveAttribute('aria-checked', 'true');
 
     fireEvent.click(screen.getByTestId('goal-strength'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('goal-strength')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('goal-hypertrophy')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('goal-strength').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('goal-hypertrophy').querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
@@ -344,8 +347,8 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
     fireEvent.click(screen.getByTestId('experience-advanced'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('experience-advanced')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('experience-beginner')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('experience-advanced').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('experience-beginner').querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
@@ -354,8 +357,8 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
     fireEvent.click(screen.getByTestId('days-6'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('days-6')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('days-3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('days-6').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('days-3').querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
@@ -364,8 +367,8 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
     fireEvent.click(screen.getByTestId('duration-45'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('duration-45')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('duration-60')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('duration-45').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('duration-60').querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
@@ -374,8 +377,8 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
     fireEvent.click(screen.getByTestId('cardio-4'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cardio-4')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('cardio-2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('cardio-4').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('cardio-2').querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
@@ -385,8 +388,14 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
     fireEvent.click(screen.getByTestId('periodization-undulating'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('periodization-undulating')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('periodization-linear')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('periodization-undulating').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+      expect(screen.getByTestId('periodization-linear').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
     });
   });
 
@@ -396,8 +405,8 @@ describe('TrainingProfileForm – RadioPills interactions', () => {
     fireEvent.click(screen.getByTestId('cycle-weeks-4'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cycle-weeks-4')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('cycle-weeks-8')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('cycle-weeks-4').querySelector('input')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('cycle-weeks-8').querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 });
@@ -408,27 +417,27 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
   it('toggles equipment chip on and off', async () => {
     render(<TrainingProfileForm />);
     const barbellChip = screen.getByTestId('equipment-barbell');
-    expect(barbellChip).toHaveAttribute('aria-checked', 'false');
+    expect(barbellChip.querySelector('input')).toHaveAttribute('aria-checked', 'false');
 
     fireEvent.click(barbellChip);
     await waitFor(() => {
-      expect(barbellChip).toHaveAttribute('aria-checked', 'true');
+      expect(barbellChip.querySelector('input')).toHaveAttribute('aria-checked', 'true');
     });
 
     fireEvent.click(barbellChip);
     await waitFor(() => {
-      expect(barbellChip).toHaveAttribute('aria-checked', 'false');
+      expect(barbellChip.querySelector('input')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
   it('toggles injury restrictions', async () => {
     render(<TrainingProfileForm />);
     const shouldersChip = screen.getByTestId('injury-shoulders');
-    expect(shouldersChip).toHaveAttribute('aria-checked', 'false');
+    expect(shouldersChip.querySelector('input')).toHaveAttribute('aria-checked', 'false');
 
     fireEvent.click(shouldersChip);
     await waitFor(() => {
-      expect(shouldersChip).toHaveAttribute('aria-checked', 'true');
+      expect(shouldersChip.querySelector('input')).toHaveAttribute('aria-checked', 'true');
     });
   });
 
@@ -441,9 +450,18 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
     fireEvent.click(screen.getByTestId('priority-muscles-legs'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('priority-muscles-chest')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('priority-muscles-back')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByTestId('priority-muscles-legs')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('priority-muscles-chest').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+      expect(screen.getByTestId('priority-muscles-back').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+      expect(screen.getByTestId('priority-muscles-legs').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
     });
   });
 
@@ -456,13 +474,19 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
     fireEvent.click(screen.getByTestId('priority-muscles-legs'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('priority-muscles-legs')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('priority-muscles-legs').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
     });
 
     // Try selecting a 4th muscle — should be blocked by ChipSelect maxItems
     fireEvent.click(screen.getByTestId('priority-muscles-arms'));
     await waitFor(() => {
-      expect(screen.getByTestId('priority-muscles-arms')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('priority-muscles-arms').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
     });
   });
 
@@ -475,19 +499,28 @@ describe('TrainingProfileForm – ChipSelect interactions', () => {
     fireEvent.click(screen.getByTestId('priority-muscles-legs'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('priority-muscles-legs')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('priority-muscles-legs').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
     });
 
     // Deselect one
     fireEvent.click(screen.getByTestId('priority-muscles-chest'));
     await waitFor(() => {
-      expect(screen.getByTestId('priority-muscles-chest')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('priority-muscles-chest').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
     });
 
     // Now a 4th (actually 3rd) should be allowed
     fireEvent.click(screen.getByTestId('priority-muscles-arms'));
     await waitFor(() => {
-      expect(screen.getByTestId('priority-muscles-arms')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('priority-muscles-arms').querySelector('input')).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
     });
   });
 });
@@ -593,7 +626,7 @@ describe('TrainingProfileForm – embedded mode & saveRef', () => {
     fireEvent.click(screen.getByTestId('cycle-weeks-4'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('days-6')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('days-6').querySelector('input')).toHaveAttribute('aria-checked', 'true');
     });
 
     await saveRef.current!();
@@ -648,7 +681,7 @@ describe('TrainingProfileForm – embedded mode & saveRef', () => {
     fireEvent.click(screen.getByTestId('priority-muscles-back'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('equipment-barbell')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('equipment-barbell').querySelector('input')).toHaveAttribute('aria-checked', 'true');
     });
 
     await saveRef.current!();
@@ -904,7 +937,7 @@ describe('TrainingProfileForm – full save flow', () => {
     fireEvent.change(screen.getByTestId('sleep-hours-input'), { target: { value: '7' } });
 
     await waitFor(() => {
-      expect(screen.getByTestId('goal-endurance')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('goal-endurance').querySelector('input')).toHaveAttribute('aria-checked', 'true');
     });
 
     const result = await saveRef.current!();

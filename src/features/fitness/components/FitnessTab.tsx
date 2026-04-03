@@ -25,6 +25,7 @@ const FitnessTabInner = () => {
   const trainingProfile = useFitnessStore(s => s.trainingProfile);
   const planStrategy = useFitnessStore(s => s.planStrategy);
   const profileOutOfSync = useFitnessStore(s => s.profileOutOfSync);
+  const profileChangedFields = useFitnessStore(s => s.profileChangedFields);
   const addTrainingPlan = useFitnessStore(s => s.addTrainingPlan);
   const addPlanDays = useFitnessStore(s => s.addPlanDays);
   const setActivePlan = useFitnessStore(s => s.setActivePlan);
@@ -130,8 +131,6 @@ const FitnessTabInner = () => {
         <SubTabBar tabs={subTabs} activeTab={activeSubTab} onTabChange={handleTabChange} />
       </div>
 
-      {insight && <SmartInsightBanner insight={insight} />}
-
       {profileOutOfSync && activeSubTab === 'plan' && (
         <div
           className="mx-4 mt-2 flex items-center gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
@@ -140,6 +139,11 @@ const FitnessTabInner = () => {
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
           <div className="flex-1">
             <span>{t('fitness.plan.profileOutOfSync')}</span>
+            {profileChangedFields.length > 0 && (
+              <span className="ml-1 text-xs opacity-80" data-testid="changed-fields-hint">
+                ({profileChangedFields.map(f => t(`fitness.profile.field.${f}`)).join(', ')})
+              </span>
+            )}
           </div>
           <button
             type="button"
@@ -153,6 +157,7 @@ const FitnessTabInner = () => {
       )}
 
       <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {insight && activeSubTab === 'plan' && <SmartInsightBanner insight={insight} />}
         {activeSubTab === 'plan' && (
           <div data-testid="plan-subtab-content" role="tabpanel" id="tabpanel-plan">
             <PlanGeneratedCard />

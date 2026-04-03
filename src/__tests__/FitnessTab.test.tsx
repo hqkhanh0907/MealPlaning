@@ -113,6 +113,7 @@ interface MockFitnessState {
   trainingProfile: unknown;
   planStrategy: 'auto' | 'manual' | null;
   profileOutOfSync: boolean;
+  profileChangedFields: string[];
   addTrainingPlan: Mock;
   addPlanDays: Mock;
   setActivePlan: Mock;
@@ -147,6 +148,7 @@ describe('FitnessTab', () => {
           trainingProfile: null,
           planStrategy: null,
           profileOutOfSync: false,
+          profileChangedFields: [],
           addTrainingPlan: mockAddTrainingPlan,
           addPlanDays: mockAddPlanDays,
           setActivePlan: mockSetActivePlan,
@@ -257,6 +259,7 @@ describe('FitnessTab', () => {
           trainingProfile: null,
           planStrategy: 'auto',
           profileOutOfSync: false,
+          profileChangedFields: [],
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
           setActivePlan: localSetActivePlan,
@@ -376,6 +379,7 @@ describe('FitnessTab', () => {
           trainingProfile: null,
           planStrategy: 'manual',
           profileOutOfSync: false,
+          profileChangedFields: [],
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
           setActivePlan: localSetActivePlan,
@@ -513,6 +517,7 @@ describe('FitnessTab', () => {
           trainingProfile: null,
           planStrategy: null,
           profileOutOfSync: false,
+          profileChangedFields: [],
           addTrainingPlan: vi.fn(),
           addPlanDays: vi.fn(),
           setActivePlan: vi.fn(),
@@ -520,7 +525,7 @@ describe('FitnessTab', () => {
       );
     });
 
-    it('renders SmartInsightBanner when insight is present', () => {
+    it('renders SmartInsightBanner when insight is present on plan tab', () => {
       mockInsightRef.current = 'You need more protein';
       render(<FitnessTab />);
       expect(screen.getByTestId('smart-insight-banner')).toBeInTheDocument();
@@ -529,6 +534,22 @@ describe('FitnessTab', () => {
     it('does not render SmartInsightBanner when insight is null', () => {
       mockInsightRef.current = null;
       render(<FitnessTab />);
+      expect(screen.queryByTestId('smart-insight-banner')).not.toBeInTheDocument();
+    });
+
+    it('does not render SmartInsightBanner on history tab', () => {
+      mockInsightRef.current = 'You need more protein';
+      render(<FitnessTab />);
+      const historyTab = screen.getByRole('tab', { name: /lịch sử/i });
+      fireEvent.click(historyTab);
+      expect(screen.queryByTestId('smart-insight-banner')).not.toBeInTheDocument();
+    });
+
+    it('does not render SmartInsightBanner on progress tab', () => {
+      mockInsightRef.current = 'You need more protein';
+      render(<FitnessTab />);
+      const progressTab = screen.getByRole('tab', { name: /tiến trình/i });
+      fireEvent.click(progressTab);
       expect(screen.queryByTestId('smart-insight-banner')).not.toBeInTheDocument();
     });
   });
@@ -544,6 +565,7 @@ describe('FitnessTab', () => {
           trainingProfile: { level: 'beginner', goal: 'strength' },
           planStrategy: 'auto',
           profileOutOfSync: false,
+          profileChangedFields: [],
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
           setActivePlan: localSetActivePlan,
@@ -575,6 +597,20 @@ describe('FitnessTab', () => {
       expect(screen.getByTestId('regenerate-plan-btn')).toBeInTheDocument();
       expect(screen.getByText('fitness.plan.profileOutOfSync')).toBeInTheDocument();
       expect(screen.getByText('fitness.plan.regeneratePlan')).toBeInTheDocument();
+    });
+
+    it('shows changed fields hint when profileChangedFields is not empty', () => {
+      setupStore({ profileOutOfSync: true, profileChangedFields: ['daysPerWeek', 'sessionDurationMin'] });
+      render(<FitnessTab />);
+
+      expect(screen.getByTestId('changed-fields-hint')).toBeInTheDocument();
+    });
+
+    it('does not show changed fields hint when profileChangedFields is empty', () => {
+      setupStore({ profileOutOfSync: true, profileChangedFields: [] });
+      render(<FitnessTab />);
+
+      expect(screen.queryByTestId('changed-fields-hint')).not.toBeInTheDocument();
     });
 
     it('does NOT show banner when profileOutOfSync is false', () => {

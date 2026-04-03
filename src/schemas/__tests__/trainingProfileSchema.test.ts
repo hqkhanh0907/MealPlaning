@@ -7,13 +7,13 @@ describe('trainingProfileSchema', () => {
     const valid: TrainingProfileFormData = {
       trainingGoal: 'hypertrophy',
       trainingExperience: 'intermediate',
-      daysPerWeek: '4',
-      sessionDurationMin: '60',
+      daysPerWeek: 4,
+      sessionDurationMin: 60,
       availableEquipment: ['barbell', 'dumbbell'],
       injuryRestrictions: [],
-      cardioSessionsWeek: '2',
+      cardioSessionsWeek: 2,
       periodizationModel: 'undulating',
-      planCycleWeeks: '8',
+      planCycleWeeks: 8,
       priorityMuscles: ['chest', 'back'],
       avgSleepHours: 7,
     };
@@ -22,19 +22,19 @@ describe('trainingProfileSchema', () => {
   });
 
   it('rejects invalid daysPerWeek (must be 2-6)', () => {
-    const data = { ...trainingProfileDefaults, daysPerWeek: '1' };
+    const data = { ...trainingProfileDefaults, daysPerWeek: 1 };
     const result = trainingProfileSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
 
   it('rejects daysPerWeek = 7', () => {
-    const data = { ...trainingProfileDefaults, daysPerWeek: '7' };
+    const data = { ...trainingProfileDefaults, daysPerWeek: 7 };
     const result = trainingProfileSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
 
   it('rejects invalid sessionDurationMin', () => {
-    const data = { ...trainingProfileDefaults, sessionDurationMin: '20' };
+    const data = { ...trainingProfileDefaults, sessionDurationMin: 20 };
     const result = trainingProfileSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
@@ -60,8 +60,8 @@ describe('trainingProfileSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('allows avgSleepHours as empty string (treated as undefined)', () => {
-    const data = { ...trainingProfileDefaults, avgSleepHours: '' };
+  it('allows avgSleepHours as undefined', () => {
+    const data = { ...trainingProfileDefaults, avgSleepHours: undefined };
     const result = trainingProfileSchema.safeParse(data);
     expect(result.success).toBe(true);
   });
@@ -73,13 +73,13 @@ describe('trainingProfileSchema', () => {
   });
 
   it('rejects cardioSessionsWeek above 5', () => {
-    const data = { ...trainingProfileDefaults, cardioSessionsWeek: '6' };
+    const data = { ...trainingProfileDefaults, cardioSessionsWeek: 6 };
     const result = trainingProfileSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
 
   it('rejects planCycleWeeks not in allowed set', () => {
-    const data = { ...trainingProfileDefaults, planCycleWeeks: '5' };
+    const data = { ...trainingProfileDefaults, planCycleWeeks: 5 };
     const result = trainingProfileSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
@@ -97,14 +97,14 @@ describe('trainingProfileSchema', () => {
   });
 
   it('accepts all valid session durations', () => {
-    for (const dur of ['30', '45', '60', '90'] as const) {
+    for (const dur of [30, 45, 60, 90] as const) {
       const data = { ...trainingProfileDefaults, sessionDurationMin: dur };
       expect(trainingProfileSchema.safeParse(data).success).toBe(true);
     }
   });
 
   it('accepts all valid cycle weeks', () => {
-    for (const weeks of ['4', '6', '8', '12'] as const) {
+    for (const weeks of [4, 6, 8, 12] as const) {
       const data = { ...trainingProfileDefaults, planCycleWeeks: weeks };
       expect(trainingProfileSchema.safeParse(data).success).toBe(true);
     }

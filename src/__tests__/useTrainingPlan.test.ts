@@ -318,12 +318,12 @@ describe('generateTrainingPlan', () => {
 
     it('cut goal reduces total volume compared to maintain', () => {
       const cut = generateTrainingPlan({
-        trainingProfile: createProfile(),
+        trainingProfile: createProfile({ sessionDurationMin: 120 }),
         healthProfile: { age: 25, weightKg: 80, goalType: 'cut' },
         exerciseDB: mockDB,
       });
       const maintain = generateTrainingPlan({
-        trainingProfile: createProfile(),
+        trainingProfile: createProfile({ sessionDurationMin: 120 }),
         healthProfile: { age: 25, weightKg: 80, goalType: 'maintain' },
         exerciseDB: mockDB,
       });
@@ -1099,7 +1099,7 @@ describe('generateTrainingPlan — multi-session', () => {
     expect(doubleDays).toBeLessThanOrEqual(2);
   });
 
-  it('splits heaviest strength day when sessionDurationMin <= 45 and daysPerWeek >= 5', () => {
+  it('splits heaviest strength day when sessionDurationMin <= 45', () => {
     const result = generateTrainingPlan({
       trainingProfile: createProfile({
         daysPerWeek: 5,
@@ -1118,6 +1118,73 @@ describe('generateTrainingPlan — multi-session', () => {
       for (const ex of exs) {
         expect(['isolation', 'secondary']).toContain(ex.exercise.category);
       }
+    }
+  });
+
+  it('splits heaviest strength day when sessionDurationMin <= 45 even with daysPerWeek < 5', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 3,
+        sessionDurationMin: 40,
+        cardioSessionsWeek: 0,
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+    // With daysPerWeek=3 (full body), sessions may have enough exercises for splitting
+    const session2Strength = result.days.filter(d => d.sessionOrder === 2 && !d.workoutType.includes('Cardio'));
+    // If there are splittable days (>=4 exercises with compounds + non-compounds), they should be split
+    for (const d of session2Strength) {
+      expect(d.exercises).toBeTruthy();
+      const exs = JSON.parse(d.exercises!) as SelectedExercise[];
+      for (const ex of exs) {
+        expect(['isolation', 'secondary']).toContain(ex.exercise.category);
+      }
+    }
+  });
+
+  it('trims exercises so each day fits within sessionDurationMin', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 4,
+        sessionDurationMin: 45,
+        cardioSessionsWeek: 0,
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+
+    const WARM_UP_MIN = 5;
+    const SET_DURATION_SEC = 40;
+    const SETUP_SEC = 30;
+
+    for (const day of result.days) {
+      if (!day.exercises) continue;
+      const exs = JSON.parse(day.exercises) as SelectedExercise[];
+      if (exs.length === 0) continue;
+      const totalSeconds = exs.reduce((sum, ex) => sum + ex.sets * (SET_DURATION_SEC + ex.restSeconds) + SETUP_SEC, 0);
+      const minutes = Math.round(totalSeconds / 60) + WARM_UP_MIN;
+      expect(minutes).toBeLessThanOrEqual(45);
+    }
+  });
+
+  it('does not trim exercises when session duration is large enough', () => {
+    const result = generateTrainingPlan({
+      trainingProfile: createProfile({
+        daysPerWeek: 3,
+        sessionDurationMin: 120,
+        cardioSessionsWeek: 0,
+      }),
+      healthProfile: { age: 30, weightKg: 75 },
+      exerciseDB: mockDB,
+    });
+
+    // With a generous 120 minute session, every day should have exercises
+    const strengthDays = result.days.filter(d => d.exercises && d.workoutType !== 'Cardio');
+    expect(strengthDays.length).toBeGreaterThan(0);
+    for (const day of strengthDays) {
+      const exs = JSON.parse(day.exercises!) as SelectedExercise[];
+      expect(exs.length).toBeGreaterThan(0);
     }
   });
 

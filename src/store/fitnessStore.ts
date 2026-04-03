@@ -85,6 +85,7 @@ export interface FitnessState {
   sqliteReady: boolean;
   showPlanCelebration: boolean;
   profileOutOfSync: boolean;
+  profileChangedFields: string[];
 
   setPlanStrategy: (strategy: 'auto' | 'manual' | null) => void;
   clearTrainingPlans: () => void;
@@ -147,19 +148,43 @@ export const useFitnessStore = create<FitnessState>()(
       sqliteReady: false,
       showPlanCelebration: false,
       profileOutOfSync: false,
+      profileChangedFields: [],
 
       setPlanStrategy: strategy => set({ planStrategy: strategy }),
 
       clearTrainingPlans: () => set({ trainingPlans: [], trainingPlanDays: [] }),
 
       setTrainingProfile: profile =>
-        set(state => ({
-          trainingProfile: profile,
-          profileOutOfSync: state.trainingPlans.some(p => p.status === 'active'),
-        })),
+        set(state => {
+          const hasActivePlan = state.trainingPlans.some(p => p.status === 'active');
+          const changedFields: string[] = [];
+          if (hasActivePlan && state.trainingProfile) {
+            const prev = state.trainingProfile;
+            const keys: Array<keyof TrainingProfile> = [
+              'trainingGoal',
+              'trainingExperience',
+              'daysPerWeek',
+              'sessionDurationMin',
+              'periodizationModel',
+              'planCycleWeeks',
+            ];
+            for (const key of keys) {
+              if (prev[key] !== profile[key]) changedFields.push(key);
+            }
+          }
+          return {
+            trainingProfile: profile,
+            profileOutOfSync: hasActivePlan,
+            profileChangedFields: hasActivePlan ? changedFields : [],
+          };
+        }),
 
       addTrainingPlan: plan =>
-        set(state => ({ trainingPlans: [...state.trainingPlans, plan], profileOutOfSync: false })),
+        set(state => ({
+          trainingPlans: [...state.trainingPlans, plan],
+          profileOutOfSync: false,
+          profileChangedFields: [],
+        })),
 
       updateTrainingPlan: (id, updates) =>
         set(state => ({
