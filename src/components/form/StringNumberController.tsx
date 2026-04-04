@@ -18,6 +18,8 @@ interface StringNumberControllerProps<T extends FieldValues> {
   testId?: string;
   ariaLabel?: string;
   disabled?: boolean;
+  'aria-required'?: boolean;
+  'aria-invalid'?: boolean;
 }
 
 function StringNumberControllerInner<T extends FieldValues>({
@@ -33,6 +35,8 @@ function StringNumberControllerInner<T extends FieldValues>({
   testId,
   ariaLabel,
   disabled,
+  'aria-required': ariaRequired,
+  'aria-invalid': ariaInvalid,
   ref,
 }: StringNumberControllerProps<T> & { ref?: React.Ref<HTMLInputElement> }) {
   const { field } = useController({ name, control });
@@ -119,6 +123,8 @@ function StringNumberControllerInner<T extends FieldValues>({
         step={step}
         disabled={disabled}
         aria-label={ariaLabel ?? label}
+        aria-required={ariaRequired}
+        aria-invalid={ariaInvalid}
         className={className ?? 'text-foreground min-h-[44px] w-full'}
       />
     </>

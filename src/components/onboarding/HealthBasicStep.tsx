@@ -61,23 +61,27 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
 
           {/* Gender */}
           <div>
-            <label className="text-foreground mb-2 block text-sm font-medium">{t('onboarding.health.gender')}</label>
-            <fieldset className="m-0 flex gap-3 border-0 p-0" aria-label={t('onboarding.health.gender')}>
-              {(['male', 'female'] as const).map(g => (
-                <button
-                  key={g}
-                  type="button"
-                  aria-pressed={genderField.field.value === g}
-                  onClick={() => genderField.field.onChange(g)}
-                  className={`focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${
-                    genderField.field.value === g
-                      ? 'border-primary bg-primary-subtle text-primary-emphasis'
-                      : 'border-border text-foreground-secondary'
-                  }`}
-                >
-                  {t(`onboarding.health.gender_${g}`)}
-                </button>
-              ))}
+            <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
+              <legend className="text-foreground mb-2 block text-sm font-medium">
+                {t('onboarding.health.gender')}
+              </legend>
+              <div className="flex gap-3">
+                {(['male', 'female'] as const).map(g => (
+                  <button
+                    key={g}
+                    type="button"
+                    aria-pressed={genderField.field.value === g}
+                    onClick={() => genderField.field.onChange(g)}
+                    className={`focus-visible:ring-ring min-h-[44px] flex-1 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+                      genderField.field.value === g
+                        ? 'border-primary bg-primary-subtle text-primary-emphasis'
+                        : 'border-border text-foreground-secondary'
+                    }`}
+                  >
+                    {t(`onboarding.health.gender_${g}`)}
+                  </button>
+                ))}
+              </div>
             </fieldset>
           </div>
 

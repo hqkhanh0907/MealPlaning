@@ -106,7 +106,6 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                   <button
                     type="button"
                     aria-pressed={isCurrent}
-                    aria-disabled={isFull}
                     data-testid={`day-option-${day}`}
                     disabled={isFull}
                     onClick={() => handleSelect(day)}
@@ -118,7 +117,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                       isCurrent
                         ? 'border-primary bg-primary-subtle border-2'
                         : 'bg-card border-border hover:bg-accent border',
-                      isFull ? 'cursor-not-allowed opacity-50' : '',
+                      'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
                     ]
                       .filter(Boolean)
                       .join(' ')}

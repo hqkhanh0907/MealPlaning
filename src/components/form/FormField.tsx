@@ -7,6 +7,7 @@ interface FormFieldProps {
   children: React.ReactNode;
   className?: string;
   required?: boolean;
+  htmlFor?: string;
 }
 
 export const FormField = React.memo(function FormField({
@@ -15,14 +16,17 @@ export const FormField = React.memo(function FormField({
   children,
   className,
   required,
+  htmlFor,
 }: FormFieldProps) {
   const fieldId = useId();
   const errorId = `${fieldId}-error`;
+  const labelFor = htmlFor ?? fieldId;
 
   const enhancedChildren = React.Children.map(children, child => {
     if (!React.isValidElement(child)) return child;
 
     const extraProps: Record<string, unknown> = {};
+    if (!htmlFor) extraProps['id'] = fieldId;
     if (required) extraProps['aria-required'] = true;
     if (error?.message) extraProps['aria-describedby'] = errorId;
 
@@ -31,7 +35,7 @@ export const FormField = React.memo(function FormField({
 
   return (
     <div className={className ?? 'mb-4'}>
-      <label className="text-foreground-secondary mb-1 block text-sm font-medium">
+      <label htmlFor={labelFor} className="text-foreground-secondary mb-1 block text-sm font-medium">
         {label}
         {required && <span className="ml-0.5 text-rose-500">*</span>}
       </label>

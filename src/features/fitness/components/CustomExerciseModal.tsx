@@ -67,6 +67,8 @@ export function CustomExerciseModal({
               id="custom-exercise-name"
               placeholder={t('fitness.exerciseSelector.customName')}
               data-testid="custom-exercise-name"
+              aria-required={true}
+              aria-invalid={!!errors.name}
               className={`w-full ${errors.name ? 'border-rose-500' : ''}`}
             />
             {errors.name && (

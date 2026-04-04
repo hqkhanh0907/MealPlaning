@@ -167,10 +167,17 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                 onBlur={() => triggerAIFill(field.value, qaUnit.vi)}
                 placeholder={t('dish.quickAddNamePlaceholder')}
                 className={`w-full ${errors.qaName ? 'border-rose-500' : ''}`}
+                aria-invalid={!!errors.qaName}
+                aria-describedby={errors.qaName ? 'qa-name-error' : undefined}
+                aria-required={true}
               />
             )}
           />
-          {errors.qaName && <p className="mt-0.5 text-xs text-rose-500">{errors.qaName.message}</p>}
+          {errors.qaName && (
+            <p id="qa-name-error" className="mt-0.5 text-xs text-rose-500" role="alert">
+              {errors.qaName.message}
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="qa-unit" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">

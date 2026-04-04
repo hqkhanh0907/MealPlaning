@@ -333,7 +333,7 @@ export const DishEditModal = ({
               onClick={handleClose}
               data-testid="btn-close-dish"
               aria-label={t('common.closeDialog')}
-              className="dark:text-muted-foreground text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2"
+              className="dark:text-muted-foreground text-muted-foreground hover:bg-accent focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 focus-visible:ring-2 focus-visible:outline-none"
             >
               <X className="h-5 w-5" />
             </button>
@@ -358,6 +358,8 @@ export const DishEditModal = ({
                   className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`}
                   placeholder={t('dish.namePlaceholder')}
                   data-testid="input-dish-name"
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? 'dish-name-error' : undefined}
                 />
                 {aiSuggestLoading ? (
                   <div
@@ -381,7 +383,12 @@ export const DishEditModal = ({
                 )}
               </div>
               {errors.name && (
-                <p className="mt-1 text-xs text-rose-500" data-testid="error-dish-name">
+                <p
+                  id="dish-name-error"
+                  className="mt-1 text-xs text-rose-500"
+                  data-testid="error-dish-name"
+                  role="alert"
+                >
                   {errors.name.message}
                 </p>
               )}
@@ -414,7 +421,11 @@ export const DishEditModal = ({
                   );
                 })}
               </div>
-              {errors.tags && <p className="mt-1.5 text-xs font-medium text-rose-500">{errors.tags.message}</p>}
+              {errors.tags && (
+                <p className="mt-1.5 text-xs font-medium text-rose-500" role="alert">
+                  {errors.tags.message}
+                </p>
+              )}
             </div>
 
             {/* Rating & Notes */}
@@ -580,6 +591,7 @@ export const DishEditModal = ({
                               inputMode="numeric"
                               testId={`input-dish-amount-${field.ingredientId}`}
                               ariaLabel={getLocalizedField(ing.name, lang)}
+                              aria-required={true}
                               className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-border'} focus:border-primary bg-card transition-all outline-none`}
                             />
                             <button
@@ -608,6 +620,7 @@ export const DishEditModal = ({
                             <p
                               className="mt-1 text-xs text-rose-500"
                               data-testid={`error-dish-amount-${field.ingredientId}`}
+                              role="alert"
                             >
                               {errors.ingredients[index].amount.message}
                             </p>
@@ -630,7 +643,7 @@ export const DishEditModal = ({
                         {t('dish.noIngredientSelected')}
                       </p>
                       {errors.ingredients?.message && (
-                        <p className="mt-1 text-xs text-rose-500" data-testid="error-dish-ingredients">
+                        <p className="mt-1 text-xs text-rose-500" data-testid="error-dish-ingredients" role="alert">
                           {errors.ingredients.message}
                         </p>
                       )}

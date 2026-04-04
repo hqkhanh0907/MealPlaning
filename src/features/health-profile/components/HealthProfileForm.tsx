@@ -238,7 +238,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       {!embedded && <h3 className="text-foreground text-xl font-bold">{t('healthProfile.title')}</h3>}
 
       {/* Name */}
-      <FormField label={t('healthProfile.name')} error={errors.name} className="">
+      <FormField label={t('healthProfile.name')} error={errors.name} htmlFor="hp-name" className="">
         <Controller
           name="name"
           control={control}
@@ -248,6 +248,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               type="text"
               data-testid="hp-name"
               aria-label={t('healthProfile.name')}
+              aria-invalid={!!errors.name}
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -273,7 +274,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </fieldset>
 
       {/* Date of Birth + Computed Age */}
-      <FormField label={t('healthProfile.dateOfBirth')} error={errors.dateOfBirth} className="">
+      <FormField label={t('healthProfile.dateOfBirth')} error={errors.dateOfBirth} htmlFor="hp-dob" className="">
         <Controller
           name="dateOfBirth"
           control={control}
@@ -283,6 +284,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
               type="date"
               data-testid="hp-dob"
               aria-label={t('healthProfile.dateOfBirth')}
+              aria-invalid={!!errors.dateOfBirth}
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -298,24 +300,26 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </FormField>
 
       {/* Height */}
-      <FormField label={t('healthProfile.height')} error={errors.heightCm} className="">
+      <FormField label={t('healthProfile.height')} error={errors.heightCm} htmlFor="hp-height" className="">
         <StringNumberController<HealthProfileFormData>
           name="heightCm"
           control={control}
           testId="hp-height"
           ariaLabel={t('healthProfile.height')}
+          aria-invalid={!!errors.heightCm}
           step={0.5}
           className={inputClass('heightCm')}
         />
       </FormField>
 
       {/* Weight */}
-      <FormField label={t('healthProfile.weight')} error={errors.weightKg} className="">
+      <FormField label={t('healthProfile.weight')} error={errors.weightKg} htmlFor="hp-weight" className="">
         <StringNumberController<HealthProfileFormData>
           name="weightKg"
           control={control}
           testId="hp-weight"
           ariaLabel={t('healthProfile.weight')}
+          aria-invalid={!!errors.weightKg}
           step={0.1}
           className={inputClass('weightKg')}
         />
@@ -429,12 +433,13 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </fieldset>
 
       {/* Protein Ratio */}
-      <FormField label={t('healthProfile.proteinRatio')} error={errors.proteinRatio} className="">
+      <FormField label={t('healthProfile.proteinRatio')} error={errors.proteinRatio} htmlFor="hp-protein" className="">
         <StringNumberController<HealthProfileFormData>
           name="proteinRatio"
           control={control}
           testId="hp-protein"
           ariaLabel={t('healthProfile.proteinRatio')}
+          aria-invalid={!!errors.proteinRatio}
           step={0.1}
           className={inputClass('proteinRatio')}
         />

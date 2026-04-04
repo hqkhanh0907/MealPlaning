@@ -208,15 +208,15 @@ export const IngredientManager = ({
                 <button
                   data-testid={`btn-edit-ingredient-${ing.id}`}
                   onClick={() => modal.openEdit(ing)}
-                  className="text-muted-foreground hover:bg-primary-subtle hover:text-primary flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all"
+                  className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <Edit3 className="h-4 w-4" /> {t('common.edit')}
                 </button>
                 <button
                   data-testid={`btn-delete-ingredient-${ing.id}`}
                   onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
-                  aria-disabled={isUsed(ing.id)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                  disabled={isUsed(ing.id)}
+                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                 >
                   <Trash2 className="h-4 w-4" /> {t('common.delete')}
                 </button>
@@ -275,7 +275,7 @@ export const IngredientManager = ({
                           <button
                             type="button"
                             onClick={() => modal.openView(ing)}
-                            className="hover:text-primary text-foreground cursor-pointer text-left font-bold transition-colors"
+                            className="hover:text-primary text-foreground focus-visible:ring-ring cursor-pointer text-left font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
                           >
                             {getLocalizedField(ing.name, lang)}
                           </button>
@@ -301,16 +301,16 @@ export const IngredientManager = ({
                           data-testid={`btn-edit-ingredient-${ing.id}`}
                           onClick={() => modal.openEdit(ing)}
                           aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
-                          className="hover:bg-primary-subtle text-muted-foreground hover:text-primary rounded-lg p-2 transition-all"
+                          className="hover:bg-primary-subtle text-muted-foreground hover:text-primary focus-visible:ring-ring rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none"
                         >
                           <Edit3 className="h-4 w-4" />
                         </button>
                         <button
                           data-testid={`btn-delete-ingredient-${ing.id}`}
                           onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
-                          aria-disabled={isUsed(ing.id)}
+                          disabled={isUsed(ing.id)}
                           aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                          className={`rounded-lg p-2 transition-all ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                          className={`focus-visible:ring-ring rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -350,16 +350,16 @@ export const IngredientManager = ({
                     data-testid={`btn-edit-ingredient-${ing.id}`}
                     onClick={() => modal.openEdit(ing)}
                     aria-label={`${t('common.edit')} ${getLocalizedField(ing.name, lang)}`}
-                    className="hover:bg-primary-subtle text-muted-foreground hover:text-primary rounded-lg p-2.5 transition-all"
+                    className="hover:bg-primary-subtle text-muted-foreground hover:text-primary focus-visible:ring-ring rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Edit3 className="h-4 w-4" />
                   </button>
                   <button
                     data-testid={`btn-delete-ingredient-${ing.id}`}
                     onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
-                    aria-disabled={isUsed(ing.id)}
+                    disabled={isUsed(ing.id)}
                     aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                    className={`rounded-lg p-2.5 transition-all ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                    className={`focus-visible:ring-ring rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

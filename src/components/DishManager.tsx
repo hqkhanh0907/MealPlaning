@@ -231,7 +231,8 @@ export const DishManager = ({
           <button
             onClick={() => setFilterTag(null)}
             data-testid="btn-filter-all-dishes"
-            className={`min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${filterTag ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground'}`}
+            aria-pressed={!filterTag}
+            className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground'}`}
           >
             {t('common.all')} ({dishes.length})
           </button>
@@ -242,7 +243,8 @@ export const DishManager = ({
                 key={type}
                 onClick={() => setFilterTag(filterTag === type ? null : type)}
                 data-testid={`btn-filter-${type}`}
-                className={`inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                aria-pressed={filterTag === type}
+                className={`focus-visible:ring-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
               >
                 <TagIcon className="size-3.5" aria-hidden="true" /> {label} ({count})
               </button>
@@ -264,7 +266,7 @@ export const DishManager = ({
                 <button
                   data-testid={`btn-compare-${dish.id}`}
                   onClick={() => toggleCompare(dish.id)}
-                  className={`absolute top-3 right-3 z-10 flex h-7 min-h-11 w-7 min-w-11 items-center justify-center rounded-lg border-2 transition-all ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400 hover:text-blue-400'}`}
+                  className={`focus-visible:ring-ring absolute top-3 right-3 z-10 flex h-7 min-h-11 w-7 min-w-11 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400 hover:text-blue-400'}`}
                   aria-label={t('dish.compare')}
                 >
                   <GitCompareArrows className="h-4 w-4" />
@@ -332,22 +334,22 @@ export const DishManager = ({
                   <button
                     data-testid={`btn-clone-dish-${dish.id}`}
                     onClick={() => handleClone(dish)}
-                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all"
+                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Copy className="h-4 w-4" /> {t('dish.clone')}
                   </button>
                   <button
                     data-testid={`btn-edit-dish-${dish.id}`}
                     onClick={() => modal.openEdit(dish)}
-                    className="text-muted-foreground hover:bg-primary-subtle hover:text-primary flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all"
+                    className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Edit3 className="h-4 w-4" /> {t('common.edit')}
                   </button>
                   <button
                     data-testid={`btn-delete-dish-${dish.id}`}
                     onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
-                    aria-disabled={isUsed(dish.id)}
-                    className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                    disabled={isUsed(dish.id)}
+                    className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                   >
                     <Trash2 className="h-4 w-4" /> {t('common.delete')}
                   </button>
@@ -405,7 +407,7 @@ export const DishManager = ({
                           <button
                             data-testid={`btn-compare-${dish.id}`}
                             onClick={() => toggleCompare(dish.id)}
-                            className={`flex h-6 min-h-11 w-6 min-w-11 shrink-0 items-center justify-center rounded border-2 transition-all ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
+                            className={`focus-visible:ring-ring flex h-6 min-h-11 w-6 min-w-11 shrink-0 items-center justify-center rounded border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
                             aria-label={t('dish.compare')}
                           >
                             <GitCompareArrows className="h-4 w-4" />
@@ -417,7 +419,7 @@ export const DishManager = ({
                             <button
                               type="button"
                               onClick={() => modal.openView(dish)}
-                              className="hover:text-primary text-foreground cursor-pointer text-left font-bold transition-colors"
+                              className="hover:text-primary text-foreground focus-visible:ring-ring cursor-pointer text-left font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
                             >
                               {getLocalizedField(dish.name, lang)}
                             </button>
@@ -457,7 +459,7 @@ export const DishManager = ({
                             data-testid={`btn-clone-dish-${dish.id}`}
                             onClick={() => handleClone(dish)}
                             aria-label={`${t('common.clone')} ${getLocalizedField(dish.name, lang)}`}
-                            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
+                            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none"
                           >
                             <Copy className="h-4 w-4" />
                           </button>
@@ -465,16 +467,16 @@ export const DishManager = ({
                             data-testid={`btn-edit-dish-${dish.id}`}
                             onClick={() => modal.openEdit(dish)}
                             aria-label={`${t('common.edit')} ${getLocalizedField(dish.name, lang)}`}
-                            className="hover:bg-primary-subtle text-muted-foreground hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
+                            className="hover:bg-primary-subtle text-muted-foreground hover:text-primary focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none"
                           >
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button
                             data-testid={`btn-delete-dish-${dish.id}`}
                             onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
-                            aria-disabled={isUsed(dish.id)}
+                            disabled={isUsed(dish.id)}
                             aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                            className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all ${isUsed(dish.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                            className={`focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -499,7 +501,7 @@ export const DishManager = ({
                     <button
                       data-testid={`btn-compare-${dish.id}`}
                       onClick={() => toggleCompare(dish.id)}
-                      className={`relative z-10 flex h-7 min-h-11 w-7 min-w-11 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
+                      className={`focus-visible:ring-ring relative z-10 flex h-7 min-h-11 w-7 min-w-11 shrink-0 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
                       aria-label={t('dish.compare')}
                     >
                       <GitCompareArrows className="h-3.5 w-3.5" />
@@ -526,7 +528,7 @@ export const DishManager = ({
                       data-testid={`btn-clone-dish-${dish.id}`}
                       onClick={() => handleClone(dish)}
                       aria-label={`${t('common.clone')} ${getLocalizedField(dish.name, lang)}`}
-                      className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all"
+                      className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none"
                     >
                       <Copy className="h-4 w-4" />
                     </button>
@@ -534,16 +536,16 @@ export const DishManager = ({
                       data-testid={`btn-edit-dish-${dish.id}`}
                       onClick={() => modal.openEdit(dish)}
                       aria-label={`${t('common.edit')} ${getLocalizedField(dish.name, lang)}`}
-                      className="hover:bg-primary-subtle text-muted-foreground hover:text-primary flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all"
+                      className="hover:bg-primary-subtle text-muted-foreground hover:text-primary focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
                     <button
                       data-testid={`btn-delete-dish-${dish.id}`}
                       onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
-                      aria-disabled={isUsed(dish.id)}
+                      disabled={isUsed(dish.id)}
                       aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all ${isUsed(dish.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                      className={`focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -697,7 +699,7 @@ export const DishManager = ({
         <button
           data-testid="btn-open-compare"
           onClick={() => setShowCompare(true)}
-          className="bg-primary text-primary-foreground hover:bg-primary-emphasis fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold shadow-lg transition-all"
+          className="bg-primary text-primary-foreground hover:bg-primary-emphasis focus-visible:ring-ring fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold shadow-lg transition-all focus-visible:ring-2 focus-visible:outline-none"
         >
           <GitCompareArrows className="h-5 w-5" />
           {t('dish.compareSelected', { count: compareIds.size })}
@@ -726,7 +728,7 @@ export const DishManager = ({
               <div className="fixed inset-0 bg-black/50" aria-hidden="true">
                 <button
                   type="button"
-                  className="h-full w-full cursor-default border-none bg-transparent"
+                  className="focus-visible:ring-ring h-full w-full cursor-default border-none bg-transparent focus-visible:ring-2 focus-visible:outline-none"
                   onClick={() => setShowCompare(false)}
                   aria-label={t('common.closeBackdrop')}
                   data-testid="compare-backdrop"
@@ -740,7 +742,7 @@ export const DishManager = ({
                   </h3>
                   <button
                     onClick={() => setShowCompare(false)}
-                    className="hover:text-foreground-secondary text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
+                    className="hover:text-foreground-secondary text-muted-foreground focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none"
                     aria-label={t('common.close')}
                   >
                     <X className="h-5 w-5" />

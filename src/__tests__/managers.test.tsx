@@ -129,10 +129,12 @@ describe('DishManager', () => {
 
   it('prevents deletion of used dishes', () => {
     render(<DishManager {...defaultProps} isUsed={vi.fn().mockReturnValue(true)} />);
-    // Click delete on first dish
     const deleteButtons = screen.getAllByText('Xóa');
+    // Button should be disabled for used dishes
+    expect(deleteButtons[0]).toBeDisabled();
+    // Click should not trigger warning or confirmation
     fireEvent.click(deleteButtons[0]);
-    expect(mockNotify.warning).toHaveBeenCalledWith('Không thể xóa', expect.any(String));
+    expect(mockNotify.warning).not.toHaveBeenCalled();
   });
 
   it('shows delete confirmation modal for unused dish', () => {
@@ -746,8 +748,11 @@ describe('IngredientManager', () => {
   it('prevents deletion of used ingredients', () => {
     render(<IngredientManager {...defaultProps} isUsed={vi.fn().mockReturnValue(true)} />);
     const deleteButtons = screen.getAllByText('Xóa');
+    // Button should be disabled for used ingredients
+    expect(deleteButtons[0]).toBeDisabled();
+    // Click should not trigger warning or confirmation
     fireEvent.click(deleteButtons[0]);
-    expect(mockNotify.warning).toHaveBeenCalledWith('Không thể xóa', expect.any(String));
+    expect(mockNotify.warning).not.toHaveBeenCalled();
   });
 
   it('confirms and deletes ingredient', () => {

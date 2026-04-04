@@ -176,6 +176,8 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                   className={`flex-1 ${errors.name?.vi ? 'border-rose-500' : ''}`}
                   placeholder={t('ingredient.namePlaceholder')}
                   data-testid="input-ing-name"
+                  aria-invalid={!!errors.name?.vi}
+                  aria-required={true}
                 />
                 <button
                   type="button"
@@ -240,6 +242,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                       {...register(field, { valueAsNumber: true })}
                       data-testid={`input-ing-${field.replace('Per100', '')}`}
                       className={`w-full ${errors[field] ? 'border-rose-500' : ''}`}
+                      aria-invalid={!!errors[field]}
                     />
                     {errors[field] && (
                       <p
