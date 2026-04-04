@@ -1,12 +1,14 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useIngredientStore } from '../store/ingredientStore';
+import { _resetQueue, _waitForIdle } from '../store/helpers/dbWriteQueue';
+import { __resetIngredientDbForTesting, useIngredientStore } from '../store/ingredientStore';
 import type { Ingredient } from '../types';
 
 /* ------------------------------------------------------------------ */
 /* Helpers */
 /* ------------------------------------------------------------------ */
 function resetStore() {
+  __resetIngredientDbForTesting();
   useIngredientStore.setState({ ingredients: [] });
 }
 
@@ -250,6 +252,110 @@ describe('ingredientStore', () => {
       await useIngredientStore.getState().loadAll(mockDb as never);
 
       expect(useIngredientStore.getState().ingredients).toHaveLength(1);
+    });
+  });
+
+  describe('SQLite persistence', () => {
+    const mockDb = {
+      query: vi.fn().mockResolvedValue([
+        {
+          id: 'db-i1',
+          name_vi: 'Loaded',
+          name_en: null,
+          calories_per_100: 100,
+          protein_per_100: 10,
+          carbs_per_100: 20,
+          fat_per_100: 5,
+          fiber_per_100: 2,
+          unit_vi: 'g',
+          unit_en: null,
+        },
+      ]),
+      execute: vi.fn().mockResolvedValue(undefined),
+      transaction: vi.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+    };
+
+    beforeEach(async () => {
+      _resetQueue();
+      mockDb.execute.mockClear();
+      mockDb.transaction.mockClear();
+      mockDb.query.mockClear();
+      mockDb.query.mockResolvedValue([
+        {
+          id: 'db-i1',
+          name_vi: 'Loaded',
+          name_en: null,
+          calories_per_100: 100,
+          protein_per_100: 10,
+          carbs_per_100: 20,
+          fat_per_100: 5,
+          fiber_per_100: 2,
+          unit_vi: 'g',
+          unit_en: null,
+        },
+      ]);
+      await useIngredientStore.getState().loadAll(mockDb as never);
+    });
+
+    afterEach(() => {
+      __resetIngredientDbForTesting();
+      _resetQueue();
+    });
+
+    it('persists addIngredient via queue', async () => {
+      useIngredientStore.getState().addIngredient(SAMPLE_INGREDIENT);
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO ingredients'),
+        expect.arrayContaining(['ing-test-01', 'Ức gà']),
+      );
+    });
+
+    it('persists updateIngredient via queue', async () => {
+      useIngredientStore.setState({ ingredients: [SAMPLE_INGREDIENT] });
+      useIngredientStore.getState().updateIngredient({ ...SAMPLE_INGREDIENT, caloriesPer100: 200 });
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO ingredients'),
+        expect.arrayContaining(['ing-test-01', 200]),
+      );
+    });
+
+    it('syncs setIngredients (batch) via transaction', async () => {
+      useIngredientStore.getState().setIngredients([SAMPLE_INGREDIENT]);
+
+      await vi.waitFor(() =>
+        expect(mockDb.execute).toHaveBeenCalledWith(
+          expect.stringContaining('DELETE FROM ingredients WHERE id NOT IN'),
+          ['ing-test-01'],
+        ),
+      );
+    });
+
+    it('does not persist when _db is null', () => {
+      __resetIngredientDbForTesting();
+      mockDb.execute.mockClear();
+
+      useIngredientStore.getState().addIngredient(SAMPLE_INGREDIENT_NO_EN);
+
+      expect(mockDb.execute).not.toHaveBeenCalled();
+    });
+
+    it('loadAll sets _db so subsequent mutations persist', async () => {
+      mockDb.execute.mockClear();
+      useIngredientStore.getState().addIngredient(SAMPLE_INGREDIENT);
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalled();
+    });
+
+    it('catches transaction errors in syncAllToDb', async () => {
+      mockDb.transaction.mockRejectedValueOnce(new Error('DB locked'));
+      useIngredientStore.getState().setIngredients([SAMPLE_INGREDIENT]);
+
+      await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
     });
   });
 });

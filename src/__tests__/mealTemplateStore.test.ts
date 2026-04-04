@@ -1,9 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useMealTemplateStore } from '../store/mealTemplateStore';
+import { _resetQueue, _waitForIdle } from '../store/helpers/dbWriteQueue';
+import { __resetTemplateDbForTesting, useMealTemplateStore } from '../store/mealTemplateStore';
 import type { DayPlan } from '../types';
 
 function resetStore() {
+  __resetTemplateDbForTesting();
   useMealTemplateStore.setState({ templates: [] });
 }
 
@@ -223,6 +225,82 @@ describe('mealTemplateStore', () => {
 
       const { templates } = useMealTemplateStore.getState();
       expect(templates[0].tags).toBeUndefined();
+    });
+  });
+
+  describe('SQLite persistence', () => {
+    const mockDb = {
+      query: vi.fn().mockResolvedValue([]),
+      execute: vi.fn().mockResolvedValue(undefined),
+      transaction: vi.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+    };
+
+    beforeEach(async () => {
+      _resetQueue();
+      mockDb.execute.mockClear();
+      mockDb.query.mockClear();
+      mockDb.query.mockResolvedValue([]);
+      await useMealTemplateStore.getState().loadAll(mockDb as never);
+    });
+
+    afterEach(() => {
+      __resetTemplateDbForTesting();
+      _resetQueue();
+    });
+
+    it('persists saveTemplate via queue', async () => {
+      useMealTemplateStore.getState().saveTemplate('Test', SAMPLE_PLAN, ['tag']);
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        'INSERT INTO meal_templates (id, name, data) VALUES (?,?,?)',
+        expect.arrayContaining(['Test']),
+      );
+    });
+
+    it('persists deleteTemplate via queue', async () => {
+      useMealTemplateStore.getState().saveTemplate('Temp', SAMPLE_PLAN);
+      await _waitForIdle();
+      const id = useMealTemplateStore.getState().templates[0].id;
+
+      mockDb.execute.mockClear();
+      useMealTemplateStore.getState().deleteTemplate(id);
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM meal_templates WHERE id = ?', [id]);
+    });
+
+    it('persists renameTemplate via queue', async () => {
+      useMealTemplateStore.getState().saveTemplate('Old', SAMPLE_PLAN);
+      await _waitForIdle();
+      const id = useMealTemplateStore.getState().templates[0].id;
+
+      mockDb.execute.mockClear();
+      useMealTemplateStore.getState().renameTemplate(id, 'New');
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith('UPDATE meal_templates SET name = ? WHERE id = ?', ['New', id]);
+    });
+
+    it('does not persist when _db is null', () => {
+      __resetTemplateDbForTesting();
+      mockDb.execute.mockClear();
+
+      useMealTemplateStore.getState().saveTemplate('No persist', SAMPLE_PLAN);
+
+      expect(mockDb.execute).not.toHaveBeenCalled();
+    });
+
+    it('loadAll filters out corrupt template JSON gracefully', async () => {
+      mockDb.query.mockResolvedValueOnce([
+        { id: 'good', name: 'Good', data: JSON.stringify({ breakfast: [], lunch: [], dinner: [], tags: [] }) },
+        { id: 'bad', name: 'Bad', data: 'not-json{{{' },
+      ]);
+      await useMealTemplateStore.getState().loadAll(mockDb as never);
+
+      const templates = useMealTemplateStore.getState().templates;
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).toBe('good');
     });
   });
 });

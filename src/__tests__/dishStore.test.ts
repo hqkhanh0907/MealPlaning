@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useDishStore } from '../store/dishStore';
+import { __resetDishDbForTesting, useDishStore } from '../store/dishStore';
+import { _resetQueue, _waitForIdle } from '../store/helpers/dbWriteQueue';
 import type { Dish } from '../types';
 
 const SAMPLE_DISH: Dish = {
@@ -23,6 +24,7 @@ const DISH_VI_ONLY: Dish = {
 };
 
 function resetStore() {
+  __resetDishDbForTesting();
   useDishStore.setState({ dishes: [] });
 }
 
@@ -289,6 +291,117 @@ describe('dishStore', () => {
       expect(dishes).toHaveLength(2);
       expect(dishes[0].ingredients).toEqual([{ ingredientId: 'i1', amount: 50 }]);
       expect(dishes[1].ingredients).toEqual([]);
+    });
+
+    it('falls back to empty array when tags JSON is corrupt in loadAll', async () => {
+      const mockDb = {
+        query: vi
+          .fn()
+          .mockResolvedValueOnce([
+            { id: 'd1', name_vi: 'Test', name_en: null, tags: 'not-json{{{', rating: null, notes: null },
+          ])
+          .mockResolvedValueOnce([]),
+      };
+
+      await useDishStore.getState().loadAll(mockDb as never);
+
+      const { dishes } = useDishStore.getState();
+      expect(dishes).toHaveLength(1);
+      expect(dishes[0].tags).toEqual([]);
+    });
+  });
+
+  describe('SQLite persistence', () => {
+    const mockDb = {
+      query: vi.fn().mockResolvedValue([]),
+      execute: vi.fn().mockResolvedValue(undefined),
+      transaction: vi.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+    };
+
+    beforeEach(async () => {
+      _resetQueue();
+      mockDb.execute.mockClear();
+      mockDb.transaction.mockClear();
+      mockDb.query.mockClear();
+      mockDb.query.mockResolvedValue([]);
+      await useDishStore.getState().loadAll(mockDb as never);
+    });
+
+    afterEach(() => {
+      __resetDishDbForTesting();
+      _resetQueue();
+    });
+
+    it('persists addDish via transaction (dishes + dish_ingredients)', async () => {
+      useDishStore.getState().addDish(SAMPLE_DISH);
+
+      await vi.waitFor(() =>
+        expect(mockDb.execute).toHaveBeenCalledWith(
+          expect.stringContaining('INSERT INTO dish_ingredients'),
+          expect.arrayContaining(['dish-1', 'ing-1', 200]),
+        ),
+      );
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO dishes'),
+        expect.arrayContaining(['dish-1', 'Cơm gà']),
+      );
+    });
+
+    it('persists updateDish with delete+reinsert of dish_ingredients', async () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+      const updated = { ...SAMPLE_DISH, name: { vi: 'Updated' } };
+      useDishStore.getState().updateDish(updated);
+
+      await vi.waitFor(() =>
+        expect(mockDb.execute).toHaveBeenCalledWith(
+          expect.stringContaining('DELETE FROM dish_ingredients WHERE dish_id'),
+          ['dish-1'],
+        ),
+      );
+    });
+
+    it('persists deleteDish via queue', async () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+      useDishStore.getState().deleteDish('dish-1');
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM dish_ingredients WHERE dish_id = ?', ['dish-1']);
+      expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM dishes WHERE id = ?', ['dish-1']);
+    });
+
+    it('syncs setDishes (batch) via transaction', async () => {
+      useDishStore.getState().setDishes([SAMPLE_DISH]);
+
+      await vi.waitFor(() =>
+        expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM dishes WHERE id NOT IN'), [
+          'dish-1',
+        ]),
+      );
+    });
+
+    it('does not persist when _db is null', () => {
+      __resetDishDbForTesting();
+      mockDb.execute.mockClear();
+      mockDb.transaction.mockClear();
+
+      useDishStore.getState().addDish(DISH_VI_ONLY);
+
+      expect(mockDb.execute).not.toHaveBeenCalled();
+      expect(mockDb.transaction).not.toHaveBeenCalled();
+    });
+
+    it('catches transaction errors in persistDish', async () => {
+      mockDb.transaction.mockRejectedValueOnce(new Error('DB locked'));
+      useDishStore.getState().addDish(DISH_VI_ONLY);
+
+      await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
+    });
+
+    it('catches transaction errors in syncAllDishesToDb', async () => {
+      mockDb.transaction.mockRejectedValueOnce(new Error('Disk full'));
+      useDishStore.getState().setDishes([DISH_VI_ONLY]);
+
+      await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
     });
   });
 });

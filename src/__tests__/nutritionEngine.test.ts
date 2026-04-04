@@ -143,6 +143,10 @@ describe('calculateTarget', () => {
   it('calculates maintain target (zero offset)', () => {
     expect(calculateTarget(2500, 0)).toBe(2500);
   });
+
+  it('floors at 0 when aggressive offset exceeds TDEE (BM-BUG-02)', () => {
+    expect(calculateTarget(1200, -1500)).toBe(0);
+  });
 });
 
 // ---------------------------------------------------------------------------

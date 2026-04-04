@@ -60,9 +60,9 @@ export function getAutoAdjustedMultiplier(baseLevel: ActivityLevel, sessionsPerW
   return auto * 0.7 + base * 0.3;
 }
 
-/** Caloric target = TDEE + offset (cut < 0, bulk > 0, maintain = 0) */
+/** Caloric target = TDEE + offset (cut < 0, bulk > 0, maintain = 0). Floored at 0. */
 export function calculateTarget(tdee: number, calorieOffset: number): number {
-  return Math.round(Number(tdee) + Number(calorieOffset));
+  return Math.max(0, Math.round(Number(tdee) + Number(calorieOffset)));
 }
 
 /** Priority-based macro split: Protein → Fat → Carbs (remainder) */

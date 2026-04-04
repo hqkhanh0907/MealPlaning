@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useDayPlanStore } from '../store/dayPlanStore';
+import { __resetDayPlanDbForTesting, useDayPlanStore } from '../store/dayPlanStore';
+import { _resetQueue, _waitForIdle } from '../store/helpers/dbWriteQueue';
 import type { DayPlan } from '../types';
 
 /* ------------------------------------------------------------------ */
@@ -16,6 +17,7 @@ const makePlan = (overrides: Partial<DayPlan> = {}): DayPlan => ({
 });
 
 function resetStore(): void {
+  __resetDayPlanDbForTesting();
   useDayPlanStore.setState({ dayPlans: [] });
 }
 
@@ -282,6 +284,113 @@ describe('dayPlanStore', () => {
       await useDayPlanStore.getState().loadAll(mockDb as never);
 
       expect(useDayPlanStore.getState().dayPlans).toHaveLength(1);
+    });
+
+    it('falls back to empty array when JSON is corrupt in loadAll', async () => {
+      const mockDb = {
+        query: vi.fn().mockResolvedValue([
+          {
+            date: '2025-03-01',
+            breakfast_dish_ids: 'not-valid-json{{{',
+            lunch_dish_ids: '["d1"]',
+            dinner_dish_ids: '[]',
+            servings: null,
+          },
+        ]),
+      };
+
+      await useDayPlanStore.getState().loadAll(mockDb as never);
+
+      const plans = useDayPlanStore.getState().dayPlans;
+      expect(plans).toHaveLength(1);
+      expect(plans[0].breakfastDishIds).toEqual([]);
+      expect(plans[0].lunchDishIds).toEqual(['d1']);
+    });
+  });
+
+  describe('SQLite persistence', () => {
+    const mockDb = {
+      query: vi.fn().mockResolvedValue([]),
+      execute: vi.fn().mockResolvedValue(undefined),
+      transaction: vi.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
+    };
+
+    beforeEach(async () => {
+      _resetQueue();
+      mockDb.execute.mockClear();
+      mockDb.transaction.mockClear();
+      mockDb.query.mockClear();
+      mockDb.query.mockResolvedValue([]);
+      await useDayPlanStore.getState().loadAll(mockDb as never);
+    });
+
+    afterEach(() => {
+      __resetDayPlanDbForTesting();
+      _resetQueue();
+    });
+
+    it('persists updatePlan via queue UPSERT', async () => {
+      useDayPlanStore.getState().updatePlan('2025-01-15', 'breakfast', ['d1', 'd2']);
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO day_plans'),
+        expect.arrayContaining(['2025-01-15']),
+      );
+    });
+
+    it('persists updateServings via queue UPSERT', async () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
+      useDayPlanStore.getState().updateServings('2025-01-15', 'd1', 3);
+      await _waitForIdle();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO day_plans'),
+        expect.arrayContaining(['2025-01-15']),
+      );
+    });
+
+    it('syncs setDayPlans (batch) via transaction', async () => {
+      const plan = makePlan();
+      useDayPlanStore.getState().setDayPlans([plan]);
+
+      await vi.waitFor(() =>
+        expect(mockDb.execute).toHaveBeenCalledWith(
+          expect.stringContaining('DELETE FROM day_plans WHERE date NOT IN'),
+          ['2025-01-15'],
+        ),
+      );
+    });
+
+    it('syncs restoreDayPlans via transaction', async () => {
+      const plan = makePlan({ date: '2025-02-01' });
+      useDayPlanStore.getState().restoreDayPlans([plan]);
+
+      await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
+    });
+
+    it('handles empty setDayPlans by deleting all', async () => {
+      useDayPlanStore.setState({ dayPlans: [makePlan()] });
+      useDayPlanStore.getState().setDayPlans([]);
+
+      await vi.waitFor(() => expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM day_plans'));
+    });
+
+    it('does not persist when _db is null', () => {
+      __resetDayPlanDbForTesting();
+      mockDb.execute.mockClear();
+
+      useDayPlanStore.getState().updatePlan('2025-01-15', 'breakfast', ['d1']);
+
+      expect(mockDb.execute).not.toHaveBeenCalled();
+    });
+
+    it('catches transaction errors in syncAllPlansToDb', async () => {
+      mockDb.transaction.mockRejectedValueOnce(new Error('DB locked'));
+      useDayPlanStore.getState().setDayPlans([makePlan()]);
+
+      // Should not throw — error is caught internally
+      await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
     });
   });
 });
