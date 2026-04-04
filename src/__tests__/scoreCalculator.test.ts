@@ -318,6 +318,56 @@ describe('scoreCalculator', () => {
       expect(result.factors.weightLog).toBe(100);
       expect(result.availableFactors).toBe(1);
     });
+
+    it('excludes workout factor when skipWorkoutFactor is true (FIX-09)', () => {
+      const result = calculateDailyScore({
+        actualCalories: 2000,
+        targetCalories: 2000,
+        actualProteinG: 150,
+        targetProteinG: 150,
+        workoutCompleted: false,
+        isRestDay: false,
+        isBeforeEvening: false,
+        weightLoggedToday: true,
+        streakDays: 10,
+        skipWorkoutFactor: true,
+      });
+
+      // workout should be excluded
+      expect(result.factors.workout).toBeNull();
+      // Other factors: cal=100, protein=100, weightLog=100, streak=50
+      // Available: 4 (not 5), weights redistributed
+      expect(result.availableFactors).toBe(4);
+      // Without workout, score should be higher than if workout=0 was included
+      expect(result.totalScore).toBeGreaterThan(50);
+    });
+
+    it('skipWorkoutFactor redistributes weights to remaining factors (FIX-09)', () => {
+      // With workout included (and missed)
+      const withWorkout = calculateDailyScore({
+        actualCalories: 2000,
+        targetCalories: 2000,
+        workoutCompleted: false,
+        isRestDay: false,
+        isBeforeEvening: false,
+        skipWorkoutFactor: false,
+      });
+
+      // With workout excluded
+      const withoutWorkout = calculateDailyScore({
+        actualCalories: 2000,
+        targetCalories: 2000,
+        workoutCompleted: false,
+        isRestDay: false,
+        isBeforeEvening: false,
+        skipWorkoutFactor: true,
+      });
+
+      // Without missed workout penalty, score should be higher
+      expect(withoutWorkout.totalScore).toBeGreaterThan(withWorkout.totalScore);
+      expect(withoutWorkout.factors.workout).toBeNull();
+      expect(withWorkout.factors.workout).toBe(0); // missed
+    });
   });
 
   // ── 16. getScoreColor ──

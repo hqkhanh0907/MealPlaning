@@ -87,7 +87,7 @@ export function calculateDailyScore(input: ScoreInput): ScoreResult {
     weighted.push({ weight: SCORE_WEIGHTS.protein, score });
   }
 
-  if (input.workoutCompleted != null) {
+  if (input.workoutCompleted != null && !input.skipWorkoutFactor) {
     const score = calculateWorkoutScore(
       input.workoutCompleted,
       input.isRestDay ?? false,

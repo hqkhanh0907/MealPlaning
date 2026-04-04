@@ -15,6 +15,7 @@ export interface ScoreInput {
   weightLoggedToday?: boolean;
   weightLoggedYesterday?: boolean;
   streakDays?: number;
+  skipWorkoutFactor?: boolean;
 }
 
 export interface ScoreResult {
