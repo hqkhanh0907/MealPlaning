@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { CapacitorSQLite, SQLiteConnection as SQLiteConnectionClass } from '@capacitor-community/sqlite';
 
 /* ------------------------------------------------------------------ */
 /* Public interface */
@@ -209,8 +210,7 @@ export class NativeDatabaseService implements DatabaseService {
   private inTransaction = false;
 
   async initialize(): Promise<void> {
-    const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite');
-    const sqliteConnection = new SQLiteConnection(CapacitorSQLite);
+    const sqliteConnection = new SQLiteConnectionClass(CapacitorSQLite);
 
     const dbName = 'mealplaner';
     const ret = await sqliteConnection.checkConnectionsConsistency();
