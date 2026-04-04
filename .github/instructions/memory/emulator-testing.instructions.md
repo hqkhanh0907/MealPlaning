@@ -665,3 +665,81 @@ Khi protein+fat calories > target (ví dụ aggressive cut cho người nhẹ c�
 - Remaining hiển thị số âm: "Còn lại: -209 kcal"
 
 Đây KHÔNG phải bug — đây là hành vi đúng khi goal quá aggressive.
+
+---
+
+## 21. ⚠️ BẪY QUAN TRỌNG — COMPREHENSIVE TEST SESSION FLOW
+
+### Single-session constraint
+
+Do in-memory SQLite, TẤT CẢ test phải chạy trong 1 WebSocket session.
+Script pattern chuẩn:
+
+```
+pm clear → am start → wait 6s → CDP connect
+    → Full onboarding (15+ clicks, 13s computing wait)
+    → Group B (verify onboarding)
+    → Group D/C (verify seed data)
+    → Group E (add meals, confirm plan)
+    → Group H (dashboard verification)
+    → Group I (settings propagation: weight→goal→rate→revert)
+    → Group L (cross-tab consistency)
+    → KHÔNG restart giữa chừng!
+```
+
+### Onboarding completion detection
+
+Plan Preview screen là nơi script HAY BỊ STUCK. Pattern đúng:
+
+```python
+# Strategy step
+await clk("strategy-auto")
+await asyncio.sleep(1)
+await clk_btn("Tiếp tục")
+await asyncio.sleep(14)  # ← 13-14s cho computing animation
+
+# Plan Preview — button có thể là testid HOẶC text
+r = await clk("onboarding-complete")
+if r == "none":
+    r = await clk_btn("Bắt đầu tập luyện")
+await asyncio.sleep(3)
+
+# VERIFY nav visible trước khi tiếp tục
+nav = await ev('document.querySelector("[role=\\"tablist\\"]")?"yes":"no"')
+assert nav == "yes", "Nav tabs not visible after onboarding!"
+```
+
+### Settings edit flow — Close+Reopen pattern
+
+Sau khi save trong Settings, detail view vẫn active. PHẢI close+reopen trước khi navigate sang section khác:
+
+```python
+await clk("settings-detail-save")
+await asyncio.sleep(1)
+await clk("btn-close-settings")  # Close toàn bộ settings
+await asyncio.sleep(0.5)
+# Reopen nếu cần navigate sang section khác
+await ev('...header button click...')
+await asyncio.sleep(1)
+await clk("settings-nav-goal")  # Giờ mới click được
+```
+
+### Verified test data (2026-04-04)
+
+```
+Input:  Male, Tester, 1996-05-15, 175cm, 75kg, moderate, cut-moderate
+Age:    29 (birthday chưa tới)
+BMR:    1704   (10×75 + 6.25×175 - 5×29 + 5)
+TDEE:   2641   (1704 × 1.55)
+Target: 2091   (2641 - 550)
+
+Meals:  Sáng d5+d1=487cal, Trưa d2+d4+d3=510cal, Tối d2=330cal
+Total:  1327 kcal, 170g protein
+Remaining: 764 kcal (2091-1327)
+
+Weight 80kg change:
+BMR=1754, TDEE=2719, Target=2169
+
+Goal maintain (w=80): Target=TDEE=2719
+Goal bulk+aggressive (w=80): Target=2719+1100=3819
+```
