@@ -16,11 +16,14 @@ Sau **MỌI lần thay đổi code** (fix bug, thêm feature, refactor UI, thay 
 1. npm run lint          → 0 errors
 2. npm run test          → 0 failures, coverage 100%
 3. npm run build         → clean build
-4. npx cap sync android  → sync web assets
-5. cd android && ./gradlew assembleDebug  → build APK
-6. adb -s emulator-5556 install -r app-debug.apk  → install
-7. CDP test script       → verify thay đổi trên emulator thật
-8. Screenshot            → lưu bằng chứng
+4. npm run test:coverage → generate lcov report
+5. npm run sonar         → SonarQube scan → 0 issues (xem QUY TẮC #2)
+   → Nếu còn issues → fix → lặp lại từ bước 1
+6. npx cap sync android  → sync web assets
+7. cd android && ./gradlew assembleDebug  → build APK
+8. adb -s emulator-5556 install -r app-debug.apk  → install
+9. CDP test script       → verify thay đổi trên emulator thật
+10. Screenshot           → lưu bằng chứng
 ```
 
 ### Tại sao bắt buộc?
@@ -39,7 +42,72 @@ Sau **MỌI lần thay đổi code** (fix bug, thêm feature, refactor UI, thay 
 
 ---
 
-## QUY TẮC #2: TỰ HỌC TỪ KINH NGHIỆM
+## QUY TẮC #2: SONARQUBE SCAN TRƯỚC MỌI COMMIT — BẮT BUỘC
+
+> **KHÔNG ĐƯỢC COMMIT nếu SonarQube còn bất kỳ issue nào (Bug, Vulnerability, Code Smell).**
+
+Trước **MỌI lần commit code**, PHẢI thực hiện đầy đủ quy trình sau:
+
+### Quy trình bắt buộc:
+
+```
+1. Đảm bảo SonarQube server đang chạy:
+   - Kiểm tra: curl -sf http://localhost:9000/api/system/status
+   - Nếu chưa chạy: docker compose up -d sonarqube → chờ đến khi status="UP"
+   - Hoặc: npm run sonar:setup (tự động khởi động + tạo token)
+
+2. Chạy coverage trước (SonarQube cần lcov report):
+   - npm run test:coverage
+
+3. Chạy SonarQube scan:
+   - npm run sonar
+
+4. Kiểm tra kết quả trên dashboard:
+   - http://localhost:9000/dashboard?id=meal-planing
+   - HOẶC dùng API: curl -sf -u "$SONAR_TOKEN:" "http://localhost:9000/api/issues/search?componentKeys=meal-planing&resolved=false&types=BUG,VULNERABILITY,CODE_SMELL" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Issues: {d[\"total\"]}')"
+
+5. NẾU CÒN ISSUES → Fix tất cả → Quay lại bước 2 (loop)
+   - Đọc từng issue trên dashboard
+   - Fix code theo đề xuất của SonarQube
+   - Chạy lại npm run test:coverage → npm run sonar
+   - Lặp cho đến khi total issues = 0
+
+6. CHỈ KHI 0 issues → ĐƯỢC PHÉP commit
+```
+
+### Tại sao bắt buộc?
+
+- ESLint chỉ bắt syntax/style issues → SonarQube phát hiện thêm **logic bugs, security vulnerabilities, code smells**
+- SonarQube phân tích **data flow** và **control flow** sâu hơn ESLint
+- Cognitive Complexity, Duplications, Security Hotspots chỉ SonarQube mới phát hiện
+- Giữ codebase **zero-issue** từ đầu dễ hơn sửa hàng trăm issues tích tụ
+
+### KHÔNG ĐƯỢC bỏ qua vì bất kỳ lý do nào:
+
+- ❌ "Chỉ thay đổi nhỏ" → VẪN PHẢI scan (1 dòng có thể tạo security vulnerability!)
+- ❌ "SonarQube chậm" → Scan mất ~30s, đáng để tránh bugs production
+- ❌ "Issue là false positive" → Dùng `sonar.issue.ignore` trong config, KHÔNG skip scan
+- ❌ "Server chưa chạy" → Khởi động bằng `docker compose up -d` trước
+
+### Lệnh nhanh (copy-paste):
+
+```bash
+# Kiểm tra SonarQube status
+curl -sf http://localhost:9000/api/system/status | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])"
+
+# Khởi động nếu chưa chạy
+docker compose up -d sonarqube
+
+# Full scan pipeline
+npm run test:coverage && npm run sonar
+
+# Check issues count qua API
+curl -sf -u "$SONAR_TOKEN:" "http://localhost:9000/api/issues/search?componentKeys=meal-planing&resolved=false" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Total issues: {d[\"total\"]}')"
+```
+
+---
+
+## QUY TẮC #3: TỰ HỌC TỪ KINH NGHIỆM
 
 Kinh nghiệm là tài sản quý nhất. **MỌI lần hoàn thành 1 task** đều phải rút kinh nghiệm.
 
