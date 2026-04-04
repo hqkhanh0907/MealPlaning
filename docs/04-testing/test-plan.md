@@ -1,8 +1,9 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 10.0  
-**Date:** 2026-07-05  
+**Version:** 11.0  
+**Date:** 2026-07-20  
 **Author:** Dev Team  
+**Changelog v11.0:** Wave 2 fixes: FIX-07 (dbWriteQueue helper), FIX-10 (FK SET NULL migration v5→v6), FIX-13 (fire-and-forget patterns → persistToDb/transaction). Updated schema version 6, 28 tables. Added test report: `test-report-wave2.md`
 **Changelog v10.0:** Thêm Unified Onboarding, Plan Editing UX, Multi-Session System, coverage 100% target, Chrome DevTools manual testing protocol, SonarQube quality gates, Navigation audit: fixed Settings/Grocery tab references (not tabs), added TC_ENERGY/TC_HEALTH
 
 ---

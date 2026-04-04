@@ -21,16 +21,16 @@
 
 ### Files
 
-| Loại | Convention | Ví dụ |
-|------|-----------|-------|
-| Component | PascalCase `.tsx` | `IngredientEditModal.tsx` |
-| Hook | camelCase, prefix `use` | `usePersistedState.ts` |
-| Service | camelCase, suffix `Service` | `geminiService.ts` |
-| Utility | camelCase | `calorieCalculator.ts` |
-| Type | camelCase `.ts` | `types.ts` |
-| Test | `.test.ts(x)` cùng tên file gốc | `geminiService.test.ts` |
-| E2E Page Object | PascalCase, suffix `Page` | `CalendarPage.ts` |
-| E2E Spec | prefix số thứ tự | `03-dish-crud.spec.ts` |
+| Loại            | Convention                      | Ví dụ                     |
+| --------------- | ------------------------------- | ------------------------- |
+| Component       | PascalCase `.tsx`               | `IngredientEditModal.tsx` |
+| Hook            | camelCase, prefix `use`         | `usePersistedState.ts`    |
+| Service         | camelCase, suffix `Service`     | `geminiService.ts`        |
+| Utility         | camelCase                       | `calorieCalculator.ts`    |
+| Type            | camelCase `.ts`                 | `types.ts`                |
+| Test            | `.test.ts(x)` cùng tên file gốc | `geminiService.test.ts`   |
+| E2E Page Object | PascalCase, suffix `Page`       | `CalendarPage.ts`         |
+| E2E Spec        | prefix số thứ tự                | `03-dish-crud.spec.ts`    |
 
 ### Store API Naming
 
@@ -133,12 +133,7 @@ export const IngredientEditModal: React.FC<IngredientEditModalProps> = ({
 ```typescript
 // ✅ Luôn dùng type guard cho AI response
 function isAnalyzedDishResult(obj: unknown): obj is AnalyzedDishResult {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'name' in obj &&
-    'isFood' in obj
-  );
+  return typeof obj === 'object' && obj !== null && 'name' in obj && 'isFood' in obj;
 }
 
 // ❌ Không cast trực tiếp
@@ -181,11 +176,11 @@ export function saveAndCalculate(dayPlan: DayPlan, dishes: Dish[]): number {
 const { t } = useTranslation();
 
 // ✅ Dùng key path đầy đủ
-t('ingredients.modal.title')
-t('common.save')
+t('ingredients.modal.title');
+t('common.save');
 
 // ❌ Hardcode text tiếng Việt
-"Thêm nguyên liệu"
+('Thêm nguyên liệu');
 ```
 
 ### LocalizedString type
@@ -193,7 +188,7 @@ t('common.save')
 ```typescript
 // Ứng dụng chỉ hỗ trợ Tiếng Việt
 interface Ingredient {
-  name: LocalizedString;   // { vi: string }
+  name: LocalizedString; // { vi: string }
   unit: LocalizedString;
 }
 
@@ -238,14 +233,14 @@ import { useShallow } from 'zustand/react/shallow';
 
 // ✅ Correct — useShallow khi select multiple properties
 const { dishes, ingredients, addDish } = useMealStore(
-  useShallow((s) => ({ dishes: s.dishes, ingredients: s.ingredients, addDish: s.addDish }))
+  useShallow(s => ({ dishes: s.dishes, ingredients: s.ingredients, addDish: s.addDish })),
 );
 
 // ✅ Correct — single property không cần useShallow
-const dishes = useMealStore((s) => s.dishes);
+const dishes = useMealStore(s => s.dishes);
 
 // ❌ Wrong — select multiple properties WITHOUT useShallow → unnecessary re-renders
-const { dishes, ingredients } = useMealStore((s) => ({
+const { dishes, ingredients } = useMealStore(s => ({
   dishes: s.dishes,
   ingredients: s.ingredients,
 }));
@@ -253,15 +248,10 @@ const { dishes, ingredients } = useMealStore((s) => ({
 
 ```typescript
 // ✅ Dùng usePersistedState
-const [ingredients, setIngredients] = usePersistedState<Ingredient[]>(
-  'mp-ingredients',
-  []
-);
+const [ingredients, setIngredients] = usePersistedState<Ingredient[]>('mp-ingredients', []);
 
 // ❌ Tự gọi localStorage
-const [ingredients, setIngredients] = useState(() =>
-  JSON.parse(localStorage.getItem('mp-ingredients') || '[]')
-);
+const [ingredients, setIngredients] = useState(() => JSON.parse(localStorage.getItem('mp-ingredients') || '[]'));
 ```
 
 ---
@@ -284,8 +274,8 @@ logger.warn('Missing nutrition data', { ingredientId });
 logger.error('analyzeDishImage failed', error);
 
 // ❌ KHÔNG dùng console.* trực tiếp
-console.log('saving', data);          // ← ESLint no-console sẽ báo lỗi
-console.error('failed', error);       // ← ESLint no-console sẽ báo lỗi
+console.log('saving', data); // ← ESLint no-console sẽ báo lỗi
+console.error('failed', error); // ← ESLint no-console sẽ báo lỗi
 ```
 
 > **Lưu ý:** ESLint rule `no-console` được disable **chỉ** trong file `src/utils/logger.ts`. Mọi file khác gọi `console.*` sẽ bị ESLint báo lỗi.
@@ -306,7 +296,7 @@ notify.info(t('info.syncComplete'));
 
 // ❌ Wrong — destructure method không tồn tại
 const { showNotification } = useNotification(); // showNotification KHÔNG tồn tại
-showNotification('success', 'Saved!');           // sẽ crash runtime
+showNotification('success', 'Saved!'); // sẽ crash runtime
 ```
 
 ### Async Error Handling
@@ -415,19 +405,53 @@ Tất cả component mới **bắt buộc** phải account cho mobile safe areas
 
 > **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)
 
-Khi viết test liên quan đến database (SQLite), **bắt buộc** gọi `createSchema(db)` sau `db.initialize()` để đảm bảo schema được tạo đầy đủ (19 tables):
+Khi viết test liên quan đến database (SQLite), **bắt buộc** gọi `createSchema(db)` sau `db.initialize()` để đảm bảo schema được tạo đầy đủ (28 tables, SCHEMA_VERSION=6):
 
 ```typescript
 // ✅ Correct — luôn gọi createSchema sau initialize
 const db = new SQLiteDatabase();
 await db.initialize();
-await createSchema(db);  // ← BẮT BUỘC — tạo đủ 19 tables
+await createSchema(db); // ← BẮT BUỘC — tạo đủ 28 tables
 
 // ❌ Wrong — thiếu createSchema → test fail do missing tables
 const db = new SQLiteDatabase();
 await db.initialize();
 // forgot createSchema → queries fail with "no such table"
 ```
+
+### DB Write Patterns trong Stores
+
+> **Quy tắc bắt buộc** — xác nhận từ Wave 2 (2026-07-20)
+
+Zustand stores dùng optimistic update. Có 3 patterns cho DB writes:
+
+```typescript
+// Pattern 1: Single-write fire-and-forget → persistToDb()
+import { persistToDb } from '@/store/helpers/dbWriteQueue';
+persistToDb(_db, 'INSERT INTO ...', [params], 'actionName.context');
+
+// Pattern 2: Multi-write atomic → db.transaction() + .catch()
+const db = _db;
+db.transaction(async () => {
+  await db.execute('UPDATE ...', [params]);
+  await db.execute('DELETE ...', [params]);
+}).catch(e => logger.error({ component: 'storeName', action: 'actionName' }, e));
+
+// Pattern 3: Critical with rollback → await + try/catch
+const prevState = get().items;
+try {
+  await _db.transaction(async () => { ... });
+} catch (error) {
+  set({ items: prevState }); // rollback Zustand
+  logger.error({ ... }, error);
+}
+```
+
+**Quy tắc:**
+
+- KHÔNG dùng `persistToDb()` cho multi-write actions (queue ≠ atomicity)
+- Multi-write actions PHẢI dùng `db.transaction()` để đảm bảo all-or-nothing
+- `transaction()` callback KHÔNG nhận tham số — dùng `db` reference trực tiếp bên trong
 
 ### i18n Assertions trong Tests
 
@@ -447,7 +471,8 @@ expect(screen.getByText(/nguyên liệu/i)).toBeInTheDocument();
 expect(screen.getByText('Add Ingredient')).toBeInTheDocument();
 expect(screen.getByText('Thêm nguyên liệu mới vào danh sách')).toBeInTheDocument();
 ```
-```
+
+````
 
 ### E2E tests
 
@@ -460,21 +485,21 @@ await management.addDish('Thịt bò xào');
 
 // ❌ Inline selectors trong spec
 await $('button[data-testid="add-dish"]').click();
-```
+````
 
 ### Coverage targets
 
-| Module | Target | Current |
-|--------|--------|---------|
-| `services/` | ≥ 90% | **100%** ✅ |
-| `utils/` | ≥ 90% | **100%** ✅ |
-| `hooks/` | ≥ 85% | **100%** ✅ |
-| `components/` | ≥ 75% | **100%** ✅ |
-| `contexts/` | ≥ 85% | **100%** ✅ |
-| **Overall Stmts** | ≥ 98% | **≥98%** ✅ |
-| **Overall Branch** | ≥ 75% | **93.99%** ✅ |
-| **E2E Specs** | 24 specs | **183 tests** ✅ |
-| **Unit Test Files** | — | **165 files, 3954 tests** ✅ |
+| Module              | Target   | Current                      |
+| ------------------- | -------- | ---------------------------- |
+| `services/`         | ≥ 90%    | **100%** ✅                  |
+| `utils/`            | ≥ 90%    | **100%** ✅                  |
+| `hooks/`            | ≥ 85%    | **100%** ✅                  |
+| `components/`       | ≥ 75%    | **100%** ✅                  |
+| `contexts/`         | ≥ 85%    | **100%** ✅                  |
+| **Overall Stmts**   | ≥ 98%    | **≥98%** ✅                  |
+| **Overall Branch**  | ≥ 75%    | **93.99%** ✅                |
+| **E2E Specs**       | 24 specs | **183 tests** ✅             |
+| **Unit Test Files** | —        | **165 files, 3954 tests** ✅ |
 
 > **Chuẩn mới (2026-06-28):** 98%+ statement coverage là baseline bắt buộc. Mọi PR không được làm giảm coverage dưới 98%. Hiện tại: 165 test files, 3954 tests passing.
 >
@@ -514,12 +539,12 @@ if (isAnalyzedDishResult(response)) {
 
 Chrome 91.0.4472.114 does NOT support ES2022+. These are **BANNED** in E2E test code:
 
-| ❌ Banned | ✅ Replacement |
-|-----------|---------------|
-| `Array.at()` | `arr[arr.length - 1]` |
-| `structuredClone()` | `JSON.parse(JSON.stringify(obj))` |
-| `Object.hasOwn()` | `Object.prototype.hasOwnProperty.call(obj, key)` |
-| Optional chaining in older contexts | Explicit null checks |
+| ❌ Banned                           | ✅ Replacement                                   |
+| ----------------------------------- | ------------------------------------------------ |
+| `Array.at()`                        | `arr[arr.length - 1]`                            |
+| `structuredClone()`                 | `JSON.parse(JSON.stringify(obj))`                |
+| `Object.hasOwn()`                   | `Object.prototype.hasOwnProperty.call(obj, key)` |
+| Optional chaining in older contexts | Explicit null checks                             |
 
 #### React 18 `_valueTracker` Pattern
 
@@ -545,6 +570,7 @@ Each spec should inject its own test data via `injectTestData()` with unique IDs
 ### Test patterns đã xác lập (từ QA Cycle 2)
 
 **Vietnamese i18n assertions:**
+
 ```typescript
 // ✅ Assert text hiển thị qua t() — dùng i18n key hoặc translated text
 expect(screen.getByText(/nguyên liệu/i)).toBeInTheDocument();
@@ -552,6 +578,7 @@ expect(screen.getByRole('button', { name: t('common.save') })).toBeInTheDocument
 ```
 
 **Mock patterns cho services:**
+
 ```typescript
 // ✅ Mock Gemini service với retry/abort support
 vi.mock('../services/geminiService', () => ({
@@ -583,6 +610,7 @@ Object.defineProperty(navigator, 'mediaDevices', {
 ### Khi thay đổi `src/types.ts`
 
 Bắt buộc update đồng thời (cùng PR/commit):
+
 - `docs/03-developer-guide/localstorage-schema.md` — nếu type liên quan đến localStorage
 - `docs/02-architecture/data-model.md` — nếu thay đổi core domain types
 - `docs/01-requirements/PRD.md` — nếu thay đổi ảnh hưởng đến business logic
@@ -599,6 +627,7 @@ Bắt buộc update đồng thời (cùng PR/commit):
 > **Quy tắc bắt buộc** — validated by BUG-E2E-003
 
 Bắt buộc update đồng thời (cùng PR/commit):
+
 - `e2e/pageobjects/CalendarPage.ts` — cập nhật Page Object cho flow mới
 - Các E2E specs test flow đó (e.g., `e2e/specs/xx-*.spec.ts`)
 - `docs/02-architecture/SAD.md` — cập nhật sequence descriptions
@@ -615,6 +644,7 @@ Bắt buộc update đồng thời (cùng PR/commit):
 ### Khi thay đổi API/Service
 
 Bắt buộc update:
+
 - `docs/02-architecture/sequence-diagrams.md` — nếu flow thay đổi
 - `docs/03-developer-guide/setup.md` — nếu env vars mới
 - `docs/04-testing/test-cases.md` — nếu behavior thay đổi
