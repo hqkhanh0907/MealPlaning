@@ -121,55 +121,83 @@ class WebDatabaseService implements DatabaseService {
 
   async exportToJSON(): Promise<string> {
     const db = this.getDb();
-    const tablesResult = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
-    const result: Record<string, unknown[]> = {};
-    if (tablesResult.length > 0) {
-      for (const row of tablesResult[0].values) {
-        const tableName = row[0] as string;
-        const data = db.exec(`SELECT * FROM "${tableName}"`);
-        if (data.length === 0) {
-          result[tableName] = [];
-        } else {
-          const { columns, values } = data[0];
-          result[tableName] = values.map(r => {
-            const obj: Record<string, unknown> = {};
-            columns.forEach((col, i) => {
-              obj[col] = r[i];
-            });
-            return obj;
+    const { SCHEMA_TABLES } = await import('./schema');
+    const tables: Record<string, unknown[]> = {};
+
+    for (const tableName of SCHEMA_TABLES) {
+      const data = db.exec(`SELECT * FROM "${tableName}"`);
+      if (data.length === 0) {
+        tables[tableName] = [];
+      } else {
+        const { columns, values } = data[0];
+        tables[tableName] = values.map(r => {
+          const obj: Record<string, unknown> = {};
+          columns.forEach((col, i) => {
+            obj[col] = r[i];
           });
-        }
+          return obj;
+        });
       }
     }
-    return JSON.stringify(result);
+
+    return JSON.stringify({
+      _version: '2.0',
+      _exportedAt: new Date().toISOString(),
+      _format: 'sqlite-json',
+      tables,
+    });
   }
 
   async importFromJSON(json: string): Promise<void> {
-    let data: Record<string, unknown[]>;
+    let parsed: unknown;
     try {
-      data = JSON.parse(json) as Record<string, unknown[]>;
+      parsed = JSON.parse(json);
     } catch {
       throw new Error('invalid JSON string');
     }
 
-    const db = this.getDb();
-    const existingTables = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
-    if (existingTables.length > 0) {
-      for (const row of existingTables[0].values) {
-        db.run(`DROP TABLE IF EXISTS "${row[0] as string}"`);
-      }
+    // Accept V2ExportPayload envelope or raw table map
+    let tables: Record<string, unknown[]>;
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      '_version' in parsed &&
+      (parsed as Record<string, unknown>)._version === '2.0'
+    ) {
+      tables = (parsed as { tables: Record<string, unknown[]> }).tables ?? {};
+    } else {
+      tables = parsed as Record<string, unknown[]>;
     }
 
-    for (const [tableName, rows] of Object.entries(data)) {
-      if (!Array.isArray(rows) || rows.length === 0) continue;
-      const columns = Object.keys(rows[0] as Record<string, unknown>);
-      const colDefs = columns.map(c => `"${c}" TEXT`).join(', ');
-      db.run(`CREATE TABLE "${tableName}" (${colDefs})`);
+    const db = this.getDb();
 
+    // 1. Disable FK constraints during reset
+    db.run('PRAGMA foreign_keys = OFF');
+
+    // 2. Drop existing tables in reverse dependency order
+    const { IMPORT_ORDER } = await import('./syncV2Utils');
+    const reverseOrder = [...IMPORT_ORDER].reverse();
+    for (const t of reverseOrder) {
+      db.run(`DROP TABLE IF EXISTS "${t}"`);
+    }
+
+    // 3. Recreate schema with proper types/constraints
+    const { createSchema } = await import('./schema');
+    await createSchema(this);
+
+    // 4. Re-enable FK constraints
+    db.run('PRAGMA foreign_keys = ON');
+
+    // 5. Insert data in forward dependency order
+    for (const tableName of IMPORT_ORDER) {
+      const rows = tables[tableName];
+      if (!Array.isArray(rows) || rows.length === 0) continue;
       for (const row of rows) {
-        const r = row as Record<string, unknown>;
+        const obj = row as Record<string, unknown>;
+        const columns = Object.keys(obj);
+        if (columns.length === 0) continue;
         const placeholders = columns.map(() => '?').join(', ');
-        const values = columns.map(c => r[c]);
+        const values = columns.map(c => obj[c] ?? null);
         const columnList = columns.map(c => `"${c}"`).join(', ');
         db.run(`INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`, values);
       }

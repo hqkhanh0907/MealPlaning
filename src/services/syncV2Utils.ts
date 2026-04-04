@@ -26,7 +26,7 @@ type DataVersion = '1.x' | '2.0';
  * FK-safe import order: parents before children.
  * Delete uses reverse order (children first).
  */
-const IMPORT_ORDER: readonly string[] = [
+export const IMPORT_ORDER: readonly string[] = [
   'ingredients',
   'dishes',
   'dish_ingredients',
@@ -43,6 +43,12 @@ const IMPORT_ORDER: readonly string[] = [
   'weight_log',
   'daily_log',
   'adjustments',
+  'fitness_profiles',
+  'fitness_preferences',
+  'workout_drafts',
+  'app_settings',
+  'grocery_checked',
+  'plan_templates',
 ] as const;
 
 /* ------------------------------------------------------------------ */

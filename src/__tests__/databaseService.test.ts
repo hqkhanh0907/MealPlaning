@@ -147,49 +147,124 @@ describe('DatabaseService', () => {
     expect(rows).toHaveLength(0);
   });
 
-  it('exportToJSON() returns valid JSON string', async () => {
-    await db.execute('CREATE TABLE export_test (id INTEGER, name TEXT)');
-    await db.execute("INSERT INTO export_test VALUES (1, 'Alpha')");
-    await db.execute("INSERT INTO export_test VALUES (2, 'Beta')");
+  it('exportToJSON() returns V2ExportPayload envelope with table data', async () => {
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    await db.execute("INSERT INTO ingredients VALUES ('i1','Alpha','AlphaEN',100,10,20,5,3,'g','g')");
 
     const json = await db.exportToJSON();
-    const parsed = JSON.parse(json) as Record<string, unknown[]>;
+    const parsed = JSON.parse(json);
 
-    expect(parsed).toHaveProperty('export_test');
-    expect(parsed['export_test']).toHaveLength(2);
-    expect(parsed['export_test'][0]).toEqual({ id: 1, name: 'Alpha' });
+    expect(parsed._version).toBe('2.0');
+    expect(parsed._format).toBe('sqlite-json');
+    expect(parsed._exportedAt).toBeDefined();
+    expect(parsed.tables).toBeDefined();
+    expect(parsed.tables.ingredients).toHaveLength(1);
+    expect(parsed.tables.ingredients[0]).toMatchObject({ id: 'i1', name_vi: 'Alpha' });
   });
 
-  it('exportToJSON() returns empty object when no tables', async () => {
+  it('exportToJSON() includes all SCHEMA_TABLES even if empty', async () => {
+    const { createSchema, SCHEMA_TABLES } = await import('../services/schema');
+    await createSchema(db);
     const json = await db.exportToJSON();
-    expect(JSON.parse(json)).toEqual({});
+    const parsed = JSON.parse(json);
+    for (const table of SCHEMA_TABLES) {
+      expect(parsed.tables).toHaveProperty(table);
+    }
   });
 
-  it('importFromJSON() imports data correctly', async () => {
-    const importData = {
-      products: [
-        { id: '1', product_name: 'Coffee' },
-        { id: '2', product_name: 'Tea' },
+  it('importFromJSON() preserves schema types (FK-safe)', async () => {
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    await db.execute("INSERT INTO ingredients VALUES ('i1','Test','TestEN',100,10,20,5,3,'g','g')");
+    const json = await db.exportToJSON();
+
+    await db.importFromJSON(json);
+
+    const rows = await db.query<{ id: string }>('SELECT id FROM ingredients');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].id).toBe('i1');
+
+    // Verify column types preserved (not all TEXT)
+    const info = await db.query<{ type: string; name: string }>("PRAGMA table_info('ingredients')");
+    const calCol = info.find(c => c.name === 'calories_per_100');
+    expect(calCol?.type).toBe('REAL');
+  });
+
+  it('importFromJSON() handles V2ExportPayload envelope format', async () => {
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    await db.execute("INSERT INTO ingredients VALUES ('i1','Test','TestEN',100,10,20,5,3,'g','g')");
+    const json = await db.exportToJSON();
+    const parsed = JSON.parse(json);
+    expect(parsed._version).toBe('2.0');
+    expect(parsed.tables.ingredients).toHaveLength(1);
+  });
+
+  it('importFromJSON() accepts raw table map for backward compat', async () => {
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    const rawJson = JSON.stringify({
+      ingredients: [
+        {
+          id: 'i1',
+          name_vi: 'Test',
+          name_en: null,
+          calories_per_100: 100,
+          protein_per_100: 10,
+          carbs_per_100: 20,
+          fat_per_100: 5,
+          fiber_per_100: 3,
+          unit_vi: 'g',
+          unit_en: null,
+        },
       ],
-    };
+    });
+    await db.importFromJSON(rawJson);
+    const rows = await db.query<{ id: string }>('SELECT id FROM ingredients');
+    expect(rows).toHaveLength(1);
+  });
 
-    await db.importFromJSON(JSON.stringify(importData));
+  it('importFromJSON() handles FK tables correctly (dishes → dish_ingredients)', async () => {
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    await db.execute("INSERT INTO ingredients VALUES ('i1','Ga','Chicken',165,31,0,4,0,'g','g')");
+    await db.execute("INSERT INTO dishes VALUES ('d1','Mon 1',NULL,'[]',NULL,NULL)");
+    await db.execute("INSERT INTO dish_ingredients VALUES ('d1','i1',150)");
 
-    const rows = await db.query<{ id: string; productName: string }>('SELECT * FROM products');
-    expect(rows).toHaveLength(2);
-    expect(rows[0]).toEqual({ id: '1', productName: 'Coffee' });
-    expect(rows[1]).toEqual({ id: '2', productName: 'Tea' });
+    const json = await db.exportToJSON();
+    await db.importFromJSON(json);
+
+    const di = await db.query<{ dishId: string }>('SELECT dish_id FROM dish_ingredients');
+    expect(di).toHaveLength(1);
   });
 
   it('importFromJSON() replaces existing data', async () => {
-    await db.execute('CREATE TABLE old_table (id INTEGER)');
-    await db.execute('INSERT INTO old_table VALUES (1)');
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    await db.execute("INSERT INTO ingredients VALUES ('old','Old','OldEN',0,0,0,0,0,'g','g')");
 
-    await db.importFromJSON(JSON.stringify({ new_table: [{ id: '10', val: 'x' }] }));
+    const newData = JSON.stringify({
+      ingredients: [
+        {
+          id: 'new1',
+          name_vi: 'New',
+          name_en: null,
+          calories_per_100: 50,
+          protein_per_100: 5,
+          carbs_per_100: 10,
+          fat_per_100: 2,
+          fiber_per_100: 1,
+          unit_vi: 'g',
+          unit_en: null,
+        },
+      ],
+    });
+    await db.importFromJSON(newData);
 
-    await expect(db.query('SELECT * FROM old_table')).rejects.toThrow();
-    const rows = await db.query<{ id: string; val: string }>('SELECT * FROM new_table');
+    const rows = await db.query<{ id: string }>('SELECT id FROM ingredients');
     expect(rows).toHaveLength(1);
+    expect(rows[0].id).toBe('new1');
   });
 
   it('importFromJSON() throws on invalid JSON', async () => {
@@ -197,10 +272,24 @@ describe('DatabaseService', () => {
   });
 
   it('importFromJSON() rolls back on SQL error during import', async () => {
-    await db.execute('CREATE TABLE before_import (id INTEGER)');
-    await db.execute('INSERT INTO before_import VALUES (1)');
-
-    const validData = { before_import: [{ id: '1' }] };
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    const validData = {
+      ingredients: [
+        {
+          id: 'i1',
+          name_vi: 'Test',
+          name_en: null,
+          calories_per_100: 100,
+          protein_per_100: 10,
+          carbs_per_100: 20,
+          fat_per_100: 5,
+          fiber_per_100: 3,
+          unit_vi: 'g',
+          unit_en: null,
+        },
+      ],
+    };
     await expect(db.importFromJSON(JSON.stringify(validData))).resolves.toBeUndefined();
   });
 
@@ -223,17 +312,19 @@ describe('DatabaseService', () => {
   });
 
   it('exportToJSON() handles table with no rows', async () => {
-    await db.execute('CREATE TABLE empty_export (id INTEGER, name TEXT)');
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
     const json = await db.exportToJSON();
-    const parsed = JSON.parse(json) as Record<string, unknown[]>;
-    expect(parsed).toHaveProperty('empty_export');
-    expect(parsed['empty_export']).toEqual([]);
+    const parsed = JSON.parse(json);
+    expect(parsed.tables.ingredients).toEqual([]);
   });
 
   it('importFromJSON() skips empty row arrays', async () => {
-    await db.importFromJSON(JSON.stringify({ skip_table: [] }));
-    const json = await db.exportToJSON();
-    expect(JSON.parse(json)).toEqual({});
+    const { createSchema } = await import('../services/schema');
+    await createSchema(db);
+    await db.importFromJSON(JSON.stringify({ ingredients: [] }));
+    const rows = await db.query('SELECT * FROM ingredients');
+    expect(rows).toEqual([]);
   });
 
   it('close() resolves without error', async () => {
