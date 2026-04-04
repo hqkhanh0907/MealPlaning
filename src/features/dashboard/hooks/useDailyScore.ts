@@ -99,7 +99,8 @@ export function useDailyScore(): DailyScoreData {
 
     const workoutCompleted = workouts.some(w => w.date === today);
 
-    const todayDayOfWeek = now.getDay();
+    // Convert JS Sunday=0 to ISO Sunday=7 to match trainingPlanDays.dayOfWeek
+    const todayDayOfWeek = now.getDay() || 7;
     let isRestDay = false;
 
     if (activePlan) {
@@ -126,6 +127,7 @@ export function useDailyScore(): DailyScoreData {
       weightLoggedToday,
       weightLoggedYesterday,
       streakDays: streakInfo.currentStreak,
+      skipWorkoutFactor: !activePlan,
     });
 
     return {

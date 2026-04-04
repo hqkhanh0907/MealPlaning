@@ -353,8 +353,10 @@ describe('useDailyScore', () => {
     });
 
     it('detects rest day when active plan has no scheduled day for today', () => {
-      const todayDow = new Date().getDay();
-      const otherDow = (todayDow + 1) % 7;
+      // Use ISO day-of-week (Mon=1..Sun=7)
+      const jsDow = new Date().getDay();
+      const todayIsoDow = jsDow === 0 ? 7 : jsDow;
+      const otherDow = todayIsoDow === 7 ? 1 : todayIsoDow + 1;
       setupFitnessStore({
         trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
         trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: otherDow }],
@@ -366,15 +368,47 @@ describe('useDailyScore', () => {
     });
 
     it('detects training day when active plan is scheduled for today', () => {
-      const todayDow = new Date().getDay();
+      // Use ISO day-of-week (Mon=1..Sun=7)
+      const jsDow = new Date().getDay();
+      const todayIsoDow = jsDow === 0 ? 7 : jsDow;
       setupFitnessStore({
         trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
-        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: todayDow }],
+        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: todayIsoDow }],
       });
 
       renderHook(() => useDailyScore());
 
       expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: false }));
+    });
+
+    it('correctly maps Sunday to ISO dayOfWeek=7 (FIX-03)', () => {
+      // Pin to a Sunday
+      vi.setSystemTime(new Date('2025-01-19T10:00:00')); // Sunday
+      setupFitnessStore({
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: 7 }],
+      });
+
+      renderHook(() => useDailyScore());
+
+      // Sunday should match dayOfWeek=7, so NOT rest day
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: false }));
+    });
+
+    it('treats Sunday as rest day when not in plan schedule (FIX-03)', () => {
+      vi.setSystemTime(new Date('2025-01-19T10:00:00')); // Sunday
+      setupFitnessStore({
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+        trainingPlanDays: [
+          { id: 'pd1', planId: 'p1', dayOfWeek: 1 },
+          { id: 'pd2', planId: 'p1', dayOfWeek: 3 },
+          { id: 'pd3', planId: 'p1', dayOfWeek: 5 },
+        ],
+      });
+
+      renderHook(() => useDailyScore());
+
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: true }));
     });
 
     it('passes isBeforeEvening true when hour < 20', () => {
@@ -555,6 +589,28 @@ describe('useDailyScore', () => {
 
       expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ isRestDay: false }));
       expect(mockCalculateStreak).toHaveBeenCalledWith([], [], todayStr());
+    });
+
+    it('passes skipWorkoutFactor=true when no active plan (FIX-09)', () => {
+      setupFitnessStore({
+        trainingPlans: [],
+        trainingPlanDays: [],
+      });
+
+      renderHook(() => useDailyScore());
+
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ skipWorkoutFactor: true }));
+    });
+
+    it('passes skipWorkoutFactor=false when active plan exists (FIX-09)', () => {
+      setupFitnessStore({
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+        trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: 1 }],
+      });
+
+      renderHook(() => useDailyScore());
+
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ skipWorkoutFactor: false }));
     });
   });
 
