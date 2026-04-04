@@ -147,7 +147,7 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
                 <Dumbbell className="h-4 w-4" />
                 {t('energyDetail.caloriesOut')}
               </span>
-              <span className="font-bold text-blue-600 dark:text-blue-400">-{Math.round(caloriesOut)} kcal</span>
+              <span className="text-status-info font-bold">-{Math.round(caloriesOut)} kcal</span>
             </div>
             <div className="border-border-subtle border-t pt-2">
               <div className="flex items-center justify-between text-sm">

@@ -322,7 +322,10 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          <div
+            aria-label={t('calendar.monthYear', { month: month + 1, year })}
+            className="grid grid-cols-7 gap-1 sm:gap-2"
+          >
             {emptyCellKeys.map(key => (
               <div key={key} className="p-1 sm:p-2" />
             ))}
