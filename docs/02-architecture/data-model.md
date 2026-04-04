@@ -643,13 +643,31 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 
 ---
 
-## 10. SQLite Database Schema (22+ Tables)
+## 10. SQLite Database Schema (22 Tables)
 
 > **Source of truth:** `src/services/schema.ts` — `SCHEMA_VERSION = 6`
 >
-> Ứng dụng sử dụng SQLite với **dual implementation**: `WebDatabaseService` (sql.js WASM cho web/tests) và `NativeDatabaseService` (@capacitor-community/sqlite cho Android native). Schema gồm **22+ bảng** chia thành 5 nhóm chức năng.
+> Ứng dụng sử dụng SQLite với **dual implementation**: `WebDatabaseService` (sql.js WASM cho web/tests) và `NativeDatabaseService` (@capacitor-community/sqlite cho Android native). Schema gồm **22 bảng** chia thành 5 nhóm chức năng.
 >
-> **⚠️ Persistence Gap**: 4 stores (`dayPlanStore`, `dishStore`, `ingredientStore`, `mealTemplateStore`) chỉ load data từ SQLite khi startup (`loadAll()`). Mutations chỉ update Zustand in-memory — KHÔNG ghi ngược SQLite. Chỉ `fitnessStore` và `healthProfileStore` có full write-back. Xem [SAD.md §2.4](SAD.md#⚠️-persistence-gap--known-limitation-ceo-audit) cho chi tiết.
+> **✅ Full Persistence (BM-BUG-01 resolved 2026-07-22):** Tất cả 6 data stores đều ghi SQLite khi mutation. Xem [SAD.md §2.4](SAD.md#✅-store-persistence-architecture-bm-audit--resolved) cho chi tiết persistence pattern.
+
+### 10.0 Store-to-Table Mapping
+
+> **Added 2026-07-22 (BM Business Logic Audit reverse-sync)**
+
+| Store                | Tables                                                                                                                                                                                 | Persistence Mechanism                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `ingredientStore`    | `ingredients`                                                                                                                                                                          | `persistToDb` queue                                 |
+| `dishStore`          | `dishes`, `dish_ingredients`                                                                                                                                                           | `db.transaction()` (1:N relation)                   |
+| `dayPlanStore`       | `day_plans`                                                                                                                                                                            | `persistToDb` (single) / `db.transaction()` (batch) |
+| `mealTemplateStore`  | `meal_templates`                                                                                                                                                                       | `persistToDb` queue                                 |
+| `fitnessStore`       | `exercises`, `workouts`, `workout_sets`, `training_plans`, `training_plan_days`, `weight_log`, `daily_log`, `adjustments`, `fitness_profiles`, `fitness_preferences`, `workout_drafts` | `persistToDb` + `db.transaction()`                  |
+| `healthProfileStore` | `user_profile`, `goals`                                                                                                                                                                | `persistToDb` queue                                 |
+| `navigationStore`    | _(none — memory only)_                                                                                                                                                                 | —                                                   |
+| `uiStore`            | _(none — memory only)_                                                                                                                                                                 | —                                                   |
+| `appOnboardingStore` | _(none — localStorage via Zustand persist)_                                                                                                                                            | —                                                   |
+
+**Remaining tables** not owned by a specific store: `training_profile`, `plan_templates`, `app_settings`, `grocery_checked` — managed directly via service-level queries.
 
 ### 10.1 Meal Planning Tables (migrated from localStorage)
 
@@ -972,8 +990,9 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 | 19  | `workout_drafts`      | Fitness       | Bản nháp workout đang thực hiện     |
 | 20  | `app_settings`        | Settings      | Key-value application settings      |
 | 21  | `grocery_checked`     | Meal Planning | Trạng thái đã mua của grocery items |
+| 22  | `plan_templates`      | Training      | Mẫu kế hoạch tập luyện có sẵn       |
 
-> **Lưu ý:** Schema version 6 có 22+ tables (tạo qua `CREATE TABLE IF NOT EXISTS` trong `schema.ts`). Migration logic có thể tạo thêm tables trong quá trình upgrade (ví dụ: `plan_templates`, `training_plan_days_v2`). Tham khảo `schema.ts` cho danh sách đầy đủ.
+> **Lưu ý:** Schema version 6 có **22 permanent tables** (tạo qua `CREATE TABLE IF NOT EXISTS` trong `schema.ts`). Migration logic sử dụng temporary tables (`training_plan_days_v2`, `workout_sets_new`) cho schema upgrades — chúng được rename thành bảng chính sau migration. Xem §10.0 cho Store-to-Table mapping.
 >
 > **⚠️ Defensive parsing**: Các cột JSON (`tags`, `breakfast_dish_ids`, `lunch_dish_ids`, `dinner_dish_ids`, `servings`, `exercises`, `muscle_groups`) được parse bằng `safeJsonParse()` — corrupt data trả về fallback thay vì crash app.
 
@@ -981,11 +1000,12 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 
 ## 11. Revision History
 
-| Version | Date       | Changes                                                                                                                                                                                                                                                                                                                  |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | 2026-02-20 | Initial data model — localStorage types                                                                                                                                                                                                                                                                                  |
-| 1.1     | 2026-03-08 | Added MealTemplate, FilterConfig, AI Response Types                                                                                                                                                                                                                                                                      |
-| 1.2     | 2026-03-28 | Added SQLite database schema (19 tables). 3 new fitness module tables: `fitness_profiles`, `fitness_preferences`, `workout_drafts`. Documented all table columns, constraints, indexes, and FK relationships from `src/services/schema.ts`                                                                               |
-| 2.0     | 2026-07-16 | **Major update**: Added Fitness Domain Types (§4): TrainingPlan, TrainingDay, TrainingSession, PlannedExercise, WorkoutLog, ExerciseLog, SetLog. Added Health Profile Types (§5): HealthProfile, OnboardingState. Added Fitness ER diagram (§6.2). Updated SQLite schema to version 3 (27 tables). Re-numbered sections. |
-| 2.1     | 2026-07-20 | Schema v5→v6: `workout_sets.exercise_id` nullable with `ON DELETE SET NULL`. `WorkoutSet.exerciseId` type changed to `string                                                                                                                                                                                             | null`. Added `dbWriteQueue`helper for serialized fire-and-forget writes. Multi-write actions use`db.transaction()` for atomicity. |
-| 2.2     | 2026-07-21 | **CEO Audit sync**: Updated schema section header (22+ tables). Documented persistence write-back gap cho 4 stores. Added `safeJsonParse` defensive parsing note cho JSON columns. Updated dual DB implementation reference (WebDatabaseService + NativeDatabaseService).                                                |
+| Version | Date       | Changes                                                                                                                                                                                                                                                                                                                                  |
+| ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-02-20 | Initial data model — localStorage types                                                                                                                                                                                                                                                                                                  |
+| 1.1     | 2026-03-08 | Added MealTemplate, FilterConfig, AI Response Types                                                                                                                                                                                                                                                                                      |
+| 1.2     | 2026-03-28 | Added SQLite database schema (19 tables). 3 new fitness module tables: `fitness_profiles`, `fitness_preferences`, `workout_drafts`. Documented all table columns, constraints, indexes, and FK relationships from `src/services/schema.ts`                                                                                               |
+| 2.0     | 2026-07-16 | **Major update**: Added Fitness Domain Types (§4): TrainingPlan, TrainingDay, TrainingSession, PlannedExercise, WorkoutLog, ExerciseLog, SetLog. Added Health Profile Types (§5): HealthProfile, OnboardingState. Added Fitness ER diagram (§6.2). Updated SQLite schema to version 3 (27 tables). Re-numbered sections.                 |
+| 2.1     | 2026-07-20 | Schema v5→v6: `workout_sets.exercise_id` nullable with `ON DELETE SET NULL`. `WorkoutSet.exerciseId` type changed to `string                                                                                                                                                                                                             | null`. Added `dbWriteQueue`helper for serialized fire-and-forget writes. Multi-write actions use`db.transaction()` for atomicity. |
+| 2.2     | 2026-07-21 | **CEO Audit sync**: Updated schema section header (22+ tables). Documented persistence write-back gap cho 4 stores. Added `safeJsonParse` defensive parsing note cho JSON columns. Updated dual DB implementation reference (WebDatabaseService + NativeDatabaseService).                                                                |
+| 2.3     | 2026-07-22 | **BM Business Logic Audit sync**: Added §10.0 Store-to-Table Mapping (9 stores → tables). Resolved persistence gap note — all 6 data stores now persist to SQLite (BM-BUG-01). Corrected table count: 22 permanent tables. Updated cross-references to SAD.md §2.4 (renamed from "Persistence Gap" to "Store Persistence Architecture"). |

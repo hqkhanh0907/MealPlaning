@@ -1,8 +1,9 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 12.0  
+**Version:** 13.0  
 **Date:** 2026-07-21  
 **Author:** Dev Team  
+**Changelog v13.0:** BM Business Logic Audit — 12 findings (1 HIGH, 1 MEDIUM, 2 LOW, 5 warnings, 3 info). Fixed BM-BUG-01 (store persistence) and BM-BUG-02 (negative target). Added 28 persistence tests. 184 test files, 4661 tests. Test report: `reports/BM-business-logic-audit.md`
 **Changelog v12.0:** CEO-level audit: 6 issues fixed (2 P0, 2 P1, 2 P2). GoalPhaseSelector form.trigger() + saveRef useEffect deps. safeJsonParse cho dayPlanStore/dishStore/mealTemplateStore. UnitSelector i18n. fitnessStore structured logging. 184 test files, 4633 tests. Test report: `test-report-ceo-audit.md`
 **Changelog v11.0:** Wave 2 fixes: FIX-07 (dbWriteQueue helper), FIX-10 (FK SET NULL migration v5→v6), FIX-13 (fire-and-forget patterns → persistToDb/transaction). Updated schema version 6, 28 tables. Added test report: `test-report-wave2.md`
 **Changelog v10.0:** Thêm Unified Onboarding, Plan Editing UX, Multi-Session System, coverage 100% target, Chrome DevTools manual testing protocol, SonarQube quality gates, Navigation audit: fixed Settings/Grocery tab references (not tabs), added TC_ENERGY/TC_HEALTH
@@ -467,9 +468,48 @@ CEO audit phát hiện 3 stores dùng `JSON.parse` trực tiếp trên dữ li�
 | Metric         | Trước audit | Sau audit | Delta |
 | -------------- | ----------- | --------- | ----- |
 | Test files     | 184         | 184       | 0     |
-| Total tests    | 4633        | 4633      | 0     |
+| Total tests    | 4633        | 4661      | +28   |
 | Pass rate      | 100%        | 100%      | —     |
 | Lint errors    | 0           | 0         | 0     |
 | P0 bugs open   | 2           | 0         | -2    |
 | P1 bugs open   | 2           | 0         | -2    |
 | Schema version | 6           | 6         | 0     |
+
+---
+
+## 11. BM Business Logic Audit — Store Persistence & Negative Target (v13.0)
+
+**Date:** 2026-07-21  
+**Audit report:** [BM-business-logic-audit.md](reports/BM-business-logic-audit.md)  
+**Commit:** c45b4af
+
+### 11.1 Findings Summary
+
+12 findings total: 1 HIGH, 1 MEDIUM, 2 LOW, 5 warnings, 3 info.
+
+### 11.2 BM-BUG-01 — Store Persistence (HIGH)
+
+4 Zustand stores had actions that mutated state without persisting to SQLite:
+
+| Store             | Actions missing persistence | Fix                         |
+| ----------------- | --------------------------- | --------------------------- |
+| ingredientStore   | update/delete actions       | Added `persistToDb()` calls |
+| dayPlanStore      | plan mutations              | Added `persistToDb()` calls |
+| mealTemplateStore | template CRUD               | Added `persistToDb()` calls |
+| userProfileStore  | profile updates             | Added `persistToDb()` calls |
+
+**Rule:** Every Zustand store action that mutates state MUST also persist to SQLite. Pattern: `persistToDb(db, sql, params, context)` for atomic ops, `db.transaction()` for batch ops.
+
+### 11.3 BM-BUG-02 — Negative Target Calories (MEDIUM)
+
+When aggressive cut goal with low TDEE, `targetCalories` could become negative. Added `Math.max(0, ...)` guard in nutrition engine.
+
+### 11.4 Test Coverage Added
+
+28 new persistence tests verify that ALL store actions correctly write to SQLite:
+
+| Test area                    | Tests added |
+| ---------------------------- | ----------- |
+| Store persistence (4 stores) | 28          |
+
+**Current totals:** 184 test files, **4661 tests**, 100% pass rate.

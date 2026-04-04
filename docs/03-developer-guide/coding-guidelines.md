@@ -527,6 +527,33 @@ try {
 - Multi-write actions PHẢI dùng `db.transaction()` để đảm bảo all-or-nothing
 - `transaction()` callback KHÔNG nhận tham số — dùng `db` reference trực tiếp bên trong
 
+### Store Persistence Rule
+
+> **Quy tắc bắt buộc** — xác nhận từ BM Business Logic Audit (2026-07-21)
+
+Every Zustand store action that mutates state MUST also persist the change to SQLite:
+
+- **Atomic operations:** Use `persistToDb(db, sql, params, context)` from `@/store/helpers/dbWriteQueue`
+- **Batch operations:** Use `db.transaction()` for full reconcile (DELETE stale + UPSERT current)
+- **Pattern:** Set `_db = db` at the START of `loadAll()`, BEFORE early return
+- **New stores** MUST follow the same pattern as existing stores (see fitnessStore, dishStore)
+
+```typescript
+// ✅ ĐÚNG — mọi action đều persist
+addItem: (item) => {
+  set(state => ({ items: [...state.items, item] }));
+  persistToDb(_db, 'INSERT INTO items ...', [item.id, item.name], 'addItem');
+},
+
+// ❌ SAI — chỉ update Zustand, quên persist
+addItem: (item) => {
+  set(state => ({ items: [...state.items, item] }));
+  // BM-BUG-01: Missing SQLite write!
+},
+```
+
+**Audit check:** `grep` all store actions, compare with `persistToDb`/`db.execute`/`db.transaction` calls. Any mismatch = potential data loss bug.
+
 ### i18n Assertions trong Tests
 
 > **Quy tắc bắt buộc** — xác nhận từ QA Stabilization (2026-03-28)

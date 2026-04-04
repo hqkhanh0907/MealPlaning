@@ -18,7 +18,7 @@ Code changes
      │ ✅ 0 errors (react-refresh warnings acceptable)
      ▼
 [3] Run unit tests (npm test)
-     │ ✅ 3954/3954 (165 files)
+     │ ✅ 4661/4661 (184 files)
      ▼
 [4] Run coverage check (npm run test:coverage)
      │ ✅ ≥98% Stmts
@@ -62,7 +62,7 @@ Trước mỗi release, kiểm tra tất cả items:
 ```
 □ npx tsc --noEmit      → 0 errors (TypeScript type-check)
 □ npx eslint src/       → 0 errors (warnings from react-refresh are pre-existing and acceptable)
-□ npm test              → 100% pass, 0 failures (currently 3954 tests, 165 files)
+□ npm test              → 100% pass, 0 failures (currently 4661 tests, 184 files)
 □ npm run test:coverage → statement coverage ≥98%
 □ npm run sonar        → 0 Bugs, 0 Vulnerabilities (SonarQube mandatory)
 □ No eslint-disable     → grep -r "eslint-disable" src/ phải trả về 0 kết quả
@@ -93,11 +93,12 @@ Các quality gates sau **bắt buộc** pass trước khi merge hoặc release:
 | --- | ------------- | ---------------------------------------- | ------------------------------------------------ |
 | 1   | TypeScript    | `npx tsc --noEmit`                       | 0 errors                                         |
 | 2   | ESLint        | `npx eslint src/`                        | 0 errors (react-refresh warnings acceptable)     |
-| 3   | Unit Tests    | `npm test`                               | All 3954 tests pass (165 files)                  |
+| 3   | Unit Tests    | `npm test`                               | All 4661 tests pass (184 files)                  |
 | 4   | Coverage      | `npm run test:coverage`                  | Statement coverage ≥98%                          |
 | 5   | **SonarQube** | `npm run test:coverage && npm run sonar` | **0 Bugs, 0 Vulnerabilities, 0 Code Smells mới** |
 | 6   | DevTools      | Chrome DevTools Console                  | 0 errors, 0 warnings                             |
 | 7   | Mobile        | Manual test 393×851 viewport             | Critical flows pass                              |
+| 8   | Store Persist | Verify all store actions persist SQLite  | Every state mutation has matching DB write       |
 
 ### ⛔ Chính sách No eslint-disable
 

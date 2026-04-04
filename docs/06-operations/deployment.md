@@ -11,9 +11,9 @@ App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor 8 + React)
 
 > **Lưu ý:** Không cần backend server để chạy ứng dụng. Tất cả dữ liệu được lưu trữ local trên thiết bị. Chỉ cần kết nối internet cho AI features (Gemini API) và Cloud Sync (Google Drive).
 
-| Môi trường | Mô tả |
-|-----------|-------|
-| **Debug** | APK debug, dùng cho dev/testing |
+| Môi trường  | Mô tả                                                       |
+| ----------- | ----------------------------------------------------------- |
+| **Debug**   | APK debug, dùng cho dev/testing                             |
 | **Release** | APK signed, dùng cho production (Google Play hoặc sideload) |
 
 ---
@@ -39,6 +39,7 @@ cd android && ./gradlew assembleDebug   # Build APK
 ```
 
 **Output:**
+
 ```
 android/app/build/outputs/apk/debug/app-debug.apk
 Size: ~147 MB (bao gồm WebView assets)
@@ -102,6 +103,7 @@ bash upload-apk-drive.sh
 Script tự động upload APK từ `android/app/build/outputs/apk/debug/app-debug.apk` lên Google Drive folder đã cấu hình. File config: `metadata.json`.
 
 #### Setup Google Drive upload
+
 1. Tạo service account trong Google Cloud Console
 2. Share folder Drive với email service account
 3. Đặt credentials file path trong script
@@ -110,11 +112,11 @@ Script tự động upload APK từ `android/app/build/outputs/apk/debug/app-deb
 
 ## 5. Yêu cầu thiết bị
 
-| Yêu cầu | Giá trị tối thiểu |
-|---------|------------------|
-| Android | 7.0+ (API 24, minSdkVersion) |
-| RAM | 2 GB |
-| Storage | 500 MB trống |
+| Yêu cầu  | Giá trị tối thiểu                    |
+| -------- | ------------------------------------ |
+| Android  | 7.0+ (API 24, minSdkVersion)         |
+| RAM      | 2 GB                                 |
+| Storage  | 500 MB trống                         |
 | Internet | Cần để dùng AI features (Gemini API) |
 
 ---
@@ -129,19 +131,20 @@ File: `capacitor.config.ts`
 const config: CapacitorConfig = {
   appId: 'com.mealplaner.app',
   appName: 'Smart Meal Planner',
-  webDir: 'dist',                    // Output của npm run build
+  webDir: 'dist', // Output của npm run build
   android: {
     buildOptions: {
-      keystorePath: undefined,        // Debug keystore
+      keystorePath: undefined, // Debug keystore
       keystoreAlias: undefined,
-    }
-  }
+    },
+  },
   // server.url: KHÔNG set trong production — app load từ local assets
   // Chỉ enable server.url cho dev mode khi cần hot-reload
 };
 ```
 
 **Lưu ý production:**
+
 - `webDir: 'dist'` — Capacitor copy nội dung `dist/` vào Android assets khi `cap sync`
 - Server localhost bị disable trong production — app load trực tiếp từ bundled assets
 - Không cần chạy dev server khi dùng APK
@@ -152,13 +155,13 @@ const config: CapacitorConfig = {
 
 App yêu cầu các permissions sau (khai báo trong `AndroidManifest.xml`):
 
-| Permission | Lý do |
-|-----------|-------|
-| `INTERNET` | Gọi Gemini API |
-| `READ_EXTERNAL_STORAGE` | Import file backup |
-| `WRITE_EXTERNAL_STORAGE` | Export file backup |
-| `CAMERA` | Chụp ảnh món ăn cho AI |
-| `READ_MEDIA_IMAGES` | Chọn ảnh từ Gallery |
+| Permission               | Lý do                  |
+| ------------------------ | ---------------------- |
+| `INTERNET`               | Gọi Gemini API         |
+| `READ_EXTERNAL_STORAGE`  | Import file backup     |
+| `WRITE_EXTERNAL_STORAGE` | Export file backup     |
+| `CAMERA`                 | Chụp ảnh món ăn cho AI |
+| `READ_MEDIA_IMAGES`      | Chọn ảnh từ Gallery    |
 
 ---
 
@@ -197,7 +200,53 @@ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 
 ### Giữ nguyên dữ liệu user
 
-`adb install -r` (replace) giữ nguyên data của app. Dữ liệu trong localStorage/WebView không bị xóa.
+`adb install -r` (replace) giữ nguyên data của app. Dữ liệu trong localStorage/WebView và SQLite database không bị xóa.
+
+### Checklist xác nhận sau deploy
+
+1. Cài APK lên thiết bị/emulator
+2. Mở app → tạo dữ liệu test (thêm ingredient, tạo dish, lên meal plan)
+3. Force-stop app: `adb shell am force-stop com.mealplaner.app`
+4. Mở lại app: `adb shell am start -n com.mealplaner.app/.MainActivity`
+5. **Xác nhận dữ liệu vẫn còn** — ingredients, dishes, meal plans phải persist qua restart
+6. Nếu dữ liệu mất → kiểm tra NativeDatabaseService initialization logs
+
+---
+
+## 9.5 Data Persistence Architecture
+
+### Tổng quan
+
+SQLite database được persist qua **Capacitor SQLite plugin** (`@capacitor-community/sqlite`) trên Android. Trên web/dev environment, dùng **sql.js (WASM)** — dữ liệu chỉ tồn tại trong bộ nhớ (in-memory).
+
+### Chi tiết
+
+| Thông số       | Giá trị                                                                      |
+| -------------- | ---------------------------------------------------------------------------- |
+| Schema version | 6                                                                            |
+| Số bảng        | 23                                                                           |
+| Migration      | Tự động khi startup (xem `src/services/schema.ts`)                           |
+| Web/Dev        | `WebDatabaseService` (sql.js WASM) — in-memory, mất khi reload               |
+| Android        | `NativeDatabaseService` (@capacitor-community/sqlite) — persistent trên disk |
+
+### Store persistence matrix
+
+| Store                | Persistence     | Ghi chú                                   |
+| -------------------- | --------------- | ----------------------------------------- |
+| `ingredientStore`    | ✅ SQLite       | Nguyên liệu + nutrition per 100g          |
+| `dishStore`          | ✅ SQLite       | Recipes với ingredient lists              |
+| `dayPlanStore`       | ✅ SQLite       | Daily meal plans (breakfast/lunch/dinner) |
+| `mealTemplateStore`  | ✅ SQLite       | Meal templates                            |
+| `fitnessStore`       | ✅ SQLite       | Workouts, training plans, weight logs     |
+| `navigationStore`    | ❌ Memory only  | Tab/page stack, scroll positions          |
+| `uiStore`            | ❌ Memory only  | Modal visibility, selected date           |
+| `appOnboardingStore` | ❌ localStorage | First-run state (Zustand persist)         |
+
+### Backup & Sync
+
+Google Drive backup hoạt động bằng cách export SQLite database sang JSON format, upload lên `appDataFolder` scope. Import thực hiện quy trình ngược lại.
+
+> **BM-BUG-01 (đã fix):** 4 stores (ingredientStore, dishStore, dayPlanStore, mealTemplateStore) trước đây thiếu SQLite persistence — chỉ lưu trong Zustand memory. Đã fix bằng cách thêm `useAutoSync` hooks cho tất cả data stores.
 
 ---
 
@@ -253,19 +302,24 @@ bash build-apk.sh
 ### Gradle Build Errors
 
 #### Error: "SDK not found"
+
 ```bash
 echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 ```
 
 #### Error: "Minimum SDK version"
+
 Kiểm tra `android/app/build.gradle`:
+
 ```
 minSdkVersion 24
 targetSdkVersion 36
 ```
 
 #### Error: "Java version mismatch"
+
 Đảm bảo JDK 17:
+
 ```bash
 java -version
 # openjdk version "17.x.x"
@@ -309,17 +363,20 @@ adb shell pm clear com.mealplaner.app
 Để sử dụng tính năng Cloud Sync, cần cấu hình Google OAuth2:
 
 ### Yêu cầu
+
 - Google Cloud Console project
 - OAuth 2.0 Client ID (Web application type)
 - Authorized JavaScript origins: `http://localhost:3000` (dev), production domain
 - Google Drive API enabled trong project
 
 ### Biến môi trường
-| Biến | Mô tả | Ví dụ |
-|------|--------|-------|
+
+| Biến                    | Mô tả            | Ví dụ                            |
+| ----------------------- | ---------------- | -------------------------------- |
 | `VITE_GOOGLE_CLIENT_ID` | OAuth2 Client ID | `xxx.apps.googleusercontent.com` |
 
 ### Lưu ý
+
 - App sử dụng `appDataFolder` scope — chỉ truy cập folder ẩn riêng của app trên Google Drive
 - Không cần Drive full access — chỉ cần scope `https://www.googleapis.com/auth/drive.appdata`
 - Token được lưu trong localStorage key `mp-auth-state`
@@ -346,22 +403,22 @@ jobs:
   build-and-test:
     steps:
       - npm install
-      - npx tsc --noEmit          # TypeScript check
-      - npx eslint src/           # Lint check
-      - npm test                  # Unit tests (3954 tests)
-      - npm run test:coverage     # Coverage check (≥98%)
-      - npm run build             # Production build
+      - npx tsc --noEmit # TypeScript check
+      - npx eslint src/ # Lint check
+      - npm test # Unit tests (3954 tests)
+      - npm run test:coverage # Coverage check (≥98%)
+      - npm run build # Production build
 ```
 
 ### Quality Gates trong CI
 
-| Step | Lệnh | Pass criteria |
-|------|-------|---------------|
-| TypeScript | `npx tsc --noEmit` | 0 errors |
-| ESLint | `npx eslint src/` | 0 errors |
-| Unit Tests | `npm test` | All 3954 tests pass |
-| Coverage | `npm run test:coverage` | ≥98% statements |
-| Build | `npm run build` | Exit code 0 |
+| Step       | Lệnh                    | Pass criteria       |
+| ---------- | ----------------------- | ------------------- |
+| TypeScript | `npx tsc --noEmit`      | 0 errors            |
+| ESLint     | `npx eslint src/`       | 0 errors            |
+| Unit Tests | `npm test`              | All 3954 tests pass |
+| Coverage   | `npm run test:coverage` | ≥98% statements     |
+| Build      | `npm run build`         | Exit code 0         |
 
 ### SonarQube trong CI
 
