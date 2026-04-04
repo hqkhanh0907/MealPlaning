@@ -47,6 +47,7 @@ function DashboardTabInner(): React.ReactElement {
   const { targetCalories, targetProtein } = useNutritionTargets();
   const { eaten, protein } = useTodayNutrition();
   const todayCaloriesOut = useTodayCaloriesOut();
+  const hasNutritionTargets = targetCalories > 0 && targetProtein > 0;
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -97,13 +98,25 @@ function DashboardTabInner(): React.ReactElement {
           data-testid="dashboard-tier-2"
           style={staggerStyle(STAGGER_DELAYS.tier2)}
         >
-          <EnergyBalanceMini
-            eaten={eaten}
-            burned={todayCaloriesOut}
-            target={targetCalories}
-            onTapDetail={handleOpenEnergyDetail}
-          />
-          <ProteinProgress current={protein} target={targetProtein} />
+          {hasNutritionTargets ? (
+            <>
+              <EnergyBalanceMini
+                eaten={eaten}
+                burned={todayCaloriesOut}
+                target={targetCalories}
+                onTapDetail={handleOpenEnergyDetail}
+              />
+              <ProteinProgress current={protein} target={targetProtein} />
+            </>
+          ) : (
+            <div
+              data-testid="setup-nutrition-prompt"
+              className="bg-card border-border-subtle rounded-2xl border p-4 text-center shadow-sm"
+            >
+              <p className="text-foreground text-sm font-medium">{t('dashboard.setupNutrition.title')}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{t('dashboard.setupNutrition.description')}</p>
+            </div>
+          )}
         </div>
       </ErrorBoundary>
 

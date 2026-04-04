@@ -1141,6 +1141,11 @@
       "insight": "Không thể tải phân tích",
       "quickActions": "Không thể tải thao tác nhanh"
     },
+    "setupNutrition": {
+      "title": "Thiết lập mục tiêu dinh dưỡng",
+      "description": "Cập nhật hồ sơ sức khỏe để xem mục tiêu calo và protein hàng ngày.",
+      "cta": "Cài đặt hồ sơ"
+    },
     "todaysPlan": {
       "title": "Kế hoạch hôm nay",
       "noPlan": "Chưa có kế hoạch tập luyện",
