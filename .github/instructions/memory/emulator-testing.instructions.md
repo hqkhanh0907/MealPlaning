@@ -572,6 +572,90 @@ Ví dụ SC-01: TDEE=2633, Target=2083 (cut -550)
 
 ---
 
+## 18. ⚠️ BẪY QUAN TRỌNG — AGE CALCULATION & TEST EXPECTATIONS
+
+### Vấn đề
+
+Khi viết test expected values, PHẢI tính age chính xác dựa trên ngày test hiện tại:
+
+- DOB=1996-05-15, test date=2026-04-04 → age=**29** (NOT 30 — birthday chưa tới)
+- Sai age 1 năm → BMR sai 5 kcal → TDEE sai ~8 kcal → tất cả assertions fail
+
+### Quy tắc
+
+```python
+from datetime import date
+dob = date(1996, 5, 15)
+today = date.today()
+age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+```
+
+### Ví dụ
+
+| DOB        | Test Date  | Age | BMR (Male, 75kg, 175cm) |
+| ---------- | ---------- | --- | ----------------------- |
+| 1996-05-15 | 2026-04-04 | 29  | 1704                    |
+| 1996-05-15 | 2026-05-15 | 30  | 1699                    |
+| 1996-05-15 | 2026-12-31 | 30  | 1699                    |
+
+---
+
+## 19. ⚠️ KIẾN TRÚC — SQL.JS IN-MEMORY (KHÔNG CÓ LOCAL PERSISTENCE)
+
+### Phát hiện quan trọng
+
+App dùng `sql.js` WASM tạo SQLite database **trong bộ nhớ** (`new SQL.Database()`).
+KHÔNG có persistence xuống filesystem.
+
+### Hệ quả
+
+- `pm clear` hoặc `force-stop` + restart → **MẤT TOÀN BỘ data** (health profile, meals, custom ingredients)
+- Seed data (10 ingredients, 5 dishes) được **tạo lại** mỗi lần khởi động qua `createSchema()`
+- `localStorage` (Zustand persist) vẫn còn: `appOnboardingStore`, `fitnessStore`
+- Chỉ Google Drive sync mới backup data thực sự
+
+### Ảnh hưởng đến test
+
+- **PHẢI test tất cả trong 1 session** — không restart giữa chừng
+- J-06 (persistence test) = **known limitation**, KHÔNG phải bug
+- Sau restart: onboarding skipped (localStorage) nhưng health profile = empty (SQLite lost)
+
+---
+
+## 20. Health Profile Form — Settings Page
+
+### Input testids (KHÁC với onboarding form!)
+
+| Field         | testid                      | Type  | Note                        |
+| ------------- | --------------------------- | ----- | --------------------------- |
+| Tên           | hp-name                     | text  |                             |
+| Gender        | name="gender" (radio)       | radio | No testid                   |
+| Ngày sinh     | hp-dob                      | date  |                             |
+| Chiều cao     | hp-height                   | text  | ⚠️ type="text" NOT "number" |
+| Cân nặng      | hp-weight                   | text  | ⚠️ type="text" NOT "number" |
+| Tỉ lệ mỡ      | hp-bodyfat                  | text  | Optional                    |
+| BMR override  | name="bmr-override" (radio) | radio | 2 radios                    |
+| Protein ratio | hp-protein                  | text  | g/kg                        |
+
+### QUAN TRỌNG: type="text" cho số
+
+Form dùng `type="text"` cho height/weight (NOT `type="number"`).
+Script tìm `input[type="number"]` sẽ **KHÔNG TÌM THẤY**.
+Luôn dùng `data-testid` để tìm input:
+
+```javascript
+var el = document.querySelector('[data-testid="hp-weight"]');
+```
+
+### Edit flow
+
+1. Open Settings (header icon, last button)
+2. Click `settings-nav-health-profile`
+3. Click "Chỉnh sửa" (last visible button with that text)
+4. Modify fields using native setter pattern
+5. Click `settings-detail-save`
+6. Close: `btn-close-settings`
+
 ## 18. Edge Case: Macro Overflow
 
 Khi protein+fat calories > target (ví dụ aggressive cut cho người nhẹ cân):
