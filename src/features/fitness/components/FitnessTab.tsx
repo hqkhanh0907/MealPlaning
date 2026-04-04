@@ -48,14 +48,14 @@ const FitnessTabInner = () => {
     setActiveSubTab(id as FitnessSubTab);
   }, []);
 
-  const handleGeneratePlan = useCallback(() => {
+  const handleGeneratePlan = useCallback(async () => {
     if (!trainingProfile) return;
     const result = generatePlan({
       trainingProfile,
       healthProfile: { age: healthProfileAge ?? 30, weightKg: healthProfileWeight },
     });
     if (result) {
-      addTrainingPlan(result.plan);
+      await addTrainingPlan(result.plan);
       addPlanDays(result.days);
       setActivePlan(result.plan.id);
       notify.success(t('fitness.plan.planCreated'));
@@ -75,7 +75,7 @@ const FitnessTabInner = () => {
     t,
   ]);
 
-  const handleCreateManualPlan = useCallback(() => {
+  const handleCreateManualPlan = useCallback(async () => {
     const now = new Date();
     const planId = `manual-${now.getTime()}`;
     const startDate = now.toISOString();
@@ -95,7 +95,7 @@ const FitnessTabInner = () => {
       trainingDays: [] as number[],
       restDays: [1, 2, 3, 4, 5, 6, 7],
     };
-    addTrainingPlan(plan);
+    await addTrainingPlan(plan);
     setActivePlan(plan.id);
 
     const days = Array.from({ length: 7 }, (_, i) => ({

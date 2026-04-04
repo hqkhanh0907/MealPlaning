@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
 
 import { FitnessTab } from '../features/fitness/components/FitnessTab';
@@ -291,14 +291,16 @@ describe('FitnessTab', () => {
       expect(localAddTrainingPlan).not.toHaveBeenCalled();
     });
 
-    it('adds plan and days then shows success notification', () => {
+    it('adds plan and days then shows success notification', async () => {
       const mockPlan = { id: 'plan-1', name: 'Test Plan' };
       const mockDays = [{ id: 'day-1', planId: 'plan-1' }];
       mockGeneratePlan.mockReturnValue({ plan: mockPlan, days: mockDays });
       setupStore({ trainingProfile: { level: 'beginner', goal: 'strength' } });
 
       render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('generate-plan-btn'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('generate-plan-btn'));
+      });
 
       expect(mockGeneratePlan).toHaveBeenCalledWith({
         trainingProfile: { level: 'beginner', goal: 'strength' },
@@ -407,7 +409,7 @@ describe('FitnessTab', () => {
       vi.useRealTimers();
     });
 
-    it('creates a 7-day blank plan and opens PlanDayEditor on a weekday', () => {
+    it('creates a 7-day blank plan and opens PlanDayEditor on a weekday', async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2025, 0, 8, 12, 0, 0)); // Wednesday
       const now = new Date();
@@ -419,7 +421,9 @@ describe('FitnessTab', () => {
 
       setupStore();
       render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+      });
 
       expect(localAddTrainingPlan).toHaveBeenCalledWith({
         id: expectedPlanId,
@@ -464,13 +468,15 @@ describe('FitnessTab', () => {
       expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
     });
 
-    it('maps Sunday (getDay()=0) to dayOfWeek 7', () => {
+    it('maps Sunday (getDay()=0) to dayOfWeek 7', async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2025, 0, 5, 12, 0, 0)); // Sunday
 
       setupStore();
       render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+      });
 
       expect(mockPushPage).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -484,14 +490,16 @@ describe('FitnessTab', () => {
       expect(localAddPlanDays.mock.calls[0][0] as Array<{ dayOfWeek: number }>).toHaveLength(7);
     });
 
-    it('skips pushPage when todayDay is not found', () => {
+    it('skips pushPage when todayDay is not found', async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2025, 0, 8, 12, 0, 0));
       const spy = vi.spyOn(Date.prototype, 'getDay').mockReturnValue(8);
 
       setupStore();
       render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+      });
 
       expect(localAddTrainingPlan).toHaveBeenCalled();
       expect(localAddPlanDays).toHaveBeenCalled();
@@ -638,14 +646,16 @@ describe('FitnessTab', () => {
       expect(screen.queryByTestId('profile-out-of-sync-banner')).not.toBeInTheDocument();
     });
 
-    it('clicking "Tạo lại" calls generatePlan and addTrainingPlan', () => {
+    it('clicking "Tạo lại" calls generatePlan and addTrainingPlan', async () => {
       const mockPlan = { id: 'regen-1', name: 'Regenerated' };
       const mockDays = [{ id: 'rd-1', planId: 'regen-1' }];
       mockGeneratePlan.mockReturnValue({ plan: mockPlan, days: mockDays });
       setupStore({ profileOutOfSync: true });
 
       render(<FitnessTab />);
-      fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+      });
 
       expect(mockGeneratePlan).toHaveBeenCalledWith({
         trainingProfile: { level: 'beginner', goal: 'strength' },

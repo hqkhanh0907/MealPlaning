@@ -91,9 +91,9 @@ export interface FitnessState {
   setPlanStrategy: (strategy: 'auto' | 'manual' | null) => void;
   clearTrainingPlans: () => void;
   setTrainingProfile: (profile: TrainingProfile) => void;
-  addTrainingPlan: (plan: TrainingPlan) => void;
+  addTrainingPlan: (plan: TrainingPlan) => Promise<void>;
   updateTrainingPlan: (id: string, updates: Partial<TrainingPlan>) => void;
-  setActivePlan: (planId: string) => void;
+  setActivePlan: (planId: string) => Promise<void>;
   addPlanDays: (days: TrainingPlanDay[]) => void;
   getPlanDays: (planId: string) => TrainingPlanDay[];
   updatePlanDayExercises: (dayId: string, exercises: SelectedExercise[]) => void;
@@ -105,11 +105,11 @@ export interface FitnessState {
   deleteWorkout: (id: string) => Promise<void>;
   addWorkoutSet: (workoutSet: WorkoutSet) => void;
   saveWorkoutAtomic: (workout: Workout, sets: WorkoutSet[]) => Promise<void>;
-  updateWorkoutSet: (id: string, updates: Partial<WorkoutSet>) => void;
+  updateWorkoutSet: (id: string, updates: Partial<WorkoutSet>) => Promise<void>;
   removeWorkoutSet: (id: string) => void;
   getWorkoutSets: (workoutId: string) => WorkoutSet[];
   addWeightEntry: (entry: WeightEntry) => void;
-  updateWeightEntry: (id: string, updates: Partial<WeightEntry>) => void;
+  updateWeightEntry: (id: string, updates: Partial<WeightEntry>) => Promise<void>;
   removeWeightEntry: (id: string) => void;
   setOnboarded: (value: boolean) => void;
   setWorkoutMode: (mode: 'strength' | 'cardio') => void;
@@ -181,26 +181,100 @@ export const useFitnessStore = create<FitnessState>()(
           };
         }),
 
-      addTrainingPlan: plan =>
+      addTrainingPlan: async plan => {
+        const prevPlans = get().trainingPlans;
         set(state => ({
           trainingPlans: [...state.trainingPlans, plan],
           profileOutOfSync: false,
           profileChangedFields: [],
-        })),
+        }));
+        if (_db) {
+          try {
+            await _db.execute(
+              `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, current_week, start_date, end_date, template_id, training_days, rest_days, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                plan.id,
+                plan.name,
+                plan.status,
+                plan.splitType,
+                plan.durationWeeks,
+                plan.currentWeek ?? null,
+                plan.startDate,
+                plan.endDate ?? null,
+                plan.templateId ?? null,
+                JSON.stringify(plan.trainingDays),
+                JSON.stringify(plan.restDays),
+                plan.createdAt,
+                plan.updatedAt,
+              ],
+            );
+          } catch (error: unknown) {
+            set({ trainingPlans: prevPlans, profileOutOfSync: false, profileChangedFields: [] });
+            logger.error({ component: 'fitnessStore', action: 'addTrainingPlan.persist' }, error);
+          }
+        }
+      },
 
-      updateTrainingPlan: (id, updates) =>
+      updateTrainingPlan: (id, updates) => {
         set(state => ({
           trainingPlans: state.trainingPlans.map(p => (p.id === id ? { ...p, ...updates } : p)),
-        })),
+        }));
+        if (_db) {
+          const p = get().trainingPlans.find(pl => pl.id === id);
+          if (p) {
+            _db
+              .execute(
+                `UPDATE training_plans SET name = ?, status = ?, split_type = ?, duration_weeks = ?,
+                 current_week = ?, start_date = ?, end_date = ?, template_id = ?,
+                 training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?`,
+                [
+                  p.name,
+                  p.status,
+                  p.splitType,
+                  p.durationWeeks,
+                  p.currentWeek ?? null,
+                  p.startDate,
+                  p.endDate ?? null,
+                  p.templateId ?? null,
+                  JSON.stringify(p.trainingDays),
+                  JSON.stringify(p.restDays),
+                  p.updatedAt,
+                  id,
+                ],
+              )
+              .catch((error: unknown) => {
+                logger.error({ component: 'fitnessStore', action: 'updateTrainingPlan.persist' }, error);
+              });
+          }
+        }
+      },
 
-      setActivePlan: planId =>
+      setActivePlan: async planId => {
+        const prevPlans = get().trainingPlans;
+        const targetExists = prevPlans.some(p => p.id === planId);
+        if (!targetExists) return;
         set(state => ({
           trainingPlans: state.trainingPlans.map(p => {
             if (p.id === planId) return { ...p, status: 'active' as const };
             if (p.status === 'active') return { ...p, status: 'paused' as const };
             return p;
           }),
-        })),
+        }));
+        if (_db) {
+          try {
+            await _db.transaction(async () => {
+              await _db!.execute("UPDATE training_plans SET status = 'paused' WHERE status = 'active' AND id <> ?", [
+                planId,
+              ]);
+              await _db!.execute("UPDATE training_plans SET status = 'active' WHERE id = ?", [planId]);
+            });
+          } catch (error: unknown) {
+            logger.error({ component: 'fitnessStore', action: 'setActivePlan.persist' }, error);
+            set({ trainingPlans: prevPlans });
+          }
+        }
+      },
 
       addPlanDays: days => {
         set(state => ({
@@ -354,10 +428,24 @@ export const useFitnessStore = create<FitnessState>()(
         }
       },
 
-      updateWorkout: (id, updates) =>
+      updateWorkout: (id, updates) => {
         set(state => ({
           workouts: state.workouts.map(w => (w.id === id ? { ...w, ...updates } : w)),
-        })),
+        }));
+        if (_db) {
+          const w = get().workouts.find(wo => wo.id === id);
+          if (w) {
+            _db
+              .execute(
+                'UPDATE workouts SET date = ?, name = ?, plan_day_id = ?, duration_min = ?, notes = ?, updated_at = ? WHERE id = ?',
+                [w.date, w.name, w.planDayId ?? null, w.durationMin ?? null, w.notes ?? null, w.updatedAt, id],
+              )
+              .catch((error: unknown) => {
+                logger.error({ component: 'fitnessStore', action: 'updateWorkout.persist' }, error);
+              });
+          }
+        }
+      },
 
       deleteWorkout: async id => {
         set(state => ({
@@ -491,32 +579,109 @@ export const useFitnessStore = create<FitnessState>()(
         }));
       },
 
-      updateWorkoutSet: (id, updates) =>
+      updateWorkoutSet: async (id, updates) => {
+        const prev = get().workoutSets.find(s => s.id === id);
         set(state => ({
           workoutSets: state.workoutSets.map(s => (s.id === id ? { ...s, ...updates } : s)),
-        })),
+        }));
+        if (_db) {
+          try {
+            const s = get().workoutSets.find(ws => ws.id === id);
+            if (s) {
+              await _db.execute(
+                `UPDATE workout_sets SET reps = ?, weight_kg = ?, rpe = ?, rest_seconds = ?,
+                 duration_min = ?, distance_km = ?, avg_heart_rate = ?, intensity = ?,
+                 estimated_calories = ?, updated_at = ? WHERE id = ?`,
+                [
+                  s.reps ?? null,
+                  s.weightKg,
+                  s.rpe ?? null,
+                  s.restSeconds ?? null,
+                  s.durationMin ?? null,
+                  s.distanceKm ?? null,
+                  s.avgHeartRate ?? null,
+                  s.intensity ?? null,
+                  s.estimatedCalories ?? null,
+                  s.updatedAt,
+                  id,
+                ],
+              );
+            }
+          } catch (error: unknown) {
+            logger.error({ component: 'fitnessStore', action: 'updateWorkoutSet.persist' }, error);
+            if (prev) {
+              set(state => ({
+                workoutSets: state.workoutSets.map(s => (s.id === id ? prev : s)),
+              }));
+            }
+          }
+        }
+      },
 
-      removeWorkoutSet: id =>
+      removeWorkoutSet: id => {
         set(state => ({
           workoutSets: state.workoutSets.filter(s => s.id !== id),
-        })),
+        }));
+        if (_db) {
+          _db.execute('DELETE FROM workout_sets WHERE id = ?', [id]).catch((error: unknown) => {
+            logger.error({ component: 'fitnessStore', action: 'removeWorkoutSet.persist' }, error);
+          });
+        }
+      },
 
       getWorkoutSets: workoutId => get().workoutSets.filter(s => s.workoutId === workoutId),
 
-      addWeightEntry: entry =>
+      addWeightEntry: entry => {
         set(state => ({
           weightEntries: [...state.weightEntries, entry],
-        })),
+        }));
+        if (_db) {
+          _db
+            .execute(
+              'INSERT INTO weight_log (id, date, weight_kg, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+              [entry.id, entry.date, entry.weightKg, entry.notes ?? null, entry.createdAt, entry.updatedAt],
+            )
+            .catch((error: unknown) => {
+              logger.error({ component: 'fitnessStore', action: 'addWeightEntry.persist' }, error);
+            });
+        }
+      },
 
-      updateWeightEntry: (id, updates) =>
+      updateWeightEntry: async (id, updates) => {
+        const prev = get().weightEntries.find(e => e.id === id);
         set(state => ({
           weightEntries: state.weightEntries.map(e => (e.id === id ? { ...e, ...updates } : e)),
-        })),
+        }));
+        if (_db) {
+          try {
+            const e = get().weightEntries.find(we => we.id === id);
+            if (e) {
+              await _db.execute(
+                'UPDATE weight_log SET date = ?, weight_kg = ?, notes = ?, updated_at = ? WHERE id = ?',
+                [e.date, e.weightKg, e.notes ?? null, e.updatedAt, id],
+              );
+            }
+          } catch (error: unknown) {
+            logger.error({ component: 'fitnessStore', action: 'updateWeightEntry.persist' }, error);
+            if (prev) {
+              set(state => ({
+                weightEntries: state.weightEntries.map(e => (e.id === id ? prev : e)),
+              }));
+            }
+          }
+        }
+      },
 
-      removeWeightEntry: id =>
+      removeWeightEntry: id => {
         set(state => ({
           weightEntries: state.weightEntries.filter(e => e.id !== id),
-        })),
+        }));
+        if (_db) {
+          _db.execute('DELETE FROM weight_log WHERE id = ?', [id]).catch((error: unknown) => {
+            logger.error({ component: 'fitnessStore', action: 'removeWeightEntry.persist' }, error);
+          });
+        }
+      },
 
       setOnboarded: value => set({ isOnboarded: value }),
 
@@ -871,6 +1036,66 @@ export const useFitnessStore = create<FitnessState>()(
           }
 
           set({ sqliteReady: true });
+
+          // Load training plans from SQLite
+          try {
+            const plans = await db.query<Record<string, unknown>>(
+              'SELECT * FROM training_plans ORDER BY created_at DESC',
+            );
+            if (plans.length > 0) {
+              set({
+                trainingPlans: plans.map(p => ({
+                  id: p.id as string,
+                  name: p.name as string,
+                  status: (p.status as TrainingPlan['status']) ?? 'active',
+                  splitType: p.splitType as SplitType,
+                  durationWeeks: p.durationWeeks as number,
+                  currentWeek: (p.currentWeek as number | undefined) ?? 1,
+                  startDate: p.startDate as string,
+                  endDate: p.endDate as string | undefined,
+                  templateId: p.templateId as string | null | undefined,
+                  trainingDays: safeParseJsonArray<number>(p.trainingDays as string),
+                  restDays: safeParseJsonArray<number>(p.restDays as string),
+                  createdAt: p.createdAt as string,
+                  updatedAt: p.updatedAt as string,
+                })),
+              });
+            }
+          } catch (plansError) {
+            logger.warn(
+              { component: 'fitnessStore', action: 'initializeFromSQLite.trainingPlans' },
+              String(plansError),
+            );
+          }
+
+          // Load training plan days from SQLite
+          try {
+            const planDays = await db.query<Record<string, unknown>>(
+              'SELECT * FROM training_plan_days ORDER BY plan_id, session_order',
+            );
+            if (planDays.length > 0) {
+              set({
+                trainingPlanDays: planDays.map(d => ({
+                  id: d.id as string,
+                  planId: d.planId as string,
+                  dayOfWeek: d.dayOfWeek as number,
+                  sessionOrder: (d.sessionOrder as number) ?? 1,
+                  workoutType: d.workoutType as string,
+                  muscleGroups: d.muscleGroups as string | undefined,
+                  exercises: d.exercises as string | undefined,
+                  originalExercises: d.originalExercises as string | undefined,
+                  isUserAssigned: Boolean(d.isUserAssigned),
+                  originalDayOfWeek: (d.originalDayOfWeek as number) ?? (d.dayOfWeek as number),
+                  notes: d.notes as string | undefined,
+                })),
+              });
+            }
+          } catch (planDaysError) {
+            logger.warn(
+              { component: 'fitnessStore', action: 'initializeFromSQLite.trainingPlanDays' },
+              String(planDaysError),
+            );
+          }
 
           // Load user-created templates from SQLite
           try {
