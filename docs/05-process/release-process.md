@@ -1,7 +1,7 @@
 # Release Process — Smart Meal Planner
 
-**Version:** 4.2  
-**Date:** 2026-06-28
+**Version:** 4.3  
+**Date:** 2026-07-20
 
 ---
 
@@ -22,6 +22,9 @@ Code changes
      ▼
 [4] Run coverage check (npm run test:coverage)
      │ ✅ ≥98% Stmts
+     ▼
+[4.1] SonarQube scan (npm run sonar)
+     │ ✅ 0 Bugs, 0 Vulnerabilities
      ▼
 [5] Build web assets (npm run build)
      │ ✅ dist/ generated
@@ -61,6 +64,7 @@ Trước mỗi release, kiểm tra tất cả items:
 □ npx eslint src/       → 0 errors (warnings from react-refresh are pre-existing and acceptable)
 □ npm test              → 100% pass, 0 failures (currently 3954 tests, 165 files)
 □ npm run test:coverage → statement coverage ≥98%
+□ npm run sonar        → 0 Bugs, 0 Vulnerabilities (SonarQube mandatory)
 □ No eslint-disable     → grep -r "eslint-disable" src/ phải trả về 0 kết quả
 □ npm run build         → build thành công, không warnings
 □ npx cap sync android  → sync OK
@@ -85,14 +89,15 @@ Trước mỗi release, kiểm tra tất cả items:
 
 Các quality gates sau **bắt buộc** pass trước khi merge hoặc release:
 
-| # | Gate | Lệnh | Tiêu chí |
-|---|------|-------|----------|
-| 1 | TypeScript | `npx tsc --noEmit` | 0 errors |
-| 2 | ESLint | `npx eslint src/` | 0 errors (react-refresh warnings acceptable) |
-| 3 | Unit Tests | `npm test` | All 3954 tests pass (165 files) |
-| 4 | Coverage | `npm run test:coverage` | Statement coverage ≥98% |
-| 5 | DevTools | Chrome DevTools Console | 0 errors, 0 warnings |
-| 6 | Mobile | Manual test 393×851 viewport | Critical flows pass |
+| #   | Gate          | Lệnh                                     | Tiêu chí                                         |
+| --- | ------------- | ---------------------------------------- | ------------------------------------------------ |
+| 1   | TypeScript    | `npx tsc --noEmit`                       | 0 errors                                         |
+| 2   | ESLint        | `npx eslint src/`                        | 0 errors (react-refresh warnings acceptable)     |
+| 3   | Unit Tests    | `npm test`                               | All 3954 tests pass (165 files)                  |
+| 4   | Coverage      | `npm run test:coverage`                  | Statement coverage ≥98%                          |
+| 5   | **SonarQube** | `npm run test:coverage && npm run sonar` | **0 Bugs, 0 Vulnerabilities, 0 Code Smells mới** |
+| 6   | DevTools      | Chrome DevTools Console                  | 0 errors, 0 warnings                             |
+| 7   | Mobile        | Manual test 393×851 viewport             | Critical flows pass                              |
 
 ### ⛔ Chính sách No eslint-disable
 
@@ -102,15 +107,27 @@ Các quality gates sau **bắt buộc** pass trước khi merge hoặc release:
 - Không chấp nhận PR nào chứa eslint-disable trong `src/`
 - File test (`e2e/`) được phép sử dụng eslint-disable cho type casting khi cần thiết
 
-### 🔍 SonarQube Integration
+### 🔍 SonarQube Integration (Mandatory)
 
-SonarQube analysis được chạy sau mỗi sprint để đảm bảo code quality:
+SonarQube analysis **bắt buộc** trước mỗi release:
 
 - Config: `sonar-project.properties` tại root project
 - Script: `bash sonar-setup.sh`
-- Chạy analysis: sau mỗi sprint hoặc trước release
+- **Chạy analysis: TRƯỚC MỌI release** (không chỉ sau mỗi sprint)
 - Quality Profile: Default + custom rules cho TypeScript/React
-- Gate: Phải pass SonarQube quality gate trước khi release
+- **Gate: Phải pass SonarQube quality gate (0 new Bugs, 0 Vulnerabilities) trước khi release**
+- Quy trình: `npm run test:coverage` → `npm run sonar` → kiểm tra dashboard `http://localhost:9000`
+
+```bash
+# Pipeline bắt buộc trước release
+npm run test:coverage && npm run sonar
+
+# Kiểm tra kết quả
+curl -sf -u "$SONAR_TOKEN:" \
+  "http://localhost:9000/api/issues/search?componentKeys=meal-planing&resolved=false&types=BUG,VULNERABILITY" \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Issues: {d[\"total\"]}')"
+# Phải trả về: Issues: 0
+```
 
 ---
 
@@ -149,15 +166,16 @@ bash build-apk.sh
 
 ### Version format: `MAJOR.MINOR.PATCH`
 
-| Component | Khi nào tăng |
-|-----------|-------------|
-| MAJOR | Breaking change lớn (thay đổi storage schema không backward compatible) |
-| MINOR | Feature mới |
-| PATCH | Bug fix |
+| Component | Khi nào tăng                                                            |
+| --------- | ----------------------------------------------------------------------- |
+| MAJOR     | Breaking change lớn (thay đổi storage schema không backward compatible) |
+| MINOR     | Feature mới                                                             |
+| PATCH     | Bug fix                                                                 |
 
 ### Cập nhật version
 
 Trong `package.json`:
+
 ```json
 {
   "version": "1.1.0"
@@ -165,6 +183,7 @@ Trong `package.json`:
 ```
 
 Trong `android/app/build.gradle`:
+
 ```groovy
 versionCode 2          // Tăng 1 mỗi release lên Google Play
 versionName "1.1.0"    // Phải khớp package.json
@@ -214,14 +233,17 @@ Cập nhật `CHANGELOG.md` hoặc tạo file session mới trong `docs/`:
 # CHANGELOG v1.1.0 — 2026-03-06
 
 ## Added
+
 - AI meal suggestion preview modal #42
 - Copy day feature in Calendar #38
 
 ## Fixed
+
 - Scroll lock regression on modal close #35
 - IngredientEditModal auto-focus on Android #36
 
 ## Tests
+
 - Unit: 1201/1201 pass
 - E2E: 24/24 pass (183 test cases, including deep integration)
 - Coverage: 99.46% Stmts, 99.41% Funcs, 100% Lines, 92.51% Branch
@@ -248,6 +270,7 @@ bash upload-apk-drive.sh
 Script sử dụng Google Drive API với service account. File config: `metadata.json`
 
 #### Setup Google Drive API
+
 1. Tạo service account trong Google Cloud Console
 2. Share folder Drive với email service account
 3. Đặt credentials file path trong script
@@ -291,3 +314,37 @@ Khi có bug nghiêm trọng sau release:
 
 - [Deployment Guide](../06-operations/deployment.md) — Hướng dẫn triển khai chi tiết
 - [Coding Guidelines](../03-developer-guide/coding-guidelines.md) — Quy tắc code và testing
+
+---
+
+## 9. CEO Audit — Quy trình kiểm tra chất lượng định kỳ
+
+> **Phát sinh từ CEO Audit Q3/2026** — phát hiện 4 bugs (form validation, JSON resilience, i18n, logging) mà unit tests và linting không bắt được.
+
+### 9.1 Tần suất
+
+- **Hàng quý** (Q1/Q2/Q3/Q4) — hoặc sau mỗi milestone lớn (thêm module mới, refactor lớn)
+- **Khoảng thời gian:** 1-2 ngày cho mỗi audit cycle
+
+### 9.2 Phạm vi kiểm tra
+
+| #   | Hạng mục                   | Mô tả                                                                                                      |
+| --- | -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1   | **Form Validation Audit**  | Kiểm tra tất cả multi-step forms: `form.trigger()` có truyền field list? Cross-field validation hoạt động? |
+| 2   | **Data Resilience Audit**  | Kiểm tra tất cả `JSON.parse` trong stores: có safe wrapper? Fallback values hợp lý?                        |
+| 3   | **i18n Completeness**      | `grep` tìm hardcoded Vietnamese strings trong `src/components/` — phải trả về 0 kết quả                    |
+| 4   | **Logging Standards**      | Kiểm tra `console.error`/`console.warn` trong stores — phải dùng structured `logger.*`                     |
+| 5   | **useEffect Dependencies** | Kiểm tra useEffect thiếu/không có deps — phải có comment giải thích hoặc fix                               |
+| 6   | **SonarQube Scan**         | Full scan — 0 Bugs, 0 Vulnerabilities, Code Smells dưới ngưỡng                                             |
+
+### 9.3 Output
+
+- **Audit Report**: Danh sách findings (severity P0-P3), root cause, proposed fix
+- **Coding Guidelines Update**: Thêm rule mới vào `coding-guidelines.md` nếu phát hiện pattern bug mới
+- **PRD Update**: Cập nhật NFR nếu phát hiện yêu cầu phi chức năng bị thiếu
+
+### 9.4 Blocking Rule
+
+- **P0/P1 findings từ CEO Audit phải được fix TRƯỚC release tiếp theo** — không được defer
+- Findings được track trong `docs/bug-reports/` với prefix `AUD-`
+- Mỗi fix phải kèm regression test

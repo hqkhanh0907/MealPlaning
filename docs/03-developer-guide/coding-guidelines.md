@@ -1,7 +1,7 @@
 # Quy Tắc Code — Smart Meal Planner
 
-**Version:** 5.2  
-**Date:** 2026-06-28
+**Version:** 5.3  
+**Date:** 2026-07-20
 
 ---
 
@@ -212,6 +212,29 @@ const newIng: Ingredient = { id: Date.now().toString(), ... };
 - Mọi tên nguyên liệu/món ăn phải sử dụng `LocalizedString` (chỉ field `vi`)
 - Ứng dụng chỉ hỗ trợ Tiếng Việt — không cần dịch sang tiếng Anh
 
+### i18n Completeness Check (CEO Audit Q3)
+
+> **Quy tắc bắt buộc** — phát hiện từ CEO Audit: 3 hardcoded Vietnamese strings trong UnitSelector.
+
+**Không được hardcode bất kỳ string tiếng Việt nào** trong component code — kể cả labels, placeholders, tooltips, error messages. Tất cả phải qua `t()`:
+
+```typescript
+// ❌ SAI — hardcode string tiếng Việt
+<option value="g">gram</option>
+<span>Chọn đơn vị</span>
+
+// ✅ ĐÚNG — dùng i18n key
+<option value="g">{t('units.gram')}</option>
+<span>{t('common.selectUnit')}</span>
+```
+
+**Kiểm tra trước khi commit:**
+
+```bash
+# Tìm chuỗi tiếng Việt hardcode trong components (ngoại trừ test files)
+grep -rn '[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệ]' src/components/ --include='*.tsx' | grep -v '.test.'
+```
+
 ---
 
 ## 6. Quản lý state
@@ -279,6 +302,34 @@ console.error('failed', error); // ← ESLint no-console sẽ báo lỗi
 ```
 
 > **Lưu ý:** ESLint rule `no-console` được disable **chỉ** trong file `src/utils/logger.ts`. Mọi file khác gọi `console.*` sẽ bị ESLint báo lỗi.
+
+### JSON.parse Safety (CEO Audit Q3)
+
+> **Quy tắc bắt buộc** — phát hiện từ CEO Audit: 3 stores dùng `JSON.parse` trực tiếp trong `loadAll()` → corrupt data crash toàn bộ app init.
+
+**Tất cả `JSON.parse` trong store `loadAll()` hoặc bất kỳ data loading path nào PHẢI dùng safe wrapper** với try/catch và fallback value. Không được để JSON parse error lan truyền (propagate) và crash app:
+
+```typescript
+import { logger } from '@/utils/logger';
+
+// ✅ ĐÚNG — safe JSON parse wrapper
+function safeJsonParse<T>(json: string, fallback: T, context: string): T {
+  try {
+    return JSON.parse(json) as T;
+  } catch {
+    logger.warn(`Invalid JSON in ${context}, using fallback`, { json: json.slice(0, 100) });
+    return fallback;
+  }
+}
+
+// Sử dụng trong store loadAll():
+const items = safeJsonParse<string[]>(row.tags, [], 'ingredientStore.loadAll.tags');
+
+// ❌ SAI — JSON.parse trực tiếp trong loadAll
+const items = JSON.parse(row.tags); // corrupt data → crash app!
+```
+
+**Nguyên tắc:** Dữ liệu từ storage (SQLite, localStorage, IndexedDB) **luôn có thể bị corrupt** — do migration lỗi, manual edit, hoặc disk corruption. Code đọc dữ liệu PHẢI defensive. Xem thêm: PRD NFR-11.
 
 ### Notification API
 
@@ -367,6 +418,29 @@ const form = useForm<FormData>({
 > **Quy tắc bắt buộc** — tránh `react-hooks/incompatible-library` warnings.
 
 Sử dụng `useWatch` hook thay vì `form.watch()` method để theo dõi field values:
+
+### Multi-Step Form Validation (CEO Audit Q3)
+
+> **Quy tắc bắt buộc** — phát hiện từ CEO Audit: `GoalPhaseSelector` gọi `form.trigger()` không có tham số → validate toàn bộ schema kể cả các bước chưa điền → false validation errors.
+
+Trong multi-step forms, **KHÔNG BAO GIỜ** gọi `form.trigger()` mà không truyền danh sách fields cụ thể:
+
+```typescript
+// Định nghĩa fields cho mỗi step
+const STEP_FIELDS = {
+  0: ['name', 'gender', 'dob'] as const,
+  1: ['height', 'weight', 'activityLevel'] as const,
+  2: ['goal', 'goalRate'] as const,
+};
+
+// ✅ ĐÚNG — trigger chỉ fields của step hiện tại
+const isValid = await form.trigger([...STEP_FIELDS[currentStep]]);
+
+// ❌ SAI — trigger toàn bộ schema, bao gồm steps chưa điền
+const isValid = await form.trigger(); // ← BUG! Validates future steps
+```
+
+**Lưu ý:** `superRefine` cross-field validators **không chạy** khi trigger field-level. Nếu cần cross-field validation (ví dụ: `endDate > startDate`), implement manual check bằng `form.setError()` ngay trong handler `handleNext`.
 
 ```typescript
 import { useWatch } from 'react-hook-form';
@@ -728,3 +802,39 @@ const ManagementTab = lazy(() => import('./components/tabs/ManagementTab'));
 - Bundle analysis: `npm run analyze` (rollup-plugin-visualizer)
 - Production: `esbuild.drop: ['console', 'debugger']`
 - Sourcemaps: `hidden` trong production
+
+---
+
+## 12. CEO Audit Findings Index (Q3/2026)
+
+> Tóm tắt các quy tắc phát sinh từ CEO Audit. Mỗi rule đã được integrate vào section tương ứng — section này chỉ là index để dễ tra cứu.
+
+| #      | Finding                                                                              | Quy tắc                                                            | Section                       |
+| ------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ----------------------------- |
+| AUD-01 | `form.trigger()` không có field list trong multi-step form → validate toàn bộ schema | NEVER gọi `form.trigger()` không tham số trong wizard/multi-step   | §8 Multi-Step Form Validation |
+| AUD-02 | `JSON.parse` trực tiếp trong `loadAll()` → corrupt data crash app                    | Mọi JSON.parse từ storage PHẢI dùng safe wrapper với fallback      | §7 JSON.parse Safety          |
+| AUD-03 | Hardcoded Vietnamese strings trong UnitSelector                                      | Tất cả text phải qua `t()` — không ngoại lệ                        | §5 i18n Completeness Check    |
+| AUD-04 | `console.error` trong fitnessStore thay vì structured logger                         | Dùng `logger.*` từ `utils/logger.ts` — ESLint `no-console` enforce | §7 Logger Usage               |
+
+### useEffect Dependencies — DOM-Read Reconciliation Pattern
+
+> **Pattern đặc biệt** — ghi nhận từ CEO Audit: một số `useEffect` cố ý KHÔNG có dependencies (empty deps `[]` hoặc no deps).
+
+Trong một số trường hợp, `useEffect` cần đọc DOM state (scroll position, element dimensions) sau mỗi render để reconcile. ESLint `react-hooks/exhaustive-deps` sẽ cảnh báo, nhưng đây là **intentional pattern**:
+
+```typescript
+// ✅ Pattern hợp lệ — DOM-read reconciliation
+useEffect(() => {
+  // Đọc scroll position sau render để sync với state
+  const el = scrollRef.current;
+  if (el && el.scrollTop !== expectedScroll) {
+    el.scrollTop = expectedScroll;
+  }
+}); // ← Intentionally no deps: cần chạy sau MỌI render
+
+// ✅ Nếu cần suppress warning, document rõ lý do TRONG COMMENT (không dùng eslint-disable):
+// Cách đúng: restructure code để ESLint không cảnh báo (useCallback, useRef)
+// KHÔNG dùng eslint-disable-next-line
+```
+
+**Quy tắc:** Khi gặp useEffect không có deps hoặc thiếu deps, PHẢI có comment giải thích tại sao. Nếu không có comment → coi là bug và thêm deps đúng.
