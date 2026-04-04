@@ -293,3 +293,143 @@ export function createDatabaseService(): DatabaseService {
 ### Bài học
 
 Migration database layer = thay đổi lớn, cần TDD nghiêm ngặt. Mỗi bước: write test → implement → verify → commit. Và PHẢI test trên emulator — unit test pass không đảm bảo plugin work ở runtime.
+
+---
+
+## 9. Always grep before creating tokens
+
+### Vấn đề
+
+Kế hoạch audit v6 nói "tạo status tokens cho toast states" nhưng khi triển khai, phát hiện tokens này **đã tồn tại** trong `src/index.css` (`--status-success`, `--status-warning`, `--status-error`, `--status-info`). Hoàn toàn không cần tạo.
+
+### Nguyên nhân
+
+Lập kế hoạch từ memory/grep mà không verify lại codebase. Giả định tokens không tồn tại dựa trên thông tin cũ.
+
+### Giải pháp
+
+BẮT BUỘC grep trước khi tạo bất kỳ token/class nào:
+
+```bash
+grep -n 'token-name' src/index.css
+grep -r 'class-name' src/
+```
+
+Nếu đã tồn tại → dùng luôn thay vì tạo duplicate.
+
+### Bài học
+
+Grep before create — tránh duplicate, conflict, và lãng phí thời gian. Luôn verify codebase **đúng lúc**, không dựa vào memory lỗi thời.
+
+---
+
+## 10. Rose ≠ Red, Sky ≠ Blue — never assume Tailwind palette aliases
+
+### Vấn đề
+
+Kế hoạch gốc nói "dùng Red-500 cho toast error" vì `--destructive` dùng Red-500. Nhưng audit thực tế phát hiện:
+
+- Error toast dùng Rose-_ (không phải Red-_)
+- Info toast dùng Sky-_ (không phải Blue-_)
+
+Nếu dùng `--destructive` (Red-500) cho toast error, màu sẽ **dịch chuyển rõ rệt** — user sẽ thấy thay đổi.
+
+### Nguyên nhân
+
+Tailwind palette có tên giống nhưng **khác hue**:
+
+- Red (#FF0000) vs Rose (hng hơn, hue ~350°)
+- Blue (#0000FF) vs Sky (nhạt hơn, hue ~200°)
+
+Giả định "Red-500 = destructive color" mà không check OKLCH values thực tế.
+
+### Giải pháp
+
+Tạo dedicated tokens với giá trị EXACT:
+
+- `--toast-error: var(--rose-500);` (Rose-500 OKLCH)
+- `--toast-info: var(--sky-500);` (Sky-500 OKLCH)
+
+Điều này bảo toàn hue chính xác mà không "approximate" bằng token khác.
+
+### Bài học
+
+Khi mapping colors, LUÔN verify OKLCH values trước. "Close enough" không có — mọi sai khác OKLCH sẽ hiển thị trên mobile. Không bao giờ assume aliases — kiểm tra thực tế.
+
+---
+
+## 11. Critic-driven plan revision is highest-leverage
+
+### Vấn đề
+
+Kế hoạch audit v6 lúc đầu có **8 vấn đề lớn**:
+
+- Đường dẫn file sai (`src/` vs `src/components/`)
+- Đếm sai số lượng tokens
+- Dependency giả tạo
+- Migration không đầy đủ
+
+Nếu bắt đầu code ngay, sẽ:
+
+- Build thất bại (đường dẫn sai)
+- Tạo token trùng lặp (count sai)
+- Tính toán rebase ngầm (dependencies sai)
+- Conflict merge (migration không đủ)
+
+### Nguyên nhân
+
+Lập kế hoạch từ memory + grep nhanh, mà không có independent verification.
+
+### Giải pháp
+
+**Dispatch critic agent SAU kế hoạch, TRƯỚC implementation** (5 phút review).
+
+Critic session phát hiện:
+
+- Đường dẫn cần verify: `src/components/shared/tokens` (không phải `src/tokens`)
+- Token reuse opportunity: dùng `--status-*` thay vì tạo `--toast-*`
+- Color shift risk: Rose ≠ Red
+- Merge conflict risk: 2 branches đều đổi index.css
+- Button migration: quên chuyển `bg-blue-600` → `bg-status-info`
+
+### Bài học
+
+**Critic review tại điểm quyết định** (ngay sau plan, trước code) có **ROI cao nhất**. 5 phút review = giảm rework 60% → tiết kiệm giờ code. LUÔN gọi critic cho non-trivial plans.
+
+---
+
+## 12. Logic-dependent CSS classes cannot be migrated
+
+### Vấn đề
+
+Component `DishManager` dùng:
+
+```jsx
+<div className={compareIds.has(dish.id) ? 'border-blue-400' : 'border-blue-500'}>
+```
+
+Ternary này **kiểm soát border color dựa trên JS logic** (comparison state).
+
+Nếu migrate → chọn 1 token duy nhất (vd `--status-primary`), tính năng "toggle border hiệu ứng khi compare" bị mất.
+
+### Nguyên nhân
+
+CSS classes kiểm soát bởi JS ternary/conditional **không thể tách riêng** — chúng là phần của business logic, không phải styling tĩnh.
+
+### Giải pháp
+
+Phân loại class này:
+
+- **Legitimate domain color**: "logic-dependent, tulsi thực. Archive vào false positives list.
+- **Không migrate**: Để ternary gốc `border-blue-400/500` — dùng CSS variables + Tailwind arbitrary values nếu cần refactor.
+
+```jsx
+// KHÔNG thay đổi — logic-dependent color
+const borderClass = compareIds.has(dish.id) ? 'border-blue-400' : 'border-blue-500';
+```
+
+### Bài học
+
+Trước khi migrate bất kỳ color class nào, **LUÔN check xem nó có trong JS ternary/conditional không**. Nếu có → nó là logic-dependent, phải để yên. Chỉ migrate color classes **tĩnh** (không có logic kiểm soát).
+
+---

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import { useFitnessStore } from '../store/fitnessStore';
@@ -7,8 +8,12 @@ const STRENGTH_MET = 5;
 const FALLBACK_CAL_PER_SET = 8;
 
 export function useTodayCaloriesOut(): number {
-  const workouts = useFitnessStore(s => s.workouts);
-  const workoutSets = useFitnessStore(s => s.workoutSets);
+  const { workouts, workoutSets } = useFitnessStore(
+    useShallow(s => ({
+      workouts: s.workouts,
+      workoutSets: s.workoutSets,
+    })),
+  );
   const weightKg = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
 
   return useMemo(() => {

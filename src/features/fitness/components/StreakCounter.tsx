@@ -1,6 +1,7 @@
 import { CheckCircle, Circle, Flame, MapPin, Moon } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { DAY_LABELS } from '../constants';
@@ -23,15 +24,18 @@ function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
 
 export const StreakCounter = React.memo(function StreakCounter() {
   const { t } = useTranslation();
-  const workouts = useFitnessStore(s => s.workouts);
-  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const { workouts, trainingPlanDays } = useFitnessStore(
+    useShallow(s => ({
+      workouts: s.workouts,
+      trainingPlanDays: s.trainingPlanDays,
+    })),
+  );
 
   const planDays = useMemo(() => {
-    const activePlan = trainingPlans.find(p => p.status === 'active');
     if (!activePlan) return [] as number[];
     return trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek);
-  }, [trainingPlanDays, trainingPlans]);
+  }, [trainingPlanDays, activePlan]);
 
   const streakInfo = useMemo(() => calculateStreak(workouts, planDays), [workouts, planDays]);
 

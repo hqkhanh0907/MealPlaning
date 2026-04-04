@@ -1,6 +1,7 @@
 import { Flame } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateStreak } from '../../fitness/utils/gamification';
@@ -19,15 +20,18 @@ interface StreakMiniProps {
 
 function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactElement {
   const { t } = useTranslation();
-  const workouts = useFitnessStore(s => s.workouts);
-  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const { workouts, trainingPlanDays } = useFitnessStore(
+    useShallow(s => ({
+      workouts: s.workouts,
+      trainingPlanDays: s.trainingPlanDays,
+    })),
+  );
 
   const planDays = useMemo(() => {
-    const activePlan = trainingPlans.find(p => p.status === 'active');
     if (!activePlan) return [] as number[];
     return trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek);
-  }, [trainingPlans, trainingPlanDays]);
+  }, [activePlan, trainingPlanDays]);
 
   const streakInfo = useMemo(() => calculateStreak(workouts, planDays), [workouts, planDays]);
 

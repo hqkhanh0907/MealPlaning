@@ -1,6 +1,7 @@
 import { CheckCircle, ChevronDown } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { calculateStreak, checkMilestones } from '../utils/gamification';
@@ -8,12 +9,15 @@ import { calculateStreak, checkMilestones } from '../utils/gamification';
 export const MilestonesList = React.memo(function MilestonesList() {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const workouts = useFitnessStore(s => s.workouts);
-  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const { workouts, trainingPlanDays } = useFitnessStore(
+    useShallow(s => ({
+      workouts: s.workouts,
+      trainingPlanDays: s.trainingPlanDays,
+    })),
+  );
 
   const { milestones, currentSessions, currentLongestStreak } = useMemo(() => {
-    const activePlan = trainingPlans.find(p => p.status === 'active');
     const days = activePlan ? trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek) : [];
     const streakInfo = calculateStreak(workouts, days);
     const ms = checkMilestones(workouts.length, streakInfo.longestStreak);
@@ -22,7 +26,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
       currentSessions: workouts.length,
       currentLongestStreak: streakInfo.longestStreak,
     };
-  }, [workouts, trainingPlans, trainingPlanDays]);
+  }, [workouts, activePlan, trainingPlanDays]);
 
   const nextMilestone = milestones.find(m => !m.achievedDate);
 

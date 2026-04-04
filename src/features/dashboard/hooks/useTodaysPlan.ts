@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow';
+
 import { useDayPlanStore } from '../../../store/dayPlanStore';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import type {
@@ -121,18 +123,25 @@ export function useTodaysPlan(): TodaysPlanData {
   const todayDow = today.getDay() === 0 ? 7 : today.getDay();
   const tomorrowDow = todayDow === 7 ? 1 : todayDow + 1;
 
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
-  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
-  const workouts = useFitnessStore(s => s.workouts);
-  const workoutSets = useFitnessStore(s => s.workoutSets);
+  // Pattern 1: direct .find() — only re-renders when active plan changes
+  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+
+  // useShallow: consolidate remaining array subscriptions
+  const { trainingPlanDays, workoutSets } = useFitnessStore(
+    useShallow(s => ({
+      trainingPlanDays: s.trainingPlanDays,
+      workoutSets: s.workoutSets,
+    })),
+  );
+
+  // useShallow + filter: only re-renders when today's workouts actually change
+  const todayWorkouts = useFitnessStore(useShallow(s => s.workouts.filter(w => w.date === todayStr)));
 
   const dayPlans = useDayPlanStore(s => s.dayPlans);
 
-  const activePlan = trainingPlans.find(p => p.status === 'active');
   const planDays = activePlan ? trainingPlanDays.filter(d => d.planId === activePlan.id) : [];
 
   const todayPlanDays = planDays.filter(d => d.dayOfWeek === todayDow).sort((a, b) => a.sessionOrder - b.sessionOrder);
-  const todayWorkouts = workouts.filter(w => w.date === todayStr);
 
   const state = determineTodayPlanState(activePlan, todayPlanDays, todayWorkouts);
 

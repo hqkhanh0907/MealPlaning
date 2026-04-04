@@ -85,14 +85,14 @@ export function useQuickActions(options?: { onLogWeight?: () => void }): {
   actions: [QuickAction, QuickAction, QuickAction];
   handleAction: (action: QuickAction) => void;
 } {
+  const today = new Date().toISOString().split('T')[0];
   const dayPlans = useDayPlanStore(s => s.dayPlans);
-  const weightEntries = useFitnessStore(s => s.weightEntries);
-  const workouts = useFitnessStore(s => s.workouts);
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const weightLoggedToday = useFitnessStore(s => s.weightEntries.some(e => e.date.split('T')[0] === today));
+  const workoutCompletedToday = useFitnessStore(s => s.workouts.some(w => w.date.split('T')[0] === today));
+  const hasTrainingPlan = useFitnessStore(s => s.trainingPlans.some(p => p.status === 'active'));
   const navigateTab = useNavigationStore(s => s.navigateTab);
 
   const actions = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
     const todayPlan = dayPlans.find(p => p.date === today);
 
     const hasBreakfast = (todayPlan?.breakfastDishIds?.length ?? 0) > 0;
@@ -100,21 +100,17 @@ export function useQuickActions(options?: { onLogWeight?: () => void }): {
     const hasDinner = (todayPlan?.dinnerDishIds?.length ?? 0) > 0;
     const mealsCount = (hasBreakfast ? 1 : 0) + (hasLunch ? 1 : 0) + (hasDinner ? 1 : 0);
 
-    const weightLoggedToday = weightEntries.some(w => w.date.split('T')[0] === today);
-    const workoutCompleted = workouts.some(w => w.date.split('T')[0] === today);
-    const hasTrainingPlan = trainingPlans.some(p => p.status === 'active');
-
     return determineQuickActions({
       mealsLoggedToday: mealsCount,
       hasBreakfast,
       hasLunch,
       hasDinner,
-      workoutCompleted,
+      workoutCompleted: workoutCompletedToday,
       isRestDay: false,
       weightLoggedToday,
       hasTrainingPlan,
     });
-  }, [dayPlans, weightEntries, workouts, trainingPlans]);
+  }, [dayPlans, today, weightLoggedToday, workoutCompletedToday, hasTrainingPlan]);
 
   const handleAction = useCallback(
     (action: QuickAction) => {

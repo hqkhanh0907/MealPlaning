@@ -7,11 +7,9 @@ export const PlanGeneratedCard = () => {
   const { t } = useTranslation();
   const showPlanCelebration = useFitnessStore(s => s.showPlanCelebration);
   const dismissPlanCelebration = useFitnessStore(s => s.dismissPlanCelebration);
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
+  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
 
   if (!showPlanCelebration) return null;
-
-  const activePlan = trainingPlans.find(p => p.status === 'active');
 
   return (
     <div

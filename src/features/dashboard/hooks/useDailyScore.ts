@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useDayPlanStore } from '../../../store/dayPlanStore';
 import { useDishStore } from '../../../store/dishStore';
@@ -59,10 +60,17 @@ export function useDailyScore(): DailyScoreData {
   const dayPlans = useDayPlanStore(s => s.dayPlans);
   const dishes = useDishStore(s => s.dishes);
   const ingredients = useIngredientStore(s => s.ingredients);
-  const workouts = useFitnessStore(s => s.workouts);
-  const weightEntries = useFitnessStore(s => s.weightEntries);
-  const trainingPlans = useFitnessStore(s => s.trainingPlans);
-  const trainingPlanDays = useFitnessStore(s => s.trainingPlanDays);
+  // .find() selector — re-renders only when active plan identity changes
+  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+
+  // Consolidate remaining arrays with useShallow (3 subscriptions → 1)
+  const { workouts, weightEntries, trainingPlanDays } = useFitnessStore(
+    useShallow(s => ({
+      workouts: s.workouts,
+      weightEntries: s.weightEntries,
+      trainingPlanDays: s.trainingPlanDays,
+    })),
+  );
 
   return useMemo(() => {
     const now = new Date();
@@ -91,7 +99,6 @@ export function useDailyScore(): DailyScoreData {
 
     const workoutCompleted = workouts.some(w => w.date === today);
 
-    const activePlan = trainingPlans.find(p => p.status === 'active');
     const todayDayOfWeek = now.getDay();
     let isRestDay = false;
 
@@ -137,7 +144,7 @@ export function useDailyScore(): DailyScoreData {
     ingredients,
     workouts,
     weightEntries,
-    trainingPlans,
+    activePlan,
     trainingPlanDays,
   ]);
 }
