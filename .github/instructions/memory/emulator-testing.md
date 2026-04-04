@@ -153,6 +153,9 @@ adb -s emulator-5556 shell monkey -p com.mealplaner.app -c android.intent.catego
 # Force stop
 adb -s emulator-5556 shell am force-stop com.mealplaner.app
 
+# Clear app data (fresh install effect)
+adb -s emulator-5556 shell pm clear com.mealplaner.app
+
 # Screenshot
 adb -s emulator-5556 exec-out screencap -p > screenshot.png
 
@@ -165,3 +168,416 @@ adb devices
 # Logcat filter cho app
 adb -s emulator-5556 logcat --pid=$(adb -s emulator-5556 shell pidof com.mealplaner.app)
 ```
+
+---
+
+## 9. Python Async CDP Test Framework (Chi tiết)
+
+> Rút ra từ chiến dịch test 8 scenario (SC-01 → SC-08) ngày 2026-04-03.
+> Dùng `websockets` (async) thay vì `websocket-client` (sync).
+
+### 9.1 Template chuẩn cho 1 scenario test
+
+```python
+import json, asyncio, websockets, urllib.request, base64, subprocess, time, os
+
+env = {**os.environ, "PATH": os.environ.get("PATH","") + ":/Users/khanhhuynh/Library/Android/sdk/platform-tools"}
+
+async def run():
+    # === FRESH INSTALL ===
+    subprocess.run(["adb", "-s", "emulator-5556", "shell", "pm", "clear", "com.mealplaner.app"],
+                   capture_output=True, env=env)
+    time.sleep(1)
+    subprocess.run(["adb", "-s", "emulator-5556", "shell", "am", "start", "-n",
+                     "com.mealplaner.app/.MainActivity"], capture_output=True, env=env)
+    time.sleep(5)  # chờ app khởi động đầy đủ
+
+    # === CDP CONNECTION ===
+    pid = subprocess.run(["adb", "-s", "emulator-5556", "shell", "pidof", "com.mealplaner.app"],
+                        capture_output=True, text=True, env=env).stdout.strip()
+    subprocess.run(["adb", "-s", "emulator-5556", "forward", "tcp:9222",
+                     f"localabstract:webview_devtools_remote_{pid}"], capture_output=True, env=env)
+    time.sleep(2)
+
+    data = json.loads(urllib.request.urlopen("http://localhost:9222/json").read())
+    ws_url = data[0]["webSocketDebuggerUrl"]
+
+    async with websockets.connect(ws_url, max_size=10*1024*1024) as ws:
+        mid = [100]  # message ID counter
+
+        # === HELPER FUNCTIONS ===
+        async def ev(expr):
+            """Evaluate JS expression and return value"""
+            mid[0] += 1
+            await ws.send(json.dumps({"id": mid[0], "method": "Runtime.evaluate",
+                "params": {"expression": expr, "returnByValue": True, "awaitPromise": True}}))
+            r = json.loads(await ws.recv())
+            return r.get("result",{}).get("result",{}).get("value","")
+
+        async def get_txt(tid):
+            """Get textContent of element by data-testid"""
+            return await ev(f'(function(){{var e=document.querySelector(\'[data-testid="{tid}"]\');'
+                           f'return e?e.textContent.trim():"N/A"}})()')
+
+        async def clk(tid):
+            """Click element by data-testid"""
+            return await ev(f'(function(){{var b=document.querySelector(\'[data-testid="{tid}"]\');'
+                           f'if(b){{b.click();return"ok"}}return"none"}})()')
+
+        async def set_input(tid, value):
+            """Set React-controlled input value (native setter pattern)"""
+            return await ev(f'''(function(){{
+                var el=document.querySelector('[data-testid="{tid}"]');
+                if(!el)return'no el';
+                var ns=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+                ns.call(el,'{value}');
+                el.dispatchEvent(new Event('input',{{bubbles:true}}));
+                el.dispatchEvent(new Event('change',{{bubbles:true}}));
+                return'set:'+el.value;
+            }})()''')
+
+        async def set_activity(value):
+            """Set activity level select SCOPED TO FORM (critical!)"""
+            return await ev(f'''(function(){{
+                var form=document.querySelector('[data-testid="health-profile-form"]');
+                if(!form)return'no form';
+                var sel=form.querySelector('select');
+                if(!sel)return'no select';
+                for(var i=0;i<sel.options.length;i++){{
+                    if(sel.options[i].value==='{value}'){{
+                        sel.selectedIndex=i;
+                        sel.dispatchEvent(new Event('change',{{bubbles:true}}));
+                        return'set:'+sel.value;
+                    }}
+                }}
+                return'not found';
+            }})()''')
+
+        async def screenshot(path):
+            """Take screenshot via CDP"""
+            await ws.send(json.dumps({"id": 999, "method": "Page.captureScreenshot",
+                                       "params": {"format": "png"}}))
+            r = json.loads(await ws.recv())
+            with open(path, "wb") as f:
+                f.write(base64.b64decode(r["result"]["data"]))
+
+        # === BYPASS ONBOARDING ===
+        await ev('localStorage.setItem("app-onboarding-storage",'
+                 'JSON.stringify({state:{isAppOnboarded:true,onboardingSection:null},version:1}))')
+        await ws.send(json.dumps({"id": 50, "method": "Page.reload"}))
+        await asyncio.sleep(4)
+        await ws.recv()  # consume reload response
+
+        # ... test logic here ...
+
+asyncio.run(run())
+```
+
+### 9.2 Library: `websockets` (async) vs `websocket-client` (sync)
+
+- **`websockets`** (async): Dùng `pip install websockets`. Cần `async/await`. Ổn định hơn.
+  - `async with websockets.connect(url, max_size=10*1024*1024)` — tăng max_size cho screenshot
+  - KHÔNG cần `suppress_origin`
+- **`websocket-client`** (sync): Dùng `pip install websocket-client`. Cần `suppress_origin=True`.
+  - Dễ bị timeout khi chờ response lâu
+
+**Recommendation**: Luôn dùng `websockets` (async) cho test scripts.
+
+---
+
+## 10. ⚠️ BẪY QUAN TRỌNG — FORM-SCOPED SELECT
+
+### Vấn đề
+
+Trang có NHIỀU `<select>` elements. `document.querySelector('select')` trả về **select đầu tiên trên DOM** — thường là select sắp xếp món ăn (sort dropdown), KHÔNG phải activity level select trong form.
+
+### Triệu chứng
+
+Activity level luôn là "moderate" (default) dù đã set "sedentary". TDEE sai.
+
+### Giải pháp BẮT BUỘC
+
+```javascript
+// ❌ SAI — tìm select toàn trang
+var sel = document.querySelector('select');
+
+// ✅ ĐÚNG — scope vào form
+var form = document.querySelector('[data-testid="health-profile-form"]');
+var sel = form.querySelector('select');
+```
+
+### Activity values
+
+- `sedentary` → "Ít vận động"
+- `light` → "Hoạt động nhẹ"
+- `moderate` → "Hoạt động vừa phải" (DEFAULT)
+- `active` → "Hoạt động tích cực"
+- `extra_active` → "Hoạt động rất cao"
+
+---
+
+## 11. ⚠️ BẪY QUAN TRỌNG — SETTINGS NAVIGATION
+
+### Vấn đề
+
+Sau khi save Health Profile, app ở **detail view** (không phải main settings list). Click `settings-nav-goal` trả về "none" vì element bị ẩn bởi detail view.
+
+### Giải pháp
+
+**Đóng settings rồi mở lại** trước khi navigate sang section khác:
+
+```python
+# Sau khi save health profile...
+await clk("settings-detail-save")
+await asyncio.sleep(1)
+
+# ❌ SAI — nav-goal ẩn trong detail view
+await clk("settings-nav-goal")  # → "none"!
+
+# ✅ ĐÚNG — close + reopen
+await clk("btn-close-settings")
+await asyncio.sleep(0.5)
+await clk("btn-open-settings")
+await asyncio.sleep(1)
+await clk("settings-nav-goal")  # → "ok" ✅
+```
+
+### Settings detail views
+
+Mỗi section (health-profile, goal, training-profile) có:
+
+- **Read view**: Hiển thị thông tin + nút "Chỉnh sửa"
+- **Edit view**: Form nhập liệu + "Lưu" / "Hủy"
+
+Nút "Chỉnh sửa" có NHIỀU instances trong DOM (6 cái), phần lớn invisible. Chỉ cái cuối cùng có `getBoundingClientRect().width > 0`:
+
+```javascript
+// Tìm "Chỉnh sửa" visible
+var btns = document.querySelectorAll('button');
+for (var i = btns.length - 1; i >= 0; i--) {
+  if (btns[i].textContent.trim() === 'Chỉnh sửa') {
+    var r = btns[i].getBoundingClientRect();
+    if (r.width > 0) {
+      btns[i].click();
+      break;
+    }
+  }
+}
+```
+
+---
+
+## 12. ⚠️ BẪY QUAN TRỌNG — MEAL PLANNER FLOW
+
+### Flow thêm món vào bữa ăn
+
+```
+1. Click "Lên kế hoạch" (btn-plan-meal-section) hoặc "Thêm" trên meal slot
+2. Planner view mở ra với 3 sections: Bữa Sáng / Bữa Trưa / Bữa Tối
+3. Click vào section header (ví dụ "Bữa Trưa") để chọn slot đích
+4. Click nút quick-add dish (dạng: "Ức gà áp chảo 330 kcal 62g")
+5. Click "Xác nhận" (btn-confirm-plan) để lưu
+```
+
+### Chọn meal slot
+
+```javascript
+// Click section header để chọn slot
+var els = document.querySelectorAll('h3,h4,div,button,span');
+for (var i = 0; i < els.length; i++) {
+  if (els[i].textContent.trim() === 'Bữa Trưa') {
+    els[i].click();
+    break;
+  }
+}
+```
+
+### ⚠️ Quick-add buttons format
+
+Có 2 loại buttons cho cùng 1 món:
+
+1. **Library card**: `"Bông cải xanh luộc"` (không có kcal) — KHÔNG phải quick-add
+2. **Quick-add**: `"Bông cải xanh luộc 51 kcal 5g"` (có kcal+protein) — ĐÂY mới là nút add
+
+```javascript
+// Tìm quick-add button (phải có kcal trong text)
+var btns = document.querySelectorAll('button');
+for (var i = 0; i < btns.length; i++) {
+  var t = btns[i].textContent.trim();
+  if (t.startsWith('Ức gà') && t.includes('330')) {
+    btns[i].click();
+    break;
+  }
+}
+```
+
+### ⚠️ PHẢI confirm plan
+
+Sau khi add xong tất cả dishes, **BẮT BUỘC** click `btn-confirm-plan`. Nếu không, meals KHÔNG được lưu vào dayPlan:
+
+```python
+await clk("btn-confirm-plan")
+await asyncio.sleep(2)  # chờ DB persist
+```
+
+### Dish meal type tags (seed data)
+
+| Dish                                 | Sáng | Trưa | Tối |
+| ------------------------------------ | ---- | ---- | --- |
+| D1: Trứng ốp la (155 cal, 13g)       | ✅   |      | ✅  |
+| D2: Yến mạch sữa chua (332 cal, 25g) | ✅   |      |     |
+| D3: Bông cải xanh luộc (51 cal, 5g)  |      | ✅   | ✅  |
+| D4: Khoai lang luộc (129 cal, 3g)    |      | ✅   | ✅  |
+| D5: Ức gà áp chảo (330 cal, 62g)     |      | ✅   | ✅  |
+
+Default breakfast slot tự chọn khi mở planner. Phải click header "Bữa Trưa"/"Bữa Tối" để switch.
+
+---
+
+## 13. ⚠️ BẪY QUAN TRỌNG — BMR OVERRIDE
+
+### Flow
+
+1. Trong health profile form, BMR có 2 radio: "Tự động tính" / "Nhập thủ công"
+2. Click radio thứ 2 (`input[name="bmr-override"]` index 1) để enable manual
+3. Input field xuất hiện: `data-testid="bmr-override-input"`
+4. Set giá trị bằng native setter pattern
+
+```python
+# Enable manual BMR
+await ev('(function(){var r=document.querySelectorAll(\'input[name="bmr-override"]\');'
+         'r[1].click();return"manual"})()')
+await asyncio.sleep(0.5)
+
+# Set value
+await set_input("bmr-override-input", "1800")
+```
+
+---
+
+## 14. Fresh Install Test Pattern
+
+### Quy trình test từ đầu (mỗi scenario)
+
+```python
+# 1. Clear data = fresh install
+subprocess.run(["adb", "-s", "emulator-5556", "shell", "pm", "clear", "com.mealplaner.app"], ...)
+
+# 2. Relaunch
+subprocess.run(["adb", "-s", "emulator-5556", "shell", "am", "start", "-n",
+                 "com.mealplaner.app/.MainActivity"], ...)
+time.sleep(5)  # QUAN TRỌNG: chờ đủ 5s cho WebView init
+
+# 3. Reconnect CDP (PID thay đổi sau clear!)
+pid = subprocess.run([...pidof...]).stdout.strip()
+subprocess.run([...forward tcp:9222...])
+time.sleep(2)
+
+# 4. Bypass onboarding (PHẢI làm sau connect, trước reload)
+await ev('localStorage.setItem("app-onboarding-storage",...)')
+await ws.send({"method": "Page.reload"})
+await asyncio.sleep(4)
+await ws.recv()  # consume reload response
+```
+
+### ⚠️ Timing quan trọng
+
+| Bước                       | Wait time | Lý do                              |
+| -------------------------- | --------- | ---------------------------------- |
+| Sau `am start`             | 5s        | WebView cần init, load JS bundle   |
+| Sau `forward tcp`          | 2s        | Socket binding                     |
+| Sau `Page.reload`          | 4s        | Full page reload + React hydration |
+| Sau `click` (navigation)   | 1s        | State update + re-render           |
+| Sau `click` (quick action) | 0.3-0.5s  | Optimistic update                  |
+| Sau `btn-confirm-plan`     | 2s        | DB persistence                     |
+
+---
+
+## 15. 8 Verification Locations (data-testid map)
+
+| ID  | Location                   | testid / cách truy cập                                                                        |
+| --- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| L1  | Health Profile Form        | `bmr-value`, `tdee-value`, `macro-protein`, `macro-fat`, `macro-carbs`                        |
+| L2  | Dashboard Mini             | `mini-eaten`, `mini-burned`, `mini-net`                                                       |
+| L3  | Dashboard Protein          | `protein-display` (format: "Xg / Yg")                                                         |
+| L4  | Dashboard Detail Sheet     | Click `energy-balance-mini` → `bmr-value`, `tdee-value`, `target-value`, `per-meal-breakdown` |
+| L5  | Calendar Nutrition Card    | `energy-balance-card` (click `subtab-nutrition` first)                                        |
+| L6  | Calendar Nutrition Summary | Header text "Mục tiêu: X kcal, Yg Protein"                                                    |
+| L7  | Calendar Meals Bar         | `mini-nutrition-bar`, `mini-remaining-cal`, `mini-remaining-pro`                              |
+| L8  | Fitness tab                | Same testids as L7 (bridge reuses components)                                                 |
+
+### Navigation giữa locations
+
+```python
+# Calendar tabs
+await clk("nav-calendar")        # → Calendar tab
+await clk("subtab-meals")        # → Meals subtab
+await clk("subtab-nutrition")    # → Nutrition subtab
+
+# Dashboard
+await clk("nav-dashboard")       # → Dashboard tab
+await clk("energy-balance-mini") # → Opens EnergyDetailSheet (L4)
+
+# Close sheet
+await ev('(function(){var bd=document.querySelector(\'[data-testid="modal-backdrop"]\');if(bd)bd.click()})()')
+
+# Fitness
+await clk("nav-fitness")         # → Fitness tab
+```
+
+---
+
+## 16. Goal Settings Form
+
+### testid map
+
+| Element           | testid                                                  |
+| ----------------- | ------------------------------------------------------- |
+| Goal type buttons | `goal-type-cut`, `goal-type-maintain`, `goal-type-bulk` |
+| Rate buttons      | `rate-conservative`, `rate-moderate`, `rate-aggressive` |
+| Offset display    | `calorie-offset-display`                                |
+| Save              | `settings-detail-save`                                  |
+| Cancel            | `settings-detail-cancel`                                |
+
+### Offset values
+
+| Goal     | Rate               | Offset |
+| -------- | ------------------ | ------ |
+| Cut      | Conservative       | -275   |
+| Cut      | Moderate (default) | -550   |
+| Cut      | Aggressive         | -1100  |
+| Maintain | —                  | 0      |
+| Bulk     | Conservative       | +275   |
+| Bulk     | Moderate (default) | +550   |
+| Bulk     | Aggressive         | +1100  |
+
+---
+
+## 17. Macro Calculation Nuance — Form vs App
+
+**QUAN TRỌNG**: Health Profile Form preview hiển thị macros tính từ **TDEE** (không có goal offset). Tất cả locations khác tính từ **Target = TDEE + offset**.
+
+```
+Form Preview:  macros(target=TDEE)     → dùng khi chưa set goal
+App Display:   macros(target=TDEE+offset) → dùng ở L2-L8
+```
+
+Với "maintain" (offset=0): hai giá trị giống nhau.
+Với "cut"/"bulk": hai giá trị KHÁC nhau đáng kể.
+
+Ví dụ SC-01: TDEE=2633, Target=2083 (cut -550)
+
+- Form: Fat=73g, Carbs=344g (từ 2633)
+- App: Fat=58g, Carbs=241g (từ 2083)
+
+---
+
+## 18. Edge Case: Macro Overflow
+
+Khi protein+fat calories > target (ví dụ aggressive cut cho người nhẹ cân):
+
+- `carbsCal = max(0, target - proteinCal - fatCal)` → carbs = 0
+- App hiển thị "Vượt: X kcal" thay vì "Còn lại: X kcal" khi eaten > target
+- Remaining hiển thị số âm: "Còn lại: -209 kcal"
+
+Đây KHÔNG phải bug — đây là hành vi đúng khi goal quá aggressive.
