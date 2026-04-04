@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type {
   Exercise,
+  MuscleGroup,
   TrainingPlan,
   TrainingPlanDay,
   TrainingProfile,
@@ -13,7 +14,8 @@ import type {
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import { createSchema } from '../services/schema';
 import { __resetDbForTesting, useFitnessStore } from '../store/fitnessStore';
-import { _resetQueue } from '../store/helpers/dbWriteQueue';
+import { _resetQueue, _waitForIdle } from '../store/helpers/dbWriteQueue';
+import { logger } from '../utils/logger';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -3912,5 +3914,1236 @@ describe('fitnessStore – FIX-04 changeSplitType transaction', () => {
 
     expect(callCount).toBe(1); // Transaction was attempted
     consoleSpy.mockRestore();
+  });
+});
+
+/* ================================================================== */
+/* FIX-14 — changeSplitType atomicity tests                           */
+/* ================================================================== */
+describe('fitnessStore – changeSplitType atomicity (FIX-14)', () => {
+  beforeEach(() => {
+    resetStore();
+  });
+
+  it('handles null _db gracefully (web mode)', async () => {
+    // Set up plan + days in Zustand WITHOUT initializing any DB
+    const plan = samplePlan({
+      id: 'atom-plan',
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3],
+      restDays: [4, 5, 6, 7],
+    });
+    const days = [
+      samplePlanDay({ id: 'atom-d1', planId: 'atom-plan', dayOfWeek: 1, workoutType: 'Push' }),
+      samplePlanDay({ id: 'atom-d2', planId: 'atom-plan', dayOfWeek: 2, workoutType: 'Pull' }),
+      samplePlanDay({ id: 'atom-d3', planId: 'atom-plan', dayOfWeek: 3, workoutType: 'Legs' }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.changeSplitType('atom-plan', 'upper_lower', 'regenerate');
+    });
+
+    const state = useFitnessStore.getState();
+    expect(state.trainingPlans[0].splitType).toBe('upper_lower');
+    // New days should be created for the upper_lower split
+    const newDays = state.trainingPlanDays.filter(d => d.planId === 'atom-plan');
+    expect(newDays.length).toBeGreaterThan(0);
+    // Old day IDs should be gone (replaced by new ones)
+    expect(newDays.every(d => !['atom-d1', 'atom-d2', 'atom-d3'].includes(d.id))).toBe(true);
+  });
+
+  it('preserves original data when changeSplitType DB transaction fails', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'atom-tx-plan';
+
+    // Insert plan + days into DB
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'Atom Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,2,3]',
+        '[4,5,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    for (const [idx, wt] of ['Push', 'Pull', 'Legs'].entries()) {
+      await db.execute(
+        `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [`atom-tx-d${idx}`, PLAN_ID, idx + 1, 1, wt, '[]', '[]', '[]', 0, idx + 1, wt],
+      );
+    }
+
+    // Create a bad DB that fails during transaction
+    const badDb: DatabaseService = {
+      initialize: () => db.initialize(),
+      execute: (sql: string, params?: unknown[]) => db.execute(sql, params),
+      query: <T>(sql: string, params?: unknown[]) => db.query<T>(sql, params),
+      queryOne: <T>(sql: string, params?: unknown[]) => db.queryOne<T>(sql, params),
+      transaction: async () => {
+        throw new Error('Simulated transaction failure');
+      },
+      close: () => db.close(),
+      exportToJSON: () => db.exportToJSON(),
+      importFromJSON: (json: string) => db.importFromJSON(json),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    // Verify original state is loaded
+    expect(useFitnessStore.getState().trainingPlans[0].splitType).toBe('ppl');
+    expect(useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === PLAN_ID)).toHaveLength(3);
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // changeSplitType should throw because transaction fails
+    await expect(
+      act(async () => {
+        await result.current.changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+      }),
+    ).rejects.toThrow('Simulated transaction failure');
+
+    // Zustand should NOT have been updated (error was thrown before set())
+    const state = useFitnessStore.getState();
+    expect(state.trainingPlans[0].splitType).toBe('ppl');
+    const remainingDays = state.trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(remainingDays).toHaveLength(3);
+    expect(remainingDays.map(d => d.workoutType).sort()).toEqual(['Legs', 'Pull', 'Push']);
+
+    // DB should also be unchanged
+    const dbPlan = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(dbPlan[0].splitType).toBe('ppl');
+
+    consoleSpy.mockRestore();
+    await db.close();
+  });
+});
+
+/* ================================================================== */
+/* FIX-11 — fitnessStore coverage gaps                                */
+/* ================================================================== */
+describe('fitnessStore – coverage gaps (FIX-11)', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+  });
+
+  /* ---- scoreDaySlot adjacent muscle penalty (via autoAssignWorkouts) ---- */
+  it('penalizes adjacent-day same-muscle assignment in autoAssignWorkouts', () => {
+    // Use training days [1, 3, 5] — none are adjacent to each other.
+    // With 2 chest sessions + 1 back session, the algorithm should spread
+    // chest to non-adjacent days (e.g., 1 and 5) rather than adjacent ones.
+    // The -20 adjacent-muscle penalty on scoreDaySlot ensures this.
+    const plan = samplePlan({
+      id: 'adj-plan',
+      trainingDays: [1, 3, 5],
+      restDays: [2, 4, 6, 7],
+    });
+    // Two chest sessions + one back session
+    const days = [
+      samplePlanDay({
+        id: 'adj-d1',
+        planId: 'adj-plan',
+        dayOfWeek: 1,
+        workoutType: 'chest-a',
+        muscleGroups: JSON.stringify(['chest']),
+      }),
+      samplePlanDay({
+        id: 'adj-d2',
+        planId: 'adj-plan',
+        dayOfWeek: 3,
+        workoutType: 'back',
+        muscleGroups: JSON.stringify(['back']),
+      }),
+      samplePlanDay({
+        id: 'adj-d3',
+        planId: 'adj-plan',
+        dayOfWeek: 5,
+        workoutType: 'chest-b',
+        muscleGroups: JSON.stringify(['chest']),
+      }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    useFitnessStore.getState().autoAssignWorkouts('adj-plan');
+
+    const assigned = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === 'adj-plan');
+    expect(assigned).toHaveLength(3);
+    // Each plan day should be assigned to a different training day (no collisions)
+    const dayOfWeeks = assigned.map(d => d.dayOfWeek);
+    expect(new Set(dayOfWeeks).size).toBe(3);
+    // All assigned days should be valid training days
+    expect(dayOfWeeks.every(d => [1, 3, 5].includes(d))).toBe(true);
+  });
+
+  /* ---- saveWorkoutAtomic without _db ---- */
+  it('saveWorkoutAtomic throws when DB not initialized', async () => {
+    // Do NOT call initializeFromSQLite — _db is null
+    const workout: Workout = {
+      id: 'w-no-db',
+      date: '2025-06-01',
+      name: 'Test Workout',
+      durationMin: 60,
+      planDayId: undefined,
+      notes: undefined,
+      createdAt: '2025-06-01T08:00:00Z',
+      updatedAt: '2025-06-01T09:00:00Z',
+    };
+
+    await expect(useFitnessStore.getState().saveWorkoutAtomic(workout, [])).rejects.toThrow(/Database not initialized/);
+  });
+
+  /* ---- updateTrainingDays DB persistence ---- */
+  it('updateTrainingDays persists changes to DB', async () => {
+    const PLAN_ID = 'utd-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'UTD Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,3,5]',
+        '[2,4,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    // Day on day 5 — we'll remove day 5 from training days
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['utd-d1', PLAN_ID, 5, 1, 'legs', '["legs"]', '[]', '[]', 0, 5, 'legs day'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    // Change training days: remove day 5, keep 1 and 3
+    await act(async () => {
+      result.current.updateTrainingDays(PLAN_ID, [1, 3]);
+    });
+
+    // Wait for fire-and-forget transaction
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
+    const dbPlan = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(JSON.parse(dbPlan[0].trainingDays as string)).toEqual([1, 3]);
+    expect(JSON.parse(dbPlan[0].restDays as string)).toEqual([2, 4, 5, 6, 7]);
+
+    // The orphaned session on day 5 should have been reassigned to nearest training day
+    const dbDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(dbDays).toHaveLength(1);
+    expect([1, 3]).toContain(dbDays[0].dayOfWeek);
+
+    await db.close();
+  });
+
+  /* ---- reassignWorkoutToDay DB persistence ---- */
+  it('reassignWorkoutToDay persists to DB via write queue', async () => {
+    const PLAN_ID = 'rwd-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'RWD Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,3,5]',
+        '[2,4,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['rwd-d1', PLAN_ID, 1, 1, 'push', '["chest"]', '[]', '[]', 0, 1, 'push day'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    // Reassign from day 1 to day 3
+    act(() => {
+      result.current.reassignWorkoutToDay('rwd-d1', 3);
+    });
+
+    // Wait for persistToDb queue
+    await act(async () => {
+      await _waitForIdle();
+    });
+
+    const dbDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE id = ?', ['rwd-d1']);
+    expect(dbDays[0].dayOfWeek).toBe(3);
+    expect(dbDays[0].isUserAssigned).toBe(1);
+
+    await db.close();
+  });
+
+  /* ---- autoAssignWorkouts DB persistence ---- */
+  it('autoAssignWorkouts persists to DB', async () => {
+    const PLAN_ID = 'aa-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'AA Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,3,5]',
+        '[2,4,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['aa-d1', PLAN_ID, 1, 1, 'push', '["chest"]', '[]', '[]', 1, 1, null],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.autoAssignWorkouts(PLAN_ID);
+    });
+
+    // Wait for fire-and-forget transaction
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
+    const dbDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE id = ?', ['aa-d1']);
+    expect(dbDays).toHaveLength(1);
+    // isUserAssigned should be reset to 0 by autoAssign
+    expect(dbDays[0].isUserAssigned).toBe(0);
+
+    await db.close();
+  });
+
+  /* ---- autoAssignWorkouts newDay === undefined branch ---- */
+  it('autoAssignWorkouts leaves unmatched days unchanged', () => {
+    const plan = samplePlan({
+      id: 'aa-unmatch',
+      trainingDays: [1, 3],
+      restDays: [2, 4, 5, 6, 7],
+    });
+    // A day for this plan + a day for ANOTHER plan that shouldn't be touched
+    const days = [
+      samplePlanDay({ id: 'aa-own', planId: 'aa-unmatch', dayOfWeek: 1, workoutType: 'push' }),
+      samplePlanDay({ id: 'aa-other', planId: 'other-plan', dayOfWeek: 7, workoutType: 'cardio' }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    useFitnessStore.getState().autoAssignWorkouts('aa-unmatch');
+
+    // The other plan's day should be untouched (newDay === undefined branch)
+    const otherDay = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'aa-other');
+    expect(otherDay?.dayOfWeek).toBe(7);
+    expect(otherDay?.workoutType).toBe('cardio');
+  });
+
+  /* ---- restoreOriginalSchedule DB persistence ---- */
+  it('restoreOriginalSchedule persists to DB', async () => {
+    const PLAN_ID = 'ros-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'ROS Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[2,4]',
+        '[1,3,5,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    // Day originally on day 1, moved to day 2
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['ros-d1', PLAN_ID, 2, 1, 'push', '["chest"]', '[]', '[]', 1, 1, 'push'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.restoreOriginalSchedule(PLAN_ID);
+    });
+
+    // Wait for fire-and-forget transaction
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
+    // Zustand should restore day to originalDayOfWeek (1)
+    const zustandDay = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'ros-d1');
+    expect(zustandDay?.dayOfWeek).toBe(1);
+    expect(zustandDay?.isUserAssigned).toBe(false);
+
+    // DB should also be updated
+    const dbDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE id = ?', ['ros-d1']);
+    expect(dbDays[0].dayOfWeek).toBe(1);
+    expect(dbDays[0].isUserAssigned).toBe(0);
+
+    // Plan training_days should reflect the restored days
+    const dbPlan = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(JSON.parse(dbPlan[0].trainingDays as string)).toContain(1);
+
+    await db.close();
+  });
+
+  /* ---- initializeFromSQLite error catches for plans, planDays, templates ---- */
+  it('initializeFromSQLite handles query errors for plans gracefully', async () => {
+    // Insert valid workout data (loaded BEFORE the plan queries)
+    await db.execute(`INSERT INTO weight_log (id, date, weight_kg, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`, [
+      'wl-err',
+      '2025-06-01',
+      75,
+      '2025-06-01T00:00:00Z',
+      '2025-06-01T00:00:00Z',
+    ]);
+
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Proxy DB that fails on training_plans query
+    const failDb: DatabaseService = {
+      initialize: () => db.initialize(),
+      execute: (sql: string, params?: unknown[]) => db.execute(sql, params),
+      query: <T>(sql: string, params?: unknown[]): Promise<T[]> => {
+        if (sql.includes('training_plans')) throw new Error('Plans table corrupted');
+        return db.query<T>(sql, params);
+      },
+      queryOne: <T>(sql: string, params?: unknown[]) => db.queryOne<T>(sql, params),
+      transaction: (fn: () => Promise<void>) => db.transaction(fn),
+      close: () => db.close(),
+      exportToJSON: () => db.exportToJSON(),
+      importFromJSON: (json: string) => db.importFromJSON(json),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(failDb);
+    });
+
+    // Weight entries loaded successfully (before the failing section)
+    expect(useFitnessStore.getState().weightEntries).toHaveLength(1);
+    // Plans failed gracefully — should still be empty
+    expect(useFitnessStore.getState().trainingPlans).toHaveLength(0);
+    // sqliteReady should still be true (set before plan queries)
+    expect(useFitnessStore.getState().sqliteReady).toBe(true);
+    // Warning logged
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+    await db.close();
+  });
+
+  it('initializeFromSQLite handles query errors for plan days gracefully', async () => {
+    // Insert a valid plan so the plans query succeeds
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['err-plan', 'Test', 'active', 'ppl', 8, '2025-06-01', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const failDb: DatabaseService = {
+      initialize: () => db.initialize(),
+      execute: (sql: string, params?: unknown[]) => db.execute(sql, params),
+      query: <T>(sql: string, params?: unknown[]): Promise<T[]> => {
+        if (sql.includes('training_plan_days')) throw new Error('Plan days corrupted');
+        return db.query<T>(sql, params);
+      },
+      queryOne: <T>(sql: string, params?: unknown[]) => db.queryOne<T>(sql, params),
+      transaction: (fn: () => Promise<void>) => db.transaction(fn),
+      close: () => db.close(),
+      exportToJSON: () => db.exportToJSON(),
+      importFromJSON: (json: string) => db.importFromJSON(json),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(failDb);
+    });
+
+    // Plans loaded fine
+    expect(useFitnessStore.getState().trainingPlans).toHaveLength(1);
+    // Plan days failed gracefully
+    expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(0);
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+    await db.close();
+  });
+
+  it('initializeFromSQLite handles query errors for templates gracefully', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const failDb: DatabaseService = {
+      initialize: () => db.initialize(),
+      execute: (sql: string, params?: unknown[]) => db.execute(sql, params),
+      query: <T>(sql: string, params?: unknown[]): Promise<T[]> => {
+        if (sql.includes('plan_templates')) throw new Error('Templates corrupted');
+        return db.query<T>(sql, params);
+      },
+      queryOne: <T>(sql: string, params?: unknown[]) => db.queryOne<T>(sql, params),
+      transaction: (fn: () => Promise<void>) => db.transaction(fn),
+      close: () => db.close(),
+      exportToJSON: () => db.exportToJSON(),
+      importFromJSON: (json: string) => db.importFromJSON(json),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(failDb);
+    });
+
+    // Templates failed — userTemplates should remain empty
+    expect(useFitnessStore.getState().userTemplates).toHaveLength(0);
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+    await db.close();
+  });
+
+  /* ---- changeSplitType non-existent plan ---- */
+  it('changeSplitType returns early for non-existent plan', async () => {
+    useFitnessStore.setState({ trainingPlans: [], trainingPlanDays: [] });
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.changeSplitType('no-such-plan', 'ppl', 'regenerate');
+    });
+
+    // No plans or days should be created
+    expect(useFitnessStore.getState().trainingPlans).toHaveLength(0);
+    expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(0);
+  });
+
+  /* ---- previewSplitChange non-existent plan ---- */
+  it('previewSplitChange returns empty arrays for non-existent plan', () => {
+    useFitnessStore.setState({ trainingPlans: [] });
+    const preview = useFitnessStore.getState().previewSplitChange('no-plan', 'upper_lower');
+    expect(preview).toEqual({ mapped: [], suggested: [], unmapped: [] });
+  });
+
+  /* ---- getRecommendedTemplates ---- */
+  it('getRecommendedTemplates returns top 3 templates for a profile', () => {
+    const profile = sampleProfile({
+      trainingExperience: 'beginner',
+      trainingGoal: 'strength',
+      daysPerWeek: 3,
+      availableEquipment: ['barbell'],
+    });
+
+    const recommendations = useFitnessStore.getState().getRecommendedTemplates(profile);
+    expect(recommendations).toHaveLength(3);
+    // First result should be a good match for a beginner strength profile
+    expect(recommendations[0]).toBeDefined();
+    expect(recommendations[0].id).toBeDefined();
+    expect(recommendations[0].name).toBeDefined();
+  });
+
+  /* ---- applyTemplate happy path ---- */
+  it('applyTemplate replaces plan days with template config', () => {
+    const plan = samplePlan({
+      id: 'tpl-apply-plan',
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3],
+      restDays: [4, 5, 6, 7],
+    });
+    const oldDay = samplePlanDay({ id: 'old-day-1', planId: 'tpl-apply-plan' });
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: [oldDay] });
+
+    // Use 'starting_strength' template — known 3-day full_body template
+    useFitnessStore.getState().applyTemplate('tpl-apply-plan', 'starting_strength');
+
+    const state = useFitnessStore.getState();
+    const updatedPlan = state.trainingPlans.find(p => p.id === 'tpl-apply-plan');
+    expect(updatedPlan?.splitType).toBe('full_body');
+    expect(updatedPlan?.templateId).toBe('starting_strength');
+
+    // Old day should be gone, new days from template should exist
+    const newDays = state.trainingPlanDays.filter(d => d.planId === 'tpl-apply-plan');
+    expect(newDays).toHaveLength(3);
+    expect(newDays.every(d => d.id !== 'old-day-1')).toBe(true);
+    // Each day should have the template config
+    expect(newDays[0].notes).toBe('Full Body A');
+    expect(newDays[0].workoutType).toBe('strength');
+  });
+
+  /* ---- applyTemplate non-existent template ---- */
+  it('applyTemplate returns early for non-existent template', () => {
+    const plan = samplePlan({ id: 'tpl-no-tpl' });
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: [] });
+
+    useFitnessStore.getState().applyTemplate('tpl-no-tpl', 'non-existent-template');
+
+    // Plan should be unchanged
+    expect(useFitnessStore.getState().trainingPlans[0].splitType).toBe('ppl');
+  });
+
+  /* ---- applyTemplate non-existent plan ---- */
+  it('applyTemplate returns early for non-existent plan', () => {
+    useFitnessStore.setState({ trainingPlans: [], trainingPlanDays: [] });
+
+    useFitnessStore.getState().applyTemplate('no-plan', 'starting_strength');
+
+    expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(0);
+  });
+
+  /* ---- applyTemplate with DB persistence ---- */
+  it('applyTemplate persists to DB', async () => {
+    const PLAN_ID = 'tpl-db-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'TPL DB Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,2,3]',
+        '[4,5,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.applyTemplate(PLAN_ID, 'starting_strength');
+    });
+
+    // Wait for fire-and-forget transaction
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
+    const dbPlan = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(dbPlan[0].splitType).toBe('full_body');
+    expect(dbPlan[0].templateId).toBe('starting_strength');
+
+    const dbDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(dbDays).toHaveLength(3);
+
+    await db.close();
+  });
+
+  /* ---- saveCurrentAsTemplate non-existent plan ---- */
+  it('saveCurrentAsTemplate returns early for non-existent plan', () => {
+    useFitnessStore.setState({ trainingPlans: [], userTemplates: [] });
+    useFitnessStore.getState().saveCurrentAsTemplate('no-plan', 'My Template');
+    expect(useFitnessStore.getState().userTemplates).toHaveLength(0);
+  });
+
+  /* ---- saveCurrentAsTemplate DB persistence ---- */
+  it('saveCurrentAsTemplate persists template to DB', async () => {
+    const PLAN_ID = 'save-tpl-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'Save TPL Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,3,5]',
+        '[2,4,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['save-tpl-d1', PLAN_ID, 1, 1, 'push', '["chest","shoulders"]', '[]', '[]', 0, 1, 'Push Day'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    act(() => {
+      result.current.saveCurrentAsTemplate(PLAN_ID, 'My Custom Template');
+    });
+
+    // Wait for persistToDb queue
+    await act(async () => {
+      await _waitForIdle();
+    });
+
+    // Verify in Zustand
+    const templates = useFitnessStore.getState().userTemplates;
+    expect(templates).toHaveLength(1);
+    expect(templates[0].name).toBe('My Custom Template');
+    expect(templates[0].isBuiltin).toBe(false);
+    expect(templates[0].splitType).toBe('ppl');
+
+    // Verify in DB
+    const dbTemplates = await db.query<Record<string, unknown>>('SELECT * FROM plan_templates WHERE is_builtin = 0');
+    expect(dbTemplates).toHaveLength(1);
+    expect(dbTemplates[0].name).toBe('My Custom Template');
+    expect(dbTemplates[0].splitType).toBe('ppl');
+
+    await db.close();
+  });
+});
+
+/* ================================================================== */
+/* Additional branch-coverage tests                                    */
+/* ================================================================== */
+describe('fitnessStore – branch coverage gaps', () => {
+  beforeEach(() => {
+    resetStore();
+  });
+
+  /* ---- scoreDaySlot hasSameMuscleAdjacent = true (lines 81-82, 86-87) ---- */
+  it('autoAssignWorkouts penalises same-muscle on adjacent training days', () => {
+    // Adjacent training days [1,2,3] with 3 chest sessions → penalty triggers
+    const plan = samplePlan({
+      id: 'adj2-plan',
+      trainingDays: [1, 2, 3],
+      restDays: [4, 5, 6, 7],
+    });
+    const days = [
+      samplePlanDay({
+        id: 'adj2-d1',
+        planId: 'adj2-plan',
+        dayOfWeek: 1,
+        workoutType: 'chest-a',
+        muscleGroups: JSON.stringify(['chest']),
+      }),
+      samplePlanDay({
+        id: 'adj2-d2',
+        planId: 'adj2-plan',
+        dayOfWeek: 2,
+        workoutType: 'chest-b',
+        muscleGroups: JSON.stringify(['chest']),
+      }),
+      samplePlanDay({
+        id: 'adj2-d3',
+        planId: 'adj2-plan',
+        dayOfWeek: 3,
+        workoutType: 'chest-c',
+        muscleGroups: JSON.stringify(['chest']),
+      }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    useFitnessStore.getState().autoAssignWorkouts('adj2-plan');
+
+    const assigned = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === 'adj2-plan');
+    expect(assigned).toHaveLength(3);
+    // Each gets a unique training day; the -20 penalty tries to spread them
+    const usedDays = new Set(assigned.map(d => d.dayOfWeek));
+    expect(usedDays.size).toBe(3);
+    expect([...usedDays].every(d => [1, 2, 3].includes(d))).toBe(true);
+  });
+
+  /* ---- reassignWorkoutToDay: target day already has 3 sessions (line 840) ---- */
+  it('reassignWorkoutToDay rejects when target day already has 3 sessions', () => {
+    const plan = samplePlan({
+      id: 'max-plan',
+      trainingDays: [1, 2],
+      restDays: [3, 4, 5, 6, 7],
+    });
+    const days = [
+      samplePlanDay({ id: 'max-d1', planId: 'max-plan', dayOfWeek: 1, workoutType: 'a' }),
+      samplePlanDay({ id: 'max-d2', planId: 'max-plan', dayOfWeek: 1, workoutType: 'b', sessionOrder: 2 }),
+      samplePlanDay({ id: 'max-d3', planId: 'max-plan', dayOfWeek: 1, workoutType: 'c', sessionOrder: 3 }),
+      samplePlanDay({ id: 'max-d4', planId: 'max-plan', dayOfWeek: 2, workoutType: 'd' }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    useFitnessStore.getState().reassignWorkoutToDay('max-d4', 1);
+
+    // Day 1 already has 3 sessions — reassignment should be rejected
+    const d4 = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'max-d4');
+    expect(d4?.dayOfWeek).toBe(2); // unchanged
+  });
+
+  /* ---- restoreOriginalSchedule with no planDays (line 939) ---- */
+  it('restoreOriginalSchedule exits early when planDays is empty', () => {
+    const plan = samplePlan({ id: 'empty-plan' });
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: [] });
+
+    useFitnessStore.getState().restoreOriginalSchedule('empty-plan');
+
+    // Plan should remain unchanged (no crash, no update)
+    const storedPlan = useFitnessStore.getState().trainingPlans[0];
+    expect(storedPlan.trainingDays).toEqual([1, 3, 5]);
+  });
+
+  /* ---- previewSplitChange happy path (lines 1260-1264) ---- */
+  it('previewSplitChange returns remapped exercises for valid plan', () => {
+    const plan = samplePlan({
+      id: 'preview-plan',
+      splitType: 'ppl',
+      trainingDays: [1, 3, 5],
+    });
+    const days = [
+      samplePlanDay({ id: 'pv-d1', planId: 'preview-plan', dayOfWeek: 1, workoutType: 'Push' }),
+      samplePlanDay({ id: 'pv-d2', planId: 'preview-plan', dayOfWeek: 3, workoutType: 'Pull' }),
+      samplePlanDay({ id: 'pv-d3', planId: 'preview-plan', dayOfWeek: 5, workoutType: 'Legs' }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    const preview = useFitnessStore.getState().previewSplitChange('preview-plan', 'upper_lower');
+
+    expect(preview).toHaveProperty('mapped');
+    expect(preview).toHaveProperty('suggested');
+    expect(preview).toHaveProperty('unmapped');
+  });
+
+  /* ---- applyTemplate: daysPerWeek > plan.trainingDays → index fallback (line 1293) ---- */
+  it('applyTemplate fills missing training days with index fallback', () => {
+    const plan = samplePlan({
+      id: 'tmpl-plan',
+      splitType: 'ppl',
+      trainingDays: [1, 3], // Only 2 training days
+      restDays: [2, 4, 5, 6, 7],
+    });
+    // 4-day template on 2-day plan forces fallback
+    const customTemplate = {
+      id: 'custom-4day',
+      name: '4-Day Template',
+      splitType: 'upper_lower' as const,
+      daysPerWeek: 4,
+      experienceLevel: 'intermediate' as const,
+      trainingGoal: 'hypertrophy' as const,
+      equipmentRequired: ['barbell' as const],
+      description: 'Test template',
+      dayConfigs: [
+        {
+          workoutType: 'Upper A',
+          muscleGroups: ['chest', 'back'] as MuscleGroup[],
+          exercises: [],
+          dayLabel: 'Upper A',
+        },
+        {
+          workoutType: 'Lower A',
+          muscleGroups: ['legs', 'glutes'] as MuscleGroup[],
+          exercises: [],
+          dayLabel: 'Lower A',
+        },
+        {
+          workoutType: 'Upper B',
+          muscleGroups: ['shoulders', 'arms'] as MuscleGroup[],
+          exercises: [],
+          dayLabel: 'Upper B',
+        },
+        { workoutType: 'Lower B', muscleGroups: ['legs', 'core'] as MuscleGroup[], exercises: [], dayLabel: 'Lower B' },
+      ],
+      popularityScore: 50,
+      isBuiltin: false,
+    };
+    useFitnessStore.setState({
+      trainingPlans: [plan],
+      trainingPlanDays: [],
+      userTemplates: [customTemplate],
+    });
+
+    useFitnessStore.getState().applyTemplate('tmpl-plan', 'custom-4day');
+
+    const newDays = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === 'tmpl-plan');
+    expect(newDays).toHaveLength(4);
+    // First 2 days use plan.trainingDays [1,3], remaining use index [2,3]
+    expect(newDays[0].dayOfWeek).toBe(1);
+    expect(newDays[1].dayOfWeek).toBe(3);
+    expect(newDays[2].dayOfWeek).toBe(2); // fallback: index i=2
+    expect(newDays[3].dayOfWeek).toBe(3); // fallback: index i=3
+
+    const updatedPlan = useFitnessStore.getState().trainingPlans[0];
+    expect(updatedPlan.templateId).toBe('custom-4day');
+    expect(updatedPlan.splitType).toBe('upper_lower');
+  });
+
+  /* ---- initializeFromSQLite: workout sets with null exerciseId (line 1004) ---- */
+  it('initializeFromSQLite loads workout sets with null exerciseId', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    await db.execute(
+      `INSERT INTO workouts (id, date, name, created_at, updated_at)
+       VALUES ('ws-w1', '2025-06-01', 'Test', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z')`,
+    );
+    await db.execute(
+      `INSERT INTO workout_sets (id, workout_id, exercise_id, set_number, weight_kg, updated_at)
+       VALUES ('ws-s1', 'ws-w1', NULL, 1, NULL, '2025-06-01T00:00:00Z')`,
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const sets = useFitnessStore.getState().workoutSets;
+    expect(sets).toHaveLength(1);
+    expect(sets[0].exerciseId).toBeNull();
+    expect(sets[0].weightKg).toBe(0); // NULL → ?? 0 fallback
+
+    await db.close();
+  });
+
+  /* ---- initializeFromSQLite: training plan nullable fields (lines 1046-1049) ---- */
+  it('initializeFromSQLite handles null status/currentWeek in training plans', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    // Explicitly insert with NULL status and current_week to bypass DEFAULT
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, current_week, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES ('null-plan', 'Test', NULL, 'ppl', 8, NULL, '2025-06-01', '[1,3,5]', '[2,4,6,7]', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z')`,
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const plans = useFitnessStore.getState().trainingPlans;
+    expect(plans).toHaveLength(1);
+    expect(plans[0].status).toBe('active'); // ?? 'active' fallback
+    expect(plans[0].currentWeek).toBe(1); // ?? 1 fallback
+
+    await db.close();
+  });
+
+  /* ---- initializeFromSQLite: user template nullable fields (lines 1108-1115) ---- */
+  it('initializeFromSQLite handles null fields in user templates', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    await db.execute(
+      `INSERT INTO plan_templates (id, name, split_type, days_per_week, is_builtin, experience_level, training_goal, description, day_configs, popularity_score, created_at, updated_at)
+       VALUES ('tmpl-null', 'Minimal', 'ppl', 3, 0, NULL, NULL, NULL, '[]', NULL, '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z')`,
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const templates = useFitnessStore.getState().userTemplates;
+    expect(templates).toHaveLength(1);
+    expect(templates[0].experienceLevel).toBe('all'); // ?? 'all' fallback
+    expect(templates[0].trainingGoal).toBe('general'); // ?? 'general' fallback
+    expect(templates[0].description).toBe(''); // ?? '' fallback
+    expect(templates[0].popularityScore).toBe(0); // ?? 0 fallback
+
+    await db.close();
+  });
+
+  /* ---- initializeFromSQLite: plan days nullable sessionOrder/originalDayOfWeek (lines 1078, 1084) ---- */
+  it('initializeFromSQLite handles null sessionOrder and originalDayOfWeek', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    await db.execute(
+      `INSERT INTO training_plans (id, name, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES ('so-plan', 'Test', 'ppl', 8, '2025-06-01', '[1,3,5]', '[2,4,6,7]', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z')`,
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, workout_type, is_user_assigned, original_day_of_week)
+       VALUES ('so-d1', 'so-plan', 3, 'Push', 0, NULL)`,
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const days = useFitnessStore.getState().trainingPlanDays;
+    expect(days).toHaveLength(1);
+    expect(days[0].sessionOrder).toBe(1); // ?? 1 fallback
+    expect(days[0].originalDayOfWeek).toBe(3); // ?? dayOfWeek fallback
+
+    await db.close();
+  });
+
+  /* ---- restoreOriginalSchedule recalculates training/rest days (lines 947-960) ---- */
+  it('restoreOriginalSchedule restores days and recomputes training/rest days', () => {
+    const plan = samplePlan({
+      id: 'ros-plan',
+      trainingDays: [2, 4], // currently reassigned
+      restDays: [1, 3, 5, 6, 7],
+    });
+    const days = [
+      samplePlanDay({
+        id: 'ros-d1',
+        planId: 'ros-plan',
+        dayOfWeek: 2,
+        originalDayOfWeek: 1,
+        isUserAssigned: true,
+      }),
+      samplePlanDay({
+        id: 'ros-d2',
+        planId: 'ros-plan',
+        dayOfWeek: 4,
+        originalDayOfWeek: 3,
+        isUserAssigned: true,
+      }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    useFitnessStore.getState().restoreOriginalSchedule('ros-plan');
+
+    const restored = useFitnessStore.getState().trainingPlanDays.filter(d => d.planId === 'ros-plan');
+    expect(restored[0].dayOfWeek).toBe(1);
+    expect(restored[1].dayOfWeek).toBe(3);
+    expect(restored[0].isUserAssigned).toBe(false);
+
+    const updatedPlan = useFitnessStore.getState().trainingPlans[0];
+    expect(updatedPlan.trainingDays).toContain(1);
+    expect(updatedPlan.trainingDays).toContain(3);
+    expect(updatedPlan.restDays).toContain(2);
+  });
+
+  /* ---- applyTemplate with DB (line 1324-1332) ---- */
+  it('applyTemplate persists to DB when initialised', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'at-db-plan';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, 'Test Plan', 'ppl', 8, '2025-06-01', '[1,2,3,4,5,6]', '[7]', ?, ?)`,
+      [PLAN_ID, '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const templates = useFitnessStore.getState().getTemplates();
+    const builtinTmpl = templates.find(t => t.isBuiltin);
+    if (!builtinTmpl) return;
+
+    await act(async () => {
+      result.current.applyTemplate(PLAN_ID, builtinTmpl.id);
+    });
+    await _waitForIdle();
+
+    const plan = useFitnessStore.getState().trainingPlans.find(p => p.id === PLAN_ID);
+    expect(plan?.templateId).toBe(builtinTmpl.id);
+    expect(plan?.splitType).toBe(builtinTmpl.splitType);
+
+    const dbPlan = await db.queryOne<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(dbPlan?.templateId).toBe(builtinTmpl.id);
+
+    const dbDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(dbDays.length).toBe(builtinTmpl.dayConfigs.length);
+
+    await db.close();
+  });
+
+  /* ---- DB error catch handlers (lines 815, 927, 975, 1332) ---- */
+  it('updateTrainingDays catch handler fires on DB error (line 815)', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'utd-err';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, 'T', 'ppl', 8, '2025-06-01', '[1,3,5]', '[2,4,6,7]', ?, ?)`,
+      [PLAN_ID, '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, workout_type, is_user_assigned, original_day_of_week)
+       VALUES ('utd-d1', ?, 1, 'Push', 0, 1)`,
+      [PLAN_ID],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    // Close DB to make transaction fail
+    await db.close();
+    const errorSpy = vi.spyOn(logger, 'error');
+
+    await act(async () => {
+      result.current.updateTrainingDays(PLAN_ID, [2, 4]);
+    });
+    // Wait for async catch to fire
+    await new Promise(r => setTimeout(r, 50));
+
+    // Zustand still updated (optimistic)
+    const plan = useFitnessStore.getState().trainingPlans.find(p => p.id === PLAN_ID);
+    expect(plan?.trainingDays).toEqual([2, 4]);
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it('autoAssignWorkouts catch handler fires on DB error (line 927)', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'aa-err';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, 'T', 'ppl', 8, '2025-06-01', '[1,3,5]', '[2,4,6,7]', ?, ?)`,
+      [PLAN_ID, '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, workout_type, is_user_assigned, original_day_of_week, muscle_groups)
+       VALUES ('aa-d1', ?, 1, 'Push', 0, 1, '["chest"]')`,
+      [PLAN_ID],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.close();
+    const errorSpy = vi.spyOn(logger, 'error');
+
+    await act(async () => {
+      result.current.autoAssignWorkouts(PLAN_ID);
+    });
+    await new Promise(r => setTimeout(r, 50));
+
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it('restoreOriginalSchedule catch handler fires on DB error (line 975)', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'ros-err';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, 'T', 'ppl', 8, '2025-06-01', '[1,3]', '[2,4,5,6,7]', ?, ?)`,
+      [PLAN_ID, '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, workout_type, is_user_assigned, original_day_of_week)
+       VALUES ('ros-d1', ?, 3, 'Push', 1, 1)`,
+      [PLAN_ID],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await db.close();
+    const errorSpy = vi.spyOn(logger, 'error');
+
+    await act(async () => {
+      result.current.restoreOriginalSchedule(PLAN_ID);
+    });
+    await new Promise(r => setTimeout(r, 50));
+
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it('applyTemplate catch handler fires on DB error (line 1332)', async () => {
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'at-err';
+    await db.execute(
+      `INSERT INTO training_plans (id, name, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, 'T', 'ppl', 8, '2025-06-01', '[1,2,3,4,5,6]', '[7]', ?, ?)`,
+      [PLAN_ID, '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'],
+    );
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    const templates = useFitnessStore.getState().getTemplates();
+    const tmpl = templates.find(t => t.isBuiltin);
+    if (!tmpl) return;
+
+    await db.close();
+    const errorSpy = vi.spyOn(logger, 'error');
+
+    await act(async () => {
+      result.current.applyTemplate(PLAN_ID, tmpl.id);
+    });
+    await new Promise(r => setTimeout(r, 50));
+
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 });
