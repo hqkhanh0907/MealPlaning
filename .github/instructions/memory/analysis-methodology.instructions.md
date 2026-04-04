@@ -573,3 +573,123 @@ Layer 3: Component      — Each component self-guard, không tin prop blindly
 ### Bài học
 
 Guard tại 1 điểm = fragile. Guard tại MỌI tầng = robust. Đặc biệt quan trọng khi data source có thể corrupt (stale SQLite, partial profile).
+
+---
+
+## 18. Team Workflow (multi-agent pipeline) — Orchestration Patterns
+
+### Vấn đề
+
+Phân tích 1 module lớn (fitness: 61 files, 12,739 LOC) cần nhiều góc nhìn — business logic, architecture, code quality, test coverage. Làm tuần tự mất quá lâu.
+
+### Giải pháp: 6-agent pipeline
+
+```
+Phase 1: CEO Agent (explore codebase + brainstorm) — 10 phút
+Phase 2-4: BM + Tech Leader song song — 10 phút
+Phase 5-6: Dev + QA song song — 15 phút
+Tổng hợp Executive Summary — 5 phút
+```
+
+### Kinh nghiệm orchestration
+
+1. **General-purpose agents tự spawn explore sub-agents** — CEO agent tự tạo 3 explore agents, BM tạo 2, Tech Leader tạo 5. Tổng ~15 agents chạy. Không cần micro-manage.
+2. **Parallel phases PHẢI độc lập** — BM + Tech Leader chạy song song OK vì không phụ thuộc nhau. Dev + QA phụ thuộc BM + Tech Leader → phải đợi xong.
+3. **Context transfer giữa phases** — Inject findings từ phase trước vào prompt phase sau (BM bugs → Dev verify). KHÔNG dùng file sharing — copy trực tiếp vào prompt.
+4. **Agent timeout** — General-purpose agents mất 5-15 phút. `read_agent(wait=true, timeout=60)` sẽ timeout nhiều lần → kiên nhẫn, sẽ có notification khi xong.
+5. **Output quá lớn** — Agent output > 10KB bị save ra temp file. Dùng `view` với `view_range` để đọc từng phần.
+6. **Mỗi agent TỰ tạo document** — Cho agent tự commit document thay vì copy output. Clean hơn + agent verify nội dung trước khi commit.
+
+### Bài học
+
+Multi-agent pipeline 5x nhanh hơn sequential analysis. Nhưng PHẢI có CEO phase đầu tiên để map scope — nếu không, các agent sau sẽ overlap hoặc bỏ sót.
+
+---
+
+## 19. Copilot CLI Extension Creation — User-level Tools & Hooks
+
+### Vấn đề
+
+Muốn port gstack skills (ship, ceo-review, security audit, investigate...) sang Copilot CLI nhưng chúng là Claude Code "SKILL.md" prompts, không tương thích trực tiếp.
+
+### Giải pháp: Copilot CLI Extensions
+
+```javascript
+// extension.mjs (ES module, KHÔNG dùng TypeScript)
+import { joinSession } from "@github/copilot-sdk/extension";
+
+const session = await joinSession({
+    hooks: { onPreToolUse, onSessionStart, onSessionEnd },
+    tools: [{ name, description, parameters, handler }],
+});
+```
+
+### Gotchas quan trọng
+
+1. **PHẢI là `.mjs`** — Copilot CLI không support TypeScript extensions
+2. **`location: "user"`** khi scaffold → global extensions, không project-specific
+3. **Tools return STRINGS** — Không return objects. String = structured prompt hướng dẫn agent thực hiện multi-step workflow
+4. **`onPreToolUse` return `permissionDecision: "ask"`** — Không dùng `"deny"` vì user không có cơ hội override
+5. **`session.log()`** cho timeline messages — KHÔNG dùng `console.log` (stdout reserved for JSON-RPC)
+6. **Tool names PHẢI globally unique** — Prefix bằng extension name để tránh collision
+7. **`skipPermission: true`** cho tools chỉ đọc (readonly) — tránh confirm prompt mỗi lần gọi
+8. **Extensions reload trên `/clear`** hoặc `extensions_reload()` — test bằng cách reload
+
+### Pattern: Workflow Tool (ship, investigate, ceo-review)
+
+```javascript
+handler: async (args) => {
+    // 1. Gather context (git status, branch, diff)
+    const branch = await runShell("git branch --show-current");
+    // 2. Return structured prompt with steps
+    return `# WORKFLOW: Ship Pipeline\n## Step 1: ...\n## Step 2: ...`;
+    // Agent sẽ follow prompt steps tự động
+}
+```
+
+### Pattern: Safety Hook (careful)
+
+```javascript
+onPreToolUse: async (input) => {
+    if (input.toolName !== "bash") return;
+    const cmd = String(input.toolArgs?.command || "");
+    // Regex match destructive patterns
+    if (isDangerous(cmd)) return { permissionDecision: "ask", permissionDecisionReason: "..." };
+}
+```
+
+### Bài học
+
+Copilot CLI extensions = **prompt engineering + tool registration**. Workflow tools không thực sự "chạy" pipeline — chúng trả về structured prompt để agent follow. Safety hooks thì CAN THIỆP trực tiếp vào tool execution.
+
+---
+
+## 20. Persistence Audit Pattern — Kiểm tra "fire-and-forget" writes
+
+### Vấn đề
+
+Fitness module có 24 store actions nhưng chỉ 14 persist SQLite, 10 chỉ update Zustand. Phát hiện bằng multi-agent analysis nhưng có thể phát hiện nhanh hơn bằng grep pattern.
+
+### Pattern detect nhanh
+
+```bash
+# Tìm tất cả actions trong store
+grep -n "^\s*\w\+:" src/store/fitnessStore.ts | grep -v "//"
+
+# Tìm actions CÓ DB write
+grep -n "_db\.\(execute\|run\|query\|transaction\)" src/store/fitnessStore.ts
+
+# So sánh 2 danh sách → actions THIẾU DB write = bugs
+```
+
+### Checklist persistence audit
+
+- [ ] Mỗi action thay đổi state → CÓ DB write tương ứng?
+- [ ] DB write nào dùng transaction? Nào fire-and-forget?
+- [ ] `.catch()` handler có log đủ context? Hay nuốt im lặng?
+- [ ] Có retry logic cho failed writes?
+- [ ] `initializeFromSQLite()` load TẤT CẢ data mà actions write?
+
+### Bài học
+
+Khi audit bất kỳ Zustand + SQLite store nào: **grep `_db.execute` rồi so sánh với list actions**. Mismatch = potential data loss bug. Session này phát hiện 10/24 actions thiếu — tỷ lệ 42% — rất nghiêm trọng.
