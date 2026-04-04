@@ -233,3 +233,21 @@ Manual test phát hiện thêm những gì code audit bỏ sót.
 - [ ] Test cả positive (happy path) lẫn negative (edge case)
 - [ ] Screenshot mỗi bước quan trọng
 - [ ] Không restart app giữa test suite (in-memory DB)
+
+## 7. Bẫy `<dialog open>` — Browser UA Stylesheet Override
+
+### Vấn đề
+
+3 fitness components dùng `<dialog open>` để hiển thị confirm modal nhưng KHÔNG override browser UA defaults → modal hiển thị sai (nhỏ, lệch, có border).
+
+### Nguyên nhân
+
+Browser UA stylesheet cho `<dialog>` mặc định: `margin: auto`, `max-width: fit-content`, `border: solid`, `padding: 1em`, `width: fit-content`. Các class Tailwind `fixed inset-0 flex` bị UA override.
+
+### Giải pháp
+
+Dùng component có sẵn (`UnsavedChangesDialog` hoặc `ModalBackdrop`) thay vì raw `<dialog>`. Nếu buộc phải dùng `<dialog open>`, PHẢI thêm: `m-0 max-h-none max-w-none border-none h-full w-full p-0`.
+
+### Bài học
+
+Khi thấy `<dialog>` trong code, luôn kiểm tra xem có override đủ UA defaults chưa. Ưu tiên dùng shared component (ModalBackdrop/UnsavedChangesDialog) để đảm bảo nhất quán.
