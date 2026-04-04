@@ -4,22 +4,55 @@
 
 ---
 
-## Khi nào PHẢI lưu vào memory?
+## NGUYÊN TẮC CỐT LÕI
 
-Khi xảy ra **BẤT KỲ** tình huống nào sau đây trong session:
+Kinh nghiệm là tài sản quý nhất. **MỌI lần hoàn thành 1 task** đều phải rút kinh nghiệm.
 
-| Trigger                                     | Ví dụ                                                        |
-| ------------------------------------------- | ------------------------------------------------------------ |
-| **Retry > 2 lần** cho cùng 1 vấn đề         | Build fail 3 lần vì sai config                               |
-| **Sai approach** phải đổi hướng             | Dùng `input[type="number"]` → fail → phải dùng `data-testid` |
-| **Gotcha/trap** mất > 10 phút               | Age tính nhẩm sai 1 năm → toàn bộ expected values sai        |
-| **Workaround** cho tool/platform limitation | WebSocket cần `suppress_origin=True`                         |
-| **Pattern mới** có giá trị tái sử dụng      | Backward tracing từ UI → root cause                          |
-| **Debug technique** hiệu quả                | CDP `Runtime.evaluate` thay vì `adb tap`                     |
-| **Config/setup** dễ quên                    | Package name đúng, port forwarding command                   |
-| **Architecture discovery**                  | sql.js in-memory → không persist, mất data khi restart       |
-| **Phát hiện bug** và cách fix               | Consumer dùng TDEE thay Target                               |
-| **Sai lầm phân tích**                       | Chỉ audit logic, bỏ qua persistence layer                    |
+---
+
+## Quy trình 3 bước — CHẠY MỖI SESSION
+
+### Bước 1: ĐỌC memory hiện có (đầu session)
+
+Khi bắt đầu session mới, ĐỌC tất cả files trong `.github/instructions/memory/` để:
+
+- Biết kinh nghiệm đã có
+- Tránh lặp lại sai lầm cũ
+- Áp dụng pattern đã được ghi nhận
+
+### Bước 2: RÚT KINH NGHIỆM (sau mỗi task/trả lời)
+
+Sau khi hoàn thành 1 task cho user, TỰ HỎI:
+
+> 1. "Mình vừa học được gì mới?"
+> 2. "Kinh nghiệm này đã có trong memory chưa?"
+> 3. "Nếu có rồi — cần cập nhật/bổ sung gì không?"
+> 4. "Nếu chưa — thêm vào file nào?"
+
+### Bước 3: CẬP NHẬT memory
+
+- **Kinh nghiệm MỚI** → APPEND vào file phù hợp
+- **Kinh nghiệm đã có nhưng THIẾU** → Bổ sung thêm chi tiết
+- **Kinh nghiệm đã có và ĐỦ** → Không cần làm gì
+- **Commit ngay** sau khi cập nhật
+
+---
+
+## Loại kinh nghiệm cần lưu
+
+| Loại                       | Ví dụ                                       | Giá trị             |
+| -------------------------- | ------------------------------------------- | ------------------- |
+| **Sai lầm**                | Tính nhẩm age sai → expected values sai hết | Tránh lặp lại       |
+| **Pattern hiệu quả**       | Backward tracing từ UI → root cause         | Tái sử dụng         |
+| **Gotcha/trap**            | Form dùng type="text" cho số                | Tiết kiệm thời gian |
+| **Architecture discovery** | sql.js in-memory, không persist             | Hiểu hệ thống       |
+| **Debug technique**        | CDP Runtime.evaluate thay adb tap           | Công cụ tốt hơn     |
+| **Config/setup**           | Package name, port forwarding               | Không quên          |
+| **Workaround**             | WebSocket suppress_origin                   | Platform limitation |
+| **Quyết định thiết kế**    | Chọn GP1 vì ít thay đổi nhất                | Trade-off analysis  |
+| **Quy trình tối ưu**       | Test tất cả trong 1 session                 | Best practice       |
+
+**Không giới hạn** — bất cứ kinh nghiệm gì có giá trị cho lần sau đều PHẢI lưu.
 
 ---
 
@@ -42,9 +75,7 @@ Thư mục: `.github/instructions/memory/`
 
 ---
 
-## Cách lưu?
-
-### Format entry mới:
+## Format entry mới
 
 ```markdown
 ## N. Tiêu đề ngắn gọn
@@ -61,47 +92,15 @@ Root cause (1-2 câu)
 
 Code/command/pattern cụ thể
 
-### Thời gian mất
+### Bài học
 
-Ước lượng (vd: "2 vòng retry, ~30 phút")
+1 câu tóm tắt để nhớ nhanh
 ```
 
-### Quy tắc:
+### Quy tắc ghi:
 
 1. **APPEND** vào file hiện có — KHÔNG tạo file mới nếu đã có file phù hợp
 2. **Tăng số thứ tự** section (vd: file có đến ##20, entry mới là ##21)
 3. **Cụ thể** — ghi code/command thật, KHÔNG viết chung chung
 4. **Commit ngay** sau khi lưu — không để uncommitted
-
----
-
-## Quy trình cuối mỗi session
-
-Trước khi kết thúc session (hoặc trước `task_complete`), tự hỏi:
-
-> "Trong session này, tôi có gặp tình huống nào trong bảng trigger ở trên không?"
-
-Nếu CÓ → lưu vào memory TRƯỚC khi kết thúc.
-Nếu KHÔNG → không cần lưu (không lưu rác).
-
----
-
-## Ví dụ thực tế (từ session 2026-04-04)
-
-### Trigger: Sai approach → đổi hướng
-
-- **Vấn đề**: Tìm weight input bằng `input[type="number"]` → không tìm thấy
-- **Lưu vào**: `emulator-testing.instructions.md` → Section "Health Profile Form"
-- **Nội dung**: Bảng testids, ghi rõ type="text" cho số
-
-### Trigger: Gotcha mất > 10 phút
-
-- **Vấn đề**: Age tính nhẩm = 30, thực tế = 29 → tất cả expected sai
-- **Lưu vào**: `test-case-design.instructions.md` → Section "Sai lầm 5.1"
-- **Nội dung**: Code Python tính age đúng, bảng ví dụ
-
-### Trigger: Architecture discovery
-
-- **Vấn đề**: sql.js in-memory, force-stop mất hết data
-- **Lưu vào**: `emulator-testing.instructions.md` → Section "KIẾN TRÚC"
-- **Nội dung**: Hệ quả + ảnh hưởng đến test strategy
+5. **Không lưu rác** — chỉ lưu điều thực sự có giá trị cho lần sau
