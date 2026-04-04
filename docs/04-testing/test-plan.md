@@ -1,8 +1,9 @@
 # Test Plan — Smart Meal Planner
 
-**Version:** 11.0  
-**Date:** 2026-07-20  
+**Version:** 12.0  
+**Date:** 2026-07-21  
 **Author:** Dev Team  
+**Changelog v12.0:** CEO-level audit: 6 issues fixed (2 P0, 2 P1, 2 P2). GoalPhaseSelector form.trigger() + saveRef useEffect deps. safeJsonParse cho dayPlanStore/dishStore/mealTemplateStore. UnitSelector i18n. fitnessStore structured logging. 184 test files, 4633 tests. Test report: `test-report-ceo-audit.md`
 **Changelog v11.0:** Wave 2 fixes: FIX-07 (dbWriteQueue helper), FIX-10 (FK SET NULL migration v5→v6), FIX-13 (fire-and-forget patterns → persistToDb/transaction). Updated schema version 6, 28 tables. Added test report: `test-report-wave2.md`
 **Changelog v10.0:** Thêm Unified Onboarding, Plan Editing UX, Multi-Session System, coverage 100% target, Chrome DevTools manual testing protocol, SonarQube quality gates, Navigation audit: fixed Settings/Grocery tab references (not tabs), added TC_ENERGY/TC_HEALTH
 
@@ -390,3 +391,85 @@ E2E tests tạo dữ liệu programmatically qua UI và inject dữ liệu qua l
 | Build status                         | ✅ Stable |
 
 > **Full report:** [reports/test-report-fitness-flexibility.md](reports/test-report-fitness-flexibility.md)
+
+---
+
+## 10. CEO-Level Audit — Test Coverage Updates (v12.0)
+
+**Date:** 2026-07-21  
+**Audit report:** [test-report-ceo-audit.md](test-report-ceo-audit.md)
+
+### 10.1 safeJsonParse — Test Coverage
+
+CEO audit phát hiện 3 stores dùng `JSON.parse` trực tiếp trên dữ liệu từ SQLite. Đã thêm protection:
+
+| Store             | Pattern           | Fields protected                                              | Test coverage |
+| ----------------- | ----------------- | ------------------------------------------------------------- | ------------- |
+| dayPlanStore      | `safeJsonParse()` | breakfast_dish_ids, lunch_dish_ids, dinner_dish_ids, servings | ✅ Unit test  |
+| dishStore         | `safeJsonParse()` | tags (MealType[])                                             | ✅ Unit test  |
+| mealTemplateStore | try-catch+filter  | data (template JSON blob)                                     | ✅ Unit test  |
+
+**Test cases mới:**
+
+| TC ID          | Mô tả                                                | File test               |
+| -------------- | ---------------------------------------------------- | ----------------------- |
+| TC_SJSON_01    | safeJsonParse trả về parsed value khi JSON hợp lệ    | `safeJsonParse.test.ts` |
+| TC_SJSON_02    | safeJsonParse trả về fallback khi JSON corrupt       | `safeJsonParse.test.ts` |
+| TC_SJSON_03    | safeJsonParse log warning với context khi parse fail | `safeJsonParse.test.ts` |
+| TC_STORE_JP_01 | dayPlanStore.loadAll handles corrupt dish_ids JSON   | `dayPlanStore.test.ts`  |
+| TC_STORE_JP_02 | dishStore.loadAll handles corrupt tags JSON          | `dishStore.test.ts`     |
+| TC_STORE_JP_03 | mealTemplateStore.loadAll filters corrupt templates  | `mealTemplate.test.tsx` |
+
+**Quy tắc áp dụng:** Mọi `JSON.parse` trên dữ liệu từ database PHẢI dùng `safeJsonParse` hoặc try-catch. Không exception.
+
+### 10.2 GoalPhaseSelector — Validation & Dependency Fixes
+
+| TC ID         | Mô tả                                                       | Kết quả |
+| ------------- | ----------------------------------------------------------- | ------- |
+| TC_GPS_VAL_01 | form.trigger() chỉ validate fields của step hiện tại        | ✅ Pass |
+| TC_GPS_VAL_02 | form.trigger() KHÔNG validate fields ở steps khác           | ✅ Pass |
+| TC_GPS_REF_01 | saveRef useEffect có dependency array [saveRef, handleSave] | ✅ Pass |
+| TC_GPS_REF_02 | saveRef.current cập nhật khi handleSave thay đổi            | ✅ Pass |
+
+### 10.3 fitnessStore Logging Migration
+
+8 `console.error` calls đã migrate sang `logger.warn` với structured metadata:
+
+| Action            | Logging pattern                                          | Verified |
+| ----------------- | -------------------------------------------------------- | -------- |
+| addWorkout        | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| addWorkoutSet     | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| removeWorkoutSet  | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| addWeightEntry    | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| removeWeightEntry | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| updateWeightEntry | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| saveWorkoutDraft  | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+| clearWorkoutDraft | `logger.warn({ component: 'fitnessStore', action })` msg | ✅       |
+
+**Verification:** `grep -c 'console.error' src/store/fitnessStore.ts` → 0
+
+### 10.4 UnitSelector i18n Completion
+
+3 hardcoded Vietnamese strings đã được thay bằng `t()` calls:
+
+| i18n Key                               | Giá trị Vietnamese  | Component location |
+| -------------------------------------- | ------------------- | ------------------ |
+| `shared.unitSelectorDefault`           | "-- Chọn đơn vị --" | select placeholder |
+| `shared.unitSelectorCustom`            | "Tùy chỉnh..."      | custom option      |
+| `shared.unitSelectorCustomPlaceholder` | "Nhập đơn vị..."    | input placeholder  |
+
+### 10.5 DishEditModal — Intentional No-Deps Pattern
+
+`DishEditModal.tsx:158` useEffect không có dependency array — **confirmed intentional**. Pattern: DOM read reconciliation — effect đọc giá trị DOM (ngoài React dep tracking) mỗi render để sync form state. Comment đã thêm giải thích.
+
+### 10.6 Thống kê tổng thể sau audit
+
+| Metric         | Trước audit | Sau audit | Delta |
+| -------------- | ----------- | --------- | ----- |
+| Test files     | 184         | 184       | 0     |
+| Total tests    | 4633        | 4633      | 0     |
+| Pass rate      | 100%        | 100%      | —     |
+| Lint errors    | 0           | 0         | 0     |
+| P0 bugs open   | 2           | 0         | -2    |
+| P1 bugs open   | 2           | 0         | -2    |
+| Schema version | 6           | 6         | 0     |
