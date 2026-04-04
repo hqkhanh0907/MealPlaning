@@ -435,4 +435,48 @@ const DishCard = React.memo(({ dish, onToggle, onView, onClone }) => (
 
 ---
 
+## Resolution Status (Updated)
+
+### ✅ Wave 1 — Fixed (commit 67a49c3)
+
+| Finding  | Fix                                                                                            | Files Changed                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| A11Y-01  | MealActionBar: `aria-haspopup`, `aria-expanded`, `role="menu"`, `role="menuitem"`              | MealActionBar.tsx                                                                                               |
+| A11Y-02  | ModalBackdrop: auto-focus first focusable, respect child `autoFocus`, restore focus on unmount | ModalBackdrop.tsx                                                                                               |
+| TW-01/02 | Error text/border `text-rose-500`/`border-rose-500` → `text-destructive`/`border-destructive`  | FormField, DishEditModal, IngredientEditModal, QuickAddIngredientForm, SaveAnalyzedDishModal, SaveTemplateModal |
+| Tests    | 5 new tests (2 ARIA, 3 focus management)                                                       | scheduleComponents.test.tsx, modalBackdrop.test.tsx                                                             |
+
+### ✅ Wave 2 — Fixed (commit b8c899d)
+
+| Finding | Fix                                                                                                                   | Files Changed            |
+| ------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| TW-01   | EnergyDetailSheet `text-blue-600 dark:text-blue-400` → `text-status-info`                                             | EnergyDetailSheet.tsx    |
+| A11Y-05 | DateSelector calendar grid `aria-label`                                                                               | DateSelector.tsx         |
+| I18N-02 | Orphan key analysis: sampled 20/1355 keys → 0 orphans found. Dynamic keys (`t(\`ns.${var}\`)`) cause false positives. | N/A (investigation only) |
+
+### 🟡 Wave 3 — Deferred (Tech Debt)
+
+Items requiring significant refactoring or designer review:
+
+| Finding         | Reason Deferred                                                                                                      | Estimated Effort |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| CS-01           | DishManager 795-line split (DishGridCard, DishTableRow, DishMobileItem) — high regression risk                       | 8 hrs            |
+| CS-02/03/04/05  | Split large modals (DishEditModal, IngredientEditModal, etc.)                                                        | 12 hrs           |
+| CS-06           | Nutrition display duplication across 6 files → extract NutritionBadge                                                | 4 hrs            |
+| PERF-01/02/03   | Inline handlers in `.map()` loops — tied to CS-01 component extraction                                               | 4 hrs            |
+| TW-03           | Standardize spacing scale across 30+ files                                                                           | 4 hrs            |
+| TW-01 (partial) | Protein bars use `bg-blue-400` but `--macro-protein` is Emerald (green) — design inconsistency needs designer review | 1 hr             |
+| TW-01 (partial) | `bg-blue-50 dark:bg-blue-900/30` info boxes — no matching token exists, needs new `--info-subtle` token              | 2 hrs            |
+| TW-01 (partial) | DishManager compare feature colors are logic-dependent (JS ternary) — cannot tokenize                                | N/A              |
+| I18N-02         | Orphan key pruning needs dynamic-key-aware analyzer before safe deletion                                             | 2 hrs            |
+
+### Quality Gates (Final)
+
+- **Lint**: 0 errors, 6 warnings (pre-existing)
+- **Tests**: 4666 passed (184 files), +5 new tests
+- **Build**: Clean production build
+- **Coverage**: No regression
+
+---
+
 **[Designer] Trạng thái: HOÀN_THÀNH**
