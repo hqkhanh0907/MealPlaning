@@ -31,8 +31,9 @@ const mockDb = {
   query: vi.fn().mockResolvedValue([]),
   queryOne: vi.fn().mockResolvedValue(null),
   transaction: vi.fn(),
-  exportBinary: vi.fn().mockReturnValue(new Uint8Array([1, 2, 3])),
-  importBinary: vi.fn().mockResolvedValue(undefined),
+  exportToJSON: vi.fn().mockResolvedValue('{}'),
+  importFromJSON: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
 };
 
 vi.mock('../contexts/DatabaseContext', () => ({
@@ -211,7 +212,7 @@ describe('GoogleDriveSync', () => {
     it('uploads binary backup data to Drive', async () => {
       mockUploadBackup.mockResolvedValueOnce({
         id: 'file1',
-        name: 'backup.sqlite',
+        name: 'backup.json',
         modifiedTime: '2024-01-01T00:00:00Z',
       });
 
@@ -220,8 +221,8 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-upload-drive'));
       });
 
-      expect(mockDb.exportBinary).toHaveBeenCalled();
-      expect(mockUploadBackup).toHaveBeenCalledWith('test-token', expect.any(Uint8Array));
+      expect(mockDb.exportToJSON).toHaveBeenCalled();
+      expect(mockUploadBackup).toHaveBeenCalledWith('test-token', expect.any(String));
       expect(mockNotify.success).toHaveBeenCalledWith('Dữ liệu đã tải lên Google Drive');
     });
 
@@ -237,7 +238,7 @@ describe('GoogleDriveSync', () => {
     });
 
     it('shows last sync time after successful upload', async () => {
-      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.sqlite', modifiedTime: '2024-01-01T00:00:00Z' });
+      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.json', modifiedTime: '2024-01-01T00:00:00Z' });
 
       render(<GoogleDriveSync />);
       await act(async () => {
@@ -275,7 +276,7 @@ describe('GoogleDriveSync', () => {
       expect(screen.getByTestId('btn-download-drive')).toBeDisabled();
 
       await act(async () => {
-        resolveUpload({ id: 'f1', name: 'b.sqlite', modifiedTime: '2024-01-01T00:00:00Z' });
+        resolveUpload({ id: 'f1', name: 'b.json', modifiedTime: '2024-01-01T00:00:00Z' });
       });
     });
 
@@ -291,7 +292,7 @@ describe('GoogleDriveSync', () => {
     });
 
     it('persists lastSyncAt to app_settings using Drive modifiedTime', async () => {
-      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.sqlite', modifiedTime: '2024-06-15T10:30:00Z' });
+      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.json', modifiedTime: '2024-06-15T10:30:00Z' });
 
       render(<GoogleDriveSync />);
       await act(async () => {
@@ -310,10 +311,10 @@ describe('GoogleDriveSync', () => {
     });
 
     it('downloads and imports binary backup data', async () => {
-      const remoteData = new Uint8Array([10, 20, 30]);
+      const remoteData = '{"test":"data"}';
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: remoteData,
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2099-01-01T00:00:00Z' },
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2099-01-01T00:00:00Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -321,7 +322,7 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-download-drive'));
       });
 
-      expect(mockDb.importBinary).toHaveBeenCalledWith(remoteData);
+      expect(mockDb.importFromJSON).toHaveBeenCalledWith(remoteData);
       expect(mockReloadAllStores).toHaveBeenCalledWith(mockDb);
       expect(mockNotify.success).toHaveBeenCalledWith('Dữ liệu đã tải xuống từ Google Drive');
     });
@@ -335,7 +336,7 @@ describe('GoogleDriveSync', () => {
       });
 
       expect(mockNotify.warning).toHaveBeenCalledWith('Không tìm thấy bản sao lưu trên Google Drive');
-      expect(mockDb.importBinary).not.toHaveBeenCalled();
+      expect(mockDb.importFromJSON).not.toHaveBeenCalled();
     });
 
     it('shows error notification on download failure', async () => {
@@ -361,8 +362,8 @@ describe('GoogleDriveSync', () => {
     it('shows conflict modal when local data is newer than remote', async () => {
       mockGetSetting.mockResolvedValue('2025-01-01T00:00:00Z');
       mockDownloadLatestBackup.mockResolvedValueOnce({
-        data: new Uint8Array([1, 2]),
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2020-01-01T00:00:00Z' },
+        data: '{"test":"data"}',
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -379,10 +380,10 @@ describe('GoogleDriveSync', () => {
     it('imports remote data when choosing cloud in conflict modal', async () => {
       mockGetSetting.mockResolvedValue('2025-01-01T00:00:00Z');
 
-      const remoteData = new Uint8Array([5, 6, 7]);
+      const remoteData = '{"test":"data"}';
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: remoteData,
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2020-01-01T00:00:00Z' },
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -398,7 +399,7 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-use-cloud'));
       });
 
-      expect(mockDb.importBinary).toHaveBeenCalledWith(remoteData);
+      expect(mockDb.importFromJSON).toHaveBeenCalledWith(remoteData);
       expect(mockReloadAllStores).toHaveBeenCalledWith(mockDb);
       expect(mockNotify.success).toHaveBeenCalledWith('Dữ liệu đã tải xuống từ Google Drive');
     });
@@ -406,8 +407,8 @@ describe('GoogleDriveSync', () => {
     it('keeps local data when choosing local in conflict modal', async () => {
       mockGetSetting.mockResolvedValue('2025-01-01T00:00:00Z');
       mockDownloadLatestBackup.mockResolvedValueOnce({
-        data: new Uint8Array([1, 2]),
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2020-01-01T00:00:00Z' },
+        data: '{"test":"data"}',
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -423,15 +424,15 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-keep-local'));
       });
 
-      expect(mockDb.importBinary).not.toHaveBeenCalled();
+      expect(mockDb.importFromJSON).not.toHaveBeenCalled();
       expect(screen.queryByTestId('sync-conflict-modal')).not.toBeInTheDocument();
     });
 
     it('closes conflict modal on cancel', async () => {
       mockGetSetting.mockResolvedValue('2025-01-01T00:00:00Z');
       mockDownloadLatestBackup.mockResolvedValueOnce({
-        data: new Uint8Array([1, 2]),
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2020-01-01T00:00:00Z' },
+        data: '{"test":"data"}',
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -448,14 +449,14 @@ describe('GoogleDriveSync', () => {
       });
 
       expect(screen.queryByTestId('sync-conflict-modal')).not.toBeInTheDocument();
-      expect(mockDb.importBinary).not.toHaveBeenCalled();
+      expect(mockDb.importFromJSON).not.toHaveBeenCalled();
     });
 
     it('imports directly when remote is newer (no conflict)', async () => {
-      const remoteData = new Uint8Array([10, 20]);
+      const remoteData = '{"test":"data"}';
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: remoteData,
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2099-12-31T23:59:59Z' },
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2099-12-31T23:59:59Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -463,15 +464,15 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-download-drive'));
       });
 
-      expect(mockDb.importBinary).toHaveBeenCalledWith(remoteData);
+      expect(mockDb.importFromJSON).toHaveBeenCalledWith(remoteData);
       expect(screen.queryByTestId('sync-conflict-modal')).not.toBeInTheDocument();
     });
 
     it('imports directly when local has no stored sync time', async () => {
-      const remoteData = new Uint8Array([10, 20]);
+      const remoteData = '{"test":"data"}';
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: remoteData,
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2099-12-31T23:59:59Z' },
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2099-12-31T23:59:59Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -479,14 +480,14 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-download-drive'));
       });
 
-      expect(mockDb.importBinary).toHaveBeenCalledWith(remoteData);
+      expect(mockDb.importFromJSON).toHaveBeenCalledWith(remoteData);
     });
 
     it('persists remote modifiedTime as lastSyncAt after download', async () => {
-      const remoteData = new Uint8Array([10, 20]);
+      const remoteData = '{"test":"data"}';
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: remoteData,
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2024-07-20T15:00:00Z' },
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2024-07-20T15:00:00Z' },
       });
 
       render(<GoogleDriveSync />);
@@ -500,12 +501,12 @@ describe('GoogleDriveSync', () => {
 
     it('shows error when importing cloud data fails during conflict resolution', async () => {
       mockGetSetting.mockResolvedValue('2025-01-01T00:00:00Z');
-      const remoteData = new Uint8Array([1, 2]);
+      const remoteData = '{"test":"data"}';
       mockDownloadLatestBackup.mockResolvedValueOnce({
         data: remoteData,
-        file: { id: 'f1', name: 'b.sqlite', modifiedTime: '2020-01-01T00:00:00Z' },
+        file: { id: 'f1', name: 'b.json', modifiedTime: '2020-01-01T00:00:00Z' },
       });
-      mockDb.importBinary.mockRejectedValueOnce(new Error('import failed'));
+      mockDb.importFromJSON.mockRejectedValueOnce(new Error('import failed'));
 
       render(<GoogleDriveSync />);
       await act(async () => {
@@ -538,7 +539,7 @@ describe('GoogleDriveSync', () => {
     });
 
     it('shows green check icon after successful sync', async () => {
-      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.sqlite', modifiedTime: '2024-01-01T00:00:00Z' });
+      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.json', modifiedTime: '2024-01-01T00:00:00Z' });
 
       render(<GoogleDriveSync />);
       await act(async () => {

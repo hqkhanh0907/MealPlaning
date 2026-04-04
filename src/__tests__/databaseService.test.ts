@@ -348,11 +348,17 @@ const mockConnection = {
   query: vi.fn().mockResolvedValue({ values: [] }),
 };
 
+const mockSqliteConnection = {
+  checkConnectionsConsistency: vi.fn().mockResolvedValue({ result: false }),
+  isConnection: vi.fn().mockResolvedValue({ result: false }),
+  createConnection: vi.fn().mockResolvedValue(mockConnection),
+  retrieveConnection: vi.fn().mockResolvedValue(mockConnection),
+};
+
 vi.mock('@capacitor-community/sqlite', () => ({
-  CapacitorSQLite: {
-    checkConnectionsConsistency: vi.fn().mockResolvedValue({ result: false }),
-    createConnection: vi.fn().mockResolvedValue(mockConnection),
-    retrieveConnection: vi.fn().mockResolvedValue(mockConnection),
+  CapacitorSQLite: {},
+  SQLiteConnection: function () {
+    return mockSqliteConnection;
   },
 }));
 
@@ -374,17 +380,16 @@ describe('NativeDatabaseService', () => {
 
   it('initialize() creates connection and opens it', async () => {
     await nativeDb.initialize();
-    const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
-    expect(CapacitorSQLite.checkConnectionsConsistency).toHaveBeenCalled();
-    expect(CapacitorSQLite.createConnection).toHaveBeenCalled();
+    expect(mockSqliteConnection.checkConnectionsConsistency).toHaveBeenCalled();
+    expect(mockSqliteConnection.createConnection).toHaveBeenCalled();
     expect(mockConnection.open).toHaveBeenCalled();
   });
 
   it('initialize() retrieves existing connection if consistent', async () => {
-    const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
-    vi.mocked(CapacitorSQLite.checkConnectionsConsistency).mockResolvedValueOnce({ result: true });
+    mockSqliteConnection.checkConnectionsConsistency.mockResolvedValueOnce({ result: true });
+    mockSqliteConnection.isConnection.mockResolvedValueOnce({ result: true });
     await nativeDb.initialize();
-    expect(CapacitorSQLite.retrieveConnection).toHaveBeenCalled();
+    expect(mockSqliteConnection.retrieveConnection).toHaveBeenCalled();
   });
 
   it('execute() throws if not initialized', async () => {

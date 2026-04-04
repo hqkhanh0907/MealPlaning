@@ -14,8 +14,9 @@ const mockDb = {
   query: vi.fn().mockResolvedValue([]),
   queryOne: vi.fn().mockResolvedValue(null),
   transaction: vi.fn(),
-  exportBinary: vi.fn().mockReturnValue(new Uint8Array([83, 81, 76, 105])),
-  importBinary: vi.fn().mockResolvedValue(undefined),
+  exportToJSON: vi.fn().mockResolvedValue('{}'),
+  importFromJSON: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
 };
 
 vi.mock('../contexts/DatabaseContext', () => ({
@@ -37,7 +38,7 @@ vi.mock('../services/storeLoader', () => ({
   reloadAllStores: (...args: unknown[]) => mockReloadAllStores(...args),
 }));
 
-const mockWriteFile = vi.fn().mockResolvedValue({ uri: 'file:///cache/backup.sqlite' });
+const mockWriteFile = vi.fn().mockResolvedValue({ uri: 'file:///cache/backup.json' });
 const mockShare = vi.fn().mockResolvedValue(undefined);
 let mockIsNative = false;
 
@@ -54,12 +55,9 @@ vi.mock('@capacitor/share', () => ({
   Share: { share: (...args: unknown[]) => mockShare(...args) },
 }));
 
-// Helper: build a valid SQLite file header as Uint8Array
-function buildSqliteHeader(): Uint8Array {
-  const magic = new TextEncoder().encode('SQLite format 3\0');
-  const data = new Uint8Array(100);
-  data.set(magic);
-  return data;
+// Helper: build a valid JSON backup string
+function buildJsonBackup(): string {
+  return JSON.stringify({ version: 1, data: [] });
 }
 
 beforeEach(() => {
@@ -75,7 +73,7 @@ describe('DataBackup', () => {
     expect(screen.getByText('Nhập dữ liệu')).toBeInTheDocument();
   });
 
-  it('exports SQLite binary as download', () => {
+  it('exports SQLite binary as download', async () => {
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
     const mockRevokeObjectURL = vi.fn();
     globalThis.URL.createObjectURL = mockCreateObjectURL;
@@ -84,9 +82,12 @@ describe('DataBackup', () => {
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     render(<DataBackup />);
-    fireEvent.click(screen.getByText('Xuất dữ liệu'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Xuất dữ liệu'));
+      await new Promise(r => setTimeout(r, 50));
+    });
 
-    expect(mockDb.exportBinary).toHaveBeenCalled();
+    expect(mockDb.exportToJSON).toHaveBeenCalled();
     expect(mockCreateObjectURL).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
     expect(mockRevokeObjectURL).toHaveBeenCalled();
@@ -102,13 +103,13 @@ describe('DataBackup', () => {
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
     await waitFor(() => {
-      expect(mockDb.exportBinary).toHaveBeenCalled();
+      expect(mockDb.exportToJSON).toHaveBeenCalled();
       expect(mockWriteFile).toHaveBeenCalledWith(
         expect.objectContaining({
           directory: 'CACHE',
         }),
       );
-      expect(mockShare).toHaveBeenCalledWith(expect.objectContaining({ url: 'file:///cache/backup.sqlite' }));
+      expect(mockShare).toHaveBeenCalledWith(expect.objectContaining({ url: 'file:///cache/backup.json' }));
       expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
     });
   });
@@ -125,13 +126,14 @@ describe('DataBackup', () => {
     });
   });
 
-  it('shows error notification when export fails', () => {
-    mockDb.exportBinary.mockImplementationOnce(() => {
-      throw new Error('fail');
-    });
+  it('shows error notification when export fails', async () => {
+    mockDb.exportToJSON.mockRejectedValueOnce(new Error('fail'));
 
     render(<DataBackup />);
-    fireEvent.click(screen.getByText('Xuất dữ liệu'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Xuất dữ liệu'));
+      await new Promise(r => setTimeout(r, 50));
+    });
 
     expect(mockNotify.error).toHaveBeenCalledWith('Xuất thất bại', expect.any(String));
   });
@@ -139,8 +141,8 @@ describe('DataBackup', () => {
   it('imports valid SQLite file', async () => {
     render(<DataBackup />);
 
-    const sqliteData = buildSqliteHeader();
-    const file = new File([sqliteData], 'backup.sqlite', { type: 'application/octet-stream' });
+    const jsonData = buildJsonBackup();
+    const file = new File([jsonData], 'backup.json', { type: 'application/json' });
 
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
@@ -156,7 +158,7 @@ describe('DataBackup', () => {
     fireEvent.click(screen.getByTestId('btn-confirm-action'));
 
     await waitFor(() => {
-      expect(mockDb.importBinary).toHaveBeenCalledWith(expect.any(Uint8Array));
+      expect(mockDb.importFromJSON).toHaveBeenCalledWith(expect.any(String));
       expect(mockReloadAllStores).toHaveBeenCalledWith(mockDb);
     });
   });
@@ -167,9 +169,9 @@ describe('DataBackup', () => {
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).toBeTruthy();
 
-    // Create file with non-SQLite content
-    const fileContent = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
-    const file = new File([fileContent], 'bad.db', { type: 'application/octet-stream' });
+    // Create file with invalid JSON content
+    const fileContent = 'not valid json';
+    const file = new File([fileContent], 'bad.json', { type: 'application/json' });
 
     await act(async () => {
       if (input) {
@@ -178,7 +180,7 @@ describe('DataBackup', () => {
       }
     });
 
-    // Allow async arrayBuffer() to resolve
+    // Allow async text() to resolve
     await act(async () => {
       await new Promise(r => {
         setTimeout(r, 50);
@@ -186,7 +188,7 @@ describe('DataBackup', () => {
     });
 
     expect(mockNotify.error).toHaveBeenCalled();
-    expect(mockDb.importBinary).not.toHaveBeenCalled();
+    expect(mockDb.importFromJSON).not.toHaveBeenCalled();
   });
 
   it('does nothing when no file is selected', async () => {
@@ -195,15 +197,15 @@ describe('DataBackup', () => {
     expect(input).not.toBeNull();
     if (input) fireEvent.change(input, { target: { files: [] } });
 
-    expect(mockDb.importBinary).not.toHaveBeenCalled();
+    expect(mockDb.importFromJSON).not.toHaveBeenCalled();
     expect(mockNotify.error).not.toHaveBeenCalled();
   });
 
   it('cancels import when user dismisses confirmation dialog', async () => {
     render(<DataBackup />);
 
-    const sqliteData = buildSqliteHeader();
-    const file = new File([sqliteData], 'backup.sqlite', { type: 'application/octet-stream' });
+    const jsonData = buildJsonBackup();
+    const file = new File([jsonData], 'backup.json', { type: 'application/json' });
 
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
@@ -217,7 +219,7 @@ describe('DataBackup', () => {
     });
     fireEvent.click(screen.getByTestId('btn-cancel-action'));
 
-    expect(mockDb.importBinary).not.toHaveBeenCalled();
+    expect(mockDb.importFromJSON).not.toHaveBeenCalled();
   });
 
   it('clicks import button which triggers fileInput click', () => {
@@ -231,8 +233,8 @@ describe('DataBackup', () => {
     clickSpy.mockRestore();
   });
 
-  it('exports successfully even when DB is empty', () => {
-    mockDb.exportBinary.mockReturnValueOnce(new Uint8Array([0]));
+  it('exports successfully even when DB is empty', async () => {
+    mockDb.exportToJSON.mockResolvedValueOnce('{}');
 
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:empty');
     const mockRevokeObjectURL = vi.fn();
@@ -242,7 +244,10 @@ describe('DataBackup', () => {
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     render(<DataBackup />);
-    fireEvent.click(screen.getByText('Xuất dữ liệu'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Xuất dữ liệu'));
+      await new Promise(r => setTimeout(r, 50));
+    });
 
     expect(mockCreateObjectURL).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
@@ -311,7 +316,7 @@ describe('DataBackup', () => {
       });
     });
 
-    it('updates last backup timestamp in app_settings after successful export', () => {
+    it('updates last backup timestamp in app_settings after successful export', async () => {
       const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
       const mockRevokeObjectURL = vi.fn();
       globalThis.URL.createObjectURL = mockCreateObjectURL;
@@ -319,7 +324,10 @@ describe('DataBackup', () => {
       const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
       render(<DataBackup />);
-      fireEvent.click(screen.getByText('Xuất dữ liệu'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Xuất dữ liệu'));
+        await new Promise(r => setTimeout(r, 50));
+      });
       // Export success notification proves the export completed (setSetting called internally)
       expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
 
@@ -332,7 +340,8 @@ describe('DataBackup', () => {
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
 
-    const tinyFile = new File([new Uint8Array(8)], 'tiny.db', { type: 'application/octet-stream' });
+    // Create a valid but minimal JSON file
+    const tinyFile = new File(['{}'], 'tiny.json', { type: 'application/json' });
 
     await act(async () => {
       if (input) {
@@ -346,8 +355,10 @@ describe('DataBackup', () => {
       });
     });
 
-    expect(mockNotify.error).toHaveBeenCalled();
-    expect(mockDb.importBinary).not.toHaveBeenCalled();
+    // Minimal JSON is valid, so it should proceed to confirmation dialog
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
   });
 
   it('shows error when file reading fails (arrayBuffer rejects)', async () => {
@@ -355,8 +366,8 @@ describe('DataBackup', () => {
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
 
-    const badFile = new File([new Uint8Array(100)], 'bad.db');
-    vi.spyOn(badFile, 'arrayBuffer').mockRejectedValueOnce(new Error('Read failed'));
+    const badFile = new File(['{}'], 'bad.json');
+    vi.spyOn(badFile, 'text').mockRejectedValueOnce(new Error('Read failed'));
 
     await act(async () => {
       if (input) {
@@ -374,11 +385,11 @@ describe('DataBackup', () => {
   });
 
   it('shows error when database import fails during confirm', async () => {
-    mockDb.importBinary.mockRejectedValueOnce(new Error('DB import failed'));
+    mockDb.importFromJSON.mockRejectedValueOnce(new Error('DB import failed'));
 
     render(<DataBackup />);
-    const sqliteData = buildSqliteHeader();
-    const file = new File([sqliteData], 'backup.sqlite', { type: 'application/octet-stream' });
+    const jsonData = buildJsonBackup();
+    const file = new File([jsonData], 'backup.json', { type: 'application/json' });
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
 

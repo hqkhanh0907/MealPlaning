@@ -77,8 +77,9 @@ const mockDb = {
   query: vi.fn().mockResolvedValue([]),
   queryOne: vi.fn().mockResolvedValue(null),
   transaction: vi.fn(),
-  exportBinary: vi.fn().mockReturnValue(new Uint8Array([1, 2, 3])),
-  importBinary: vi.fn().mockResolvedValue(undefined),
+  exportToJSON: vi.fn().mockResolvedValue('{}'),
+  importFromJSON: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
 };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -90,11 +91,12 @@ describe('useAutoSync', () => {
     mockAuthValues.user = null;
     mockAuthValues.accessToken = null;
     mockStoreData = { ingredients: [], dishes: [], dayPlans: [], templates: [] };
-    mockDb.exportBinary.mockReturnValue(new Uint8Array([1, 2, 3]));
-    mockDb.importBinary.mockResolvedValue(undefined);
+    mockDb.exportToJSON.mockResolvedValue('{}');
+    mockDb.importFromJSON.mockResolvedValue(undefined);
+    mockDb.close.mockResolvedValue(undefined);
     (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'f1',
-      name: 'backup.sqlite',
+      name: 'backup.json',
       modifiedTime: '2026-01-01T00:00:00Z',
     });
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue(null);
@@ -134,8 +136,8 @@ describe('useAutoSync', () => {
       await result.current.triggerUpload();
     });
 
-    expect(mockDb.exportBinary).toHaveBeenCalled();
-    expect(driveService.uploadBackup).toHaveBeenCalledWith('tok', expect.any(Uint8Array));
+    expect(mockDb.exportToJSON).toHaveBeenCalled();
+    expect(driveService.uploadBackup).toHaveBeenCalledWith('tok', expect.any(String));
     expect(result.current.syncStatus).toBe('idle');
     expect(result.current.lastSyncAt).toBeTruthy();
   });
@@ -167,10 +169,10 @@ describe('useAutoSync', () => {
   it('should trigger download manually', async () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
-    const mockData = new Uint8Array([10, 20, 30]);
+    const mockData = '{"test":"data"}';
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: mockData,
-      file: { id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-01-01T00:00:00Z' },
+      file: { id: 'f1', name: 'backup.json', modifiedTime: '2026-01-01T00:00:00Z' },
     });
 
     const { result } = renderHook(() => useAutoSync(), { wrapper });
@@ -184,7 +186,7 @@ describe('useAutoSync', () => {
       await result.current.triggerDownload();
     });
 
-    expect(mockDb.importBinary).toHaveBeenCalled();
+    expect(mockDb.importFromJSON).toHaveBeenCalled();
     expect(result.current.syncStatus).toBe('idle');
     expect(result.current.lastSyncAt).toBe('2026-01-01T00:00:00Z');
   });
@@ -270,8 +272,8 @@ describe('useAutoSync', () => {
     mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
     mockAuthValues.accessToken = 'tok';
     (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: new Uint8Array([1, 2]),
-      file: { id: 'f1', name: 'backup.sqlite', modifiedTime: '2026-05-20T12:00:00Z' },
+      data: '{"test":"data"}',
+      file: { id: 'f1', name: 'backup.json', modifiedTime: '2026-05-20T12:00:00Z' },
     });
 
     const { result } = renderHook(() => useAutoSync(), { wrapper });

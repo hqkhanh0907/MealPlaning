@@ -55,7 +55,7 @@ export const useAutoSync = (): UseAutoSyncReturn => {
     isUploadingRef.current = true;
     setSyncStatus('uploading');
     try {
-      const data = dbRef.current.exportBinary();
+      const data = await dbRef.current.exportToJSON();
       const result = await driveService.uploadBackup(accessToken, data);
       await updateLastSync(result.modifiedTime);
       setSyncStatus('idle');
@@ -72,7 +72,7 @@ export const useAutoSync = (): UseAutoSyncReturn => {
     try {
       const result = await driveService.downloadLatestBackup(accessToken);
       if (result) {
-        await dbRef.current.importBinary(result.data);
+        await dbRef.current.importFromJSON(result.data);
         await reloadAllStores(dbRef.current);
         await updateLastSync(result.file.modifiedTime);
       }
@@ -93,7 +93,7 @@ export const useAutoSync = (): UseAutoSyncReturn => {
           const remoteSyncTime = result.file.modifiedTime;
           const localSyncTime = await getSetting(dbRef.current, 'last_sync_at');
           if (!localSyncTime || remoteSyncTime > localSyncTime) {
-            await dbRef.current.importBinary(result.data);
+            await dbRef.current.importFromJSON(result.data);
             await reloadAllStores(dbRef.current);
             await updateLastSync(remoteSyncTime);
           }

@@ -1,6 +1,6 @@
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3/files';
-const BACKUP_FILE_NAME = 'meal-planner-backup.sqlite';
+const BACKUP_FILE_NAME = 'meal-planner-backup.json';
 
 export interface DriveFileInfo {
   id: string;
@@ -27,18 +27,17 @@ export const listBackups = async (accessToken: string): Promise<DriveFileInfo[]>
   return data.files ?? [];
 };
 
-export const downloadBackup = async (accessToken: string, fileId: string): Promise<Uint8Array> => {
+export const downloadBackup = async (accessToken: string, fileId: string): Promise<string> => {
   const res = await fetch(`${DRIVE_API}/${fileId}?alt=media`, {
     headers: authHeaders(accessToken),
   });
   if (!res.ok) throw new Error(`Drive download failed: ${res.status}`);
-  const buffer = await res.arrayBuffer();
-  return new Uint8Array(buffer);
+  return res.text();
 };
 
 export const downloadLatestBackup = async (
   accessToken: string,
-): Promise<{ data: Uint8Array; file: DriveFileInfo } | null> => {
+): Promise<{ data: string; file: DriveFileInfo } | null> => {
   const files = await listBackups(accessToken);
   if (files.length === 0) return null;
   const latest = files[0];
@@ -46,7 +45,7 @@ export const downloadLatestBackup = async (
   return { data, file: latest };
 };
 
-export const uploadBackup = async (accessToken: string, data: Uint8Array): Promise<DriveFileInfo> => {
+export const uploadBackup = async (accessToken: string, data: string): Promise<DriveFileInfo> => {
   const existing = await listBackups(accessToken);
 
   if (existing.length > 0) {
@@ -55,7 +54,7 @@ export const uploadBackup = async (accessToken: string, data: Uint8Array): Promi
       method: 'PATCH',
       headers: {
         ...authHeaders(accessToken),
-        'Content-Type': 'application/octet-stream',
+        'Content-Type': 'application/json',
       },
       body: data,
     });
@@ -66,17 +65,16 @@ export const uploadBackup = async (accessToken: string, data: Uint8Array): Promi
   const boundary = '___meal_planner_boundary___';
   const metadata = {
     name: BACKUP_FILE_NAME,
-    mimeType: 'application/octet-stream',
+    mimeType: 'application/json',
     parents: ['appDataFolder'],
   };
-  const encoder = new TextEncoder();
-  const body = new Blob([
-    encoder.encode(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`),
-    encoder.encode(JSON.stringify(metadata)),
-    encoder.encode(`\r\n--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`),
+  const body = [
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
+    JSON.stringify(metadata),
+    `\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n`,
     data,
-    encoder.encode(`\r\n--${boundary}--`),
-  ]);
+    `\r\n--${boundary}--`,
+  ].join('');
 
   const res = await fetch(`${DRIVE_UPLOAD_API}?uploadType=multipart`, {
     method: 'POST',

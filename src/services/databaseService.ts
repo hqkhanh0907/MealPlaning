@@ -52,14 +52,12 @@ import type initSqlJsType from 'sql.js';
 /* ------------------------------------------------------------------ */
 class WebDatabaseService implements DatabaseService {
   private db: SqlJsDatabase | null = null;
-  private SQL: Awaited<ReturnType<typeof initSqlJsType>> | null = null;
 
   async initialize(): Promise<void> {
     const initSqlJs: typeof initSqlJsType = (await import('sql.js')).default;
     const SQL = await initSqlJs({
       locateFile: (file: string) => `/wasm/${file}`,
     });
-    this.SQL = SQL;
     this.db = new SQL.Database();
   }
 
@@ -160,13 +158,9 @@ class WebDatabaseService implements DatabaseService {
 
     // Accept V2ExportPayload envelope or raw table map
     let tables: Record<string, unknown[]>;
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      '_version' in parsed &&
-      (parsed as Record<string, unknown>)._version === '2.0'
-    ) {
-      tables = (parsed as { tables: Record<string, unknown[]> }).tables ?? {};
+    const obj = parsed as Record<string, unknown>;
+    if (typeof parsed === 'object' && parsed !== null && '_version' in parsed && obj._version === '2.0') {
+      tables = (obj.tables as Record<string, unknown[]>) ?? {};
     } else {
       tables = parsed as Record<string, unknown[]>;
     }
@@ -215,24 +209,25 @@ export class NativeDatabaseService implements DatabaseService {
   private inTransaction = false;
 
   async initialize(): Promise<void> {
-    const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
-    const sqlite = CapacitorSQLite;
+    const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite');
+    const sqliteConnection = new SQLiteConnection(CapacitorSQLite);
 
     const dbName = 'mealplaner';
-    const ret = await sqlite.checkConnectionsConsistency({ dbNames: [dbName], openModes: ['RW'] });
+    const ret = await sqliteConnection.checkConnectionsConsistency();
+    const isConn = (await sqliteConnection.isConnection(dbName, false)).result;
 
-    if (ret.result) {
-      this.connection = await sqlite.retrieveConnection({ database: dbName, readonly: false });
+    if (ret.result && isConn) {
+      this.connection = (await sqliteConnection.retrieveConnection(dbName, false)) as unknown as SQLiteDBConnection;
     } else {
-      this.connection = await sqlite.createConnection({
-        database: dbName,
-        encrypted: false,
-        mode: 'no-encryption',
-        version: 1,
-        readonly: false,
-      });
+      this.connection = (await sqliteConnection.createConnection(
+        dbName,
+        false,
+        'no-encryption',
+        1,
+        false,
+      )) as unknown as SQLiteDBConnection;
     }
-    await this.connection.open();
+    await this.connection!.open();
   }
 
   private getConnection(): SQLiteDBConnection {
@@ -281,9 +276,7 @@ export class NativeDatabaseService implements DatabaseService {
     const tables: Record<string, unknown[]> = {};
 
     for (const tableName of SCHEMA_TABLES) {
-      const result = await this.query<Record<string, unknown>>(`SELECT * FROM "${tableName}"`);
-      // query() already applies rowToType — we need raw snake_case for export
-      // Re-query with raw access
+      // query() applies rowToType (camelCase) — we need raw snake_case for export
       const conn = this.getConnection();
       const raw = await conn.query(`SELECT * FROM "${tableName}"`, []);
       tables[tableName] = raw.values ?? [];
@@ -306,13 +299,9 @@ export class NativeDatabaseService implements DatabaseService {
     }
 
     let tables: Record<string, unknown[]>;
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      '_version' in parsed &&
-      (parsed as Record<string, unknown>)._version === '2.0'
-    ) {
-      tables = (parsed as { tables: Record<string, unknown[]> }).tables ?? {};
+    const obj = parsed as Record<string, unknown>;
+    if (typeof parsed === 'object' && parsed !== null && '_version' in parsed && obj._version === '2.0') {
+      tables = (obj.tables as Record<string, unknown[]>) ?? {};
     } else {
       tables = parsed as Record<string, unknown[]>;
     }

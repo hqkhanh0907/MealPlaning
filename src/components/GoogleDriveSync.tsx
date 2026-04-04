@@ -20,7 +20,7 @@ export const GoogleDriveSync = () => {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
   const [conflictData, setConflictData] = useState<{
-    remoteData: Uint8Array;
+    remoteData: string;
     remoteModifiedTime: string;
   } | null>(null);
 
@@ -62,7 +62,7 @@ export const GoogleDriveSync = () => {
     if (!accessToken) return;
     setSyncStatus('uploading');
     try {
-      const data = db.exportBinary();
+      const data = await db.exportToJSON();
       const result = await driveService.uploadBackup(accessToken, data);
       updateLastSync(result.modifiedTime);
       setSyncStatus('idle');
@@ -95,7 +95,7 @@ export const GoogleDriveSync = () => {
         return;
       }
 
-      await db.importBinary(result.data);
+      await db.importFromJSON(result.data);
       await reloadAllStores(db);
       updateLastSync(remoteSyncTime);
       setSyncStatus('idle');
@@ -110,7 +110,7 @@ export const GoogleDriveSync = () => {
     async (choice: 'local' | 'cloud') => {
       if (choice === 'cloud' && conflictData) {
         try {
-          await db.importBinary(conflictData.remoteData);
+          await db.importFromJSON(conflictData.remoteData);
           await reloadAllStores(db);
           updateLastSync(conflictData.remoteModifiedTime);
           notify.success(t('cloudSync.downloadSuccess'));

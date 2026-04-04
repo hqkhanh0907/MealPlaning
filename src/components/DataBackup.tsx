@@ -49,7 +49,7 @@ function useBackupHealthStatus(): { level: 'good' | 'warning' | 'critical'; days
   return status;
 }
 
-const exportFileName = () => `meal-planner-backup-${new Date().toISOString().split('T')[0]}.sqlite`;
+const exportFileName = () => `meal-planner-backup-${new Date().toISOString().split('T')[0]}.json`;
 
 const HEALTH_STYLES = {
   good: {
@@ -96,10 +96,10 @@ export const DataBackup = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [pendingImport, setPendingImport] = useState<{ data: Uint8Array; fileName: string } | null>(null);
+  const [pendingImport, setPendingImport] = useState<{ data: string; fileName: string } | null>(null);
 
-  const exportWeb = (data: Uint8Array, fileName: string) => {
-    const blob = new Blob([data], { type: 'application/x-sqlite3' });
+  const exportWeb = (data: string, fileName: string) => {
+    const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -110,8 +110,8 @@ export const DataBackup = () => {
     URL.revokeObjectURL(url);
   };
 
-  const exportNative = async (data: Uint8Array, fileName: string) => {
-    const base64 = btoa(String.fromCodePoint(...data));
+  const exportNative = async (data: string, fileName: string) => {
+    const base64 = btoa(unescape(encodeURIComponent(data)));
     const result = await Filesystem.writeFile({
       path: fileName,
       data: base64,
@@ -127,7 +127,7 @@ export const DataBackup = () => {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      const data = db.exportBinary();
+      const data = await db.exportToJSON();
       const fileName = exportFileName();
 
       if (Capacitor.isNativePlatform()) {
@@ -151,21 +151,17 @@ export const DataBackup = () => {
 
     try {
       setIsImporting(true);
-      const buffer = await file.arrayBuffer();
-      const data = new Uint8Array(buffer);
+      const text = await file.text();
 
-      if (data.length < 16) {
+      // Validate JSON format
+      try {
+        JSON.parse(text);
+      } catch {
         notify.error(t('backup.invalidFile'), '');
         return;
       }
 
-      const header = new TextDecoder().decode(data.slice(0, 16));
-      if (!header.startsWith('SQLite format 3\0')) {
-        notify.error(t('backup.invalidFile'), '');
-        return;
-      }
-
-      setPendingImport({ data, fileName: file.name });
+      setPendingImport({ data: text, fileName: file.name });
     } catch {
       notify.error(t('backup.importFailed'), '');
     } finally {
@@ -177,7 +173,7 @@ export const DataBackup = () => {
   const confirmImport = async () => {
     if (pendingImport) {
       try {
-        await db.importBinary(pendingImport.data);
+        await db.importFromJSON(pendingImport.data);
         await reloadAllStores(db);
         notify.success(t('backup.importSuccess'), '');
       } catch {
@@ -213,7 +209,7 @@ export const DataBackup = () => {
           type="file"
           ref={fileInputRef}
           onChange={handleImport}
-          accept=".sqlite,.db"
+          accept=".json"
           aria-label={t('backup.import')}
           className="hidden"
         />
