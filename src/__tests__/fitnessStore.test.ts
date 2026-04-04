@@ -4032,6 +4032,84 @@ describe('fitnessStore – changeSplitType atomicity (FIX-14)', () => {
     consoleSpy.mockRestore();
     await db.close();
   });
+
+  it('rolls back partial writes when INSERT fails mid-transaction', async () => {
+    // This tests the transaction atomicity mechanism that changeSplitType relies on.
+    // Combined with the test above (which verifies changeSplitType re-throws and
+    // doesn't call set()), this proves full atomic rollback on partial failure.
+    const db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+
+    const PLAN_ID = 'partial-plan';
+
+    // Insert real plan + 3 days
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'Partial Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,2,3]',
+        '[4,5,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    for (const [idx, wt] of ['Push', 'Pull', 'Legs'].entries()) {
+      await db.execute(
+        `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, is_user_assigned, original_day_of_week, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [`partial-d${idx}`, PLAN_ID, idx + 1, 1, wt, '[]', '[]', '[]', 0, idx + 1, wt],
+      );
+    }
+
+    // Simulate changeSplitType's transaction with a failure after UPDATE + DELETE
+    try {
+      await db.transaction(async () => {
+        // Partial write 1: UPDATE split_type (same as changeSplitType line 1237)
+        await db.execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [
+          'upper_lower',
+          new Date().toISOString(),
+          PLAN_ID,
+        ]);
+
+        // Partial write 2: DELETE all days (same as replaceAllPlanDays line 40)
+        await db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [PLAN_ID]);
+
+        // Verify mid-transaction state: UPDATE + DELETE took effect
+        const midPlan = await db.query<Record<string, unknown>>('SELECT split_type FROM training_plans WHERE id = ?', [
+          PLAN_ID,
+        ]);
+        expect(midPlan[0].splitType).toBe('upper_lower');
+        const midDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+          PLAN_ID,
+        ]);
+        expect(midDays).toHaveLength(0);
+
+        // Simulated INSERT failure (e.g., disk error, constraint violation)
+        throw new Error('Simulated INSERT failure mid-transaction');
+      });
+    } catch {
+      // Expected: transaction method re-throws after ROLLBACK
+    }
+
+    // DB should have ALL original rows intact (ROLLBACK undid UPDATE + DELETE)
+    const afterPlan = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(afterPlan[0].splitType).toBe('ppl');
+
+    const afterDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(afterDays).toHaveLength(3);
+    expect(afterDays.map(r => r.id).sort()).toEqual(['partial-d0', 'partial-d1', 'partial-d2']);
+
+    await db.close();
+  });
 });
 
 /* ================================================================== */

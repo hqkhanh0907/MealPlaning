@@ -53,7 +53,7 @@ async function replaceAllPlanDays(db: DatabaseService, planId: string, newDays: 
         day.exercises ?? null,
         day.originalExercises ?? null,
         day.notes ?? null,
-        day.originalDayOfWeek ?? day.dayOfWeek,
+        day.originalDayOfWeek ?? null,
         day.isUserAssigned ? 1 : 0,
       ],
     );

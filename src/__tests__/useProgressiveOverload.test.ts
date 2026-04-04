@@ -5,7 +5,7 @@ import {
   detectAcuteFatigue,
   detectChronicOvertraining,
   detectPlateau,
-  getExerciseHistory,
+  getExerciseWorkoutContext,
   isLowerBodyExercise,
   isWeightSimilar,
   suggestNextSet,
@@ -855,10 +855,10 @@ describe('useProgressiveOverload hook', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* getExerciseHistory (pure helper) */
+/* getExerciseWorkoutContext (shared precursor helper) */
 /* ------------------------------------------------------------------ */
 
-describe('getExerciseHistory', () => {
+describe('getExerciseWorkoutContext', () => {
   function makeWorkout(overrides?: Partial<Workout>): Workout {
     return {
       id: 'w-1',
@@ -870,55 +870,58 @@ describe('getExerciseHistory', () => {
     };
   }
 
-  function buildMap(sets: WorkoutSet[]): Map<string, WorkoutSet[]> {
-    const m = new Map<string, WorkoutSet[]>();
-    for (const s of sets) {
-      const arr = m.get(s.workoutId) ?? [];
-      arr.push(s);
-      m.set(s.workoutId, arr);
-    }
-    return m;
-  }
-
-  it('returns [] when exerciseId is null', () => {
-    expect(getExerciseHistory(null, [], [], new Map())).toEqual([]);
+  it('returns empty arrays when exerciseId is null', () => {
+    const result = getExerciseWorkoutContext(null, [], []);
+    expect(result).toEqual({ exerciseSets: [], relevantWorkouts: [] });
   });
 
-  it('returns [] when no sets match the exerciseId', () => {
+  it('returns empty arrays when no sets match the exerciseId', () => {
     const sets = [createSet({ exerciseId: 'other' })];
-    expect(getExerciseHistory('target', sets, [], buildMap(sets))).toEqual([]);
+    const result = getExerciseWorkoutContext('target', sets, []);
+    expect(result).toEqual({ exerciseSets: [], relevantWorkouts: [] });
   });
 
-  it('returns [] when matching sets exist but no corresponding workouts', () => {
+  it('returns exerciseSets with empty relevantWorkouts when no workouts match', () => {
     const sets = [createSet({ workoutId: 'w-orphan', exerciseId: 'target' })];
     const workouts = [makeWorkout({ id: 'w-different' })];
-    expect(getExerciseHistory('target', sets, workouts, buildMap(sets))).toEqual([]);
+    const result = getExerciseWorkoutContext('target', sets, workouts);
+    expect(result.exerciseSets).toHaveLength(1);
+    expect(result.exerciseSets[0].exerciseId).toBe('target');
+    expect(result.relevantWorkouts).toHaveLength(0);
   });
 
-  it('returns sets from the latest workout sorted by setNumber', () => {
-    const s1 = createSet({ workoutId: 'w-old', exerciseId: 'bench', setNumber: 1, weightKg: 50 });
-    const s2 = createSet({ workoutId: 'w-old', exerciseId: 'bench', setNumber: 2, weightKg: 50 });
-    const s3 = createSet({ workoutId: 'w-new', exerciseId: 'bench', setNumber: 2, weightKg: 60 });
-    const s4 = createSet({ workoutId: 'w-new', exerciseId: 'bench', setNumber: 1, weightKg: 60 });
-    const allSets = [s1, s2, s3, s4];
+  it('returns exerciseSets and relevantWorkouts from multiple workouts', () => {
+    const s1 = createSet({ workoutId: 'w-old', exerciseId: 'bench', setNumber: 1 });
+    const s2 = createSet({ workoutId: 'w-old', exerciseId: 'bench', setNumber: 2 });
+    const s3 = createSet({ workoutId: 'w-new', exerciseId: 'bench', setNumber: 1 });
+    const allSets = [s1, s2, s3];
     const workouts = [
       makeWorkout({ id: 'w-old', date: '2024-01-01' }),
       makeWorkout({ id: 'w-new', date: '2024-01-10' }),
     ];
-    const result = getExerciseHistory('bench', allSets, workouts, buildMap(allSets));
-    expect(result).toHaveLength(2);
-    expect(result[0].workoutId).toBe('w-new');
-    expect(result[0].setNumber).toBe(1);
-    expect(result[1].setNumber).toBe(2);
+    const result = getExerciseWorkoutContext('bench', allSets, workouts);
+    expect(result.exerciseSets).toHaveLength(3);
+    expect(result.relevantWorkouts).toHaveLength(2);
+    expect(result.relevantWorkouts.map(w => w.id).sort()).toEqual(['w-new', 'w-old']);
   });
 
-  it('filters out sets from other exercises in the same workout', () => {
+  it('filters out sets from other exercises', () => {
     const s1 = createSet({ workoutId: 'w-1', exerciseId: 'bench', setNumber: 1 });
     const s2 = createSet({ workoutId: 'w-1', exerciseId: 'squat', setNumber: 1 });
     const allSets = [s1, s2];
     const workouts = [makeWorkout({ id: 'w-1' })];
-    const result = getExerciseHistory('bench', allSets, workouts, buildMap(allSets));
-    expect(result).toHaveLength(1);
-    expect(result[0].exerciseId).toBe('bench');
+    const result = getExerciseWorkoutContext('bench', allSets, workouts);
+    expect(result.exerciseSets).toHaveLength(1);
+    expect(result.exerciseSets[0].exerciseId).toBe('bench');
+    expect(result.relevantWorkouts).toHaveLength(1);
+  });
+
+  it('excludes workouts that have no matching exercise sets', () => {
+    const s1 = createSet({ workoutId: 'w-1', exerciseId: 'bench' });
+    const allSets = [s1];
+    const workouts = [makeWorkout({ id: 'w-1', date: '2024-01-01' }), makeWorkout({ id: 'w-2', date: '2024-01-05' })];
+    const result = getExerciseWorkoutContext('bench', allSets, workouts);
+    expect(result.relevantWorkouts).toHaveLength(1);
+    expect(result.relevantWorkouts[0].id).toBe('w-1');
   });
 });

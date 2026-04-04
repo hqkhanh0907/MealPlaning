@@ -162,24 +162,20 @@ export function detectChronicOvertraining(historySets: WorkoutSet[]): { level: F
 /* ------------------------------------------------------------------ */
 
 /**
- * Returns the sets from the most recent workout that includes this exercise,
- * sorted by setNumber ascending. Returns [] when exerciseId is null/not found.
+ * Shared precursor: filters exercise-specific sets and the workouts that contain them.
+ * Callers apply their own ordering/aggregation on top.
  */
-export function getExerciseHistory(
+export function getExerciseWorkoutContext(
   exerciseId: string | null,
   workoutSets: WorkoutSet[],
   workouts: Workout[],
-  workoutSetsByWorkoutId: Map<string, WorkoutSet[]>,
-): WorkoutSet[] {
-  if (!exerciseId) return [];
+): { exerciseSets: WorkoutSet[]; relevantWorkouts: Workout[] } {
+  if (!exerciseId) return { exerciseSets: [], relevantWorkouts: [] };
   const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
-  if (exerciseSets.length === 0) return [];
+  if (exerciseSets.length === 0) return { exerciseSets: [], relevantWorkouts: [] };
   const workoutIdSet = new Set(exerciseSets.map(s => s.workoutId));
-  const latestWorkout = workouts.filter(w => workoutIdSet.has(w.id)).sort((a, b) => b.date.localeCompare(a.date))[0];
-  if (!latestWorkout) return [];
-  return (workoutSetsByWorkoutId.get(latestWorkout.id) ?? [])
-    .filter(s => s.exerciseId === exerciseId)
-    .sort((a, b) => a.setNumber - b.setNumber);
+  const relevantWorkouts = workouts.filter(w => workoutIdSet.has(w.id));
+  return { exerciseSets, relevantWorkouts };
 }
 
 /* ------------------------------------------------------------------ */
@@ -216,22 +212,23 @@ export function useProgressiveOverload(): {
 
   const getLastSets = useCallback(
     (exerciseId: string): WorkoutSet[] => {
-      return getExerciseHistory(exerciseId, workoutSets, workouts, workoutSetsByWorkoutId);
+      const { relevantWorkouts } = getExerciseWorkoutContext(exerciseId, workoutSets, workouts);
+      if (relevantWorkouts.length === 0) return [];
+      const latestWorkout = relevantWorkouts.sort((a, b) => b.date.localeCompare(a.date))[0];
+      return (workoutSetsByWorkoutId.get(latestWorkout.id) ?? [])
+        .filter(s => s.exerciseId === exerciseId)
+        .sort((a, b) => a.setNumber - b.setNumber);
     },
     [workoutSets, workouts, workoutSetsByWorkoutId],
   );
 
   const checkPlateauFn = useCallback(
     (exerciseId: string): { isPlateaued: boolean; weeks: number } => {
-      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
+      const { exerciseSets, relevantWorkouts } = getExerciseWorkoutContext(exerciseId, workoutSets, workouts);
       if (exerciseSets.length === 0) return { isPlateaued: false, weeks: 0 };
 
-      const workoutIdSet = new Set(exerciseSets.map(s => s.workoutId));
-      const relevantWorkouts = workouts
-        .filter(w => workoutIdSet.has(w.id))
-        .sort((a, b) => a.date.localeCompare(b.date));
-
-      const groupedSets = relevantWorkouts.map(w =>
+      const sortedWorkouts = relevantWorkouts.sort((a, b) => a.date.localeCompare(b.date));
+      const groupedSets = sortedWorkouts.map(w =>
         (workoutSetsByWorkoutId.get(w.id) ?? []).filter(s => s.exerciseId === exerciseId),
       );
 
@@ -255,10 +252,10 @@ export function useProgressiveOverload(): {
 
   const checkChronicOvertrainingFn = useCallback(
     (exerciseId: string): { level: FatigueLevel; message: string } => {
-      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
+      const { exerciseSets } = getExerciseWorkoutContext(exerciseId, workoutSets, workouts);
       return detectChronicOvertraining(exerciseSets);
     },
-    [workoutSets],
+    [workoutSets, workouts],
   );
 
   const suggestNextSetFn = useCallback(
@@ -270,7 +267,7 @@ export function useProgressiveOverload(): {
       const suggestion = suggestNextSet(lastSets, experience, targetRepsMin, targetRepsMax, isLower);
 
       const plateauResult = checkPlateauFn(exerciseId);
-      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
+      const { exerciseSets } = getExerciseWorkoutContext(exerciseId, workoutSets, workouts);
       const fatigueResult = detectAcuteFatigue(exerciseSets);
       const setsWithRpe = exerciseSets.filter(s => s.rpe != null && s.rpe > 0);
       const avgRpe =
@@ -284,7 +281,7 @@ export function useProgressiveOverload(): {
         ...(fatigueResult.level === 'none' ? {} : { isOvertraining: true, avgRpe }),
       };
     },
-    [getLastSets, trainingProfile, checkPlateauFn, workoutSets],
+    [getLastSets, trainingProfile, checkPlateauFn, workoutSets, workouts],
   );
 
   return {
