@@ -612,6 +612,17 @@ describe('useDailyScore', () => {
 
       expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ skipWorkoutFactor: false }));
     });
+
+    it('passes skipWorkoutFactor=true when active plan has empty scheduledDays (FIX-09)', () => {
+      setupFitnessStore({
+        trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+        trainingPlanDays: [], // plan exists but no days scheduled
+      });
+
+      renderHook(() => useDailyScore());
+
+      expect(mockCalcDailyScore).toHaveBeenCalledWith(expect.objectContaining({ skipWorkoutFactor: true }));
+    });
   });
 
   describe('color based on score', () => {

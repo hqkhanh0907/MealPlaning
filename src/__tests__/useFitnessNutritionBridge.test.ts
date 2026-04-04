@@ -350,6 +350,46 @@ describe('useFitnessNutritionBridge hook', () => {
     expect(result.current.todayCalorieBudget).toBe(2600); // 2500 + 100
   });
 
+  it('uses strength MET fallback for sets without estimatedCalories (FIX-06)', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (
+        selector: (s: {
+          workouts: Array<{
+            date: string;
+            id: string;
+            durationMin?: number;
+            name: string;
+            createdAt: string;
+            updatedAt: string;
+          }>;
+          workoutSets: Array<{
+            id: string;
+            workoutId: string;
+            exerciseId: string;
+            setNumber: number;
+            weightKg: number;
+            reps?: number;
+            estimatedCalories?: number;
+            updatedAt: string;
+          }>;
+        }) => unknown,
+      ) =>
+        selector({
+          workouts: [{ date: today, id: 'w1', durationMin: 45, name: 'Strength', createdAt: today, updatedAt: today }],
+          workoutSets: [
+            // Strength set: has weightKg+reps but NO estimatedCalories → triggers MET fallback
+            { id: 's1', workoutId: 'w1', exerciseId: 'e1', setNumber: 1, weightKg: 60, reps: 10, updatedAt: today },
+          ],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    // STRENGTH_MET=5, userWeight=70kg, duration=45min → 5*70*45/60 = 262.5 → 263
+    expect(result.current.todayBurned).toBe(263);
+    expect(result.current.todayCalorieBudget).toBe(2500 + 263);
+  });
+
   it('burned calories prevent false deficit warning (FIX-06)', () => {
     const today = formatDate(new Date());
     (useFitnessStore as unknown as Mock).mockImplementation(

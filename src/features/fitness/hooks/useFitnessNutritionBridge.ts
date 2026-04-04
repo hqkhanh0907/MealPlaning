@@ -5,6 +5,7 @@ import i18n from '../../../i18n';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
+import { calculateExerciseAdjustment } from '../utils/activityMultiplier';
 
 export interface FitnessNutritionInsight {
   type: 'surplus-on-rest' | 'deficit-on-training' | 'protein-low' | 'recovery-day' | 'balanced';
@@ -98,14 +99,12 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
     const weekStartStr = toDateString(weekStart);
     const weeklyTrainingLoad = workouts.filter(w => w.date >= weekStartStr && w.date <= today).length;
 
-    // Calculate today's burned calories from workout sets
-    const todayWorkoutIds = new Set(workouts.filter(w => w.date === today).map(w => w.id));
+    // Calculate today's burned calories using the same logic as calculateExerciseAdjustment
+    // (includes both estimatedCalories from cardio sets AND strength MET fallback)
+    const todayWorkouts = workouts.filter(w => w.date === today);
+    const userWeightKg = healthProfile?.weightKg ?? 0;
     const todayBurned =
-      todayWorkoutIds.size > 0
-        ? workoutSets
-            .filter(s => todayWorkoutIds.has(s.workoutId))
-            .reduce((sum, s) => sum + (s.estimatedCalories ?? 0), 0)
-        : 0;
+      todayWorkouts.length > 0 ? calculateExerciseAdjustment(todayWorkouts, workoutSets, userWeightKg, 1) : 0;
 
     if (!healthProfile) {
       return { insight: null, todayCalorieBudget: 0, todayBurned: 0, isTrainingDay, weeklyTrainingLoad };

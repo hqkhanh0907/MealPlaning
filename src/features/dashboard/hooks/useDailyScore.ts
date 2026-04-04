@@ -101,20 +101,15 @@ export function useDailyScore(): DailyScoreData {
 
     // Convert JS Sunday=0 to ISO Sunday=7 to match trainingPlanDays.dayOfWeek
     const todayDayOfWeek = now.getDay() || 7;
-    let isRestDay = false;
-
-    if (activePlan) {
-      const scheduledDays = trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek);
-      isRestDay = !scheduledDays.includes(todayDayOfWeek);
-    }
+    const scheduledDays = activePlan
+      ? trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek)
+      : [];
+    const isRestDay = activePlan ? !scheduledDays.includes(todayDayOfWeek) : false;
 
     const weightLoggedToday = weightEntries.some(e => e.date === today);
     const weightLoggedYesterday = weightEntries.some(e => e.date === yesterday);
 
-    const planDaysForStreak = activePlan
-      ? trainingPlanDays.filter(d => d.planId === activePlan.id).map(d => d.dayOfWeek)
-      : [];
-    const streakInfo = calculateStreak(workouts, planDaysForStreak, today);
+    const streakInfo = calculateStreak(workouts, scheduledDays, today);
 
     const scoreResult = calculateDailyScore({
       actualCalories,
@@ -127,7 +122,7 @@ export function useDailyScore(): DailyScoreData {
       weightLoggedToday,
       weightLoggedYesterday,
       streakDays: streakInfo.currentStreak,
-      skipWorkoutFactor: !activePlan,
+      skipWorkoutFactor: !activePlan || scheduledDays.length === 0,
     });
 
     return {
