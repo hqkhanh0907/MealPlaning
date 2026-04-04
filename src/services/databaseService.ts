@@ -7,10 +7,9 @@ export interface DatabaseService {
   query<T>(sql: string, params?: unknown[]): Promise<T[]>;
   queryOne<T>(sql: string, params?: unknown[]): Promise<T | null>;
   transaction(fn: () => Promise<void>): Promise<void>;
-  exportBinary(): Uint8Array;
-  importBinary(data: Uint8Array): Promise<void>;
   exportToJSON(): Promise<string>;
   importFromJSON(json: string): Promise<void>;
+  close(): Promise<void>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -115,15 +114,9 @@ class WebDatabaseService implements DatabaseService {
     }
   }
 
-  exportBinary(): Uint8Array {
-    return (this.getDb() as unknown as { export(): Uint8Array }).export();
-  }
-
-  async importBinary(data: Uint8Array): Promise<void> {
-    if (!this.SQL) throw new Error('SQL.js not loaded');
+  async close(): Promise<void> {
     this.db?.close();
-    const SQL = this.SQL;
-    this.db = new (SQL.Database as unknown as new (data: Uint8Array) => InstanceType<typeof SQL.Database>)(data);
+    this.db = null;
   }
 
   async exportToJSON(): Promise<string> {

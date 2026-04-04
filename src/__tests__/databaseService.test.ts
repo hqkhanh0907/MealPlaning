@@ -235,6 +235,15 @@ describe('DatabaseService', () => {
     const json = await db.exportToJSON();
     expect(JSON.parse(json)).toEqual({});
   });
+
+  it('close() resolves without error', async () => {
+    await expect(db.close()).resolves.toBeUndefined();
+  });
+
+  it('close() makes subsequent operations fail', async () => {
+    await db.close();
+    await expect(db.execute('SELECT 1')).rejects.toThrow();
+  });
 });
 
 /* ================================================================== */
