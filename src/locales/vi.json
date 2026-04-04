@@ -884,6 +884,7 @@
       "cancelRegenerate": "Hủy",
       "convertToRest": "Chuyển thành ngày nghỉ",
       "convertToRestConfirm": "Xóa tất cả buổi tập ngày này và chuyển thành ngày nghỉ?",
+      "confirmConvertToRest": "Đồng ý",
       "convertToWorkout": "Thêm buổi tập",
       "coachingHint": "Chạm ✏ để chỉnh bài tập • Chạm ngày để xem buổi tập",
       "dayContextMenu": "Tùy chọn ngày tập",

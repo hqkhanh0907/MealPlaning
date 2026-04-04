@@ -777,7 +777,7 @@ function TrainingPlanViewInner({
         icon={<RefreshCw className="h-8 w-8" />}
         title={t('fitness.plan.regenerate')}
         message={t('fitness.plan.regenerateConfirm')}
-        confirmLabel={t('fitness.plan.regenerate')}
+        confirmLabel={t('fitness.plan.confirmRegenerate')}
         onConfirm={handleRegeneratePlan}
         onCancel={() => setShowRegenerateConfirm(false)}
       />
@@ -787,7 +787,7 @@ function TrainingPlanViewInner({
         variant="danger"
         title={t('fitness.plan.convertToRest')}
         message={t('fitness.plan.convertToRestConfirm')}
-        confirmLabel={t('fitness.plan.convertToRest')}
+        confirmLabel={t('fitness.plan.confirmConvertToRest')}
         onConfirm={() => {
           if (showConvertToRestConfirm !== null) {
             confirmConvertToRest(showConvertToRestConfirm);
