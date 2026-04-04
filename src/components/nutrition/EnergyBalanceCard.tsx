@@ -23,11 +23,13 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
   const [collapsed, setCollapsed] = useState(false);
 
   const netCalories = Math.round(caloriesIn - caloriesOut);
-  const remaining = Math.round(targetCalories - netCalories);
-  const safeTgt = targetCalories > 0 ? targetCalories : 1;
+  const displayTarget = Number.isFinite(targetCalories) ? Math.round(targetCalories) : 0;
+  const displayProTarget = Number.isFinite(proteinTarget) ? Math.round(proteinTarget) : 0;
+  const remaining = displayTarget - netCalories;
+  const safeTgt = displayTarget > 0 ? displayTarget : 1;
   const inPct = Math.min(100, Math.round((caloriesIn / safeTgt) * 100));
   const outPct = Math.min(inPct, Math.round((caloriesOut / safeTgt) * 100));
-  const safeProTgt = proteinTarget > 0 ? proteinTarget : 1;
+  const safeProTgt = displayProTarget > 0 ? displayProTarget : 1;
   const proPct = Math.min(100, Math.round((proteinCurrent / safeProTgt) * 100));
 
   const toggleCollapse = useCallback(() => {
@@ -110,7 +112,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
             </div>
             <div className="text-muted-foreground flex justify-between text-xs">
               <span>
-                {t('nutrition.target')}: {targetCalories} {t('nutrition.kcal')}
+                {t('nutrition.target')}: {displayTarget} {t('nutrition.kcal')}
               </span>
               <span
                 data-testid="remaining-display"
@@ -129,7 +131,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
                 {t('nutrition.protein')}
               </span>
               <span data-testid="protein-display">
-                {Math.round(proteinCurrent)}/{proteinTarget}
+                {Math.round(proteinCurrent)}/{displayProTarget}
                 {t('nutrition.grams')}
               </span>
             </div>

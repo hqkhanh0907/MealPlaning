@@ -24,9 +24,11 @@ function getBarColorClass(pct: number): string {
 export const ProteinProgress = React.memo(function ProteinProgress({ current, target }: ProteinProgressProps) {
   const { t } = useTranslation();
 
-  const safeTarget = target > 0 ? target : 1;
+  const roundedCurrent = Math.round(current);
+  const roundedTarget = Number.isFinite(target) ? Math.round(target) : 0;
+  const safeTarget = Number.isFinite(target) && target > 0 ? target : 1;
   const pct = Math.min(100, Math.max(0, Math.round((current / safeTarget) * 100)));
-  const deficit = target - current;
+  const deficit = roundedTarget - roundedCurrent;
 
   const barColorClass = getBarColorClass(pct);
 
@@ -39,9 +41,6 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
     }
     return t('nutrition.proteinNeedSignificant');
   }, [deficit, t]);
-
-  const roundedCurrent = Math.round(current);
-  const roundedTarget = Math.round(target);
 
   return (
     <div className="space-y-1" style={{ minHeight: 48 }}>

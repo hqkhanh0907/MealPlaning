@@ -349,13 +349,15 @@ export const AISuggestionPreviewModal = ({
                       <span
                         className={`font-medium ${nutritionSummary.calories > targetCalories ? 'text-rose-600' : 'text-primary'}`}
                       >
-                        {Math.round((nutritionSummary.calories / targetCalories) * 100)}%
+                        {targetCalories > 0 ? Math.round((nutritionSummary.calories / targetCalories) * 100) : 0}%
                       </span>
                     </div>
                     <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
                         className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-rose-500' : 'bg-primary'}`}
-                        style={{ width: `${Math.min(100, (nutritionSummary.calories / targetCalories) * 100)}%` }}
+                        style={{
+                          width: `${targetCalories > 0 ? Math.min(100, (nutritionSummary.calories / targetCalories) * 100) : 0}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -365,13 +367,15 @@ export const AISuggestionPreviewModal = ({
                       <span
                         className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-primary' : 'text-amber-600'}`}
                       >
-                        {Math.round((nutritionSummary.protein / targetProtein) * 100)}%
+                        {targetProtein > 0 ? Math.round((nutritionSummary.protein / targetProtein) * 100) : 0}%
                       </span>
                     </div>
                     <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
                         className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-amber-500'}`}
-                        style={{ width: `${Math.min(100, (nutritionSummary.protein / targetProtein) * 100)}%` }}
+                        style={{
+                          width: `${targetProtein > 0 ? Math.min(100, (nutritionSummary.protein / targetProtein) * 100) : 0}%`,
+                        }}
                       />
                     </div>
                   </div>

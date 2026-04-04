@@ -54,7 +54,7 @@ function rowToProfile(row: ProfileRow): HealthProfile {
     bmrOverride: row.bmr_override ?? undefined,
     proteinRatio: row.protein_ratio,
     fatPct: row.fat_pct,
-    targetCalories: row.target_calories,
+    targetCalories: row.target_calories ?? 1500,
     updatedAt: row.updated_at,
   };
 }

@@ -53,9 +53,12 @@ export function useNutritionTargets(): NutritionTargets {
     const configured = isProfileConfigured(healthProfile);
 
     if (!configured) {
-      const fallbackProtein = Math.round(healthProfile.weightKg * healthProfile.proteinRatio);
+      const safeCal = Number.isFinite(healthProfile.targetCalories) ? healthProfile.targetCalories : 1500;
+      const safeWeight = Number.isFinite(healthProfile.weightKg) ? healthProfile.weightKg : 70;
+      const safeRatio = Number.isFinite(healthProfile.proteinRatio) ? healthProfile.proteinRatio : 2;
+      const fallbackProtein = Math.round(safeWeight * safeRatio);
       return {
-        targetCalories: healthProfile.targetCalories,
+        targetCalories: safeCal,
         targetProtein: fallbackProtein,
         targetFat: 0,
         targetCarbs: 0,
@@ -87,12 +90,12 @@ export function useNutritionTargets(): NutritionTargets {
     );
 
     return {
-      targetCalories,
-      targetProtein: macros.proteinG,
-      targetFat: macros.fatG,
-      targetCarbs: macros.carbsG,
-      bmr,
-      tdee,
+      targetCalories: Number.isFinite(targetCalories) ? targetCalories : 0,
+      targetProtein: Number.isFinite(macros.proteinG) ? macros.proteinG : 0,
+      targetFat: Number.isFinite(macros.fatG) ? macros.fatG : 0,
+      targetCarbs: Number.isFinite(macros.carbsG) ? macros.carbsG : 0,
+      bmr: Number.isFinite(bmr) ? bmr : 0,
+      tdee: Number.isFinite(tdee) ? tdee : 0,
     };
   }, [healthProfile, activeGoal]);
 }

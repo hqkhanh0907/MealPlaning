@@ -18,16 +18,20 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
   onSwitchToNutrition,
 }: MiniNutritionBarProps) {
   const { t } = useTranslation();
+  const displayCal = Number.isFinite(targetCalories) ? targetCalories : 0;
+  const displayPro = Number.isFinite(targetProtein) ? targetProtein : 0;
+  const safeCal = displayCal > 0 ? displayCal : 1;
+  const safePro = displayPro > 0 ? displayPro : 1;
   const totalCal = Math.round(
     dayNutrition.breakfast.calories + dayNutrition.lunch.calories + dayNutrition.dinner.calories,
   );
   const totalPro = Math.round(
     dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein,
   );
-  const calPct = Math.min(100, Math.round((totalCal / targetCalories) * 100));
-  const proPct = Math.min(100, Math.round((totalPro / targetProtein) * 100));
-  const remainingCal = targetCalories - totalCal;
-  const remainingPro = targetProtein - totalPro;
+  const calPct = Math.min(100, Math.round((totalCal / safeCal) * 100));
+  const proPct = Math.min(100, Math.round((totalPro / safePro) * 100));
+  const remainingCal = displayCal - totalCal;
+  const remainingPro = displayPro - totalPro;
 
   return (
     <button
@@ -43,7 +47,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           <div className="text-foreground flex items-center gap-1.5">
             <Flame className="h-3.5 w-3.5 text-orange-500" />
             <span className="text-xs font-medium">
-              {totalCal}/{targetCalories} kcal
+              {totalCal}/{displayCal} kcal
             </span>
           </div>
           <div className="bg-muted h-1.5 overflow-hidden rounded-full">
@@ -66,7 +70,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           <div className="text-foreground flex items-center gap-1.5">
             <Beef className="h-3.5 w-3.5 text-blue-500" />
             <span className="text-xs font-medium">
-              {totalPro}/{targetProtein}g Pro
+              {totalPro}/{displayPro}g Pro
             </span>
           </div>
           <div className="bg-muted h-1.5 overflow-hidden rounded-full">
