@@ -43,7 +43,7 @@ export const FormField = React.memo(function FormField({
       {enhancedChildren}
 
       {error?.message && (
-        <p id={errorId} className="mt-1 text-xs text-rose-500 dark:text-rose-400" role="alert">
+        <p id={errorId} className="text-destructive mt-1 text-xs" role="alert">
           {error.message}
         </p>
       )}

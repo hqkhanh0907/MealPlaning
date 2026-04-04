@@ -48,10 +48,16 @@ function _handleGlobalEscape(e: KeyboardEvent) {
  * lock so that stacked modals (e.g. a confirmation dialog rendered
  * over a form modal) do not fight over the body style on unmount.
  */
+/** Focusable element selector — excludes hidden and tabindex=-1 elements. */
+const FOCUSABLE_SELECTOR =
+  'button:not([tabindex="-1"]):not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackdropProps) => {
   const { t } = useTranslation();
   const onCloseRef = React.useRef(onClose);
   onCloseRef.current = onClose;
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const previousFocusRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     // Only apply the iOS-safe position:fixed lock when this is the first
@@ -103,6 +109,28 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
     };
   }, []);
 
+  // Focus management: capture previous focus on mount and auto-focus first
+  // interactive element inside the content wrapper (skipping the backdrop button).
+  // Only moves focus if nothing inside the modal already claimed it (e.g. autoFocus).
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+
+    const raf = requestAnimationFrame(() => {
+      const wrapper = contentRef.current;
+      if (!wrapper) return;
+      // If a child already grabbed focus (via autoFocus), don't steal it.
+      if (wrapper.contains(document.activeElement)) return;
+      const first = wrapper.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      first?.focus();
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      // Restore focus to the element that was focused before the modal opened.
+      previousFocusRef.current?.focus();
+    };
+  }, []);
+
   return (
     <dialog
       open
@@ -116,7 +144,9 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
         onClick={onClose}
         tabIndex={-1}
       />
-      {children}
+      <div ref={contentRef} className="contents">
+        {children}
+      </div>
     </dialog>
   );
 };

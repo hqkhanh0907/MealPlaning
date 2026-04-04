@@ -385,7 +385,7 @@ export const DishEditModal = ({
               {errors.name && (
                 <p
                   id="dish-name-error"
-                  className="mt-1 text-xs text-rose-500"
+                  className="text-destructive mt-1 text-xs"
                   data-testid="error-dish-name"
                   role="alert"
                 >
@@ -393,7 +393,7 @@ export const DishEditModal = ({
                 </p>
               )}
               {aiSuggestError && (
-                <p className="mt-1 text-xs text-rose-500" data-testid="ai-suggest-error">
+                <p className="text-destructive mt-1 text-xs" data-testid="ai-suggest-error">
                   {aiSuggestError}
                 </p>
               )}
@@ -401,7 +401,7 @@ export const DishEditModal = ({
             </div>
             <div>
               <p
-                className={`mb-1.5 block text-xs font-semibold uppercase ${errors.tags ? 'text-rose-500' : 'text-muted-foreground'}`}
+                className={`mb-1.5 block text-xs font-semibold uppercase ${errors.tags ? 'text-destructive' : 'text-muted-foreground'}`}
               >
                 {t('dish.suitableFor')} <span className="text-rose-500">*</span>
               </p>
@@ -422,7 +422,7 @@ export const DishEditModal = ({
                 })}
               </div>
               {errors.tags && (
-                <p className="mt-1.5 text-xs font-medium text-rose-500" role="alert">
+                <p className="text-destructive mt-1.5 text-xs font-medium" role="alert">
                   {errors.tags.message}
                 </p>
               )}
@@ -618,7 +618,7 @@ export const DishEditModal = ({
                           </p>
                           {errors.ingredients?.[index]?.amount && (
                             <p
-                              className="mt-1 text-xs text-rose-500"
+                              className="text-destructive mt-1 text-xs"
                               data-testid={`error-dish-amount-${field.ingredientId}`}
                               role="alert"
                             >
@@ -643,7 +643,7 @@ export const DishEditModal = ({
                         {t('dish.noIngredientSelected')}
                       </p>
                       {errors.ingredients?.message && (
-                        <p className="mt-1 text-xs text-rose-500" data-testid="error-dish-ingredients" role="alert">
+                        <p className="text-destructive mt-1 text-xs" data-testid="error-dish-ingredients" role="alert">
                           {errors.ingredients.message}
                         </p>
                       )}

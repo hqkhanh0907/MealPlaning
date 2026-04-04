@@ -193,7 +193,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 </button>
               </div>
               {errors.name?.vi && (
-                <p data-testid="error-ing-name" className="mt-1 text-xs text-rose-500" role="alert">
+                <p data-testid="error-ing-name" className="text-destructive mt-1 text-xs" role="alert">
                   {errors.name.vi.message}
                 </p>
               )}
@@ -212,7 +212,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 data-testid="input-ing-unit"
               />
               {errors.unit?.vi && (
-                <p className="mt-1 text-xs text-rose-500" role="alert">
+                <p className="text-destructive mt-1 text-xs" role="alert">
                   {errors.unit.vi.message}
                 </p>
               )}
@@ -241,12 +241,12 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                       inputMode="numeric"
                       {...register(field, { valueAsNumber: true })}
                       data-testid={`input-ing-${field.replace('Per100', '')}`}
-                      className={`w-full ${errors[field] ? 'border-rose-500' : ''}`}
+                      className={`w-full ${errors[field] ? 'border-destructive' : ''}`}
                       aria-invalid={!!errors[field]}
                     />
                     {errors[field] && (
                       <p
-                        className="mt-1 text-xs text-rose-500"
+                        className="text-destructive mt-1 text-xs"
                         role="alert"
                         data-testid={`error-ing-${field.replace('Per100', '')}`}
                       >

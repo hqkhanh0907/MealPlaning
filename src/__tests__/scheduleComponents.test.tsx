@@ -388,6 +388,24 @@ describe('MealActionBar', () => {
     openMenu();
     expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
   });
+
+  it('has aria-haspopup on trigger and aria-expanded toggles', () => {
+    render(<MealActionBar {...baseProps} />);
+    const trigger = screen.getByTestId('btn-more-actions');
+    expect(trigger).toHaveAttribute('aria-haspopup', 'true');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    openMenu();
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('renders menu with role="menu" and items with role="menuitem"', () => {
+    render(<MealActionBar {...baseProps} />);
+    openMenu();
+    const menu = screen.getByTestId('more-actions-menu');
+    expect(menu).toHaveAttribute('role', 'menu');
+    const menuItems = menu.querySelectorAll('[role="menuitem"]');
+    expect(menuItems.length).toBeGreaterThan(0);
+  });
 });
 
 // ─── MiniNutritionBar ────────────────────────────────────────────────

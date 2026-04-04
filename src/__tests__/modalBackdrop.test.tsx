@@ -147,6 +147,65 @@ describe('ModalBackdrop', () => {
     expect(onCloseOuter).not.toHaveBeenCalled();
   });
 
+  describe('focus management', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('auto-focuses first interactive element inside content', async () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>
+            <button data-testid="first-btn">First</button>
+            <button data-testid="second-btn">Second</button>
+          </div>
+        </ModalBackdrop>,
+      );
+      // requestAnimationFrame fires on next frame
+      await vi.advanceTimersByTimeAsync(20);
+      expect(document.activeElement).toBe(screen.getByTestId('first-btn'));
+    });
+
+    it('does not steal focus from a child that uses autoFocus', async () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>
+            <button data-testid="first-btn">First</button>
+            <input data-testid="auto-input" autoFocus />
+          </div>
+        </ModalBackdrop>,
+      );
+      await vi.advanceTimersByTimeAsync(20);
+      // autoFocus input should keep focus — ModalBackdrop should not override
+      expect(document.activeElement).toBe(screen.getByTestId('auto-input'));
+    });
+
+    it('restores focus to previously focused element on unmount', async () => {
+      const outerBtn = document.createElement('button');
+      outerBtn.textContent = 'Outside';
+      document.body.appendChild(outerBtn);
+      outerBtn.focus();
+      expect(document.activeElement).toBe(outerBtn);
+
+      const { unmount } = render(
+        <ModalBackdrop onClose={onClose}>
+          <div>
+            <button>Inside</button>
+          </div>
+        </ModalBackdrop>,
+      );
+      await vi.advanceTimersByTimeAsync(20);
+
+      unmount();
+      expect(document.activeElement).toBe(outerBtn);
+      document.body.removeChild(outerBtn);
+    });
+  });
+
   /**
    * BUG: scroll-lock-nested-modal
    *

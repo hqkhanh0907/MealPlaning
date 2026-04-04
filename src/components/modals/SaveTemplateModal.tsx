@@ -184,11 +184,11 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
               maxLength={MAX_NAME_LENGTH}
               placeholder={t('template.namePlaceholder')}
               autoFocus
-              className={`text-foreground min-h-12 w-full border-2 ${showNameError ? 'border-rose-300' : ''}`}
+              className={`text-foreground min-h-12 w-full border-2 ${showNameError ? 'border-destructive' : ''}`}
             />
             <div className="mt-1.5 flex items-center justify-between">
               {showNameError ? (
-                <p className="text-xs font-medium text-rose-500" role="alert">
+                <p className="text-destructive text-xs font-medium" role="alert">
                   {errors.name?.message}
                 </p>
               ) : (

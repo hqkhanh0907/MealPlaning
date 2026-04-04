@@ -253,7 +253,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                       </div>
                     )}
                   />
-                  {tagError && <p className="mt-1.5 text-xs font-medium text-rose-500">{tagError}</p>}
+                  {tagError && <p className="text-destructive mt-1.5 text-xs font-medium">{tagError}</p>}
                 </div>
               </div>
             )}
