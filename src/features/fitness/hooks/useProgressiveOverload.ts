@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { EXERCISES } from '../data/exerciseDatabase';
-import type { SetSuggestion, TrainingExperience, WorkoutSet } from '../types';
+import type { SetSuggestion, TrainingExperience, Workout, WorkoutSet } from '../types';
 import { getOverloadIncrement } from '../utils/periodization';
 import type { PlateauResult } from '../utils/plateauAnalysis';
 import { analyzePlateau } from '../utils/plateauAnalysis';
@@ -158,6 +158,31 @@ export function detectChronicOvertraining(historySets: WorkoutSet[]): { level: F
 }
 
 /* ------------------------------------------------------------------ */
+/* Shared helper – exported for testing */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Returns the sets from the most recent workout that includes this exercise,
+ * sorted by setNumber ascending. Returns [] when exerciseId is null/not found.
+ */
+export function getExerciseHistory(
+  exerciseId: string | null,
+  workoutSets: WorkoutSet[],
+  workouts: Workout[],
+  workoutSetsByWorkoutId: Map<string, WorkoutSet[]>,
+): WorkoutSet[] {
+  if (!exerciseId) return [];
+  const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
+  if (exerciseSets.length === 0) return [];
+  const workoutIdSet = new Set(exerciseSets.map(s => s.workoutId));
+  const latestWorkout = workouts.filter(w => workoutIdSet.has(w.id)).sort((a, b) => b.date.localeCompare(a.date))[0];
+  if (!latestWorkout) return [];
+  return (workoutSetsByWorkoutId.get(latestWorkout.id) ?? [])
+    .filter(s => s.exerciseId === exerciseId)
+    .sort((a, b) => a.setNumber - b.setNumber);
+}
+
+/* ------------------------------------------------------------------ */
 /* Hook */
 /* ------------------------------------------------------------------ */
 
@@ -191,19 +216,7 @@ export function useProgressiveOverload(): {
 
   const getLastSets = useCallback(
     (exerciseId: string): WorkoutSet[] => {
-      const exerciseSets = workoutSets.filter(s => s.exerciseId === exerciseId);
-      if (exerciseSets.length === 0) return [];
-
-      const workoutIdSet = new Set(exerciseSets.map(s => s.workoutId));
-      const relevantWorkouts = workouts
-        .filter(w => workoutIdSet.has(w.id))
-        .sort((a, b) => b.date.localeCompare(a.date));
-
-      if (relevantWorkouts.length === 0) return [];
-
-      return (workoutSetsByWorkoutId.get(relevantWorkouts[0].id) ?? [])
-        .filter(s => s.exerciseId === exerciseId)
-        .sort((a, b) => a.setNumber - b.setNumber);
+      return getExerciseHistory(exerciseId, workoutSets, workouts, workoutSetsByWorkoutId);
     },
     [workoutSets, workouts, workoutSetsByWorkoutId],
   );
