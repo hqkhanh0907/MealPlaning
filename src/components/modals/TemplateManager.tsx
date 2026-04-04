@@ -105,7 +105,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
         <div className="flex-1 overflow-y-auto p-6 sm:p-8">
           {templates.length === 0 ? (
             <div className="py-8 text-center">
-              <BookTemplate className="mx-auto mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" />
+              <BookTemplate className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
               <p className="text-muted-foreground font-medium">{t('template.empty')}</p>
               <p className="text-muted-foreground mt-1 text-sm">{t('template.emptyHint')}</p>
             </div>

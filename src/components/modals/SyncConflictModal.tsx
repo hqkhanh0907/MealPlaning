@@ -61,7 +61,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
           <button
             data-testid="btn-cancel-sync"
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground w-full px-4 py-2.5 text-sm font-medium transition-colors dark:hover:text-slate-200"
+            className="text-muted-foreground hover:text-foreground w-full px-4 py-2.5 text-sm font-medium transition-colors"
           >
             {t('common.cancel')}
           </button>

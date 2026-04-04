@@ -43,7 +43,7 @@ function DotIndicator({ total, current, ariaLabel }: Readonly<{ total: number; c
           aria-current={i === current ? 'step' : undefined}
           className={cn(
             'h-2 rounded-full motion-safe:transition-[width] motion-safe:duration-300',
-            i === current ? 'bg-primary w-6' : 'w-2 bg-slate-300 dark:bg-slate-600',
+            i === current ? 'bg-primary w-6' : 'bg-muted w-2',
           )}
         />
       ))}

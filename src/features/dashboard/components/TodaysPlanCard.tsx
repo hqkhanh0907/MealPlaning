@@ -331,7 +331,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     <div data-testid="todays-plan-card" className={CARD_CLASS}>
       <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
       <div data-testid="no-plan-section" className="flex flex-col items-center py-4">
-        <Dumbbell className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
+        <Dumbbell className="text-muted-foreground mb-3 h-12 w-12" aria-hidden="true" />
         <p className="text-muted-foreground mb-3 text-sm">{t('dashboard.todaysPlan.noPlan')}</p>
         <Button
           size="sm"

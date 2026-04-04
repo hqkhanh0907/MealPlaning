@@ -81,7 +81,7 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
           r={r}
           fill="none"
           stroke="currentColor"
-          className="text-slate-100 dark:text-slate-700"
+          className="text-muted dark:text-slate-700"
           strokeWidth={strokeWidth}
         />
 

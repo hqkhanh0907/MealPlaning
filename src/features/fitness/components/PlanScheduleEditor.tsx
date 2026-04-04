@@ -166,7 +166,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           data-testid="empty-plan-state"
           className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center"
         >
-          <CalendarDays className="h-16 w-16 text-slate-300 dark:text-slate-600" />
+          <CalendarDays className="text-muted-foreground h-16 w-16" />
           <p className="text-foreground-secondary text-lg font-semibold">{t('fitness.scheduleEditor.emptyPlan')}</p>
           <button
             type="button"

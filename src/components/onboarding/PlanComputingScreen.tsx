@@ -166,14 +166,8 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
             transition={{ delay: i * 0.1, duration: 0.3 }}
             className="flex items-center gap-3"
           >
-            <div
-              className={`h-2 w-2 rounded-full ${i <= activeStep ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}
-            />
-            <span
-              className={`text-sm ${
-                i <= activeStep ? 'text-foreground font-medium' : 'text-muted-foreground dark:text-slate-600'
-              }`}
-            >
+            <div className={`h-2 w-2 rounded-full ${i <= activeStep ? 'bg-primary' : 'bg-muted'}`} />
+            <span className={`text-sm ${i <= activeStep ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
               {t(`onboarding.computing.step_${step.key}`)}
             </span>
             {i === activeStep && !reducedMotion && (

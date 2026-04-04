@@ -190,7 +190,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
   if (workouts.length === 0) {
     return (
       <div data-testid="workout-history-empty" className="flex flex-col items-center justify-center py-16 text-center">
-        <ClipboardList className="mb-4 h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
+        <ClipboardList className="text-muted-foreground mb-4 h-12 w-12" aria-hidden="true" />
         <p data-testid="empty-title" className="text-muted-foreground mb-1 font-medium">
           {t('fitness.history.noHistory')}
         </p>

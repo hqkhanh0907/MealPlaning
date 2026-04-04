@@ -53,7 +53,7 @@ function GoalViewMode() {
   if (!activeGoal) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="goal-view-empty">
-        <Target className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+        <Target className="text-muted-foreground mb-3 h-12 w-12" />
         <p className="text-foreground-secondary text-sm font-medium">{t('settings.goalNotSet')}</p>
         <p className="text-muted-foreground mt-1 text-xs">{t('settings.goalDesc')}</p>
       </div>

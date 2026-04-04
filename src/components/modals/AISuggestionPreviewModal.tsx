@@ -284,8 +284,8 @@ export const AISuggestionPreviewModal = ({
                           disabled={!isSelected}
                           className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                             isSelected
-                              ? 'text-foreground-secondary hover:bg-card/50 hover:text-foreground dark:hover:text-slate-100'
-                              : 'cursor-not-allowed text-slate-300 dark:text-slate-600'
+                              ? 'text-foreground-secondary hover:bg-card/50 hover:text-foreground'
+                              : 'text-muted-foreground cursor-not-allowed'
                           }`}
                         >
                           <Edit3 className="h-3.5 w-3.5" />
@@ -297,7 +297,7 @@ export const AISuggestionPreviewModal = ({
                       <div className="mb-3 space-y-2">
                         {names.map(name => (
                           <div key={name} className="flex items-center gap-2">
-                            <ChefHat className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-slate-300'}`} />
+                            <ChefHat className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                             <span className={`font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                               {name}
                             </span>
@@ -352,7 +352,7 @@ export const AISuggestionPreviewModal = ({
                         {Math.round((nutritionSummary.calories / targetCalories) * 100)}%
                       </span>
                     </div>
-                    <div className="bg-muted h-2 overflow-hidden rounded-full dark:bg-slate-600">
+                    <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
                         className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-rose-500' : 'bg-primary'}`}
                         style={{ width: `${Math.min(100, (nutritionSummary.calories / targetCalories) * 100)}%` }}
@@ -368,7 +368,7 @@ export const AISuggestionPreviewModal = ({
                         {Math.round((nutritionSummary.protein / targetProtein) * 100)}%
                       </span>
                     </div>
-                    <div className="bg-muted h-2 overflow-hidden rounded-full dark:bg-slate-600">
+                    <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
                         className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-amber-500'}`}
                         style={{ width: `${Math.min(100, (nutritionSummary.protein / targetProtein) * 100)}%` }}

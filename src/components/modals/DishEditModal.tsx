@@ -428,7 +428,7 @@ export const DishEditModal = ({
                       type="button"
                       data-testid={`star-${star}`}
                       onClick={() => setValue('rating', watchedRating === star ? 0 : star, { shouldDirty: true })}
-                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-amber-400' : 'text-slate-300 hover:text-amber-300 dark:text-slate-600'}`}
+                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-300'}`}
                       aria-label={`${star} ${t('dish.stars')}`}
                     >
                       ★
@@ -506,7 +506,7 @@ export const DishEditModal = ({
                             {Math.round(ing.caloriesPer100)}cal · {Math.round(ing.proteinPer100)}g pro
                           </span>
                         </div>
-                        <Plus className="group-hover:text-primary h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" />
+                        <Plus className="group-hover:text-primary text-muted-foreground h-4 w-4 shrink-0" />
                       </button>
                     );
                     return (

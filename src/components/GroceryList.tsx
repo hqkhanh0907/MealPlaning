@@ -328,7 +328,7 @@ export const GroceryList = React.memo(function GroceryList({
                 </span>
                 <span
                   className={`shrink-0 text-sm font-medium transition-all ${
-                    isChecked ? 'text-slate-300 dark:text-slate-600' : 'text-muted-foreground'
+                    isChecked ? 'text-muted-foreground' : 'text-muted-foreground'
                   }`}
                 >
                   {Math.round(item.amount)} {item.unit}

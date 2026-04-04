@@ -17,7 +17,7 @@ function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
     case 'missed':
       return <Circle className="h-5 w-5 text-red-400" aria-hidden="true" />;
     default:
-      return <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600" aria-hidden="true" />;
+      return <Circle className="text-muted-foreground h-5 w-5" aria-hidden="true" />;
   }
 }
 

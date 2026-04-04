@@ -332,7 +332,7 @@ export const DishManager = ({
                   <button
                     data-testid={`btn-clone-dish-${dish.id}`}
                     onClick={() => handleClone(dish)}
-                    className="text-muted-foreground flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
+                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all"
                   >
                     <Copy className="h-4 w-4" /> {t('dish.clone')}
                   </button>
@@ -347,7 +347,7 @@ export const DishManager = ({
                     data-testid={`btn-delete-dish-${dish.id}`}
                     onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                     aria-disabled={isUsed(dish.id)}
-                    className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                    className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                   >
                     <Trash2 className="h-4 w-4" /> {t('common.delete')}
                   </button>
@@ -457,7 +457,7 @@ export const DishManager = ({
                             data-testid={`btn-clone-dish-${dish.id}`}
                             onClick={() => handleClone(dish)}
                             aria-label={`${t('common.clone')} ${getLocalizedField(dish.name, lang)}`}
-                            className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
+                            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
                           >
                             <Copy className="h-4 w-4" />
                           </button>
@@ -474,7 +474,7 @@ export const DishManager = ({
                             onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                             aria-disabled={isUsed(dish.id)}
                             aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                            className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all ${isUsed(dish.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                            className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all ${isUsed(dish.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -526,7 +526,7 @@ export const DishManager = ({
                       data-testid={`btn-clone-dish-${dish.id}`}
                       onClick={() => handleClone(dish)}
                       aria-label={`${t('common.clone')} ${getLocalizedField(dish.name, lang)}`}
-                      className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
+                      className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all"
                     >
                       <Copy className="h-4 w-4" />
                     </button>
@@ -543,7 +543,7 @@ export const DishManager = ({
                       onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                       aria-disabled={isUsed(dish.id)}
                       aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all ${isUsed(dish.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all ${isUsed(dish.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -697,7 +697,7 @@ export const DishManager = ({
         <button
           data-testid="btn-open-compare"
           onClick={() => setShowCompare(true)}
-          className="fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full bg-blue-500 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-blue-600"
+          className="bg-primary text-primary-foreground hover:bg-primary-emphasis fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold shadow-lg transition-all"
         >
           <GitCompareArrows className="h-5 w-5" />
           {t('dish.compareSelected', { count: compareIds.size })}

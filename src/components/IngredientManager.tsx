@@ -310,7 +310,7 @@ export const IngredientManager = ({
                           onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                           aria-disabled={isUsed(ing.id)}
                           aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                          className={`rounded-lg p-2 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                          className={`rounded-lg p-2 transition-all ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -359,7 +359,7 @@ export const IngredientManager = ({
                     onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                     aria-disabled={isUsed(ing.id)}
                     aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                    className={`rounded-lg p-2.5 transition-all ${isUsed(ing.id) ? 'text-slate-300 opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                    className={`rounded-lg p-2.5 transition-all ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

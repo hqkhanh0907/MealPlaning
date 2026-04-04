@@ -496,7 +496,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                         <button
                           type="button"
                           onClick={() => setEditingSet(set)}
-                          className="focus-visible:ring-ring hover:text-foreground-secondary text-muted-foreground hover:bg-accent inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none dark:hover:text-slate-200"
+                          className="focus-visible:ring-ring hover:text-foreground-secondary text-muted-foreground hover:bg-accent inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none"
                           aria-label={t('fitness.logger.editSet')}
                           data-testid={`edit-set-${set.id}`}
                         >

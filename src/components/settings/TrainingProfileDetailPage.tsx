@@ -44,7 +44,7 @@ function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => voi
           className="flex flex-col items-center justify-center py-12 text-center"
           data-testid="training-profile-empty"
         >
-          <Dumbbell className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+          <Dumbbell className="text-muted-foreground mb-3 h-12 w-12" />
           <p className="text-foreground-secondary text-sm font-medium">{t('settings.notConfigured')}</p>
           <p className="text-muted-foreground mt-1 text-xs">{t('settings.notConfiguredDesc')}</p>
         </div>

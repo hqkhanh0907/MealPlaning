@@ -100,7 +100,7 @@ export const DesktopNav = ({ activeTab, onTabChange }: { activeTab: MainTab; onT
           role="tab"
           aria-selected={activeTab === tab}
           onClick={() => onTabChange(tab)}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {desktopIcon}
           <span>{t(labelKey)}</span>

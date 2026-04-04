@@ -303,7 +303,7 @@ function TrainingPlanViewInner({
     return (
       <div data-testid="training-plan-view" className="flex flex-col items-center justify-center py-12 text-center">
         <div data-testid="no-plan-cta" className="flex flex-col items-center gap-4">
-          <Dumbbell className="h-12 w-12 text-slate-300 dark:text-slate-600" aria-hidden="true" />
+          <Dumbbell className="text-muted-foreground h-12 w-12" aria-hidden="true" />
           <p className="text-muted-foreground">{t('fitness.plan.noPlan')}</p>
           <button
             data-testid="create-plan-btn"

@@ -101,7 +101,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
+          <div className="bg-muted h-1 w-10 rounded-full" />
         </div>
 
         {/* Header */}
@@ -173,7 +173,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
                       <span className="text-primary text-xs font-medium">
                         {t(CATEGORY_I18N_KEYS[exercise.category])}
                       </span>
-                      <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
+                      <span className="text-muted-foreground text-xs">•</span>
                       <span className="text-muted-foreground text-xs">
                         {exercise.equipment.map(eq => EQUIPMENT_DISPLAY[eq] ?? eq).join(', ')}
                       </span>

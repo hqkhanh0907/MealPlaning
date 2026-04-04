@@ -281,7 +281,7 @@ export const MealPlannerModal = ({
         <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-4 sm:p-8">
           {filteredDishes.length === 0 && (
             <div className="py-12 text-center">
-              <ChefHat className="mx-auto mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+              <ChefHat className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
               <p className="text-muted-foreground font-medium">
                 {t('planning.noMatchTitle', { meal: activeTabLabel })}
               </p>
