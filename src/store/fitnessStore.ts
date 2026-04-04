@@ -34,6 +34,11 @@ import type { DatabaseService } from '../services/databaseService';
 
 let _db: DatabaseService | null = null;
 
+/** @internal Reset DB reference — test-only */
+export function __resetDbForTesting(): void {
+  _db = null;
+}
+
 function scoreDaySlot(
   td: number,
   primaryMuscle: string,
@@ -125,7 +130,7 @@ export interface FitnessState {
   restoreOriginalSchedule: (planId: string) => void;
   initializeFromSQLite: (db: DatabaseService) => Promise<void>;
   dismissPlanCelebration: () => void;
-  changeSplitType: (planId: string, newSplit: SplitType, mode: 'regenerate' | 'remap') => void;
+  changeSplitType: (planId: string, newSplit: SplitType, mode: 'regenerate' | 'remap') => Promise<void>;
   previewSplitChange: (planId: string, newSplit: SplitType) => SplitChangePreview;
   getTemplates: () => PlanTemplate[];
   getRecommendedTemplates: (profile: TrainingProfile) => PlanTemplate[];
@@ -448,16 +453,21 @@ export const useFitnessStore = create<FitnessState>()(
       },
 
       deleteWorkout: async id => {
+        const prevWorkouts = get().workouts;
+        const prevSets = get().workoutSets;
         set(state => ({
           workouts: state.workouts.filter(w => w.id !== id),
           workoutSets: state.workoutSets.filter(s => s.workoutId !== id),
         }));
         if (_db) {
           try {
-            await _db.execute('DELETE FROM workout_sets WHERE workout_id = ?', [id]);
-            await _db.execute('DELETE FROM workouts WHERE id = ?', [id]);
+            await _db.transaction(async () => {
+              // CASCADE on workout_sets.workout_id handles set deletion
+              await _db!.execute('DELETE FROM workouts WHERE id = ?', [id]);
+            });
           } catch (error: unknown) {
-            logger.error({ component: 'fitnessStore', action: 'SQLite delete failed for workout' }, error);
+            logger.error({ component: 'fitnessStore', action: 'deleteWorkout' }, error);
+            set({ workouts: prevWorkouts, workoutSets: prevSets });
           }
         }
       },
@@ -1131,19 +1141,21 @@ export const useFitnessStore = create<FitnessState>()(
         }
       },
 
-      changeSplitType: (planId, newSplit, mode) => {
+      changeSplitType: async (planId, newSplit, mode) => {
         const plan = get().trainingPlans.find(p => p.id === planId);
         if (!plan) return;
 
         const currentDays = get().trainingPlanDays.filter(d => d.planId === planId);
         const now = new Date().toISOString();
 
+        // --- 1. Pure computation (no side effects) ---
+        let daysToInsert: TrainingPlanDay[];
+
         if (mode === 'regenerate') {
           const daysPerWeek = plan.trainingDays.length;
           const preview = remapExercisesToNewSplit([], newSplit, daysPerWeek);
           const { trainingProfile } = get();
 
-          // Build per-session volume distribution when profile is available
           let sessionVolumes: Record<MuscleGroup, number>[] | null = null;
           let exerciseDB: Exercise[] | undefined;
           if (trainingProfile) {
@@ -1153,7 +1165,7 @@ export const useFitnessStore = create<FitnessState>()(
             exerciseDB = getDefaultExercises();
           }
 
-          const newDays: TrainingPlanDay[] = preview.suggested.map((s, i) => {
+          daysToInsert = preview.suggested.map((s, i) => {
             let exercisesJson = '[]';
             if (trainingProfile && sessionVolumes) {
               const exercises = generateExercisesForDay(
@@ -1180,45 +1192,6 @@ export const useFitnessStore = create<FitnessState>()(
               notes: s.day,
             };
           });
-
-          set(state => ({
-            trainingPlans: state.trainingPlans.map(p =>
-              p.id === planId ? { ...p, splitType: newSplit, updatedAt: now } : p,
-            ),
-            trainingPlanDays: [...state.trainingPlanDays.filter(d => d.planId !== planId), ...newDays],
-          }));
-
-          if (_db) {
-            _db
-              .execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [newSplit, now, planId])
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'changeSplitType.planUpdate' }, error);
-              });
-            _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'changeSplitType.deleteOldDays' }, error);
-            });
-            for (const day of newDays) {
-              _db
-                .execute(
-                  `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                  [
-                    day.id,
-                    day.planId,
-                    day.dayOfWeek,
-                    day.sessionOrder,
-                    day.workoutType,
-                    day.muscleGroups ?? null,
-                    day.exercises ?? null,
-                    day.originalExercises ?? null,
-                    day.notes ?? null,
-                  ],
-                )
-                .catch((error: unknown) => {
-                  logger.error({ component: 'fitnessStore', action: 'changeSplitType.insertDay' }, error);
-                });
-            }
-          }
         } else {
           const preview = remapExercisesToNewSplit(currentDays, newSplit, plan.trainingDays.length);
 
@@ -1231,7 +1204,6 @@ export const useFitnessStore = create<FitnessState>()(
 
           const { trainingProfile } = get();
 
-          // Build per-session volume for suggested (new) days
           let suggestedVolumes: Record<MuscleGroup, number>[] | null = null;
           let exerciseDB: Exercise[] | undefined;
           if (trainingProfile && preview.suggested.length > 0) {
@@ -1269,29 +1241,23 @@ export const useFitnessStore = create<FitnessState>()(
             };
           });
 
-          const allNewDays = [...updatedDays, ...newSuggestedDays];
+          daysToInsert = [...updatedDays, ...newSuggestedDays];
+        }
 
-          set(state => ({
-            trainingPlans: state.trainingPlans.map(p =>
-              p.id === planId ? { ...p, splitType: newSplit, updatedAt: now } : p,
-            ),
-            trainingPlanDays: [...state.trainingPlanDays.filter(d => d.planId !== planId), ...allNewDays],
-          }));
-
-          if (_db) {
-            _db
-              .execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [newSplit, now, planId])
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'changeSplitType.remapPlanUpdate' }, error);
-              });
-            _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'changeSplitType.remapDeleteOldDays' }, error);
-            });
-            for (const day of allNewDays) {
-              _db
-                .execute(
+        // --- 2. DB-first transaction (if DB is available) ---
+        if (_db) {
+          try {
+            await _db.transaction(async () => {
+              await _db!.execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [
+                newSplit,
+                now,
+                planId,
+              ]);
+              await _db!.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]);
+              for (const day of daysToInsert) {
+                await _db!.execute(
                   `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                   [
                     day.id,
                     day.planId,
@@ -1303,13 +1269,22 @@ export const useFitnessStore = create<FitnessState>()(
                     day.originalExercises ?? null,
                     day.notes ?? null,
                   ],
-                )
-                .catch((error: unknown) => {
-                  logger.error({ component: 'fitnessStore', action: 'changeSplitType.remapInsertDay' }, error);
-                });
-            }
+                );
+              }
+            });
+          } catch (error: unknown) {
+            logger.error({ component: 'fitnessStore', action: 'changeSplitType.transaction' }, error);
+            throw error;
           }
         }
+
+        // --- 3. Update Zustand only after successful DB commit ---
+        set(state => ({
+          trainingPlans: state.trainingPlans.map(p =>
+            p.id === planId ? { ...p, splitType: newSplit, updatedAt: now } : p,
+          ),
+          trainingPlanDays: [...state.trainingPlanDays.filter(d => d.planId !== planId), ...daysToInsert],
+        }));
       },
 
       previewSplitChange: (planId, newSplit) => {

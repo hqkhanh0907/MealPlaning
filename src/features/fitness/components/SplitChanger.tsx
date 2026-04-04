@@ -73,7 +73,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
   const handleConfirm = useCallback(async () => {
     setIsApplying(true);
     try {
-      changeSplitType(planId, selectedSplit, mode);
+      await changeSplitType(planId, selectedSplit, mode);
       setShowConfirm(false);
       onComplete();
     } catch {

@@ -12,7 +12,7 @@ import type {
 } from '../features/fitness/types';
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import { createSchema } from '../services/schema';
-import { useFitnessStore } from '../store/fitnessStore';
+import { __resetDbForTesting, useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -42,6 +42,7 @@ const INITIAL_STATE = {
 
 function resetStore() {
   useFitnessStore.setState(INITIAL_STATE);
+  __resetDbForTesting();
 }
 
 function sampleProfile(overrides: Partial<TrainingProfile> = {}): TrainingProfile {
@@ -1507,25 +1508,27 @@ describe('fitnessStore – SQLite error paths', () => {
     consoleSpy.mockRestore();
   });
 
-  it('deleteWorkout catches SQLite delete error', async () => {
+  it('deleteWorkout catches SQLite delete error and rolls back', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { result } = renderHook(() => useFitnessStore());
     await act(async () => {
       await result.current.initializeFromSQLite(badDb);
     });
 
+    const workout = sampleWorkout({ id: 'rollback-del-w1' });
+    const wset = sampleWorkoutSet({ id: 'rollback-del-s1', workoutId: 'rollback-del-w1' });
     act(() => {
-      useFitnessStore.setState({ workouts: [sampleWorkout()] });
+      useFitnessStore.setState({ workouts: [workout], workoutSets: [wset] });
     });
 
     await act(async () => {
-      await result.current.deleteWorkout('workout-1');
+      await result.current.deleteWorkout('rollback-del-w1');
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('SQLite delete failed for workout'),
-      expect.anything(),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deleteWorkout'), expect.anything());
+    // Zustand state should be rolled back
+    expect(result.current.workouts).toContainEqual(expect.objectContaining({ id: 'rollback-del-w1' }));
+    expect(result.current.workoutSets).toContainEqual(expect.objectContaining({ id: 'rollback-del-s1' }));
     consoleSpy.mockRestore();
   });
 
@@ -3446,5 +3449,472 @@ describe('fitnessStore – initializeFromSQLite loads training_plans + plan_days
     const plan = useFitnessStore.getState().trainingPlans[0];
     expect(Array.isArray(plan.trainingDays)).toBe(true);
     expect(plan.restDays).toEqual([]);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* FIX-02: deleteWorkout transaction + CASCADE + rollback              */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – FIX-02 deleteWorkout transaction', () => {
+  let db: DatabaseService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        'plan-del-tx',
+        'Test Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,3,5]',
+        '[2,4,6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+  });
+
+  it('deleteWorkout uses transaction and CASCADE deletes sets', async () => {
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    // Insert workout + sets via raw SQL to set up FK relationships
+    await db.execute('PRAGMA foreign_keys = OFF');
+    await db.execute(
+      `INSERT INTO workouts (id, date, name, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      ['del-tx-w1', '2025-07-01', 'Workout TX', '2025-07-01T00:00:00Z', '2025-07-01T00:00:00Z'],
+    );
+    await db.execute(
+      `INSERT INTO workout_sets (id, workout_id, exercise_id, set_number, updated_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      ['del-tx-s1', 'del-tx-w1', 'barbell-bench-press', 1, '2025-07-01T00:00:00Z'],
+    );
+    await db.execute(
+      `INSERT INTO workout_sets (id, workout_id, exercise_id, set_number, updated_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      ['del-tx-s2', 'del-tx-w1', 'barbell-bench-press', 2, '2025-07-01T00:00:00Z'],
+    );
+    await db.execute('PRAGMA foreign_keys = ON');
+
+    // Hydrate Zustand with the workout + sets
+    act(() => {
+      useFitnessStore.setState({
+        workouts: [
+          {
+            id: 'del-tx-w1',
+            date: '2025-07-01',
+            name: 'Workout TX',
+            createdAt: '2025-07-01T00:00:00Z',
+            updatedAt: '2025-07-01T00:00:00Z',
+          },
+        ],
+        workoutSets: [
+          {
+            id: 'del-tx-s1',
+            workoutId: 'del-tx-w1',
+            exerciseId: 'barbell-bench-press',
+            setNumber: 1,
+            weightKg: 0,
+            updatedAt: '2025-07-01T00:00:00Z',
+          },
+          {
+            id: 'del-tx-s2',
+            workoutId: 'del-tx-w1',
+            exerciseId: 'barbell-bench-press',
+            setNumber: 2,
+            weightKg: 0,
+            updatedAt: '2025-07-01T00:00:00Z',
+          },
+        ],
+      });
+    });
+
+    await act(async () => {
+      await result.current.deleteWorkout('del-tx-w1');
+    });
+
+    // Zustand cleared
+    expect(result.current.workouts.find(w => w.id === 'del-tx-w1')).toBeUndefined();
+    expect(result.current.workoutSets.filter(s => s.workoutId === 'del-tx-w1')).toHaveLength(0);
+
+    // DB cleared — workout row
+    const workoutRows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['del-tx-w1']);
+    expect(workoutRows).toHaveLength(0);
+
+    // DB cleared — sets via CASCADE
+    const setRows = await db.query<Record<string, unknown>>('SELECT * FROM workout_sets WHERE workout_id = ?', [
+      'del-tx-w1',
+    ]);
+    expect(setRows).toHaveLength(0);
+  });
+
+  it('deleteWorkout rolls back Zustand when transaction fails', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const badDb: DatabaseService = {
+      ...db,
+      execute: db.execute.bind(db),
+      query: db.query.bind(db),
+      transaction: () => Promise.reject(new Error('Transaction error')),
+      initialize: db.initialize.bind(db),
+      queryOne: db.queryOne.bind(db),
+      close: db.close.bind(db),
+      exportToJSON: db.exportToJSON.bind(db),
+      importFromJSON: db.importFromJSON.bind(db),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    const workout: Workout = {
+      id: 'rollback-w1',
+      date: '2025-07-01',
+      name: 'Rollback Test',
+      createdAt: '2025-07-01T00:00:00Z',
+      updatedAt: '2025-07-01T00:00:00Z',
+    };
+    const wset: WorkoutSet = {
+      id: 'rollback-s1',
+      workoutId: 'rollback-w1',
+      exerciseId: 'barbell-bench-press',
+      setNumber: 1,
+      weightKg: 0,
+      updatedAt: '2025-07-01T00:00:00Z',
+    };
+    act(() => {
+      useFitnessStore.setState({ workouts: [workout], workoutSets: [wset] });
+    });
+
+    await act(async () => {
+      await result.current.deleteWorkout('rollback-w1');
+    });
+
+    // Zustand state should be rolled back
+    expect(result.current.workouts).toContainEqual(expect.objectContaining({ id: 'rollback-w1' }));
+    expect(result.current.workoutSets).toContainEqual(expect.objectContaining({ id: 'rollback-s1' }));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deleteWorkout'), expect.anything());
+    consoleSpy.mockRestore();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* FIX-04: changeSplitType transaction + DB-first + error propagation  */
+/* ------------------------------------------------------------------ */
+describe('fitnessStore – FIX-04 changeSplitType transaction', () => {
+  let db: DatabaseService;
+
+  const PLAN_ID = 'plan-split-tx';
+
+  const exercisesJson = JSON.stringify([
+    {
+      exercise: {
+        id: 'bench',
+        name: 'Bench Press',
+        primaryMuscle: 'chest',
+        equipment: 'barbell',
+        category: 'compound',
+      },
+      sets: 4,
+      repsMin: 6,
+      repsMax: 10,
+      restSeconds: 120,
+    },
+  ]);
+
+  async function insertPlanInDb() {
+    await db.execute(
+      `INSERT INTO training_plans (id, name, status, split_type, duration_weeks, start_date, training_days, rest_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        PLAN_ID,
+        'Split TX Plan',
+        'active',
+        'ppl',
+        8,
+        '2025-06-01',
+        '[1,2,3,4,5]',
+        '[6,7]',
+        '2025-06-01T00:00:00Z',
+        '2025-06-01T00:00:00Z',
+      ],
+    );
+    for (let i = 0; i < 3; i++) {
+      await db.execute(
+        `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [`split-tx-day-${i}`, PLAN_ID, i + 1, 1, `Day${i}`, '["chest"]', exercisesJson, exercisesJson, `Day${i}`],
+      );
+    }
+  }
+
+  function setupPplPlanInZustand() {
+    const plan = samplePlan({
+      id: PLAN_ID,
+      splitType: 'ppl',
+      trainingDays: [1, 2, 3, 4, 5],
+      restDays: [6, 7],
+    });
+
+    const days: TrainingPlanDay[] = [
+      samplePlanDay({
+        id: 'split-tx-day-0',
+        planId: PLAN_ID,
+        dayOfWeek: 1,
+        workoutType: 'Push',
+        muscleGroups: '["chest","shoulders"]',
+        exercises: exercisesJson,
+        originalExercises: exercisesJson,
+      }),
+      samplePlanDay({
+        id: 'split-tx-day-1',
+        planId: PLAN_ID,
+        dayOfWeek: 2,
+        workoutType: 'Pull',
+        muscleGroups: '["back"]',
+        exercises: exercisesJson,
+        originalExercises: exercisesJson,
+      }),
+      samplePlanDay({
+        id: 'split-tx-day-2',
+        planId: PLAN_ID,
+        dayOfWeek: 3,
+        workoutType: 'Legs',
+        muscleGroups: '["legs","glutes"]',
+        exercises: exercisesJson,
+        originalExercises: exercisesJson,
+      }),
+    ];
+
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+    return { plan, days };
+  }
+
+  beforeEach(async () => {
+    localStorage.clear();
+    resetStore();
+    db = createDatabaseService();
+    await db.initialize();
+    await createSchema(db);
+  });
+
+  it('changeSplitType regenerate persists via transaction', async () => {
+    await insertPlanInDb();
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await act(async () => {
+      await result.current.changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+    });
+
+    // Zustand updated
+    const plan = result.current.trainingPlans.find(p => p.id === PLAN_ID);
+    expect(plan?.splitType).toBe('upper_lower');
+
+    const days = result.current.trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(days).toHaveLength(5); // upper_lower with 5 training days
+
+    // DB updated — plan split type
+    const planRows = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(planRows[0].splitType).toBe('upper_lower');
+
+    // DB updated — old days removed, new days inserted
+    const dayRows = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(dayRows).toHaveLength(5);
+    // No old day IDs should remain
+    expect(dayRows.find(r => r.id === 'split-tx-day-0')).toBeUndefined();
+  });
+
+  it('changeSplitType remap persists via transaction', async () => {
+    await insertPlanInDb();
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    await act(async () => {
+      await result.current.changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+    });
+
+    // Zustand updated
+    const plan = result.current.trainingPlans.find(p => p.id === PLAN_ID);
+    expect(plan?.splitType).toBe('upper_lower');
+
+    // DB updated
+    const planRows = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(planRows[0].splitType).toBe('upper_lower');
+
+    const dayRows = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(dayRows).toHaveLength(5);
+  });
+
+  it('changeSplitType does NOT update Zustand when transaction fails (regenerate)', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const badDb: DatabaseService = {
+      ...db,
+      execute: db.execute.bind(db),
+      query: db.query.bind(db),
+      transaction: () => Promise.reject(new Error('Transaction error')),
+      initialize: db.initialize.bind(db),
+      queryOne: db.queryOne.bind(db),
+      close: db.close.bind(db),
+      exportToJSON: db.exportToJSON.bind(db),
+      importFromJSON: db.importFromJSON.bind(db),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    setupPplPlanInZustand();
+
+    let caughtError: Error | null = null;
+    await act(async () => {
+      try {
+        await result.current.changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+      } catch (e) {
+        caughtError = e as Error;
+      }
+    });
+
+    // Error should propagate
+    expect(caughtError).not.toBeNull();
+
+    // Zustand should remain unchanged
+    const plan = result.current.trainingPlans.find(p => p.id === PLAN_ID);
+    expect(plan?.splitType).toBe('ppl');
+
+    const days = result.current.trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(days).toHaveLength(3); // Original 3 days unchanged
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('changeSplitType.transaction'), expect.anything());
+    consoleSpy.mockRestore();
+  });
+
+  it('changeSplitType does NOT update Zustand when transaction fails (remap)', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const badDb: DatabaseService = {
+      ...db,
+      execute: db.execute.bind(db),
+      query: db.query.bind(db),
+      transaction: () => Promise.reject(new Error('Transaction error')),
+      initialize: db.initialize.bind(db),
+      queryOne: db.queryOne.bind(db),
+      close: db.close.bind(db),
+      exportToJSON: db.exportToJSON.bind(db),
+      importFromJSON: db.importFromJSON.bind(db),
+    };
+
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(badDb);
+    });
+
+    setupPplPlanInZustand();
+
+    let caughtError: Error | null = null;
+    await act(async () => {
+      try {
+        await result.current.changeSplitType(PLAN_ID, 'upper_lower', 'remap');
+      } catch (e) {
+        caughtError = e as Error;
+      }
+    });
+
+    // Error should propagate
+    expect(caughtError).not.toBeNull();
+
+    // Zustand should remain unchanged
+    const plan = result.current.trainingPlans.find(p => p.id === PLAN_ID);
+    expect(plan?.splitType).toBe('ppl');
+
+    const days = result.current.trainingPlanDays.filter(d => d.planId === PLAN_ID);
+    expect(days).toHaveLength(3);
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('changeSplitType.transaction'), expect.anything());
+    consoleSpy.mockRestore();
+  });
+
+  it('changeSplitType DB remains consistent on atomic rollback', async () => {
+    await insertPlanInDb();
+    const { result } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result.current.initializeFromSQLite(db);
+    });
+
+    // Verify initial DB state
+    const initialDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(initialDays).toHaveLength(3);
+
+    // Create a DB that fails INSIDE the transaction (after some statements)
+    let callCount = 0;
+    const failingDb: DatabaseService = {
+      ...db,
+      query: db.query.bind(db),
+      queryOne: db.queryOne.bind(db),
+      initialize: db.initialize.bind(db),
+      close: db.close.bind(db),
+      exportToJSON: db.exportToJSON.bind(db),
+      importFromJSON: db.importFromJSON.bind(db),
+      execute: db.execute.bind(db),
+      transaction: async (_fn: () => Promise<void>) => {
+        // Wrap in real transaction but inject a failure
+        await db.transaction(async () => {
+          callCount++;
+          throw new Error('Simulated transaction failure');
+        });
+      },
+    };
+
+    // Re-init with failing DB
+    resetStore();
+    const { result: result2 } = renderHook(() => useFitnessStore());
+    await act(async () => {
+      await result2.current.initializeFromSQLite(failingDb);
+    });
+
+    setupPplPlanInZustand();
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await act(async () => {
+      try {
+        await result2.current.changeSplitType(PLAN_ID, 'upper_lower', 'regenerate');
+      } catch {
+        // Expected
+      }
+    });
+
+    // DB should still have original data (transaction rolled back)
+    const afterDays = await db.query<Record<string, unknown>>('SELECT * FROM training_plan_days WHERE plan_id = ?', [
+      PLAN_ID,
+    ]);
+    expect(afterDays).toHaveLength(3);
+    expect(afterDays.find(r => r.id === 'split-tx-day-0')).toBeDefined();
+
+    const afterPlan = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', [PLAN_ID]);
+    expect(afterPlan[0].splitType).toBe('ppl'); // Original split type unchanged
+
+    expect(callCount).toBe(1); // Transaction was attempted
+    consoleSpy.mockRestore();
   });
 });
