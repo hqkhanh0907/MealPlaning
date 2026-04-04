@@ -390,18 +390,16 @@ export const useFitnessStore = create<FitnessState>()(
         });
 
         if (_db) {
-          persistToDb(_db, 'DELETE FROM training_plan_days WHERE id = ?', [dayId], 'removePlanDaySession.delete');
+          const db = _db;
           const remaining = get()
             .trainingPlanDays.filter(d => d.planId === dayToRemove.planId && d.dayOfWeek === dayToRemove.dayOfWeek)
             .sort((a, b) => a.sessionOrder - b.sessionOrder);
-          for (const d of remaining) {
-            persistToDb(
-              _db,
-              'UPDATE training_plan_days SET session_order = ? WHERE id = ?',
-              [d.sessionOrder, d.id],
-              'removePlanDaySession.reorder',
-            );
-          }
+          db.transaction(async () => {
+            await db.execute('DELETE FROM training_plan_days WHERE id = ?', [dayId]);
+            for (const d of remaining) {
+              await db.execute('UPDATE training_plan_days SET session_order = ? WHERE id = ?', [d.sessionOrder, d.id]);
+            }
+          }).catch(e => logger.error({ component: 'fitnessStore', action: 'removePlanDaySession' }, e));
         }
       },
 
@@ -777,20 +775,19 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          persistToDb(
-            _db,
-            'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
-            [JSON.stringify(trainingDays), JSON.stringify(restDays), new Date().toISOString(), planId],
-            'updateTrainingDays.planUpdate',
-          );
-          for (const session of reassignedSessions) {
-            persistToDb(
-              _db,
-              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
-              [session.dayOfWeek, session.id],
-              'updateTrainingDays.reassign',
+          const db = _db;
+          db.transaction(async () => {
+            await db.execute(
+              'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+              [JSON.stringify(trainingDays), JSON.stringify(restDays), new Date().toISOString(), planId],
             );
-          }
+            for (const session of reassignedSessions) {
+              await db.execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?', [
+                session.dayOfWeek,
+                session.id,
+              ]);
+            }
+          }).catch(e => logger.error({ component: 'fitnessStore', action: 'updateTrainingDays' }, e));
         }
       },
 
@@ -894,14 +891,15 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          for (const a of assigned) {
-            persistToDb(
-              _db,
-              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
-              [a.dayOfWeek, a.id],
-              'autoAssignWorkouts.sqlite',
-            );
-          }
+          const db = _db;
+          db.transaction(async () => {
+            for (const a of assigned) {
+              await db.execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?', [
+                a.dayOfWeek,
+                a.id,
+              ]);
+            }
+          }).catch(e => logger.error({ component: 'fitnessStore', action: 'autoAssignWorkouts' }, e));
         }
       },
 
@@ -937,20 +935,19 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          persistToDb(
-            _db,
-            'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
-            [JSON.stringify(newTrainingDays), JSON.stringify(newRestDays), new Date().toISOString(), planId],
-            'restoreOriginalSchedule.planUpdate',
-          );
-          for (const d of restoredDays) {
-            persistToDb(
-              _db,
-              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
-              [d.dayOfWeek, d.id],
-              'restoreOriginalSchedule.dayUpdate',
+          const db = _db;
+          db.transaction(async () => {
+            await db.execute(
+              'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+              [JSON.stringify(newTrainingDays), JSON.stringify(newRestDays), new Date().toISOString(), planId],
             );
-          }
+            for (const d of restoredDays) {
+              await db.execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?', [
+                d.dayOfWeek,
+                d.id,
+              ]);
+            }
+          }).catch(e => logger.error({ component: 'fitnessStore', action: 'restoreOriginalSchedule' }, e));
         }
       },
 
@@ -1319,32 +1316,31 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          persistToDb(
-            _db,
-            'UPDATE training_plans SET split_type = ?, template_id = ?, training_days = ?, updated_at = ? WHERE id = ?',
-            [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
-            'applyTemplate.planUpdate',
-          );
-          persistToDb(_db, 'DELETE FROM training_plan_days WHERE plan_id = ?', [planId], 'applyTemplate.deleteOldDays');
-          for (const day of newDays) {
-            persistToDb(
-              _db,
-              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                day.id,
-                day.planId,
-                day.dayOfWeek,
-                day.sessionOrder,
-                day.workoutType,
-                day.muscleGroups ?? null,
-                day.exercises ?? null,
-                day.originalExercises ?? null,
-                day.notes ?? null,
-              ],
-              'applyTemplate.insertDay',
+          const db = _db;
+          db.transaction(async () => {
+            await db.execute(
+              'UPDATE training_plans SET split_type = ?, template_id = ?, training_days = ?, updated_at = ? WHERE id = ?',
+              [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
             );
-          }
+            await db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]);
+            for (const day of newDays) {
+              await db.execute(
+                `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                  day.id,
+                  day.planId,
+                  day.dayOfWeek,
+                  day.sessionOrder,
+                  day.workoutType,
+                  day.muscleGroups ?? null,
+                  day.exercises ?? null,
+                  day.originalExercises ?? null,
+                  day.notes ?? null,
+                ],
+              );
+            }
+          }).catch(e => logger.error({ component: 'fitnessStore', action: 'applyTemplate' }, e));
         }
       },
 
