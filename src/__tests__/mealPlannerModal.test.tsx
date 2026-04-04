@@ -514,7 +514,7 @@ describe('MealPlannerModal', () => {
       render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={100} targetProtein={10} />);
       fireEvent.click(screen.getByText('Gà nướng'));
       const calRemaining = screen.getByTestId('meal-planner-remaining-cal');
-      expect(calRemaining.className).toContain('text-rose-600');
+      expect(calRemaining.className).toContain('text-destructive');
       expect(calRemaining.textContent).toContain('Vượt');
     });
 

@@ -362,7 +362,7 @@ export const MealPlannerModal = ({
               {remainingBudget.calories !== null && (
                 <span
                   data-testid="meal-planner-remaining-cal"
-                  className={`font-medium ${remainingBudget.calories >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+                  className={`font-medium ${remainingBudget.calories >= 0 ? 'text-primary' : 'text-destructive'}`}
                 >
                   {remainingBudget.calories >= 0
                     ? t('summary.remaining', { value: remainingBudget.calories, unit: 'kcal' })
@@ -372,7 +372,7 @@ export const MealPlannerModal = ({
               {remainingBudget.protein !== null && (
                 <span
                   data-testid="meal-planner-remaining-pro"
-                  className={`font-medium ${remainingBudget.protein >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+                  className={`font-medium ${remainingBudget.protein >= 0 ? 'text-primary' : 'text-destructive'}`}
                 >
                   {remainingBudget.protein >= 0
                     ? t('summary.remaining', { value: remainingBudget.protein, unit: 'g' })

@@ -178,7 +178,7 @@ export const AISuggestionPreviewModal = ({
           {error && !isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/30">
-                <AlertCircle className="h-8 w-8 text-rose-600 dark:text-rose-400" />
+                <AlertCircle className="text-destructive h-8 w-8" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-bold">{t('ai.suggestionError')}</p>

@@ -48,7 +48,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
         <div className="flex items-center gap-3">
           <span
             data-testid="net-calories"
-            className={`text-lg font-bold ${remaining >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-lg font-bold ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {netCalories} {t('nutrition.kcal')}
           </span>
@@ -114,10 +114,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
               <span>
                 {t('nutrition.target')}: {displayTarget} {t('nutrition.kcal')}
               </span>
-              <span
-                data-testid="remaining-display"
-                className={remaining >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}
-              >
+              <span data-testid="remaining-display" className={remaining >= 0 ? 'text-primary' : 'text-destructive'}>
                 {t('nutrition.remaining')}: {remaining} {t('nutrition.kcal')}
               </span>
             </div>

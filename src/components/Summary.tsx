@@ -78,7 +78,7 @@ export const Summary = React.memo(function Summary({
           />
           <p
             data-testid="remaining-calories"
-            className={`text-xs font-medium ${remainingCalories >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-xs font-medium ${remainingCalories >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingCalories >= 0
               ? t('summary.remaining', { value: remainingCalories, unit: 'kcal' })
@@ -107,7 +107,7 @@ export const Summary = React.memo(function Summary({
           />
           <p
             data-testid="remaining-protein"
-            className={`text-xs font-medium ${remainingProtein >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-xs font-medium ${remainingProtein >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingProtein >= 0
               ? t('summary.remaining', { value: remainingProtein, unit: 'g' })

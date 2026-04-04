@@ -38,10 +38,10 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
       type="button"
       onClick={onSwitchToNutrition}
       data-testid="mini-nutrition-bar"
-      className="w-full cursor-pointer rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-left transition-all hover:bg-indigo-100 active:scale-[0.99] lg:hidden dark:border-indigo-800/30 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/30"
+      className="border-primary/20 bg-primary/5 hover:bg-primary/10 w-full cursor-pointer rounded-2xl border p-4 text-left transition-all active:scale-[0.99] lg:hidden"
       aria-label={t('schedule.quickNutrition')}
     >
-      <p className="mb-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">{t('schedule.quickNutrition')}</p>
+      <p className="text-primary mb-2 text-xs font-semibold">{t('schedule.quickNutrition')}</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <div className="text-foreground flex items-center gap-1.5">
@@ -59,7 +59,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </div>
           <p
             data-testid="mini-remaining-cal"
-            className={`text-xs font-medium ${remainingCal >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-xs font-medium ${remainingCal >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingCal >= 0
               ? t('summary.remaining', { value: remainingCal, unit: 'kcal' })
@@ -82,7 +82,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </div>
           <p
             data-testid="mini-remaining-pro"
-            className={`text-xs font-medium ${remainingPro >= 0 ? 'text-primary' : 'text-rose-600 dark:text-rose-400'}`}
+            className={`text-xs font-medium ${remainingPro >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingPro >= 0
               ? t('summary.remaining', { value: remainingPro, unit: 'g' })

@@ -59,7 +59,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       icon: <Trash2 className="h-4 w-4" aria-hidden="true" />,
       label: t('calendar.clearPlan'),
       onClick: onOpenClearPlan,
-      className: 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30',
+      className: 'text-destructive hover:bg-destructive/5',
       testId: 'btn-clear-plan',
     });
   }
@@ -69,7 +69,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       icon: <Copy className="h-4 w-4" aria-hidden="true" />,
       label: t('template.copyPlan'),
       onClick: onCopyPlan,
-      className: 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30',
+      className: 'text-primary hover:bg-primary/5',
       testId: 'btn-copy-plan',
     });
   }
@@ -79,7 +79,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       icon: <Save className="h-4 w-4" aria-hidden="true" />,
       label: t('template.saveAs'),
       onClick: onSaveTemplate,
-      className: 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30',
+      className: 'text-warning hover:bg-warning/5',
       testId: 'btn-save-template',
     });
   }
@@ -89,7 +89,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       icon: <BookTemplate className="h-4 w-4" aria-hidden="true" />,
       label: t('template.manageTemplates'),
       onClick: onOpenTemplateManager,
-      className: 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30',
+      className: 'text-primary hover:bg-primary/5',
       testId: 'btn-template-manager',
     });
   }
@@ -108,7 +108,7 @@ export const MealActionBar = React.memo(function MealActionBar({
         onClick={onSuggestMealPlan}
         disabled={isSuggesting}
         data-testid="btn-ai-suggest"
-        className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-medium text-indigo-600 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+        className="bg-primary/10 text-primary hover:bg-primary/15 flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all active:scale-[0.98] disabled:opacity-50"
       >
         {isSuggesting ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -122,7 +122,7 @@ export const MealActionBar = React.memo(function MealActionBar({
         <button
           onClick={onOpenGrocery}
           data-testid="btn-open-grocery"
-          className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 font-medium text-amber-600 transition-all hover:bg-amber-100 active:scale-[0.98] dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50"
+          className="bg-warning/10 text-warning hover:bg-warning/15 flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all active:scale-[0.98]"
         >
           <ShoppingCart className="h-4 w-4" aria-hidden="true" />
           <span className="hidden sm:inline">{t('grocery.title')}</span>
