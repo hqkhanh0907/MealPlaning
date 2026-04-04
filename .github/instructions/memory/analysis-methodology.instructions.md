@@ -693,3 +693,64 @@ grep -n "_db\.\(execute\|run\|query\|transaction\)" src/store/fitnessStore.ts
 ### Bài học
 
 Khi audit bất kỳ Zustand + SQLite store nào: **grep `_db.execute` rồi so sánh với list actions**. Mismatch = potential data loss bug. Session này phát hiện 10/24 actions thiếu — tỷ lệ 42% — rất nghiêm trọng.
+
+---
+
+## 21. Critic feedback timing — relay BEFORE agent completes, not after
+
+### Vấn đề
+
+Critic agent finished reviewing Wave 3 plan while dev agent was mid-flight (33 tool calls in). If critic feedback arrives after agent commits, corrections require extra rollback+recommit cycle.
+
+### Giải pháp
+
+Use `write_agent` to relay critic findings to running dev agent immediately. The agent receives the message as a new conversation turn and can course-correct mid-implementation.
+
+Pattern:
+1. Dispatch critic + dev agents in parallel
+2. Critic finishes first (faster, smaller scope)
+3. `write_agent(dev_id, critic_findings)` immediately
+4. Dev agent incorporates corrections before committing
+
+### Bài học
+
+Critic-before-commit > critic-after-commit. Relay findings to running agents via write_agent — don't wait for completion.
+
+---
+
+## 22. Sub-agent spawning sub-agents — orchestration depth 2 is normal
+
+### Vấn đề
+
+Dev-wave3 agent (general-purpose) autonomously spawned:
+- 1 explore agent for fitnessStore code research
+- 1 critic agent for its own test plan review
+- 1 general-purpose sub-agent for FIX-14+FIX-11 test writing
+
+Total: 4 agents for 1 wave. Parent agent orchestrated all of them.
+
+### Giải pháp
+
+This is expected and efficient. General-purpose agents have full tool access including `task()`. Let them self-organize — don't micro-manage.
+
+However: notifications from sub-agents arrive at the main session. Read them to stay informed but don't interfere unless the sub-agent output reveals critical issues.
+
+### Bài học
+
+Depth-2 agent trees are normal for complex waves. Trust the orchestration — intervene only for blocking issues found by critics.
+
+---
+
+## 23. Coverage claims vs reality — always verify independently
+
+### Vấn đề
+
+Dev agent reported "100% statements" for fitnessStore. Independent verification showed 96.55% statements, 83.16% branches. Discrepancy likely from different coverage scoping (isolated file vs full suite).
+
+### Giải pháp
+
+Always run `npx vitest run <file> --coverage` independently after agent completes. Don't trust agent-reported numbers without verification.
+
+### Bài học
+
+Agent coverage claims are approximate. Run your own coverage check before reporting to user.
