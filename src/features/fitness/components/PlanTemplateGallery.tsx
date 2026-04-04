@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
+import { ModalBackdrop } from '@/components/shared/ModalBackdrop';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFitnessStore } from '@/store/fitnessStore';
 import { useNavigationStore } from '@/store/navigationStore';
@@ -330,14 +331,12 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
 
       {/* Save Template Dialog */}
       {showSaveDialog && (
-        <dialog
-          open
-          data-testid="save-template-dialog"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          aria-modal="true"
-          aria-label={t('fitness.templateGallery.saveNamePrompt')}
-        >
-          <div className="bg-card w-full max-w-sm rounded-2xl p-6 shadow-xl">
+        <ModalBackdrop onClose={handleCancelSave} zIndex="z-50">
+          <div
+            data-testid="save-template-dialog"
+            className="bg-card relative w-full overflow-hidden rounded-t-2xl p-6 shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl"
+            aria-label={t('fitness.templateGallery.saveNamePrompt')}
+          >
             <h3 className="text-foreground mb-4 text-lg font-semibold">
               {t('fitness.templateGallery.saveNamePrompt')}
             </h3>
@@ -371,7 +370,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
               </button>
             </div>
           </div>
-        </dialog>
+        </ModalBackdrop>
       )}
     </div>
   );

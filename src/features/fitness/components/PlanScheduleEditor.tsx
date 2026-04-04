@@ -2,6 +2,7 @@ import { AlertCircle, ArrowLeft, CalendarDays, Dumbbell, RotateCcw, Save, Wand2 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { UnsavedChangesDialog } from '../../../components/shared/UnsavedChangesDialog';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
@@ -31,8 +32,6 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   const [isDirty, setIsDirty] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [reassignDayId, setReassignDayId] = useState<string | null>(null);
-
-  const confirmDialogTitleId = 'schedule-confirm-dialog-title';
 
   const initialTrainingDaysSnapshot = useMemo(() => JSON.stringify(plan?.trainingDays ?? []), [plan?.trainingDays]);
 
@@ -132,7 +131,12 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
     }
   }, [hasChanges, popPage]);
 
-  const handleConfirmDiscard = useCallback(() => {
+  const handleSaveAndBack = useCallback(() => {
+    setShowConfirmDialog(false);
+    handleSave();
+  }, [handleSave]);
+
+  const handleDiscardAndBack = useCallback(() => {
     setShowConfirmDialog(false);
     popPage();
   }, [popPage]);
@@ -292,38 +296,12 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
       />
 
       {/* Unsaved Changes Confirmation Dialog */}
-      {showConfirmDialog && (
-        <dialog
-          open
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
-          aria-modal="true"
-          aria-labelledby={confirmDialogTitleId}
-        >
-          <div className="bg-card w-full max-w-sm rounded-2xl p-6 shadow-xl">
-            <p id={confirmDialogTitleId} className="text-foreground mb-6 text-center text-sm">
-              {t('fitness.scheduleEditor.unsavedWarning')}
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                data-testid="cancel-discard"
-                onClick={handleCancelDiscard}
-                className="bg-card focus-visible:ring-ring border-border text-foreground hover:bg-accent flex-1 touch-manipulation rounded-xl border px-4 py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                data-testid="confirm-discard"
-                onClick={handleConfirmDiscard}
-                className="flex-1 touch-manipulation rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-rose-500 focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none dark:bg-rose-500 dark:hover:bg-rose-400"
-              >
-                {t('common.confirm')}
-              </button>
-            </div>
-          </div>
-        </dialog>
-      )}
+      <UnsavedChangesDialog
+        isOpen={showConfirmDialog}
+        onSave={handleSaveAndBack}
+        onDiscard={handleDiscardAndBack}
+        onCancel={handleCancelDiscard}
+      />
     </div>
   );
 });

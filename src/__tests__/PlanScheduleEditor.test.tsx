@@ -48,9 +48,15 @@ vi.mock('react-i18next', () => ({
         'fitness.scheduleEditor.selectDay': 'Chọn ngày tập',
         'fitness.scheduleEditor.sessionsCount': '{{count}} buổi',
         'fitness.scheduleEditor.maxSessions': 'Đã đầy (tối đa 3 buổi)',
+        'unsavedChanges.title': 'Thay đổi chưa lưu',
+        'unsavedChanges.description': 'Bạn có thay đổi chưa lưu. Bạn muốn làm gì?',
+        'unsavedChanges.saveAndBack': 'Lưu và quay lại',
+        'unsavedChanges.discard': 'Bỏ thay đổi',
+        'unsavedChanges.stayEditing': 'Tiếp tục chỉnh sửa',
         'common.back': 'Quay lại',
         'common.confirm': 'Xác nhận',
         'common.cancel': 'Hủy',
+        'common.close': 'Đóng',
       };
       return map[key] ?? key;
     },
@@ -441,10 +447,11 @@ describe('PlanScheduleEditor', () => {
       fireEvent.click(screen.getByTestId('toggle-day-7'));
       fireEvent.click(screen.getByTestId('back-button'));
 
-      // Confirm dialog should appear
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toHaveAttribute('aria-modal', 'true');
-      expect(screen.getByText('Bạn có thay đổi chưa lưu. Bạn có muốn thoát không?')).toBeInTheDocument();
+      // UnsavedChangesDialog should appear with proper content
+      expect(screen.getByText('Thay đổi chưa lưu')).toBeInTheDocument();
+      expect(screen.getByText('Lưu và quay lại')).toBeInTheDocument();
+      expect(screen.getByText('Bỏ thay đổi')).toBeInTheDocument();
+      expect(screen.getByText('Tiếp tục chỉnh sửa')).toBeInTheDocument();
     });
 
     it('confirm discard navigates back', () => {
@@ -453,7 +460,7 @@ describe('PlanScheduleEditor', () => {
 
       fireEvent.click(screen.getByTestId('toggle-day-7'));
       fireEvent.click(screen.getByTestId('back-button'));
-      fireEvent.click(screen.getByTestId('confirm-discard'));
+      fireEvent.click(screen.getByText('Bỏ thay đổi'));
 
       expect(mockPopPage).toHaveBeenCalledTimes(1);
     });
@@ -464,10 +471,22 @@ describe('PlanScheduleEditor', () => {
 
       fireEvent.click(screen.getByTestId('toggle-day-7'));
       fireEvent.click(screen.getByTestId('back-button'));
-      fireEvent.click(screen.getByTestId('cancel-discard'));
+      fireEvent.click(screen.getByText('Tiếp tục chỉnh sửa'));
 
       expect(mockPopPage).not.toHaveBeenCalled();
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(screen.queryByText('Thay đổi chưa lưu')).not.toBeInTheDocument();
+    });
+
+    it('save and back saves changes then navigates', () => {
+      setupStoreMock(makePlan({ trainingDays: [1, 3, 5] }), []);
+      render(<PlanScheduleEditor planId={PLAN_ID} />);
+
+      fireEvent.click(screen.getByTestId('toggle-day-7'));
+      fireEvent.click(screen.getByTestId('back-button'));
+      fireEvent.click(screen.getByText('Lưu và quay lại'));
+
+      expect(mockUpdateTrainingDays).toHaveBeenCalled();
+      expect(mockPopPage).toHaveBeenCalledTimes(1);
     });
   });
 

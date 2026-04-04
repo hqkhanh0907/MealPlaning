@@ -13,6 +13,7 @@ import {
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { UnsavedChangesDialog } from '../../../components/shared/UnsavedChangesDialog';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useNavigationStore } from '../../../store/navigationStore';
 import type { Exercise, SelectedExercise, TrainingPlanDay } from '../types';
@@ -40,7 +41,6 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
     exercise: SelectedExercise;
   } | null>(null);
   const pendingRemovalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const confirmDialogTitleId = 'confirm-dialog-title';
 
   const initialSnapshot = useMemo(() => planDay.exercises, [planDay.exercises]);
   const hasChanges = JSON.stringify(localExercises) !== initialSnapshot;
@@ -65,7 +65,12 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
     }
   }, [hasChanges, popPage]);
 
-  const handleConfirmDiscard = useCallback(() => {
+  const handleSaveAndBack = useCallback(() => {
+    setShowConfirmDialog(false);
+    handleSave();
+  }, [handleSave]);
+
+  const handleDiscardAndBack = useCallback(() => {
     setShowConfirmDialog(false);
     popPage();
   }, [popPage]);
@@ -73,15 +78,6 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
   const handleCancelDiscard = useCallback(() => {
     setShowConfirmDialog(false);
   }, []);
-
-  useEffect(() => {
-    if (!showConfirmDialog) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleCancelDiscard();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [showConfirmDialog, handleCancelDiscard]);
 
   const pendingRemovalRef = useRef<{
     index: number;
@@ -409,37 +405,12 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
       </div>
 
       {/* Unsaved changes confirm dialog */}
-      {showConfirmDialog && (
-        <dialog
-          open
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          aria-modal="true"
-          aria-labelledby={confirmDialogTitleId}
-        >
-          <div className="bg-card mx-4 w-full max-w-sm rounded-2xl p-6 shadow-xl">
-            <p id={confirmDialogTitleId} className="text-foreground mb-6 text-sm">
-              {t('fitness.plan.unsavedChanges')}
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleCancelDiscard}
-                autoFocus
-                className="border-border text-foreground active:bg-muted flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-medium dark:active:bg-slate-700"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDiscard}
-                className="bg-destructive active:bg-destructive/90 flex h-11 flex-1 items-center justify-center rounded-xl text-sm font-medium text-white"
-              >
-                {t('common.confirm')}
-              </button>
-            </div>
-          </div>
-        </dialog>
-      )}
+      <UnsavedChangesDialog
+        isOpen={showConfirmDialog}
+        onSave={handleSaveAndBack}
+        onDiscard={handleDiscardAndBack}
+        onCancel={handleCancelDiscard}
+      />
 
       {/* Undo removal toast */}
       {pendingRemoval && (

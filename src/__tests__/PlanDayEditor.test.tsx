@@ -25,6 +25,11 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.restLabel': 'Nghỉ',
         'fitness.plan.editParams': 'Chỉnh thông số',
         'fitness.swap.title': 'Đổi bài tập',
+        'unsavedChanges.title': 'Thay đổi chưa lưu',
+        'unsavedChanges.description': 'Bạn có thay đổi chưa lưu. Bạn muốn làm gì?',
+        'unsavedChanges.saveAndBack': 'Lưu và quay lại',
+        'unsavedChanges.discard': 'Bỏ thay đổi',
+        'unsavedChanges.stayEditing': 'Tiếp tục chỉnh sửa',
         'common.back': 'Quay lại',
         'common.confirm': 'Xác nhận',
         'common.cancel': 'Hủy',
@@ -490,10 +495,11 @@ describe('PlanDayEditor', () => {
     fireEvent.click(screen.getByText('Thêm bài tập'));
     fireEvent.click(screen.getByText('Add Squat'));
     fireEvent.click(screen.getByLabelText('Quay lại'));
-    const dialog = screen.getByRole('dialog');
-    expect(dialog).toHaveAttribute('aria-modal', 'true');
-    expect(dialog).toHaveAttribute('aria-labelledby', 'confirm-dialog-title');
-    expect(screen.getByText('Bạn có thay đổi chưa lưu. Bỏ thay đổi?')).toBeInTheDocument();
+    expect(screen.getByText('Thay đổi chưa lưu')).toBeInTheDocument();
+    expect(screen.getByText('Bạn có thay đổi chưa lưu. Bạn muốn làm gì?')).toBeInTheDocument();
+    expect(screen.getByText('Lưu và quay lại')).toBeInTheDocument();
+    expect(screen.getByText('Bỏ thay đổi')).toBeInTheDocument();
+    expect(screen.getByText('Tiếp tục chỉnh sửa')).toBeInTheDocument();
   });
 
   it('cancel discard closes dialog without navigating', () => {
@@ -501,9 +507,9 @@ describe('PlanDayEditor', () => {
     fireEvent.click(screen.getByText('Thêm bài tập'));
     fireEvent.click(screen.getByText('Add Squat'));
     fireEvent.click(screen.getByLabelText('Quay lại'));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Hủy'));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Thay đổi chưa lưu')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Tiếp tục chỉnh sửa'));
+    expect(screen.queryByText('Thay đổi chưa lưu')).not.toBeInTheDocument();
     expect(mockPopPage).not.toHaveBeenCalled();
   });
 
@@ -512,7 +518,19 @@ describe('PlanDayEditor', () => {
     fireEvent.click(screen.getByText('Thêm bài tập'));
     fireEvent.click(screen.getByText('Add Squat'));
     fireEvent.click(screen.getByLabelText('Quay lại'));
-    fireEvent.click(screen.getByText('Xác nhận'));
+    fireEvent.click(screen.getByText('Bỏ thay đổi'));
+    expect(mockPopPage).toHaveBeenCalled();
+  });
+
+  it('save and back saves changes then navigates away', () => {
+    const mockUpdateExercises = vi.fn();
+    useFitnessStore.setState({ updatePlanDayExercises: mockUpdateExercises });
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    fireEvent.click(screen.getByText('Thêm bài tập'));
+    fireEvent.click(screen.getByText('Add Squat'));
+    fireEvent.click(screen.getByLabelText('Quay lại'));
+    fireEvent.click(screen.getByText('Lưu và quay lại'));
+    expect(mockUpdateExercises).toHaveBeenCalled();
     expect(mockPopPage).toHaveBeenCalled();
   });
 
@@ -630,8 +648,8 @@ describe('PlanDayEditor', () => {
     fireEvent.click(screen.getByText('Thêm bài tập'));
     fireEvent.click(screen.getByText('Add Squat'));
     fireEvent.click(screen.getByLabelText('Quay lại'));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Thay đổi chưa lưu')).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByText('Thay đổi chưa lưu')).not.toBeInTheDocument();
   });
 });
