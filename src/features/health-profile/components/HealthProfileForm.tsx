@@ -328,7 +328,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       {goalWeightWarning && (
         <div
           data-testid="goal-weight-warning"
-          className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+          className="bg-warning/10 text-warning flex items-start gap-2 rounded-lg p-3 text-sm"
           role="alert"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -470,13 +470,13 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             </div>
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.fat')}</p>
-              <p className="font-semibold text-amber-600 dark:text-amber-400" data-testid="macro-fat">
+              <p className="text-macro-fat font-semibold" data-testid="macro-fat">
                 {macros.fatG}g
               </p>
             </div>
             <div className="bg-card rounded-lg p-2">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
-              <p className="font-semibold text-blue-600 dark:text-blue-400" data-testid="macro-carbs">
+              <p className="text-macro-carbs font-semibold" data-testid="macro-carbs">
                 {macros.carbsG}g
               </p>
             </div>

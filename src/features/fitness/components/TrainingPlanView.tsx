@@ -261,7 +261,7 @@ function TrainingPlanViewInner({
     return (
       <div data-testid="training-plan-view" className="flex flex-col items-center justify-center py-12 text-center">
         <div data-testid="plan-expired-cta" className="flex flex-col items-center gap-4">
-          <RefreshCw className="h-12 w-12 text-amber-400 dark:text-amber-500" aria-hidden="true" />
+          <RefreshCw className="text-warning h-12 w-12" aria-hidden="true" />
           <h3 className="text-foreground text-lg font-bold">{t('fitness.plan.planExpired')}</h3>
           <p className="text-muted-foreground max-w-xs text-sm">{t('fitness.plan.planExpiredMessage')}</p>
           <button
@@ -458,7 +458,7 @@ function TrainingPlanViewInner({
               type="button"
               role="menuitem"
               onClick={() => handleConvertToRest(dayContextMenu.dayNum)}
-              className="focus-visible:ring-ring hover:bg-accent flex min-h-[44px] w-full items-center gap-2 px-4 py-2.5 text-sm text-rose-600 transition-colors focus-visible:ring-2 focus-visible:outline-none dark:text-rose-400"
+              className="focus-visible:ring-ring hover:bg-accent text-color-rose flex min-h-[44px] w-full items-center gap-2 px-4 py-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
               {t('fitness.plan.convertToRest')}
@@ -536,7 +536,7 @@ function TrainingPlanViewInner({
                 viewedPlanDay.exercises !== viewedPlanDay.originalExercises && (
                   <span
                     data-testid="modified-badge"
-                    className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                    className="bg-warning/10 text-warning inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
                   >
                     {t('fitness.plan.modified')}
                   </span>
@@ -652,7 +652,7 @@ function TrainingPlanViewInner({
               data-testid="day-convert-rest-btn"
               type="button"
               onClick={() => handleConvertToRest(viewedDay)}
-              className="focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-100 focus-visible:ring-2 focus-visible:outline-none dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-400 dark:hover:bg-rose-900/40"
+              className="focus-visible:ring-ring border-color-rose/20 bg-color-rose/10 text-color-rose hover:bg-color-rose/15 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <Moon className="h-4 w-4" aria-hidden="true" />
               {t('fitness.plan.convertToRest')}
@@ -660,10 +660,7 @@ function TrainingPlanViewInner({
           </div>
         </div>
       ) : (
-        <div
-          data-testid="rest-day-card"
-          className="rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 p-5 text-white"
-        >
+        <div data-testid="rest-day-card" className="from-info/80 to-info rounded-2xl bg-gradient-to-br p-5 text-white">
           <div className="mb-3 flex items-center gap-2">
             <Moon className="h-5 w-5" aria-hidden="true" />
             <h3 className="text-lg font-bold">{t('fitness.plan.restDay')}</h3>

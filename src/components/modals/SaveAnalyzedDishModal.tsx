@@ -292,7 +292,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                     <button
                       onClick={() => handleResearchIngredient(idx)}
                       disabled={researchingIngredientIndex === idx || !selectedIngredients[idx]}
-                      className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 transition-all hover:bg-indigo-100 disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                      className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/10 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-50"
                     >
                       {researchingIngredientIndex === idx ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />

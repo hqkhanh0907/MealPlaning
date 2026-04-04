@@ -12,7 +12,7 @@ export interface EnergyBalanceMiniProps {
 function getNetColorClass(net: number, target: number): string {
   const diff = net - target;
   if (Math.abs(diff) <= 100) return 'text-primary';
-  if (diff > 100) return 'text-amber-600 dark:text-amber-400';
+  if (diff > 100) return 'text-color-energy';
   return 'text-foreground-secondary';
 }
 

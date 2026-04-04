@@ -34,7 +34,7 @@ export function WorkoutSummaryCard({
       <div className="flex flex-1 flex-col items-center justify-center p-6">
         {hasPR && (
           <div
-            className="mb-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 px-6 py-3 text-amber-950 shadow-lg"
+            className="from-color-energy to-color-energy/80 mb-4 rounded-xl bg-gradient-to-r px-6 py-3 text-amber-950 shadow-lg"
             data-testid="pr-celebration"
           >
             <Trophy className="mx-auto mb-1 h-8 w-8" aria-hidden="true" />
@@ -51,7 +51,7 @@ export function WorkoutSummaryCard({
         <h2 className="mb-6 text-2xl font-bold">{t('fitness.summary.title')}</h2>
         <div className="w-full max-w-sm space-y-3">
           <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
-            <Clock className="h-5 w-5 text-blue-500" aria-hidden="true" />
+            <Clock className="text-info h-5 w-5" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.duration')}</span>
             <span className="ml-auto font-semibold">{formatElapsed(durationSeconds)}</span>
           </div>
@@ -70,7 +70,7 @@ export function WorkoutSummaryCard({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="mt-8 w-full max-w-sm rounded-xl bg-blue-600 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-info mt-8 w-full max-w-sm rounded-xl py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="save-workout-button"
         >
           {isSaving ? (

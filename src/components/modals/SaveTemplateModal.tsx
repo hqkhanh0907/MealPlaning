@@ -48,11 +48,13 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
   const [watchName, watchTags] = useWatch({ control, name: ['name', 'tags'] });
 
   const getDishInfo = useCallback(
-    (ids: string[]): { id: string; name: string }[] =>
-      ids
-        .map(id => dishes.find(d => d.id === id))
+    (ids: string[]): { id: string; name: string }[] => {
+      const map = new Map(dishes.map(d => [d.id, d]));
+      return ids
+        .map(id => map.get(id))
         .filter(Boolean)
-        .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
+        .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) }));
+    },
     [dishes, lang],
   );
 
@@ -132,19 +134,19 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
       key: 'breakfast',
       label: t('calendar.morning'),
       items: preview.breakfast,
-      color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400',
+      color: 'bg-amber-50 dark:bg-amber-900/20 text-status-warning',
     },
     {
       key: 'lunch',
       label: t('calendar.afternoon'),
       items: preview.lunch,
-      color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
+      color: 'bg-blue-50 dark:bg-blue-900/20 text-status-info',
     },
     {
       key: 'dinner',
       label: t('calendar.evening'),
       items: preview.dinner,
-      color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400',
+      color: 'bg-indigo-50 dark:bg-indigo-900/20 text-color-ai',
     },
   ];
 
@@ -213,7 +215,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
                     type="button"
                     data-testid={`remove-tag-${tag}`}
                     onClick={() => removeTag(tag)}
-                    className="ml-0.5 hover:text-rose-500"
+                    className="hover:text-color-rose ml-0.5"
                     aria-label={`${t('common.delete')} ${tag}`}
                   >
                     <X className="h-3 w-3" />

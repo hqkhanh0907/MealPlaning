@@ -93,7 +93,7 @@ function MealsSection({
           size="sm"
           onClick={onLogMeal}
           data-testid="log-meal-cta"
-          className="mt-2 h-auto p-0 text-xs text-blue-600 dark:text-blue-400"
+          className="text-info mt-2 h-auto p-0 text-xs"
         >
           {t(nextMealKey)}
         </Button>
@@ -149,7 +149,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="workout-section">
               <div className="mb-2 flex items-center gap-1.5">
-                <Dumbbell className="h-4 w-4 text-blue-500" aria-hidden="true" />
+                <Dumbbell className="text-info h-4 w-4" aria-hidden="true" />
                 <span className="text-foreground-secondary text-xs font-medium">
                   {t('dashboard.todaysPlan.workout')}
                 </span>
@@ -175,7 +175,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                 size="sm"
                 onClick={handleStartWorkout}
                 data-testid="start-workout-cta"
-                className="mt-2 gap-1 bg-blue-600 text-white hover:bg-blue-700"
+                className="bg-info hover:bg-info/90 mt-2 gap-1 text-white"
               >
                 <Play className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('dashboard.todaysPlan.startCta')}
@@ -250,7 +250,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   })}
                 </p>
                 {data.completedWorkout.hasPR && (
-                  <p data-testid="pr-highlight" className="text-sm font-bold text-amber-500">
+                  <p data-testid="pr-highlight" className="text-color-energy text-sm font-bold">
                     {t('dashboard.todaysPlan.prHighlight')}
                   </p>
                 )}
@@ -337,7 +337,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           size="sm"
           onClick={handleCreatePlan}
           data-testid="create-plan-cta"
-          className="gap-1 bg-blue-600 text-white hover:bg-blue-700"
+          className="bg-info hover:bg-info/90 gap-1 text-white"
         >
           {t('dashboard.todaysPlan.createPlan')}
           <ChevronRight className="h-4 w-4" aria-hidden="true" />

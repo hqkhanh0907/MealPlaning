@@ -31,7 +31,7 @@ export const Summary = React.memo(function Summary({
     <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-xl shadow-black/5 sm:p-6 md:p-8 dark:shadow-black/10">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 sm:p-3 dark:bg-indigo-900/30 dark:text-indigo-400">
+          <div className="bg-color-ai-subtle text-color-ai rounded-xl p-2.5 sm:p-3">
             <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
@@ -59,7 +59,7 @@ export const Summary = React.memo(function Summary({
         <div className="min-w-[200px] flex-1 space-y-2">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div className="text-foreground flex items-center gap-1.5 font-medium sm:gap-2">
-              <Flame className="h-4 w-4 text-orange-500 sm:h-5 sm:w-5" />{' '}
+              <Flame className="text-color-energy h-4 w-4 sm:h-5 sm:w-5" />{' '}
               <span className="text-sm sm:text-base">{t('common.calories')}</span>
             </div>
             <div className="text-left sm:text-right">
@@ -90,7 +90,7 @@ export const Summary = React.memo(function Summary({
         <div className="min-w-[200px] flex-1 space-y-2">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div className="text-foreground flex items-center gap-1.5 font-medium sm:gap-2">
-              <Beef className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />{' '}
+              <Beef className="text-macro-protein h-4 w-4 sm:h-5 sm:w-5" />{' '}
               <span className="text-sm sm:text-base">{t('common.protein')}</span>
             </div>
             <div className="text-left sm:text-right">
@@ -100,7 +100,7 @@ export const Summary = React.memo(function Summary({
           </div>
           <progress
             data-testid="progress-protein"
-            className="[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-blue-500 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500"
+            className="[&::-webkit-progress-bar]:bg-muted [&::-moz-progress-bar]:bg-macro-protein [&::-webkit-progress-value]:bg-macro-protein h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500"
             aria-label={t('common.protein')}
             value={Math.round(totalProtein)}
             max={targetProtein}
@@ -117,24 +117,24 @@ export const Summary = React.memo(function Summary({
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-        <div className="rounded-2xl border border-amber-100/50 bg-amber-50 p-3 sm:p-4 dark:border-amber-800/30 dark:bg-amber-900/20">
-          <div className="mb-1 flex items-center gap-1.5 text-amber-700 sm:gap-2 dark:text-amber-400">
+        <div className="border-macro-carbs/20 bg-macro-carbs/10 rounded-2xl border p-3 sm:p-4">
+          <div className="text-macro-carbs mb-1 flex items-center gap-1.5 sm:gap-2">
             <Wheat className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.carbs')}</span>
           </div>
-          <p className="text-lg font-bold text-amber-900 sm:text-2xl dark:text-amber-300">
+          <p className="text-macro-carbs text-lg font-bold sm:text-2xl">
             {Math.round(totalCarbs)}
-            <span className="ml-1 text-xs font-normal text-amber-700/70 sm:text-sm dark:text-amber-500/70">g</span>
+            <span className="text-macro-carbs/70 ml-1 text-xs font-normal sm:text-sm">g</span>
           </p>
         </div>
-        <div className="rounded-2xl border border-rose-100/50 bg-rose-50 p-3 sm:p-4 dark:border-rose-800/30 dark:bg-rose-900/20">
-          <div className="mb-1 flex items-center gap-1.5 text-rose-700 sm:gap-2 dark:text-rose-400">
+        <div className="border-macro-fat/20 bg-macro-fat/10 rounded-2xl border p-3 sm:p-4">
+          <div className="text-macro-fat mb-1 flex items-center gap-1.5 sm:gap-2">
             <Droplet className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.fat')}</span>
           </div>
-          <p className="text-lg font-bold text-rose-900 sm:text-2xl dark:text-rose-300">
+          <p className="text-macro-fat text-lg font-bold sm:text-2xl">
             {Math.round(totalFat)}
-            <span className="ml-1 text-xs font-normal text-rose-700/70 sm:text-sm dark:text-rose-500/70">g</span>
+            <span className="text-macro-fat/70 ml-1 text-xs font-normal sm:text-sm">g</span>
           </p>
         </div>
         <div className="bg-primary-subtle border-primary/10 rounded-2xl border p-3 sm:p-4">

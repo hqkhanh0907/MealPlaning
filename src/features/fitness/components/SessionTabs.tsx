@@ -157,16 +157,16 @@ function SessionTabsInner({
           data-testid="delete-session-confirm"
           role="alertdialog"
           aria-label={t('fitness.plan.deleteSessionConfirm')}
-          className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20"
+          className="bg-destructive/10 mt-2 flex items-center gap-2 rounded-lg px-3 py-2"
         >
           <Trash2 className="text-destructive h-4 w-4 shrink-0" aria-hidden="true" />
-          <span className="text-sm text-red-700 dark:text-red-300">{t('fitness.plan.deleteSessionConfirm')}</span>
+          <span className="text-destructive text-sm">{t('fitness.plan.deleteSessionConfirm')}</span>
           <button
             data-testid="confirm-delete-session"
             type="button"
             onClick={handleConfirmDelete}
             aria-label={t('fitness.plan.deleteSession')}
-            className="focus-visible:ring-ring ml-auto min-h-[44px] min-w-[44px] rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring bg-destructive hover:bg-destructive/90 ml-auto min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Trash2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
             {t('fitness.plan.delete')}

@@ -133,7 +133,7 @@ const FitnessTabInner = () => {
 
       {profileOutOfSync && activeSubTab === 'plan' && (
         <div
-          className="mx-4 mt-2 flex items-center gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+          className="bg-warning/10 text-warning mx-4 mt-2 flex items-center gap-2 rounded-lg p-3 text-sm"
           data-testid="profile-out-of-sync-banner"
         >
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />

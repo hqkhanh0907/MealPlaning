@@ -17,14 +17,14 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
   return (
     <ModalBackdrop onClose={onAccept}>
       <div className="bg-card rounded-2xl p-6" data-testid="deload-modal">
-        <h3 className="text-lg font-bold text-amber-600">🔄 {t('fitness.deload.title')}</h3>
+        <h3 className="text-warning text-lg font-bold">🔄 {t('fitness.deload.title')}</h3>
         <p className="text-foreground-secondary mt-2 text-sm">{t('fitness.deload.explanation')}</p>
         <p className="text-muted-foreground mt-1 text-xs">{reason}</p>
         <div className="mt-4 flex gap-3">
           <button
             type="button"
             onClick={onAccept}
-            className="flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-amber-500 py-2.5 font-medium text-amber-950 transition-colors hover:bg-amber-600 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+            className="bg-warning hover:bg-warning/90 focus-visible:ring-warning flex min-h-[44px] flex-1 items-center justify-center rounded-lg py-2.5 font-medium text-amber-950 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             data-testid="deload-accept"
           >
             {t('fitness.deload.accept')}

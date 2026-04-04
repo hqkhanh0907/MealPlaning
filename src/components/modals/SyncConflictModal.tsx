@@ -20,7 +20,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
     >
       <div className="bg-card w-full max-w-sm rounded-2xl p-5 shadow-xl">
         <div className="mb-4 flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          <AlertTriangle className="text-warning h-5 w-5" />
           <h3 className="text-foreground font-bold">{t('syncConflict.title')}</h3>
         </div>
 
@@ -28,7 +28,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
 
         <div className="mb-5 space-y-2">
           <div className="bg-muted flex items-center gap-2 rounded-xl p-3">
-            <Monitor className="h-4 w-4 shrink-0 text-blue-500" />
+            <Monitor className="text-info h-4 w-4 shrink-0" />
             <div className="min-w-0">
               <p className="text-foreground text-xs font-semibold">{t('syncConflict.localData')}</p>
               <p className="text-muted-foreground truncate text-xs">{formatTime(localTime)}</p>
@@ -47,7 +47,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
           <button
             data-testid="btn-keep-local"
             onClick={() => onResolve('local')}
-            className="w-full rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
+            className="bg-info hover:bg-info/90 w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors"
           >
             {t('syncConflict.keepLocal')}
           </button>

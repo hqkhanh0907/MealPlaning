@@ -321,10 +321,8 @@ export const DishManager = ({
                     <span className="text-primary-emphasis text-sm font-bold">{Math.round(nutrition.calories)}</span>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-                    <span className="text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</span>
-                    <span className="text-sm font-bold text-blue-700 dark:text-blue-400">
-                      {Math.round(nutrition.protein)}g
-                    </span>
+                    <span className="text-macro-protein text-xs font-bold uppercase">{t('common.protein')}</span>
+                    <span className="text-macro-protein text-sm font-bold">{Math.round(nutrition.protein)}g</span>
                   </div>
                 </div>
                 <div className="border-border relative z-10 mt-auto flex items-center gap-4 border-t pt-4">
@@ -446,9 +444,7 @@ export const DishManager = ({
                         <span className="text-foreground font-bold">{Math.round(nutrition.calories)}</span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="font-bold text-blue-600 dark:text-blue-400">
-                          {Math.round(nutrition.protein)}g
-                        </span>
+                        <span className="text-macro-protein font-bold">{Math.round(nutrition.protein)}g</span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-3">
@@ -516,7 +512,7 @@ export const DishManager = ({
                       </button>
                       <div className="text-muted-foreground flex items-center gap-2 text-xs">
                         <span>{Math.round(nutrition.calories)} kcal</span>
-                        <span className="text-blue-600 dark:text-blue-400">{Math.round(nutrition.protein)}g Pro</span>
+                        <span className="text-macro-protein">{Math.round(nutrition.protein)}g Pro</span>
                       </div>
                     </div>
                   </div>
@@ -610,24 +606,24 @@ export const DishManager = ({
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
-                  <p className="mb-1 text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</p>
-                  <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
+                  <p className="text-macro-protein mb-1 text-xs font-bold uppercase">{t('common.protein')}</p>
+                  <p className="text-macro-protein text-xl font-bold">
                     {Math.round(nutrition.protein)}
-                    <span className="text-xs font-medium text-blue-400">g</span>
+                    <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
-                  <p className="mb-1 text-xs font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
-                  <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
+                  <p className="text-macro-carbs mb-1 text-xs font-bold uppercase">{t('common.carbs')}</p>
+                  <p className="text-macro-carbs text-xl font-bold">
                     {Math.round(nutrition.carbs)}
-                    <span className="text-xs font-medium text-amber-400">g</span>
+                    <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
-                  <p className="mb-1 text-xs font-bold text-rose-400 uppercase">{t('common.fat')}</p>
-                  <p className="text-xl font-bold text-rose-700 dark:text-rose-400">
+                  <p className="text-macro-fat mb-1 text-xs font-bold uppercase">{t('common.fat')}</p>
+                  <p className="text-macro-fat text-xl font-bold">
                     {Math.round(nutrition.fat)}
-                    <span className="text-xs font-medium text-rose-400">g</span>
+                    <span className="text-macro-fat text-xs font-medium">g</span>
                   </p>
                 </div>
               </div>
@@ -710,9 +706,9 @@ export const DishManager = ({
           const NUTRITION_KEYS = ['calories', 'protein', 'carbs', 'fat', 'fiber'] as const;
           const NUTRITION_COLORS: Record<string, string> = {
             calories: 'text-foreground',
-            protein: 'text-blue-600 dark:text-blue-400',
-            carbs: 'text-amber-600 dark:text-amber-400',
-            fat: 'text-rose-600 dark:text-rose-400',
+            protein: 'text-macro-protein',
+            carbs: 'text-macro-carbs',
+            fat: 'text-macro-fat',
             fiber: 'text-primary',
           };
           return (

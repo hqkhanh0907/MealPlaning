@@ -23,7 +23,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
     <ModalBackdrop onClose={onCancel} zIndex="z-70">
       <div className="bg-card relative w-full overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl">
         <div className="p-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-500 dark:bg-amber-900/30">
+          <div className="bg-warning/10 text-warning mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
             <Save className="h-8 w-8" />
           </div>
           <h4 className="text-foreground mb-2 text-xl font-bold">{t('unsavedChanges.title')}</h4>
@@ -38,7 +38,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
             <button
               onClick={onDiscard}
               data-testid="btn-discard-unsaved"
-              className="min-h-12 w-full rounded-xl py-3 font-bold text-rose-600 transition-all hover:bg-rose-50 active:scale-[0.98] dark:hover:bg-rose-900/20"
+              className="text-color-rose hover:bg-color-rose/10 min-h-12 w-full rounded-xl py-3 font-bold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.discard')}
             </button>

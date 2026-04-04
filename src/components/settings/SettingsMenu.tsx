@@ -65,7 +65,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
     () => [
       {
         id: 'health-profile',
-        icon: <Heart className="h-5 w-5 text-rose-500 dark:text-rose-400" />,
+        icon: <Heart className="text-color-rose h-5 w-5" />,
         titleKey: 'settings.healthProfileSection',
         summary: `BMR: ${bmr} • TDEE: ${tdee}`,
         keywords: [t('settings.healthProfileSection'), t('healthProfile.title'), 'BMR', 'TDEE'],
@@ -79,7 +79,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       },
       {
         id: 'training-profile',
-        icon: <Dumbbell className="h-5 w-5 text-blue-500 dark:text-blue-400" />,
+        icon: <Dumbbell className="text-info h-5 w-5" />,
         titleKey: 'settings.trainingProfileSection',
         summary: trainingSummary,
         keywords: [
@@ -158,8 +158,8 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       {visibleInlineSections.has('theme') && (
         <section className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/30">
-              <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+            <div className="bg-warning/10 flex h-10 w-10 items-center justify-center rounded-xl">
+              <Sun className="text-warning h-5 w-5" />
             </div>
             <div>
               <h3 className="text-foreground font-bold">{t('settings.theme')}</h3>
@@ -199,8 +199,8 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       {visibleInlineSections.has('data') && (
         <section className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/30">
-              <Database className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
+            <div className="bg-color-ai-subtle flex h-10 w-10 items-center justify-center rounded-xl">
+              <Database className="text-color-ai h-5 w-5" />
             </div>
             <div>
               <h3 className="text-foreground font-bold">{t('settings.data')}</h3>

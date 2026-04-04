@@ -119,7 +119,8 @@ const MealRow = React.memo(function MealRow({
   const hasDishes = dishIds.length > 0;
 
   const resolvedDishes = useMemo(() => {
-    return dishIds.map(id => dishes.find(d => d.id === id)).filter((d): d is Dish => d !== undefined);
+    const map = new Map(dishes.map(d => [d.id, d]));
+    return dishIds.map(id => map.get(id)).filter((d): d is Dish => d !== undefined);
   }, [dishIds, dishes]);
 
   const nutrition = useMemo(() => {

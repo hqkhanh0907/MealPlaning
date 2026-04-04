@@ -19,8 +19,8 @@ function FallbackUI({ onReset }: Readonly<{ onReset: () => void }>) {
   return (
     <div className="bg-card flex min-h-dvh flex-col items-center justify-center px-6">
       <div className="flex w-full max-w-sm flex-col items-center text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
-          <AlertTriangle aria-hidden="true" className="h-8 w-8 text-amber-500 dark:text-amber-400" />
+        <div className="bg-warning/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <AlertTriangle aria-hidden="true" className="text-warning h-8 w-8" />
         </div>
         <h2 className="text-foreground mb-6 text-lg font-bold">{t('onboarding.error.title')}</h2>
         <button

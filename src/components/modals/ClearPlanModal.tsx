@@ -170,13 +170,11 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   </p>
                   <p className="text-muted-foreground text-sm">{desc}</p>
                   {count > 0 && mealCount > 0 && (
-                    <p className="mt-0.5 text-xs text-rose-500 dark:text-rose-400">
-                      {t('clearPlan.totalMeals', { count: mealCount })}
-                    </p>
+                    <p className="text-color-rose mt-0.5 text-xs">{t('clearPlan.totalMeals', { count: mealCount })}</p>
                   )}
                 </div>
                 {count > 0 && (
-                  <span className="shrink-0 rounded-full bg-rose-100 px-2.5 py-1 text-xs font-bold text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+                  <span className="bg-color-rose/10 text-color-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-bold">
                     {t('clearPlan.dayCount', { count })}
                   </span>
                 )}
@@ -196,10 +194,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   {[...dates]
                     .sort((a, b) => a.localeCompare(b))
                     .map(d => (
-                      <span
-                        key={d}
-                        className="rounded-full bg-rose-50 px-2 py-0.5 text-xs text-rose-600 dark:bg-rose-900/20 dark:text-rose-400"
-                      >
+                      <span key={d} className="bg-color-rose/10 text-color-rose rounded-full px-2 py-0.5 text-xs">
                         {formatShortDate(d)}
                       </span>
                     ))}

@@ -76,11 +76,13 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
   }, []);
 
   const getDishInfo = useCallback(
-    (ids: string[]): { id: string; name: string }[] =>
-      ids
-        .map(id => dishes.find(d => d.id === id))
+    (ids: string[]): { id: string; name: string }[] => {
+      const map = new Map(dishes.map(d => [d.id, d]));
+      return ids
+        .map(id => map.get(id))
         .filter(Boolean)
-        .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) })),
+        .map(d => ({ id: d!.id, name: getLocalizedField(d!.name, lang) }));
+    },
     [dishes, lang],
   );
 
@@ -92,9 +94,9 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
     if (total === 0) return null;
 
     return [
-      { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-amber-600 dark:text-amber-400' },
-      { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-blue-600 dark:text-blue-400' },
-      { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-indigo-600 dark:text-indigo-400' },
+      { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-status-warning' },
+      { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-status-info' },
+      { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-color-ai' },
     ];
   }, [getDishInfo, sourcePlan, t]);
 
@@ -225,7 +227,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
                     <span className="text-primary-emphasis text-sm font-medium">{formatDate(date, dateLocale)}</span>
                     <button
                       onClick={() => handleRemoveDate(date)}
-                      className="text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 transition-all hover:text-rose-500"
+                      className="text-muted-foreground hover:text-color-rose flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 transition-all"
                       aria-label={t('copyPlan.remove')}
                     >
                       <Trash2 className="h-4 w-4" />

@@ -125,7 +125,7 @@ export const GoogleDriveSync = () => {
 
   const statusIcon = useMemo(() => {
     if (syncStatus === 'uploading' || syncStatus === 'downloading') {
-      return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
+      return <Loader2 className="text-info h-4 w-4 animate-spin" />;
     }
     if (syncStatus === 'error') {
       return <AlertCircle className="text-destructive h-4 w-4" />;
@@ -148,7 +148,7 @@ export const GoogleDriveSync = () => {
         className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-5"
       >
         <div className="mb-4 flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30">
+          <div className="bg-info/10 text-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
             <Cloud className="h-5 w-5" />
           </div>
           <div>
@@ -160,7 +160,7 @@ export const GoogleDriveSync = () => {
           data-testid="btn-google-sign-in"
           onClick={handleSignIn}
           disabled={authLoading}
-          className="border-border bg-card text-foreground flex w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-semibold transition-all hover:border-blue-400 disabled:opacity-50 dark:hover:border-blue-500"
+          className="border-border bg-card text-foreground hover:border-info flex w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-50"
         >
           {authLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -196,7 +196,7 @@ export const GoogleDriveSync = () => {
       className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-5"
     >
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30">
+        <div className="bg-info/10 text-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
           <Cloud className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -213,7 +213,7 @@ export const GoogleDriveSync = () => {
           data-testid="btn-upload-drive"
           onClick={handleUpload}
           disabled={isSyncing}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-600 disabled:opacity-50"
+          className="bg-info hover:bg-info/90 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50"
         >
           {syncStatus === 'uploading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {t('cloudSync.uploadToDrive')}

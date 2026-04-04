@@ -191,16 +191,16 @@ export const IngredientManager = ({
                   <span className="text-foreground text-sm font-bold">{ing.caloriesPer100}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-                  <span className="text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</span>
-                  <span className="text-sm font-bold text-blue-700 dark:text-blue-400">{ing.proteinPer100}g</span>
+                  <span className="text-macro-protein text-xs font-bold uppercase">{t('common.protein')}</span>
+                  <span className="text-macro-protein text-sm font-bold">{ing.proteinPer100}g</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
-                  <span className="text-xs font-bold text-amber-400 uppercase">{t('common.carbs')}</span>
-                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{ing.carbsPer100}g</span>
+                  <span className="text-macro-carbs text-xs font-bold uppercase">{t('common.carbs')}</span>
+                  <span className="text-macro-carbs text-sm font-bold">{ing.carbsPer100}g</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-rose-50 p-2 dark:bg-rose-900/30">
-                  <span className="text-xs font-bold text-rose-400 uppercase">{t('common.fat')}</span>
-                  <span className="text-sm font-bold text-rose-700 dark:text-rose-400">{ing.fatPer100}g</span>
+                  <span className="text-macro-fat text-xs font-bold uppercase">{t('common.fat')}</span>
+                  <span className="text-macro-fat text-sm font-bold">{ing.fatPer100}g</span>
                 </div>
               </div>
               {renderUsedInDishes(ing.id)}
@@ -287,13 +287,13 @@ export const IngredientManager = ({
                       <span className="text-foreground font-bold">{ing.caloriesPer100}</span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="font-bold text-blue-600 dark:text-blue-400">{ing.proteinPer100}g</span>
+                      <span className="text-macro-protein font-bold">{ing.proteinPer100}g</span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="font-bold text-amber-600 dark:text-amber-400">{ing.carbsPer100}g</span>
+                      <span className="text-macro-carbs font-bold">{ing.carbsPer100}g</span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="font-bold text-rose-600 dark:text-rose-400">{ing.fatPer100}g</span>
+                      <span className="text-macro-fat font-bold">{ing.fatPer100}g</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-3">
@@ -341,7 +341,7 @@ export const IngredientManager = ({
                     </button>
                     <div className="text-muted-foreground flex items-center gap-2 text-xs">
                       <span>{ing.caloriesPer100} kcal</span>
-                      <span className="text-blue-600 dark:text-blue-400">{ing.proteinPer100}g Pro</span>
+                      <span className="text-macro-protein">{ing.proteinPer100}g Pro</span>
                     </div>
                   </div>
                 </div>
@@ -408,24 +408,24 @@ export const IngredientManager = ({
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
-                  <p className="mb-1 text-xs font-bold text-blue-400 uppercase">{t('common.protein')}</p>
-                  <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
+                  <p className="text-macro-protein mb-1 text-xs font-bold uppercase">{t('common.protein')}</p>
+                  <p className="text-macro-protein text-xl font-bold">
                     {ing.proteinPer100}
-                    <span className="text-xs font-medium text-blue-400">g</span>
+                    <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
-                  <p className="mb-1 text-xs font-bold text-amber-400 uppercase">{t('common.carbs')}</p>
-                  <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
+                  <p className="text-macro-carbs mb-1 text-xs font-bold uppercase">{t('common.carbs')}</p>
+                  <p className="text-macro-carbs text-xl font-bold">
                     {ing.carbsPer100}
-                    <span className="text-xs font-medium text-amber-400">g</span>
+                    <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
-                  <p className="mb-1 text-xs font-bold text-rose-400 uppercase">{t('common.fat')}</p>
-                  <p className="text-xl font-bold text-rose-700 dark:text-rose-400">
+                  <p className="text-macro-fat mb-1 text-xs font-bold uppercase">{t('common.fat')}</p>
+                  <p className="text-macro-fat text-xl font-bold">
                     {ing.fatPer100}
-                    <span className="text-xs font-medium text-rose-400">g</span>
+                    <span className="text-macro-fat text-xs font-medium">g</span>
                   </p>
                 </div>
               </div>

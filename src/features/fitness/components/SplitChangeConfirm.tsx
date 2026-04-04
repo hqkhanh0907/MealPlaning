@@ -54,9 +54,9 @@ export function SplitChangeConfirm({
         <SheetHeader>
           <div className="flex items-center gap-2">
             {isRegenerate ? (
-              <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden="true" data-testid="warning-icon" />
+              <AlertTriangle className="text-warning h-5 w-5" aria-hidden="true" data-testid="warning-icon" />
             ) : (
-              <Info className="h-5 w-5 text-blue-500" aria-hidden="true" data-testid="info-icon" />
+              <Info className="text-info h-5 w-5" aria-hidden="true" data-testid="info-icon" />
             )}
             <SheetTitle data-testid="confirm-title">
               {t('fitness.splitChanger.changeTo', { split: splitName })}
@@ -73,10 +73,10 @@ export function SplitChangeConfirm({
             <span className="bg-primary/10 text-primary rounded-full px-3 py-1">
               {String(preview.mapped.length)} {t('fitness.splitChanger.mapped')}
             </span>
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+            <span className="bg-warning/10 text-warning rounded-full px-3 py-1">
               {String(preview.suggested.length)} {t('fitness.splitChanger.suggested')}
             </span>
-            <span className="rounded-full bg-red-100 px-3 py-1 text-red-800 dark:bg-red-900 dark:text-red-200">
+            <span className="bg-destructive/10 text-destructive rounded-full px-3 py-1">
               {String(preview.unmapped.length)} {t('fitness.splitChanger.unmapped')}
             </span>
           </div>

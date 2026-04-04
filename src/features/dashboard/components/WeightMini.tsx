@@ -181,9 +181,9 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
           spark: COLORS.emerald500,
         }
       : {
-          bg: 'bg-amber-50 dark:bg-amber-900/15',
-          icon: 'text-amber-600 dark:text-amber-400',
-          text: 'text-amber-700 dark:text-amber-400',
+          bg: 'bg-warning/10',
+          icon: 'text-warning',
+          text: 'text-warning',
           spark: COLORS.amber500,
         };
 

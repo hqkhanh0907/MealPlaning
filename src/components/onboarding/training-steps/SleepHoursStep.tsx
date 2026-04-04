@@ -53,9 +53,9 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
       </fieldset>
       <p className="text-muted-foreground mt-2 text-xs">{t('fitness.onboarding.hoursUnit')}</p>
       {showWarning && (
-        <output className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden="true" />
-          <span className="text-xs text-amber-700 dark:text-amber-300">{t('fitness.onboarding.sleepWarning')}</span>
+        <output className="border-warning/20 bg-warning/10 mt-4 flex items-start gap-2 rounded-lg border p-3">
+          <AlertTriangle className="text-warning mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="text-warning text-xs">{t('fitness.onboarding.sleepWarning')}</span>
         </output>
       )}
     </StepLayout>

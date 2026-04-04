@@ -149,10 +149,10 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 } touch-manipulation`}
                 data-testid="mode-regenerate"
               >
-                <RefreshCw className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                <RefreshCw className="text-warning mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <span className="text-foreground font-medium">{t('fitness.splitChanger.regenerate')}</span>
-                  <p className="mt-1 flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
+                  <p className="text-warning mt-1 flex items-center gap-1 text-sm">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     {t('fitness.splitChanger.regenerateWarning')}
                   </p>
@@ -190,10 +190,10 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
 
             {previewError && (
               <div
-                className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+                className="border-destructive/20 bg-destructive/10 rounded-lg border p-4"
                 data-testid="preview-error"
               >
-                <p className="text-sm text-red-700 dark:text-red-300">{previewError}</p>
+                <p className="text-destructive text-sm">{previewError}</p>
               </div>
             )}
 
@@ -204,10 +204,10 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                   <span className="bg-primary/10 text-primary rounded-full px-3 py-1">
                     {String(preview.mapped.length)} {t('fitness.splitChanger.mapped')}
                   </span>
-                  <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                  <span className="bg-warning/10 text-warning rounded-full px-3 py-1">
                     {String(preview.suggested.length)} {t('fitness.splitChanger.suggested')}
                   </span>
-                  <span className="rounded-full bg-red-100 px-3 py-1 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  <span className="bg-destructive/10 text-destructive rounded-full px-3 py-1">
                     {String(preview.unmapped.length)} {t('fitness.splitChanger.unmapped')}
                   </span>
                 </div>
@@ -237,10 +237,10 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                     {preview.suggested.map((item, idx) => (
                       <div
                         key={`suggested-${String(idx)}`}
-                        className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 dark:bg-amber-950"
+                        className="bg-warning/10 flex items-center gap-2 rounded-lg px-3 py-2"
                         data-testid="preview-suggested-item"
                       >
-                        <Lightbulb className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+                        <Lightbulb className="text-warning h-4 w-4 shrink-0" aria-hidden="true" />
                         <span className="text-foreground min-w-0 flex-1 truncate text-sm">{item.day}</span>
                         <span className="text-muted-foreground text-xs">{item.reason}</span>
                       </div>
@@ -254,7 +254,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                     {preview.unmapped.map(item => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 dark:bg-red-950"
+                        className="bg-destructive/10 flex items-center gap-2 rounded-lg px-3 py-2"
                         data-testid="preview-unmapped-item"
                       >
                         <CircleAlert className="text-destructive h-4 w-4 shrink-0" aria-hidden="true" />

@@ -52,7 +52,7 @@ const EmptyState = () => {
   const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-center space-y-5 py-8 text-center">
-      <div className="from-primary/10 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br to-indigo-50 dark:to-indigo-900/20">
+      <div className="from-primary/10 to-color-ai-subtle flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br">
         <ImageIcon className="dark:text-primary/40 text-primary/40 h-12 w-12" />
       </div>
       <div className="space-y-2">
@@ -90,10 +90,10 @@ const IngredientRow = ({ ing }: { ing: AnalyzedIngredient }) => {
       <td className="text-foreground-secondary px-3 py-2">
         {ing.amount} {ing.unit}
       </td>
-      <td className="px-3 py-2 font-medium text-orange-500">{Math.round(n.calories)}</td>
-      <td className="px-3 py-2 font-medium text-blue-500">{Math.round(n.protein)}</td>
-      <td className="px-3 py-2 font-medium text-amber-500">{Math.round(n.carbs)}</td>
-      <td className="px-3 py-2 font-medium text-rose-500">{Math.round(n.fat)}</td>
+      <td className="text-color-energy px-3 py-2 font-medium">{Math.round(n.calories)}</td>
+      <td className="text-macro-protein px-3 py-2 font-medium">{Math.round(n.protein)}</td>
+      <td className="text-macro-carbs px-3 py-2 font-medium">{Math.round(n.carbs)}</td>
+      <td className="text-macro-fat px-3 py-2 font-medium">{Math.round(n.fat)}</td>
     </tr>
   );
 };
@@ -112,19 +112,19 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="text-center">
           <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.calories')}</p>
-          <p className="text-sm font-semibold text-orange-500">{Math.round(n.calories)}</p>
+          <p className="text-color-energy text-sm font-semibold">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
           <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.protein')}</p>
-          <p className="text-sm font-semibold text-blue-500">{Math.round(n.protein)}g</p>
+          <p className="text-macro-protein text-sm font-semibold">{Math.round(n.protein)}g</p>
         </div>
         <div className="text-center">
           <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.carbs')}</p>
-          <p className="text-sm font-semibold text-amber-500">{Math.round(n.carbs)}g</p>
+          <p className="text-macro-carbs text-sm font-semibold">{Math.round(n.carbs)}g</p>
         </div>
         <div className="text-center">
           <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.fat')}</p>
-          <p className="text-sm font-semibold text-rose-500">{Math.round(n.fat)}g</p>
+          <p className="text-macro-fat text-sm font-semibold">{Math.round(n.fat)}g</p>
         </div>
       </div>
     </div>
@@ -148,21 +148,21 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
           label={t('ai.estimateCalories')}
           value={result.totalNutrition?.calories}
           unit="kcal"
-          color="text-orange-500"
+          color="text-color-energy"
         />
         <NutritionCard
           label={t('ai.estimateProtein')}
           value={result.totalNutrition?.protein}
           unit="g"
-          color="text-blue-500"
+          color="text-macro-protein"
         />
         <NutritionCard
           label={t('ai.estimateCarbs')}
           value={result.totalNutrition?.carbs}
           unit="g"
-          color="text-amber-500"
+          color="text-macro-carbs"
         />
-        <NutritionCard label={t('ai.estimateFat')} value={result.totalNutrition?.fat} unit="g" color="text-rose-500" />
+        <NutritionCard label={t('ai.estimateFat')} value={result.totalNutrition?.fat} unit="g" color="text-macro-fat" />
       </div>
 
       <div>
@@ -197,7 +197,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
         </div>
       </div>
 
-      <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-800 dark:border-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+      <div className="border-color-ai/20 bg-color-ai-subtle text-color-ai rounded-xl border p-4 text-sm">
         <p className="mb-1 font-bold">{t('ai.disclaimer')}</p>
         <p className="opacity-80">{t('ai.disclaimerText')}</p>
       </div>
@@ -205,7 +205,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
       {onOpenSaveModal && (
         <button
           onClick={onOpenSaveModal}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-bold text-white transition-all hover:bg-indigo-700"
+          className="bg-color-ai hover:bg-color-ai/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-bold text-white transition-all"
         >
           <Save className="h-5 w-5" aria-hidden="true" />
           {t('ai.saveToLibrary')}

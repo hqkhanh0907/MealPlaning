@@ -44,7 +44,8 @@ export const MealSlot = React.memo(function MealSlot({
   const label = t(`meal.${type}`);
 
   const resolvedDishes = useMemo(() => {
-    return slot.dishIds.map(id => dishes.find(d => d.id === id)).filter((d): d is Dish => d !== undefined);
+    const map = new Map(dishes.map(d => [d.id, d]));
+    return slot.dishIds.map(id => map.get(id)).filter((d): d is Dish => d !== undefined);
   }, [slot.dishIds, dishes]);
 
   const handleServingChange = useCallback(
@@ -156,7 +157,7 @@ export const MealSlot = React.memo(function MealSlot({
         <span className="bg-primary-subtle text-primary rounded px-2 py-0.5 text-xs font-bold uppercase">
           {Math.round(slot.calories)} kcal
         </span>
-        <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-600 uppercase dark:bg-blue-900/30 dark:text-blue-400">
+        <span className="bg-info/10 text-info rounded px-2 py-0.5 text-xs font-bold uppercase">
           {Math.round(slot.protein)}g Pro
         </span>
       </div>

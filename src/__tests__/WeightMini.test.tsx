@@ -114,7 +114,7 @@ describe('WeightMini', () => {
     const trendEl = screen.getByTestId('weight-trend');
     expect(trendEl).toHaveTextContent('Cần điều chỉnh');
     const mini = screen.getByTestId('weight-mini');
-    expect(mini.className).toContain('amber');
+    expect(mini.className).toContain('warning');
   });
 
   it('Bulk + Gaining moderate (≤0.5kg/wk) → green, "Đúng tiến độ"', () => {
@@ -138,7 +138,7 @@ describe('WeightMini', () => {
     const trendEl = screen.getByTestId('weight-trend');
     expect(trendEl).toHaveTextContent('Tăng nhanh');
     const mini = screen.getByTestId('weight-mini');
-    expect(mini.className).toContain('amber');
+    expect(mini.className).toContain('warning');
   });
 
   it('Maintain + Stable (±0.3kg/wk) → green, Minus icon, "Ổn định"', () => {
@@ -258,7 +258,7 @@ describe('WeightMini', () => {
     render(<WeightMini />);
 
     const mini = screen.getByTestId('weight-mini');
-    expect(mini.className).toContain('amber');
+    expect(mini.className).toContain('warning');
     expect(screen.getByTestId('weight-trend')).toHaveTextContent('Cần điều chỉnh');
   });
 
@@ -269,6 +269,6 @@ describe('WeightMini', () => {
     render(<WeightMini />);
 
     expect(screen.getByTestId('weight-trend')).toHaveTextContent('Cần điều chỉnh');
-    expect(screen.getByTestId('weight-mini').className).toContain('amber');
+    expect(screen.getByTestId('weight-mini').className).toContain('warning');
   });
 });

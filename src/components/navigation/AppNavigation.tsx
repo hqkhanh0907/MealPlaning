@@ -76,7 +76,7 @@ export const BottomNavBar = ({
               <div className="relative">
                 {mobileIcon}
                 {tab === 'ai-analysis' && showAIBadge && (
-                  <div className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-rose-500" />
+                  <div className="bg-color-rose absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full border-2 border-white" />
                 )}
               </div>
               <span className="mt-0.5 max-w-[72px] truncate text-xs leading-normal font-medium">{label}</span>

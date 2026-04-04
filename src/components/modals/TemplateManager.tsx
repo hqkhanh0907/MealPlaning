@@ -265,7 +265,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={() => onDelete(template.id)}
                             data-testid={`btn-delete-template-${template.id}`}
-                            className="flex min-h-11 items-center gap-1.5 rounded-lg bg-rose-100 px-3 py-2 text-sm font-medium text-rose-600 transition-all hover:bg-rose-200 active:scale-[0.98] dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-900/50"
+                            className="bg-color-rose/10 text-color-rose hover:bg-color-rose/15 flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                             {t('template.delete')}

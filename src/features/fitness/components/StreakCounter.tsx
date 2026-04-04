@@ -12,11 +12,11 @@ function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
     case 'completed':
       return <CheckCircle className="text-primary h-5 w-5" aria-hidden="true" />;
     case 'rest':
-      return <Moon className="h-5 w-5 text-blue-400" aria-hidden="true" />;
+      return <Moon className="text-info h-5 w-5" aria-hidden="true" />;
     case 'today':
       return <MapPin className="text-primary h-5 w-5" aria-hidden="true" />;
     case 'missed':
-      return <Circle className="h-5 w-5 text-red-400" aria-hidden="true" />;
+      return <Circle className="text-destructive h-5 w-5" aria-hidden="true" />;
     default:
       return <Circle className="text-muted-foreground h-5 w-5" aria-hidden="true" />;
   }
@@ -50,7 +50,7 @@ export const StreakCounter = React.memo(function StreakCounter() {
       </div>
 
       {streakInfo.streakAtRisk && (
-        <p data-testid="streak-warning" className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+        <p data-testid="streak-warning" className="text-warning mt-1 text-sm">
           {t('fitness.gamification.streakAtRisk')}
         </p>
       )}

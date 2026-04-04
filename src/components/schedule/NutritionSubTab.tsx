@@ -18,8 +18,8 @@ interface RecommendationPanelProps {
 
 const TIP_STYLES: Record<NutritionTip['type'], string> = {
   success: 'bg-primary-subtle border-primary/10 text-primary',
-  warning: 'bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800 text-amber-800 dark:text-amber-300',
-  info: 'bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-300',
+  warning: 'bg-warning/10 border-warning/20 text-warning',
+  info: 'bg-info/10 border-info/20 text-info',
 };
 
 const RecommendationPanel = ({
@@ -53,7 +53,7 @@ const RecommendationPanel = ({
 
   return (
     <div className="bg-card border-border-subtle flex flex-col rounded-2xl border p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-2 font-semibold text-indigo-600 dark:text-indigo-400">
+      <div className="text-color-ai mb-4 flex items-center gap-2 font-semibold">
         <Info className="h-5 w-5" aria-hidden="true" />
         <h3>{t('recommendation.title')}</h3>
       </div>
@@ -79,7 +79,7 @@ const RecommendationPanel = ({
           </div>
         )}
         {!isComplete && hasAnyPlan && (
-          <div className="flex items-center gap-2 pt-1 font-medium text-amber-600 dark:text-amber-400">
+          <div className="text-warning flex items-center gap-2 pt-1 font-medium">
             <AlertCircle className="h-4 w-4" aria-hidden="true" />
             {t('recommendation.missing')} {getMissingSlots()}
           </div>

@@ -293,11 +293,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                 <span className="text-lg font-bold">{date.getDate()}</span>
                 <div className="mt-0.5 flex gap-0.5">
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`}
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-color-energy')}`}
                   />
-                  <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`} />
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`}
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-macro-carbs')}`}
+                  />
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-color-ai')}`}
                   />
                 </div>
               </button>
@@ -359,13 +361,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
 
                   <div className="absolute bottom-1 flex gap-0.5 sm:bottom-2">
                     <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-amber-400')}`}
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-color-energy')}`}
                     />
                     <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-blue-400')}`}
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-macro-carbs')}`}
                     />
                     <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-indigo-400')}`}
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-color-ai')}`}
                     />
                   </div>
                 </button>
@@ -392,13 +394,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             })()}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}
+                <div className="bg-color-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
               </div>
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}
+                <div className="bg-macro-carbs h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
               </div>
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}
+                <div className="bg-color-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
               </div>
             </div>
           </div>
@@ -410,13 +412,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
           {!hintDismissed && <span>{t('calendar.swipeHint')}</span>}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-amber-400"></div> {t('calendar.morning')}
+              <div className="bg-color-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
             </div>
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-blue-400"></div> {t('calendar.afternoon')}
+              <div className="bg-macro-carbs h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
             </div>
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-indigo-400"></div> {t('calendar.evening')}
+              <div className="bg-color-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
             </div>
           </div>
         </div>

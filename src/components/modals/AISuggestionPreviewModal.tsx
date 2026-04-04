@@ -137,10 +137,10 @@ export const AISuggestionPreviewModal = ({
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
         {/* Header */}
-        <div className="border-border-subtle flex items-center justify-between border-b bg-linear-to-r from-indigo-50 to-indigo-50 px-6 py-4 dark:from-indigo-900/30 dark:to-indigo-900/30">
+        <div className="border-border-subtle bg-color-ai-subtle flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/50">
-              <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+            <div className="bg-color-ai-subtle flex h-10 w-10 items-center justify-center rounded-xl">
+              <Sparkles className="text-color-ai h-5 w-5" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-foreground text-lg font-bold">{t('ai.suggestionTitle')}</h3>
@@ -161,15 +161,15 @@ export const AISuggestionPreviewModal = ({
           {/* Loading State */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-16">
-              <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <Sparkles className="h-8 w-8 text-indigo-600" />
+              <div className="bg-color-ai-subtle flex h-16 w-16 animate-pulse items-center justify-center rounded-full">
+                <Sparkles className="text-color-ai h-8 w-8" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-bold">{t('ai.suggestionLoading')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionLoadingHint')}</p>
               </div>
               <div className="bg-muted h-2 w-48 overflow-hidden rounded-full">
-                <div className="animate-loading-bar h-full w-3/5 rounded-full bg-indigo-500" />
+                <div className="animate-loading-bar bg-color-ai h-full w-3/5 rounded-full" />
               </div>
             </div>
           )}
@@ -177,7 +177,7 @@ export const AISuggestionPreviewModal = ({
           {/* Error State */}
           {error && !isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/30">
+              <div className="bg-destructive/10 flex h-16 w-16 items-center justify-center rounded-full">
                 <AlertCircle className="text-destructive h-8 w-8" />
               </div>
               <div className="text-center">
@@ -186,7 +186,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <button
                 onClick={onRegenerate}
-                className="flex items-center gap-2 rounded-xl bg-indigo-50 px-6 py-2.5 font-medium text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-6 py-2.5 font-medium transition-all"
               >
                 <RefreshCw className="h-4 w-4" />
                 {t('common.retry')}
@@ -197,8 +197,8 @@ export const AISuggestionPreviewModal = ({
           {/* Empty Suggestion State */}
           {!isLoading && !error && !hasAnySuggestion && (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                <ChefHat className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <div className="bg-status-warning/15 flex h-16 w-16 items-center justify-center rounded-full">
+                <ChefHat className="text-status-warning h-8 w-8" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-bold">{t('ai.suggestionEmpty')}</p>
@@ -206,7 +206,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <button
                 onClick={onRegenerate}
-                className="flex items-center gap-2 rounded-xl bg-indigo-50 px-6 py-2.5 font-medium text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-6 py-2.5 font-medium transition-all"
               >
                 <RefreshCw className="h-4 w-4" />
                 {t('ai.suggestionRegenerate')}
@@ -219,18 +219,14 @@ export const AISuggestionPreviewModal = ({
             <>
               {/* Reasoning Card */}
               {suggestion.reasoning && (
-                <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50 to-indigo-50 p-4 dark:border-indigo-800 dark:from-indigo-900/20 dark:to-indigo-900/20">
+                <div className="border-color-ai/30 bg-color-ai-subtle rounded-2xl border p-4">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/50">
-                      <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                    <div className="bg-color-ai-subtle mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <Sparkles className="text-color-ai h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
-                      <p className="mb-1 text-sm font-semibold text-indigo-800 dark:text-indigo-300">
-                        {t('ai.reasoning')}
-                      </p>
-                      <p className="text-sm leading-relaxed text-indigo-700 dark:text-indigo-400">
-                        {suggestion.reasoning}
-                      </p>
+                      <p className="text-color-ai mb-1 text-sm font-semibold">{t('ai.reasoning')}</p>
+                      <p className="text-color-ai text-sm leading-relaxed">{suggestion.reasoning}</p>
                     </div>
                   </div>
                 </div>
@@ -397,7 +393,7 @@ export const AISuggestionPreviewModal = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={onRegenerate}
-                className="flex items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-medium text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
               >
                 <RefreshCw className="h-4 w-4" />
                 <span>{t('ai.suggestionRegenerate')}</span>

@@ -22,10 +22,7 @@ export function QuickConfirmCard({
   onCustomize,
 }: Readonly<QuickConfirmCardProps>) {
   return (
-    <div
-      className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
-      data-testid="quick-confirm-card"
-    >
+    <div className="border-info/20 bg-info/10 rounded-xl border p-4" data-testid="quick-confirm-card">
       <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <Dumbbell className="h-4 w-4" />
         <span>{exerciseName}</span>
@@ -49,7 +46,7 @@ export function QuickConfirmCard({
           <button
             type="button"
             onClick={() => onConfirm(suggestion)}
-            className="rounded-lg bg-blue-600 p-2 text-white"
+            className="bg-info rounded-lg p-2 text-white"
             data-testid="quick-confirm-button"
           >
             <Check className="h-5 w-5" />

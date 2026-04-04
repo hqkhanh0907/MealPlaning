@@ -50,7 +50,7 @@ describe('EnergyBalanceMini', () => {
     render(<EnergyBalanceMini eaten={2200} burned={0} target={2000} />);
 
     const net = screen.getByTestId('mini-net');
-    expect(net.className).toContain('amber');
+    expect(net.className).toContain('color-energy');
   });
 
   it('shows default color when significantly under target', () => {

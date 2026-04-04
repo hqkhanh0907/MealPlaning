@@ -363,10 +363,10 @@ export const DishEditModal = ({
                 />
                 {aiSuggestLoading ? (
                   <div
-                    className="flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/30"
+                    className="bg-color-ai-subtle flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl"
                     data-testid="ai-suggest-loading"
                   >
-                    <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+                    <Loader2 className="text-color-ai h-5 w-5 animate-spin" />
                   </div>
                 ) : (
                   <button
@@ -376,7 +376,7 @@ export const DishEditModal = ({
                     title={t('dish.aiSuggestButton')}
                     aria-label={t('dish.aiSuggestButton')}
                     data-testid="btn-ai-suggest"
-                    className="flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                    className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/10 flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Sparkles className="h-5 w-5" />
                   </button>
@@ -397,7 +397,7 @@ export const DishEditModal = ({
                   {aiSuggestError}
                 </p>
               )}
-              {aiSuggestLoading && <p className="mt-1 text-xs text-indigo-500">{t('dish.aiSuggestLoading')}</p>}
+              {aiSuggestLoading && <p className="text-color-ai mt-1 text-xs">{t('dish.aiSuggestLoading')}</p>}
             </div>
             <div>
               <p

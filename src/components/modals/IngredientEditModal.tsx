@@ -184,7 +184,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                   onClick={handleAISearch}
                   disabled={!watchName || !getLocalizedField(watchUnit, lang) || isSearchingAI}
                   data-testid="btn-ai-search"
-                  className="rounded-xl bg-indigo-50 px-3 py-2 text-indigo-600 transition-all hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                  className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/10 rounded-xl px-3 py-2 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label={
                     getLocalizedField(watchUnit, lang) ? t('ingredient.aiTooltip') : t('ingredient.aiTooltipNoUnit')
                   }

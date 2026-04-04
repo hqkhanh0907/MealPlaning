@@ -81,7 +81,8 @@ export const MealsSubTab = React.memo(function MealsSubTab({
 
   const recentDishes = useMemo(() => {
     if (!recentDishIds?.length) return [];
-    return recentDishIds.map(id => dishes.find(d => d.id === id)).filter(Boolean) as Dish[];
+    const map = new Map(dishes.map(d => [d.id, d]));
+    return recentDishIds.map(id => map.get(id)).filter(Boolean) as Dish[];
   }, [recentDishIds, dishes]);
 
   const emptySlots = useMemo(() => {

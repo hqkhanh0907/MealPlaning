@@ -114,8 +114,8 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
   if (error) {
     return (
       <div className="bg-card flex flex-1 flex-col items-center justify-center px-8" data-testid="plan-computing">
-        <div className="w-full max-w-xs rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <p className="mb-4 text-sm font-medium text-red-700 dark:text-red-300">{t('onboarding.computing.error')}</p>
+        <div className="border-destructive/20 bg-destructive/10 w-full max-w-xs rounded-2xl border p-6 text-center">
+          <p className="text-destructive mb-4 text-sm font-medium">{t('onboarding.computing.error')}</p>
           <div className="flex flex-col gap-3">
             <button
               type="button"

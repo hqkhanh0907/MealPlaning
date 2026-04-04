@@ -53,9 +53,7 @@ function AddSessionModalInner({
         {step === 'options' && (
           <>
             <h3 className="text-foreground mb-4 text-lg font-bold">{t('fitness.plan.addSession')}</h3>
-            {isMaxReached && (
-              <p className="mb-3 text-sm text-amber-600 dark:text-amber-400">{t('fitness.plan.maxSessions')}</p>
-            )}
+            {isMaxReached && <p className="text-warning mb-3 text-sm">{t('fitness.plan.maxSessions')}</p>}
             <div className="flex flex-col gap-3">
               <button
                 type="button"
@@ -74,14 +72,12 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={onSelectCardio}
-                className="flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3 text-left transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
+                className="bg-info/10 hover:bg-info/15 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                <Heart className="text-info h-5 w-5" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">
-                    {t('fitness.plan.cardioOption')}
-                  </p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('fitness.plan.cardioDesc')}</p>
+                  <p className="text-info text-sm font-semibold">{t('fitness.plan.cardioOption')}</p>
+                  <p className="text-info text-xs">{t('fitness.plan.cardioDesc')}</p>
                 </div>
               </button>
 
@@ -89,14 +85,12 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={onSelectFreestyle}
-                className="flex items-center gap-3 rounded-xl bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-amber-900/20 dark:hover:bg-amber-900/40"
+                className="bg-warning/10 hover:bg-warning/15 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                <Zap className="text-warning h-5 w-5" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                    {t('fitness.plan.freestyleOption')}
-                  </p>
-                  <p className="text-xs text-amber-600 dark:text-amber-400">{t('fitness.plan.freestyleDesc')}</p>
+                  <p className="text-warning text-sm font-semibold">{t('fitness.plan.freestyleOption')}</p>
+                  <p className="text-warning text-xs">{t('fitness.plan.freestyleDesc')}</p>
                 </div>
               </button>
             </div>

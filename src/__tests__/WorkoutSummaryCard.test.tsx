@@ -27,8 +27,8 @@ describe('WorkoutSummaryCard', () => {
     render(<WorkoutSummaryCard {...defaultProps} personalRecords={[{ exerciseName: 'Squat', weight: 140 }]} />);
     const celebration = screen.getByTestId('pr-celebration');
     expect(celebration).toBeInTheDocument();
-    expect(celebration.className).toContain('from-amber-600');
-    expect(celebration.className).toContain('to-amber-500');
+    expect(celebration.className).toContain('from-color-energy');
+    expect(celebration.className).toContain('to-color-energy/80');
     expect(screen.getByText(/Squat: 140kg/)).toBeInTheDocument();
   });
 

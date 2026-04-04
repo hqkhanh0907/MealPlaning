@@ -130,7 +130,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">cm</span>
             </div>
             {heightField.field.value != null && heightField.field.value < 3 && heightField.field.value > 0 && (
-              <p className="mt-1 text-xs text-amber-500">{t('onboarding.validation.heightHint')}</p>
+              <p className="text-warning mt-1 text-xs">{t('onboarding.validation.heightHint')}</p>
             )}
             {heightField.fieldState.error && (
               <p id="ob-height-error" role="alert" className="text-destructive mt-1 text-xs">

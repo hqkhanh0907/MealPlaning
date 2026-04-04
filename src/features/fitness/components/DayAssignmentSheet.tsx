@@ -145,7 +145,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                     {isFull && (
                       <span
                         data-testid={`day-full-warning-${day}`}
-                        className="flex flex-shrink-0 items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+                        className="text-warning flex flex-shrink-0 items-center gap-1 text-xs"
                         aria-label={t('fitness.scheduleEditor.maxSessions')}
                       >
                         <AlertTriangle className="h-4 w-4" />
