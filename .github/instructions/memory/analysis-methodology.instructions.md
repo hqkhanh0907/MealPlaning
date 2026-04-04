@@ -1,0 +1,235 @@
+# Kinh nghiệm Phân tích & Debug — MealPlaning
+
+> Rút ra từ session audit BMR/TDEE/calorie logic (2026-04-03 → 04-04).
+> Áp dụng cho mọi lần audit code, tìm bug, hoặc phân tích vấn đề.
+
+---
+
+## 1. Chiến lược phân tích ban đầu
+
+### 1.1 Dùng parallel agents để quét 3 góc nhìn đồng thời
+
+Khi audit 1 feature, KHÔNG đọc tuần tự từ đầu đến cuối. Thay vào đó, dispatch 3 explore agents song song:
+
+| Agent   | Nhiệm vụ          | Tìm gì                                  |
+| ------- | ----------------- | --------------------------------------- |
+| Agent 1 | **Core logic**    | Thuật toán, công thức, pure functions   |
+| Agent 2 | **Consumer code** | Nơi sử dụng kết quả (UI, hooks, stores) |
+| Agent 3 | **Test coverage** | Test hiện tại có cover đúng logic không |
+
+**Kết quả session này**: Core engine (`nutritionEngine.ts`) hoàn toàn đúng. Tất cả 5 bugs đều nằm ở **consumer code** — nơi GỌI engine, không phải engine.
+
+### 1.2 Bài học: Bug thường KHÔNG ở nơi bạn nghĩ
+
+```
+Dự đoán ban đầu: "Công thức BMR/TDEE tính sai"
+Thực tế:          Core engine OK, bugs ở hooks gọi engine
+```
+
+**Pattern phổ biến**:
+
+- Core logic đúng, nhưng consumer truyền sai param (BUG-02: dùng `.age` thay vì `getAge()`)
+- Core logic đúng, nhưng consumer hard-code thay vì dùng config (BUG-01: protein 1.6g/kg)
+- Core logic đúng, nhưng consumer dùng sai giá trị trả về (BUG-04: dùng TDEE thay vì Target)
+
+**Quy tắc**: Khi user báo "feature X tính sai" → check **consumer trước**, core logic sau.
+
+---
+
+## 2. Truy vết ngược (Backward Tracing)
+
+### 2.1 Pattern hiệu quả nhất: Từ UI → ngược lên source
+
+Khi thấy giá trị sai trên UI:
+
+```
+UI hiển thị sai
+    ↑ Component nào render?
+        ↑ Prop/state nào cung cấp dữ liệu?
+            ↑ Hook nào tính giá trị?
+                ↑ Function nào được gọi? Với params gì?
+                    ↑ Params đến từ đâu? Đúng chưa?
+```
+
+**Ví dụ BUG-04**:
+
+```
+Dashboard budget hiển thị TDEE thay vì Target
+    ↑ useTodayCaloriesOut hook
+        ↑ Dùng `tdee` trực tiếp
+            ↑ LẼ RA phải dùng `targetCalories` (= TDEE + offset)
+```
+
+Tìm ra trong 5 phút thay vì đọc toàn bộ codebase.
+
+### 2.2 KHÔNG BAO GIỜ đọc code từ đầu đến cuối
+
+**SAI**: Mở `App.tsx` → đọc từ dòng 1 → hy vọng tìm ra bug
+**ĐÚNG**: Bắt đầu từ symptom → trace backward → tìm root cause
+
+---
+
+## 3. Phân biệt Bug vs UX Issue vs Architecture Issue
+
+### 3.1 Ba loại vấn đề khác nhau
+
+Trong session này phát hiện cả 3 loại:
+
+| Loại                   | Ví dụ                                              | Cách xử lý                          |
+| ---------------------- | -------------------------------------------------- | ----------------------------------- |
+| **Code Bug**           | BUG-01→05: Sai logic trong consumer                | Fix code + thêm test                |
+| **UX Issue**           | Không có nơi nào hiển thị BMR/TDEE/Target chi tiết | Tạo feature mới (EnergyDetailSheet) |
+| **Architecture Issue** | In-memory SQLite, không persist                    | Cần plan lớn, thay đổi infra        |
+
+### 3.2 Bẫy: User nói "tính sai" nhưng thực ra là "không hiển thị"
+
+User ban đầu hỏi: _"audit logic tính BMR/TDEE"_
+
+Phát hiện: Logic tính **đúng**, nhưng user không thấy vì:
+
+- BMR/TDEE chỉ hiển thị trong Settings Health Profile (ẩn sâu)
+- Dashboard chỉ hiện eaten/target, không hiện BMR/TDEE
+- Calendar nutrition tab chỉ hiện chart, không hiện con số
+
+**Bài học**: Khi user nghi ngờ logic sai → có thể vấn đề là THIẾU HIỂN THỊ để verify. Tạo EnergyDetailSheet + EnergyBalanceCard giải quyết gốc rễ: user CÓ THỂ nhìn thấy BMR→TDEE→Target→Macros.
+
+---
+
+## 4. Sai lầm trong phân tích
+
+### 4.1 Giả định đơn giản mà không verify
+
+**Sai lầm**: Tính nhẩm age = 2026 - 1996 = 30
+**Thực tế**: DOB 15/05, test date 04/04 → chưa qua sinh nhật → age = 29
+**Hậu quả**: TẤT CẢ expected values sai, 2 vòng test thất bại (~30 phút)
+
+**Quy tắc**: Mọi phép tính PHẢI viết code verify, KHÔNG tính nhẩm.
+
+```python
+# ĐÚNG: Tính bằng code
+age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+# SAI: Tính nhẩm "2026 - 1996 = 30"
+```
+
+### 4.2 Không đọc comment trong code
+
+File `databaseService.ts` dòng 191-193 ghi rõ:
+
+```
+// sql.js (WASM) works in both web browsers and Capacitor WebViews,
+// so we use WebDatabaseService universally until a native SQLite
+// plugin is integrated for better performance on mobile.
+```
+
+Comment nói **rõ ràng** đây là giải pháp tạm. Nhưng tôi chỉ phát hiện architecture issue khi manual test thấy data mất sau restart.
+
+**Quy tắc**: Khi audit code, ĐỌC COMMENT — đặc biệt comment có "TODO", "FIXME", "until", "temporary", "workaround".
+
+### 4.3 Chỉ audit logic, bỏ qua persistence layer
+
+Audit ban đầu focus vào:
+
+- ✅ Công thức tính toán
+- ✅ Consumer hooks
+- ✅ UI rendering
+- ❌ **KHÔNG check** data persistence
+
+**Bài học**: Audit bất kỳ feature nào phải cover đầy đủ 4 tầng:
+
+```
+1. Data Layer     — Lưu ở đâu? Persist như nào? Mất khi nào?
+2. Logic Layer    — Tính toán đúng không? Edge cases?
+3. Integration    — Consumer gọi đúng không? Params đúng không?
+4. Presentation   — Hiển thị đúng không? User verify được không?
+```
+
+### 4.4 Tin vào assumption thay vì inspect DOM
+
+**Sai lầm**: Giả sử Settings form dùng `type="number"` cho weight (vì semantically hợp lý)
+**Thực tế**: Form dùng `type="text"` → script tìm `input[type="number"]` thất bại
+
+**Quy tắc**: LUÔN inspect DOM thật trước khi viết selector.
+
+```javascript
+// Debug DOM structure TRƯỚC khi viết script
+var inputs = form.querySelectorAll('input');
+for (var i = 0; i < inputs.length; i++) {
+  console.log(i, inputs[i].type, inputs[i].getAttribute('data-testid'), inputs[i].value);
+}
+```
+
+---
+
+## 5. Pattern phân tích hiệu quả
+
+### 5.1 "Đổi 1 biến, verify toàn chuỗi"
+
+Cách tốt nhất để tìm bug propagation:
+
+1. Ghi nhận baseline (tất cả giá trị hiện tại)
+2. Thay đổi ĐÚNG 1 input (vd: weight 75→80)
+3. Check TỪNG ĐIỂM trong chuỗi: BMR→TDEE→Target→Macros→Dashboard→Calendar→Fitness
+4. Điểm nào sai = bug ở đoạn đó
+
+### 5.2 "3 giải pháp, chọn 1" cho bug phức tạp
+
+Với mỗi bug, BẮT BUỘC đề xuất ≥2 giải pháp trước khi code:
+
+**Ví dụ BUG-04** (budget dùng TDEE thay vì Target):
+
+- GP1: Fix tại `useTodayCaloriesOut` — thay `tdee` bằng `targetCalories` ✅ **Chọn**
+- GP2: Thêm parameter `useGoalTarget` vào hook
+- GP3: Tạo hook mới `useDailyBudget` tách biệt
+
+Chọn GP1 vì: ít thay đổi nhất, đúng semantic, không break existing callers.
+
+### 5.3 Kiểm chứng bằng manual test SAU code audit
+
+**Thứ tự đúng**:
+
+```
+1. Code audit (tìm bug lý thuyết) → phát hiện 5 bugs
+2. Fix code + unit test
+3. Manual test trên emulator (verify thực tế) → xác nhận fix đúng
+4. Propagation test (thay đổi settings, verify toàn app)
+```
+
+**SAI**: Chỉ code audit + unit test rồi coi là xong.
+Code audit tìm được BUG-01→05, nhưng KHÔNG tìm được:
+
+- Architecture issue (in-memory SQLite)
+- UX issue (thiếu hiển thị BMR/TDEE)
+- Integration issue (form type="text" vs "number")
+
+Manual test phát hiện thêm những gì code audit bỏ sót.
+
+---
+
+## 6. Checklist phân tích cho lần sau
+
+### Khi audit 1 feature:
+
+- [ ] **Tầng Data**: Lưu ở đâu? Persist cách nào? Mất khi nào?
+- [ ] **Tầng Logic**: Thuật toán đúng? Edge cases? Rounding?
+- [ ] **Tầng Integration**: Consumer gọi đúng? Params từ đâu? Hard-code?
+- [ ] **Tầng Presentation**: Hiển thị ở đâu? User verify được?
+- [ ] **Comments**: Có TODO/FIXME/temporary/workaround?
+- [ ] **Tests**: Coverage đủ? Test cases cover edge cases?
+
+### Khi tìm bug:
+
+- [ ] Trace backward từ symptom → root cause
+- [ ] Check consumer TRƯỚC, core logic SAU
+- [ ] Inspect DOM thật, KHÔNG assume
+- [ ] Tính expected values bằng CODE, không nhẩm
+- [ ] Đề xuất ≥2 giải pháp, so sánh trade-off
+- [ ] Verify bằng manual test sau khi fix
+
+### Khi viết test:
+
+- [ ] Expected values tính DYNAMIC (age, date)
+- [ ] Cover propagation chain đầy đủ
+- [ ] Test cả positive (happy path) lẫn negative (edge case)
+- [ ] Screenshot mỗi bước quan trọng
+- [ ] Không restart app giữa test suite (in-memory DB)
