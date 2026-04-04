@@ -3738,6 +3738,12 @@ describe('fitnessStore – FIX-04 changeSplitType transaction', () => {
     expect(dayRows).toHaveLength(5);
     // No old day IDs should remain
     expect(dayRows.find(r => r.id === 'split-tx-day-0')).toBeUndefined();
+
+    // Verify original_day_of_week and is_user_assigned are persisted
+    for (const row of dayRows) {
+      expect(row.originalDayOfWeek).toBeDefined();
+      expect(typeof row.isUserAssigned).toBe('number');
+    }
   });
 
   it('changeSplitType remap persists via transaction', async () => {

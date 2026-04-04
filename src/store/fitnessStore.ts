@@ -1256,8 +1256,8 @@ export const useFitnessStore = create<FitnessState>()(
               await _db!.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]);
               for (const day of daysToInsert) {
                 await _db!.execute(
-                  `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                  `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes, original_day_of_week, is_user_assigned)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                   [
                     day.id,
                     day.planId,
@@ -1268,6 +1268,8 @@ export const useFitnessStore = create<FitnessState>()(
                     day.exercises ?? null,
                     day.originalExercises ?? null,
                     day.notes ?? null,
+                    day.originalDayOfWeek ?? day.dayOfWeek,
+                    day.isUserAssigned ? 1 : 0,
                   ],
                 );
               }
