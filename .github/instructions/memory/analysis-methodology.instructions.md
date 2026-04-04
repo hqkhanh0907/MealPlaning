@@ -522,3 +522,54 @@ Wave N code → lint → test → build → commit
 ### Bài học
 
 Efficiency (batch commits) ≠ Quality (individual verify). User instructions là LAW, không phải suggestion. Mỗi commit phải kèm emulator screenshot evidence. KHÔNG BAO GIỜ skip QUY TẮC #1 dù có "chỉ thay đổi nhỏ".
+
+---
+
+## 16. JSON.stringify(NaN) trả về "null" — Bẫy debug nguy hiểm
+
+### Vấn đề
+
+CDP fiber inspection trả về `"target": null` nhưng giá trị thực tế là `NaN`. Dẫn đến chẩn đoán sai root cause.
+
+### Nguyên nhân
+
+`JSON.stringify(NaN)` returns `null` theo spec (RFC 8259). `typeof NaN` là `"number"`. Chỉ `Number.isNaN(value)` mới detect đúng.
+
+### Giải pháp
+
+Khi debug giá trị qua CDP/JSON, LUÔN kiểm tra bằng:
+
+```javascript
+Number.isNaN(value); // true nếu NaN
+typeof value === 'number' && !Number.isFinite(value); // true nếu NaN/Infinity
+```
+
+KHÔNG tin `JSON.stringify()` output khi nghi NaN.
+
+### Bài học
+
+`null` trong JSON output ≠ `null` trong runtime. Có thể là `NaN`, `undefined`, hoặc `Infinity`. Luôn verify bằng `Number.isNaN()` trực tiếp.
+
+---
+
+## 17. Defense-in-depth cho NaN display — Guard ở MỌI tầng
+
+### Vấn đề
+
+Initial fix chỉ guard fallback path trong `useNutritionTargets`, bỏ sót full calculation path → NaN vẫn xuất hiện.
+
+### Nguyên nhân
+
+Stale data (weight=0, height=0) trong native SQLite khiến `isProfileConfigured()` return true (vì age=29 ≠ default), rồi full calculation path chạy: `calculateBMR(0, 0, 29, "male")` = -140 → NaN qua division.
+
+### Giải pháp: 3 lớp bảo vệ
+
+```
+Layer 1: Hook output    — Number.isFinite() guard TẤT CẢ return values
+Layer 2: Display text   — displayCal/displayPro cho text, safeCal/safePro cho math
+Layer 3: Component      — Each component self-guard, không tin prop blindly
+```
+
+### Bài học
+
+Guard tại 1 điểm = fragile. Guard tại MỌI tầng = robust. Đặc biệt quan trọng khi data source có thể corrupt (stale SQLite, partial profile).
