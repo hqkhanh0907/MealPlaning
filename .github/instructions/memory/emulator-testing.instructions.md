@@ -743,3 +743,106 @@ BMR=1754, TDEE=2719, Target=2169
 Goal maintain (w=80): Target=TDEE=2719
 Goal bulk+aggressive (w=80): Target=2719+1100=3819
 ```
+
+---
+
+## 22. ⚠️ BẪY QUAN TRỌNG — PAGE STACK OVERLAY & DOM SCOPING
+
+### Vấn đề
+
+Khi PlanDayEditor (hoặc bất kỳ page stack page nào) mở qua `pushPage()`, nó render thành full-screen overlay bởi `PageStackOverlay`. Tuy nhiên, **DOM của page bên dưới VẪN CÒN** — buttons, inputs, testids đều accessible qua `document.querySelectorAll()`.
+
+### Triệu chứng
+
+- `document.querySelectorAll('button')` trả về buttons từ CẢ plan view (bên dưới) VÀ PlanDayEditor (overlay trên)
+- `querySelector('[data-testid="subtab-plan"]')` vẫn tìm được dù đang ở PlanDayEditor
+- Click nhầm button plan view thay vì button trong editor → hỏng test flow
+
+### Giải pháp
+
+**Luôn scope queries hoặc dùng vị trí (coordinates) để click đúng element:**
+
+```javascript
+// ❌ SAI — tìm bất kỳ button nào trên trang
+document.querySelectorAll('button');
+
+// ✅ ĐÚNG — dùng vị trí để xác định đúng button
+var btns = document.querySelectorAll('button');
+for (var i = 0; i < btns.length; i++) {
+  var label = btns[i].getAttribute('aria-label') || '';
+  var rect = btns[i].getBoundingClientRect();
+  // Back button = top-left (y < 120, x < 100)
+  if (label === 'Quay lại' && rect.top < 120 && rect.left < 100 && rect.width > 0) {
+    btns[i].click();
+    break;
+  }
+}
+
+// ✅ ĐÚNG — dùng testid specific (exercise-item-{id}, exercise-selector-sheet)
+document.querySelector('[data-testid="exercise-selector-sheet"]');
+document.querySelectorAll('[data-testid^="exercise-item-"]');
+
+// ✅ ĐÚNG — dùng reverse order cho bottom buttons (overlay renders LAST)
+for (var i = btns.length - 1; i >= 0; i--) {
+  if (btns[i].textContent.includes('Thêm bài tập') && btns[i].getBoundingClientRect().width > 0) {
+    btns[i].click();
+    break;
+  }
+}
+```
+
+### Bài học
+
+PageStackOverlay = DOM additive (không xóa DOM cũ). Luôn dùng coordinates/testids cụ thể, không dùng generic queries.
+
+---
+
+## 23. PlanDayEditor — Exercise Selector Flow
+
+### Testids
+
+| Element               | testid                                                           |
+| --------------------- | ---------------------------------------------------------------- |
+| Edit exercises button | `edit-exercises-btn`                                             |
+| Exercise selector     | `exercise-selector-sheet`                                        |
+| Exercise items        | `exercise-item-{slug}` (vd: `exercise-item-barbell-bench-press`) |
+| Back button           | aria-label="Quay lại" (NO testid!)                               |
+
+### Flow chuẩn để test UnsavedChangesDialog
+
+```python
+# 1. Mở editor
+await clk("edit-exercises-btn")
+await asyncio.sleep(1)
+
+# 2. Thêm exercise (TẠO dirty state)
+# Click "Thêm bài tập" (reverse order để tránh nhầm)
+# → exercise-selector-sheet mở
+# Click exercise-item-{id}
+# → selector tự đóng, exercise added
+
+# 3. Press back (CẨN THẬN click đúng nút)
+# Back button ở top-left: aria-label="Quay lại", y < 120, x < 100
+
+# 4. Verify UnsavedChangesDialog
+# Buttons: "Lưu & quay lại", "Bỏ thay đổi", "Ở lại chỉnh sửa"
+# (CHÚ Ý: "Lưu &" chứ KHÔNG phải "Lưu và", "Ở lại" chứ KHÔNG phải "Tiếp tục")
+```
+
+### UnsavedChangesDialog — Actual Button Texts (vi.json)
+
+| Key         | Text              |
+| ----------- | ----------------- |
+| title       | Thay đổi chưa lưu |
+| saveAndBack | Lưu & quay lại    |
+| discard     | Bỏ thay đổi       |
+| stayEditing | Ở lại chỉnh sửa   |
+
+### Verified Dialog Properties (emulator 411px width)
+
+```
+width: 411, height: 914
+margin: 0px (✅ no UA default)
+borderStyle: none (✅ no UA default)
+maxWidth: none (✅ no UA default)
+```
