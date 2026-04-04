@@ -16,8 +16,12 @@ const config: CapacitorConfig = {
         google: true,
       },
     },
+    CapacitorSQLite: {
+      iosDatabaseLocation: 'Library/CapacitorDatabase',
+      iosIsEncryption: false,
+      androidIsEncryption: false,
+    },
   },
 };
 
 export default config;
-

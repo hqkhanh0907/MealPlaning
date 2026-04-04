@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+
 /* ------------------------------------------------------------------ */
 /* Public interface */
 /* ------------------------------------------------------------------ */
@@ -206,11 +208,172 @@ class WebDatabaseService implements DatabaseService {
 }
 
 /* ------------------------------------------------------------------ */
+/* Native implementation (@capacitor-community/sqlite) */
+/* ------------------------------------------------------------------ */
+export class NativeDatabaseService implements DatabaseService {
+  private connection: SQLiteDBConnection | null = null;
+  private inTransaction = false;
+
+  async initialize(): Promise<void> {
+    const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
+    const sqlite = CapacitorSQLite;
+
+    const dbName = 'mealplaner';
+    const ret = await sqlite.checkConnectionsConsistency({ dbNames: [dbName], openModes: ['RW'] });
+
+    if (ret.result) {
+      this.connection = await sqlite.retrieveConnection({ database: dbName, readonly: false });
+    } else {
+      this.connection = await sqlite.createConnection({
+        database: dbName,
+        encrypted: false,
+        mode: 'no-encryption',
+        version: 1,
+        readonly: false,
+      });
+    }
+    await this.connection.open();
+  }
+
+  private getConnection(): SQLiteDBConnection {
+    if (!this.connection) throw new Error('Database not initialized');
+    return this.connection;
+  }
+
+  async execute(sql: string, params?: unknown[]): Promise<void> {
+    const conn = this.getConnection();
+    if (params && params.length > 0) {
+      await conn.run(sql, params as SQLiteValue[], !this.inTransaction);
+    } else {
+      await conn.execute(sql, !this.inTransaction);
+    }
+  }
+
+  async query<T>(sql: string, params?: unknown[]): Promise<T[]> {
+    const conn = this.getConnection();
+    const result = await conn.query(sql, (params ?? []) as SQLiteValue[]);
+    const rows = result.values ?? [];
+    return rows.map(row => rowToType<T>(row as Record<string, unknown>));
+  }
+
+  async queryOne<T>(sql: string, params?: unknown[]): Promise<T | null> {
+    const rows = await this.query<T>(sql, params);
+    return rows[0] ?? null;
+  }
+
+  async transaction(fn: () => Promise<void>): Promise<void> {
+    const conn = this.getConnection();
+    this.inTransaction = true;
+    await conn.execute('BEGIN TRANSACTION', false);
+    try {
+      await fn();
+      await conn.execute('COMMIT', false);
+    } catch (err) {
+      await conn.execute('ROLLBACK', false);
+      throw err;
+    } finally {
+      this.inTransaction = false;
+    }
+  }
+
+  async exportToJSON(): Promise<string> {
+    const { SCHEMA_TABLES } = await import('./schema');
+    const tables: Record<string, unknown[]> = {};
+
+    for (const tableName of SCHEMA_TABLES) {
+      const result = await this.query<Record<string, unknown>>(`SELECT * FROM "${tableName}"`);
+      // query() already applies rowToType — we need raw snake_case for export
+      // Re-query with raw access
+      const conn = this.getConnection();
+      const raw = await conn.query(`SELECT * FROM "${tableName}"`, []);
+      tables[tableName] = raw.values ?? [];
+    }
+
+    return JSON.stringify({
+      _version: '2.0',
+      _exportedAt: new Date().toISOString(),
+      _format: 'sqlite-json',
+      tables,
+    });
+  }
+
+  async importFromJSON(json: string): Promise<void> {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(json);
+    } catch {
+      throw new Error('invalid JSON string');
+    }
+
+    let tables: Record<string, unknown[]>;
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      '_version' in parsed &&
+      (parsed as Record<string, unknown>)._version === '2.0'
+    ) {
+      tables = (parsed as { tables: Record<string, unknown[]> }).tables ?? {};
+    } else {
+      tables = parsed as Record<string, unknown[]>;
+    }
+
+    const conn = this.getConnection();
+    await conn.execute('PRAGMA foreign_keys = OFF', false);
+
+    const { IMPORT_ORDER } = await import('./syncV2Utils');
+    const reverseOrder = [...IMPORT_ORDER].reverse();
+    for (const t of reverseOrder) {
+      await conn.execute(`DROP TABLE IF EXISTS "${t}"`, false);
+    }
+
+    const { createSchema } = await import('./schema');
+    await createSchema(this);
+
+    await conn.execute('PRAGMA foreign_keys = ON', false);
+
+    for (const tableName of IMPORT_ORDER) {
+      const rows = tables[tableName];
+      if (!Array.isArray(rows) || rows.length === 0) continue;
+      for (const row of rows) {
+        const obj = row as Record<string, unknown>;
+        const columns = Object.keys(obj);
+        if (columns.length === 0) continue;
+        const placeholders = columns.map(() => '?').join(', ');
+        const values = columns.map(c => obj[c] ?? null);
+        const columnList = columns.map(c => `"${c}"`).join(', ');
+        await conn.run(
+          `INSERT INTO "${tableName}" (${columnList}) VALUES (${placeholders})`,
+          values as SQLiteValue[],
+          false,
+        );
+      }
+    }
+  }
+
+  async close(): Promise<void> {
+    if (this.connection) {
+      await this.connection.close();
+      this.connection = null;
+    }
+  }
+}
+
+// Plugin types — minimal subset used by NativeDatabaseService
+type SQLiteValue = string | number | boolean | null | undefined;
+interface SQLiteDBConnection {
+  open(): Promise<void>;
+  close(): Promise<void>;
+  execute(statements: string, transaction?: boolean): Promise<{ changes?: { changes: number } }>;
+  run(statement: string, values?: SQLiteValue[], transaction?: boolean): Promise<{ changes?: { changes: number } }>;
+  query(statement: string, values?: SQLiteValue[]): Promise<{ values?: Record<string, unknown>[] }>;
+}
+
+/* ------------------------------------------------------------------ */
 /* Factory */
 /* ------------------------------------------------------------------ */
 export function createDatabaseService(): DatabaseService {
-  // sql.js (WASM) works in both web browsers and Capacitor WebViews,
-  // so we use WebDatabaseService universally until a native SQLite
-  // plugin is integrated for better performance on mobile.
+  if (Capacitor.isNativePlatform()) {
+    return new NativeDatabaseService();
+  }
   return new WebDatabaseService();
 }

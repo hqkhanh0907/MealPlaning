@@ -338,42 +338,120 @@ describe('DatabaseService', () => {
 });
 
 /* ================================================================== */
-/* NativeDatabaseService (stub) tests */
+/* NativeDatabaseService tests (mocked plugin) */
 /* ================================================================== */
+const mockConnection = {
+  open: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
+  execute: vi.fn().mockResolvedValue({ changes: { changes: 0 } }),
+  run: vi.fn().mockResolvedValue({ changes: { changes: 1 } }),
+  query: vi.fn().mockResolvedValue({ values: [] }),
+};
+
+vi.mock('@capacitor-community/sqlite', () => ({
+  CapacitorSQLite: {
+    checkConnectionsConsistency: vi.fn().mockResolvedValue({ result: false }),
+    createConnection: vi.fn().mockResolvedValue(mockConnection),
+    retrieveConnection: vi.fn().mockResolvedValue(mockConnection),
+  },
+}));
+
 describe('NativeDatabaseService', () => {
   let nativeDb: DatabaseService;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     mockIsNativePlatform.mockReturnValue(true);
     nativeDb = createDatabaseService();
     mockIsNativePlatform.mockReturnValue(false);
   });
 
-  it('initialize() succeeds (uses WebDatabaseService universally)', async () => {
-    await expect(nativeDb.initialize()).resolves.toBeUndefined();
+  it('factory returns NativeDatabaseService when native platform', () => {
+    mockIsNativePlatform.mockReturnValue(true);
+    const db2 = createDatabaseService();
+    expect(db2.constructor.name).toBe('NativeDatabaseService');
   });
 
-  it('execute() throws not initialized', async () => {
+  it('initialize() creates connection and opens it', async () => {
+    await nativeDb.initialize();
+    const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
+    expect(CapacitorSQLite.checkConnectionsConsistency).toHaveBeenCalled();
+    expect(CapacitorSQLite.createConnection).toHaveBeenCalled();
+    expect(mockConnection.open).toHaveBeenCalled();
+  });
+
+  it('initialize() retrieves existing connection if consistent', async () => {
+    const { CapacitorSQLite } = await import('@capacitor-community/sqlite');
+    vi.mocked(CapacitorSQLite.checkConnectionsConsistency).mockResolvedValueOnce({ result: true });
+    await nativeDb.initialize();
+    expect(CapacitorSQLite.retrieveConnection).toHaveBeenCalled();
+  });
+
+  it('execute() throws if not initialized', async () => {
     await expect(nativeDb.execute('SELECT 1')).rejects.toThrow('not initialized');
   });
 
-  it('query() throws not initialized', async () => {
-    await expect(nativeDb.query('SELECT 1')).rejects.toThrow('not initialized');
+  it('execute() without params calls connection.execute', async () => {
+    await nativeDb.initialize();
+    await nativeDb.execute('CREATE TABLE t (id TEXT)');
+    expect(mockConnection.execute).toHaveBeenCalledWith('CREATE TABLE t (id TEXT)', true);
   });
 
-  it('queryOne() throws not initialized', async () => {
-    await expect(nativeDb.queryOne('SELECT 1')).rejects.toThrow('not initialized');
+  it('execute() with params calls connection.run', async () => {
+    await nativeDb.initialize();
+    await nativeDb.execute('INSERT INTO t VALUES (?)', ['val']);
+    expect(mockConnection.run).toHaveBeenCalledWith('INSERT INTO t VALUES (?)', ['val'], true);
   });
 
-  it('transaction() throws not initialized', async () => {
-    await expect(nativeDb.transaction(async () => {})).rejects.toThrow('not initialized');
+  it('query() returns mapped rows via rowToType', async () => {
+    await nativeDb.initialize();
+    mockConnection.query.mockResolvedValueOnce({
+      values: [{ user_name: 'Alice', user_age: 30 }],
+    });
+    const rows = await nativeDb.query<{ userName: string; userAge: number }>('SELECT * FROM users');
+    expect(rows).toEqual([{ userName: 'Alice', userAge: 30 }]);
   });
 
-  it('exportToJSON() throws not initialized', async () => {
-    await expect(nativeDb.exportToJSON()).rejects.toThrow('not initialized');
+  it('queryOne() returns first row or null', async () => {
+    await nativeDb.initialize();
+    mockConnection.query.mockResolvedValueOnce({ values: [] });
+    const result = await nativeDb.queryOne('SELECT 1');
+    expect(result).toBeNull();
   });
 
-  it('importFromJSON() throws not initialized', async () => {
-    await expect(nativeDb.importFromJSON('{}')).rejects.toThrow('not initialized');
+  it('transaction() wraps in BEGIN/COMMIT', async () => {
+    await nativeDb.initialize();
+    const fn = vi.fn().mockResolvedValue(undefined);
+    await nativeDb.transaction(fn);
+    expect(mockConnection.execute).toHaveBeenCalledWith('BEGIN TRANSACTION', false);
+    expect(fn).toHaveBeenCalled();
+    expect(mockConnection.execute).toHaveBeenCalledWith('COMMIT', false);
+  });
+
+  it('transaction() rolls back on error', async () => {
+    await nativeDb.initialize();
+    const fn = vi.fn().mockRejectedValue(new Error('fail'));
+    await expect(nativeDb.transaction(fn)).rejects.toThrow('fail');
+    expect(mockConnection.execute).toHaveBeenCalledWith('ROLLBACK', false);
+  });
+
+  it('execute() inside transaction passes transaction=false', async () => {
+    await nativeDb.initialize();
+    mockConnection.run.mockClear();
+    await nativeDb.transaction(async () => {
+      await nativeDb.execute('INSERT INTO t VALUES (?)', ['x']);
+    });
+    // The run call inside transaction should have transaction=false
+    expect(mockConnection.run).toHaveBeenCalledWith('INSERT INTO t VALUES (?)', ['x'], false);
+  });
+
+  it('close() closes connection', async () => {
+    await nativeDb.initialize();
+    await nativeDb.close();
+    expect(mockConnection.close).toHaveBeenCalled();
+  });
+
+  it('close() is safe when not initialized', async () => {
+    await expect(nativeDb.close()).resolves.toBeUndefined();
   });
 });
