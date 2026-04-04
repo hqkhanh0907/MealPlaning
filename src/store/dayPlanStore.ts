@@ -3,6 +3,17 @@ import { create } from 'zustand';
 import type { DatabaseService } from '../services/databaseService';
 import { updateDayPlanSlot } from '../services/planService';
 import type { DayPlan, MealType } from '../types';
+import { logger } from '../utils/logger';
+
+/** Safely parse JSON with fallback and logging for corrupted data */
+function safeJsonParse<T>(raw: string, fallback: T, context: string): T {
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    logger.warn({ component: 'dayPlanStore', action: 'safeJsonParse' }, `Corrupt ${context}: ${raw.slice(0, 80)}`);
+    return fallback;
+  }
+}
 
 interface DayPlanRow {
   date: string;
@@ -57,10 +68,10 @@ export const useDayPlanStore = create<DayPlanState>((set, get) => ({
     if (rows.length === 0) return;
     const dayPlans: DayPlan[] = rows.map(r => ({
       date: r.date,
-      breakfastDishIds: JSON.parse(r.breakfast_dish_ids) as string[],
-      lunchDishIds: JSON.parse(r.lunch_dish_ids) as string[],
-      dinnerDishIds: JSON.parse(r.dinner_dish_ids) as string[],
-      ...(r.servings ? { servings: JSON.parse(r.servings) as Record<string, number> } : {}),
+      breakfastDishIds: safeJsonParse<string[]>(r.breakfast_dish_ids, [], `breakfast_dish_ids[${r.date}]`),
+      lunchDishIds: safeJsonParse<string[]>(r.lunch_dish_ids, [], `lunch_dish_ids[${r.date}]`),
+      dinnerDishIds: safeJsonParse<string[]>(r.dinner_dish_ids, [], `dinner_dish_ids[${r.date}]`),
+      ...(r.servings ? { servings: safeJsonParse<Record<string, number>>(r.servings, {}, `servings[${r.date}]`) } : {}),
     }));
     set({ dayPlans });
   },

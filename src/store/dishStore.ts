@@ -2,7 +2,18 @@ import { create } from 'zustand';
 
 import { initialDishes } from '../data/initialData';
 import type { DatabaseService } from '../services/databaseService';
-import type { Dish } from '../types';
+import type { Dish, MealType } from '../types';
+import { logger } from '../utils/logger';
+
+/** Safely parse JSON with fallback and logging for corrupted data */
+function safeJsonParse<T>(raw: string, fallback: T, context: string): T {
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    logger.warn({ component: 'dishStore', action: 'safeJsonParse' }, `Corrupt ${context}: ${raw.slice(0, 80)}`);
+    return fallback;
+  }
+}
 
 interface DishRow {
   id: string;
@@ -60,7 +71,7 @@ export const useDishStore = create<DishState>((set, get) => ({
           id: r.id,
           name: { vi: r.name_vi, ...(r.name_en ? { en: r.name_en } : {}) },
           ingredients: ings.map(i => ({ ingredientId: i.ingredient_id, amount: i.amount })),
-          tags: JSON.parse(r.tags),
+          tags: safeJsonParse<MealType[]>(r.tags, [], `tags[${r.id}]`),
           ...(r.rating == null ? {} : { rating: r.rating }),
           ...(r.notes == null ? {} : { notes: r.notes }),
         };

@@ -1041,3 +1041,110 @@ Sau đó → loadAll() đọc từ SQLite → hydrate Zustand stores
 ### Bài học
 
 Không giả định seed data tự động có trong DB. Luôn kiểm tra bằng SELECT COUNT trước khi test.
+
+---
+
+## 30. ⚠️ BẪY QUAN TRỌNG — CapacitorSQLite readonly:false BẮT BUỘC cho mọi query
+
+### Vấn đề
+
+`P.query({database: 'mealplaner', ..., readonly: true})` trả về "No available connection for database mealplaner". Tất cả DB tests fail.
+
+### Nguyên nhân
+
+App chỉ mở 1 connection (`readonly: false`) qua `SQLiteConnectionClass.createConnection()`. Khi gọi `P.query({readonly: true})`, plugin tìm read-only connection riêng biệt — mà connection đó chưa bao giờ được tạo.
+
+`P.run()` với `readonly: false` hoạt động OK vì dùng đúng connection đã mở.
+
+### Giải pháp
+
+**LUÔN dùng `readonly: false`** cho cả query lẫn run khi gọi trực tiếp qua CDP:
+
+```javascript
+// ❌ SAI — readonly connection không tồn tại
+P.query({ database: 'mealplaner', statement: 'SELECT ...', values: [], readonly: true });
+
+// ✅ ĐÚNG — dùng connection đã mở bởi app
+P.query({ database: 'mealplaner', statement: 'SELECT ...', values: [], readonly: false });
+```
+
+### Bài học
+
+Capacitor SQLite plugin quản lý 2 connections riêng biệt (read-only và read-write). App chỉ tạo read-write. Khi test qua CDP, LUÔN dùng `readonly: false`.
+
+---
+
+## 31. Onboarding selectors: id="ob-\*" KHÔNG PHẢI data-testid
+
+### Vấn đề
+
+Script dùng `set_input("ob-name", ...)` (tìm `[data-testid="ob-name"]`) → "no el". Name field trống → validation error → stuck tại health basic step.
+
+### Nguyên nhân
+
+HealthBasicStep.tsx dùng `id="ob-name"`, `id="ob-dob"`, `id="ob-height"`, `id="ob-weight"` — KHÔNG PHẢI `data-testid`.
+
+### Giải pháp
+
+Dùng `document.getElementById('ob-name')` hoặc `document.querySelector('#ob-name')`:
+
+```javascript
+var el = document.getElementById('ob-name');
+var ns = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+ns.call(el, 'QA Tester');
+el.dispatchEvent(new Event('input', { bubbles: true }));
+```
+
+### Bài học
+
+LUÔN verify selector type (id vs data-testid vs name) trước khi viết script. Kiểm tra bằng grep: `grep 'ob-name' src/components/onboarding/`.
+
+---
+
+## 32. Schema v6 — Correct Column Names (Fitness tables)
+
+### exercises
+
+```
+id, name_vi, name_en, muscle_group, secondary_muscles, category, equipment,
+contraindicated, exercise_type, default_reps_min, default_reps_max, is_custom, updated_at
+```
+
+**KHÔNG CÓ**: `is_compound`, `is_favorite`
+
+### workouts
+
+```
+id, date, name, plan_day_id, duration_min, notes, created_at, updated_at
+```
+
+**KHÔNG CÓ**: `started_at`, `completed_at`
+
+### workout_sets
+
+```
+id, workout_id, exercise_id, set_number, reps, weight_kg, rpe, rest_seconds,
+duration_min, distance_km, avg_heart_rate, intensity, estimated_calories, updated_at
+```
+
+**KHÔNG CÓ**: `set_order`, `weight`, `duration_seconds`
+
+### training_plans
+
+```
+id, name, status, split_type, duration_weeks, current_week, start_date, end_date,
+template_id, training_days, rest_days, created_at, updated_at
+```
+
+**KHÔNG CÓ**: `is_active` (dùng `status = 'active'`), `name_vi` (dùng `name`)
+
+### training_plan_days (KHÔNG PHẢI plan_days!)
+
+```
+id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises,
+original_exercises, is_user_assigned, original_day_of_week, notes
+```
+
+### Bài học
+
+Luôn kiểm tra schema bằng `SELECT sql FROM sqlite_master WHERE name = 'table_name'` trước khi viết INSERT/SELECT.

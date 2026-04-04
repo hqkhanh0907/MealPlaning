@@ -12,6 +12,7 @@
  * selects "Khác..." and shows the text input pre-filled with that value.
  */
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
 
@@ -57,6 +58,7 @@ type UnitSelectorProps = SingleProps | BilingualProps;
 
 export const UnitSelector = (props: UnitSelectorProps) => {
   const { className = '', error = false, onBlur, id } = props;
+  const { t } = useTranslation();
   const currentVi = props.mode === 'single' ? props.value : props.value.vi;
 
   const [selectVal, setSelectVal] = useState<string>(() => resolveSelectVal(currentVi));
@@ -122,13 +124,13 @@ export const UnitSelector = (props: UnitSelectorProps) => {
         data-testid={testId ? `${testId}-select` : undefined}
         className={inputBase + borderClass + ' cursor-pointer'}
       >
-        <option value="">— chọn đơn vị —</option>
+        <option value="">{t('shared.unitSelectorDefault')}</option>
         {COMMON_UNITS.map(u => (
           <option key={u.vi} value={u.vi}>
             {u.label ?? u.vi}
           </option>
         ))}
-        <option value={CUSTOM_VALUE}>Khác...</option>
+        <option value={CUSTOM_VALUE}>{t('shared.unitSelectorCustom')}</option>
       </select>
 
       {/* Free-text input shown only when "Khác..." is selected */}
@@ -138,7 +140,7 @@ export const UnitSelector = (props: UnitSelectorProps) => {
           value={customText}
           onChange={handleCustomChange}
           onBlur={onBlur}
-          placeholder="Nhập đơn vị tuỳ chỉnh..."
+          placeholder={t('shared.unitSelectorCustomPlaceholder')}
           data-testid={testId ? `${testId}-custom` : undefined}
           className={error ? 'w-full border-rose-500' : 'w-full'}
           autoFocus

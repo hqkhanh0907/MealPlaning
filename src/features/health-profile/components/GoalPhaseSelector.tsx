@@ -177,8 +177,8 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
   }, [manualOverrideField.field, customOffsetField.field, autoOffset]);
 
   const handleSave = useCallback(async (): Promise<boolean> => {
-    // Trigger full form validation (schema superRefine handles cross-field checks)
-    const valid = await form.trigger();
+    // Trigger validation only for goal-specific fields (avoid validating unrelated fields)
+    const valid = await form.trigger(['goalType', 'rateOfChange', 'targetWeightKg', 'manualOverride', 'customOffset']);
     if (!valid) return false;
 
     const values = form.getValues();
@@ -208,7 +208,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
     if (saveRef) {
       saveRef.current = handleSave;
     }
-  });
+  }, [saveRef, handleSave]);
 
   const showRateSelector = goalType !== 'maintain';
   const showTargetWeight = goalType !== 'maintain';

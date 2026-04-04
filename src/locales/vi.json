@@ -1548,5 +1548,10 @@
     "netCalories": "Calo ròng",
     "remaining": "Còn lại",
     "perMeal": "Theo bữa ăn"
+  },
+  "shared": {
+    "unitSelectorDefault": "— chọn đơn vị —",
+    "unitSelectorCustom": "Khác...",
+    "unitSelectorCustomPlaceholder": "Nhập đơn vị tuỳ chỉnh..."
   }
 }

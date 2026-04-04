@@ -765,7 +765,10 @@ export const useFitnessStore = create<FitnessState>()(
 
       updateTrainingDays: (planId, trainingDays) => {
         if (trainingDays.length < 2 || trainingDays.length > 6) {
-          console.error('[fitnessStore] updateTrainingDays: training days must be between 2 and 6');
+          logger.warn(
+            { component: 'fitnessStore', action: 'updateTrainingDays' },
+            'training days must be between 2 and 6',
+          );
           return;
         }
 
@@ -775,7 +778,7 @@ export const useFitnessStore = create<FitnessState>()(
 
         const plan = get().trainingPlans.find(p => p.id === planId);
         if (!plan) {
-          console.error('[fitnessStore] updateTrainingDays: plan not found');
+          logger.warn({ component: 'fitnessStore', action: 'updateTrainingDays' }, 'plan not found');
           return;
         }
 
@@ -819,18 +822,21 @@ export const useFitnessStore = create<FitnessState>()(
       reassignWorkoutToDay: (dayId, newDayOfWeek) => {
         const day = get().trainingPlanDays.find(d => d.id === dayId);
         if (!day) {
-          console.error('[fitnessStore] reassignWorkoutToDay: day not found');
+          logger.warn({ component: 'fitnessStore', action: 'reassignWorkoutToDay' }, 'day not found');
           return;
         }
 
         const plan = get().trainingPlans.find(p => p.id === day.planId);
         if (!plan) {
-          console.error('[fitnessStore] reassignWorkoutToDay: plan not found');
+          logger.warn({ component: 'fitnessStore', action: 'reassignWorkoutToDay' }, 'plan not found');
           return;
         }
 
         if (!new Set(plan.trainingDays).has(newDayOfWeek)) {
-          console.error('[fitnessStore] reassignWorkoutToDay: target day is not a training day');
+          logger.warn(
+            { component: 'fitnessStore', action: 'reassignWorkoutToDay' },
+            'target day is not a training day',
+          );
           return;
         }
 
@@ -838,7 +844,10 @@ export const useFitnessStore = create<FitnessState>()(
           d => d.planId === day.planId && d.dayOfWeek === newDayOfWeek,
         );
         if (sessionsOnTarget.length >= 3) {
-          console.error('[fitnessStore] reassignWorkoutToDay: target day already has 3 sessions');
+          logger.warn(
+            { component: 'fitnessStore', action: 'reassignWorkoutToDay' },
+            'target day already has 3 sessions',
+          );
           return;
         }
 
@@ -861,7 +870,7 @@ export const useFitnessStore = create<FitnessState>()(
       autoAssignWorkouts: planId => {
         const plan = get().trainingPlans.find(p => p.id === planId);
         if (!plan) {
-          console.error('[fitnessStore] autoAssignWorkouts: plan not found');
+          logger.warn({ component: 'fitnessStore', action: 'autoAssignWorkouts' }, 'plan not found');
           return;
         }
 
@@ -931,7 +940,7 @@ export const useFitnessStore = create<FitnessState>()(
       restoreOriginalSchedule: planId => {
         const plan = get().trainingPlans.find(p => p.id === planId);
         if (!plan) {
-          console.error('[fitnessStore] restoreOriginalSchedule: plan not found');
+          logger.warn({ component: 'fitnessStore', action: 'restoreOriginalSchedule' }, 'plan not found');
           return;
         }
 

@@ -155,7 +155,7 @@ export const DishEditModal = ({
         }
       }
     }
-  });
+  }); // No deps: intentionally runs every render — reads from DOM which is outside React's dep tracking
 
   const buildDish = (values: DishEditFormData): Dish => ({
     id: editingItem ? editingItem.id : generateUUID(),

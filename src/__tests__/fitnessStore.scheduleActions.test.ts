@@ -89,7 +89,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('rejects fewer than 2 training days', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const plan = samplePlan();
       useFitnessStore.setState({ trainingPlans: [plan] });
 
@@ -101,7 +101,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('rejects more than 6 training days', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const plan = samplePlan();
       useFitnessStore.setState({ trainingPlans: [plan] });
 
@@ -147,9 +147,9 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('handles non-existent plan gracefully', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       useFitnessStore.getState().updateTrainingDays('nonexistent', [1, 3]);
-      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
+      expect(spy).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
 
@@ -185,7 +185,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('rejects reassignment to a non-training day', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const plan = samplePlan({ trainingDays: [1, 3, 5] });
       const day = samplePlanDay({ id: 'day-1', planId: 'plan-1', dayOfWeek: 1 });
       useFitnessStore.setState({
@@ -201,7 +201,7 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('rejects reassignment when target day already has 3 sessions', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const plan = samplePlan({ trainingDays: [1, 3, 5] });
       const existing = [
         samplePlanDay({ id: 'slot-1', planId: 'plan-1', dayOfWeek: 3, sessionOrder: 1 }),
@@ -222,19 +222,19 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('handles non-existent day gracefully', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       useFitnessStore.getState().reassignWorkoutToDay('nonexistent', 1);
-      expect(spy).toHaveBeenCalledWith(expect.stringContaining('day not found'));
+      expect(spy).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('day not found'));
       spy.mockRestore();
     });
 
     it('handles non-existent plan gracefully', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const day = samplePlanDay({ id: 'day-1', planId: 'orphan-plan', dayOfWeek: 1 });
       useFitnessStore.setState({ trainingPlanDays: [day] });
 
       useFitnessStore.getState().reassignWorkoutToDay('day-1', 3);
-      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
+      expect(spy).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
   });
@@ -319,9 +319,9 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('handles non-existent plan gracefully', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       useFitnessStore.getState().autoAssignWorkouts('nonexistent');
-      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
+      expect(spy).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
 
@@ -429,9 +429,9 @@ describe('fitnessStore — Schedule Editor Actions', () => {
     });
 
     it('handles non-existent plan gracefully', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       useFitnessStore.getState().restoreOriginalSchedule('nonexistent');
-      expect(spy).toHaveBeenCalledWith(expect.stringContaining('plan not found'));
+      expect(spy).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('plan not found'));
       spy.mockRestore();
     });
 

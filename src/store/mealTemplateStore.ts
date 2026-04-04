@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import type { DatabaseService } from '../services/databaseService';
 import type { DayPlan, MealTemplate } from '../types';
 import { generateUUID } from '../utils/helpers';
+import { logger } from '../utils/logger';
 
 interface MealTemplateRow {
   id: string;
@@ -50,10 +51,20 @@ export const useMealTemplateStore = create<MealTemplateState>(set => ({
   loadAll: async (db: DatabaseService) => {
     const rows = await db.query<MealTemplateRow>('SELECT * FROM meal_templates');
     if (rows.length === 0) return;
-    const templates: MealTemplate[] = rows.map(r => {
-      const data = JSON.parse(r.data) as Omit<MealTemplate, 'id' | 'name'>;
-      return { id: r.id, name: r.name, ...data };
-    });
+    const templates: MealTemplate[] = rows
+      .map(r => {
+        try {
+          const data = JSON.parse(r.data) as Omit<MealTemplate, 'id' | 'name'>;
+          return { id: r.id, name: r.name, ...data };
+        } catch {
+          logger.warn(
+            { component: 'mealTemplateStore', action: 'loadAll' },
+            `Corrupt template data[${r.id}]: ${r.data.slice(0, 80)}`,
+          );
+          return null;
+        }
+      })
+      .filter((t): t is MealTemplate => t !== null);
     set({ templates });
   },
 }));
