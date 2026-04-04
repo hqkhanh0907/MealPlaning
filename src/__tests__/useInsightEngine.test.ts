@@ -24,8 +24,7 @@ const mockDb: DatabaseService = {
     return Promise.resolve(value !== undefined ? { value } : null);
   }),
   transaction: vi.fn(),
-  exportBinary: vi.fn().mockReturnValue(new Uint8Array()),
-  importBinary: vi.fn(),
+  close: vi.fn().mockResolvedValue(undefined),
   exportToJSON: vi.fn(),
   importFromJSON: vi.fn(),
 };

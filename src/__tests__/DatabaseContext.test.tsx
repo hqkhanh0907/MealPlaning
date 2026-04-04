@@ -5,18 +5,26 @@ import { DatabaseProvider, useDatabase } from '../contexts/DatabaseContext';
 
 /* Mock createDatabaseService so we don't need real sql.js WASM */
 const mockInitialize = vi.fn();
+const mockClose = vi.fn().mockResolvedValue(undefined);
 const mockService = {
   initialize: mockInitialize,
   execute: vi.fn().mockResolvedValue(undefined),
   query: vi.fn().mockResolvedValue([]),
   queryOne: vi.fn().mockResolvedValue(null),
   transaction: vi.fn().mockResolvedValue(undefined),
+  close: mockClose,
   exportToJSON: vi.fn(),
   importFromJSON: vi.fn(),
 };
 
 vi.mock('../services/databaseService', () => ({
   createDatabaseService: () => mockService,
+}));
+
+vi.mock('../services/schema', () => ({
+  createSchema: vi.fn().mockResolvedValue(undefined),
+  getSchemaVersion: vi.fn().mockResolvedValue(0),
+  runSchemaMigrations: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('DatabaseProvider', () => {
@@ -109,5 +117,57 @@ describe('DatabaseProvider', () => {
     }).toThrow('useDatabase must be used within DatabaseProvider');
 
     spy.mockRestore();
+  });
+
+  it('calls runSchemaMigrations when version > 0 (existing DB)', async () => {
+    const { getSchemaVersion, runSchemaMigrations } = await import('../services/schema');
+    vi.mocked(getSchemaVersion).mockResolvedValue(3);
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+    expect(runSchemaMigrations).toHaveBeenCalledWith(mockService);
+  });
+
+  it('skips runSchemaMigrations when version = 0 (fresh DB)', async () => {
+    const { getSchemaVersion, runSchemaMigrations } = await import('../services/schema');
+    vi.mocked(getSchemaVersion).mockResolvedValue(0);
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+    expect(runSchemaMigrations).not.toHaveBeenCalled();
+  });
+
+  it('calls close() on unmount cleanup', async () => {
+    mockInitialize.mockResolvedValue(undefined);
+    mockClose.mockClear();
+
+    const { unmount } = render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+
+    unmount();
+    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 });

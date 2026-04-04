@@ -1383,8 +1383,7 @@ describe('fitnessStore – SQLite error paths', () => {
       transaction: () => Promise.reject(new Error('Transaction error')),
       initialize: db.initialize.bind(db),
       queryOne: db.queryOne.bind(db),
-      exportBinary: db.exportBinary.bind(db),
-      importBinary: db.importBinary.bind(db),
+      close: db.close.bind(db),
       exportToJSON: db.exportToJSON.bind(db),
       importFromJSON: db.importFromJSON.bind(db),
     };

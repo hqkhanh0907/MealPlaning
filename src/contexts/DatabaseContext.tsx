@@ -7,7 +7,7 @@ import {
   migrateFitnessData,
   migrateFromLocalStorage,
 } from '../services/migrationService';
-import { createSchema } from '../services/schema';
+import { createSchema, getSchemaVersion, runSchemaMigrations } from '../services/schema';
 
 const DatabaseContext = createContext<DatabaseService | null>(null);
 
@@ -16,10 +16,18 @@ export function DatabaseProvider({ children }: Readonly<{ children: React.ReactN
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const service = createDatabaseService();
     service
       .initialize()
       .then(async () => {
+        if (cancelled) return;
+
+        // Migration-aware startup: check existing DB version
+        const version = await getSchemaVersion(service);
+        if (version > 0) {
+          await runSchemaMigrations(service);
+        }
         await createSchema(service);
 
         // Migrate legacy localStorage data to SQLite on first load
@@ -29,6 +37,8 @@ export function DatabaseProvider({ children }: Readonly<{ children: React.ReactN
         if (!isFitnessMigrationCompleted()) {
           await migrateFitnessData(service);
         }
+
+        if (cancelled) return;
 
         // Load all stores from SQLite before rendering the app
         const { useIngredientStore } = await import('../store/ingredientStore');
@@ -47,11 +57,18 @@ export function DatabaseProvider({ children }: Readonly<{ children: React.ReactN
           useFitnessStore.getState().initializeFromSQLite(service),
         ]);
 
+        if (cancelled) return;
         setDb(service);
       })
       .catch((err: unknown) => {
+        if (cancelled) return;
         setError(err instanceof Error ? err.message : String(err));
       });
+
+    return () => {
+      cancelled = true;
+      service.close().catch(() => {});
+    };
   }, []);
 
   if (error) {

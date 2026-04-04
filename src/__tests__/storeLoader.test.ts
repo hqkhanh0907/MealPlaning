@@ -55,8 +55,7 @@ function createMockDb(): DatabaseService {
     query: vi.fn().mockResolvedValue([]),
     queryOne: vi.fn().mockResolvedValue(null),
     transaction: vi.fn().mockResolvedValue(undefined),
-    exportBinary: vi.fn().mockReturnValue(new Uint8Array()),
-    importBinary: vi.fn().mockResolvedValue(undefined),
+    close: vi.fn().mockResolvedValue(undefined),
     exportToJSON: vi.fn().mockResolvedValue('{}'),
     importFromJSON: vi.fn().mockResolvedValue(undefined),
   };

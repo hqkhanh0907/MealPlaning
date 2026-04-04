@@ -84,8 +84,7 @@ function createMockDb(tables: Record<string, unknown[]> = {}, opts?: { executeEr
     }) as DatabaseService['query'],
     queryOne: vi.fn(),
     transaction: transactionFn,
-    exportBinary: vi.fn(() => new Uint8Array()),
-    importBinary: vi.fn(),
+    close: vi.fn().mockResolvedValue(undefined),
     exportToJSON: vi.fn(async () => JSON.stringify(_stored)),
     importFromJSON: vi.fn(async (json: string) => {
       const parsed = JSON.parse(json) as Record<string, unknown[]>;
