@@ -125,8 +125,9 @@ const DEFAULT_PROFILE = {
 describe('useFitnessNutritionBridge hook', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useFitnessStore as unknown as Mock).mockImplementation((selector: (s: { workouts: unknown[] }) => unknown) =>
-      selector({ workouts: [] }),
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (selector: (s: { workouts: unknown[]; workoutSets: unknown[] }) => unknown) =>
+        selector({ workouts: [], workoutSets: [] }),
     );
     (useHealthProfileStore as unknown as Mock).mockImplementation(
       (selector: (s: { profile: typeof DEFAULT_PROFILE }) => unknown) => selector({ profile: DEFAULT_PROFILE }),
@@ -143,6 +144,7 @@ describe('useFitnessNutritionBridge hook', () => {
     expect(result.current.isTrainingDay).toBe(false);
     expect(result.current.weeklyTrainingLoad).toBe(0);
     expect(result.current.todayCalorieBudget).toBe(2500);
+    expect(result.current.todayBurned).toBe(0);
   });
 
   it('returns null insight and zero calorie budget when profile is null', () => {
@@ -153,6 +155,7 @@ describe('useFitnessNutritionBridge hook', () => {
     const { result } = renderHook(() => useFitnessNutritionBridge());
     expect(result.current.insight).toBeNull();
     expect(result.current.todayCalorieBudget).toBe(0);
+    expect(result.current.todayBurned).toBe(0);
     expect(result.current.isTrainingDay).toBe(false);
     expect(result.current.weeklyTrainingLoad).toBe(0);
   });
@@ -160,9 +163,10 @@ describe('useFitnessNutritionBridge hook', () => {
   it('identifies training day when workout matches today', () => {
     const today = formatDate(new Date());
     (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+      (selector: (s: { workouts: Array<{ date: string; id: string }>; workoutSets: unknown[] }) => unknown) =>
         selector({
-          workouts: [{ date: today }],
+          workouts: [{ date: today, id: 'w1' }],
+          workoutSets: [],
         }),
     );
 
@@ -180,9 +184,13 @@ describe('useFitnessNutritionBridge hook', () => {
     const d2 = '2026-03-24'; // Tue (same week)
 
     (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+      (selector: (s: { workouts: Array<{ date: string; id: string }>; workoutSets: unknown[] }) => unknown) =>
         selector({
-          workouts: [{ date: d1 }, { date: d2 }],
+          workouts: [
+            { date: d1, id: 'w1' },
+            { date: d2, id: 'w2' },
+          ],
+          workoutSets: [],
         }),
     );
 
@@ -198,9 +206,10 @@ describe('useFitnessNutritionBridge hook', () => {
     const oldDate = formatDate(lastMonth);
 
     (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) =>
+      (selector: (s: { workouts: Array<{ date: string; id: string }>; workoutSets: unknown[] }) => unknown) =>
         selector({
-          workouts: [{ date: oldDate }],
+          workouts: [{ date: oldDate, id: 'w1' }],
+          workoutSets: [],
         }),
     );
 
@@ -212,7 +221,8 @@ describe('useFitnessNutritionBridge hook', () => {
   it('returns insight object from deriveInsight integration', () => {
     const today = formatDate(new Date());
     (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) => selector({ workouts: [{ date: today }] }),
+      (selector: (s: { workouts: Array<{ date: string; id: string }>; workoutSets: unknown[] }) => unknown) =>
+        selector({ workouts: [{ date: today, id: 'w1' }], workoutSets: [] }),
     );
     vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
       eaten: 500,
@@ -241,7 +251,8 @@ describe('useFitnessNutritionBridge hook', () => {
   it('uses correct protein target from useNutritionTargets', () => {
     const today = formatDate(new Date());
     (useFitnessStore as unknown as Mock).mockImplementation(
-      (selector: (s: { workouts: Array<{ date: string }> }) => unknown) => selector({ workouts: [{ date: today }] }),
+      (selector: (s: { workouts: Array<{ date: string; id: string }>; workoutSets: unknown[] }) => unknown) =>
+        selector({ workouts: [{ date: today, id: 'w1' }], workoutSets: [] }),
     );
     vi.mocked(useNutritionTargets).mockReturnValue({
       targetCalories: 2500,
@@ -259,5 +270,111 @@ describe('useFitnessNutritionBridge hook', () => {
     const { result } = renderHook(() => useFitnessNutritionBridge());
     expect(result.current.insight).not.toBeNull();
     expect(result.current.insight?.type).toBe('protein-low');
+  });
+
+  it('includes burned calories in todayCalorieBudget (FIX-06)', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (
+        selector: (s: {
+          workouts: Array<{ date: string; id: string }>;
+          workoutSets: Array<{ workoutId: string; estimatedCalories?: number }>;
+        }) => unknown,
+      ) =>
+        selector({
+          workouts: [{ date: today, id: 'w1' }],
+          workoutSets: [
+            { workoutId: 'w1', estimatedCalories: 300 },
+            { workoutId: 'w1', estimatedCalories: 150 },
+          ],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    // targetCalories=2500 + burned=450 = 2950
+    expect(result.current.todayBurned).toBe(450);
+    expect(result.current.todayCalorieBudget).toBe(2950);
+  });
+
+  it('handles workout sets with undefined estimatedCalories (FIX-06)', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (
+        selector: (s: {
+          workouts: Array<{ date: string; id: string }>;
+          workoutSets: Array<{ workoutId: string; estimatedCalories?: number }>;
+        }) => unknown,
+      ) =>
+        selector({
+          workouts: [{ date: today, id: 'w1' }],
+          workoutSets: [
+            { workoutId: 'w1', estimatedCalories: 200 },
+            { workoutId: 'w1', estimatedCalories: undefined },
+          ],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.todayBurned).toBe(200);
+    expect(result.current.todayCalorieBudget).toBe(2700); // 2500 + 200
+  });
+
+  it('only counts workout sets from today workouts (FIX-06)', () => {
+    const today = formatDate(new Date());
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = formatDate(yesterday);
+
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (
+        selector: (s: {
+          workouts: Array<{ date: string; id: string }>;
+          workoutSets: Array<{ workoutId: string; estimatedCalories?: number }>;
+        }) => unknown,
+      ) =>
+        selector({
+          workouts: [
+            { date: today, id: 'w-today' },
+            { date: yesterdayStr, id: 'w-yesterday' },
+          ],
+          workoutSets: [
+            { workoutId: 'w-today', estimatedCalories: 100 },
+            { workoutId: 'w-yesterday', estimatedCalories: 500 },
+          ],
+        }),
+    );
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    // Only today's 100 should count, not yesterday's 500
+    expect(result.current.todayBurned).toBe(100);
+    expect(result.current.todayCalorieBudget).toBe(2600); // 2500 + 100
+  });
+
+  it('burned calories prevent false deficit warning (FIX-06)', () => {
+    const today = formatDate(new Date());
+    (useFitnessStore as unknown as Mock).mockImplementation(
+      (
+        selector: (s: {
+          workouts: Array<{ date: string; id: string }>;
+          workoutSets: Array<{ workoutId: string; estimatedCalories?: number }>;
+        }) => unknown,
+      ) =>
+        selector({
+          workouts: [{ date: today, id: 'w1' }],
+          workoutSets: [{ workoutId: 'w1', estimatedCalories: 500 }],
+        }),
+    );
+    // eaten=2000, target=2500, burned=500 → budget=3000 → 2000 < 3000*0.75=2250 → deficit warning
+    // But without burned: budget=2500 → 2000 < 2500*0.75=1875? No (2000 > 1875) → no deficit
+    // With burned: budget=3000 → 2000 < 3000*0.75=2250 → deficit warning
+    vi.mocked(todayNutrition.useTodayNutrition).mockReturnValue({
+      eaten: 2000,
+      protein: 120,
+    });
+
+    const { result } = renderHook(() => useFitnessNutritionBridge());
+    expect(result.current.todayCalorieBudget).toBe(3000);
+    // 2000 < 3000*0.75(=2250) → deficit
+    expect(result.current.insight?.type).toBe('deficit-on-training');
   });
 });

@@ -78,12 +78,14 @@ export function deriveInsight(
 export interface FitnessNutritionBridgeResult {
   insight: FitnessNutritionInsight | null;
   todayCalorieBudget: number;
+  todayBurned: number;
   isTrainingDay: boolean;
   weeklyTrainingLoad: number;
 }
 
 export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
   const workouts = useFitnessStore(s => s.workouts);
+  const workoutSets = useFitnessStore(s => s.workoutSets);
   const healthProfile = useHealthProfileStore(s => s.profile);
   const { eaten, protein } = useTodayNutrition();
   const { targetCalories, targetProtein } = useNutritionTargets();
@@ -96,11 +98,20 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
     const weekStartStr = toDateString(weekStart);
     const weeklyTrainingLoad = workouts.filter(w => w.date >= weekStartStr && w.date <= today).length;
 
+    // Calculate today's burned calories from workout sets
+    const todayWorkoutIds = new Set(workouts.filter(w => w.date === today).map(w => w.id));
+    const todayBurned =
+      todayWorkoutIds.size > 0
+        ? workoutSets
+            .filter(s => todayWorkoutIds.has(s.workoutId))
+            .reduce((sum, s) => sum + (s.estimatedCalories ?? 0), 0)
+        : 0;
+
     if (!healthProfile) {
-      return { insight: null, todayCalorieBudget: 0, isTrainingDay, weeklyTrainingLoad };
+      return { insight: null, todayCalorieBudget: 0, todayBurned: 0, isTrainingDay, weeklyTrainingLoad };
     }
 
-    const todayCalorieBudget = targetCalories;
+    const todayCalorieBudget = targetCalories + Math.round(todayBurned);
     const todayCaloriesConsumed = eaten;
     const todayProteinConsumed = protein;
 
@@ -113,6 +124,6 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
       targetProtein,
     );
 
-    return { insight, todayCalorieBudget, isTrainingDay, weeklyTrainingLoad };
-  }, [workouts, healthProfile, eaten, protein, targetCalories, targetProtein]);
+    return { insight, todayCalorieBudget, todayBurned, isTrainingDay, weeklyTrainingLoad };
+  }, [workouts, workoutSets, healthProfile, eaten, protein, targetCalories, targetProtein]);
 }
