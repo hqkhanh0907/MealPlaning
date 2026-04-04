@@ -423,7 +423,7 @@ describe('App', () => {
   it('navigates to AI analysis tab and renders AIImageAnalyzer', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => expect(screen.getByTestId('ai-image-analyzer')).toBeInTheDocument());
   });
@@ -431,7 +431,7 @@ describe('App', () => {
   it('handleSaveAnalyzedDish with shouldCreateDish=true creates dish and switches to dishes sub-tab', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-save-dish'));
     fireEvent.click(screen.getByTestId('ai-save-dish'));
@@ -441,7 +441,7 @@ describe('App', () => {
   it('handleSaveAnalyzedDish with shouldCreateDish=false saves ingredients only and switches to ingredients sub-tab', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-save-ingredients'));
     fireEvent.click(screen.getByTestId('ai-save-ingredients'));
@@ -453,7 +453,7 @@ describe('App', () => {
   it('handleAnalysisComplete when on ai-analysis tab does not set hasNewAIResult', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-complete'));
     fireEvent.click(screen.getByTestId('ai-complete'));
@@ -524,7 +524,7 @@ describe('App', () => {
   it('handleAnalysisComplete from another tab sets new result flag', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-complete'));
     // Navigate away from AI tab using desktop nav
@@ -633,7 +633,7 @@ describe('App', () => {
   it('handleAnalysisComplete fires notification when called from non-AI tab', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-image-analyzer'));
     expect(capturedAnalysisComplete).toBeTruthy();
@@ -651,7 +651,7 @@ describe('App', () => {
   it('handleSaveAnalyzedDish with new ingredients adds them to state', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-save-dish'));
     fireEvent.click(screen.getByTestId('ai-save-dish'));
@@ -668,7 +668,7 @@ describe('App', () => {
   it('handleSaveAnalyzedDish without tags defaults to lunch', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-save-dish-no-tags'));
     fireEvent.click(screen.getByTestId('ai-save-dish-no-tags'));
@@ -678,7 +678,7 @@ describe('App', () => {
   it('handleAnalysisComplete notification onClick navigates to AI tab', async () => {
     render(<App />);
     const navTabs = screen.getAllByRole('tab');
-    const aiTab = navTabs.find(b => b.textContent?.includes('AI'));
+    const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => screen.getByTestId('ai-image-analyzer'));
     const calTab = navTabs.find(b => b.textContent?.includes('Lịch trình'));

@@ -79,7 +79,7 @@ export const BottomNavBar = ({
                   <div className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-rose-500" />
                 )}
               </div>
-              <span className="mt-0.5 max-w-[60px] truncate text-xs leading-normal font-medium">{label}</span>
+              <span className="mt-0.5 max-w-[72px] truncate text-xs leading-normal font-medium">{label}</span>
               {activeTab === tab && <div className="bg-primary absolute -bottom-0.5 h-0.5 w-5 rounded-full" />}
             </button>
           );
