@@ -433,3 +433,92 @@ const borderClass = compareIds.has(dish.id) ? 'border-blue-400' : 'border-blue-5
 Trước khi migrate bất kỳ color class nào, **LUÔN check xem nó có trong JS ternary/conditional không**. Nếu có → nó là logic-dependent, phải để yên. Chỉ migrate color classes **tĩnh** (không có logic kiểm soát).
 
 ---
+
+## 13. Zustand v5 Selector Optimization — Pattern Guide
+
+### Vấn đề
+
+Dashboard re-render quá nhiều do coarse selectors (`useStore(state => state)` hoặc subscribe toàn bộ store).
+
+### Nguyên nhân
+
+Zustand triggers re-render khi selector return value thay đổi (Object.is comparison). Array/object literals luôn tạo ref mới → luôn re-render.
+
+### Giải pháp: 3 patterns theo loại data
+
+```typescript
+// Pattern 1: .find() — trả ref ổn định nếu item không đổi
+const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.isActive));
+
+// Pattern 2: Primitive — best, Object.is so sánh trực tiếp
+const hasActivePlan = useFitnessStore(s => s.trainingPlans.some(p => p.isActive));
+
+// Pattern 3: .filter() — PHẢI wrap useShallow (tạo array mới mỗi lần)
+import { useShallow } from 'zustand/react/shallow';
+const todayWorkouts = useFitnessStore(useShallow(s => s.workoutSets.filter(w => isToday(w.date))));
+```
+
+### Bài học
+
+`.find()` = safe (ref ổn định), primitive selectors = best, `.filter()` = PHẢI có `useShallow`. Consolidate nhiều useStore calls thành 1 khi chúng cùng store.
+
+---
+
+## 14. aria-disabled → native disabled — Test Impact
+
+### Vấn đề
+
+Đổi `aria-disabled="true"` sang HTML `disabled` attribute → tests fail vì disabled button không fire click event.
+
+### Nguyên nhân
+
+- `aria-disabled` chỉ là hint cho screen reader, click handler VẪN CHẠY
+- Native `disabled` attribute block toàn bộ events (click, focus, keydown)
+- Tests kiểu "click disabled → show warning" phải đổi thành "verify button is disabled"
+
+### Giải pháp
+
+```typescript
+// ❌ Test cũ — SAI sau khi đổi sang disabled
+await user.click(deleteBtn);
+expect(showNotification).toHaveBeenCalledWith('warning');
+
+// ✅ Test mới — verify disabled attribute
+expect(deleteBtn).toBeDisabled();
+// HOẶC
+expect(deleteBtn).toHaveAttribute('disabled');
+```
+
+Thêm Tailwind classes cho visual feedback: `disabled:opacity-50 disabled:pointer-events-none`
+
+### Bài học
+
+Khi migrate aria-disabled → disabled, LUÔN check test suite vì click behavior thay đổi hoàn toàn. Guard code trong handler (isUsed check) trở thành dead code nhưng giữ lại làm safety net.
+
+---
+
+## 15. QUY TẮC #1 Violation — Bài học sống còn
+
+### Vấn đề
+
+Commit 3 waves (622e2d0, 10987c0, 8dfac7f) liên tiếp mà KHÔNG build APK + emulator verify. User called out vi phạm mandatory instruction.
+
+### Nguyên nhân
+
+Bị cuốn vào momentum của parallel agents, focus vào "commit xong wave tiếp theo" mà quên quy trình bắt buộc.
+
+### Giải pháp
+
+**Mỗi commit = 1 APK verify cycle**. KHÔNG ĐƯỢC batch commits rồi verify cuối cùng.
+
+```
+Wave N code → lint → test → build → commit
+  → npm run build → npx cap sync android
+  → cd android && ./gradlew assembleDebug
+  → adb install → CDP verify → screenshot
+  → PASS → Wave N+1
+```
+
+### Bài học
+
+Efficiency (batch commits) ≠ Quality (individual verify). User instructions là LAW, không phải suggestion. Mỗi commit phải kèm emulator screenshot evidence. KHÔNG BAO GIỜ skip QUY TẮC #1 dù có "chỉ thay đổi nhỏ".
