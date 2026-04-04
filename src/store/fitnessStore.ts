@@ -31,6 +31,7 @@ import {
 import { remapExercisesToNewSplit } from '../features/fitness/utils/splitRemapper';
 import { computeMatchScore } from '../features/fitness/utils/templateMatcher';
 import type { DatabaseService } from '../services/databaseService';
+import { persistToDb } from '../store/helpers/dbWriteQueue';
 
 let _db: DatabaseService | null = null;
 
@@ -228,29 +229,27 @@ export const useFitnessStore = create<FitnessState>()(
         if (_db) {
           const p = get().trainingPlans.find(pl => pl.id === id);
           if (p) {
-            _db
-              .execute(
-                `UPDATE training_plans SET name = ?, status = ?, split_type = ?, duration_weeks = ?,
+            persistToDb(
+              _db,
+              `UPDATE training_plans SET name = ?, status = ?, split_type = ?, duration_weeks = ?,
                  current_week = ?, start_date = ?, end_date = ?, template_id = ?,
                  training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?`,
-                [
-                  p.name,
-                  p.status,
-                  p.splitType,
-                  p.durationWeeks,
-                  p.currentWeek ?? null,
-                  p.startDate,
-                  p.endDate ?? null,
-                  p.templateId ?? null,
-                  JSON.stringify(p.trainingDays),
-                  JSON.stringify(p.restDays),
-                  p.updatedAt,
-                  id,
-                ],
-              )
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'updateTrainingPlan.persist' }, error);
-              });
+              [
+                p.name,
+                p.status,
+                p.splitType,
+                p.durationWeeks,
+                p.currentWeek ?? null,
+                p.startDate,
+                p.endDate ?? null,
+                p.templateId ?? null,
+                JSON.stringify(p.trainingDays),
+                JSON.stringify(p.restDays),
+                p.updatedAt,
+                id,
+              ],
+              'updateTrainingPlan.persist',
+            );
           }
         }
       },
@@ -287,25 +286,23 @@ export const useFitnessStore = create<FitnessState>()(
         }));
         if (_db) {
           for (const day of days) {
-            _db
-              .execute(
-                `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+            persistToDb(
+              _db,
+              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                  day.id,
-                  day.planId,
-                  day.dayOfWeek,
-                  day.sessionOrder ?? 1,
-                  day.workoutType,
-                  day.muscleGroups ?? null,
-                  day.exercises ?? null,
-                  day.originalExercises ?? null,
-                  day.notes ?? null,
-                ],
-              )
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'addPlanDays' }, error);
-              });
+              [
+                day.id,
+                day.planId,
+                day.dayOfWeek,
+                day.sessionOrder ?? 1,
+                day.workoutType,
+                day.muscleGroups ?? null,
+                day.exercises ?? null,
+                day.originalExercises ?? null,
+                day.notes ?? null,
+              ],
+              'addPlanDays',
+            );
           }
         }
       },
@@ -319,11 +316,12 @@ export const useFitnessStore = create<FitnessState>()(
           ),
         }));
         if (_db) {
-          _db
-            .execute('UPDATE training_plan_days SET exercises = ? WHERE id = ?', [JSON.stringify(exercises), dayId])
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'updatePlanDayExercises' }, error);
-            });
+          persistToDb(
+            _db,
+            'UPDATE training_plan_days SET exercises = ? WHERE id = ?',
+            [JSON.stringify(exercises), dayId],
+            'updatePlanDayExercises',
+          );
         }
       },
 
@@ -334,11 +332,12 @@ export const useFitnessStore = create<FitnessState>()(
           ),
         }));
         if (_db) {
-          _db
-            .execute('UPDATE training_plan_days SET exercises = original_exercises WHERE id = ?', [dayId])
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'restorePlanDayOriginal' }, error);
-            });
+          persistToDb(
+            _db,
+            'UPDATE training_plan_days SET exercises = original_exercises WHERE id = ?',
+            [dayId],
+            'restorePlanDayOriginal',
+          );
         }
       },
 
@@ -354,25 +353,23 @@ export const useFitnessStore = create<FitnessState>()(
           trainingPlanDays: [...state.trainingPlanDays, newDay],
         }));
         if (_db) {
-          _db
-            .execute(
-              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+          persistToDb(
+            _db,
+            `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                newDay.id,
-                newDay.planId,
-                newDay.dayOfWeek,
-                newDay.sessionOrder,
-                newDay.workoutType,
-                newDay.muscleGroups ?? null,
-                newDay.exercises ?? null,
-                newDay.originalExercises ?? null,
-                newDay.notes ?? null,
-              ],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'addPlanDaySession' }, error);
-            });
+            [
+              newDay.id,
+              newDay.planId,
+              newDay.dayOfWeek,
+              newDay.sessionOrder,
+              newDay.workoutType,
+              newDay.muscleGroups ?? null,
+              newDay.exercises ?? null,
+              newDay.originalExercises ?? null,
+              newDay.notes ?? null,
+            ],
+            'addPlanDaySession',
+          );
         }
       },
 
@@ -393,18 +390,17 @@ export const useFitnessStore = create<FitnessState>()(
         });
 
         if (_db) {
-          _db.execute('DELETE FROM training_plan_days WHERE id = ?', [dayId]).catch((error: unknown) => {
-            logger.error({ component: 'fitnessStore', action: 'removePlanDaySession.delete' }, error);
-          });
+          persistToDb(_db, 'DELETE FROM training_plan_days WHERE id = ?', [dayId], 'removePlanDaySession.delete');
           const remaining = get()
             .trainingPlanDays.filter(d => d.planId === dayToRemove.planId && d.dayOfWeek === dayToRemove.dayOfWeek)
             .sort((a, b) => a.sessionOrder - b.sessionOrder);
           for (const d of remaining) {
-            _db
-              .execute('UPDATE training_plan_days SET session_order = ? WHERE id = ?', [d.sessionOrder, d.id])
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'removePlanDaySession.reorder' }, error);
-              });
+            persistToDb(
+              _db,
+              'UPDATE training_plan_days SET session_order = ? WHERE id = ?',
+              [d.sessionOrder, d.id],
+              'removePlanDaySession.reorder',
+            );
           }
         }
       },
@@ -412,24 +408,22 @@ export const useFitnessStore = create<FitnessState>()(
       addWorkout: workout => {
         set(state => ({ workouts: [...state.workouts, workout] }));
         if (_db) {
-          _db
-            .execute(
-              `INSERT INTO workouts (id, date, name, plan_day_id, duration_min, notes, created_at, updated_at)
+          persistToDb(
+            _db,
+            `INSERT INTO workouts (id, date, name, plan_day_id, duration_min, notes, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                workout.id,
-                workout.date,
-                workout.name,
-                workout.planDayId ?? null,
-                workout.durationMin ?? null,
-                workout.notes ?? null,
-                workout.createdAt,
-                workout.updatedAt,
-              ],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'SQLite write failed for workout' }, error);
-            });
+            [
+              workout.id,
+              workout.date,
+              workout.name,
+              workout.planDayId ?? null,
+              workout.durationMin ?? null,
+              workout.notes ?? null,
+              workout.createdAt,
+              workout.updatedAt,
+            ],
+            'addWorkout',
+          );
         }
       },
 
@@ -440,14 +434,12 @@ export const useFitnessStore = create<FitnessState>()(
         if (_db) {
           const w = get().workouts.find(wo => wo.id === id);
           if (w) {
-            _db
-              .execute(
-                'UPDATE workouts SET date = ?, name = ?, plan_day_id = ?, duration_min = ?, notes = ?, updated_at = ? WHERE id = ?',
-                [w.date, w.name, w.planDayId ?? null, w.durationMin ?? null, w.notes ?? null, w.updatedAt, id],
-              )
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'updateWorkout.persist' }, error);
-              });
+            persistToDb(
+              _db,
+              'UPDATE workouts SET date = ?, name = ?, plan_day_id = ?, duration_min = ?, notes = ?, updated_at = ? WHERE id = ?',
+              [w.date, w.name, w.planDayId ?? null, w.durationMin ?? null, w.notes ?? null, w.updatedAt, id],
+              'updateWorkout.persist',
+            );
           }
         }
       },
@@ -477,32 +469,30 @@ export const useFitnessStore = create<FitnessState>()(
           workoutSets: [...state.workoutSets, workoutSet],
         }));
         if (_db) {
-          _db
-            .execute(
-              `INSERT INTO workout_sets
+          persistToDb(
+            _db,
+            `INSERT INTO workout_sets
                  (id, workout_id, exercise_id, set_number, reps, weight_kg, rpe, rest_seconds,
                   duration_min, distance_km, avg_heart_rate, intensity, estimated_calories, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                workoutSet.id,
-                workoutSet.workoutId,
-                workoutSet.exerciseId,
-                workoutSet.setNumber,
-                workoutSet.reps ?? null,
-                workoutSet.weightKg,
-                workoutSet.rpe ?? null,
-                workoutSet.restSeconds ?? null,
-                workoutSet.durationMin ?? null,
-                workoutSet.distanceKm ?? null,
-                workoutSet.avgHeartRate ?? null,
-                workoutSet.intensity ?? null,
-                workoutSet.estimatedCalories ?? null,
-                workoutSet.updatedAt,
-              ],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'SQLite write failed for workoutSet' }, error);
-            });
+            [
+              workoutSet.id,
+              workoutSet.workoutId,
+              workoutSet.exerciseId,
+              workoutSet.setNumber,
+              workoutSet.reps ?? null,
+              workoutSet.weightKg,
+              workoutSet.rpe ?? null,
+              workoutSet.restSeconds ?? null,
+              workoutSet.durationMin ?? null,
+              workoutSet.distanceKm ?? null,
+              workoutSet.avgHeartRate ?? null,
+              workoutSet.intensity ?? null,
+              workoutSet.estimatedCalories ?? null,
+              workoutSet.updatedAt,
+            ],
+            'addWorkoutSet',
+          );
         }
       },
 
@@ -633,9 +623,7 @@ export const useFitnessStore = create<FitnessState>()(
           workoutSets: state.workoutSets.filter(s => s.id !== id),
         }));
         if (_db) {
-          _db.execute('DELETE FROM workout_sets WHERE id = ?', [id]).catch((error: unknown) => {
-            logger.error({ component: 'fitnessStore', action: 'removeWorkoutSet.persist' }, error);
-          });
+          persistToDb(_db, 'DELETE FROM workout_sets WHERE id = ?', [id], 'removeWorkoutSet.persist');
         }
       },
 
@@ -646,14 +634,12 @@ export const useFitnessStore = create<FitnessState>()(
           weightEntries: [...state.weightEntries, entry],
         }));
         if (_db) {
-          _db
-            .execute(
-              'INSERT INTO weight_log (id, date, weight_kg, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
-              [entry.id, entry.date, entry.weightKg, entry.notes ?? null, entry.createdAt, entry.updatedAt],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'addWeightEntry.persist' }, error);
-            });
+          persistToDb(
+            _db,
+            'INSERT INTO weight_log (id, date, weight_kg, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+            [entry.id, entry.date, entry.weightKg, entry.notes ?? null, entry.createdAt, entry.updatedAt],
+            'addWeightEntry.persist',
+          );
         }
       },
 
@@ -687,9 +673,7 @@ export const useFitnessStore = create<FitnessState>()(
           weightEntries: state.weightEntries.filter(e => e.id !== id),
         }));
         if (_db) {
-          _db.execute('DELETE FROM weight_log WHERE id = ?', [id]).catch((error: unknown) => {
-            logger.error({ component: 'fitnessStore', action: 'removeWeightEntry.persist' }, error);
-          });
+          persistToDb(_db, 'DELETE FROM weight_log WHERE id = ?', [id], 'removeWeightEntry.persist');
         }
       },
 
@@ -702,30 +686,26 @@ export const useFitnessStore = create<FitnessState>()(
       setWorkoutDraft: draft => {
         set({ workoutDraft: draft });
         if (_db && draft) {
-          _db
-            .execute(
-              `INSERT OR REPLACE INTO workout_drafts (id, exercises_json, sets_json, start_time, plan_day_id, updated_at)
+          persistToDb(
+            _db,
+            `INSERT OR REPLACE INTO workout_drafts (id, exercises_json, sets_json, start_time, plan_day_id, updated_at)
                VALUES ('current', ?, ?, ?, ?, ?)`,
-              [
-                JSON.stringify(draft.exercises),
-                JSON.stringify(draft.sets),
-                new Date().toISOString(),
-                draft.planDayId ?? null,
-                new Date().toISOString(),
-              ],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'SQLite write failed for workout draft' }, error);
-            });
+            [
+              JSON.stringify(draft.exercises),
+              JSON.stringify(draft.sets),
+              new Date().toISOString(),
+              draft.planDayId ?? null,
+              new Date().toISOString(),
+            ],
+            'setWorkoutDraft',
+          );
         }
       },
 
       clearWorkoutDraft: () => {
         set({ workoutDraft: null });
         if (_db) {
-          _db.execute(`DELETE FROM workout_drafts WHERE id = 'current'`).catch((error: unknown) => {
-            logger.error({ component: 'fitnessStore', action: 'SQLite delete failed for workout draft' }, error);
-          });
+          persistToDb(_db, `DELETE FROM workout_drafts WHERE id = 'current'`, [], 'clearWorkoutDraft');
         }
       },
 
@@ -797,25 +777,19 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          _db
-            .execute('UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?', [
-              JSON.stringify(trainingDays),
-              JSON.stringify(restDays),
-              new Date().toISOString(),
-              planId,
-            ])
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'updateTrainingDays.planUpdate' }, error);
-            });
+          persistToDb(
+            _db,
+            'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+            [JSON.stringify(trainingDays), JSON.stringify(restDays), new Date().toISOString(), planId],
+            'updateTrainingDays.planUpdate',
+          );
           for (const session of reassignedSessions) {
-            _db
-              .execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?', [
-                session.dayOfWeek,
-                session.id,
-              ])
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'updateTrainingDays.reassign' }, error);
-              });
+            persistToDb(
+              _db,
+              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
+              [session.dayOfWeek, session.id],
+              'updateTrainingDays.reassign',
+            );
           }
         }
       },
@@ -853,14 +827,12 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          _db
-            .execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 1 WHERE id = ?', [
-              newDayOfWeek,
-              dayId,
-            ])
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'reassignWorkoutToDay.sqlite' }, error);
-            });
+          persistToDb(
+            _db,
+            'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 1 WHERE id = ?',
+            [newDayOfWeek, dayId],
+            'reassignWorkoutToDay.sqlite',
+          );
         }
       },
 
@@ -923,14 +895,12 @@ export const useFitnessStore = create<FitnessState>()(
 
         if (_db) {
           for (const a of assigned) {
-            _db
-              .execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?', [
-                a.dayOfWeek,
-                a.id,
-              ])
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'autoAssignWorkouts.sqlite' }, error);
-              });
+            persistToDb(
+              _db,
+              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
+              [a.dayOfWeek, a.id],
+              'autoAssignWorkouts.sqlite',
+            );
           }
         }
       },
@@ -967,25 +937,19 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          _db
-            .execute('UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?', [
-              JSON.stringify(newTrainingDays),
-              JSON.stringify(newRestDays),
-              new Date().toISOString(),
-              planId,
-            ])
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'restoreOriginalSchedule.planUpdate' }, error);
-            });
+          persistToDb(
+            _db,
+            'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+            [JSON.stringify(newTrainingDays), JSON.stringify(newRestDays), new Date().toISOString(), planId],
+            'restoreOriginalSchedule.planUpdate',
+          );
           for (const d of restoredDays) {
-            _db
-              .execute('UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?', [
-                d.dayOfWeek,
-                d.id,
-              ])
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'restoreOriginalSchedule.dayUpdate' }, error);
-              });
+            persistToDb(
+              _db,
+              'UPDATE training_plan_days SET day_of_week = ?, is_user_assigned = 0 WHERE id = ?',
+              [d.dayOfWeek, d.id],
+              'restoreOriginalSchedule.dayUpdate',
+            );
           }
         }
       },
@@ -1015,7 +979,7 @@ export const useFitnessStore = create<FitnessState>()(
               workoutSets: sets.map(s => ({
                 id: s.id as string,
                 workoutId: s.workoutId as string,
-                exerciseId: s.exerciseId as string,
+                exerciseId: (s.exerciseId as string | null) ?? null,
                 setNumber: s.setNumber as number,
                 reps: s.reps as number | undefined,
                 weightKg: (s.weightKg as number | undefined) ?? 0,
@@ -1355,37 +1319,31 @@ export const useFitnessStore = create<FitnessState>()(
         }));
 
         if (_db) {
-          _db
-            .execute(
-              'UPDATE training_plans SET split_type = ?, template_id = ?, training_days = ?, updated_at = ? WHERE id = ?',
-              [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'applyTemplate.planUpdate' }, error);
-            });
-          _db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]).catch((error: unknown) => {
-            logger.error({ component: 'fitnessStore', action: 'applyTemplate.deleteOldDays' }, error);
-          });
+          persistToDb(
+            _db,
+            'UPDATE training_plans SET split_type = ?, template_id = ?, training_days = ?, updated_at = ? WHERE id = ?',
+            [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
+            'applyTemplate.planUpdate',
+          );
+          persistToDb(_db, 'DELETE FROM training_plan_days WHERE plan_id = ?', [planId], 'applyTemplate.deleteOldDays');
           for (const day of newDays) {
-            _db
-              .execute(
-                `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+            persistToDb(
+              _db,
+              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                  day.id,
-                  day.planId,
-                  day.dayOfWeek,
-                  day.sessionOrder,
-                  day.workoutType,
-                  day.muscleGroups ?? null,
-                  day.exercises ?? null,
-                  day.originalExercises ?? null,
-                  day.notes ?? null,
-                ],
-              )
-              .catch((error: unknown) => {
-                logger.error({ component: 'fitnessStore', action: 'applyTemplate.insertDay' }, error);
-              });
+              [
+                day.id,
+                day.planId,
+                day.dayOfWeek,
+                day.sessionOrder,
+                day.workoutType,
+                day.muscleGroups ?? null,
+                day.exercises ?? null,
+                day.originalExercises ?? null,
+                day.notes ?? null,
+              ],
+              'applyTemplate.insertDay',
+            );
           }
         }
       },
@@ -1424,28 +1382,26 @@ export const useFitnessStore = create<FitnessState>()(
         };
 
         if (_db) {
-          _db
-            .execute(
-              `INSERT INTO plan_templates (id, name, split_type, days_per_week, experience_level, training_goal, equipment_required, description, day_configs, popularity_score, is_builtin, created_at, updated_at)
+          persistToDb(
+            _db,
+            `INSERT INTO plan_templates (id, name, split_type, days_per_week, experience_level, training_goal, equipment_required, description, day_configs, popularity_score, is_builtin, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
-              [
-                template.id,
-                template.name,
-                template.splitType,
-                template.daysPerWeek,
-                template.experienceLevel,
-                template.trainingGoal,
-                JSON.stringify(template.equipmentRequired),
-                template.description,
-                JSON.stringify(template.dayConfigs),
-                template.popularityScore,
-                now,
-                now,
-              ],
-            )
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'saveCurrentAsTemplate' }, error);
-            });
+            [
+              template.id,
+              template.name,
+              template.splitType,
+              template.daysPerWeek,
+              template.experienceLevel,
+              template.trainingGoal,
+              JSON.stringify(template.equipmentRequired),
+              template.description,
+              JSON.stringify(template.dayConfigs),
+              template.popularityScore,
+              now,
+              now,
+            ],
+            'saveCurrentAsTemplate',
+          );
         }
 
         set(state => ({ userTemplates: [...state.userTemplates, template] }));

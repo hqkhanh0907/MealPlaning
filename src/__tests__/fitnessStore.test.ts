@@ -13,6 +13,7 @@ import type {
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import { createSchema } from '../services/schema';
 import { __resetDbForTesting, useFitnessStore } from '../store/fitnessStore';
+import { _resetQueue } from '../store/helpers/dbWriteQueue';
 
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -43,6 +44,7 @@ const INITIAL_STATE = {
 function resetStore() {
   useFitnessStore.setState(INITIAL_STATE);
   __resetDbForTesting();
+  _resetQueue();
 }
 
 function sampleProfile(overrides: Partial<TrainingProfile> = {}): TrainingProfile {
@@ -1501,10 +1503,7 @@ describe('fitnessStore – SQLite error paths', () => {
     });
 
     await new Promise(resolve => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('SQLite write failed for workout'),
-      expect.anything(),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('addWorkout'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1544,10 +1543,7 @@ describe('fitnessStore – SQLite error paths', () => {
     });
 
     await new Promise(resolve => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('SQLite write failed for workoutSet'),
-      expect.anything(),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('addWorkoutSet'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1567,10 +1563,7 @@ describe('fitnessStore – SQLite error paths', () => {
     });
 
     await new Promise(resolve => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('SQLite write failed for workout draft'),
-      expect.anything(),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('setWorkoutDraft'), expect.anything());
     consoleSpy.mockRestore();
   });
 
@@ -1586,10 +1579,7 @@ describe('fitnessStore – SQLite error paths', () => {
     });
 
     await new Promise(resolve => setTimeout(resolve, 50));
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('SQLite delete failed for workout draft'),
-      expect.anything(),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('clearWorkoutDraft'), expect.anything());
     consoleSpy.mockRestore();
   });
 });
