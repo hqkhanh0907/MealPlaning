@@ -1,7 +1,7 @@
 # Data Model — Smart Meal Planner
 
-**Version:** 2.0  
-**Date:** 2026-07-16  
+**Version:** 2.2  
+**Date:** 2026-07-21  
 **Source of truth:** `src/types.ts` (domain types), `src/features/fitness/types.ts` (fitness types), `src/features/health-profile/types.ts` (health types), `src/services/schema.ts` (SQLite schema)
 
 ---
@@ -643,11 +643,13 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 
 ---
 
-## 10. SQLite Database Schema (27 Tables)
+## 10. SQLite Database Schema (22+ Tables)
 
 > **Source of truth:** `src/services/schema.ts` — `SCHEMA_VERSION = 6`
 >
-> Ứng dụng đã chuyển từ localStorage sang SQLite (via sql.js WASM). Schema gồm **27 bảng** chia thành 5 nhóm chức năng.
+> Ứng dụng sử dụng SQLite với **dual implementation**: `WebDatabaseService` (sql.js WASM cho web/tests) và `NativeDatabaseService` (@capacitor-community/sqlite cho Android native). Schema gồm **22+ bảng** chia thành 5 nhóm chức năng.
+>
+> **⚠️ Persistence Gap**: 4 stores (`dayPlanStore`, `dishStore`, `ingredientStore`, `mealTemplateStore`) chỉ load data từ SQLite khi startup (`loadAll()`). Mutations chỉ update Zustand in-memory — KHÔNG ghi ngược SQLite. Chỉ `fitnessStore` và `healthProfileStore` có full write-back. Xem [SAD.md §2.4](SAD.md#⚠️-persistence-gap--known-limitation-ceo-audit) cho chi tiết.
 
 ### 10.1 Meal Planning Tables (migrated from localStorage)
 
@@ -971,7 +973,9 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 | 20  | `app_settings`        | Settings      | Key-value application settings      |
 | 21  | `grocery_checked`     | Meal Planning | Trạng thái đã mua của grocery items |
 
-> **Lưu ý:** Bảng 20-21+ và các bảng bổ sung khác có thể được thêm trong các migration tiếp theo. Tham khảo `schema.ts` cho danh sách đầy đủ (SCHEMA_VERSION = 6, 28 bảng).
+> **Lưu ý:** Schema version 6 có 22+ tables (tạo qua `CREATE TABLE IF NOT EXISTS` trong `schema.ts`). Migration logic có thể tạo thêm tables trong quá trình upgrade (ví dụ: `plan_templates`, `training_plan_days_v2`). Tham khảo `schema.ts` cho danh sách đầy đủ.
+>
+> **⚠️ Defensive parsing**: Các cột JSON (`tags`, `breakfast_dish_ids`, `lunch_dish_ids`, `dinner_dish_ids`, `servings`, `exercises`, `muscle_groups`) được parse bằng `safeJsonParse()` — corrupt data trả về fallback thay vì crash app.
 
 ---
 
@@ -984,3 +988,4 @@ Lưu bản nháp workout đang thực hiện (tránh mất dữ liệu khi app c
 | 1.2     | 2026-03-28 | Added SQLite database schema (19 tables). 3 new fitness module tables: `fitness_profiles`, `fitness_preferences`, `workout_drafts`. Documented all table columns, constraints, indexes, and FK relationships from `src/services/schema.ts`                                                                               |
 | 2.0     | 2026-07-16 | **Major update**: Added Fitness Domain Types (§4): TrainingPlan, TrainingDay, TrainingSession, PlannedExercise, WorkoutLog, ExerciseLog, SetLog. Added Health Profile Types (§5): HealthProfile, OnboardingState. Added Fitness ER diagram (§6.2). Updated SQLite schema to version 3 (27 tables). Re-numbered sections. |
 | 2.1     | 2026-07-20 | Schema v5→v6: `workout_sets.exercise_id` nullable with `ON DELETE SET NULL`. `WorkoutSet.exerciseId` type changed to `string                                                                                                                                                                                             | null`. Added `dbWriteQueue`helper for serialized fire-and-forget writes. Multi-write actions use`db.transaction()` for atomicity. |
+| 2.2     | 2026-07-21 | **CEO Audit sync**: Updated schema section header (22+ tables). Documented persistence write-back gap cho 4 stores. Added `safeJsonParse` defensive parsing note cho JSON columns. Updated dual DB implementation reference (WebDatabaseService + NativeDatabaseService).                                                |
