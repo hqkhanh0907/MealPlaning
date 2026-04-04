@@ -309,10 +309,7 @@ export const DishManager = ({
                 {dish.rating && dish.rating > 0 && (
                   <div className="mb-2 flex items-center gap-0.5" data-testid={`dish-rating-${dish.id}`}>
                     {[1, 2, 3, 4, 5].map(s => (
-                      <span
-                        key={s}
-                        className={`text-sm ${s <= dish.rating! ? 'text-amber-400' : 'text-slate-200 dark:text-slate-700'}`}
-                      >
+                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-amber-400' : 'text-muted'}`}>
                         ★
                       </span>
                     ))}
@@ -436,7 +433,7 @@ export const DishManager = ({
                             return (
                               <span
                                 key={tag}
-                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold dark:bg-slate-600"
+                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold"
                               >
                                 {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
                                 {tagLabels[tag]}
@@ -495,7 +492,7 @@ export const DishManager = ({
               return (
                 <div
                   key={dish.id}
-                  className={`relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'active:bg-muted dark:active:bg-slate-700'}`}
+                  className={`relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'active:bg-muted'}`}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <button
@@ -646,7 +643,7 @@ export const DishManager = ({
                         className="bg-muted flex items-center justify-between rounded-xl px-4 py-3"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="text-primary border-border-subtle bg-card flex h-8 w-8 items-center justify-center rounded-lg border dark:bg-slate-600">
+                          <div className="text-primary border-border-subtle bg-muted flex h-8 w-8 items-center justify-center rounded-lg border">
                             <Apple className="h-4 w-4" />
                           </div>
                           <span className="text-foreground text-sm font-medium">

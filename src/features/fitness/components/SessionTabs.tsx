@@ -177,7 +177,7 @@ function SessionTabsInner({
             onClick={handleCancelDelete}
             autoFocus
             aria-label={t('fitness.plan.cancelDelete')}
-            className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none dark:bg-slate-600"
+            className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             {t('fitness.plan.cancelDelete')}
           </button>

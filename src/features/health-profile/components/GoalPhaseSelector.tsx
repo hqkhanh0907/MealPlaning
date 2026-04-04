@@ -323,7 +323,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
             aria-checked={manualOverrideField.field.value}
             className={cn(
               'relative h-5 w-10 rounded-full transition-colors',
-              manualOverrideField.field.value ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600',
+              manualOverrideField.field.value ? 'bg-primary' : 'bg-muted-foreground/30',
             )}
           >
             <span

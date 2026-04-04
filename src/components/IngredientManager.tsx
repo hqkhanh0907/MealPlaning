@@ -325,7 +325,7 @@ export const IngredientManager = ({
             {list.filteredItems.map(ing => (
               <div
                 key={ing.id}
-                className="active:bg-muted relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors dark:active:bg-slate-700"
+                className="active:bg-muted relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="text-primary bg-primary-subtle flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">

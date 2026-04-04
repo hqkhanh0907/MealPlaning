@@ -257,7 +257,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={() => startRename(template)}
                             data-testid={`btn-rename-template-${template.id}`}
-                            className="text-foreground-secondary bg-muted hover:bg-accent flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] dark:bg-slate-600"
+                            className="text-foreground-secondary bg-muted hover:bg-accent flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                             {t('template.rename')}

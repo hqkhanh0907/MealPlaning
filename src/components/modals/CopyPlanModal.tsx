@@ -186,14 +186,14 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             <button
               data-testid="btn-mode-overwrite"
               onClick={() => setMergeMode(false)}
-              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-muted-foreground' : 'text-primary-emphasis bg-card shadow-sm dark:bg-slate-600'}`}
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-muted-foreground' : 'text-primary-emphasis bg-card shadow-sm'}`}
             >
               {t('copyPlan.overwriteMode')}
             </button>
             <button
               data-testid="btn-mode-merge"
               onClick={() => setMergeMode(true)}
-              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-primary-emphasis bg-card shadow-sm dark:bg-slate-600' : 'text-muted-foreground'}`}
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${mergeMode ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground'}`}
             >
               {t('copyPlan.mergeMode')}
             </button>

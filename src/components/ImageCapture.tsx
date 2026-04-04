@@ -200,7 +200,12 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
         >
           {image ? (
             <div className="relative aspect-video">
-              <img src={image} alt={t('imageCapture.uploadedDishAlt')} className="h-full w-full object-cover" />
+              <img
+                src={image}
+                alt={t('imageCapture.uploadedDishAlt')}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
               <button
                 onClick={onClear}
                 className="bg-card/90 text-foreground hover:bg-card absolute top-4 right-4 rounded-xl px-4 py-2 text-sm font-bold shadow-sm backdrop-blur transition-all"
@@ -222,7 +227,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                       </div>
                       <span className="text-primary-emphasis text-sm font-bold">{t('imageCapture.takePhoto')}</span>
                     </button>
-                    <div className="bg-muted h-20 w-px self-center dark:bg-slate-600"></div>
+                    <div className="bg-muted h-20 w-px self-center"></div>
                   </>
                 )}
                 <button

@@ -22,7 +22,7 @@
   --secondary: oklch(0.984 0.003 247.86); /* Slate-50 #F8FAFC */
   --secondary-foreground: oklch(0.279 0.029 260.03);
   --muted: oklch(0.968 0.007 247.86); /* Slate-100 */
-  --muted-foreground: oklch(0.554 0.046 257.42); /* Slate-500 #64748B */
+  --muted-foreground: oklch(0.446 0.043 257.28); /* Slate-600 #475569 — WCAG AA 6.4:1 on white */
   --accent: oklch(0.968 0.007 247.86);
   --accent-foreground: oklch(0.279 0.029 260.03);
   --destructive: oklch(0.637 0.237 25.33); /* Red-500 #EF4444 */

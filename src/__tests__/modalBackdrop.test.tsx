@@ -113,7 +113,7 @@ describe('ModalBackdrop', () => {
     );
     const dialog = document.querySelector('dialog');
     expect(dialog?.className).toContain('backdrop-blur');
-    expect(dialog?.className).toContain('bg-slate-900/50');
+    expect(dialog?.className).toContain('bg-background/50');
   });
 
   it('calls onClose when Escape key is pressed', () => {

@@ -414,7 +414,7 @@ export const DishEditModal = ({
                       type="button"
                       onClick={() => handleTagToggle(type, isActive)}
                       data-testid={`tag-${type}`}
-                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground-secondary bg-muted hover:bg-accent active:bg-slate-300'}`}
+                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground-secondary bg-muted hover:bg-accent active:bg-accent'}`}
                     >
                       <TagIcon className="size-4" aria-hidden="true" /> {label}
                     </button>
@@ -581,7 +581,7 @@ export const DishEditModal = ({
                                 setValue(`ingredients.${index}.amount`, a, { shouldDirty: true });
                               }}
                               aria-label={`${t('common.decrease')} ${getLocalizedField(ing.name, lang)}`}
-                              className="text-foreground-secondary bg-muted hover:bg-accent flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg transition-all active:bg-slate-300 dark:bg-slate-600"
+                              className="text-foreground-secondary bg-muted hover:bg-accent active:bg-accent flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg transition-all"
                             >
                               <Minus className="h-4 w-4" />
                             </button>
@@ -602,7 +602,7 @@ export const DishEditModal = ({
                                 setValue(`ingredients.${index}.amount`, a, { shouldDirty: true });
                               }}
                               aria-label={`${t('common.increase')} ${getLocalizedField(ing.name, lang)}`}
-                              className="text-foreground-secondary bg-muted hover:bg-accent flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg transition-all active:bg-slate-300 dark:bg-slate-600"
+                              className="text-foreground-secondary bg-muted hover:bg-accent active:bg-accent flex h-10 min-h-11 w-10 min-w-11 items-center justify-center rounded-lg transition-all"
                             >
                               <Plus className="h-4 w-4" />
                             </button>

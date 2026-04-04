@@ -46,7 +46,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
               {totalCal}/{targetCalories} kcal
             </span>
           </div>
-          <div className="bg-muted h-1.5 overflow-hidden rounded-full dark:bg-slate-600">
+          <div className="bg-muted h-1.5 overflow-hidden rounded-full">
             <div
               className="h-full rounded-full bg-orange-400 transition-all"
               style={{ width: `${calPct}%` }}
@@ -69,7 +69,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
               {totalPro}/{targetProtein}g Pro
             </span>
           </div>
-          <div className="bg-muted h-1.5 overflow-hidden rounded-full dark:bg-slate-600">
+          <div className="bg-muted h-1.5 overflow-hidden rounded-full">
             <div
               className="h-full rounded-full bg-blue-400 transition-all"
               style={{ width: `${proPct}%` }}

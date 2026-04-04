@@ -71,7 +71,7 @@ export const Summary = React.memo(function Summary({
           </div>
           <progress
             data-testid="progress-calories"
-            className={`[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 ${totalCalories > targetCalories ? '[&::-moz-progress-bar]:bg-rose-500 [&::-webkit-progress-value]:bg-rose-500' : '[&::-moz-progress-bar]:bg-orange-500 [&::-webkit-progress-value]:bg-orange-500'}`}
+            className={`[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 ${totalCalories > targetCalories ? '[&::-moz-progress-bar]:bg-rose-500 [&::-webkit-progress-value]:bg-rose-500' : '[&::-moz-progress-bar]:bg-orange-500 [&::-webkit-progress-value]:bg-orange-500'}`}
             aria-label={t('common.calories')}
             value={Math.round(totalCalories)}
             max={targetCalories}
@@ -100,7 +100,7 @@ export const Summary = React.memo(function Summary({
           </div>
           <progress
             data-testid="progress-protein"
-            className="[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-blue-500 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full dark:[&::-webkit-progress-bar]:bg-slate-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500"
+            className="[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-blue-500 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-500 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500"
             aria-label={t('common.protein')}
             value={Math.round(totalProtein)}
             max={targetProtein}

@@ -69,10 +69,10 @@ describe('ProteinProgress', () => {
     expect(screen.getByTestId('protein-bar').className).toContain('amber');
   });
 
-  it('shows slate bar when <50%', () => {
+  it('shows muted-foreground bar when <50%', () => {
     render(<ProteinProgress current={30} target={100} />);
 
-    expect(screen.getByTestId('protein-bar').className).toContain('slate');
+    expect(screen.getByTestId('protein-bar').className).toContain('bg-muted-foreground');
   });
 
   it('shows emerald bar at 100%', () => {

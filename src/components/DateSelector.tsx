@@ -224,7 +224,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
-            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:min-h-9 sm:min-w-9 sm:p-2 dark:active:bg-slate-600"
+            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:min-h-9 sm:min-w-9 sm:p-2"
             title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
             aria-label={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
           >
@@ -241,7 +241,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? prevMonth : prevWeek}
             data-testid="btn-prev-date"
             aria-label={viewMode === 'calendar' ? t('calendar.prevMonth') : t('calendar.prevWeek')}
-            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:p-2 dark:active:bg-slate-600"
+            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:p-2"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -249,7 +249,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             onClick={viewMode === 'calendar' ? nextMonth : nextWeek}
             data-testid="btn-next-date"
             aria-label={viewMode === 'calendar' ? t('calendar.nextMonth') : t('calendar.nextWeek')}
-            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:p-2 dark:active:bg-slate-600"
+            className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:p-2"
           >
             <ChevronRight className="h-5 w-5" />
           </button>

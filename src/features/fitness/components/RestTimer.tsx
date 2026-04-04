@@ -121,7 +121,7 @@ export const RestTimer = React.memo(function RestTimer({
               fill="none"
               stroke="currentColor"
               strokeWidth="8"
-              className="text-slate-200 dark:text-slate-700"
+              className="text-muted"
             />
             <circle
               cx="64"

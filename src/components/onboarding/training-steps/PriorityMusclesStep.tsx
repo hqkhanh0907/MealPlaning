@@ -42,7 +42,7 @@ export function PriorityMusclesStep({ form, goNext, goBack }: Readonly<StepProps
           if (isSelected) {
             stateClass = 'border-primary bg-primary-subtle text-primary-emphasis';
           } else if (isDisabled) {
-            stateClass = 'cursor-not-allowed border-border-subtle text-slate-300 dark:text-slate-600';
+            stateClass = 'cursor-not-allowed border-border-subtle text-muted-foreground';
           } else {
             stateClass = 'border-border text-foreground-secondary';
           }

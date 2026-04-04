@@ -417,9 +417,7 @@ export const GroceryList = React.memo(function GroceryList({
             }}
             data-testid={`tab-grocery-${key}`}
             className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all ${
-              scope === key
-                ? 'text-primary-emphasis bg-card shadow-sm'
-                : 'text-muted-foreground active:bg-muted dark:active:bg-slate-600'
+              scope === key ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground active:bg-muted'
             }`}
           >
             {t(getScopeLabelKey(key))}

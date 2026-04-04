@@ -18,7 +18,7 @@ function getDayOfYear(): number {
 function getBarColorClass(pct: number): string {
   if (pct >= 80) return 'bg-primary';
   if (pct >= 50) return 'bg-amber-500';
-  return 'bg-slate-400';
+  return 'bg-muted-foreground';
 }
 
 export const ProteinProgress = React.memo(function ProteinProgress({ current, target }: ProteinProgressProps) {

@@ -156,7 +156,7 @@ const MealRow = React.memo(function MealRow({
         {hasDishes && (
           <div className="flex gap-2">
             <div
-              className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full dark:bg-slate-600"
+              className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full"
               title={`${nutrition.calories.toFixed(0)} kcal`}
             >
               <div
@@ -166,7 +166,7 @@ const MealRow = React.memo(function MealRow({
               />
             </div>
             <div
-              className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full dark:bg-slate-600"
+              className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full"
               title={`${nutrition.protein.toFixed(1)}g protein`}
             >
               <div

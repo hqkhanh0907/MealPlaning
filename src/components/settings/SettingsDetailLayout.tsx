@@ -88,7 +88,7 @@ export function SettingsDetailLayout({
               className={`flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all ${
                 hasChanges
                   ? 'bg-primary hover:bg-primary active:scale-[0.98]'
-                  : 'cursor-not-allowed bg-slate-300 dark:bg-slate-600'
+                  : 'bg-muted-foreground/30 cursor-not-allowed'
               }`}
             >
               {t('healthProfile.save')}

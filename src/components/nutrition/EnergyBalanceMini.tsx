@@ -39,7 +39,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
 
   const baseClass = 'w-full bg-card rounded-xl border border-border-subtle px-3 py-2';
   const interactiveClass =
-    'cursor-pointer active:bg-muted dark:active:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
+    'cursor-pointer active:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
   const content = (
     <div className="flex items-center justify-around">
