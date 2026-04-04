@@ -284,3 +284,69 @@ def calc_expected(weight, height, dob_str, gender, activity, goal, rate):
 - [ ] Script KHÔNG restart app giữa chừng
 - [ ] Screenshot được lưu cho mỗi bước quan trọng
 - [ ] Tất cả testids đã verify bằng `document.querySelector` trước khi dùng
+
+---
+
+## 8. i18n Key Design cho Buttons — Tách title và confirmLabel
+
+### Vấn đề
+
+ConfirmationModal nhận `title` và `confirmLabel` props. Khi lười, dev truyền cùng 1 i18n key cho cả hai → button text = title text → overflow.
+
+### Ví dụ thực tế
+
+```tsx
+// ❌ SAI — title text quá dài cho button
+<ConfirmationModal
+  title={t('fitness.plan.confirmConvertToRest')}     // "Chuyển thành ngày nghỉ"
+  confirmLabel={t('fitness.plan.confirmConvertToRest')} // 22 chars → OVERFLOW!
+/>
+
+// ✅ ĐÚNG — tách key riêng, button ngắn gọn
+<ConfirmationModal
+  title={t('fitness.plan.confirmConvertToRest')}       // "Chuyển thành ngày nghỉ"
+  confirmLabel={t('fitness.plan.confirmConvertToRestBtn')} // "Đồng ý" (6 chars)
+/>
+```
+
+### Quy tắc đặt tên i18n key cho modal
+
+| Prop         | Naming convention                     | Max length | Ví dụ                                            |
+| ------------ | ------------------------------------- | ---------- | ------------------------------------------------ |
+| title        | `confirm{Action}`                     | ~30 chars  | `confirmConvertToRest: "Chuyển thành ngày nghỉ"` |
+| description  | `confirm{Action}Desc`                 | ~60 chars  | `confirmConvertToRestDesc: "Bạn có chắc chắn?"`  |
+| confirmLabel | Reuse generic OR `confirm{Action}Btn` | ~10 chars  | `confirmConvertToRestBtn: "Đồng ý"`              |
+| cancelLabel  | Reuse `common.cancel`                 | ~6 chars   | `"Hủy"`                                          |
+
+### Bài học
+
+Luôn kiểm tra `confirmLabel` prop khi tạo ConfirmationModal — nếu dùng cùng key với title, đó là bug tiềm ẩn. Tạo key riêng cho button, giữ ≤10 ký tự.
+
+---
+
+## 9. Lessons Learned — Luôn rút kinh nghiệm trước khi task_complete
+
+### Vấn đề
+
+Nhiều lần hoàn thành task và gọi `task_complete` mà quên cập nhật memory. Kinh nghiệm quý giá bị mất.
+
+### Quy tắc bắt buộc
+
+Trước MỌI lần gọi `task_complete`, PHẢI thực hiện:
+
+```
+1. Tự hỏi: "Mình vừa học được gì mới?"
+2. Kiểm tra memory hiện có: đã có kinh nghiệm này chưa?
+3. Nếu chưa → APPEND vào file phù hợp
+4. Nếu có rồi → cần cập nhật/bổ sung gì?
+5. Commit memory changes
+6. SAU ĐÓ mới gọi task_complete
+```
+
+### Checklist kinh nghiệm cần review mỗi task
+
+- [ ] Có sai lầm nào đã mắc? (retry, wrong approach)
+- [ ] Có pattern nào hiệu quả? (reusable)
+- [ ] Có gotcha/trap nào? (tiết kiệm thời gian lần sau)
+- [ ] Có tool/technique nào mới? (debug, test)
+- [ ] Có quyết định thiết kế nào? (trade-off analysis)

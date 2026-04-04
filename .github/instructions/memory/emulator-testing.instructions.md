@@ -846,3 +846,98 @@ margin: 0px (✅ no UA default)
 borderStyle: none (✅ no UA default)
 maxWidth: none (✅ no UA default)
 ```
+
+---
+
+## 24. ⚠️ BẪY QUAN TRỌNG — BUTTON TEXT OVERFLOW DETECTION VIA CDP
+
+### Vấn đề
+
+ConfirmationModal dùng `flex-1` cho cả 2 button (Confirm + Cancel), chia đều ~176px mỗi bên trên màn 411px. Text > ~12 ký tự sẽ bị overflow hoặc xuống dòng.
+
+### Pattern kiểm tra overflow qua CDP
+
+```javascript
+// Kiểm tra button text, kích thước VÀ overflow properties
+(function () {
+  var btns = document.querySelectorAll('[role="alertdialog"] button, dialog button');
+  var results = [];
+  btns.forEach(function (b) {
+    var r = b.getBoundingClientRect();
+    if (r.width > 0) {
+      var cs = getComputedStyle(b);
+      results.push({
+        text: b.textContent.trim(),
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        overflow: cs.overflow !== 'visible' && b.scrollWidth > r.width,
+        textOverflow: cs.textOverflow,
+        whiteSpace: cs.whiteSpace,
+      });
+    }
+  });
+  return JSON.stringify(results);
+})();
+```
+
+### Quy tắc button text trong ConfirmationModal
+
+| Vị trí       | Max chars | Ví dụ tốt                  | Ví dụ xấu                            |
+| ------------ | --------- | -------------------------- | ------------------------------------ |
+| confirmLabel | ~10 ký tự | "Đồng ý", "Tạo lại", "Xóa" | "Chuyển thành ngày nghỉ" (22 chars!) |
+| cancelLabel  | ~10 ký tự | "Hủy", "Không"             | "Hủy bỏ thao tác này"                |
+
+### Bài học
+
+KHÔNG BAO GIỜ dùng lại title text làm confirmLabel — title có thể dài (mô tả hành động), nhưng button phải ngắn gọn (xác nhận hành động). Tạo i18n key riêng cho confirm button.
+
+---
+
+## 25. CDP Modal Test Pattern — Verify 3 thuộc tính
+
+Khi test bất kỳ modal nào trên emulator, LUÔN verify 3 thuộc tính:
+
+1. **Visual**: Screenshot để confirm layout/position đúng
+2. **Overflow**: Check `scrollWidth > clientWidth` cho tất cả buttons/text
+3. **CSS properties**: Confirm `border`, `margin`, `maxWidth` không bị UA override
+
+```python
+# Pattern chuẩn cho modal test
+async def verify_modal(ws, ev, screenshot_path, modal_name):
+    # 1. Screenshot
+    await screenshot(screenshot_path)
+
+    # 2. Check button overflow
+    btn_info = await ev('''(function(){
+        var btns = document.querySelectorAll('dialog button, [role="alertdialog"] button');
+        var r = [];
+        btns.forEach(function(b){
+            var rect = b.getBoundingClientRect();
+            if(rect.width > 0) r.push({
+                text: b.textContent.trim(),
+                w: Math.round(rect.width),
+                overflow: b.scrollWidth > rect.width
+            });
+        });
+        return JSON.stringify(r);
+    })()''')
+
+    # 3. Check container CSS (for <dialog> elements)
+    css_info = await ev('''(function(){
+        var d = document.querySelector('dialog[open]');
+        if(!d) return 'no dialog';
+        var cs = getComputedStyle(d);
+        return JSON.stringify({
+            margin: cs.margin,
+            border: cs.borderStyle,
+            maxWidth: cs.maxWidth,
+            w: Math.round(d.getBoundingClientRect().width)
+        });
+    })()''')
+
+    return {"buttons": btn_info, "css": css_info}
+```
+
+### Bài học
+
+Chỉ screenshot KHÔNG ĐỦ — overflow nhẹ (1-2px) có thể không thấy bằng mắt nhưng gây hiển thị lỗi trên một số thiết bị. Luôn verify bằng code.
