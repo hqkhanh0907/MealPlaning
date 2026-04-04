@@ -33,6 +33,7 @@ const INITIAL_STATE = {
   workouts: [] as Workout[],
   workoutSets: [] as WorkoutSet[],
   weightEntries: [] as WeightEntry[],
+  userTemplates: [] as import('../features/fitness/types').PlanTemplate[],
   isOnboarded: false,
   workoutMode: 'strength' as const,
   workoutDraft: null,
@@ -180,6 +181,7 @@ describe('fitnessStore', () => {
     expect(state.workouts).toEqual([]);
     expect(state.workoutSets).toEqual([]);
     expect(state.weightEntries).toEqual([]);
+    expect(state.userTemplates).toEqual([]);
     expect(state.isOnboarded).toBe(false);
     expect(state.workoutMode).toBe('strength');
     expect(state.workoutDraft).toBeNull();
@@ -2630,5 +2632,128 @@ describe('fitnessStore – profileOutOfSync', () => {
     useFitnessStore.getState().addTrainingPlan(samplePlan({ id: 'new-plan-3' }));
 
     expect(useFitnessStore.getState().profileChangedFields).toEqual([]);
+  });
+
+  /* ---------- FIX-05: getTemplates returns builtin + userTemplates ---------- */
+  describe('getTemplates (FIX-05)', () => {
+    it('returns only builtin templates when userTemplates is empty', () => {
+      const templates = useFitnessStore.getState().getTemplates();
+      expect(templates.length).toBeGreaterThan(0);
+      expect(templates.every(t => t.isBuiltin)).toBe(true);
+    });
+
+    it('returns builtin + user templates when userTemplates has entries', () => {
+      const userTemplate: import('../features/fitness/types').PlanTemplate = {
+        id: 'user-tpl-1',
+        name: 'My Custom Plan',
+        splitType: 'ppl',
+        daysPerWeek: 4,
+        experienceLevel: 'intermediate',
+        trainingGoal: 'hypertrophy',
+        equipmentRequired: ['barbell'],
+        description: 'Custom template',
+        dayConfigs: [],
+        popularityScore: 0,
+        isBuiltin: false,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      useFitnessStore.setState({ userTemplates: [userTemplate] });
+
+      const templates = useFitnessStore.getState().getTemplates();
+      expect(templates.some(t => t.id === 'user-tpl-1')).toBe(true);
+      expect(templates.some(t => t.isBuiltin)).toBe(true);
+      expect(templates.length).toBeGreaterThan(1);
+    });
+  });
+
+  /* ---------- FIX-05: saveCurrentAsTemplate adds to userTemplates ---------- */
+  describe('saveCurrentAsTemplate (FIX-05)', () => {
+    it('adds template to userTemplates state', () => {
+      const plan = samplePlan({ id: 'plan-tpl', name: 'My Plan' });
+      const day = samplePlanDay({ planId: 'plan-tpl' });
+      useFitnessStore.setState({
+        trainingPlans: [plan],
+        trainingPlanDays: [day],
+        trainingProfile: sampleProfile(),
+        userTemplates: [],
+      });
+
+      useFitnessStore.getState().saveCurrentAsTemplate('plan-tpl', 'Saved Template');
+
+      const state = useFitnessStore.getState();
+      expect(state.userTemplates).toHaveLength(1);
+      expect(state.userTemplates[0].name).toBe('Saved Template');
+      expect(state.userTemplates[0].isBuiltin).toBe(false);
+    });
+
+    it('saved template appears in getTemplates()', () => {
+      const plan = samplePlan({ id: 'plan-tpl2', name: 'Plan 2' });
+      const day = samplePlanDay({ planId: 'plan-tpl2' });
+      useFitnessStore.setState({
+        trainingPlans: [plan],
+        trainingPlanDays: [day],
+        trainingProfile: sampleProfile(),
+        userTemplates: [],
+      });
+
+      useFitnessStore.getState().saveCurrentAsTemplate('plan-tpl2', 'My Template');
+
+      const templates = useFitnessStore.getState().getTemplates();
+      expect(templates.some(t => t.name === 'My Template')).toBe(true);
+    });
+  });
+
+  /* ---------- FIX-05: initializeFromSQLite loads user templates ---------- */
+  describe('initializeFromSQLite user templates (FIX-05)', () => {
+    it('loads user templates from plan_templates table', async () => {
+      const db = createDatabaseService();
+      await db.initialize();
+      await createSchema(db);
+
+      // Insert a user template
+      await db.execute(
+        `INSERT INTO plan_templates (id, name, split_type, days_per_week, experience_level, training_goal, equipment_required, description, day_configs, popularity_score, is_builtin, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+        [
+          'ut-1',
+          'My Saved Template',
+          'ppl',
+          3,
+          'intermediate',
+          'hypertrophy',
+          '["barbell"]',
+          'A custom plan',
+          '[]',
+          0,
+          '2025-01-01T00:00:00.000Z',
+          '2025-01-01T00:00:00.000Z',
+        ],
+      );
+
+      const { result } = renderHook(() => useFitnessStore());
+      await act(async () => {
+        await result.current.initializeFromSQLite(db);
+      });
+
+      const state = useFitnessStore.getState();
+      expect(state.userTemplates).toHaveLength(1);
+      expect(state.userTemplates[0].id).toBe('ut-1');
+      expect(state.userTemplates[0].name).toBe('My Saved Template');
+      expect(state.userTemplates[0].isBuiltin).toBe(false);
+    });
+
+    it('keeps userTemplates empty when no user templates in DB', async () => {
+      const db = createDatabaseService();
+      await db.initialize();
+      await createSchema(db);
+
+      const { result } = renderHook(() => useFitnessStore());
+      await act(async () => {
+        await result.current.initializeFromSQLite(db);
+      });
+
+      expect(useFitnessStore.getState().userTemplates).toEqual([]);
+    });
   });
 });

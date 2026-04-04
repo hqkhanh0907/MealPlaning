@@ -73,6 +73,7 @@ export interface FitnessState {
   workouts: Workout[];
   workoutSets: WorkoutSet[];
   weightEntries: WeightEntry[];
+  userTemplates: PlanTemplate[];
   isOnboarded: boolean;
   workoutMode: 'strength' | 'cardio';
   workoutDraft: {
@@ -141,6 +142,7 @@ export const useFitnessStore = create<FitnessState>()(
       workouts: [],
       workoutSets: [],
       weightEntries: [],
+      userTemplates: [],
       isOnboarded: false,
       workoutMode: 'strength',
       workoutDraft: null,
@@ -869,6 +871,36 @@ export const useFitnessStore = create<FitnessState>()(
           }
 
           set({ sqliteReady: true });
+
+          // Load user-created templates from SQLite
+          try {
+            const templateRows = await db.query<Record<string, unknown>>(
+              'SELECT * FROM plan_templates WHERE is_builtin = 0',
+            );
+            if (templateRows.length > 0) {
+              set({
+                userTemplates: templateRows.map(row => ({
+                  id: row.id as string,
+                  name: row.name as string,
+                  splitType: row.splitType as SplitType,
+                  daysPerWeek: row.daysPerWeek as number,
+                  experienceLevel: (row.experienceLevel as PlanTemplate['experienceLevel']) ?? 'all',
+                  trainingGoal: (row.trainingGoal as PlanTemplate['trainingGoal']) ?? 'general',
+                  equipmentRequired: safeParseJsonArray<PlanTemplate['equipmentRequired'][number]>(
+                    row.equipmentRequired as string,
+                  ),
+                  description: (row.description as string) ?? '',
+                  dayConfigs: safeParseJsonArray<PlanTemplate['dayConfigs'][number]>(row.dayConfigs as string),
+                  popularityScore: (row.popularityScore as number) ?? 0,
+                  isBuiltin: false,
+                  createdAt: row.createdAt as string | undefined,
+                  updatedAt: row.updatedAt as string | undefined,
+                })),
+              });
+            }
+          } catch (templateError) {
+            logger.warn({ component: 'fitnessStore', action: 'initializeFromSQLite.templates' }, String(templateError));
+          }
         } catch (error) {
           logger.warn({ component: 'fitnessStore', action: 'initializeFromSQLite' }, String(error));
         }
@@ -1064,43 +1096,7 @@ export const useFitnessStore = create<FitnessState>()(
       },
 
       getTemplates: () => {
-        const builtins = [...BUILTIN_TEMPLATES];
-        if (!_db) return builtins;
-
-        try {
-          const rows: Record<string, unknown>[] = [];
-          _db
-            .query<Record<string, unknown>>('SELECT * FROM plan_templates WHERE is_builtin = 0')
-            .then(result => {
-              rows.push(...result);
-            })
-            .catch((error: unknown) => {
-              logger.error({ component: 'fitnessStore', action: 'getTemplates.query' }, error);
-            });
-
-          const userTemplates: PlanTemplate[] = rows.map(row => ({
-            id: row.id as string,
-            name: row.name as string,
-            splitType: row.splitType as SplitType,
-            daysPerWeek: row.daysPerWeek as number,
-            experienceLevel: (row.experienceLevel as PlanTemplate['experienceLevel']) ?? 'all',
-            trainingGoal: (row.trainingGoal as PlanTemplate['trainingGoal']) ?? 'general',
-            equipmentRequired: safeParseJsonArray<PlanTemplate['equipmentRequired'][number]>(
-              row.equipmentRequired as string,
-            ),
-            description: (row.description as string) ?? '',
-            dayConfigs: safeParseJsonArray<PlanTemplate['dayConfigs'][number]>(row.dayConfigs as string),
-            popularityScore: (row.popularityScore as number) ?? 0,
-            isBuiltin: false,
-            createdAt: row.createdAt as string | undefined,
-            updatedAt: row.updatedAt as string | undefined,
-          }));
-
-          return [...builtins, ...userTemplates];
-        } catch (error: unknown) {
-          logger.error({ component: 'fitnessStore', action: 'getTemplates' }, error);
-          return builtins;
-        }
+        return [...BUILTIN_TEMPLATES, ...get().userTemplates];
       },
 
       getRecommendedTemplates: profile => {
@@ -1249,6 +1245,8 @@ export const useFitnessStore = create<FitnessState>()(
               logger.error({ component: 'fitnessStore', action: 'saveCurrentAsTemplate' }, error);
             });
         }
+
+        set(state => ({ userTemplates: [...state.userTemplates, template] }));
 
         return template;
       },

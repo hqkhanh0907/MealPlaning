@@ -22,6 +22,7 @@ const INITIAL_STATE = {
   workouts: [],
   workoutSets: [],
   weightEntries: [],
+  userTemplates: [] as import('../features/fitness/types').PlanTemplate[],
   isOnboarded: false,
   workoutMode: 'strength' as const,
   workoutDraft: null,
