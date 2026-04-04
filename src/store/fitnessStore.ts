@@ -35,6 +35,31 @@ import { persistToDb } from '../store/helpers/dbWriteQueue';
 
 let _db: DatabaseService | null = null;
 
+/** Delete all existing plan days and insert new ones (used inside transactions). */
+async function replaceAllPlanDays(db: DatabaseService, planId: string, newDays: TrainingPlanDay[]): Promise<void> {
+  await db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]);
+  for (const day of newDays) {
+    await db.execute(
+      `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type,
+       muscle_groups, exercises, original_exercises, notes, original_day_of_week, is_user_assigned)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        day.id,
+        day.planId,
+        day.dayOfWeek,
+        day.sessionOrder,
+        day.workoutType,
+        day.muscleGroups ?? null,
+        day.exercises ?? null,
+        day.originalExercises ?? null,
+        day.notes ?? null,
+        day.originalDayOfWeek ?? day.dayOfWeek,
+        day.isUserAssigned ? 1 : 0,
+      ],
+    );
+  }
+}
+
 /** @internal Reset DB reference — test-only */
 export function __resetDbForTesting(): void {
   _db = null;
@@ -1214,26 +1239,7 @@ export const useFitnessStore = create<FitnessState>()(
                 now,
                 planId,
               ]);
-              await _db!.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]);
-              for (const day of daysToInsert) {
-                await _db!.execute(
-                  `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes, original_day_of_week, is_user_assigned)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                  [
-                    day.id,
-                    day.planId,
-                    day.dayOfWeek,
-                    day.sessionOrder,
-                    day.workoutType,
-                    day.muscleGroups ?? null,
-                    day.exercises ?? null,
-                    day.originalExercises ?? null,
-                    day.notes ?? null,
-                    day.originalDayOfWeek ?? day.dayOfWeek,
-                    day.isUserAssigned ? 1 : 0,
-                  ],
-                );
-              }
+              await replaceAllPlanDays(_db!, planId, daysToInsert);
             });
           } catch (error: unknown) {
             logger.error({ component: 'fitnessStore', action: 'changeSplitType.transaction' }, error);
@@ -1322,24 +1328,7 @@ export const useFitnessStore = create<FitnessState>()(
               'UPDATE training_plans SET split_type = ?, template_id = ?, training_days = ?, updated_at = ? WHERE id = ?',
               [template.splitType, template.id, JSON.stringify(trainingDays), now, planId],
             );
-            await db.execute('DELETE FROM training_plan_days WHERE plan_id = ?', [planId]);
-            for (const day of newDays) {
-              await db.execute(
-                `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                  day.id,
-                  day.planId,
-                  day.dayOfWeek,
-                  day.sessionOrder,
-                  day.workoutType,
-                  day.muscleGroups ?? null,
-                  day.exercises ?? null,
-                  day.originalExercises ?? null,
-                  day.notes ?? null,
-                ],
-              );
-            }
+            await replaceAllPlanDays(db, planId, newDays);
           }).catch(e => logger.error({ component: 'fitnessStore', action: 'applyTemplate' }, e));
         }
       },
