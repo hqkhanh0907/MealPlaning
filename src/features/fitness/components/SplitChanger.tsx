@@ -26,8 +26,9 @@ const SPLIT_OPTIONS: Array<{ value: SplitType; labelKey: string; descKey: string
 
 export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<SplitChangerProps>) {
   const { t } = useTranslation();
-  const { popPage } = useNavigationStore();
-  const { changeSplitType, previewSplitChange } = useFitnessStore();
+  const popPage = useNavigationStore(s => s.popPage);
+  const changeSplitType = useFitnessStore(s => s.changeSplitType);
+  const previewSplitChange = useFitnessStore(s => s.previewSplitChange);
 
   const [selectedSplit, setSelectedSplit] = useState<SplitType>(currentSplit);
   const [mode, setMode] = useState<'regenerate' | 'remap'>('remap');

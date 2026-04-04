@@ -27,7 +27,7 @@ interface PlanDayEditorProps {
 
 export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEditorProps): React.JSX.Element {
   const { t } = useTranslation();
-  const { popPage } = useNavigationStore();
+  const popPage = useNavigationStore(s => s.popPage);
 
   const [localExercises, setLocalExercises] = useState<SelectedExercise[]>(() =>
     safeJsonParse<SelectedExercise[]>(planDay.exercises ?? '[]', []),

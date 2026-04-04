@@ -21,7 +21,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   planId,
 }: PlanScheduleEditorProps): React.JSX.Element {
   const { t } = useTranslation();
-  const { popPage } = useNavigationStore();
+  const popPage = useNavigationStore(s => s.popPage);
   const notify = useNotification();
 
   const plan = useFitnessStore(useCallback(s => s.trainingPlans.find(p => p.id === planId), [planId]));

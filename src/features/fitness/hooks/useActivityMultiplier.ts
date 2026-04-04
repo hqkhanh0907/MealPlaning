@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useHealthProfileStore } from '../../health-profile/store/healthProfileStore';
@@ -13,8 +14,9 @@ interface UseActivityMultiplierReturn {
 }
 
 export function useActivityMultiplier(): UseActivityMultiplierReturn {
-  const workouts = useFitnessStore(state => state.workouts);
-  const workoutSets = useFitnessStore(state => state.workoutSets);
+  const { workouts, workoutSets } = useFitnessStore(
+    useShallow(s => ({ workouts: s.workouts, workoutSets: s.workoutSets })),
+  );
   const profile = useHealthProfileStore(state => state.profile);
 
   const [dismissed, setDismissed] = useState(false);

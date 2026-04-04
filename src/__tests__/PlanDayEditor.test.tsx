@@ -42,7 +42,10 @@ vi.mock('react-i18next', () => ({
 
 const mockPopPage = vi.fn();
 vi.mock('../store/navigationStore', () => ({
-  useNavigationStore: () => ({ popPage: mockPopPage }),
+  useNavigationStore: (selector?: (s: Record<string, unknown>) => unknown) => {
+    const state = { popPage: mockPopPage };
+    return selector ? selector(state) : state;
+  },
 }));
 
 // Mock ExerciseSelector

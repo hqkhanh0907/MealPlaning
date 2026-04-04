@@ -45,19 +45,23 @@ vi.mock('react-i18next', () => ({
 
 const mockPopPage = vi.fn();
 vi.mock('@/store/navigationStore', () => ({
-  useNavigationStore: () => ({
-    popPage: mockPopPage,
-  }),
+  useNavigationStore: (selector?: (s: Record<string, unknown>) => unknown) => {
+    const state = { popPage: mockPopPage };
+    return selector ? selector(state) : state;
+  },
 }));
 
 const mockChangeSplitType = vi.fn();
 const mockPreviewSplitChange = vi.fn();
 
 vi.mock('@/store/fitnessStore', () => ({
-  useFitnessStore: () => ({
-    changeSplitType: mockChangeSplitType,
-    previewSplitChange: mockPreviewSplitChange,
-  }),
+  useFitnessStore: (selector?: (s: Record<string, unknown>) => unknown) => {
+    const state = {
+      changeSplitType: mockChangeSplitType,
+      previewSplitChange: mockPreviewSplitChange,
+    };
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('lucide-react', () => {
