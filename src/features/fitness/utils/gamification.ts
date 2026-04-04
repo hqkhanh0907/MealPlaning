@@ -203,7 +203,7 @@ export function detectPRs(
   const seen = new Set<string>();
 
   for (const set of currentSets) {
-    if (seen.has(set.exerciseId) || !set.reps || set.weightKg <= 0) {
+    if (!set.exerciseId || seen.has(set.exerciseId) || !set.reps || set.weightKg <= 0) {
       continue;
     }
 

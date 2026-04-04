@@ -932,7 +932,8 @@
       "minutes": "phút",
       "completedAt": "Hoàn thành lúc",
       "weekOf": "Tuần từ {{date}}",
-      "exerciseCount": "{{count}} bài tập"
+      "exerciseCount": "{{count}} bài tập",
+      "deletedExercise": "Bài tập đã xóa"
     },
     "progress": {
       "title": "Tiến trình",

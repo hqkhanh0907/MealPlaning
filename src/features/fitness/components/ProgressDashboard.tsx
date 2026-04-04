@@ -140,7 +140,7 @@ function ProgressDashboardInner() {
   }, [workouts, workoutSets]);
 
   const plateauInsights = useMemo(() => {
-    const exerciseIds = [...new Set(workoutSets.map(s => s.exerciseId))];
+    const exerciseIds = [...new Set(workoutSets.map(s => s.exerciseId).filter((id): id is string => id !== null))];
     const results: { id: string; text: string }[] = [];
     for (const eid of exerciseIds) {
       const result = analyzePlateau(workouts, workoutSets, eid);

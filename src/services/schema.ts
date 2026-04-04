@@ -1,6 +1,6 @@
 import type { DatabaseService } from './databaseService';
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export const SCHEMA_TABLES = new Set([
   'ingredients',
@@ -224,7 +224,7 @@ export async function createSchema(db: DatabaseService): Promise<void> {
     CREATE TABLE IF NOT EXISTS workout_sets (
       id TEXT PRIMARY KEY,
       workout_id TEXT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
-      exercise_id TEXT NOT NULL REFERENCES exercises(id),
+      exercise_id TEXT REFERENCES exercises(id) ON DELETE SET NULL,
       set_number INTEGER NOT NULL,
       reps INTEGER,
       weight_kg REAL DEFAULT 0,
@@ -504,5 +504,39 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
       await db.execute('ALTER TABLE training_plans ADD COLUMN current_week INTEGER DEFAULT 1');
     }
     await db.execute('PRAGMA user_version = 5');
+  }
+
+  // Migration v5 → v6: Make workout_sets.exercise_id nullable + ON DELETE SET NULL
+  if (currentVersion < 6) {
+    const tables = await db.query<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='workout_sets'",
+    );
+    if (tables.length > 0) {
+      await db.transaction(async () => {
+        await db.execute(`CREATE TABLE workout_sets_new (
+          id TEXT PRIMARY KEY,
+          workout_id TEXT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
+          exercise_id TEXT REFERENCES exercises(id) ON DELETE SET NULL,
+          set_number INTEGER NOT NULL,
+          reps INTEGER,
+          weight_kg REAL DEFAULT 0,
+          rpe REAL,
+          rest_seconds INTEGER,
+          duration_min REAL,
+          distance_km REAL,
+          avg_heart_rate INTEGER,
+          intensity TEXT CHECK (intensity IN ('low', 'moderate', 'high')),
+          estimated_calories REAL,
+          updated_at TEXT NOT NULL,
+          UNIQUE(workout_id, exercise_id, set_number)
+        )`);
+        await db.execute('INSERT INTO workout_sets_new SELECT * FROM workout_sets');
+        await db.execute('DROP TABLE workout_sets');
+        await db.execute('ALTER TABLE workout_sets_new RENAME TO workout_sets');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_workout_sets_workout ON workout_sets(workout_id)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise ON workout_sets(exercise_id)');
+      });
+    }
+    await db.execute('PRAGMA user_version = 6');
   }
 }

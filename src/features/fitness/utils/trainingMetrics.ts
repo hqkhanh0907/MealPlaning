@@ -36,6 +36,7 @@ export function getVolumeByMuscleGroup(
 ): Record<string, number> {
   const result: Record<string, number> = {};
   for (const set of sets) {
+    if (!set.exerciseId) continue;
     const muscle = exerciseMuscleMap[set.exerciseId];
     if (muscle) {
       result[muscle] = (result[muscle] ?? 0) + (set.reps ?? 0);

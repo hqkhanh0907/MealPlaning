@@ -65,7 +65,11 @@ function ExerciseGroupDetail({
   return (
     <div data-testid={`exercise-group-${exerciseId}`} className="py-2">
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-foreground text-sm font-medium">{EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId}</span>
+        <span className="text-foreground text-sm font-medium">
+          {exerciseId === '_deleted'
+            ? t('fitness.history.deletedExercise')
+            : (EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId)}
+        </span>
         {exerciseVolume > 0 && (
           <span className="text-primary text-xs">
             {t('fitness.history.volume')}: {exerciseVolume} kg
@@ -111,7 +115,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
   const getExerciseCount = useCallback(
     (workoutId: string): number => {
       const sets = getSetsForWorkout(workoutId);
-      return new Set(sets.map(s => s.exerciseId)).size;
+      return new Set(sets.map(s => s.exerciseId).filter(Boolean)).size;
     },
     [getSetsForWorkout],
   );
@@ -161,7 +165,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
       const sets = getSetsForWorkout(workoutId);
       const grouped: Record<string, WorkoutSet[]> = {};
       for (const set of sets) {
-        const key = set.exerciseId;
+        const key = set.exerciseId ?? '_deleted';
         if (!grouped[key]) grouped[key] = [];
         grouped[key].push(set);
       }

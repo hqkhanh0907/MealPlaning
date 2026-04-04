@@ -112,7 +112,7 @@ describe('createSchema', () => {
   it('sets schema version to current SCHEMA_VERSION', async () => {
     const version = await getSchemaVersion(db);
     expect(version).toBe(SCHEMA_VERSION);
-    expect(version).toBe(5);
+    expect(version).toBe(6);
   });
 
   it('is idempotent — running createSchema twice does not error', async () => {
@@ -324,5 +324,49 @@ describe('runSchemaMigrations', () => {
     };
     const version = await getSchemaVersion(mockDb);
     expect(version).toBe(0);
+  });
+
+  it('migrates from v5 → v6: workout_sets.exercise_id becomes nullable', async () => {
+    await createSchema(db);
+    // Force version back to 5 to simulate pre-migration state
+    await db.execute('PRAGMA user_version = 5');
+
+    // Insert test data with the old schema
+    await db.execute(
+      `INSERT INTO exercises (id, name_vi, muscle_group, category, exercise_type, updated_at)
+       VALUES ('barbell-bench-press', 'Bench Press', 'chest', 'compound', 'strength', '2024-01-01')`,
+    );
+    await db.execute(
+      `INSERT INTO workouts (id, date, name, created_at, updated_at)
+       VALUES ('w1', '2024-01-01', 'Test', '2024-01-01', '2024-01-01')`,
+    );
+    await db.execute(
+      `INSERT INTO workout_sets (id, workout_id, exercise_id, set_number, weight_kg, updated_at)
+       VALUES ('s1', 'w1', 'barbell-bench-press', 1, 80, '2024-01-01')`,
+    );
+
+    await runSchemaMigrations(db);
+
+    expect(await getSchemaVersion(db)).toBe(6);
+
+    // Verify data preserved
+    const sets = await db.query<Record<string, unknown>>('SELECT * FROM workout_sets WHERE id = ?', ['s1']);
+    expect(sets).toHaveLength(1);
+    expect(sets[0].exerciseId).toBe('barbell-bench-press');
+    expect(sets[0].weightKg).toBe(80);
+
+    // Verify exercise_id is now nullable
+    const cols = await db.query<{ name: string; notnull: number }>('PRAGMA table_info(workout_sets)');
+    const exerciseIdCol = cols.find(c => c.name === 'exercise_id');
+    expect(exerciseIdCol).toBeDefined();
+    expect(exerciseIdCol!.notnull).toBe(0);
+
+    // Verify indexes recreated
+    const indexes = await db.query<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='workout_sets'",
+    );
+    const indexNames = indexes.map(i => i.name);
+    expect(indexNames).toContain('idx_workout_sets_workout');
+    expect(indexNames).toContain('idx_workout_sets_exercise');
   });
 });

@@ -165,7 +165,7 @@ export interface Workout {
 export interface WorkoutSet {
   id: string;
   workoutId: string;
-  exerciseId: string;
+  exerciseId: string | null;
   setNumber: number;
   reps?: number;
   weightKg: number;
