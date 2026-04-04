@@ -941,3 +941,103 @@ async def verify_modal(ws, ev, screenshot_path, modal_name):
 ### Bài học
 
 Chỉ screenshot KHÔNG ĐỦ — overflow nhẹ (1-2px) có thể không thấy bằng mắt nhưng gây hiển thị lỗi trên một số thiết bị. Luôn verify bằng code.
+
+---
+
+## 26. ⚠️ BẪY QUAN TRỌNG — @capacitor-community/sqlite Dynamic Import
+
+### Vấn đề
+
+`NativeDatabaseService.initialize()` dùng `await import('@capacitor-community/sqlite')` (dynamic import) → fails tại runtime trong Capacitor WebView với lỗi: `Failed to resolve module specifier '@capacitor-community/sqlite'`.
+
+### Nguyên nhân
+
+Vite bundles static imports vào build output, nhưng dynamic `import()` tạo separate chunk với module specifier mà WebView không resolve được. Capacitor plugins' JS wrappers phải được bundled statically.
+
+### Giải pháp
+
+Chuyển từ dynamic import sang static import ở đầu file:
+
+```typescript
+// ❌ SAI — dynamic import fails tại runtime
+async initialize(): Promise<void> {
+    const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite');
+}
+
+// ✅ ĐÚNG — static import, Vite bundles correctly
+import { CapacitorSQLite, SQLiteConnection as SQLiteConnectionClass } from '@capacitor-community/sqlite';
+```
+
+### Bài học
+
+Capacitor plugins PHẢI dùng static import. Dynamic import chỉ work cho lazy-loading app code, KHÔNG work cho native plugin wrappers. Nếu cần code-splitting, dùng Vite's `manualChunks` config.
+
+---
+
+## 27. Native SQLite Persistence Verification Pattern
+
+### Cách kiểm tra persistence hoạt động đúng
+
+```python
+# 1. Insert data trực tiếp qua Capacitor plugin bridge
+result = await ev('''(async function(){
+    var P = window.Capacitor.Plugins.CapacitorSQLite;
+    await P.run({
+        database: 'mealplaner',
+        statement: 'INSERT OR REPLACE INTO ingredients (id, name_vi, ...) VALUES (?, ?, ...)',
+        values: ['test-id', 'Test Data', ...],
+        transaction: true, readonly: false
+    });
+    return 'inserted';
+})()''')
+
+# 2. Force-stop app
+subprocess.run(["adb", "-s", "emulator-5556", "shell", "am", "force-stop", "com.mealplaner.app"])
+time.sleep(3)
+
+# 3. Relaunch + reconnect CDP
+subprocess.run(["adb", "-s", "emulator-5556", "shell", "am", "start", "-n", ...])
+time.sleep(6)
+# ... reconnect CDP ...
+
+# 4. Query directly to verify
+result = await ev('''(async function(){
+    var P = window.Capacitor.Plugins.CapacitorSQLite;
+    var r = await P.query({database:'mealplaner', statement:'SELECT * FROM ingredients', values:[], readonly:false});
+    return JSON.stringify(r.values);
+})()''')
+# Should contain 'test-id' data → PERSISTENCE WORKS!
+```
+
+### Quan trọng
+
+- Plugin API dùng OPTIONS OBJECT: `P.run({database, statement, values, transaction, readonly})`
+- SQLiteDBConnection wrapper dùng DIRECT PARAMS: `conn.run(statement, values, transaction)`
+- Khi debug persistence, bypass wrapper và dùng trực tiếp `Capacitor.Plugins.CapacitorSQLite` để isolate issues
+- `Capacitor.Plugins.CapacitorSQLite` available trên `window` khi plugin registered
+
+---
+
+## 28. Seed Data Không Nằm Trong createSchema()
+
+### Phát hiện quan trọng
+
+`createSchema()` trong `schema.ts` CHỈ tạo tables (DDL). Seed data (10 ingredients, 5 dishes) được tạo trong quá trình ONBOARDING, KHÔNG phải khi khởi tạo DB.
+
+### Luồng dữ liệu
+
+```
+Fresh install → createSchema() tạo tables → DB rỗng
+Onboarding → User nhập data → Zustand stores update → useAutoSync ghi xuống SQLite
+Sau đó → loadAll() đọc từ SQLite → hydrate Zustand stores
+```
+
+### Hệ quả cho testing
+
+- Bypass onboarding (`localStorage.setItem(...)`) = SKIP data entry = DB rỗng (0 ingredients, 0 dishes, 0 profile)
+- Muốn test với data → PHẢI chạy full onboarding HOẶC insert trực tiếp qua SQL
+- Schema version (PRAGMA user_version) PERSIST sau restart (kiểm tra với `PRAGMA user_version` → trả về 5)
+
+### Bài học
+
+Không giả định seed data tự động có trong DB. Luôn kiểm tra bằng SELECT COUNT trước khi test.

@@ -251,3 +251,45 @@ Dùng component có sẵn (`UnsavedChangesDialog` hoặc `ModalBackdrop`) thay v
 ### Bài học
 
 Khi thấy `<dialog>` trong code, luôn kiểm tra xem có override đủ UA defaults chưa. Ưu tiên dùng shared component (ModalBackdrop/UnsavedChangesDialog) để đảm bảo nhất quán.
+
+---
+
+## 8. SQLite Migration — Dual Implementation Pattern
+
+### Vấn đề
+
+Migrate từ sql.js (in-memory, mất data khi restart) sang @capacitor-community/sqlite (persistent trên native).
+
+### Giải pháp: Factory + Dual Implementation
+
+```typescript
+// Factory detect platform → return đúng implementation
+export function createDatabaseService(): DatabaseService {
+  if (Capacitor.isNativePlatform()) return new NativeDatabaseService();
+  return new WebDatabaseService();
+}
+```
+
+- **WebDatabaseService**: sql.js WASM, cho web dev + Vitest
+- **NativeDatabaseService**: @capacitor-community/sqlite, cho Android/iOS
+
+### Kinh nghiệm migration
+
+1. **Static import BẮT BUỘC** cho Capacitor plugins — dynamic `import()` fails tại runtime
+2. **Plugin API vs Wrapper API**: Plugin dùng options object `{database, statement, values}`, wrapper dùng direct params `(statement, values, transaction)`
+3. **Type casting**: Plugin trả về types không khớp với local interface → cần `as unknown as SQLiteDBConnection`
+4. **Transaction flag đảo ngược**: `run(statement, values, transaction=true)` means "auto-wrap in transaction" → khi đã trong explicit transaction, pass `false`
+5. **Sync consumers PHẢI chuyển binary→JSON**: exportBinary/importBinary → exportToJSON/importFromJSON, filename .sqlite→.json, Content-Type octet-stream→application/json
+
+### Trade-off analysis
+
+| Aspect      | sql.js             | @capacitor-community/sqlite |
+| ----------- | ------------------ | --------------------------- |
+| Persistence | ❌ In-memory only  | ✅ Disk-based               |
+| Web support | ✅ Full            | ❌ Native only              |
+| Test compat | ✅ Works in Vitest | ❌ Needs mocking            |
+| Performance | Moderate           | Better (native)             |
+
+### Bài học
+
+Migration database layer = thay đổi lớn, cần TDD nghiêm ngặt. Mỗi bước: write test → implement → verify → commit. Và PHẢI test trên emulator — unit test pass không đảm bảo plugin work ở runtime.
