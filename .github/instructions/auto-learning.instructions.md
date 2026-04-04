@@ -1,10 +1,45 @@
-# Quy tắc Tự học (Auto-Learning) — BẮT BUỘC
+# Quy tắc Tự học (Auto-Learning) & Quy trình Bắt buộc — BẮT BUỘC
 
 > File này được load tự động vào mỗi session. Copilot PHẢI tuân thủ.
 
 ---
 
-## NGUYÊN TẮC CỐT LÕI
+## QUY TẮC #1: MANUAL TEST TRÊN EMULATOR SAU MỌI THAY ĐỔI CODE — BẮT BUỘC
+
+> **KHÔNG ĐƯỢC COI TASK LÀ HOÀN THÀNH nếu chưa manual test trên emulator-5556.**
+
+Sau **MỌI lần thay đổi code** (fix bug, thêm feature, refactor UI, thay đổi text/label), PHẢI thực hiện đầy đủ quy trình sau:
+
+### Quy trình bắt buộc:
+
+```
+1. npm run lint          → 0 errors
+2. npm run test          → 0 failures, coverage 100%
+3. npm run build         → clean build
+4. npx cap sync android  → sync web assets
+5. cd android && ./gradlew assembleDebug  → build APK
+6. adb -s emulator-5556 install -r app-debug.apk  → install
+7. CDP test script       → verify thay đổi trên emulator thật
+8. Screenshot            → lưu bằng chứng
+```
+
+### Tại sao bắt buộc?
+
+- Unit test PASS ≠ UI hiển thị đúng trên mobile
+- CSS/layout có thể khác nhau giữa browser và Capacitor WebView
+- Text overflow, button alignment, modal position chỉ phát hiện được khi chạy thật
+- Emulator là **nguồn sự thật cuối cùng** (Single Source of Truth cho UI)
+
+### KHÔNG ĐƯỢC bỏ qua vì bất kỳ lý do nào:
+
+- ❌ "Chỉ thay đổi text" → VẪN PHẢI test (text overflow!)
+- ❌ "Chỉ fix logic" → VẪN PHẢI test (propagation bug!)
+- ❌ "Unit test đã pass" → VẪN PHẢI test (UI regression!)
+- ❌ "Emulator khó setup" → ĐÃ CÓ sẵn quy trình CDP trong memory
+
+---
+
+## QUY TẮC #2: TỰ HỌC TỪ KINH NGHIỆM
 
 Kinh nghiệm là tài sản quý nhất. **MỌI lần hoàn thành 1 task** đều phải rút kinh nghiệm.
 
