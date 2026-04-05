@@ -473,7 +473,7 @@ describe('OnboardingProgress', () => {
 
   it('renders correct number of section segments', () => {
     render(<OnboardingProgress currentSection={1} totalSections={7} stepInSection={0} totalStepsInSection={3} />);
-    const progressBar = screen.getByRole('progressbar');
+    const progressBar = screen.getByTestId('progress-segments');
     const segments = progressBar.children;
     expect(segments.length).toBe(7);
   });
@@ -498,7 +498,7 @@ describe('OnboardingProgress', () => {
 
   it('fills segment to 100% on the last step of a multi-step section (fence-post)', () => {
     render(<OnboardingProgress currentSection={2} totalSections={5} stepInSection={3} totalStepsInSection={4} />);
-    const progressBar = screen.getByRole('progressbar');
+    const progressBar = screen.getByTestId('progress-segments');
     // Section 2 is the 2nd segment (index 1); last step: 3/(4-1) = 100%
     const activeSegment = progressBar.children[1] as HTMLElement;
     const fill = activeSegment.firstElementChild as HTMLElement;
@@ -507,7 +507,7 @@ describe('OnboardingProgress', () => {
 
   it('fills single-step section to 100% immediately when active', () => {
     render(<OnboardingProgress currentSection={3} totalSections={7} stepInSection={0} totalStepsInSection={1} />);
-    const progressBar = screen.getByRole('progressbar');
+    const progressBar = screen.getByTestId('progress-segments');
     // Section 3 (index 2): single-step guard → 100%
     const activeSegment = progressBar.children[2] as HTMLElement;
     const fill = activeSegment.firstElementChild as HTMLElement;
@@ -523,7 +523,7 @@ describe('OnboardingProgress', () => {
 
   it('applies active tint class to the current section segment', () => {
     render(<OnboardingProgress currentSection={3} totalSections={5} stepInSection={0} totalStepsInSection={4} />);
-    const progressBar = screen.getByRole('progressbar');
+    const progressBar = screen.getByTestId('progress-segments');
 
     const pastSegment = progressBar.children[0] as HTMLElement;
     const activeSegment = progressBar.children[2] as HTMLElement;

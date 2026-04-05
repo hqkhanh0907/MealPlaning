@@ -2836,7 +2836,9 @@ describe('fitnessStore – FIX-01a write-through (fire-and-forget)', () => {
       result.current.updateTrainingPlan('non-existent', { name: 'Ghost' });
     });
     await new Promise(resolve => setTimeout(resolve, 50));
-    // No error thrown, no-op
+
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM training_plans WHERE id = ?', ['non-existent']);
+    expect(rows).toHaveLength(0);
   });
 
   it('updateWorkout persists to SQLite', async () => {
@@ -2872,7 +2874,9 @@ describe('fitnessStore – FIX-01a write-through (fire-and-forget)', () => {
       result.current.updateWorkout('non-existent', { name: 'Ghost' });
     });
     await new Promise(resolve => setTimeout(resolve, 50));
-    // No error thrown, no-op
+
+    const rows = await db.query<Record<string, unknown>>('SELECT * FROM workouts WHERE id = ?', ['non-existent']);
+    expect(rows).toHaveLength(0);
   });
 
   it('removeWorkoutSet persists DELETE to SQLite', async () => {
@@ -4739,13 +4743,13 @@ describe('fitnessStore – branch coverage gaps', () => {
   it('autoAssignWorkouts returns early when plan is not found', () => {
     useFitnessStore.setState({ trainingPlans: [] });
     useFitnessStore.getState().autoAssignWorkouts('nonexistent-plan');
-    // Should not throw — just logs warning and returns
+    expect(useFitnessStore.getState().trainingPlans).toHaveLength(0);
   });
 
   it('restoreOriginalSchedule returns early when plan is not found', () => {
     useFitnessStore.setState({ trainingPlans: [] });
     useFitnessStore.getState().restoreOriginalSchedule('nonexistent-plan');
-    // Should not throw — just logs warning and returns
+    expect(useFitnessStore.getState().trainingPlans).toHaveLength(0);
   });
 
   /* ---- scoreDaySlot hasSameMuscleAdjacent = true (lines 81-82, 86-87) ---- */

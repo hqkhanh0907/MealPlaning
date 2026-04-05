@@ -214,7 +214,7 @@ export function useProgressiveOverload(): {
     (exerciseId: string): WorkoutSet[] => {
       const { relevantWorkouts } = getExerciseWorkoutContext(exerciseId, workoutSets, workouts);
       if (relevantWorkouts.length === 0) return [];
-      const latestWorkout = relevantWorkouts.sort((a, b) => b.date.localeCompare(a.date))[0];
+      const latestWorkout = [...relevantWorkouts].sort((a, b) => b.date.localeCompare(a.date))[0];
       return (workoutSetsByWorkoutId.get(latestWorkout.id) ?? [])
         .filter(s => s.exerciseId === exerciseId)
         .sort((a, b) => a.setNumber - b.setNumber);
@@ -227,7 +227,7 @@ export function useProgressiveOverload(): {
       const { exerciseSets, relevantWorkouts } = getExerciseWorkoutContext(exerciseId, workoutSets, workouts);
       if (exerciseSets.length === 0) return { isPlateaued: false, weeks: 0 };
 
-      const sortedWorkouts = relevantWorkouts.sort((a, b) => a.date.localeCompare(b.date));
+      const sortedWorkouts = [...relevantWorkouts].sort((a, b) => a.date.localeCompare(b.date));
       const groupedSets = sortedWorkouts.map(w =>
         (workoutSetsByWorkoutId.get(w.id) ?? []).filter(s => s.exerciseId === exerciseId),
       );

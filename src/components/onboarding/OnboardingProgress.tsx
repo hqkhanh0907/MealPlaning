@@ -49,12 +49,20 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
 
   return (
     <div className="w-full px-4 py-2">
-      <div
-        role="progressbar"
+      <progress
+        value={overallProgress}
+        max={100}
         aria-valuenow={overallProgress}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={sectionLabel}
+        className="sr-only"
+      >
+        {overallProgress}%
+      </progress>
+      <div
+        aria-hidden="true"
+        data-testid="progress-segments"
         className="flex h-1 w-full gap-[1px] overflow-hidden rounded-sm"
       >
         {segments.map(({ sectionIndex, fillPercent, isActive }, i) => (

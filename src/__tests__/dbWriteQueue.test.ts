@@ -170,8 +170,7 @@ describe('dbWriteQueue', () => {
 
   describe('_waitForIdle', () => {
     it('should resolve immediately when queue is empty', async () => {
-      await _waitForIdle();
-      // No assertion needed — if it hangs, the test times out
+      await expect(_waitForIdle()).resolves.toBeUndefined();
     });
 
     it('should resolve when processing completes', async () => {

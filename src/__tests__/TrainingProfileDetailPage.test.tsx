@@ -172,5 +172,7 @@ describe('TrainingProfileDetailPage', () => {
     // Click save — saveRef might be null in edge case
     // This should not throw
     fireEvent.click(screen.getByTestId('settings-detail-save'));
+
+    expect(screen.getByTestId('settings-detail-save')).toBeInTheDocument();
   });
 });

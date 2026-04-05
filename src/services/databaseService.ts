@@ -227,7 +227,8 @@ export class NativeDatabaseService implements DatabaseService {
         false,
       )) as unknown as SQLiteDBConnection;
     }
-    await this.connection!.open();
+    if (!this.connection) throw new Error('Failed to create database connection');
+    await this.connection.open();
   }
 
   private getConnection(): SQLiteDBConnection {
@@ -248,7 +249,7 @@ export class NativeDatabaseService implements DatabaseService {
     const conn = this.getConnection();
     const result = await conn.query(sql, (params ?? []) as SQLiteValue[]);
     const rows = result.values ?? [];
-    return rows.map(row => rowToType<T>(row as Record<string, unknown>));
+    return rows.map(row => rowToType<T>(row));
   }
 
   async queryOne<T>(sql: string, params?: unknown[]): Promise<T | null> {
