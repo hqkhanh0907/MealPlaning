@@ -1098,3 +1098,31 @@ const value = useMemo(() => expensive(), [deps]); // compiler tự optimize
 ### Bài học
 
 Khi React Compiler active, `useShallow` là **ngoại lệ duy nhất** cho manual memoization — chỉ dùng cho Zustand selectors trả về new reference (`.filter()`, `.map()`, object literals). Tất cả các trường hợp khác → để compiler handle.
+
+---
+
+## 34. Multi-wave parallel agent orchestration — icon audit at scale
+
+### Vấn đề
+
+Icon audit toàn dự án: 96 Lucide icons, ~20 emoji, 52 hardcoded symbols in vi.json — cần thay đổi 34 files, 179 mapped entries.
+
+### Giải pháp: 4-wave parallel execution
+
+```
+Wave 1: 3 parallel agents (icon semantics) — Dumbbell/Flame/misc fixes
+Wave 2: 3 parallel agents (color unification) — unify/add/settings colors
+Wave 3: Manual (emoji cleanup) — dead code removal, WorkoutLogger
+Wave 4: Manual (vi.json cleanup) — strip emoji/arrows/checkmarks from i18n
+```
+
+### Gotchas phát hiện
+
+1. **Sub-agents miss files**: wave1-flame agent claimed StreakCounter.tsx "doesn't exist" (it does at `src/features/fitness/components/StreakCounter.tsx`). wave1-dumbbell missed `tips.ts`. → Always verify agent claims manually.
+2. **Test merging error**: When manually fixing useQuickActions.test.ts, accidentally merged two test blocks (fitness 4 calls + calendar 5 calls → single block expecting 5 calls to wrong tab). → Always run test after manual edits.
+3. **Emoji in AiInsightCard ICON_PREFIX_MAP**: Agents changed ICON_MAP but forgot ICON_PREFIX_MAP emojis AND tests. → When changing icon maps, grep for ALL related maps and tests.
+4. **Pre-existing SonarQube issues**: 9 MINOR issues showed up in scan but none at lines I modified → verify with `git diff --name-only` before concluding you caused them.
+
+### Bài học
+
+For large-scale icon/color refactors: create exhaustive mapping FIRST (179 entries), then wave-based execution with clear file ownership per agent. Manual follow-up always needed — agents miss ~10-15% of files.
