@@ -31,10 +31,8 @@ export function usePageStackBackHandler(): void {
       }
     } else if (curr < prev && pushedCountRef.current > 0) {
       const delta = Math.min(prev - curr, pushedCountRef.current);
-      if (delta > 0) {
-        pushedCountRef.current -= delta;
-        removeBackEntries(delta);
-      }
+      pushedCountRef.current -= delta;
+      removeBackEntries(delta);
     }
   }, [pageStackLength, popPage]);
 }
