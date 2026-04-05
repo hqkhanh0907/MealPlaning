@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
 import { ModalBackdrop } from '@/components/shared/ModalBackdrop';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useNotification } from '@/contexts/NotificationContext';
 import { useFitnessStore } from '@/store/fitnessStore';
 import { useNavigationStore } from '@/store/navigationStore';
 
@@ -82,6 +83,7 @@ function LoadingSkeleton(): React.JSX.Element {
 function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>): React.JSX.Element {
   const { t } = useTranslation();
   const popPage = useNavigationStore(s => s.popPage);
+  const notify = useNotification();
 
   const { getTemplates, getRecommendedTemplates, applyTemplate, saveCurrentAsTemplate, trainingProfile } =
     useFitnessStore(
@@ -180,11 +182,11 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
       setShowSaveDialog(false);
       setSaveName('');
     } catch {
-      // stay in dialog
+      notify.error(t('fitness.templateGallery.saveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [saveCurrentAsTemplate, planId, saveName]);
+  }, [saveCurrentAsTemplate, planId, saveName, notify, t]);
 
   const handleCancelSave = useCallback(() => {
     setShowSaveDialog(false);

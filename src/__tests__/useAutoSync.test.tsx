@@ -347,4 +347,132 @@ describe('useAutoSync', () => {
 
     expect(driveService.uploadBackup).toHaveBeenCalled();
   });
+
+  it('should prevent concurrent downloads', async () => {
+    mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
+    mockAuthValues.accessToken = 'tok';
+
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
+
+    // Flush sync-on-launch
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+
+    // Clear any calls from sync-on-launch
+    (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockClear();
+
+    let resolveDownload: (v: unknown) => void;
+    (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockImplementation(
+      () =>
+        new Promise(r => {
+          resolveDownload = r;
+        }),
+    );
+
+    // Start first download (will hang)
+    let firstDone = false;
+    act(() => {
+      result.current.triggerDownload().then(() => {
+        firstDone = true;
+      });
+    });
+
+    // Start second download immediately — should be a no-op
+    let secondDone = false;
+    act(() => {
+      result.current.triggerDownload().then(() => {
+        secondDone = true;
+      });
+    });
+
+    // Second should complete immediately (no-op)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(secondDone).toBe(true);
+
+    // Resolve first
+    await act(async () => {
+      resolveDownload!(null);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(firstDone).toBe(true);
+    expect(driveService.downloadLatestBackup).toHaveBeenCalledTimes(1);
+  });
+
+  it('should block upload during download', async () => {
+    mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
+    mockAuthValues.accessToken = 'tok';
+
+    let resolveDownload: (v: unknown) => void;
+    (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockImplementation(
+      () =>
+        new Promise(r => {
+          resolveDownload = r;
+        }),
+    );
+
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
+
+    // Start download (hangs)
+    act(() => {
+      void result.current.triggerDownload();
+    });
+
+    // Try upload — should be blocked
+    await act(async () => {
+      await result.current.triggerUpload();
+    });
+
+    expect(driveService.uploadBackup).not.toHaveBeenCalled();
+
+    // Cleanup: resolve download
+    await act(async () => {
+      resolveDownload!(null);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+  });
+
+  it('should block download during upload', async () => {
+    mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
+    mockAuthValues.accessToken = 'tok';
+
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
+
+    // Flush sync-on-launch
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+
+    // Clear any calls from sync-on-launch
+    (driveService.downloadLatestBackup as ReturnType<typeof vi.fn>).mockClear();
+
+    let resolveUpload: (v: unknown) => void;
+    (driveService.uploadBackup as ReturnType<typeof vi.fn>).mockImplementation(
+      () =>
+        new Promise(r => {
+          resolveUpload = r;
+        }),
+    );
+
+    // Start upload (hangs)
+    act(() => {
+      void result.current.triggerUpload();
+    });
+
+    // Try download — should be blocked
+    await act(async () => {
+      await result.current.triggerDownload();
+    });
+
+    expect(driveService.downloadLatestBackup).not.toHaveBeenCalled();
+
+    // Cleanup: resolve upload
+    await act(async () => {
+      resolveUpload!({ id: 'f1', name: 'backup.json', modifiedTime: '2026-01-01T00:00:00Z' });
+      await vi.advanceTimersByTimeAsync(0);
+    });
+  });
 });

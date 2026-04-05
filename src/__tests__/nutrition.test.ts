@@ -179,6 +179,33 @@ describe('calculateIngredientNutrition', () => {
     expect(result.calories).toBe(155);
     expect(result.protein).toBe(13);
   });
+
+  it('should return zero nutrition when amount is NaN', () => {
+    const result = calculateIngredientNutrition(chicken, NaN);
+    expect(result.calories).toBe(0);
+    expect(result.protein).toBe(0);
+    expect(result.carbs).toBe(0);
+    expect(result.fat).toBe(0);
+    expect(result.fiber).toBe(0);
+  });
+
+  it('should return zero nutrition when amount is undefined (cast as any)', () => {
+    const result = calculateIngredientNutrition(chicken, undefined as unknown as number);
+    expect(result.calories).toBe(0);
+    expect(result.protein).toBe(0);
+  });
+
+  it('should return zero nutrition when amount is negative', () => {
+    const result = calculateIngredientNutrition(chicken, -1);
+    expect(result.calories).toBe(0);
+    expect(result.protein).toBe(0);
+  });
+
+  it('should return zero nutrition when amount is Infinity', () => {
+    const result = calculateIngredientNutrition(chicken, Infinity);
+    expect(result.calories).toBe(0);
+    expect(result.protein).toBe(0);
+  });
 });
 
 describe('calculateDishNutrition', () => {
@@ -272,6 +299,22 @@ describe('calculateDishesNutrition', () => {
   it('should handle duplicate dish IDs (counts twice)', () => {
     const result = calculateDishesNutrition(['dish-2', 'dish-2'], dishes, allIngredients);
     expect(result.calories).toBe(620); // 310 * 2
+  });
+
+  it('should fall back to multiplier 1 when servings value is NaN', () => {
+    const result = calculateDishesNutrition(['dish-2'], dishes, allIngredients, { 'dish-2': NaN });
+    // NaN falls back to 1 → 310 * 1 = 310
+    expect(result.calories).toBe(310);
+  });
+
+  it('should use servings multiplier when it is a valid number', () => {
+    const result = calculateDishesNutrition(['dish-2'], dishes, allIngredients, { 'dish-2': 3 });
+    expect(result.calories).toBe(930); // 310 * 3
+  });
+
+  it('should fall back to multiplier 1 when servings value is Infinity', () => {
+    const result = calculateDishesNutrition(['dish-2'], dishes, allIngredients, { 'dish-2': Infinity });
+    expect(result.calories).toBe(310);
   });
 });
 

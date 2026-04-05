@@ -1110,7 +1110,8 @@
       "empty": "Không tải được mẫu",
       "retry": "Thử lại",
       "cancel": "Hủy",
-      "confirm": "Xác nhận"
+      "confirm": "Xác nhận",
+      "saveError": "Lưu template thất bại. Vui lòng thử lại."
     },
     "planActions": {
       "editSchedule": "Chỉnh lịch",

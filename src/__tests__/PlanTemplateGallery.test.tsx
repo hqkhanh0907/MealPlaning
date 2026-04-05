@@ -7,6 +7,18 @@ import type { TrainingProfile } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
 
+const mockNotify = {
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn(),
+  info: vi.fn(),
+  dismiss: vi.fn(),
+  dismissAll: vi.fn(),
+};
+vi.mock('../contexts/NotificationContext', () => ({
+  useNotification: () => mockNotify,
+}));
+
 // ---------- helpers ----------
 
 function buildProfile(overrides: Partial<TrainingProfile> = {}): TrainingProfile {
@@ -47,6 +59,7 @@ function buildPlan() {
 
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
   useFitnessStore.setState({
     trainingProfile: null,
     trainingPlans: [],
@@ -234,5 +247,30 @@ describe('PlanTemplateGallery', () => {
     expect(screen.getByTestId('split-group-upper_lower')).toBeInTheDocument();
     expect(screen.getByTestId('split-group-ppl')).toBeInTheDocument();
     expect(screen.getByTestId('split-group-bro_split')).toBeInTheDocument();
+  });
+
+  it('shows error notification when save fails', async () => {
+    useFitnessStore.setState({
+      saveCurrentAsTemplate: () => {
+        throw new Error('DB error');
+      },
+    });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-input')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('save-template-input'), { target: { value: 'My Template' } });
+    fireEvent.click(screen.getByTestId('save-template-confirm'));
+
+    await waitFor(() => {
+      expect(mockNotify.error).toHaveBeenCalledWith('Lưu template thất bại. Vui lòng thử lại.');
+    });
   });
 });

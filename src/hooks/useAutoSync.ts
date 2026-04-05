@@ -28,6 +28,7 @@ export const useAutoSync = (): UseAutoSyncReturn => {
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isUploadingRef = useRef(false);
+  const isDownloadingRef = useRef(false);
   const initializedRef = useRef(false);
   const dbRef = useRef(db);
   dbRef.current = db;
@@ -51,7 +52,7 @@ export const useAutoSync = (): UseAutoSyncReturn => {
   }, []);
 
   const triggerUpload = useCallback(async () => {
-    if (!accessToken || isUploadingRef.current) return;
+    if (!accessToken || isUploadingRef.current || isDownloadingRef.current) return;
     isUploadingRef.current = true;
     setSyncStatus('uploading');
     try {
@@ -67,7 +68,8 @@ export const useAutoSync = (): UseAutoSyncReturn => {
   }, [accessToken, updateLastSync]);
 
   const triggerDownload = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken || isDownloadingRef.current || isUploadingRef.current) return;
+    isDownloadingRef.current = true;
     setSyncStatus('downloading');
     try {
       const result = await driveService.downloadLatestBackup(accessToken);
@@ -79,6 +81,8 @@ export const useAutoSync = (): UseAutoSyncReturn => {
       setSyncStatus('idle');
     } catch {
       setSyncStatus('error');
+    } finally {
+      isDownloadingRef.current = false;
     }
   }, [accessToken, updateLastSync]);
 

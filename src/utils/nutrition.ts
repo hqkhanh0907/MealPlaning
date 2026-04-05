@@ -41,6 +41,8 @@ const getConversionFactor = (unit: string): number => {
 };
 
 export const calculateIngredientNutrition = (ingredient: Ingredient, amount: number): NutritionInfo => {
+  if (!Number.isFinite(amount) || amount < 0) return { ...ZERO_NUTRITION };
+
   let factor: number;
   const rawUnit = typeof ingredient.unit === 'string' ? ingredient.unit : ingredient.unit.vi;
   if (isWeightOrVolume(rawUnit)) {
@@ -87,7 +89,8 @@ export const calculateDishesNutrition = (
       const dish = allDishes.find(d => d.id === dishId);
       if (!dish) return acc;
       const nutrition = calculateDishNutrition(dish, allIngredients);
-      const multiplier = servings?.[dishId] ?? 1;
+      const raw = servings?.[dishId] ?? 1;
+      const multiplier = Number.isFinite(raw) ? raw : 1;
       return {
         calories: acc.calories + nutrition.calories * multiplier,
         protein: acc.protein + nutrition.protein * multiplier,

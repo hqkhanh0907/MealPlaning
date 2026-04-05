@@ -140,7 +140,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
     if (saveRef) {
       saveRef.current = handleSave;
     }
-  });
+  }, [saveRef, handleSave]);
 
   return (
     <div className={embedded ? 'space-y-6' : 'space-y-6 p-4'} data-testid="training-profile-form">
