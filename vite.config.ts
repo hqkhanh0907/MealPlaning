@@ -1,10 +1,10 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
-import {type PluginOption, defineConfig} from 'vite';
+import { type PluginOption, defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
 
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const enableCompression = process.env.COMPRESS === 'true';
 
@@ -12,13 +12,11 @@ export default defineConfig(({mode}) => {
     plugins: [
       react(),
       tailwindcss(),
-      enableCompression &&
-        viteCompression({algorithm: 'gzip', ext: '.gz', threshold: 1024, deleteOriginFile: false}),
-      enableCompression &&
-        viteCompression({algorithm: 'brotliCompress', ext: '.br', threshold: 1024}),
+      enableCompression && viteCompression({ algorithm: 'gzip', ext: '.gz', threshold: 1024, deleteOriginFile: false }),
+      enableCompression && viteCompression({ algorithm: 'brotliCompress', ext: '.br', threshold: 1024 }),
       process.env.ANALYZE === 'true' &&
         import('rollup-plugin-visualizer').then(m =>
-          m.visualizer({filename: 'stats.html', gzipSize: true, brotliSize: true, template: 'treemap'}),
+          m.visualizer({ filename: 'stats.html', gzipSize: true, brotliSize: true, template: 'treemap' }),
         ),
     ].filter(Boolean) as PluginOption[],
     resolve: {
@@ -44,6 +42,9 @@ export default defineConfig(({mode}) => {
             }
             if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next')) {
               return 'vendor-i18n';
+            }
+            if (id.includes('node_modules/@google/genai')) {
+              return 'vendor-genai';
             }
             if (
               id.includes('onboarding/TrainingDetailSteps') ||
