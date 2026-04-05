@@ -30,7 +30,7 @@ npm run build → dist/ → npx cap sync android → Android Studio build (hoặ
 
 ```bash
 # Full pipeline
-bash build-apk.sh
+bash scripts/build-apk.sh
 
 # Từng bước nếu cần debug
 npm run build                           # Build React app → dist/
@@ -97,7 +97,7 @@ adb logcat --pid=$(adb shell pidof com.mealplaner.app)
 ### 4.1 Upload APK lên Google Drive (tự động)
 
 ```bash
-bash upload-apk-drive.sh
+bash scripts/upload-apk-drive.sh
 ```
 
 Script tự động upload APK từ `android/app/build/outputs/apk/debug/app-debug.apk` lên Google Drive folder đã cấu hình. File config: `metadata.json`.
@@ -192,7 +192,7 @@ git pull
 npm install
 
 # 3. Build lại
-bash build-apk.sh
+bash scripts/build-apk.sh
 
 # 4. Cài đè lên thiết bị
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
@@ -296,7 +296,7 @@ cd android
 cd ..
 npm run build
 npx cap sync android
-bash build-apk.sh
+bash scripts/build-apk.sh
 ```
 
 ### Gradle Build Errors
@@ -425,7 +425,7 @@ jobs:
 SonarQube analysis có thể được tích hợp vào CI pipeline:
 
 ```bash
-bash sonar-setup.sh
+bash scripts/sonar-setup.sh
 ```
 
 Config: `sonar-project.properties` tại root project. Chạy sau mỗi sprint hoặc khi cần audit code quality.

@@ -7,15 +7,15 @@
 
 ## 1. Yêu cầu hệ thống
 
-| Công cụ | Phiên bản tối thiểu | Ghi chú |
-|---------|---------------------|---------|
-| Node.js | 18+ | Dùng `nvm` để quản lý version (khuyến nghị 20 LTS) |
-| npm | 9+ | Đi kèm với Node 18+ |
-| Android Studio | Iguana 2023.2+ | Build Android APK |
-| JDK | 17 | Được bundle trong Android Studio |
-| Android SDK | API 34+ | Cài qua Android Studio SDK Manager (Capacitor target) |
-| Git | 2.40+ | |
-| macOS / Linux | - | Windows cần thêm file `.bat` |
+| Công cụ        | Phiên bản tối thiểu | Ghi chú                                               |
+| -------------- | ------------------- | ----------------------------------------------------- |
+| Node.js        | 18+                 | Dùng `nvm` để quản lý version (khuyến nghị 20 LTS)    |
+| npm            | 9+                  | Đi kèm với Node 18+                                   |
+| Android Studio | Iguana 2023.2+      | Build Android APK                                     |
+| JDK            | 17                  | Được bundle trong Android Studio                      |
+| Android SDK    | API 34+             | Cài qua Android Studio SDK Manager (Capacitor target) |
+| Git            | 2.40+               |                                                       |
+| macOS / Linux  | -                   | Windows cần thêm file `.bat`                          |
 
 ---
 
@@ -105,12 +105,13 @@ npx cap sync android
 npx cap open android
 
 # Hoặc build APK trực tiếp qua script
-bash build-apk.sh
+bash scripts/build-apk.sh
 ```
 
 ### 3.5 Tạo AVD (Android Virtual Device)
 
 Trong Android Studio → **Device Manager** → **Create Device**:
+
 - Device: `Medium Phone` (411×914px, xhdpi)
 - System Image: `API 36.1` (Google APIs / x86_64)
 - AVD Name: `Medium_Phone_API_36.1`
@@ -145,7 +146,7 @@ appium driver install chromedriver --source=npm --package=appium-chromedriver
 ### 4.4 Build APK cho E2E
 
 ```bash
-bash build-apk.sh
+bash scripts/build-apk.sh
 ```
 
 APK output: `android/app/build/outputs/apk/debug/app-debug.apk`
@@ -167,11 +168,13 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 ### 4.7 Chạy E2E tests
 
 Terminal 1 — Appium server:
+
 ```bash
 appium
 ```
 
 Terminal 2 — E2E runner:
+
 ```bash
 npm run test:e2e
 ```
@@ -180,21 +183,21 @@ npm run test:e2e
 
 ## 5. Lệnh hay dùng
 
-| Lệnh | Mô tả |
-|------|-------|
-| `npm run dev` | Dev server tại localhost:3000 |
-| `npm run build` | Build production bundle → `dist/` |
-| `npm test` | Unit tests (Vitest, không watch) |
-| `npm run test:watch` | Unit tests watch mode |
-| `npm run test:coverage` | Unit tests + coverage report |
-| `npm run test:e2e` | E2E tests (cần Appium + emulator) |
-| `npm run lint` | ESLint check |
-| `npx eslint src/` | ESLint check (trực tiếp) |
-| `npx tsc --noEmit` | TypeScript type-check (không emit) |
-| `npx cap sync android` | Sync web assets vào Android project |
-| `npx cap open android` | Mở Android Studio |
-| `bash build-apk.sh` | Build APK đầy đủ |
-| `npm run analyze` | Bundle analysis (visualizer, cần ANALYZE=true) |
+| Lệnh                        | Mô tả                                          |
+| --------------------------- | ---------------------------------------------- |
+| `npm run dev`               | Dev server tại localhost:3000                  |
+| `npm run build`             | Build production bundle → `dist/`              |
+| `npm test`                  | Unit tests (Vitest, không watch)               |
+| `npm run test:watch`        | Unit tests watch mode                          |
+| `npm run test:coverage`     | Unit tests + coverage report                   |
+| `npm run test:e2e`          | E2E tests (cần Appium + emulator)              |
+| `npm run lint`              | ESLint check                                   |
+| `npx eslint src/`           | ESLint check (trực tiếp)                       |
+| `npx tsc --noEmit`          | TypeScript type-check (không emit)             |
+| `npx cap sync android`      | Sync web assets vào Android project            |
+| `npx cap open android`      | Mở Android Studio                              |
+| `bash scripts/build-apk.sh` | Build APK đầy đủ                               |
+| `npm run analyze`           | Bundle analysis (visualizer, cần ANALYZE=true) |
 
 ---
 
@@ -279,7 +282,7 @@ cd android
 cd ..
 npm run build
 npx cap sync android
-bash build-apk.sh
+bash scripts/build-apk.sh
 ```
 
 ---
@@ -296,13 +299,13 @@ bash build-apk.sh
 
 ### Coverage target
 
-| Metric | Target | Hiện tại (2026-06-28) |
-|--------|--------|-----------------------|
-| Test files | — | **165 files** |
-| Tests passing | 100% | **3954/3954** ✅ |
-| Statement coverage | ≥ 98% | **≥98%** ✅ |
-| Lint errors | 0 | **0** ✅ |
-| TypeScript errors | 0 | **0** ✅ |
+| Metric             | Target | Hiện tại (2026-06-28) |
+| ------------------ | ------ | --------------------- |
+| Test files         | —      | **165 files**         |
+| Tests passing      | 100%   | **3954/3954** ✅      |
+| Statement coverage | ≥ 98%  | **≥98%** ✅           |
+| Lint errors        | 0      | **0** ✅              |
+| TypeScript errors  | 0      | **0** ✅              |
 
 ### Lệnh kiểm tra
 
@@ -322,7 +325,7 @@ npm run test:coverage    # Unit tests + coverage report (≥98% statements)
 Chạy sonar analysis:
 
 ```bash
-bash sonar-setup.sh
+bash scripts/sonar-setup.sh
 ```
 
 Config: `sonar-project.properties`

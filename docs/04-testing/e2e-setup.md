@@ -8,6 +8,7 @@
 ## 1. Tổng quan
 
 E2E tests của project dùng:
+
 - **WebdriverIO v9** — test runner và assertion library
 - **Appium 2** — mobile automation server
 - **UiAutomator2** — Android native driver
@@ -19,13 +20,13 @@ Tests chạy trong WEBVIEW context của app: `WEBVIEW_com.mealplaner.app`
 
 ## 2. Yêu cầu
 
-| Công cụ | Version | Kiểm tra |
-|---------|---------|---------|
-| Node.js | 20 LTS | `node --version` |
-| Android Studio | Iguana+ | GUI |
-| Android SDK | API 36 | `sdkmanager --list` |
-| ADB | Platform Tools | `adb version` |
-| Java | 17 | `java -version` |
+| Công cụ        | Version        | Kiểm tra            |
+| -------------- | -------------- | ------------------- |
+| Node.js        | 20 LTS         | `node --version`    |
+| Android Studio | Iguana+        | GUI                 |
+| Android SDK    | API 36         | `sdkmanager --list` |
+| ADB            | Platform Tools | `adb version`       |
+| Java           | 17             | `java -version`     |
 
 ---
 
@@ -51,6 +52,7 @@ npx appium-doctor --android
 ```
 
 Kết quả mong đợi — tất cả item phải ✓ hoặc ⚠ (warning), không có ✗:
+
 ```
 ✓ The Android SDK was found at: ~/Library/Android/sdk
 ✓ Java JDK was found at: ...
@@ -82,6 +84,7 @@ avdmanager create avd \
 ```
 
 **Thông số AVD chuẩn:**
+
 - Profile: `Medium Phone`
 - API: `36.1` (Google APIs x86_64)
 - RAM: 2048 MB+
@@ -93,7 +96,7 @@ avdmanager create avd \
 
 ```bash
 # Build APK
-bash build-apk.sh
+bash scripts/build-apk.sh
 
 # Khởi động emulator
 emulator -avd Medium_Phone_API_36.1 -no-audio &
@@ -136,6 +139,7 @@ npx wdio run e2e/wdio.conf.ts --logLevel debug
 ### 6.3 Kết quả
 
 WebdriverIO in kết quả ra terminal:
+
 ```
 [0-0] PASS  01-navigation.spec.ts
 [0-0] PASS  02-calendar-basic.spec.ts
@@ -149,14 +153,16 @@ Spec Files:  24 passed, 0 failed, 0 skipped (24 total)
 
 ```typescript
 // e2e/wdio.conf.ts — các setting quan trọng
-capabilities: [{
-  platformName: 'Android',
-  'appium:deviceName': 'Medium_Phone_API_36.1',
-  'appium:app': path.resolve('android/app/build/outputs/apk/debug/app-debug.apk'),
-  'appium:automationName': 'UiAutomator2',
-  'appium:noReset': true,          // QUAN TRỌNG: không reset app state giữa các runs
-  'appium:ensureWebviewsHavePages': true,  // Đợi WEBVIEW có trang trước khi switch
-}]
+capabilities: [
+  {
+    platformName: 'Android',
+    'appium:deviceName': 'Medium_Phone_API_36.1',
+    'appium:app': path.resolve('android/app/build/outputs/apk/debug/app-debug.apk'),
+    'appium:automationName': 'UiAutomator2',
+    'appium:noReset': true, // QUAN TRỌNG: không reset app state giữa các runs
+    'appium:ensureWebviewsHavePages': true, // Đợi WEBVIEW có trang trước khi switch
+  },
+];
 ```
 
 **`noReset: true`** — tránh Appium reset app state giữa specs. Thay vào đó, mỗi spec tự xóa localStorage:
@@ -208,8 +214,10 @@ export class BasePage {
 
 // CalendarPage.ts — specific page
 export class CalendarPage extends BasePage {
-  get addMealButton() { return $('[data-testid="add-meal-btn"]'); }
-  
+  get addMealButton() {
+    return $('[data-testid="add-meal-btn"]');
+  }
+
   async addMealToSlot(mealType: string, dishName: string) {
     await this.tapElement(`[data-testid="slot-${mealType}"]`);
     await this.tapElement(`[data-testid="dish-${dishName}"]`);
@@ -262,6 +270,7 @@ emulator -avd Medium_Phone_API_36.1 &
 ### Chrome driver version mismatch
 
 WebdriverIO v9 tự động download chromedriver. Nếu vẫn lỗi:
+
 ```bash
 npx wdio run e2e/wdio.conf.ts --updateDriver
 ```

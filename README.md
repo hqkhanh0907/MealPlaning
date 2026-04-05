@@ -24,15 +24,15 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 
 **Tech stack:**
 
-| Layer | Technology |
-|-------|-----------|
-| UI | React 19 + TypeScript + Tailwind CSS v4 |
-| Build | Vite 6 |
-| Mobile | Capacitor 8 (Android) |
-| AI | Google Gemini API (`gemini-2.0-flash-preview`) |
-| i18n | i18next (Tiếng Việt) |
-| Testing | Vitest (unit) + WebdriverIO v9 + Appium 2 (E2E) |
-| Code Quality | ESLint + TypeScript strict + SonarQube |
+| Layer        | Technology                                      |
+| ------------ | ----------------------------------------------- |
+| UI           | React 19 + TypeScript + Tailwind CSS v4         |
+| Build        | Vite 6                                          |
+| Mobile       | Capacitor 8 (Android)                           |
+| AI           | Google Gemini API (`gemini-2.0-flash-preview`)  |
+| i18n         | i18next (Tiếng Việt)                            |
+| Testing      | Vitest (unit) + WebdriverIO v9 + Appium 2 (E2E) |
+| Code Quality | ESLint + TypeScript strict + SonarQube          |
 
 ---
 
@@ -59,7 +59,7 @@ Smart Meal Planner là ứng dụng **offline-first**, chạy hoàn toàn trên 
 - **Node.js** ≥ 20
 - **npm** ≥ 10
 - **Gemini API Key** ([lấy tại Google AI Studio](https://aistudio.google.com/apikey))
-- *(Android build)* Android Studio, JDK 17+, Android SDK (API 35+)
+- _(Android build)_ Android Studio, JDK 17+, Android SDK (API 35+)
 
 ---
 
@@ -93,7 +93,7 @@ npm run analyze        # Bundle analysis (visualizer)
 
 ```bash
 # Build APK đầy đủ + upload Google Drive (script tự động)
-bash build-apk.sh
+bash scripts/build-apk.sh
 
 # Hoặc từng bước thủ công:
 npm run build              # Build web
@@ -120,6 +120,7 @@ npm run e2e
 ```
 
 **Kết quả hiện tại (2026-03-28):**
+
 - Unit: **3135/3135** tests passing (139 test files)
 - E2E: **183/183** tests passing (24 specs, Appium + WebdriverIO, Android)
 - Coverage: **97.24%** statements
@@ -158,20 +159,20 @@ docs/                   # Toàn bộ tài liệu dự án
 
 ## Biến môi trường
 
-| Biến | Bắt buộc | Mô tả |
-|------|----------|-------|
-| `VITE_GEMINI_API_KEY` | ✅ | Google Gemini API key. Lấy tại [AI Studio](https://aistudio.google.com/apikey). Prefix `VITE_` bắt buộc để Vite expose lên client. |
+| Biến                  | Bắt buộc | Mô tả                                                                                                                              |
+| --------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_GEMINI_API_KEY` | ✅       | Google Gemini API key. Lấy tại [AI Studio](https://aistudio.google.com/apikey). Prefix `VITE_` bắt buộc để Vite expose lên client. |
 
 ---
 
 ## Tài liệu đầy đủ
 
-| Nhóm | Tài liệu |
-|------|----------|
-| 📋 Yêu cầu | [PRD](docs/01-requirements/PRD.md) · [Use Cases](docs/01-requirements/use-cases.md) |
-| 🏗️ Kiến trúc | [SAD](docs/02-architecture/SAD.md) · [Data Model](docs/02-architecture/data-model.md) · [Sequence Diagrams](docs/02-architecture/sequence-diagrams.md) |
-| 👩‍💻 Dev Guide | [Setup](docs/03-developer-guide/setup.md) · [Coding Guidelines](docs/03-developer-guide/coding-guidelines.md) · [Storage Schema](docs/03-developer-guide/localstorage-schema.md) |
-| 🧪 Testing | [Test Plan](docs/04-testing/test-plan.md) · [Test Cases](docs/04-testing/test-cases.md) · [Test Report](docs/04-testing/test-report.md) · [E2E Guide](docs/04-testing/e2e-setup.md) |
-| ⚙️ Process | [Release Process](docs/05-process/release-process.md) |
-| 🚀 Operations | [Deployment Guide](docs/06-operations/deployment.md) |
-| 📐 ADR | [001 localStorage](docs/adr/001-local-storage-only.md) · [002 Gemini AI](docs/adr/002-gemini-ai-integration.md) · [003 i18n](docs/adr/003-i18n-with-i18next.md) |
+| Nhóm          | Tài liệu                                                                                                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📋 Yêu cầu    | [PRD](docs/01-requirements/PRD.md) · [Use Cases](docs/01-requirements/use-cases.md)                                                                                                 |
+| 🏗️ Kiến trúc  | [SAD](docs/02-architecture/SAD.md) · [Data Model](docs/02-architecture/data-model.md) · [Sequence Diagrams](docs/02-architecture/sequence-diagrams.md)                              |
+| 👩‍💻 Dev Guide  | [Setup](docs/03-developer-guide/setup.md) · [Coding Guidelines](docs/03-developer-guide/coding-guidelines.md) · [Storage Schema](docs/03-developer-guide/localstorage-schema.md)    |
+| 🧪 Testing    | [Test Plan](docs/04-testing/test-plan.md) · [Test Cases](docs/04-testing/test-cases.md) · [Test Report](docs/04-testing/test-report.md) · [E2E Guide](docs/04-testing/e2e-setup.md) |
+| ⚙️ Process    | [Release Process](docs/05-process/release-process.md)                                                                                                                               |
+| 🚀 Operations | [Deployment Guide](docs/06-operations/deployment.md)                                                                                                                                |
+| 📐 ADR        | [001 localStorage](docs/adr/001-local-storage-only.md) · [002 Gemini AI](docs/adr/002-gemini-ai-integration.md) · [003 i18n](docs/adr/003-i18n-with-i18next.md)                     |

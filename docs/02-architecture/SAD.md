@@ -574,7 +574,7 @@ npx cap sync android  → android/app/src/main/assets/public/
 ./gradlew assembleDebug  → app-debug.apk
       │
       ▼
-bash build-apk.sh  → copy to ~/Desktop + upload Google Drive
+bash scripts/build-apk.sh  → copy to ~/Desktop + upload Google Drive
 ```
 
 ---

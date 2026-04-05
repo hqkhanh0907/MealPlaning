@@ -32,7 +32,7 @@ Code changes
 [6] Sync to Android (npx cap sync android)
      │ ✅ web assets in android/
      ▼
-[7] Build APK (bash build-apk.sh)
+[7] Build APK (bash scripts/build-apk.sh)
      │ ✅ app-debug.apk generated
      ▼
 [8] Chrome DevTools console check
@@ -68,7 +68,7 @@ Trước mỗi release, kiểm tra tất cả items:
 □ No eslint-disable     → grep -r "eslint-disable" src/ phải trả về 0 kết quả
 □ npm run build         → build thành công, không warnings
 □ npx cap sync android  → sync OK
-□ bash build-apk.sh     → APK tạo được (≈147MB)
+□ bash scripts/build-apk.sh     → APK tạo được (≈147MB)
 □ npm run test:e2e      → 24/24 specs pass (183 test cases)
 □ E2E deep integration → specs 23-24 pass (cascade + cross-tab)
 □ adb install APK       → cài thành công trên emulator
@@ -113,7 +113,7 @@ Các quality gates sau **bắt buộc** pass trước khi merge hoặc release:
 SonarQube analysis **bắt buộc** trước mỗi release:
 
 - Config: `sonar-project.properties` tại root project
-- Script: `bash sonar-setup.sh`
+- Script: `bash scripts/sonar-setup.sh`
 - **Chạy analysis: TRƯỚC MỌI release** (không chỉ sau mỗi sprint)
 - Quality Profile: Default + custom rules cho TypeScript/React
 - **Gate: Phải pass SonarQube quality gate (0 new Bugs, 0 Vulnerabilities) trước khi release**
@@ -156,7 +156,7 @@ echo "✅ APK: android/app/build/outputs/apk/debug/app-debug.apk"
 ### Chạy build
 
 ```bash
-bash build-apk.sh
+bash scripts/build-apk.sh
 ```
 
 **Output:** `android/app/build/outputs/apk/debug/app-debug.apk` (~147MB)
@@ -265,7 +265,7 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 Script tự động upload APK lên Google Drive:
 
 ```bash
-bash upload-apk-drive.sh
+bash scripts/upload-apk-drive.sh
 ```
 
 Script sử dụng Google Drive API với service account. File config: `metadata.json`

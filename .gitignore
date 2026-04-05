@@ -27,9 +27,17 @@ client_secret*.json
 
 # Bundle analysis
 stats.html
+
+# AI/Superpowers
 .superpowers/
-.superpowers/
+
+# Build/test output logs
 clean_cov.txt
 cov_raw.txt
 vitest_stderr.txt
+coverage_*.txt
+nohup.out
+DOCUMENTATION_SUMMARY.txt
+
+# Screenshots (emulator/audit evidence)
 screenshots/
