@@ -38,7 +38,15 @@ import { DailyWeightInput } from './DailyWeightInput';
 import { SessionTabs } from './SessionTabs';
 import { StreakCounter } from './StreakCounter';
 
-const DAY_FULL_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'] as const;
+const DAY_FULL_LABEL_KEYS = [
+  'fitness.dayFull.0',
+  'fitness.dayFull.1',
+  'fitness.dayFull.2',
+  'fitness.dayFull.3',
+  'fitness.dayFull.4',
+  'fitness.dayFull.5',
+  'fitness.dayFull.6',
+] as const;
 
 interface TrainingPlanViewProps {
   onGeneratePlan: () => void;
@@ -376,7 +384,7 @@ function TrainingPlanViewInner({
               onContextMenu={e => handleDayContextMenu(e, dayNum)}
               className={`focus-visible:ring-ring flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-xl px-1 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${colorClass} ${ringClass}`}
               aria-current={isToday ? 'date' : undefined}
-              aria-label={DAY_FULL_LABELS[i]}
+              aria-label={t(DAY_FULL_LABEL_KEYS[i])}
             >
               <span>{DAY_LABELS[i]}</span>
             </button>

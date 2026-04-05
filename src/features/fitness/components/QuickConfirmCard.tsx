@@ -1,4 +1,5 @@
 import { Check, Dumbbell, Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
 
@@ -21,6 +22,7 @@ export function QuickConfirmCard({
   onConfirm,
   onCustomize,
 }: Readonly<QuickConfirmCardProps>) {
+  const { t } = useTranslation();
   return (
     <div className="border-info/20 bg-info/10 rounded-xl border p-4" data-testid="quick-confirm-card">
       <div className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -30,7 +32,7 @@ export function QuickConfirmCard({
       <div className="mt-2 flex items-end justify-between">
         <div>
           <p className="text-foreground text-2xl font-bold">
-            {suggestion.weight}kg × {suggestion.reps}
+            {t('fitness.setFormat', { weight: suggestion.weight, reps: suggestion.reps })}
           </p>
           <p className="text-muted-foreground text-xs">{SOURCE_LABELS[suggestion.source] ?? suggestion.source}</p>
         </div>

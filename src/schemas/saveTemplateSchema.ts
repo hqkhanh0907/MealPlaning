@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 import { z } from 'zod';
 
 const MAX_NAME_LENGTH = 100;
@@ -6,8 +7,8 @@ export const saveTemplateSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, { error: 'Tên mẫu không được bỏ trống' })
-    .max(MAX_NAME_LENGTH, { error: `Tên mẫu không được vượt quá ${MAX_NAME_LENGTH} ký tự` }),
+    .min(1, { error: i18n.t('validation.template.nameRequired') })
+    .max(MAX_NAME_LENGTH, { error: i18n.t('validation.template.nameMaxLength', { max: MAX_NAME_LENGTH }) }),
   tags: z.array(z.string().min(1).trim()).default([]),
 });
 

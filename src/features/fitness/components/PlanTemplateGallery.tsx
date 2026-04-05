@@ -21,12 +21,12 @@ interface PlanTemplateGalleryProps {
 
 const SPLIT_GROUP_ORDER: SplitType[] = ['full_body', 'upper_lower', 'ppl', 'bro_split', 'custom'];
 
-const SPLIT_GROUP_LABELS: Record<SplitType, string> = {
-  full_body: 'Toàn thân',
-  upper_lower: 'Trên/Dưới',
-  ppl: 'Đẩy/Kéo/Chân',
-  bro_split: 'Chia từng nhóm',
-  custom: 'Tùy chỉnh',
+const SPLIT_LABEL_KEYS: Record<SplitType, string> = {
+  full_body: 'fitness.splitLabel.full_body',
+  upper_lower: 'fitness.splitLabel.upper_lower',
+  ppl: 'fitness.splitLabel.ppl',
+  bro_split: 'fitness.splitLabel.bro_split',
+  custom: 'fitness.splitLabel.custom',
 };
 
 function TemplateCard({
@@ -53,7 +53,7 @@ function TemplateCard({
       </div>
       <p className="text-muted-foreground line-clamp-2 text-xs">{template.description}</p>
       <div className="text-foreground-secondary flex flex-wrap gap-2 text-xs">
-        <span className="bg-muted rounded-full px-2 py-0.5">{SPLIT_GROUP_LABELS[template.splitType]}</span>
+        <span className="bg-muted rounded-full px-2 py-0.5">{t(SPLIT_LABEL_KEYS[template.splitType])}</span>
         <span className="bg-muted rounded-full px-2 py-0.5 tabular-nums">
           {t('fitness.templateGallery.daysPerWeek', { count: template.daysPerWeek })}
         </span>
@@ -294,7 +294,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
             if (!templates || templates.length === 0) return null;
             return (
               <div key={splitType} className="mb-4" data-testid={`split-group-${splitType}`}>
-                <h3 className="text-muted-foreground mb-2 text-xs font-medium">{SPLIT_GROUP_LABELS[splitType]}</h3>
+                <h3 className="text-muted-foreground mb-2 text-xs font-medium">{t(SPLIT_LABEL_KEYS[splitType])}</h3>
                 <div className="space-y-3">
                   {templates.map(tpl => (
                     <TemplateCard key={tpl.id} template={tpl} onApply={handleApplyRequest} />

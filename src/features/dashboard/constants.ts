@@ -55,25 +55,4 @@ export const INSIGHT_PRIORITIES: Record<InsightPriority, number> = {
   low: 1,
 };
 
-export const DAILY_TIPS_VI = [
-  'Uống đủ 2-3 lít nước mỗi ngày để hỗ trợ trao đổi chất.',
-  'Ăn chậm, nhai kỹ giúp no lâu hơn và hấp thu tốt hơn.',
-  'Bổ sung rau xanh mỗi bữa ăn để tăng chất xơ.',
-  'Protein từ trứng, ức gà, cá là nguồn dinh dưỡng tuyệt vời.',
-  'Ngủ đủ 7-8 tiếng mỗi đêm để phục hồi cơ bắp.',
-  'Không bỏ bữa sáng – đây là bữa quan trọng nhất trong ngày.',
-  'Hạn chế đồ uống có đường, thay bằng nước lọc hoặc trà xanh.',
-  'Tập thể dục ít nhất 30 phút mỗi ngày để duy trì sức khỏe.',
-  'Chia nhỏ bữa ăn thành 4-5 bữa để ổn định đường huyết.',
-  'Bổ sung trái cây tươi thay vì nước ép để giữ chất xơ.',
-  'Cân đo thực phẩm để kiểm soát lượng calo chính xác hơn.',
-  'Kết hợp cardio và tập tạ để đốt mỡ hiệu quả.',
-  'Ăn đủ protein sau tập luyện trong vòng 30-60 phút.',
-  'Giảm muối trong bữa ăn để bảo vệ tim mạch.',
-  'Chuẩn bị meal prep vào cuối tuần để tiết kiệm thời gian.',
-  'Theo dõi cân nặng hàng ngày vào cùng một thời điểm.',
-  'Duy trì streak tập luyện để tạo thói quen bền vững.',
-  'Vitamin D từ ánh nắng sáng giúp tăng cường miễn dịch.',
-  'Hạn chế thức ăn chế biến sẵn, ưu tiên thực phẩm tươi.',
-  'Đặt mục tiêu nhỏ và tăng dần để tránh quá tải.',
-] as const;
+export const DAILY_TIPS_VI_KEYS: readonly string[] = Array.from({ length: 20 }, (_, i) => `dashboard.dailyTip.${i}`);

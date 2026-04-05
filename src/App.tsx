@@ -489,7 +489,7 @@ export default function App() {
             <DesktopNav activeTab={activeMainTab} onTabChange={handleTabChange} />
             <button
               type="button"
-              aria-label="Cài đặt"
+              aria-label={t('settings.ariaLabel')}
               data-testid="btn-open-settings"
               onClick={handleOpenSettings}
               className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-lg p-2 transition-colors"

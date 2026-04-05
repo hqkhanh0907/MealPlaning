@@ -1,31 +1,48 @@
+import i18n from 'i18next';
 import { z } from 'zod';
 
 export const ingredientEditSchema = z.object({
   name: z.object({
-    vi: z.string().trim().min(1, { error: 'Vui lòng nhập tên nguyên liệu' }),
+    vi: z
+      .string()
+      .trim()
+      .min(1, { error: i18n.t('validation.ingredient.nameRequired') }),
   }),
   unit: z.object({
-    vi: z.string().trim().min(1, { error: 'Vui lòng nhập đơn vị tính' }),
+    vi: z
+      .string()
+      .trim()
+      .min(1, { error: i18n.t('validation.ingredient.unitRequired') }),
   }),
   caloriesPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
+    z
+      .number({ error: i18n.t('validation.ingredient.valueRequired') })
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
   ),
   proteinPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
+    z
+      .number({ error: i18n.t('validation.ingredient.valueRequired') })
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
   ),
   carbsPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
+    z
+      .number({ error: i18n.t('validation.ingredient.valueRequired') })
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
   ),
   fatPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
+    z
+      .number({ error: i18n.t('validation.ingredient.valueRequired') })
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
   ),
   fiberPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    z.number({ error: 'Vui lòng nhập giá trị' }).min(0, { error: 'Giá trị không được âm' }),
+    z
+      .number({ error: i18n.t('validation.ingredient.valueRequired') })
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
   ),
 });
 

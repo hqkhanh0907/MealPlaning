@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDatabase } from '../../../contexts/DatabaseContext';
@@ -41,28 +42,15 @@ export interface InsightInput {
   weightTrendWeeks?: number;
 }
 
-export const TIPS_POOL: ReadonlyArray<{ title: string; message: string }> = [
-  { title: 'Nước', message: '💧 Uống 2-3L nước mỗi ngày giúp tối ưu hiệu suất tập luyện' },
-  { title: 'Protein', message: '🥩 Chia đều protein 4 bữa/ngày để tối ưu tổng hợp cơ' },
-  { title: 'Giấc ngủ', message: '😴 Ngủ 7-9 tiếng giúp phục hồi cơ bắp tốt hơn' },
-  { title: 'Chất xơ', message: '🥗 Ăn rau trước bữa ăn giúp no lâu hơn' },
-  { title: 'Sau tập', message: '⏰ Ăn đủ protein trong 2h sau tập' },
-  { title: 'Giãn cơ', message: '🧘 Stretching 10 phút sau tập giảm đau cơ' },
-  { title: 'Meal Prep', message: '📦 Chuẩn bị bữa ăn trước giúp duy trì chế độ dễ hơn' },
-  { title: 'Chất béo', message: '🥑 Chất béo lành mạnh giúp hấp thu vitamin tốt hơn' },
-  { title: 'Đi bộ', message: '🚶 Đi bộ 10.000 bước/ngày giúp đốt thêm 300-500 calo' },
-  { title: 'Kiên trì', message: '📊 Kiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x' },
-  { title: 'Bữa sáng', message: '🌅 Bữa sáng giàu protein giúp giảm cảm giác thèm ăn cả ngày' },
-  { title: 'Caffeine', message: '☕ Uống cafe 30 phút trước tập giúp tăng hiệu suất' },
-  { title: 'Nghỉ ngơi', message: '🛋️ Ngày nghỉ cũng quan trọng như ngày tập' },
-  { title: 'Rau quả', message: '🥦 Ăn ít nhất 5 phần rau quả mỗi ngày' },
-  { title: 'Uống nước', message: '💧 Uống nước trước bữa ăn 30 phút giúp kiểm soát khẩu phần' },
-  { title: 'Ăn chậm', message: '🍽️ Ăn chậm giúp não nhận tín hiệu no tốt hơn' },
-  { title: 'Đa khớp', message: '🏋️ Bài tập đa khớp đốt calo nhiều hơn bài đơn khớp' },
-  { title: 'Progress', message: '📸 Chụp ảnh progress mỗi tuần để thấy sự thay đổi' },
-  { title: 'Creatine', message: '💪 Creatine 5g/ngày giúp tăng sức mạnh và phục hồi' },
-  { title: 'Tập trung', message: '🧠 Ăn tập trung, không xem điện thoại giúp kiểm soát lượng ăn' },
-];
+export const TIPS_POOL_SIZE = 20;
+
+export const TIPS_POOL: ReadonlyArray<{ title: string; message: string }> = Array.from(
+  { length: TIPS_POOL_SIZE },
+  (_, i) => ({
+    title: i18n.t(`insightCard.tip.${i}.title`),
+    message: i18n.t(`insightCard.tip.${i}.message`),
+  }),
+);
 
 function hashDateToIndex(dateStr: string, poolSize: number): number {
   let hash = 0;
@@ -81,11 +69,15 @@ function createP1(input: InsightInput): Insight | null {
     priority: 1,
     type: 'alert',
     color: 'dark-amber',
-    title: 'Điều chỉnh tự động',
+    title: i18n.t('insightCard.autoAdjust.title'),
     message: details
-      ? `Calories điều chỉnh: ${details.oldCal} → ${details.newCal} kcal. Lý do: ${details.reason}`
-      : 'Hệ thống đã tự động điều chỉnh calories dựa trên dữ liệu 14 ngày',
-    actionLabel: 'Xem chi tiết',
+      ? i18n.t('insightCard.autoAdjust.message', {
+          oldCal: details.oldCal,
+          newCal: details.newCal,
+          reason: details.reason,
+        })
+      : i18n.t('insightCard.autoAdjust.messageDefault'),
+    actionLabel: i18n.t('insightCard.autoAdjust.actionLabel'),
     actionType: 'navigate',
     dismissable: false,
   };
@@ -100,9 +92,9 @@ function createP2(input: InsightInput): Insight | null {
     priority: 2,
     type: 'action',
     color: 'amber',
-    title: 'Protein thấp',
-    message: `Bạn mới đạt ${Math.round(input.proteinRatio * 100)}% mục tiêu protein. Hãy bổ sung thêm!`,
-    actionLabel: 'Gợi ý bữa tối',
+    title: i18n.t('insightCard.lowProtein.title'),
+    message: i18n.t('insightCard.lowProtein.message', { pct: Math.round(input.proteinRatio * 100) }),
+    actionLabel: i18n.t('insightCard.lowProtein.actionLabel'),
     actionType: 'navigate',
     dismissable: true,
   };
@@ -117,9 +109,9 @@ function createP3(input: InsightInput): Insight | null {
     priority: 3,
     type: 'remind',
     color: 'amber',
-    title: 'Cập nhật cân nặng',
-    message: `Đã ${input.daysSinceWeightLog} ngày chưa cập nhật cân nặng. Log ngay!`,
-    actionLabel: 'Log cân nặng',
+    title: i18n.t('insightCard.weightLog.title'),
+    message: i18n.t('insightCard.weightLog.message', { days: input.daysSinceWeightLog }),
+    actionLabel: i18n.t('insightCard.weightLog.actionLabel'),
     actionType: 'navigate',
     dismissable: true,
   };
@@ -139,8 +131,11 @@ function createP4(input: InsightInput): Insight | null {
     priority: 4,
     type: 'motivate',
     color: 'blue',
-    title: 'Sắp phá kỷ lục!',
-    message: `Còn ${input.longestStreak - input.currentStreak} ngày nữa là phá kỷ lục streak ${input.longestStreak} ngày! 🔥`,
+    title: i18n.t('insightCard.streakNearRecord.title'),
+    message: i18n.t('insightCard.streakNearRecord.message', {
+      remaining: input.longestStreak - input.currentStreak,
+      longest: input.longestStreak,
+    }),
     dismissable: true,
     autoDismissHours: 24,
   };
@@ -153,8 +148,8 @@ function createP5(input: InsightInput): Insight | null {
     priority: 5,
     type: 'celebrate',
     color: 'blue',
-    title: 'Kỷ lục mới! 🎉',
-    message: 'Chúc mừng! Bạn vừa đạt Personal Record mới hôm nay!',
+    title: i18n.t('insightCard.prToday.title'),
+    message: i18n.t('insightCard.prToday.message'),
     dismissable: true,
     autoDismissHours: 24,
   };
@@ -169,8 +164,8 @@ function createP6(input: InsightInput): Insight | null {
     priority: 6,
     type: 'praise',
     color: 'green',
-    title: 'Tuần xuất sắc! 👏',
-    message: `Bạn đã đạt ${Math.round(input.weeklyAdherence)}% mục tiêu tuần này. Tuyệt vời!`,
+    title: i18n.t('insightCard.weeklyAdherence.title'),
+    message: i18n.t('insightCard.weeklyAdherence.message', { pct: Math.round(input.weeklyAdherence) }),
     dismissable: true,
     autoDismissHours: 24,
   };
@@ -189,8 +184,8 @@ function createP7(input: InsightInput): Insight | null {
     priority: 7,
     type: 'progress',
     color: 'green',
-    title: 'Xu hướng tốt! 📈',
-    message: `Cân nặng đúng hướng ${input.weightTrendWeeks} tuần liên tiếp. Tiếp tục phát huy!`,
+    title: i18n.t('insightCard.weightTrend.title'),
+    message: i18n.t('insightCard.weightTrend.message', { weeks: input.weightTrendWeeks }),
     dismissable: true,
     autoDismissHours: 24,
   };

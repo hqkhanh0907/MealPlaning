@@ -538,7 +538,8 @@
     "cancel": "Hủy",
     "back": "Quay lại",
     "goalNotSet": "Chưa thiết lập mục tiêu",
-    "trainingProfileEditHint": "Để thay đổi hồ sơ tập luyện, vui lòng quay lại tab Tập luyện và chạy lại thiết lập ban đầu."
+    "trainingProfileEditHint": "Để thay đổi hồ sơ tập luyện, vui lòng quay lại tab Tập luyện và chạy lại thiết lập ban đầu.",
+    "ariaLabel": "Cài đặt"
   },
   "filter": {
     "button": "Lọc",
@@ -1117,7 +1118,24 @@
       "editSchedule": "Chỉnh lịch",
       "changeSplit": "Đổi Split",
       "templates": "Mẫu Plan"
-    }
+    },
+    "dayFull": {
+      "0": "Thứ 2",
+      "1": "Thứ 3",
+      "2": "Thứ 4",
+      "3": "Thứ 5",
+      "4": "Thứ 6",
+      "5": "Thứ 7",
+      "6": "Chủ Nhật"
+    },
+    "splitLabel": {
+      "full_body": "Toàn thân",
+      "upper_lower": "Trên/Dưới",
+      "ppl": "Đẩy/Kéo/Chân",
+      "bro_split": "Chia từng nhóm",
+      "custom": "Tùy chỉnh"
+    },
+    "setFormat": "{{weight}}kg × {{reps}}"
   },
   "dashboard": {
     "hero": {
@@ -1199,7 +1217,29 @@
     },
     "greetingMorning": "Chào buổi sáng!",
     "greetingAfternoon": "Chào buổi chiều!",
-    "greetingEvening": "Chào buổi tối!"
+    "greetingEvening": "Chào buổi tối!",
+    "dailyTip": {
+      "0": "Uống đủ 2-3 lít nước mỗi ngày để hỗ trợ trao đổi chất.",
+      "1": "Ăn chậm, nhai kỹ giúp no lâu hơn và hấp thu tốt hơn.",
+      "2": "Bổ sung rau xanh mỗi bữa ăn để tăng chất xơ.",
+      "3": "Protein từ trứng, ức gà, cá là nguồn dinh dưỡng tuyệt vời.",
+      "4": "Ngủ đủ 7-8 tiếng mỗi đêm để phục hồi cơ bắp.",
+      "5": "Không bỏ bữa sáng – đây là bữa quan trọng nhất trong ngày.",
+      "6": "Hạn chế đồ uống có đường, thay bằng nước lọc hoặc trà xanh.",
+      "7": "Tập thể dục ít nhất 30 phút mỗi ngày để duy trì sức khỏe.",
+      "8": "Chia nhỏ bữa ăn thành 4-5 bữa để ổn định đường huyết.",
+      "9": "Bổ sung trái cây tươi thay vì nước ép để giữ chất xơ.",
+      "10": "Cân đo thực phẩm để kiểm soát lượng calo chính xác hơn.",
+      "11": "Kết hợp cardio và tập tạ để đốt mỡ hiệu quả.",
+      "12": "Ăn đủ protein sau tập luyện trong vòng 30-60 phút.",
+      "13": "Giảm muối trong bữa ăn để bảo vệ tim mạch.",
+      "14": "Chuẩn bị meal prep vào cuối tuần để tiết kiệm thời gian.",
+      "15": "Theo dõi cân nặng hàng ngày vào cùng một thời điểm.",
+      "16": "Duy trì streak tập luyện để tạo thói quen bền vững.",
+      "17": "Vitamin D từ ánh nắng sáng giúp tăng cường miễn dịch.",
+      "18": "Hạn chế thức ăn chế biến sẵn, ưu tiên thực phẩm tươi.",
+      "19": "Đặt mục tiêu nhỏ và tăng dần để tránh quá tải."
+    }
   },
   "nutrition": {
     "caloriesIn": "Nạp vào",
@@ -1221,7 +1261,8 @@
     "proteinSuggestion1": "Gợi ý: thêm cá, tôm, đậu phụ",
     "proteinSuggestion2": "Gợi ý: thêm sữa, phô mai, hạt",
     "proteinSuggestion3": "Gợi ý: thêm thịt bò, trứng, đậu nành",
-    "proteinSuggestion4": "Gợi ý: thêm cá hồi, ức gà, đậu xanh"
+    "proteinSuggestion4": "Gợi ý: thêm cá hồi, ức gà, đậu xanh",
+    "proteinAriaLabel": "Protein: {{current}}g trên {{target}}g. {{suggestion}}"
   },
   "quickActions": {
     "ariaLabel": "Thao tác nhanh",
@@ -1319,7 +1360,121 @@
     "notConfigured": "Chưa thiết lập hồ sơ sức khỏe"
   },
   "insightCard": {
-    "dismiss": "Bỏ qua"
+    "dismiss": "Bỏ qua",
+    "tip": {
+      "0": {
+        "title": "Nước",
+        "message": "💧 Uống 2-3L nước mỗi ngày giúp tối ưu hiệu suất tập luyện"
+      },
+      "1": {
+        "title": "Protein",
+        "message": "🥩 Chia đều protein 4 bữa/ngày để tối ưu tổng hợp cơ"
+      },
+      "2": {
+        "title": "Giấc ngủ",
+        "message": "😴 Ngủ 7-9 tiếng giúp phục hồi cơ bắp tốt hơn"
+      },
+      "3": {
+        "title": "Chất xơ",
+        "message": "🥗 Ăn rau trước bữa ăn giúp no lâu hơn"
+      },
+      "4": {
+        "title": "Sau tập",
+        "message": "⏰ Ăn đủ protein trong 2h sau tập"
+      },
+      "5": {
+        "title": "Giãn cơ",
+        "message": "🧘 Stretching 10 phút sau tập giảm đau cơ"
+      },
+      "6": {
+        "title": "Meal Prep",
+        "message": "📦 Chuẩn bị bữa ăn trước giúp duy trì chế độ dễ hơn"
+      },
+      "7": {
+        "title": "Chất béo",
+        "message": "🥑 Chất béo lành mạnh giúp hấp thu vitamin tốt hơn"
+      },
+      "8": {
+        "title": "Đi bộ",
+        "message": "🚶 Đi bộ 10.000 bước/ngày giúp đốt thêm 300-500 calo"
+      },
+      "9": {
+        "title": "Kiên trì",
+        "message": "📊 Kiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x"
+      },
+      "10": {
+        "title": "Bữa sáng",
+        "message": "🌅 Bữa sáng giàu protein giúp giảm cảm giác thèm ăn cả ngày"
+      },
+      "11": {
+        "title": "Caffeine",
+        "message": "☕ Uống cafe 30 phút trước tập giúp tăng hiệu suất"
+      },
+      "12": {
+        "title": "Nghỉ ngơi",
+        "message": "🛋️ Ngày nghỉ cũng quan trọng như ngày tập"
+      },
+      "13": {
+        "title": "Rau quả",
+        "message": "🥦 Ăn ít nhất 5 phần rau quả mỗi ngày"
+      },
+      "14": {
+        "title": "Uống nước",
+        "message": "💧 Uống nước trước bữa ăn 30 phút giúp kiểm soát khẩu phần"
+      },
+      "15": {
+        "title": "Ăn chậm",
+        "message": "🍽️ Ăn chậm giúp não nhận tín hiệu no tốt hơn"
+      },
+      "16": {
+        "title": "Đa khớp",
+        "message": "🏋️ Bài tập đa khớp đốt calo nhiều hơn bài đơn khớp"
+      },
+      "17": {
+        "title": "Progress",
+        "message": "📸 Chụp ảnh progress mỗi tuần để thấy sự thay đổi"
+      },
+      "18": {
+        "title": "Creatine",
+        "message": "💪 Creatine 5g/ngày giúp tăng sức mạnh và phục hồi"
+      },
+      "19": {
+        "title": "Tập trung",
+        "message": "🧠 Ăn tập trung, không xem điện thoại giúp kiểm soát lượng ăn"
+      }
+    },
+    "autoAdjust": {
+      "title": "Điều chỉnh tự động",
+      "message": "Calories điều chỉnh: {{oldCal}} → {{newCal}} kcal. Lý do: {{reason}}",
+      "messageDefault": "Hệ thống đã tự động điều chỉnh calories dựa trên dữ liệu 14 ngày",
+      "actionLabel": "Xem chi tiết"
+    },
+    "lowProtein": {
+      "title": "Protein thấp",
+      "message": "Bạn mới đạt {{pct}}% mục tiêu protein. Hãy bổ sung thêm!",
+      "actionLabel": "Gợi ý bữa tối"
+    },
+    "weightLog": {
+      "title": "Cập nhật cân nặng",
+      "message": "Đã {{days}} ngày chưa cập nhật cân nặng. Log ngay!",
+      "actionLabel": "Log cân nặng"
+    },
+    "streakNearRecord": {
+      "title": "Sắp phá kỷ lục!",
+      "message": "Còn {{remaining}} ngày nữa là phá kỷ lục streak {{longest}} ngày! 🔥"
+    },
+    "prToday": {
+      "title": "Kỷ lục mới! 🎉",
+      "message": "Chúc mừng! Bạn vừa đạt Personal Record mới hôm nay!"
+    },
+    "weeklyAdherence": {
+      "title": "Tuần xuất sắc! 👏",
+      "message": "Bạn đã đạt {{pct}}% mục tiêu tuần này. Tuyệt vời!"
+    },
+    "weightTrend": {
+      "title": "Xu hướng tốt! 📈",
+      "message": "Cân nặng đúng hướng {{weeks}} tuần liên tiếp. Tiếp tục phát huy!"
+    }
   },
   "welcome": {
     "slide1Title": "Chào mừng đến với Smart Meal Planner",
@@ -1556,5 +1711,46 @@
     "unitSelectorDefault": "— chọn đơn vị —",
     "unitSelectorCustom": "Khác...",
     "unitSelectorCustomPlaceholder": "Nhập đơn vị tuỳ chỉnh..."
+  },
+  "validation": {
+    "healthProfile": {
+      "nameRequired": "Vui lòng nhập tên",
+      "nameMax": "Tên tối đa 50 ký tự",
+      "dobRequired": "Vui lòng nhập ngày sinh",
+      "dobInvalid": "Ngày sinh không hợp lệ",
+      "heightMin": "Chiều cao tối thiểu là 100 cm",
+      "heightMax": "Chiều cao tối đa là 250 cm",
+      "weightMin": "Cân nặng tối thiểu là 30 kg",
+      "weightMax": "Cân nặng tối đa là 300 kg",
+      "bodyFatMin": "Tỉ lệ mỡ tối thiểu là 3%",
+      "bodyFatMax": "Tỉ lệ mỡ tối đa là 60%",
+      "bmrPositive": "BMR phải là số dương",
+      "proteinRatioMin": "Tỉ lệ protein tối thiểu là 0.8 g/kg",
+      "proteinRatioMax": "Tỉ lệ protein tối đa là 4 g/kg",
+      "bmrOverrideRequired": "Vui lòng nhập giá trị BMR khi bật ghi đè"
+    },
+    "ingredient": {
+      "nameRequired": "Vui lòng nhập tên nguyên liệu",
+      "unitRequired": "Vui lòng nhập đơn vị tính",
+      "valueRequired": "Vui lòng nhập giá trị",
+      "valueNonNegative": "Giá trị không được âm"
+    },
+    "trainingProfile": {
+      "daysPerWeek": "Số ngày tập phải là 2, 3, 4, 5 hoặc 6",
+      "sessionDuration": "Thời lượng buổi tập phải là 30, 45, 60 hoặc 90 phút",
+      "cardioSessions": "Số buổi cardio phải từ 0 đến 5",
+      "cycleWeeks": "Số tuần chu kỳ phải là 4, 6, 8 hoặc 12",
+      "priorityMusclesMax": "Chọn tối đa {{max}} nhóm cơ ưu tiên",
+      "sleepMin": "Giờ ngủ tối thiểu là 3",
+      "sleepMax": "Giờ ngủ tối đa là 12"
+    },
+    "exercise": {
+      "nameRequired": "Tên bài tập không được bỏ trống",
+      "categoryInvalid": "Loại bài tập không hợp lệ"
+    },
+    "template": {
+      "nameRequired": "Tên mẫu không được bỏ trống",
+      "nameMaxLength": "Tên mẫu không được vượt quá {{max}} ký tự"
+    }
   }
 }

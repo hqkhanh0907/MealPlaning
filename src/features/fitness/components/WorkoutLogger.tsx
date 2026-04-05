@@ -115,6 +115,7 @@ function ProgressiveOverloadChip({
   suggestion: OverloadSuggestion | null;
   onApply: (s: OverloadSuggestion) => void;
 }>): React.JSX.Element | null {
+  const { t } = useTranslation();
   if (!suggestion) return null;
   const isPlateaued = suggestion.isPlateaued ?? false;
   return (
@@ -130,7 +131,7 @@ function ProgressiveOverloadChip({
       )}
       data-testid="overload-chip"
     >
-      {isPlateaued ? '⚠️' : '📈'} {suggestion.weight}kg × {suggestion.reps}
+      {isPlateaued ? '⚠️' : '📈'} {t('fitness.setFormat', { weight: suggestion.weight, reps: suggestion.reps })}
       {isPlateaued && suggestion.plateauWeeks != null && ` (plateau ${suggestion.plateauWeeks}w)`}
     </Button>
   );
@@ -511,7 +512,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                       </span>
                       <span>
                         {/* v8 ignore start */}
-                        {set.weightKg}kg × {set.reps ?? 0}
+                        {t('fitness.setFormat', { weight: set.weightKg, reps: set.reps ?? 0 })}
                         {/* v8 ignore stop */}
                       </span>
                       {set.rpe !== undefined && <span className="text-primary text-xs">RPE {set.rpe}</span>}

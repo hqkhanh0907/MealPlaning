@@ -53,7 +53,7 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
         aria-valuenow={roundedCurrent}
         aria-valuemin={0}
         aria-valuemax={roundedTarget}
-        aria-label={`Protein: ${roundedCurrent}g trên ${roundedTarget}g. ${suggestion}`}
+        aria-label={t('nutrition.proteinAriaLabel', { current: roundedCurrent, target: roundedTarget, suggestion })}
       >
         {t('nutrition.protein')}: {roundedCurrent}g / {roundedTarget}g. {suggestion}
       </progress>

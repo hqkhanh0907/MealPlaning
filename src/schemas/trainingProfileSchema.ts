@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 import { z } from 'zod';
 
 // ── Enum value tuples (match src/features/fitness/types.ts exactly) ──
@@ -41,14 +42,14 @@ export const trainingProfileSchema = z.object({
     .number()
     .int()
     .refine(v => (DAYS_PER_WEEK_VALUES as readonly number[]).includes(v), {
-      message: 'Số ngày tập phải là 2, 3, 4, 5 hoặc 6',
+      message: i18n.t('validation.trainingProfile.daysPerWeek'),
     }),
 
   sessionDurationMin: z
     .number()
     .int()
     .refine(v => (SESSION_DURATION_VALUES as readonly number[]).includes(v), {
-      message: 'Thời lượng buổi tập phải là 30, 45, 60 hoặc 90 phút',
+      message: i18n.t('validation.trainingProfile.sessionDuration'),
     }),
 
   availableEquipment: z.array(z.enum(EQUIPMENT_TYPE_VALUES)),
@@ -59,7 +60,7 @@ export const trainingProfileSchema = z.object({
     .number()
     .int()
     .refine(v => (CARDIO_SESSIONS_VALUES as readonly number[]).includes(v), {
-      message: 'Số buổi cardio phải từ 0 đến 5',
+      message: i18n.t('validation.trainingProfile.cardioSessions'),
     }),
 
   periodizationModel: z.enum(PERIODIZATION_MODEL_VALUES),
@@ -68,17 +69,17 @@ export const trainingProfileSchema = z.object({
     .number()
     .int()
     .refine(v => (CYCLE_WEEKS_VALUES as readonly number[]).includes(v), {
-      message: 'Số tuần chu kỳ phải là 4, 6, 8 hoặc 12',
+      message: i18n.t('validation.trainingProfile.cycleWeeks'),
     }),
 
   priorityMuscles: z.array(z.enum(MUSCLE_GROUP_VALUES)).max(MAX_PRIORITY_MUSCLES, {
-    message: `Chọn tối đa ${MAX_PRIORITY_MUSCLES} nhóm cơ ưu tiên`,
+    message: i18n.t('validation.trainingProfile.priorityMusclesMax', { max: MAX_PRIORITY_MUSCLES }),
   }),
 
   avgSleepHours: z
     .number()
-    .min(3, { message: 'Giờ ngủ tối thiểu là 3' })
-    .max(12, { message: 'Giờ ngủ tối đa là 12' })
+    .min(3, { message: i18n.t('validation.trainingProfile.sleepMin') })
+    .max(12, { message: i18n.t('validation.trainingProfile.sleepMax') })
     .optional(),
 });
 
