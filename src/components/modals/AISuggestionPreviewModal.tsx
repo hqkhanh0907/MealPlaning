@@ -162,7 +162,7 @@ export const AISuggestionPreviewModal = ({
           {isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-16">
               <div className="bg-color-ai-subtle flex h-16 w-16 animate-pulse items-center justify-center rounded-full">
-                <Sparkles className="text-color-ai h-8 w-8" />
+                <Sparkles className="text-color-ai h-6 w-6" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-bold">{t('ai.suggestionLoading')}</p>
@@ -178,7 +178,7 @@ export const AISuggestionPreviewModal = ({
           {error && !isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
               <div className="bg-destructive/10 flex h-16 w-16 items-center justify-center rounded-full">
-                <AlertCircle className="text-destructive h-8 w-8" />
+                <AlertCircle className="text-destructive h-6 w-6" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-bold">{t('ai.suggestionError')}</p>
@@ -198,7 +198,7 @@ export const AISuggestionPreviewModal = ({
           {!isLoading && !error && !hasAnySuggestion && (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
               <div className="bg-status-warning/15 flex h-16 w-16 items-center justify-center rounded-full">
-                <ChefHat className="text-status-warning h-8 w-8" />
+                <ChefHat className="text-status-warning h-6 w-6" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-bold">{t('ai.suggestionEmpty')}</p>

@@ -244,8 +244,9 @@ describe('SetEditor', () => {
   it('editor has proper aria attributes', () => {
     renderEditor();
     const editor = screen.getByTestId('set-editor');
-    expect(editor).toHaveAttribute('aria-modal', 'true');
     expect(editor).toHaveAttribute('aria-label', 'Chỉnh sửa set');
+    const dialog = editor.closest('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
   });
 
   // Touch target size

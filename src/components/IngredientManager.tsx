@@ -140,7 +140,7 @@ export const IngredientManager = ({
   };
 
   // --- Render ---
-  const emptyIcon = <Apple className="text-primary/40 h-8 w-8" />;
+  const emptyIcon = <Apple className="text-primary/40 h-6 w-6" />;
 
   return (
     <div className="space-y-6">
@@ -393,7 +393,7 @@ export const IngredientManager = ({
             >
               <div className="flex items-center gap-4">
                 <div className="text-primary bg-primary-subtle flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl">
-                  <Apple className="h-7 w-7" />
+                  <Apple className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="text-foreground text-xl font-bold">{getLocalizedField(ing.name, lang)}</h3>

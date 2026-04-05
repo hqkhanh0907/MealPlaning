@@ -79,7 +79,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       icon: <Save className="h-4 w-4" aria-hidden="true" />,
       label: t('template.saveAs'),
       onClick: onSaveTemplate,
-      className: 'text-warning hover:bg-warning/5',
+      className: 'text-primary hover:bg-primary/5',
       testId: 'btn-save-template',
     });
   }

@@ -22,6 +22,7 @@ import { DishEditModal } from './modals/DishEditModal';
 import { DetailModal } from './shared/DetailModal';
 import { EmptyState } from './shared/EmptyState';
 import { ListToolbar } from './shared/ListToolbar';
+import { ModalBackdrop } from './shared/ModalBackdrop';
 
 type DishSortOption = BaseSortOption | 'ing-asc' | 'ing-desc' | 'rating-asc' | 'rating-desc';
 
@@ -207,7 +208,7 @@ export const DishManager = ({
   );
 
   // --- Render helpers ---
-  const emptyIcon = <ChefHat className="text-primary/40 h-8 w-8" />;
+  const emptyIcon = <ChefHat className="text-primary/40 h-6 w-6" />;
 
   return (
     <div data-testid="dish-manager" className="space-y-6">
@@ -573,7 +574,7 @@ export const DishManager = ({
             >
               <div className="flex items-center gap-4">
                 <div className="text-primary bg-primary-subtle flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl">
-                  <ChefHat className="h-7 w-7" />
+                  <ChefHat className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="text-foreground text-xl font-bold">{getLocalizedField(dish.name, lang)}</h3>
@@ -712,22 +713,12 @@ export const DishManager = ({
             fiber: 'text-primary',
           };
           return (
-            <dialog
-              data-testid="compare-panel"
-              open
-              className="fixed inset-0 z-50 m-0 flex h-full w-full items-end justify-center border-none bg-black/50 bg-transparent p-0 sm:items-center"
-              aria-label={t('dish.compareNutrition')}
-            >
-              <div className="fixed inset-0 bg-black/50" aria-hidden="true">
-                <button
-                  type="button"
-                  className="focus-visible:ring-ring h-full w-full cursor-default border-none bg-transparent focus-visible:ring-2 focus-visible:outline-none"
-                  onClick={() => setShowCompare(false)}
-                  aria-label={t('common.closeBackdrop')}
-                  data-testid="compare-backdrop"
-                />
-              </div>
-              <div className="bg-card relative z-10 max-h-[80dvh] w-full overflow-y-auto rounded-t-2xl shadow-2xl sm:max-w-2xl sm:rounded-2xl">
+            <ModalBackdrop onClose={() => setShowCompare(false)} zIndex="z-50">
+              <div
+                data-testid="compare-panel"
+                className="bg-card relative z-10 max-h-[80dvh] w-full overflow-y-auto rounded-t-2xl shadow-2xl sm:max-w-2xl sm:rounded-2xl"
+                aria-label={t('dish.compareNutrition')}
+              >
                 <div className="bg-card border-border-subtle sticky top-0 z-10 flex items-center justify-between border-b p-4">
                   <h3 className="text-foreground flex items-center gap-2 text-lg font-bold">
                     <GitCompareArrows className="h-5 w-5 text-blue-500" />
@@ -787,7 +778,7 @@ export const DishManager = ({
                   </table>
                 </div>
               </div>
-            </dialog>
+            </ModalBackdrop>
           );
         })()}
     </div>

@@ -37,7 +37,7 @@ export function WorkoutSummaryCard({
             className="from-color-energy to-color-energy/80 mb-4 rounded-xl bg-gradient-to-r px-6 py-3 text-amber-950 shadow-lg"
             data-testid="pr-celebration"
           >
-            <Trophy className="mx-auto mb-1 h-8 w-8" aria-hidden="true" />
+            <Trophy className="mx-auto mb-1 h-6 w-6" aria-hidden="true" />
             <p className="text-center text-sm font-semibold">
               {t('fitness.summary.newPR', { count: personalRecords.length })}
             </p>

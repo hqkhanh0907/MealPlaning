@@ -1,4 +1,4 @@
-import { Bot, Calendar, ClipboardList, Dumbbell, LayoutDashboard } from 'lucide-react';
+import { Bot, Calendar, ClipboardList, Dumbbell, LayoutDashboard, Loader2 } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -115,7 +115,7 @@ export const TabLoadingFallback = () => {
   return (
     <div className="flex items-center justify-center py-20">
       <div className="text-muted-foreground flex flex-col items-center gap-3">
-        <div className="border-t-primary border-primary/20 h-8 w-8 animate-spin rounded-full border-3" />
+        <Loader2 className="text-primary h-8 w-8 animate-spin" aria-hidden="true" />
         <p className="text-sm font-medium">{t('common.loading')}</p>
       </div>
     </div>

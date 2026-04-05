@@ -154,7 +154,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               data-testid="swap-empty-state"
               className="text-muted-foreground flex flex-col items-center justify-center py-12"
             >
-              <ArrowLeftRight className="mb-2 h-8 w-8 opacity-40" />
+              <ArrowLeftRight className="mb-2 h-6 w-6 opacity-40" />
               <p className="text-sm">{t('fitness.swap.noAlternatives')}</p>
             </div>
           ) : (

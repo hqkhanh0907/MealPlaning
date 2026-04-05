@@ -174,7 +174,7 @@ const AISLE_ORDER: AisleCategory[] = ['produce', 'protein', 'dairy', 'grains', '
 const GroceryEmptyState = ({ t }: { t: (key: string) => string }) => (
   <div data-testid="grocery-empty-state" className="bg-card border-border rounded-2xl border p-8 text-center sm:p-12">
     <div className="bg-primary-subtle mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full">
-      <ShoppingCart className="text-primary/40 h-10 w-10" aria-hidden="true" />
+      <ShoppingCart className="text-primary/40 h-12 w-12" aria-hidden="true" />
     </div>
     <h3 className="text-foreground mb-2 text-lg font-bold">{t('grocery.emptyTitle')}</h3>
     <p className="text-muted-foreground mx-auto mb-2 max-w-sm text-sm">{t('grocery.emptyDescription')}</p>

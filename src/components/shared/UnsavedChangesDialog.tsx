@@ -24,7 +24,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
       <div className="bg-card relative w-full overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl">
         <div className="p-6 text-center">
           <div className="bg-warning/10 text-warning mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <Save className="h-8 w-8" />
+            <Save className="h-6 w-6" />
           </div>
           <h4 className="text-foreground mb-2 text-xl font-bold">{t('unsavedChanges.title')}</h4>
           <p className="text-foreground-secondary mb-6">{t('unsavedChanges.description')}</p>

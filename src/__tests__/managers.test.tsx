@@ -628,7 +628,7 @@ describe('DishManager', () => {
     fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
     fireEvent.click(screen.getByTestId('btn-open-compare'));
     expect(screen.getByTestId('compare-panel')).toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText('Đóng'));
+    fireEvent.click(screen.getAllByLabelText('Đóng')[1]);
     expect(screen.queryByTestId('compare-panel')).not.toBeInTheDocument();
   });
 
@@ -655,7 +655,7 @@ describe('DishManager', () => {
     fireEvent.click(screen.getAllByTestId('btn-compare-d1')[0]);
     fireEvent.click(screen.getAllByTestId('btn-compare-d2')[0]);
     fireEvent.click(screen.getByTestId('btn-open-compare'));
-    fireEvent.click(screen.getByTestId('compare-backdrop'));
+    fireEvent.click(screen.getAllByLabelText('Đóng')[0]);
     expect(screen.queryByTestId('compare-panel')).not.toBeInTheDocument();
   });
 

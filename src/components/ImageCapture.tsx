@@ -179,7 +179,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                   aria-label={t('imageCapture.takePhoto')}
                   className="focus-visible:ring-ring hover:bg-primary-subtle bg-card text-primary flex min-h-12 min-w-12 items-center justify-center rounded-full p-5 shadow-2xl transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
                 >
-                  <Camera className="h-9 w-9" />
+                  <Camera className="h-6 w-6" />
                 </button>
                 <button
                   onClick={switchCamera}
@@ -223,7 +223,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                       className="hover:bg-primary-subtle flex flex-col items-center gap-2 rounded-xl p-4 transition-all"
                     >
                       <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full shadow-sm transition-all">
-                        <Camera className="text-primary h-7 w-7" />
+                        <Camera className="text-primary h-6 w-6" />
                       </div>
                       <span className="text-primary-emphasis text-sm font-bold">{t('imageCapture.takePhoto')}</span>
                     </button>

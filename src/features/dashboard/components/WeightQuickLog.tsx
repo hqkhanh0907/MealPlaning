@@ -243,8 +243,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
 
   return (
     <ModalBackdrop onClose={onClose} zIndex="z-60">
-      <dialog
-        open
+      <div
         data-testid="weight-quick-log"
         className="bg-card relative w-full rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
         aria-label={t('fitness.weight.quickLogTitle')}
@@ -374,7 +373,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             {t('common.save')}
           </button>
         </div>
-      </dialog>
+      </div>
     </ModalBackdrop>
   );
 }

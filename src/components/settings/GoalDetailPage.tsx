@@ -67,7 +67,7 @@ function GoalViewMode() {
     <div className="space-y-6" data-testid="goal-view">
       {/* Goal Type Badge */}
       <div className="bg-muted flex items-center gap-3 rounded-xl p-4">
-        <GoalIcon className={`h-8 w-8 ${goalColor}`} />
+        <GoalIcon className={`h-6 w-6 ${goalColor}`} />
         <div>
           <p className="text-foreground text-lg font-bold">{t(`goal.${activeGoal.type}`)}</p>
           <p className="text-muted-foreground text-xs">

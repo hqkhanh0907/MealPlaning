@@ -56,7 +56,7 @@ export const ConfirmationModal = ({
   if (!isOpen) return null;
 
   const styles = VARIANT_STYLES[variant];
-  const defaultIcon = variant === 'danger' ? <Trash2 className="h-8 w-8" /> : <AlertTriangle className="h-8 w-8" />;
+  const defaultIcon = variant === 'danger' ? <Trash2 className="h-6 w-6" /> : <AlertTriangle className="h-6 w-6" />;
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-70">

@@ -779,7 +779,7 @@ function TrainingPlanViewInner({
       <ConfirmationModal
         isOpen={showRegenerateConfirm}
         variant="warning"
-        icon={<RefreshCw className="h-8 w-8" />}
+        icon={<RefreshCw className="h-6 w-6" />}
         title={t('fitness.plan.regenerate')}
         message={t('fitness.plan.regenerateConfirm')}
         confirmLabel={t('fitness.plan.confirmRegenerate')}

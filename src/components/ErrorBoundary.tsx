@@ -44,7 +44,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       return (
         <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
           <div className="bg-warning/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <AlertTriangle className="text-warning h-8 w-8" />
+            <AlertTriangle className="text-warning h-6 w-6" />
           </div>
           <h3 className="text-foreground mb-2 text-lg font-bold">
             {this.props.fallbackTitle || i18n.t('errorBoundary.defaultTitle')}

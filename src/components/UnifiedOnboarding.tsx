@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -77,7 +78,7 @@ const slideVariants = {
 function StepFallback() {
   return (
     <div className="flex h-full items-center justify-center">
-      <div className="border-t-primary border-primary/20 h-8 w-8 animate-spin rounded-full border-4" />
+      <Loader2 className="text-primary h-8 w-8 animate-spin" aria-hidden="true" />
     </div>
   );
 }

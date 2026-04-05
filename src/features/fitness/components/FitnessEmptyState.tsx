@@ -21,7 +21,7 @@ export const FitnessEmptyState = ({
   return (
     <div data-testid="fitness-empty-state" className="flex flex-col items-center justify-center py-16 text-center">
       <div className="bg-muted mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-        <Icon className="text-muted-foreground h-8 w-8" aria-hidden="true" />
+        <Icon className="text-muted-foreground h-6 w-6" aria-hidden="true" />
       </div>
       <h3 className="text-foreground text-lg font-semibold">{t(titleKey)}</h3>
       <p className="text-muted-foreground mt-1 max-w-xs text-sm">{t(descriptionKey)}</p>

@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -445,7 +446,7 @@ export default function App() {
       <Suspense
         fallback={
           <div className="flex h-dvh items-center justify-center">
-            <div className="border-t-primary border-primary/20 h-8 w-8 animate-spin rounded-full border-4" />
+            <Loader2 className="text-primary h-8 w-8 animate-spin" aria-hidden="true" />
           </div>
         }
       >
