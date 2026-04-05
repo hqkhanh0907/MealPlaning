@@ -28,7 +28,7 @@ export function WorkoutSummaryCard({
       open
       aria-modal="true"
       aria-label={t('fitness.summary.title')}
-      className="pt-safe pb-safe bg-card fixed inset-0 z-50 m-0 flex max-h-none max-w-none flex-col border-none p-0"
+      className="pt-safe pb-safe bg-card fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none flex-col border-none p-0"
       data-testid="workout-summary-card"
     >
       <div className="flex flex-1 flex-col items-center justify-center p-6">
