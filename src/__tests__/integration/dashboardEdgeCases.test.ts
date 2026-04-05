@@ -1000,21 +1000,21 @@ describe('Edge Case 6: Midnight rollover', () => {
     vi.setSystemTime(new Date(2024, 5, 16, 8, 0, 0));
     const { unmount: u1 } = render(React.createElement(DailyScoreHero));
     let hero = screen.getByTestId('daily-score-hero');
-    expect(hero.textContent).toContain('Chào buổi sáng!');
+    expect(hero.textContent).toContain('dashboard.greetingMorning');
     u1();
 
     // Afternoon
     vi.setSystemTime(new Date(2024, 5, 16, 14, 0, 0));
     const { unmount: u2 } = render(React.createElement(DailyScoreHero));
     hero = screen.getByTestId('daily-score-hero');
-    expect(hero.textContent).toContain('Chào buổi chiều!');
+    expect(hero.textContent).toContain('dashboard.greetingAfternoon');
     u2();
 
     // Evening
     vi.setSystemTime(new Date(2024, 5, 16, 20, 0, 0));
     render(React.createElement(DailyScoreHero));
     hero = screen.getByTestId('daily-score-hero');
-    expect(hero.textContent).toContain('Chào buổi tối!');
+    expect(hero.textContent).toContain('dashboard.greetingEvening');
   });
 
   it('no console errors during midnight transition', () => {

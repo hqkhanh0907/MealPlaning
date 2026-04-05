@@ -9,6 +9,7 @@ import { useDishStore } from '../store/dishStore';
 import { useIngredientStore } from '../store/ingredientStore';
 import { useMealTemplateStore } from '../store/mealTemplateStore';
 import type { SyncStatus } from '../types';
+import { logger } from '../utils/logger';
 import { useAuth } from './useAuth';
 
 const DEBOUNCE_DELAY_MS = 3000;
@@ -43,12 +44,14 @@ export const useAutoSync = (): UseAutoSyncReturn => {
       .then(v => {
         setLastSyncAt(v);
       })
-      .catch(() => {});
+      .catch(e => logger.warn({ component: 'useAutoSync', action: 'loadLastSync' }, String(e)));
   }, [db]);
 
   const updateLastSync = useCallback(async (timestamp: string) => {
     setLastSyncAt(timestamp);
-    await setSetting(dbRef.current, 'last_sync_at', timestamp).catch(() => {});
+    await setSetting(dbRef.current, 'last_sync_at', timestamp).catch(e =>
+      logger.warn({ component: 'useAutoSync', action: 'updateLastSync' }, String(e)),
+    );
   }, []);
 
   const triggerUpload = useCallback(async () => {
@@ -102,8 +105,8 @@ export const useAutoSync = (): UseAutoSyncReturn => {
             await updateLastSync(remoteSyncTime);
           }
         }
-      } catch {
-        // Silently fail sync-on-launch
+      } catch (e) {
+        logger.warn({ component: 'useAutoSync', action: 'syncOnLaunch' }, String(e));
       }
     };
     syncOnLaunch();

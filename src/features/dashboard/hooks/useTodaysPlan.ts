@@ -2,6 +2,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { useDayPlanStore } from '../../../store/dayPlanStore';
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { selectActivePlan } from '../../../store/selectors/fitnessSelectors';
 import type {
   SelectedExercise,
   TodayPlanState,
@@ -124,7 +125,7 @@ export function useTodaysPlan(): TodaysPlanData {
   const tomorrowDow = todayDow === 7 ? 1 : todayDow + 1;
 
   // Pattern 1: direct .find() — only re-renders when active plan changes
-  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const activePlan = useFitnessStore(selectActivePlan);
 
   // useShallow: consolidate remaining array subscriptions
   const { trainingPlanDays, workoutSets } = useFitnessStore(

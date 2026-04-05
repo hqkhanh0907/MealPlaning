@@ -656,7 +656,10 @@ describe('WorkoutLogger', () => {
     expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
     expect(mockClearWorkoutDraft).not.toHaveBeenCalled();
     expect(onComplete).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalledWith('[WorkoutLogger] Save failed, draft preserved:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[WorkoutLogger] save',
+      expect.objectContaining({ message: 'Simulated DB failure' }),
+    );
 
     consoleErrorSpy.mockRestore();
   });

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { deleteSetting, getSetting, setSetting } from '../services/appSettings';
 import type { DatabaseService } from '../services/databaseService';
 import type { AuthUser } from '../types';
+import { logger } from '../utils/logger';
 import type { AuthContextValue, AuthState } from './authContextDef';
 import { AuthContext } from './authContextDef';
 import { useDatabase } from './DatabaseContext';
@@ -22,9 +23,13 @@ interface PersistedAuth {
 
 const persistAuth = (db: DatabaseService, auth: PersistedAuth | null): void => {
   if (auth) {
-    setSetting(db, AUTH_SETTING_KEY, JSON.stringify(auth)).catch(() => {});
+    setSetting(db, AUTH_SETTING_KEY, JSON.stringify(auth)).catch(e =>
+      logger.warn({ component: 'AuthContext', action: 'persistAuth' }, String(e)),
+    );
   } else {
-    deleteSetting(db, AUTH_SETTING_KEY).catch(() => {});
+    deleteSetting(db, AUTH_SETTING_KEY).catch(e =>
+      logger.warn({ component: 'AuthContext', action: 'clearAuth' }, String(e)),
+    );
   }
 };
 

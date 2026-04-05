@@ -96,8 +96,9 @@ type IngredientWithSource = { ingredientId: string; amount: number; dishId: stri
 
 const collectDishIngredients = (dishIds: string[], allDishes: Dish[], lang: SupportedLang): IngredientWithSource[] => {
   const result: IngredientWithSource[] = [];
+  const dishMap = new Map(allDishes.map(d => [d.id, d]));
   for (const dishId of dishIds) {
-    const dish = allDishes.find(d => d.id === dishId);
+    const dish = dishMap.get(dishId);
     if (dish) {
       const dishName = getLocalizedField(dish.name, lang);
       for (const di of dish.ingredients) {
@@ -114,8 +115,9 @@ const buildGroceryList = (
   lang: SupportedLang,
 ): GroceryItemWithCategory[] => {
   const map: Record<string, GroceryItemWithCategory> = {};
+  const ingredientMap = new Map(allIngredients.map(i => [i.id, i]));
   for (const di of dishIngredients) {
-    const ing = allIngredients.find(i => i.id === di.ingredientId);
+    const ing = ingredientMap.get(di.ingredientId);
     if (!ing) continue;
     if (map[ing.id]) {
       map[ing.id].amount += di.amount;

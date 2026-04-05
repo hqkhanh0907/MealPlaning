@@ -499,10 +499,12 @@ export async function runSchemaMigrations(db: DatabaseService): Promise<void> {
   }
 
   if (currentVersion < 5) {
-    const cols = await db.query<{ name: string }>("PRAGMA table_info('training_plans')");
-    if (!cols.some(c => c.name === 'current_week')) {
-      await db.execute('ALTER TABLE training_plans ADD COLUMN current_week INTEGER DEFAULT 1');
-    }
+    await db.transaction(async () => {
+      const cols = await db.query<{ name: string }>("PRAGMA table_info('training_plans')");
+      if (!cols.some(c => c.name === 'current_week')) {
+        await db.execute('ALTER TABLE training_plans ADD COLUMN current_week INTEGER DEFAULT 1');
+      }
+    });
     await db.execute('PRAGMA user_version = 5');
   }
 

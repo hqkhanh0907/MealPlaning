@@ -1,5 +1,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 
+import { logger } from '@/utils/logger';
+
 import {
   AnalyzedDishResult,
   AvailableDishInfo,
@@ -75,9 +77,9 @@ const sanitizeForPrompt = (input: string): string => input.replaceAll(/[`"\\]/g,
 const logAICall = (label: string, startMs: number, success: boolean): void => {
   const elapsed = Date.now() - startMs;
   if (!success) {
-    console.warn(`[GeminiService] ${label} FAILED — elapsed: ${elapsed}ms`);
+    logger.warn({ component: 'GeminiService', action: label }, `FAILED — elapsed: ${elapsed}ms`);
   } else if (elapsed > 10_000) {
-    console.warn(`[GeminiService] ${label} slow call: ${elapsed}ms`);
+    logger.warn({ component: 'GeminiService', action: label }, `slow call: ${elapsed}ms`);
   }
 };
 

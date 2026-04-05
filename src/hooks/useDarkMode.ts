@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useDatabase } from '../contexts/DatabaseContext';
 import { getSetting, setSetting } from '../services/appSettings';
+import { logger } from '../utils/logger';
 
 type Theme = 'light' | 'dark' | 'system' | 'schedule';
 
@@ -40,13 +41,15 @@ export function useDarkMode() {
           applyTheme(v);
         }
       })
-      .catch(() => {});
+      .catch(e => logger.warn({ component: 'useDarkMode', action: 'loadTheme' }, String(e)));
   }, [db]);
 
   const persistTheme = useCallback(
     (t: Theme) => {
       setTheme(t);
-      setSetting(db, 'theme', t).catch(() => {});
+      setSetting(db, 'theme', t).catch(e =>
+        logger.warn({ component: 'useDarkMode', action: 'persistTheme' }, String(e)),
+      );
       applyTheme(t);
     },
     [db],

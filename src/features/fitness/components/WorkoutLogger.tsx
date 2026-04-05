@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { generateUUID } from '@/utils/helpers';
+import { logger } from '@/utils/logger';
 
 import { useNotification } from '../../../contexts/NotificationContext';
 import {
@@ -379,7 +380,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
     try {
       await saveWorkoutAtomic(workout, sets);
     } catch (error) {
-      console.error('[WorkoutLogger] Save failed, draft preserved:', error);
+      logger.error({ component: 'WorkoutLogger', action: 'save' }, error);
       notify.error(t('fitness.logger.saveFailed'));
       setIsSaving(false);
       return;

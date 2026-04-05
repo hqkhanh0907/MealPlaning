@@ -1196,7 +1196,10 @@
       "a11y": "Chuỗi tập {{days}} ngày, kỷ lục {{record}} ngày",
       "days": "{{count}} ngày",
       "record": "Kỷ lục: {{count}} ngày"
-    }
+    },
+    "greetingMorning": "Chào buổi sáng!",
+    "greetingAfternoon": "Chào buổi chiều!",
+    "greetingEvening": "Chào buổi tối!"
   },
   "nutrition": {
     "caloriesIn": "Nạp vào",
@@ -1394,8 +1397,7 @@
       "activity_light_desc": "Đi bộ, việc nhà cơ bản",
       "activity_moderate_desc": "Đi lại nhiều, công việc chân tay",
       "activity_active_desc": "Lao động chân tay, thể thao",
-      "activity_extra_active_desc": "VĐV / lao động nặng liên tục",
-      "gender_other": "Khác"
+      "activity_extra_active_desc": "VĐV / lao động nặng liên tục"
     },
     "goal": {
       "title": "Mục tiêu của bạn?",

@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useDayPlanStore } from '../../../store/dayPlanStore';
 import { useDishStore } from '../../../store/dishStore';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { useIngredientStore } from '../../../store/ingredientStore';
+import { selectActivePlan } from '../../../store/selectors/fitnessSelectors';
 import { calculateDishesNutrition } from '../../../utils/nutrition';
 import { calculateStreak } from '../../fitness/utils/gamification';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
@@ -35,10 +37,10 @@ function formatLocalDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-function getGreeting(hour: number): string {
-  if (hour < 12) return 'Chào buổi sáng!';
-  if (hour < 18) return 'Chào buổi chiều!';
-  return 'Chào buổi tối!';
+function getGreeting(hour: number, t: (key: string) => string): string {
+  if (hour < 12) return t('dashboard.greetingMorning');
+  if (hour < 18) return t('dashboard.greetingAfternoon');
+  return t('dashboard.greetingEvening');
 }
 
 function isDefaultProfile(profile: HealthProfile | null): boolean {
@@ -55,13 +57,14 @@ function isDefaultProfile(profile: HealthProfile | null): boolean {
 }
 
 export function useDailyScore(): DailyScoreData {
+  const { t } = useTranslation();
   const profile = useHealthProfileStore(s => s.profile);
   const { targetCalories, targetProtein } = useNutritionTargets();
   const dayPlans = useDayPlanStore(s => s.dayPlans);
   const dishes = useDishStore(s => s.dishes);
   const ingredients = useIngredientStore(s => s.ingredients);
-  // .find() selector — re-renders only when active plan identity changes
-  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  // Shared selector — re-renders only when active plan identity changes
+  const activePlan = useFitnessStore(selectActivePlan);
 
   // Consolidate remaining arrays with useShallow (3 subscriptions → 1)
   const { workouts, weightEntries, trainingPlanDays } = useFitnessStore(
@@ -77,7 +80,7 @@ export function useDailyScore(): DailyScoreData {
     const today = formatLocalDate(now);
     const yesterday = formatLocalDate(new Date(now.getTime() - 86_400_000));
     const hour = now.getHours();
-    const greeting = getGreeting(hour);
+    const greeting = getGreeting(hour, t);
 
     const hasAnyMeals = dayPlans.some(
       p => p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0,
@@ -143,5 +146,6 @@ export function useDailyScore(): DailyScoreData {
     weightEntries,
     activePlan,
     trainingPlanDays,
+    t,
   ]);
 }

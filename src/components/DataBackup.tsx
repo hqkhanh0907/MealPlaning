@@ -9,6 +9,7 @@ import { useDatabase } from '../contexts/DatabaseContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { getSetting, setSetting } from '../services/appSettings';
 import { reloadAllStores } from '../services/storeLoader';
+import { logger } from '../utils/logger';
 import { ConfirmationModal } from './modals/ConfirmationModal';
 
 function useBackupHealthStatus(): { level: 'good' | 'warning' | 'critical'; daysSince: number | null } {
@@ -137,7 +138,9 @@ export const DataBackup = () => {
       }
 
       notify.success(t('backup.exportSuccess'), '');
-      setSetting(db, 'last_local_backup_at', new Date().toISOString()).catch(() => {});
+      setSetting(db, 'last_local_backup_at', new Date().toISOString()).catch(e =>
+        logger.warn({ component: 'DataBackup', action: 'persistBackupTimestamp' }, String(e)),
+      );
     } catch {
       notify.error(t('backup.exportFailed'), '');
     } finally {

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { selectActivePlan } from '../../../store/selectors/fitnessSelectors';
 import { DAY_LABELS } from '../constants';
 import { calculateStreak } from '../utils/gamification';
 
@@ -24,7 +25,7 @@ function DotIcon({ status }: Readonly<{ status: string }>): React.JSX.Element {
 
 export const StreakCounter = React.memo(function StreakCounter() {
   const { t } = useTranslation();
-  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const activePlan = useFitnessStore(selectActivePlan);
   const { workouts, trainingPlanDays } = useFitnessStore(
     useShallow(s => ({
       workouts: s.workouts,

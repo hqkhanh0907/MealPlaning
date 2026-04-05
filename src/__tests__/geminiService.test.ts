@@ -430,7 +430,10 @@ describe('geminiService', () => {
 
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       await suggestIngredientInfo('Slow test', 'g');
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('slow call'));
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('GeminiService'),
+        expect.stringContaining('slow call'),
+      );
       warnSpy.mockRestore();
       vi.spyOn(Date, 'now').mockRestore();
     });

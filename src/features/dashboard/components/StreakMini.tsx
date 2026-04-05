@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { selectActivePlan } from '../../../store/selectors/fitnessSelectors';
 import { calculateStreak } from '../../fitness/utils/gamification';
 
 const DOT_COLORS: Record<string, string> = {
@@ -20,7 +21,7 @@ interface StreakMiniProps {
 
 function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactElement {
   const { t } = useTranslation();
-  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const activePlan = useFitnessStore(selectActivePlan);
   const { workouts, trainingPlanDays } = useFitnessStore(
     useShallow(s => ({
       workouts: s.workouts,

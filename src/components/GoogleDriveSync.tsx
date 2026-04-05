@@ -9,6 +9,7 @@ import { deleteSetting, getSetting, setSetting } from '../services/appSettings';
 import * as driveService from '../services/googleDriveService';
 import { reloadAllStores } from '../services/storeLoader';
 import type { SyncStatus } from '../types';
+import { logger } from '../utils/logger';
 import { SyncConflictModal } from './modals/SyncConflictModal';
 
 export const GoogleDriveSync = () => {
@@ -29,7 +30,7 @@ export const GoogleDriveSync = () => {
       .then(v => {
         setLastSyncAt(v);
       })
-      .catch(() => {});
+      .catch(e => logger.warn({ component: 'GoogleDriveSync', action: 'loadLastSync' }, String(e)));
   }, [db]);
 
   const isSyncing = syncStatus === 'uploading' || syncStatus === 'downloading';
@@ -46,14 +47,18 @@ export const GoogleDriveSync = () => {
   const handleSignOut = useCallback(async () => {
     await signOut();
     setLastSyncAt(null);
-    deleteSetting(db, 'last_sync_at').catch(() => {});
+    deleteSetting(db, 'last_sync_at').catch(e =>
+      logger.warn({ component: 'GoogleDriveSync', action: 'clearLastSync' }, String(e)),
+    );
     notify.success(t('cloudSync.signOutSuccess'));
   }, [signOut, notify, t, db]);
 
   const updateLastSync = useCallback(
     (timestamp: string) => {
       setLastSyncAt(timestamp);
-      setSetting(db, 'last_sync_at', timestamp).catch(() => {});
+      setSetting(db, 'last_sync_at', timestamp).catch(e =>
+        logger.warn({ component: 'GoogleDriveSync', action: 'updateLastSync' }, String(e)),
+      );
     },
     [db],
   );

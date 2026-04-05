@@ -2,12 +2,13 @@ import { PartyPopper, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { selectActivePlan } from '../../../store/selectors/fitnessSelectors';
 
 export const PlanGeneratedCard = () => {
   const { t } = useTranslation();
   const showPlanCelebration = useFitnessStore(s => s.showPlanCelebration);
   const dismissPlanCelebration = useFitnessStore(s => s.dismissPlanCelebration);
-  const activePlan = useFitnessStore(s => s.trainingPlans.find(p => p.status === 'active'));
+  const activePlan = useFitnessStore(selectActivePlan);
 
   if (!showPlanCelebration) return null;
 
