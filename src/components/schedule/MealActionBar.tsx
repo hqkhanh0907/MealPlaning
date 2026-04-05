@@ -113,7 +113,7 @@ export const MealActionBar = React.memo(function MealActionBar({
         {isSuggesting ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         ) : (
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          <Sparkles className="text-color-ai h-4 w-4" aria-hidden="true" />
         )}
         <span className="hidden sm:inline">{t('calendar.aiSuggest')}</span>
         <span className="sm:hidden">AI</span>

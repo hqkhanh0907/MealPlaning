@@ -74,7 +74,7 @@ function AddSessionModalInner({
                 onClick={onSelectCardio}
                 className="bg-info/10 hover:bg-info/15 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Heart className="text-info h-5 w-5" aria-hidden="true" />
+                <Heart className="text-color-rose h-5 w-5" aria-hidden="true" />
                 <div>
                   <p className="text-info text-sm font-semibold">{t('fitness.plan.cardioOption')}</p>
                   <p className="text-info text-xs">{t('fitness.plan.cardioDesc')}</p>

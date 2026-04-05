@@ -35,6 +35,11 @@ const FIELD_ICON: Record<string, LucideIcon> = {
   avgSleepHours: Moon,
 };
 
+const FIELD_COLOR: Partial<Record<string, string>> = {
+  injuryRestrictions: 'text-status-warning',
+  cardioSessionsWeek: 'text-color-rose',
+};
+
 export function TrainingProfileSection() {
   const { t } = useTranslation();
   const trainingProfile = useFitnessStore(s => s.trainingProfile);
@@ -141,7 +146,9 @@ export function TrainingProfileSection() {
           <span className="mt-0.5 text-base leading-normal">
             {(() => {
               const Icon = FIELD_ICON[field.key] ?? ClipboardList;
-              return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;
+              return (
+                <Icon className={`${FIELD_COLOR[field.key] ?? 'text-muted-foreground'} size-5`} aria-hidden="true" />
+              );
             })()}
           </span>
           <div className="min-w-0">

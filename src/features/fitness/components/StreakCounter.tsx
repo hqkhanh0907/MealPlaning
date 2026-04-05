@@ -1,4 +1,4 @@
-import { CheckCircle, Circle, Flame, MapPin, Moon } from 'lucide-react';
+import { CheckCircle, Circle, MapPin, Moon, Trophy } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
@@ -43,7 +43,7 @@ export const StreakCounter = React.memo(function StreakCounter() {
   return (
     <div data-testid="streak-counter" className="bg-card rounded-xl p-4 shadow-sm">
       <div className="flex items-center gap-2">
-        <Flame className="text-color-energy size-6" aria-hidden="true" />
+        <Trophy className="text-color-energy size-6" aria-hidden="true" />
         <span data-testid="streak-count" className="text-foreground text-xl font-semibold">
           {streakInfo.currentStreak}
         </span>

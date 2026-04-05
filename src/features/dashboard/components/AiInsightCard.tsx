@@ -1,14 +1,14 @@
 import {
   AlertTriangle,
-  Beef,
   CheckCircle,
   ChevronRight,
-  Flame,
   Lightbulb,
   Scale,
+  Sparkles,
   TrendingUp,
   Trophy,
   X,
+  Zap,
 } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,9 +20,9 @@ import { useInsightEngine } from '../hooks/useInsightEngine';
 
 const ICON_MAP: Record<InsightType, React.ComponentType<{ className?: string }>> = {
   alert: AlertTriangle,
-  action: Beef,
+  action: Zap,
   remind: Scale,
-  motivate: Flame,
+  motivate: Sparkles,
   celebrate: Trophy,
   praise: CheckCircle,
   progress: TrendingUp,
@@ -89,13 +89,18 @@ const COLOR_MAP: Record<InsightColor, ColorConfig> = {
 
 const ICON_PREFIX_MAP: Record<InsightType, string> = {
   alert: '⚠️',
-  action: '🥩',
+  action: '⚡',
   remind: '⚖️',
-  motivate: '🔥',
+  motivate: '✨',
   celebrate: '🏆',
   praise: '✅',
   progress: '📈',
   tip: '💡',
+};
+
+const ICON_COLOR_OVERRIDE: Partial<Record<InsightType, string>> = {
+  action: 'text-color-ai',
+  motivate: 'text-color-ai',
 };
 
 export const AiInsightCard = React.memo(function AiInsightCard() {
@@ -121,6 +126,7 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
   const IconComponent = ICON_MAP[currentInsight.type];
   const colors = COLOR_MAP[currentInsight.color];
   const iconPrefix = ICON_PREFIX_MAP[currentInsight.type];
+  const iconColor = ICON_COLOR_OVERRIDE[currentInsight.type] ?? colors.icon;
 
   return (
     <section
@@ -129,7 +135,7 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
       className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} flex items-start gap-3 p-4`}
     >
       <div className="mt-0.5 flex-shrink-0" data-testid="insight-icon">
-        <IconComponent className={`h-5 w-5 ${colors.icon}`} />
+        <IconComponent className={`h-5 w-5 ${iconColor}`} />
       </div>
 
       <div className="min-w-0 flex-1">

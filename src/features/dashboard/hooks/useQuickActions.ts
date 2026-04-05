@@ -17,7 +17,6 @@ export type ActionType =
 
 export interface QuickAction {
   id: ActionType;
-  icon: string;
   label: string;
   isPrimary: boolean;
 }
@@ -33,48 +32,48 @@ export interface QuickActionsInput {
   hasTrainingPlan: boolean;
 }
 
-function makeAction(id: ActionType, icon: string, label: string, isPrimary: boolean): QuickAction {
-  return { id, icon, label, isPrimary };
+function makeAction(id: ActionType, label: string, isPrimary: boolean): QuickAction {
+  return { id, label, isPrimary };
 }
 
 function determineCenterAction(input: QuickActionsInput, allMealsLogged: boolean): QuickAction {
   if (allMealsLogged && input.workoutCompleted) {
-    return makeAction('view-results', '📊', 'quickActions.viewResults', true);
+    return makeAction('view-results', 'quickActions.viewResults', true);
   }
   if (input.isRestDay || input.workoutCompleted) {
-    return makeAction('log-meal', '➕', 'quickActions.logMeal', true);
+    return makeAction('log-meal', 'quickActions.logMeal', true);
   }
   if (allMealsLogged) {
     return input.hasTrainingPlan
-      ? makeAction('start-workout', '🏋️', 'quickActions.startWorkout', true)
-      : makeAction('log-meal', '➕', 'quickActions.logMeal', true);
+      ? makeAction('start-workout', 'quickActions.startWorkout', true)
+      : makeAction('log-meal', 'quickActions.logMeal', true);
   }
   if (!input.hasBreakfast) {
-    return makeAction('log-breakfast', '➕', 'quickActions.logBreakfast', true);
+    return makeAction('log-breakfast', 'quickActions.logBreakfast', true);
   }
   if (input.hasLunch) {
-    return makeAction('log-dinner', '➕', 'quickActions.logDinner', true);
+    return makeAction('log-dinner', 'quickActions.logDinner', true);
   }
-  return makeAction('log-lunch', '➕', 'quickActions.logLunch', true);
+  return makeAction('log-lunch', 'quickActions.logLunch', true);
 }
 
 function determineRightAction(input: QuickActionsInput, allMealsLogged: boolean): QuickAction {
   if (allMealsLogged && (input.workoutCompleted || !input.isRestDay)) {
-    return makeAction('log-snack', '➕', 'quickActions.addSnack', false);
+    return makeAction('log-snack', 'quickActions.addSnack', false);
   }
   if (!input.isRestDay && input.workoutCompleted) {
-    return makeAction('view-results', '📊', 'quickActions.viewResults', false);
+    return makeAction('view-results', 'quickActions.viewResults', false);
   }
   if (!input.isRestDay && input.hasTrainingPlan) {
-    return makeAction('start-workout', '🏋️', 'quickActions.startWorkout', false);
+    return makeAction('start-workout', 'quickActions.startWorkout', false);
   }
-  return makeAction('log-cardio', '🏃', 'quickActions.logCardio', false);
+  return makeAction('log-cardio', 'quickActions.logCardio', false);
 }
 
 export function determineQuickActions(input: QuickActionsInput): [QuickAction, QuickAction, QuickAction] {
   const allMealsLogged = input.hasBreakfast && input.hasLunch && input.hasDinner;
 
-  const left = makeAction('log-weight', '⚖️', 'quickActions.logWeight', false);
+  const left = makeAction('log-weight', 'quickActions.logWeight', false);
   const center = determineCenterAction(input, allMealsLogged);
   const right = determineRightAction(input, allMealsLogged);
 

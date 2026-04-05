@@ -46,7 +46,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       {/* Eaten */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
-          <UtensilsCrossed className="text-primary h-3.5 w-3.5" aria-hidden="true" />
+          <UtensilsCrossed className="text-color-energy h-3.5 w-3.5" aria-hidden="true" />
           <span data-testid="mini-eaten" className="text-foreground text-sm font-semibold tabular-nums">
             {Math.round(eaten)}
           </span>

@@ -1,4 +1,4 @@
-import { Beef, Dumbbell, Flame, Scale, UtensilsCrossed } from 'lucide-react';
+import { Beef, Dumbbell, Scale, Trophy, UtensilsCrossed } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,7 +22,7 @@ const FACTOR_CONFIG = [
   { key: 'protein' as const, icon: Beef },
   { key: 'workout' as const, icon: Dumbbell },
   { key: 'weightLog' as const, icon: Scale },
-  { key: 'streak' as const, icon: Flame },
+  { key: 'streak' as const, icon: Trophy },
 ];
 
 const CHECKLIST_KEYS = [

@@ -1,4 +1,4 @@
-import { Flame } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
@@ -61,7 +61,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
         onKeyDown={handleKeyDown}
         className="focus:ring-ring bg-muted flex items-center gap-3 rounded-2xl p-3 transition-transform focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98]"
       >
-        <Flame className="text-muted-foreground h-5 w-5" aria-hidden={true} />
+        <Trophy className="text-muted-foreground h-5 w-5" aria-hidden={true} />
         <div>
           <p className="text-muted-foreground text-sm font-medium">{t('dashboard.streakMini.noData')}</p>
           <p className="text-muted-foreground text-xs">{t('dashboard.streakMini.startFirst')}</p>
@@ -85,7 +85,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5" data-testid="streak-count">
-          <Flame className="text-color-energy h-4 w-4" aria-hidden={true} />
+          <Trophy className="text-color-energy h-4 w-4" aria-hidden={true} />
           <span className="text-foreground text-base font-semibold tabular-nums">
             {t('dashboard.streakMini.days', {
               count: streakInfo.currentStreak,

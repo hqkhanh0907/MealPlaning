@@ -367,7 +367,7 @@
     "importFailed": "Nhập thất bại",
     "importConfirmMsg": "Dữ liệu nhập sẽ ghi đè dữ liệu hiện tại ({{summary}}). Bạn có muốn tiếp tục?",
     "neverBackedUp": "Chưa từng sao lưu — hãy sao lưu dữ liệu ngay!",
-    "lastBackupDays_zero": "Đã sao lưu hôm nay ✓",
+    "lastBackupDays_zero": "Đã sao lưu hôm nay",
     "lastBackupDays_one": "Sao lưu lần cuối: {{count}} ngày trước",
     "lastBackupDays_other": "Sao lưu lần cuối: {{count}} ngày trước"
   },
@@ -669,7 +669,7 @@
       "knowMyOrm": "Tôi biết 1RM của mình",
       "sleepHours": "Giờ ngủ trung bình",
       "maxItems": "tối đa {{count}}",
-      "start": "Bắt đầu →",
+      "start": "Bắt đầu",
       "daysUnit": "ngày/tuần",
       "minutesUnit": "phút",
       "sessionsUnit": "buổi/tuần",
@@ -1365,83 +1365,83 @@
     "tip": {
       "0": {
         "title": "Nước",
-        "message": "💧 Uống 2-3L nước mỗi ngày giúp tối ưu hiệu suất tập luyện"
+        "message": "Uống 2-3L nước mỗi ngày giúp tối ưu hiệu suất tập luyện"
       },
       "1": {
         "title": "Protein",
-        "message": "🥩 Chia đều protein 4 bữa/ngày để tối ưu tổng hợp cơ"
+        "message": "Chia đều protein 4 bữa/ngày để tối ưu tổng hợp cơ"
       },
       "2": {
         "title": "Giấc ngủ",
-        "message": "😴 Ngủ 7-9 tiếng giúp phục hồi cơ bắp tốt hơn"
+        "message": "Ngủ 7-9 tiếng giúp phục hồi cơ bắp tốt hơn"
       },
       "3": {
         "title": "Chất xơ",
-        "message": "🥗 Ăn rau trước bữa ăn giúp no lâu hơn"
+        "message": "Ăn rau trước bữa ăn giúp no lâu hơn"
       },
       "4": {
         "title": "Sau tập",
-        "message": "⏰ Ăn đủ protein trong 2h sau tập"
+        "message": "Ăn đủ protein trong 2h sau tập"
       },
       "5": {
         "title": "Giãn cơ",
-        "message": "🧘 Stretching 10 phút sau tập giảm đau cơ"
+        "message": "Stretching 10 phút sau tập giảm đau cơ"
       },
       "6": {
         "title": "Meal Prep",
-        "message": "📦 Chuẩn bị bữa ăn trước giúp duy trì chế độ dễ hơn"
+        "message": "Chuẩn bị bữa ăn trước giúp duy trì chế độ dễ hơn"
       },
       "7": {
         "title": "Chất béo",
-        "message": "🥑 Chất béo lành mạnh giúp hấp thu vitamin tốt hơn"
+        "message": "Chất béo lành mạnh giúp hấp thu vitamin tốt hơn"
       },
       "8": {
         "title": "Đi bộ",
-        "message": "🚶 Đi bộ 10.000 bước/ngày giúp đốt thêm 300-500 calo"
+        "message": "Đi bộ 10.000 bước/ngày giúp đốt thêm 300-500 calo"
       },
       "9": {
         "title": "Kiên trì",
-        "message": "📊 Kiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x"
+        "message": "Kiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x"
       },
       "10": {
         "title": "Bữa sáng",
-        "message": "🌅 Bữa sáng giàu protein giúp giảm cảm giác thèm ăn cả ngày"
+        "message": "Bữa sáng giàu protein giúp giảm cảm giác thèm ăn cả ngày"
       },
       "11": {
         "title": "Caffeine",
-        "message": "☕ Uống cafe 30 phút trước tập giúp tăng hiệu suất"
+        "message": "Uống cafe 30 phút trước tập giúp tăng hiệu suất"
       },
       "12": {
         "title": "Nghỉ ngơi",
-        "message": "🛋️ Ngày nghỉ cũng quan trọng như ngày tập"
+        "message": "Ngày nghỉ cũng quan trọng như ngày tập"
       },
       "13": {
         "title": "Rau quả",
-        "message": "🥦 Ăn ít nhất 5 phần rau quả mỗi ngày"
+        "message": "Ăn ít nhất 5 phần rau quả mỗi ngày"
       },
       "14": {
         "title": "Uống nước",
-        "message": "💧 Uống nước trước bữa ăn 30 phút giúp kiểm soát khẩu phần"
+        "message": "Uống nước trước bữa ăn 30 phút giúp kiểm soát khẩu phần"
       },
       "15": {
         "title": "Ăn chậm",
-        "message": "🍽️ Ăn chậm giúp não nhận tín hiệu no tốt hơn"
+        "message": "Ăn chậm giúp não nhận tín hiệu no tốt hơn"
       },
       "16": {
         "title": "Đa khớp",
-        "message": "🏋️ Bài tập đa khớp đốt calo nhiều hơn bài đơn khớp"
+        "message": "Bài tập đa khớp đốt calo nhiều hơn bài đơn khớp"
       },
       "17": {
         "title": "Progress",
-        "message": "📸 Chụp ảnh progress mỗi tuần để thấy sự thay đổi"
+        "message": "Chụp ảnh progress mỗi tuần để thấy sự thay đổi"
       },
       "18": {
         "title": "Creatine",
-        "message": "💪 Creatine 5g/ngày giúp tăng sức mạnh và phục hồi"
+        "message": "Creatine 5g/ngày giúp tăng sức mạnh và phục hồi"
       },
       "19": {
         "title": "Tập trung",
-        "message": "🧠 Ăn tập trung, không xem điện thoại giúp kiểm soát lượng ăn"
+        "message": "Ăn tập trung, không xem điện thoại giúp kiểm soát lượng ăn"
       }
     },
     "autoAdjust": {
@@ -1489,7 +1489,7 @@
     "next": "Tiếp tục",
     "skip": "Bỏ qua",
     "getStarted": "Bắt đầu",
-    "letsGo": "Vào ứng dụng →",
+    "letsGo": "Vào ứng dụng",
     "step": "Bước {{current}}/{{total}}",
     "slideIndicator": "Chỉ báo trang trình chiếu"
   },
@@ -1599,7 +1599,7 @@
       "carbs": "Carbs",
       "advanced": "Tùy chỉnh nâng cao",
       "advancedDesc": "Body Fat %, BMR thủ công, Tỷ lệ protein/kg",
-      "continueTraining": "Tiếp tục thiết lập tập luyện →",
+      "continueTraining": "Tiếp tục thiết lập tập luyện",
       "detailToggle": "Xem chi tiết",
       "hideDetail": "Ẩn chi tiết",
       "subtitle": "Kiểm tra lại trước khi tiếp tục",
@@ -1677,7 +1677,7 @@
       "restDays": "{{count}} ngày nghỉ",
       "totalExercises": "{{count}} bài tập",
       "sessionDuration": "~{{duration}} phút/buổi",
-      "start": "Bắt đầu tập luyện →",
+      "start": "Bắt đầu tập luyện",
       "customize": "Tùy chỉnh kế hoạch trước",
       "exercises": "{{count}} bài tập",
       "subtitle": "Đây là kế hoạch tập luyện dựa trên thông tin của bạn",

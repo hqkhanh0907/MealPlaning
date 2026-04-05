@@ -224,19 +224,22 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                         <div className="text-muted-foreground mb-3 space-y-0.5 text-xs">
                           {template.breakfastDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
-                              <Sunrise className="inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
+                              <Sunrise
+                                className="text-color-energy inline-block size-3.5 shrink-0"
+                                aria-hidden="true"
+                              />{' '}
                               {getDishNames(template.breakfastDishIds)}
                             </p>
                           )}
                           {template.lunchDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
-                              <Sun className="inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
+                              <Sun className="text-color-energy inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
                               {getDishNames(template.lunchDishIds)}
                             </p>
                           )}
                           {template.dinnerDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
-                              <Moon className="inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
+                              <Moon className="text-status-info inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
                               {getDishNames(template.dinnerDishIds)}
                             </p>
                           )}

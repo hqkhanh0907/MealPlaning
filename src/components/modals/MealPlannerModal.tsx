@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { CheckCircle2, ChefHat, Dumbbell, Flame, Moon, Search, SlidersHorizontal, Sun, Sunrise, X } from 'lucide-react';
+import { Beef, CheckCircle2, ChefHat, Flame, Moon, Search, SlidersHorizontal, Sun, Sunrise, X } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -46,10 +46,10 @@ const getDishIdsForMeal = (plan: DayPlan, type: MealType): string[] => {
   }
 };
 
-const MEAL_TABS: { type: MealType; icon: LucideIcon; labelKey: string }[] = [
-  { type: 'breakfast', icon: Sunrise, labelKey: 'meal.breakfastFull' },
-  { type: 'lunch', icon: Sun, labelKey: 'meal.lunchFull' },
-  { type: 'dinner', icon: Moon, labelKey: 'meal.dinnerFull' },
+const MEAL_TABS: { type: MealType; icon: LucideIcon; labelKey: string; color: string }[] = [
+  { type: 'breakfast', icon: Sunrise, labelKey: 'meal.breakfastFull', color: 'text-color-energy' },
+  { type: 'lunch', icon: Sun, labelKey: 'meal.lunchFull', color: 'text-color-energy' },
+  { type: 'dinner', icon: Moon, labelKey: 'meal.dinnerFull', color: 'text-status-info' },
 ];
 
 interface MealPlannerModalProps {
@@ -226,7 +226,7 @@ export const MealPlannerModal = ({
                   }`}
                 >
                   <span>
-                    <tab.icon className="inline-block size-4" aria-hidden="true" />
+                    <tab.icon className={`inline-block size-4 ${!isActive ? tab.color : ''}`} aria-hidden="true" />
                   </span>
                   <span>{t(tab.labelKey)}</span>
                   {count > 0 && (
@@ -322,7 +322,7 @@ export const MealPlannerModal = ({
                         kcal
                       </span>
                       <span className="bg-macro-protein/10 text-macro-protein inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
-                        <Dumbbell className="inline-block size-3.5" aria-hidden="true" />{' '}
+                        <Beef className="text-macro-protein inline-block size-3.5" aria-hidden="true" />{' '}
                         {Math.round(nutrition.protein)}g
                       </span>
                     </div>
@@ -354,7 +354,7 @@ export const MealPlannerModal = ({
             {totalDayDishCount > 0 && (
               <span className="text-muted-foreground">
                 <Flame className="inline-block size-3.5" aria-hidden="true" /> {Math.round(totalDayNutrition.calories)}{' '}
-                kcal · <Dumbbell className="inline-block size-3.5" aria-hidden="true" />{' '}
+                kcal · <Beef className="text-macro-protein inline-block size-3.5" aria-hidden="true" />{' '}
                 {Math.round(totalDayNutrition.protein)}g Pro
               </span>
             )}

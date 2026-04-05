@@ -53,7 +53,7 @@ export function PlanStrategyChoice({
             data-testid="strategy-auto"
           >
             <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
-              <Sparkles className="text-primary h-6 w-6" aria-hidden="true" />
+              <Sparkles className="text-color-ai h-6 w-6" aria-hidden="true" />
             </div>
             <div>
               <p className="text-primary-emphasis text-sm font-semibold">{t('onboarding.strategy.auto')}</p>

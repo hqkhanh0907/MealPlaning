@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Beef,
   Clock,
   Droplets,
-  Dumbbell,
   Flame,
   Loader2,
   Minus,
@@ -702,19 +702,19 @@ export const DishEditModal = ({
                   </div>
                   <div>
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                      <Dumbbell className="size-3.5" aria-hidden="true" /> Protein
+                      <Beef className="text-macro-protein size-3.5" aria-hidden="true" /> Protein
                     </p>
                     <p className="text-foreground text-sm font-semibold">{Math.round(totals.prot)}g</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                      <Wheat className="size-3.5" aria-hidden="true" /> Carbs
+                      <Wheat className="text-macro-carbs size-3.5" aria-hidden="true" /> Carbs
                     </p>
                     <p className="text-foreground text-sm font-semibold">{Math.round(totals.carbs)}g</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                      <Droplets className="size-3.5" aria-hidden="true" /> Fat
+                      <Droplets className="text-macro-fat size-3.5" aria-hidden="true" /> Fat
                     </p>
                     <p className="text-foreground text-sm font-semibold">{Math.round(totals.fat)}g</p>
                   </div>

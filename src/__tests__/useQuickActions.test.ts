@@ -139,7 +139,6 @@ describe('determineQuickActions', () => {
   it('8 – weight logged today still shows log-weight as left action', () => {
     const [left] = determineQuickActions(makeInput({ weightLoggedToday: true }));
     expect(left.id).toBe('log-weight');
-    expect(left.icon).toBe('⚖️');
   });
 
   it('9 – no training plan + rest day → no start-workout option', () => {
@@ -199,7 +198,6 @@ describe('determineQuickActions', () => {
 
   it('left action always has correct icon and label', () => {
     const [left] = determineQuickActions(makeInput());
-    expect(left.icon).toBe('⚖️');
     expect(left.label).toBe('quickActions.logWeight');
   });
 
@@ -348,7 +346,6 @@ describe('useQuickActions', () => {
       act(() => {
         result.current.handleAction({
           id,
-          icon: '',
           label: '',
           isPrimary: false,
         });
@@ -372,7 +369,6 @@ describe('useQuickActions', () => {
       act(() => {
         result.current.handleAction({
           id,
-          icon: '',
           label: '',
           isPrimary: false,
         });

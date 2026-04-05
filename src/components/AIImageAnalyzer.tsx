@@ -107,7 +107,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
               </>
             ) : (
               <>
-                <Sparkles className="h-5 w-5" aria-hidden="true" />
+                <Sparkles className="text-color-ai h-5 w-5" aria-hidden="true" />
                 {t('ai.analyzeDish')}
               </>
             )}

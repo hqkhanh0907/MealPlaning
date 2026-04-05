@@ -1,14 +1,4 @@
-import {
-  AlertTriangle,
-  Beef,
-  CheckCircle2,
-  ClipboardList,
-  Droplets,
-  Dumbbell,
-  FileText,
-  Leaf,
-  TrendingDown,
-} from 'lucide-react';
+import { AlertTriangle, Beef, CheckCircle2, ClipboardList, Droplets, FileText, Leaf, TrendingDown } from 'lucide-react';
 
 import i18n from '../i18n';
 import { DayNutritionSummary, SlotInfo } from '../types';
@@ -97,7 +87,7 @@ describe('getDynamicTips', () => {
       TARGET_PROT,
       t,
     );
-    const success = tips.find(t => t.icon === Dumbbell);
+    const success = tips.find(t => t.icon === Beef);
     expect(success).toBeDefined();
     expect(success?.type).toBe('success');
     expect(success?.text).toContain('protein');

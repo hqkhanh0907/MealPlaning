@@ -23,16 +23,26 @@ function GoalViewMode() {
   const { t } = useTranslation();
   const activeGoal = useHealthProfileStore(s => s.activeGoal);
 
-  const fields: { label: string; value: string; icon: LucideIcon }[] = useMemo(() => {
+  const fields: { label: string; value: string; icon: LucideIcon; color: string }[] = useMemo(() => {
     if (!activeGoal) return [];
-    const result: { label: string; value: string; icon: LucideIcon }[] = [
-      { label: t('goal.title'), value: t(`goal.${activeGoal.type}`), icon: Target },
+    const result: { label: string; value: string; icon: LucideIcon; color: string }[] = [
+      { label: t('goal.title'), value: t(`goal.${activeGoal.type}`), icon: Target, color: 'text-primary' },
     ];
     if (activeGoal.type !== 'maintain' && activeGoal.rateOfChange) {
-      result.push({ label: t('goal.rateOfChange'), value: t(`goal.${activeGoal.rateOfChange}`), icon: Zap });
+      result.push({
+        label: t('goal.rateOfChange'),
+        value: t(`goal.${activeGoal.rateOfChange}`),
+        icon: Zap,
+        color: 'text-status-warning',
+      });
     }
     if (activeGoal.targetWeightKg) {
-      result.push({ label: t('goal.targetWeight'), value: `${activeGoal.targetWeightKg} kg`, icon: Scale });
+      result.push({
+        label: t('goal.targetWeight'),
+        value: `${activeGoal.targetWeightKg} kg`,
+        icon: Scale,
+        color: 'text-muted-foreground',
+      });
     }
     let calorieLabel: string;
     if (activeGoal.calorieOffset > 0) {
@@ -46,6 +56,7 @@ function GoalViewMode() {
       label: t('goal.calorieOffset'),
       value: calorieLabel,
       icon: Flame,
+      color: 'text-color-energy',
     });
     return result;
   }, [activeGoal, t]);
@@ -83,7 +94,7 @@ function GoalViewMode() {
             <span className="mt-0.5 text-base leading-normal">
               {(() => {
                 const Icon = field.icon;
-                return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;
+                return <Icon className={`${field.color} size-5`} aria-hidden="true" />;
               })()}
             </span>
             <div className="min-w-0">

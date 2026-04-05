@@ -91,7 +91,7 @@ const RecommendationPanel = ({
             data-testid="btn-switch-to-meals"
             className="bg-primary-subtle text-primary-emphasis border-primary/20 hover:bg-primary/10 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all active:scale-[0.98]"
           >
-            <UtensilsCrossed className="h-4 w-4" aria-hidden="true" />
+            <UtensilsCrossed className="text-color-energy h-4 w-4" aria-hidden="true" />
             {t('schedule.switchToMeals')}
           </button>
         )}

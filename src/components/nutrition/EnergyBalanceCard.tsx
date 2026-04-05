@@ -1,4 +1,4 @@
-import { Beef, ChevronDown, ChevronUp, Dumbbell, Flame } from 'lucide-react';
+import { Beef, ChevronDown, ChevronUp, Flame, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -85,11 +85,11 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
           {/* Calorie in / out labels */}
           <div className="text-foreground-secondary flex justify-between text-xs">
             <span className="flex items-center gap-1">
-              <Flame className="text-primary h-3.5 w-3.5" />
+              <Flame className="text-color-energy h-3.5 w-3.5" />
               {t('nutrition.caloriesIn')}: <strong data-testid="calories-in">{Math.round(caloriesIn)}</strong>
             </span>
             <span className="flex items-center gap-1">
-              <Dumbbell className="text-status-info h-3.5 w-3.5" />
+              <Zap className="text-color-rose h-3.5 w-3.5" />
               {t('nutrition.caloriesOut')}: <strong data-testid="calories-out">{Math.round(caloriesOut)}</strong>
             </span>
           </div>

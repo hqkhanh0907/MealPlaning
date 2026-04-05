@@ -1,4 +1,4 @@
-import { Activity, Dumbbell, Flame, Target, UtensilsCrossed, X } from 'lucide-react';
+import { Activity, Flame, Target, UtensilsCrossed, X, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -137,14 +137,14 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
           <div className="bg-muted space-y-2 rounded-xl p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
-                <UtensilsCrossed className="h-4 w-4" />
+                <UtensilsCrossed className="text-color-energy h-4 w-4" />
                 {t('energyDetail.caloriesIn')}
               </span>
               <span className="text-foreground font-semibold">{Math.round(eaten)} kcal</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
-                <Dumbbell className="h-4 w-4" />
+                <Zap className="text-color-rose h-4 w-4" />
                 {t('energyDetail.caloriesOut')}
               </span>
               <span className="text-status-info font-semibold">-{Math.round(caloriesOut)} kcal</span>

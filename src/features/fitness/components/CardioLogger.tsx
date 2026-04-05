@@ -151,7 +151,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         <section>
           <h3 className="text-foreground-secondary mb-2 text-sm font-semibold">{t('fitness.cardio.type')}</h3>
           <div className="flex gap-2 overflow-x-auto pb-2" data-testid="cardio-type-selector">
-            {CARDIO_TYPES.map(({ type, icon: Icon, i18nKey }) => (
+            {CARDIO_TYPES.map(({ type, icon: Icon, i18nKey, color }) => (
               <Button
                 key={type}
                 variant={selectedType === type ? 'default' : 'outline'}
@@ -165,7 +165,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 )}
                 data-testid={`cardio-type-${type}`}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon className={`h-4 w-4 ${selectedType !== type ? color : ''}`} aria-hidden="true" />
                 <span>{t(i18nKey)}</span>
               </Button>
             ))}

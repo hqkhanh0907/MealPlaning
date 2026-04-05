@@ -1,16 +1,6 @@
 import { TFunction } from 'i18next';
 import type { LucideIcon } from 'lucide-react';
-import {
-  AlertTriangle,
-  Beef,
-  CheckCircle2,
-  ClipboardList,
-  Droplets,
-  Dumbbell,
-  FileText,
-  Leaf,
-  TrendingDown,
-} from 'lucide-react';
+import { AlertTriangle, Beef, CheckCircle2, ClipboardList, Droplets, FileText, Leaf, TrendingDown } from 'lucide-react';
 
 import { DayNutritionSummary } from '../types';
 
@@ -98,7 +88,7 @@ function getProteinTip(
   if (totals.protein <= 0) return null;
   if (totals.protein >= targetProtein) {
     return {
-      icon: Dumbbell,
+      icon: Beef,
       text: t('tips.proteinMet', { current: Math.round(totals.protein), target: targetProtein }),
       type: 'success',
     };

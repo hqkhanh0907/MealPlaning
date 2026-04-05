@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Pencil, Plus, Trash2, TrendingUp, X } from 'lucide-react';
 import React, { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
@@ -131,7 +131,12 @@ function ProgressiveOverloadChip({
       )}
       data-testid="overload-chip"
     >
-      {isPlateaued ? '⚠️' : '📈'} {t('fitness.setFormat', { weight: suggestion.weight, reps: suggestion.reps })}
+      {isPlateaued ? (
+        <AlertTriangle className="mr-1 inline h-3 w-3" aria-hidden="true" />
+      ) : (
+        <TrendingUp className="mr-1 inline h-3 w-3" aria-hidden="true" />
+      )}{' '}
+      {t('fitness.setFormat', { weight: suggestion.weight, reps: suggestion.reps })}
       {isPlateaued && suggestion.plateauWeeks != null && ` (plateau ${suggestion.plateauWeeks}w)`}
     </Button>
   );

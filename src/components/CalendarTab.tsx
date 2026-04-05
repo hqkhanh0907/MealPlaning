@@ -90,7 +90,7 @@ export const CalendarTab = React.memo(function CalendarTab({
   }, [dayPlans, selectedDate]);
 
   const SUB_TABS: { key: ScheduleSubTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'meals', label: t('schedule.mealsTab'), icon: <UtensilsCrossed className="h-4 w-4" /> },
+    { key: 'meals', label: t('schedule.mealsTab'), icon: <UtensilsCrossed className="text-color-energy h-4 w-4" /> },
     { key: 'nutrition', label: t('schedule.nutritionTab'), icon: <BarChart3 className="h-4 w-4" /> },
   ];
 

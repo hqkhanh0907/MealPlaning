@@ -374,9 +374,9 @@ describe('AiInsightCard', () => {
   describe('Icon mapping', () => {
     const iconCases: Array<{ type: Insight['type']; prefix: string }> = [
       { type: 'alert', prefix: '⚠️' },
-      { type: 'action', prefix: '🥩' },
+      { type: 'action', prefix: '⚡' },
       { type: 'remind', prefix: '⚖️' },
-      { type: 'motivate', prefix: '🔥' },
+      { type: 'motivate', prefix: '✨' },
       { type: 'celebrate', prefix: '🏆' },
       { type: 'praise', prefix: '✅' },
       { type: 'progress', prefix: '📈' },

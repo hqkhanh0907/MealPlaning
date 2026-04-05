@@ -149,7 +149,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="workout-section">
               <div className="mb-2 flex items-center gap-1.5">
-                <Dumbbell className="text-info h-4 w-4" aria-hidden="true" />
+                <Dumbbell className="text-status-info h-4 w-4" aria-hidden="true" />
                 <span className="text-foreground-secondary text-xs font-medium">
                   {t('dashboard.todaysPlan.workout')}
                 </span>

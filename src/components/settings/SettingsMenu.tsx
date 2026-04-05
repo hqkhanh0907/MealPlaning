@@ -23,10 +23,10 @@ interface SettingsMenuProps {
 }
 
 const THEME_OPTIONS = [
-  { value: 'light', labelKey: 'settings.themeLight', icon: Sun },
-  { value: 'dark', labelKey: 'settings.themeDark', icon: Moon },
-  { value: 'system', labelKey: 'settings.themeSystem', icon: Monitor },
-  { value: 'schedule', labelKey: 'settings.themeSchedule', icon: Clock },
+  { value: 'light', labelKey: 'settings.themeLight', icon: Sun, color: 'text-color-energy' },
+  { value: 'dark', labelKey: 'settings.themeDark', icon: Moon, color: 'text-status-info' },
+  { value: 'system', labelKey: 'settings.themeSystem', icon: Monitor, color: 'text-muted-foreground' },
+  { value: 'schedule', labelKey: 'settings.themeSchedule', icon: Clock, color: 'text-muted-foreground' },
 ] as const;
 
 export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsMenuProps>) {
@@ -79,7 +79,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       },
       {
         id: 'training-profile',
-        icon: <Dumbbell className="text-info h-5 w-5" />,
+        icon: <Dumbbell className="text-status-info h-5 w-5" />,
         titleKey: 'settings.trainingProfileSection',
         summary: trainingSummary,
         keywords: [
@@ -167,7 +167,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {THEME_OPTIONS.map(({ value, labelKey, icon: Icon }) => (
+            {THEME_OPTIONS.map(({ value, labelKey, icon: Icon, color }) => (
               <Button
                 key={value}
                 variant="ghost"
@@ -180,7 +180,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
                     : 'border-border text-foreground hover:border-border dark:hover:border-border',
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className={cn('h-5 w-5', theme !== value && color)} />
                 <span className="text-sm font-semibold">{t(labelKey)}</span>
               </Button>
             ))}
