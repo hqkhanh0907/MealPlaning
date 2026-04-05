@@ -1126,3 +1126,52 @@ Wave 4: Manual (vi.json cleanup) — strip emoji/arrows/checkmarks from i18n
 ### Bài học
 
 For large-scale icon/color refactors: create exhaustive mapping FIRST (179 entries), then wave-based execution with clear file ownership per agent. Manual follow-up always needed — agents miss ~10-15% of files.
+
+---
+
+## 35. Tailwind v4 @theme color naming — text-{name} NOT text-color-{name}
+
+### Vấn đề
+
+287 color class names sai naming convention, dẫn đến TOÀN BỘ icon/text/background colors không hiển thị (bị Tailwind ignore vì class không tồn tại trong build output).
+
+### Nguyên nhân
+
+Tailwind v4 `@theme` block: `--color-{name}` generates utility `text-{name}`, `bg-{name}`, `border-{name}`. Developers (and AI agents) assumed the full variable name maps to class name:
+
+```
+@theme {
+  --color-energy: oklch(...);   → generates text-energy, NOT text-color-energy
+  --color-rose: oklch(...);     → generates text-rose, NOT text-color-rose
+  --color-ai: oklch(...);       → generates text-ai, NOT text-color-ai
+  --color-info: oklch(...);     → generates text-info, NOT text-status-info
+  --color-success: oklch(...);  → generates text-success, NOT text-status-success
+  --color-warning: oklch(...);  → generates text-warning, NOT text-status-warning
+}
+```
+
+### Giải pháp
+
+Bulk sed replace across all TSX/TS files:
+
+```bash
+find src/ \( -name '*.tsx' -o -name '*.ts' \) ! -name 'index.css' -print0 | xargs -0 sed -i '' \
+  -e 's/text-color-energy/text-energy/g' \
+  -e 's/bg-color-energy/bg-energy/g' \
+  -e 's/text-color-rose/text-rose/g' \
+  -e 's/text-color-ai/text-ai/g' \
+  -e 's/text-status-info/text-info/g' \
+  -e 's/text-status-success/text-success/g' \
+  -e 's/text-status-warning/text-warning/g'
+  # Same for bg-* and border-* variants
+```
+
+### Verification
+
+Check built CSS: `cat dist/assets/index-*.css | grep -oE '\.(text|bg|border)-(energy|rose|ai|info|success|warning)\b' | sort | uniq -c`
+
+If class doesn't appear in build CSS → it's invalid → Tailwind silently ignores it → no visual effect.
+
+### Bài học
+
+**LUÔN verify Tailwind class trong build output** trước khi commit. Quy tắc Tailwind v4: `--color-X` → `text-X` (strip `--color-` prefix). KHÔNG append extra prefixes. Sai naming = class bị ignore = UI mất màu hoàn toàn mà không có lỗi nào báo.
