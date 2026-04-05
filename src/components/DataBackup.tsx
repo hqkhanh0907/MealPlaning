@@ -112,7 +112,7 @@ export const DataBackup = () => {
   };
 
   const exportNative = async (data: string, fileName: string) => {
-    const base64 = btoa(Array.from(new TextEncoder().encode(data), b => String.fromCharCode(b)).join(''));
+    const base64 = btoa(Array.from(new TextEncoder().encode(data), b => String.fromCodePoint(b)).join(''));
     const result = await Filesystem.writeFile({
       path: fileName,
       data: base64,
