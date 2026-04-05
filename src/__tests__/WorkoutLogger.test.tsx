@@ -1390,4 +1390,60 @@ describe('WorkoutLogger', () => {
       resolvePromise!();
     });
   });
+
+  /* TC_SET_MULTI: Deleting a set from one exercise does not renumber another */
+  it('TC_SET_MULTI: deleting bench-press set leaves squat set unchanged', () => {
+    const multiPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Full Body',
+      exercises: makeExercisesJson('bench-press', 'squat'),
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
+
+    // Log 2 bench-press sets + 1 squat set
+    logSetAndDismissRest('bench-press', '60', '10');
+    logSetAndDismissRest('bench-press', '70', '8');
+    logSetAndDismissRest('squat', '100', '6');
+
+    // Verify all 3 sets exist
+    expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
+    expect(screen.getByText(/70kg × 8/)).toBeInTheDocument();
+    expect(screen.getByText(/100kg × 6/)).toBeInTheDocument();
+
+    // Delete the first bench-press set (60kg × 10)
+    const deleteButtons = screen.getAllByRole('button', { name: 'Xóa set' });
+    fireEvent.click(deleteButtons[0]);
+
+    // Deleted set gone, bench-press renumbered
+    expect(screen.queryByText(/60kg × 10/)).not.toBeInTheDocument();
+    expect(screen.getByText(/70kg × 8/)).toBeInTheDocument();
+
+    // Squat set should be unchanged (line 264: return s — different exercise)
+    expect(screen.getByText(/100kg × 6/)).toBeInTheDocument();
+  });
+
+  /* TC_SET_CANCEL: Clicking cancel in SetEditor closes without changes */
+  it('TC_SET_CANCEL: edit cancel closes editor without modifying set', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    // Open editor
+    fireEvent.click(screen.getByRole('button', { name: 'Chỉnh sửa set' }));
+    expect(screen.getByTestId('set-editor')).toBeInTheDocument();
+
+    // Change weight to 99 in editor
+    fireEvent.change(screen.getByTestId('weight-input'), {
+      target: { value: '99' },
+    });
+
+    // Click cancel (line 285: handleEditSetCancel → setEditingSet(null))
+    fireEvent.click(screen.getByTestId('cancel-button'));
+
+    // Editor should close
+    expect(screen.queryByTestId('set-editor')).not.toBeInTheDocument();
+    // Original set data should be unchanged
+    expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
+    expect(screen.queryByText(/99kg/)).not.toBeInTheDocument();
+  });
 });

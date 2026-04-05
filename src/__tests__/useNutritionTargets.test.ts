@@ -265,4 +265,49 @@ describe('useNutritionTargets', () => {
     expect(result.current.bmr).toBe(expectedBMR);
     expect(result.current.bmr).toBeGreaterThan(0);
   });
+
+  it('falls back to 1500 when unconfigured profile has NaN targetCalories', () => {
+    // targetCalories is NOT compared in isProfileConfigured,
+    // so NaN targetCalories + all other fields default → !configured → fallback path
+    useHealthProfileStore.setState({
+      profile: { ...DEFAULT_HEALTH_PROFILE, targetCalories: NaN },
+    });
+
+    const { result } = renderHook(() => useNutritionTargets());
+
+    expect(result.current.targetCalories).toBe(1500);
+    expect(result.current.targetProtein).toBe(Math.round(70 * 2));
+    expect(result.current.bmr).toBe(0);
+    expect(result.current.tdee).toBe(0);
+  });
+
+  it('falls back to 1500 when unconfigured profile has Infinity targetCalories', () => {
+    useHealthProfileStore.setState({
+      profile: { ...DEFAULT_HEALTH_PROFILE, targetCalories: Infinity },
+    });
+
+    const { result } = renderHook(() => useNutritionTargets());
+
+    expect(result.current.targetCalories).toBe(1500);
+  });
+
+  it('guards against NaN cascade when weightKg is NaN in configured profile', () => {
+    // NaN !== 70 → isProfileConfigured returns true → full calculation path
+    // BMR(NaN, ...) → NaN, proteinG = NaN*2 = NaN → all NaN guards on lines 91-96 fire
+    useHealthProfileStore.setState({
+      profile: {
+        ...DEFAULT_HEALTH_PROFILE,
+        weightKg: NaN,
+      },
+    });
+
+    const { result } = renderHook(() => useNutritionTargets());
+
+    expect(result.current.bmr).toBe(0);
+    expect(result.current.tdee).toBe(0);
+    expect(result.current.targetCalories).toBe(0);
+    expect(result.current.targetProtein).toBe(0);
+    expect(result.current.targetFat).toBe(0);
+    expect(result.current.targetCarbs).toBe(0);
+  });
 });

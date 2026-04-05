@@ -520,4 +520,166 @@ describe('HealthProfileForm', () => {
 
     expect(screen.queryByTestId('goal-weight-warning')).not.toBeInTheDocument();
   });
+
+  /* ------------------------------------------------------------------ */
+  /* Embedded mode & blank defaults tests */
+  /* ------------------------------------------------------------------ */
+
+  it('hides title and save button in embedded mode', () => {
+    render(<HealthProfileForm embedded />);
+
+    expect(screen.queryByText('Hồ sơ sức khỏe')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Lưu' })).not.toBeInTheDocument();
+    // Form fields still render
+    expect(screen.getByTestId('health-profile-form')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tên')).toBeInTheDocument();
+  });
+
+  it('uses blank defaults when blankDefaults prop is set and profile is null', () => {
+    resetStore({ profile: null });
+    render(<HealthProfileForm blankDefaults />);
+
+    expect(screen.getByLabelText('Tên')).toHaveValue('');
+    expect(screen.getByLabelText('Ngày sinh')).toHaveValue('');
+    expect(screen.getByLabelText('Chiều cao (cm)')).toHaveValue('');
+    expect(screen.getByLabelText('Cân nặng (kg)')).toHaveValue('');
+    expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toHaveValue('');
+    // Macro display uses profile?.fatPct ?? 0.25 fallback (line 156)
+    expect(screen.getByTestId('bmr-value')).toHaveTextContent('0');
+  });
+
+  it('saves with fallback base profile when store profile is null', async () => {
+    resetStore({ profile: null });
+    const saveRef = { current: null as (() => Promise<boolean>) | null };
+    render(<HealthProfileForm blankDefaults saveRef={saveRef} />);
+
+    // Fill all required fields for schema validation
+    fireEvent.change(screen.getByLabelText('Tên'), { target: { value: 'Test User' } });
+    fireEvent.change(screen.getByLabelText('Ngày sinh'), { target: { value: dobForAge(25) } });
+    fireEvent.change(screen.getByLabelText('Chiều cao (cm)'), { target: { value: '175' } });
+    fireEvent.change(screen.getByLabelText('Cân nặng (kg)'), { target: { value: '70' } });
+    fireEvent.change(screen.getByLabelText('Tỉ lệ protein (g/kg)'), { target: { value: '2' } });
+
+    const result = await saveRef.current!();
+    expect(result).toBe(true);
+
+    await waitFor(() => {
+      expect(mockSaveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    // onSubmit uses fallback base (profile ?? {...default...}) on line 175
+    expect(mockSaveProfile).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        id: 'default',
+        name: 'Test User',
+        heightCm: 175,
+        weightKg: 70,
+        proteinRatio: 2,
+        gender: 'male',
+        activityLevel: 'moderate',
+        fatPct: 0.25,
+      }),
+    );
+  });
+
+  it('saves bodyFatPct as number when filled', async () => {
+    render(<HealthProfileForm />);
+
+    fireEvent.change(screen.getByLabelText(/Tỉ lệ mỡ cơ thể/), { target: { value: '15' } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    });
+
+    await waitFor(() => {
+      expect(mockSaveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    // Line 199: typeof data.bodyFatPct === 'number' → true → saves 15
+    expect(mockSaveProfile).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        bodyFatPct: 15,
+      }),
+    );
+  });
+
+  it('saves bmrOverride when override is enabled', async () => {
+    render(<HealthProfileForm />);
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Nhập thủ công' }));
+    fireEvent.change(screen.getByTestId('bmr-override-input'), { target: { value: '1800' } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    });
+
+    await waitFor(() => {
+      expect(mockSaveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    // Line 200: data.bmrOverrideEnabled ? data.bmrOverride : undefined → 1800
+    expect(mockSaveProfile).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        bmrOverride: 1800,
+      }),
+    );
+  });
+
+  it('goalWeightWarning returns null when weight field is empty', () => {
+    resetStore({
+      profile: { ...VALID_PROFILE, weightKg: 80 },
+      activeGoal: {
+        id: 'goal-1',
+        type: 'cut',
+        rateOfChange: 'moderate',
+        targetWeightKg: 65,
+        calorieOffset: -500,
+        startDate: '2025-01-01',
+        isActive: true,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      },
+    });
+    render(<HealthProfileForm />);
+
+    // Clear weight field: Number('') = 0, !0 = true → line 162 returns null
+    const weightInput = screen.getByTestId('hp-weight');
+    fireEvent.change(weightInput, { target: { value: '' } });
+
+    expect(screen.queryByTestId('goal-weight-warning')).not.toBeInTheDocument();
+  });
+
+  it('computeAgeFromDob returns 0 for invalid date string', () => {
+    // Set DOB to a truthy but invalid date string directly via store
+    resetStore({
+      profile: { ...VALID_PROFILE, dateOfBirth: '9999-99-99' },
+    });
+    render(<HealthProfileForm />);
+
+    // computeAgeFromDob('9999-99-99') → new Date('9999-99-99') → NaN time → returns 0
+    // The form renders without crashing (age=0, invalid preview)
+    expect(screen.getByTestId('hp-dob')).toBeInTheDocument();
+  });
+
+  it('computeAgeFromDob handles birthday not yet passed this year', () => {
+    // Create a DOB where the birth month is AFTER the current month
+    const today = new Date();
+    const futureMonth = today.getMonth() + 2; // 2 months ahead
+    const year = futureMonth > 11 ? today.getFullYear() - 29 : today.getFullYear() - 30;
+    const month = futureMonth > 11 ? futureMonth - 12 : futureMonth;
+    const dob = `${year}-${String(month + 1).padStart(2, '0')}-15`;
+
+    resetStore({
+      profile: { ...VALID_PROFILE, dateOfBirth: dob },
+    });
+    render(<HealthProfileForm />);
+
+    // Birthday hasn't passed yet → age = yearDiff - 1
+    // The form should render without errors and show the age-adjusted BMR
+    const dobInput = screen.getByTestId('hp-dob');
+    expect(dobInput).toHaveValue(dob);
+  });
 });

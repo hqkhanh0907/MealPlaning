@@ -19,8 +19,7 @@ export interface NutritionTargets {
  * A profile that still matches every DEFAULT_HEALTH_PROFILE field
  * (except the volatile `updatedAt`) is considered "not set up".
  */
-function isProfileConfigured(profile: HealthProfile | null): boolean {
-  if (!profile) return false;
+function isProfileConfigured(profile: HealthProfile): boolean {
   if (profile.dateOfBirth != null) return true;
   return (
     profile.gender !== DEFAULT_HEALTH_PROFILE.gender ||
@@ -54,9 +53,7 @@ export function useNutritionTargets(): NutritionTargets {
 
     if (!configured) {
       const safeCal = Number.isFinite(healthProfile.targetCalories) ? healthProfile.targetCalories : 1500;
-      const safeWeight = Number.isFinite(healthProfile.weightKg) ? healthProfile.weightKg : 70;
-      const safeRatio = Number.isFinite(healthProfile.proteinRatio) ? healthProfile.proteinRatio : 2;
-      const fallbackProtein = Math.round(safeWeight * safeRatio);
+      const fallbackProtein = Math.round(healthProfile.weightKg * healthProfile.proteinRatio);
       return {
         targetCalories: safeCal,
         targetProtein: fallbackProtein,
