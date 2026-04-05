@@ -21,6 +21,12 @@ const MEAL_ICONS: Record<MealType, LucideIcon> = {
   dinner: Moon,
 };
 
+const MEAL_ICON_COLORS: Record<MealType, string> = {
+  breakfast: 'text-energy',
+  lunch: 'text-energy',
+  dinner: 'text-info',
+};
+
 const MAX_VISIBLE_DISHES = 2;
 
 const TEST_ID_MAP: Record<MealType, string> = {
@@ -41,6 +47,7 @@ export const MealSlot = React.memo(function MealSlot({
   const lang = i18n.language as SupportedLang;
   const hasDishes = slot.dishIds.length > 0;
   const MealIcon = MEAL_ICONS[type];
+  const mealIconColor = MEAL_ICON_COLORS[type];
   const label = t(`meal.${type}`);
 
   const resolvedDishes = useMemo(() => {
@@ -66,7 +73,7 @@ export const MealSlot = React.memo(function MealSlot({
         data-testid={TEST_ID_MAP[type]}
         className="bg-muted hover:bg-accent flex items-center gap-3 rounded-xl p-3 transition-colors"
       >
-        <MealIcon className="size-5 shrink-0" aria-hidden="true" />
+        <MealIcon className={`size-5 shrink-0 ${mealIconColor}`} aria-hidden="true" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="text-foreground text-sm font-medium">{label}</span>
@@ -93,7 +100,7 @@ export const MealSlot = React.memo(function MealSlot({
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MealIcon className="size-5 shrink-0" aria-hidden="true" />
+          <MealIcon className={`size-5 shrink-0 ${mealIconColor}`} aria-hidden="true" />
           <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">{label}</span>
         </div>
         <button

@@ -15,6 +15,7 @@ interface SessionTabsProps {
 }
 
 const SESSION_ICONS = [Sun, Moon, Sunset] as const;
+const SESSION_ICON_COLORS = ['text-energy', 'text-info', 'text-energy'] as const;
 const LONG_PRESS_MS = 500;
 
 function SessionTabsInner({
@@ -118,7 +119,10 @@ function SessionTabsInner({
                 {isCompleted ? (
                   <Check className="h-4 w-4" aria-hidden="true" />
                 ) : (
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <Icon
+                    className={`h-4 w-4 ${!isActive ? (SESSION_ICON_COLORS[index] ?? '') : ''}`}
+                    aria-hidden="true"
+                  />
                 )}
                 {t('fitness.plan.sessionTab', { order: session.sessionOrder })}
                 {isActive && canDelete && (

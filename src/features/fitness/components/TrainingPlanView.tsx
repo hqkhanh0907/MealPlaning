@@ -660,7 +660,7 @@ function TrainingPlanViewInner({
               onClick={() => handleConvertToRest(viewedDay)}
               className="focus-visible:ring-ring border-rose/20 bg-rose/10 text-rose hover:bg-rose/15 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
-              <Moon className="h-4 w-4" aria-hidden="true" />
+              <Moon className="text-info h-4 w-4" aria-hidden="true" />
               {t('fitness.plan.convertToRest')}
             </button>
           </div>

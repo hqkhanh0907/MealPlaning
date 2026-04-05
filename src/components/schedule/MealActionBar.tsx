@@ -108,7 +108,7 @@ export const MealActionBar = React.memo(function MealActionBar({
         onClick={onSuggestMealPlan}
         disabled={isSuggesting}
         data-testid="btn-ai-suggest"
-        className="bg-primary/10 text-primary hover:bg-primary/15 flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all active:scale-[0.98] disabled:opacity-50"
+        className="bg-ai/10 text-ai hover:bg-ai/15 flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all active:scale-[0.98] disabled:opacity-50"
       >
         {isSuggesting ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
