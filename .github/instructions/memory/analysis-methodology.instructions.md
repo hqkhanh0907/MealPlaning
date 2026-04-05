@@ -616,11 +616,11 @@ Muốn port gstack skills (ship, ceo-review, security audit, investigate...) san
 
 ```javascript
 // extension.mjs (ES module, KHÔNG dùng TypeScript)
-import { joinSession } from "@github/copilot-sdk/extension";
+import { joinSession } from '@github/copilot-sdk/extension';
 
 const session = await joinSession({
-    hooks: { onPreToolUse, onSessionStart, onSessionEnd },
-    tools: [{ name, description, parameters, handler }],
+  hooks: { onPreToolUse, onSessionStart, onSessionEnd },
+  tools: [{ name, description, parameters, handler }],
 });
 ```
 
@@ -638,24 +638,24 @@ const session = await joinSession({
 ### Pattern: Workflow Tool (ship, investigate, ceo-review)
 
 ```javascript
-handler: async (args) => {
-    // 1. Gather context (git status, branch, diff)
-    const branch = await runShell("git branch --show-current");
-    // 2. Return structured prompt with steps
-    return `# WORKFLOW: Ship Pipeline\n## Step 1: ...\n## Step 2: ...`;
-    // Agent sẽ follow prompt steps tự động
-}
+handler: async args => {
+  // 1. Gather context (git status, branch, diff)
+  const branch = await runShell('git branch --show-current');
+  // 2. Return structured prompt with steps
+  return `# WORKFLOW: Ship Pipeline\n## Step 1: ...\n## Step 2: ...`;
+  // Agent sẽ follow prompt steps tự động
+};
 ```
 
 ### Pattern: Safety Hook (careful)
 
 ```javascript
-onPreToolUse: async (input) => {
-    if (input.toolName !== "bash") return;
-    const cmd = String(input.toolArgs?.command || "");
-    // Regex match destructive patterns
-    if (isDangerous(cmd)) return { permissionDecision: "ask", permissionDecisionReason: "..." };
-}
+onPreToolUse: async input => {
+  if (input.toolName !== 'bash') return;
+  const cmd = String(input.toolArgs?.command || '');
+  // Regex match destructive patterns
+  if (isDangerous(cmd)) return { permissionDecision: 'ask', permissionDecisionReason: '...' };
+};
 ```
 
 ### Bài học
@@ -707,6 +707,7 @@ Critic agent finished reviewing Wave 3 plan while dev agent was mid-flight (33 t
 Use `write_agent` to relay critic findings to running dev agent immediately. The agent receives the message as a new conversation turn and can course-correct mid-implementation.
 
 Pattern:
+
 1. Dispatch critic + dev agents in parallel
 2. Critic finishes first (faster, smaller scope)
 3. `write_agent(dev_id, critic_findings)` immediately
@@ -723,6 +724,7 @@ Critic-before-commit > critic-after-commit. Relay findings to running agents via
 ### Vấn đề
 
 Dev-wave3 agent (general-purpose) autonomously spawned:
+
 - 1 explore agent for fitnessStore code research
 - 1 critic agent for its own test plan review
 - 1 general-purpose sub-agent for FIX-14+FIX-11 test writing
@@ -754,3 +756,43 @@ Always run `npx vitest run <file> --coverage` independently after agent complete
 ### Bài học
 
 Agent coverage claims are approximate. Run your own coverage check before reporting to user.
+
+---
+
+## 24. KHÔNG BAO GIỜ dừng lại giữa pipeline khi user yêu cầu "tự động làm hết"
+
+### Vấn đề
+
+User yêu cầu "tự động làm hết nhá" nhưng Copilot cứ dừng lại sau mỗi Wave/milestone để báo cáo tiến độ và chờ user xác nhận. User phải nhắc 3 lần "tại sao lại dừng lại?"
+
+### Nguyên nhân gốc
+
+1. **Thói quen báo cáo milestone**: Sau mỗi agent hoàn thành → dừng lại report → chờ user
+2. **Không dispatch ngay bước tiếp**: Đọc kết quả agent xong → kết thúc turn thay vì dispatch tiếp
+3. **Confuse "inform" với "block"**: Báo cáo tiến độ là tốt, nhưng KHÔNG ĐƯỢC block pipeline để chờ phản hồi
+
+### Giải pháp BẮT BUỘC
+
+Khi user nói "tự động", "làm hết", "không cần hỏi":
+
+```
+RULE 1: Mỗi turn PHẢI kết thúc bằng 1 action (dispatch agent, run command, hoặc task_complete)
+RULE 2: KHÔNG BAO GIỜ kết thúc turn chỉ với text báo cáo — luôn kèm tool call
+RULE 3: Khi agent hoàn thành → đọc kết quả → NGAY LẬP TỨC dispatch bước tiếp theo trong CÙNG turn
+RULE 4: Báo cáo ngắn (1-2 dòng) kèm theo action, KHÔNG dừng lại chờ
+RULE 5: Chỉ dừng khi: (a) gặp lỗi cần user quyết định, (b) pipeline hoàn thành, (c) cần input bắt buộc
+```
+
+### Pattern đúng
+
+```
+# ❌ SAI — dừng lại report
+Agent done → "Wave 3 complete! Results: ..." → END TURN (chờ user)
+
+# ✅ ĐÚNG — report + dispatch ngay
+Agent done → "Wave 3 ✅. Starting Wave 4:" → dispatch Wave 4 agent → END TURN
+```
+
+### Bài học
+
+"Tự động làm hết" = pipeline chạy liên tục từ đầu đến cuối. Mỗi turn PHẢI có action. User chỉ cần thấy kết quả cuối cùng, không cần approve từng bước.
