@@ -24,18 +24,18 @@ const VARIANT_STYLES: Record<
   { iconBg: string; iconText: string; btnBg: string; btnHover: string; btnShadow: string }
 > = {
   danger: {
-    iconBg: 'bg-rose-100 dark:bg-rose-900/30',
-    iconText: 'text-rose-500 dark:text-rose-400',
-    btnBg: 'bg-rose-500',
-    btnHover: 'hover:bg-rose-600',
-    btnShadow: 'shadow-rose-200',
+    iconBg: 'bg-destructive/10',
+    iconText: 'text-destructive',
+    btnBg: 'bg-destructive',
+    btnHover: 'hover:bg-destructive/90',
+    btnShadow: 'shadow-destructive/20',
   },
   warning: {
-    iconBg: 'bg-amber-100 dark:bg-amber-900/30',
-    iconText: 'text-amber-500 dark:text-amber-400',
-    btnBg: 'bg-amber-500',
-    btnHover: 'hover:bg-amber-600',
-    btnShadow: 'shadow-amber-200',
+    iconBg: 'bg-status-warning/10',
+    iconText: 'text-status-warning',
+    btnBg: 'bg-status-warning',
+    btnHover: 'hover:bg-status-warning/90',
+    btnShadow: 'shadow-status-warning/20',
   },
 };
 

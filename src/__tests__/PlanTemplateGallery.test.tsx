@@ -133,7 +133,7 @@ describe('TemplateMatchBadge', () => {
   it('shows amber styling for score >= 60 and < 80', () => {
     render(<TemplateMatchBadge score={65} />);
     const badge = screen.getByTestId('template-match-badge');
-    expect(badge.className).toContain('amber');
+    expect(badge.className).toContain('color-energy');
   });
 
   it('shows gray styling for score < 60', () => {
@@ -141,7 +141,7 @@ describe('TemplateMatchBadge', () => {
     const badge = screen.getByTestId('template-match-badge');
     expect(badge.className).toContain('muted');
     expect(badge.className).not.toContain('primary');
-    expect(badge.className).not.toContain('amber');
+    expect(badge.className).not.toContain('color-energy');
   });
 
   it('clamps score to 0-100 range', () => {

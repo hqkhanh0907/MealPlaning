@@ -7,13 +7,13 @@ import type { ScoreColor } from '../types';
 
 const GRADIENT_MAP: Record<ScoreColor, string> = {
   emerald: 'from-primary/90 to-primary',
-  amber: 'from-amber-500 to-amber-600',
+  amber: 'from-color-energy to-color-energy',
   slate: 'from-slate-500 to-slate-600',
 };
 
 const TEXT_COLOR_MAP: Record<ScoreColor, { primary: string; secondary: string; muted: string }> = {
   emerald: { primary: 'text-white', secondary: 'text-white/90', muted: 'text-white/60' },
-  amber: { primary: 'text-amber-950', secondary: 'text-amber-950/90', muted: 'text-amber-950/60' },
+  amber: { primary: 'text-foreground', secondary: 'text-foreground/90', muted: 'text-foreground/60' },
   slate: { primary: 'text-white', secondary: 'text-white/90', muted: 'text-white/60' },
 };
 

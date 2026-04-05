@@ -317,11 +317,11 @@ export const MealPlannerModal = ({
                       {getLocalizedField(dish.name, lang)}
                     </h4>
                     <div className="mt-1 flex gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">
+                      <span className="bg-color-energy-subtle text-color-energy inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
                         <Flame className="inline-block size-3.5" aria-hidden="true" /> {Math.round(nutrition.calories)}{' '}
                         kcal
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                      <span className="bg-macro-protein/10 text-macro-protein inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
                         <Dumbbell className="inline-block size-3.5" aria-hidden="true" />{' '}
                         {Math.round(nutrition.protein)}g
                       </span>

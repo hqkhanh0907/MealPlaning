@@ -72,7 +72,7 @@ function MealsSection({
   return (
     <div data-testid="meals-section">
       <div className="mb-2 flex items-center gap-1.5">
-        <UtensilsCrossed className="h-4 w-4 text-orange-500" aria-hidden="true" />
+        <UtensilsCrossed className="text-color-energy h-4 w-4" aria-hidden="true" />
         <span className="text-foreground-secondary text-xs font-medium">{t('dashboard.todaysPlan.meals')}</span>
       </div>
       <div data-testid="meals-progress" className="text-foreground text-sm font-semibold">

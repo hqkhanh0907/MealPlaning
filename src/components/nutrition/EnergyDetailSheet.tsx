@@ -81,7 +81,7 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
       >
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <div className="bg-primary/10 text-primary rounded-xl p-2">
               <Activity className="h-5 w-5" />
             </div>
             <h3 className="text-foreground text-lg font-semibold">{t('energyDetail.title')}</h3>

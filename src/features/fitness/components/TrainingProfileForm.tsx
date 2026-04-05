@@ -275,7 +275,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
 
       {hasHiddenFields && (
         <div
-          className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-950/30 dark:text-blue-300"
+          className="bg-status-info/10 text-status-info flex items-center gap-2 rounded-lg p-3 text-sm"
           data-testid="smart-defaults-banner"
         >
           <Info className="h-4 w-4 shrink-0" aria-hidden="true" />

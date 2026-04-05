@@ -217,7 +217,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   <Button
                     variant="default"
                     onClick={handlePauseStopwatch}
-                    className="bg-color-energy hover:bg-color-energy/90 flex-1 py-2.5 text-amber-950"
+                    className="bg-color-energy hover:bg-color-energy/90 text-color-energy-emphasis flex-1 py-2.5"
                     data-testid="pause-button"
                   >
                     {t('fitness.cardio.pause')}
@@ -262,7 +262,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                       min={0}
                     />
                     {fieldState.error?.message && (
-                      <p className="mt-1 text-xs text-rose-500" role="alert" aria-live="assertive">
+                      <p className="text-destructive mt-1 text-xs" role="alert" aria-live="assertive">
                         {fieldState.error.message}
                       </p>
                     )}
@@ -296,7 +296,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                     step={0.1}
                   />
                   {fieldState.error?.message && (
-                    <p className="mt-1 text-xs text-rose-500" role="alert" aria-live="assertive">
+                    <p className="text-destructive mt-1 text-xs" role="alert" aria-live="assertive">
                       {fieldState.error.message}
                     </p>
                   )}
@@ -327,7 +327,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   min={0}
                 />
                 {fieldState.error?.message && (
-                  <p className="mt-1 text-xs text-rose-500" role="alert" aria-live="assertive">
+                  <p className="text-destructive mt-1 text-xs" role="alert" aria-live="assertive">
                     {fieldState.error.message}
                   </p>
                 )}

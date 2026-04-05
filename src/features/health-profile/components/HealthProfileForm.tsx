@@ -228,7 +228,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
   function inputClass(field: keyof HealthProfileFormData): string {
     const borderColor = errors[field]
-      ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+      ? 'border-destructive focus:ring-destructive/50 focus:border-destructive'
       : 'border-border focus:ring-ring focus:border-primary';
     return `${inputBase} border ${borderColor}`;
   }

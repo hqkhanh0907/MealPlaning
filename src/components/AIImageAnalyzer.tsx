@@ -77,14 +77,14 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
           </div>
           <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           <div className="flex items-center gap-1.5">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+            <span className="bg-color-ai-subtle text-color-ai flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
               2
             </span>
             <span>{t('ai.step2')}</span>
           </div>
           <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           <div className="flex items-center gap-1.5">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+            <span className="bg-color-energy-subtle text-color-energy flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
               3
             </span>
             <span>{t('ai.step3')}</span>

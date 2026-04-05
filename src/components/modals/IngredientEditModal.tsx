@@ -173,7 +173,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 <Input
                   id="ing-name"
                   {...register('name.vi')}
-                  className={`flex-1 ${errors.name?.vi ? 'border-rose-500' : ''}`}
+                  className={`flex-1 ${errors.name?.vi ? 'border-destructive' : ''}`}
                   placeholder={t('ingredient.namePlaceholder')}
                   data-testid="input-ing-name"
                   aria-invalid={!!errors.name?.vi}

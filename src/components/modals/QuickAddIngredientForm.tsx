@@ -148,7 +148,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         </div>
         <div>
           <label htmlFor="qa-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-            {t('dish.quickAddName')} <span className="text-rose-500">*</span>
+            {t('dish.quickAddName')} <span className="text-destructive">*</span>
           </label>
           <Controller
             name="qaName"

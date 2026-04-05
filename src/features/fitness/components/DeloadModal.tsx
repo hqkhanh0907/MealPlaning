@@ -24,7 +24,7 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
           <button
             type="button"
             onClick={onAccept}
-            className="bg-warning hover:bg-warning/90 focus-visible:ring-warning flex min-h-[44px] flex-1 items-center justify-center rounded-lg py-2.5 font-medium text-amber-950 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="bg-warning hover:bg-warning/90 focus-visible:ring-warning text-foreground flex min-h-[44px] flex-1 items-center justify-center rounded-lg py-2.5 font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
             data-testid="deload-accept"
           >
             {t('fitness.deload.accept')}

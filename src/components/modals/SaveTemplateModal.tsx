@@ -134,19 +134,19 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
       key: 'breakfast',
       label: t('calendar.morning'),
       items: preview.breakfast,
-      color: 'bg-amber-50 dark:bg-amber-900/20 text-status-warning',
+      color: 'bg-status-warning/10 text-status-warning',
     },
     {
       key: 'lunch',
       label: t('calendar.afternoon'),
       items: preview.lunch,
-      color: 'bg-blue-50 dark:bg-blue-900/20 text-status-info',
+      color: 'bg-status-info/10 text-status-info',
     },
     {
       key: 'dinner',
       label: t('calendar.evening'),
       items: preview.dinner,
-      color: 'bg-indigo-50 dark:bg-indigo-900/20 text-color-ai',
+      color: 'bg-color-ai-subtle text-color-ai',
     },
   ];
 

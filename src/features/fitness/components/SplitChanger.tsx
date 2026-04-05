@@ -153,9 +153,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                 type="button"
                 onClick={() => setMode('regenerate')}
                 className={`flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
-                  mode === 'regenerate'
-                    ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950'
-                    : 'bg-card border-border'
+                  mode === 'regenerate' ? 'border-status-warning bg-status-warning/10' : 'bg-card border-border'
                 } touch-manipulation`}
                 data-testid="mode-regenerate"
               >

@@ -212,7 +212,7 @@ describe('HealthProfileForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Tên').className).toContain('border-red');
+      expect(screen.getByLabelText('Tên').className).toContain('border-destructive');
     });
 
     expect(mockSaveProfile).not.toHaveBeenCalled();
@@ -227,7 +227,7 @@ describe('HealthProfileForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Ngày sinh').className).toContain('border-red');
+      expect(screen.getByLabelText('Ngày sinh').className).toContain('border-destructive');
     });
 
     expect(mockSaveProfile).not.toHaveBeenCalled();
@@ -249,7 +249,7 @@ describe('HealthProfileForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Ngày sinh').className).toContain('border-red');
+      expect(screen.getByLabelText('Ngày sinh').className).toContain('border-destructive');
     });
 
     expect(mockSaveProfile).not.toHaveBeenCalled();

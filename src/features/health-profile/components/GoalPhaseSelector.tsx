@@ -22,9 +22,9 @@ import type { Goal, GoalType, RateOfChange } from '../types';
 /* Constants                                                           */
 /* ------------------------------------------------------------------ */
 const GOAL_OPTIONS = [
-  { type: 'cut' as const, icon: TrendingDown, color: 'text-blue-500' },
+  { type: 'cut' as const, icon: TrendingDown, color: 'text-status-info' },
   { type: 'maintain' as const, icon: Minus, color: 'text-primary' },
-  { type: 'bulk' as const, icon: TrendingUp, color: 'text-orange-500' },
+  { type: 'bulk' as const, icon: TrendingUp, color: 'text-color-energy' },
 ] as const;
 
 const RATE_OPTIONS = [

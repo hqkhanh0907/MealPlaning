@@ -59,7 +59,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       {/* Burned */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
-          <Flame className="h-3.5 w-3.5 text-orange-500" aria-hidden="true" />
+          <Flame className="text-color-energy h-3.5 w-3.5" aria-hidden="true" />
           <span data-testid="mini-burned" className="text-foreground text-sm font-semibold tabular-nums">
             {Math.round(burned)}
           </span>

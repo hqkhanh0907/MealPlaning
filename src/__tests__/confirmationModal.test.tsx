@@ -111,19 +111,19 @@ describe('ConfirmationModal', () => {
   it('defaults to danger variant', () => {
     renderModal();
     const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-rose-500');
+    expect(confirmBtn.className).toContain('bg-destructive');
   });
 
   it('danger variant applies rose button styles', () => {
     renderModal({ variant: 'danger' });
     const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-rose-500');
-    expect(confirmBtn.className).toContain('hover:bg-rose-600');
+    expect(confirmBtn.className).toContain('bg-destructive');
+    expect(confirmBtn.className).toContain('hover:bg-destructive/90');
   });
 
   it('danger variant applies rose icon background', () => {
     const { container } = renderModal({ variant: 'danger' });
-    const iconWrapper = container.querySelector('.bg-rose-100');
+    const iconWrapper = container.querySelector('.bg-destructive\\/10');
     expect(iconWrapper).toBeInTheDocument();
   });
 
@@ -132,13 +132,13 @@ describe('ConfirmationModal', () => {
   it('warning variant applies amber button styles', () => {
     renderModal({ variant: 'warning' });
     const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-amber-500');
-    expect(confirmBtn.className).toContain('hover:bg-amber-600');
+    expect(confirmBtn.className).toContain('bg-status-warning');
+    expect(confirmBtn.className).toContain('hover:bg-status-warning/90');
   });
 
   it('warning variant applies amber icon background', () => {
     const { container } = renderModal({ variant: 'warning' });
-    const iconWrapper = container.querySelector('.bg-amber-100');
+    const iconWrapper = container.querySelector('.bg-status-warning\\/10');
     expect(iconWrapper).toBeInTheDocument();
   });
 
@@ -159,7 +159,7 @@ describe('ConfirmationModal', () => {
 
   it('renders default icon for warning variant when no icon provided', () => {
     const { container } = renderModal({ variant: 'warning' });
-    const iconContainer = container.querySelector('.bg-amber-100');
+    const iconContainer = container.querySelector('.bg-status-warning\\/10');
     expect(iconContainer).toBeInTheDocument();
     const svgIcon = iconContainer?.querySelector('svg');
     expect(svgIcon).toBeInTheDocument();

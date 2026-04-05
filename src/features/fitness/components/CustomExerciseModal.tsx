@@ -69,10 +69,10 @@ export function CustomExerciseModal({
               data-testid="custom-exercise-name"
               aria-required={true}
               aria-invalid={!!errors.name}
-              className={`w-full ${errors.name ? 'border-rose-500' : ''}`}
+              className={`w-full ${errors.name ? 'border-destructive' : ''}`}
             />
             {errors.name && (
-              <p className="mt-1 text-xs text-rose-500" role="alert">
+              <p className="text-destructive mt-1 text-xs" role="alert">
                 {errors.name.message}
               </p>
             )}

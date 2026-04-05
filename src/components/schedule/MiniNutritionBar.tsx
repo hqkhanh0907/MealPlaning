@@ -45,14 +45,14 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <div className="text-foreground flex items-center gap-1.5">
-            <Flame className="h-3.5 w-3.5 text-orange-500" />
+            <Flame className="text-color-energy h-3.5 w-3.5" />
             <span className="text-xs font-medium">
               {totalCal}/{displayCal} kcal
             </span>
           </div>
           <div className="bg-muted h-1.5 overflow-hidden rounded-full">
             <div
-              className="h-full rounded-full bg-orange-400 transition-all"
+              className="bg-color-energy h-full rounded-full transition-all"
               style={{ width: `${calPct}%` }}
               data-testid="mini-cal-bar"
             />
@@ -68,14 +68,14 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
         </div>
         <div className="space-y-1">
           <div className="text-foreground flex items-center gap-1.5">
-            <Beef className="h-3.5 w-3.5 text-blue-500" />
+            <Beef className="text-macro-protein h-3.5 w-3.5" />
             <span className="text-xs font-medium">
               {totalPro}/{displayPro}g Pro
             </span>
           </div>
           <div className="bg-muted h-1.5 overflow-hidden rounded-full">
             <div
-              className="h-full rounded-full bg-blue-400 transition-all"
+              className="bg-macro-protein h-full rounded-full transition-all"
               style={{ width: `${proPct}%` }}
               data-testid="mini-pro-bar"
             />

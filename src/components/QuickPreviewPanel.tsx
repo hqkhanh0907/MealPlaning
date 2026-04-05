@@ -161,7 +161,7 @@ const MealRow = React.memo(function MealRow({
               title={`${nutrition.calories.toFixed(0)} kcal`}
             >
               <div
-                className="h-full rounded-full bg-orange-400 transition-all"
+                className="bg-color-energy h-full rounded-full transition-all"
                 style={{ width: `${calPercent}%` }}
                 data-testid={`cal-bar-${type}`}
               />
@@ -171,7 +171,7 @@ const MealRow = React.memo(function MealRow({
               title={`${nutrition.protein.toFixed(1)}g protein`}
             >
               <div
-                className="h-full rounded-full bg-blue-400 transition-all"
+                className="bg-macro-protein h-full rounded-full transition-all"
                 style={{ width: `${proPercent}%` }}
                 data-testid={`pro-bar-${type}`}
               />

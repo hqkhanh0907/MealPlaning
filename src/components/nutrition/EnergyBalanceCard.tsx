@@ -41,7 +41,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Flame className="h-5 w-5 text-orange-500" />
+          <Flame className="text-color-energy h-5 w-5" />
           <span className="text-foreground text-sm font-semibold">{t('nutrition.netCalories')}</span>
         </div>
 
@@ -89,7 +89,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
               {t('nutrition.caloriesIn')}: <strong data-testid="calories-in">{Math.round(caloriesIn)}</strong>
             </span>
             <span className="flex items-center gap-1">
-              <Dumbbell className="h-3.5 w-3.5 text-blue-500" />
+              <Dumbbell className="text-status-info h-3.5 w-3.5" />
               {t('nutrition.caloriesOut')}: <strong data-testid="calories-out">{Math.round(caloriesOut)}</strong>
             </span>
           </div>
@@ -106,7 +106,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
               {/* Exercise (blue) overlay from left */}
               <div
                 data-testid="bar-exercise"
-                className="absolute inset-y-0 left-0 rounded-l-full bg-blue-400 transition-all"
+                className="bg-status-info absolute inset-y-0 left-0 rounded-l-full transition-all"
                 style={{ width: `${outPct}%` }}
               />
             </div>
@@ -124,7 +124,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
           <div className="space-y-1">
             <div className="text-foreground-secondary flex items-center justify-between text-xs">
               <span className="flex items-center gap-1">
-                <Beef className="h-3.5 w-3.5 text-indigo-500" aria-hidden="true" />
+                <Beef className="text-macro-protein h-3.5 w-3.5" aria-hidden="true" />
                 {t('nutrition.protein')}
               </span>
               <span data-testid="protein-display">
@@ -135,7 +135,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
             <div className="bg-muted h-2 overflow-hidden rounded-full">
               <div
                 data-testid="protein-bar"
-                className="h-full rounded-full bg-indigo-400 transition-all"
+                className="bg-macro-protein h-full rounded-full transition-all"
                 style={{ width: `${proPct}%` }}
               />
             </div>

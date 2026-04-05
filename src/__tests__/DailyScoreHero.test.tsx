@@ -70,8 +70,8 @@ describe('DailyScoreHero', () => {
       render(<DailyScoreHero />);
 
       const hero = screen.getByTestId('daily-score-hero');
-      expect(hero.className).toContain('from-amber-500');
-      expect(hero.className).toContain('to-amber-600');
+      expect(hero.className).toContain('from-color-energy');
+      expect(hero.className).toContain('to-color-energy');
     });
 
     it('renders slate gradient for score < 50', () => {

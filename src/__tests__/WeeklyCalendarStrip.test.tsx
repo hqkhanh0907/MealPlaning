@@ -71,9 +71,9 @@ describe('WeeklyCalendarStrip', () => {
   it('renders today highlight with blue ring', () => {
     render(<WeeklyCalendarStrip {...defaultProps} todayDow={3} />);
     const day3 = screen.getByTestId('calendar-day-3');
-    expect(day3.className).toContain('ring-blue-500');
+    expect(day3.className).toContain('ring-status-info');
     const day1 = screen.getByTestId('calendar-day-1');
-    expect(day1.className).not.toContain('ring-blue-500');
+    expect(day1.className).not.toContain('ring-status-info');
   });
 
   it('renders selected day with bold border', () => {

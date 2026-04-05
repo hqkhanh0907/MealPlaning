@@ -25,11 +25,11 @@ export const PRToast = React.memo(function PRToast({ pr, onDismiss }: PRToastPro
       onClick={onDismiss}
       aria-label={t('fitness.gamification.newPR')}
     >
-      <p className="flex items-center gap-2 text-lg font-semibold text-amber-900">
+      <p className="text-color-energy-emphasis flex items-center gap-2 text-lg font-semibold">
         <Trophy className="h-5 w-5" aria-hidden="true" />
         {t('fitness.gamification.newPR')}
       </p>
-      <p data-testid="pr-details" className="text-sm text-amber-800">
+      <p data-testid="pr-details" className="text-color-energy-emphasis text-sm">
         {pr.exerciseName}: {pr.newWeight}kg \u00d7 {pr.reps} reps (+
         {pr.improvement}kg)
       </p>

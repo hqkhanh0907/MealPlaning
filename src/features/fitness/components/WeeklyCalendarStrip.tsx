@@ -83,7 +83,7 @@ export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
               'transition-colors duration-150',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               isTraining ? 'bg-primary text-primary-foreground dark:bg-primary' : 'text-foreground-secondary bg-muted',
-              isToday ? 'ring-2 ring-blue-500 ring-offset-1' : '',
+              isToday ? 'ring-status-info ring-2 ring-offset-1' : '',
               isSelected ? 'border-border border-2 dark:border-white' : '',
             ]
               .filter(Boolean)

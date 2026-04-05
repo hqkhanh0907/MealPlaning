@@ -109,7 +109,7 @@ export const UnitSelector = (props: UnitSelectorProps) => {
   const inputBase =
     'w-full px-4 py-2.5 rounded-xl border focus:border-primary outline-none ' +
     'transition-all text-base sm:text-sm bg-card ';
-  const borderClass = error ? 'border-rose-500' : 'border-border';
+  const borderClass = error ? 'border-destructive' : 'border-border';
 
   const testId = props['data-testid'];
 
@@ -142,7 +142,7 @@ export const UnitSelector = (props: UnitSelectorProps) => {
           onBlur={onBlur}
           placeholder={t('shared.unitSelectorCustomPlaceholder')}
           data-testid={testId ? `${testId}-custom` : undefined}
-          className={error ? 'w-full border-rose-500' : 'w-full'}
+          className={error ? 'border-destructive w-full' : 'w-full'}
           autoFocus
         />
       )}

@@ -17,9 +17,9 @@ interface NutritionGoalStepProps {
 }
 
 const GOALS = [
-  { value: 'cut', icon: TrendingDown, color: 'text-blue-500' },
+  { value: 'cut', icon: TrendingDown, color: 'text-status-info' },
   { value: 'maintain', icon: Minus, color: 'text-primary' },
-  { value: 'bulk', icon: TrendingUp, color: 'text-orange-500' },
+  { value: 'bulk', icon: TrendingUp, color: 'text-color-energy' },
 ] as const;
 
 const RATES = ['conservative', 'moderate', 'aggressive'] as const;

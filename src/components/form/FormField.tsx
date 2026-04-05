@@ -37,7 +37,7 @@ export const FormField = React.memo(function FormField({
     <div className={className ?? 'mb-4'}>
       <label htmlFor={labelFor} className="text-foreground-secondary mb-1 block text-sm font-medium">
         {label}
-        {required && <span className="ml-0.5 text-rose-500">*</span>}
+        {required && <span className="text-destructive ml-0.5">*</span>}
       </label>
 
       {enhancedChildren}

@@ -28,7 +28,7 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
 
           let stateClass: string;
           if (isActive && hours < LOW_SLEEP_THRESHOLD) {
-            stateClass = 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+            stateClass = 'border-status-warning bg-status-warning/10 text-status-warning';
           } else if (isActive) {
             stateClass = 'border-primary bg-primary-subtle text-primary-emphasis';
           } else {

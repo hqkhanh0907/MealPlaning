@@ -14,9 +14,9 @@ const GOAL_ICON: Record<string, typeof TrendingDown> = {
 };
 
 const GOAL_COLOR: Record<string, string> = {
-  cut: 'text-blue-600 dark:text-blue-400',
+  cut: 'text-status-info',
   maintain: 'text-primary',
-  bulk: 'text-orange-600 dark:text-orange-400',
+  bulk: 'text-color-energy',
 };
 
 function GoalViewMode() {

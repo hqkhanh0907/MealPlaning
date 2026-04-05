@@ -163,7 +163,7 @@ describe('StreakMini', () => {
     // Tue (day 2) should be rest
     const dot2 = screen.getByTestId('dot-2');
     expect(dot2).toHaveAttribute('data-status', 'rest');
-    expect(dot2.className).toContain('blue');
+    expect(dot2.className).toContain('status-info');
   });
 
   it('missed day dot has gray outline', () => {

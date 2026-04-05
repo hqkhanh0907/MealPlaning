@@ -43,7 +43,7 @@ export const StreakCounter = React.memo(function StreakCounter() {
   return (
     <div data-testid="streak-counter" className="bg-card rounded-xl p-4 shadow-sm">
       <div className="flex items-center gap-2">
-        <Flame className="size-6 text-orange-500" aria-hidden="true" />
+        <Flame className="text-color-energy size-6" aria-hidden="true" />
         <span data-testid="streak-count" className="text-foreground text-xl font-semibold">
           {streakInfo.currentStreak}
         </span>
