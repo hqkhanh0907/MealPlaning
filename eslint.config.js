@@ -26,6 +26,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/components/ui/**', 'src/contexts/**'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     files: ['src/utils/logger.ts'],
     rules: {
       'no-console': 'off',

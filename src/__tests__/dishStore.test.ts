@@ -403,5 +403,13 @@ describe('dishStore', () => {
 
       await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
     });
+
+    it('syncs setDishes with empty array — deletes all rows', async () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+      useDishStore.getState().setDishes([]);
+
+      await vi.waitFor(() => expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM dish_ingredients'));
+      expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM dishes');
+    });
   });
 });

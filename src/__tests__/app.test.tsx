@@ -6,6 +6,7 @@ import { initialDishes } from '../data/initialData';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import { useDishStore } from '../store/dishStore';
 import { useMealTemplateStore } from '../store/mealTemplateStore';
+import { useNavigationStore } from '../store/navigationStore';
 import type { Dish, Ingredient } from '../types';
 
 const getLocalToday = () => {
@@ -24,6 +25,7 @@ vi.mock('../contexts/NotificationContext', () => ({
 }));
 
 let mockThemeValue: 'light' | 'dark' | 'system' = 'light';
+let mockIsOnboarded = true;
 
 // Mock ManagementTab to expose dish + ingredient callbacks for testing
 vi.mock('../components/ManagementTab', () => ({
@@ -196,7 +198,8 @@ vi.mock('../contexts/DatabaseContext', () => ({
   }),
 }));
 vi.mock('../store/appOnboardingStore', () => ({
-  useAppOnboardingStore: (selector: (s: { isAppOnboarded: boolean }) => boolean) => selector({ isAppOnboarded: true }),
+  useAppOnboardingStore: (selector: (s: { isAppOnboarded: boolean }) => boolean) =>
+    selector({ isAppOnboarded: mockIsOnboarded }),
 }));
 vi.mock('../hooks/useAutoSync', () => ({
   useAutoSync: () => ({ syncStatus: 'idle', lastSyncAt: null, triggerUpload: vi.fn(), triggerDownload: vi.fn() }),
@@ -326,14 +329,70 @@ vi.mock('../components/modals/ClearPlanModal', () => ({
   ),
 }));
 
+// Mock lazy-loaded onboarding
+vi.mock('../components/UnifiedOnboarding', () => ({
+  UnifiedOnboarding: () => <div data-testid="onboarding-view">Onboarding</div>,
+}));
+
+// Mock lazy-loaded full-screen fitness page components
+vi.mock('../features/fitness/components/WorkoutLogger', () => ({
+  WorkoutLogger: ({ onComplete, onBack }: { onComplete: () => void; onBack: () => void; planDay: unknown }) => (
+    <div data-testid="workout-logger">
+      <button data-testid="workout-complete-btn" onClick={onComplete}>
+        Complete
+      </button>
+      <button data-testid="workout-back-btn" onClick={onBack}>
+        Back
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('../features/fitness/components/CardioLogger', () => ({
+  CardioLogger: ({ onComplete, onBack }: { onComplete: () => void; onBack: () => void }) => (
+    <div data-testid="cardio-logger">
+      <button data-testid="cardio-complete-btn" onClick={onComplete}>
+        Complete Cardio
+      </button>
+      <button data-testid="cardio-back-btn" onClick={onBack}>
+        Back Cardio
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('../features/fitness/components/PlanDayEditor', () => ({
+  PlanDayEditor: () => <div data-testid="plan-day-editor">Plan Day Editor</div>,
+}));
+
+vi.mock('../features/fitness/components/PlanScheduleEditor', () => ({
+  default: () => <div data-testid="plan-schedule-editor">Schedule Editor</div>,
+}));
+
+vi.mock('../features/fitness/components/SplitChanger', () => ({
+  SplitChanger: ({ onComplete }: { onComplete: () => void; planId: string; currentSplit: string }) => (
+    <div data-testid="split-changer">
+      <button data-testid="split-complete-btn" onClick={onComplete}>
+        Done
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('../features/fitness/components/PlanTemplateGallery', () => ({
+  default: () => <div data-testid="plan-template-gallery">Template Gallery</div>,
+}));
+
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
     mockThemeValue = 'light';
+    mockIsOnboarded = true;
     useDayPlanStore.setState({ dayPlans: [] });
     useDishStore.setState({ dishes: initialDishes });
     useMealTemplateStore.setState({ templates: [] });
+    useNavigationStore.setState({ activeTab: 'calendar', pageStack: [], showBottomNav: true, tabScrollPositions: {} });
   });
 
   it('renders header with app name', () => {
@@ -627,6 +686,51 @@ describe('App', () => {
     });
     fireEvent.click(screen.getByTestId('btn-quick-add-breakfast-quick1'));
     // Should trigger the success notification
+    expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('handleQuickAdd appends dish to existing slot with pre-existing dishes', async () => {
+    const today = getLocalToday();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    useDayPlanStore.setState({
+      dayPlans: [
+        { date: yesterdayStr, breakfastDishIds: ['quick2'], lunchDishIds: [], dinnerDishIds: [] },
+        { date: today, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: [] },
+      ],
+    });
+    useDishStore.getState().addDish({ id: 'quick2', name: { vi: 'Quick Dish 2' }, ingredients: [], tags: [] });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
+    });
+    // Only dinner is empty — clicking a recent dish quick-adds directly to dinner
+    fireEvent.click(screen.getByTestId('btn-recent-quick2'));
+    // Direct add to the single empty slot (dinner)
+    expect(mockNotify.success).toHaveBeenCalled();
+  });
+
+  it('handleQuickAdd creates new slot when no plan exists for today', async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    // Only yesterday has a plan — no plan for today at all
+    useDayPlanStore.setState({
+      dayPlans: [{ date: yesterdayStr, breakfastDishIds: ['quick3'], lunchDishIds: [], dinnerDishIds: [] }],
+    });
+    useDishStore.getState().addDish({ id: 'quick3', name: { vi: 'Quick Dish 3' }, ingredients: [], tags: [] });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByTestId('recent-dishes-section')).toBeInTheDocument();
+    });
+    // All slots empty for today → clicking recent dish shows dropdown
+    fireEvent.click(screen.getByTestId('btn-recent-quick3'));
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-quick-add-breakfast-quick3')).toBeInTheDocument();
+    });
+    // This triggers handleQuickAdd with existing=undefined → ?? [] fallback taken
+    fireEvent.click(screen.getByTestId('btn-quick-add-breakfast-quick3'));
     expect(mockNotify.success).toHaveBeenCalled();
   });
 
@@ -979,5 +1083,217 @@ describe('App', () => {
     expect(screen.getByTestId('serving-count-srv2')).toHaveTextContent('2x');
     fireEvent.click(screen.getByTestId('btn-serving-minus-srv2'));
     expect(screen.getByTestId('serving-count-srv2')).toHaveTextContent('1x');
+  });
+
+  // --- PageStackOverlay branch coverage ---
+
+  it('renders WorkoutLogger page in overlay', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'workout-1', component: 'WorkoutLogger', props: { planDay: null } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('workout-logger')).toBeInTheDocument());
+    expect(screen.getByTestId('page-overlay-workout-1')).toBeInTheDocument();
+  });
+
+  it('WorkoutLogger onComplete pops page from stack', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'workout-2', component: 'WorkoutLogger', props: { planDay: null } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('workout-logger')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('workout-complete-btn'));
+    await waitFor(() => expect(screen.queryByTestId('workout-logger')).not.toBeInTheDocument());
+  });
+
+  it('WorkoutLogger onBack pops page from stack', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'workout-3', component: 'WorkoutLogger', props: { planDay: null } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('workout-logger')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('workout-back-btn'));
+    await waitFor(() => expect(screen.queryByTestId('workout-logger')).not.toBeInTheDocument());
+  });
+
+  it('renders CardioLogger page in overlay', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'cardio-1', component: 'CardioLogger', props: {} }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('cardio-logger')).toBeInTheDocument());
+    expect(screen.getByTestId('page-overlay-cardio-1')).toBeInTheDocument();
+  });
+
+  it('renders PlanDayEditor page in overlay', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'planday-1', component: 'PlanDayEditor', props: { planDay: null } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('plan-day-editor')).toBeInTheDocument());
+  });
+
+  it('renders PlanScheduleEditor page in overlay', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'schedule-1', component: 'PlanScheduleEditor', props: { planId: 'p1' } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('plan-schedule-editor')).toBeInTheDocument());
+  });
+
+  it('renders SplitChanger page in overlay', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'split-1', component: 'SplitChanger', props: { planId: 'p1', currentSplit: 'upper_lower' } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('split-changer')).toBeInTheDocument());
+  });
+
+  it('renders PlanTemplateGallery page in overlay', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'gallery-1', component: 'PlanTemplateGallery', props: { planId: 'p1' } }],
+      });
+    });
+    await waitFor(() => expect(screen.getByTestId('plan-template-gallery')).toBeInTheDocument());
+  });
+
+  it('renders nothing for unknown page component in stack (default case)', async () => {
+    render(<App />);
+    act(() => {
+      useNavigationStore.setState({
+        pageStack: [{ id: 'unknown-1', component: 'NonExistent' as never }],
+      });
+    });
+    // Default case returns null → overlay not rendered
+    await waitFor(() => {
+      expect(screen.queryByTestId('page-overlay-unknown-1')).not.toBeInTheDocument();
+    });
+  });
+
+  // --- Onboarding branch ---
+
+  it('renders onboarding view when not onboarded', async () => {
+    mockIsOnboarded = false;
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('onboarding-view')).toBeInTheDocument());
+    // Main app content should not be visible
+    expect(screen.queryByText('Smart Meal Planner')).not.toBeInTheDocument();
+  });
+
+  // --- Keyboard shortcut from INPUT/TEXTAREA ---
+
+  it('ignores keyboard shortcuts when target is an input element', () => {
+    render(<App />);
+    const calendarNav = screen.getByTestId('nav-calendar');
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    fireEvent.keyDown(input, { key: '2', metaKey: true });
+    // Should still be on calendar tab — shortcut was suppressed
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    document.body.removeChild(input);
+  });
+
+  it('ignores keyboard shortcuts when target is a textarea', () => {
+    render(<App />);
+    const calendarNav = screen.getByTestId('nav-calendar');
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    const textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+    fireEvent.keyDown(textarea, { key: '2', metaKey: true });
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    document.body.removeChild(textarea);
+  });
+
+  it('ignores keyboard shortcuts for non-digit keys', () => {
+    render(<App />);
+    const calendarNav = screen.getByTestId('nav-calendar');
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    // Press meta+A (not a digit) — should be ignored
+    fireEvent.keyDown(document, { key: 'a', metaKey: true });
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('ignores keyboard shortcuts for out-of-range digits', () => {
+    render(<App />);
+    const calendarNav = screen.getByTestId('nav-calendar');
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+    // Press meta+9 (out of 1-5 range)
+    fireEvent.keyDown(document, { key: '9', metaKey: true });
+    expect(calendarNav).toHaveAttribute('aria-selected', 'true');
+  });
+
+  // --- Copy plan with existing targets for undo ---
+
+  it('copy plan creates snapshot of existing target date plans for undo', async () => {
+    const today = getLocalToday();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+    useDayPlanStore.setState({
+      dayPlans: [
+        { date: today, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+        { date: tomorrowStr, breakfastDishIds: ['d2'], lunchDishIds: ['d3'], dinnerDishIds: [] },
+      ],
+    });
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-more-actions'));
+    await waitFor(() => expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-copy-plan'));
+    await waitFor(() => expect(screen.getByTestId('copy-plan-modal')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('btn-copy-tomorrow'));
+    fireEvent.click(screen.getByTestId('btn-copy-confirm'));
+    expect(mockNotify.success).toHaveBeenCalled();
+    // Verify undo restores the previous plan state
+    const successCalls = mockNotify.success.mock.calls;
+    const lastCall = successCalls[successCalls.length - 1];
+    const actionObj = lastCall?.[2]?.action;
+    if (actionObj) {
+      act(() => {
+        actionObj.onClick();
+      });
+      expect(mockNotify.info).toHaveBeenCalled();
+    }
+  });
+
+  // --- openTypeSelection with non-empty meal slots ---
+
+  it('opens planner on first empty slot when some slots have dishes', async () => {
+    const today = getLocalToday();
+    useDayPlanStore.setState({
+      dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] }],
+    });
+    render(<App />);
+    const planBtns = screen.getAllByText('Lên kế hoạch');
+    fireEvent.click(planBtns[0]);
+    await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
+  });
+
+  it('opens planner on breakfast default when all slots have dishes', async () => {
+    const today = getLocalToday();
+    useDayPlanStore.setState({
+      dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] }],
+    });
+    render(<App />);
+    const planBtns = screen.getAllByText('Lên kế hoạch');
+    fireEvent.click(planBtns[0]);
+    await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
   });
 });

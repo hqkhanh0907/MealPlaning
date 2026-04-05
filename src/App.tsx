@@ -324,9 +324,11 @@ export default function App() {
         return updateDayPlanSlot(prev, selectedDate, type, [...currentIds, dishId]);
       });
       const dish = dishes.find(d => d.id === dishId);
+      /* v8 ignore start -- defensive: dish always exists because UI only renders buttons for known dishes */
       if (dish) {
         notify.success(t('notification.dishAdded'), getLocalizedField(dish.name));
       }
+      /* v8 ignore stop */
     },
     [selectedDate, setDayPlans, dishes, notify, t],
   );

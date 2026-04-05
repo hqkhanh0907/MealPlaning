@@ -20,7 +20,12 @@ vi.mock('@capacitor/core', () => ({
 
 vi.mock('sql.js', async () => {
   const real = await vi.importActual<typeof import('sql.js')>('sql.js');
-  return { default: () => real.default() };
+  return {
+    default: (opts?: { locateFile?: (file: string) => string }) => {
+      if (opts?.locateFile) opts.locateFile('sql-wasm.wasm');
+      return real.default();
+    },
+  };
 });
 
 /* ================================================================== */

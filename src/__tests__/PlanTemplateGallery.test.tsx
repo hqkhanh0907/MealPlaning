@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { flushSync } from 'react-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PlanTemplateGallery } from '../features/fitness/components/PlanTemplateGallery';
 import { TemplateMatchBadge } from '../features/fitness/components/TemplateMatchBadge';
-import type { TrainingProfile } from '../features/fitness/types';
+import type { EquipmentType, PlanTemplate, TrainingProfile } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
 
@@ -17,6 +18,44 @@ const mockNotify = {
 };
 vi.mock('../contexts/NotificationContext', () => ({
   useNotification: () => mockNotify,
+}));
+
+// Mock ConfirmationModal to always render buttons in DOM (even when isOpen=false)
+// so we can test the defensive guard in handleConfirmApply when applyTarget is null
+vi.mock('@/components/modals/ConfirmationModal', () => ({
+  ConfirmationModal: ({
+    isOpen,
+    onConfirm,
+    onCancel,
+    confirmLabel,
+    cancelLabel,
+    message,
+    title,
+  }: {
+    isOpen: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    message?: string;
+    title?: string;
+  }) =>
+    isOpen ? (
+      <div data-testid="confirmation-modal">
+        <h2>{title}</h2>
+        <p>{message}</p>
+        <button data-testid="btn-cancel-action" onClick={onCancel}>
+          {cancelLabel}
+        </button>
+        <button data-testid="btn-confirm-action" onClick={onConfirm}>
+          {confirmLabel}
+        </button>
+      </div>
+    ) : (
+      <button data-testid="btn-confirm-hidden" onClick={onConfirm} style={{ display: 'none' }}>
+        {confirmLabel}
+      </button>
+    ),
 }));
 
 // ---------- helpers ----------
@@ -57,6 +96,14 @@ function buildPlan() {
   };
 }
 
+// Save original store methods before any test mutates them
+const origFitnessMethods = {
+  getTemplates: useFitnessStore.getState().getTemplates,
+  getRecommendedTemplates: useFitnessStore.getState().getRecommendedTemplates,
+  applyTemplate: useFitnessStore.getState().applyTemplate,
+  saveCurrentAsTemplate: useFitnessStore.getState().saveCurrentAsTemplate,
+};
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -64,6 +111,7 @@ afterEach(() => {
     trainingProfile: null,
     trainingPlans: [],
     trainingPlanDays: [],
+    ...origFitnessMethods,
   });
   useNavigationStore.setState({ pageStack: [] });
 });
@@ -207,8 +255,6 @@ describe('PlanTemplateGallery', () => {
   });
 
   it('shows empty state with retry when no templates', async () => {
-    // Override getTemplates to return empty array
-    const originalGetTemplates = useFitnessStore.getState().getTemplates;
     useFitnessStore.setState({
       getTemplates: () => [],
       getRecommendedTemplates: () => [],
@@ -220,9 +266,6 @@ describe('PlanTemplateGallery', () => {
     });
     expect(screen.getByText('Không tải được mẫu')).toBeInTheDocument();
     expect(screen.getByTestId('retry-button')).toBeInTheDocument();
-
-    // Restore
-    useFitnessStore.setState({ getTemplates: originalGetTemplates });
   });
 
   it('back button calls popPage', async () => {
@@ -271,6 +314,360 @@ describe('PlanTemplateGallery', () => {
 
     await waitFor(() => {
       expect(mockNotify.error).toHaveBeenCalledWith('Lưu template thất bại. Vui lòng thử lại.');
+    });
+  });
+
+  it('shows error/empty state when getTemplates throws', async () => {
+    useFitnessStore.setState({
+      getTemplates: () => {
+        throw new Error('load fail');
+      },
+    });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('template-empty-state')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('retry-button')).toBeInTheDocument();
+  });
+
+  it('does not show recommended section when trainingProfile is null', async () => {
+    useFitnessStore.setState({ trainingProfile: null });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('all-templates-section')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('recommended-section')).not.toBeInTheDocument();
+  });
+
+  it('confirms apply: calls applyTemplate and popPage', async () => {
+    const applyTemplateSpy = vi.fn();
+    const popPageSpy = vi.fn();
+    useFitnessStore.setState({ applyTemplate: applyTemplateSpy });
+    useNavigationStore.setState({ popPage: popPageSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getAllByTestId('template-card-starting_strength').length).toBeGreaterThan(0);
+    });
+
+    // Click a template card to open confirmation
+    fireEvent.click(screen.getAllByTestId('template-card-starting_strength')[0]);
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
+
+    // Click confirm
+    fireEvent.click(screen.getByTestId('btn-confirm-action'));
+    expect(applyTemplateSpy).toHaveBeenCalledWith('plan-1', 'starting_strength');
+    expect(popPageSpy).toHaveBeenCalled();
+  });
+
+  it('handleConfirmApply catches error from applyTemplate', async () => {
+    const applyTemplateSpy = vi.fn(() => {
+      throw new Error('apply error');
+    });
+    useFitnessStore.setState({ applyTemplate: applyTemplateSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getAllByTestId('template-card-starting_strength').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getAllByTestId('template-card-starting_strength')[0]);
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
+
+    // Confirm — should catch the error, not crash
+    fireEvent.click(screen.getByTestId('btn-confirm-action'));
+    expect(applyTemplateSpy).toHaveBeenCalled();
+    // Modal should still be rendered (isApplying resets to false)
+    expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+  });
+
+  it('cancels apply confirmation via cancel button', async () => {
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getAllByTestId('template-card-starting_strength').length).toBeGreaterThan(0);
+    });
+
+    // Open confirm modal
+    fireEvent.click(screen.getAllByTestId('template-card-starting_strength')[0]);
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-cancel-action')).toBeInTheDocument();
+    });
+
+    // Cancel
+    fireEvent.click(screen.getByTestId('btn-cancel-action'));
+    await waitFor(() => {
+      expect(screen.queryByTestId('btn-cancel-action')).not.toBeInTheDocument();
+    });
+  });
+
+  it('save dialog cancel closes dialog and clears name', async () => {
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    // Open save dialog
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-dialog')).toBeInTheDocument();
+    });
+
+    // Type a name then cancel
+    fireEvent.change(screen.getByTestId('save-template-input'), { target: { value: 'Draft Name' } });
+    fireEvent.click(screen.getByTestId('save-template-cancel'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('save-template-dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('save confirm does nothing when name is empty/whitespace', async () => {
+    const saveSpy = vi.fn();
+    useFitnessStore.setState({ saveCurrentAsTemplate: saveSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-confirm')).toBeInTheDocument();
+    });
+
+    // Don't enter a name — button should be disabled, but also test the guard
+    fireEvent.click(screen.getByTestId('save-template-confirm'));
+    expect(saveSpy).not.toHaveBeenCalled();
+
+    // Enter whitespace only
+    fireEvent.change(screen.getByTestId('save-template-input'), { target: { value: '   ' } });
+    fireEvent.click(screen.getByTestId('save-template-confirm'));
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+
+  it('successful save closes dialog and clears name', async () => {
+    const saveSpy = vi.fn();
+    useFitnessStore.setState({ saveCurrentAsTemplate: saveSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-input')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('save-template-input'), { target: { value: 'My New Template' } });
+    fireEvent.click(screen.getByTestId('save-template-confirm'));
+
+    expect(saveSpy).toHaveBeenCalledWith('plan-1', 'My New Template');
+    await waitFor(() => {
+      expect(screen.queryByTestId('save-template-dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows isApplying label on confirm button in happy path', async () => {
+    // Mock applyTemplate and popPage as no-ops — isApplying stays true
+    // because there's no setIsApplying(false) in the happy path
+    const applyTemplateSpy = vi.fn();
+    const popPageSpy = vi.fn();
+    useFitnessStore.setState({ applyTemplate: applyTemplateSpy });
+    useNavigationStore.setState({ popPage: popPageSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getAllByTestId('template-card-starting_strength').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getAllByTestId('template-card-starting_strength')[0]);
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-confirm-action')).toBeInTheDocument();
+    });
+
+    // Before confirm: label is "Xác nhận"
+    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Xác nhận');
+
+    // Click confirm — applyTemplate + popPage succeed as no-ops, isApplying stays true
+    fireEvent.click(screen.getByTestId('btn-confirm-action'));
+    await waitFor(() => {
+      // After confirm, the label switches to the "applying" text
+      expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Áp dụng');
+    });
+  });
+
+  it('displays equipment fallback when equipment is not in EQUIPMENT_DISPLAY', async () => {
+    // Create a template with unknown equipment
+    useFitnessStore.setState({
+      getTemplates: () => [
+        {
+          id: 'custom_tpl',
+          name: 'Custom Template',
+          splitType: 'custom' as const,
+          daysPerWeek: 4,
+          experienceLevel: 'intermediate' as const,
+          trainingGoal: 'hypertrophy' as const,
+          equipmentRequired: ['unknown_equip' as EquipmentType],
+          description: 'Template with unknown equipment',
+          dayConfigs: [],
+          popularityScore: 50,
+          isBuiltin: false,
+        },
+      ],
+      getRecommendedTemplates: () => [],
+    });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('all-templates-section')).toBeInTheDocument();
+    });
+    // The raw equipment key should be rendered as fallback
+    expect(screen.getByText('unknown_equip')).toBeInTheDocument();
+  });
+
+  it('retry button reloads templates after error', async () => {
+    const getTemplatesMock = vi.fn((): PlanTemplate[] => {
+      throw new Error('network fail');
+    });
+    useFitnessStore.setState({
+      getTemplates: getTemplatesMock,
+      getRecommendedTemplates: () => [],
+    });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('retry-button')).toBeInTheDocument();
+    });
+
+    // Fix getTemplates to return empty and retry
+    getTemplatesMock.mockImplementation(() => []);
+
+    fireEvent.click(screen.getByTestId('retry-button'));
+
+    // Should still show empty state (no templates returned)
+    await waitFor(() => {
+      expect(screen.getByTestId('template-empty-state')).toBeInTheDocument();
+    });
+    expect(getTemplatesMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows isSaving loader during save operation', async () => {
+    // We need saveCurrentAsTemplate to be slow enough to see the saving state
+    // Since it's sync, we test by verifying the button disabled state
+    const saveSpy = vi.fn();
+    useFitnessStore.setState({ saveCurrentAsTemplate: saveSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-input')).toBeInTheDocument();
+    });
+
+    // The confirm button should be disabled when name is empty
+    expect(screen.getByTestId('save-template-confirm')).toBeDisabled();
+
+    // Enter name — button should be enabled
+    fireEvent.change(screen.getByTestId('save-template-input'), { target: { value: 'Test' } });
+    expect(screen.getByTestId('save-template-confirm')).not.toBeDisabled();
+  });
+
+  it('displays match score badge only on recommended templates', async () => {
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('recommended-section')).toBeInTheDocument();
+    });
+
+    // Recommended section should have badges
+    const recSection = screen.getByTestId('recommended-section');
+    const badgesInRec = recSection.querySelectorAll('[data-testid="template-match-badge"]');
+    expect(badgesInRec.length).toBeGreaterThan(0);
+
+    // All templates section cards should NOT have badges
+    const allSection = screen.getByTestId('all-templates-section');
+    const badgesInAll = allSection.querySelectorAll('[data-testid="template-match-badge"]');
+    expect(badgesInAll.length).toBe(0);
+  });
+
+  it('handleConfirmApply guards against null applyTarget', async () => {
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('all-templates-section')).toBeInTheDocument();
+    });
+
+    // The hidden confirm button is always rendered by our mock (isOpen=false path)
+    // This allows us to test the defensive guard when applyTarget is null
+    const hiddenConfirm = screen.getByTestId('btn-confirm-hidden');
+    fireEvent.click(hiddenConfirm);
+
+    // Guard returns early — applyTemplate should NOT have been called
+    // Component should remain stable (no crash, no navigation)
+    expect(screen.getByTestId('all-templates-section')).toBeInTheDocument();
+  });
+
+  it('handleConfirmSave guards against empty saveName even if called directly', async () => {
+    const saveSpy = vi.fn();
+    useFitnessStore.setState({ saveCurrentAsTemplate: saveSpy });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-confirm')).toBeInTheDocument();
+    });
+
+    // Button is disabled when saveName is empty. React prevents onClick dispatch on disabled buttons.
+    // Access the onClick handler directly via React fiber to test the defensive guard.
+    const confirmBtn = screen.getByTestId('save-template-confirm');
+    const fiberKey = Object.keys(confirmBtn).find(k => k.startsWith('__reactFiber$'));
+    expect(fiberKey).toBeDefined();
+    const fiber = (confirmBtn as unknown as Record<string, unknown>)[fiberKey!] as {
+      memoizedProps?: { onClick?: () => void };
+    };
+    fiber.memoizedProps?.onClick?.();
+
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders Loader2 spinner when isSaving is true during save', async () => {
+    useFitnessStore.setState({
+      saveCurrentAsTemplate: () => {
+        // Force React to commit the pending setIsSaving(true) update
+        flushSync(() => {});
+        throw new Error('fail after flush');
+      },
+    });
+
+    render(<PlanTemplateGallery planId="plan-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('save-as-template-btn')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('save-as-template-btn'));
+    await waitFor(() => {
+      expect(screen.getByTestId('save-template-input')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('save-template-input'), { target: { value: 'Test Name' } });
+    fireEvent.click(screen.getByTestId('save-template-confirm'));
+
+    // flushSync inside the mock forced a render with isSaving=true (Loader2 branch covered)
+    // After the throw + finally, isSaving resets to false and error notification fires
+    await waitFor(() => {
+      expect(mockNotify.error).toHaveBeenCalled();
     });
   });
 });

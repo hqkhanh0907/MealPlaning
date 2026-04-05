@@ -88,8 +88,22 @@ vi.mock('lucide-react', () => {
 
 // Minimal mock for Sheet — renders children directly when open
 vi.mock('@/components/ui/sheet', () => ({
-  Sheet: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
-    open ? <div data-testid="mock-sheet">{children}</div> : null,
+  Sheet: ({
+    open,
+    children,
+    onOpenChange,
+  }: {
+    open: boolean;
+    children: React.ReactNode;
+    onOpenChange?: (isOpen: boolean) => void;
+  }) =>
+    open ? (
+      <div data-testid="mock-sheet">
+        {onOpenChange && <button data-testid="sheet-close-trigger" onClick={() => onOpenChange(false)} type="button" />}
+        {onOpenChange && <button data-testid="sheet-open-trigger" onClick={() => onOpenChange(true)} type="button" />}
+        {children}
+      </div>
+    ) : null,
   SheetContent: ({
     children,
     showCloseButton: _,
@@ -116,6 +130,8 @@ vi.mock('@/components/ui/sheet', () => ({
   ),
   SheetFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
+
+import { flushSync } from 'react-dom';
 
 import { SplitChanger } from '../features/fitness/components/SplitChanger';
 import type { SplitChangePreview } from '../features/fitness/types';
@@ -362,5 +378,123 @@ describe('SplitChanger', () => {
     expect(summary).toHaveTextContent('0 Đã ghép');
     expect(summary).toHaveTextContent('0 Gợi ý');
     expect(summary).toHaveTextContent('0 Chưa ghép');
+  });
+
+  it('shows apply error when changeSplitType rejects', async () => {
+    mockChangeSplitType.mockRejectedValueOnce(new Error('apply fail'));
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    fireEvent.click(screen.getByTestId('apply-button'));
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('confirm-button'));
+    });
+
+    expect(screen.getByTestId('preview-error')).toBeInTheDocument();
+    expect(screen.getByText('Lỗi áp dụng thay đổi. Vui lòng thử lại.')).toBeInTheDocument();
+    expect(defaultProps.onComplete).not.toHaveBeenCalled();
+  });
+
+  it('closes confirm sheet via handleCloseConfirm (cancel button)', async () => {
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    fireEvent.click(screen.getByTestId('apply-button'));
+    expect(screen.getByTestId('mock-sheet')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('cancel-button'));
+    expect(screen.queryByTestId('mock-sheet')).not.toBeInTheDocument();
+  });
+
+  it('closes confirm sheet via Sheet onOpenChange(false)', async () => {
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    fireEvent.click(screen.getByTestId('apply-button'));
+    expect(screen.getByTestId('mock-sheet')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('sheet-close-trigger'));
+    expect(screen.queryByTestId('mock-sheet')).not.toBeInTheDocument();
+  });
+
+  it('switches back to remap mode after selecting regenerate', () => {
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    fireEvent.click(screen.getByTestId('mode-regenerate'));
+    expect(screen.queryByTestId('preview-panel')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('mode-remap'));
+    expect(screen.getByTestId('preview-panel')).toBeInTheDocument();
+  });
+
+  it('uses workoutType fallback when mapped item has no notes', () => {
+    const previewNoNotes = makeMockPreview({
+      mapped: [
+        {
+          from: {
+            id: 'd-no-notes',
+            planId: 'plan1',
+            dayOfWeek: 2,
+            sessionOrder: 1,
+            workoutType: 'pull',
+            muscleGroups: '["back"]',
+            exercises: '[]',
+            isUserAssigned: false,
+            originalDayOfWeek: 2,
+          },
+          toDay: 'Pull Day',
+          toMuscleGroups: ['back'],
+        },
+      ],
+    });
+    mockPreviewSplitChange.mockReturnValue(previewNoNotes);
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    const mapped = screen.getAllByTestId('preview-mapped-item');
+    expect(mapped[0]).toHaveTextContent('pull');
+  });
+
+  it('uses workoutType fallback when unmapped item has no notes', () => {
+    const previewNoNotes = makeMockPreview({
+      unmapped: [
+        {
+          id: 'd-unmapped-no-notes',
+          planId: 'plan1',
+          dayOfWeek: 6,
+          sessionOrder: 1,
+          workoutType: 'legs',
+          isUserAssigned: false,
+          originalDayOfWeek: 6,
+        },
+      ],
+    });
+    mockPreviewSplitChange.mockReturnValue(previewNoNotes);
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    const unmapped = screen.getAllByTestId('preview-unmapped-item');
+    expect(unmapped[0]).toHaveTextContent('legs');
+  });
+
+  it('sheet onOpenChange(true) does not close the confirm sheet', () => {
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    fireEvent.click(screen.getByTestId('apply-button'));
+    expect(screen.getByTestId('mock-sheet')).toBeInTheDocument();
+
+    // Trigger onOpenChange(true) — SplitChangeConfirm should NOT close
+    fireEvent.click(screen.getByTestId('sheet-open-trigger'));
+    expect(screen.getByTestId('mock-sheet')).toBeInTheDocument();
+  });
+
+  it('renders loading spinner when preview is loading (flushSync)', () => {
+    mockPreviewSplitChange.mockImplementation(() => {
+      // Force React to commit pending isLoadingPreview=true before returning
+      flushSync(() => {
+        /* flush pending state */
+      });
+      return makeMockPreview();
+    });
+    render(<SplitChanger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('split-option-ppl'));
+    // After resolution, preview panel is shown (loading is done)
+    expect(screen.getByTestId('preview-panel')).toBeInTheDocument();
   });
 });

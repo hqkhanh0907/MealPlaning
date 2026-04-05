@@ -686,4 +686,43 @@ describe('AuthProvider', () => {
       expect(screen.getByTestId('user').textContent).toBe('null');
     });
   });
+
+  describe('persistAuth error handling', () => {
+    it('handles setSetting rejection when persisting auth (line 27)', async () => {
+      mockIsNative = true;
+      mockSetSetting.mockRejectedValueOnce(new Error('persist fail'));
+      mockIsLoggedIn.mockResolvedValue({ isLoggedIn: true });
+      mockLogin.mockResolvedValue(mockOnlineResponse);
+
+      renderApp();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user').textContent).toBe('test@gmail.com');
+      });
+      // signIn succeeded despite setSetting rejection (line 27 catch logs warning)
+      expect(screen.getByTestId('token').textContent).toBe('test-access-token');
+    });
+
+    it('handles deleteSetting rejection when clearing auth (line 31)', async () => {
+      mockIsNative = true;
+      mockIsLoggedIn.mockResolvedValue({ isLoggedIn: true });
+      mockLogin.mockResolvedValue(mockOnlineResponse);
+
+      renderApp();
+      await waitFor(() => {
+        expect(screen.getByTestId('user').textContent).toBe('test@gmail.com');
+      });
+
+      mockDeleteSetting.mockRejectedValueOnce(new Error('delete fail'));
+
+      const user = userEvent.setup();
+      await user.click(screen.getByText('sign-out'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user').textContent).toBe('null');
+      });
+      // signOut succeeded despite deleteSetting rejection (line 31 catch logs warning)
+      expect(screen.getByTestId('token').textContent).toBe('null');
+    });
+  });
 });

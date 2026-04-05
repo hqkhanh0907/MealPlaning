@@ -898,4 +898,29 @@ describe('GroceryList', () => {
     expect(panel.textContent).toContain('Gà nướng');
     expect(panel.textContent).toContain('400 g');
   });
+
+  it('handles corrupt JSON from grocery_checked setting (line 214-215)', async () => {
+    // getSetting is not mocked in this file — it uses real impl calling db.queryOne.
+    // The mock db's queryOne returns null, so getSetting normally returns null.
+    // To trigger JSON.parse catch, spy on getSetting to return invalid JSON for one call.
+    const appSettings = await import('../services/appSettings');
+    const spy = vi.spyOn(appSettings, 'getSetting').mockResolvedValueOnce('{{corrupt-json');
+
+    render(
+      <GroceryList
+        currentPlan={currentPlan}
+        dayPlans={dayPlans}
+        selectedDate={today}
+        allDishes={dishes}
+        allIngredients={ingredients}
+      />,
+    );
+
+    // Component should still render without crashing despite corrupt JSON
+    await waitFor(() => {
+      expect(screen.getByText('Ức gà')).toBeInTheDocument();
+    });
+
+    spy.mockRestore();
+  });
 });

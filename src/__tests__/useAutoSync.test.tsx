@@ -475,4 +475,36 @@ describe('useAutoSync', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
   });
+
+  it('catches getSetting rejection when loading lastSyncAt (line 47)', async () => {
+    const { getSetting } = await import('../services/appSettings');
+    vi.mocked(getSetting).mockRejectedValueOnce(new Error('DB read fail'));
+
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    // Should not throw — falls back to null
+    expect(result.current.lastSyncAt).toBeNull();
+  });
+
+  it('catches setSetting rejection when updating lastSync (line 53)', async () => {
+    const { setSetting } = await import('../services/appSettings');
+    vi.mocked(setSetting).mockRejectedValueOnce(new Error('DB write fail'));
+
+    mockAuthValues.user = { id: 'u1', email: 'e@g.com', displayName: 'U', photoUrl: null };
+    mockAuthValues.accessToken = 'tok';
+
+    const { result } = renderHook(() => useAutoSync(), { wrapper });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+
+    // Trigger upload which calls updateLastSync → setSetting (which rejects)
+    await act(async () => {
+      await result.current.triggerUpload();
+    });
+    // Should not throw — catches rejection silently
+    expect(result.current.syncStatus).toBe('idle');
+  });
 });

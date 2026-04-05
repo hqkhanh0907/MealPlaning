@@ -1385,4 +1385,187 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.queryByTestId('recently-used-header')).not.toBeInTheDocument();
   });
+
+  // --- Additional branch coverage tests ---
+
+  it('sorts recently-used ingredients by frequency with multiple entries', () => {
+    const allDishes: Dish[] = [
+      {
+        id: 'd1',
+        name: { vi: 'D1' },
+        ingredients: [
+          { ingredientId: 'i1', amount: 100 },
+          { ingredientId: 'i3', amount: 100 },
+        ],
+        tags: ['lunch'],
+      },
+      {
+        id: 'd2',
+        name: { vi: 'D2' },
+        ingredients: [
+          { ingredientId: 'i3', amount: 50 },
+          { ingredientId: 'i2', amount: 80 },
+        ],
+        tags: ['dinner'],
+      },
+      {
+        id: 'd3',
+        name: { vi: 'D3' },
+        ingredients: [{ ingredientId: 'i1', amount: 75 }],
+        tags: ['lunch'],
+      },
+    ];
+    // i1: freq=2, i2: freq=1, i3: freq=2 → sort comparator executes with 3 elements
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        allDishes={allDishes}
+        onSubmit={onSubmit}
+        onClose={onClose}
+      />,
+    );
+    expect(screen.getByTestId('recently-used-header')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-add-ing-i1')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-add-ing-i2')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-add-ing-i3')).toBeInTheDocument();
+  });
+
+  it('hides all-ingredients header when rest list is empty', () => {
+    const allDishes: Dish[] = [
+      {
+        id: 'd1',
+        name: { vi: 'D1' },
+        ingredients: [
+          { ingredientId: 'i1', amount: 100 },
+          { ingredientId: 'i2', amount: 100 },
+          { ingredientId: 'i3', amount: 100 },
+        ],
+        tags: ['lunch'],
+      },
+    ];
+    render(
+      <DishEditModal
+        editingItem={null}
+        ingredients={ingredients}
+        allDishes={allDishes}
+        onSubmit={onSubmit}
+        onClose={onClose}
+      />,
+    );
+    expect(screen.getByTestId('recently-used-header')).toBeInTheDocument();
+    // All 3 ingredients are recently-used; rest is empty so "all ingredients" header hidden
+    expect(screen.queryByText('Tất cả nguyên liệu')).not.toBeInTheDocument();
+  });
+
+  it('shows no-ingredient-found message when search yields no matches', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-ingredient-search'), { target: { value: 'zzznotfound' } });
+    expect(screen.getByText('Không tìm thấy nguyên liệu')).toBeInTheDocument();
+  });
+
+  it('skips duplicate ingredient in AI suggest confirm', async () => {
+    const aiSuggestions = [
+      { name: 'Ức gà', amount: 200, unit: 'g', calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0 },
+    ];
+    mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest-confirm'));
+    });
+    // existingDish already has i1 (Ức gà) — confirm should skip the duplicate
+    // Verify by counting amount input fields (one per selected ingredient)
+    const amountInputs = screen.getAllByTestId(/^input-dish-amount-/);
+    expect(amountInputs).toHaveLength(2); // original 2 ingredients, not 3
+  });
+
+  it('AI suggest confirm clears ingredients form-level error', async () => {
+    const aiSuggestions = [
+      { name: 'Giá đỗ', amount: 50, unit: 'g', calories: 31, protein: 3, carbs: 5, fat: 0.2, fiber: 2 },
+    ];
+    mockSuggestDishIngredients.mockResolvedValue(aiSuggestions);
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    // Trigger ingredients validation error by submitting with name+tag but no ingredients
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Test' } });
+    fireEvent.click(screen.getByTestId('tag-lunch'));
+    fireEvent.click(screen.getByTestId('btn-save-dish'));
+    expect(screen.getByText('Vui lòng chọn ít nhất một nguyên liệu')).toBeInTheDocument();
+    // AI suggest + confirm clears the error
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest-confirm'));
+    });
+    expect(screen.queryByText('Vui lòng chọn ít nhất một nguyên liệu')).not.toBeInTheDocument();
+  });
+
+  it('handleClose aborts pending AI suggest and suppresses results', async () => {
+    let resolveFn: (v: unknown) => void;
+    mockSuggestDishIngredients.mockImplementation(
+      () =>
+        new Promise(resolve => {
+          resolveFn = resolve;
+        }),
+    );
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Test' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    expect(screen.getByTestId('ai-suggest-loading')).toBeInTheDocument();
+    // handleClose aborts the AI controller; name was changed → shows unsaved dialog
+    fireEvent.click(screen.getByLabelText('Đóng'));
+    expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
+    // Resolve the promise after abort — the aborted signal check prevents state updates
+    await act(async () => {
+      resolveFn!([{ name: 'Test', amount: 100, unit: 'g', calories: 100, protein: 10, carbs: 20, fat: 5, fiber: 2 }]);
+    });
+    // Since aborted, suggestions should NOT appear (state update was skipped)
+    expect(screen.queryByTestId('ai-suggest-item-0')).not.toBeInTheDocument();
+  });
+
+  it('handleClose aborts pending AI suggest and suppresses error', async () => {
+    let rejectFn: (e: Error) => void;
+    mockSuggestDishIngredients.mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectFn = reject;
+        }),
+    );
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Test' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    });
+    expect(screen.getByTestId('ai-suggest-loading')).toBeInTheDocument();
+    // Abort via handleClose
+    fireEvent.click(screen.getByLabelText('Đóng'));
+    // Reject the promise after abort — the aborted signal check suppresses the error
+    await act(async () => {
+      rejectFn!(new Error('network error'));
+    });
+    expect(screen.queryByTestId('ai-suggest-error')).not.toBeInTheDocument();
+  });
+
+  it('validateForm uses form value fallback when DOM input not found', () => {
+    render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
+    // Mock querySelector to return null for amount inputs, forcing the fallback path
+    const origQuerySelector = document.querySelector.bind(document);
+    vi.spyOn(document, 'querySelector').mockImplementation((selector: string) => {
+      if (typeof selector === 'string' && selector.includes('input-dish-amount-')) return null;
+      return origQuerySelector(selector);
+    });
+    // Submit should still work (falls back to form values which are valid numbers)
+    fireEvent.click(screen.getByTestId('btn-save-dish'));
+    expect(onSubmit).toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
 });

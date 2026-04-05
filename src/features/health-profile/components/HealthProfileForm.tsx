@@ -221,7 +221,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
     if (saveRef) {
       saveRef.current = handleSave;
     }
-  }, [saveRef, handleSave]);
+  });
 
   const inputBase =
     'w-full px-3 py-2 bg-card rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 transition-all';

@@ -15,6 +15,15 @@ vi.mock('../contexts/DatabaseContext', () => ({
   }),
 }));
 
+vi.mock('../contexts/NotificationContext', () => ({
+  useNotification: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+  }),
+}));
+
 vi.mock('../services/appSettings', () => ({
   getSetting: vi.fn((_db: unknown, key: string) => {
     if (key === 'date_hint_dismissed') return Promise.resolve(mockDateHintDismissed);
@@ -605,5 +614,25 @@ describe('CalendarTab', () => {
     render(<CalendarTab {...defaultProps} servings={{ d1: 3 }} onUpdateServings={onUpdateServings} />);
     fireEvent.click(screen.getByTestId('btn-serving-minus-d1'));
     expect(onUpdateServings).toHaveBeenCalledWith('d1', 2);
+  });
+
+  it('computes recentDishIds from dayPlans (line 76-89)', () => {
+    // dayPlans already have d1 (breakfast), d2 (lunch), d3 (dinner)
+    // Rendering with those dayPlans should compute recentDishIds and pass them to MealsSubTab
+    render(<CalendarTab {...defaultProps} />);
+    // The MealsSubTab receives recentDishIds and shows recent dish quick-add buttons
+    // If recentDishIds is computed, the component renders without error
+    expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
+  });
+
+  it('opens and closes grocery modal (line 228-240)', () => {
+    render(<CalendarTab {...defaultProps} />);
+    // Open grocery modal via the MealActionBar's grocery button
+    const groceryBtn = screen.getByTestId('btn-open-grocery');
+    fireEvent.click(groceryBtn);
+    expect(screen.getByTestId('grocery-modal')).toBeInTheDocument();
+    // Close via close button
+    fireEvent.click(screen.getByTestId('btn-close-grocery'));
+    expect(screen.queryByTestId('grocery-modal')).not.toBeInTheDocument();
   });
 });

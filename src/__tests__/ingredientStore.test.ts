@@ -357,5 +357,12 @@ describe('ingredientStore', () => {
 
       await vi.waitFor(() => expect(mockDb.transaction).toHaveBeenCalled());
     });
+
+    it('syncs setIngredients with empty array — deletes all rows', async () => {
+      useIngredientStore.setState({ ingredients: [SAMPLE_INGREDIENT] });
+      useIngredientStore.getState().setIngredients([]);
+
+      await vi.waitFor(() => expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM ingredients'));
+    });
   });
 });

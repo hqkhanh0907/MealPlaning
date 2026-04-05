@@ -326,6 +326,38 @@ describe('runSchemaMigrations', () => {
     expect(version).toBe(0);
   });
 
+  it('migrates from v4 → v5: adds current_week column to training_plans', async () => {
+    await createSchema(db);
+    // Force version back to 4 to simulate pre-v5 state
+    await db.execute('PRAGMA user_version = 4');
+
+    // Drop the current_week column by recreating the table without it
+    const cols = await db.query<{ name: string }>('PRAGMA table_info(training_plans)');
+    const hasCurrentWeek = cols.some(c => c.name === 'current_week');
+    if (hasCurrentWeek) {
+      // Recreate without current_week to simulate v4 schema
+      await db.execute(`CREATE TABLE training_plans_backup AS SELECT id, name, status, split_type,
+        duration_weeks, start_date, end_date, template_id, training_days, rest_days,
+        created_at, updated_at FROM training_plans`);
+      await db.execute('DROP TABLE training_plans');
+      await db.execute(`CREATE TABLE training_plans (
+        id TEXT PRIMARY KEY, name TEXT NOT NULL, status TEXT DEFAULT 'draft',
+        split_type TEXT, duration_weeks INTEGER DEFAULT 4,
+        start_date TEXT, end_date TEXT, template_id TEXT,
+        training_days TEXT DEFAULT '[]', rest_days TEXT DEFAULT '[]',
+        created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+      )`);
+      await db.execute('INSERT INTO training_plans SELECT * FROM training_plans_backup');
+      await db.execute('DROP TABLE training_plans_backup');
+    }
+
+    await runSchemaMigrations(db);
+
+    expect(await getSchemaVersion(db)).toBe(6);
+    const colsAfter = await db.query<{ name: string }>('PRAGMA table_info(training_plans)');
+    expect(colsAfter.some(c => c.name === 'current_week')).toBe(true);
+  });
+
   it('migrates from v5 → v6: workout_sets.exercise_id becomes nullable', async () => {
     await createSchema(db);
     // Force version back to 5 to simulate pre-migration state

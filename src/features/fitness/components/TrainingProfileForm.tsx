@@ -128,19 +128,16 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
     return true;
   }
 
-  async function handleSave(): Promise<boolean> {
-    let result = false;
-    await handleSubmit(data => {
-      result = onSubmit(data);
-    })();
-    return result;
-  }
-
   useEffect(() => {
-    if (saveRef) {
-      saveRef.current = handleSave;
-    }
-  }, [saveRef, handleSave]);
+    if (!saveRef) return;
+    saveRef.current = async () => {
+      let result = false;
+      await handleSubmit(data => {
+        result = onSubmit(data);
+      })();
+      return result;
+    };
+  });
 
   return (
     <div className={embedded ? 'space-y-6' : 'space-y-6 p-4'} data-testid="training-profile-form">

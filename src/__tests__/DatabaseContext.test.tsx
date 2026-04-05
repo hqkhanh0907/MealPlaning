@@ -1,7 +1,14 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 
 import { DatabaseProvider, useDatabase } from '../contexts/DatabaseContext';
+import {
+  isFitnessMigrationCompleted,
+  isMigrationNeeded,
+  migrateFitnessData,
+  migrateFromLocalStorage,
+} from '../services/migrationService';
+import { createSchema, getSchemaVersion, runSchemaMigrations } from '../services/schema';
 
 /* Mock createDatabaseService so we don't need real sql.js WASM */
 const mockInitialize = vi.fn();
@@ -27,9 +34,24 @@ vi.mock('../services/schema', () => ({
   runSchemaMigrations: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('../services/migrationService', () => ({
+  isMigrationNeeded: vi.fn().mockReturnValue(false),
+  migrateFromLocalStorage: vi.fn().mockResolvedValue(undefined),
+  isFitnessMigrationCompleted: vi.fn().mockReturnValue(true),
+  migrateFitnessData: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('DatabaseProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockClose.mockResolvedValue(undefined);
+    vi.mocked(getSchemaVersion).mockResolvedValue(0);
+    vi.mocked(createSchema).mockResolvedValue(undefined);
+    vi.mocked(runSchemaMigrations).mockResolvedValue(undefined);
+    vi.mocked(isMigrationNeeded).mockReturnValue(false);
+    vi.mocked(migrateFromLocalStorage).mockResolvedValue({ success: true });
+    vi.mocked(isFitnessMigrationCompleted).mockReturnValue(true);
+    vi.mocked(migrateFitnessData).mockResolvedValue({ migrated: false, recordCount: 0 });
   });
 
   it('shows loading state initially', () => {
@@ -120,7 +142,6 @@ describe('DatabaseProvider', () => {
   });
 
   it('calls runSchemaMigrations when version > 0 (existing DB)', async () => {
-    const { getSchemaVersion, runSchemaMigrations } = await import('../services/schema');
     vi.mocked(getSchemaVersion).mockResolvedValue(3);
     mockInitialize.mockResolvedValue(undefined);
 
@@ -137,7 +158,6 @@ describe('DatabaseProvider', () => {
   });
 
   it('skips runSchemaMigrations when version = 0 (fresh DB)', async () => {
-    const { getSchemaVersion, runSchemaMigrations } = await import('../services/schema');
     vi.mocked(getSchemaVersion).mockResolvedValue(0);
     mockInitialize.mockResolvedValue(undefined);
 
@@ -169,5 +189,201 @@ describe('DatabaseProvider', () => {
 
     unmount();
     expect(mockClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls migrateFromLocalStorage when isMigrationNeeded returns true', async () => {
+    vi.mocked(isMigrationNeeded).mockReturnValue(true);
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+    expect(migrateFromLocalStorage).toHaveBeenCalledWith(mockService);
+  });
+
+  it('skips migrateFromLocalStorage when isMigrationNeeded returns false', async () => {
+    vi.mocked(isMigrationNeeded).mockReturnValue(false);
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+    expect(migrateFromLocalStorage).not.toHaveBeenCalled();
+  });
+
+  it('calls migrateFitnessData when isFitnessMigrationCompleted returns false', async () => {
+    vi.mocked(isFitnessMigrationCompleted).mockReturnValue(false);
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+    expect(migrateFitnessData).toHaveBeenCalledWith(mockService);
+  });
+
+  it('skips migrateFitnessData when isFitnessMigrationCompleted returns true', async () => {
+    vi.mocked(isFitnessMigrationCompleted).mockReturnValue(true);
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+    expect(migrateFitnessData).not.toHaveBeenCalled();
+  });
+
+  it('does not proceed when cancelled before init completes', async () => {
+    let resolveInit!: () => void;
+    mockInitialize.mockImplementation(
+      () =>
+        new Promise<void>(r => {
+          resolveInit = r;
+        }),
+    );
+
+    const { unmount } = render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    unmount();
+
+    await act(async () => {
+      resolveInit();
+    });
+
+    expect(getSchemaVersion).not.toHaveBeenCalled();
+  });
+
+  it('does not load stores when cancelled during migrations', async () => {
+    let resolveMigration!: () => void;
+    vi.mocked(isFitnessMigrationCompleted).mockReturnValue(false);
+    vi.mocked(migrateFitnessData).mockImplementation(
+      () =>
+        new Promise<{ migrated: boolean; recordCount: number }>(r => {
+          resolveMigration = () => r({ migrated: false, recordCount: 0 });
+        }),
+    );
+    mockInitialize.mockResolvedValue(undefined);
+
+    const { unmount } = render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(migrateFitnessData).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    await act(async () => {
+      resolveMigration();
+    });
+  });
+
+  it('does not set db when cancelled after store loads', async () => {
+    const ingredientModule = await import('../store/ingredientStore');
+    const state = ingredientModule.useIngredientStore.getState();
+    let resolveLoadAll!: (value: void) => void;
+    const spy = vi.spyOn(state, 'loadAll').mockImplementation(
+      () =>
+        new Promise<void>(r => {
+          resolveLoadAll = r;
+        }),
+    );
+    mockInitialize.mockResolvedValue(undefined);
+
+    const { unmount } = render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    await act(async () => {
+      resolveLoadAll(undefined);
+    });
+
+    spy.mockRestore();
+  });
+
+  it('does not set error when cancelled during catch', async () => {
+    let rejectSchema!: (err: Error) => void;
+    vi.mocked(createSchema).mockImplementation(
+      () =>
+        new Promise<void>((_, rej) => {
+          rejectSchema = rej;
+        }),
+    );
+    mockInitialize.mockResolvedValue(undefined);
+
+    const { unmount } = render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(createSchema).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    await act(async () => {
+      rejectSchema(new Error('cancelled rejection'));
+    });
+  });
+
+  it('handles close() rejection silently on unmount', async () => {
+    mockInitialize.mockResolvedValue(undefined);
+    mockClose.mockRejectedValue(new Error('close failed'));
+
+    const { unmount } = render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+
+    unmount();
+
+    await act(async () => {
+      await new Promise(r => setTimeout(r, 0));
+    });
   });
 });

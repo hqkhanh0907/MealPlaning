@@ -549,4 +549,41 @@ describe('GoogleDriveSync', () => {
       expect(screen.getByText(/Đồng bộ lần cuối/)).toBeInTheDocument();
     });
   });
+
+  describe('appSettings error handling', () => {
+    it('renders normally when getSetting rejects on mount (line 33)', async () => {
+      mockGetSetting.mockRejectedValueOnce(new Error('db fail'));
+      render(<GoogleDriveSync />);
+      // Component still renders signed-out view without crashing
+      expect(screen.getByTestId('cloud-sync-signed-out')).toBeInTheDocument();
+    });
+
+    it('completes sign-out when deleteSetting rejects (line 51)', async () => {
+      mockAuthState.user = mockUser;
+      mockAuthState.accessToken = 'test-token';
+      mockDeleteSetting.mockRejectedValueOnce(new Error('fail'));
+
+      render(<GoogleDriveSync />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-google-sign-out'));
+      });
+
+      expect(mockSignOut).toHaveBeenCalled();
+      expect(mockNotify.success).toHaveBeenCalledWith('Đã đăng xuất');
+    });
+
+    it('completes upload when setSetting rejects in updateLastSync (line 60)', async () => {
+      mockAuthState.user = mockUser;
+      mockAuthState.accessToken = 'test-token';
+      mockSetSetting.mockRejectedValueOnce(new Error('fail'));
+      mockUploadBackup.mockResolvedValueOnce({ id: 'f1', name: 'b.json', modifiedTime: '2024-01-01T00:00:00Z' });
+
+      render(<GoogleDriveSync />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('btn-upload-drive'));
+      });
+
+      expect(mockNotify.success).toHaveBeenCalled();
+    });
+  });
 });

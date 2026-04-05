@@ -404,4 +404,33 @@ describe('DataBackup', () => {
       expect(mockNotify.error).toHaveBeenCalled();
     });
   });
+
+  it('shows critical status when getSetting throws in backup health hook (line 44)', async () => {
+    mockGetSetting.mockRejectedValue(new Error('db fail'));
+    render(<DataBackup />);
+    await waitFor(() => {
+      const health = screen.getByTestId('backup-health');
+      expect(health).toBeInTheDocument();
+      expect(health.textContent).toContain('Chưa từng sao lưu');
+    });
+  });
+
+  it('handles setSetting rejection after successful export (line 142)', async () => {
+    mockSetSetting.mockRejectedValueOnce(new Error('persist fail'));
+
+    const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
+    const mockRevokeObjectURL = vi.fn();
+    globalThis.URL.createObjectURL = mockCreateObjectURL;
+    globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    render(<DataBackup />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Xuất dữ liệu'));
+      await new Promise(r => setTimeout(r, 50));
+    });
+
+    expect(mockNotify.success).toHaveBeenCalledWith('Xuất dữ liệu thành công!', expect.any(String));
+    clickSpy.mockRestore();
+  });
 });

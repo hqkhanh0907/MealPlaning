@@ -17,7 +17,9 @@
   --card-foreground: oklch(0.279 0.029 260.03); /* Slate-800 */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.279 0.029 260.03);
-  --primary: oklch(0.627 0.194 163.95); /* Emerald-600 #059669 — WCAG AA compliant (4.5:1+) */
+  --primary: oklch(
+    0.627 0.194 163.95
+  ); /* Emerald-600 #059669 — 3.77:1 on white (AA large text only, NOT AA body text) */
   --primary-foreground: oklch(1 0 0); /* White */
   --secondary: oklch(0.984 0.003 247.86); /* Slate-50 #F8FAFC */
   --secondary-foreground: oklch(0.279 0.029 260.03);

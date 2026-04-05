@@ -173,4 +173,43 @@ describe('DayAssignmentSheet', () => {
     const day1 = screen.getByTestId('day-option-1');
     expect(day1.className).toContain('motion-reduce:transition-none');
   });
+
+  it('fires handleSelect via hidden radio onChange', () => {
+    const onSelectDay = vi.fn();
+    const onClose = vi.fn();
+    render(
+      <DayAssignmentSheet
+        open={true}
+        onClose={onClose}
+        trainingDays={[1, 3]}
+        currentDay={1}
+        onSelectDay={onSelectDay}
+      />,
+    );
+    const radios = screen.getAllByRole('radio');
+    // Day 3 has no entry in existingDayCounts (omitted prop, defaults to {})
+    // This covers the ?? 0 fallback branch in handleSelect (line 55)
+    fireEvent.click(radios[1]);
+    expect(onSelectDay).toHaveBeenCalledWith(3);
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('radio onChange does not select a full day', () => {
+    const onSelectDay = vi.fn();
+    const onClose = vi.fn();
+    render(
+      <DayAssignmentSheet
+        {...defaultProps}
+        onSelectDay={onSelectDay}
+        onClose={onClose}
+        existingDayCounts={{ 1: 1, 3: 3, 5: 0 }}
+      />,
+    );
+    const radios = screen.getAllByRole('radio');
+    // Day 3 is full (count=3 >= MAX 3). Radio is disabled but fireEvent bypasses it.
+    // This covers the early return in handleSelect (line 56)
+    fireEvent.click(radios[1]);
+    expect(onSelectDay).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });

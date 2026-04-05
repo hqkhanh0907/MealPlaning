@@ -364,6 +364,32 @@ describe('syncV2Utils', () => {
       expect(templates[0]).toEqual(tplData);
     });
 
+    it('falls back to { id, name } when template data is invalid JSON (line 79, 160)', () => {
+      const tables: Record<string, unknown[]> = {
+        meal_templates: [{ id: 't1', name: 'Bulk', data: 'not-valid-json{{{' }],
+      };
+
+      const legacy = buildLegacyFormat(tables);
+      const templates = legacy['meal-templates'] as Array<Record<string, unknown>>;
+
+      expect(templates).toHaveLength(1);
+      // safeJsonParse returns original string (line 79), which is not an object,
+      // so fallback to { id, name } (line 160)
+      expect(templates[0]).toEqual({ id: 't1', name: 'Bulk' });
+    });
+
+    it('falls back to { id, name } when template data parses to non-object (null)', () => {
+      const tables: Record<string, unknown[]> = {
+        meal_templates: [{ id: 't2', name: 'Cut', data: 'null' }],
+      };
+
+      const legacy = buildLegacyFormat(tables);
+      const templates = legacy['meal-templates'] as Array<Record<string, unknown>>;
+
+      expect(templates).toHaveLength(1);
+      expect(templates[0]).toEqual({ id: 't2', name: 'Cut' });
+    });
+
     it('returns empty object when all tables are empty', () => {
       const legacy = buildLegacyFormat({});
       expect(Object.keys(legacy)).toHaveLength(0);

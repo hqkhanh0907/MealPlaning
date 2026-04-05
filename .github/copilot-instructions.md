@@ -249,3 +249,49 @@ Copilot là **Pragmatic Perfectionist**, KHÔNG phải Toxic Perfectionist:
 | Refactoring code cũ                          | Chỉ refactor khi có lý do rõ ràng (bug, performance, readability) — KHÔNG refactor chỉ vì "trông không thuận mắt" |
 | Quyết định kiến trúc                         | Cân nhắc kỹ, nhưng có timebox — KHÔNG analysis paralysis                                                          |
 | Ý tưởng cải thiện chưa cấp bách              | Ghi nhận vào backlog, KHÔNG block release hiện tại                                                                |
+
+---
+
+## Design Context
+
+> Full design system in `.impeccable.md`. Key rules summarized here.
+
+### Brand: Clean · Smart · Motivating
+
+Approachable, encouraging, never clinical. The app is a knowledgeable friend, not a strict dietitian. Users should feel **calm and organized**.
+
+### 5 Design Principles
+
+1. **Clarity over decoration** — 3-second comprehension test. Whitespace > ornament.
+2. **Data with empathy** — Progress, not judgment. Never red for "you ate too much."
+3. **Mobile-first, touch-native** — 44px+ targets, bottom actions, safe areas.
+4. **Semantic everything** — Tokens only, no raw colors. Dark mode = first-class.
+5. **Accessible by default** — WCAG 2.1 AA, focus rings, reduced motion, Vietnamese diacritics.
+
+### Critical Color Rules
+
+- `--primary` (Emerald-600) = **3.77:1 on white** → large text/icons ONLY, not body text
+- Use `--primary-emphasis` (Emerald-700) for small primary text
+- `--muted-foreground` (Slate-600) = 7.58:1 → safe for all caption text
+- Domain colors (protein/fat/carbs) are for nutrition context only, not UI chrome
+
+### Typography Rules
+
+- Font: Geist Variable. Vietnamese body text needs `leading-relaxed` minimum (diacritics).
+- 🎯 Migrate `font-bold` → `font-semibold`. Bold only for display numbers ≥24px.
+- Sizes: `text-xs` = 12px, `text-sm` = 14px (body), `text-base` = 16px. Min readable: `text-xs`. Micro `text-[10px]` for badges only.
+- ⚠️ `src/styles/tokens.css` is DEAD CODE (not imported). Do NOT reference its values.
+
+### Interaction States (ALL 6 required)
+
+Every interactive element: default → hover → active → focus-visible → disabled → error.
+
+- Loading: Skeleton shimmer (`bg-muted animate-pulse`), NOT centered spinner
+- Empty: EmptyState component (icon + encouraging message + CTA)
+- Disabled: `disabled:opacity-50 disabled:pointer-events-none` + explain WHY
+- Errors: `text-destructive text-xs` + `role="alert"` + `aria-describedby`
+
+### Copy Tone
+
+- State facts neutrally → suggest action positively → never blame the user
+- Numbers: `Math.round()`, no decimals for kcal/g, unit: `kcal` / `g` / `kg`

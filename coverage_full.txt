@@ -1,0 +1,121 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/khanhhuynh/person_project/MealPlaning[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/__tests__/settingsTabCoverage.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/unifiedOnboardingIntegration.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/dishEditModal.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/fitnessStore.test.ts
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/ingredientEditModal.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/trainingProfileForm.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/unifiedOnboarding.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/managers.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/app.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/WorkoutLogger.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/GoalPhaseSelector.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/settingsTabCoverage.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 988[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates to health-profile detail and back to menu [33m 344[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates to goal detail page [33m 314[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates to training-profile detail page [33m 312[2mms[22m[39m
+[90mstdout[2m | src/__tests__/TrainingPlanView.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/WorkoutLogger.test.tsx [2m([22m[2m67 tests[22m[2m)[22m[33m 1370[2mms[22m[39m
+ [32m✓[39m src/__tests__/ingredientEditModal.test.tsx [2m([22m[2m48 tests[22m[2m)[22m[33m 1855[2mms[22m[39m
+[90mstdout[2m | src/__tests__/SplitChanger.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/trainingProfileForm.test.tsx [2m([22m[2m94 tests[22m[2m)[22m[33m 2082[2mms[22m[39m
+[90mstdout[2m | src/__tests__/calendarAndDate.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/managers.test.tsx [2m([22m[2m99 tests[22m[2m)[22m[33m 2134[2mms[22m[39m
+ [32m✓[39m src/__tests__/SplitChanger.test.tsx [2m([22m[2m24 tests[22m[2m)[22m[33m 424[2mms[22m[39m
+ [32m✓[39m src/__tests__/TrainingPlanView.test.tsx [2m([22m[2m103 tests[22m[2m)[22m[33m 930[2mms[22m[39m
+[90mstdout[2m | src/__tests__/CardioLogger.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/unifiedOnboarding.test.tsx [2m([22m[2m184 tests[22m[2m)[22m[33m 2526[2mms[22m[39m
+     [33m[2m✓[22m[39m renders welcome slides at initial state [33m 322[2mms[22m[39m
+     [33m[2m✓[22m[39m skip from welcome goes to section 2 (health basic) [33m 309[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates through section 2 steps with valid form data [33m 967[2mms[22m[39m
+[90mstdout[2m | src/__tests__/saveAnalyzedDishModal.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/NutritionGoalStep.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/GoalPhaseSelector.test.tsx [2m([22m[2m29 tests[22m[2m)[22m[33m 3112[2mms[22m[39m
+     [33m[2m✓[22m[39m correct offset values for each rate × goal combo [33m 567[2mms[22m[39m
+[90mstdout[2m | src/__tests__/NotificationContext.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/unifiedOnboardingIntegration.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 3381[2mms[22m[39m
+       [33m[2m✓[22m[39m navigates through all 7 sections and reaches preview [33m 2859[2mms[22m[39m
+ [32m✓[39m src/__tests__/fitnessStore.test.ts [2m([22m[2m201 tests[22m[2m)[22m[33m 3580[2mms[22m[39m
+ [32m✓[39m src/__tests__/calendarAndDate.test.tsx [2m([22m[2m49 tests[22m[2m)[22m[33m 1330[2mms[22m[39m
+[90mstdout[2m | src/__tests__/HealthProfileForm.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/mealPlannerModal.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/dishEditModal.test.tsx [2m([22m[2m96 tests[22m[2m)[22m[33m 3861[2mms[22m[39m
+     [33m[2m✓[22m[39m removes ingredient from selected list [33m 360[2mms[22m[39m
+[90mstdout[2m | src/__tests__/PlanTemplateGallery.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/CardioLogger.test.tsx [2m([22m[2m25 tests[22m[2m)[22m[33m 978[2mms[22m[39m
+ [32m✓[39m src/__tests__/NotificationContext.test.tsx [2m([22m[2m15 tests[22m[2m)[22m[33m 953[2mms[22m[39m
+[90mstdout[2m | src/__tests__/planningModal.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/ExerciseSelector.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/NutritionGoalStep.test.tsx [2m([22m[2m40 tests[22m[2m)[22m[33m 1093[2mms[22m[39m
+[90mstdout[2m | src/__tests__/HealthConfirmStep.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/dataBackup.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/saveAnalyzedDishModal.test.tsx [2m([22m[2m31 tests[22m[2m)[22m[33m 1580[2mms[22m[39m
+ [32m✓[39m src/__tests__/PlanTemplateGallery.test.tsx [2m([22m[2m35 tests[22m[2m)[22m[33m 715[2mms[22m[39m
+[90mstdout[2m | src/__tests__/quickAddIngredientForm.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/mealPlannerModal.test.tsx [2m([22m[2m59 tests[22m[2m)[22m[33m 1004[2mms[22m[39m
+[90mstdout[2m | src/__tests__/authContext.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/HealthProfileForm.test.tsx [2m([22m[2m28 tests[22m[2m)[22m[33m 1243[2mms[22m[39m
+[90mstdout[2m | src/__tests__/SwapExerciseSheet.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+[90mstdout[2m | src/__tests__/groceryList.test.tsx
+[22m[39m🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+
+ [32m✓[39m src/__tests__/planningModal.test.tsx [2m([22m[2m39 tests[22m[2m)[22m[33m 967[2mms[22m[39m

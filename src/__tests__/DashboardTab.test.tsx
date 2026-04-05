@@ -561,4 +561,42 @@ describe('DashboardTab', () => {
       expect(mod.DashboardTab.$$typeof).toBe(Symbol.for('react.memo'));
     });
   });
+
+  describe('useReducedMotion SSR guard (line 23)', () => {
+    it('handles prefers-reduced-motion matching', () => {
+      // Override matchMedia to return true for reduced motion
+      Object.defineProperty(globalThis, 'matchMedia', {
+        writable: true,
+        value: createMatchMediaMock(true),
+      });
+      renderDashboard();
+      // Dashboard renders correctly when reduced motion is preferred
+      expect(screen.getByTestId('dashboard-tab')).toBeInTheDocument();
+      // Restore default
+      Object.defineProperty(globalThis, 'matchMedia', {
+        writable: true,
+        value: createMatchMediaMock(false),
+      });
+    });
+  });
+
+  describe('setup nutrition prompt (line 101)', () => {
+    it('shows setup-nutrition-prompt when targets are zero', async () => {
+      const mod = await import('../features/health-profile/hooks/useNutritionTargets');
+      const spy = vi.spyOn(mod, 'useNutritionTargets').mockReturnValue({
+        targetCalories: 0,
+        targetProtein: 0,
+        targetFat: 0,
+        targetCarbs: 0,
+        bmr: 0,
+        tdee: 0,
+      });
+
+      renderDashboard();
+      expect(screen.getByTestId('setup-nutrition-prompt')).toBeInTheDocument();
+      expect(screen.queryByTestId('energy-balance-mini')).not.toBeInTheDocument();
+
+      spy.mockRestore();
+    });
+  });
 });

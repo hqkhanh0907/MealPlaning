@@ -4736,6 +4736,18 @@ describe('fitnessStore – branch coverage gaps', () => {
     resetStore();
   });
 
+  it('autoAssignWorkouts returns early when plan is not found', () => {
+    useFitnessStore.setState({ trainingPlans: [] });
+    useFitnessStore.getState().autoAssignWorkouts('nonexistent-plan');
+    // Should not throw — just logs warning and returns
+  });
+
+  it('restoreOriginalSchedule returns early when plan is not found', () => {
+    useFitnessStore.setState({ trainingPlans: [] });
+    useFitnessStore.getState().restoreOriginalSchedule('nonexistent-plan');
+    // Should not throw — just logs warning and returns
+  });
+
   /* ---- scoreDaySlot hasSameMuscleAdjacent = true (lines 81-82, 86-87) ---- */
   it('autoAssignWorkouts penalises same-muscle on adjacent training days', () => {
     // Adjacent training days [1,2,3] with 3 chest sessions → penalty triggers
@@ -4799,6 +4811,68 @@ describe('fitnessStore – branch coverage gaps', () => {
     // Day 1 already has 3 sessions — reassignment should be rejected
     const d4 = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'max-d4');
     expect(d4?.dayOfWeek).toBe(2); // unchanged
+  });
+
+  /* ---- updateTrainingDays: invalid count (lines 768-772) ---- */
+  it('updateTrainingDays returns early when training days count is invalid', () => {
+    const plan = samplePlan({ id: 'valid-plan' });
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: [] });
+
+    // Less than 2 training days
+    useFitnessStore.getState().updateTrainingDays('valid-plan', [1]);
+    expect(useFitnessStore.getState().trainingPlans[0].trainingDays).toEqual([1, 3, 5]); // unchanged
+
+    // More than 6 training days
+    useFitnessStore.getState().updateTrainingDays('valid-plan', [1, 2, 3, 4, 5, 6, 7]);
+    expect(useFitnessStore.getState().trainingPlans[0].trainingDays).toEqual([1, 3, 5]); // unchanged
+  });
+
+  /* ---- updateTrainingDays: plan not found (lines 781-782) ---- */
+  it('updateTrainingDays returns early when plan not found', () => {
+    useFitnessStore.setState({ trainingPlans: [], trainingPlanDays: [] });
+
+    useFitnessStore.getState().updateTrainingDays('nonexistent-plan', [1, 3, 5]);
+
+    // No crash, state unchanged
+    expect(useFitnessStore.getState().trainingPlans).toEqual([]);
+  });
+
+  /* ---- reassignWorkoutToDay: day not found (lines 825-826) ---- */
+  it('reassignWorkoutToDay returns early when day not found', () => {
+    useFitnessStore.setState({ trainingPlans: [], trainingPlanDays: [] });
+
+    useFitnessStore.getState().reassignWorkoutToDay('nonexistent-day', 3);
+
+    // No crash, state unchanged
+    expect(useFitnessStore.getState().trainingPlanDays).toEqual([]);
+  });
+
+  /* ---- reassignWorkoutToDay: plan not found (lines 831-832) ---- */
+  it('reassignWorkoutToDay returns early when plan not found', () => {
+    const day = samplePlanDay({ id: 'orphan-day', planId: 'nonexistent-plan', dayOfWeek: 1 });
+    useFitnessStore.setState({ trainingPlans: [], trainingPlanDays: [day] });
+
+    useFitnessStore.getState().reassignWorkoutToDay('orphan-day', 3);
+
+    const d = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'orphan-day');
+    expect(d?.dayOfWeek).toBe(1); // unchanged
+  });
+
+  /* ---- reassignWorkoutToDay: target day not a training day (lines 836-840) ---- */
+  it('reassignWorkoutToDay rejects when target is not a training day', () => {
+    const plan = samplePlan({
+      id: 'rest-plan',
+      trainingDays: [1, 3],
+      restDays: [2, 4, 5, 6, 7],
+    });
+    const day = samplePlanDay({ id: 'rest-d1', planId: 'rest-plan', dayOfWeek: 1 });
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: [day] });
+
+    // Day 2 is a rest day, not a training day
+    useFitnessStore.getState().reassignWorkoutToDay('rest-d1', 2);
+
+    const d = useFitnessStore.getState().trainingPlanDays.find(d => d.id === 'rest-d1');
+    expect(d?.dayOfWeek).toBe(1); // unchanged
   });
 
   /* ---- restoreOriginalSchedule with no planDays (line 939) ---- */

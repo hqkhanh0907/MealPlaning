@@ -707,6 +707,30 @@ describe('DishManager', () => {
     const pos5 = allText.indexOf('Gà nướng');
     expect(pos1).toBeLessThan(pos5);
   });
+
+  it('shows warning when handleDelete is called for a used dish (line 165-166)', () => {
+    const isUsedMock = vi.fn().mockReturnValue(false);
+    render(<DishManager {...defaultProps} isUsed={isUsedMock} />);
+    // Button is enabled (isUsed returned false during render)
+    // Now change isUsed to return true before clicking delete
+    isUsedMock.mockReturnValue(true);
+    const deleteButtons = screen.getAllByText('Xóa');
+    fireEvent.click(deleteButtons[0]);
+    expect(mockNotify.warning).toHaveBeenCalledWith('Không thể xóa', 'Món ăn này đang được sử dụng trong kế hoạch.');
+  });
+
+  it('toggles compare in list view table layout (line 404)', () => {
+    render(<DishManager {...defaultProps} />);
+    // Switch to list view
+    fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
+    // Click compare button in the table — first occurrence is from table row
+    const compareBtn = screen.getAllByTestId('btn-compare-d1')[0];
+    fireEvent.click(compareBtn);
+    // Select a second dish to see the floating compare button
+    const compareBtn2 = screen.getAllByTestId('btn-compare-d2')[0];
+    fireEvent.click(compareBtn2);
+    expect(screen.getByTestId('btn-open-compare')).toBeInTheDocument();
+  });
 });
 
 // --- IngredientManager ---

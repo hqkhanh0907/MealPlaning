@@ -242,4 +242,31 @@ describe('useDarkMode', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     vi.useRealTimers();
   });
+
+  it('schedule interval fires applyTheme on each tick', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 0, 1, 12, 0, 0));
+    const { result } = renderHook(() => useDarkMode());
+    act(() => {
+      result.current.setTheme('schedule');
+    });
+    // Advance timer past 60s interval to trigger the callback (line 70)
+    act(() => {
+      vi.advanceTimersByTime(60_001);
+    });
+    // Still day time → light
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it('catches getSetting rejection when loading theme (line 44)', async () => {
+    const { getSetting } = await import('../services/appSettings');
+    vi.mocked(getSetting).mockRejectedValueOnce(new Error('DB corrupt'));
+    const { result } = renderHook(() => useDarkMode());
+    // Should not throw — falls back to default light
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(result.current.theme).toBe('light');
+  });
 });

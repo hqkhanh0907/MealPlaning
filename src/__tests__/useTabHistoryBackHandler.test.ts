@@ -1,8 +1,159 @@
-import { act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+describe('useTabHistoryBackHandler', () => {
+  const mockNavigateTabBack = vi.fn();
+  const mockPushBackEntry = vi.fn();
+  let mockActiveTab = 'calendar';
+  let mockTabHistory: string[] = [];
+  const mockGetState = vi.fn(() => ({
+    tabHistory: mockTabHistory,
+    navigateTabBack: mockNavigateTabBack,
+  }));
+  const mockSetState = vi.fn();
+
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    mockActiveTab = 'calendar';
+    mockTabHistory = [];
+  });
+
+  async function importHook() {
+    vi.doMock('../services/backNavigationService', () => ({
+      pushBackEntry: mockPushBackEntry,
+    }));
+    vi.doMock('../store/navigationStore', () => ({
+      useNavigationStore: Object.assign(
+        (selector: (s: Record<string, unknown>) => unknown) => {
+          const state = { activeTab: mockActiveTab };
+          return selector(state);
+        },
+        {
+          getState: () => mockGetState(),
+          setState: (...args: unknown[]) => mockSetState(...args),
+        },
+      ),
+    }));
+    const mod = await import('../hooks/useTabHistoryBackHandler');
+    return mod.useTabHistoryBackHandler;
+  }
+
+  it('does not push back entry on initial render when tab unchanged', async () => {
+    const useTabHistoryBackHandler = await importHook();
+    renderHook(() => useTabHistoryBackHandler());
+
+    expect(mockPushBackEntry).not.toHaveBeenCalled();
+  });
+
+  it('pushes back entry when activeTab changes', async () => {
+    const useTabHistoryBackHandler = await importHook();
+    const { rerender } = renderHook(() => useTabHistoryBackHandler());
+
+    mockActiveTab = 'library';
+    rerender();
+
+    expect(mockPushBackEntry).toHaveBeenCalledTimes(1);
+    expect(mockPushBackEntry).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('back handler navigates to previous tab when tabHistory is non-empty', async () => {
+    let capturedHandler: (() => void) | null = null;
+    mockPushBackEntry.mockImplementation((handler: () => void) => {
+      capturedHandler = handler;
+    });
+
+    const useTabHistoryBackHandler = await importHook();
+    const { rerender } = renderHook(() => useTabHistoryBackHandler());
+
+    mockActiveTab = 'library';
+    rerender();
+
+    expect(capturedHandler).not.toBeNull();
+
+    mockTabHistory = ['calendar'];
+    act(() => capturedHandler!());
+
+    expect(mockSetState).toHaveBeenCalledWith({ tabHistory: [] });
+    expect(mockNavigateTabBack).toHaveBeenCalledWith('calendar');
+  });
+
+  it('back handler does nothing when tabHistory is empty', async () => {
+    let capturedHandler: (() => void) | null = null;
+    mockPushBackEntry.mockImplementation((handler: () => void) => {
+      capturedHandler = handler;
+    });
+
+    const useTabHistoryBackHandler = await importHook();
+    const { rerender } = renderHook(() => useTabHistoryBackHandler());
+
+    mockActiveTab = 'fitness';
+    rerender();
+
+    mockTabHistory = [];
+    act(() => capturedHandler!());
+
+    expect(mockSetState).not.toHaveBeenCalled();
+    expect(mockNavigateTabBack).not.toHaveBeenCalled();
+  });
+
+  it('skips push and resets flag when back-navigating', async () => {
+    let capturedHandler: (() => void) | null = null;
+    mockPushBackEntry.mockImplementation((handler: () => void) => {
+      capturedHandler = handler;
+    });
+
+    const useTabHistoryBackHandler = await importHook();
+    const { rerender } = renderHook(() => useTabHistoryBackHandler());
+
+    // Tab changes → push back entry
+    mockActiveTab = 'library';
+    rerender();
+    expect(mockPushBackEntry).toHaveBeenCalledTimes(1);
+
+    // Simulate back navigation: handler sets isBackNavigatingRef=true
+    mockTabHistory = ['calendar'];
+    act(() => capturedHandler!());
+
+    vi.clearAllMocks();
+
+    // activeTab changes due to navigateTabBack (simulated)
+    mockActiveTab = 'calendar';
+    rerender();
+
+    // Should NOT push a new back entry (isBackNavigatingRef was true)
+    expect(mockPushBackEntry).not.toHaveBeenCalled();
+
+    // Next tab change should work normally (flag was reset)
+    mockActiveTab = 'fitness';
+    rerender();
+    expect(mockPushBackEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('back handler pops the last entry from multi-entry tabHistory', async () => {
+    let capturedHandler: (() => void) | null = null;
+    mockPushBackEntry.mockImplementation((handler: () => void) => {
+      capturedHandler = handler;
+    });
+
+    const useTabHistoryBackHandler = await importHook();
+    const { rerender } = renderHook(() => useTabHistoryBackHandler());
+
+    mockActiveTab = 'fitness';
+    rerender();
+
+    mockTabHistory = ['calendar', 'library'];
+    act(() => capturedHandler!());
+
+    expect(mockNavigateTabBack).toHaveBeenCalledWith('library');
+    expect(mockSetState).toHaveBeenCalledWith({ tabHistory: ['calendar'] });
+  });
+});
 
 describe('navigationStore tabHistory', () => {
   beforeEach(async () => {
+    vi.doUnmock('../store/navigationStore');
+    vi.doUnmock('../services/backNavigationService');
     vi.resetModules();
   });
 
