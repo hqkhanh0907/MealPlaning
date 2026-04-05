@@ -1,4 +1,14 @@
-import { AlertTriangle, ArrowLeft, Check, CircleAlert, Lightbulb, Loader2, RefreshCw, Shuffle } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleAlert,
+  Lightbulb,
+  Loader2,
+  RefreshCw,
+  Shuffle,
+} from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -191,6 +201,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
             {previewError && (
               <div
                 className="border-destructive/20 bg-destructive/10 rounded-lg border p-4"
+                role="alert"
                 data-testid="preview-error"
               >
                 <p className="text-destructive text-sm">{previewError}</p>
@@ -225,7 +236,9 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
                         <span className="text-foreground min-w-0 flex-1 truncate text-sm">
                           {item.from.notes ?? item.from.workoutType}
                         </span>
-                        <span className="text-muted-foreground text-xs">→ {item.toDay}</span>
+                        <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                          <ArrowRight className="inline h-3 w-3" aria-hidden="true" /> {item.toDay}
+                        </span>
                       </div>
                     ))}
                   </div>

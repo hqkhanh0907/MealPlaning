@@ -66,6 +66,21 @@
   --toast-info-subtle: oklch(0.977 0.013 236.6); /* Sky-50 */
   --toast-info-emphasis: oklch(0.443 0.11 240.8); /* Sky-800 */
 
+  /* ── Dark/emphasis variants for domain colors ── */
+  --color-energy-emphasis: oklch(0.555 0.163 48.99); /* Amber-700 #B45309 */
+  --color-energy-subtle: oklch(0.987 0.022 95.3); /* Amber-50 #FFFBEB */
+  --color-ai-emphasis: oklch(0.457 0.24 277.02); /* Indigo-700 #4338CA */
+  --color-rose-emphasis: oklch(0.514 0.222 16.57); /* Rose-700 #BE123C */
+  --color-rose-subtle: oklch(0.969 0.015 12.4); /* Rose-50 #FFF1F2 */
+  --destructive-emphasis: oklch(0.505 0.213 27.33); /* Red-700 #B91C1C */
+  --destructive-subtle: oklch(0.971 0.013 17.38); /* Red-50 #FEF2F2 */
+  --macro-carbs-emphasis: oklch(0.488 0.243 264.06); /* Blue-700 #1D4ED8 */
+  --macro-carbs-subtle: oklch(0.97 0.014 254.6); /* Blue-50 #EFF6FF */
+
+  /* ── Compare state colors (DishManager) ── */
+  --compare-active: oklch(0.746 0.16 232.66); /* Blue-400 */
+  --compare-default: oklch(0.546 0.245 262.88); /* Blue-500 */
+
   --radius: 0.625rem;
 
   /* ── Elevation (Shadow) ── */
@@ -194,6 +209,19 @@ input[type='number'] {
   --color-toast-info-subtle: var(--toast-info-subtle);
   --color-toast-info-emphasis: var(--toast-info-emphasis);
 
+  /* ── Domain emphasis color utilities ── */
+  --color-energy-emphasis: var(--color-energy-emphasis);
+  --color-energy-subtle: var(--color-energy-subtle);
+  --color-ai-emphasis: var(--color-ai-emphasis);
+  --color-rose-emphasis: var(--color-rose-emphasis);
+  --color-rose-subtle: var(--color-rose-subtle);
+  --color-destructive-emphasis: var(--destructive-emphasis);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-macro-carbs-emphasis: var(--macro-carbs-emphasis);
+  --color-macro-carbs-subtle: var(--macro-carbs-subtle);
+  --color-compare-active: var(--compare-active);
+  --color-compare-default: var(--compare-default);
+
   /* ── Border radius scale ── */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -253,6 +281,13 @@ input[type='number'] {
   --toast-info: oklch(0.746 0.16 232.7); /* Sky-400 */
   --toast-info-subtle: oklch(0.257 0.09 237 / 30%); /* Sky-900/30 */
   --toast-info-emphasis: oklch(0.812 0.119 230.5); /* Sky-300 */
+
+  /* Dark overrides for emphasis/subtle */
+  --color-energy-subtle: oklch(0.344 0.06 53); /* Amber-950 */
+  --color-ai-subtle: oklch(0.297 0.07 278); /* Indigo-950 */
+  --color-rose-subtle: oklch(0.31 0.06 17); /* Rose-950 */
+  --destructive-subtle: oklch(0.31 0.06 24); /* Red-950 */
+  --macro-carbs-subtle: oklch(0.31 0.06 265); /* Blue-950 */
 
   --shadow-glow: 0 2px 6px oklch(0.765 0.177 163.22 / 0.3);
 }

@@ -103,7 +103,7 @@ function DialogTitle({ className, ...props }: Readonly<DialogPrimitive.Title.Pro
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn('font-heading text-base leading-none font-medium', className)}
+      className={cn('font-heading text-base leading-snug font-medium', className)}
       {...props}
     />
   );

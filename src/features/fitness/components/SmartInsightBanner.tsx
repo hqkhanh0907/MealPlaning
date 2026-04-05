@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { FitnessNutritionInsight } from '../hooks/useFitnessNutritionBridge';
 
@@ -20,6 +21,7 @@ export function SmartInsightBanner({
 }: Readonly<{
   insight: FitnessNutritionInsight;
 }>) {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
@@ -44,7 +46,7 @@ export function SmartInsightBanner({
         onClick={() => setDismissed(true)}
         className="-m-1 flex h-8 w-8 items-center justify-center rounded-md opacity-50 hover:opacity-100"
         data-testid="dismiss-insight"
-        aria-label="Dismiss"
+        aria-label={t('common.dismiss')}
       >
         <X className="h-4 w-4" />
       </button>

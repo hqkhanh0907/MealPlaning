@@ -45,6 +45,7 @@ function RadioPillsInner<T extends FieldValues>({
                   className="sr-only"
                   checked={isActive}
                   aria-checked={isActive}
+                  aria-label={option.label}
                   onChange={() => field.onChange(option.value)}
                   name={name}
                 />

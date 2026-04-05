@@ -488,7 +488,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         <button
           type="button"
           onClick={() => void handleSave()}
-          className="bg-primary text-primary-foreground hover:bg-primary w-full rounded-xl py-3 font-medium shadow-sm transition-all active:scale-[0.98]"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 w-full rounded-xl py-3 font-medium shadow-sm transition-all focus-visible:ring-3 active:scale-[0.98]"
         >
           {saved && !isDirty ? t('healthProfile.saved') : t('healthProfile.save')}
         </button>

@@ -1,4 +1,4 @@
-import { Flame, Target, UtensilsCrossed } from 'lucide-react';
+import { Flame, Minus, Target, UtensilsCrossed } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -54,7 +54,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
         <span className="text-muted-foreground text-xs">{t('nutrition.caloriesIn')}</span>
       </div>
 
-      <span className="text-muted-foreground text-sm">−</span>
+      <Minus className="text-muted-foreground h-4 w-4" aria-hidden="true" />
 
       {/* Burned */}
       <div className="flex flex-col items-center gap-0.5">

@@ -74,6 +74,7 @@ vi.mock('lucide-react', () => {
     );
   return {
     ArrowLeft: icon('arrow-left'),
+    ArrowRight: icon('arrow-right'),
     Check: icon('check'),
     AlertTriangle: icon('alert-triangle'),
     Lightbulb: icon('lightbulb'),

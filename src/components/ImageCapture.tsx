@@ -148,7 +148,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
           data-testid="camera-overlay"
         >
           {cameraError ? (
-            <div className="max-w-xs p-6 text-center">
+            <div className="max-w-xs p-6 text-center" role="alert">
               <div className="bg-destructive/20 text-destructive mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
                 <X className="h-6 w-6" />
               </div>

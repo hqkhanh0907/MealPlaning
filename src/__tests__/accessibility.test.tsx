@@ -569,7 +569,7 @@ describe('EnergyBalanceMini a11y', () => {
 
     const container = screen.getByTestId('energy-balance-mini');
     const svgs = container.querySelectorAll('svg');
-    expect(svgs.length).toBe(3);
+    expect(svgs.length).toBe(4);
     svgs.forEach(svg => {
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });

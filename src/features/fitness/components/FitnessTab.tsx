@@ -148,7 +148,7 @@ const FitnessTabInner = () => {
           <button
             type="button"
             onClick={handleGeneratePlan}
-            className="text-primary text-xs font-semibold whitespace-nowrap underline"
+            className="text-primary hover:bg-muted focus-visible:ring-ring/50 rounded px-1 text-xs font-semibold whitespace-nowrap underline focus-visible:ring-3"
             data-testid="regenerate-plan-btn"
           >
             {t('fitness.plan.regeneratePlan')}

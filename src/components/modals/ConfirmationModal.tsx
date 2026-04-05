@@ -64,6 +64,7 @@ export const ConfirmationModal = ({
         <div className="p-6 text-center">
           <div
             className={`h-16 w-16 ${styles.iconBg} ${styles.iconText} mx-auto mb-4 flex items-center justify-center rounded-full`}
+            aria-hidden="true"
           >
             {icon || defaultIcon}
           </div>

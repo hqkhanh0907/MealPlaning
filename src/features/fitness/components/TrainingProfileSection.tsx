@@ -138,7 +138,7 @@ export function TrainingProfileSection() {
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {fields.map(field => (
         <div key={field.key} className="bg-muted flex items-start gap-2.5 rounded-xl p-3">
-          <span className="mt-0.5 text-base leading-none">
+          <span className="mt-0.5 text-base leading-normal">
             {(() => {
               const Icon = FIELD_ICON[field.key] ?? ClipboardList;
               return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;

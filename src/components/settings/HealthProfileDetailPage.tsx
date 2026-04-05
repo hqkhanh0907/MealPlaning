@@ -76,7 +76,7 @@ function HealthProfileViewMode() {
       <div className="grid grid-cols-2 gap-3">
         {fields.map(field => (
           <div key={field.label} className="bg-muted flex items-start gap-2.5 rounded-xl p-3">
-            <span className="mt-0.5 text-base leading-none">
+            <span className="mt-0.5 text-base leading-normal">
               {(() => {
                 const Icon = field.icon;
                 return <Icon className="text-muted-foreground size-5" aria-hidden="true" />;

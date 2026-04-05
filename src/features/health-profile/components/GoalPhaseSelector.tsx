@@ -321,6 +321,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
             onClick={handleToggleOverride}
             role="switch"
             aria-checked={manualOverrideField.field.value}
+            aria-label={t('goal.calorieOffset')}
             className={cn(
               'relative h-5 w-10 rounded-full transition-colors',
               manualOverrideField.field.value ? 'bg-primary' : 'bg-muted-foreground/30',
@@ -341,6 +342,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
             type="number"
             inputMode="numeric"
             data-testid="custom-offset-input"
+            aria-label={t('goal.calorieOffsetCustom')}
             value={customOffsetField.field.value ?? ''}
             onChange={handleCustomOffsetChange}
             className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 text-base focus-visible:ring-2 focus-visible:outline-none"

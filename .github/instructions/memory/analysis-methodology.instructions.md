@@ -796,3 +796,305 @@ Agent done → "Wave 3 ✅. Starting Wave 4:" → dispatch Wave 4 agent → END 
 ### Bài học
 
 "Tự động làm hết" = pipeline chạy liên tục từ đầu đến cuối. Mỗi turn PHẢI có action. User chỉ cần thấy kết quả cuối cùng, không cần approve từng bước.
+
+---
+
+## 25. Full-project audit pipeline — 6 phases, 5 waves, 28 todos
+
+### Vấn đề
+
+Audit toàn bộ project (98k+ LOC, 193 test files) cần structured approach, không thể grep random.
+
+### Giải pháp: Team SOP Pipeline
+
+```
+Phase 1: CEO Agent — scan toàn bộ codebase, xác định scope
+Phase 2: BM Agent — verify CEO findings, tạo User Stories
+Phase 3: Designer — skip nếu pure code audit
+Phase 4: Tech Leader — break thành TASK-01→19, dependency graph, 5 waves
+Phase 5: Dev — parallel agents per wave (2-5 agents/wave)
+Phase 6: QA — emulator test 10 TCs
+```
+
+### Kết quả thực tế
+
+- **28 todos tracked** trong SQL database
+- **10 commits** across 5 waves
+- **~180 new tests**, coverage 98.2% → 99.27% stmts
+- **14 SonarQube issues → 0**
+- **501kB → 249kB** main chunk (bundle split)
+- **~100 hardcoded strings → i18n**
+- Tổng thời gian: ~3-4 giờ (với parallel agents)
+
+### Bài học
+
+Structured pipeline (CEO→BM→Leader→Dev→QA) hiệu quả hơn random fixes. Leader phase tạo dependency graph giúp parallelize waves. SQL todo tracking giữ pipeline on track.
+
+---
+
+## 26. Wave-based parallel execution — maximize throughput
+
+### Vấn đề
+
+19 technical tasks cần fix, làm tuần tự sẽ rất chậm.
+
+### Giải pháp: Group tasks thành waves với dependency graph
+
+```
+Wave 1: ESLint warnings (1 task, blocking)
+Wave 2: Coverage critical files (4 tasks, parallel)
+Wave 3: Coverage secondary + batch (5 tasks, parallel)
+Wave 4: i18n + bundle optimization (2 tasks, parallel)
+Wave 5: SonarQube validation (1 task, blocking)
+```
+
+### Pattern dispatch parallel agents
+
+```python
+# Dispatch 4 agents cùng lúc
+agent1 = task(name="dev-task03", prompt="Fix useTabHistory...", mode="background")
+agent2 = task(name="dev-task04", prompt="Fix NutritionGoal...", mode="background")
+agent3 = task(name="dev-task05", prompt="Fix PlanTemplate...", mode="background")
+agent4 = task(name="dev-task06", prompt="Fix DatabaseCtx...", mode="background")
+# Wait for all → merge → commit
+```
+
+### Gotchas
+
+1. **Parallel agents có thể edit cùng file** → merge conflicts. Giải pháp: assign files rõ ràng, không overlap.
+2. **Coverage reporting khác nhau** giữa `--coverage` flag khác nhau. Luôn verify bằng `npx vitest run --coverage` độc lập.
+3. **Agent output > 10KB** → saved to temp file. Dùng `view` với `view_range` để đọc.
+
+### Bài học
+
+Wave structure + parallel agents = 3-5x throughput. Nhưng PHẢI có clear file ownership per agent.
+
+---
+
+## 27. SonarQube scan — 14 issues categories & fix patterns
+
+### Vấn đề
+
+Sau lint + test + build pass, SonarQube vẫn phát hiện 14 issues (6 BLOCKER, 4 MAJOR, 3 MINOR, 1 BUG).
+
+### Categories phổ biến
+
+| Category             | Count | Ví dụ                                   | Fix                |
+| -------------------- | ----- | --------------------------------------- | ------------------ |
+| Deprecated API       | 3     | `String.fromCharCode` → `fromCodePoint` | Thay API           |
+| Deprecated API       | 2     | `unescape()` → `decodeURIComponent`     | Thay API           |
+| Cognitive complexity | 2     | Function > 15 complexity                | Extract helper     |
+| Identical branches   | 1     | `if/else` return same value             | Remove dead branch |
+| Unused import        | 2     | Import not used after refactor          | Remove             |
+| Type safety          | 2     | Implicit `any` from catch               | Type narrow        |
+| Regex safety         | 1     | Non-escaped special chars               | Escape             |
+| String safety        | 1     | Template literal in wrong context       | Fix syntax         |
+
+### Pattern fix nhanh
+
+```bash
+# Check SonarQube issues qua API (không cần auth)
+curl -sf "http://localhost:9000/api/issues/search?componentKeys=meal-planing&resolved=false" | \
+  python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'{i[\"component\"]}:{i[\"line\"]} [{i[\"severity\"]}] {i[\"message\"]}') for i in d['issues']]"
+```
+
+### Bài học
+
+ESLint bắt syntax/style, SonarQube bắt **logic bugs + deprecated APIs + cognitive complexity**. Cả hai đều cần. Run SonarQube TRƯỚC commit, không phải sau.
+
+---
+
+## 28. Bundle splitting strategy — manualChunks in Vite
+
+### Vấn đề
+
+Main chunk 501kB (vượt 500kB warning), gây slow initial load trên mobile.
+
+### Nguyên nhân
+
+`@google/genai` (258kB) bundled vào main chunk dù chỉ dùng trong 1 feature (AI analysis).
+
+### Giải pháp: 3 dòng trong vite.config.ts
+
+```typescript
+manualChunks(id) {
+  if (id.includes('@google/genai')) return 'vendor-genai';
+}
+```
+
+### Kết quả
+
+- Main chunk: 501kB → **249kB** (-50%)
+- vendor-genai chunk: 258kB (lazy loaded khi cần)
+
+### Trade-off analysis
+
+| Option              | Pros            | Cons                           |
+| ------------------- | --------------- | ------------------------------ |
+| manualChunks (chọn) | Simple, 3 lines | Chunk vẫn load khi navigate    |
+| Dynamic import()    | True lazy load  | Cần refactor import sites      |
+| Tree-shaking        | Smallest size   | GenAI SDK không tree-shake tốt |
+
+### Bài học
+
+`manualChunks` là quick win cho bundle > 500kB. Identify thư viện lớn nhất bằng `npm run analyze` → tách riêng. Với MealPlaning, @google/genai chiếm 50% main chunk.
+
+---
+
+## 29. i18n extraction at scale — 100 strings across 14 files
+
+### Vấn đề
+
+~100 hardcoded Vietnamese strings scattered across 14 source files. ESLint không bắt, SonarQube không bắt, chỉ code review mới phát hiện.
+
+### Pattern tìm hardcoded strings
+
+```bash
+# Tìm Vietnamese characters trong source (trừ test + i18n files)
+grep -rn '[àáạảã-ỹ]' src/ --include='*.tsx' --include='*.ts' \
+  --exclude-dir='__tests__' --exclude-dir='locales' | head -30
+```
+
+### Pattern extraction
+
+1. **Constants/arrays**: Extract array items → i18n keys array, `t(keys[i])`
+2. **Template literals**: Extract static parts → `t('key', { variable })`
+3. **Inline strings**: Direct → `t('namespace.key')`
+4. **Zod validation messages**: Extract → `{ message: t('validation.key') }`
+
+### Namespace organization
+
+```json
+{
+  "insights": { "title1": "...", "tip1": "..." },
+  "tips": { "daily1": "...", "daily2": "..." },
+  "validation": { "invalidEmail": "..." },
+  "common": { "dayLabels": { "monday": "Thứ Hai" } }
+}
+```
+
+### Bài học
+
+i18n extraction cần **systematic grep** không phải random finding. Tổ chức keys theo namespace (feature/concern). Dynamic keys `t(`prefix.${var}`)` cần tất cả possible values có entry.
+
+---
+
+## 30. QA emulator test — false positive detection
+
+### Vấn đề
+
+TC-05 (Dashboard) failed vì test script check `includes("kcal") || includes("Dashboard")` nhưng Vietnamese UI hiển thị "Tổng quan" và "Protein".
+
+### Nguyên nhân
+
+Test script dùng English keywords thay vì Vietnamese. Dashboard bypassed onboarding nên không có nutrition data → không hiện "kcal".
+
+### Giải pháp
+
+Test assertions cho Vietnamese app PHẢI dùng Vietnamese text:
+
+```python
+# ❌ SAI — English keywords
+'document.body.innerText.includes("Dashboard")'
+
+# ✅ ĐÚNG — Vietnamese keywords
+'document.body.innerText.includes("Tổng quan")'
+```
+
+### Bài học
+
+QA scripts cho Vietnamese app PHẢI dùng Vietnamese assertions. Khi 1 TC fail, verify bằng debug script trước khi kết luận bug — có thể chỉ là test script sai.
+
+---
+
+## 31. v8 ignore annotations — khi nào dùng, khi nào không
+
+### Vấn đề
+
+User hỏi tại sao dùng `/* v8 ignore next -- defensive: ... */` trong code.
+
+### Giải thích
+
+`v8 ignore` là annotation cho **coverage tool** (V8/Istanbul), KHÔNG phải eslint-disable. Nó nói với coverage tool: "dòng này unreachable trong production nhưng tôi giữ lại như defensive guard".
+
+### Khi nào dùng (hợp lệ)
+
+```typescript
+// ✅ NaN guard sau calculation chain — mathematically unreachable nhưng guard cho data corruption
+if (Number.isNaN(bmr)) /* v8 ignore next -- defensive: NaN from corrupt data */ return { bmr: 0, tdee: 0, target: 0 };
+
+// ✅ Null check sau type narrowing — TypeScript guarantees non-null nhưng runtime guard
+if (!user) /* v8 ignore next -- defensive: null after type narrowing */ return defaultProfile;
+```
+
+### Khi nào KHÔNG dùng
+
+```typescript
+// ❌ Logic branch that CAN be reached — phải viết test cover nó
+if (items.length === 0) /* v8 ignore next */ // SAI — empty array IS reachable
+  return [];
+
+// ❌ Error handling that SHOULD be tested
+try { ... } catch (e) { /* v8 ignore next */ } // SAI — errors happen!
+```
+
+### Bài học
+
+`v8 ignore` ≠ `eslint-disable`. Nó chỉ ảnh hưởng coverage report, không bỏ qua lint rule. Dùng khi branch genuinely unreachable nhưng cần defensive guard. LUÔN kèm comment giải thích tại sao unreachable.
+
+---
+
+## 32. ESLint override cho generated/third-party code
+
+### Vấn đề
+
+`react-refresh/only-export-components` warning cho `src/components/ui/*` (shadcn/ui generated) và `src/contexts/*` (React contexts export cả provider + hook).
+
+### Giải pháp: Targeted override (không phải eslint-disable)
+
+```javascript
+// eslint.config.js
+{
+  files: ['src/components/ui/**', 'src/contexts/**'],
+  rules: {
+    'react-refresh/only-export-components': 'off',
+  },
+}
+```
+
+### Tại sao override thay vì fix code
+
+1. `components/ui/` = generated by shadcn CLI → sẽ bị overwrite khi update
+2. `contexts/` = React pattern chuẩn: export `Provider` + `useContext` hook từ cùng file
+3. Rule `only-export-components` không áp dụng cho context files (chúng KHÔNG phải components)
+
+### Bài học
+
+ESLint override ở config level ≠ eslint-disable ở code level. Override là architectural decision (loại file này exempt), disable là hack (dòng code này skip). Project rule "never use eslint-disable" vẫn intact.
+
+---
+
+## 33. React Compiler + Zustand — useShallow là ngoại lệ duy nhất
+
+### Vấn đề
+
+React Compiler active → không được dùng `useCallback`/`useMemo` (compiler tự optimize). Nhưng Zustand `.filter()` selectors tạo array mới mỗi render → re-render loop.
+
+### Giải pháp duy nhất
+
+```typescript
+import { useShallow } from 'zustand/react/shallow';
+
+// ✅ OK — useShallow là ngoại lệ được phép
+const items = useStore(useShallow(s => s.items.filter(i => i.active)));
+
+// ❌ KHÔNG ĐƯỢC — React Compiler handles this
+const handler = useCallback(() => { ... }, [deps]); // compiler tự optimize
+
+// ❌ KHÔNG ĐƯỢC
+const value = useMemo(() => expensive(), [deps]); // compiler tự optimize
+```
+
+### Bài học
+
+Khi React Compiler active, `useShallow` là **ngoại lệ duy nhất** cho manual memoization — chỉ dùng cho Zustand selectors trả về new reference (`.filter()`, `.map()`, object literals). Tất cả các trường hợp khác → để compiler handle.

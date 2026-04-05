@@ -290,7 +290,7 @@ function ProgressDashboardInner() {
         <button
           type="button"
           data-testid="start-training-cta"
-          className="bg-primary text-primary-foreground active:bg-primary mt-4 rounded-full px-6 py-2.5 text-sm font-medium"
+          className="bg-primary text-primary-foreground active:bg-primary/80 focus-visible:ring-ring/50 mt-4 rounded-full px-6 py-2.5 text-sm font-medium focus-visible:ring-3"
         >
           {t('fitness.progress.startTraining')} →
         </button>

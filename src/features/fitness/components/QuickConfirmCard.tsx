@@ -40,18 +40,20 @@ export function QuickConfirmCard({
           <button
             type="button"
             onClick={onCustomize}
-            className="text-muted-foreground rounded-lg border p-2"
+            aria-label={t('common.edit')}
+            className="text-muted-foreground focus-visible:ring-ring/50 rounded-lg border p-2 focus-visible:ring-3"
             data-testid="customize-button"
           >
-            <Pencil className="h-5 w-5" />
+            <Pencil className="h-5 w-5" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => onConfirm(suggestion)}
-            className="bg-info rounded-lg p-2 text-white"
+            aria-label={t('common.confirm')}
+            className="bg-info focus-visible:ring-ring/50 rounded-lg p-2 text-white focus-visible:ring-3"
             data-testid="quick-confirm-button"
           >
-            <Check className="h-5 w-5" />
+            <Check className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       </div>

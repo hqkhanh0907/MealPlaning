@@ -397,7 +397,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
         <button
           type="button"
           onClick={handleOpenSelector}
-          className="bg-primary text-primary-foreground active:bg-primary/80 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium"
+          className="bg-primary text-primary-foreground active:bg-primary/80 focus-visible:ring-ring/50 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium focus-visible:ring-3"
         >
           <Plus className="h-5 w-5" aria-hidden="true" />
           {t('fitness.plan.addExercise')}

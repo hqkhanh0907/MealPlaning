@@ -110,6 +110,6 @@ describe('SmartInsightBanner', () => {
   it('dismiss button has aria-label', () => {
     render(<SmartInsightBanner insight={makeInsight()} />);
     const btn = screen.getByTestId('dismiss-insight');
-    expect(btn).toHaveAttribute('aria-label', 'Dismiss');
+    expect(btn).toHaveAttribute('aria-label', 'Bỏ qua');
   });
 });
